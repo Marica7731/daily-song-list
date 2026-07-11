@@ -260,6 +260,8 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     page: 3,
     pageSize: 100,
     bucket: "あ",
+    rankMetric: "occurrences",
+    videoLayout: "cards",
     outside: true,
     q: "First Good-Bye",
     snapshotPath: "data/snapshots/2026-07-10.json",
@@ -278,6 +280,40 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     snapshot: "archive-20260710",
   });
   assert.deepEqual(parseUrlState(serialized, options), parsed);
+});
+
+test("url state keeps rank metric and video layout only when relevant", () => {
+  const options = urlStateOptions();
+  const metricState = {
+    range: "72h",
+    view: "artistRank",
+    page: 1,
+    pageSize: 50,
+    bucket: "全部",
+    rankMetric: "videos",
+    videoLayout: "cards",
+    outside: false,
+    q: "",
+    snapshotPath: "data/latest.json",
+  };
+
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(metricState, options))), {
+    view: "artistRank",
+    metric: "videos",
+  });
+  assert.equal(parseUrlState("?view=artistRank&metric=videos", options).rankMetric, "videos");
+
+  const compactVideo = {
+    ...metricState,
+    view: "videos",
+    rankMetric: "occurrences",
+    videoLayout: "compact",
+  };
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(compactVideo, options))), {
+    view: "videos",
+    layout: "compact",
+  });
+  assert.equal(parseUrlState("?view=videos&layout=compact", options).videoLayout, "compact");
 });
 
 test("url state falls back to safe defaults and only accepts configured snapshots", () => {

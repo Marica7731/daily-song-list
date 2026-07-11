@@ -6,11 +6,14 @@ const {
   matchBlockedSource,
   TAIWAN_VTUBER_BLACKLIST,
 } = require("../assets/source-filter");
+const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
 const { isLikelyNonSongEntry, isTimestampCandidateText, normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
 const SNAPSHOT_DIR = path.join(DATA_DIR, "snapshots");
+const SNAPSHOT_INDEX_PATH = path.join(SNAPSHOT_DIR, "index.json");
+const DIFF_DIR = path.join(DATA_DIR, "diff");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const STATUS_PATH = path.join(DATA_DIR, "status.json");
 const AUDIT_PATH = path.join(DATA_DIR, "audit.json");
@@ -63,6 +66,15 @@ const MONTH_REFRESH_LIMIT = positiveInteger(process.env.DAILY_SONG_MONTH_REFRESH
 const H72_MS = 72 * 60 * 60 * 1000;
 const H48_MS = 48 * 60 * 60 * 1000;
 const MONTH_CARRY_MS = 35 * 24 * 60 * 60 * 1000;
+const DIFF_RANGES = [
+  { id: "72h", file: "latest-72h.json" },
+  { id: "1m", file: "latest-1m.json" },
+];
+const rankCollator = new Intl.Collator("en", {
+  numeric: true,
+  sensitivity: "base",
+  ignorePunctuation: true,
+});
 const requestLimiter = createRequestLimiter({ requestDelayMs: REQUEST_DELAY_MS, max429Errors: MAX_429_ERRORS });
 
 if (require.main === module) {
@@ -98,6 +110,7 @@ async function main() {
   if (totalItems <= 0) {
     throw new Error(`No usable timestamp song lists found after inspecting ${inspected.length} videos.`);
   }
+  const previousSnapshot = readPreviousSuccessfulSnapshot();
 
   const payload = {
     schemaVersion: 1,
@@ -173,6 +186,7 @@ async function main() {
   });
   writeJson(path.join(DATA_DIR, "72h.json"), groups["72h"]);
   writeJson(path.join(DATA_DIR, "1m.json"), groups["1m"]);
+  writeRankDiffFiles(payload, previousSnapshot);
   writeSnapshot(payload, capturedAt);
   writeJson(STATUS_PATH, payload.status);
   console.log(`[update] success totalItems=${totalItems} snapshot=${hourSnapshotId(capturedAt)}`);
@@ -935,6 +949,175 @@ function applyGroupQualityFilters(groups) {
   );
 }
 
+function writeRankDiffFiles(payload, previousSnapshot = readPreviousSuccessfulSnapshot(payload)) {
+  const diffs = buildRankDiffs(payload, previousSnapshot);
+  for (const range of DIFF_RANGES) {
+    writeJson(path.join(DIFF_DIR, range.file), diffs[range.id]);
+  }
+  return diffs;
+}
+
+function buildRankDiffs(payload, previousSnapshot = null) {
+  const previousPayload = previousSnapshotPayload(previousSnapshot);
+  const previous = previousSnapshotMetadata(previousSnapshot);
+  const current = currentSnapshotMetadata(payload);
+  return Object.fromEntries(
+    DIFF_RANGES.map((range) => [
+      range.id,
+      buildRankDiffForRange({
+        rangeId: range.id,
+        current,
+        previous,
+        currentGroup: payload?.groups?.[range.id],
+        previousGroup: previousPayload?.groups?.[range.id],
+      }),
+    ]),
+  );
+}
+
+function buildRankDiffForRange({ rangeId, current, previous, currentGroup, previousGroup }) {
+  return {
+    schemaVersion: 1,
+    generatedAt: current.generatedAt,
+    capturedAt: current.capturedAt,
+    range: rangeId,
+    current,
+    previous,
+    songRank: buildRankDiffEntries(buildSongRankState(currentGroup), buildSongRankState(previousGroup)),
+    artistRank: buildRankDiffEntries(buildArtistRankState(currentGroup), buildArtistRankState(previousGroup)),
+  };
+}
+
+function buildSongRankState(group) {
+  const records = buildSongRecords(collectSongOccurrences(group?.items || [])).sort(compareSongRankRecords);
+  return buildRankState(records, (record) => record.title || record.key);
+}
+
+function buildArtistRankState(group) {
+  const { records } = buildArtistRecords(collectSongOccurrences(group?.items || []));
+  records.sort(compareCountRecords);
+  return buildRankState(records, (record) => record.name || record.key);
+}
+
+function buildRankState(records, labelFn) {
+  const ranks = buildCompetitionRanks(records);
+  return new Map(
+    records.map((record) => [
+      record.key,
+      {
+        entityKey: record.key,
+        label: labelFn(record),
+        rank: ranks.get(record.key),
+        count: record.count,
+      },
+    ]),
+  );
+}
+
+function buildRankDiffEntries(currentState, previousState) {
+  return [...currentState.values()].map((current) => {
+    const previous = previousState.get(current.entityKey) || null;
+    const previousRank = previous?.rank ?? null;
+    const previousCount = previous?.count ?? 0;
+    return {
+      entityKey: current.entityKey,
+      label: current.label,
+      previousRank,
+      currentRank: current.rank,
+      rankDelta: previousRank == null ? null : previousRank - current.rank,
+      previousCount,
+      currentCount: current.count,
+      countDelta: current.count - previousCount,
+      isNew: previousRank == null,
+    };
+  });
+}
+
+function collectSongOccurrences(items) {
+  const occurrences = [];
+  for (const item of items || []) {
+    for (const song of item.songs || []) {
+      if (!normalizeWhitespace(song?.title)) continue;
+      occurrences.push({ item, song });
+    }
+  }
+  return occurrences;
+}
+
+function compareSongRankRecords(a, b) {
+  return b.count - a.count || compareValues(a.sortKey, b.sortKey) || compareValues(a.title, b.title);
+}
+
+function compareCountRecords(a, b) {
+  return b.count - a.count || compareValues(a.name || a.title || a.key, b.name || b.title || b.key);
+}
+
+function compareValues(a, b) {
+  return rankCollator.compare(String(a || ""), String(b || ""));
+}
+
+function currentSnapshotMetadata(payload) {
+  const generatedAt = payload?.generatedAt || payload?.capturedAt || "";
+  const capturedAt = payload?.capturedAt || payload?.generatedAt || "";
+  const capturedDate = new Date(capturedAt);
+  return {
+    snapshotId: payload?.snapshotId || (Number.isFinite(capturedDate.getTime()) ? hourSnapshotId(capturedDate) : ""),
+    path: "",
+    generatedAt,
+    capturedAt,
+  };
+}
+
+function previousSnapshotPayload(previousSnapshot) {
+  if (!previousSnapshot) return null;
+  if (previousSnapshot.payload?.groups) return previousSnapshot.payload;
+  return previousSnapshot.groups ? previousSnapshot : null;
+}
+
+function previousSnapshotMetadata(previousSnapshot) {
+  const payload = previousSnapshotPayload(previousSnapshot);
+  if (!payload) return null;
+  const entry = previousSnapshot?.entry || {};
+  return {
+    snapshotId: payload.snapshotId || entry.id || "",
+    path: entry.path || "",
+    generatedAt: payload.generatedAt || entry.generatedAt || "",
+    capturedAt: payload.capturedAt || entry.capturedAt || payload.generatedAt || entry.generatedAt || "",
+  };
+}
+
+function readPreviousSuccessfulSnapshot(currentPayload = null) {
+  const index = readJsonIfExists(SNAPSHOT_INDEX_PATH);
+  const entries = Array.isArray(index?.snapshots) ? index.snapshots : [];
+  const latestEntry = entries.find((entry) => entry?.id && entry.id === index?.latestSnapshotId);
+  const orderedEntries = [...(latestEntry ? [latestEntry] : []), ...entries.filter((entry) => entry !== latestEntry)];
+  for (const entry of orderedEntries) {
+    const snapshot = readSnapshotEntry(entry);
+    if (snapshot && !isSameSnapshotPayload(snapshot.payload, currentPayload)) return snapshot;
+  }
+  return null;
+}
+
+function readSnapshotEntry(entry) {
+  if (!entry?.path) return null;
+  const snapshotPath = path.resolve(ROOT, entry.path);
+  if (!isPathInsideRoot(snapshotPath)) return null;
+  const payload = readJsonIfExists(snapshotPath);
+  return payload?.groups ? { entry, payload } : null;
+}
+
+function isPathInsideRoot(filePath) {
+  const relative = path.relative(ROOT, filePath);
+  return relative && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
+function isSameSnapshotPayload(snapshotPayload, currentPayload) {
+  if (!snapshotPayload || !currentPayload) return false;
+  const snapshotTime = snapshotPayload.capturedAt || snapshotPayload.generatedAt || "";
+  const currentTime = currentPayload.capturedAt || currentPayload.generatedAt || "";
+  return Boolean(snapshotTime && currentTime && snapshotTime === currentTime && snapshotPayload.generatedAt === currentPayload.generatedAt);
+}
+
 function isLowQualitySelectedItem(item) {
   if (!Array.isArray(item.songs) || item.songs.length < 2) return true;
   const artistCount = item.songs.filter((song) => isUsableArtist(song.artist)).length;
@@ -951,8 +1134,7 @@ function writeSnapshot(payload, capturedAt) {
   const snapshotPath = path.join(SNAPSHOT_DIR, `${snapshotId}.json`);
   writeJson(snapshotPath, { ...payload, snapshotId });
 
-  const indexPath = path.join(SNAPSHOT_DIR, "index.json");
-  const index = readJsonIfExists(indexPath) || { snapshots: [] };
+  const index = readJsonIfExists(SNAPSHOT_INDEX_PATH) || { snapshots: [] };
   const cutoff = Date.now() - SNAPSHOT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
   const entries = new Map();
   for (const entry of Array.isArray(index.snapshots) ? index.snapshots : []) {
@@ -983,7 +1165,7 @@ function writeSnapshot(payload, capturedAt) {
     }
   }
 
-  writeJson(indexPath, {
+  writeJson(SNAPSHOT_INDEX_PATH, {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     retentionDays: SNAPSHOT_RETENTION_DAYS,
@@ -1590,6 +1772,8 @@ function nonNegativeInteger(value, fallback = 0) {
 
 module.exports = {
   buildGroups,
+  buildRankDiffForRange,
+  buildRankDiffs,
   collectCarryForwardVideos,
   createRequestLimiter,
   filterBlockedVideos,
@@ -1600,5 +1784,6 @@ module.exports = {
   parseRetryAfterMs,
   retryDelayMs,
   selectCandidatesForInspection,
+  writeRankDiffFiles,
   TAIWAN_VTUBER_BLACKLIST,
 };

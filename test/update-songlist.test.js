@@ -8,6 +8,7 @@ process.env.DAILY_SONG_429_COOLDOWN_MS = "9000";
 
 const {
   buildGroups,
+  buildRankDiffs,
   collectCarryForwardVideos,
   createRequestLimiter,
   filterArtistRichMixedSourceSongs,
@@ -202,6 +203,115 @@ test("monthly group includes recent videos found through the 72h search", () => 
   );
 });
 
+test("rank diffs compare current ranks and counts to previous snapshot", () => {
+  const previous = payloadWithItems({
+    "72h": [
+      rankedItem("AAAAAAAAAAA", [...repeatedSongs("Alpha", "Artist A", 3)]),
+      rankedItem("BBBBBBBBBBB", [...repeatedSongs("Beta", "Artist B", 2)]),
+    ],
+    "1m": [],
+  });
+  const current = payloadWithItems({
+    "72h": [
+      rankedItem("CCCCCCCCCCC", [...repeatedSongs("Beta", "Artist B", 4)]),
+      rankedItem("DDDDDDDDDDD", [...repeatedSongs("Alpha", "Artist A", 2)]),
+      rankedItem("EEEEEEEEEEE", [song("Fresh", "Artist C")]),
+    ],
+    "1m": [],
+  });
+
+  const diff = buildRankDiffs(current, {
+    entry: { id: "20260711T120000Z", path: "data/snapshots/20260711T120000Z.json" },
+    payload: previous,
+  })["72h"];
+
+  assert.equal(diff.previous.snapshotId, "20260711T120000Z");
+  assertRankDiff(diff.songRank, "Beta", {
+    previousRank: 2,
+    currentRank: 1,
+    rankDelta: 1,
+    previousCount: 2,
+    currentCount: 4,
+    countDelta: 2,
+    isNew: false,
+  });
+  assertRankDiff(diff.songRank, "Alpha", {
+    previousRank: 1,
+    currentRank: 2,
+    rankDelta: -1,
+    previousCount: 3,
+    currentCount: 2,
+    countDelta: -1,
+    isNew: false,
+  });
+  assertRankDiff(diff.songRank, "Fresh", {
+    previousRank: null,
+    currentRank: 3,
+    rankDelta: null,
+    previousCount: 0,
+    currentCount: 1,
+    countDelta: 1,
+    isNew: true,
+  });
+  assertRankDiff(diff.artistRank, "Artist B", {
+    previousRank: 2,
+    currentRank: 1,
+    rankDelta: 1,
+    previousCount: 2,
+    currentCount: 4,
+    countDelta: 2,
+    isNew: false,
+  });
+});
+
+test("rank diffs use stable new-entry fields without previous snapshot", () => {
+  const current = payloadWithItems({
+    "72h": [rankedItem("AAAAAAAAAAA", [song("Fresh", "Artist A")])],
+    "1m": [rankedItem("BBBBBBBBBBB", [song("Monthly Fresh", "Artist B")])],
+  });
+
+  const diffs = buildRankDiffs(current, null);
+
+  assert.equal(diffs["72h"].previous, null);
+  assertRankDiff(diffs["72h"].songRank, "Fresh", {
+    previousRank: null,
+    currentRank: 1,
+    rankDelta: null,
+    previousCount: 0,
+    currentCount: 1,
+    countDelta: 1,
+    isNew: true,
+  });
+  assertRankDiff(diffs["1m"].artistRank, "Artist B", {
+    previousRank: null,
+    currentRank: 1,
+    rankDelta: null,
+    previousCount: 0,
+    currentCount: 1,
+    countDelta: 1,
+    isNew: true,
+  });
+});
+
+test("rank diffs preserve competition ranking for tied counts", () => {
+  const current = payloadWithItems({
+    "72h": [
+      rankedItem("AAAAAAAAAAA", [...repeatedSongs("Alpha", "Artist A", 3)]),
+      rankedItem("BBBBBBBBBBB", [...repeatedSongs("Beta", "Artist B", 2)]),
+      rankedItem("CCCCCCCCCCC", [...repeatedSongs("Gamma", "Artist C", 2)]),
+      rankedItem("DDDDDDDDDDD", [song("Delta", "Artist D")]),
+    ],
+    "1m": [],
+  });
+
+  const diff = buildRankDiffs(current, null)["72h"];
+
+  assert.equal(rankDiffByLabel(diff.songRank, "Alpha").currentRank, 1);
+  assert.equal(rankDiffByLabel(diff.songRank, "Beta").currentRank, 2);
+  assert.equal(rankDiffByLabel(diff.songRank, "Gamma").currentRank, 2);
+  assert.equal(rankDiffByLabel(diff.songRank, "Delta").currentRank, 4);
+});
+
 test("Taiwan VTuber blacklist matches named channels without relying on song title text", () => {
   assert.equal(TAIWAN_VTUBER_BLACKLIST.some((entry) => entry.name === "羽芝扉扉"), true);
   assert.equal(TAIWAN_VTUBER_BLACKLIST.some((entry) => entry.name === "厄倫蒂兒"), true);
@@ -318,13 +428,61 @@ function video(videoId, hoursAgo, sourceGroups, overrides = {}) {
   };
 }
 
-function song(title) {
+function song(title, artist = "artist", overrides = {}) {
   return {
     title,
-    artist: "artist",
+    artist,
     seconds: 60,
     time: "0:01:00",
+    ...overrides,
   };
+}
+
+function repeatedSongs(title, artist, count) {
+  return Array.from({ length: count }, () => song(title, artist));
+}
+
+function rankedItem(videoId, songs) {
+  return {
+    ...candidate(videoId, 1, ["today"]),
+    publishedText: "1 hour ago",
+    songs,
+  };
+}
+
+function payloadWithItems(groups) {
+  return {
+    schemaVersion: 1,
+    generatedAt: NOW.toISOString(),
+    capturedAt: NOW.toISOString(),
+    groups: {
+      "72h": group("72h", groups["72h"] || []),
+      "1m": group("1m", groups["1m"] || []),
+    },
+  };
+}
+
+function group(id, items) {
+  return {
+    id,
+    title: id,
+    generatedAt: NOW.toISOString(),
+    updatedAt: NOW.toISOString(),
+    items,
+  };
+}
+
+function rankDiffByLabel(entries, label) {
+  const entry = entries.find((item) => item.label === label);
+  assert.ok(entry, `Expected rank diff entry for ${label}`);
+  return entry;
+}
+
+function assertRankDiff(entries, label, expected) {
+  const entry = rankDiffByLabel(entries, label);
+  for (const [key, value] of Object.entries(expected)) {
+    assert.equal(entry[key], value, `${label}.${key}`);
+  }
 }
 
 function response(status, retryAfter) {

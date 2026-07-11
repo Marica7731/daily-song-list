@@ -23,14 +23,20 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - `data/latest.json`
    - `data/72h.json`
    - `data/1m.json`
+   - `data/diff/latest-72h.json`
+   - `data/diff/latest-1m.json`
    - `data/audit.json`
    - `data/snapshots/<hour>.json`
    - `data/snapshots/index.json`
    - `data/status.json`
+   - The diff files compare the latest generated ranks against the previous successful snapshot from `data/snapshots/index.json`. Each range includes `songRank` and `artistRank` entries with `entityKey`, previous/current rank, rank delta, previous/current count, count delta, and `isNew`. `rankDelta` is `previousRank - currentRank`, so positive values mean the entity moved up and negative values mean it moved down.
 4. `index.html` + `assets/app.js` render the latest data and allow switching to an hourly snapshot.
    - Default view is song appearance ranking.
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
    - Ranking rows preview one primary source channel inline; `+N 来源` opens the source drawer with every matching timestamp link.
+   - Initial load skips `song-search-known-songs.json` when payload songs already contain `isNiche`; older snapshots load that index only when niche annotation is missing. Prepared snapshots are kept in a small in-memory LRU cache, while immutable hourly snapshot JSON uses browser cache.
+   - URL state omits defaults, uses browser history for range/view/page/snapshot changes, and keeps search typing on `replaceState`. Song index bucket params are written only for the song index view.
+   - Video search keeps song-only matches visible before the fold. Rank views can switch between `按收录` and `按视频`, and latest song/artist ranks display movement from `data/diff`.
 5. `.github/workflows/update-songlist.yml` runs hourly and commits only data changes.
 
 `data/audit.json` is intentionally generated for review. It records inspected videos, rejected source reasons, rejected timestamp rows, and top channels producing non-song timestamp data.

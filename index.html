@@ -51,6 +51,7 @@
             >
               月度
             </button>
+            <button class="info-button" type="button" data-info-topic="month" aria-label="月度说明">i</button>
           </div>
 
           <div class="segmented view-mode" role="group" aria-label="视图">
@@ -75,10 +76,16 @@
               >未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。</span
             >
           </label>
+          <button class="info-button niche-info-button" type="button" data-info-topic="niche" aria-label="小众说明">i</button>
 
-          <label class="field snapshot-field">
-            <span class="sr-only">历史快照</span>
-            <select id="snapshotSelect" aria-label="历史快照"></select>
+          <label class="field snapshot-date-field">
+            <span class="sr-only">快照日期</span>
+            <select id="snapshotDateSelect" aria-label="快照日期"></select>
+          </label>
+
+          <label class="field snapshot-time-field">
+            <span class="sr-only">快照时间</span>
+            <select id="snapshotSelect" aria-label="快照时间"></select>
           </label>
         </div>
       </section>

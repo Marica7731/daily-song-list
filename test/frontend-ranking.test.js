@@ -153,6 +153,55 @@ test("artist ranking excludes unknown artist placeholders", () => {
   assert.equal(missingArtistCount, 3);
 });
 
+test("artist ranking merges conservative non-identity artist annotations", () => {
+  const { records } = buildArtistRecords([
+    occurrence("Song A", "Ａｄｏ（2020）", "A"),
+    occurrence("Song B", "Ado", "B"),
+    occurrence("Song C", "Ado", "C"),
+    occurrence("Song D", "Ado / 動画 OP", "D"),
+    occurrence("Song E", "Ado【原曲】", "E"),
+    occurrence("Song F", "Ado TV size", "F"),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].key, "ado");
+  assert.equal(records[0].name, "Ado");
+  assert.equal(records[0].count, 6);
+  assert.ok(Array.isArray(records[0].aliases));
+  assert.equal(records[0].aliases[0].name, "Ado");
+  assert.equal(records[0].aliases[0].count, 2);
+  assert.deepEqual(
+    new Set(records[0].aliases.map((alias) => alias.name)),
+    new Set(["Ａｄｏ（2020）", "Ado", "Ado / 動画 OP", "Ado【原曲】", "Ado TV size"]),
+  );
+});
+
+test("artist ranking does not merge explicit CV identity into the base artist", () => {
+  const { records } = buildArtistRecords([
+    occurrence("恋愛サーキュレーション", "千石撫子", "A"),
+    occurrence("恋愛サーキュレーション", "千石撫子(CV.花澤香菜)", "B"),
+  ]);
+
+  assert.equal(records.length, 2);
+  assert.deepEqual(
+    records.map((record) => record.name).sort(),
+    ["千石撫子", "千石撫子(CV.花澤香菜)"].sort(),
+  );
+});
+
+test("artist ranking does not merge feat identity into the base artist", () => {
+  const { records } = buildArtistRecords([
+    occurrence("からくりピエロ", "40mP", "A"),
+    occurrence("からくりピエロ", "40mP feat.初音ミク", "B"),
+  ]);
+
+  assert.equal(records.length, 2);
+  assert.deepEqual(
+    records.map((record) => record.name).sort(),
+    ["40mP", "40mP feat.初音ミク"].sort(),
+  );
+});
+
 test("buildArtistSongGroups groups occurrences by song", () => {
   const groups = buildArtistSongGroups([
     occurrence("Song A", "Artist", "A"),

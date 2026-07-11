@@ -22,15 +22,15 @@
         const payload = await callbacks.readJson(path, { signal });
         if (currentRequestId !== requestId) return { status: "stale" };
         hasSuccessfulPayload = true;
-        callbacks.onSuccess?.({ payload, path, previousPath });
+        await callbacks.onSuccess?.({ payload, path, previousPath });
         return { status: "success", payload };
       } catch (error) {
         if (currentRequestId !== requestId || isAbortError(error)) return { status: "stale" };
         if (isInitial && !hasSuccessfulPayload) {
-          callbacks.onFirstFailure?.({ error, path, previousPath });
+          await callbacks.onFirstFailure?.({ error, path, previousPath });
           return { status: "initial-failure", error };
         }
-        callbacks.onFailure?.({ error, path, previousPath });
+        await callbacks.onFailure?.({ error, path, previousPath });
         return { status: "failure", error };
       } finally {
         if (currentRequestId === requestId) {
@@ -167,11 +167,15 @@
     const validRanges = new Set(options.validRanges || []);
     const validViews = new Set(options.validViews || []);
     const validPageSizes = new Set((options.validPageSizes || []).map(Number));
+    const validRankMetrics = new Set(options.validRankMetrics || ["occurrences", "videos"]);
+    const validVideoLayouts = new Set(options.validVideoLayouts || ["cards", "compact"]);
     const fallbackRange = defaults.range || firstSetValue(validRanges) || "";
     const fallbackView = defaults.view || firstSetValue(validViews) || "";
     const fallbackPageSize = positiveInteger(defaults.pageSize, 50);
     const hasPageSizeParam = params.has("pageSize");
     const parsedPageSize = Number.parseInt(params.get("pageSize") || "", 10);
+    const rankMetric = params.get("metric");
+    const videoLayout = params.get("layout");
 
     return {
       range: validRanges.has(params.get("range")) ? params.get("range") : fallbackRange,
@@ -179,6 +183,8 @@
       page: positiveInteger(params.get("page"), positiveInteger(defaults.page, 1)),
       pageSize: validPageSizes.has(parsedPageSize) ? parsedPageSize : hasPageSizeParam ? 50 : fallbackPageSize,
       bucket: params.has("bucket") ? cleanBucketLabel(params.get("bucket")) : defaults.bucket || "全部",
+      rankMetric: validRankMetrics.has(rankMetric) ? rankMetric : defaults.rankMetric || "occurrences",
+      videoLayout: validVideoLayouts.has(videoLayout) ? videoLayout : defaults.videoLayout || "cards",
       outside: parseBooleanParam(params.get("outside") ?? params.get("libraryOutside"), Boolean(defaults.outside)),
       q: params.has("q") ? String(params.get("q") || "").slice(0, 200) : defaults.q || "",
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
@@ -187,11 +193,33 @@
 
   function serializeUrlState(state, options = {}) {
     const params = new URLSearchParams();
-    params.set("range", state.range || "");
-    params.set("view", state.view || "");
-    params.set("page", String(positiveInteger(state.page, 1)));
-    params.set("pageSize", String(positiveInteger(state.pageSize, 50)));
-    params.set("bucket", cleanBucketLabel(state.bucket || "全部"));
+    const defaults = {
+      range: "72h",
+      view: "songRank",
+      page: 1,
+      pageSize: 50,
+      bucket: "全部",
+      rankMetric: "occurrences",
+      videoLayout: "cards",
+      ...(options.defaults || {}),
+    };
+    const range = state.range || defaults.range;
+    const view = state.view || defaults.view;
+    const page = positiveInteger(state.page, defaults.page);
+    const pageSize = positiveInteger(state.pageSize, defaults.pageSize);
+    const bucket = cleanBucketLabel(state.bucket || defaults.bucket);
+    const rankMetric = state.rankMetric || defaults.rankMetric;
+    const videoLayout = state.videoLayout || defaults.videoLayout;
+
+    if (range !== defaults.range) params.set("range", range);
+    if (view !== defaults.view) params.set("view", view);
+    if (page !== defaults.page) params.set("page", String(page));
+    if (view !== "videos" && pageSize !== defaults.pageSize) params.set("pageSize", String(pageSize));
+    if (view === "songAz" && bucket !== defaults.bucket) params.set("bucket", bucket);
+    if ((view === "songRank" || view === "artistRank") && rankMetric !== defaults.rankMetric) {
+      params.set("metric", rankMetric);
+    }
+    if (view === "videos" && videoLayout !== defaults.videoLayout) params.set("layout", videoLayout);
     if (state.outside) params.set("outside", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
 

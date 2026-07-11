@@ -118,7 +118,7 @@
 
   function buildArtistRecords(occurrences, options = {}) {
     const clean = options.cleanText || cleanText;
-    const normalize = options.normalizeEntityKey || normalizeEntityKey;
+    const normalizeArtist = options.normalizeArtistKey || normalizeArtistKey;
     const increment = options.incrementCount || incrementCount;
     const records = new Map();
     let missingArtistCount = 0;
@@ -130,7 +130,7 @@
         continue;
       }
 
-      const key = normalize(artist);
+      const key = artistRecordKey(artist, normalizeArtist);
       if (!key) {
         missingArtistCount += 1;
         continue;
@@ -143,17 +143,20 @@
           songs: new Map(),
           channels: new Map(),
           occurrences: [],
+          aliasCounts: new Map(),
         });
       }
 
       const record = records.get(key);
       record.count += 1;
       record.occurrences.push(occurrence);
+      incrementAliasCount(record.aliasCounts, artist);
       increment(record.songs, clean(occurrence?.song?.title));
       increment(record.channels, clean(occurrence?.item?.channelName));
     }
 
-    return { records: Array.from(records.values()), missingArtistCount };
+    const finalizedRecords = Array.from(records.values()).map((record) => finalizeArtistRecord(record, normalizeArtist));
+    return { records: finalizedRecords, missingArtistCount };
   }
 
   function buildArtistSongGroups(occurrences, options = {}) {
@@ -254,6 +257,58 @@
     if (!title) return;
     record.title = title;
     record.sortKey = makeSortKey(title);
+  }
+
+  function artistRecordKey(artist, normalizeArtist) {
+    const primaryKey = normalizeArtist(artist);
+    if (!primaryKey) return "";
+    const baseKeys = artistBaseKeys(artist, normalizeArtist, { preserveIdentityAnnotations: true });
+    return baseKeys[0] || primaryKey;
+  }
+
+  function incrementAliasCount(map, name) {
+    const cleanName = cleanText(name);
+    if (!cleanName) return;
+    map.set(cleanName, (map.get(cleanName) || 0) + 1);
+  }
+
+  function finalizeArtistRecord(record, normalizeArtist) {
+    const aliases = Array.from(record.aliasCounts.entries())
+      .map(([name, count]) => ({
+        key: normalizeArtist(name),
+        name,
+        count,
+      }))
+      .sort(compareArtistAlias);
+    if (aliases[0]) record.name = aliases[0].name;
+    record.aliases = aliases;
+    delete record.aliasCounts;
+    return record;
+  }
+
+  function compareArtistAlias(a, b) {
+    return (
+      b.count - a.count ||
+      artistNameQualityScore(b.name) - artistNameQualityScore(a.name) ||
+      a.name.length - b.name.length ||
+      compareValues(a.name, b.name)
+    );
+  }
+
+  function artistNameQualityScore(name) {
+    const text = cleanText(name);
+    if (!text) return -10;
+    let score = 0;
+    if (/[\p{Letter}\p{Number}]/u.test(text)) score += 2;
+    if (text !== text.normalize("NFKC")) score -= 1;
+    if (/[\t]/u.test(text)) score -= 2;
+    if (/[(（［\[【「『].*[)）］\]】」』]\s*$/u.test(text)) {
+      score += stripTrailingNonArtistParenthetical(text) ? -1 : 0;
+    }
+    if (stripTrailingNonArtistDescriptor(text)) score -= 1;
+    if (stripArtistBeforeWorkAnnotation(text)) score -= 1;
+    if (stripArtistBeforeBrokenBracket(text)) score -= 1;
+    return score;
   }
 
   function selectCanonicalTitle(titleCounts) {
@@ -361,17 +416,21 @@
     return result;
   }
 
-  function artistBaseKeys(value, normalizeArtist) {
+  function artistBaseKeys(value, normalizeArtist, options = {}) {
     const text = cleanText(value).normalize("NFKC");
+    const preserveIdentityAnnotations = options.preserveIdentityAnnotations === true;
     const workBase = stripArtistBeforeWorkAnnotation(text);
     const brokenBracketBase = stripArtistBeforeBrokenBracket(text);
     const candidates = [];
-    addArtistBaseCandidate(candidates, stripArtistBeforeFeat(text), normalizeArtist);
+    if (!preserveIdentityAnnotations) addArtistBaseCandidate(candidates, stripArtistBeforeFeat(text), normalizeArtist);
     addArtistBaseCandidate(candidates, stripTrailingNonArtistParenthetical(text), normalizeArtist);
-    addArtistBaseCandidate(candidates, workBase, normalizeArtist);
     addArtistBaseCandidate(candidates, stripTrailingNonArtistParenthetical(workBase), normalizeArtist);
-    addArtistBaseCandidate(candidates, brokenBracketBase, normalizeArtist);
+    addArtistBaseCandidate(candidates, stripTrailingNonArtistDescriptor(workBase), normalizeArtist);
+    addArtistBaseCandidate(candidates, stripTrailingNonArtistDescriptor(brokenBracketBase), normalizeArtist);
     addArtistBaseCandidate(candidates, stripTrailingNonArtistParenthetical(brokenBracketBase), normalizeArtist);
+    addArtistBaseCandidate(candidates, workBase, normalizeArtist);
+    addArtistBaseCandidate(candidates, brokenBracketBase, normalizeArtist);
+    addArtistBaseCandidate(candidates, stripTrailingNonArtistDescriptor(text), normalizeArtist);
     return uniqueStrings(candidates);
   }
 
@@ -386,28 +445,69 @@
   }
 
   function stripTrailingNonArtistParenthetical(value) {
-    const match = String(value).match(/^(.*?)\s*[(（［\[]([^()（）\[\]［］]{1,100})[)）］\]]\s*$/u);
+    const match = String(value).match(/^(.*?)\s*[(（［\[【「『]([^()（）\[\]［］【】「」『』]{1,100})[)）］\]】」』]\s*$/u);
     if (!match) return "";
     return isNonArtistDescriptor(match[2]) ? match[1].trim() : "";
   }
 
+  function stripTrailingNonArtistDescriptor(value) {
+    const text = String(value);
+    const separated = text.match(/^(.+?)\s*(?:[-ー–—|｜:：])\s*(.{1,80})\s*$/u);
+    if (separated && isNonArtistDescriptor(separated[2])) return separated[1].trim();
+    const spaced = text.match(/^(.+?)\s+([^\s].{0,80})\s*$/u);
+    if (!spaced) return "";
+    return isStandaloneNonArtistDescriptor(spaced[2]) ? spaced[1].trim() : "";
+  }
+
   function stripArtistBeforeWorkAnnotation(value) {
-    const match = String(value).match(/^(.*?)\s*(?:\/|／)\s*(?:TV|アニメ|映画|ドラマ|OP|ED|主題歌|テーマ).+$/iu);
-    return match ? match[1].trim() : "";
+    const match = String(value).match(/^(.*?)\s*(?:\/|／)\s*(.+)$/u);
+    if (!match) return "";
+    return isNonArtistDescriptor(match[2]) ? match[1].trim() : "";
   }
 
   function stripArtistBeforeBrokenBracket(value) {
-    const match = String(value).match(/^(.*?)\s*(?:[-ー–—]\s*)?【.*$/u);
-    return match ? match[1].trim() : "";
+    const match = String(value).match(/^(.*?)\s*(?:[-ー–—]\s*)?【(.{1,100})$/u);
+    if (!match) return "";
+    return isNonArtistDescriptor(match[2]) ? match[1].trim() : "";
   }
 
   function isNonArtistDescriptor(value) {
     const text = cleanText(value).normalize("NFKC");
-    if (!text || /\b(?:cv|starring|feat|ft|vocal)\b|歌唱|声優/iu.test(text)) return false;
+    if (!text || hasArtistIdentityAnnotation(text)) return false;
     return (
-      /^(?:19|20)\d{2}年?$/u.test(text) ||
-      /(?:ver\.?|version|retake|piano|acoustic|cover|key|キー|ピアノ|アカペラ|セルフ|歌詞|調整|途中|原曲)/iu.test(text) ||
-      /(?:TV|アニメ|映画|ドラマ|OP|ED|主題歌|テーマ|CM|機動戦士|ガンダム|NARUTO|エヴァンゲリオン)/iu.test(text)
+      isStandaloneNonArtistDescriptor(text) ||
+      hasWorkDescriptor(text)
+    );
+  }
+
+  function isStandaloneNonArtistDescriptor(value) {
+    const text = cleanText(value).normalize("NFKC");
+    if (!text || hasArtistIdentityAnnotation(text)) return false;
+    const normalized = text
+      .replace(/^[([{【「『]\s*/u, "")
+      .replace(/\s*[)\]}】」』]$/u, "")
+      .trim();
+    return (
+      /^(?:19|20)\d{2}年?$/u.test(normalized) ||
+      /^(?:(?:self\s*)?cover|covered|original|原曲|原唱|retake|take\s*\d+|key|キー|歌詞|調整|途中)$/iu.test(normalized) ||
+      /^(?:(?:piano|acoustic|アコースティック|ピアノ|アカペラ)(?:\s*(?:ver\.?|version|版))?)$/iu.test(normalized) ||
+      /^(?:TV\s*size|TV\s*アニメ|TV\s*anime|TV|OP|ED|opening|ending|アニメ|動畫|动画|映画|ドラマ|主題歌|主题歌|テーマ|CM)(?:\s*(?:OP|ED|opening|ending|ver\.?|version|版|サイズ|size))?$/iu.test(
+        normalized,
+      )
+    );
+  }
+
+  function hasArtistIdentityAnnotation(value) {
+    return /\b(?:cv|starring|feat(?:uring)?|ft|vocal|member|members)\b|歌唱|声優|声优|聲優|组合|組合|成員|成员/iu.test(
+      value,
+    );
+  }
+
+  function hasWorkDescriptor(value) {
+    return (
+      /(?:TV\s*size|TV\s*アニメ|TV\s*anime|アニメ|動畫|动画|映画|ドラマ|opening|ending|主題歌|主题歌|テーマ|CM|機動戦士|ガンダム|NARUTO|エヴァンゲリオン)/iu.test(
+        value,
+      ) || /(?:^|[\s/／:：_\-ー–—])(?:OP|ED)(?:$|[\s/／:：_\-ー–—])/iu.test(value)
     );
   }
 
