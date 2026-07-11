@@ -211,27 +211,19 @@
     }
 
     const preview = [];
-    const deferred = [];
     const seenSources = new Set();
 
     for (const occurrence of sourceOccurrences) {
       const sourceKey = sourcePreviewKey(occurrence);
       if (sourceKey && seenSources.has(sourceKey)) {
-        deferred.push(occurrence);
         continue;
       }
       if (sourceKey) seenSources.add(sourceKey);
 
       if (preview.length < limit) {
         preview.push(occurrence);
-      } else {
-        deferred.push(occurrence);
       }
-    }
-
-    for (const occurrence of deferred) {
       if (preview.length >= limit) break;
-      preview.push(occurrence);
     }
 
     return {

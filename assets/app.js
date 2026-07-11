@@ -1043,7 +1043,7 @@ function appendSublineSource(container, occurrences, drawerId, isExpanded) {
     return;
   }
   if (occurrences.length === 1) {
-    appendSublineNode(container, renderInlineSourceLink(occurrences[0], { compact: false }));
+    appendSublineNode(container, renderInlineSourceLink(occurrences[0], { compact: true }));
     return;
   }
 
@@ -1069,21 +1069,30 @@ function renderSourcePreviewLinks(occurrences) {
   const preview = document.createElement("span");
   preview.className = "source-preview-list";
   preview.setAttribute("aria-label", "来源预览");
-  for (const occurrence of occurrences) {
+  occurrences.forEach((occurrence, index) => {
+    if (index > 0) {
+      const separator = document.createElement("span");
+      separator.className = "source-preview-separator";
+      separator.setAttribute("aria-hidden", "true");
+      separator.textContent = "/";
+      preview.append(separator);
+    }
     preview.append(renderInlineSourceLink(occurrence, { compact: true }));
-  }
+  });
   return preview;
 }
 
 function renderInlineSourceLink(occurrence, options = {}) {
+  const label = options.compact ? compactSourceLabel(occurrence) : sourceLabel(occurrence);
+  const channelLink = youtubeChannelLink(occurrence.item);
   const link = document.createElement("a");
   link.className = "source-link-inline";
-  link.href = youtubeTimeUrl(occurrence.item.videoId, occurrence.song.seconds);
+  link.href = channelLink.href;
   link.target = "_blank";
   link.rel = "noreferrer";
-  link.textContent = options.compact ? compactSourceLabel(occurrence) : sourceLabel(occurrence);
-  link.title = sourceLabel(occurrence);
-  link.setAttribute("aria-label", `打开来源：${sourceLabel(occurrence)}`);
+  link.textContent = label;
+  link.title = channelLink.isFallbackSearch ? `搜索频道：${label}` : `打开频道：${label}`;
+  link.setAttribute("aria-label", link.title);
   return link;
 }
 
@@ -1423,6 +1432,46 @@ function sourceLabel({ item, song }) {
 
 function compactSourceLabel({ item }) {
   return item.channelName || item.title || item.videoId || "来源";
+}
+
+function youtubeChannelLink(item = {}) {
+  const channelHandle = cleanText(item.channelHandle);
+  const handleUrl = youtubeChannelHandleUrl(channelHandle);
+  if (handleUrl) {
+    return { href: handleUrl, isFallbackSearch: false };
+  }
+
+  const channelId = cleanText(item.channelId);
+  if (channelId) {
+    return {
+      href: `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`,
+      isFallbackSearch: false,
+    };
+  }
+
+  const channelName = cleanText(item.channelName);
+  if (channelName) {
+    return {
+      href: `https://www.youtube.com/results?search_query=${encodeURIComponent(channelName)}`,
+      isFallbackSearch: true,
+    };
+  }
+
+  return {
+    href: item.videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(item.videoId)}` : "https://www.youtube.com/",
+    isFallbackSearch: true,
+  };
+}
+
+function youtubeChannelHandleUrl(value) {
+  if (!value) return "";
+  if (/^https?:\/\/(www\.)?youtube\.com\//i.test(value)) return value;
+  if (value.startsWith("/")) return `https://www.youtube.com${value}`;
+  if (value.startsWith("@")) return `https://www.youtube.com/${value}`;
+  if (value.startsWith("channel/") || value.startsWith("c/") || value.startsWith("user/")) {
+    return `https://www.youtube.com/${value}`;
+  }
+  return "";
 }
 
 function formatRank(rank) {

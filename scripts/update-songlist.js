@@ -328,6 +328,8 @@ function mergeCandidate(byVideoId, item, search, nowMs) {
   if (!existing.thumbnailUrl && item.thumbnailUrl) existing.thumbnailUrl = item.thumbnailUrl;
   if (!existing.viewText && item.viewText) existing.viewText = item.viewText;
   if (!existing.channelName && item.channelName) existing.channelName = item.channelName;
+  if (!existing.channelId && item.channelId) existing.channelId = item.channelId;
+  if (!existing.channelHandle && item.channelHandle) existing.channelHandle = item.channelHandle;
 }
 
 function addUnique(list, value) {
@@ -498,6 +500,8 @@ function mergeVideoMetadata(target, source) {
   if (!target.publishedTimestamp && source.publishedTimestamp) target.publishedTimestamp = source.publishedTimestamp;
   if (!target.thumbnailUrl && source.thumbnailUrl) target.thumbnailUrl = source.thumbnailUrl;
   if (!target.durationText && source.durationText) target.durationText = source.durationText;
+  if (!target.channelId && source.channelId) target.channelId = source.channelId;
+  if (!target.channelHandle && source.channelHandle) target.channelHandle = source.channelHandle;
 }
 
 function selectCandidatesForInspection(candidates, now, options = {}) {
@@ -680,6 +684,8 @@ async function fetchVideoSongList(candidate) {
       videoId: candidate.videoId,
       title: candidate.title,
       channelName: candidate.channelName,
+      channelId: candidate.channelId || "",
+      channelHandle: candidate.channelHandle || "",
       keyword: candidate.keyword,
       keywords: candidate.keywords || [candidate.keyword].filter(Boolean),
       sourceGroups: candidate.sourceGroups || [candidate.sourceGroup].filter(Boolean),

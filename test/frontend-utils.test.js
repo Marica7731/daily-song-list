@@ -101,16 +101,17 @@ test("source preview prioritizes different channels before duplicates", () => {
   assert.equal(preview.total, 4);
 });
 
-test("source preview fills open slots with duplicate-channel occurrences", () => {
+test("source preview omits duplicate-channel occurrences from inline preview", () => {
   const preview = buildSourcePreview([occurrence("A", "shared channel"), occurrence("B", "shared channel")], {
     limit: 2,
   });
 
   assert.deepEqual(
     preview.preview.map(({ item }) => item.videoId),
-    ["A", "B"],
+    ["A"],
   );
-  assert.equal(preview.hiddenCount, 0);
+  assert.equal(preview.hiddenCount, 1);
+  assert.equal(preview.total, 2);
 });
 
 test("pagination clamps pages and returns stable page metadata", () => {
