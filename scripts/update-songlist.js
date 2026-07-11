@@ -1,6 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { isLikelyNonSongEntry, isTimestampCandidateText, parseTimestampSongs } = require("./song-utils");
+const { isLikelyNonSongEntry, isTimestampCandidateText, normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -404,7 +404,7 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now) {
   }
 
   if (!videos.size) return empty("no_carryable_previous_videos", from, ageHours);
-  const skipVideoIds = new Set(videos.keys());
+  const skipVideoIds = new Set([...videos.values()].filter((video) => !video.needsRefreshFromDirtyCarryForward).map((video) => video.videoId));
   addKnownAuditSkipIds(skipVideoIds, previousAudit);
   return {
     enabled: true,
@@ -431,8 +431,10 @@ function upsertCarriedVideo(videos, item, sourceGroups, from) {
 
 function normalizeCarryForwardItem(item, sourceGroups, from) {
   if (!isValidVideoId(item?.videoId)) return null;
-  const songs = (item.songs || []).filter(isValidSong);
+  const originalSongs = item.songs || [];
+  const songs = originalSongs.map(normalizeParsedSong).filter(isValidSong).filter((song) => !isLikelyNonSongEntry(song));
   if (!songs.length) return null;
+  const needsRefreshFromDirtyCarryForward = hasDirtyCarriedSongs(originalSongs, songs);
   const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
   const mergedSourceGroups = uniqueValues([...listValues(item.sourceGroups), item.sourceGroup, ...sourceGroups]);
   return {
@@ -442,7 +444,18 @@ function normalizeCarryForwardItem(item, sourceGroups, from) {
     sourceGroups: mergedSourceGroups,
     carriedFromPrevious: true,
     carriedFromSnapshot: from,
+    needsRefreshFromDirtyCarryForward,
   };
+}
+
+function hasDirtyCarriedSongs(originalSongs, normalizedSongs) {
+  if (originalSongs.length !== normalizedSongs.length) return true;
+  for (let index = 0; index < originalSongs.length; index += 1) {
+    const original = originalSongs[index] || {};
+    const normalized = normalizedSongs[index] || {};
+    if (original.title !== normalized.title || (original.artist || "未記載") !== normalized.artist) return true;
+  }
+  return false;
 }
 
 function addKnownAuditSkipIds(skipVideoIds, previousAudit) {
@@ -671,7 +684,7 @@ async function fetchVideoSongList(candidate) {
       rejectedSources: rejectedSources.slice(0, 5),
       rejectedEntryCount: audit.rejectedEntryCount,
       sourceQuality: selected.sourceQuality || null,
-      songs: selected.map((song, index) => ({
+      songs: selected.map(normalizeParsedSong).map((song, index) => ({
         index: index + 1,
         time: song.time,
         seconds: song.seconds,
@@ -776,7 +789,9 @@ function rejectedSongSourceReason(stats, candidate) {
 }
 
 function isKnownNoArtistSongListTheme(candidate) {
-  return /(?:縛り|全曲|歌った曲|曲目|セトリ|セットリスト|リクエスト)/iu.test(`${candidate.title || ""} ${candidate.keyword || ""}`);
+  return /(?:縛り|全曲|耐久|歌唱耐久|歌った曲|曲目|セトリ|セットリスト|リクエスト|\d+\s*回)/iu.test(
+    `${candidate.title || ""} ${candidate.keyword || ""}`,
+  );
 }
 
 function isTopicLikeEntry(song) {
@@ -935,7 +950,7 @@ function applyGroupQualityFilters(groups) {
         items: group.items
           .map((item) => ({
             ...item,
-            songs: (item.songs || []).filter((song) => !isLikelyNonSongEntry(song)),
+            songs: (item.songs || []).map(normalizeParsedSong).filter((song) => !isLikelyNonSongEntry(song)),
           }))
           .filter((item) => !isLowQualitySelectedItem(item)),
       },

@@ -55,6 +55,41 @@ test("carries fresh previous song lists and skips previously inspected stable vi
   assert.equal(carry.skipVideoIds.has("FFFFFFFFFFF"), false);
 });
 
+test("dirty carried videos are normalized but left eligible for refresh", () => {
+  const previous = {
+    generatedAt: "2026-07-11T12:00:00Z",
+    groups: {
+      "72h": {
+        items: [
+          {
+            ...video("AAAAAAAAAAA", 2, ["today"]),
+            songs: [
+              { title: "_hotsmile", artist: "", seconds: 10, time: "0:00:10", raw: "0:10 :_hotsmile:" },
+              {
+                title: "勝利のマシンロボ",
+                artist: "マシンロボクロノスの大逆襲OP(キー+4)",
+                seconds: 60,
+                time: "0:01:00",
+                raw: "1:00 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(キー+4)",
+              },
+            ],
+          },
+        ],
+      },
+      "1m": { items: [] },
+    },
+  };
+
+  const carry = collectCarryForwardVideos(previous, { videos: [] }, NOW);
+
+  assert.equal(carry.enabled, true);
+  assert.equal(carry.videos.length, 1);
+  assert.equal(carry.videos[0].needsRefreshFromDirtyCarryForward, true);
+  assert.equal(carry.videos[0].songs.length, 1);
+  assert.equal(carry.videos[0].songs[0].artist, "未記載");
+  assert.equal(carry.skipVideoIds.has("AAAAAAAAAAA"), false);
+});
+
 test("incremental selection skips known videos, scans 48h, and caps monthly refresh", () => {
   const candidates = [
     candidate("AAAAAAAAAAA", 2, ["today"]),

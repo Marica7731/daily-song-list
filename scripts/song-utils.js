@@ -46,11 +46,16 @@ function parseTimestampSongs(comments, options = {}) {
         rejectTimestampLine(onReject, "obvious_non_song_text", { line, time, tail });
         continue;
       }
+      if (isCustomEmojiOnlyText(tail)) {
+        rejectTimestampLine(onReject, "custom_emoji_only", { line, time, tail });
+        continue;
+      }
 
       const [title, artist] = splitTitleArtist(tail);
       const basicRejectReason =
         (isBadSongField(title) && "bad_title") ||
         (isBadSongField(artist) && "bad_artist") ||
+        (isCustomEmojiOnlyEntry(title, artist) && "custom_emoji_only") ||
         (isNonSongSectionPair(title, artist) && "section_marker_pair") ||
         (isObviouslyNonSongActivityTitle(title) && "activity_title");
       if (basicRejectReason) {
@@ -78,6 +83,19 @@ function parseTimestampSongs(comments, options = {}) {
   return dedupeSongs(songs);
 }
 
+function normalizeParsedSong(song) {
+  if (!song || typeof song !== "object") return song;
+  const title = cleanSongOrArtistPart(song.title);
+  let artist = String(song.artist || "").trim();
+  if (!artist || artist === "未記載") artist = "未記載";
+  else if (isLikelyWorkMetadata(artist)) artist = "未記載";
+  return {
+    ...song,
+    title,
+    artist,
+  };
+}
+
 function rejectTimestampLine(onReject, reason, payload) {
   if (!onReject) return;
   onReject({
@@ -97,10 +115,14 @@ function isLikelyNonSongEntry(song) {
   const combined = `${title} ${raw}`;
   const hasArtist = Boolean(artist && artist !== "未記載");
 
+  if (isCustomEmojiOnlyText(title)) return true;
   if (/^(音入り|音入[り]?|声入り|マイクテスト|開始|終了|曲始まり|オープニング|エンディング|登場|退場|ゲスト|スパチャ読み|読み開始|コメント読み|告知|雑談|休憩|ただいま|まで)$/iu.test(title)) {
     return true;
   }
   if (/(?:曲始まり|オープニング|エンディング|登場|退場|スパチャ読み|コメント読み|チャット読み|ギフト(?:は)?読|読み開始|読み上げ|告知|宣伝|配信終了|配信開始|高評価|ch登録|チャンネル登録|登録者(?:数)?|視聴者|OBS|お手洗い休憩|チャットお題|\d+\s*達成|開始\s*[\/／]|虚空|クリックとは|クリックあるもの|ゲスト匂わせ|ゲストでよく呼ばれる|スパチャ|メモは紙|ライブでやる曲|チャンネルで.+歌ってみた|明日の曲について|ござるさん)/iu.test(combined)) {
+    return true;
+  }
+  if (!hasArtist && /^(?:本編開始|全曲終了|開始[・\s]?|終了[・\s]?|ライブ開催決定|特別ゲスト|突然の)/iu.test(title)) {
     return true;
   }
   if (!hasArtist && /(?:お話|話$|話①|話②|話題|裏話|スケジュール|おすすめ|コメント|チャット|ギフト|設定|手癖|腰|良い音|到着|ただいま|お土産|先生|予想|コンディション|休暇中|気圧|体調|配信|動画|映画|クリップ|バランス|読み|頑張|ありがとう|お疲れ|おつかれ)/iu.test(combined)) {
@@ -270,7 +292,10 @@ function extractSongArtistCore(text) {
 
   const lastDelimiter = findLastDelimiterOutsideBrackets(raw, SEPARATOR_CHARS);
   if (lastDelimiter > 0 && lastDelimiter < raw.length - 1) {
-    const parsed = [cleanSongOrArtistPart(raw.slice(0, lastDelimiter)), splitWithMetadata(raw.slice(lastDelimiter + 1))];
+    const title = cleanSongOrArtistPart(raw.slice(0, lastDelimiter));
+    const artistPart = raw.slice(lastDelimiter + 1);
+    if (title && isLikelyWorkMetadata(artistPart)) return [title, "未記載"];
+    const parsed = [title, splitWithMetadata(artistPart)];
     if (!isBadSongField(parsed[0]) && !isBadSongField(parsed[1])) return parsed;
   }
 
@@ -294,6 +319,7 @@ function splitWithMetadata(text) {
 
 function cleanSongOrArtistPart(text) {
   let value = stripTrailingLatinAnnotation(String(text || "").trim());
+  value = stripCustomEmojiAliases(value).trim();
   value = value.replace(/^_[A-Za-z0-9]+:\s*/u, "").trim();
   const preserveTrailingDoubleSlash = /[A-Za-z0-9)\]）]\/\/\s*$/.test(value);
   value = value.replace(/^\s*(?:\d{1,3}\s*[\-—–−]|[#＃]\s*\d{1,3}\s*[.)．。、:：\-—–−]?|encore|アンコール)\s*/iu, "").trim();
@@ -320,6 +346,25 @@ function isTimestampCandidateText(text) {
     .replace(TIMESTAMP_RE, "")
     .replace(/[\s\u3000\[\]【】()（）<>＜＞:：;；,，.。~～\-—–−_/／|｜￤∣丨♪♫♬♩▶▷►▸▹・･●○◆◇■□]+/gu, "");
   return /[A-Za-zぁ-んァ-ヶ一-龯々]/u.test(remainder);
+}
+
+function isCustomEmojiOnlyEntry(title, artist) {
+  if (String(artist || "").trim() && artist !== "未記載") return false;
+  return isCustomEmojiOnlyText(title);
+}
+
+function isCustomEmojiOnlyText(text) {
+  const value = normalizeTimelineChars(text).trim();
+  if (!value || value.length > 100) return false;
+  return /^:?_[^\s　/／|｜￤∣丨]+(?::+_?[^\s　/／|｜￤∣丨]+)*:?$/u.test(value);
+}
+
+function stripCustomEmojiAliases(text) {
+  return String(text || "")
+    .replace(/[:：]_[^\s　:：]+[:：]?/gu, "")
+    .replace(/^_[^\s　:：]+[:：]\s*/u, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function isStartTimestampMarkerLine(text) {
@@ -390,6 +435,32 @@ function isObviouslyNonSongActivityTitle(text) {
 
 function isNonSongSectionPair(title, artist) {
   return Boolean(title && artist && isNonSongSectionMarker(title) && isNonSongSectionMarker(artist));
+}
+
+function isLikelyWorkMetadata(text) {
+  const value = cleanSongOrArtistPart(text);
+  if (!value) return false;
+  if (looksLikeArtistCreditWithWorkMetadata(value)) return false;
+  const base = value
+    .replace(/\s*[\(（][^()（）]{1,100}[\)）]\s*$/u, "")
+    .replace(/\s*\[[^\[\]]{1,100}\]\s*$/u, "")
+    .trim();
+  if (!base) return false;
+  return /(?:^|[\s・･])(?:OP|ED|OST|BGM|MV|PV|主題歌|挿入歌|劇中歌|テーマ|opening|ending)$/iu.test(base) ||
+    /(?:アニメ|映画|劇場版|ドラマ|ゲーム|特撮|番組|作品|第\d+期|シーズン\d+).{0,40}(?:OP|ED|主題歌|挿入歌|劇中歌|テーマ)?$/iu.test(base) ||
+    /(?:OP|ED)(?:\d+|[①-⑳])?$/iu.test(base);
+}
+
+function looksLikeArtistCreditWithWorkMetadata(text) {
+  const value = String(text || "").trim();
+  if (/(?:feat\.?|featuring|starring|covered\s+by|歌唱|cover(?:ed)?\s+by)/iu.test(value)) return true;
+  if (
+    /^[A-Za-zÀ-ÖØ-öø-ÿ0-9 .:'’"“”&+_\-!?~～#＃♯♭★☆♪♫♡♥◎・･=×∞]{2,}(?:\s*[\(（]|\s*[\/／|｜￤∣丨])/u.test(value) &&
+    /(?:\d{4}|TV|アニメ|映画|ドラマ|ゲーム|主題歌|OP|ED)/iu.test(value)
+  ) {
+    return !/^(?:TV|OP|ED|OST|BGM|MV|PV|opening|ending)\b/iu.test(value);
+  }
+  return false;
 }
 
 function isNonSongSectionMarker(text) {
@@ -526,6 +597,7 @@ module.exports = {
   isTimestampCandidateText,
   isLikelyNonSongEntry,
   normalizeCommentText,
+  normalizeParsedSong,
   parseTimestampSongs,
   timeToSeconds,
 };

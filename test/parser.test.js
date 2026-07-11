@@ -120,6 +120,45 @@ test("strips leading custom emoji aliases from song titles", () => {
   assert.equal(songs[0].title, "ワールドイズマイン");
 });
 
+test("rejects custom emoji aliases without song text", () => {
+  const songs = parseTimestampSongs(["0:01 :_hotsmile:", "0:02 :_可愛い:ぷくっ"]);
+
+  assert.deepEqual(songs, []);
+});
+
+test("strips trailing custom emoji aliases from song titles", () => {
+  const songs = parseTimestampSongs(["1:44:21 READY STEADY GO:_hey:"]);
+
+  assert.equal(songs.length, 1);
+  assert.equal(songs[0].title, "READY STEADY GO");
+});
+
+test("keeps anime work metadata out of artist fields", () => {
+  const songs = parseTimestampSongs([
+    "0:03 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(キー+4)",
+    "0:08 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(Ado風ver.)",
+    "0:13 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(Secret guest山岡さん参戦)",
+  ]);
+
+  assert.equal(songs.length, 3);
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["勝利のマシンロボ", "勝利のマシンロボ", "勝利のマシンロボ"],
+  );
+  assert.deepEqual(
+    songs.map((song) => song.artist),
+    ["未記載", "未記載", "未記載"],
+  );
+});
+
+test("keeps song rows with guest annotations in work metadata", () => {
+  const songs = parseTimestampSongs(["60曲目 3:58:12 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(特別ゲスト ケンリュウ)"]);
+
+  assert.equal(songs.length, 1);
+  assert.equal(songs[0].title, "勝利のマシンロボ");
+  assert.equal(songs[0].artist, "未記載");
+});
+
 test("keeps song titles that contain greeting-like words", () => {
   const songs = parseTimestampSongs(["08. 1:31:32 金曜日のおはよう（HoneyWorks）"]);
 
