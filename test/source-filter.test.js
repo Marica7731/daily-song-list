@@ -3,6 +3,7 @@ const test = require("node:test");
 
 const {
   cleanSongTitleNoise,
+  isArtistRichMixedSongList,
   isBlockedSongEntry,
   filterPayloadBlockedSources,
   isBlockedSource,
@@ -76,6 +77,11 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "後半再開！", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "換気タイム", artist: "待补歌手" }), true);
   assert.equal(isBlockedSongEntry({ title: "_UTANO012; オケが止まった", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "100人達成！", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "222人に目標変更", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "A LELELELE", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "KP", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ft", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "はじまりはいつも雨", artist: "未記載" }), false);
 
@@ -116,6 +122,54 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   ]);
   assert.equal(filtered.source.clientFilteredBlockedSongCount, 6);
   assert.equal(filtered.source.clientNormalizedSongCount, 1);
+});
+
+test("source filter drops title-only rows only inside artist-rich mixed lists", () => {
+  const artistRows = Array.from({ length: 8 }, (_, index) => ({
+    title: `Song ${index + 1}`,
+    artist: `Artist ${index + 1}`,
+    seconds: index + 1,
+    time: `0:00:0${index + 1}`,
+  }));
+  const mixedSongs = [
+    { title: "「君とのメモリー 更新中～」", artist: "未記載", seconds: 226, time: "0:03:46" },
+    { title: "ナナフシダンス", artist: "待补歌手", seconds: 13506, time: "3:45:06" },
+    ...artistRows,
+  ];
+
+  assert.equal(isArtistRichMixedSongList(mixedSongs), true);
+
+  const payload = {
+    source: { name: "fixture" },
+    groups: {
+      "72h": {
+        items: [
+          { videoId: "AAAAAAAAAAA", title: "mixed", channelName: "A", songs: mixedSongs },
+          {
+            videoId: "BBBBBBBBBBB",
+            title: "title only",
+            channelName: "B",
+            songs: [
+              { title: "タッチ", artist: "未記載", seconds: 1, time: "0:00:01" },
+              { title: "ラムのラブソング", artist: "未記載", seconds: 2, time: "0:00:02" },
+              { title: "KP", artist: "未記載", seconds: 3, time: "0:00:03" },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const filtered = filterPayloadBlockedSources(payload);
+  assert.deepEqual(
+    filtered.groups["72h"].items[0].songs.map((song) => song.title),
+    artistRows.map((song) => song.title),
+  );
+  assert.deepEqual(
+    filtered.groups["72h"].items[1].songs.map((song) => song.title),
+    ["タッチ", "ラムのラブソング"],
+  );
+  assert.equal(filtered.source.clientFilteredBlockedSongCount, 3);
 });
 
 function video(videoId, channelName, title) {

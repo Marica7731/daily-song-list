@@ -182,6 +182,10 @@ test("channel link uses handle, channelId, and search fallback", () => {
     youtubeChannelLink({ channelId: "UCID", channelName: "Id Channel" }).href,
     "https://www.youtube.com/channel/UCID",
   );
+  assert.equal(
+    youtubeChannelLink({ channelUrl: "https://www.youtube.com/@DirectHandle", channelName: "Direct Channel" }).href,
+    "https://www.youtube.com/@DirectHandle",
+  );
   assert.deepEqual(youtubeChannelLink({ channelName: "Search Channel" }), {
     href: "https://www.youtube.com/results?search_query=Search%20Channel",
     isFallbackSearch: true,

@@ -349,11 +349,23 @@ function extractSongArtistCore(text) {
 
 function splitWithMetadata(text) {
   const value = String(text || "").trim();
+  const slashMetadataArtist = splitArtistBeforeWorkMetadata(value);
+  if (slashMetadataArtist) return slashMetadataArtist;
   const match = findSpacedDelimiterOutsideBrackets(value, "|｜￤∣丨");
   if (!match) return cleanArtistPart(value);
   const artist = cleanArtistPart(value.slice(0, match.index));
   const metadata = cleanSongOrArtistPart(value.slice(match.index + match.length)).replace(/^[\[\]【】]+|[\[\]【】]+$/g, "");
   return artist && metadata ? `${artist} [${metadata}]` : artist;
+}
+
+function splitArtistBeforeWorkMetadata(text) {
+  const value = String(text || "").trim();
+  const match = findSpacedDelimiterOutsideBrackets(value, "/／");
+  if (!match) return "";
+  const artist = cleanArtistPart(value.slice(0, match.index));
+  const metadata = cleanSongOrArtistPart(value.slice(match.index + match.length));
+  if (!artist || isBadSongField(artist) || !metadata || !isLikelyWorkMetadata(metadata)) return "";
+  return artist;
 }
 
 function cleanSongOrArtistPart(text) {

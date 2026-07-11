@@ -168,6 +168,25 @@ test("keeps anime work metadata out of artist fields", () => {
   );
 });
 
+test("parses artist before a trailing slash metadata block", () => {
+  const songs = parseTimestampSongs([
+    [
+      "02:43:45 ラムのラブソング / 松谷祐子 (1981) / TVアニメ「うる星やつら」初代OP",
+      "03:01:03 ふわふわ時間 / 桜高軽音部 (2009) / TVアニメ「けいおん!」劇中歌",
+      "06:09:57 恋愛サーキュレーション / 千石撫子(CV:花澤香菜) (2009) / TVアニメ 「化物語 」第10話OP",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["ラムのラブソング", "ふわふわ時間", "恋愛サーキュレーション"],
+  );
+  assert.deepEqual(
+    songs.map((song) => song.artist),
+    ["松谷祐子 (1981)", "桜高軽音部 (2009)", "千石撫子(CV:花澤香菜) (2009)"],
+  );
+});
+
 test("keeps song rows with guest annotations in work metadata", () => {
   const songs = parseTimestampSongs(["60曲目 3:58:12 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(特別ゲスト ケンリュウ)"]);
 

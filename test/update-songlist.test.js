@@ -10,6 +10,7 @@ const {
   buildGroups,
   collectCarryForwardVideos,
   createRequestLimiter,
+  filterArtistRichMixedSourceSongs,
   isBlockedSource,
   mergeFetchedAndCarriedVideos,
   parseRetryAfterMs,
@@ -98,6 +99,53 @@ test("dirty carried videos are normalized but left eligible for refresh", () => 
   assert.equal(carry.videos[0].songs.length, 1);
   assert.equal(carry.videos[0].songs[0].artist, "未記載");
   assert.equal(carry.skipVideoIds.has("AAAAAAAAAAA"), false);
+});
+
+test("artist-rich mixed sources drop title-only rows without rejecting pure title-only lists", () => {
+  const artistRows = Array.from({ length: 8 }, (_, index) => ({
+    title: `Song ${index + 1}`,
+    artist: `Artist ${index + 1}`,
+    time: `0:${String(index + 1).padStart(2, "0")}:00`,
+    seconds: 60 * (index + 1),
+    raw: `${index + 1}:00 Song ${index + 1} / Artist ${index + 1}`,
+  }));
+  const mixed = filterArtistRichMixedSourceSongs([
+    {
+      title: "「君とのメモリー 更新中～」",
+      artist: "未記載",
+      time: "0:03:46",
+      seconds: 226,
+      raw: "03:46 「君とのメモリー 更新中～」",
+    },
+    {
+      title: "222人に目標変更",
+      artist: "未記載",
+      time: "3:31:11",
+      seconds: 12671,
+      raw: "03:31:11 222人に目標変更",
+    },
+    ...artistRows,
+  ]);
+
+  assert.deepEqual(
+    mixed.songs.map((song) => song.title),
+    artistRows.map((song) => song.title),
+  );
+  assert.deepEqual(
+    mixed.rejectedEntries.map((entry) => entry.reason),
+    ["artist_rich_source_title_only_entry", "artist_rich_source_title_only_entry"],
+  );
+
+  const titleOnly = filterArtistRichMixedSourceSongs([
+    { title: "タッチ", artist: "未記載" },
+    { title: "ラムのラブソング", artist: "未記載" },
+    { title: "ジェミニ", artist: "未記載" },
+  ]);
+  assert.deepEqual(
+    titleOnly.songs.map((song) => song.title),
+    ["タッチ", "ラムのラブソング", "ジェミニ"],
+  );
+  assert.deepEqual(titleOnly.rejectedEntries, []);
 });
 
 test("incremental selection skips known videos, scans 48h, and caps monthly refresh", () => {

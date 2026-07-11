@@ -531,6 +531,11 @@
       };
     }
 
+    const directUrl = youtubeChannelDirectUrl(item.channelUrl || item.authorUrl || item.ownerUrl);
+    if (directUrl) {
+      return { href: directUrl, isFallbackSearch: false };
+    }
+
     const channelName = cleanText(item.channelName);
     if (channelName) {
       return {
@@ -553,6 +558,13 @@
     if (value.startsWith("channel/") || value.startsWith("c/") || value.startsWith("user/")) {
       return `https://www.youtube.com/${value}`;
     }
+    return "";
+  }
+
+  function youtubeChannelDirectUrl(value) {
+    const url = cleanText(value);
+    if (!/^https?:\/\/(www\.)?youtube\.com\//i.test(url)) return "";
+    if (/\/(?:channel|@|c\/|user\/)/i.test(url.replace(/^https?:\/\/(www\.)?youtube\.com/i, ""))) return url;
     return "";
   }
 

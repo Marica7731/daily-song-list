@@ -91,10 +91,17 @@
             removedSources += 1;
             continue;
           }
+          const normalizedItemSongs = (item.songs || []).map(normalizeSongEntry);
+          const dropTitleOnlyFromArtistRichList = isArtistRichMixedSongList(normalizedItemSongs);
           const songs = [];
-          for (const song of item.songs || []) {
-            const normalizedSong = normalizeSongEntry(song);
+          for (let index = 0; index < normalizedItemSongs.length; index += 1) {
+            const song = (item.songs || [])[index];
+            const normalizedSong = normalizedItemSongs[index];
             if (isBlockedSongEntry(normalizedSong)) {
+              removedSongs += 1;
+              continue;
+            }
+            if (dropTitleOnlyFromArtistRichList && !hasKnownArtist(normalizedSong)) {
               removedSongs += 1;
               continue;
             }
@@ -144,11 +151,24 @@
 
   function isBlockedSongEntry(song) {
     const title = String(song?.title || song?.raw || "").trim();
+    const hasArtist = hasKnownArtist(song);
     const artist = String(song?.artist || "").trim();
-    const hasArtist = Boolean(artist && !isUnknownArtist(artist));
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
     return !hasArtist && isChatReactionShoutText(title);
+  }
+
+  function isArtistRichMixedSongList(songs) {
+    const entries = Array.isArray(songs) ? songs : [];
+    const artistCount = entries.filter(hasKnownArtist).length;
+    const titleOnlyCount = entries.length - artistCount;
+    const artistRatio = entries.length ? artistCount / entries.length : 0;
+    return artistCount >= 8 && titleOnlyCount >= 2 && artistRatio >= 0.35;
+  }
+
+  function hasKnownArtist(song) {
+    const artist = String(song?.artist || "").trim();
+    return Boolean(artist && !isUnknownArtist(artist));
   }
 
   function isStrongNonSongMarker(text) {
@@ -167,6 +187,14 @@
     const key = normalizeNoiseTitleKey(text);
     if (!key) return false;
     if (/^(?:第)?\d+個目$/u.test(key)) return true;
+    if (/^\d+\s*(?:人|名)(?:達成|に目標変更)$/u.test(key)) return true;
+    if (/^(?:本日の)?目標[:：]?.*(?:目指|達成|人|名)/u.test(key)) return true;
+    if (/チャンネル登録者?\d*(?:人|名)?達成/u.test(key)) return true;
+    if (/^(?:今晩の)?メニューと配信時間/u.test(key)) return true;
+    if (/^(?:朝食|配信の食事事情|心音asmr|ギターの話|お声も起きてきた|告知とed)$/iu.test(key)) return true;
+    if (/^(?:\d+時間じゃ足りない|平均配信時間\d+時間|喉の調子が|のどおぢ|だいぶ慣れてきた|ストリームモンスター|どう見てもロ)$/iu.test(key)) {
+      return true;
+    }
     if (/^(?:前半|後半)?再開$/u.test(key)) return true;
     if (/^おつ[\p{L}\p{N}ー]{1,18}$/iu.test(key)) return true;
     if (/^せーの.*おつ/u.test(key)) return true;
@@ -243,7 +271,7 @@
     if (!compact) return false;
     if (/^(?:hi)?(?:dq|denq|天q)(?:clap)?$/iu.test(compact)) return true;
     if (/^wa{3,}$/iu.test(compact)) return true;
-    return /^(?:hotsmile|kopipe|gola|golacheerskp|alelelelele|blessyou|pat|pienface|zoomin|mumumu|otugaugausmile|smile)$/iu.test(compact);
+    return /^(?:hotsmile|kopipe|gola|golacheerskp|kp|ft|alelelele|alelelelele|blessyou|pat|pienface|zoomin|mumumu|otugaugausmile|smile)$/iu.test(compact);
   }
 
   function normalizeChatReactionText(text) {
@@ -280,6 +308,7 @@
     cleanSongTitleNoise,
     filterBlockedVideos,
     filterPayloadBlockedSources,
+    isArtistRichMixedSongList,
     isBlockedSongEntry,
     isBlockedSource,
     isChatReactionShoutText,

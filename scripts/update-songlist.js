@@ -371,7 +371,8 @@ function upsertCarriedVideo(videos, item, sourceGroups, from) {
 function normalizeCarryForwardItem(item, sourceGroups, from) {
   if (!isValidVideoId(item?.videoId)) return null;
   const originalSongs = item.songs || [];
-  const songs = originalSongs.map(normalizeParsedSong).filter(isValidSong).filter((song) => !isLikelyNonSongEntry(song));
+  const normalizedSongs = originalSongs.map(normalizeParsedSong).filter(isValidSong).filter((song) => !isLikelyNonSongEntry(song));
+  const { songs } = filterArtistRichMixedSourceSongs(normalizedSongs);
   if (!songs.length) return null;
   const needsRefreshFromDirtyCarryForward = hasDirtyCarriedSongs(originalSongs, songs);
   const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
@@ -642,7 +643,7 @@ async function fetchVideoSongList(candidate) {
 }
 
 function buildSongSource(songs, rejectedEntries, sourceText, sourceType, candidate) {
-  const cleaned = songs.filter((song) => !isLikelyNonSongEntry(song));
+  const likelySongEntries = songs.filter((song) => !isLikelyNonSongEntry(song));
   const additionallyRejected = songs
     .filter((song) => isLikelyNonSongEntry(song))
     .map((song) =>
@@ -654,7 +655,9 @@ function buildSongSource(songs, rejectedEntries, sourceText, sourceType, candida
         artist: song.artist,
       }),
     );
-  const allRejectedEntries = [...rejectedEntries, ...additionallyRejected];
+  const mixedSourceFilter = filterArtistRichMixedSourceSongs(likelySongEntries);
+  const cleaned = mixedSourceFilter.songs;
+  const allRejectedEntries = [...rejectedEntries, ...additionallyRejected, ...mixedSourceFilter.rejectedEntries];
   const stats = sourceStats(cleaned, songs, allRejectedEntries, sourceText, sourceType);
   const rejectedReason = rejectedSongSourceReason(stats, candidate);
   return {
@@ -678,6 +681,35 @@ function buildSongSource(songs, rejectedEntries, sourceText, sourceType, candida
       rejectedEntries: allRejectedEntries,
     },
   };
+}
+
+function filterArtistRichMixedSourceSongs(songs) {
+  const entries = Array.isArray(songs) ? songs : [];
+  const artistCount = entries.filter((song) => isUsableArtist(song.artist)).length;
+  const titleOnlyCount = entries.length - artistCount;
+  const artistRatio = entries.length ? artistCount / entries.length : 0;
+  if (artistCount < 8 || titleOnlyCount < 2 || artistRatio < 0.35) {
+    return { songs: entries, rejectedEntries: [] };
+  }
+
+  const kept = [];
+  const rejectedEntries = [];
+  for (const song of entries) {
+    if (isUsableArtist(song.artist)) {
+      kept.push(song);
+      continue;
+    }
+    rejectedEntries.push(
+      compactRejectedEntry({
+        reason: "artist_rich_source_title_only_entry",
+        line: song.raw,
+        time: song.time,
+        title: song.title,
+        artist: song.artist,
+      }),
+    );
+  }
+  return { songs: kept, rejectedEntries };
 }
 
 function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType) {
@@ -1272,7 +1304,7 @@ function displayArtist(artist) {
 
 function isUsableArtist(artist) {
   const value = String(artist || "").trim();
-  if (!value || value === "未記載") return false;
+  if (!value || /^(?:未記載|未记载|待补歌手|待補歌手|待补|待補)$/u.test(value)) return false;
   if (/^(ソロ|全員|みんな|ゲスト|本人|原曲|オリジナル|ラジオ|仮の日程|20\d{2}年?)$/iu.test(value)) return false;
   if (/^\d+\s*(?:人|名)$/u.test(value)) return false;
   return true;
@@ -1561,6 +1593,7 @@ module.exports = {
   collectCarryForwardVideos,
   createRequestLimiter,
   filterBlockedVideos,
+  filterArtistRichMixedSourceSongs,
   isBlockedSource,
   matchBlockedSource,
   mergeFetchedAndCarriedVideos,
