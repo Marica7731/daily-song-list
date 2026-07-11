@@ -11,15 +11,22 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
 
 1. `scripts/update-songlist.js` fetches YouTube search pages for `歌枠` and `弾き語り` using the same month-filter search URLs used by the existing ranking project.
 2. It fetches each candidate watch page, extracts description and first comment continuations, parses timestamped song lists, and skips videos without usable songs.
+   - Non-song chapter rows, chat highlights, setup sections, channel metrics, custom emoji prefixes, and low-quality mixed comment timelines are filtered before write.
+   - Long title-only lists are kept only when they look like a real setlist, such as a clear `縛り`/setlist theme.
 3. It writes:
    - `data/latest.json`
    - `data/72h.json`
    - `data/1m.json`
+   - `data/audit.json`
    - `data/snapshots/<hour>.json`
    - `data/snapshots/index.json`
    - `data/status.json`
 4. `index.html` + `assets/app.js` render the latest data and allow switching to an hourly snapshot.
+   - Default view is song appearance ranking.
+   - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
 5. `.github/workflows/update-songlist.yml` runs hourly and commits only data changes.
+
+`data/audit.json` is intentionally generated for review. It records inspected videos, rejected source reasons, rejected timestamp rows, and top channels producing non-song timestamp data.
 
 ## Commands
 

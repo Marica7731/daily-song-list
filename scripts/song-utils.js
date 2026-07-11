@@ -2,7 +2,7 @@ const TIMESTAMP_RE = /(?<![\dA-Za-z_:])(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]
 const TIMESTAMP_TOKEN_RE = /(?<![\dA-Za-z_:])(?:[\[【(（]\s*)?(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)(?:\s*[\]】)）])?(?!\d)/g;
 const INDEX_RE =
   /^\s*(?:[⟦［\[]\s*#?[\d０-９]{1,3}\s*[⟧］\]]\s*|[#＃]?[\d０-９]{1,3}[)）、:：]\s*|[#＃]?[\d０-９]{1,3}[.．]\s*|[#＃]?[\d０-９]{1,3}\s+)/;
-const SEPARATOR_CHARS = "/／|｜￤∣丨";
+const SEPARATOR_CHARS = "/／|｜￤∣丨✦";
 const BRACKET_OPEN = "([{（［【「『";
 const BRACKET_CLOSE = ")]}）］】」』";
 
@@ -22,32 +22,53 @@ function normalizeCommentText(text) {
     .replace(/\u200b/g, "");
 }
 
-function parseTimestampSongs(comments) {
+function parseTimestampSongs(comments, options = {}) {
   const songs = [];
+  const onReject = typeof options.onReject === "function" ? options.onReject : null;
   for (const comment of comments || []) {
     for (const rawLine of mergeSplitTimelineLines(comment)) {
       const line = rawLine.trim();
       const match = TIMESTAMP_RE.exec(line);
       if (!match) continue;
 
+      const time = normalizeCommentTime(match[0]);
       let tail = stripLeadingTimelineDecorations(line.slice(match.index + match[0].length));
       tail = stripLeadingTimelineDecorations(tail.replace(INDEX_RE, "")).trim();
-      if (!tail || isObviouslyNonSongText(tail)) continue;
-
-      const [title, artist] = splitTitleArtist(tail);
-      if (
-        isBadSongField(title) ||
-        isBadSongField(artist) ||
-        isNonSongSectionPair(title, artist) ||
-        isObviouslyNonSongActivityTitle(title)
-      ) {
+      if (!tail) {
+        const prefix = stripLeadingTimelineDecorations(line.slice(0, match.index).replace(INDEX_RE, "")).trim();
+        if (prefix && !isObviouslyNonSongText(prefix)) tail = prefix;
+      }
+      if (!tail) {
+        rejectTimestampLine(onReject, "empty_after_timestamp", { line, time, tail });
         continue;
       }
-      if (artist === "未記載" && isObviouslyNonSongTitleCandidate(title)) continue;
+      if (isObviouslyNonSongText(tail)) {
+        rejectTimestampLine(onReject, "obvious_non_song_text", { line, time, tail });
+        continue;
+      }
+
+      const [title, artist] = splitTitleArtist(tail);
+      const basicRejectReason =
+        (isBadSongField(title) && "bad_title") ||
+        (isBadSongField(artist) && "bad_artist") ||
+        (isNonSongSectionPair(title, artist) && "section_marker_pair") ||
+        (isObviouslyNonSongActivityTitle(title) && "activity_title");
+      if (basicRejectReason) {
+        rejectTimestampLine(onReject, basicRejectReason, { line, time, tail, title, artist });
+        continue;
+      }
+      if (artist === "未記載" && isObviouslyNonSongTitleCandidate(title)) {
+        rejectTimestampLine(onReject, "title_only_non_song_candidate", { line, time, tail, title, artist });
+        continue;
+      }
+      if (isLikelyNonSongEntry({ title, artist, raw: line })) {
+        rejectTimestampLine(onReject, "likely_non_song_entry", { line, time, tail, title, artist });
+        continue;
+      }
 
       songs.push({
-        time: normalizeCommentTime(match[0]),
-        seconds: timeToSeconds(normalizeCommentTime(match[0])),
+        time,
+        seconds: timeToSeconds(time),
         title,
         artist,
         raw: line,
@@ -57,10 +78,66 @@ function parseTimestampSongs(comments) {
   return dedupeSongs(songs);
 }
 
+function rejectTimestampLine(onReject, reason, payload) {
+  if (!onReject) return;
+  onReject({
+    reason,
+    line: payload.line || "",
+    time: payload.time || "",
+    tail: payload.tail || "",
+    title: payload.title || "",
+    artist: payload.artist || "",
+  });
+}
+
+function isLikelyNonSongEntry(song) {
+  const title = String(song?.title || "").trim();
+  const artist = String(song?.artist || "").trim();
+  const raw = String(song?.raw || "");
+  const combined = `${title} ${raw}`;
+  const hasArtist = Boolean(artist && artist !== "未記載");
+
+  if (/^(音入り|音入[り]?|声入り|マイクテスト|開始|終了|曲始まり|オープニング|エンディング|登場|退場|ゲスト|スパチャ読み|読み開始|コメント読み|告知|雑談|休憩|ただいま|まで)$/iu.test(title)) {
+    return true;
+  }
+  if (/(?:曲始まり|オープニング|エンディング|登場|退場|スパチャ読み|コメント読み|チャット読み|ギフト(?:は)?読|読み開始|読み上げ|告知|宣伝|配信終了|配信開始|高評価|ch登録|チャンネル登録|登録者(?:数)?|視聴者|OBS|お手洗い休憩|チャットお題|\d+\s*達成|開始\s*[\/／]|虚空|クリックとは|クリックあるもの|ゲスト匂わせ|ゲストでよく呼ばれる|スパチャ|メモは紙|ライブでやる曲|チャンネルで.+歌ってみた|明日の曲について|ござるさん)/iu.test(combined)) {
+    return true;
+  }
+  if (!hasArtist && /(?:お話|話$|話①|話②|話題|裏話|スケジュール|おすすめ|コメント|チャット|ギフト|設定|手癖|腰|良い音|到着|ただいま|お土産|先生|予想|コンディション|休暇中|気圧|体調|配信|動画|映画|クリップ|バランス|読み|頑張|ありがとう|お疲れ|おつかれ)/iu.test(combined)) {
+    return true;
+  }
+  if (
+    !hasArtist &&
+    /^(?:おはよう|おはようございます|こんにちは|こんばんは)[^\n]{0,28}(?:です|だよ|でーす)[!！。.\s]*$/iu.test(title)
+  ) {
+    return true;
+  }
+  if (!hasArtist && /^(?:おはよう|おはようございます|こんにちは|こんばんは)[ー〜～?？!！。.\s]*$/iu.test(title)) {
+    return true;
+  }
+  if (!hasArtist && /^.{0,4}(実は|ほら|悲報|どうすか|めっちゃいい|新しいこと|良い音|魅惑の腰|別の意味で|フラグ立て|まさか今|ここから|いつもより|苦しうない).{0,8}$/iu.test(title)) {
+    return true;
+  }
+  if (hasArtist && /^(咳払い|くしゃみ|雑談|告知|宣伝|休憩)$/iu.test(artist)) {
+    return true;
+  }
+  return false;
+}
+
 function splitTitleArtist(text) {
   const parsed = extractSongArtistCore(text);
   if (parsed) return parsed;
+  const symbolicPerformer = extractTitleWithSymbolicPerformer(text);
+  if (symbolicPerformer) return symbolicPerformer;
   return [cleanSongOrArtistPart(text), "未記載"];
+}
+
+function extractTitleWithSymbolicPerformer(text) {
+  const raw = String(text || "").trim();
+  const match = raw.match(/^(.+?)\s*[\/／|｜￤∣丨]\s*[\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F\s・･×+＆&、,]+$/u);
+  if (!match) return null;
+  const title = cleanSongOrArtistPart(match[1]);
+  return title && !isBadSongField(title) ? [title, "未記載"] : null;
 }
 
 function mergeSplitTimelineLines(text) {
@@ -217,10 +294,11 @@ function splitWithMetadata(text) {
 
 function cleanSongOrArtistPart(text) {
   let value = stripTrailingLatinAnnotation(String(text || "").trim());
+  value = value.replace(/^_[A-Za-z0-9]+:\s*/u, "").trim();
   const preserveTrailingDoubleSlash = /[A-Za-z0-9)\]）]\/\/\s*$/.test(value);
   value = value.replace(/^\s*(?:\d{1,3}\s*[\-—–−]|[#＃]\s*\d{1,3}\s*[.)．。、:：\-—–−]?|encore|アンコール)\s*/iu, "").trim();
   value = value.replace(/^[\[［]+|[\]］]+$/g, "").trim();
-  value = value.replace(/^[\-—–−/／|｜￤∣丨:：;；]+|[\-—–−/／|｜￤∣丨:：;；]+$/g, "").trim();
+  value = value.replace(/^[\-—–−/／|｜￤∣丨✦:：;；]+|[\-—–−/／|｜￤∣丨✦:：;；]+$/g, "").trim();
   if (preserveTrailingDoubleSlash && !value.endsWith("//")) value = `${value}//`;
   return value;
 }
@@ -284,7 +362,13 @@ function isObviouslyNonSongTitleCandidate(text) {
     return true;
   }
   const raw = String(text || "");
-  if (/(?:お疲れ|おつかれ|ありがとう|ありがと|こんばんは|こんにちは|おはよう|ただいま|待ってて|読み開始|\braid\b|\bthanks?\b)/iu.test(raw)) {
+  if (/(?:お疲れ|おつかれ|ありがとう|ありがと|ただいま|待ってて|読み開始|\braid\b|\bthanks?\b)/iu.test(raw)) {
+    return true;
+  }
+  if (/^(?:おはよう|おはようございます|こんにちは|こんばんは)[^\n]{0,28}(?:です|だよ|でーす)[!！。.\s]*$/iu.test(raw)) {
+    return true;
+  }
+  if (/^(?:またね)[ー〜～!！。.\s]*$/iu.test(raw)) {
     return true;
   }
   if (
@@ -294,14 +378,14 @@ function isObviouslyNonSongTitleCandidate(text) {
     return true;
   }
   if (/[\u{1F300}-\u{1FAFF}]/u.test(raw) && raw.length >= 12) return true;
-  return /(?:トーク|配信|コメント|アーカイブ|歌ってほしい|歌唱検知|かわい|好き|鼻詰まり|照れ顔|最近|オケだけ|ざっぶーん|歌枠|リアクション|ハモリ|ライブ行って|イメージ|印象|共通点|接点|生放送|武道館|コラボ予定|チケット|キービジュアル|ジャケット写真|グッズ|スクショ|誕生日|ニッポン放送|写真投稿|試験|頑張る|またね)/iu.test(raw);
+  return /(?:トーク|配信|コメント|アーカイブ|歌ってほしい|歌唱検知|かわい|好き|鼻詰まり|照れ顔|最近|オケだけ|ざっぶーん|歌枠|リアクション|ハモリ|ライブ行って|イメージ|印象|共通点|接点|生放送|武道館|コラボ予定|チケット|キービジュアル|ジャケット写真|グッズ|スクショ|誕生日|ニッポン放送|写真投稿|試験|頑張る)/iu.test(raw);
 }
 
 function isObviouslyNonSongActivityTitle(text) {
   if (/^\s*[A-Za-zぁ-んァ-ヶ一-龯々ー・\s]{2,}\s*[→⇒]\s*[A-Za-zぁ-んァ-ヶ一-龯々ー・\s]{2,}\s*$/u.test(text || "")) {
     return true;
   }
-  return /(?:歌枠|リアクション|ハモリ|ライブ行って|イメージ|印象|共通点|接点|生放送|武道館|コラボ予定|チケット|キービジュアル|ジャケット写真|グッズ|スクショ|誕生日|ニッポン放送|写真投稿|試験|頑張る|またね|声がかかる|自己啓発|放送📻)/iu.test(text || "");
+  return /(?:歌枠|リアクション|ハモリ|ライブ行って|イメージ|印象|共通点|接点|生放送|武道館|コラボ予定|チケット|キービジュアル|ジャケット写真|グッズ|スクショ|誕生日|ニッポン放送|写真投稿|試験|頑張る|声がかかる|自己啓発|放送📻)/iu.test(text || "");
 }
 
 function isNonSongSectionPair(title, artist) {
@@ -350,7 +434,7 @@ function songKey(text) {
   return normalizeTimelineChars(stripTrailingLatinAnnotation(text))
     .replace(/\s+/g, "")
     .toLowerCase()
-    .replace(/[\[\]（）()【】「」『』"'“”‘’・･,，.。:：;；!！?？~～\-—–−_/／|｜￤∣丨]/gu, "");
+    .replace(/[\[\]（）()【】「」『』"'“”‘’・･,，.。:：;；!！?？~～\-—–−_/／|｜￤∣丨✦]/gu, "");
 }
 
 function normalizeCommentTime(value) {
@@ -440,6 +524,7 @@ function isSpace(ch) {
 module.exports = {
   TIMESTAMP_RE,
   isTimestampCandidateText,
+  isLikelyNonSongEntry,
   normalizeCommentText,
   parseTimestampSongs,
   timeToSeconds,

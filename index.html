@@ -21,9 +21,16 @@
 
     <main class="layout">
       <section class="controls" aria-label="Playlist controls">
-        <div class="segmented" role="tablist" aria-label="Range">
+        <div class="segmented range-mode" role="tablist" aria-label="Range">
           <button class="tab active" type="button" data-range="72h" role="tab" aria-selected="true">72H</button>
           <button class="tab" type="button" data-range="1m" role="tab" aria-selected="false">1M</button>
+        </div>
+
+        <div class="segmented view-mode" role="tablist" aria-label="View">
+          <button class="tab active" type="button" data-view="songRank" role="tab" aria-selected="true">Song Rank</button>
+          <button class="tab" type="button" data-view="artistRank" role="tab" aria-selected="false">Artist Rank</button>
+          <button class="tab" type="button" data-view="songAz" role="tab" aria-selected="false">Song A-Z</button>
+          <button class="tab" type="button" data-view="videos" role="tab" aria-selected="false">Videos</button>
         </div>
 
         <label class="field">
@@ -55,6 +62,22 @@
             <div class="song-count"></div>
           </div>
           <ol class="song-list"></ol>
+        </div>
+      </article>
+    </template>
+
+    <template id="rankTemplate">
+      <article class="rank-card">
+        <div class="rank-position"></div>
+        <div class="rank-main">
+          <div class="rank-heading">
+            <div>
+              <h2 class="rank-title"></h2>
+              <div class="rank-meta"></div>
+            </div>
+            <div class="rank-count"></div>
+          </div>
+          <div class="source-list"></div>
         </div>
       </article>
     </template>

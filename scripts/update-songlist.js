@@ -1,12 +1,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { isTimestampCandidateText, parseTimestampSongs } = require("./song-utils");
+const { isLikelyNonSongEntry, isTimestampCandidateText, parseTimestampSongs } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
 const SNAPSHOT_DIR = path.join(DATA_DIR, "snapshots");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const STATUS_PATH = path.join(DATA_DIR, "status.json");
+const AUDIT_PATH = path.join(DATA_DIR, "audit.json");
 
 const SEARCHES = [
   {
@@ -40,20 +41,32 @@ async function main() {
 
   const inspected = [];
   const videos = [];
+  const audits = [];
   for (const candidate of candidates.slice(0, VIDEO_LIMIT)) {
     try {
-      const detail = await fetchVideoSongList(candidate);
+      const result = await fetchVideoSongList(candidate);
+      const detail = result?.detail || null;
+      if (result?.audit) audits.push(result.audit);
       inspected.push({ videoId: candidate.videoId, ok: Boolean(detail), songCount: detail?.songs.length || 0 });
       if (detail) videos.push(detail);
       console.log(`[update] ${candidate.videoId} songs=${detail?.songs.length || 0} ${candidate.title}`);
     } catch (error) {
       inspected.push({ videoId: candidate.videoId, ok: false, error: error.message });
+      audits.push({
+        videoId: candidate.videoId,
+        title: candidate.title,
+        channelName: candidate.channelName,
+        keyword: candidate.keyword,
+        result: "fetch_error",
+        error: error.message,
+        sources: [],
+      });
       console.warn(`[update] skip ${candidate.videoId}: ${error.message}`);
     }
   }
 
   const capturedAt = new Date();
-  const groups = buildGroups(videos, capturedAt);
+  const groups = applyGroupQualityFilters(buildGroups(videos, capturedAt));
   const totalItems = Object.values(groups).reduce((sum, group) => sum + group.items.length, 0);
   if (totalItems <= 0) {
     throw new Error(`No usable timestamp song lists found after inspecting ${inspected.length} videos.`);
@@ -68,6 +81,8 @@ async function main() {
       searches: SEARCHES,
       inspectedCount: inspected.length,
       usableVideoCount: videos.length,
+      auditPath: "data/audit.json",
+      auditSummary: summarizeAudits(audits),
     },
     status: {
       status: "success",
@@ -79,6 +94,14 @@ async function main() {
   };
 
   writeJson(LATEST_PATH, payload);
+  writeJson(AUDIT_PATH, {
+    schemaVersion: 1,
+    generatedAt: capturedAt.toISOString(),
+    inspectedCount: inspected.length,
+    usableVideoCount: videos.length,
+    summary: payload.source.auditSummary,
+    videos: audits,
+  });
   writeJson(path.join(DATA_DIR, "72h.json"), groups["72h"]);
   writeJson(path.join(DATA_DIR, "1m.json"), groups["1m"]);
   writeSnapshot(payload, capturedAt);
@@ -115,41 +138,288 @@ async function fetchVideoSongList(candidate) {
   const apiKey = extractRegex(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
   const clientVersion = extractRegex(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/) || "2.20260601.00.00";
   const initialData = extractJsonAfter(html, "ytInitialData");
-  const comments = extractDescriptionCandidates(initialData);
+  const comments = extractDescriptionCandidates(initialData).map((text) => ({ text, sourceType: "description" }));
   const continuation = findCommentsContinuation(initialData);
   if (apiKey && continuation) {
     const response = await fetchYouTubeContinuation(apiKey, clientVersion, continuation);
-    comments.push(...extractCommentTexts(response));
-    comments.push(...(await fetchCommentReplyTexts(apiKey, clientVersion, response, REPLY_LIMIT)));
+    comments.push(...extractCommentTexts(response).map((text) => ({ text, sourceType: "comment" })));
+    comments.push(...(await fetchCommentReplyTexts(apiKey, clientVersion, response, REPLY_LIMIT)).map((text) => ({ text, sourceType: "reply" })));
   }
 
-  const sources = [];
-  for (const text of comments) {
-    const songs = parseTimestampSongs([text]);
-    if (songs.length) sources.push(songs);
-  }
-  const selected = selectBestSongs(withMergedOrderedSource(sources));
-  if (!selected.length) return null;
-
-  return {
+  const audit = {
     videoId: candidate.videoId,
     title: candidate.title,
     channelName: candidate.channelName,
     keyword: candidate.keyword,
     publishedText: candidate.publishedText,
-    publishedTimestamp: candidate.publishedTimestamp || null,
     durationText: candidate.durationText,
-    thumbnailUrl: candidate.thumbnailUrl || `https://i.ytimg.com/vi/${candidate.videoId}/hqdefault.jpg`,
-    sourceCount: sources.length,
-    songs: selected.map((song, index) => ({
-      index: index + 1,
-      time: song.time,
-      seconds: song.seconds,
-      title: song.title,
-      artist: song.artist === "未記載" ? "" : song.artist,
-      raw: song.raw,
-    })),
+    commentCandidateCount: comments.length,
+    result: "no_timestamp_candidates",
+    selectedSongCount: 0,
+    acceptedSourceCount: 0,
+    rejectedSourceCount: 0,
+    rejectedEntryCount: 0,
+    sources: [],
   };
+  const sources = [];
+  const rejectedSources = [];
+  for (const { text, sourceType } of comments) {
+    const rejectedEntries = [];
+    const songs = parseTimestampSongs([text], {
+      onReject: (entry) => rejectedEntries.push(compactRejectedEntry(entry)),
+    });
+    if (!songs.length && !rejectedEntries.length) continue;
+    const source = buildSongSource(songs, rejectedEntries, text, sourceType, candidate);
+    audit.sources.push(source.summary);
+    audit.rejectedEntryCount += source.summary.rejectedEntryCount;
+    if (source.rejected) {
+      rejectedSources.push(source.summary);
+      continue;
+    }
+    sources.push(source);
+  }
+  const selected = selectBestSongs(withMergedOrderedSource(sources));
+  audit.acceptedSourceCount = sources.length;
+  audit.rejectedSourceCount = rejectedSources.length;
+  audit.result = selected.length ? "selected" : audit.sources.length ? "no_usable_song_source" : audit.result;
+  audit.selectedSongCount = selected.length;
+  if (!selected.length) return { detail: null, audit };
+
+  return {
+    detail: {
+      videoId: candidate.videoId,
+      title: candidate.title,
+      channelName: candidate.channelName,
+      keyword: candidate.keyword,
+      publishedText: candidate.publishedText,
+      publishedTimestamp: candidate.publishedTimestamp || null,
+      durationText: candidate.durationText,
+      thumbnailUrl: candidate.thumbnailUrl || `https://i.ytimg.com/vi/${candidate.videoId}/hqdefault.jpg`,
+      sourceCount: sources.length,
+      rejectedSourceCount: rejectedSources.length,
+      rejectedSources: rejectedSources.slice(0, 5),
+      rejectedEntryCount: audit.rejectedEntryCount,
+      sourceQuality: selected.sourceQuality || null,
+      songs: selected.map((song, index) => ({
+        index: index + 1,
+        time: song.time,
+        seconds: song.seconds,
+        title: song.title,
+        artist: displayArtist(song.artist),
+        raw: song.raw,
+      })),
+    },
+    audit,
+  };
+}
+
+function buildSongSource(songs, rejectedEntries, sourceText, sourceType, candidate) {
+  const cleaned = songs.filter((song) => !isLikelyNonSongEntry(song));
+  const additionallyRejected = songs
+    .filter((song) => isLikelyNonSongEntry(song))
+    .map((song) =>
+      compactRejectedEntry({
+        reason: "source_level_likely_non_song_entry",
+        line: song.raw,
+        time: song.time,
+        title: song.title,
+        artist: song.artist,
+      }),
+    );
+  const allRejectedEntries = [...rejectedEntries, ...additionallyRejected];
+  const stats = sourceStats(cleaned, songs, allRejectedEntries, sourceText, sourceType);
+  const rejectedReason = rejectedSongSourceReason(stats, candidate);
+  return {
+    songs: cleaned,
+    stats,
+    rejected: Boolean(rejectedReason),
+    rejectedReason,
+    summary: {
+      sourceType,
+      reason: rejectedReason,
+      originalCount: stats.originalCount,
+      keptCount: cleaned.length,
+      artistCount: stats.artistCount,
+      topicCount: stats.topicCount,
+      structuralCount: stats.structuralCount,
+      sentenceLikeCount: stats.sentenceLikeCount,
+      sample: songs.slice(0, 8).map((song) => `${song.time} ${song.title}`),
+      rejectedEntryCount: allRejectedEntries.length,
+      rejectedEntryReasons: countBy(allRejectedEntries, (entry) => entry.reason),
+      rejectedSamples: allRejectedEntries.slice(0, 8),
+      rejectedEntries: allRejectedEntries,
+    },
+  };
+}
+
+function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType) {
+  const rawCount = original.length + rejectedEntries.length;
+  const topicCount =
+    original.filter((song) => isTopicLikeEntry(song)).length +
+    rejectedEntries.filter((entry) => isTopicLikeEntry(entry)).length;
+  const sentenceLikeCount = original.filter((song) => isSentenceLikeNoArtistEntry(song)).length;
+  const artistCount = cleaned.filter((song) => isUsableArtist(song.artist)).length;
+  const structuralCount =
+    original.filter((song) => hasSetlistStructure(song.raw)).length +
+    rejectedEntries.filter((entry) => hasSetlistStructure(entry.line)).length;
+  return {
+    sourceType,
+    originalCount: rawCount,
+    keptCount: cleaned.length,
+    artistCount,
+    artistRatio: cleaned.length ? artistCount / cleaned.length : 0,
+    topicCount,
+    topicRatio: rawCount ? topicCount / rawCount : 0,
+    sentenceLikeCount,
+    sentenceLikeRatio: cleaned.length ? sentenceLikeCount / cleaned.length : 0,
+    structuralCount,
+    hasSetlistKeyword: /(?:セトリ|セットリスト|set\s*list|song\s*list|歌った曲|曲目|歌唱曲|タイムスタンプ|timestamps?)/iu.test(sourceText),
+  };
+}
+
+function rejectedSongSourceReason(stats, candidate) {
+  if (stats.keptCount <= 0) return "no_song_after_filter";
+  if (stats.keptCount < 2 && !stats.hasSetlistKeyword) return "too_few_timestamp_songs";
+  if (stats.originalCount >= 6 && stats.artistCount === 0 && stats.topicCount >= 2 && !stats.hasSetlistKeyword) {
+    return "topic_timeline_without_artists";
+  }
+  if (stats.originalCount >= 10 && stats.topicRatio >= 0.25 && stats.artistRatio < 0.25) {
+    return "topic_heavy_low_artist_source";
+  }
+  if (stats.originalCount >= 8 && stats.artistCount === 0 && stats.structuralCount <= 1 && !stats.hasSetlistKeyword) {
+    return "unstructured_title_only_timeline";
+  }
+  if (
+    stats.originalCount >= 12 &&
+    stats.artistRatio < 0.1 &&
+    stats.sentenceLikeRatio >= 0.25 &&
+    !stats.hasSetlistKeyword &&
+    !isKnownNoArtistSongListTheme(candidate)
+  ) {
+    return "mixed_comment_timeline_low_song_density";
+  }
+  if (/音魂ヒビク|Hibiku Otodama/i.test(candidate.channelName || "") && stats.artistRatio < 0.4 && stats.topicCount > 0) {
+    return "hibiku_topic_timeline_specialized_filter";
+  }
+  return "";
+}
+
+function isKnownNoArtistSongListTheme(candidate) {
+  return /(?:縛り|全曲|歌った曲|曲目|セトリ|セットリスト|リクエスト)/iu.test(`${candidate.title || ""} ${candidate.keyword || ""}`);
+}
+
+function isTopicLikeEntry(song) {
+  return (
+    isLikelyNonSongEntry(song) ||
+    /(?:曲始まり|お話|話$|話①|話②|スケジュール|おすすめ|コメント|チャット|ギフト|設定|手癖|腰|良い音|到着|お土産|先生|予想|コンディション|休暇中|気圧|体調|動画|映画|クリップ|バランス|スパチャ読み|読み開始|告知|開始|終了|高評価|ch登録|チャンネル登録|登録者(?:数)?|視聴者|OBS)/iu.test(
+      `${song.title || ""} ${song.raw || song.line || ""}`,
+    )
+  );
+}
+
+function isSentenceLikeNoArtistEntry(song) {
+  if (isUsableArtist(song.artist)) return false;
+  const title = String(song.title || "").trim();
+  const raw = String(song.raw || song.line || "");
+  if (!title) return false;
+  return /(?:と思|だった|でした|です|ます|して|した|する|取る|開かない|気になる|喉|小皺|お年頃|水が|動き|ポーズ|マイク|スタンド|年齢|歳|歌録り|企画|ゲスト|登場|楽しい|どうだった|さみしく|歌いたい|聞ける|お祝い|憧れ|出てこいや|おかげ|機会|友情出演|公開|目標|リハ|テイク|ざぶぅん|イントロ|おめでとう|ズル|かわい|好き|おもろ|すぎ|くん|さん|ちゃん|笑|ww|ｗｗ|練習|告知|MV|グッズ|誕生日|手紙|最後まで|ありがとう|お疲れ|おつかれ)/iu.test(
+    `${title} ${raw}`,
+  );
+}
+
+function hasSetlistStructure(raw) {
+  return /(?:^|[\s　])(?:#?\d{1,3}|[０-９]{1,3})[.)．、）:：]\s*\S/u.test(raw || "");
+}
+
+function compactRejectedEntry(entry) {
+  return {
+    reason: entry.reason || "unknown",
+    time: entry.time || "",
+    title: entry.title || entry.tail || "",
+    artist: entry.artist || "",
+    line: truncateAuditText(entry.line || entry.tail || "", 180),
+  };
+}
+
+function truncateAuditText(text, limit) {
+  const value = String(text || "").replace(/\s+/g, " ").trim();
+  return value.length <= limit ? value : `${value.slice(0, limit - 1)}…`;
+}
+
+function summarizeAudits(audits) {
+  const summary = {
+    inspectedVideos: audits.length,
+    selectedVideos: audits.filter((audit) => audit.result === "selected").length,
+    noUsableSongSourceVideos: audits.filter((audit) => audit.result === "no_usable_song_source").length,
+    fetchErrorVideos: audits.filter((audit) => audit.result === "fetch_error").length,
+    rejectedEntries: 0,
+    rejectedSources: 0,
+    acceptedSources: 0,
+    rejectedEntryReasons: {},
+    rejectedSourceReasons: {},
+    topRejectedChannels: [],
+  };
+  const channels = new Map();
+  for (const audit of audits) {
+    summary.rejectedEntries += audit.rejectedEntryCount || 0;
+    summary.rejectedSources += audit.rejectedSourceCount || 0;
+    summary.acceptedSources += audit.acceptedSourceCount || 0;
+
+    const channel = audit.channelName || "unknown";
+    if (!channels.has(channel)) {
+      channels.set(channel, {
+        channelName: channel,
+        videos: 0,
+        selectedVideos: 0,
+        rejectedEntries: 0,
+        rejectedSources: 0,
+        noUsableSongSourceVideos: 0,
+        samples: [],
+      });
+    }
+    const channelStats = channels.get(channel);
+    channelStats.videos += 1;
+    if (audit.result === "selected") channelStats.selectedVideos += 1;
+    if (audit.result === "no_usable_song_source") channelStats.noUsableSongSourceVideos += 1;
+    channelStats.rejectedEntries += audit.rejectedEntryCount || 0;
+    channelStats.rejectedSources += audit.rejectedSourceCount || 0;
+
+    for (const source of audit.sources || []) {
+      if (source.reason) incrementPlainCount(summary.rejectedSourceReasons, source.reason);
+      for (const [reason, count] of Object.entries(source.rejectedEntryReasons || {})) {
+        incrementPlainCount(summary.rejectedEntryReasons, reason, count);
+      }
+      for (const sample of source.rejectedSamples || []) {
+        if (channelStats.samples.length >= 3) break;
+        channelStats.samples.push(`${sample.time} ${sample.title}`.trim());
+      }
+    }
+  }
+  summary.topRejectedChannels = [...channels.values()]
+    .filter((entry) => entry.rejectedEntries || entry.rejectedSources || entry.noUsableSongSourceVideos)
+    .sort(
+      (a, b) =>
+        b.rejectedEntries - a.rejectedEntries ||
+        b.rejectedSources - a.rejectedSources ||
+        b.noUsableSongSourceVideos - a.noUsableSongSourceVideos ||
+        a.channelName.localeCompare(b.channelName, "ja"),
+    )
+    .slice(0, 12);
+  return summary;
+}
+
+function countBy(items, keyFn) {
+  const counts = {};
+  for (const item of items || []) {
+    const key = keyFn(item);
+    if (!key) continue;
+    incrementPlainCount(counts, key);
+  }
+  return counts;
+}
+
+function incrementPlainCount(target, key, amount = 1) {
+  target[key] = (target[key] || 0) + amount;
 }
 
 function buildGroups(videos, capturedAt) {
@@ -181,6 +451,34 @@ function buildGroups(videos, capturedAt) {
       items: sortVideos(videos.filter((item) => inRange(item, MONTH_MS))),
     },
   };
+}
+
+function applyGroupQualityFilters(groups) {
+  return Object.fromEntries(
+    Object.entries(groups).map(([groupId, group]) => [
+      groupId,
+      {
+        ...group,
+        items: group.items
+          .map((item) => ({
+            ...item,
+            songs: (item.songs || []).filter((song) => !isLikelyNonSongEntry(song)),
+          }))
+          .filter((item) => !isLowQualitySelectedItem(item)),
+      },
+    ]),
+  );
+}
+
+function isLowQualitySelectedItem(item) {
+  if (!Array.isArray(item.songs) || item.songs.length < 2) return true;
+  const artistCount = item.songs.filter((song) => isUsableArtist(song.artist)).length;
+  const sentenceLikeCount = item.songs.filter((song) => isSentenceLikeNoArtistEntry(song)).length;
+  const artistRatio = item.songs.length ? artistCount / item.songs.length : 0;
+  const sentenceLikeRatio = item.songs.length ? sentenceLikeCount / item.songs.length : 0;
+  const topicCount = item.sourceQuality?.topicCount || 0;
+  if (artistRatio < 0.1 && topicCount >= 4 && !isKnownNoArtistSongListTheme(item)) return true;
+  return artistRatio < 0.1 && sentenceLikeRatio >= 0.25 && !isKnownNoArtistSongListTheme(item);
 }
 
 function writeSnapshot(payload, capturedAt) {
@@ -362,35 +660,62 @@ async function fetchYouTubeContinuation(apiKey, clientVersion, continuation) {
 
 function selectBestSongs(sources) {
   if (!sources.length) return [];
-  return [...sources].sort((a, b) => {
-    const lenDiff = b.length - a.length;
+  const best = [...sources].sort((a, b) => {
+    const scoreDiff = sourceScore(b) - sourceScore(a);
+    if (scoreDiff) return scoreDiff;
+    const lenDiff = b.songs.length - a.songs.length;
     if (lenDiff) return lenDiff;
-    const artistDiff = countArtists(b) - countArtists(a);
+    const artistDiff = b.stats.artistCount - a.stats.artistCount;
     if (artistDiff) return artistDiff;
-    return a[0].seconds - b[0].seconds;
+    return a.songs[0].seconds - b.songs[0].seconds;
   })[0];
+  best.songs.sourceQuality = {
+    sourceType: best.stats.sourceType,
+    originalCount: best.stats.originalCount,
+    keptCount: best.stats.keptCount,
+    artistCount: best.stats.artistCount,
+    topicCount: best.stats.topicCount,
+    structuralCount: best.stats.structuralCount,
+    sentenceLikeCount: best.stats.sentenceLikeCount,
+  };
+  return best.songs;
 }
 
 function withMergedOrderedSource(sources) {
   const merged = mergeOrderedSources(sources);
-  if (!merged.length) return sources;
-  const largest = Math.max(0, ...sources.map((source) => source.length));
-  return merged.length > largest ? [merged, ...sources] : sources;
+  if (!merged || !merged.songs.length) return sources;
+  const largest = Math.max(0, ...sources.map((source) => source.songs.length));
+  return merged.songs.length > largest ? [merged, ...sources] : sources;
 }
 
 function mergeOrderedSources(sources) {
-  const longSources = sources.filter((source) => source.length >= 10);
-  if (longSources.length < 2) return [];
+  const longSources = sources.filter((source) => source.songs.length >= 10);
+  if (longSources.length < 2) return null;
   const merged = [];
   let lastSeconds = -1;
-  for (const source of longSources.sort((a, b) => a[0].seconds - b[0].seconds)) {
-    const start = source[0].seconds;
-    const end = source[source.length - 1].seconds;
+  for (const source of longSources.sort((a, b) => a.songs[0].seconds - b.songs[0].seconds)) {
+    const start = source.songs[0].seconds;
+    const end = source.songs[source.songs.length - 1].seconds;
     if (start <= lastSeconds || end <= start) continue;
-    merged.push(...source);
+    merged.push(...source.songs);
     lastSeconds = end;
   }
-  return merged.length >= 20 ? dedupeMergedSongs(merged) : [];
+  const songs = merged.length >= 20 ? dedupeMergedSongs(merged) : [];
+  if (!songs.length) return null;
+  return {
+    songs,
+    stats: {
+      sourceType: "merged",
+      originalCount: songs.length,
+      keptCount: songs.length,
+      artistCount: countArtists(songs),
+      artistRatio: songs.length ? countArtists(songs) / songs.length : 0,
+      topicCount: 0,
+      topicRatio: 0,
+      structuralCount: songs.length,
+      hasSetlistKeyword: true,
+    },
+  };
 }
 
 function dedupeMergedSongs(songs) {
@@ -406,7 +731,24 @@ function dedupeMergedSongs(songs) {
 }
 
 function countArtists(songs) {
-  return songs.filter((song) => song.artist && song.artist !== "未記載").length;
+  return songs.filter((song) => isUsableArtist(song.artist)).length;
+}
+
+function displayArtist(artist) {
+  return isUsableArtist(artist) ? String(artist).trim() : "";
+}
+
+function isUsableArtist(artist) {
+  const value = String(artist || "").trim();
+  if (!value || value === "未記載") return false;
+  if (/^(ソロ|全員|みんな|ゲスト|本人|原曲|オリジナル|ラジオ|仮の日程|20\d{2}年?)$/iu.test(value)) return false;
+  if (/^\d+\s*(?:人|名)$/u.test(value)) return false;
+  return true;
+}
+
+function sourceScore(source) {
+  const stats = source.stats;
+  return stats.keptCount + stats.artistCount * 4 + stats.structuralCount * 1.5 + (stats.hasSetlistKeyword ? 5 : 0) - stats.topicCount * 8;
 }
 
 function parsePublishedTimestamp(text, nowMs) {
