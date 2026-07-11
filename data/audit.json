@@ -1,37 +1,38 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-11T10:02:51.592Z",
+  "generatedAt": "2026-07-11T10:17:02.372Z",
   "inspectedCount": 40,
-  "usableVideoCount": 35,
+  "usableVideoCount": 33,
   "summary": {
     "inspectedVideos": 40,
-    "selectedVideos": 35,
-    "noUsableSongSourceVideos": 3,
+    "selectedVideos": 33,
+    "noUsableSongSourceVideos": 6,
     "fetchErrorVideos": 0,
-    "rejectedEntries": 487,
-    "rejectedSources": 54,
-    "acceptedSources": 110,
+    "rejectedEntries": 479,
+    "rejectedSources": 88,
+    "acceptedSources": 57,
     "rejectedEntryReasons": {
-      "title_only_non_song_candidate": 235,
-      "likely_non_song_entry": 140,
-      "obvious_non_song_text": 34,
+      "title_only_non_song_candidate": 222,
+      "likely_non_song_entry": 159,
+      "obvious_non_song_text": 29,
+      "activity_title": 20,
       "bad_title": 19,
-      "empty_after_timestamp": 35,
-      "activity_title": 24
+      "empty_after_timestamp": 30
     },
     "rejectedSourceReasons": {
       "topic_timeline_without_artists": 7,
-      "no_song_after_filter": 41,
+      "too_few_timestamp_songs": 40,
+      "no_song_after_filter": 35,
       "hibiku_topic_timeline_specialized_filter": 2,
       "topic_heavy_low_artist_source": 4
     },
     "topRejectedChannels": [
       {
         "channelName": "音魂ヒビクHibiku Otodama",
-        "videos": 7,
-        "selectedVideos": 6,
-        "rejectedEntries": 94,
-        "rejectedSources": 7,
+        "videos": 8,
+        "selectedVideos": 7,
+        "rejectedEntries": 110,
+        "rejectedSources": 13,
         "noUsableSongSourceVideos": 1,
         "samples": [
           "2:45:53 明日は16時から配信有〼。",
@@ -44,7 +45,7 @@
         "videos": 2,
         "selectedVideos": 2,
         "rejectedEntries": 77,
-        "rejectedSources": 2,
+        "rejectedSources": 4,
         "noUsableSongSourceVideos": 0,
         "samples": [
           "0:02:07 WNF!! OP",
@@ -56,8 +57,8 @@
         "channelName": "ミナミイズミ / IZUMI MINAMI",
         "videos": 3,
         "selectedVideos": 3,
-        "rejectedEntries": 52,
-        "rejectedSources": 5,
+        "rejectedEntries": 54,
+        "rejectedSources": 7,
         "noUsableSongSourceVideos": 0,
         "samples": [
           "0:05:00 Start、立ち姿にしてみた、アニソン縛り20曲以上、日々が早いけど濃い",
@@ -70,7 +71,7 @@
         "videos": 1,
         "selectedVideos": 1,
         "rejectedEntries": 45,
-        "rejectedSources": 4,
+        "rejectedSources": 13,
         "noUsableSongSourceVideos": 0,
         "samples": [
           "0:27:07 年齢のくだり笑ったかわいいｗｗｗｗｗｗ",
@@ -83,7 +84,7 @@
         "videos": 1,
         "selectedVideos": 1,
         "rejectedEntries": 35,
-        "rejectedSources": 4,
+        "rejectedSources": 9,
         "noUsableSongSourceVideos": 0,
         "samples": [
           "0:02:07",
@@ -92,24 +93,11 @@
         ]
       },
       {
-        "channelName": "戌亥とこ -Inui Toko-",
-        "videos": 3,
-        "selectedVideos": 3,
-        "rejectedEntries": 32,
-        "rejectedSources": 8,
-        "noUsableSongSourceVideos": 0,
-        "samples": [
-          "0:01:56 開始",
-          "0:05:42 自己紹介",
-          "0:33:45 かわいい時間"
-        ]
-      },
-      {
         "channelName": "AZKi Channel",
         "videos": 2,
         "selectedVideos": 2,
         "rejectedEntries": 26,
-        "rejectedSources": 0,
+        "rejectedSources": 1,
         "noUsableSongSourceVideos": 0,
         "samples": [
           "0:04:35 開始",
@@ -118,16 +106,16 @@
         ]
       },
       {
-        "channelName": "町田ちま【にじさんじ】",
-        "videos": 4,
-        "selectedVideos": 4,
-        "rejectedEntries": 20,
-        "rejectedSources": 8,
+        "channelName": "Iroha ch. 風真いろは - holoX -",
+        "videos": 1,
+        "selectedVideos": 1,
+        "rejectedEntries": 21,
+        "rejectedSources": 0,
         "noUsableSongSourceVideos": 0,
         "samples": [
-          "1:06:28 人見知りのちまちゃんがここ歌うの泣ける",
-          "0:10:32 ツノの見せ合い好き",
-          "0:17:59 難しい曲なのにめっちゃうまい😆"
+          "0:00:41 声入り",
+          "0:01:07 開始 / ずっと虚空に向かって話していたいろは殿:_kusa",
+          "0:02:20 自己紹介:_iroha1"
         ]
       },
       {
@@ -135,7 +123,7 @@
         "videos": 3,
         "selectedVideos": 3,
         "rejectedEntries": 19,
-        "rejectedSources": 1,
+        "rejectedSources": 3,
         "noUsableSongSourceVideos": 0,
         "samples": [
           "0:02:33 昨日のせんべい配信について",
@@ -148,7 +136,7 @@
         "videos": 1,
         "selectedVideos": 1,
         "rejectedEntries": 19,
-        "rejectedSources": 0,
+        "rejectedSources": 2,
         "noUsableSongSourceVideos": 0,
         "samples": [
           "0:06:17 「結構長い一日でしたよ？」歌うま大賞でぺこらと一緒にMCをしたIRyS:_irysPatrys",
@@ -157,29 +145,42 @@
         ]
       },
       {
-        "channelName": "皇れお / Sumeragi Reo【にじさんじ】",
-        "videos": 1,
-        "selectedVideos": 1,
-        "rejectedEntries": 14,
-        "rejectedSources": 2,
-        "noUsableSongSourceVideos": 0,
+        "channelName": "町田ちま【にじさんじ】",
+        "videos": 4,
+        "selectedVideos": 2,
+        "rejectedEntries": 18,
+        "rejectedSources": 10,
+        "noUsableSongSourceVideos": 2,
         "samples": [
-          "0:13:58 まさか今ユニバースが聞けるなんて思ってなくて大号泣でした🥲♡れおくんにピッタリでした👏",
-          "0:00:06 オープニング",
-          "0:04:53 こんばんは？"
+          "1:06:28 人見知りのちまちゃんがここ歌うの泣ける",
+          "0:10:32 ツノの見せ合い好き",
+          "0:17:59 難しい曲なのにめっちゃうまい😆"
         ]
       },
       {
-        "channelName": "Iroha ch. 風真いろは - holoX -",
-        "videos": 1,
-        "selectedVideos": 1,
-        "rejectedEntries": 13,
-        "rejectedSources": 0,
+        "channelName": "戌亥とこ -Inui Toko-",
+        "videos": 2,
+        "selectedVideos": 2,
+        "rejectedEntries": 12,
+        "rejectedSources": 6,
         "noUsableSongSourceVideos": 0,
         "samples": [
-          "0:00:41 声入り",
-          "0:02:20 自己紹介:_iroha1",
-          "0:02:39 明日誕生日です！"
+          "1:06:03 ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️",
+          "1:10:16 お披露目裏話",
+          "1:03:53 ちなみにとこちゃんはPretender歌ったことあります‼️‼️"
+        ]
+      },
+      {
+        "channelName": "天宮 こころ / Amamya Ch.",
+        "videos": 1,
+        "selectedVideos": 1,
+        "rejectedEntries": 12,
+        "rejectedSources": 3,
+        "noUsableSongSourceVideos": 0,
+        "samples": [
+          "0:01:45",
+          "0:02:17 マイクテスト",
+          "0:22:40 ラップかわいい"
         ]
       }
     ]
@@ -207,6 +208,7 @@
           "artistCount": 12,
           "topicCount": 0,
           "structuralCount": 14,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:04:26 ルージュの伝言",
             "0:11:12 おやすみ泣き声、さよなら歌姫",
@@ -230,6 +232,7 @@
           "artistCount": 0,
           "topicCount": 21,
           "structuralCount": 0,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:22:21 季節を感じる",
             "0:37:38 一番大事なの",
@@ -472,8 +475,8 @@
       "commentCandidateCount": 14,
       "result": "selected",
       "selectedSongCount": 7,
-      "acceptedSourceCount": 2,
-      "rejectedSourceCount": 1,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 2,
       "rejectedEntryCount": 20,
       "sources": [
         {
@@ -484,6 +487,7 @@
           "artistCount": 5,
           "topicCount": 0,
           "structuralCount": 7,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:17:11 へび",
             "0:31:22 花に亡霊",
@@ -506,6 +510,7 @@
           "artistCount": 0,
           "topicCount": 19,
           "structuralCount": 0,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:53:42 病み上がりで清楚な殿",
             "1:36:19 高音助かる",
@@ -722,12 +727,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:46:20 ちなみに"
           ],
@@ -748,8 +754,8 @@
       "commentCandidateCount": 24,
       "result": "selected",
       "selectedSongCount": 11,
-      "acceptedSourceCount": 5,
-      "rejectedSourceCount": 0,
+      "acceptedSourceCount": 4,
+      "rejectedSourceCount": 1,
       "rejectedEntryCount": 24,
       "sources": [
         {
@@ -760,6 +766,7 @@
           "artistCount": 10,
           "topicCount": 0,
           "structuralCount": 10,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:08:30 JOINT",
             "0:15:05 Take a shot",
@@ -783,6 +790,7 @@
           "artistCount": 10,
           "topicCount": 12,
           "structuralCount": 28,
+          "sentenceLikeCount": 4,
           "sample": [
             "0:05:40 ロックな曲といえば？",
             "0:06:12 の生誕ライブ、ロックだった",
@@ -1036,6 +1044,7 @@
           "artistCount": 10,
           "topicCount": 0,
           "structuralCount": 11,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:04:35 【セットリスト】 Start",
             "0:08:30 JOINT",
@@ -1053,12 +1062,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 1,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:44:00 ebullient future(English)"
           ],
@@ -1075,6 +1085,7 @@
           "artistCount": 10,
           "topicCount": 0,
           "structuralCount": 10,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:08:25 JOINT",
             "0:15:03 Take a shot",
@@ -1114,6 +1125,7 @@
           "artistCount": 7,
           "topicCount": 0,
           "structuralCount": 7,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:02:39 天体観測",
             "0:12:29 君の知らない物語",
@@ -1122,6 +1134,272 @@
             "0:53:19 星屑ビーナス",
             "1:08:48 ミカヅキ",
             "1:17:46 ミカヅキ"
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
+        }
+      ]
+    },
+    {
+      "videoId": "jyVKRc1_nUw",
+      "title": "【歌枠】1曲いかが？弾き語り【#vtuber #vsinger】",
+      "channelName": "音魂ヒビクHibiku Otodama",
+      "keyword": "弾き語り",
+      "publishedText": "4 日前 に配信済み",
+      "durationText": "2:08:49",
+      "commentCandidateCount": 17,
+      "result": "selected",
+      "selectedSongCount": 13,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 2,
+      "rejectedEntryCount": 16,
+      "sources": [
+        {
+          "sourceType": "comment",
+          "reason": "",
+          "originalCount": 14,
+          "keptCount": 13,
+          "artistCount": 8,
+          "topicCount": 1,
+          "structuralCount": 14,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:02:41 ルージュの伝言",
+            "0:09:51 regret",
+            "0:18:44 月曜日戦争",
+            "0:24:36 鬼の宴",
+            "0:30:13 KING（Kanaria）",
+            "0:35:12 神っぽいな",
+            "0:41:33 天ノ弱",
+            "0:48:38 ロミオとシンデレラ"
+          ],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "obvious_non_song_text": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "obvious_non_song_text",
+              "time": "0:00:43",
+              "title": "開始",
+              "artist": "",
+              "line": "0:43 開始"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "obvious_non_song_text",
+              "time": "0:00:43",
+              "title": "開始",
+              "artist": "",
+              "line": "0:43 開始"
+            }
+          ]
+        },
+        {
+          "sourceType": "comment",
+          "reason": "topic_timeline_without_artists",
+          "originalCount": 23,
+          "keptCount": 8,
+          "artistCount": 0,
+          "topicCount": 14,
+          "structuralCount": 0,
+          "sentenceLikeCount": 1,
+          "sample": [
+            "0:55:45 大人になってから",
+            "1:04:09 ちょっと前に",
+            "1:05:26 情緒がある",
+            "1:19:08 ベストパフォーマンス",
+            "1:55:05 中高生の頃から",
+            "1:58:30 今年は",
+            "2:07:31 明日はお休みです！7月8日㈬21時にまたお会いしましょう",
+            "2:08:35 7月11日㈯OFUSEでいただいた質問に答えるメン限有〼。"
+          ],
+          "rejectedEntryCount": 15,
+          "rejectedEntryReasons": {
+            "title_only_non_song_candidate": 2,
+            "activity_title": 1,
+            "likely_non_song_entry": 12
+          },
+          "rejectedSamples": [
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "2:07:39",
+              "title": "アーカイブコメントお待ちしており〼。",
+              "artist": "未記載",
+              "line": "💭2:07:39 アーカイブコメントお待ちしており〼。"
+            },
+            {
+              "reason": "activity_title",
+              "time": "0:47:35",
+              "title": "元気だったら7月9日㈭今週ボカロ縛り歌枠有〼。",
+              "artist": "未記載",
+              "line": "💭0:47:35 📆元気だったら7月9日㈭今週ボカロ縛り歌枠有〼。"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:07:15",
+              "title": "夢見が悪い~夢のお話",
+              "artist": "未記載",
+              "line": "💭0:07:15 夢見が悪い~夢のお話"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:09:20",
+              "title": "今日の音響のお話",
+              "artist": "未記載",
+              "line": "💭0:09:20 今日の音響のお話"
+            },
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "0:16:47",
+              "title": "月曜日お疲れ様",
+              "artist": "未記載",
+              "line": "💭0:16:47 月曜日お疲れ様"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:23:11",
+              "title": "別の意味で",
+              "artist": "未記載",
+              "line": "💭0:23:11 別の意味で"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:28:51",
+              "title": "フラグ立て",
+              "artist": "未記載",
+              "line": "💭0:28:51 フラグ立て"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:59:31",
+              "title": "東京のお話",
+              "artist": "未記載",
+              "line": "💭0:59:31 東京のお話"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "2:07:39",
+              "title": "アーカイブコメントお待ちしており〼。",
+              "artist": "未記載",
+              "line": "💭2:07:39 アーカイブコメントお待ちしており〼。"
+            },
+            {
+              "reason": "activity_title",
+              "time": "0:47:35",
+              "title": "元気だったら7月9日㈭今週ボカロ縛り歌枠有〼。",
+              "artist": "未記載",
+              "line": "💭0:47:35 📆元気だったら7月9日㈭今週ボカロ縛り歌枠有〼。"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:07:15",
+              "title": "夢見が悪い~夢のお話",
+              "artist": "未記載",
+              "line": "💭0:07:15 夢見が悪い~夢のお話"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:09:20",
+              "title": "今日の音響のお話",
+              "artist": "未記載",
+              "line": "💭0:09:20 今日の音響のお話"
+            },
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "0:16:47",
+              "title": "月曜日お疲れ様",
+              "artist": "未記載",
+              "line": "💭0:16:47 月曜日お疲れ様"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:23:11",
+              "title": "別の意味で",
+              "artist": "未記載",
+              "line": "💭0:23:11 別の意味で"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:28:51",
+              "title": "フラグ立て",
+              "artist": "未記載",
+              "line": "💭0:28:51 フラグ立て"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:59:31",
+              "title": "東京のお話",
+              "artist": "未記載",
+              "line": "💭0:59:31 東京のお話"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:01:21",
+              "title": "まさか今",
+              "artist": "未記載",
+              "line": "💭1:01:21 まさか今"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:09:11",
+              "title": "気圧のお話",
+              "artist": "未記載",
+              "line": "💭1:09:11 気圧のお話"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:12:31",
+              "title": "大丈夫ではないお話～フラグ回収",
+              "artist": "未記載",
+              "line": "💭1:12:31 大丈夫ではないお話～フラグ回収"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:14:28",
+              "title": "蚊に刺されたお話",
+              "artist": "未記載",
+              "line": "💭1:14:28 蚊に刺されたお話"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:37:02",
+              "title": "実はこの前",
+              "artist": "未記載",
+              "line": "💭1:37:02 実はこの前"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:53:05",
+              "title": "そら豆のお話",
+              "artist": "未記載",
+              "line": "💭1:53:05 そら豆のお話"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:40:53",
+              "title": "めっちゃいい",
+              "artist": "未記載",
+              "line": "🎸🎸0:40:53 めっちゃいい"
+            }
+          ]
+        },
+        {
+          "sourceType": "comment",
+          "reason": "too_few_timestamp_songs",
+          "originalCount": 1,
+          "keptCount": 1,
+          "artistCount": 0,
+          "topicCount": 0,
+          "structuralCount": 1,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "1:38:57 俺にも似たような出来事あるわ　なんかそういうの起こった時失った感とかがえげつないんよ"
           ],
           "rejectedEntryCount": 0,
           "rejectedEntryReasons": {},
@@ -1140,8 +1418,8 @@
       "commentCandidateCount": 13,
       "result": "selected",
       "selectedSongCount": 12,
-      "acceptedSourceCount": 2,
-      "rejectedSourceCount": 1,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 2,
       "rejectedEntryCount": 14,
       "sources": [
         {
@@ -1152,6 +1430,7 @@
           "artistCount": 9,
           "topicCount": 0,
           "structuralCount": 12,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:03:34 海の幽霊",
             "0:09:58 星座になれたら",
@@ -1169,12 +1448,30 @@
         },
         {
           "sourceType": "comment",
+          "reason": "too_few_timestamp_songs",
+          "originalCount": 1,
+          "keptCount": 1,
+          "artistCount": 0,
+          "topicCount": 0,
+          "structuralCount": 1,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:01:44 ん？"
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
+        },
+        {
+          "sourceType": "comment",
           "reason": "topic_timeline_without_artists",
           "originalCount": 24,
           "keptCount": 10,
           "artistCount": 0,
           "topicCount": 8,
           "structuralCount": 0,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:31:28 貼るトローチ春夏",
             "0:32:11 音変わった？風呂も入ったし！",
@@ -1349,22 +1646,6 @@
               "line": "💭1:55:26 初めて買ったCDのお話～King of Popのお話"
             }
           ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:01:44 ん？"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
         }
       ]
     },
@@ -1390,6 +1671,7 @@
           "artistCount": 13,
           "topicCount": 0,
           "structuralCount": 20,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:03:44 vivi（米津玄師）🆕",
             "0:08:14 蝶々結び",
@@ -1413,6 +1695,7 @@
           "artistCount": 0,
           "topicCount": 12,
           "structuralCount": 0,
+          "sentenceLikeCount": 6,
           "sample": [
             "0:15:16 音響調整成功？",
             "0:24:22 今日はしっかり音が出るように",
@@ -1592,8 +1875,8 @@
       "commentCandidateCount": 20,
       "result": "selected",
       "selectedSongCount": 70,
-      "acceptedSourceCount": 7,
-      "rejectedSourceCount": 4,
+      "acceptedSourceCount": 2,
+      "rejectedSourceCount": 9,
       "rejectedEntryCount": 35,
       "sources": [
         {
@@ -1604,6 +1887,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 16,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:04:34 Hero's Come Back!!",
             "0:10:39 ニワカ雨二モ負ケズ",
@@ -1660,6 +1944,7 @@
           "artistCount": 16,
           "topicCount": 3,
           "structuralCount": 84,
+          "sentenceLikeCount": 4,
           "sample": [
             "0:04:33 Hero’s Come Back!!",
             "0:04:33 Hero’s Come Back!!（𝗔𝗹𝗹）",
@@ -1888,6 +2173,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -1920,6 +2206,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 9,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 9,
           "rejectedEntryReasons": {
@@ -2052,12 +2339,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "1:16:50 小悪魔"
           ],
@@ -2068,12 +2356,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:13:41 踊ってたら入り忘れちゃって後ろの3人がひっくり返るのおもろいwww"
           ],
@@ -2084,14 +2373,15 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
-            "0:32:05 「おい歌えるやつ俺しかいねーじゃねーか！」"
+            "0:51:54 原キー(元気) カット後TS修正済"
           ],
           "rejectedEntryCount": 0,
           "rejectedEntryReasons": {},
@@ -2100,14 +2390,15 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
-            "0:51:54 原キー(元気) カット後TS修正済"
+            "0:32:05 「おい歌えるやつ俺しかいねーじゃねーか！」"
           ],
           "rejectedEntryCount": 0,
           "rejectedEntryReasons": {},
@@ -2122,6 +2413,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2154,6 +2446,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2180,12 +2473,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 2,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 1,
           "structuralCount": 2,
+          "sentenceLikeCount": 1,
           "sample": [
             "1:19:43 こうです"
           ],
@@ -2215,289 +2509,6 @@
       ]
     },
     {
-      "videoId": "wo7UjtdXtZE",
-      "title": "【 #皇れお誕生日2026 】告知＆ゲストあり！誕生日歌枠いくぞ！！！【 皇れお / にじさんじ 】",
-      "channelName": "皇れお / Sumeragi Reo【にじさんじ】",
-      "keyword": "歌枠",
-      "publishedText": "8 日前 に配信済み",
-      "durationText": "1:15:42",
-      "commentCandidateCount": 20,
-      "result": "selected",
-      "selectedSongCount": 58,
-      "acceptedSourceCount": 3,
-      "rejectedSourceCount": 2,
-      "rejectedEntryCount": 14,
-      "sources": [
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:14:10 ユニバース"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 1,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:13:58",
-              "title": "まさか今ユニバースが聞けるなんて思ってなくて大号泣でした🥲♡れおくんにピッタリでした👏",
-              "artist": "未記載",
-              "line": "13:58 まさか今ユニバースが聞けるなんて思ってなくて大号泣でした🥲♡れおくんにピッタリでした👏"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:13:58",
-              "title": "まさか今ユニバースが聞けるなんて思ってなくて大号泣でした🥲♡れおくんにピッタリでした👏",
-              "artist": "未記載",
-              "line": "13:58 まさか今ユニバースが聞けるなんて思ってなくて大号泣でした🥲♡れおくんにピッタリでした👏"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 70,
-          "keptCount": 58,
-          "artistCount": 3,
-          "topicCount": 4,
-          "structuralCount": 70,
-          "sample": [
-            "0:01:52 Booo！",
-            "0:05:48 もう楽しい",
-            "0:06:27 メーベル",
-            "0:09:43 絶対歌いたいと思ってた",
-            "0:10:09 さみしくなったらゲスト",
-            "0:11:31 オトモ",
-            "0:12:28 オトモじじいにはいない",
-            "0:12:44 サンドウィッチ企画"
-          ],
-          "rejectedEntryCount": 12,
-          "rejectedEntryReasons": {
-            "likely_non_song_entry": 3,
-            "empty_after_timestamp": 4,
-            "activity_title": 3,
-            "obvious_non_song_text": 1,
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "likely_non_song_entry",
-              "time": "0:00:06",
-              "title": "オープニング",
-              "artist": "未記載",
-              "line": "00:06 オープニング"
-            },
-            {
-              "reason": "likely_non_song_entry",
-              "time": "0:04:53",
-              "title": "こんばんは？",
-              "artist": "未記載",
-              "line": "4:53 こんばんは？"
-            },
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:10:32",
-              "title": "",
-              "artist": "",
-              "line": "10:32 💡🌞"
-            },
-            {
-              "reason": "likely_non_song_entry",
-              "time": "0:11:55",
-              "title": "登場",
-              "artist": "未記載",
-              "line": "┗ 11:55 登場"
-            },
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:13:14",
-              "title": "",
-              "artist": "",
-              "line": "13:14 💡"
-            },
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:30:56",
-              "title": "",
-              "artist": "",
-              "line": "30:56 🍝🍷📿🍔"
-            },
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:38:54",
-              "title": "",
-              "artist": "",
-              "line": "38:54 ☯️🐟🍴"
-            },
-            {
-              "reason": "activity_title",
-              "time": "0:54:02",
-              "title": "はじめての誕生日",
-              "artist": "未記載",
-              "line": "54:02 はじめての誕生日"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "likely_non_song_entry",
-              "time": "0:00:06",
-              "title": "オープニング",
-              "artist": "未記載",
-              "line": "00:06 オープニング"
-            },
-            {
-              "reason": "likely_non_song_entry",
-              "time": "0:04:53",
-              "title": "こんばんは？",
-              "artist": "未記載",
-              "line": "4:53 こんばんは？"
-            },
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:10:32",
-              "title": "",
-              "artist": "",
-              "line": "10:32 💡🌞"
-            },
-            {
-              "reason": "likely_non_song_entry",
-              "time": "0:11:55",
-              "title": "登場",
-              "artist": "未記載",
-              "line": "┗ 11:55 登場"
-            },
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:13:14",
-              "title": "",
-              "artist": "",
-              "line": "13:14 💡"
-            },
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:30:56",
-              "title": "",
-              "artist": "",
-              "line": "30:56 🍝🍷📿🍔"
-            },
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:38:54",
-              "title": "",
-              "artist": "",
-              "line": "38:54 ☯️🐟🍴"
-            },
-            {
-              "reason": "activity_title",
-              "time": "0:54:02",
-              "title": "はじめての誕生日",
-              "artist": "未記載",
-              "line": "54:02 はじめての誕生日"
-            },
-            {
-              "reason": "activity_title",
-              "time": "0:54:20",
-              "title": "お誕生日グッズ",
-              "artist": "未記載",
-              "line": "54:20 お誕生日グッズ"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:56:01",
-              "title": "歌みた告知",
-              "artist": "",
-              "line": "56:01 歌みた告知"
-            },
-            {
-              "reason": "activity_title",
-              "time": "1:03:33",
-              "title": "すぷれあお誕生日一周",
-              "artist": "未記載",
-              "line": "1:03:33 すぷれあお誕生日一周"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:06:56",
-              "title": "かわいそうだけどけわいい",
-              "artist": "未記載",
-              "line": "┗ 1:06:56 かわいそうだけどけわいい"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 1,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 1,
-          "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:58:03",
-              "title": "アイドルの皇れおをずっっと貫いてくれてありがとう、おめでとう",
-              "artist": "未記載",
-              "line": "アイドルの皇れおをずっっと貫いてくれてありがとう、おめでとう 58:03"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:58:03",
-              "title": "アイドルの皇れおをずっっと貫いてくれてありがとう、おめでとう",
-              "artist": "未記載",
-              "line": "アイドルの皇れおをずっっと貫いてくれてありがとう、おめでとう 58:03"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:33:20 あまりにも太陽すぎた"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        }
-      ]
-    },
-    {
       "videoId": "X_wMcAfIwmw",
       "title": "【3D歌枠】今夜は3Dでカラオケだ～～～ッ！！！【にじさんじ/ドーラ/夢追翔/レヴィ・エリファ/町田ちま】",
       "channelName": "町田ちま【にじさんじ】",
@@ -2505,10 +2516,10 @@
       "publishedText": "10 日前 に配信済み",
       "durationText": "1:23:54",
       "commentCandidateCount": 20,
-      "result": "selected",
-      "selectedSongCount": 1,
-      "acceptedSourceCount": 1,
-      "rejectedSourceCount": 6,
+      "result": "no_usable_song_source",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 7,
       "rejectedEntryCount": 6,
       "sources": [
         {
@@ -2519,6 +2530,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2545,12 +2557,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:21:08 ここの伸びすご…良すぎる"
           ],
@@ -2567,6 +2580,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2599,6 +2613,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2631,6 +2646,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2663,6 +2679,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2695,6 +2712,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2728,29 +2746,13 @@
       "keyword": "弾き語り",
       "publishedText": "10 日前 に配信済み",
       "durationText": "1:59:10",
-      "commentCandidateCount": 22,
+      "commentCandidateCount": 21,
       "result": "selected",
       "selectedSongCount": 14,
-      "acceptedSourceCount": 4,
+      "acceptedSourceCount": 2,
       "rejectedSourceCount": 1,
       "rejectedEntryCount": 2,
       "sources": [
-        {
-          "sourceType": "description",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 1,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:04:00 03/07/2026"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
         {
           "sourceType": "comment",
           "reason": "",
@@ -2759,6 +2761,7 @@
           "artistCount": 14,
           "topicCount": 0,
           "structuralCount": 14,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:10:59 アイネクライネ",
             "0:10:59 Eine Kleine",
@@ -2782,6 +2785,7 @@
           "artistCount": 0,
           "topicCount": 1,
           "structuralCount": 14,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:08:09 アイネクライネ",
             "0:18:43 花人局",
@@ -2817,28 +2821,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:06:20 本能めっちゃ良くてびびった！！"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
           "reason": "no_song_after_filter",
           "originalCount": 1,
           "keptCount": 0,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -2887,6 +2876,7 @@
           "artistCount": 2,
           "topicCount": 1,
           "structuralCount": 10,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:07:30 白い雪のプリンセスは（のぼる↑）🆕",
             "0:13:47 すずめ",
@@ -2928,6 +2918,7 @@
           "artistCount": 0,
           "topicCount": 1,
           "structuralCount": 10,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:12:54 この曲、本当に殿にぴったり",
             "0:30:44 tskr 可愛い",
@@ -3023,6 +3014,7 @@
           "artistCount": 0,
           "topicCount": 16,
           "structuralCount": 1,
+          "sentenceLikeCount": 4,
           "sample": [
             "0:02:58 みんな聴いてくれた？",
             "0:14:36 おぉー:_きらきら",
@@ -3229,19 +3221,20 @@
       "durationText": "1:20:29",
       "commentCandidateCount": 31,
       "result": "selected",
-      "selectedSongCount": 40,
-      "acceptedSourceCount": 11,
-      "rejectedSourceCount": 4,
+      "selectedSongCount": 39,
+      "acceptedSourceCount": 2,
+      "rejectedSourceCount": 13,
       "rejectedEntryCount": 45,
       "sources": [
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:52:08 シンクロまーじでおもろいww"
           ],
@@ -3252,12 +3245,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:30:58 可愛いざぶぅんリピ用"
           ],
@@ -3268,12 +3262,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:43:22 近スンギ"
           ],
@@ -3284,12 +3279,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:52:08 シンクロハンコック"
           ],
@@ -3300,12 +3296,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:52:08 緋八はこのシンクロに気付いてなかったのおもろすぎる"
           ],
@@ -3322,6 +3319,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -3348,12 +3346,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:46:30 ここの「ぅぅん」がすき"
           ],
@@ -3364,12 +3363,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 1,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:50:34 ガキマナ"
           ],
@@ -3380,12 +3380,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:30:58 可愛すぎるざぶぅん"
           ],
@@ -3402,6 +3403,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -3428,12 +3430,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:38:52 大困惑"
           ],
@@ -3450,6 +3453,7 @@
           "artistCount": 0,
           "topicCount": 7,
           "structuralCount": 26,
+          "sentenceLikeCount": 8,
           "sample": [
             "0:02:05 ノンフィクション",
             "0:08:04 馬と鹿",
@@ -3627,6 +3631,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -3653,60 +3658,46 @@
         },
         {
           "sourceType": "comment",
-          "reason": "no_song_after_filter",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
-          "keptCount": 0,
+          "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:38:46",
-              "title": "MECHATU-Aで唯一加齢する緋八マナと、Specialeで唯一加齢する渚トラウトの｢人間みたいね｣は最高に良すぎて.....。",
-              "artist": "未記載",
-              "line": "38:46 MECHATU-Aで唯一加齢する緋八マナと、Specialeで唯一加齢する渚トラウトの｢人間みたいね｣は最高に良すぎて.....。"
-            }
+          "sentenceLikeCount": 1,
+          "sample": [
+            "1:05:43 可愛すぎるw"
           ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:38:46",
-              "title": "MECHATU-Aで唯一加齢する緋八マナと、Specialeで唯一加齢する渚トラウトの｢人間みたいね｣は最高に良すぎて.....。",
-              "artist": "未記載",
-              "line": "38:46 MECHATU-Aで唯一加齢する緋八マナと、Specialeで唯一加齢する渚トラウトの｢人間みたいね｣は最高に良すぎて.....。"
-            }
-          ]
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
         },
         {
           "sourceType": "reply",
           "reason": "",
           "originalCount": 68,
-          "keptCount": 40,
+          "keptCount": 39,
           "artistCount": 0,
-          "topicCount": 9,
+          "topicCount": 10,
           "structuralCount": 35,
+          "sentenceLikeCount": 19,
           "sample": [
             "0:02:05 ノンフィクション",
             "0:06:50 そろそろ小皺が気になるお年頃",
-            "0:07:15 虚空から水を取る",
             "0:07:20 ちょっとだけね",
             "0:08:04 馬と鹿",
             "0:13:05 歌録りがちな時の喉の調子",
             "0:14:48 のび〜！スタンドマイク取れます！",
-            "0:15:53 よくばり"
+            "0:15:53 よくばり",
+            "0:20:45 ワールド・ランプシェード"
           ],
-          "rejectedEntryCount": 28,
+          "rejectedEntryCount": 29,
           "rejectedEntryReasons": {
             "obvious_non_song_text": 1,
             "title_only_non_song_candidate": 22,
+            "likely_non_song_entry": 3,
             "empty_after_timestamp": 1,
-            "likely_non_song_entry": 2,
             "activity_title": 2
           },
           "rejectedSamples": [
@@ -3723,6 +3714,13 @@
               "title": "こんにちはー！緋八マナです！",
               "artist": "未記載",
               "line": "06:40 こんにちはー！緋八マナです！"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:07:15",
+              "title": "虚空から水を取る",
+              "artist": "未記載",
+              "line": "07:15 虚空から水を取る"
             },
             {
               "reason": "empty_after_timestamp",
@@ -3758,13 +3756,6 @@
               "title": "おめでとう🐝🤣ありがとう",
               "artist": "未記載",
               "line": "25:37 💡おめでとう🐝🤣ありがとう"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:25:42",
-              "title": "ざぶぅんの挨拶",
-              "artist": "未記載",
-              "line": "25:42 ざぶぅんの挨拶"
             }
           ],
           "rejectedEntries": [
@@ -3781,6 +3772,13 @@
               "title": "こんにちはー！緋八マナです！",
               "artist": "未記載",
               "line": "06:40 こんにちはー！緋八マナです！"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:07:15",
+              "title": "虚空から水を取る",
+              "artist": "未記載",
+              "line": "07:15 虚空から水を取る"
             },
             {
               "reason": "empty_after_timestamp",
@@ -3978,8 +3976,8 @@
       "commentCandidateCount": 32,
       "result": "selected",
       "selectedSongCount": 33,
-      "acceptedSourceCount": 2,
-      "rejectedSourceCount": 2,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 3,
       "rejectedEntryCount": 55,
       "sources": [
         {
@@ -3990,6 +3988,7 @@
           "artistCount": 15,
           "topicCount": 8,
           "structuralCount": 59,
+          "sentenceLikeCount": 6,
           "sample": [
             "0:02:53 こんばんドドド",
             "0:03:47 旅行の準備は1mmもしてまてーん",
@@ -4258,6 +4257,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -4284,12 +4284,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "4:44:22 自分用"
           ],
@@ -4306,6 +4307,7 @@
           "artistCount": 3,
           "topicCount": 23,
           "structuralCount": 62,
+          "sentenceLikeCount": 4,
           "sample": [
             "2:20:02 おトイレ行きたい",
             "2:20:29 お花摘みタイム",
@@ -4592,8 +4594,8 @@
       "commentCandidateCount": 27,
       "result": "selected",
       "selectedSongCount": 15,
-      "acceptedSourceCount": 3,
-      "rejectedSourceCount": 2,
+      "acceptedSourceCount": 2,
+      "rejectedSourceCount": 3,
       "rejectedEntryCount": 2,
       "sources": [
         {
@@ -4604,6 +4606,7 @@
           "artistCount": 15,
           "topicCount": 0,
           "structuralCount": 15,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:06:34 Pretender",
             "0:13:46 ドライフラワー",
@@ -4627,6 +4630,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -4653,12 +4657,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "1:17:57 私助かる:_うめうめ"
           ],
@@ -4675,6 +4680,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -4707,6 +4713,7 @@
           "artistCount": 15,
           "topicCount": 0,
           "structuralCount": 15,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:06:34 Pretender",
             "0:13:46 Dried Flower",
@@ -4725,6 +4732,79 @@
       ]
     },
     {
+      "videoId": "qLteog9rK_g",
+      "title": "【 歌枠 】2026年上半期ヒットソング歌っていくよ～！🎤✨【にじさんじ / 珠乃井ナナ】",
+      "channelName": "珠乃井ナナ / Tamanoi Nana【にじさんじ】",
+      "keyword": "歌枠",
+      "publishedText": "12 日前 に配信済み",
+      "durationText": "1:07:44",
+      "commentCandidateCount": 20,
+      "result": "selected",
+      "selectedSongCount": 10,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 1,
+      "rejectedEntryCount": 1,
+      "sources": [
+        {
+          "sourceType": "comment",
+          "reason": "no_song_after_filter",
+          "originalCount": 1,
+          "keptCount": 0,
+          "artistCount": 0,
+          "topicCount": 0,
+          "structuralCount": 1,
+          "sentenceLikeCount": 0,
+          "sample": [],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "title_only_non_song_candidate": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "0:51:28",
+              "title": "ここの間奏で表情が😌😊😌😊😌😊と交互に変わるの、大変kawaii✨",
+              "artist": "未記載",
+              "line": "51:28 ここの間奏で表情が😌😊😌😊😌😊と交互に変わるの、大変kawaii✨"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "0:51:28",
+              "title": "ここの間奏で表情が😌😊😌😊😌😊と交互に変わるの、大変kawaii✨",
+              "artist": "未記載",
+              "line": "51:28 ここの間奏で表情が😌😊😌😊😌😊と交互に変わるの、大変kawaii✨"
+            }
+          ]
+        },
+        {
+          "sourceType": "comment",
+          "reason": "",
+          "originalCount": 10,
+          "keptCount": 10,
+          "artistCount": 10,
+          "topicCount": 0,
+          "structuralCount": 10,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:06:07 らしさ",
+            "0:13:50 恋風",
+            "0:19:44 プロポーズ",
+            "0:24:57 アゲハ蝶",
+            "0:32:34 シルエット",
+            "0:37:49 怪獣",
+            "0:44:18 革命道中",
+            "0:49:31 lulu."
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
+        }
+      ]
+    },
+    {
       "videoId": "xi33GXN0xgg",
       "title": "✯┊アコギchill弾き語り┊お昼の癒しChill✨ギタ～とお歌練習〖 天宮こころ / にじさんじ 〗",
       "channelName": "天宮 こころ / Amamya Ch.",
@@ -4734,8 +4814,8 @@
       "commentCandidateCount": 20,
       "result": "selected",
       "selectedSongCount": 14,
-      "acceptedSourceCount": 2,
-      "rejectedSourceCount": 2,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 3,
       "rejectedEntryCount": 12,
       "sources": [
         {
@@ -4746,6 +4826,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -4772,12 +4853,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "2:14:46 ray助かりすぎる"
           ],
@@ -4794,6 +4876,7 @@
           "artistCount": 8,
           "topicCount": 5,
           "structuralCount": 23,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:15:42 Fighting My Way",
             "0:28:26 あのね",
@@ -4941,6 +5024,7 @@
           "artistCount": 0,
           "topicCount": 1,
           "structuralCount": 2,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 2,
           "rejectedEntryReasons": {
@@ -4982,466 +5066,28 @@
       ]
     },
     {
-      "videoId": "zHwgfvmPfSM",
-      "title": "【重大告知あり！！】リクエストでいただいた楽曲を3Dでゲストのみなさんと歌う！【戌亥とこ/にじさんじ】",
-      "channelName": "戌亥とこ -Inui Toko-",
-      "keyword": "歌枠",
-      "publishedText": "13 日前 に配信済み",
-      "durationText": "1:34:52",
-      "commentCandidateCount": 20,
-      "result": "selected",
-      "selectedSongCount": 3,
-      "acceptedSourceCount": 12,
-      "rejectedSourceCount": 3,
-      "rejectedEntryCount": 12,
-      "sources": [
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:12:13 長尾君がステージから降りてきた時の女性陣の悲鳴が事件性ありすぎるw"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:54:08 ネス〜、景〜、行くわよ！で神"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:52:51 ビブラートまでユニゾンするところ余韻が凄い"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:12:22 ほんとに見つめて欲しく無さそうでおもろいww"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:13:09 ここのステージに戻るとこ普通に美しくて感動しちゃった"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "topic_timeline_without_artists",
-          "originalCount": 35,
-          "keptCount": 26,
-          "artistCount": 0,
-          "topicCount": 5,
-          "structuralCount": 35,
-          "sample": [
-            "0:08:32 IRIS OUT",
-            "0:18:56 おやすみ泣き声、さよなら歌姫",
-            "0:25:06 灰色と青",
-            "0:34:27 気合いを入れるべりなな",
-            "0:35:32 人生は夢だらけ",
-            "0:39:55 アイネクライネ1回目",
-            "0:41:07 アイネクライネ2回目",
-            "0:41:55 アイネクライネ"
-          ],
-          "rejectedEntryCount": 9,
-          "rejectedEntryReasons": {
-            "obvious_non_song_text": 6,
-            "title_only_non_song_candidate": 3
-          },
-          "rejectedSamples": [
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:01:56",
-              "title": "開始",
-              "artist": "",
-              "line": "1:56 開始"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:05:42",
-              "title": "自己紹介",
-              "artist": "",
-              "line": "5:42 自己紹介"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:33:45",
-              "title": "かわいい時間",
-              "artist": "未記載",
-              "line": "33:45 かわいい時間"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:46:44",
-              "title": "とこちゃんに名前を呼んで欲しいみんな",
-              "artist": "未記載",
-              "line": "46:44 とこちゃんに名前を呼んで欲しいみんな"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "1:16:25",
-              "title": "音置き去り告知",
-              "artist": "",
-              "line": "1:16:25 音置き去り告知"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "1:20:59",
-              "title": "足音告知",
-              "artist": "",
-              "line": "1:20:59 足音告知"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "1:22:45",
-              "title": "完璧告知",
-              "artist": "",
-              "line": "1:22:45 完璧告知"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:27:10",
-              "title": "ありがとうとこちゃん",
-              "artist": "未記載",
-              "line": "1:27:10 ありがとうとこちゃん"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:01:56",
-              "title": "開始",
-              "artist": "",
-              "line": "1:56 開始"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:05:42",
-              "title": "自己紹介",
-              "artist": "",
-              "line": "5:42 自己紹介"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:33:45",
-              "title": "かわいい時間",
-              "artist": "未記載",
-              "line": "33:45 かわいい時間"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:46:44",
-              "title": "とこちゃんに名前を呼んで欲しいみんな",
-              "artist": "未記載",
-              "line": "46:44 とこちゃんに名前を呼んで欲しいみんな"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "1:16:25",
-              "title": "音置き去り告知",
-              "artist": "",
-              "line": "1:16:25 音置き去り告知"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "1:20:59",
-              "title": "足音告知",
-              "artist": "",
-              "line": "1:20:59 足音告知"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "1:22:45",
-              "title": "完璧告知",
-              "artist": "",
-              "line": "1:22:45 完璧告知"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:27:10",
-              "title": "ありがとうとこちゃん",
-              "artist": "未記載",
-              "line": "1:27:10 ありがとうとこちゃん"
-            },
-            {
-              "reason": "obvious_non_song_text",
-              "time": "1:28:51",
-              "title": "感想",
-              "artist": "",
-              "line": "1:28:51 感想"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:10:33 ここからの長尾劇場だいすき"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:10:33 世が世なら「無駄に洗練された無駄のない無駄な動き」「なぜベストを尽くしてしまったのか」のタグがついてたと思う"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 1,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 1,
-          "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:10:32",
-              "title": "盛れミは流石に俺得すぎるありがとう",
-              "artist": "未記載",
-              "line": "1:10:32 盛れミは流石に俺得すぎるありがとう"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:10:32",
-              "title": "盛れミは流石に俺得すぎるありがとう",
-              "artist": "未記載",
-              "line": "1:10:32 盛れミは流石に俺得すぎるありがとう"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 3,
-          "keptCount": 3,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 3,
-          "sample": [
-            "0:18:57 さようなら歌姫",
-            "1:08:46 担当発表",
-            "1:10:32 モレミアモレ"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:18:51 ネスくんの歌声ほんとすき音域広すぎ"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 2,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 2,
-          "sample": [
-            "0:42:12 ななたまが目閉じてて"
-          ],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:42:20",
-              "title": "ここがいいんだよ！ってやっててかわいい",
-              "artist": "未記載",
-              "line": "42:20 ここがいいんだよ！ってやっててかわいい"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:42:20",
-              "title": "ここがいいんだよ！ってやっててかわいい",
-              "artist": "未記載",
-              "line": "42:20 ここがいいんだよ！ってやっててかわいい"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:51:18 いにゅいに甘えてなでなでして貰ってぴょんぴょんななたま可愛すぎる"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 1,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "activity_title": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "activity_title",
-              "time": "1:12:08",
-              "title": "ここだけスクショ撮ったらべりななの振り付けに見えるが、これは長尾から目を背けるための動作です",
-              "artist": "未記載",
-              "line": "1:12:08 ここだけスクショ撮ったらべりななの振り付けに見えるが、これは長尾から目を背けるための動作です"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "activity_title",
-              "time": "1:12:08",
-              "title": "ここだけスクショ撮ったらべりななの振り付けに見えるが、これは長尾から目を背けるための動作です",
-              "artist": "未記載",
-              "line": "1:12:08 ここだけスクショ撮ったらべりななの振り付けに見えるが、これは長尾から目を背けるための動作です"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:12:33 ここのちょっと切なそうな表情で爆笑したw"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        }
-      ]
-    },
-    {
       "videoId": "ZK83YYTFPPI",
       "title": "【歌枠耐久】90万人到達が先か、町田が90人になるのが先か。Singing Stream【にじさんじ/町田ちま】",
       "channelName": "町田ちま【にじさんじ】",
       "keyword": "歌枠",
       "publishedText": "2 週間前 に配信済み",
       "durationText": "53:45",
-      "commentCandidateCount": 34,
+      "commentCandidateCount": 26,
       "result": "selected",
-      "selectedSongCount": 7,
-      "acceptedSourceCount": 3,
+      "selectedSongCount": 1,
+      "acceptedSourceCount": 1,
       "rejectedSourceCount": 1,
-      "rejectedEntryCount": 2,
+      "rejectedEntryCount": 0,
       "sources": [
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:22:47 今この世で君だけ大増殖"
           ],
@@ -5452,84 +5098,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 1,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "activity_title": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "activity_title",
-              "time": "0:08:10",
-              "title": "ここで久しぶりに狂気の歌枠であることに気づいた",
-              "artist": "未記載",
-              "line": "8:10ここで久しぶりに狂気の歌枠であることに気づいた"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "activity_title",
-              "time": "0:08:10",
-              "title": "ここで久しぶりに狂気の歌枠であることに気づいた",
-              "artist": "未記載",
-              "line": "8:10ここで久しぶりに狂気の歌枠であることに気づいた"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 8,
-          "keptCount": 7,
-          "artistCount": 1,
-          "topicCount": 0,
-          "structuralCount": 8,
-          "sample": [
-            "0:04:54 (1人, One Machita)",
-            "0:07:57 (10人, 10 Machitas)",
-            "0:08:40 IRIS OUT",
-            "0:11:27 (20人, 20 Machitas)",
-            "0:14:05 (30人, 30 Machitas)",
-            "0:17:15 (50人, 50 Machitas)",
-            "0:20:40 (90人, 90 Machitas)"
-          ],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "empty_after_timestamp": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:03:38",
-              "title": "",
-              "artist": "",
-              "line": "0, 3:38"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "empty_after_timestamp",
-              "time": "0:03:38",
-              "title": "",
-              "artist": "",
-              "line": "0, 3:38"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
           "reason": "",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:08:18 2曲目始まってから登録スピード加速するのホントにオモロい"
           ],
@@ -5550,7 +5125,7 @@
       "commentCandidateCount": 25,
       "result": "selected",
       "selectedSongCount": 9,
-      "acceptedSourceCount": 2,
+      "acceptedSourceCount": 1,
       "rejectedSourceCount": 0,
       "rejectedEntryCount": 2,
       "sources": [
@@ -5562,6 +5137,7 @@
           "artistCount": 9,
           "topicCount": 2,
           "structuralCount": 9,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:08:04 rise",
             "0:15:04 Ex-Otogibanashi",
@@ -5608,22 +5184,6 @@
               "line": "［50:15 新衣装お披露目生誕ライブ告知］"
             }
           ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 1,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "0:52:20 2026/7"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
         }
       ]
     },
@@ -5634,51 +5194,113 @@
       "keyword": "歌枠",
       "publishedText": "2 週間前 に配信済み",
       "durationText": "1:24:56",
-      "commentCandidateCount": 21,
+      "commentCandidateCount": 20,
       "result": "selected",
       "selectedSongCount": 33,
-      "acceptedSourceCount": 5,
-      "rejectedSourceCount": 4,
-      "rejectedEntryCount": 14,
+      "acceptedSourceCount": 3,
+      "rejectedSourceCount": 3,
+      "rejectedEntryCount": 6,
       "sources": [
         {
           "sourceType": "comment",
-          "reason": "",
-          "originalCount": 12,
-          "keptCount": 11,
-          "artistCount": 11,
-          "topicCount": 1,
-          "structuralCount": 12,
-          "sample": [
-            "0:11:46 トウキョウ・シャンディ・ランデヴ",
-            "0:20:29 雨とカプチーノ",
-            "0:28:26 絶頂讃歌",
-            "0:32:36 あなたのことをおしえて",
-            "0:36:02 炎",
-            "0:42:08 シンデレラボーイ",
-            "0:46:49 アポリア",
-            "0:52:24 月並みに輝け"
-          ],
+          "reason": "no_song_after_filter",
+          "originalCount": 1,
+          "keptCount": 0,
+          "artistCount": 0,
+          "topicCount": 0,
+          "structuralCount": 1,
+          "sentenceLikeCount": 0,
+          "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
-            "obvious_non_song_text": 1
+            "title_only_non_song_candidate": 1
           },
           "rejectedSamples": [
             {
-              "reason": "obvious_non_song_text",
-              "time": "0:02:00",
-              "title": "声入り",
-              "artist": "",
-              "line": "2:00 声入り"
+              "reason": "title_only_non_song_candidate",
+              "time": "1:06:03",
+              "title": "ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️",
+              "artist": "未記載",
+              "line": "1:06:03 ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️"
             }
           ],
           "rejectedEntries": [
             {
-              "reason": "obvious_non_song_text",
-              "time": "0:02:00",
-              "title": "声入り",
-              "artist": "",
-              "line": "2:00 声入り"
+              "reason": "title_only_non_song_candidate",
+              "time": "1:06:03",
+              "title": "ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️",
+              "artist": "未記載",
+              "line": "1:06:03 ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️"
+            }
+          ]
+        },
+        {
+          "sourceType": "comment",
+          "reason": "",
+          "originalCount": 4,
+          "keptCount": 3,
+          "artistCount": 0,
+          "topicCount": 1,
+          "structuralCount": 4,
+          "sentenceLikeCount": 1,
+          "sample": [
+            "0:36:02 炎",
+            "1:08:44 ユニゾン増やしがち",
+            "1:09:25 歌詞割りする特権"
+          ],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "likely_non_song_entry": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:10:16",
+              "title": "お披露目裏話",
+              "artist": "未記載",
+              "line": "1:10:16 お披露目裏話"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:10:16",
+              "title": "お披露目裏話",
+              "artist": "未記載",
+              "line": "1:10:16 お披露目裏話"
+            }
+          ]
+        },
+        {
+          "sourceType": "comment",
+          "reason": "no_song_after_filter",
+          "originalCount": 1,
+          "keptCount": 0,
+          "artistCount": 0,
+          "topicCount": 0,
+          "structuralCount": 1,
+          "sentenceLikeCount": 0,
+          "sample": [],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "title_only_non_song_candidate": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "1:03:53",
+              "title": "ちなみにとこちゃんはPretender歌ったことあります‼️‼️",
+              "artist": "未記載",
+              "line": "1:03:53 ちなみにとこちゃんはPretender歌ったことあります‼️‼️"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "1:03:53",
+              "title": "ちなみにとこちゃんはPretender歌ったことあります‼️‼️",
+              "artist": "未記載",
+              "line": "1:03:53 ちなみにとこちゃんはPretender歌ったことあります‼️‼️"
             }
           ]
         },
@@ -5690,6 +5312,7 @@
           "artistCount": 10,
           "topicCount": 0,
           "structuralCount": 13,
+          "sentenceLikeCount": 3,
           "sample": [
             "0:02:00 スタート",
             "0:02:59 朝から元気",
@@ -5740,255 +5363,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
-          "originalCount": 12,
-          "keptCount": 9,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 12,
-          "sample": [
-            "0:02:25 月並みに輝け🍰",
-            "0:11:47 トウキョウ・シャディ・ランデヴ",
-            "0:28:27 絶頂賛歌🍹",
-            "0:36:02 炎",
-            "0:42:08 シンデレラボーイ",
-            "0:57:59 Pretender",
-            "1:04:20 知らんけど",
-            "1:19:14 恋するフォーチュンクッキー"
-          ],
-          "rejectedEntryCount": 3,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 3
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:20:30",
-              "title": "雨とカプチーノ （べり柱用ね😉",
-              "artist": "未記載",
-              "line": "20:30 雨とカプチーノ （べり柱用ね😉"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:32:36",
-              "title": "あなたのことをおしえて🍰",
-              "artist": "未記載",
-              "line": "32:36 あなたのことをおしえて🍰"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:46:50",
-              "title": "アポリア 🍹😽‪‪🤍",
-              "artist": "未記載",
-              "line": "46:50 アポリア 🍹😽‪‪🤍"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:20:30",
-              "title": "雨とカプチーノ （べり柱用ね😉",
-              "artist": "未記載",
-              "line": "20:30 雨とカプチーノ （べり柱用ね😉"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:32:36",
-              "title": "あなたのことをおしえて🍰",
-              "artist": "未記載",
-              "line": "32:36 あなたのことをおしえて🍰"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:46:50",
-              "title": "アポリア 🍹😽‪‪🤍",
-              "artist": "未記載",
-              "line": "46:50 アポリア 🍹😽‪‪🤍"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 4,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 4,
-          "sample": [],
-          "rejectedEntryCount": 4,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 4
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:11:46",
-              "title": "トウキョウ・シャディ・ランデヴ🍹🍰♡",
-              "artist": "未記載",
-              "line": "11:46 トウキョウ・シャディ・ランデヴ🍹🍰♡"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:20:30",
-              "title": "雨とカプチーノ🍹🍰♡",
-              "artist": "未記載",
-              "line": "20:30 雨とカプチーノ🍹🍰♡"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:42:08",
-              "title": "シンデレラボーイ🍹🍰",
-              "artist": "未記載",
-              "line": "42:08 シンデレラボーイ🍹🍰"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:57:59",
-              "title": "Pretender🍹🍰",
-              "artist": "未記載",
-              "line": "57:59 Pretender🍹🍰"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:11:46",
-              "title": "トウキョウ・シャディ・ランデヴ🍹🍰♡",
-              "artist": "未記載",
-              "line": "11:46 トウキョウ・シャディ・ランデヴ🍹🍰♡"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:20:30",
-              "title": "雨とカプチーノ🍹🍰♡",
-              "artist": "未記載",
-              "line": "20:30 雨とカプチーノ🍹🍰♡"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:42:08",
-              "title": "シンデレラボーイ🍹🍰",
-              "artist": "未記載",
-              "line": "42:08 シンデレラボーイ🍹🍰"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:57:59",
-              "title": "Pretender🍹🍰",
-              "artist": "未記載",
-              "line": "57:59 Pretender🍹🍰"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 4,
-          "keptCount": 3,
-          "artistCount": 0,
-          "topicCount": 1,
-          "structuralCount": 4,
-          "sample": [
-            "0:36:02 炎",
-            "1:08:44 ユニゾン増やしがち",
-            "1:09:25 歌詞割りする特権"
-          ],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "likely_non_song_entry": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "likely_non_song_entry",
-              "time": "1:10:16",
-              "title": "お披露目裏話",
-              "artist": "未記載",
-              "line": "1:10:16 お披露目裏話"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "likely_non_song_entry",
-              "time": "1:10:16",
-              "title": "お披露目裏話",
-              "artist": "未記載",
-              "line": "1:10:16 お披露目裏話"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 1,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:03:53",
-              "title": "ちなみにとこちゃんはPretender歌ったことあります‼️‼️",
-              "artist": "未記載",
-              "line": "1:03:53 ちなみにとこちゃんはPretender歌ったことあります‼️‼️"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:03:53",
-              "title": "ちなみにとこちゃんはPretender歌ったことあります‼️‼️",
-              "artist": "未記載",
-              "line": "1:03:53 ちなみにとこちゃんはPretender歌ったことあります‼️‼️"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 1,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:06:03",
-              "title": "ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️",
-              "artist": "未記載",
-              "line": "1:06:03 ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:06:03",
-              "title": "ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️",
-              "artist": "未記載",
-              "line": "1:06:03 ここ上手すぎね🤦🏻‍♀️🤦🏻‍♀️"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:25:03 とまったところ"
           ],
@@ -5999,12 +5380,135 @@
         },
         {
           "sourceType": "comment",
+          "reason": "",
+          "originalCount": 12,
+          "keptCount": 11,
+          "artistCount": 11,
+          "topicCount": 1,
+          "structuralCount": 12,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:11:46 トウキョウ・シャンディ・ランデヴ",
+            "0:20:29 雨とカプチーノ",
+            "0:28:26 絶頂讃歌",
+            "0:32:36 あなたのことをおしえて",
+            "0:36:02 炎",
+            "0:42:08 シンデレラボーイ",
+            "0:46:49 アポリア",
+            "0:52:24 月並みに輝け"
+          ],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "obvious_non_song_text": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "obvious_non_song_text",
+              "time": "0:02:00",
+              "title": "声入り",
+              "artist": "",
+              "line": "2:00 声入り"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "obvious_non_song_text",
+              "time": "0:02:00",
+              "title": "声入り",
+              "artist": "",
+              "line": "2:00 声入り"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "qt3CZg8GcXs",
+      "title": "【歌枠/KARAOKE】リハビリ歌枠💓こいついつもリハビリしてんな👊【尾丸ポルカ/ホロライブ】",
+      "channelName": "Polka Ch. 尾丸ポルカ",
+      "keyword": "歌枠",
+      "publishedText": "2 週間前 に配信済み",
+      "durationText": "2:00:19",
+      "commentCandidateCount": 26,
+      "result": "selected",
+      "selectedSongCount": 27,
+      "acceptedSourceCount": 6,
+      "rejectedSourceCount": 1,
+      "rejectedEntryCount": 2,
+      "sources": [
+        {
+          "sourceType": "comment",
+          "reason": "",
+          "originalCount": 27,
+          "keptCount": 27,
+          "artistCount": 25,
+          "topicCount": 0,
+          "structuralCount": 27,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:02:28 開幕",
+            "0:05:24 『milk』",
+            "0:10:24 『さよならを おしえて』",
+            "0:15:33 『フォニイ』",
+            "0:19:14 『運命共同体！』",
+            "0:23:45 『staple stable』",
+            "0:29:00 『BLUE BIRD』",
+            "0:33:30 『 恋愛レボリューション21』"
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
+        },
+        {
+          "sourceType": "comment",
+          "reason": "",
+          "originalCount": 7,
+          "keptCount": 6,
+          "artistCount": 6,
+          "topicCount": 0,
+          "structuralCount": 7,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:05:28 milk",
+            "0:10:25 さよならをおしえて/Sayonara wo oshiete",
+            "0:15:34 フォニィ/Phony",
+            "0:19:16 運命共同体！/Unmei Kyoudotai!",
+            "0:23:47 staple stable",
+            "0:28:56 BLUE BIRD"
+          ],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "obvious_non_song_text": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "obvious_non_song_text",
+              "time": "0:02:30",
+              "title": "START",
+              "artist": "",
+              "line": "2:30 START"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "obvious_non_song_text",
+              "time": "0:02:30",
+              "title": "START",
+              "artist": "",
+              "line": "2:30 START"
+            }
+          ]
+        },
+        {
+          "sourceType": "comment",
           "reason": "no_song_after_filter",
           "originalCount": 1,
           "keptCount": 0,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -6013,21 +5517,112 @@
           "rejectedSamples": [
             {
               "reason": "title_only_non_song_candidate",
-              "time": "0:36:03",
-              "title": "久しぶりに出たわねベリ柱！とこ柱！！お二人の炎最高だわね",
+              "time": "0:36:42",
+              "title": "ここのポルカのかんそう好き",
               "artist": "未記載",
-              "line": "36:03 久しぶりに出たわねベリ柱！とこ柱！！お二人の炎最高だわね"
+              "line": "36:42ここのポルカのかんそう好き"
             }
           ],
           "rejectedEntries": [
             {
               "reason": "title_only_non_song_candidate",
-              "time": "0:36:03",
-              "title": "久しぶりに出たわねベリ柱！とこ柱！！お二人の炎最高だわね",
+              "time": "0:36:42",
+              "title": "ここのポルカのかんそう好き",
               "artist": "未記載",
-              "line": "36:03 久しぶりに出たわねベリ柱！とこ柱！！お二人の炎最高だわね"
+              "line": "36:42ここのポルカのかんそう好き"
             }
           ]
+        },
+        {
+          "sourceType": "comment",
+          "reason": "",
+          "originalCount": 25,
+          "keptCount": 25,
+          "artistCount": 25,
+          "topicCount": 1,
+          "structuralCount": 25,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:05:25 〜 1.『milk』",
+            "0:10:24 〜 2.『さよならを　おしえて』",
+            "0:15:34 〜3.『フォニイ』",
+            "0:19:14 〜4. 『運命共同体！』",
+            "0:23:46 〜5.『staple stable』",
+            "0:29:01 〜6.『BLUE BIRD』",
+            "0:33:30 〜7.『恋愛レボリューション21』",
+            "0:38:48 〜8.『Yeah! めっちゃホリディ』"
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
+        },
+        {
+          "sourceType": "reply",
+          "reason": "",
+          "originalCount": 6,
+          "keptCount": 6,
+          "artistCount": 6,
+          "topicCount": 0,
+          "structuralCount": 6,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "1:32:15 ラビュー・ラビュー/Love u Love u",
+            "1:37:41 ファッとして桃源郷/Fa ttoshite Togenkyo",
+            "1:42:05 正解はひとつ!じゃない!!/Seikai ha Hitotsu! Janai!!",
+            "1:46:15 Daydream cafe",
+            "1:50:21 ハッピー⭐︎マテリアル/Happy Material",
+            "1:55:42 1000%SPARKING"
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
+        },
+        {
+          "sourceType": "reply",
+          "reason": "",
+          "originalCount": 6,
+          "keptCount": 6,
+          "artistCount": 6,
+          "topicCount": 0,
+          "structuralCount": 6,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:33:21 恋愛レボリューション21/Love Revolution21",
+            "0:38:48 Yeah!めっちゃホリデイ/Yeah Meccha Holiday",
+            "0:42:51 Sparkling Daydream",
+            "0:47:22 シャボン玉/Syabondama",
+            "0:52:09 I can’t stop my love for you",
+            "0:57:45 チェリーポップ/Cherry Pop"
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
+        },
+        {
+          "sourceType": "reply",
+          "reason": "",
+          "originalCount": 7,
+          "keptCount": 7,
+          "artistCount": 7,
+          "topicCount": 0,
+          "structuralCount": 7,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "1:00:33 マシュマロ/Marshmallow",
+            "1:03:30 空色デイズ/Sorairo Days",
+            "1:07:55 シリウス/Sirius",
+            "1:13:45 ココ⭐︎ナツ/Koko Natsu",
+            "1:18:53 オリオンをなぞる/Orion wo Nazoru",
+            "1:23:30 車輪の唄/Sharin no Uta",
+            "1:28:04 サウダージ/Saudade"
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
         }
       ]
     },
@@ -6041,8 +5636,8 @@
       "commentCandidateCount": 24,
       "result": "selected",
       "selectedSongCount": 41,
-      "acceptedSourceCount": 5,
-      "rejectedSourceCount": 0,
+      "acceptedSourceCount": 3,
+      "rejectedSourceCount": 2,
       "rejectedEntryCount": 17,
       "sources": [
         {
@@ -6053,6 +5648,7 @@
           "artistCount": 10,
           "topicCount": 0,
           "structuralCount": 10,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:04:09 風を食む",
             "0:12:38 からくりピエロ",
@@ -6076,6 +5672,7 @@
           "artistCount": 13,
           "topicCount": 12,
           "structuralCount": 58,
+          "sentenceLikeCount": 5,
           "sample": [
             "0:02:50 あいさつ",
             "0:04:09 風を食む",
@@ -6275,12 +5872,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:02:33 忘れろビーム～"
           ],
@@ -6291,12 +5889,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:02:52 一瞬mosi mosi歌い出すかと思ってドキッとした"
           ],
@@ -6313,6 +5912,7 @@
           "artistCount": 10,
           "topicCount": 0,
           "structuralCount": 10,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:04:09 Eat the Wind",
             "0:12:38 Karakuri Pierrot",
@@ -6353,10 +5953,10 @@
       "publishedText": "3 週間前 に配信済み",
       "durationText": "1:34:28",
       "commentCandidateCount": 20,
-      "result": "selected",
-      "selectedSongCount": 1,
-      "acceptedSourceCount": 1,
-      "rejectedSourceCount": 1,
+      "result": "no_usable_song_source",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 2,
       "rejectedEntryCount": 1,
       "sources": [
         {
@@ -6367,6 +5967,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -6393,12 +5994,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:59:32 からみんな聴いてくれ、4人とも歌が綺麗すぎる"
           ],
@@ -6420,8 +6022,8 @@
       "result": "no_usable_song_source",
       "selectedSongCount": 0,
       "acceptedSourceCount": 0,
-      "rejectedSourceCount": 3,
-      "rejectedEntryCount": 3,
+      "rejectedSourceCount": 2,
+      "rejectedEntryCount": 2,
       "sources": [
         {
           "sourceType": "comment",
@@ -6431,38 +6033,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
-          "sample": [],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "title_only_non_song_candidate": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:44:32",
-              "title": "左3人のSeeds2期生のターンが揃いすぎてる",
-              "artist": "未記載",
-              "line": "1:44:32 左3人のSeeds2期生のターンが揃いすぎてる"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "1:44:32",
-              "title": "左3人のSeeds2期生のターンが揃いすぎてる",
-              "artist": "未記載",
-              "line": "1:44:32 左3人のSeeds2期生のターンが揃いすぎてる"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "no_song_after_filter",
-          "originalCount": 1,
-          "keptCount": 0,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -6495,6 +6066,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -6503,19 +6075,19 @@
           "rejectedSamples": [
             {
               "reason": "title_only_non_song_candidate",
-              "time": "1:36:18",
-              "title": "令和におじさん2人のZOIDSが聴けるなんて！ベルさん、舞元さんに圧倒的感謝…！",
+              "time": "1:44:32",
+              "title": "左3人のSeeds2期生のターンが揃いすぎてる",
               "artist": "未記載",
-              "line": "1:36:18 令和におじさん2人のZOIDSが聴けるなんて！ベルさん、舞元さんに圧倒的感謝…！"
+              "line": "1:44:32 左3人のSeeds2期生のターンが揃いすぎてる"
             }
           ],
           "rejectedEntries": [
             {
               "reason": "title_only_non_song_candidate",
-              "time": "1:36:18",
-              "title": "令和におじさん2人のZOIDSが聴けるなんて！ベルさん、舞元さんに圧倒的感謝…！",
+              "time": "1:44:32",
+              "title": "左3人のSeeds2期生のターンが揃いすぎてる",
               "artist": "未記載",
-              "line": "1:36:18 令和におじさん2人のZOIDSが聴けるなんて！ベルさん、舞元さんに圧倒的感謝…！"
+              "line": "1:44:32 左3人のSeeds2期生のターンが揃いすぎてる"
             }
           ]
         }
@@ -6531,8 +6103,8 @@
       "commentCandidateCount": 20,
       "result": "selected",
       "selectedSongCount": 10,
-      "acceptedSourceCount": 4,
-      "rejectedSourceCount": 1,
+      "acceptedSourceCount": 2,
+      "rejectedSourceCount": 3,
       "rejectedEntryCount": 6,
       "sources": [
         {
@@ -6543,6 +6115,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 11,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:02:00 スタート",
             "0:08:54 3時間半ぐらい喋ってる",
@@ -6620,12 +6193,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:41:15 ここすき"
           ],
@@ -6642,6 +6216,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -6674,6 +6249,7 @@
           "artistCount": 10,
           "topicCount": 1,
           "structuralCount": 11,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:05:18 HOT LIMIT",
             "0:11:53 天体観測",
@@ -6709,12 +6285,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:41:20 ああ〜メロコがエントリー"
           ],
@@ -6735,8 +6312,8 @@
       "commentCandidateCount": 33,
       "result": "selected",
       "selectedSongCount": 13,
-      "acceptedSourceCount": 3,
-      "rejectedSourceCount": 0,
+      "acceptedSourceCount": 2,
+      "rejectedSourceCount": 1,
       "rejectedEntryCount": 22,
       "sources": [
         {
@@ -6747,6 +6324,7 @@
           "artistCount": 12,
           "topicCount": 0,
           "structuralCount": 13,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:09:18 丸の内サディスティック",
             "0:15:20 さぁ",
@@ -6764,12 +6342,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:59:19 もう一回お祝いできるドン！"
           ],
@@ -6786,6 +6365,7 @@
           "artistCount": 1,
           "topicCount": 5,
           "structuralCount": 54,
+          "sentenceLikeCount": 3,
           "sample": [
             "0:02:05 こんばんドドド",
             "0:04:10 セトリの不正も考えたけど…:_草くさ",
@@ -7029,35 +6609,36 @@
       "durationText": "1:25:25",
       "commentCandidateCount": 20,
       "result": "selected",
-      "selectedSongCount": 28,
+      "selectedSongCount": 10,
       "acceptedSourceCount": 1,
       "rejectedSourceCount": 0,
-      "rejectedEntryCount": 13,
+      "rejectedEntryCount": 21,
       "sources": [
         {
           "sourceType": "comment",
           "reason": "",
-          "originalCount": 41,
-          "keptCount": 28,
-          "artistCount": 17,
-          "topicCount": 7,
-          "structuralCount": 26,
+          "originalCount": 31,
+          "keptCount": 10,
+          "artistCount": 6,
+          "topicCount": 14,
+          "structuralCount": 16,
+          "sentenceLikeCount": 1,
           "sample": [
-            "0:01:07 開始 / ずっと虚空に向かって話していたいろは殿:_kusa",
             "0:07:16 ワールドイズマイン",
-            "0:07:16 _light1:ワールドイズマイン",
-            "0:11:30 生誕ライブにゲストでよく呼ばれるのでクリックあるものだと思ってしまった",
-            "0:12:31 クリックとは",
             "0:13:00 爆裂愛してる",
-            "0:13:00 _light1:爆裂愛してる",
-            "0:16:21 爆裂ハイテンションなござるさん"
+            "0:20:02 お返事まだカナ💦❓おじさん構文😁❗",
+            "0:28:24 IRIS OUT",
+            "0:37:11 ヴァンパイア",
+            "0:44:42 君色に染まる",
+            "0:51:48 W/X/Y",
+            "0:59:56 UNDEAD"
           ],
-          "rejectedEntryCount": 13,
+          "rejectedEntryCount": 21,
           "rejectedEntryReasons": {
             "obvious_non_song_text": 1,
+            "likely_non_song_entry": 11,
             "title_only_non_song_candidate": 4,
-            "activity_title": 5,
-            "likely_non_song_entry": 3
+            "activity_title": 5
           },
           "rejectedSamples": [
             {
@@ -7066,6 +6647,13 @@
               "title": "声入り",
               "artist": "",
               "line": "0:41 声入り"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:01:07",
+              "title": "開始 / ずっと虚空に向かって話していたいろは殿:_kusa",
+              "artist": "未記載",
+              "line": "1:07 開始 / ずっと虚空に向かって話していたいろは殿:_kusa:"
             },
             {
               "reason": "title_only_non_song_candidate",
@@ -7089,32 +6677,25 @@
               "line": "4:58 明日の誕生日ライブは視聴者参加型です！20時開始！"
             },
             {
-              "reason": "activity_title",
-              "time": "0:17:05",
-              "title": "顔を生誕ライブのキービジュアルに:_kusa",
+              "reason": "likely_non_song_entry",
+              "time": "0:11:30",
+              "title": "生誕ライブにゲストでよく呼ばれるのでクリックあるものだと思ってしまった",
               "artist": "未記載",
-              "line": "┣17:05 顔を生誕ライブのキービジュアルに:_kusa:"
+              "line": "┣11:30 生誕ライブにゲストでよく呼ばれるのでクリックあるものだと思ってしまった"
             },
             {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:31:13",
-              "title": "最近の曲は歌えるようになるのが大変！",
+              "reason": "likely_non_song_entry",
+              "time": "0:12:31",
+              "title": "クリックとは",
               "artist": "未記載",
-              "line": "┣31:13 最近の曲は歌えるようになるのが大変！"
+              "line": "┗12:31 クリックとは"
             },
             {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:32:02",
-              "title": "マネちゃんにロゴがないことを教えてもらう",
-              "artist": "未記載",
-              "line": "┣32:02 マネちゃんにロゴがないことを教えてもらう"
-            },
-            {
-              "reason": "title_only_non_song_candidate",
-              "time": "0:35:06",
-              "title": "コメントのリクエストの中に明日のライブで歌う曲がちらほら",
-              "artist": "未記載",
-              "line": "┗35:06 コメントのリクエストの中に明日のライブで歌う曲がちらほら"
+              "reason": "likely_non_song_entry",
+              "time": "0:16:21",
+              "title": "爆裂ハイテンションなござるさん",
+              "artist": "そらちゃんのチャンネルで爆裂愛してるの歌ってみた上がってます！",
+              "line": "┣16:21 爆裂ハイテンションなござるさん / そらちゃんのチャンネルで爆裂愛してるの歌ってみた上がってます！"
             }
           ],
           "rejectedEntries": [
@@ -7126,6 +6707,13 @@
               "line": "0:41 声入り"
             },
             {
+              "reason": "likely_non_song_entry",
+              "time": "0:01:07",
+              "title": "開始 / ずっと虚空に向かって話していたいろは殿:_kusa",
+              "artist": "未記載",
+              "line": "1:07 開始 / ずっと虚空に向かって話していたいろは殿:_kusa:"
+            },
+            {
               "reason": "title_only_non_song_candidate",
               "time": "0:02:20",
               "title": "自己紹介:_iroha1",
@@ -7147,11 +6735,39 @@
               "line": "4:58 明日の誕生日ライブは視聴者参加型です！20時開始！"
             },
             {
+              "reason": "likely_non_song_entry",
+              "time": "0:11:30",
+              "title": "生誕ライブにゲストでよく呼ばれるのでクリックあるものだと思ってしまった",
+              "artist": "未記載",
+              "line": "┣11:30 生誕ライブにゲストでよく呼ばれるのでクリックあるものだと思ってしまった"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:12:31",
+              "title": "クリックとは",
+              "artist": "未記載",
+              "line": "┗12:31 クリックとは"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:16:21",
+              "title": "爆裂ハイテンションなござるさん",
+              "artist": "そらちゃんのチャンネルで爆裂愛してるの歌ってみた上がってます！",
+              "line": "┣16:21 爆裂ハイテンションなござるさん / そらちゃんのチャンネルで爆裂愛してるの歌ってみた上がってます！"
+            },
+            {
               "reason": "activity_title",
               "time": "0:17:05",
               "title": "顔を生誕ライブのキービジュアルに:_kusa",
               "artist": "未記載",
               "line": "┣17:05 顔を生誕ライブのキービジュアルに:_kusa:"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:17:55",
+              "title": "ゲスト匂わせ要素",
+              "artist": "未記載",
+              "line": "┗17:55 ゲスト匂わせ要素"
             },
             {
               "reason": "title_only_non_song_candidate",
@@ -7173,6 +6789,20 @@
               "title": "コメントのリクエストの中に明日のライブで歌う曲がちらほら",
               "artist": "未記載",
               "line": "┗35:06 コメントのリクエストの中に明日のライブで歌う曲がちらほら"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:40:29",
+              "title": "ライブでやる曲をDに提案したところ…",
+              "artist": "未記載",
+              "line": "┣40:29 ライブでやる曲をDに提案したところ…"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "0:43:43",
+              "title": "今日スパチャはオフ！",
+              "artist": "未記載",
+              "line": "┗43:43 今日スパチャはオフ！"
             },
             {
               "reason": "activity_title",
@@ -7187,6 +6817,13 @@
               "title": "UNDEADを歌うにあたっての裏話",
               "artist": "未記載",
               "line": "┣1:03:01 UNDEADを歌うにあたっての裏話"
+            },
+            {
+              "reason": "likely_non_song_entry",
+              "time": "1:07:43",
+              "title": "メモは紙に書くいろは殿",
+              "artist": "明日の曲について書いた独特すぎるメモ:_kusa",
+              "line": "┗1:07:43 メモは紙に書くいろは殿 / 明日の曲について書いた独特すぎるメモ:_kusa:"
             },
             {
               "reason": "activity_title",
@@ -7223,8 +6860,8 @@
       "commentCandidateCount": 23,
       "result": "selected",
       "selectedSongCount": 65,
-      "acceptedSourceCount": 5,
-      "rejectedSourceCount": 0,
+      "acceptedSourceCount": 2,
+      "rejectedSourceCount": 2,
       "rejectedEntryCount": 19,
       "sources": [
         {
@@ -7235,6 +6872,7 @@
           "artistCount": 16,
           "topicCount": 9,
           "structuralCount": 83,
+          "sentenceLikeCount": 14,
           "sample": [
             "0:05:57 _irysHirys",
             "0:14:36 すずめ feat.十明",
@@ -7445,6 +7083,7 @@
           "artistCount": 1,
           "topicCount": 0,
           "structuralCount": 19,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:05:58 End",
             "0:14:36 Suzume",
@@ -7480,12 +7119,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:36:11 「星座になれたら」"
           ],
@@ -7496,30 +7136,15 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 1,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "1:24:27 このstand"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 1,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:24:27 IRyS"
           ],
           "rejectedEntryCount": 0,
           "rejectedEntryReasons": {},
@@ -7550,6 +7175,7 @@
           "artistCount": 1,
           "topicCount": 0,
           "structuralCount": 12,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:59:04 BLOODY STREAM"
           ],
@@ -7698,21 +7324,6 @@
       ]
     },
     {
-      "videoId": "jPOpoXWnq7k",
-      "title": "【全編ノーカット】大森靖子 ライブ映像｜歌舞伎町大森靖子祭2026【4K】",
-      "channelName": "こむたん",
-      "keyword": "弾き語り",
-      "publishedText": "3 週間前",
-      "durationText": "43:02",
-      "commentCandidateCount": 32,
-      "result": "no_timestamp_candidates",
-      "selectedSongCount": 0,
-      "acceptedSourceCount": 0,
-      "rejectedSourceCount": 0,
-      "rejectedEntryCount": 0,
-      "sources": []
-    },
-    {
       "videoId": "oOuDD4aIl-Y",
       "title": "【歌/アコギ】久しぶりの弾き語り、深夜練習🌃【ラトナ・プティ/にじさんじ】",
       "channelName": "ラトナ・プティ -Ratna Petit -にじさんじ所属",
@@ -7734,6 +7345,7 @@
           "artistCount": 0,
           "topicCount": 2,
           "structuralCount": 18,
+          "sentenceLikeCount": 3,
           "sample": [
             "0:08:31 まずは歌ってみる",
             "0:14:46 センチメンタル・キス",
@@ -7819,6 +7431,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -7855,9 +7468,9 @@
       "commentCandidateCount": 15,
       "result": "selected",
       "selectedSongCount": 30,
-      "acceptedSourceCount": 3,
-      "rejectedSourceCount": 2,
-      "rejectedEntryCount": 14,
+      "acceptedSourceCount": 2,
+      "rejectedSourceCount": 3,
+      "rejectedEntryCount": 15,
       "sources": [
         {
           "sourceType": "comment",
@@ -7867,6 +7480,7 @@
           "artistCount": 28,
           "topicCount": 0,
           "structuralCount": 30,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:10:22 境界線",
             "0:15:45 痛覚",
@@ -7886,10 +7500,11 @@
           "sourceType": "comment",
           "reason": "topic_heavy_low_artist_source",
           "originalCount": 29,
-          "keptCount": 16,
+          "keptCount": 15,
           "artistCount": 0,
-          "topicCount": 8,
+          "topicCount": 9,
           "structuralCount": 29,
+          "sentenceLikeCount": 6,
           "sample": [
             "0:32:39 弾き語りの楽しいところ",
             "0:49:56 アチアチですわ",
@@ -7900,10 +7515,10 @@
             "2:10:30 A CHI CHI A CHI♪、終わったらお酒飲む、耐久で歌うアニソンなくなる",
             "2:18:04 69700人Thx、BUMPツアーで入れてほしいセトリたち"
           ],
-          "rejectedEntryCount": 13,
+          "rejectedEntryCount": 14,
           "rejectedEntryReasons": {
             "title_only_non_song_candidate": 6,
-            "likely_non_song_entry": 6,
+            "likely_non_song_entry": 7,
             "obvious_non_song_text": 1
           },
           "rejectedSamples": [
@@ -8043,6 +7658,13 @@
               "line": "02:44:43 25-26. 高評価1200Thx、7万人耐久をいつするか、今日220人増えてる"
             },
             {
+              "reason": "likely_non_song_entry",
+              "time": "3:17:10",
+              "title": "30曲歌った、スパチャお礼、明日19時から7万人耐久",
+              "artist": "未記載",
+              "line": "03:17:10 30曲歌った、スパチャお礼、明日19時から7万人耐久"
+            },
+            {
               "reason": "title_only_non_song_candidate",
               "time": "3:26:41",
               "title": "エンディングトーク",
@@ -8060,14 +7682,34 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "2:34:40 strawberryフルで聴きたい…"
+          ],
+          "rejectedEntryCount": 0,
+          "rejectedEntryReasons": {},
+          "rejectedSamples": [],
+          "rejectedEntries": []
+        },
+        {
+          "sourceType": "comment",
+          "reason": "",
+          "originalCount": 3,
+          "keptCount": 3,
+          "artistCount": 0,
+          "topicCount": 0,
+          "structuralCount": 3,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:40:35 今強さが欲しい",
+            "1:25:47 あおいあおい",
+            "2:15:05 永久リピート"
           ],
           "rejectedEntryCount": 0,
           "rejectedEntryReasons": {},
@@ -8082,6 +7724,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -8105,24 +7748,6 @@
               "line": "43:35「ダイアモンド クレバス」と「狂乱 Hey Kids!!」が特に特に好きでした！"
             }
           ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 3,
-          "keptCount": 3,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 3,
-          "sample": [
-            "0:40:35 今強さが欲しい",
-            "1:25:47 あおいあおい",
-            "2:15:05 永久リピート"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
         }
       ]
     },
@@ -8138,7 +7763,7 @@
       "selectedSongCount": 17,
       "acceptedSourceCount": 2,
       "rejectedSourceCount": 2,
-      "rejectedEntryCount": 17,
+      "rejectedEntryCount": 18,
       "sources": [
         {
           "sourceType": "comment",
@@ -8148,6 +7773,7 @@
           "artistCount": 17,
           "topicCount": 0,
           "structuralCount": 17,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:05:07 おしゃかしゃま",
             "0:08:51 Believe",
@@ -8167,10 +7793,11 @@
           "sourceType": "comment",
           "reason": "topic_heavy_low_artist_source",
           "originalCount": 34,
-          "keptCount": 18,
+          "keptCount": 17,
           "artistCount": 4,
-          "topicCount": 12,
+          "topicCount": 13,
           "structuralCount": 34,
+          "sentenceLikeCount": 3,
           "sample": [
             "0:08:37 ノンストップでいく",
             "0:17:08 あと67人",
@@ -8181,9 +7808,9 @@
             "1:00:52 13曲目演奏中に猫:chillwcat:発生で巻き戻し",
             "1:12:33 マックスハイテンション！"
           ],
-          "rejectedEntryCount": 16,
+          "rejectedEntryCount": 17,
           "rejectedEntryReasons": {
-            "likely_non_song_entry": 6,
+            "likely_non_song_entry": 7,
             "bad_title": 1,
             "title_only_non_song_candidate": 7,
             "activity_title": 1,
@@ -8333,6 +7960,13 @@
               "line": "01:24:20 全然お水呑んでなかった⇒写真撮るわ(シャッター音)"
             },
             {
+              "reason": "likely_non_song_entry",
+              "time": "1:25:49",
+              "title": "明日スパチャお礼のサンキューカード投稿する、ギター弾きすぎた",
+              "artist": "未記載",
+              "line": "01:25:49 明日スパチャお礼のサンキューカード投稿する、ギター弾きすぎた"
+            },
+            {
               "reason": "title_only_non_song_candidate",
               "time": "1:28:27",
               "title": "明日注文するピザを日記投稿する、みんなで乾杯しよう、ドミノピザの案件配信ではない",
@@ -8370,6 +8004,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 0,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -8402,6 +8037,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 2,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:46:14 chillwcat",
             "1:00:56 巻き戻し"
@@ -8435,6 +8071,7 @@
           "artistCount": 0,
           "topicCount": 1,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -8467,6 +8104,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 0,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -8499,6 +8137,7 @@
           "artistCount": 9,
           "topicCount": 0,
           "structuralCount": 15,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:09:45 Sweet Sugar (Sugar.U) - Original Song",
             "0:31:16 I Want It That Way (Backstreet Boys)",
@@ -8544,8 +8183,8 @@
       "commentCandidateCount": 19,
       "result": "selected",
       "selectedSongCount": 33,
-      "acceptedSourceCount": 2,
-      "rejectedSourceCount": 1,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 2,
       "rejectedEntryCount": 21,
       "sources": [
         {
@@ -8556,6 +8195,7 @@
           "artistCount": 33,
           "topicCount": 0,
           "structuralCount": 33,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:10:34 有心論",
             "0:18:07 鱗",
@@ -8579,6 +8219,7 @@
           "artistCount": 2,
           "topicCount": 15,
           "structuralCount": 38,
+          "sentenceLikeCount": 4,
           "sample": [
             "0:06:34 デビュー1年まで3週間",
             "0:23:50 「弾き語りってええよな」",
@@ -8805,12 +8446,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 1,
           "sample": [
             "0:49:33 「憂、燦々」、サビに入るところがめちゃくちゃかっこよかったです！"
           ],
@@ -8829,20 +8471,21 @@
       "publishedText": "3 週間前 に配信済み",
       "durationText": "1:47:00",
       "commentCandidateCount": 13,
-      "result": "selected",
-      "selectedSongCount": 1,
-      "acceptedSourceCount": 1,
-      "rejectedSourceCount": 0,
+      "result": "no_usable_song_source",
+      "selectedSongCount": 0,
+      "acceptedSourceCount": 0,
+      "rejectedSourceCount": 1,
       "rejectedEntryCount": 0,
       "sources": [
         {
           "sourceType": "description",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 1,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:04:00 03/07/2026"
           ],
@@ -8875,6 +8518,7 @@
           "artistCount": 9,
           "topicCount": 0,
           "structuralCount": 10,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:06:01 ルージュの伝言",
             "0:14:07 香水",
@@ -8914,6 +8558,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 10,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:08:12 ブラック★ロックシューター",
             "0:13:48 ブリキノダンス",
@@ -8937,6 +8582,7 @@
           "artistCount": 12,
           "topicCount": 8,
           "structuralCount": 40,
+          "sentenceLikeCount": 8,
           "sample": [
             "0:01:31 ころさん",
             "0:01:38 恥ずかしい",
@@ -9108,6 +8754,7 @@
           "artistCount": 0,
           "topicCount": 1,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -9140,6 +8787,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 12,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:02:38 全員 ピースサイン",
             "0:09:30 しとど晴天大迷惑",
@@ -9163,6 +8811,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 12,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:02:39 ピースサイン",
             "0:09:36 しとど晴天大迷惑",
@@ -9186,6 +8835,7 @@
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [],
           "rejectedEntryCount": 1,
           "rejectedEntryReasons": {
@@ -9222,58 +8872,19 @@
       "commentCandidateCount": 20,
       "result": "selected",
       "selectedSongCount": 7,
-      "acceptedSourceCount": 6,
-      "rejectedSourceCount": 0,
+      "acceptedSourceCount": 2,
+      "rejectedSourceCount": 3,
       "rejectedEntryCount": 4,
       "sources": [
         {
           "sourceType": "comment",
-          "reason": "",
-          "originalCount": 8,
-          "keptCount": 7,
-          "artistCount": 7,
-          "topicCount": 1,
-          "structuralCount": 8,
-          "sample": [
-            "0:07:12 才能が無いから何だ",
-            "0:12:24 rain stops, good-bye",
-            "0:20:48 アムリタ",
-            "0:28:40 366日",
-            "0:41:49 青いベンチ",
-            "0:44:00 宿命",
-            "1:01:03 小さきもの"
-          ],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "obvious_non_song_text": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:01:17",
-              "title": "声入り",
-              "artist": "",
-              "line": "01:17 声入り"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "obvious_non_song_text",
-              "time": "0:01:17",
-              "title": "声入り",
-              "artist": "",
-              "line": "01:17 声入り"
-            }
-          ]
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 3,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 3,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:06:15 届かなくていい、言うな、勝手に歌ってるんだから！"
           ],
@@ -9316,12 +8927,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:33:57 これ出るのやばくないか"
           ],
@@ -9333,11 +8945,86 @@
         {
           "sourceType": "comment",
           "reason": "",
+          "originalCount": 8,
+          "keptCount": 7,
+          "artistCount": 7,
+          "topicCount": 1,
+          "structuralCount": 8,
+          "sentenceLikeCount": 0,
+          "sample": [
+            "0:07:12 才能が無いから何だ",
+            "0:12:24 rain stops, good-bye",
+            "0:20:48 アムリタ",
+            "0:28:40 366日",
+            "0:41:49 青いベンチ",
+            "0:44:00 宿命",
+            "1:01:03 小さきもの"
+          ],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "obvious_non_song_text": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "obvious_non_song_text",
+              "time": "0:01:17",
+              "title": "声入り",
+              "artist": "",
+              "line": "01:17 声入り"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "obvious_non_song_text",
+              "time": "0:01:17",
+              "title": "声入り",
+              "artist": "",
+              "line": "01:17 声入り"
+            }
+          ]
+        },
+        {
+          "sourceType": "comment",
+          "reason": "no_song_after_filter",
+          "originalCount": 1,
+          "keptCount": 0,
+          "artistCount": 0,
+          "topicCount": 0,
+          "structuralCount": 1,
+          "sentenceLikeCount": 0,
+          "sample": [],
+          "rejectedEntryCount": 1,
+          "rejectedEntryReasons": {
+            "title_only_non_song_candidate": 1
+          },
+          "rejectedSamples": [
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "0:12:24",
+              "title": "rain stops,good-byeすごく好き…",
+              "artist": "未記載",
+              "line": "12:24 rain stops,good-byeすごく好き…"
+            }
+          ],
+          "rejectedEntries": [
+            {
+              "reason": "title_only_non_song_candidate",
+              "time": "0:12:24",
+              "title": "rain stops,good-byeすごく好き…",
+              "artist": "未記載",
+              "line": "12:24 rain stops,good-byeすごく好き…"
+            }
+          ]
+        },
+        {
+          "sourceType": "comment",
+          "reason": "",
           "originalCount": 7,
           "keptCount": 7,
           "artistCount": 7,
           "topicCount": 0,
           "structuralCount": 7,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:07:12 sainou ga naikara nanda",
             "0:12:24 rain stops, good - bye",
@@ -9351,56 +9038,6 @@
           "rejectedEntryReasons": {},
           "rejectedSamples": [],
           "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 1,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 0,
-          "structuralCount": 1,
-          "sample": [
-            "1:08:52 最後"
-          ],
-          "rejectedEntryCount": 0,
-          "rejectedEntryReasons": {},
-          "rejectedSamples": [],
-          "rejectedEntries": []
-        },
-        {
-          "sourceType": "comment",
-          "reason": "",
-          "originalCount": 2,
-          "keptCount": 1,
-          "artistCount": 0,
-          "topicCount": 1,
-          "structuralCount": 2,
-          "sample": [
-            "1:04:29 ピック吹き飛んだ瞬間"
-          ],
-          "rejectedEntryCount": 1,
-          "rejectedEntryReasons": {
-            "likely_non_song_entry": 1
-          },
-          "rejectedSamples": [
-            {
-              "reason": "likely_non_song_entry",
-              "time": "1:04:46",
-              "title": "予備ピック登場",
-              "artist": "未記載",
-              "line": "1:04:46 予備ピック登場"
-            }
-          ],
-          "rejectedEntries": [
-            {
-              "reason": "likely_non_song_entry",
-              "time": "1:04:46",
-              "title": "予備ピック登場",
-              "artist": "未記載",
-              "line": "1:04:46 予備ピック登場"
-            }
-          ]
         }
       ]
     },
@@ -9414,8 +9051,8 @@
       "commentCandidateCount": 27,
       "result": "selected",
       "selectedSongCount": 11,
-      "acceptedSourceCount": 3,
-      "rejectedSourceCount": 0,
+      "acceptedSourceCount": 1,
+      "rejectedSourceCount": 2,
       "rejectedEntryCount": 2,
       "sources": [
         {
@@ -9426,6 +9063,7 @@
           "artistCount": 9,
           "topicCount": 2,
           "structuralCount": 13,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:04:57 カントリーロード",
             "0:12:22 悲しみの向こうへ",
@@ -9476,12 +9114,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 0,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:48:42 魂の叫び"
           ],
@@ -9492,12 +9131,13 @@
         },
         {
           "sourceType": "comment",
-          "reason": "",
+          "reason": "too_few_timestamp_songs",
           "originalCount": 1,
           "keptCount": 1,
           "artistCount": 1,
           "topicCount": 0,
           "structuralCount": 1,
+          "sentenceLikeCount": 0,
           "sample": [
             "0:47:53 カワボ"
           ],
