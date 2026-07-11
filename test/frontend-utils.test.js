@@ -333,7 +333,7 @@ test("song-search lookup annotates and filters niche songs", () => {
       "72h": {
         items: [
           video("A", "video A", "channel A", [
-            song("known song", "other artist"),
+            song("known song", "other artist", { isNiche: true }),
             song("exact song", "exact artist"),
             song("rare song", "rare artist"),
           ]),
@@ -358,6 +358,40 @@ test("song-search lookup annotates and filters niche songs", () => {
       true,
     ).map(({ song }) => song.title),
     ["rare song"],
+  );
+});
+
+test("song-search lookup tolerates list markers and artist text leaked into titles", () => {
+  const lookup = createSongSearchLookup({
+    titleKeys: [normalizeSongSearchText("少女レイ"), normalizeSongSearchText("鬼ノ宴")],
+    titleArtistKeys: [
+      normalizeSongSearchText("少女レイ") + "::" + normalizeSongSearchText("みきとP"),
+      normalizeSongSearchText("鬼ノ宴") + "::" + normalizeSongSearchText("友成空"),
+    ],
+  });
+
+  assert.equal(isSongSearchKnown(song("少女レイ\tみきとP", "未記載"), lookup), true);
+  assert.equal(isSongSearchKnown(song("⑪少女レイ", "みきとP"), lookup), true);
+  assert.equal(isSongSearchKnown(song("「鬼ノ宴」友成空", "未記載"), lookup), true);
+  assert.equal(isSongSearchKnown(song("unknown song\tみきとP", "未記載"), lookup), false);
+
+  const payload = {
+    groups: {
+      "72h": {
+        items: [
+          video("A", "video A", "channel A", [
+            song("「鬼ノ宴」友成空", "未記載", { isNiche: true }),
+            song("unknown song\tみきとP", "未記載", { isNiche: false }),
+          ]),
+        ],
+      },
+    },
+  };
+  const annotated = annotatePayloadWithNiche(payload, lookup);
+
+  assert.deepEqual(
+    annotated.groups["72h"].items[0].songs.map((item) => item.isNiche),
+    [false, true],
   );
 });
 

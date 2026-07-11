@@ -1,4 +1,8 @@
-const { normalizeSongSearchText } = require("../assets/frontend-utils");
+const {
+  createSongSearchLookup,
+  isSongSearchKnown,
+  normalizeSongSearchText,
+} = require("../assets/frontend-utils");
 
 const SOURCE_REPOSITORY = "Marica7731/song-search";
 const SOURCE_BRANCH = "main";
@@ -183,7 +187,7 @@ function buildSongSearchIndex(entries, options = {}) {
 }
 
 function annotatePayloadWithSongSearchNiche(payload, index) {
-  const lookup = buildLookup(index);
+  const lookup = createSongSearchLookup(index);
   if (!payload || !lookup.available) return payload;
   return {
     ...payload,
@@ -207,22 +211,7 @@ function annotateGroupWithSongSearchNiche(group, lookup) {
 }
 
 function isKnownSong(song, lookup) {
-  const titleKey = normalizeSongSearchText(song?.title);
-  if (!titleKey) return false;
-  const artistKey = normalizeSongSearchText(song?.artist);
-  const titleArtistKey = artistKey && !isUnknownArtistKey(artistKey) ? `${titleKey}::${artistKey}` : "";
-  if (titleArtistKey && lookup.titleArtistKeys.has(titleArtistKey)) return true;
-  return lookup.titleKeys.has(titleKey);
-}
-
-function buildLookup(index) {
-  const titleKeys = new Set(Array.isArray(index?.titleKeys) ? index.titleKeys : []);
-  const titleArtistKeys = new Set(Array.isArray(index?.titleArtistKeys) ? index.titleArtistKeys : []);
-  return {
-    available: Boolean(titleKeys.size || titleArtistKeys.size),
-    titleKeys,
-    titleArtistKeys,
-  };
+  return isSongSearchKnown(song, lookup);
 }
 
 function isSongSearchIndexAvailable(index) {

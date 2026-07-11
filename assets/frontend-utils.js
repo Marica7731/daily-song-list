@@ -243,10 +243,12 @@
   function createSongSearchLookup(index) {
     const titleKeys = new Set(Array.isArray(index?.titleKeys) ? index.titleKeys : []);
     const titleArtistKeys = new Set(Array.isArray(index?.titleArtistKeys) ? index.titleArtistKeys : []);
+    const combinedTitleArtistKeys = createCombinedTitleArtistKeys(titleArtistKeys);
     return {
       available: Boolean(titleKeys.size || titleArtistKeys.size),
       titleKeys,
       titleArtistKeys,
+      combinedTitleArtistKeys,
       generatedAt: index?.generatedAt || "",
       source: index?.source || null,
     };
@@ -302,10 +304,16 @@
 
   function isSongSearchKnown(song, lookup) {
     if (!lookup?.available) return false;
-    const keys = songSearchKeys(song);
-    if (!keys.titleKey) return false;
-    if (keys.titleArtistKey && lookup.titleArtistKeys.has(keys.titleArtistKey)) return true;
-    return lookup.titleKeys.has(keys.titleKey);
+    const keys = songSearchKeyCandidates(song);
+    if (!keys.titleKeys.size) return false;
+    for (const titleArtistKey of keys.titleArtistKeys) {
+      if (lookup.titleArtistKeys.has(titleArtistKey)) return true;
+    }
+    for (const titleKey of keys.titleKeys) {
+      if (lookup.titleKeys.has(titleKey)) return true;
+      if (lookup.combinedTitleArtistKeys?.has(titleKey)) return true;
+    }
+    return false;
   }
 
   function songSearchKeys(song) {
@@ -316,6 +324,84 @@
       artistKey,
       titleArtistKey: titleKey && artistKey && !isUnknownArtistKey(artistKey) ? `${titleKey}::${artistKey}` : "",
     };
+  }
+
+  function songSearchKeyCandidates(song) {
+    const artistKey = normalizeSongSearchText(song?.artist);
+    const titleKeys = new Set();
+    const titleArtistKeys = new Set();
+    for (const titleText of songSearchTitleTextCandidates(song?.title)) {
+      const titleKey = normalizeSongSearchText(titleText);
+      if (!titleKey) continue;
+      titleKeys.add(titleKey);
+      if (artistKey && !isUnknownArtistKey(artistKey)) titleArtistKeys.add(`${titleKey}::${artistKey}`);
+    }
+    for (const pair of songSearchTitleArtistTextCandidates(song?.title)) {
+      const titleKey = normalizeSongSearchText(pair.title);
+      const inferredArtistKey = normalizeSongSearchText(pair.artist);
+      if (!titleKey) continue;
+      titleKeys.add(titleKey);
+      if (inferredArtistKey && !isUnknownArtistKey(inferredArtistKey)) {
+        titleArtistKeys.add(`${titleKey}::${inferredArtistKey}`);
+      }
+    }
+    return { titleKeys, titleArtistKeys };
+  }
+
+  function songSearchTitleTextCandidates(value) {
+    const text = cleanSongSearchCandidateText(value);
+    const candidates = [text, stripLeadingSongListMarker(text)];
+    for (const pair of songSearchTitleArtistTextCandidates(text)) {
+      candidates.push(pair.title, stripLeadingSongListMarker(pair.title));
+    }
+    return uniqueCleanValues(candidates);
+  }
+
+  function songSearchTitleArtistTextCandidates(value) {
+    const rawText = String(value ?? "").trim();
+    const normalizedSpaceText = cleanSongSearchCandidateText(rawText);
+    const pairs = [];
+    if (rawText.includes("\t")) {
+      const [title, ...artistParts] = rawText.split(/\t+/u);
+      pairs.push({ title, artist: artistParts.join(" ") });
+    }
+    const quotedMatch = normalizedSpaceText.match(/^(?:[「『｢【\["'“‘])\s*(.+?)\s*(?:[」』｣】\]"'”’])\s*(.+)$/u);
+    if (quotedMatch) pairs.push({ title: quotedMatch[1], artist: quotedMatch[2] });
+    return pairs
+      .map((pair) => ({
+        title: cleanSongSearchCandidateText(stripLeadingSongListMarker(pair.title)),
+        artist: cleanSongSearchCandidateText(pair.artist),
+      }))
+      .filter((pair) => pair.title && pair.artist);
+  }
+
+  function cleanSongSearchCandidateText(value) {
+    return String(value ?? "").replace(/\s+/g, " ").trim();
+  }
+
+  function stripLeadingSongListMarker(value) {
+    return cleanSongSearchCandidateText(value).replace(
+      /^(?:[#＃]?\s*[0-9０-９]+[\s.)\]）．、。:：|｜\-_/／]+|[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*)/u,
+      "",
+    );
+  }
+
+  function createCombinedTitleArtistKeys(titleArtistKeys) {
+    const combined = new Set();
+    for (const key of titleArtistKeys || []) {
+      const separatorIndex = String(key).indexOf("::");
+      if (separatorIndex <= 0) continue;
+      const titleKey = String(key).slice(0, separatorIndex);
+      const artistKey = String(key).slice(separatorIndex + 2);
+      if (!titleKey || !artistKey) continue;
+      combined.add(`${titleKey}${artistKey}`);
+      combined.add(`${artistKey}${titleKey}`);
+    }
+    return combined;
+  }
+
+  function uniqueCleanValues(values) {
+    return [...new Set((values || []).map(cleanSongSearchCandidateText).filter(Boolean))];
   }
 
   function normalizeSongSearchText(value) {

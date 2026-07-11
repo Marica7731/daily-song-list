@@ -86,6 +86,43 @@ test("annotates payload songs as niche when they are absent from song-search", (
   );
 });
 
+test("annotates noisy title matches as known song-search entries", () => {
+  const index = buildSongSearchIndex(
+    [
+      { title: "少女レイ", artist: "みきとP" },
+      { title: "鬼ノ宴", artist: "友成空" },
+    ],
+    {
+      generatedAt: "2026-07-11T00:00:00.000Z",
+      files: ["known.js"],
+    },
+  );
+  const payload = {
+    groups: {
+      "72h": {
+        items: [
+          {
+            videoId: "BBBBBBBBBBB",
+            songs: [
+              { title: "少女レイ\tみきとP", artist: "未記載", seconds: 1, time: "0:00:01" },
+              { title: "⑪少女レイ", artist: "みきとP", seconds: 2, time: "0:00:02" },
+              { title: "「鬼ノ宴」友成空", artist: "未記載", seconds: 3, time: "0:00:03" },
+              { title: "unknown song\tみきとP", artist: "未記載", seconds: 4, time: "0:00:04" },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const annotated = annotatePayloadWithSongSearchNiche(payload, index);
+
+  assert.deepEqual(
+    annotated.groups["72h"].items[0].songs.map((song) => song.isNiche),
+    [false, false, false, true],
+  );
+});
+
 test("fetches manifest files with fallback and skips missing files", async () => {
   const fetchImpl = async (url) => {
     if (url.endsWith("/data/index.json")) {

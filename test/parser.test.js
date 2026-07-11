@@ -214,6 +214,43 @@ test("does not reject song titles that contain farewell text", () => {
   assert.equal(songs[0].artist, "ずっと真夜中でいいのに。");
 });
 
+test("rejects short chat reaction timestamps after a real set list", () => {
+  const songs = parseTimestampSongs([
+    [
+      "Set List",
+      "17:45 タッチ",
+      "21:38 さよならエレジー",
+      "27:16 ラムのラブソング",
+      "36:08 Rolling star",
+      "39:52 V.I.P",
+      "50:32 LUVORATORRRRRY!",
+      "56:40 BOYS&GIRLS",
+      "1:44:21 READY STEADY GOhey",
+      "1:48:30 ブルーバード",
+      "2:25:39 lulu.",
+      "---------------------",
+      "29:45 DQ",
+      "39:15 DEN Q~~~",
+      "1:00:46 DQ~~~clap",
+      "1:10:24 DQ~~~~",
+      "1:10:42 天Q~",
+      "1:48:09 DEN Q",
+      "1:52:18 bless you🙏",
+      "1:53:41 pat",
+      "2:04:04 pienface",
+      "2:32:33 ZOOM IN",
+      "2:34:17 MUMUMU",
+      "2:35:16 WAAAA~",
+      "2:36:00 smile",
+    ].join("\n"),
+  ]);
+  const titles = songs.map((song) => song.title);
+
+  assert.equal(titles.includes("タッチ"), true);
+  assert.equal(titles.includes("lulu"), true);
+  assert.equal(titles.some((title) => /^(?:DQ|DEN Q|天Q|ZOOM IN|MUMUMU|WAAAA|smile)/iu.test(title)), false);
+});
+
 test("rejects tree child notes and channel metrics", () => {
   const songs = parseTimestampSongs([
     [

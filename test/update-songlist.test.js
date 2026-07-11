@@ -136,9 +136,12 @@ test("fetched videos win over carried videos while preserving month membership",
 test("Taiwan VTuber blacklist matches named channels without relying on song title text", () => {
   assert.equal(TAIWAN_VTUBER_BLACKLIST.some((entry) => entry.name === "羽芝扉扉"), true);
   assert.equal(TAIWAN_VTUBER_BLACKLIST.some((entry) => entry.name === "厄倫蒂兒"), true);
+  assert.equal(TAIWAN_VTUBER_BLACKLIST.some((entry) => entry.name === "綽貓喵"), true);
   assert.equal(isBlockedSource({ channelName: "羽芝扉扉Uchi Fifi", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelName: "Earendel ch. 厄倫蒂兒", title: "Karaoke" }), true);
+  assert.equal(isBlockedSource({ channelName: "CheukCat Ch. 綽貓喵", title: "歌雜 / HKVtuber" }), true);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "厄倫蒂兒 cover setlist" }), false);
+  assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "奔跑日記！ / 米亞 MYA" }), false);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "#厄倫蒂兒 clip" }), true);
 });
 

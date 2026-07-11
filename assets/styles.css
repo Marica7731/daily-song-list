@@ -525,14 +525,14 @@ input::placeholder {
 
 .source-preview-list {
   display: inline-flex;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   align-items: center;
   gap: 4px;
   max-width: min(430px, 42vw);
 }
 
 .source-preview-list .source-link-inline {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   max-width: 100%;
 }
 

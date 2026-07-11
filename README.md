@@ -16,7 +16,7 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
 2. It fetches each candidate watch page, extracts description and first comment continuations, parses timestamped song lists, and skips videos without usable songs.
    - Non-song chapter rows, chat highlights, setup sections, channel metrics, custom emoji prefixes, and low-quality mixed comment timelines are filtered before write.
    - Long title-only lists are kept only when they look like a real setlist, such as a clear `縛り`/setlist theme.
-   - A channel-first Taiwan VTuber source blacklist runs before inspection, during carry-forward, and before final merge. Maintain it in `TAIWAN_VTUBER_BLACKLIST` in `scripts/update-songlist.js`; add channel names and stable aliases first, and only add title aliases for exact hashtags or strong source markers.
+   - A channel-first Taiwan/HK VTuber source blacklist runs before inspection, during carry-forward, before final merge, and in the front-end as an in-memory safety filter for existing snapshots. Maintain it in `TAIWAN_VTUBER_BLACKLIST` in `assets/source-filter.js`; add channel names and stable aliases first, and only add title aliases for exact hashtags or strong source markers.
 3. It writes:
    - `data/latest.json`
    - `data/72h.json`

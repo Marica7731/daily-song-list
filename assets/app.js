@@ -493,8 +493,11 @@ function applySnapshotPayload(payload, path, options = {}) {
 }
 
 function preparePayload(payload) {
-  if (window.FrontendUtils.hasNicheAnnotations(payload) || !state.songSearchLookup.available) return payload;
-  return window.FrontendUtils.annotatePayloadWithNiche(payload, state.songSearchLookup);
+  const sourceFiltered = window.SourceFilter?.filterPayloadBlockedSources
+    ? window.SourceFilter.filterPayloadBlockedSources(payload)
+    : payload;
+  if (!state.songSearchLookup.available) return sourceFiltered;
+  return window.FrontendUtils.annotatePayloadWithNiche(sourceFiltered, state.songSearchLookup);
 }
 
 function syncNicheToggle() {
@@ -631,7 +634,7 @@ function renderVideoList(group, items) {
   ]);
 
   if (!items.length) {
-    renderEmpty(emptyMessage("这个范围还没有时间戳歌曲列表", "没有找到符合条件的视频", "没有找到曲库外歌曲视频"), {
+    renderEmpty(emptyMessage("这个范围还没有时间戳歌曲列表", "没有找到符合条件的视频", "没有找到小众歌曲视频"), {
       clearable: Boolean(state.filter),
     });
     return;
@@ -660,7 +663,7 @@ function renderSongRank(group, occurrences) {
   ]);
 
   if (!records.length) {
-    renderEmpty(emptyMessage("这个范围还没有歌曲", "没有找到符合条件的歌曲", "没有找到曲库外歌曲"), {
+    renderEmpty(emptyMessage("这个范围还没有歌曲", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
       clearable: Boolean(state.filter),
     });
     return;
@@ -703,7 +706,7 @@ function renderArtistRank(group, occurrences) {
   ], missingArtistCount ? `${missingArtistCount} 条待补歌手` : "");
 
   if (!records.length) {
-    renderEmpty(emptyMessage("这个范围还没有歌手资料", "没有找到符合条件的歌手", "没有找到曲库外歌曲歌手"), {
+    renderEmpty(emptyMessage("这个范围还没有歌手资料", "没有找到符合条件的歌手", "没有找到小众歌曲歌手"), {
       clearable: Boolean(state.filter),
     });
     return;
@@ -742,7 +745,7 @@ function renderSongIndexView(group, occurrences) {
   ]);
 
   if (!records.length) {
-    renderEmpty(emptyMessage("这个范围还没有歌曲索引", "没有找到符合条件的歌曲", "没有找到曲库外歌曲"), {
+    renderEmpty(emptyMessage("这个范围还没有歌曲索引", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
       clearable: Boolean(state.filter),
     });
     return;
@@ -812,7 +815,7 @@ function renderSummary(group, metrics, note = "") {
   if (state.nicheOnly) {
     const niche = document.createElement("span");
     niche.className = "summary-chip niche-summary";
-    niche.textContent = "曲库外歌曲";
+    niche.textContent = "小众歌曲";
     els.summary.append(niche);
   }
 
@@ -1129,7 +1132,7 @@ function songMeta(record) {
   return {
     primary: artists.length ? artists.slice(0, 2).map(formatCountEntry).join("、") : "待补歌手",
     missingPrimary: !artists.length,
-    badges: isNicheRecord(record) ? ["曲库外"] : [],
+    badges: isNicheRecord(record) ? ["小众"] : [],
   };
 }
 
@@ -1544,7 +1547,7 @@ function appendVideoSongLinks(list, item, songs, extraClass = "") {
     if (window.FrontendUtils.isNicheSong(song)) {
       const badge = document.createElement("span");
       badge.className = "song-badge niche-badge";
-      badge.textContent = "曲库外";
+      badge.textContent = "小众";
       link.append(" ", badge);
     }
 
