@@ -49,22 +49,38 @@ const REPLY_LIMIT = positiveInteger(process.env.DAILY_SONG_COMMENT_REPLY_LIMIT, 
 const SEARCH_CONTINUATION_ROUNDS = positiveInteger(process.env.DAILY_SONG_SEARCH_CONTINUATION_ROUNDS, 40);
 const FETCH_RETRIES = positiveInteger(process.env.DAILY_SONG_FETCH_RETRIES, 3);
 const SNAPSHOT_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_SNAPSHOT_RETENTION_DAYS, 35);
+const CARRY_FORWARD_MAX_AGE_HOURS = positiveInteger(process.env.DAILY_SONG_CARRY_FORWARD_MAX_AGE_HOURS, 36);
+const MONTH_REFRESH_LIMIT = positiveInteger(process.env.DAILY_SONG_MONTH_REFRESH_LIMIT, Math.max(20, Math.floor(VIDEO_LIMIT / 8)));
 const H72_MS = 72 * 60 * 60 * 1000;
+const H48_MS = 48 * 60 * 60 * 1000;
+const MONTH_CARRY_MS = 35 * 24 * 60 * 60 * 1000;
 
-main().catch((error) => {
-  console.error(`[update] ${error.stack || error.message}`);
-  markFailure(error).finally(() => process.exit(2));
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(`[update] ${error.stack || error.message}`);
+    markFailure(error).finally(() => process.exit(2));
+  });
+}
 
 async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
   const startedAt = new Date();
+  const previousPayload = readJsonIfExists(LATEST_PATH);
+  const previousAudit = readJsonIfExists(AUDIT_PATH);
+  const carryForward = collectCarryForwardVideos(previousPayload, previousAudit, startedAt);
   const { candidates, searchSummaries } = await collectCandidates(startedAt);
-  const inspectionCandidates = selectCandidatesForInspection(candidates, startedAt);
-  console.log(`[update] candidates=${candidates.length} inspect=${inspectionCandidates.length}`);
+  const selection = selectCandidatesForInspection(candidates, startedAt, {
+    carryForwardEnabled: carryForward.enabled,
+    excludeVideoIds: carryForward.skipVideoIds,
+  });
+  const inspectionCandidates = selection.items;
+  console.log(
+    `[update] candidates=${candidates.length} inspect=${inspectionCandidates.length} carry=${carryForward.videos.length} skippedKnown=${selection.skippedKnownCandidateCount} mode=${selection.mode}`,
+  );
 
-  const { inspected, videos, audits } = await inspectCandidates(inspectionCandidates);
+  const { inspected, videos: fetchedVideos, audits } = await inspectCandidates(inspectionCandidates);
+  const videos = mergeFetchedAndCarriedVideos(fetchedVideos, carryForward.videos);
 
   const capturedAt = new Date();
   const groups = applyGroupQualityFilters(buildGroups(videos, capturedAt));
@@ -83,11 +99,23 @@ async function main() {
       searchGroups: SEARCH_GROUPS,
       searches: searchSummaries,
       inspectedCount: inspected.length,
+      fetchedUsableVideoCount: fetchedVideos.length,
+      carriedVideoCount: carryForward.videos.length,
+      carried72hVideoCount: carryForward.counts.h72,
+      carriedMonthVideoCount: carryForward.counts.month,
+      carryForwardEnabled: carryForward.enabled,
+      carryForwardFrom: carryForward.from,
+      carryForwardAgeHours: carryForward.ageHours,
+      carryForwardReason: carryForward.reason,
+      knownVideoSkipCount: carryForward.skipVideoIds.size,
+      skippedKnownCandidateCount: selection.skippedKnownCandidateCount,
       usableVideoCount: videos.length,
       candidateCount: candidates.length,
       inspectionLimit: VIDEO_LIMIT,
       videoConcurrency: VIDEO_CONCURRENCY,
       recentBucketLimit: RECENT_BUCKET_LIMIT,
+      monthRefreshLimit: MONTH_REFRESH_LIMIT,
+      recentScanHorizonHours: selection.recentScanHorizonHours,
       auditPath: "data/audit.json",
       auditSummary: summarizeAudits(audits),
     },
@@ -106,6 +134,17 @@ async function main() {
     generatedAt: capturedAt.toISOString(),
     candidateCount: candidates.length,
     inspectedCount: inspected.length,
+    fetchedUsableVideoCount: fetchedVideos.length,
+    carriedVideoCount: carryForward.videos.length,
+    carryForward: {
+      enabled: carryForward.enabled,
+      from: carryForward.from,
+      ageHours: carryForward.ageHours,
+      reason: carryForward.reason,
+      counts: carryForward.counts,
+      knownVideoSkipCount: carryForward.skipVideoIds.size,
+      skippedKnownCandidateCount: selection.skippedKnownCandidateCount,
+    },
     usableVideoCount: videos.length,
     searches: searchSummaries,
     summary: payload.source.auditSummary,
@@ -244,37 +283,177 @@ function candidateSort(a, b) {
   return (b.sourceGroups?.length || 0) - (a.sourceGroups?.length || 0);
 }
 
-function selectCandidatesForInspection(candidates, now) {
+function collectCarryForwardVideos(previousPayload, previousAudit, now) {
   const nowMs = now.getTime();
+  const counts = { h72: 0, month: 0 };
+  const empty = (reason, from = "", ageHours = null) => ({
+    enabled: false,
+    reason,
+    from,
+    ageHours,
+    videos: [],
+    counts,
+    skipVideoIds: new Set(),
+  });
+
+  if (!previousPayload?.groups) return empty("no_previous_latest");
+  const from = previousPayload.generatedAt || previousPayload.capturedAt || "";
+  const previousMs = Date.parse(from);
+  if (!Number.isFinite(previousMs)) return empty("invalid_previous_timestamp", from);
+  const ageHours = roundNumber((nowMs - previousMs) / (60 * 60 * 1000), 2);
+  if (ageHours < 0) return empty("previous_timestamp_in_future", from, ageHours);
+  if (ageHours > CARRY_FORWARD_MAX_AGE_HOURS) return empty("previous_latest_too_old", from, ageHours);
+
+  const videos = new Map();
+  for (const item of previousPayload.groups["72h"]?.items || []) {
+    if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, H72_MS)) continue;
+    if (upsertCarriedVideo(videos, item, ["today"], from)) counts.h72 += 1;
+  }
+  for (const item of previousPayload.groups["1m"]?.items || []) {
+    if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS)) continue;
+    if (upsertCarriedVideo(videos, item, ["month"], from)) counts.month += 1;
+  }
+
+  if (!videos.size) return empty("no_carryable_previous_videos", from, ageHours);
+  const skipVideoIds = new Set(videos.keys());
+  addKnownAuditSkipIds(skipVideoIds, previousAudit);
+  return {
+    enabled: true,
+    reason: "previous_latest_fresh",
+    from,
+    ageHours,
+    videos: [...videos.values()],
+    counts,
+    skipVideoIds,
+  };
+}
+
+function upsertCarriedVideo(videos, item, sourceGroups, from) {
+  const carried = normalizeCarryForwardItem(item, sourceGroups, from);
+  if (!carried) return false;
+  const existing = videos.get(carried.videoId);
+  if (!existing) {
+    videos.set(carried.videoId, carried);
+    return true;
+  }
+  mergeVideoMetadata(existing, carried);
+  return true;
+}
+
+function normalizeCarryForwardItem(item, sourceGroups, from) {
+  if (!isValidVideoId(item?.videoId)) return null;
+  const songs = (item.songs || []).filter(isValidSong);
+  if (!songs.length) return null;
+  const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
+  const mergedSourceGroups = uniqueValues([...listValues(item.sourceGroups), item.sourceGroup, ...sourceGroups]);
+  return {
+    ...item,
+    songs,
+    publishedTimestamp,
+    sourceGroups: mergedSourceGroups,
+    carriedFromPrevious: true,
+    carriedFromSnapshot: from,
+  };
+}
+
+function addKnownAuditSkipIds(skipVideoIds, previousAudit) {
+  for (const audit of previousAudit?.videos || []) {
+    if (!isValidVideoId(audit.videoId) || audit.result === "fetch_error") continue;
+    skipVideoIds.add(audit.videoId);
+  }
+}
+
+function mergeFetchedAndCarriedVideos(fetchedVideos, carriedVideos) {
+  const byVideoId = new Map();
+  for (const video of fetchedVideos) {
+    if (!isValidVideoId(video.videoId)) continue;
+    byVideoId.set(video.videoId, video);
+  }
+  for (const carried of carriedVideos) {
+    const existing = byVideoId.get(carried.videoId);
+    if (existing) {
+      mergeVideoMetadata(existing, carried);
+      continue;
+    }
+    byVideoId.set(carried.videoId, carried);
+  }
+  return [...byVideoId.values()];
+}
+
+function mergeVideoMetadata(target, source) {
+  target.sourceGroups = uniqueValues([...listValues(target.sourceGroups), target.sourceGroup, ...listValues(source.sourceGroups), source.sourceGroup]);
+  target.sourceUrls = uniqueValues([...listValues(target.sourceUrls), ...listValues(source.sourceUrls)]);
+  target.keywords = uniqueValues([...listValues(target.keywords), ...listValues(source.keywords)]);
+  target.keywordKeys = uniqueValues([...listValues(target.keywordKeys), ...listValues(source.keywordKeys)]);
+  if (!target.publishedTimestamp && source.publishedTimestamp) target.publishedTimestamp = source.publishedTimestamp;
+  if (!target.thumbnailUrl && source.thumbnailUrl) target.thumbnailUrl = source.thumbnailUrl;
+  if (!target.durationText && source.durationText) target.durationText = source.durationText;
+}
+
+function selectCandidatesForInspection(candidates, now, options = {}) {
+  const nowMs = now.getTime();
+  const carryForwardEnabled = Boolean(options.carryForwardEnabled);
+  const excludeVideoIds = options.excludeVideoIds || new Set();
+  const recentScanHorizonMs = carryForwardEnabled ? H48_MS : H72_MS;
+  let skippedKnownCandidateCount = 0;
+  const availableCandidates = candidates.filter((item) => {
+    if (!excludeVideoIds.has(item.videoId)) return true;
+    skippedKnownCandidateCount += 1;
+    return false;
+  });
   const selected = [];
   const seen = new Set();
+  const bucketCounts = new Map();
   const add = (items, limit) => {
+    let addedFromThisCall = 0;
     for (const item of items) {
       if (selected.length >= VIDEO_LIMIT || seen.has(item.videoId)) continue;
-      if (limit != null && selected.filter((selectedItem) => selectedItem.__bucket === item.__bucket).length >= limit) continue;
+      if (limit != null && item.__bucket) {
+        const bucketCount = bucketCounts.get(item.__bucket) || 0;
+        if (bucketCount >= limit) continue;
+        bucketCounts.set(item.__bucket, bucketCount + 1);
+      } else if (limit != null && addedFromThisCall >= limit) {
+        continue;
+      }
       seen.add(item.videoId);
       selected.push(item);
+      addedFromThisCall += 1;
     }
   };
 
-  for (const bucket of recentBuckets(nowMs)) {
-    const bucketItems = candidates
+  for (const bucket of recentBuckets(nowMs, recentScanHorizonMs)) {
+    const bucketItems = availableCandidates
       .filter((item) => item.publishedTimestamp && item.publishedTimestamp >= bucket.from && item.publishedTimestamp < bucket.to)
       .map((item) => ({ ...item, __bucket: bucket.id }))
       .sort(candidateSort);
     add(bucketItems, RECENT_BUCKET_LIMIT);
   }
 
-  add(candidates, null);
-  return selected.map(({ __bucket, ...item }) => item);
+  const recentCandidates = availableCandidates
+    .filter((item) => item.publishedTimestamp && nowMs - item.publishedTimestamp >= 0 && nowMs - item.publishedTimestamp <= recentScanHorizonMs)
+    .sort(candidateSort);
+  add(recentCandidates, null);
+
+  const monthCandidates = availableCandidates.filter((item) => item.sourceGroups?.includes("month") || item.sourceGroup === "month").sort(candidateSort);
+  add(monthCandidates, carryForwardEnabled ? MONTH_REFRESH_LIMIT : null);
+  if (!carryForwardEnabled) add(availableCandidates, null);
+
+  return {
+    items: selected.map(({ __bucket, ...item }) => item),
+    mode: carryForwardEnabled ? "incremental_48h_with_carry_forward" : "full_72h_recovery",
+    recentScanHorizonHours: Math.round(recentScanHorizonMs / (60 * 60 * 1000)),
+    skippedKnownCandidateCount,
+  };
 }
 
-function recentBuckets(nowMs) {
-  return [
+function recentBuckets(nowMs, horizonMs = H72_MS) {
+  const cutoff = nowMs - horizonMs;
+  const buckets = [
     { id: "today", from: nowMs - 24 * 60 * 60 * 1000, to: nowMs + 1 },
     { id: "one_day_ago", from: nowMs - 48 * 60 * 60 * 1000, to: nowMs - 24 * 60 * 60 * 1000 },
     { id: "two_days_ago", from: nowMs - H72_MS, to: nowMs - 48 * 60 * 60 * 1000 },
   ];
+  return buckets.filter((bucket) => bucket.to > cutoff);
 }
 
 async function inspectCandidates(candidates) {
@@ -1019,6 +1198,47 @@ function isUsableArtist(artist) {
   return true;
 }
 
+function isValidVideoId(videoId) {
+  return /^[A-Za-z0-9_-]{11}$/.test(String(videoId || ""));
+}
+
+function isValidSong(song) {
+  return (
+    song &&
+    String(song.title || "").trim() &&
+    Number.isInteger(song.seconds) &&
+    song.seconds >= 0 &&
+    /^\d+:\d{2}:\d{2}$/.test(song.time || "")
+  );
+}
+
+function finiteTimestamp(value) {
+  const timestamp = Number(value);
+  return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null;
+}
+
+function isWithinAgeWindow(timestamp, nowMs, windowMs) {
+  const value = finiteTimestamp(timestamp);
+  if (!value) return false;
+  const ageMs = nowMs - value;
+  return ageMs >= 0 && ageMs <= windowMs;
+}
+
+function uniqueValues(values) {
+  return [...new Set((values || []).filter(Boolean))];
+}
+
+function listValues(value) {
+  if (Array.isArray(value)) return value;
+  return value ? [value] : [];
+}
+
+function roundNumber(value, digits = 2) {
+  if (!Number.isFinite(value)) return null;
+  const scale = 10 ** digits;
+  return Math.round(value * scale) / scale;
+}
+
 function sourceScore(source) {
   const stats = source.stats;
   return stats.keptCount + stats.artistCount * 4 + stats.structuralCount * 1.5 + (stats.hasSetlistKeyword ? 5 : 0) - stats.topicCount * 8;
@@ -1188,3 +1408,9 @@ function positiveInteger(value, fallback = 1) {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
+
+module.exports = {
+  collectCarryForwardVideos,
+  mergeFetchedAndCarriedVideos,
+  selectCandidatesForInspection,
+};

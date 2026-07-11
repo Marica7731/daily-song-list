@@ -7,7 +7,7 @@ const VIEWS = {
 
 const RANGE_LABELS = {
   "72h": "最近72小时",
-  "1m": "近30天",
+  "1m": "本月",
 };
 
 const KANA_BUCKETS = [
