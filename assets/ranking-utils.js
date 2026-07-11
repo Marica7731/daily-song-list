@@ -156,6 +156,20 @@
     return { records: Array.from(records.values()), missingArtistCount };
   }
 
+  function buildArtistSongGroups(occurrences, options = {}) {
+    const isNicheSong = typeof options.isNicheSong === "function" ? options.isNicheSong : defaultIsNicheSong;
+    const compare = typeof options.compareValues === "function" ? options.compareValues : compareValues;
+    return buildSongRecords(occurrences, options)
+      .sort((a, b) => b.count - a.count || compare(a.sortKey, b.sortKey) || compare(a.title, b.title))
+      .map((record) => ({
+        key: record.key,
+        title: record.title,
+        count: record.count,
+        isNiche: record.occurrences.some(({ song }) => isNicheSong(song)),
+        occurrences: record.occurrences,
+      }));
+  }
+
   function mergeKnownArtistVariants(titleGroup) {
     const recordsByKey = titleGroup.knownArtists;
     const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
@@ -216,6 +230,18 @@
 
   function compareRecordDominance(a, b) {
     return b.count - a.count || String(a.key).localeCompare(String(b.key));
+  }
+
+  function compareValues(a, b) {
+    return String(a || "").localeCompare(String(b || ""), "en", {
+      numeric: true,
+      sensitivity: "base",
+      ignorePunctuation: true,
+    });
+  }
+
+  function defaultIsNicheSong(song) {
+    return song?.isNiche === true || song?.niche === true;
   }
 
   function incrementTitleCount(map, title) {
@@ -398,6 +424,7 @@
 
   return {
     buildArtistRecords,
+    buildArtistSongGroups,
     buildCompetitionRanks,
     buildSongRecords,
     cleanText,

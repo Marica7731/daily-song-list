@@ -317,6 +317,19 @@ function bindEvents() {
       return;
     }
 
+    const pageSizeButton = event.target.closest("[data-page-size]");
+    if (pageSizeButton) {
+      const nextPageSize = Number.parseInt(pageSizeButton.dataset.pageSize || "", 10);
+      if (LIST_PAGE_SIZE_OPTIONS.includes(nextPageSize) && state.pageSize !== nextPageSize) {
+        state.pageSize = nextPageSize;
+        writeStoredPageSize(state.pageSize);
+        state.expandedRows.clear();
+        resetPagination();
+        render({ focusAfterPageChange: true });
+      }
+      return;
+    }
+
     const bucketButton = event.target.closest("[data-index-bucket]");
     if (bucketButton) {
       state.indexBucket = bucketButton.dataset.indexBucket || INDEX_ALL_BUCKET;
@@ -672,10 +685,11 @@ function renderSongRank(group, occurrences) {
   const pageInfo = pagedSlice(records);
   const fragment = document.createDocumentFragment();
   appendPagination(fragment, { pageInfo, unit: "首歌曲", variant: "top" });
-  fragment.append(renderRankHeader());
+  fragment.append(renderRankHeader("song"));
   for (const record of pageInfo.visible) {
     fragment.append(
       renderRankRecord({
+        mode: "song",
         key: `song-${record.key}`,
         rank: ranks.get(record.key),
         isTied: countFrequencies.get(record.count) > 1,
@@ -715,18 +729,21 @@ function renderArtistRank(group, occurrences) {
   const pageInfo = pagedSlice(records);
   const fragment = document.createDocumentFragment();
   appendPagination(fragment, { pageInfo, unit: "位歌手", variant: "top" });
-  fragment.append(renderRankHeader());
+  fragment.append(renderRankHeader("artist"));
   for (const record of pageInfo.visible) {
+    const songGroups = buildArtistSongGroups(record.occurrences);
     fragment.append(
       renderRankRecord({
+        mode: "artist",
         key: `artist-${record.key}`,
         rank: ranks.get(record.key),
         isTied: countFrequencies.get(record.count) > 1,
         title: record.name,
-        meta: artistMeta(record),
+        meta: artistMeta(record, songGroups),
         videoCount: uniqueVideoCount(record.occurrences),
         count: record.count,
         occurrences: record.occurrences,
+        songGroups,
       }),
     );
   }
@@ -855,13 +872,14 @@ function renderIndexBucketNav(buckets) {
 }
 
 function renderIndexBucketButton(label, bucket, isCurrent) {
+  const model = window.FrontendUtils.indexBucketButtonModel(label, bucket, isCurrent);
   const button = document.createElement("button");
-  button.className = isCurrent ? "index-bucket is-current" : "index-bucket";
-  button.type = "button";
-  button.dataset.indexBucket = bucket;
-  button.textContent = label;
-  button.setAttribute("aria-pressed", isCurrent ? "true" : "false");
-  if (isCurrent) button.setAttribute("aria-current", "page");
+  button.className = model.className;
+  button.type = model.type;
+  button.dataset.indexBucket = model.dataset.indexBucket;
+  button.textContent = model.text;
+  button.setAttribute("aria-pressed", model.ariaPressed);
+  if (model.ariaCurrent) button.setAttribute("aria-current", model.ariaCurrent);
   return button;
 }
 
@@ -871,7 +889,9 @@ function appendPagination(container, options) {
 }
 
 function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
-  if (pageInfo.total <= pageInfo.pageSize) return null;
+  const showPageControls = pageInfo.total > pageInfo.pageSize;
+  const showPageSizeControl = shouldShowPageSizeControl(pageInfo, variant);
+  if (!showPageControls && !showPageSizeControl) return null;
 
   const footer = document.createElement("div");
   footer.className = `pagination-row pagination-${variant}`;
@@ -881,10 +901,15 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
   note.textContent = `第 ${pageInfo.page} / ${pageInfo.pageCount} 页 · ${pageInfo.startIndex + 1}-${pageInfo.endIndex} / ${pageInfo.total} ${unit}`;
   footer.append(note);
 
+  if (showPageSizeControl) {
+    footer.append(renderPageSizeControl());
+  }
+
   const controls = document.createElement("div");
   controls.className = "pagination-controls";
 
   if (variant === "top") {
+    if (!showPageControls) return footer;
     controls.append(
       renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1),
       renderPageStatus(pageInfo),
@@ -895,25 +920,51 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
   }
 
   controls.append(
-    renderPageButton("首页", 1, pageInfo.page === 1),
-    renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1),
+    ...(showPageControls ? [renderPageButton("首页", 1, pageInfo.page === 1), renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1)] : []),
   );
 
-  for (const token of window.FrontendUtils.visiblePageTokens(pageInfo.page, pageInfo.pageCount)) {
-    if (token === "ellipsis") {
-      controls.append(renderPageEllipsis());
-    } else {
-      controls.append(renderPageButton(String(token), token, token === pageInfo.page, token === pageInfo.page));
+  if (showPageControls) {
+    for (const token of window.FrontendUtils.visiblePageTokens(pageInfo.page, pageInfo.pageCount)) {
+      if (token === "ellipsis") {
+        controls.append(renderPageEllipsis());
+      } else {
+        controls.append(renderPageButton(String(token), token, token === pageInfo.page, token === pageInfo.page));
+      }
     }
+
+    controls.append(
+      renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount),
+      renderPageButton("末页", pageInfo.pageCount, pageInfo.page === pageInfo.pageCount),
+    );
+    footer.append(controls);
   }
 
-  controls.append(
-    renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount),
-    renderPageButton("末页", pageInfo.pageCount, pageInfo.page === pageInfo.pageCount),
-  );
-  footer.append(controls);
-
   return footer;
+}
+
+function shouldShowPageSizeControl(pageInfo, variant) {
+  if (variant !== "bottom" || state.view === "videos") return false;
+  return pageInfo.total > Math.min(...LIST_PAGE_SIZE_OPTIONS);
+}
+
+function renderPageSizeControl() {
+  const group = document.createElement("div");
+  group.className = "page-size-control";
+  group.setAttribute("role", "group");
+  group.setAttribute("aria-label", "每页数量");
+
+  for (const option of LIST_PAGE_SIZE_OPTIONS) {
+    const button = document.createElement("button");
+    const current = state.pageSize === option;
+    button.className = current ? "page-size-button is-current" : "page-size-button";
+    button.type = "button";
+    button.dataset.pageSize = String(option);
+    button.setAttribute("aria-pressed", current ? "true" : "false");
+    button.textContent = `每页 ${option}`;
+    group.append(button);
+  }
+
+  return group;
 }
 
 function renderPageButton(label, page, disabled, isCurrent = false) {
@@ -1082,6 +1133,17 @@ function buildArtistRecords(occurrences) {
   });
 }
 
+function buildArtistSongGroups(occurrences) {
+  return window.RankingUtils.buildArtistSongGroups(occurrences, {
+    cleanText,
+    compareValues,
+    incrementCount,
+    isNicheSong: window.FrontendUtils.isNicheSong,
+    makeSongSortKey,
+    normalizeEntityKey,
+  });
+}
+
 function buildCompetitionRanks(records) {
   return window.RankingUtils.buildCompetitionRanks(records);
 }
@@ -1127,15 +1189,17 @@ function formatCountEntry(entry) {
   return entry.count > 1 ? `${entry.name} (${entry.count})` : entry.name;
 }
 
-function renderRankRecord({ key, rank, isTied, title, meta, videoCount, count, occurrences, isNiche = false }) {
+function renderRankRecord({ mode = "song", key, rank, isTied, title, meta, videoCount, count, occurrences, songGroups = [], isNiche = false }) {
   const row = document.createElement("article");
   const rowKey = makeDomId(key);
   const drawerId = `source-drawer-${rowKey}`;
-  const expandable = occurrences.length > 1;
+  const artistSongCount = songGroups.length;
+  const expandable = mode === "artist" ? artistSongCount > 1 || occurrences.length > 1 : occurrences.length > 1;
   const isExpanded = state.expandedRows.has(rowKey);
 
   row.className = [
     "rank-row",
+    `rank-row-${mode}`,
     expandable ? "is-expandable" : "",
     isExpanded ? "is-expanded" : "",
     isTied ? "is-tied" : "",
@@ -1145,7 +1209,9 @@ function renderRankRecord({ key, rank, isTied, title, meta, videoCount, count, o
     .filter(Boolean)
     .join(" ");
   row.dataset.rowKey = rowKey;
+  row.dataset.drawerMode = mode;
   row._sourceOccurrences = occurrences;
+  row._artistSongGroups = songGroups;
   if (isTied) row.title = "同收录次数共享名次";
 
   const rankNumber = document.createElement("div");
@@ -1154,9 +1220,9 @@ function renderRankRecord({ key, rank, isTied, title, meta, videoCount, count, o
   rankNumber.setAttribute("aria-label", `第 ${rank} 名`);
   row.append(rankNumber);
 
-  row.append(renderRecordContent(title, meta, { occurrences, drawerId, isExpanded, videoCount }));
+  row.append(renderRecordContent(title, meta, { mode, occurrences, songGroups, drawerId, isExpanded, videoCount }));
   row.append(renderCount(count));
-  if (expandable) row.append(renderSourceDrawer(occurrences, drawerId, isExpanded));
+  if (expandable) row.append(renderSourceDrawer({ mode, occurrences, songGroups, drawerId, isExpanded }));
 
   return row;
 }
@@ -1172,10 +1238,12 @@ function renderIndexRecord(record) {
     .filter(Boolean)
     .join(" ");
   row.dataset.rowKey = rowKey;
+  row.dataset.drawerMode = "index";
   row._sourceOccurrences = record.occurrences;
 
   row.append(
     renderRecordContent(record.title, songMeta(record), {
+      mode: "index",
       occurrences: record.occurrences,
       drawerId,
       isExpanded,
@@ -1184,16 +1252,17 @@ function renderIndexRecord(record) {
     }),
   );
   row.append(renderCount(record.count));
-  if (expandable) row.append(renderSourceDrawer(record.occurrences, drawerId, isExpanded));
+  if (expandable) row.append(renderSourceDrawer({ mode: "index", occurrences: record.occurrences, drawerId, isExpanded }));
 
   return row;
 }
 
-function renderRankHeader() {
+function renderRankHeader(mode = "song") {
   const header = document.createElement("div");
   header.className = "rank-header";
 
-  for (const label of ["排名", "歌曲与来源", "收录"]) {
+  const contentLabel = mode === "artist" ? "歌手与曲目" : "歌曲与来源";
+  for (const label of ["排名", contentLabel, "收录"]) {
     const item = document.createElement("span");
     item.textContent = label;
     header.append(item);
@@ -1203,7 +1272,7 @@ function renderRankHeader() {
 }
 
 function renderRecordContent(title, meta, options) {
-  const { occurrences, drawerId, isExpanded, videoCount, headingLevel = 2 } = options;
+  const { mode = "song", occurrences, songGroups = [], drawerId, isExpanded, videoCount, headingLevel = 2 } = options;
   const content = document.createElement("div");
   content.className = "rank-content";
 
@@ -1220,12 +1289,31 @@ function renderRecordContent(title, meta, options) {
 
   const subline = document.createElement("div");
   subline.className = "rank-subline";
-  appendSublinePart(subline, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
-  appendSublinePart(subline, `${videoCount} 个视频`, "subline-video-count");
-  appendSublineSource(subline, occurrences, drawerId, isExpanded);
+  if (mode === "artist") {
+    appendArtistSubline(subline, { occurrences, songGroups, drawerId, isExpanded, videoCount });
+  } else {
+    appendSublinePart(subline, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
+    appendSublinePart(subline, `${videoCount} 个视频`, "subline-video-count");
+    appendSublineSource(subline, { mode, occurrences, drawerId, isExpanded });
+  }
   content.append(subline);
 
   return content;
+}
+
+function appendArtistSubline(container, { occurrences, songGroups, drawerId, isExpanded, videoCount }) {
+  const songCount = songGroups.length;
+  appendSublinePart(container, `${songCount}首歌曲`, "subline-song-count");
+  appendSublinePart(container, songGroups.slice(0, 2).map((group) => group.title).join("、"), "subline-primary artist-song-preview");
+  if (songCount === 1 && occurrences.length === 1) {
+    appendSublineNode(container, renderInlineSource(occurrences[0]));
+  }
+  appendSublinePart(container, `${videoCount} 个视频`, "subline-video-count");
+
+  if (songCount > 1 || occurrences.length > 1) {
+    const button = renderSourceToggleButton({ mode: "artist", drawerId, isExpanded, songCount });
+    appendSublineNode(container, button);
+  }
 }
 
 function appendSublinePart(container, text, className = "") {
@@ -1249,13 +1337,13 @@ function renderCount(count) {
   return node;
 }
 
-function appendSublineSource(container, occurrences, drawerId, isExpanded) {
+function appendSublineSource(container, { mode, occurrences, drawerId, isExpanded }) {
   if (!occurrences.length) {
     appendSublinePart(container, "无来源");
     return;
   }
   if (occurrences.length === 1) {
-    appendSublineNode(container, renderInlineSourceLink(occurrences[0], { compact: true }));
+    appendSublineNode(container, renderInlineSource(occurrences[0]));
     return;
   }
 
@@ -1264,17 +1352,31 @@ function appendSublineSource(container, occurrences, drawerId, isExpanded) {
   });
   appendSublineNode(container, renderSourcePreviewLinks(sourcePreview.preview));
 
+  const button = renderSourceToggleButton({
+    mode,
+    drawerId,
+    isExpanded,
+    hiddenCount: sourcePreview.hiddenCount,
+    total: sourcePreview.total,
+  });
+  appendSublineNode(container, button);
+}
+
+function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0, total = 0, songCount = 0 }) {
+  const model = window.FrontendUtils.rankToggleModel({ mode, isExpanded, hiddenCount, total, songCount });
   const button = document.createElement("button");
   button.className = "rank-expand";
   button.type = "button";
   button.dataset.toggleSource = "true";
-  button.dataset.sourceTotal = String(sourcePreview.total);
-  button.dataset.sourceHiddenCount = String(sourcePreview.hiddenCount);
+  button.dataset.sourceMode = mode;
+  button.dataset.sourceTotal = String(total);
+  button.dataset.sourceHiddenCount = String(hiddenCount);
+  button.dataset.songCount = String(songCount);
   button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
   button.setAttribute("aria-controls", drawerId);
-  button.setAttribute("aria-label", sourceToggleAriaLabel(isExpanded, sourcePreview.total, sourcePreview.hiddenCount));
-  button.textContent = sourceToggleText(isExpanded, sourcePreview.hiddenCount);
-  appendSublineNode(container, button);
+  button.setAttribute("aria-label", model.ariaLabel);
+  button.textContent = model.text;
+  return button;
 }
 
 function renderSourcePreviewLinks(occurrences) {
@@ -1289,35 +1391,40 @@ function renderSourcePreviewLinks(occurrences) {
       separator.textContent = "/";
       preview.append(separator);
     }
-    preview.append(renderInlineSourceLink(occurrence, { compact: true }));
+    preview.append(renderInlineSource(occurrence));
   });
   return preview;
 }
 
-function renderInlineSourceLink(occurrence, options = {}) {
-  const label = options.compact ? sourceLabel(occurrence) : sourceLabel(occurrence);
-  const channelLink = youtubeChannelLink(occurrence.item);
-  const link = document.createElement("a");
-  link.className = "source-link-inline";
-  link.href = channelLink.href;
-  link.target = "_blank";
-  link.rel = "noreferrer";
-  link.textContent = label;
-  const channelName = occurrence.item.channelName || occurrence.item.title || occurrence.item.videoId || label;
-  link.title = channelLink.isFallbackSearch ? `搜索频道：${channelName}` : `打开频道：${channelName}`;
-  link.setAttribute("aria-label", link.title);
-  return link;
-}
+function renderInlineSource(occurrence) {
+  const model = window.FrontendUtils.buildInlineSourceModel(occurrence);
+  const wrapper = document.createElement("span");
+  wrapper.className = "inline-source";
 
-function sourceToggleText(isExpanded, hiddenCount) {
-  if (isExpanded) return "收起来源";
-  return hiddenCount > 0 ? `+${hiddenCount} 来源` : "来源详情";
-}
+  const time = document.createElement("a");
+  time.className = "inline-source-time";
+  time.href = model.time.href;
+  time.target = "_blank";
+  time.rel = "noreferrer";
+  time.textContent = model.time.text;
+  time.setAttribute("aria-label", model.time.ariaLabel);
 
-function sourceToggleAriaLabel(isExpanded, total, hiddenCount) {
-  if (isExpanded) return "收起来源";
-  if (hiddenCount > 0) return `查看全部 ${total} 个来源，另有 ${hiddenCount} 个未显示`;
-  return `查看 ${total} 个来源详情`;
+  const separator = document.createElement("span");
+  separator.className = "inline-source-separator";
+  separator.setAttribute("aria-hidden", "true");
+  separator.textContent = "·";
+
+  const channel = document.createElement("a");
+  channel.className = "inline-source-channel";
+  channel.href = model.channel.href;
+  channel.target = "_blank";
+  channel.rel = "noreferrer";
+  channel.textContent = model.channel.text;
+  channel.title = model.channel.ariaLabel;
+  channel.setAttribute("aria-label", model.channel.ariaLabel);
+
+  wrapper.append(time, separator, channel);
+  return wrapper;
 }
 
 function appendSublineNode(container, node) {
@@ -1330,18 +1437,27 @@ function appendSublineNode(container, node) {
   container.append(node);
 }
 
-function renderSourceDrawer(occurrences, drawerId, isExpanded) {
+function renderSourceDrawer({ mode, occurrences, songGroups = [], drawerId, isExpanded }) {
   const drawer = document.createElement("div");
-  drawer.className = "source-drawer";
+  drawer.className = mode === "artist" ? "source-drawer artist-song-drawer" : "source-drawer";
   drawer.id = drawerId;
+  drawer.dataset.sourceMode = mode;
   drawer.hidden = !isExpanded;
   if (!isExpanded) {
     drawer.dataset.sourceDeferred = "true";
     return drawer;
   }
 
-  appendSourceDrawerLinks(drawer, occurrences);
+  appendSourceDrawerContent(drawer, { mode, occurrences, songGroups });
   return drawer;
+}
+
+function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] }) {
+  if (mode === "artist") {
+    appendArtistSongGroups(drawer, songGroups);
+    return;
+  }
+  appendSourceDrawerLinks(drawer, occurrences);
 }
 
 function appendSourceDrawerLinks(drawer, occurrences) {
@@ -1369,6 +1485,45 @@ function appendSourceDrawerLinks(drawer, occurrences) {
   }
 }
 
+function appendArtistSongGroups(drawer, songGroups) {
+  for (const group of songGroups) {
+    const section = document.createElement("section");
+    section.className = "artist-song-group";
+
+    const header = document.createElement("div");
+    header.className = "artist-song-header";
+
+    const firstOccurrence = group.occurrences[0];
+    const title = document.createElement("a");
+    title.className = "artist-song-title";
+    title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
+    title.target = "_blank";
+    title.rel = "noreferrer";
+    title.textContent = group.title;
+    title.setAttribute("aria-label", `打开歌曲首次来源：${group.title}`);
+    header.append(title);
+
+    if (group.isNiche) {
+      const badge = document.createElement("span");
+      badge.className = "song-badge niche-badge";
+      badge.textContent = "小众";
+      header.append(badge);
+    }
+
+    const count = document.createElement("span");
+    count.className = "artist-song-count";
+    count.textContent = `${group.count}次`;
+    header.append(count);
+    section.append(header);
+
+    const sources = document.createElement("div");
+    sources.className = "artist-song-sources";
+    appendSourceDrawerLinks(sources, group.occurrences);
+    section.append(sources);
+    drawer.append(section);
+  }
+}
+
 function toggleSourceDrawer(row) {
   if (!row) return;
   const drawer = row.querySelector(".source-drawer");
@@ -1378,7 +1533,11 @@ function toggleSourceDrawer(row) {
   const nextExpanded = drawer.hidden;
   if (nextExpanded && drawer.dataset.sourceDeferred === "true") {
     drawer.replaceChildren();
-    appendSourceDrawerLinks(drawer, row._sourceOccurrences || []);
+    appendSourceDrawerContent(drawer, {
+      mode: row.dataset.drawerMode || drawer.dataset.sourceMode || "song",
+      occurrences: row._sourceOccurrences || [],
+      songGroups: row._artistSongGroups || [],
+    });
     delete drawer.dataset.sourceDeferred;
   }
   drawer.hidden = !nextExpanded;
@@ -1388,8 +1547,11 @@ function toggleSourceDrawer(row) {
     const count = row._sourceOccurrences?.length || 0;
     const total = Number(button.dataset.sourceTotal || count);
     const hiddenCount = Number(button.dataset.sourceHiddenCount || Math.max(0, count - INLINE_SOURCE_PREVIEW_LIMIT));
-    button.setAttribute("aria-label", sourceToggleAriaLabel(nextExpanded, total, hiddenCount));
-    button.textContent = sourceToggleText(nextExpanded, hiddenCount);
+    const songCount = Number(button.dataset.songCount || row._artistSongGroups?.length || 0);
+    const mode = button.dataset.sourceMode || row.dataset.drawerMode || "song";
+    const model = window.FrontendUtils.rankToggleModel({ mode, isExpanded: nextExpanded, total, hiddenCount, songCount });
+    button.setAttribute("aria-label", model.ariaLabel);
+    button.textContent = model.text;
   }
 
   if (nextExpanded) {
@@ -1635,56 +1797,6 @@ function snapshotOptionLabel(entry) {
   const h72 = Number.isFinite(Number(counts["72h"])) ? Number(counts["72h"]) : 0;
   const month = Number.isFinite(Number(counts["1m"])) ? Number(counts["1m"]) : 0;
   return `${time} · 72H ${h72} · 月度 ${month}`;
-}
-
-function sourceLabel({ item, song }) {
-  return [song.time || formatSeconds(song.seconds), item.channelName || item.title || item.videoId]
-    .filter(Boolean)
-    .join(" · ");
-}
-
-function compactSourceLabel({ item }) {
-  return item.channelName || item.title || item.videoId || "来源";
-}
-
-function youtubeChannelLink(item = {}) {
-  const channelHandle = cleanText(item.channelHandle);
-  const handleUrl = youtubeChannelHandleUrl(channelHandle);
-  if (handleUrl) {
-    return { href: handleUrl, isFallbackSearch: false };
-  }
-
-  const channelId = cleanText(item.channelId);
-  if (channelId) {
-    return {
-      href: `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`,
-      isFallbackSearch: false,
-    };
-  }
-
-  const channelName = cleanText(item.channelName);
-  if (channelName) {
-    return {
-      href: `https://www.youtube.com/results?search_query=${encodeURIComponent(channelName)}`,
-      isFallbackSearch: true,
-    };
-  }
-
-  return {
-    href: item.videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(item.videoId)}` : "https://www.youtube.com/",
-    isFallbackSearch: true,
-  };
-}
-
-function youtubeChannelHandleUrl(value) {
-  if (!value) return "";
-  if (/^https?:\/\/(www\.)?youtube\.com\//i.test(value)) return value;
-  if (value.startsWith("/")) return `https://www.youtube.com${value}`;
-  if (value.startsWith("@")) return `https://www.youtube.com/${value}`;
-  if (value.startsWith("channel/") || value.startsWith("c/") || value.startsWith("user/")) {
-    return `https://www.youtube.com/${value}`;
-  }
-  return "";
 }
 
 function formatRank(rank) {

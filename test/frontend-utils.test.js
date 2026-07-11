@@ -4,6 +4,7 @@ const test = require("node:test");
 const {
   annotatePayloadWithNiche,
   buildIndexBucketModel,
+  buildInlineSourceModel,
   buildSourcePreview,
   createSnapshotLoader,
   createSongSearchLookup,
@@ -12,12 +13,15 @@ const {
   filterOccurrencesBySearch,
   filterOccurrencesByNiche,
   isSongSearchKnown,
+  indexBucketButtonModel,
   normalizeSearch,
   normalizeSongSearchText,
   paginateItems,
   parseUrlState,
+  rankToggleModel,
   serializeUrlState,
   visiblePageTokens,
+  youtubeChannelLink,
 } = require("../assets/frontend-utils");
 
 test("snapshot request race keeps the latest response", async () => {
@@ -139,6 +143,63 @@ test("source preview defaults to one inline source and counts hidden sources", (
   );
   assert.equal(single.hiddenCount, 0);
   assert.equal(single.total, 1);
+});
+
+test("artist rank toggle uses unique song count", () => {
+  const collapsed = rankToggleModel({ mode: "artist", isExpanded: false, songCount: 5, hiddenCount: 12 });
+  assert.equal(collapsed.text, "查看5首");
+  assert.equal(collapsed.ariaLabel, "查看该歌手的 5 首歌曲");
+
+  const expanded = rankToggleModel({ mode: "artist", isExpanded: true, songCount: 5 });
+  assert.equal(expanded.text, "收起曲目");
+  assert.equal(expanded.ariaLabel, "收起该歌手曲目");
+});
+
+test("song rank toggle uses hidden source count", () => {
+  const collapsed = rankToggleModel({ mode: "song", isExpanded: false, hiddenCount: 3, songCount: 1 });
+  assert.equal(collapsed.text, "+3 来源");
+  assert.equal(collapsed.ariaLabel, "查看该歌曲的全部来源");
+
+  const expanded = rankToggleModel({ mode: "song", isExpanded: true, hiddenCount: 3 });
+  assert.equal(expanded.text, "收起来源");
+  assert.equal(expanded.ariaLabel, "收起该歌曲来源");
+});
+
+test("inline source timestamp link points to YouTube watch time", () => {
+  const model = buildInlineSourceModel(occurrence("VideoA", "Channel A", { seconds: 75, time: "1:15" }));
+
+  assert.equal(model.time.href, "https://www.youtube.com/watch?v=VideoA&t=75s");
+  assert.equal(model.time.text, "1:15");
+  assert.equal(model.time.ariaLabel, "打开视频时间戳：1:15");
+});
+
+test("channel link uses handle, channelId, and search fallback", () => {
+  assert.equal(
+    youtubeChannelLink({ channelHandle: "/@handle", channelId: "UCID", channelName: "Handle Channel" }).href,
+    "https://www.youtube.com/@handle",
+  );
+  assert.equal(
+    youtubeChannelLink({ channelId: "UCID", channelName: "Id Channel" }).href,
+    "https://www.youtube.com/channel/UCID",
+  );
+  assert.deepEqual(youtubeChannelLink({ channelName: "Search Channel" }), {
+    href: "https://www.youtube.com/results?search_query=Search%20Channel",
+    isFallbackSearch: true,
+  });
+});
+
+test("index bucket button model uses button class and aria-pressed", () => {
+  const current = indexBucketButtonModel("あ", "あ", true);
+  assert.equal(current.className, "index-bucket is-current");
+  assert.equal(current.type, "button");
+  assert.deepEqual(current.dataset, { indexBucket: "あ" });
+  assert.equal(current.ariaPressed, "true");
+  assert.equal(current.ariaCurrent, "page");
+
+  const other = indexBucketButtonModel("か", "か", false);
+  assert.equal(other.className, "index-bucket");
+  assert.equal(other.ariaPressed, "false");
+  assert.equal(other.ariaCurrent, "");
 });
 
 test("pagination uses pageSize 50 and clamps pages to available bounds", () => {
@@ -469,13 +530,14 @@ function song(title, artist, overrides = {}) {
   };
 }
 
-function occurrence(videoId, channelName) {
+function occurrence(videoId, channelName, songOverrides = {}, itemOverrides = {}) {
   return {
     item: {
       videoId,
       title: `video ${videoId}`,
       channelName,
+      ...itemOverrides,
     },
-    song: song("song", "artist"),
+    song: song("song", "artist", songOverrides),
   };
 }

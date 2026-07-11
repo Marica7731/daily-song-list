@@ -460,9 +460,120 @@
     return normalizeSearch(item.channelName || item.title || item.videoId || "");
   }
 
+  function buildInlineSourceModel(occurrence) {
+    const item = occurrence?.item || {};
+    const song = occurrence?.song || {};
+    const timeText = song.time || formatSeconds(song.seconds);
+    const channel = youtubeChannelLink(item);
+    const channelText = cleanText(item.channelName || item.title || item.videoId || "来源");
+    return {
+      time: {
+        text: timeText,
+        href: youtubeTimeUrl(item.videoId, song.seconds),
+        ariaLabel: `打开视频时间戳：${timeText}`,
+      },
+      channel: {
+        text: channelText,
+        href: channel.href,
+        isFallbackSearch: channel.isFallbackSearch,
+        ariaLabel: channel.isFallbackSearch ? `搜索频道：${channelText}` : `打开频道：${channelText}`,
+      },
+    };
+  }
+
+  function rankToggleModel(options = {}) {
+    const mode = options.mode || "song";
+    const isExpanded = Boolean(options.isExpanded);
+    if (mode === "artist") {
+      const songCount = Math.max(0, Number(options.songCount) || 0);
+      return {
+        text: isExpanded ? "收起曲目" : `查看${songCount}首`,
+        ariaLabel: isExpanded ? "收起该歌手曲目" : `查看该歌手的 ${songCount} 首歌曲`,
+      };
+    }
+
+    const hiddenCount = Math.max(0, Number(options.hiddenCount) || 0);
+    return {
+      text: isExpanded ? "收起来源" : `+${hiddenCount} 来源`,
+      ariaLabel: isExpanded ? "收起该歌曲来源" : "查看该歌曲的全部来源",
+    };
+  }
+
+  function indexBucketButtonModel(label, bucket, isCurrent) {
+    const current = Boolean(isCurrent);
+    return {
+      className: current ? "index-bucket is-current" : "index-bucket",
+      type: "button",
+      dataset: { indexBucket: bucket },
+      text: label,
+      ariaPressed: current ? "true" : "false",
+      ariaCurrent: current ? "page" : "",
+    };
+  }
+
+  function youtubeTimeUrl(videoId, seconds) {
+    const safeSeconds = Math.max(0, Number(seconds) || 0);
+    return `https://www.youtube.com/watch?v=${encodeURIComponent(videoId || "")}&t=${safeSeconds}s`;
+  }
+
+  function youtubeChannelLink(item = {}) {
+    const channelHandle = cleanText(item.channelHandle);
+    const handleUrl = youtubeChannelHandleUrl(channelHandle);
+    if (handleUrl) {
+      return { href: handleUrl, isFallbackSearch: false };
+    }
+
+    const channelId = cleanText(item.channelId);
+    if (channelId) {
+      return {
+        href: `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`,
+        isFallbackSearch: false,
+      };
+    }
+
+    const channelName = cleanText(item.channelName);
+    if (channelName) {
+      return {
+        href: `https://www.youtube.com/results?search_query=${encodeURIComponent(channelName)}`,
+        isFallbackSearch: true,
+      };
+    }
+
+    return {
+      href: item.videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(item.videoId)}` : "https://www.youtube.com/",
+      isFallbackSearch: true,
+    };
+  }
+
+  function youtubeChannelHandleUrl(value) {
+    if (!value) return "";
+    if (/^https?:\/\/(www\.)?youtube\.com\//i.test(value)) return value;
+    if (value.startsWith("/")) return `https://www.youtube.com${value}`;
+    if (value.startsWith("@")) return `https://www.youtube.com/${value}`;
+    if (value.startsWith("channel/") || value.startsWith("c/") || value.startsWith("user/")) {
+      return `https://www.youtube.com/${value}`;
+    }
+    return "";
+  }
+
+  function formatSeconds(value) {
+    const total = Math.max(0, Number(value) || 0);
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = total % 60;
+    return hours
+      ? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+      : `${minutes}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function cleanText(value) {
+    return String(value ?? "").replace(/\s+/g, " ").trim();
+  }
+
   return {
     annotatePayloadWithNiche,
     buildIndexBucketModel,
+    buildInlineSourceModel,
     buildSourcePreview,
     createSnapshotLoader,
     createSongSearchLookup,
@@ -473,12 +584,16 @@
     hasNicheAnnotations,
     isNicheSong,
     isSongSearchKnown,
+    indexBucketButtonModel,
     matchesSearch,
     normalizeSearch,
     normalizeSongSearchText,
     paginateItems,
     parseUrlState,
+    rankToggleModel,
     serializeUrlState,
     visiblePageTokens,
+    youtubeChannelLink,
+    youtubeTimeUrl,
   };
 });

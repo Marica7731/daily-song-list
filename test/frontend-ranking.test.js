@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 
-const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
+const { buildArtistRecords, buildArtistSongGroups, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
 
 test("merges same title with the same known artist", () => {
   const records = buildSongRecords([occurrence("花に亡霊", "ヨルシカ", "A"), occurrence("花に亡霊", "ヨルシカ", "B")]);
@@ -153,7 +153,78 @@ test("artist ranking excludes unknown artist placeholders", () => {
   assert.equal(missingArtistCount, 3);
 });
 
-function occurrence(title, artist, videoId) {
+test("buildArtistSongGroups groups occurrences by song", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("Song A", "Artist", "A"),
+    occurrence("Song A", "Artist", "B"),
+  ]);
+
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].title, "Song A");
+  assert.deepEqual(
+    groups[0].occurrences.map(({ item }) => item.videoId),
+    ["A", "B"],
+  );
+});
+
+test("buildArtistSongGroups counts multiple sources for the same song", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("Song A", "Artist", "A"),
+    occurrence("Song A", "Artist", "B"),
+    occurrence("Song A", "Artist", "C"),
+  ]);
+
+  assert.equal(groups[0].count, 3);
+});
+
+test("buildArtistSongGroups keeps different songs separated", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("Song A", "Artist", "A"),
+    occurrence("Song B", "Artist", "B"),
+  ]);
+
+  assert.deepEqual(
+    groups.map((group) => group.title).sort(),
+    ["Song A", "Song B"],
+  );
+});
+
+test("buildArtistSongGroups sorts song groups by count descending", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("Song A", "Artist", "A"),
+    occurrence("Song B", "Artist", "B"),
+    occurrence("Song B", "Artist", "C"),
+  ]);
+
+  assert.deepEqual(
+    groups.map((group) => group.title),
+    ["Song B", "Song A"],
+  );
+});
+
+test("buildArtistSongGroups sorts tied counts by song sort key", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("Beta", "Artist", "A"),
+    occurrence("Alpha", "Artist", "B"),
+  ]);
+
+  assert.deepEqual(
+    groups.map((group) => group.title),
+    ["Alpha", "Beta"],
+  );
+});
+
+test("buildArtistSongGroups preserves niche state on song groups", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("Known", "Artist", "A"),
+    occurrence("Rare", "Artist", "B", { isNiche: true }),
+  ]);
+
+  assert.equal(groups.find((group) => group.title === "Rare").isNiche, true);
+  assert.equal(groups.find((group) => group.title === "Known").isNiche, false);
+});
+
+function occurrence(title, artist, videoId, overrides = {}) {
   return {
     item: {
       videoId,
@@ -165,6 +236,7 @@ function occurrence(title, artist, videoId) {
       artist,
       seconds: 60,
       time: "0:01:00",
+      ...overrides,
     },
   };
 }
