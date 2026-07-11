@@ -116,6 +116,7 @@ function isLikelyNonSongEntry(song) {
   const hasArtist = Boolean(artist && artist !== "未記載");
 
   if (isCustomEmojiOnlyText(title)) return true;
+  if (isReactionActivityEntry(title, artist, raw)) return true;
   if (/^(音入り|音入[り]?|声入り|マイクテスト|開始|終了|曲始まり|オープニング|エンディング|登場|退場|ゲスト|スパチャ読み|読み開始|コメント読み|告知|雑談|休憩|ただいま|まで)$/iu.test(title)) {
     return true;
   }
@@ -144,6 +145,40 @@ function isLikelyNonSongEntry(song) {
     return true;
   }
   return false;
+}
+
+function isReactionActivityEntry(title, artist, raw) {
+  const hasArtist = Boolean(artist && artist !== "未記載");
+  const titleReaction = isReactionActivityText(title);
+  const artistReaction = isReactionActivityText(artist);
+  const rawHasMarker = hasReactionActivityMarker(raw);
+
+  if (!hasArtist && titleReaction) return true;
+  if (rawHasMarker && (titleReaction || artistReaction)) return true;
+  return false;
+}
+
+function isReactionActivityText(text) {
+  const value = normalizeReactionActivityText(text);
+  return /^(?:ぷくっ?|ふんっ?|あくび|欠伸|くしゃみ|咳払い|せき払い|咳|のび|伸び|水分補給)$/iu.test(value) ||
+    /^(?:ぷくっ?|ふんっ?|あくび)(?:かわいい|可愛い)$/iu.test(value);
+}
+
+function hasReactionActivityMarker(raw) {
+  const value = String(raw || "");
+  if (/[:：]_[^\s　:：]+[:：]?/u.test(value) || /[\u{1F300}-\u{1FAFF}]/u.test(value)) return true;
+  for (const match of value.matchAll(/[（(]([^()（）]{1,24})[)）]/gu)) {
+    if (isReactionActivityText(match[1])) return true;
+  }
+  return false;
+}
+
+function normalizeReactionActivityText(text) {
+  return stripCustomEmojiAliases(text)
+    .replace(/[\u200b-\u200f\u202a-\u202e\ufe0e\ufe0f]/gu, "")
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
+    .replace(/[^\u3040-\u30ff\u3400-\u9fff々〆ヵヶーっ]/gu, "")
+    .trim();
 }
 
 function splitTitleArtist(text) {

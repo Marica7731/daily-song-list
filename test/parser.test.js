@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { parseTimestampSongs, timeToSeconds } = require("../scripts/song-utils");
+const { isLikelyNonSongEntry, parseTimestampSongs, timeToSeconds } = require("../scripts/song-utils");
 
 test("parses timestamp before song index without truncating minutes", () => {
   const songs = parseTimestampSongs([
@@ -120,10 +120,27 @@ test("strips leading custom emoji aliases from song titles", () => {
   assert.equal(songs[0].title, "ワールドイズマイン");
 });
 
-test("rejects custom emoji aliases without song text", () => {
-  const songs = parseTimestampSongs(["0:01 :_hotsmile:", "0:02 :_可愛い:ぷくっ"]);
+test("rejects custom emoji aliases and reaction activities without song text", () => {
+  const songs = parseTimestampSongs([
+    "0:01 :_hotsmile:",
+    "0:02 :_可愛い:ぷくっ",
+    "0:03 :_可愛い:あくび",
+    "31:03 あくび🥱‪‪‬ᐝ",
+    "5:26:51 :_可愛い:ふんっ（ぷくっ）",
+    "6:17:44 もうちょっと普通の時も（ぷくっ）",
+    "あくびかわいい:_heart: 0:08:29",
+  ]);
 
   assert.deepEqual(songs, []);
+});
+
+test("rejects carried reaction activities without rejecting real artist credits", () => {
+  assert.equal(isLikelyNonSongEntry({ title: "ぷくっ", artist: "未記載", raw: "34:02 :_可愛い:ぷくっ" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "あくび", artist: "未記載", raw: "3:38:54 :_可愛い:あくび" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "あくび🥱‪‪‬ᐝ", artist: "未記載", raw: "31:03  あくび🥱‪‪‬ᐝ" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "ふんっ", artist: "ぷくっ", raw: "5:26:51 :_可愛い:ふんっ（ぷくっ）" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "もうちょっと普通の時も", artist: "ぷくっ", raw: "6:17:44 もうちょっと普通の時も（ぷくっ）" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "あくび", artist: "作曲者", raw: "3:38:54 あくび / 作曲者" }), false);
 });
 
 test("strips trailing custom emoji aliases from song titles", () => {

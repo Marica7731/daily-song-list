@@ -69,6 +69,11 @@ test("dirty carried videos are normalized but left eligible for refresh", () => 
             ...video("AAAAAAAAAAA", 2, ["today"]),
             songs: [
               { title: "_hotsmile", artist: "", seconds: 10, time: "0:00:10", raw: "0:10 :_hotsmile:" },
+              { title: "ぷくっ", artist: "未記載", seconds: 20, time: "0:00:20", raw: "0:20 :_可愛い:ぷくっ" },
+              { title: "あくび", artist: "未記載", seconds: 30, time: "0:00:30", raw: "0:30 :_可愛い:あくび" },
+              { title: "あくび🥱‪‪‬ᐝ", artist: "未記載", seconds: 35, time: "0:00:35", raw: "0:35 あくび🥱‪‪‬ᐝ" },
+              { title: "ふんっ", artist: "ぷくっ", seconds: 40, time: "0:00:40", raw: "0:40 :_可愛い:ふんっ（ぷくっ）" },
+              { title: "もうちょっと普通の時も", artist: "ぷくっ", seconds: 45, time: "0:00:45", raw: "0:45 もうちょっと普通の時も（ぷくっ）" },
               {
                 title: "勝利のマシンロボ",
                 artist: "マシンロボクロノスの大逆襲OP(キー+4)",
