@@ -9,22 +9,46 @@ const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const STATUS_PATH = path.join(DATA_DIR, "status.json");
 const AUDIT_PATH = path.join(DATA_DIR, "audit.json");
 
-const SEARCHES = [
+const KEYWORDS = [
   {
     keyword: "歌枠",
-    url: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D",
+    key: "utawaku",
+    urls: {
+      today: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D",
+      month: "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D",
+    },
   },
   {
     keyword: "弾き語り",
-    url: "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D",
+    key: "hikigatari",
+    urls: {
+      today: "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBAgCGAI%253D",
+      month: "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D",
+    },
   },
 ];
 
-const SEARCH_LIMIT = positiveInteger(process.env.DAILY_SONG_SEARCH_LIMIT, 36);
-const VIDEO_LIMIT = positiveInteger(process.env.DAILY_SONG_VIDEO_LIMIT, 36);
+const SEARCH_GROUPS = {
+  today: {
+    id: "today",
+    label: "YouTube today filter",
+    description: "Same YouTube search filter used by Marica7731/mygit for today's ranking.",
+  },
+  month: {
+    id: "month",
+    label: "YouTube month filter",
+    description: "Same YouTube search filter used by Marica7731/mygit for monthly ranking.",
+  },
+};
+
+const SEARCH_LIMIT = positiveInteger(process.env.DAILY_SONG_SEARCH_LIMIT, 160);
+const VIDEO_LIMIT = positiveInteger(process.env.DAILY_SONG_VIDEO_LIMIT, 160);
+const RECENT_BUCKET_LIMIT = positiveInteger(process.env.DAILY_SONG_RECENT_BUCKET_LIMIT, Math.max(40, Math.floor(VIDEO_LIMIT / 4)));
+const VIDEO_CONCURRENCY = positiveInteger(process.env.DAILY_SONG_VIDEO_CONCURRENCY, 2);
 const REPLY_LIMIT = positiveInteger(process.env.DAILY_SONG_COMMENT_REPLY_LIMIT, 12);
+const SEARCH_CONTINUATION_ROUNDS = positiveInteger(process.env.DAILY_SONG_SEARCH_CONTINUATION_ROUNDS, 40);
+const FETCH_RETRIES = positiveInteger(process.env.DAILY_SONG_FETCH_RETRIES, 3);
 const SNAPSHOT_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_SNAPSHOT_RETENTION_DAYS, 35);
-const MONTH_MS = 31 * 24 * 60 * 60 * 1000;
 const H72_MS = 72 * 60 * 60 * 1000;
 
 main().catch((error) => {
@@ -36,34 +60,11 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
   const startedAt = new Date();
-  const candidates = await collectCandidates(startedAt);
-  console.log(`[update] candidates=${candidates.length}`);
+  const { candidates, searchSummaries } = await collectCandidates(startedAt);
+  const inspectionCandidates = selectCandidatesForInspection(candidates, startedAt);
+  console.log(`[update] candidates=${candidates.length} inspect=${inspectionCandidates.length}`);
 
-  const inspected = [];
-  const videos = [];
-  const audits = [];
-  for (const candidate of candidates.slice(0, VIDEO_LIMIT)) {
-    try {
-      const result = await fetchVideoSongList(candidate);
-      const detail = result?.detail || null;
-      if (result?.audit) audits.push(result.audit);
-      inspected.push({ videoId: candidate.videoId, ok: Boolean(detail), songCount: detail?.songs.length || 0 });
-      if (detail) videos.push(detail);
-      console.log(`[update] ${candidate.videoId} songs=${detail?.songs.length || 0} ${candidate.title}`);
-    } catch (error) {
-      inspected.push({ videoId: candidate.videoId, ok: false, error: error.message });
-      audits.push({
-        videoId: candidate.videoId,
-        title: candidate.title,
-        channelName: candidate.channelName,
-        keyword: candidate.keyword,
-        result: "fetch_error",
-        error: error.message,
-        sources: [],
-      });
-      console.warn(`[update] skip ${candidate.videoId}: ${error.message}`);
-    }
-  }
+  const { inspected, videos, audits } = await inspectCandidates(inspectionCandidates);
 
   const capturedAt = new Date();
   const groups = applyGroupQualityFilters(buildGroups(videos, capturedAt));
@@ -78,9 +79,15 @@ async function main() {
     capturedAt: capturedAt.toISOString(),
     source: {
       name: "YouTube search + watch comments/descriptions",
-      searches: SEARCHES,
+      keywords: KEYWORDS.map((keyword) => ({ keyword: keyword.keyword, key: keyword.key })),
+      searchGroups: SEARCH_GROUPS,
+      searches: searchSummaries,
       inspectedCount: inspected.length,
       usableVideoCount: videos.length,
+      candidateCount: candidates.length,
+      inspectionLimit: VIDEO_LIMIT,
+      videoConcurrency: VIDEO_CONCURRENCY,
+      recentBucketLimit: RECENT_BUCKET_LIMIT,
       auditPath: "data/audit.json",
       auditSummary: summarizeAudits(audits),
     },
@@ -97,8 +104,10 @@ async function main() {
   writeJson(AUDIT_PATH, {
     schemaVersion: 1,
     generatedAt: capturedAt.toISOString(),
+    candidateCount: candidates.length,
     inspectedCount: inspected.length,
     usableVideoCount: videos.length,
+    searches: searchSummaries,
     summary: payload.source.auditSummary,
     videos: audits,
   });
@@ -110,27 +119,209 @@ async function main() {
 }
 
 async function collectCandidates(now) {
-  const all = [];
-  for (const search of SEARCHES) {
-    const html = await fetchText(search.url);
-    const data = extractJsonAfter(html, "ytInitialData");
-    const items = extractSearchItems(data)
-      .slice(0, SEARCH_LIMIT)
-      .map((item) => ({ ...item, keyword: search.keyword }));
-    all.push(...items);
+  const nowMs = now.getTime();
+  const byVideoId = new Map();
+  const searchSummaries = [];
+  for (const search of buildSearchSources()) {
+    const result = await fetchSearchSource(search);
+    searchSummaries.push(result.summary);
+    for (const item of result.items) {
+      mergeCandidate(byVideoId, item, search, nowMs);
+    }
   }
 
-  const nowMs = now.getTime();
-  return dedupeByVideoId(all)
-    .map((item) => ({
+  return {
+    candidates: [...byVideoId.values()].sort(candidateSort),
+    searchSummaries,
+  };
+}
+
+function buildSearchSources() {
+  return Object.keys(SEARCH_GROUPS).flatMap((sourceGroup) =>
+    KEYWORDS.map((keyword) => ({
+      sourceGroup,
+      sourceLabel: SEARCH_GROUPS[sourceGroup].label,
+      keyword: keyword.keyword,
+      keywordKey: keyword.key,
+      url: keyword.urls[sourceGroup],
+    })),
+  );
+}
+
+async function fetchSearchSource(search) {
+  const collectedAt = new Date().toISOString();
+  const seenContinuations = new Set();
+  const items = [];
+  let continuation = "";
+  let apiKey = "";
+  let clientVersion = "";
+  let reachedEnd = false;
+  let continuationRounds = 0;
+
+  const html = await fetchText(search.url);
+  apiKey = extractRegex(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
+  clientVersion = extractRegex(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/) || "2.20260601.00.00";
+  const initialData = extractJsonAfter(html, "ytInitialData");
+  addSearchItems(items, extractSearchItems(initialData));
+  continuation = findSearchContinuation(initialData);
+
+  while (items.length < SEARCH_LIMIT && continuation && apiKey && continuationRounds < SEARCH_CONTINUATION_ROUNDS) {
+    if (seenContinuations.has(continuation)) break;
+    seenContinuations.add(continuation);
+    continuationRounds += 1;
+    const response = await fetchYouTubeSearchContinuation(apiKey, clientVersion, continuation);
+    addSearchItems(items, extractSearchItems(response));
+    continuation = findSearchContinuation(response);
+  }
+
+  if (!continuation || items.length < SEARCH_LIMIT) reachedEnd = true;
+  const deduped = dedupeByVideoId(items);
+  const skippedActiveLiveOrUpcoming = deduped.filter((item) => isActiveLiveOrUpcomingCandidate(item)).length;
+  const finalItems = deduped.filter((item) => !isActiveLiveOrUpcomingCandidate(item)).slice(0, SEARCH_LIMIT);
+  const summary = {
+    sourceGroup: search.sourceGroup,
+    sourceLabel: search.sourceLabel,
+    keyword: search.keyword,
+    keywordKey: search.keywordKey,
+    url: search.url,
+    itemCount: finalItems.length,
+    limit: SEARCH_LIMIT,
+    continuationRounds,
+    reachedEnd,
+    truncatedByLimit: finalItems.length >= SEARCH_LIMIT && !reachedEnd,
+    skippedActiveLiveOrUpcoming,
+    collectedAt,
+  };
+  console.log(
+    `[search:${search.sourceGroup}] ${search.keyword} items=${summary.itemCount} skippedLive=${skippedActiveLiveOrUpcoming} rounds=${continuationRounds} reachedEnd=${reachedEnd}`,
+  );
+  return { summary, items: finalItems };
+}
+
+function addSearchItems(target, items) {
+  target.push(...items.filter((item) => item.videoId && item.title));
+}
+
+function mergeCandidate(byVideoId, item, search, nowMs) {
+  const publishedTimestamp = parsePublishedTimestamp(item.publishedText, nowMs);
+  const existing = byVideoId.get(item.videoId);
+  if (!existing) {
+    byVideoId.set(item.videoId, {
       ...item,
-      publishedTimestamp: parsePublishedTimestamp(item.publishedText, nowMs),
-    }))
-    .filter((item) => {
-      if (!item.publishedTimestamp) return true;
-      return nowMs - item.publishedTimestamp <= MONTH_MS;
-    })
-    .sort((a, b) => (b.publishedTimestamp || 0) - (a.publishedTimestamp || 0));
+      keyword: search.keyword,
+      keywords: [search.keyword],
+      keywordKeys: [search.keywordKey],
+      sourceGroup: search.sourceGroup,
+      sourceGroups: [search.sourceGroup],
+      sourceUrls: [search.url],
+      publishedTimestamp,
+    });
+    return;
+  }
+
+  addUnique(existing.keywords, search.keyword);
+  addUnique(existing.keywordKeys, search.keywordKey);
+  addUnique(existing.sourceGroups, search.sourceGroup);
+  addUnique(existing.sourceUrls, search.url);
+  if (!existing.publishedTimestamp && publishedTimestamp) existing.publishedTimestamp = publishedTimestamp;
+  if (!existing.publishedText && item.publishedText) existing.publishedText = item.publishedText;
+  if (!existing.durationText && item.durationText) existing.durationText = item.durationText;
+  if (!existing.thumbnailUrl && item.thumbnailUrl) existing.thumbnailUrl = item.thumbnailUrl;
+  if (!existing.viewText && item.viewText) existing.viewText = item.viewText;
+  if (!existing.channelName && item.channelName) existing.channelName = item.channelName;
+}
+
+function addUnique(list, value) {
+  if (value && !list.includes(value)) list.push(value);
+}
+
+function candidateSort(a, b) {
+  const timeDiff = (b.publishedTimestamp || 0) - (a.publishedTimestamp || 0);
+  if (timeDiff) return timeDiff;
+  const aIsRecent = a.sourceGroups?.includes("today") ? 1 : 0;
+  const bIsRecent = b.sourceGroups?.includes("today") ? 1 : 0;
+  if (aIsRecent !== bIsRecent) return bIsRecent - aIsRecent;
+  return (b.sourceGroups?.length || 0) - (a.sourceGroups?.length || 0);
+}
+
+function selectCandidatesForInspection(candidates, now) {
+  const nowMs = now.getTime();
+  const selected = [];
+  const seen = new Set();
+  const add = (items, limit) => {
+    for (const item of items) {
+      if (selected.length >= VIDEO_LIMIT || seen.has(item.videoId)) continue;
+      if (limit != null && selected.filter((selectedItem) => selectedItem.__bucket === item.__bucket).length >= limit) continue;
+      seen.add(item.videoId);
+      selected.push(item);
+    }
+  };
+
+  for (const bucket of recentBuckets(nowMs)) {
+    const bucketItems = candidates
+      .filter((item) => item.publishedTimestamp && item.publishedTimestamp >= bucket.from && item.publishedTimestamp < bucket.to)
+      .map((item) => ({ ...item, __bucket: bucket.id }))
+      .sort(candidateSort);
+    add(bucketItems, RECENT_BUCKET_LIMIT);
+  }
+
+  add(candidates, null);
+  return selected.map(({ __bucket, ...item }) => item);
+}
+
+function recentBuckets(nowMs) {
+  return [
+    { id: "today", from: nowMs - 24 * 60 * 60 * 1000, to: nowMs + 1 },
+    { id: "one_day_ago", from: nowMs - 48 * 60 * 60 * 1000, to: nowMs - 24 * 60 * 60 * 1000 },
+    { id: "two_days_ago", from: nowMs - H72_MS, to: nowMs - 48 * 60 * 60 * 1000 },
+  ];
+}
+
+async function inspectCandidates(candidates) {
+  const results = new Array(candidates.length);
+  let nextIndex = 0;
+  const workerCount = Math.min(VIDEO_CONCURRENCY, Math.max(1, candidates.length));
+  async function worker() {
+    while (nextIndex < candidates.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      const candidate = candidates[index];
+      try {
+        const result = await fetchVideoSongList(candidate);
+        const detail = result?.detail || null;
+        results[index] = {
+          inspected: { videoId: candidate.videoId, ok: Boolean(detail), songCount: detail?.songs.length || 0 },
+          detail,
+          audit: result?.audit || null,
+        };
+        console.log(`[update] ${index + 1}/${candidates.length} ${candidate.videoId} songs=${detail?.songs.length || 0} ${candidate.title}`);
+      } catch (error) {
+        results[index] = {
+          inspected: { videoId: candidate.videoId, ok: false, error: error.message },
+          detail: null,
+          audit: {
+            videoId: candidate.videoId,
+            title: candidate.title,
+            channelName: candidate.channelName,
+            keyword: candidate.keyword,
+            keywords: candidate.keywords || [],
+            sourceGroups: candidate.sourceGroups || [],
+            result: "fetch_error",
+            error: error.message,
+            sources: [],
+          },
+        };
+        console.warn(`[update] ${index + 1}/${candidates.length} skip ${candidate.videoId}: ${error.message}`);
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return {
+    inspected: results.map((result) => result.inspected).filter(Boolean),
+    videos: results.map((result) => result.detail).filter(Boolean),
+    audits: results.map((result) => result.audit).filter(Boolean),
+  };
 }
 
 async function fetchVideoSongList(candidate) {
@@ -151,6 +342,8 @@ async function fetchVideoSongList(candidate) {
     title: candidate.title,
     channelName: candidate.channelName,
     keyword: candidate.keyword,
+    keywords: candidate.keywords,
+    sourceGroups: candidate.sourceGroups,
     publishedText: candidate.publishedText,
     durationText: candidate.durationText,
     commentCandidateCount: comments.length,
@@ -191,6 +384,9 @@ async function fetchVideoSongList(candidate) {
       title: candidate.title,
       channelName: candidate.channelName,
       keyword: candidate.keyword,
+      keywords: candidate.keywords || [candidate.keyword].filter(Boolean),
+      sourceGroups: candidate.sourceGroups || [candidate.sourceGroup].filter(Boolean),
+      sourceUrls: candidate.sourceUrls || [],
       publishedText: candidate.publishedText,
       publishedTimestamp: candidate.publishedTimestamp || null,
       durationText: candidate.durationText,
@@ -424,10 +620,8 @@ function incrementPlainCount(target, key, amount = 1) {
 
 function buildGroups(videos, capturedAt) {
   const nowMs = capturedAt.getTime();
-  const inRange = (item, maxAgeMs) => {
-    if (!item.publishedTimestamp) return maxAgeMs === MONTH_MS;
-    return nowMs - item.publishedTimestamp <= maxAgeMs;
-  };
+  const in72h = (item) => Boolean(item.publishedTimestamp && nowMs - item.publishedTimestamp <= H72_MS);
+  const inMonthSearch = (item) => item.sourceGroups?.includes("month") || item.sourceGroup === "month";
   const sortVideos = (items) =>
     [...items].sort((a, b) => {
       const timeDiff = (b.publishedTimestamp || 0) - (a.publishedTimestamp || 0);
@@ -441,14 +635,14 @@ function buildGroups(videos, capturedAt) {
       title: "72H timestamp song lists",
       generatedAt: capturedAt.toISOString(),
       updatedAt: capturedAt.toISOString(),
-      items: sortVideos(videos.filter((item) => inRange(item, H72_MS))),
+      items: sortVideos(videos.filter((item) => in72h(item))),
     },
     "1m": {
       id: "1m",
-      title: "One-month timestamp song lists",
+      title: "YouTube monthly-filter timestamp song lists",
       generatedAt: capturedAt.toISOString(),
       updatedAt: capturedAt.toISOString(),
-      items: sortVideos(videos.filter((item) => inRange(item, MONTH_MS))),
+      items: sortVideos(videos.filter((item) => inMonthSearch(item))),
     },
   };
 }
@@ -553,12 +747,53 @@ function extractSearchItems(data) {
       title: textFrom(renderer.title),
       channelName: textFrom(renderer.ownerText || renderer.longBylineText || renderer.shortBylineText),
       publishedText: textFrom(renderer.publishedTimeText),
-      durationText: textFrom(renderer.lengthText),
+    durationText: textFrom(renderer.lengthText),
+      statusText: statusTextFromRenderer(renderer),
       thumbnailUrl: bestThumbnail(renderer.thumbnail),
       viewText: textFrom(renderer.viewCountText || renderer.shortViewCountText),
     });
   }
   return dedupeByVideoId(items).filter((item) => item.title);
+}
+
+function statusTextFromRenderer(renderer) {
+  const values = [];
+  collectTextSnippets(renderer.thumbnailOverlays, values);
+  collectTextSnippets(renderer.badges, values);
+  collectTextSnippets(renderer.ownerBadges, values);
+  collectTextSnippets(renderer.upcomingEventData, values);
+  collectTextSnippets(renderer.publishedTimeText, values);
+  return normalizeWhitespace([...new Set(values)].join(" / "));
+}
+
+function collectTextSnippets(value, target) {
+  if (!value) return;
+  if (typeof value === "string") {
+    target.push(value);
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const child of value) collectTextSnippets(child, target);
+    return;
+  }
+  if (typeof value !== "object") return;
+  if (typeof value.simpleText === "string") target.push(value.simpleText);
+  if (Array.isArray(value.runs)) target.push(value.runs.map((run) => run?.text || "").join(""));
+  for (const child of Object.values(value)) collectTextSnippets(child, target);
+}
+
+function isActiveLiveOrUpcomingCandidate(item) {
+  const status = normalizeWhitespace(`${item.statusText || ""} ${item.publishedText || ""} ${item.durationText || ""}`);
+  const title = normalizeWhitespace(item.title || "");
+  const hasDuration = /\b(?:\d{1,2}:)?\d{1,2}:\d{2}\b/.test(item.durationText || "");
+  if (!hasDuration && /(?:がライブ配信中|ライブ配信中[!！]?|配信中です|is live|streaming now)/iu.test(title)) return true;
+  if (/(?:upcoming|scheduled|premiere|公開予定|配信予定|ライブ配信予定|予定|予約|待機|まもなく|即将|預約|预约)/iu.test(status)) {
+    return !hasDuration;
+  }
+  if (/(?:LIVE|ライブ|配信中|生放送|視聴中|watching|直播中|正在观看|正在觀看|실시간|시청 중)/iu.test(status)) {
+    return !hasDuration;
+  }
+  return false;
 }
 
 function extractDescriptionCandidates(data) {
@@ -636,7 +871,7 @@ function extractCommentTexts(data) {
 }
 
 async function fetchYouTubeContinuation(apiKey, clientVersion, continuation) {
-  const response = await fetch(`https://www.youtube.com/youtubei/v1/next?prettyPrint=false&key=${encodeURIComponent(apiKey)}`, {
+  const response = await fetchWithRetry(`https://www.youtube.com/youtubei/v1/next?prettyPrint=false&key=${encodeURIComponent(apiKey)}`, {
     method: "POST",
     headers: {
       ...headers(),
@@ -656,6 +891,44 @@ async function fetchYouTubeContinuation(apiKey, clientVersion, continuation) {
   });
   if (!response.ok) throw new Error(`youtubei continuation HTTP ${response.status}`);
   return response.json();
+}
+
+async function fetchYouTubeSearchContinuation(apiKey, clientVersion, continuation) {
+  const response = await fetchWithRetry(`https://www.youtube.com/youtubei/v1/search?prettyPrint=false&key=${encodeURIComponent(apiKey)}`, {
+    method: "POST",
+    headers: {
+      ...headers(),
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      context: {
+        client: {
+          clientName: "WEB",
+          clientVersion,
+          hl: "ja",
+          gl: "JP",
+        },
+      },
+      continuation,
+    }),
+  });
+  if (!response.ok) throw new Error(`youtubei search continuation HTTP ${response.status}`);
+  return response.json();
+}
+
+function findSearchContinuation(data) {
+  for (const item of walkDicts(data)) {
+    const renderer = item.continuationItemRenderer;
+    const token = renderer?.continuationEndpoint?.continuationCommand?.token;
+    if (token) return token;
+  }
+  for (const item of walkDicts(data)) {
+    const endpoint = item.continuationEndpoint;
+    const token = endpoint?.continuationCommand?.token;
+    const apiUrl = endpoint?.commandMetadata?.webCommandMetadata?.apiUrl || "";
+    if (token && /\/youtubei\/v1\/search/i.test(apiUrl)) return token;
+  }
+  return "";
 }
 
 function selectBestSongs(sources) {
@@ -781,9 +1054,27 @@ function normalizeDigits(text) {
 }
 
 async function fetchText(url) {
-  const response = await fetch(url, { headers: headers() });
+  const response = await fetchWithRetry(url, { headers: headers() });
   if (!response.ok) throw new Error(`${url} HTTP ${response.status}`);
   return response.text();
+}
+
+async function fetchWithRetry(url, options) {
+  let response;
+  for (let attempt = 1; attempt <= FETCH_RETRIES; attempt += 1) {
+    response = await fetch(url, options);
+    if (response.ok || !isRetryableHttpStatus(response.status) || attempt >= FETCH_RETRIES) return response;
+    await delay(750 * attempt * attempt);
+  }
+  return response;
+}
+
+function isRetryableHttpStatus(status) {
+  return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function headers() {
