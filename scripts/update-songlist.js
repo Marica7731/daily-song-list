@@ -48,12 +48,16 @@ const VIDEO_CONCURRENCY = positiveInteger(process.env.DAILY_SONG_VIDEO_CONCURREN
 const REPLY_LIMIT = positiveInteger(process.env.DAILY_SONG_COMMENT_REPLY_LIMIT, 12);
 const SEARCH_CONTINUATION_ROUNDS = positiveInteger(process.env.DAILY_SONG_SEARCH_CONTINUATION_ROUNDS, 40);
 const FETCH_RETRIES = positiveInteger(process.env.DAILY_SONG_FETCH_RETRIES, 3);
+const REQUEST_DELAY_MS = nonNegativeInteger(process.env.DAILY_SONG_REQUEST_DELAY_MS, 0);
+const RATE_LIMIT_COOLDOWN_MS = nonNegativeInteger(process.env.DAILY_SONG_429_COOLDOWN_MS, 15_000);
+const MAX_429_ERRORS = nonNegativeInteger(process.env.DAILY_SONG_MAX_429_ERRORS, 8);
 const SNAPSHOT_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_SNAPSHOT_RETENTION_DAYS, 35);
 const CARRY_FORWARD_MAX_AGE_HOURS = positiveInteger(process.env.DAILY_SONG_CARRY_FORWARD_MAX_AGE_HOURS, 36);
 const MONTH_REFRESH_LIMIT = positiveInteger(process.env.DAILY_SONG_MONTH_REFRESH_LIMIT, Math.max(20, Math.floor(VIDEO_LIMIT / 8)));
 const H72_MS = 72 * 60 * 60 * 1000;
 const H48_MS = 48 * 60 * 60 * 1000;
 const MONTH_CARRY_MS = 35 * 24 * 60 * 60 * 1000;
+const requestLimiter = createRequestLimiter({ requestDelayMs: REQUEST_DELAY_MS, max429Errors: MAX_429_ERRORS });
 
 // Channel-first source blacklist: avoid dropping ordinary song titles that only mention these names.
 const TAIWAN_VTUBER_BLACKLIST = [
@@ -159,6 +163,10 @@ async function main() {
       candidateCount: candidates.length,
       inspectionLimit: VIDEO_LIMIT,
       videoConcurrency: VIDEO_CONCURRENCY,
+      requestDelayMs: REQUEST_DELAY_MS,
+      rateLimitCooldownMs: RATE_LIMIT_COOLDOWN_MS,
+      max429Errors: MAX_429_ERRORS,
+      rateLimitErrorCount: requestLimiter.error429Count,
       recentBucketLimit: RECENT_BUCKET_LIMIT,
       monthRefreshLimit: MONTH_REFRESH_LIMIT,
       recentScanHorizonHours: selection.recentScanHorizonHours,
@@ -570,7 +578,7 @@ async function inspectCandidates(candidates) {
   let nextIndex = 0;
   const workerCount = Math.min(VIDEO_CONCURRENCY, Math.max(1, candidates.length));
   async function worker() {
-    while (nextIndex < candidates.length) {
+    while (nextIndex < candidates.length && !requestLimiter.shouldStop()) {
       const index = nextIndex;
       nextIndex += 1;
       const candidate = candidates[index];
@@ -600,6 +608,7 @@ async function inspectCandidates(candidates) {
           },
         };
         console.warn(`[update] ${index + 1}/${candidates.length} skip ${candidate.videoId}: ${error.message}`);
+        if (error instanceof RateLimitAbortError || requestLimiter.shouldStop()) break;
       }
     }
   }
@@ -1417,9 +1426,24 @@ async function fetchText(url) {
 async function fetchWithRetry(url, options) {
   let response;
   for (let attempt = 1; attempt <= FETCH_RETRIES; attempt += 1) {
+    if (requestLimiter.shouldStop()) {
+      throw new RateLimitAbortError(`YouTube HTTP 429 limit reached (${requestLimiter.error429Count}/${MAX_429_ERRORS}); stopped further inspections`);
+    }
+    await requestLimiter.beforeRequest();
+    if (requestLimiter.shouldStop()) {
+      throw new RateLimitAbortError(`YouTube HTTP 429 limit reached (${requestLimiter.error429Count}/${MAX_429_ERRORS}); stopped further inspections`);
+    }
     response = await fetch(url, options);
+    if (response.status === 429) {
+      requestLimiter.note429();
+      if (requestLimiter.shouldStop()) {
+        throw new RateLimitAbortError(`YouTube HTTP 429 limit reached (${requestLimiter.error429Count}/${MAX_429_ERRORS}); stopped further inspections`);
+      }
+    }
     if (response.ok || !isRetryableHttpStatus(response.status) || attempt >= FETCH_RETRIES) return response;
-    await delay(750 * attempt * attempt);
+    const waitMs = retryDelayMs(response, attempt);
+    if (response.status === 429) requestLimiter.cooldown(waitMs);
+    await delay(waitMs);
   }
   return response;
 }
@@ -1427,6 +1451,53 @@ async function fetchWithRetry(url, options) {
 function isRetryableHttpStatus(status) {
   return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
 }
+
+function retryDelayMs(response, attempt, nowMs = Date.now()) {
+  const retryAfterMs = parseRetryAfterMs(response?.headers?.get?.("retry-after"), nowMs);
+  const baseDelayMs = 750 * attempt * attempt;
+  const cooldownMs = response?.status === 429 ? RATE_LIMIT_COOLDOWN_MS : 0;
+  return Math.max(baseDelayMs, retryAfterMs, cooldownMs);
+}
+
+function parseRetryAfterMs(value, nowMs = Date.now()) {
+  if (!value) return 0;
+  const numeric = Number.parseFloat(value);
+  if (Number.isFinite(numeric)) return Math.max(0, Math.ceil(numeric * 1000));
+  const dateMs = Date.parse(value);
+  return Number.isFinite(dateMs) ? Math.max(0, dateMs - nowMs) : 0;
+}
+
+function createRequestLimiter({ requestDelayMs, max429Errors }) {
+  return {
+    pending: Promise.resolve(),
+    nextRequestAt: 0,
+    cooldownUntil: 0,
+    error429Count: 0,
+    stopped: false,
+    async beforeRequest(now = Date.now) {
+      const queued = this.pending.then(async () => {
+        const waitUntil = Math.max(this.nextRequestAt, this.cooldownUntil);
+        const waitMs = waitUntil - now();
+        if (waitMs > 0) await delay(waitMs);
+        this.nextRequestAt = now() + requestDelayMs;
+      });
+      this.pending = queued.catch(() => {});
+      await queued;
+    },
+    note429() {
+      this.error429Count += 1;
+      if (max429Errors > 0 && this.error429Count >= max429Errors) this.stopped = true;
+    },
+    cooldown(waitMs, now = Date.now) {
+      this.cooldownUntil = Math.max(this.cooldownUntil, now() + Math.max(0, waitMs));
+    },
+    shouldStop() {
+      return this.stopped;
+    },
+  };
+}
+
+class RateLimitAbortError extends Error {}
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -1544,12 +1615,20 @@ function positiveInteger(value, fallback = 1) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function nonNegativeInteger(value, fallback = 0) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 module.exports = {
   collectCarryForwardVideos,
+  createRequestLimiter,
   filterBlockedVideos,
   isBlockedSource,
   matchBlockedSource,
   mergeFetchedAndCarriedVideos,
+  parseRetryAfterMs,
+  retryDelayMs,
   selectCandidatesForInspection,
   TAIWAN_VTUBER_BLACKLIST,
 };

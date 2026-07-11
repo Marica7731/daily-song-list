@@ -4,11 +4,15 @@ const test = require("node:test");
 process.env.DAILY_SONG_VIDEO_LIMIT = "10";
 process.env.DAILY_SONG_RECENT_BUCKET_LIMIT = "2";
 process.env.DAILY_SONG_MONTH_REFRESH_LIMIT = "1";
+process.env.DAILY_SONG_429_COOLDOWN_MS = "9000";
 
 const {
   collectCarryForwardVideos,
+  createRequestLimiter,
   isBlockedSource,
   mergeFetchedAndCarriedVideos,
+  parseRetryAfterMs,
+  retryDelayMs,
   selectCandidatesForInspection,
   TAIWAN_VTUBER_BLACKLIST,
 } = require("../scripts/update-songlist");
@@ -186,6 +190,38 @@ test("candidate selection and final merge filter blacklisted videos", () => {
   );
 });
 
+test("Retry-After parsing supports seconds and HTTP dates", () => {
+  const nowMs = Date.parse("2026-07-12T00:00:00Z");
+
+  assert.equal(parseRetryAfterMs("2.5", nowMs), 2500);
+  assert.equal(parseRetryAfterMs("Sun, 12 Jul 2026 00:00:05 GMT", nowMs), 5000);
+  assert.equal(parseRetryAfterMs("bad", nowMs), 0);
+});
+
+test("429 retry delay honors cooldown and Retry-After headers", () => {
+  const nowMs = Date.parse("2026-07-12T00:00:00Z");
+
+  assert.equal(retryDelayMs(response(429, "2"), 1, nowMs), 9000);
+  assert.equal(retryDelayMs(response(503, "Sun, 12 Jul 2026 00:00:05 GMT"), 1, nowMs), 5000);
+  assert.equal(retryDelayMs(response(500, ""), 2, nowMs), 3000);
+});
+
+test("request limiter tracks request spacing, cooldowns, and 429 budget", async () => {
+  const limiter = createRequestLimiter({ requestDelayMs: 1000, max429Errors: 2 });
+  let nowMs = 1000;
+
+  await limiter.beforeRequest(() => nowMs);
+  assert.equal(limiter.nextRequestAt, 2000);
+
+  limiter.cooldown(5000, () => nowMs);
+  assert.equal(limiter.cooldownUntil, 6000);
+
+  limiter.note429();
+  assert.equal(limiter.shouldStop(), false);
+  limiter.note429();
+  assert.equal(limiter.shouldStop(), true);
+});
+
 function candidate(videoId, hoursAgo, sourceGroups, overrides = {}) {
   return {
     videoId,
@@ -211,5 +247,16 @@ function song(title) {
     artist: "artist",
     seconds: 60,
     time: "0:01:00",
+  };
+}
+
+function response(status, retryAfter) {
+  return {
+    status,
+    headers: {
+      get(name) {
+        return name.toLowerCase() === "retry-after" ? retryAfter : "";
+      },
+    },
   };
 }
