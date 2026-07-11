@@ -9,11 +9,12 @@
 主要目标是把旧的“白色大卡片列表”改成更适合长期浏览的榜单信息架构：
 
 - 歌曲榜/歌手榜：统一白色面板内的紧凑 `rank-row` 行。
-- 来源展示：折叠状态只显示一个来源摘要，点击行、展开按钮或“另有 N 个来源”后显示完整时间戳来源。
+- 来源展示：折叠状态只显示一个可点击时间戳来源；多来源只保留“查看来源/收起来源”按钮来显示完整时间戳来源。
 - 并列排名：同收录次数显示相同名次，使用 competition ranking，例如 `3、2、2、1 => 01、02、02、04`。
 - 歌曲索引：`歌曲索引` 不再显示排行榜名次，按索引分组展示歌曲。
 - 视频视图：独立 16:9 封面网格，默认只显示前 3 首歌，可展开其余歌曲。
-- 顶部和工具栏：中文文案、sticky 筛选栏、紧凑统计 chip、宽页面容器。
+- 顶部和工具栏：简体中文、sticky 筛选栏、紧凑统计 chip、宽页面容器。
+- 大列表渲染：歌曲榜、歌手榜、歌曲索引和视频视图先渲染首批结果，再通过“显示更多”追加。
 
 ## 修改文件清单
 
@@ -24,11 +25,15 @@
 
 - `assets/app.js`
   - 重构 `render()`，按 `songRank` / `artistRank` / `songAz` / `videos` 分流渲染。
-  - 新增 `buildCompetitionRanks()`，歌曲榜和歌手榜共用并列排名。
+  - 通过 `assets/ranking-utils.js` 的 `buildCompetitionRanks()`，歌曲榜和歌手榜共用并列排名。
+  - 通过 `assets/ranking-utils.js` 的 `buildSongRecords()` 修正同名歌曲聚合：同标题同已知歌手合并、同标题不同已知歌手拆开、未知歌手只在唯一已知歌手时安全合并。
   - 新增来源展开状态 `state.expandedRows`，视图、范围、搜索、快照变化时清空。
-  - 新增 `renderRankRecord()`、`renderSourcePreview()`、`renderSourceDrawer()`、`toggleSourceDrawer()`。
+  - 新增 `renderRankRecord()`、`appendSublineSource()`、`renderSourceDrawer()`、`toggleSourceDrawer()`。
   - 新增 `renderSongIndexView()`、`groupSongIndex()`、`songIndexBucket()`，歌曲索引不再复用排行榜行号。
   - 重写 `renderVideo()`，视频卡片默认显示 3 首歌，超过后用 `toggleVideoSongs()` 展开。
+  - 新增快照 loader，读取失败时保留上一份成功数据，快速切换时旧响应不会覆盖新选择。
+  - 搜索使用 debounce；清空搜索立即渲染。
+  - 视图渲染使用 DocumentFragment 和首批分页，避免一次性创建全部 DOM。
   - 时间戳链接仍通过 `youtubeTimeUrl(videoId, seconds)` 生成，不改变跳转语义。
 
 - `assets/styles.css`
@@ -36,6 +41,20 @@
   - 页面最大宽度改为 `1520px`，桌面端左右边距使用 `clamp(12px, 2vw, 32px)`。
   - 榜单行用固定列结构和 `min-width: 0`，避免长日文/英文标题撑破布局。
   - 移动端 tab 横向滚动，390px 宽度下无横向溢出。
+  - 移动端工具栏为“搜索第一行、范围/视图/快照横向滚动第二行”。
+  - 620px 以下隐藏独立收录次数列，避免移动端横向挤压；来源按钮仍保留清晰入口。
+
+- `assets/frontend-utils.js`
+  - 提供快照读取竞态控制、失败保留、搜索归一化和过滤纯函数。
+
+- `assets/ranking-utils.js`
+  - 提供同名歌曲聚合和 competition ranking 纯函数。
+
+- `test/frontend-ranking.test.js`
+  - 覆盖同标题同歌手合并、同标题不同歌手拆分、未知歌手安全合并和并列排名。
+
+- `test/frontend-utils.test.js`
+  - 覆盖快照请求竞态、快照失败保留以及搜索过滤。
 
 ## 和整理歌链路分支的边界
 
@@ -93,32 +112,30 @@ http://127.0.0.1:8080/
 
 合并后至少检查：
 
-- 最近72小时、本月都能切换。
+- 最近72小时、月度都能切换。
 - 歌曲榜、歌手榜、歌曲索引、视频都能切换。
 - 搜索歌曲、歌手、频道、视频标题都能过滤。
 - 同次数歌曲/歌手显示并列排名。
 - 歌曲索引不显示排行榜名次。
 - 来源展开/收起正常，时间戳链接仍是 YouTube `&t=<seconds>s`。
 - 历史快照切换后 summary 显示历史快照提示。
-- 390x844、768x1024、1366x768、1920x1080 无横向溢出。
+- 320x700、390x844、768x1024、920x900、1366x768、1920x1080 无横向溢出。
 
 ## 本轮已完成的验证
 
-- `npm run check` 通过。
+- `npm run check` 通过，当前覆盖 26 个测试。
 - 本地静态服务器 `http://127.0.0.1:8080/` 可打开。
-- Playwright 截图检查无控制台错误、无横向溢出。
+- Chrome headless 截图检查主要断点无横向溢出，390x844 首屏超过 6 条榜单行。
 - 已生成本地截图：
-  - `artifacts/ui-screenshots/1920-song-rank.png`
-  - `artifacts/ui-screenshots/1366-song-expanded.png`
-  - `artifacts/ui-screenshots/768-artist-rank.png`
-  - `artifacts/ui-screenshots/390-song-index.png`
-  - `artifacts/ui-screenshots/1366-videos.png`
-  - `artifacts/ui-screenshots/390-search-results.png`
-  - `artifacts/ui-screenshots/390-no-results.png`
-  - `artifacts/ui-screenshots/768-history-snapshot.png`
+  - `artifacts/ui2-final-verified/1920x1080.png`
+  - `artifacts/ui2-final-verified/1366x768.png`
+  - `artifacts/ui2-final-verified/920x900.png`
+  - `artifacts/ui2-final-verified/768x1024.png`
+  - `artifacts/ui2-final-verified/390x844.png`
+  - `artifacts/ui2-final-verified/320x700.png`
 
 ## 已知限制
 
 - 视频封面使用 YouTube 稳定缩略图 URL；网络慢或加载失败时会切到内置占位图。
 - 歌曲索引按现有 `makeSongSortKey()` 和标题首字符分组，不新增日文假名转写依赖。
-- 本分支没有发布到线上，也没有改 GitHub Pages workflow。
+- 本分支不改抓取、数据 schema 或 GitHub Pages workflow；上线仍通过 main 分支 GitHub Pages 自动部署。
