@@ -299,6 +299,8 @@ input::placeholder {
   padding: 10px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 72px;
   transition: background-color 140ms ease;
 }
 
@@ -498,7 +500,38 @@ input::placeholder {
   color: var(--ink);
 }
 
-/* 10. Source drawer */
+/* 10. Progressive loading */
+.load-more-row {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 0 4px;
+}
+
+.load-more-note {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.load-more {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.load-more:hover {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+/* 11. Source drawer */
 .source-drawer {
   grid-column: 2 / -1;
   display: grid;
@@ -551,7 +584,7 @@ input::placeholder {
   color: var(--muted-2);
 }
 
-/* 11. Song index */
+/* 12. Song index */
 .song-index {
   display: block;
   background: transparent;
@@ -597,6 +630,8 @@ input::placeholder {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--panel);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 360px;
   scroll-margin-top: 118px;
 }
 
@@ -624,6 +659,8 @@ input::placeholder {
   padding: 9px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
   transition: background-color 140ms ease;
 }
 
@@ -645,6 +682,8 @@ input::placeholder {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--panel);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 230px;
   transition:
     border-color 140ms ease,
     background-color 140ms ease;

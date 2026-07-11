@@ -163,6 +163,20 @@ const sortCollator = new Intl.Collator("en", {
   ignorePunctuation: true,
 });
 
+const INITIAL_RENDER_LIMITS = {
+  songRank: 120,
+  artistRank: 120,
+  songAz: 160,
+  videos: 36,
+};
+
+const LOAD_MORE_STEPS = {
+  songRank: 160,
+  artistRank: 160,
+  songAz: 200,
+  videos: 36,
+};
+
 const state = {
   payload: null,
   status: null,
@@ -171,6 +185,8 @@ const state = {
   view: "songRank",
   filter: "",
   expandedRows: new Set(),
+  renderLimit: INITIAL_RENDER_LIMITS.songRank,
+  filterTimer: null,
 };
 
 const els = {
@@ -208,6 +224,7 @@ function bindEvents() {
       if (state.range === tab.dataset.range) return;
       state.range = tab.dataset.range;
       state.expandedRows.clear();
+      resetRenderLimit();
       setActiveTab(els.rangeTabs, tab);
       render();
     });
@@ -218,6 +235,7 @@ function bindEvents() {
       if (state.view === tab.dataset.view) return;
       state.view = tab.dataset.view;
       state.expandedRows.clear();
+      resetRenderLimit();
       setActiveTab(els.viewTabs, tab);
       render();
     });
@@ -226,7 +244,9 @@ function bindEvents() {
   els.filterInput.addEventListener("input", () => {
     state.filter = normalizeSearch(els.filterInput.value.trim());
     state.expandedRows.clear();
-    render();
+    resetRenderLimit();
+    window.clearTimeout(state.filterTimer);
+    state.filterTimer = window.setTimeout(render, 80);
   });
 
   els.snapshotSelect.addEventListener("change", async () => {
@@ -235,6 +255,7 @@ function bindEvents() {
       state.payload = await readJson(path);
       state.status = state.payload.status || state.status;
       state.expandedRows.clear();
+      resetRenderLimit();
       renderStatus(state.payload.status);
       render();
     } catch (error) {
@@ -248,8 +269,16 @@ function bindEvents() {
       els.filterInput.value = "";
       state.filter = "";
       state.expandedRows.clear();
+      resetRenderLimit();
       render();
       els.filterInput.focus();
+      return;
+    }
+
+    const loadMore = event.target.closest("[data-load-more]");
+    if (loadMore) {
+      state.renderLimit = Math.min(Number(loadMore.dataset.total || 0), state.renderLimit + currentLoadMoreStep());
+      render();
       return;
     }
 
@@ -278,6 +307,24 @@ function setActiveTab(tabs, activeTab) {
     item.classList.toggle("active", item === activeTab);
     item.setAttribute("aria-selected", item === activeTab ? "true" : "false");
   }
+}
+
+function resetRenderLimit() {
+  state.renderLimit = INITIAL_RENDER_LIMITS[state.view] || 120;
+}
+
+function currentLoadMoreStep() {
+  return LOAD_MORE_STEPS[state.view] || 120;
+}
+
+function visibleSlice(items) {
+  const total = items.length;
+  const limit = Math.min(total, state.renderLimit || INITIAL_RENDER_LIMITS[state.view] || total);
+  return {
+    visible: items.slice(0, limit),
+    visibleCount: limit,
+    total,
+  };
 }
 
 function renderSnapshotOptions() {
@@ -342,6 +389,7 @@ function resetContentClasses() {
 
 function renderVideoList(group, items) {
   const allSongs = items.reduce((sum, item) => sum + (item.songs?.length || 0), 0);
+  const { visible, visibleCount, total } = visibleSlice(items);
   renderSummary(group, [
     metric(items.length, "个视频"),
     metric(allSongs, "首歌曲"),
@@ -355,15 +403,17 @@ function renderVideoList(group, items) {
     return;
   }
 
-  for (const item of items) {
+  for (const item of visible) {
     els.content.append(renderVideo(item));
   }
+  renderLoadMoreControl({ visibleCount, total, unit: "个视频" });
 }
 
 function renderSongRank(group, occurrences) {
   const records = buildSongRecords(occurrences).sort(compareSongRank);
   const ranks = buildCompetitionRanks(records);
   const countFrequencies = buildCountFrequencies(records);
+  const { visible, visibleCount, total } = visibleSlice(records);
 
   renderSummary(group, [
     metric(uniqueVideoCount(occurrences), "个视频"),
@@ -379,7 +429,7 @@ function renderSongRank(group, occurrences) {
     return;
   }
 
-  for (const record of records) {
+  for (const record of visible) {
     els.content.append(
       renderRankRecord({
         key: `song-${record.key}`,
@@ -393,6 +443,7 @@ function renderSongRank(group, occurrences) {
       }),
     );
   }
+  renderLoadMoreControl({ visibleCount, total, unit: "首歌曲" });
 }
 
 function renderArtistRank(group, occurrences) {
@@ -400,6 +451,7 @@ function renderArtistRank(group, occurrences) {
   records.sort(compareCountRecords);
   const ranks = buildCompetitionRanks(records);
   const countFrequencies = buildCountFrequencies(records);
+  const { visible, visibleCount, total } = visibleSlice(records);
 
   const searchInfo = state.filter ? `当前显示 ${records.length} 位` : "";
   const extraInfo = missingArtistCount ? `${missingArtistCount} 条待补歌手` : "";
@@ -417,7 +469,7 @@ function renderArtistRank(group, occurrences) {
     return;
   }
 
-  for (const record of records) {
+  for (const record of visible) {
     els.content.append(
       renderRankRecord({
         key: `artist-${record.key}`,
@@ -431,10 +483,12 @@ function renderArtistRank(group, occurrences) {
       }),
     );
   }
+  renderLoadMoreControl({ visibleCount, total, unit: "位歌手" });
 }
 
 function renderSongIndexView(group, occurrences) {
   const records = buildSongRecords(occurrences).sort(compareSongAz);
+  const { visible, visibleCount, total } = visibleSlice(records);
 
   renderSummary(group, [
     metric(uniqueVideoCount(occurrences), "个视频"),
@@ -450,7 +504,7 @@ function renderSongIndexView(group, occurrences) {
     return;
   }
 
-  const groups = groupSongIndex(records);
+  const groups = groupSongIndex(visible);
   const nav = document.createElement("nav");
   nav.className = "index-nav";
   nav.setAttribute("aria-label", "歌曲快速索引");
@@ -481,6 +535,7 @@ function renderSongIndexView(group, occurrences) {
     section.append(list);
     els.content.append(section);
   }
+  renderLoadMoreControl({ visibleCount, total, unit: "首歌曲" });
 }
 
 function renderSummary(group, metrics, note = "") {
@@ -516,6 +571,28 @@ function renderSummary(group, metrics, note = "") {
     noteNode.textContent = note;
     els.summary.append(noteNode);
   }
+}
+
+function renderLoadMoreControl({ visibleCount, total, unit }) {
+  if (visibleCount >= total) return;
+
+  const footer = document.createElement("div");
+  footer.className = "load-more-row";
+
+  const note = document.createElement("span");
+  note.className = "load-more-note";
+  note.textContent = `已显示 ${visibleCount} / ${total} ${unit}`;
+  footer.append(note);
+
+  const button = document.createElement("button");
+  button.className = "load-more";
+  button.type = "button";
+  button.dataset.loadMore = "true";
+  button.dataset.total = String(total);
+  button.textContent = "显示更多";
+  footer.append(button);
+
+  els.content.append(footer);
 }
 
 function renderEmpty(message, options = {}) {
@@ -724,6 +801,7 @@ function renderRankRecord({ key, rank, isTied, title, meta, videoCount, count, o
     .filter(Boolean)
     .join(" ");
   row.dataset.rowKey = rowKey;
+  row._sourceOccurrences = occurrences;
 
   const rankNumber = document.createElement("div");
   rankNumber.className = "rank-number";
@@ -751,6 +829,7 @@ function renderIndexRecord(record) {
     .filter(Boolean)
     .join(" ");
   row.dataset.rowKey = rowKey;
+  row._sourceOccurrences = record.occurrences;
 
   row.append(renderRecordContent(record.title, songMeta(record), record.occurrences, drawerId, isExpanded));
   row.append(renderCount(record.count));
@@ -875,7 +954,16 @@ function renderSourceDrawer(occurrences, drawerId, isExpanded) {
   drawer.className = "source-drawer";
   drawer.id = drawerId;
   drawer.hidden = !isExpanded;
+  if (!isExpanded) {
+    drawer.dataset.sourceDeferred = "true";
+    return drawer;
+  }
 
+  appendSourceDrawerLinks(drawer, occurrences);
+  return drawer;
+}
+
+function appendSourceDrawerLinks(drawer, occurrences) {
   for (const occurrence of occurrences) {
     const link = document.createElement("a");
     link.className = "source-link";
@@ -898,8 +986,6 @@ function renderSourceDrawer(occurrences, drawerId, isExpanded) {
     link.append(time, source, video);
     drawer.append(link);
   }
-
-  return drawer;
 }
 
 function toggleSourceDrawer(row) {
@@ -909,6 +995,11 @@ function toggleSourceDrawer(row) {
   if (!drawer || !buttons.length) return;
 
   const nextExpanded = drawer.hidden;
+  if (nextExpanded && drawer.dataset.sourceDeferred === "true") {
+    drawer.replaceChildren();
+    appendSourceDrawerLinks(drawer, row._sourceOccurrences || []);
+    delete drawer.dataset.sourceDeferred;
+  }
   drawer.hidden = !nextExpanded;
   row.classList.toggle("is-expanded", nextExpanded);
   for (const button of buttons) {
@@ -987,10 +1078,46 @@ function renderVideo(item) {
   const list = document.createElement("ol");
   list.className = "song-list";
   const songs = item.songs || [];
-  songs.forEach((song, index) => {
+  appendVideoSongLinks(list, item, songs.slice(0, 3));
+  body.append(list);
+
+  if (songs.length > 3) {
+    const more = document.createElement("button");
+    more.className = "video-more";
+    more.type = "button";
+    more.dataset.toggleVideoSongs = "true";
+    more.setAttribute("aria-expanded", "false");
+    card._remainingSongs = songs.slice(3);
+    card._songList = list;
+    card._videoItem = item;
+    more.textContent = `展开其余 ${songs.length - 3} 首`;
+    body.append(more);
+  }
+
+  card.append(body);
+  return card;
+}
+
+function toggleVideoSongs(card) {
+  if (!card) return;
+  const button = card.querySelector(".video-more");
+  const nextExpanded = button.getAttribute("aria-expanded") !== "true";
+  if (nextExpanded && card._remainingSongs?.length) {
+    appendVideoSongLinks(card._songList, card._videoItem, card._remainingSongs, "video-song-extra");
+    card._remainingSongs = [];
+  }
+
+  const extras = Array.from(card.querySelectorAll(".video-song-extra"));
+
+  for (const item of extras) item.hidden = !nextExpanded;
+  button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
+  button.textContent = nextExpanded ? "收起歌曲" : `展开其余 ${extras.length} 首`;
+}
+
+function appendVideoSongLinks(list, item, songs, extraClass = "") {
+  for (const song of songs) {
     const li = document.createElement("li");
-    if (index >= 3) li.hidden = true;
-    li.className = index >= 3 ? "video-song-extra" : "";
+    if (extraClass) li.className = extraClass;
 
     const link = document.createElement("a");
     link.href = youtubeTimeUrl(item.videoId, song.seconds);
@@ -1013,32 +1140,7 @@ function renderVideo(item) {
 
     li.append(link);
     list.append(li);
-  });
-  body.append(list);
-
-  if (songs.length > 3) {
-    const more = document.createElement("button");
-    more.className = "video-more";
-    more.type = "button";
-    more.dataset.toggleVideoSongs = "true";
-    more.setAttribute("aria-expanded", "false");
-    more.textContent = `展开其余 ${songs.length - 3} 首`;
-    body.append(more);
   }
-
-  card.append(body);
-  return card;
-}
-
-function toggleVideoSongs(card) {
-  if (!card) return;
-  const button = card.querySelector(".video-more");
-  const extras = Array.from(card.querySelectorAll(".video-song-extra"));
-  const nextExpanded = button.getAttribute("aria-expanded") !== "true";
-
-  for (const item of extras) item.hidden = !nextExpanded;
-  button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
-  button.textContent = nextExpanded ? "收起歌曲" : `展开其余 ${extras.length} 首`;
 }
 
 function groupSongIndex(records) {
