@@ -7,6 +7,7 @@ process.env.DAILY_SONG_MONTH_REFRESH_LIMIT = "1";
 process.env.DAILY_SONG_429_COOLDOWN_MS = "9000";
 
 const {
+  buildGroups,
   collectCarryForwardVideos,
   createRequestLimiter,
   isBlockedSource,
@@ -131,6 +132,26 @@ test("fetched videos win over carried videos while preserving month membership",
   assert.equal(merged.length, 1);
   assert.deepEqual(merged[0].songs.map((item) => item.title), ["new"]);
   assert.deepEqual(merged[0].sourceGroups.sort(), ["month", "today"]);
+});
+
+test("monthly group includes recent videos found through the 72h search", () => {
+  const groups = buildGroups(
+    [
+      video("AAAAAAAAAAA", 2, ["today"]),
+      video("BBBBBBBBBBB", 24 * 10, ["month"]),
+      video("CCCCCCCCCCC", 24 * 40, ["today"]),
+    ],
+    NOW,
+  );
+
+  assert.deepEqual(
+    groups["72h"].items.map((item) => item.videoId),
+    ["AAAAAAAAAAA"],
+  );
+  assert.deepEqual(
+    groups["1m"].items.map((item) => item.videoId),
+    ["AAAAAAAAAAA", "BBBBBBBBBBB"],
+  );
 });
 
 test("Taiwan VTuber blacklist matches named channels without relying on song title text", () => {

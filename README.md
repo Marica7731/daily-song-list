@@ -3,7 +3,7 @@
 Small GitHub Pages site that collects YouTube videos with usable timestamp song lists, then exposes jump links for two ranges:
 
 - `72h`: videos published within the last 72 hours.
-- `1m`: videos returned by YouTube's monthly search filter.
+- `1m`: videos in the monthly carry-forward window, including recent `72h` discoveries and videos returned by YouTube's monthly search filter.
 
 The site keeps one successful snapshot per hour. If a scheduled scrape fails, existing `data/latest.json` and snapshot files remain untouched, so the page continues to show the last successful result.
 
@@ -11,7 +11,7 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
 
 1. `scripts/update-songlist.js` fetches YouTube search pages for `歌枠` and `弾き語り` using the same `today` and `month` filter URLs used by `Marica7731/mygit`.
    - Search pages are expanded through YouTube search continuation requests, matching the ranking project's "scroll until more results are loaded" behavior without requiring a browser in GitHub Actions.
-   - When the previous successful snapshot is fresh, already inspected videos are carried forward and skipped. The new inspection queue scans only today's and one-day-old candidates, then refreshes a small number of monthly-filter candidates.
+   - When the previous successful snapshot is fresh, already inspected videos are carried forward and skipped. Recent videos discovered through the `72h` search are also retained in `1m` for the monthly carry-forward window, so the monthly view does not fall below the shorter range just because YouTube's monthly search ranking omitted them. The new inspection queue scans only today's and one-day-old candidates, then refreshes a small number of monthly-filter candidates.
    - If the previous successful snapshot is missing or too old, the script falls back to a full recovery queue covering today's, one-day-old, and two-day-old candidates before filling the remaining budget with monthly-filter candidates.
 2. It fetches each candidate watch page, extracts description and first comment continuations, parses timestamped song lists, and skips videos without usable songs.
    - Non-song chapter rows, chat highlights, setup sections, channel metrics, custom emoji prefixes, and low-quality mixed comment timelines are filtered before write.

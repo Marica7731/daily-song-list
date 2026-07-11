@@ -860,6 +860,7 @@ function buildGroups(videos, capturedAt) {
   const nowMs = capturedAt.getTime();
   const in72h = (item) => Boolean(item.publishedTimestamp && nowMs - item.publishedTimestamp <= H72_MS);
   const inMonthSearch = (item) => item.sourceGroups?.includes("month") || item.sourceGroup === "month";
+  const inMonthWindow = (item) => isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS);
   const sortVideos = (items) =>
     [...items].sort((a, b) => {
       const timeDiff = (b.publishedTimestamp || 0) - (a.publishedTimestamp || 0);
@@ -877,10 +878,10 @@ function buildGroups(videos, capturedAt) {
     },
     "1m": {
       id: "1m",
-      title: "YouTube monthly-filter timestamp song lists",
+      title: "Monthly timestamp song lists",
       generatedAt: capturedAt.toISOString(),
       updatedAt: capturedAt.toISOString(),
-      items: sortVideos(videos.filter((item) => inMonthSearch(item))),
+      items: sortVideos(videos.filter((item) => inMonthWindow(item) || inMonthSearch(item))),
     },
   };
 }
@@ -1556,6 +1557,7 @@ function nonNegativeInteger(value, fallback = 0) {
 }
 
 module.exports = {
+  buildGroups,
   collectCarryForwardVideos,
   createRequestLimiter,
   filterBlockedVideos,
