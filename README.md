@@ -43,9 +43,9 @@ python -m http.server 8080
 Useful environment variables:
 
 - `DAILY_SONG_SEARCH_LIMIT`: maximum search results per keyword and source group, default `160`; GitHub Actions uses `500`.
-- `DAILY_SONG_VIDEO_LIMIT`: maximum candidate videos to inspect, default `160`; GitHub Actions uses `240`.
+- `DAILY_SONG_VIDEO_LIMIT`: maximum candidate videos to inspect, default `160`; GitHub Actions uses `200`.
 - `DAILY_SONG_VIDEO_CONCURRENCY`: concurrent watch-page inspections, default `2`; GitHub Actions uses `2`.
-- `DAILY_SONG_RECENT_BUCKET_LIMIT`: maximum candidates reserved for each 0-24h, 24-48h, and 48-72h bucket, default is based on `DAILY_SONG_VIDEO_LIMIT`; GitHub Actions uses `80`.
+- `DAILY_SONG_RECENT_BUCKET_LIMIT`: maximum candidates reserved for each 0-24h, 24-48h, and 48-72h bucket, default is based on `DAILY_SONG_VIDEO_LIMIT`; GitHub Actions uses `70`.
 - `DAILY_SONG_SEARCH_CONTINUATION_ROUNDS`: maximum YouTube search continuation requests per source, default `40`; GitHub Actions uses `120`.
 - `DAILY_SONG_FETCH_RETRIES`: retry count for YouTube 429/5xx responses, default `3`.
 - `DAILY_SONG_COMMENT_REPLY_LIMIT`: max reply continuations, default `12`.
