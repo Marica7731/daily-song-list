@@ -74,7 +74,55 @@
     );
   }
 
+  function buildSourcePreview(occurrences, options = {}) {
+    const sourceOccurrences = (occurrences || []).filter(Boolean);
+    const rawLimit = Number(options.limit ?? 2);
+    const limit = Number.isFinite(rawLimit) ? Math.max(0, Math.floor(rawLimit)) : 2;
+    if (!limit) {
+      return {
+        preview: [],
+        hiddenCount: sourceOccurrences.length,
+        total: sourceOccurrences.length,
+      };
+    }
+
+    const preview = [];
+    const deferred = [];
+    const seenSources = new Set();
+
+    for (const occurrence of sourceOccurrences) {
+      const sourceKey = sourcePreviewKey(occurrence);
+      if (sourceKey && seenSources.has(sourceKey)) {
+        deferred.push(occurrence);
+        continue;
+      }
+      if (sourceKey) seenSources.add(sourceKey);
+
+      if (preview.length < limit) {
+        preview.push(occurrence);
+      } else {
+        deferred.push(occurrence);
+      }
+    }
+
+    for (const occurrence of deferred) {
+      if (preview.length >= limit) break;
+      preview.push(occurrence);
+    }
+
+    return {
+      preview,
+      hiddenCount: Math.max(0, sourceOccurrences.length - preview.length),
+      total: sourceOccurrences.length,
+    };
+  }
+
+  function sourcePreviewKey(occurrence) {
+    const item = occurrence?.item || {};
+    return normalizeSearch(item.channelName || item.title || item.videoId || "");
+  }
   return {
+    buildSourcePreview,
     createSnapshotLoader,
     filterItemsBySearch,
     filterOccurrencesBySearch,

@@ -12,6 +12,7 @@ const RANGE_LABELS = {
 
 const SNAPSHOT_LATEST_PATH = "data/latest.json";
 const SEARCH_DEBOUNCE_MS = 140;
+const INLINE_SOURCE_PREVIEW_LIMIT = 2;
 const INITIAL_RENDER_LIMITS = {
   songRank: 160,
   artistRank: 160,
@@ -956,26 +957,60 @@ function appendSublineSource(container, occurrences, drawerId, isExpanded) {
     appendSublinePart(container, "无来源");
     return;
   }
-  const first = occurrences[0];
-  const link = document.createElement("a");
-  link.className = "source-link-inline";
-  link.href = youtubeTimeUrl(first.item.videoId, first.song.seconds);
-  link.target = "_blank";
-  link.rel = "noreferrer";
-  link.textContent = sourceLabel(first);
-  link.setAttribute("aria-label", `打开 ${cleanText(first.song.title)} 的时间戳来源`);
-  appendSublineNode(container, link);
+  if (occurrences.length === 1) {
+    appendSublineNode(container, renderInlineSourceLink(occurrences[0], { compact: false }));
+    return;
+  }
 
-  if (occurrences.length <= 1) return;
+  const sourcePreview = window.FrontendUtils.buildSourcePreview(occurrences, {
+    limit: INLINE_SOURCE_PREVIEW_LIMIT,
+  });
+  appendSublineNode(container, renderSourcePreviewLinks(sourcePreview.preview));
+
   const button = document.createElement("button");
   button.className = "rank-expand";
   button.type = "button";
   button.dataset.toggleSource = "true";
+  button.dataset.sourceTotal = String(sourcePreview.total);
+  button.dataset.sourceHiddenCount = String(sourcePreview.hiddenCount);
   button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
   button.setAttribute("aria-controls", drawerId);
-  button.setAttribute("aria-label", isExpanded ? "收起来源" : `查看全部 ${occurrences.length} 个来源`);
-  button.textContent = isExpanded ? "收起来源" : "查看来源";
+  button.setAttribute("aria-label", sourceToggleAriaLabel(isExpanded, sourcePreview.total, sourcePreview.hiddenCount));
+  button.textContent = sourceToggleText(isExpanded, sourcePreview.hiddenCount);
   appendSublineNode(container, button);
+}
+
+function renderSourcePreviewLinks(occurrences) {
+  const preview = document.createElement("span");
+  preview.className = "source-preview-list";
+  preview.setAttribute("aria-label", "来源预览");
+  for (const occurrence of occurrences) {
+    preview.append(renderInlineSourceLink(occurrence, { compact: true }));
+  }
+  return preview;
+}
+
+function renderInlineSourceLink(occurrence, options = {}) {
+  const link = document.createElement("a");
+  link.className = "source-link-inline";
+  link.href = youtubeTimeUrl(occurrence.item.videoId, occurrence.song.seconds);
+  link.target = "_blank";
+  link.rel = "noreferrer";
+  link.textContent = options.compact ? compactSourceLabel(occurrence) : sourceLabel(occurrence);
+  link.title = sourceLabel(occurrence);
+  link.setAttribute("aria-label", `打开来源：${sourceLabel(occurrence)}`);
+  return link;
+}
+
+function sourceToggleText(isExpanded, hiddenCount) {
+  if (isExpanded) return "收起来源";
+  return hiddenCount > 0 ? `+${hiddenCount} 来源` : "来源详情";
+}
+
+function sourceToggleAriaLabel(isExpanded, total, hiddenCount) {
+  if (isExpanded) return "收起来源";
+  if (hiddenCount > 0) return `查看全部 ${total} 个来源，另有 ${hiddenCount} 个未显示`;
+  return `查看 ${total} 个来源详情`;
 }
 
 function appendSublineNode(container, node) {
@@ -1044,8 +1079,10 @@ function toggleSourceDrawer(row) {
   for (const button of buttons) {
     button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
     const count = row._sourceOccurrences?.length || 0;
-    button.setAttribute("aria-label", nextExpanded ? "收起来源" : `查看全部 ${count} 个来源`);
-    button.textContent = nextExpanded ? "收起来源" : `查看来源 (${count})`;
+    const total = Number(button.dataset.sourceTotal || count);
+    const hiddenCount = Number(button.dataset.sourceHiddenCount || Math.max(0, count - INLINE_SOURCE_PREVIEW_LIMIT));
+    button.setAttribute("aria-label", sourceToggleAriaLabel(nextExpanded, total, hiddenCount));
+    button.textContent = sourceToggleText(nextExpanded, hiddenCount);
   }
 
   if (nextExpanded) {
@@ -1286,6 +1323,10 @@ function sourceLabel({ item, song }) {
   return [song.time || formatSeconds(song.seconds), item.channelName || item.title || item.videoId]
     .filter(Boolean)
     .join(" · ");
+}
+
+function compactSourceLabel({ item }) {
+  return item.channelName || item.title || item.videoId || "来源";
 }
 
 function formatRank(rank) {

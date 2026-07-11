@@ -28,6 +28,7 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
 4. `index.html` + `assets/app.js` render the latest data and allow switching to an hourly snapshot.
    - Default view is song appearance ranking.
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
+   - Ranking rows preview up to two timestamp sources inline, preferring different channels, while the source drawer keeps every matching timestamp link.
 5. `.github/workflows/update-songlist.yml` runs hourly and commits only data changes.
 
 `data/audit.json` is intentionally generated for review. It records inspected videos, rejected source reasons, rejected timestamp rows, and top channels producing non-song timestamp data.

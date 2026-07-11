@@ -426,6 +426,7 @@ input::placeholder {
 }
 
 .rank-subline span:not(.meta-separator),
+.source-preview-list,
 .source-link-inline {
   min-width: 0;
   overflow: hidden;
@@ -447,9 +448,24 @@ input::placeholder {
 }
 
 .source-link-inline {
+  display: inline-block;
   color: var(--muted);
   font-weight: 700;
   text-decoration: none;
+  white-space: nowrap;
+}
+
+.source-preview-list {
+  display: inline-flex;
+  flex: 1 1 min(360px, 34vw);
+  align-items: center;
+  gap: 6px;
+  max-width: 430px;
+}
+
+.source-preview-list .source-link-inline {
+  flex: 1 1 0;
+  max-width: 210px;
 }
 
 .source-link-inline:hover,
@@ -1059,6 +1075,17 @@ input::placeholder {
   .source-link-inline {
     flex: 0 1 76px;
     max-width: 76px;
+  }
+
+  .source-preview-list {
+    flex: 0 1 142px;
+    max-width: 142px;
+    gap: 4px;
+  }
+
+  .source-preview-list .source-link-inline {
+    flex: 1 1 0;
+    max-width: none;
   }
 
   .subline-video-count {

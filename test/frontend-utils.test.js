@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
+  buildSourcePreview,
   createSnapshotLoader,
   filterItemsBySearch,
   filterOccurrencesBySearch,
@@ -74,6 +75,37 @@ test("search clear and filtering use title, artist, channel, and video title", (
   assert.equal(filterOccurrencesBySearch(occurrences, "").length, 3);
 });
 
+test("source preview prioritizes different channels before duplicates", () => {
+  const preview = buildSourcePreview(
+    [
+      occurrence("A", "shared channel"),
+      occurrence("B", "shared channel"),
+      occurrence("C", "other channel"),
+      occurrence("D", "third channel"),
+    ],
+    { limit: 2 },
+  );
+
+  assert.deepEqual(
+    preview.preview.map(({ item }) => item.videoId),
+    ["A", "C"],
+  );
+  assert.equal(preview.hiddenCount, 2);
+  assert.equal(preview.total, 4);
+});
+
+test("source preview fills open slots with duplicate-channel occurrences", () => {
+  const preview = buildSourcePreview([occurrence("A", "shared channel"), occurrence("B", "shared channel")], {
+    limit: 2,
+  });
+
+  assert.deepEqual(
+    preview.preview.map(({ item }) => item.videoId),
+    ["A", "B"],
+  );
+  assert.equal(preview.hiddenCount, 0);
+});
+
 function createDeferred() {
   let resolve;
   let reject;
@@ -100,5 +132,16 @@ function song(title, artist) {
     artist,
     seconds: 60,
     time: "0:01:00",
+  };
+}
+
+function occurrence(videoId, channelName) {
+  return {
+    item: {
+      videoId,
+      title: `video ${videoId}`,
+      channelName,
+    },
+    song: song("song", "artist"),
   };
 }
