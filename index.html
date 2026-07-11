@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Daily Song List</title>
+    <meta
+      name="description"
+      content="YouTube 72H and one-month timestamp song-list snapshots with direct jump links."
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">YouTube timestamp song lists</p>
+        <h1>Daily Song List</h1>
+      </div>
+      <div class="status" id="status">Loading</div>
+    </header>
+
+    <main class="layout">
+      <section class="controls" aria-label="Playlist controls">
+        <div class="segmented" role="tablist" aria-label="Range">
+          <button class="tab active" type="button" data-range="72h" role="tab" aria-selected="true">72H</button>
+          <button class="tab" type="button" data-range="1m" role="tab" aria-selected="false">1M</button>
+        </div>
+
+        <label class="field">
+          <span>Snapshot</span>
+          <select id="snapshotSelect"></select>
+        </label>
+
+        <label class="field grow">
+          <span>Filter</span>
+          <input id="filterInput" type="search" placeholder="title, channel, song, artist" />
+        </label>
+      </section>
+
+      <section class="summary" id="summary" aria-live="polite"></section>
+      <section class="video-list" id="videoList"></section>
+    </main>
+
+    <template id="videoTemplate">
+      <article class="video-card">
+        <a class="thumb-link" target="_blank" rel="noreferrer">
+          <img class="thumb" alt="" loading="lazy" />
+        </a>
+        <div class="video-body">
+          <div class="video-heading">
+            <div>
+              <a class="video-title" target="_blank" rel="noreferrer"></a>
+              <div class="video-meta"></div>
+            </div>
+            <div class="song-count"></div>
+          </div>
+          <ol class="song-list"></ol>
+        </div>
+      </article>
+    </template>
+
+    <script src="assets/app.js" defer></script>
+  </body>
+</html>

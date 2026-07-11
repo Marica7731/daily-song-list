@@ -1,0 +1,17 @@
+{
+  "name": "daily-song-list",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hourly YouTube timestamp song-list snapshots for 72H and one-month views.",
+  "scripts": {
+    "update": "node scripts/update-songlist.js",
+    "mark:failure": "node scripts/mark-failure.js",
+    "validate": "node scripts/validate-data.js",
+    "check": "node scripts/check-js-syntax.js && npm test && npm run validate",
+    "serve": "python -m http.server 8080",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

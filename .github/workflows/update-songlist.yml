@@ -1,0 +1,70 @@
+name: Update song-list snapshots
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/update-songlist.yml"
+      - "scripts/**"
+      - "assets/**"
+      - "index.html"
+      - "package.json"
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-song-list-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DAILY_SONG_SEARCH_LIMIT: "42"
+      DAILY_SONG_VIDEO_LIMIT: "42"
+      DAILY_SONG_SNAPSHOT_RETENTION_DAYS: "35"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Update data with previous-data fallback
+        id: update
+        continue-on-error: true
+        run: npm run update
+
+      - name: Keep previous data after update failure
+        if: steps.update.outcome == 'failure'
+        env:
+          DAILY_SONG_FAILURE_MESSAGE: "Scheduled update failed; previous latest data kept."
+        run: npm run mark:failure
+
+      - name: Validate data if latest exists
+        run: |
+          if [ -f data/latest.json ]; then
+            npm run validate
+          else
+            echo "::warning::No data/latest.json exists yet."
+          fi
+
+      - name: Commit data changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "chore: update hourly song-list snapshot"
+            git push
+          fi
