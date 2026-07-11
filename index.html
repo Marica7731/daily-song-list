@@ -12,75 +12,41 @@
   </head>
   <body>
     <header class="topbar">
-      <div>
-        <p class="eyebrow">YouTube timestamp song lists</p>
+      <div class="brand">
         <h1>Daily Song List</h1>
+        <p>歌曲时间戳排行</p>
       </div>
-      <div class="status" id="status">Loading</div>
+      <div class="status" id="status">载入中</div>
     </header>
 
     <main class="layout">
-      <section class="controls" aria-label="Playlist controls">
+      <section class="controls" aria-label="榜单筛选">
         <div class="segmented range-mode" role="tablist" aria-label="Range">
-          <button class="tab active" type="button" data-range="72h" role="tab" aria-selected="true">72H</button>
-          <button class="tab" type="button" data-range="1m" role="tab" aria-selected="false">1M</button>
+          <button class="tab active" type="button" data-range="72h" role="tab" aria-selected="true">最近72小时</button>
+          <button class="tab" type="button" data-range="1m" role="tab" aria-selected="false">近30天</button>
         </div>
 
         <div class="segmented view-mode" role="tablist" aria-label="View">
-          <button class="tab active" type="button" data-view="songRank" role="tab" aria-selected="true">Song Rank</button>
-          <button class="tab" type="button" data-view="artistRank" role="tab" aria-selected="false">Artist Rank</button>
-          <button class="tab" type="button" data-view="songAz" role="tab" aria-selected="false">Song A-Z</button>
-          <button class="tab" type="button" data-view="videos" role="tab" aria-selected="false">Videos</button>
+          <button class="tab active" type="button" data-view="songRank" role="tab" aria-selected="true">歌曲榜</button>
+          <button class="tab" type="button" data-view="artistRank" role="tab" aria-selected="false">歌手榜</button>
+          <button class="tab" type="button" data-view="songAz" role="tab" aria-selected="false">歌曲索引</button>
+          <button class="tab" type="button" data-view="videos" role="tab" aria-selected="false">视频</button>
         </div>
 
-        <label class="field">
-          <span>Snapshot</span>
-          <select id="snapshotSelect"></select>
+        <label class="field search-field">
+          <span class="sr-only">搜索</span>
+          <input id="filterInput" type="search" placeholder="搜索歌曲、歌手、频道或视频" autocomplete="off" />
         </label>
 
-        <label class="field grow">
-          <span>Filter</span>
-          <input id="filterInput" type="search" placeholder="title, channel, song, artist" />
+        <label class="field snapshot-field">
+          <span class="sr-only">历史快照</span>
+          <select id="snapshotSelect" aria-label="历史快照"></select>
         </label>
       </section>
 
       <section class="summary" id="summary" aria-live="polite"></section>
-      <section class="video-list" id="videoList"></section>
+      <section class="content-shell" id="videoList"></section>
     </main>
-
-    <template id="videoTemplate">
-      <article class="video-card">
-        <a class="thumb-link" target="_blank" rel="noreferrer">
-          <img class="thumb" alt="" loading="lazy" />
-        </a>
-        <div class="video-body">
-          <div class="video-heading">
-            <div>
-              <a class="video-title" target="_blank" rel="noreferrer"></a>
-              <div class="video-meta"></div>
-            </div>
-            <div class="song-count"></div>
-          </div>
-          <ol class="song-list"></ol>
-        </div>
-      </article>
-    </template>
-
-    <template id="rankTemplate">
-      <article class="rank-card">
-        <div class="rank-position"></div>
-        <div class="rank-main">
-          <div class="rank-heading">
-            <div>
-              <h2 class="rank-title"></h2>
-              <div class="rank-meta"></div>
-            </div>
-            <div class="rank-count"></div>
-          </div>
-          <div class="source-list"></div>
-        </div>
-      </article>
-    </template>
 
     <script src="assets/app.js" defer></script>
   </body>
