@@ -55,6 +55,48 @@ const H72_MS = 72 * 60 * 60 * 1000;
 const H48_MS = 48 * 60 * 60 * 1000;
 const MONTH_CARRY_MS = 35 * 24 * 60 * 60 * 1000;
 
+// Channel-first source blacklist: avoid dropping ordinary song titles that only mention these names.
+const TAIWAN_VTUBER_BLACKLIST = [
+  { name: "羽芝扉扉", aliases: ["羽芝扉扉", "Uchi Fifi", "uchififi", "@uchififi"], titleAliases: ["#羽芝扉扉", "#扉出來啦"] },
+  { name: "厄倫蒂兒", aliases: ["厄倫蒂兒", "厄伦蒂儿", "Earendel", "EarendelXDFP", "@EarendelXDFP"], titleAliases: ["#厄倫蒂兒", "#厄伦蒂儿", "#DearLive"] },
+  { name: "露恰露恰", aliases: ["露恰露恰", "LutraLutra", "Lutralutra"] },
+  { name: "歐妲", aliases: ["歐妲", "欧妲", "Olda"] },
+  { name: "祈菈・貝希毛絲", aliases: ["祈菈", "祈菈‧貝希毛絲", "祈菈・貝希毛絲", "貝希毛絲", "STORIA", "Narrator"] },
+  { name: "埃穆亞", aliases: ["埃穆亞", "埃穆亚", "Oumua"] },
+  { name: "涅默", aliases: ["涅默", "Nemesis ch. 涅默"] },
+  { name: "熙歌", aliases: ["熙歌", "Cygnus ch. 熙歌"] },
+  { name: "雲隙光", aliases: ["雲隙光", "云隙光", "Kumosuki"] },
+  { name: "冰霧", aliases: ["冰霧", "冰雾", "Eisnebel"] },
+  { name: "白白虹", aliases: ["白白虹", "Xxhacucoxx"] },
+  { name: "幻月", aliases: ["幻月", "Moondogs"] },
+  { name: "光逸幸", aliases: ["光逸幸", "Kouitu Sin"] },
+  { name: "希翁", aliases: ["希翁", "Chion"] },
+  { name: "黑銀夜烏", aliases: ["黑銀夜烏", "黑银夜乌", "Karasu"] },
+  { name: "繆・索緹絲", aliases: ["繆・索緹絲", "繆索緹絲", "缪索缇丝", "Sotis"] },
+  { name: "庫路路", aliases: ["庫路路", "库路路", "Kururun"] },
+  { name: "史黛菈・埃蕾諾亞", aliases: ["史黛菈", "史黛菈 埃蕾諾亞", "Stella Eleanor"] },
+  { name: "克蕾", aliases: ["克蕾", "Cray Ch."] },
+  { name: "火野貝", aliases: ["火野貝", "火野贝", "Hinokai"] },
+  { name: "凝川眠", aliases: ["凝川眠", "Nemuri"] },
+  { name: "汐海黑兔", aliases: ["汐海黑兔", "Usagi"] },
+  { name: "香草奈若", aliases: ["香草奈若", "Vanilla Nyoro"] },
+  { name: "蘇米", aliases: ["蘇米", "苏米", "Sumi Ch."] },
+  { name: "菜姬", aliases: ["菜姬"] },
+  { name: "希靈", aliases: ["希靈", "希灵", "ASMR Healing 希靈"] },
+  { name: "高維爾", aliases: ["高維爾", "高维尔", "Cowell"] },
+  { name: "朵璃安", aliases: ["朵璃安", "Dorian Vtuber"] },
+  { name: "烟花蹦蹦蹦", aliases: ["烟花蹦蹦蹦"] },
+  { name: "杏仁ミル", aliases: ["杏仁ミル", "杏仁咪嚕", "杏仁咪噜"] },
+  { name: "汐 seki", aliases: ["汐 seki", "汐 Seki"] },
+  { name: "璐洛洛", aliases: ["璐洛洛"] },
+  { name: "稻乙緹", aliases: ["稻乙緹", "稻乙缇"] },
+  { name: "李聽", aliases: ["李聽", "李听"] },
+  { name: "Rumi 懶貓子", aliases: ["Rumi 懶貓子", "Rumi懶貓子", "懶貓子", "懒猫子"] },
+  { name: "浠 Mizuki", aliases: ["浠 Mizuki", "浠Mizuki"] },
+  { name: "森森鈴蘭", aliases: ["森森鈴蘭", "森森铃兰"] },
+  { name: "瑪格麗特・諾爾絲", aliases: ["瑪格麗特", "玛格丽特", "Margaret Norns"] },
+];
+
 if (require.main === module) {
   main().catch((error) => {
     console.error(`[update] ${error.stack || error.message}`);
@@ -80,7 +122,7 @@ async function main() {
   );
 
   const { inspected, videos: fetchedVideos, audits } = await inspectCandidates(inspectionCandidates);
-  const videos = mergeFetchedAndCarriedVideos(fetchedVideos, carryForward.videos);
+  const videos = filterBlockedVideos(mergeFetchedAndCarriedVideos(fetchedVideos, carryForward.videos));
 
   const capturedAt = new Date();
   const groups = applyGroupQualityFilters(buildGroups(videos, capturedAt));
@@ -103,6 +145,10 @@ async function main() {
       carriedVideoCount: carryForward.videos.length,
       carried72hVideoCount: carryForward.counts.h72,
       carriedMonthVideoCount: carryForward.counts.month,
+      blacklistedSourceCount: TAIWAN_VTUBER_BLACKLIST.length,
+      blacklistedSources: TAIWAN_VTUBER_BLACKLIST.map((entry) => entry.name),
+      skippedBlacklistedSearchCount: sumBy(searchSummaries, (summary) => summary.skippedBlacklistedSource || 0),
+      skippedBlacklistedCandidateCount: selection.skippedBlacklistedCandidateCount,
       carryForwardEnabled: carryForward.enabled,
       carryForwardFrom: carryForward.from,
       carryForwardAgeHours: carryForward.ageHours,
@@ -148,6 +194,9 @@ async function main() {
     usableVideoCount: videos.length,
     searches: searchSummaries,
     summary: payload.source.auditSummary,
+    blacklistedSources: payload.source.blacklistedSources,
+    skippedBlacklistedSearchCount: payload.source.skippedBlacklistedSearchCount,
+    skippedBlacklistedCandidateCount: payload.source.skippedBlacklistedCandidateCount,
     videos: audits,
   });
   writeJson(path.join(DATA_DIR, "72h.json"), groups["72h"]);
@@ -215,8 +264,9 @@ async function fetchSearchSource(search) {
 
   if (!continuation || items.length < SEARCH_LIMIT) reachedEnd = true;
   const deduped = dedupeByVideoId(items);
+  const skippedBlacklistedSource = deduped.filter((item) => isBlockedSource(item)).length;
   const skippedActiveLiveOrUpcoming = deduped.filter((item) => isActiveLiveOrUpcomingCandidate(item)).length;
-  const finalItems = deduped.filter((item) => !isActiveLiveOrUpcomingCandidate(item)).slice(0, SEARCH_LIMIT);
+  const finalItems = deduped.filter((item) => !isBlockedSource(item) && !isActiveLiveOrUpcomingCandidate(item)).slice(0, SEARCH_LIMIT);
   const summary = {
     sourceGroup: search.sourceGroup,
     sourceLabel: search.sourceLabel,
@@ -228,20 +278,22 @@ async function fetchSearchSource(search) {
     continuationRounds,
     reachedEnd,
     truncatedByLimit: finalItems.length >= SEARCH_LIMIT && !reachedEnd,
+    skippedBlacklistedSource,
     skippedActiveLiveOrUpcoming,
     collectedAt,
   };
   console.log(
-    `[search:${search.sourceGroup}] ${search.keyword} items=${summary.itemCount} skippedLive=${skippedActiveLiveOrUpcoming} rounds=${continuationRounds} reachedEnd=${reachedEnd}`,
+    `[search:${search.sourceGroup}] ${search.keyword} items=${summary.itemCount} skippedBlocked=${skippedBlacklistedSource} skippedLive=${skippedActiveLiveOrUpcoming} rounds=${continuationRounds} reachedEnd=${reachedEnd}`,
   );
   return { summary, items: finalItems };
 }
 
 function addSearchItems(target, items) {
-  target.push(...items.filter((item) => item.videoId && item.title));
+  target.push(...items.filter((item) => item.videoId && item.title && !isBlockedSource(item)));
 }
 
 function mergeCandidate(byVideoId, item, search, nowMs) {
+  if (isBlockedSource(item)) return;
   const publishedTimestamp = parsePublishedTimestamp(item.publishedText, nowMs);
   const existing = byVideoId.get(item.videoId);
   if (!existing) {
@@ -272,6 +324,41 @@ function mergeCandidate(byVideoId, item, search, nowMs) {
 
 function addUnique(list, value) {
   if (value && !list.includes(value)) list.push(value);
+}
+
+function matchBlockedSource(item) {
+  if (!item) return null;
+  const channelText = normalizeMatcherText(
+    [item.channelName, item.ownerText, item.longBylineText, item.shortBylineText, item.channelId, item.channelHandle].filter(Boolean).join(" "),
+  );
+  const titleText = normalizeMatcherText(item.title);
+  for (const entry of TAIWAN_VTUBER_BLACKLIST) {
+    for (const alias of entry.aliases || []) {
+      const normalizedAlias = normalizeMatcherText(alias);
+      if (normalizedAlias && channelText.includes(normalizedAlias)) {
+        return { name: entry.name, alias, field: "channelName" };
+      }
+    }
+    for (const alias of entry.titleAliases || []) {
+      const normalizedAlias = normalizeMatcherText(alias);
+      if (normalizedAlias && titleText.includes(normalizedAlias)) {
+        return { name: entry.name, alias, field: "title" };
+      }
+    }
+  }
+  return null;
+}
+
+function isBlockedSource(item) {
+  return Boolean(matchBlockedSource(item));
+}
+
+function filterBlockedVideos(items) {
+  return (items || []).filter((item) => !isBlockedSource(item));
+}
+
+function normalizeMatcherText(value) {
+  return normalizeWhitespace(String(value || "").normalize("NFKC")).toLocaleLowerCase();
 }
 
 function candidateSort(a, b) {
@@ -306,10 +393,12 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now) {
 
   const videos = new Map();
   for (const item of previousPayload.groups["72h"]?.items || []) {
+    if (isBlockedSource(item)) continue;
     if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, H72_MS)) continue;
     if (upsertCarriedVideo(videos, item, ["today"], from)) counts.h72 += 1;
   }
   for (const item of previousPayload.groups["1m"]?.items || []) {
+    if (isBlockedSource(item)) continue;
     if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS)) continue;
     if (upsertCarriedVideo(videos, item, ["month"], from)) counts.month += 1;
   }
@@ -365,11 +454,11 @@ function addKnownAuditSkipIds(skipVideoIds, previousAudit) {
 
 function mergeFetchedAndCarriedVideos(fetchedVideos, carriedVideos) {
   const byVideoId = new Map();
-  for (const video of fetchedVideos) {
+  for (const video of filterBlockedVideos(fetchedVideos)) {
     if (!isValidVideoId(video.videoId)) continue;
     byVideoId.set(video.videoId, video);
   }
-  for (const carried of carriedVideos) {
+  for (const carried of filterBlockedVideos(carriedVideos)) {
     const existing = byVideoId.get(carried.videoId);
     if (existing) {
       mergeVideoMetadata(existing, carried);
@@ -395,8 +484,14 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
   const carryForwardEnabled = Boolean(options.carryForwardEnabled);
   const excludeVideoIds = options.excludeVideoIds || new Set();
   const recentScanHorizonMs = carryForwardEnabled ? H48_MS : H72_MS;
+  let skippedBlacklistedCandidateCount = 0;
   let skippedKnownCandidateCount = 0;
-  const availableCandidates = candidates.filter((item) => {
+  const sourceAllowedCandidates = candidates.filter((item) => {
+    if (!isBlockedSource(item)) return true;
+    skippedBlacklistedCandidateCount += 1;
+    return false;
+  });
+  const availableCandidates = sourceAllowedCandidates.filter((item) => {
     if (!excludeVideoIds.has(item.videoId)) return true;
     skippedKnownCandidateCount += 1;
     return false;
@@ -442,6 +537,7 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
     items: selected.map(({ __bucket, ...item }) => item),
     mode: carryForwardEnabled ? "incremental_48h_with_carry_forward" : "full_72h_recovery",
     recentScanHorizonHours: Math.round(recentScanHorizonMs / (60 * 60 * 1000)),
+    skippedBlacklistedCandidateCount,
     skippedKnownCandidateCount,
   };
 }
@@ -793,6 +889,10 @@ function countBy(items, keyFn) {
   return counts;
 }
 
+function sumBy(items, valueFn) {
+  return (items || []).reduce((sum, item) => sum + valueFn(item), 0);
+}
+
 function incrementPlainCount(target, key, amount = 1) {
   target[key] = (target[key] || 0) + amount;
 }
@@ -925,14 +1025,34 @@ function extractSearchItems(data) {
       videoId,
       title: textFrom(renderer.title),
       channelName: textFrom(renderer.ownerText || renderer.longBylineText || renderer.shortBylineText),
+      channelId: channelIdFromRenderer(renderer),
+      channelHandle: channelHandleFromRenderer(renderer),
       publishedText: textFrom(renderer.publishedTimeText),
-    durationText: textFrom(renderer.lengthText),
+      durationText: textFrom(renderer.lengthText),
       statusText: statusTextFromRenderer(renderer),
       thumbnailUrl: bestThumbnail(renderer.thumbnail),
       viewText: textFrom(renderer.viewCountText || renderer.shortViewCountText),
     });
   }
   return dedupeByVideoId(items).filter((item) => item.title);
+}
+
+function channelIdFromRenderer(renderer) {
+  return channelEndpointFromRenderer(renderer)?.browseId || "";
+}
+
+function channelHandleFromRenderer(renderer) {
+  return channelEndpointFromRenderer(renderer)?.canonicalBaseUrl || "";
+}
+
+function channelEndpointFromRenderer(renderer) {
+  for (const source of [renderer.ownerText, renderer.longBylineText, renderer.shortBylineText]) {
+    for (const run of source?.runs || []) {
+      const endpoint = run?.navigationEndpoint?.browseEndpoint;
+      if (endpoint?.browseId || endpoint?.canonicalBaseUrl) return endpoint;
+    }
+  }
+  return renderer.ownerEndpoint?.browseEndpoint || renderer.navigationEndpoint?.browseEndpoint || null;
 }
 
 function statusTextFromRenderer(renderer) {
@@ -1411,6 +1531,10 @@ function positiveInteger(value, fallback = 1) {
 
 module.exports = {
   collectCarryForwardVideos,
+  filterBlockedVideos,
+  isBlockedSource,
+  matchBlockedSource,
   mergeFetchedAndCarriedVideos,
   selectCandidatesForInspection,
+  TAIWAN_VTUBER_BLACKLIST,
 };
