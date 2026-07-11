@@ -5,6 +5,7 @@ const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const INDEX_PATH = path.join(DATA_DIR, "snapshots", "index.json");
+const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 
 const payload = readJson(LATEST_PATH);
 const errors = [];
@@ -25,6 +26,9 @@ for (const groupId of ["72h", "1m"]) {
       if (!song.title) errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].title missing`);
       if (!Number.isInteger(song.seconds) || song.seconds < 0) errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].seconds invalid`);
       if (!/^\d+:\d{2}:\d{2}$/.test(song.time || "")) errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].time invalid`);
+      if (song.isNiche !== undefined && typeof song.isNiche !== "boolean") {
+        errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].isNiche must be boolean`);
+      }
     }
   }
 }
@@ -36,6 +40,13 @@ for (const entry of index.snapshots || []) {
   if (!/^[0-9]{8}T[0-9]{4}00Z$/.test(entry.id || "")) errors.push(`invalid snapshot id: ${entry.id}`);
   const snapshotPath = path.join(ROOT, entry.path || "");
   if (!fs.existsSync(snapshotPath)) errors.push(`missing snapshot file: ${entry.path}`);
+}
+
+if (fs.existsSync(SONG_SEARCH_INDEX_PATH)) {
+  const songSearchIndex = readJson(SONG_SEARCH_INDEX_PATH);
+  if (songSearchIndex.schemaVersion !== 1) errors.push("song-search index schemaVersion must be 1");
+  if (!Array.isArray(songSearchIndex.titleKeys)) errors.push("song-search index titleKeys must be array");
+  if (!Array.isArray(songSearchIndex.titleArtistKeys)) errors.push("song-search index titleArtistKeys must be array");
 }
 
 if (errors.length) {

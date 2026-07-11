@@ -2,11 +2,18 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
+  annotatePayloadWithNiche,
   buildSourcePreview,
   createSnapshotLoader,
+  createSongSearchLookup,
   filterItemsBySearch,
+  filterItemsByNiche,
   filterOccurrencesBySearch,
+  filterOccurrencesByNiche,
+  isSongSearchKnown,
   normalizeSearch,
+  normalizeSongSearchText,
+  paginateItems,
 } = require("../assets/frontend-utils");
 
 test("snapshot request race keeps the latest response", async () => {
@@ -104,6 +111,54 @@ test("source preview fills open slots with duplicate-channel occurrences", () =>
     ["A", "B"],
   );
   assert.equal(preview.hiddenCount, 0);
+});
+
+test("pagination clamps pages and returns stable page metadata", () => {
+  const page = paginateItems([1, 2, 3, 4, 5], { page: 9, pageSize: 2 });
+
+  assert.deepEqual(page.visible, [5]);
+  assert.equal(page.page, 3);
+  assert.equal(page.pageCount, 3);
+  assert.equal(page.startIndex, 4);
+  assert.equal(page.endIndex, 5);
+});
+
+test("song-search lookup annotates and filters niche songs", () => {
+  const lookup = createSongSearchLookup({
+    titleKeys: [normalizeSongSearchText("known song")],
+    titleArtistKeys: [normalizeSongSearchText("exact song") + "::" + normalizeSongSearchText("exact artist")],
+  });
+  const payload = {
+    groups: {
+      "72h": {
+        items: [
+          video("A", "video A", "channel A", [
+            song("known song", "other artist"),
+            song("exact song", "exact artist"),
+            song("rare song", "rare artist"),
+          ]),
+        ],
+      },
+    },
+  };
+
+  assert.equal(isSongSearchKnown(song("known song", "other artist"), lookup), true);
+  assert.equal(isSongSearchKnown(song("rare song", "rare artist"), lookup), false);
+
+  const annotated = annotatePayloadWithNiche(payload, lookup);
+  const songs = annotated.groups["72h"].items[0].songs;
+  assert.deepEqual(
+    songs.map((item) => item.isNiche),
+    [false, false, true],
+  );
+  assert.equal(filterItemsByNiche(annotated.groups["72h"].items, true).length, 1);
+  assert.deepEqual(
+    filterOccurrencesByNiche(
+      annotated.groups["72h"].items[0].songs.map((item) => ({ item: annotated.groups["72h"].items[0], song: item })),
+      true,
+    ).map(({ song }) => song.title),
+    ["rare song"],
+  );
 });
 
 function createDeferred() {

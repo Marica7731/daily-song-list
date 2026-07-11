@@ -129,8 +129,8 @@ h1 {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-areas: "range view search snapshot";
-  grid-template-columns: auto auto minmax(240px, 1fr) minmax(180px, 230px);
+  grid-template-areas: "range view niche search snapshot";
+  grid-template-columns: auto auto auto minmax(240px, 1fr) minmax(180px, 230px);
   gap: 10px;
   align-items: center;
   margin: 0 calc(var(--page-x) * -1) 10px;
@@ -150,6 +150,10 @@ h1 {
 
 .view-mode {
   grid-area: view;
+}
+
+.niche-toggle {
+  grid-area: niche;
 }
 
 .search-field {
@@ -231,6 +235,54 @@ select {
 
 input::placeholder {
   color: var(--muted-2);
+}
+
+.niche-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  min-width: max-content;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.niche-toggle:hover {
+  color: var(--ink);
+  background: var(--panel);
+}
+
+.niche-toggle input {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  min-height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.niche-toggle:has(input:checked) {
+  border-color: rgba(161, 92, 7, 0.28);
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.niche-summary,
+.niche-badge {
+  border-color: rgba(161, 92, 7, 0.28);
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.niche-toggle:has(input:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* 07. Summary metrics */
@@ -412,6 +464,20 @@ input::placeholder {
   -webkit-line-clamp: 1;
 }
 
+.song-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.2;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+
 .rank-subline {
   display: flex;
   align-items: center;
@@ -514,35 +580,56 @@ input::placeholder {
   color: var(--accent-strong);
 }
 
-/* 10. Progressive loading */
-.load-more-row {
+/* 10. Pagination */
+.pagination-row {
   display: flex;
   grid-column: 1 / -1;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 18px 0 4px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0 2px;
 }
 
-.load-more-note {
+.pagination-note {
   color: var(--muted);
   font-size: 13px;
   font-weight: 750;
 }
 
-.load-more {
+.pagination-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.pagination-button {
+  min-width: 34px;
+  min-height: 34px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 0 10px;
   background: var(--panel);
-  color: var(--accent);
+  color: var(--muted);
   font-size: 13px;
   font-weight: 850;
 }
 
-.load-more:hover {
+.pagination-button:hover:not(:disabled) {
   background: var(--accent-soft);
   color: var(--accent-strong);
+}
+
+.pagination-button.is-current {
+  border-color: rgba(15, 118, 110, 0.28);
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.pagination-button:disabled {
+  cursor: default;
+  opacity: 0.52;
 }
 
 /* 11. Source drawer */
@@ -872,7 +959,7 @@ input::placeholder {
 /* 15. Responsive breakpoints */
 @media (max-width: 1280px) {
   .controls {
-    grid-template-columns: auto minmax(0, 1fr) minmax(220px, 1.1fr) minmax(180px, 220px);
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(220px, 1.1fr) minmax(180px, 220px);
   }
 
   .video-grid {
@@ -883,9 +970,9 @@ input::placeholder {
 @media (max-width: 920px) {
   .controls {
     grid-template-areas:
-      "range view snapshot"
-      "search search search";
-    grid-template-columns: auto minmax(0, 1fr) minmax(170px, 220px);
+      "range view niche snapshot"
+      "search search search search";
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(170px, 220px);
   }
 
   .rank-header {
@@ -990,7 +1077,8 @@ input::placeholder {
   }
 
   .range-mode,
-  .view-mode {
+  .view-mode,
+  .niche-toggle {
     flex: 0 0 auto;
   }
 
@@ -1009,6 +1097,12 @@ input::placeholder {
     min-height: 32px;
     padding: 0 10px;
     font-size: 13px;
+  }
+
+  .niche-toggle {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 12.5px;
   }
 
   .summary {
@@ -1060,6 +1154,12 @@ input::placeholder {
 
   .rank-title {
     font-size: 13.5px;
+  }
+
+  .song-badge {
+    min-height: 16px;
+    padding: 0 5px;
+    font-size: 10.5px;
   }
 
   .rank-subline {
@@ -1118,6 +1218,17 @@ input::placeholder {
     column-gap: 8px;
     padding: 7px 8px;
     contain-intrinsic-size: auto 54px;
+  }
+
+  .pagination-row {
+    justify-content: flex-start;
+    padding-top: 12px;
+  }
+
+  .pagination-note,
+  .pagination-controls {
+    flex: 1 1 100%;
+    justify-content: flex-start;
   }
 }
 

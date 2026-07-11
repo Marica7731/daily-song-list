@@ -4,7 +4,8 @@
   "private": true,
   "description": "Hourly YouTube timestamp song-list snapshots for 72H and one-month views.",
   "scripts": {
-    "update": "node scripts/update-songlist.js",
+    "update": "node scripts/update-songlist.js && node scripts/apply-song-search-niche.js",
+    "refresh:song-search": "node scripts/refresh-song-search-index.js",
     "mark:failure": "node scripts/mark-failure.js",
     "validate": "node scripts/validate-data.js",
     "check": "node scripts/check-js-syntax.js && npm test && npm run validate",
