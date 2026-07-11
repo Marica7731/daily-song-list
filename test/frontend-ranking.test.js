@@ -21,6 +21,37 @@ test("keeps same title separated when known artists differ", () => {
   );
 });
 
+test("merges safe artist spelling and annotation variants for the same title", () => {
+  const records = buildSongRecords([
+    occurrence("HOT LIMIT", "T.M.Revolution", "A"),
+    occurrence("Hot Limit", "T.M. Revolution", "B"),
+    occurrence("HOT LIMIT", "T.M.Revolution (1998)", "C"),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].title, "HOT LIMIT");
+  assert.equal(records[0].count, 3);
+});
+
+test("merges no-space feat annotations into an existing base artist", () => {
+  const records = buildSongRecords([
+    occurrence("からくりピエロ", "40mP", "A"),
+    occurrence("からくりピエロ", "40mP feat.初音ミク", "B"),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].count, 2);
+});
+
+test("does not strip explicit CV identity from known artists", () => {
+  const records = buildSongRecords([
+    occurrence("恋愛サーキュレーション", "千石撫子", "A"),
+    occurrence("恋愛サーキュレーション", "千石撫子(CV.花澤香菜)", "B"),
+  ]);
+
+  assert.equal(records.length, 2);
+});
+
 test("merges unknown artist rows into the only known artist group", () => {
   const records = buildSongRecords([occurrence("夜明けと蛍", "n-buna", "A"), occurrence("夜明けと蛍", "", "B")]);
 
@@ -32,15 +63,67 @@ test("merges unknown artist rows into the only known artist group", () => {
   );
 });
 
-test("keeps unknown artist rows separate when title has multiple known artists", () => {
+test("merges unknown artist rows into the dominant known artist group", () => {
   const records = buildSongRecords([
     occurrence("you", "倖田來未", "A"),
-    occurrence("you", "癒月", "B"),
-    occurrence("you", "", "C"),
+    occurrence("you", "倖田來未", "B"),
+    occurrence("you", "癒月", "C"),
+    occurrence("you", "", "D"),
   ]);
 
-  assert.equal(records.length, 3);
-  assert.equal(records.some((record) => record.key.endsWith("::unknown") && record.count === 1), true);
+  assert.equal(records.length, 2);
+  const dominant = records.find((record) => Array.from(record.artists.values()).some((artist) => artist.name === "倖田來未"));
+  assert.equal(dominant.count, 3);
+  assert.deepEqual(
+    dominant.occurrences.map(({ item }) => item.videoId),
+    ["A", "B", "D"],
+  );
+});
+
+test("normalizes song title punctuation and list markers before grouping", () => {
+  const records = buildSongRecords([
+    occurrence("少女レイ", "みきとP", "A"),
+    occurrence("『 少女レイ 』", "", "B"),
+    occurrence("⑪少女レイ", "", "C"),
+    occurrence("14| 少女レイ", "", "D"),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].title, "少女レイ");
+  assert.equal(records[0].count, 4);
+});
+
+test("uses a clean title variant even when a dirty title appears first", () => {
+  const records = buildSongRecords([
+    occurrence("⑭HOT LIMIT", "T.M.Revolution", "A"),
+    occurrence("HOT LIMIT", "T.M.Revolution", "B"),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].title, "HOT LIMIT");
+  assert.equal(records[0].count, 2);
+});
+
+test("merges missing-artist rows when the artist leaked into the title", () => {
+  const records = buildSongRecords([
+    occurrence("夏祭り", "Whiteberry", "A"),
+    occurrence("夏祭り\tWhiteberry", "", "B"),
+    occurrence("「夏祭り」Whiteberry", "", "C"),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].title, "夏祭り");
+  assert.equal(records[0].count, 3);
+});
+
+test("keeps voiced and unvoiced kana titles separated", () => {
+  const records = buildSongRecords([occurrence("ギラギラ", "Ado", "A"), occurrence("キラキラ", "aiko", "B")]);
+
+  assert.equal(records.length, 2);
+  assert.deepEqual(
+    records.map((record) => record.title).sort(),
+    ["キラキラ", "ギラギラ"].sort(),
+  );
 });
 
 test("builds competition ranking after same-title aggregation", () => {

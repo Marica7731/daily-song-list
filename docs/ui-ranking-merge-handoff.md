@@ -26,7 +26,7 @@
 - `assets/app.js`
   - 重构 `render()`，按 `songRank` / `artistRank` / `songAz` / `videos` 分流渲染。
   - 通过 `assets/ranking-utils.js` 的 `buildCompetitionRanks()`，歌曲榜和歌手榜共用并列排名。
-  - 通过 `assets/ranking-utils.js` 的 `buildSongRecords()` 修正同名歌曲聚合：同标题同已知歌手合并、同标题不同已知歌手拆开、未知歌手只在唯一已知歌手时安全合并。
+  - 通过 `assets/ranking-utils.js` 的 `buildSongRecords()` 修正同名歌曲聚合：先规范化标题符号、列表序号和全半角差异；同标题下明确不同的已知歌手仍拆开；无/误填歌手合并到重复最多的已知歌手记录。
   - 新增来源展开状态 `state.expandedRows`，视图、范围、搜索、快照变化时清空。
   - 新增 `renderRankRecord()`、`appendSublineSource()`、`renderSourceDrawer()`、`toggleSourceDrawer()`。
   - 新增 `renderSongIndexView()`、`groupSongIndex()`、`songIndexBucket()`，歌曲索引不再复用排行榜行号。
@@ -49,9 +49,10 @@
 
 - `assets/ranking-utils.js`
   - 提供同名歌曲聚合和 competition ranking 纯函数。
+  - 歌曲聚合会保留日文浊点差异，避免把 `ギラギラ` 和 `キラキラ` 这类不同标题误合并。
 
 - `test/frontend-ranking.test.js`
-  - 覆盖同标题同歌手合并、同标题不同歌手拆分、未知歌手安全合并和并列排名。
+  - 覆盖同标题同歌手合并、同标题不同歌手拆分、未知歌手归并、脏标题展示名、歌手混入标题和并列排名。
 
 - `test/frontend-utils.test.js`
   - 覆盖快照请求竞态、快照失败保留以及搜索过滤。

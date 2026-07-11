@@ -13,13 +13,18 @@ const RANGE_LABELS = {
 const SNAPSHOT_LATEST_PATH = "data/latest.json";
 const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SEARCH_DEBOUNCE_MS = 140;
-const INLINE_SOURCE_PREVIEW_LIMIT = 2;
+const INLINE_SOURCE_PREVIEW_LIMIT = 1;
+const LIST_PAGE_SIZE_KEY = "dailySongList.pageSize";
+const LIST_PAGE_SIZE_OPTIONS = [50, 100];
+const DEFAULT_LIST_PAGE_SIZE = 50;
+const VIDEO_PAGE_SIZE = 24;
 const PAGE_SIZES = {
-  songRank: 200,
-  artistRank: 200,
-  songAz: 200,
-  videos: 48,
+  songRank: DEFAULT_LIST_PAGE_SIZE,
+  artistRank: DEFAULT_LIST_PAGE_SIZE,
+  songAz: DEFAULT_LIST_PAGE_SIZE,
+  videos: VIDEO_PAGE_SIZE,
 };
+const INDEX_ALL_BUCKET = "全部";
 
 const KANA_BUCKETS = [
   { label: "あ", pattern: /^[ぁ-お]/u },
@@ -183,6 +188,8 @@ const state = {
   view: "songRank",
   filter: "",
   nicheOnly: false,
+  indexBucket: INDEX_ALL_BUCKET,
+  pageSize: DEFAULT_LIST_PAGE_SIZE,
   expandedRows: new Set(),
   filterTimer: null,
   page: 1,
@@ -199,6 +206,7 @@ const els = {
   snapshotSelect: document.querySelector("#snapshotSelect"),
   filterInput: document.querySelector("#filterInput"),
   nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
+  backToTop: document.querySelector("#backToTop"),
   toast: document.querySelector("#toast"),
   rangeTabs: Array.from(document.querySelectorAll("[data-range]")),
   viewTabs: Array.from(document.querySelectorAll("[data-view]")),
@@ -223,8 +231,17 @@ async function init() {
   state.status = status || latest.status || null;
   state.snapshots = Array.isArray(snapshotIndex.snapshots) ? snapshotIndex.snapshots : [];
   renderSnapshotOptions();
+  applyInitialUrlState();
   bindEvents();
-  applySnapshotPayload(latest, SNAPSHOT_LATEST_PATH);
+  syncControlsFromState();
+  setupBackToTopButton();
+  const requestedSnapshotPath = state.currentSnapshotPath;
+  applySnapshotPayload(latest, SNAPSHOT_LATEST_PATH, { resetPage: false, syncUrl: false });
+  if (requestedSnapshotPath !== SNAPSHOT_LATEST_PATH) {
+    await state.snapshotLoader.loadSnapshot({ path: requestedSnapshotPath, previousPath: SNAPSHOT_LATEST_PATH });
+  } else {
+    syncUrlState();
+  }
 }
 
 function bindEvents() {
@@ -252,7 +269,7 @@ function bindEvents() {
 
   els.filterInput.addEventListener("input", () => {
     const rawValue = els.filterInput.value;
-    state.filter = normalizeSearch(rawValue.trim());
+    state.filter = rawValue.trim();
     state.expandedRows.clear();
     resetPagination();
     const renderRevision = advanceRenderRevision();
@@ -268,6 +285,7 @@ function bindEvents() {
 
   els.snapshotSelect.addEventListener("change", async () => {
     const path = els.snapshotSelect.value;
+    resetPagination();
     await state.snapshotLoader.loadSnapshot({ path, previousPath: state.currentSnapshotPath });
   });
 
@@ -295,7 +313,16 @@ function bindEvents() {
     if (pageButton) {
       const nextPage = Number.parseInt(pageButton.dataset.page || "1", 10);
       setPage(nextPage);
-      render();
+      render({ focusAfterPageChange: true });
+      return;
+    }
+
+    const bucketButton = event.target.closest("[data-index-bucket]");
+    if (bucketButton) {
+      state.indexBucket = bucketButton.dataset.indexBucket || INDEX_ALL_BUCKET;
+      state.expandedRows.clear();
+      resetPagination();
+      render({ focusAfterPageChange: true });
       return;
     }
 
@@ -321,6 +348,83 @@ function setActiveTab(tabs, activeTab) {
   }
 }
 
+function applyInitialUrlState() {
+  const parsed = window.FrontendUtils.parseUrlState(window.location.search, {
+    defaults: {
+      range: state.range,
+      view: state.view,
+      page: state.page,
+      pageSize: readStoredPageSize(),
+      bucket: state.indexBucket,
+      outside: state.nicheOnly,
+      q: state.filter,
+    },
+    validRanges: Object.keys(RANGE_LABELS),
+    validViews: Object.keys(VIEWS),
+    validPageSizes: LIST_PAGE_SIZE_OPTIONS,
+    latestSnapshotPath: SNAPSHOT_LATEST_PATH,
+    snapshots: state.snapshots,
+  });
+
+  state.range = parsed.range;
+  state.view = parsed.view;
+  state.page = parsed.page;
+  state.pageSize = parsed.pageSize;
+  state.indexBucket = parsed.bucket;
+  state.nicheOnly = parsed.outside;
+  state.filter = parsed.q;
+  state.currentSnapshotPath = parsed.snapshotPath;
+  writeStoredPageSize(state.pageSize);
+}
+
+function syncControlsFromState() {
+  setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === state.range) || els.rangeTabs[0]);
+  setActiveTab(els.viewTabs, els.viewTabs.find((tab) => tab.dataset.view === state.view) || els.viewTabs[0]);
+  if (els.filterInput) els.filterInput.value = state.filter;
+  if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = state.nicheOnly;
+  if (els.snapshotSelect) els.snapshotSelect.value = state.currentSnapshotPath;
+}
+
+function syncUrlState() {
+  if (!window.history?.replaceState) return;
+  const query = window.FrontendUtils.serializeUrlState(
+    {
+      range: state.range,
+      view: state.view,
+      page: state.page,
+      pageSize: state.pageSize,
+      bucket: state.indexBucket,
+      outside: state.nicheOnly,
+      q: state.filter,
+      snapshotPath: state.currentSnapshotPath,
+    },
+    {
+      latestSnapshotPath: SNAPSHOT_LATEST_PATH,
+      snapshots: state.snapshots,
+    },
+  );
+  const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || ""}`;
+  window.history.replaceState(null, "", nextUrl);
+}
+
+function readStoredPageSize() {
+  try {
+    const value = Number.parseInt(window.localStorage?.getItem(LIST_PAGE_SIZE_KEY) || "", 10);
+    return LIST_PAGE_SIZE_OPTIONS.includes(value) ? value : DEFAULT_LIST_PAGE_SIZE;
+  } catch {
+    return DEFAULT_LIST_PAGE_SIZE;
+  }
+}
+
+function writeStoredPageSize(pageSize) {
+  if (!LIST_PAGE_SIZE_OPTIONS.includes(pageSize)) return;
+  try {
+    window.localStorage?.setItem(LIST_PAGE_SIZE_KEY, String(pageSize));
+  } catch {
+    // localStorage can be unavailable in restricted browser modes.
+  }
+}
+
 function resetPagination() {
   state.page = 1;
 }
@@ -331,7 +435,8 @@ function setPage(page) {
 }
 
 function currentPageSize() {
-  return PAGE_SIZES[state.view] || 200;
+  if (state.view === "videos") return VIDEO_PAGE_SIZE;
+  return PAGE_SIZES[state.view] ? state.pageSize : DEFAULT_LIST_PAGE_SIZE;
 }
 
 function pagedSlice(items) {
@@ -374,16 +479,16 @@ function setupControlsObserver() {
   updateControlsHeight();
 }
 
-function applySnapshotPayload(payload, path) {
+function applySnapshotPayload(payload, path, options = {}) {
   state.payload = preparePayload(payload);
   state.status = payload.status || state.status;
   state.currentSnapshotPath = path;
   state.expandedRows.clear();
-  resetPagination();
+  if (options.resetPage !== false) resetPagination();
   els.snapshotSelect.value = path;
   syncNicheToggle();
   renderStatus(state.status);
-  render();
+  render({ syncUrl: options.syncUrl !== false });
   setSnapshotBusy(false);
 }
 
@@ -418,6 +523,27 @@ function showToast(message) {
   els.toast._timer = window.setTimeout(() => {
     els.toast.hidden = true;
   }, 3200);
+}
+
+function setupBackToTopButton() {
+  if (!els.backToTop) return;
+  els.backToTop.addEventListener("click", () => {
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    });
+    focusWithoutScrolling(els.controls || document.body);
+    updateBackToTopVisibility();
+  });
+  window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
+  updateBackToTopVisibility();
+}
+
+function updateBackToTopVisibility() {
+  if (!els.backToTop) return;
+  const visible = window.scrollY > 700;
+  els.backToTop.hidden = !visible;
+  els.backToTop.setAttribute("aria-hidden", visible ? "false" : "true");
 }
 
 function advanceRenderRevision() {
@@ -462,11 +588,12 @@ function renderStatus(status) {
   els.status.textContent = status.status === "success" ? `更新于 ${at}` : `正在使用上次成功数据 · ${at}`;
 }
 
-function render() {
+function render(options = {}) {
   const group = state.payload?.groups?.[state.range] || { title: state.range, items: [] };
   const sourceItems = group.items || [];
   const videoItems = filterItems(sourceItems);
   const occurrences = filterOccurrences(collectSongOccurrences(sourceItems));
+  if (state.view !== "songAz") ensureIndexBucketExists(occurrences);
 
   resetContentClasses();
   els.content.replaceChildren();
@@ -474,23 +601,20 @@ function render() {
   if (state.view === "videos") {
     els.content.classList.add("video-grid");
     renderVideoList(group, videoItems);
-    return;
-  }
-
-  if (state.view === "artistRank") {
+  } else if (state.view === "artistRank") {
     els.content.classList.add("rank-panel");
     renderArtistRank(group, occurrences);
-    return;
-  }
-
-  if (state.view === "songAz") {
+  } else if (state.view === "songAz") {
     els.content.classList.add("song-index");
     renderSongIndexView(group, occurrences);
-    return;
+  } else {
+    els.content.classList.add("rank-panel");
+    renderSongRank(group, occurrences);
   }
 
-  els.content.classList.add("rank-panel");
-  renderSongRank(group, occurrences);
+  if (options.syncUrl !== false) syncUrlState();
+  if (options.focusAfterPageChange) schedulePageChangeFocus();
+  updateBackToTopVisibility();
 }
 
 function resetContentClasses() {
@@ -500,7 +624,6 @@ function resetContentClasses() {
 
 function renderVideoList(group, items) {
   const allSongs = items.reduce((sum, item) => sum + (item.songs?.length || 0), 0);
-  const pageInfo = pagedSlice(items);
   renderSummary(group, [
     metric(items.length, "个视频"),
     metric(allSongs, "个时间戳"),
@@ -508,25 +631,26 @@ function renderVideoList(group, items) {
   ]);
 
   if (!items.length) {
-    renderEmpty(emptyMessage("这个范围还没有时间戳歌曲列表", "没有找到符合条件的视频", "没有找到小众歌曲视频"), {
+    renderEmpty(emptyMessage("这个范围还没有时间戳歌曲列表", "没有找到符合条件的视频", "没有找到曲库外歌曲视频"), {
       clearable: Boolean(state.filter),
     });
     return;
   }
 
+  const pageInfo = pagedSlice(items);
   const fragment = document.createDocumentFragment();
+  appendPagination(fragment, { pageInfo, unit: "个视频", variant: "top" });
   for (const item of pageInfo.visible) {
     fragment.append(renderVideo(item));
   }
+  appendPagination(fragment, { pageInfo, unit: "个视频", variant: "bottom" });
   els.content.append(fragment);
-  renderPaginationControl({ pageInfo, unit: "个视频" });
 }
 
 function renderSongRank(group, occurrences) {
   const records = buildSongRecords(occurrences).sort(compareSongRank);
   const ranks = buildCompetitionRanks(records);
   const countFrequencies = buildCountFrequencies(records);
-  const pageInfo = pagedSlice(records);
 
   renderSummary(group, [
     metric(uniqueVideoCount(occurrences), "个视频"),
@@ -536,13 +660,15 @@ function renderSongRank(group, occurrences) {
   ]);
 
   if (!records.length) {
-    renderEmpty(emptyMessage("这个范围还没有歌曲", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
+    renderEmpty(emptyMessage("这个范围还没有歌曲", "没有找到符合条件的歌曲", "没有找到曲库外歌曲"), {
       clearable: Boolean(state.filter),
     });
     return;
   }
 
+  const pageInfo = pagedSlice(records);
   const fragment = document.createDocumentFragment();
+  appendPagination(fragment, { pageInfo, unit: "首歌曲", variant: "top" });
   fragment.append(renderRankHeader());
   for (const record of pageInfo.visible) {
     fragment.append(
@@ -559,8 +685,8 @@ function renderSongRank(group, occurrences) {
       }),
     );
   }
+  appendPagination(fragment, { pageInfo, unit: "首歌曲", variant: "bottom" });
   els.content.append(fragment);
-  renderPaginationControl({ pageInfo, unit: "首歌曲" });
 }
 
 function renderArtistRank(group, occurrences) {
@@ -568,7 +694,6 @@ function renderArtistRank(group, occurrences) {
   records.sort(compareCountRecords);
   const ranks = buildCompetitionRanks(records);
   const countFrequencies = buildCountFrequencies(records);
-  const pageInfo = pagedSlice(records);
 
   renderSummary(group, [
     metric(uniqueVideoCount(occurrences), "个视频"),
@@ -578,13 +703,15 @@ function renderArtistRank(group, occurrences) {
   ], missingArtistCount ? `${missingArtistCount} 条待补歌手` : "");
 
   if (!records.length) {
-    renderEmpty(emptyMessage("这个范围还没有歌手资料", "没有找到符合条件的歌手", "没有找到小众歌曲歌手"), {
+    renderEmpty(emptyMessage("这个范围还没有歌手资料", "没有找到符合条件的歌手", "没有找到曲库外歌曲歌手"), {
       clearable: Boolean(state.filter),
     });
     return;
   }
 
+  const pageInfo = pagedSlice(records);
   const fragment = document.createDocumentFragment();
+  appendPagination(fragment, { pageInfo, unit: "位歌手", variant: "top" });
   fragment.append(renderRankHeader());
   for (const record of pageInfo.visible) {
     fragment.append(
@@ -600,13 +727,12 @@ function renderArtistRank(group, occurrences) {
       }),
     );
   }
+  appendPagination(fragment, { pageInfo, unit: "位歌手", variant: "bottom" });
   els.content.append(fragment);
-  renderPaginationControl({ pageInfo, unit: "位歌手" });
 }
 
 function renderSongIndexView(group, occurrences) {
   const records = buildSongRecords(occurrences).sort(compareSongAz);
-  const pageInfo = pagedSlice(records);
 
   renderSummary(group, [
     metric(uniqueVideoCount(occurrences), "个视频"),
@@ -616,25 +742,27 @@ function renderSongIndexView(group, occurrences) {
   ]);
 
   if (!records.length) {
-    renderEmpty(emptyMessage("这个范围还没有歌曲索引", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
+    renderEmpty(emptyMessage("这个范围还没有歌曲索引", "没有找到符合条件的歌曲", "没有找到曲库外歌曲"), {
       clearable: Boolean(state.filter),
     });
     return;
   }
 
+  const bucketModel = window.FrontendUtils.buildIndexBucketModel(records, {
+    bucket: state.indexBucket,
+    getBucketLabel: songIndexBucket,
+    compareBuckets: compareIndexBuckets,
+  });
+  if (state.indexBucket !== bucketModel.currentBucket) {
+    state.indexBucket = bucketModel.currentBucket;
+    resetPagination();
+  }
+
+  const pageInfo = pagedSlice(bucketModel.records);
   const groups = groupSongIndex(pageInfo.visible);
   const fragment = document.createDocumentFragment();
-  const nav = document.createElement("nav");
-  nav.className = "index-nav";
-  nav.setAttribute("aria-label", "歌曲快速索引");
-
-  for (const groupEntry of groups) {
-    const link = document.createElement("a");
-    link.href = `#${groupEntry.id}`;
-    link.textContent = groupEntry.label;
-    nav.append(link);
-  }
-  fragment.append(nav);
+  fragment.append(renderIndexBucketNav(bucketModel.buckets));
+  appendPagination(fragment, { pageInfo, unit: "首歌曲", variant: "top" });
 
   for (const groupEntry of groups) {
     const section = document.createElement("section");
@@ -656,8 +784,16 @@ function renderSongIndexView(group, occurrences) {
     section.append(list);
     fragment.append(section);
   }
+  appendPagination(fragment, { pageInfo, unit: "首歌曲", variant: "bottom" });
   els.content.append(fragment);
-  renderPaginationControl({ pageInfo, unit: "首歌曲" });
+}
+
+function ensureIndexBucketExists(occurrences) {
+  if (state.indexBucket === INDEX_ALL_BUCKET) return;
+  const records = buildSongRecords(occurrences);
+  if (!records.some((record) => songIndexBucket(record) === state.indexBucket)) {
+    state.indexBucket = INDEX_ALL_BUCKET;
+  }
 }
 
 function renderSummary(group, metrics, note = "") {
@@ -676,7 +812,7 @@ function renderSummary(group, metrics, note = "") {
   if (state.nicheOnly) {
     const niche = document.createElement("span");
     niche.className = "summary-chip niche-summary";
-    niche.textContent = "小众歌曲";
+    niche.textContent = "曲库外歌曲";
     els.summary.append(niche);
   }
 
@@ -702,11 +838,40 @@ function renderSummary(group, metrics, note = "") {
   }
 }
 
-function renderPaginationControl({ pageInfo, unit }) {
-  if (pageInfo.total <= pageInfo.pageSize) return;
+function renderIndexBucketNav(buckets) {
+  const nav = document.createElement("nav");
+  nav.className = "index-nav";
+  nav.setAttribute("aria-label", "歌曲快速索引");
+
+  const allButton = renderIndexBucketButton(INDEX_ALL_BUCKET, INDEX_ALL_BUCKET, state.indexBucket === INDEX_ALL_BUCKET);
+  nav.append(allButton);
+  for (const bucket of buckets) {
+    nav.append(renderIndexBucketButton(bucket.label, bucket.label, state.indexBucket === bucket.label));
+  }
+  return nav;
+}
+
+function renderIndexBucketButton(label, bucket, isCurrent) {
+  const button = document.createElement("button");
+  button.className = isCurrent ? "index-bucket is-current" : "index-bucket";
+  button.type = "button";
+  button.dataset.indexBucket = bucket;
+  button.textContent = label;
+  button.setAttribute("aria-pressed", isCurrent ? "true" : "false");
+  if (isCurrent) button.setAttribute("aria-current", "page");
+  return button;
+}
+
+function appendPagination(container, options) {
+  const node = renderPaginationControl(options);
+  if (node) container.append(node);
+}
+
+function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
+  if (pageInfo.total <= pageInfo.pageSize) return null;
 
   const footer = document.createElement("div");
-  footer.className = "pagination-row";
+  footer.className = `pagination-row pagination-${variant}`;
 
   const note = document.createElement("span");
   note.className = "pagination-note";
@@ -715,13 +880,28 @@ function renderPaginationControl({ pageInfo, unit }) {
 
   const controls = document.createElement("div");
   controls.className = "pagination-controls";
+
+  if (variant === "top") {
+    controls.append(
+      renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1),
+      renderPageStatus(pageInfo),
+      renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount),
+    );
+    footer.append(controls);
+    return footer;
+  }
+
   controls.append(
     renderPageButton("首页", 1, pageInfo.page === 1),
     renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1),
   );
 
-  for (const page of visiblePageNumbers(pageInfo.page, pageInfo.pageCount)) {
-    controls.append(renderPageButton(String(page), page, page === pageInfo.page, page === pageInfo.page));
+  for (const token of window.FrontendUtils.visiblePageTokens(pageInfo.page, pageInfo.pageCount)) {
+    if (token === "ellipsis") {
+      controls.append(renderPageEllipsis());
+    } else {
+      controls.append(renderPageButton(String(token), token, token === pageInfo.page, token === pageInfo.page));
+    }
   }
 
   controls.append(
@@ -730,7 +910,7 @@ function renderPaginationControl({ pageInfo, unit }) {
   );
   footer.append(controls);
 
-  els.content.append(footer);
+  return footer;
 }
 
 function renderPageButton(label, page, disabled, isCurrent = false) {
@@ -744,9 +924,63 @@ function renderPageButton(label, page, disabled, isCurrent = false) {
   return button;
 }
 
-function visiblePageNumbers(current, total) {
-  const pages = new Set([1, total, current - 1, current, current + 1]);
-  return [...pages].filter((page) => page >= 1 && page <= total).sort((a, b) => a - b);
+function renderPageStatus(pageInfo) {
+  const status = document.createElement("span");
+  status.className = "pagination-status";
+  status.textContent = `第 ${pageInfo.page} / ${pageInfo.pageCount} 页`;
+  return status;
+}
+
+function renderPageEllipsis() {
+  const ellipsis = document.createElement("span");
+  ellipsis.className = "pagination-ellipsis";
+  ellipsis.setAttribute("aria-hidden", "true");
+  ellipsis.textContent = "…";
+  return ellipsis;
+}
+
+function schedulePageChangeFocus() {
+  window.requestAnimationFrame(() => {
+    const target = pageScrollTarget();
+    scrollToElement(target);
+    const focusTarget =
+      els.content.querySelector(".rank-title, .index-heading, .video-title, .pagination-button[aria-current='page']") ||
+      target;
+    focusWithoutScrolling(focusTarget);
+  });
+}
+
+function pageScrollTarget() {
+  return els.summary || els.content;
+}
+
+function scrollToElement(element) {
+  if (!element) return;
+  const controlsHeight = controlsHeightPx();
+  const top = Math.max(0, element.getBoundingClientRect().top + window.scrollY - controlsHeight - 8);
+  window.scrollTo({
+    top,
+    behavior: prefersReducedMotion() ? "auto" : "smooth",
+  });
+}
+
+function focusWithoutScrolling(element) {
+  if (!element) return;
+  if (!element.hasAttribute("tabindex")) element.setAttribute("tabindex", "-1");
+  try {
+    element.focus({ preventScroll: true });
+  } catch {
+    element.focus();
+  }
+}
+
+function controlsHeightPx() {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue("--controls-height");
+  return Number.parseFloat(raw) || els.controls?.getBoundingClientRect().height || 0;
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
 }
 
 function emptyMessage(defaultMessage, searchMessage, nicheMessage) {
@@ -895,7 +1129,7 @@ function songMeta(record) {
   return {
     primary: artists.length ? artists.slice(0, 2).map(formatCountEntry).join("、") : "待补歌手",
     missingPrimary: !artists.length,
-    badges: isNicheRecord(record) ? ["小众"] : [],
+    badges: isNicheRecord(record) ? ["曲库外"] : [],
   };
 }
 
@@ -1033,7 +1267,7 @@ function appendSublinePart(container, text, className = "") {
 function renderCount(count) {
   const node = document.createElement("div");
   node.className = count > 1 ? "rank-count is-strong" : "rank-count";
-  node.textContent = `${count} 次`;
+  node.textContent = `${count}次`;
   return node;
 }
 
@@ -1083,7 +1317,7 @@ function renderSourcePreviewLinks(occurrences) {
 }
 
 function renderInlineSourceLink(occurrence, options = {}) {
-  const label = options.compact ? compactSourceLabel(occurrence) : sourceLabel(occurrence);
+  const label = options.compact ? sourceLabel(occurrence) : sourceLabel(occurrence);
   const channelLink = youtubeChannelLink(occurrence.item);
   const link = document.createElement("a");
   link.className = "source-link-inline";
@@ -1091,7 +1325,8 @@ function renderInlineSourceLink(occurrence, options = {}) {
   link.target = "_blank";
   link.rel = "noreferrer";
   link.textContent = label;
-  link.title = channelLink.isFallbackSearch ? `搜索频道：${label}` : `打开频道：${label}`;
+  const channelName = occurrence.item.channelName || occurrence.item.title || occurrence.item.videoId || label;
+  link.title = channelLink.isFallbackSearch ? `搜索频道：${channelName}` : `打开频道：${channelName}`;
   link.setAttribute("aria-label", link.title);
   return link;
 }
@@ -1309,7 +1544,7 @@ function appendVideoSongLinks(list, item, songs, extraClass = "") {
     if (window.FrontendUtils.isNicheSong(song)) {
       const badge = document.createElement("span");
       badge.className = "song-badge niche-badge";
-      badge.textContent = "小众";
+      badge.textContent = "曲库外";
       link.append(" ", badge);
     }
 

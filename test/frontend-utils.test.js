@@ -3,6 +3,7 @@ const test = require("node:test");
 
 const {
   annotatePayloadWithNiche,
+  buildIndexBucketModel,
   buildSourcePreview,
   createSnapshotLoader,
   createSongSearchLookup,
@@ -14,6 +15,9 @@ const {
   normalizeSearch,
   normalizeSongSearchText,
   paginateItems,
+  parseUrlState,
+  serializeUrlState,
+  visiblePageTokens,
 } = require("../assets/frontend-utils");
 
 test("snapshot request race keeps the latest response", async () => {
@@ -114,14 +118,209 @@ test("source preview omits duplicate-channel occurrences from inline preview", (
   assert.equal(preview.total, 2);
 });
 
-test("pagination clamps pages and returns stable page metadata", () => {
-  const page = paginateItems([1, 2, 3, 4, 5], { page: 9, pageSize: 2 });
+test("source preview defaults to one inline source and counts hidden sources", () => {
+  const preview = buildSourcePreview([
+    occurrence("A", "shared channel"),
+    occurrence("B", "other channel"),
+    occurrence("C", "third channel"),
+  ]);
 
-  assert.deepEqual(page.visible, [5]);
-  assert.equal(page.page, 3);
+  assert.deepEqual(
+    preview.preview.map(({ item }) => item.videoId),
+    ["A"],
+  );
+  assert.equal(preview.hiddenCount, 2);
+  assert.equal(preview.total, 3);
+
+  const single = buildSourcePreview([occurrence("A", "only channel")]);
+  assert.deepEqual(
+    single.preview.map(({ item }) => item.videoId),
+    ["A"],
+  );
+  assert.equal(single.hiddenCount, 0);
+  assert.equal(single.total, 1);
+});
+
+test("pagination uses pageSize 50 and clamps pages to available bounds", () => {
+  const items = Array.from({ length: 121 }, (_, index) => index + 1);
+  const page = paginateItems(items, { page: 2, pageSize: 50 });
+
+  assert.deepEqual(page.visible, Array.from({ length: 50 }, (_, index) => index + 51));
+  assert.equal(page.visibleCount, 50);
+  assert.equal(page.total, 121);
+  assert.equal(page.page, 2);
+  assert.equal(page.pageSize, 50);
   assert.equal(page.pageCount, 3);
-  assert.equal(page.startIndex, 4);
-  assert.equal(page.endIndex, 5);
+  assert.equal(page.startIndex, 50);
+  assert.equal(page.endIndex, 100);
+
+  const overrun = paginateItems(items, { page: 99, pageSize: 50 });
+
+  assert.deepEqual(overrun.visible, Array.from({ length: 21 }, (_, index) => index + 101));
+  assert.equal(overrun.page, 3);
+  assert.equal(overrun.startIndex, 100);
+  assert.equal(overrun.endIndex, 121);
+
+  const underrun = paginateItems(items, { page: -1, pageSize: 50 });
+
+  assert.deepEqual(underrun.visible.slice(0, 3), [1, 2, 3]);
+  assert.equal(underrun.page, 1);
+});
+
+test("visible page tokens include ellipses for every numeric gap", () => {
+  const cases = [
+    { current: 1, total: 10, expected: [1, 2, 3, 4, 5, "ellipsis", 10] },
+    { current: 6, total: 12, expected: [1, "ellipsis", 5, 6, 7, "ellipsis", 12] },
+    { current: 12, total: 12, expected: [1, "ellipsis", 8, 9, 10, 11, 12] },
+    { current: 5, total: 7, expected: [1, 2, 3, 4, 5, 6, 7] },
+  ];
+
+  for (const { current, total, expected } of cases) {
+    const tokens = visiblePageTokens(current, total);
+    assert.deepEqual(tokens, expected);
+    assertNoNumericJumpWithoutEllipsis(tokens);
+  }
+});
+
+test("url state parses and serializes range, view, page, pageSize, bucket, outside, q, and snapshot", () => {
+  const options = urlStateOptions();
+  const parsed = parseUrlState(
+    "?range=1m&view=songAz&page=3&pageSize=100&bucket=%E3%81%82&outside=1&q=First%20Good-Bye&snapshot=archive-20260710",
+    options,
+  );
+
+  assert.deepEqual(parsed, {
+    range: "1m",
+    view: "songAz",
+    page: 3,
+    pageSize: 100,
+    bucket: "あ",
+    outside: true,
+    q: "First Good-Bye",
+    snapshotPath: "data/snapshots/2026-07-10.json",
+  });
+
+  const serialized = serializeUrlState(parsed, options);
+
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serialized)), {
+    range: "1m",
+    view: "songAz",
+    page: "3",
+    pageSize: "100",
+    bucket: "あ",
+    outside: "1",
+    q: "First Good-Bye",
+    snapshot: "archive-20260710",
+  });
+  assert.deepEqual(parseUrlState(serialized, options), parsed);
+});
+
+test("url state falls back to safe defaults and only accepts configured snapshots", () => {
+  const options = urlStateOptions();
+  const parsed = parseUrlState(
+    `?range=week&view=grid&page=0&pageSize=999&outside=no&q=${"x".repeat(
+      250,
+    )}&snapshot=data/snapshots/not-listed.json`,
+    options,
+  );
+
+  assert.equal(parsed.range, "72h");
+  assert.equal(parsed.view, "songRank");
+  assert.equal(parsed.page, 1);
+  assert.equal(parsed.pageSize, 50);
+  assert.equal(parsed.bucket, "全部");
+  assert.equal(parsed.outside, false);
+  assert.equal(parsed.q, "x".repeat(200));
+  assert.equal(parsed.snapshotPath, "data/latest.json");
+
+  const legacyOutside = parseUrlState("?libraryOutside=true&snapshot=data/snapshots/2026-07-10.json", options);
+
+  assert.equal(legacyOutside.outside, true);
+  assert.equal(legacyOutside.snapshotPath, "data/snapshots/2026-07-10.json");
+
+  const unknownSnapshot = new URLSearchParams(
+    serializeUrlState(
+      {
+        range: "72h",
+        view: "songRank",
+        page: 1,
+        pageSize: 50,
+        bucket: "全部",
+        outside: false,
+        q: "",
+        snapshotPath: "data/snapshots/not-listed.json",
+      },
+      options,
+    ),
+  );
+
+  assert.equal(unknownSnapshot.has("snapshot"), false);
+});
+
+test("song index bucket model uses all records and falls back when the current bucket disappears", () => {
+  const records = [
+    ...Array.from({ length: 50 }, (_, index) => indexRecord(`a-${index}`, "A")),
+    indexRecord("b-1", "B"),
+    indexRecord("c-1", "C"),
+  ];
+  const currentPage = paginateItems(records, { page: 1, pageSize: 50 }).visible;
+
+  assert.deepEqual([...new Set(currentPage.map((record) => record.bucket))], ["A"]);
+
+  const model = buildIndexBucketModel(records, {
+    bucket: "C",
+    getBucketLabel: (record) => record.bucket,
+    compareBuckets: compareBucketFixtures,
+  });
+
+  assert.deepEqual(
+    model.buckets.map((bucket) => [bucket.label, bucket.records.length]),
+    [
+      ["A", 50],
+      ["B", 1],
+      ["C", 1],
+    ],
+  );
+  assert.equal(model.currentBucket, "C");
+  assert.deepEqual(
+    model.records.map((record) => record.id),
+    ["c-1"],
+  );
+
+  const afterBucketDisappears = buildIndexBucketModel(
+    records.filter((record) => record.bucket !== "C"),
+    {
+      bucket: "C",
+      getBucketLabel: (record) => record.bucket,
+      compareBuckets: compareBucketFixtures,
+    },
+  );
+
+  assert.equal(afterBucketDisappears.currentBucket, "全部");
+  assert.equal(afterBucketDisappears.records.length, 51);
+});
+
+test("outside-library filters keep songs marked outside the known index", () => {
+  const items = [
+    video("A", "mixed video", "channel A", [
+      song("known song", "artist", { isNiche: false }),
+      song("outside song", "artist", { isNiche: true }),
+    ]),
+    video("B", "legacy video", "channel B", [song("legacy outside", "artist", { niche: true })]),
+    video("C", "known video", "channel C", [song("known only", "artist", { isNiche: false })]),
+  ];
+  const occurrences = items.flatMap((item) => item.songs.map((song) => ({ item, song })));
+
+  assert.deepEqual(
+    filterItemsByNiche(items, true).map((item) => item.videoId),
+    ["A", "B"],
+  );
+  assert.deepEqual(
+    filterOccurrencesByNiche(occurrences, true).map(({ song }) => song.title),
+    ["outside song", "legacy outside"],
+  );
+  assert.equal(filterItemsByNiche(items, false), items);
+  assert.equal(filterOccurrencesByNiche(occurrences, false), occurrences);
 });
 
 test("song-search lookup annotates and filters niche songs", () => {
@@ -172,6 +371,50 @@ function createDeferred() {
   return { promise, resolve, reject };
 }
 
+function assertNoNumericJumpWithoutEllipsis(tokens) {
+  let previousNumber = null;
+  let previousToken = null;
+  for (const token of tokens) {
+    if (typeof token === "number") {
+      if (previousNumber !== null && token - previousNumber > 1) {
+        assert.equal(previousToken, "ellipsis", `missing ellipsis between ${previousNumber} and ${token}`);
+      }
+      previousNumber = token;
+    }
+    previousToken = token;
+  }
+}
+
+function urlStateOptions() {
+  return {
+    validRanges: ["72h", "1m"],
+    validViews: ["songRank", "artistRank", "songAz", "videos"],
+    validPageSizes: [50, 100, 200],
+    latestSnapshotPath: "data/latest.json",
+    snapshots: [
+      { id: "archive-20260710", path: "data/snapshots/2026-07-10.json" },
+      { id: "archive-20260711", path: "data/snapshots/2026-07-11.json" },
+    ],
+    defaults: {
+      range: "72h",
+      view: "songRank",
+      page: 1,
+      pageSize: 50,
+      bucket: "全部",
+      outside: false,
+      q: "",
+    },
+  };
+}
+
+function indexRecord(id, bucket) {
+  return { id, bucket };
+}
+
+function compareBucketFixtures(a, b) {
+  return a.label.localeCompare(b.label, "en");
+}
+
 function video(videoId, title, channelName, songs) {
   return {
     videoId,
@@ -182,12 +425,13 @@ function video(videoId, title, channelName, songs) {
   };
 }
 
-function song(title, artist) {
+function song(title, artist, overrides = {}) {
   return {
     title,
     artist,
     seconds: 60,
     time: "0:01:00",
+    ...overrides,
   };
 }
 
