@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 
-const { buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
+const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
 
 test("merges same title with the same known artist", () => {
   const records = buildSongRecords([occurrence("花に亡霊", "ヨルシカ", "A"), occurrence("花に亡霊", "ヨルシカ", "B")]);
@@ -138,6 +138,19 @@ test("builds competition ranking after same-title aggregation", () => {
   assert.equal(ranks.get(records[0].key), 1);
   assert.equal(ranks.get(records[1].key), 2);
   assert.equal(ranks.get(records[2].key), 2);
+});
+
+test("artist ranking excludes unknown artist placeholders", () => {
+  const { records, missingArtistCount } = buildArtistRecords([
+    occurrence("Song A", "未記載", "A"),
+    occurrence("Song B", "待补歌手", "B"),
+    occurrence("Song C", "待補歌手", "C"),
+    occurrence("Song D", "Known Artist", "D"),
+  ]);
+
+  assert.deepEqual(records.map((record) => record.name), ["Known Artist"]);
+  assert.equal(records[0].count, 1);
+  assert.equal(missingArtistCount, 3);
 });
 
 function occurrence(title, artist, videoId) {

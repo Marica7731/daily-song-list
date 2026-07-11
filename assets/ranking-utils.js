@@ -5,7 +5,21 @@
   }
   root.RankingUtils = factory();
 })(typeof globalThis !== "undefined" ? globalThis : window, function createRankingUtils() {
-  const UNKNOWN_ARTISTS = new Set(["unknown", "n/a", "na", "未記載", "未记载", "不明", "无", "なし", "-"]);
+  const UNKNOWN_ARTISTS = new Set([
+    "unknown",
+    "n/a",
+    "na",
+    "未記載",
+    "未记载",
+    "不明",
+    "无",
+    "なし",
+    "待补歌手",
+    "待補歌手",
+    "待补",
+    "待補",
+    "-",
+  ]);
 
   function buildSongRecords(occurrences, options = {}) {
     const clean = options.cleanText || cleanText;
@@ -100,6 +114,46 @@
     }
 
     return records;
+  }
+
+  function buildArtistRecords(occurrences, options = {}) {
+    const clean = options.cleanText || cleanText;
+    const normalize = options.normalizeEntityKey || normalizeEntityKey;
+    const increment = options.incrementCount || incrementCount;
+    const records = new Map();
+    let missingArtistCount = 0;
+
+    for (const occurrence of occurrences || []) {
+      const artist = clean(occurrence?.song?.artist);
+      if (isUnknownArtistName(artist)) {
+        missingArtistCount += 1;
+        continue;
+      }
+
+      const key = normalize(artist);
+      if (!key) {
+        missingArtistCount += 1;
+        continue;
+      }
+      if (!records.has(key)) {
+        records.set(key, {
+          key,
+          name: artist,
+          count: 0,
+          songs: new Map(),
+          channels: new Map(),
+          occurrences: [],
+        });
+      }
+
+      const record = records.get(key);
+      record.count += 1;
+      record.occurrences.push(occurrence);
+      increment(record.songs, clean(occurrence?.song?.title));
+      increment(record.channels, clean(occurrence?.item?.channelName));
+    }
+
+    return { records: Array.from(records.values()), missingArtistCount };
   }
 
   function mergeKnownArtistVariants(titleGroup) {
@@ -216,6 +270,12 @@
 
   function isKnownArtist(artist, artistKey) {
     return Boolean(artistKey) && !UNKNOWN_ARTISTS.has(artistKey) && Boolean(cleanText(artist));
+  }
+
+  function isUnknownArtistName(value) {
+    const text = cleanText(value);
+    if (!text) return true;
+    return UNKNOWN_ARTISTS.has(normalizeEntityKey(text));
   }
 
   function isLikelyNonArtistAnnotation(value) {
@@ -337,9 +397,11 @@
   }
 
   return {
+    buildArtistRecords,
     buildCompetitionRanks,
     buildSongRecords,
     cleanText,
+    isUnknownArtistName,
     normalizeArtistKey,
     normalizeEntityKey,
     normalizeSongTitleKey,

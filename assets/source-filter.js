@@ -82,6 +82,7 @@
     if (!payload?.groups) return payload;
     let removedSources = 0;
     let removedSongs = 0;
+    let normalizedSongs = 0;
     const groups = Object.fromEntries(
       Object.entries(payload.groups).map(([groupId, group]) => {
         const items = [];
@@ -90,17 +91,22 @@
             removedSources += 1;
             continue;
           }
-          const songs = (item.songs || []).filter((song) => {
-            if (!isBlockedSongEntry(song)) return true;
-            removedSongs += 1;
-            return false;
-          });
+          const songs = [];
+          for (const song of item.songs || []) {
+            const normalizedSong = normalizeSongEntry(song);
+            if (isBlockedSongEntry(normalizedSong)) {
+              removedSongs += 1;
+              continue;
+            }
+            if (normalizedSong !== song) normalizedSongs += 1;
+            songs.push(normalizedSong);
+          }
           if (songs.length) items.push({ ...item, songs });
         }
         return [groupId, { ...group, items }];
       }),
     );
-    if (!removedSources && !removedSongs) return payload;
+    if (!removedSources && !removedSongs && !normalizedSongs) return payload;
     return {
       ...payload,
       groups,
@@ -108,20 +114,120 @@
         ...(payload.source || {}),
         clientFilteredBlockedSourceCount: removedSources,
         clientFilteredBlockedSongCount: removedSongs,
+        clientNormalizedSongCount: normalizedSongs,
       },
     };
   }
 
+  function normalizeSongEntry(song) {
+    if (!song || typeof song !== "object") return song;
+    const title = cleanSongTitleNoise(song.title);
+    if (title === song.title) return song;
+    return { ...song, title };
+  }
+
+  function cleanSongTitleNoise(text) {
+    let value = String(text || "").trim();
+    for (let idx = 0; idx < 4; idx += 1) {
+      const original = value;
+      value = stripCustomEmojiAliases(value).trim();
+      value = value
+        .replace(/^\s*(?:[#＃]?\d{1,3}\s+)?[#＃]?\d{1,3}\s*[.)．、:：|｜]\s*/u, "")
+        .trim();
+      value = value
+        .replace(/^\s*(?:[#＃]?\d{1,3}\s+)?[#＃]?\d{1,3}\s*曲目\s*(?:[.)．、:：|｜\-—–−]\s*)?/u, "")
+        .trim();
+      if (value === original) break;
+    }
+    return value;
+  }
+
   function isBlockedSongEntry(song) {
+    const title = String(song?.title || song?.raw || "").trim();
     const artist = String(song?.artist || "").trim();
     const hasArtist = Boolean(artist && !isUnknownArtist(artist));
-    return !hasArtist && isChatReactionShoutText(song?.title || song?.raw);
+    if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
+    if (!hasArtist && isNonSongNoiseTitle(title)) return true;
+    return !hasArtist && isChatReactionShoutText(title);
+  }
+
+  function isStrongNonSongMarker(text) {
+    return new Set([
+      "曲導入",
+    ]).has(normalizeNoiseTitleKey(text));
+  }
+
+  function isNonSongNoiseTitle(text) {
+    const rawCompact = stripCustomEmojiAliases(text)
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .replace(/[\s\u3000]+/gu, "");
+    if (/^\d+on\d+&/iu.test(rawCompact)) return true;
+
+    const key = normalizeNoiseTitleKey(text);
+    if (!key) return false;
+    if (/^(?:第)?\d+個目$/u.test(key)) return true;
+    return new Set([
+      "この曲について",
+      "待機",
+      "待機画面op",
+      "待機画面",
+      "歌い終えて",
+      "曲終わり",
+      "曲終り",
+      "曲おわり",
+      "終わりの会",
+      "終わりのあいさつ",
+      "はじまり",
+      "始まりました",
+      "本日のサムネ",
+      "チューニング",
+      "ストローク練習",
+      "インストカバーmv紹介",
+      "予告あれこれ",
+      "new",
+      "start",
+      "ご挨拶",
+      "youtubeの新機能",
+      "告知タイム",
+      "特典告知1",
+      "特典告知2",
+      "お知らせ",
+      "提供",
+      "ending",
+      "エンディング",
+      "cパート",
+      "お名前呼び",
+    ]).has(key);
+  }
+
+  function normalizeNoiseTitleKey(text) {
+    return stripCustomEmojiAliases(text)
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .replace(/[\u{1F300}-\u{1FAFF}\uFE0E\uFE0F]/gu, "")
+      .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’~～!！?？.,，。、:：;；\-—–−_・･/／|｜]+/gu, "")
+      .trim();
   }
 
   function isUnknownArtist(value) {
-    return new Set(["", "unknown", "na", "n/a", "none", "null", "未記載", "未记载", "不明", "なし", "无", "待补歌手"]).has(
-      String(value || "").trim(),
-    );
+    return new Set([
+      "",
+      "unknown",
+      "na",
+      "n/a",
+      "none",
+      "null",
+      "未記載",
+      "未记载",
+      "不明",
+      "なし",
+      "无",
+      "待补歌手",
+      "待補歌手",
+      "待补",
+      "待補",
+    ]).has(String(value || "").trim());
   }
 
   function isChatReactionShoutText(text) {
@@ -162,12 +268,14 @@
   }
 
   return {
+    cleanSongTitleNoise,
     filterBlockedVideos,
     filterPayloadBlockedSources,
     isBlockedSongEntry,
     isBlockedSource,
     isChatReactionShoutText,
     matchBlockedSource,
+    normalizeSongEntry,
     normalizeMatcherText,
     TAIWAN_VTUBER_BLACKLIST,
   };

@@ -1075,36 +1075,11 @@ function buildSongRecords(occurrences) {
 }
 
 function buildArtistRecords(occurrences) {
-  const records = new Map();
-  let missingArtistCount = 0;
-
-  for (const occurrence of occurrences) {
-    const artist = cleanText(occurrence.song.artist);
-    if (!artist) {
-      missingArtistCount += 1;
-      continue;
-    }
-
-    const key = normalizeEntityKey(artist);
-    if (!records.has(key)) {
-      records.set(key, {
-        key,
-        name: artist,
-        count: 0,
-        songs: new Map(),
-        channels: new Map(),
-        occurrences: [],
-      });
-    }
-
-    const record = records.get(key);
-    record.count += 1;
-    record.occurrences.push(occurrence);
-    incrementCount(record.songs, cleanText(occurrence.song.title));
-    incrementCount(record.channels, cleanText(occurrence.item.channelName));
-  }
-
-  return { records: Array.from(records.values()), missingArtistCount };
+  return window.RankingUtils.buildArtistRecords(occurrences, {
+    cleanText,
+    incrementCount,
+    normalizeEntityKey,
+  });
 }
 
 function buildCompetitionRanks(records) {

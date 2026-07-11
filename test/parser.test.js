@@ -251,6 +251,70 @@ test("rejects short chat reaction timestamps after a real set list", () => {
   assert.equal(titles.some((title) => /^(?:DQ|DEN Q|天Q|ZOOM IN|MUMUMU|WAAAA|smile)/iu.test(title)), false);
 });
 
+test("rejects dirty section markers from niche-only timelines", () => {
+  const songs = parseTimestampSongs([
+    [
+      "[ 12:01 この曲について ]",
+      "0:00 待機",
+      "02:02:09 歌い終えて",
+      "1:03:44 1個目！:_nonoNono:",
+      "┗ 0:07:35 [曲終わり]",
+      "01:31:56 ending",
+      "0:03:07 はじまり",
+      "2:48:22 1on1&同期は",
+      "0:00:00 待機画面／ＯＰ",
+      "0:04:21 本日のサムネ",
+      "0:05:32 チューニング",
+      "0:06:43 ストローク練習",
+      "0:07:54 インスト、カバーMV紹介",
+      "0:09:05 予告あれこれ",
+      "0:10:16 NEW!",
+      "[ 13:54 最近暑いね ](曲導入)",
+      "[ 19:35 夏と言えば…？ ](曲導入)",
+      "[ 38:02 曲導入 ]",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(songs, []);
+});
+
+test("keeps song titles that merely contain dirty marker words", () => {
+  const songs = parseTimestampSongs([
+    [
+      "1:21:48 はじまりはいつも雨",
+      "㉔2:45:49 （2012）ルミナス / ClariS『魔法少女まどか☆マギカ [前編] 始まりの物語』劇場版主題歌",
+      "60曲目 3:58:12 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(特別ゲスト ケンリュウ)",
+      "13:16 ・睡蓮花",
+      "2:30:22 「Song for...／HY」",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["睡蓮花", "はじまりはいつも雨", "「Song for...／HY」", "（2012）ルミナス", "勝利のマシンロボ"],
+  );
+  assert.equal(songs.length, 5);
+});
+
+test("cleans ordinal prefixes while keeping real song rows", () => {
+  const songs = parseTimestampSongs([
+    [
+      "00:10:32 01| ハートアンドハート(Heart and Heart) | 苺咲べりぃ(Maisaki Berry)",
+      "1:23:09 10曲目 Brave Shine / Aimer",
+      "1:03:34 3 01. 初恋サイダー / Buono!",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["ハートアンドハート", "初恋サイダー", "Brave Shine"],
+  );
+  assert.deepEqual(
+    songs.map((song) => song.artist),
+    ["苺咲べりぃ", "Buono!", "Aimer"],
+  );
+});
+
 test("rejects tree child notes and channel metrics", () => {
   const songs = parseTimestampSongs([
     [

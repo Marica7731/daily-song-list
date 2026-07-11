@@ -1,4 +1,4 @@
-const { isChatReactionShoutText } = require("../assets/source-filter");
+const { cleanSongTitleNoise, isBlockedSongEntry, isChatReactionShoutText } = require("../assets/source-filter");
 
 const TIMESTAMP_RE = /(?<![\dA-Za-z_:])(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)(?!\d)/;
 const TIMESTAMP_TOKEN_RE = /(?<![\dA-Za-z_:])(?:[\[【(（]\s*)?(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)(?:\s*[\]】)）])?(?!\d)/g;
@@ -118,6 +118,7 @@ function isLikelyNonSongEntry(song) {
   const hasArtist = Boolean(artist && artist !== "未記載");
 
   if (isCustomEmojiOnlyText(title)) return true;
+  if (isBlockedSongEntry({ title, artist, raw })) return true;
   if (!hasArtist && isChatReactionShoutText(title)) return true;
   if (isReactionActivityEntry(title, artist, raw)) return true;
   if (/^(音入り|音入[り]?|声入り|マイクテスト|開始|終了|曲始まり|オープニング|エンディング|登場|退場|ゲスト|スパチャ読み|読み開始|コメント読み|告知|雑談|休憩|ただいま|まで)$/iu.test(title)) {
@@ -358,9 +359,11 @@ function splitWithMetadata(text) {
 function cleanSongOrArtistPart(text) {
   let value = stripTrailingLatinAnnotation(String(text || "").trim());
   value = stripCustomEmojiAliases(value).trim();
+  value = cleanSongTitleNoise(value).trim();
   value = value.replace(/^_[A-Za-z0-9]+:\s*/u, "").trim();
   const preserveTrailingDoubleSlash = /[A-Za-z0-9)\]）]\/\/\s*$/.test(value);
   value = value.replace(/^\s*(?:\d{1,3}\s*[\-—–−]|[#＃]\s*\d{1,3}\s*[.)．。、:：\-—–−]?|encore|アンコール)\s*/iu, "").trim();
+  value = cleanSongTitleNoise(value).trim();
   value = value.replace(/^[\[［]+|[\]］]+$/g, "").trim();
   value = value.replace(/^[\-—–−/／|｜￤∣丨✦:：;；]+|[\-—–−/／|｜￤∣丨✦:：;；]+$/g, "").trim();
   if (preserveTrailingDoubleSlash && !value.endsWith("//")) value = `${value}//`;
