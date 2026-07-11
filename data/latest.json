@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-11T15:11:36.696Z",
-  "capturedAt": "2026-07-11T15:11:36.696Z",
+  "generatedAt": "2026-07-11T15:27:17.429Z",
+  "capturedAt": "2026-07-11T15:27:17.429Z",
   "source": {
     "name": "YouTube search + watch comments/descriptions",
     "keywords": [
@@ -33,13 +33,13 @@
         "keyword": "歌枠",
         "keywordKey": "utawaku",
         "url": "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D",
-        "itemCount": 330,
+        "itemCount": 386,
         "limit": 500,
-        "continuationRounds": 19,
+        "continuationRounds": 22,
         "reachedEnd": true,
         "truncatedByLimit": false,
         "skippedActiveLiveOrUpcoming": 0,
-        "collectedAt": "2026-07-11T15:09:45.742Z"
+        "collectedAt": "2026-07-11T15:25:28.103Z"
       },
       {
         "sourceGroup": "today",
@@ -53,7 +53,7 @@
         "reachedEnd": true,
         "truncatedByLimit": false,
         "skippedActiveLiveOrUpcoming": 0,
-        "collectedAt": "2026-07-11T15:09:53.910Z"
+        "collectedAt": "2026-07-11T15:25:37.995Z"
       },
       {
         "sourceGroup": "month",
@@ -61,13 +61,13 @@
         "keyword": "歌枠",
         "keywordKey": "utawaku",
         "url": "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D",
-        "itemCount": 410,
+        "itemCount": 486,
         "limit": 500,
-        "continuationRounds": 21,
-        "reachedEnd": true,
+        "continuationRounds": 25,
+        "reachedEnd": false,
         "truncatedByLimit": false,
         "skippedActiveLiveOrUpcoming": 0,
-        "collectedAt": "2026-07-11T15:09:55.796Z"
+        "collectedAt": "2026-07-11T15:25:39.691Z"
       },
       {
         "sourceGroup": "month",
@@ -75,28 +75,28 @@
         "keyword": "弾き語り",
         "keywordKey": "hikigatari",
         "url": "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D",
-        "itemCount": 448,
+        "itemCount": 449,
         "limit": 500,
         "continuationRounds": 24,
-        "reachedEnd": false,
+        "reachedEnd": true,
         "truncatedByLimit": false,
         "skippedActiveLiveOrUpcoming": 0,
-        "collectedAt": "2026-07-11T15:10:05.501Z"
+        "collectedAt": "2026-07-11T15:25:52.391Z"
       }
     ],
     "inspectedCount": 160,
-    "fetchedUsableVideoCount": 11,
-    "carriedVideoCount": 254,
-    "carried72hVideoCount": 232,
-    "carriedMonthVideoCount": 82,
+    "fetchedUsableVideoCount": 9,
+    "carriedVideoCount": 263,
+    "carried72hVideoCount": 241,
+    "carriedMonthVideoCount": 84,
     "carryForwardEnabled": true,
-    "carryForwardFrom": "2026-07-11T14:58:51.603Z",
-    "carryForwardAgeHours": 0.18,
+    "carryForwardFrom": "2026-07-11T15:11:36.696Z",
+    "carryForwardAgeHours": 0.23,
     "carryForwardReason": "previous_latest_fresh",
-    "knownVideoSkipCount": 408,
-    "skippedKnownCandidateCount": 309,
-    "usableVideoCount": 265,
-    "candidateCount": 1195,
+    "knownVideoSkipCount": 414,
+    "skippedKnownCandidateCount": 332,
+    "usableVideoCount": 272,
+    "candidateCount": 1320,
     "inspectionLimit": 160,
     "videoConcurrency": 2,
     "recentBucketLimit": 70,
@@ -105,164 +105,167 @@
     "auditPath": "data/audit.json",
     "auditSummary": {
       "inspectedVideos": 160,
-      "selectedVideos": 11,
-      "noUsableSongSourceVideos": 33,
+      "selectedVideos": 9,
+      "noUsableSongSourceVideos": 51,
       "fetchErrorVideos": 0,
-      "rejectedEntries": 45,
-      "rejectedSources": 39,
-      "acceptedSources": 14,
+      "rejectedEntries": 32,
+      "rejectedSources": 66,
+      "acceptedSources": 10,
       "rejectedEntryReasons": {
-        "title_only_non_song_candidate": 20,
-        "likely_non_song_entry": 15,
-        "obvious_non_song_text": 2,
+        "title_only_non_song_candidate": 17,
         "empty_after_timestamp": 3,
-        "activity_title": 5
+        "bad_title": 1,
+        "obvious_non_song_text": 4,
+        "activity_title": 5,
+        "likely_non_song_entry": 2
       },
       "rejectedSourceReasons": {
-        "too_few_timestamp_songs": 28,
-        "no_song_after_filter": 10,
-        "topic_timeline_without_artists": 1
+        "too_few_timestamp_songs": 52,
+        "no_song_after_filter": 11,
+        "mixed_comment_timeline_low_song_density": 1,
+        "unstructured_title_only_timeline": 1,
+        "topic_heavy_low_artist_source": 1
       },
       "topRejectedChannels": [
         {
-          "channelName": "若魔麦たると",
-          "videos": 1,
-          "selectedVideos": 1,
-          "rejectedEntries": 17,
-          "rejectedSources": 1,
-          "noUsableSongSourceVideos": 0,
-          "samples": [
-            "0:29:33 たるちゃん「リクエストさコメント残しといて」",
-            "0:04:56 今日はサンリオ楽曲歌枠",
-            "0:07:23 みんなが歌ってほしい曲を募集"
-          ]
-        },
-        {
-          "channelName": "Roboco Ch. - ロボ子",
-          "videos": 1,
-          "selectedVideos": 1,
-          "rejectedEntries": 9,
-          "rejectedSources": 1,
-          "noUsableSongSourceVideos": 0,
-          "samples": [
-            "0:03:09",
-            "0:03:09 配信スタート",
-            "0:04:13 眠れなかったろぼちゃん :_rbcHeadpatt"
-          ]
-        },
-        {
-          "channelName": "海月シェル Shell Ch.",
+          "channelName": "生返るるる",
           "videos": 1,
           "selectedVideos": 0,
-          "rejectedEntries": 4,
-          "rejectedSources": 2,
+          "rejectedEntries": 6,
+          "rejectedSources": 1,
           "noUsableSongSourceVideos": 1,
           "samples": [
-            "0:00:00 配信開始〜",
-            "0:02:24 オープニングMV",
-            "0:02:43 スタート！"
+            "0:01:29 配信開始、「夏の歌枠」企画を説明",
+            "0:02:30 楽曲リクエスト受付開始、前回配信設定を修正",
+            "1:00:23 SPEED「Wake Me Up!」歌唱"
           ]
         },
         {
-          "channelName": "藍射ペンネ",
+          "channelName": "Anime ch. 佐藤あにめ",
           "videos": 1,
           "selectedVideos": 0,
+          "rejectedEntries": 5,
+          "rejectedSources": 1,
+          "noUsableSongSourceVideos": 1,
+          "samples": [
+            "0:05:03 スタート",
+            "0:16:41",
+            "0:54:15 あにめの配信人生が"
+          ]
+        },
+        {
+          "channelName": "Alpha Betta【V-Dere】",
+          "videos": 1,
+          "selectedVideos": 1,
           "rejectedEntries": 3,
-          "rejectedSources": 1,
-          "noUsableSongSourceVideos": 1,
+          "rejectedSources": 2,
+          "noUsableSongSourceVideos": 0,
           "samples": [
-            "0:07:27 オープニング⤴",
-            "1:09:56 スケジュール📅",
-            "1:12:37 エンディング⤴"
+            "0:02:55 Start",
+            "1:30:05 Alicia",
+            "1:30:05 Note to self: look up alpha-beta fish when I finally get ambitious enough to make an award winning game and need a legendary OST for it"
           ]
         },
         {
-          "channelName": "勿蜜ひつみ( ないみつひつみ ) / Hitsumi Naimitsu",
+          "channelName": "合法‼︎バツ子ﾁｬﾝBatsuko",
           "videos": 1,
           "selectedVideos": 1,
-          "rejectedEntries": 2,
+          "rejectedEntries": 3,
           "rejectedSources": 0,
           "noUsableSongSourceVideos": 0,
           "samples": [
-            "0:01:34 op. 配信開始",
-            "1:00:10 ed. エンディングトーク"
+            "0:00:00 OP",
+            "0:02:50 配信開始",
+            "4:00:41 ED"
           ]
         },
         {
-          "channelName": "恭可 / Kyoka",
+          "channelName": "NONOA Ch.華美雲ののあ",
+          "videos": 1,
+          "selectedVideos": 0,
+          "rejectedEntries": 2,
+          "rejectedSources": 3,
+          "noUsableSongSourceVideos": 1,
+          "samples": [
+            "0:28:55",
+            "0:36:16 かわいい"
+          ]
+        },
+        {
+          "channelName": "siromi",
           "videos": 1,
           "selectedVideos": 0,
           "rejectedEntries": 1,
           "rejectedSources": 2,
           "noUsableSongSourceVideos": 1,
           "samples": [
-            "1:43:55"
+            "0:23:45 ～に変更［歌枠］生演奏ギター×ピアノ！VR音楽ユニット \"siromi\" 103#弾き語り #vtuber"
           ]
         },
         {
-          "channelName": "Miyako ch. 上月みやこ",
-          "videos": 1,
-          "selectedVideos": 0,
-          "rejectedEntries": 1,
-          "rejectedSources": 1,
-          "noUsableSongSourceVideos": 1,
-          "samples": [
-            "1:16:00"
-          ]
-        },
-        {
-          "channelName": "ウチヤマユウジ",
-          "videos": 1,
-          "selectedVideos": 0,
-          "rejectedEntries": 1,
-          "rejectedSources": 1,
-          "noUsableSongSourceVideos": 1,
-          "samples": [
-            "0:37:32 しましましっぽさんとミケちゃっちゃ先生のバースデーソング歌ってる？？？w"
-          ]
-        },
-        {
-          "channelName": "赤石グラナ",
-          "videos": 1,
-          "selectedVideos": 0,
-          "rejectedEntries": 1,
-          "rejectedSources": 1,
-          "noUsableSongSourceVideos": 1,
-          "samples": [
-            "0:24:00 新曲 #某トマト娘魔王堕ち✧ 【 #赤石グラナ #みたにみく #あかいとまと 】"
-          ]
-        },
-        {
-          "channelName": "夜舞かな",
-          "videos": 1,
-          "selectedVideos": 0,
-          "rejectedEntries": 1,
-          "rejectedSources": 1,
-          "noUsableSongSourceVideos": 1,
-          "samples": [
-            "0:22:00 ～】久々の歌枠🐈！ちょっと聴いてって🫶【歌枠企画11回目 】#歌枠 #karaoke #vtuber #vsinger#作業用bgm"
-          ]
-        },
-        {
-          "channelName": "悠月麻衣 / Yuduki Mai",
-          "videos": 1,
-          "selectedVideos": 0,
-          "rejectedEntries": 1,
-          "rejectedSources": 1,
-          "noUsableSongSourceVideos": 1,
-          "samples": [
-            "0:04:23 ブルーウォーターと〜〜っっても美しかったです🏝️✨サビが特にきれいでゾクゾクしてしまう…！"
-          ]
-        },
-        {
-          "channelName": "花波-Kanami-",
+          "channelName": "NORISTRY Official",
           "videos": 1,
           "selectedVideos": 1,
           "rejectedEntries": 1,
-          "rejectedSources": 1,
+          "rejectedSources": 2,
           "noUsableSongSourceVideos": 0,
           "samples": [
+            "0:19:20 てぇてぇTS失礼します😊‪🙏🏻"
+          ]
+        },
+        {
+          "channelName": "飴雲みいる / Amekumo Miiru Ch.",
+          "videos": 1,
+          "selectedVideos": 0,
+          "rejectedEntries": 1,
+          "rejectedSources": 1,
+          "noUsableSongSourceVideos": 1,
+          "samples": [
+            "0:04:48 配信スタート！"
+          ]
+        },
+        {
+          "channelName": "黄ノ瀬 オブリ - Obbli Kinose -",
+          "videos": 1,
+          "selectedVideos": 0,
+          "rejectedEntries": 1,
+          "rejectedSources": 1,
+          "noUsableSongSourceVideos": 1,
+          "samples": [
+            "1:30:33 『beautiful』と心地良い歌声の伸びの響かせ方がいっぱいでとても素敵…😌✨"
+          ]
+        },
+        {
+          "channelName": "桜一華",
+          "videos": 1,
+          "selectedVideos": 0,
+          "rejectedEntries": 1,
+          "rejectedSources": 1,
+          "noUsableSongSourceVideos": 1,
+          "samples": [
             "0:22:00 ～】久々の歌枠🐈！ちょっと聴いてって🫶【歌枠企画11回目 】#歌枠 #karaoke #vtuber #vsinger#作業用bgm"
+          ]
+        },
+        {
+          "channelName": "神代 雨葉 / Kamishiro Ameha",
+          "videos": 1,
+          "selectedVideos": 0,
+          "rejectedEntries": 1,
+          "rejectedSources": 1,
+          "noUsableSongSourceVideos": 1,
+          "samples": [
+            "0:19:30 ～　定期歌枠 かわみや かなえ #歌枠 #vtuber"
+          ]
+        },
+        {
+          "channelName": "星海りっか 【Hoshiumi Rikka】",
+          "videos": 1,
+          "selectedVideos": 0,
+          "rejectedEntries": 1,
+          "rejectedSources": 1,
+          "noUsableSongSourceVideos": 1,
+          "samples": [
+            "0:04:05 〜"
           ]
         }
       ]
@@ -270,17 +273,213 @@
   },
   "status": {
     "status": "success",
-    "attemptedAt": "2026-07-11T15:09:45.718Z",
-    "completedAt": "2026-07-11T15:11:36.696Z",
-    "message": "Captured 325 videos with timestamp song lists."
+    "attemptedAt": "2026-07-11T15:25:28.078Z",
+    "completedAt": "2026-07-11T15:27:17.429Z",
+    "message": "Captured 338 videos with timestamp song lists."
   },
   "groups": {
     "72h": {
       "id": "72h",
       "title": "72H timestamp song lists",
-      "generatedAt": "2026-07-11T15:11:36.696Z",
-      "updatedAt": "2026-07-11T15:11:36.696Z",
+      "generatedAt": "2026-07-11T15:27:17.429Z",
+      "updatedAt": "2026-07-11T15:27:17.429Z",
       "items": [
+        {
+          "videoId": "tTAXnTQjCu8",
+          "title": "【#弾き語り】アニソン歌います！1曲聴いていきませんか？ singing stream - #ミナミイズミ #shorts",
+          "channelName": "ミナミイズミ / IZUMI MINAMI",
+          "keyword": "弾き語り",
+          "keywords": [
+            "弾き語り"
+          ],
+          "sourceGroups": [
+            "month"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D"
+          ],
+          "publishedText": "5 分前 に配信済み",
+          "publishedTimestamp": 1783783228078,
+          "durationText": "2:17:01",
+          "thumbnailUrl": "https://i.ytimg.com/vi/tTAXnTQjCu8/hqdefault.jpg?sqp=-oaymwEcCOADEI4CSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDJKHdJ6UcN3UcSkpHanrvlgNtX2g",
+          "sourceCount": 1,
+          "rejectedSourceCount": 1,
+          "rejectedSources": [
+            {
+              "sourceType": "description",
+              "reason": "too_few_timestamp_songs",
+              "originalCount": 1,
+              "keptCount": 1,
+              "artistCount": 1,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 0,
+              "sample": [
+                "0:04:00 03/07/2026"
+              ],
+              "rejectedEntryCount": 0,
+              "rejectedEntryReasons": {},
+              "rejectedSamples": [],
+              "rejectedEntries": []
+            }
+          ],
+          "rejectedEntryCount": 0,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 18,
+            "keptCount": 18,
+            "artistCount": 18,
+            "topicCount": 0,
+            "structuralCount": 18,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:12:34",
+              "seconds": 754,
+              "title": "again",
+              "artist": "YUI",
+              "raw": "0:12:34  01.  again／YUI"
+            },
+            {
+              "index": 2,
+              "time": "0:20:35",
+              "seconds": 1235,
+              "title": "オレンジ",
+              "artist": "逢坂大河(釘宮理恵)・櫛枝実乃梨(堀江由衣)・川嶋亜美(喜多村英梨)",
+              "raw": "0:20:35  02.  オレンジ／逢坂大河(釘宮理恵)・櫛枝実乃梨(堀江由衣)・川嶋亜美(喜多村英梨)"
+            },
+            {
+              "index": 3,
+              "time": "0:27:21",
+              "seconds": 1641,
+              "title": "FLY HIGH!!",
+              "artist": "BURNOUT SYNDROMES",
+              "raw": "0:27:21  03.  FLY HIGH!!／BURNOUT SYNDROMES"
+            },
+            {
+              "index": 4,
+              "time": "0:33:48",
+              "seconds": 2028,
+              "title": "chAngE",
+              "artist": "miwa",
+              "raw": "0:33:48  04.  chAngE／miwa"
+            },
+            {
+              "index": 5,
+              "time": "0:39:48",
+              "seconds": 2388,
+              "title": "花になって",
+              "artist": "緑黄色社会",
+              "raw": "0:39:48  05.  花になって／緑黄色社会"
+            },
+            {
+              "index": 6,
+              "time": "0:43:54",
+              "seconds": 2634,
+              "title": "花の塔",
+              "artist": "さユり",
+              "raw": "0:43:54  06.  花の塔／さユり"
+            },
+            {
+              "index": 7,
+              "time": "0:50:09",
+              "seconds": 3009,
+              "title": "Believe",
+              "artist": "Folder5",
+              "raw": "0:50:09  07.  Believe／Folder5"
+            },
+            {
+              "index": 8,
+              "time": "0:53:39",
+              "seconds": 3219,
+              "title": "ウィーアー！",
+              "artist": "きただにひろし",
+              "raw": "0:53:39  08.  ウィーアー！／きただにひろし"
+            },
+            {
+              "index": 9,
+              "time": "0:57:35",
+              "seconds": 3455,
+              "title": "God knows...",
+              "artist": "涼宮ハルヒ(平野綾)",
+              "raw": "0:57:35  09.  God knows...／涼宮ハルヒ(平野綾)"
+            },
+            {
+              "index": 10,
+              "time": "1:01:58",
+              "seconds": 3718,
+              "title": "オリオンをなぞる",
+              "artist": "UNISON SQUARE GARDEN",
+              "raw": "1:01:58  10.  オリオンをなぞる／UNISON SQUARE GARDEN"
+            },
+            {
+              "index": 11,
+              "time": "1:09:44",
+              "seconds": 4184,
+              "title": "unravel",
+              "artist": "TK from 凛として時雨",
+              "raw": "1:09:44  11.  unravel／TK from 凛として時雨"
+            },
+            {
+              "index": 12,
+              "time": "1:14:49",
+              "seconds": 4489,
+              "title": "季節は次々死んでいく",
+              "artist": "amazarashi",
+              "raw": "1:14:49  12.  季節は次々死んでいく／amazarashi"
+            },
+            {
+              "index": 13,
+              "time": "1:20:43",
+              "seconds": 4843,
+              "title": "シルエット",
+              "artist": "KANA-BOON",
+              "raw": "1:20:43  13.  シルエット／KANA-BOON"
+            },
+            {
+              "index": 14,
+              "time": "1:28:18",
+              "seconds": 5298,
+              "title": "曇天",
+              "artist": "DOES",
+              "raw": "1:28:18  14.  曇天／DOES"
+            },
+            {
+              "index": 15,
+              "time": "1:32:08",
+              "seconds": 5528,
+              "title": "リライト",
+              "artist": "ASIAN KUNG-FU GENERATION",
+              "raw": "1:32:08  15.  リライト／ASIAN KUNG-FU GENERATION"
+            },
+            {
+              "index": 16,
+              "time": "1:39:37",
+              "seconds": 5977,
+              "title": "I",
+              "artist": "BUMP OF CHICKEN",
+              "raw": "1:39:37  16.  I／BUMP OF CHICKEN"
+            },
+            {
+              "index": 17,
+              "time": "1:44:49",
+              "seconds": 6289,
+              "title": "月虹",
+              "artist": "BUMP OF CHICKEN",
+              "raw": "1:44:49  17.  月虹／BUMP OF CHICKEN"
+            },
+            {
+              "index": 18,
+              "time": "1:51:45",
+              "seconds": 6705,
+              "title": "sailing day",
+              "artist": "BUMP OF CHICKEN",
+              "raw": "1:51:45  18.  sailing day／BUMP OF CHICKEN"
+            }
+          ]
+        },
         {
           "videoId": "JByXaGWi1ww",
           "title": "【歌枠】少しアコギを弾いて寝る弾き語り【#vtuber #vsinger 】",
@@ -387,7 +586,10 @@
               "artist": "オリ曲",
               "raw": "10. 1:06:47 arenae（オリ曲）"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
+          "keywordKeys": []
         },
         {
           "videoId": "DuDkasY22Mc",
@@ -599,7 +801,299 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
+        },
+        {
+          "videoId": "w7v5C8YhXgY",
+          "title": "【歌枠│Karaoke】初見歓迎❕90&00年代アニソン縛り📺定番～マニア曲までたくさん歌います❕【バツ子│個人V│邂逅バツ子ﾁｬ",
+          "channelName": "合法‼︎バツ子ﾁｬﾝBatsuko",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "today",
+            "month"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D",
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D"
+          ],
+          "publishedText": "1 時間前 に配信済み",
+          "publishedTimestamp": 1783779928078,
+          "durationText": "4:03:06",
+          "thumbnailUrl": "https://i.ytimg.com/vi/w7v5C8YhXgY/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCGfPqUlocx86jKGgww-ipnAE0sEw",
+          "sourceCount": 1,
+          "rejectedSourceCount": 0,
+          "rejectedSources": [],
+          "rejectedEntryCount": 3,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 35,
+            "keptCount": 32,
+            "artistCount": 32,
+            "topicCount": 1,
+            "structuralCount": 35,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:14:01",
+              "seconds": 841,
+              "title": "檄！帝国華撃団",
+              "artist": "サクラ大戦（1996）",
+              "raw": "0:14:01 檄！帝国華撃団 / サクラ大戦（1996）"
+            },
+            {
+              "index": 2,
+              "time": "0:17:04",
+              "seconds": 1024,
+              "title": "邪魔はさせない",
+              "artist": "スレイヤーズNEXT（1996）🆕",
+              "raw": "0:17:04 邪魔はさせない / スレイヤーズNEXT（1996）🆕"
+            },
+            {
+              "index": 3,
+              "time": "0:21:50",
+              "seconds": 1310,
+              "title": "Give a Reason",
+              "artist": "スレイヤーズNEXT（1996）",
+              "raw": "0:21:50 Give a Reason / スレイヤーズNEXT（1996）"
+            },
+            {
+              "index": 4,
+              "time": "0:33:36",
+              "seconds": 2016,
+              "title": "アンインストール",
+              "artist": "ぼくらの（2007）",
+              "raw": "0:33:36 アンインストール / ぼくらの（2007）"
+            },
+            {
+              "index": 5,
+              "time": "0:38:20",
+              "seconds": 2300,
+              "title": "ブルーウォーター",
+              "artist": "ふしぎの海のナディア（1990）",
+              "raw": "0:38:20 ブルーウォーター / ふしぎの海のナディア（1990）"
+            },
+            {
+              "index": 6,
+              "time": "0:43:08",
+              "seconds": 2588,
+              "title": "WILL",
+              "artist": "仙界伝 封神演義（1999）",
+              "raw": "0:43:08 WILL / 仙界伝 封神演義（1999）"
+            },
+            {
+              "index": 7,
+              "time": "0:55:56",
+              "seconds": 3356,
+              "title": "光と影を抱きしめたまま",
+              "artist": "魔法騎士レイアース（1995）🆕",
+              "raw": "0:55:56 光と影を抱きしめたまま / 魔法騎士レイアース（1995）🆕"
+            },
+            {
+              "index": 8,
+              "time": "1:01:00",
+              "seconds": 3660,
+              "title": "YEARS AFTER",
+              "artist": "機動戦士ガンダム 第08MS小隊（1996）",
+              "raw": "1:01:00 10 YEARS AFTER/機動戦士ガンダム 第08MS小隊（1996）"
+            },
+            {
+              "index": 9,
+              "time": "1:05:22",
+              "seconds": 3922,
+              "title": "Z・刻をこえて",
+              "artist": "機動戦士Zガンダム（1985）",
+              "raw": "1:05:22 Z・刻をこえて / 機動戦士Zガンダム（1985）"
+            },
+            {
+              "index": 10,
+              "time": "1:15:14",
+              "seconds": 4514,
+              "title": "君の知らない物語",
+              "artist": "化物語（2009）",
+              "raw": "1:15:14 君の知らない物語 / 化物語（2009）"
+            },
+            {
+              "index": 11,
+              "time": "1:21:04",
+              "seconds": 4864,
+              "title": "agape",
+              "artist": "円盤皇女ワるきゅーレ（2002）",
+              "raw": "1:21:04 agape / 円盤皇女ワるきゅーレ（2002）"
+            },
+            {
+              "index": 12,
+              "time": "1:25:26",
+              "seconds": 5126,
+              "title": "JOINT",
+              "artist": "灼眼のシャナII（2007）",
+              "raw": "1:25:26 JOINT / 灼眼のシャナII（2007）"
+            },
+            {
+              "index": 13,
+              "time": "1:33:30",
+              "seconds": 5610,
+              "title": "星空のSpica",
+              "artist": "魔法少女リリカルなのはStrikerS（2007）",
+              "raw": "1:33:30 星空のSpica / 魔法少女リリカルなのはStrikerS（2007）"
+            },
+            {
+              "index": 14,
+              "time": "1:38:26",
+              "seconds": 5906,
+              "title": "ETERNAL BLAZE",
+              "artist": "魔法少女リリカルなのはA's（2005）",
+              "raw": "1:38:26 ETERNAL BLAZE / 魔法少女リリカルなのはA's（2005）"
+            },
+            {
+              "index": 15,
+              "time": "1:44:03",
+              "seconds": 6243,
+              "title": "君が好きだと叫びたい",
+              "artist": "SLAM DUNK（1993）",
+              "raw": "1:44:03 君が好きだと叫びたい / SLAM DUNK（1993）"
+            },
+            {
+              "index": 16,
+              "time": "1:51:59",
+              "seconds": 6719,
+              "title": "ブルーバード",
+              "artist": "NARUTO ナルト 疾風伝（2008）",
+              "raw": "1:51:59 ブルーバード/NARUTO ナルト 疾風伝（2008）"
+            },
+            {
+              "index": 17,
+              "time": "1:55:50",
+              "seconds": 6950,
+              "title": "残酷な天使のテーゼ",
+              "artist": "新世紀エヴァンゲリオン（1995）",
+              "raw": "1:55:50 残酷な天使のテーゼ / 新世紀エヴァンゲリオン（1995）"
+            },
+            {
+              "index": 18,
+              "time": "2:00:14",
+              "seconds": 7214,
+              "title": "魂のルフラン",
+              "artist": "新世紀エヴァンゲリオン劇場版 シト新生（1997）",
+              "raw": "2:00:14 魂のルフラン / 新世紀エヴァンゲリオン劇場版 シト新生（1997）"
+            },
+            {
+              "index": 19,
+              "time": "2:15:14",
+              "seconds": 8114,
+              "title": "Let Me Be With You",
+              "artist": "ちょびっツ（2002）",
+              "raw": "2:15:14 Let Me Be With You / ちょびっツ（2002）"
+            },
+            {
+              "index": 20,
+              "time": "2:19:51",
+              "seconds": 8391,
+              "title": "小さきもの",
+              "artist": "劇場版ポケットモンスター アドバンスジェネレーション 七夜の願い星 ジラーチ（2005）",
+              "raw": "2:19:51 小さきもの / 劇場版ポケットモンスター アドバンスジェネレーション 七夜の願い星 ジラーチ（2005）"
+            },
+            {
+              "index": 21,
+              "time": "2:25:28",
+              "seconds": 8728,
+              "title": "ウンディーネ",
+              "artist": "ARIA The ANIMATION（2005）",
+              "raw": "2:25:28 ウンディーネ / ARIA The ANIMATION（2005）"
+            },
+            {
+              "index": 22,
+              "time": "2:34:07",
+              "seconds": 9247,
+              "title": "WINNERS FOREVER ～勝利者よ～",
+              "artist": "機動戦士Vガンダム（1993）",
+              "raw": "2:34:07 WINNERS FOREVER ～勝利者よ～ / 機動戦士Vガンダム（1993）"
+            },
+            {
+              "index": 23,
+              "time": "2:38:24",
+              "seconds": 9504,
+              "title": "Glossy:MMM",
+              "artist": "咲-Saki-（2009）",
+              "raw": "2:38:24 Glossy:MMM / 咲-Saki-（2009）"
+            },
+            {
+              "index": 24,
+              "time": "2:44:00",
+              "seconds": 9840,
+              "title": "本日、満開ワタシ色!",
+              "artist": "ハヤテのごとく!!（2009）",
+              "raw": "2:44:00 本日、満開ワタシ色! / ハヤテのごとく!!（2009）"
+            },
+            {
+              "index": 25,
+              "time": "2:49:44",
+              "seconds": 10184,
+              "title": "Treasure",
+              "artist": "生徒会の一存（2010）",
+              "raw": "2:49:44 Treasure / 生徒会の一存（2010）"
+            },
+            {
+              "index": 26,
+              "time": "3:04:27",
+              "seconds": 11067,
+              "title": "Super Driver",
+              "artist": "涼宮ハルヒの憂鬱（2009）",
+              "raw": "3:04:27 Super Driver / 涼宮ハルヒの憂鬱（2009）"
+            },
+            {
+              "index": 27,
+              "time": "3:08:51",
+              "seconds": 11331,
+              "title": "God knows...",
+              "artist": "涼宮ハルヒの憂鬱（2006）",
+              "raw": "3:08:51 God knows... / 涼宮ハルヒの憂鬱（2006）"
+            },
+            {
+              "index": 28,
+              "time": "3:13:42",
+              "seconds": 11622,
+              "title": "ハレ晴レユカイ",
+              "artist": "涼宮ハルヒの憂鬱（2006）",
+              "raw": "3:13:42 ハレ晴レユカイ / 涼宮ハルヒの憂鬱（2006）"
+            },
+            {
+              "index": 29,
+              "time": "3:29:09",
+              "seconds": 12549,
+              "title": "トライアングラー",
+              "artist": "マクロスF（2008）",
+              "raw": "3:29:09 トライアングラー  / マクロスF（2008）"
+            },
+            {
+              "index": 30,
+              "time": "3:34:03",
+              "seconds": 12843,
+              "title": "アナタノオト",
+              "artist": "マクロスF（2008）",
+              "raw": "3:34:03 アナタノオト  / マクロスF（2008）"
+            },
+            {
+              "index": 31,
+              "time": "3:39:03",
+              "seconds": 13143,
+              "title": "ノーザンクロス",
+              "artist": "マクロスF（2008）",
+              "raw": "3:39:03 ノーザンクロス / マクロスF（2008）"
+            },
+            {
+              "index": 32,
+              "time": "3:44:28",
+              "seconds": 13468,
+              "title": "インフィニティ",
+              "artist": "マクロスF（2008）",
+              "raw": "3:44:28 インフィニティ / マクロスF（2008）"
+            }
+          ]
         },
         {
           "videoId": "llJvQb5gwJA",
@@ -709,7 +1203,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -842,7 +1336,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "_WEzOut0NfY",
@@ -992,7 +1486,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -1223,7 +1717,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "F9iUJhnRgbw",
@@ -1291,7 +1785,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "-YwBj3v2flU",
@@ -1367,7 +1861,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Vi5CgrPf55g",
@@ -1563,7 +2057,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "siiXMi3dKCQ",
@@ -1759,7 +2253,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "8Hs3ZDmvEhU",
@@ -1883,7 +2377,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "CaXlKc-XKQ0",
@@ -2017,8 +2511,188 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
+        },
+        {
+          "videoId": "Uo8Js8LPwVU",
+          "title": "【#歌枠 】手持ち曲の少ない斎昴はなんだか懐かしいボカロとアニメソングを歌う【#KARAOKE】 #shorts #Vtuber",
+          "channelName": "斎 昴/Subaru",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "today"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D"
+          ],
+          "publishedText": "3 時間前 に配信済み",
+          "publishedTimestamp": 1783772728078,
+          "durationText": "1:47:31",
+          "thumbnailUrl": "https://i.ytimg.com/vi/Uo8Js8LPwVU/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDx7v7xbawtmgQOLQGaAWYn5uV46w",
+          "sourceCount": 1,
+          "rejectedSourceCount": 1,
+          "rejectedSources": [
+            {
+              "sourceType": "description",
+              "reason": "too_few_timestamp_songs",
+              "originalCount": 1,
+              "keptCount": 1,
+              "artistCount": 1,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 0,
+              "sample": [
+                "0:04:00 03/07/2026"
+              ],
+              "rejectedEntryCount": 0,
+              "rejectedEntryReasons": {},
+              "rejectedSamples": [],
+              "rejectedEntries": []
+            }
+          ],
+          "rejectedEntryCount": 1,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 17,
+            "keptCount": 16,
+            "artistCount": 16,
+            "topicCount": 1,
+            "structuralCount": 17,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:07:52",
+              "seconds": 472,
+              "title": "only my railgun",
+              "artist": "FripSide",
+              "raw": "0:07:52 only my railgun/FripSide"
+            },
+            {
+              "index": 2,
+              "time": "0:14:28",
+              "seconds": 868,
+              "title": "それは小さな光のような",
+              "artist": "さユり",
+              "raw": "0:14:28 それは小さな光のような/さユり"
+            },
+            {
+              "index": 3,
+              "time": "0:20:32",
+              "seconds": 1232,
+              "title": "モニタリング（うろおぼえ）",
+              "artist": "DECO*27",
+              "raw": "0:20:32 モニタリング（うろおぼえ）/DECO*27"
+            },
+            {
+              "index": 4,
+              "time": "0:25:14",
+              "seconds": 1514,
+              "title": "鐘を鳴らして",
+              "artist": "BONNIE PINK",
+              "raw": "0:25:14 鐘を鳴らして/BONNIE PINK"
+            },
+            {
+              "index": 5,
+              "time": "0:30:18",
+              "seconds": 1818,
+              "title": "花になって",
+              "artist": "緑黄色社会",
+              "raw": "0:30:18 花になって/緑黄色社会"
+            },
+            {
+              "index": 6,
+              "time": "0:35:39",
+              "seconds": 2139,
+              "title": "アンインストール",
+              "artist": "石川智昌",
+              "raw": "0:35:39 アンインストール/石川智昌"
+            },
+            {
+              "index": 7,
+              "time": "0:41:52",
+              "seconds": 2512,
+              "title": "禁じられた遊び",
+              "artist": "禁じられた遊び",
+              "raw": "0:41:52 禁じられた遊び/禁じられた遊び"
+            },
+            {
+              "index": 8,
+              "time": "0:47:28",
+              "seconds": 2848,
+              "title": "恋は戦争",
+              "artist": "Supercell",
+              "raw": "0:47:28 恋は戦争/Supercell"
+            },
+            {
+              "index": 9,
+              "time": "0:54:52",
+              "seconds": 3292,
+              "title": "星屑の革紐",
+              "artist": "Sound Horizon",
+              "raw": "0:54:52 星屑の革紐/Sound Horizon"
+            },
+            {
+              "index": 10,
+              "time": "1:03:50",
+              "seconds": 3830,
+              "title": "運命の人",
+              "artist": "藤田麻衣子",
+              "raw": "1:03:50 運命の人/藤田麻衣子"
+            },
+            {
+              "index": 11,
+              "time": "1:09:01",
+              "seconds": 4141,
+              "title": "酔いどれ知らず",
+              "artist": "Kanaria",
+              "raw": "1:09:01 酔いどれ知らず/Kanaria"
+            },
+            {
+              "index": 12,
+              "time": "1:12:58",
+              "seconds": 4378,
+              "title": "少女S",
+              "artist": "SCANDAL",
+              "raw": "1:12:58 少女S/SCANDAL"
+            },
+            {
+              "index": 13,
+              "time": "1:19:45",
+              "seconds": 4785,
+              "title": "人生リセットボタン",
+              "artist": "kemu",
+              "raw": "1:19:45 人生リセットボタン/kemu"
+            },
+            {
+              "index": 14,
+              "time": "1:24:53",
+              "seconds": 5093,
+              "title": "ブルーバード",
+              "artist": "いきものがかり",
+              "raw": "1:24:53 ブルーバード/いきものがかり"
+            },
+            {
+              "index": 15,
+              "time": "1:30:49",
+              "seconds": 5449,
+              "title": "花冠",
+              "artist": "天野月子",
+              "raw": "1:30:49 花冠/天野月子"
+            },
+            {
+              "index": 16,
+              "time": "1:40:56",
+              "seconds": 6056,
+              "title": "オトナブルー",
+              "artist": "新しい学校のリーダーズ",
+              "raw": "1:40:56 オトナブルー/新しい学校のリーダーズ"
+            }
+          ]
         },
         {
           "videoId": "R64UDcDLY_U",
@@ -2118,7 +2792,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "SlXkGknOdr4",
@@ -2314,7 +2988,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "oolmKZJ-FqI",
@@ -2470,7 +3144,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "hJYfe_kZHro",
@@ -2754,7 +3428,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "aF18BF7_Afs",
@@ -2822,7 +3496,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Y_Sz26Tv7uQ",
@@ -3020,7 +3694,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "tJV6cLSzbqo",
@@ -3412,7 +4086,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -3553,7 +4227,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "wcH48K_F3yI",
@@ -3621,7 +4295,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "d7-88bfRMhE",
@@ -3713,7 +4387,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "LQZesaPzPlI",
@@ -3965,7 +4639,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "qw7c5JsJJpo",
@@ -4083,7 +4757,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "pv0BsotH36E",
@@ -4175,7 +4849,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "GVHC-oUosT8",
@@ -4283,7 +4957,9 @@
               "artist": "",
               "raw": "0:25:38 君と夏フェス"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "pKCFv_UxL0s",
@@ -4431,7 +5107,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "4arKz-E3ZkU",
@@ -4635,7 +5311,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "3yl5bKqCR9w",
@@ -4944,7 +5620,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "gGNfC5ikLwE",
@@ -5132,7 +5808,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "NgfXMJ51VRQ",
@@ -5288,7 +5964,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "kij0QFC8Q34",
@@ -5428,7 +6104,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "vWCG0fFKEzA",
@@ -5544,7 +6220,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "VmLgly38CwY",
@@ -5814,7 +6490,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "PymwjCkY4V8",
@@ -6034,7 +6710,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "oWUhxHkwZ9g",
@@ -6256,7 +6932,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "LUCJHwTS4MY",
@@ -6454,7 +7130,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "4bXA550Sl9Y",
@@ -6618,7 +7294,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Mn2lNF5M3Mo",
@@ -6758,7 +7434,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "hmAQ8y0sC-Y",
@@ -6925,7 +7601,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "xdGz1WKg4Mo",
@@ -7041,7 +7717,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "tE3ckJFlJ9U",
@@ -7221,7 +7897,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "PzWNzyO6M60",
@@ -7601,7 +8277,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "-9UG5BNVc34",
@@ -7837,7 +8513,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "N2k0Sek8EE8",
@@ -8033,7 +8709,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "jnGDbM9oKU0",
@@ -8291,7 +8967,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "RJZKQyNjrOQ",
@@ -8423,7 +9099,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "z4D7syllQTM",
@@ -8533,7 +9209,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "2pmhJZN7LDo",
@@ -8689,7 +9365,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "_82caCX0FgY",
@@ -8945,7 +9621,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "8nstXaL424A",
@@ -9145,7 +9821,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "AS5wV6FhtNE",
@@ -9429,7 +10105,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "4k2XBw-DEJg",
@@ -9649,7 +10325,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "71OSYnx-Vy0",
@@ -9823,7 +10499,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -9980,7 +10656,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "l041wITpdbY",
@@ -10344,7 +11020,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "lZ6sX8kjw8w",
@@ -10492,7 +11168,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "8PJXYV1Y2lw",
@@ -10754,7 +11430,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "84urVpLMMAc",
@@ -10894,7 +11570,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "-Dp9dAe0ZfQ",
@@ -11362,7 +12038,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "lUd4pcxN41c",
@@ -11670,7 +12346,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Q5H4yQgjSCY",
@@ -12004,7 +12680,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "nBXiPH660Gw",
@@ -12144,7 +12820,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "3vE4dW-rbgI",
@@ -12430,7 +13106,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "cuM2MpG_I5A",
@@ -12642,7 +13318,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "k_AAdLsA3rY",
@@ -12854,7 +13530,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "6pr1tlpckLI",
@@ -13092,7 +13768,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "xEDhmH24cJk",
@@ -13322,7 +13998,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "hsC9MI-QDOE",
@@ -13524,7 +14200,9 @@
               "artist": "大塚愛",
               "raw": "03:11:36 プラネタリウム / 大塚愛"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "bUb_oMOzuf4",
@@ -14314,7 +14992,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -14671,7 +15349,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "u88eoXT2PMo",
@@ -14995,7 +15673,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "6u8BnPZ5tr4",
@@ -15311,7 +15989,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "YZLK9V0oPTw",
@@ -15655,7 +16333,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "YOuZoHM2Dv4",
@@ -15941,7 +16619,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "S_XxDfBoMxA",
@@ -16236,7 +16914,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "UI7H4OkVfw0",
@@ -16717,7 +17395,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -16938,7 +17616,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "1dFa_GH8eCs",
@@ -17110,7 +17788,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "qYlhQmQ1BiU",
@@ -17266,7 +17944,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "3iXyCTpZb7I",
@@ -17406,7 +18084,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "STDTwNeFaiw",
@@ -17546,7 +18224,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "nN7oJx_xRlI",
@@ -17662,7 +18340,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "_j1XMIcIOtE",
@@ -17754,7 +18432,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "2DmLFzh4elo",
@@ -17960,7 +18638,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -18151,7 +18829,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -18332,7 +19010,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "DzaJw8g_lH4",
@@ -18758,7 +19436,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "oAW1UDHgFsI",
@@ -18898,7 +19576,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "ioCvS_Lu6_A",
@@ -19048,7 +19726,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "nvvJySzxils",
@@ -19156,7 +19834,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "FSNTqwJE7Hw",
@@ -19232,7 +19910,195 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
+        },
+        {
+          "videoId": "9KS1yo_4NPY",
+          "title": "【 #歌枠┊︎KARAOKE 】ギャップがあるvtuber❤ #初見さんも大歓迎 #vtuber #singing",
+          "channelName": "CREA Ch.生稚くれあ",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "today"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D"
+          ],
+          "publishedText": "23 時間前 に配信済み",
+          "publishedTimestamp": 1783700728078,
+          "durationText": "2:46:14",
+          "thumbnailUrl": "https://i.ytimg.com/vi/9KS1yo_4NPY/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBt1A0HFEuFFl8ugd_aQFFQe-yBYg",
+          "sourceCount": 1,
+          "rejectedSourceCount": 1,
+          "rejectedSources": [
+            {
+              "sourceType": "comment",
+              "reason": "no_song_after_filter",
+              "originalCount": 1,
+              "keptCount": 0,
+              "artistCount": 0,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 0,
+              "sample": [],
+              "rejectedEntryCount": 1,
+              "rejectedEntryReasons": {
+                "title_only_non_song_candidate": 1
+              },
+              "rejectedSamples": [
+                {
+                  "reason": "title_only_non_song_candidate",
+                  "time": "0:32:24",
+                  "title": "ここのジト目パートほんと好き",
+                  "artist": "未記載",
+                  "line": "32:24 ここのジト目パートほんと好き"
+                }
+              ],
+              "rejectedEntries": [
+                {
+                  "reason": "title_only_non_song_candidate",
+                  "time": "0:32:24",
+                  "title": "ここのジト目パートほんと好き",
+                  "artist": "未記載",
+                  "line": "32:24 ここのジト目パートほんと好き"
+                }
+              ]
+            }
+          ],
+          "rejectedEntryCount": 1,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 15,
+            "keptCount": 15,
+            "artistCount": 13,
+            "topicCount": 0,
+            "structuralCount": 15,
+            "sentenceLikeCount": 1
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:07:45",
+              "seconds": 465,
+              "title": "LOVEずっきゅん",
+              "artist": "相対性理論",
+              "raw": "0:07:45 LOVEずっきゅん/相対性理論"
+            },
+            {
+              "index": 2,
+              "time": "0:18:21",
+              "seconds": 1101,
+              "title": "酔いどれ知らず",
+              "artist": "Kanaria",
+              "raw": "0:18:21 酔いどれ知らず/Kanaria"
+            },
+            {
+              "index": 3,
+              "time": "0:24:13",
+              "seconds": 1453,
+              "title": "ダーリンダンス",
+              "artist": "かいりきベア",
+              "raw": "0:24:13 ダーリンダンス/かいりきベア"
+            },
+            {
+              "index": 4,
+              "time": "0:31:30",
+              "seconds": 1890,
+              "title": "魔性の女A",
+              "artist": "紫",
+              "raw": "0:31:30 魔性の女A/紫"
+            },
+            {
+              "index": 5,
+              "time": "0:43:20",
+              "seconds": 2600,
+              "title": "一寸の赤",
+              "artist": "yama",
+              "raw": "0:43:20 一寸の赤/yama"
+            },
+            {
+              "index": 6,
+              "time": "1:02:28",
+              "seconds": 3748,
+              "title": "Love me，Love you",
+              "artist": "Mrs. GREEN APPLE",
+              "raw": "1:02:28 Love me，Love you/Mrs. GREEN APPLE"
+            },
+            {
+              "index": 7,
+              "time": "1:15:30",
+              "seconds": 4530,
+              "title": "Overdose",
+              "artist": "なとり",
+              "raw": "1:15:30 Overdose/なとり"
+            },
+            {
+              "index": 8,
+              "time": "1:21:17",
+              "seconds": 4877,
+              "title": "サラマンダー",
+              "artist": "DECO*27",
+              "raw": "1:21:17 サラマンダー/DECO*27"
+            },
+            {
+              "index": 9,
+              "time": "1:30:09",
+              "seconds": 5409,
+              "title": "華奢なリップ feat.ちゃんみな",
+              "artist": "ジェニーハイ",
+              "raw": "1:30:09 華奢なリップ feat.ちゃんみな/ジェニーハイ"
+            },
+            {
+              "index": 10,
+              "time": "1:39:01",
+              "seconds": 5941,
+              "title": "ダダダダ天使",
+              "artist": "ナナヲアカリ",
+              "raw": "1:39:01 ダダダダ天使/ナナヲアカリ"
+            },
+            {
+              "index": 11,
+              "time": "1:45:04",
+              "seconds": 6304,
+              "title": "キスしちゃだめっ！",
+              "artist": "めいちゃん",
+              "raw": "1:45:04 キスしちゃだめっ！/めいちゃん"
+            },
+            {
+              "index": 12,
+              "time": "1:52:00",
+              "seconds": 6720,
+              "title": "ABCの歌",
+              "artist": "",
+              "raw": "1:52:00 ABCの歌（The ABC Song）"
+            },
+            {
+              "index": 13,
+              "time": "1:53:31",
+              "seconds": 6811,
+              "title": "^_^/ちゃんみな",
+              "artist": "",
+              "raw": "1:53:31 ^_^/ちゃんみな"
+            },
+            {
+              "index": 14,
+              "time": "2:03:06",
+              "seconds": 7386,
+              "title": "モニタリング",
+              "artist": "DECO*27",
+              "raw": "2:03:06 モニタリング/DECO*27"
+            },
+            {
+              "index": 15,
+              "time": "2:16:45",
+              "seconds": 8205,
+              "title": "NG",
+              "artist": "ちゃんみな",
+              "raw": "2:16:45 NG/ちゃんみな"
+            }
+          ]
         },
         {
           "videoId": "Hicm7JdzDUk",
@@ -19668,7 +20534,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "0gbXCxLtDoE",
@@ -20016,7 +20882,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "cy8txFFKvUc",
@@ -20324,7 +21190,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "8wB68v2fhFE",
@@ -20642,7 +21508,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "qB0H_l3m8bE",
@@ -20886,7 +21752,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "hrVSzLeygV0",
@@ -21130,7 +21996,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "R98zixhrevE",
@@ -21409,7 +22275,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "4-XET4tmEaI",
@@ -21613,7 +22479,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "9PftB9uQQqk",
@@ -21809,7 +22675,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "RScogMzBQ3E",
@@ -22007,7 +22873,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "zAMa5jKXEs8",
@@ -22159,7 +23025,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -22336,7 +23202,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "pVNZdov-qo0",
@@ -22476,7 +23342,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "mrO-MSjIAR0",
@@ -22616,7 +23482,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "RHwwiB-dEeo",
@@ -22748,7 +23614,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "LRsjXGiMZUs",
@@ -22856,7 +23722,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "nK1_lZ-zn7U",
@@ -22956,7 +23822,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "x_drEb4VeQU",
@@ -23066,7 +23932,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "1JZH0KpDjcw",
@@ -23158,7 +24024,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "2XTf7gVRVmc",
@@ -23234,7 +24100,560 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
+        },
+        {
+          "videoId": "K3UKVEAbAPg",
+          "title": "【KARAOKE】FEESH FRIDAY KARAOKE!🐟🎶 #karaoke #歌枠",
+          "channelName": "Alpha Betta【V-Dere】",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "today"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D"
+          ],
+          "publishedText": "1 日前 に配信済み",
+          "publishedTimestamp": 1783697128078,
+          "durationText": "2:58:20",
+          "thumbnailUrl": "https://i.ytimg.com/vi/K3UKVEAbAPg/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLClKkBW6h_w_9PgTvXOHtlvt4lJvA",
+          "sourceCount": 1,
+          "rejectedSourceCount": 2,
+          "rejectedSources": [
+            {
+              "sourceType": "reply",
+              "reason": "no_song_after_filter",
+              "originalCount": 1,
+              "keptCount": 0,
+              "artistCount": 0,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 0,
+              "sample": [],
+              "rejectedEntryCount": 1,
+              "rejectedEntryReasons": {
+                "title_only_non_song_candidate": 1
+              },
+              "rejectedSamples": [
+                {
+                  "reason": "title_only_non_song_candidate",
+                  "time": "1:30:05",
+                  "title": "Note to self: look up alpha-beta fish when I finally get ambitious enough to make an award winning game and need a legendary OST for it",
+                  "artist": "未記載",
+                  "line": "1:30:05 Note to self: look up alpha-beta fish when I finally get ambitious enough to make an award winning game and need a legendary OST for it"
+                }
+              ],
+              "rejectedEntries": [
+                {
+                  "reason": "title_only_non_song_candidate",
+                  "time": "1:30:05",
+                  "title": "Note to self: look up alpha-beta fish when I finally get ambitious enough to make an award winning game and need a legendary OST for it",
+                  "artist": "未記載",
+                  "line": "1:30:05 Note to self: look up alpha-beta fish when I finally get ambitious enough to make an award winning game and need a legendary OST for it"
+                }
+              ]
+            },
+            {
+              "sourceType": "reply",
+              "reason": "too_few_timestamp_songs",
+              "originalCount": 1,
+              "keptCount": 1,
+              "artistCount": 0,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 0,
+              "sample": [
+                "1:21:10 Bad fish, mind blown"
+              ],
+              "rejectedEntryCount": 0,
+              "rejectedEntryReasons": {},
+              "rejectedSamples": [],
+              "rejectedEntries": []
+            }
+          ],
+          "rejectedEntryCount": 3,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 34,
+            "keptCount": 32,
+            "artistCount": 32,
+            "topicCount": 1,
+            "structuralCount": 34,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:11:45",
+              "seconds": 705,
+              "title": "Falling Behind",
+              "artist": "Laufey",
+              "raw": "11:45 Falling Behind - Laufey"
+            },
+            {
+              "index": 2,
+              "time": "0:16:30",
+              "seconds": 990,
+              "title": "Hot Limit",
+              "artist": "T.M. Revolution",
+              "raw": "16:30 Hot Limit - T.M. Revolution"
+            },
+            {
+              "index": 3,
+              "time": "0:21:35",
+              "seconds": 1295,
+              "title": "Locolotion",
+              "artist": "ORANGE RANGE",
+              "raw": "21:35 Locolotion - ORANGE RANGE"
+            },
+            {
+              "index": 4,
+              "time": "0:25:48",
+              "seconds": 1548,
+              "title": "Hana",
+              "artist": "ORANGE RANGE",
+              "raw": "25:48 Hana - ORANGE RANGE"
+            },
+            {
+              "index": 5,
+              "time": "0:30:50",
+              "seconds": 1850,
+              "title": "Planetarium",
+              "artist": "Ai Otsuka",
+              "raw": "30:50 Planetarium - Ai Otsuka"
+            },
+            {
+              "index": 6,
+              "time": "0:40:34",
+              "seconds": 2434,
+              "title": "Baby One More Time",
+              "artist": "Britney Spears",
+              "raw": "40:34 ...Baby One More Time - Britney Spears"
+            },
+            {
+              "index": 7,
+              "time": "0:44:05",
+              "seconds": 2645,
+              "title": "Torn",
+              "artist": "Natalie Imbruglia",
+              "raw": "44:05 Torn - Natalie Imbruglia"
+            },
+            {
+              "index": 8,
+              "time": "0:48:20",
+              "seconds": 2900,
+              "title": "I Want it that Way",
+              "artist": "Backstreet Boys",
+              "raw": "48:20 I Want it that Way - Backstreet Boys"
+            },
+            {
+              "index": 9,
+              "time": "0:53:05",
+              "seconds": 3185,
+              "title": "No Scrubs",
+              "artist": "TLC",
+              "raw": "53:05 No Scrubs - TLC"
+            },
+            {
+              "index": 10,
+              "time": "0:58:37",
+              "seconds": 3517,
+              "title": "Wannabe",
+              "artist": "Spice Girls",
+              "raw": "58:37 Wannabe - Spice Girls"
+            },
+            {
+              "index": 11,
+              "time": "1:02:40",
+              "seconds": 3760,
+              "title": "Party in the U.S.A.",
+              "artist": "Miley Cyrus",
+              "raw": "1:02:40 Party in the U.S.A. - Miley Cyrus"
+            },
+            {
+              "index": 12,
+              "time": "1:06:25",
+              "seconds": 3985,
+              "title": "Super Bass",
+              "artist": "Nicki Minaj",
+              "raw": "1:06:25 Super Bass - Nicki Minaj"
+            },
+            {
+              "index": 13,
+              "time": "1:11:00",
+              "seconds": 4260,
+              "title": "Title",
+              "artist": "Meghan Trainor",
+              "raw": "1:11:00 Title - Meghan Trainor"
+            },
+            {
+              "index": 14,
+              "time": "1:14:35",
+              "seconds": 4475,
+              "title": "Risk It All",
+              "artist": "Bruno Mars",
+              "raw": "1:14:35 Risk It All - Bruno Mars"
+            },
+            {
+              "index": 15,
+              "time": "1:18:51",
+              "seconds": 4731,
+              "title": "B*ng B*ng",
+              "artist": "Jessie J, Ariana Grande, Nicki Minaj",
+              "raw": "1:18:51 B*ng B*ng - Jessie J, Ariana Grande, Nicki Minaj"
+            },
+            {
+              "index": 16,
+              "time": "1:22:45",
+              "seconds": 4965,
+              "title": "Physical",
+              "artist": "Dua Lipa",
+              "raw": "1:22:45 Physical - Dua Lipa"
+            },
+            {
+              "index": 17,
+              "time": "1:26:50",
+              "seconds": 5210,
+              "title": "Nonsense",
+              "artist": "Sabrina Carpenter",
+              "raw": "1:26:50 Nonsense - Sabrina Carpenter"
+            },
+            {
+              "index": 18,
+              "time": "1:33:20",
+              "seconds": 5600,
+              "title": "I'm Your Treasure Box",
+              "artist": "Houshou Marine",
+              "raw": "1:33:20 I'm Your Treasure Box - Houshou Marine"
+            },
+            {
+              "index": 19,
+              "time": "1:38:53",
+              "seconds": 5933,
+              "title": "Bishojo Muzai Pirates",
+              "artist": "Houshou Marine",
+              "raw": "1:38:53 Bishojo Muzai Pirates - Houshou Marine"
+            },
+            {
+              "index": 20,
+              "time": "1:44:15",
+              "seconds": 6255,
+              "title": "Eien no Akuruhi",
+              "artist": "Ado",
+              "raw": "1:44:15 Eien no Akuruhi - Ado"
+            },
+            {
+              "index": 21,
+              "time": "1:51:11",
+              "seconds": 6671,
+              "title": "III",
+              "artist": "Houshou Marine & Kobo Kanaeru",
+              "raw": "1:51:11 III - Houshou Marine & Kobo Kanaeru"
+            },
+            {
+              "index": 22,
+              "time": "1:56:36",
+              "seconds": 6996,
+              "title": "Helpless",
+              "artist": "Hamilton",
+              "raw": "1:56:36 Helpless - Hamilton"
+            },
+            {
+              "index": 23,
+              "time": "2:01:30",
+              "seconds": 7290,
+              "title": "Satisfied",
+              "artist": "Hamilton",
+              "raw": "2:01:30 Satisfied - Hamilton"
+            },
+            {
+              "index": 24,
+              "time": "2:07:35",
+              "seconds": 7655,
+              "title": "That Would Be Enough",
+              "artist": "Hamilton",
+              "raw": "2:07:35 That Would Be Enough - Hamilton"
+            },
+            {
+              "index": 25,
+              "time": "2:11:05",
+              "seconds": 7865,
+              "title": "Ready for This",
+              "artist": "Hazbin Hotel",
+              "raw": "2:11:05 Ready for This - Hazbin Hotel"
+            },
+            {
+              "index": 26,
+              "time": "2:17:10",
+              "seconds": 8230,
+              "title": "Espresso",
+              "artist": "Sabrina Carpenter",
+              "raw": "2:17:10 Espresso - Sabrina Carpenter"
+            },
+            {
+              "index": 27,
+              "time": "2:21:03",
+              "seconds": 8463,
+              "title": "All Too Well",
+              "artist": "Taylor Swift",
+              "raw": "2:21:03 All Too Well - Taylor Swift"
+            },
+            {
+              "index": 28,
+              "time": "2:31:20",
+              "seconds": 9080,
+              "title": "Moon River",
+              "artist": "Audrey Hepburn",
+              "raw": "2:31:20 Moon River - Audrey Hepburn"
+            },
+            {
+              "index": 29,
+              "time": "2:33:35",
+              "seconds": 9215,
+              "title": "Somewhere Over the Rainbow",
+              "artist": "Wizard of Oz",
+              "raw": "2:33:35 Somewhere Over the Rainbow - Wizard of Oz"
+            },
+            {
+              "index": 30,
+              "time": "2:37:50",
+              "seconds": 9470,
+              "title": "My Favorite Things",
+              "artist": "The Sound of Music",
+              "raw": "2:37:50 My Favorite Things - The Sound of Music"
+            },
+            {
+              "index": 31,
+              "time": "2:43:35",
+              "seconds": 9815,
+              "title": "Monster",
+              "artist": "Frozen (Musical)",
+              "raw": "2:43:35 Monster - Frozen (Musical)"
+            },
+            {
+              "index": 32,
+              "time": "2:50:05",
+              "seconds": 10205,
+              "title": "Letter to my 13 year old self",
+              "artist": "Laufey",
+              "raw": "2:50:05 Letter to my 13 year old self - Laufey"
+            }
+          ]
+        },
+        {
+          "videoId": "vrBqIjPGYn0",
+          "title": "【#歌枠】またしても1カ月ぶり🎙🦌【鹿火璃みろく┊#個人Vtuber】#vtuber #fyp #shorts #縦型配信",
+          "channelName": "鹿火璃みろく",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "today"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D"
+          ],
+          "publishedText": "1 日前 に配信済み",
+          "publishedTimestamp": 1783697128078,
+          "durationText": "1:38:33",
+          "thumbnailUrl": "https://i.ytimg.com/vi/vrBqIjPGYn0/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCWfNRV0lboZl0q_mxm669_YoUk1Q",
+          "sourceCount": 1,
+          "rejectedSourceCount": 0,
+          "rejectedSources": [],
+          "rejectedEntryCount": 1,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 14,
+            "keptCount": 13,
+            "artistCount": 11,
+            "topicCount": 1,
+            "structuralCount": 14,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:08:40",
+              "seconds": 520,
+              "title": "気まぐれロマンティック",
+              "artist": "いきものがかり",
+              "raw": "8:40\t🎶気まぐれロマンティック／いきものがかり"
+            },
+            {
+              "index": 2,
+              "time": "0:14:20",
+              "seconds": 860,
+              "title": "SUMMERSONG",
+              "artist": "YUI",
+              "raw": "14:20\t🎶SUMMERSONG／YUI"
+            },
+            {
+              "index": 3,
+              "time": "0:20:58",
+              "seconds": 1258,
+              "title": "HOT LIMIT",
+              "artist": "T.M.Revolution",
+              "raw": "20:58\t🎶HOT LIMIT／T.M.Revolution"
+            },
+            {
+              "index": 4,
+              "time": "0:27:18",
+              "seconds": 1638,
+              "title": "ハム太郎とっとこうた",
+              "artist": "ハムちゃんず",
+              "raw": "27:18\t🎶ハム太郎とっとこうた／ハムちゃんず"
+            },
+            {
+              "index": 5,
+              "time": "0:31:38",
+              "seconds": 1898,
+              "title": "「【重要】走り回る方向」",
+              "artist": "",
+              "raw": "31:38\t🦌「【重要】走り回る方向」"
+            },
+            {
+              "index": 6,
+              "time": "0:34:52",
+              "seconds": 2092,
+              "title": "空色デイズ",
+              "artist": "中川翔子",
+              "raw": "34:52\t🎶空色デイズ／中川翔子"
+            },
+            {
+              "index": 7,
+              "time": "0:43:19",
+              "seconds": 2599,
+              "title": "貴方の恋人になりたいのです",
+              "artist": "阿部真央（弾き語りVer）",
+              "raw": "43:19\t🎶貴方の恋人になりたいのです／阿部真央（弾き語りVer）"
+            },
+            {
+              "index": 8,
+              "time": "0:51:57",
+              "seconds": 3117,
+              "title": "勘冴えて悔しいわ",
+              "artist": "ずっと真夜中でいいのに。",
+              "raw": "51:57\t🎶勘冴えて悔しいわ／ずっと真夜中でいいのに。"
+            },
+            {
+              "index": 9,
+              "time": "1:01:27",
+              "seconds": 3687,
+              "title": "夏祭り",
+              "artist": "Whiteberry",
+              "raw": "1:01:27\t🎶夏祭り／Whiteberry"
+            },
+            {
+              "index": 10,
+              "time": "1:09:47",
+              "seconds": 4187,
+              "title": "Catch You Catch Me",
+              "artist": "グミ",
+              "raw": "1:09:47\t🎶Catch You Catch Me／グミ"
+            },
+            {
+              "index": 11,
+              "time": "1:14:32",
+              "seconds": 4472,
+              "title": "Good-byedays",
+              "artist": "YUI",
+              "raw": "1:14:32\t🎶Good-byedays／YUI"
+            },
+            {
+              "index": 12,
+              "time": "1:22:25",
+              "seconds": 4945,
+              "title": "鱗",
+              "artist": "秦基博（弾き語りVer）",
+              "raw": "1:22:25\t🎶鱗／秦基博（弾き語りVer）"
+            },
+            {
+              "index": 13,
+              "time": "1:37:53",
+              "seconds": 5873,
+              "title": "ぶわぁいぶわぁい！",
+              "artist": "",
+              "raw": "1:37:53\t🦌ぶわぁいぶわぁい！"
+            }
+          ]
+        },
+        {
+          "videoId": "xQ8Doj6LOb4",
+          "title": "【#歌枠/縦型】昼休み！回線おためしちょっとだけ～🎤歌える曲ならリクエストOK",
+          "channelName": "三崎美咲",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "today"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D"
+          ],
+          "publishedText": "1 日前 に配信済み",
+          "publishedTimestamp": 1783697128078,
+          "durationText": "31:53",
+          "thumbnailUrl": "https://i.ytimg.com/vi/xQ8Doj6LOb4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBExjrQgdbq9RTeN8d37ng2OpSrJg",
+          "sourceCount": 1,
+          "rejectedSourceCount": 0,
+          "rejectedSources": [],
+          "rejectedEntryCount": 0,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 5,
+            "keptCount": 5,
+            "artistCount": 5,
+            "topicCount": 0,
+            "structuralCount": 5,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:01:24",
+              "seconds": 84,
+              "title": "創聖のアクエリオン",
+              "artist": "AKINO",
+              "raw": "01:24 創聖のアクエリオン / AKINO"
+            },
+            {
+              "index": 2,
+              "time": "0:07:53",
+              "seconds": 473,
+              "title": "恋するフォーチュンクッキー",
+              "artist": "AKB48",
+              "raw": "07:53 恋するフォーチュンクッキー / AKB48"
+            },
+            {
+              "index": 3,
+              "time": "0:14:40",
+              "seconds": 880,
+              "title": "女々しくて",
+              "artist": "ゴールデンボンバー",
+              "raw": "14:40 女々しくて / ゴールデンボンバー"
+            },
+            {
+              "index": 4,
+              "time": "0:20:26",
+              "seconds": 1226,
+              "title": "キラキラ",
+              "artist": "aiko",
+              "raw": "20:26 キラキラ / aiko"
+            },
+            {
+              "index": 5,
+              "time": "0:27:27",
+              "seconds": 1647,
+              "title": "CHE.R.RY",
+              "artist": "YUI",
+              "raw": "27:27 CHE.R.RY / YUI"
+            }
+          ]
         },
         {
           "videoId": "37WV6tXih-8",
@@ -23454,7 +24873,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "oyLAZTWYx8s",
@@ -23650,7 +25069,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "R1VeaSUZq_U",
@@ -23881,7 +25300,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "MUI0wCHRbmI",
@@ -24112,7 +25531,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "hd65D1Yc-fg",
@@ -24310,7 +25729,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "U1VskIZthjM",
@@ -24484,7 +25903,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -24649,7 +26068,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "C0ABKi9DGTs",
@@ -24813,7 +26232,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "2QPxueaQi0c",
@@ -24969,7 +26388,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "wjgTmU1JO9I",
@@ -25361,7 +26780,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -25510,7 +26929,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "YtMaTWggpSo",
@@ -25650,7 +27069,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "GlCJr2s8PxQ",
@@ -25819,7 +27238,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -25938,7 +27357,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "TkRIe4J3J0k",
@@ -26054,7 +27473,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "XAfBDdI7HCc",
@@ -26188,7 +27607,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "-Ln2KRdy5e4",
@@ -26296,7 +27715,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "33vUWhd1G_w",
@@ -26396,7 +27815,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "s-u1ERC-VTw",
@@ -26506,7 +27925,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "KW73Z8OYfNo",
@@ -26616,7 +28035,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "rKY2HRT3hVk",
@@ -26778,7 +28197,9 @@
               "artist": "",
               "raw": "【00:57:15】10. プロポーズ"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "EvOTgD2wwp4",
@@ -26908,7 +28329,9 @@
               "artist": "シド",
               "raw": "1:07:03 嘘 / シド"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "YwjfobvPQo8",
@@ -27032,7 +28455,9 @@
               "artist": "40mP feat.初音ミク ※JOYSOUND",
               "raw": "00:53:51 07. トリノコシティ - 40mP feat.初音ミク ※JOYSOUND"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "OSB6EK6bqbs",
@@ -27114,7 +28539,9 @@
               "artist": "BUMP OF CHICKEN",
               "raw": "46:33　天体観測 / BUMP OF CHICKEN"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "LmJg8IJxqU8",
@@ -27188,7 +28615,9 @@
               "artist": "千石撫子 (CV 花澤香菜)",
               "raw": "0:54:01 恋愛サーキュレーション / 千石撫子 (CV 花澤香菜)"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "zJEa2XSxky4",
@@ -27642,7 +29071,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "TKr2bNUyDV8",
@@ -27854,7 +29283,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "kZLz1DFbCUU",
@@ -28066,7 +29495,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "2Xi0pUa7Vqw",
@@ -28198,7 +29627,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "zREfHIYyb1M",
@@ -28314,7 +29743,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "8mLt4DlV5Gs",
@@ -28408,7 +29837,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "3q75gMZNjbo",
@@ -28717,7 +30146,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -28963,7 +30392,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -29193,7 +30622,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -29548,7 +30977,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -29762,7 +31191,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -29968,7 +31397,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -30158,7 +31587,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -30316,7 +31745,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -30458,7 +31887,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -30600,7 +32029,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -30751,7 +32180,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "a8CWRtzZGQk",
@@ -30937,7 +32366,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -31071,7 +32500,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -31205,7 +32634,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -31323,7 +32752,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -31427,7 +32856,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -31563,7 +32992,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -31657,7 +33086,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -31735,7 +33164,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -31956,7 +33385,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "OZIqR0DF5rs",
@@ -32152,7 +33581,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "FDRuDBQYnQY",
@@ -32324,7 +33753,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "On2BSAuWtKE",
@@ -32464,7 +33893,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "5SaOJGF4VJM",
@@ -32596,7 +34025,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "QQhW1kMYarQ",
@@ -32746,7 +34175,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "6Yr7EJ9tZhY",
@@ -32862,7 +34291,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "3Nbjrd268-8",
@@ -32970,7 +34399,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "ByMwaSkGTw8",
@@ -33078,7 +34507,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "YbqbMpCazYI",
@@ -33178,7 +34607,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "2D_nSa4QzRw",
@@ -33278,7 +34707,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "fkmIHDTsXzw",
@@ -33362,7 +34791,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "40fa5R7yzBw",
@@ -33438,7 +34867,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "YucHy0Kp-5o",
@@ -33514,7 +34943,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "RUEw_6Hsw18",
@@ -33582,7 +35011,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "pL7TXkQE-E4",
@@ -33826,7 +35255,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "BeMj_5Z8fa8",
@@ -34030,7 +35459,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "3npLfTe1xmU",
@@ -34206,7 +35635,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -34525,7 +35954,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "D1mFYMYdy9M",
@@ -34635,7 +36064,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "jT-l8E9Xsow",
@@ -35007,7 +36436,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "GxBKZ0qzSvY",
@@ -35307,7 +36736,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "s_1UH6ZZuvQ",
@@ -35543,7 +36972,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Kg4cWnWbWkc",
@@ -35789,7 +37218,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "eMIJCsuw12M",
@@ -36011,7 +37440,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "S_gVoMFdTr0",
@@ -36199,7 +37628,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "PSCeWRH2znE",
@@ -36379,7 +37808,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "99FdlB0mIJo",
@@ -36551,7 +37980,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "J8afxLZwK0o",
@@ -36741,7 +38170,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "NRj6toAGxCU",
@@ -36931,7 +38360,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "gORDBq5IpBo",
@@ -37095,7 +38524,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "lHjKmOyJR4M",
@@ -37259,7 +38688,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "LmAxCaEmQD0",
@@ -37415,7 +38844,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "6TplpBFV6LQ",
@@ -37597,7 +39026,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "pRh6tLOLMxk",
@@ -37745,7 +39174,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "2b0boexZvsg",
@@ -37999,7 +39428,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "QETC4Kv5UPY",
@@ -38131,7 +39560,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "9HkSnH457VY",
@@ -38255,7 +39684,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "5p2ps9oUVlI",
@@ -38379,7 +39808,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "SgB1kTS_tLs",
@@ -38503,7 +39932,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Xm-xihCkbo8",
@@ -38619,7 +40048,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "817O6KMiwnw",
@@ -38727,7 +40156,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Wr4HVxsDvPs",
@@ -38835,7 +40264,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Jw6piuxVevI",
@@ -38935,7 +40364,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "yCKKmYTMJ1s",
@@ -39035,7 +40464,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "fPHHwNiSeAw",
@@ -39119,7 +40548,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "t9mYQUNhlvY",
@@ -39203,7 +40632,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "9hgQ0Qbv0iM",
@@ -39505,7 +40934,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -39784,7 +41213,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "tD9BUeX5d_4",
@@ -39916,7 +41345,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "_EE8QntEBI4",
@@ -40032,7 +41461,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "zAqcZDpOM1Q",
@@ -40170,8 +41599,375 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
+        },
+        {
+          "videoId": "D0M3OLFsyEg",
+          "title": "7/8【歌枠】ゆったり深夜の歌枠【KARAOKE STREAM】",
+          "channelName": "NORISTRY Official",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "month"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D"
+          ],
+          "publishedText": "2 日前 に配信済み",
+          "publishedTimestamp": 1783610728078,
+          "durationText": "2:54:55",
+          "thumbnailUrl": "https://i.ytimg.com/vi/D0M3OLFsyEg/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCJmLhzK3-71J2aRV2BQkhDNh0m7Q",
+          "sourceCount": 1,
+          "rejectedSourceCount": 2,
+          "rejectedSources": [
+            {
+              "sourceType": "comment",
+              "reason": "too_few_timestamp_songs",
+              "originalCount": 1,
+              "keptCount": 1,
+              "artistCount": 0,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 1,
+              "sample": [
+                "1:15:10 「スナックのんでる」という歌舞伎町のお店がレンタルスペースとしても貸しているみたいなので、本当にやって欲しい！『スナックのり』"
+              ],
+              "rejectedEntryCount": 0,
+              "rejectedEntryReasons": {},
+              "rejectedSamples": [],
+              "rejectedEntries": []
+            },
+            {
+              "sourceType": "comment",
+              "reason": "no_song_after_filter",
+              "originalCount": 1,
+              "keptCount": 0,
+              "artistCount": 0,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 0,
+              "sample": [],
+              "rejectedEntryCount": 1,
+              "rejectedEntryReasons": {
+                "title_only_non_song_candidate": 1
+              },
+              "rejectedSamples": [
+                {
+                  "reason": "title_only_non_song_candidate",
+                  "time": "0:19:20",
+                  "title": "てぇてぇTS失礼します😊‪🙏🏻",
+                  "artist": "未記載",
+                  "line": "19:20 🌻💣てぇてぇTS失礼します😊‪🙏🏻"
+                }
+              ],
+              "rejectedEntries": [
+                {
+                  "reason": "title_only_non_song_candidate",
+                  "time": "0:19:20",
+                  "title": "てぇてぇTS失礼します😊‪🙏🏻",
+                  "artist": "未記載",
+                  "line": "19:20 🌻💣てぇてぇTS失礼します😊‪🙏🏻"
+                }
+              ]
+            }
+          ],
+          "rejectedEntryCount": 1,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 23,
+            "keptCount": 23,
+            "artistCount": 18,
+            "topicCount": 1,
+            "structuralCount": 23,
+            "sentenceLikeCount": 3
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:04:47",
+              "seconds": 287,
+              "title": "ベイビー・アイラブユー",
+              "artist": "TEE",
+              "raw": "4:47 ベイビー・アイラブユー　/　TEE"
+            },
+            {
+              "index": 2,
+              "time": "0:14:04",
+              "seconds": 844,
+              "title": "TSUNAMI",
+              "artist": "サザンオールスターズ",
+              "raw": "14:04 TSUNAMI　/　サザンオールスターズ"
+            },
+            {
+              "index": 3,
+              "time": "0:23:07",
+              "seconds": 1387,
+              "title": "遥か彼方",
+              "artist": "ASIAN KUNG-FU GENERATION",
+              "raw": "23:07 遥か彼方 　/　ASIAN KUNG-FU GENERATION"
+            },
+            {
+              "index": 4,
+              "time": "0:28:34",
+              "seconds": 1714,
+              "title": "ゴールデン　　　※ワンコーラスのみ",
+              "artist": "お試し",
+              "raw": "28:34 ゴールデン　　　※ワンコーラスのみ（お試し）"
+            },
+            {
+              "index": 5,
+              "time": "0:30:42",
+              "seconds": 1842,
+              "title": "夏の日の1993",
+              "artist": "",
+              "raw": "30:42 夏の日の1993"
+            },
+            {
+              "index": 6,
+              "time": "0:36:51",
+              "seconds": 2211,
+              "title": "STEADY",
+              "artist": "SPEED",
+              "raw": "36:51 STEADY 　/　SPEED"
+            },
+            {
+              "index": 7,
+              "time": "0:42:49",
+              "seconds": 2569,
+              "title": "Body & Soul",
+              "artist": "SPEED",
+              "raw": "42:49 Body & Soul 　/　SPEED"
+            },
+            {
+              "index": 8,
+              "time": "0:49:57",
+              "seconds": 2997,
+              "title": "散歩道",
+              "artist": "JUDY AND MARY",
+              "raw": "49:57 散歩道　/　JUDY AND MARY"
+            },
+            {
+              "index": 9,
+              "time": "0:56:32",
+              "seconds": 3392,
+              "title": "乙女パスタに感動",
+              "artist": "タンポポ",
+              "raw": "56:32 乙女パスタに感動 　/　タンポポ"
+            },
+            {
+              "index": 10,
+              "time": "1:04:57",
+              "seconds": 3897,
+              "title": "いい日旅立ち",
+              "artist": "山口百恵",
+              "raw": "1:04:57 いい日旅立ち　/　山口百恵"
+            },
+            {
+              "index": 11,
+              "time": "1:10:42",
+              "seconds": 4242,
+              "title": "ロンリー・チャップリン",
+              "artist": "鈴木聖美 with RATS&STAR",
+              "raw": "1:10:42 ロンリー・チャップリン　/　鈴木聖美 with RATS&STAR"
+            },
+            {
+              "index": 12,
+              "time": "1:19:10",
+              "seconds": 4750,
+              "title": "恋におちて - Fall in love",
+              "artist": "小林明子",
+              "raw": "1:19:10 恋におちて - Fall in love -　 /　小林明子"
+            },
+            {
+              "index": 13,
+              "time": "1:26:22",
+              "seconds": 5182,
+              "title": "運命のヒト",
+              "artist": "EXILE",
+              "raw": "1:26:22 運命のヒト　/ 　EXILE"
+            },
+            {
+              "index": 14,
+              "time": "1:34:03",
+              "seconds": 5643,
+              "title": "夏の終わり",
+              "artist": "森山直太朗",
+              "raw": "1:34:03 夏の終わり　/ 　森山直太朗"
+            },
+            {
+              "index": 15,
+              "time": "1:42:16",
+              "seconds": 6136,
+              "title": "みんな空の下",
+              "artist": "絢香",
+              "raw": "1:42:16 みんな空の下 　/　 絢香"
+            },
+            {
+              "index": 16,
+              "time": "1:47:04",
+              "seconds": 6424,
+              "title": "歌が上手くなるにはどんな練習をしたらいいの？",
+              "artist": "",
+              "raw": "1:47:04 歌が上手くなるにはどんな練習をしたらいいの？"
+            },
+            {
+              "index": 17,
+              "time": "2:00:53",
+              "seconds": 7253,
+              "title": "HEAVEN",
+              "artist": "浜崎あゆみ",
+              "raw": "2:00:53 HEAVEN 　/　浜崎あゆみ"
+            },
+            {
+              "index": 18,
+              "time": "2:05:56",
+              "seconds": 7556,
+              "title": "雪の華",
+              "artist": "",
+              "raw": "2:05:56 雪の華"
+            },
+            {
+              "index": 19,
+              "time": "2:23:48",
+              "seconds": 8628,
+              "title": "未来予想図II",
+              "artist": "DREAMS COME TRUE",
+              "raw": "2:23:48 未来予想図II 　/　DREAMS COME TRUE"
+            },
+            {
+              "index": 20,
+              "time": "2:32:24",
+              "seconds": 9144,
+              "title": "フライングゲット",
+              "artist": "AKB48",
+              "raw": "2:32:24 フライングゲット　/　AKB48"
+            },
+            {
+              "index": 21,
+              "time": "2:38:12",
+              "seconds": 9492,
+              "title": "雨とペトラ Prod.",
+              "artist": "東京スカパラダイスオーケストラ（Official Audio From「Fall Apart」）",
+              "raw": "2:38:12 雨とペトラ Prod. by 東京スカパラダイスオーケストラ（Official Audio From「Fall Apart」）"
+            },
+            {
+              "index": 22,
+              "time": "2:41:42",
+              "seconds": 9702,
+              "title": "ファンサ（のりワン2025ライブ映像）　※助骨にヒビ入ってます",
+              "artist": "",
+              "raw": "2:41:42 ファンサ（のりワン2025ライブ映像）　※助骨にヒビ入ってます"
+            },
+            {
+              "index": 23,
+              "time": "2:46:02",
+              "seconds": 9962,
+              "title": "小悪魔だってかまわない（のりワン2025ライブ映像）　※助骨にヒビ入ってます",
+              "artist": "",
+              "raw": "2:46:02 小悪魔だってかまわない（のりワン2025ライブ映像）　※助骨にヒビ入ってます"
+            }
+          ]
+        },
+        {
+          "videoId": "SLJzNjJ0Cm4",
+          "title": "【歌枠】kawaii uta【#無原唱レコード / #くぐる屋さん】",
+          "channelName": "傘屋くぐる / KUGURU KASAYA",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "month"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D"
+          ],
+          "publishedText": "2 日前 に配信済み",
+          "publishedTimestamp": 1783610728078,
+          "durationText": "1:16:06",
+          "thumbnailUrl": "https://i.ytimg.com/vi/SLJzNjJ0Cm4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBhwPSas-f6dKJ6CDcENAl7GiQ2sQ",
+          "sourceCount": 2,
+          "rejectedSourceCount": 0,
+          "rejectedSources": [],
+          "rejectedEntryCount": 1,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 8,
+            "keptCount": 8,
+            "artistCount": 8,
+            "topicCount": 0,
+            "structuralCount": 8,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:04:18",
+              "seconds": 258,
+              "title": "インドア派ならトラックメイカー",
+              "artist": "Yunomi 🐟☂️",
+              "raw": "4:18 ├ インドア派ならトラックメイカー / Yunomi 🐟☂️"
+            },
+            {
+              "index": 2,
+              "time": "0:11:41",
+              "seconds": 701,
+              "title": "fancy baby doll",
+              "artist": "田村 ゆかり (Yukari Tamura) 🐟☂️",
+              "raw": "11:41 └ fancy baby doll / 田村 ゆかり (Yukari Tamura) 🐟☂️"
+            },
+            {
+              "index": 3,
+              "time": "0:20:18",
+              "seconds": 1218,
+              "title": "ラプラスショコラ",
+              "artist": "Kai 🐟☂️",
+              "raw": "20:18 └ ラプラスショコラ (Laplace's Chocolat) / Kai 🐟☂️"
+            },
+            {
+              "index": 4,
+              "time": "0:35:33",
+              "seconds": 2133,
+              "title": "キャットラビング",
+              "artist": "香椎 モイミ 🐟☂️",
+              "raw": "35:33 ├ キャットラビング / 香椎 モイミ 🐟☂️"
+            },
+            {
+              "index": 5,
+              "time": "0:42:10",
+              "seconds": 2530,
+              "title": "恋愛サーキュレーション",
+              "artist": "千石撫子 (花澤香菜) 🐟☂️",
+              "raw": "42:10 ├ 恋愛サーキュレーション / 千石撫子 (花澤香菜) 🐟☂️"
+            },
+            {
+              "index": 6,
+              "time": "0:51:20",
+              "seconds": 3080,
+              "title": "ファっとして桃源郷",
+              "artist": "新庄 かなえ  (三森 すずこ) 🐟☂️",
+              "raw": "51:20 ├ ファっとして桃源郷 / 新庄 かなえ  (三森 すずこ) 🐟☂️"
+            },
+            {
+              "index": 7,
+              "time": "1:01:07",
+              "seconds": 3667,
+              "title": "チェリーポップ",
+              "artist": "DECO*27 🐟☂️",
+              "raw": "1:01:07 ├ チェリーポップ / DECO*27 🐟☂️"
+            },
+            {
+              "index": 8,
+              "time": "1:08:31",
+              "seconds": 4111,
+              "title": "有頂天ビバーチェ",
+              "artist": "Last note. 🐟☂️",
+              "raw": "1:08:31 ├ 有頂天ビバーチェ / Last note. 🐟☂️"
+            }
+          ]
         },
         {
           "videoId": "jyjBy6Vir0I",
@@ -40182,7 +41978,8 @@
             "歌枠"
           ],
           "sourceGroups": [
-            "month"
+            "month",
+            "today"
           ],
           "sourceUrls": [
             "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D"
@@ -40543,7 +42340,10 @@
               "artist": "",
               "raw": "1:57:57 〆の言葉3、明日のお外でれた報告を楽しみにしといて"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
+          "keywordKeys": []
         },
         {
           "videoId": "OVgxZDvrkPA",
@@ -40830,7 +42630,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -41068,7 +42868,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -41308,7 +43108,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -41514,7 +43314,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -41752,7 +43552,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -41920,7 +43720,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -42434,7 +44234,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -42882,7 +44682,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -43288,7 +45088,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -43558,7 +45358,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -43806,7 +45606,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -44036,7 +45836,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -44244,7 +46044,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -44402,7 +46202,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -44672,7 +46472,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -44830,7 +46630,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -45167,7 +46967,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -45383,7 +47183,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -45565,7 +47365,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -45773,7 +47573,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -45965,7 +47765,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -46175,7 +47975,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -46414,7 +48214,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -46540,7 +48340,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -46824,7 +48624,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -46953,7 +48753,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         }
       ]
@@ -46961,9 +48761,205 @@
     "1m": {
       "id": "1m",
       "title": "YouTube monthly-filter timestamp song lists",
-      "generatedAt": "2026-07-11T15:11:36.696Z",
-      "updatedAt": "2026-07-11T15:11:36.696Z",
+      "generatedAt": "2026-07-11T15:27:17.429Z",
+      "updatedAt": "2026-07-11T15:27:17.429Z",
       "items": [
+        {
+          "videoId": "tTAXnTQjCu8",
+          "title": "【#弾き語り】アニソン歌います！1曲聴いていきませんか？ singing stream - #ミナミイズミ #shorts",
+          "channelName": "ミナミイズミ / IZUMI MINAMI",
+          "keyword": "弾き語り",
+          "keywords": [
+            "弾き語り"
+          ],
+          "sourceGroups": [
+            "month"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D"
+          ],
+          "publishedText": "5 分前 に配信済み",
+          "publishedTimestamp": 1783783228078,
+          "durationText": "2:17:01",
+          "thumbnailUrl": "https://i.ytimg.com/vi/tTAXnTQjCu8/hqdefault.jpg?sqp=-oaymwEcCOADEI4CSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDJKHdJ6UcN3UcSkpHanrvlgNtX2g",
+          "sourceCount": 1,
+          "rejectedSourceCount": 1,
+          "rejectedSources": [
+            {
+              "sourceType": "description",
+              "reason": "too_few_timestamp_songs",
+              "originalCount": 1,
+              "keptCount": 1,
+              "artistCount": 1,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 0,
+              "sample": [
+                "0:04:00 03/07/2026"
+              ],
+              "rejectedEntryCount": 0,
+              "rejectedEntryReasons": {},
+              "rejectedSamples": [],
+              "rejectedEntries": []
+            }
+          ],
+          "rejectedEntryCount": 0,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 18,
+            "keptCount": 18,
+            "artistCount": 18,
+            "topicCount": 0,
+            "structuralCount": 18,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:12:34",
+              "seconds": 754,
+              "title": "again",
+              "artist": "YUI",
+              "raw": "0:12:34  01.  again／YUI"
+            },
+            {
+              "index": 2,
+              "time": "0:20:35",
+              "seconds": 1235,
+              "title": "オレンジ",
+              "artist": "逢坂大河(釘宮理恵)・櫛枝実乃梨(堀江由衣)・川嶋亜美(喜多村英梨)",
+              "raw": "0:20:35  02.  オレンジ／逢坂大河(釘宮理恵)・櫛枝実乃梨(堀江由衣)・川嶋亜美(喜多村英梨)"
+            },
+            {
+              "index": 3,
+              "time": "0:27:21",
+              "seconds": 1641,
+              "title": "FLY HIGH!!",
+              "artist": "BURNOUT SYNDROMES",
+              "raw": "0:27:21  03.  FLY HIGH!!／BURNOUT SYNDROMES"
+            },
+            {
+              "index": 4,
+              "time": "0:33:48",
+              "seconds": 2028,
+              "title": "chAngE",
+              "artist": "miwa",
+              "raw": "0:33:48  04.  chAngE／miwa"
+            },
+            {
+              "index": 5,
+              "time": "0:39:48",
+              "seconds": 2388,
+              "title": "花になって",
+              "artist": "緑黄色社会",
+              "raw": "0:39:48  05.  花になって／緑黄色社会"
+            },
+            {
+              "index": 6,
+              "time": "0:43:54",
+              "seconds": 2634,
+              "title": "花の塔",
+              "artist": "さユり",
+              "raw": "0:43:54  06.  花の塔／さユり"
+            },
+            {
+              "index": 7,
+              "time": "0:50:09",
+              "seconds": 3009,
+              "title": "Believe",
+              "artist": "Folder5",
+              "raw": "0:50:09  07.  Believe／Folder5"
+            },
+            {
+              "index": 8,
+              "time": "0:53:39",
+              "seconds": 3219,
+              "title": "ウィーアー！",
+              "artist": "きただにひろし",
+              "raw": "0:53:39  08.  ウィーアー！／きただにひろし"
+            },
+            {
+              "index": 9,
+              "time": "0:57:35",
+              "seconds": 3455,
+              "title": "God knows...",
+              "artist": "涼宮ハルヒ(平野綾)",
+              "raw": "0:57:35  09.  God knows...／涼宮ハルヒ(平野綾)"
+            },
+            {
+              "index": 10,
+              "time": "1:01:58",
+              "seconds": 3718,
+              "title": "オリオンをなぞる",
+              "artist": "UNISON SQUARE GARDEN",
+              "raw": "1:01:58  10.  オリオンをなぞる／UNISON SQUARE GARDEN"
+            },
+            {
+              "index": 11,
+              "time": "1:09:44",
+              "seconds": 4184,
+              "title": "unravel",
+              "artist": "TK from 凛として時雨",
+              "raw": "1:09:44  11.  unravel／TK from 凛として時雨"
+            },
+            {
+              "index": 12,
+              "time": "1:14:49",
+              "seconds": 4489,
+              "title": "季節は次々死んでいく",
+              "artist": "amazarashi",
+              "raw": "1:14:49  12.  季節は次々死んでいく／amazarashi"
+            },
+            {
+              "index": 13,
+              "time": "1:20:43",
+              "seconds": 4843,
+              "title": "シルエット",
+              "artist": "KANA-BOON",
+              "raw": "1:20:43  13.  シルエット／KANA-BOON"
+            },
+            {
+              "index": 14,
+              "time": "1:28:18",
+              "seconds": 5298,
+              "title": "曇天",
+              "artist": "DOES",
+              "raw": "1:28:18  14.  曇天／DOES"
+            },
+            {
+              "index": 15,
+              "time": "1:32:08",
+              "seconds": 5528,
+              "title": "リライト",
+              "artist": "ASIAN KUNG-FU GENERATION",
+              "raw": "1:32:08  15.  リライト／ASIAN KUNG-FU GENERATION"
+            },
+            {
+              "index": 16,
+              "time": "1:39:37",
+              "seconds": 5977,
+              "title": "I",
+              "artist": "BUMP OF CHICKEN",
+              "raw": "1:39:37  16.  I／BUMP OF CHICKEN"
+            },
+            {
+              "index": 17,
+              "time": "1:44:49",
+              "seconds": 6289,
+              "title": "月虹",
+              "artist": "BUMP OF CHICKEN",
+              "raw": "1:44:49  17.  月虹／BUMP OF CHICKEN"
+            },
+            {
+              "index": 18,
+              "time": "1:51:45",
+              "seconds": 6705,
+              "title": "sailing day",
+              "artist": "BUMP OF CHICKEN",
+              "raw": "1:51:45  18.  sailing day／BUMP OF CHICKEN"
+            }
+          ]
+        },
         {
           "videoId": "JByXaGWi1ww",
           "title": "【歌枠】少しアコギを弾いて寝る弾き語り【#vtuber #vsinger 】",
@@ -47069,6 +49065,301 @@
               "title": "arenae",
               "artist": "オリ曲",
               "raw": "10. 1:06:47 arenae（オリ曲）"
+            }
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
+          "keywordKeys": []
+        },
+        {
+          "videoId": "w7v5C8YhXgY",
+          "title": "【歌枠│Karaoke】初見歓迎❕90&00年代アニソン縛り📺定番～マニア曲までたくさん歌います❕【バツ子│個人V│邂逅バツ子ﾁｬ",
+          "channelName": "合法‼︎バツ子ﾁｬﾝBatsuko",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "today",
+            "month"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D",
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D"
+          ],
+          "publishedText": "1 時間前 に配信済み",
+          "publishedTimestamp": 1783779928078,
+          "durationText": "4:03:06",
+          "thumbnailUrl": "https://i.ytimg.com/vi/w7v5C8YhXgY/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCGfPqUlocx86jKGgww-ipnAE0sEw",
+          "sourceCount": 1,
+          "rejectedSourceCount": 0,
+          "rejectedSources": [],
+          "rejectedEntryCount": 3,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 35,
+            "keptCount": 32,
+            "artistCount": 32,
+            "topicCount": 1,
+            "structuralCount": 35,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:14:01",
+              "seconds": 841,
+              "title": "檄！帝国華撃団",
+              "artist": "サクラ大戦（1996）",
+              "raw": "0:14:01 檄！帝国華撃団 / サクラ大戦（1996）"
+            },
+            {
+              "index": 2,
+              "time": "0:17:04",
+              "seconds": 1024,
+              "title": "邪魔はさせない",
+              "artist": "スレイヤーズNEXT（1996）🆕",
+              "raw": "0:17:04 邪魔はさせない / スレイヤーズNEXT（1996）🆕"
+            },
+            {
+              "index": 3,
+              "time": "0:21:50",
+              "seconds": 1310,
+              "title": "Give a Reason",
+              "artist": "スレイヤーズNEXT（1996）",
+              "raw": "0:21:50 Give a Reason / スレイヤーズNEXT（1996）"
+            },
+            {
+              "index": 4,
+              "time": "0:33:36",
+              "seconds": 2016,
+              "title": "アンインストール",
+              "artist": "ぼくらの（2007）",
+              "raw": "0:33:36 アンインストール / ぼくらの（2007）"
+            },
+            {
+              "index": 5,
+              "time": "0:38:20",
+              "seconds": 2300,
+              "title": "ブルーウォーター",
+              "artist": "ふしぎの海のナディア（1990）",
+              "raw": "0:38:20 ブルーウォーター / ふしぎの海のナディア（1990）"
+            },
+            {
+              "index": 6,
+              "time": "0:43:08",
+              "seconds": 2588,
+              "title": "WILL",
+              "artist": "仙界伝 封神演義（1999）",
+              "raw": "0:43:08 WILL / 仙界伝 封神演義（1999）"
+            },
+            {
+              "index": 7,
+              "time": "0:55:56",
+              "seconds": 3356,
+              "title": "光と影を抱きしめたまま",
+              "artist": "魔法騎士レイアース（1995）🆕",
+              "raw": "0:55:56 光と影を抱きしめたまま / 魔法騎士レイアース（1995）🆕"
+            },
+            {
+              "index": 8,
+              "time": "1:01:00",
+              "seconds": 3660,
+              "title": "YEARS AFTER",
+              "artist": "機動戦士ガンダム 第08MS小隊（1996）",
+              "raw": "1:01:00 10 YEARS AFTER/機動戦士ガンダム 第08MS小隊（1996）"
+            },
+            {
+              "index": 9,
+              "time": "1:05:22",
+              "seconds": 3922,
+              "title": "Z・刻をこえて",
+              "artist": "機動戦士Zガンダム（1985）",
+              "raw": "1:05:22 Z・刻をこえて / 機動戦士Zガンダム（1985）"
+            },
+            {
+              "index": 10,
+              "time": "1:15:14",
+              "seconds": 4514,
+              "title": "君の知らない物語",
+              "artist": "化物語（2009）",
+              "raw": "1:15:14 君の知らない物語 / 化物語（2009）"
+            },
+            {
+              "index": 11,
+              "time": "1:21:04",
+              "seconds": 4864,
+              "title": "agape",
+              "artist": "円盤皇女ワるきゅーレ（2002）",
+              "raw": "1:21:04 agape / 円盤皇女ワるきゅーレ（2002）"
+            },
+            {
+              "index": 12,
+              "time": "1:25:26",
+              "seconds": 5126,
+              "title": "JOINT",
+              "artist": "灼眼のシャナII（2007）",
+              "raw": "1:25:26 JOINT / 灼眼のシャナII（2007）"
+            },
+            {
+              "index": 13,
+              "time": "1:33:30",
+              "seconds": 5610,
+              "title": "星空のSpica",
+              "artist": "魔法少女リリカルなのはStrikerS（2007）",
+              "raw": "1:33:30 星空のSpica / 魔法少女リリカルなのはStrikerS（2007）"
+            },
+            {
+              "index": 14,
+              "time": "1:38:26",
+              "seconds": 5906,
+              "title": "ETERNAL BLAZE",
+              "artist": "魔法少女リリカルなのはA's（2005）",
+              "raw": "1:38:26 ETERNAL BLAZE / 魔法少女リリカルなのはA's（2005）"
+            },
+            {
+              "index": 15,
+              "time": "1:44:03",
+              "seconds": 6243,
+              "title": "君が好きだと叫びたい",
+              "artist": "SLAM DUNK（1993）",
+              "raw": "1:44:03 君が好きだと叫びたい / SLAM DUNK（1993）"
+            },
+            {
+              "index": 16,
+              "time": "1:51:59",
+              "seconds": 6719,
+              "title": "ブルーバード",
+              "artist": "NARUTO ナルト 疾風伝（2008）",
+              "raw": "1:51:59 ブルーバード/NARUTO ナルト 疾風伝（2008）"
+            },
+            {
+              "index": 17,
+              "time": "1:55:50",
+              "seconds": 6950,
+              "title": "残酷な天使のテーゼ",
+              "artist": "新世紀エヴァンゲリオン（1995）",
+              "raw": "1:55:50 残酷な天使のテーゼ / 新世紀エヴァンゲリオン（1995）"
+            },
+            {
+              "index": 18,
+              "time": "2:00:14",
+              "seconds": 7214,
+              "title": "魂のルフラン",
+              "artist": "新世紀エヴァンゲリオン劇場版 シト新生（1997）",
+              "raw": "2:00:14 魂のルフラン / 新世紀エヴァンゲリオン劇場版 シト新生（1997）"
+            },
+            {
+              "index": 19,
+              "time": "2:15:14",
+              "seconds": 8114,
+              "title": "Let Me Be With You",
+              "artist": "ちょびっツ（2002）",
+              "raw": "2:15:14 Let Me Be With You / ちょびっツ（2002）"
+            },
+            {
+              "index": 20,
+              "time": "2:19:51",
+              "seconds": 8391,
+              "title": "小さきもの",
+              "artist": "劇場版ポケットモンスター アドバンスジェネレーション 七夜の願い星 ジラーチ（2005）",
+              "raw": "2:19:51 小さきもの / 劇場版ポケットモンスター アドバンスジェネレーション 七夜の願い星 ジラーチ（2005）"
+            },
+            {
+              "index": 21,
+              "time": "2:25:28",
+              "seconds": 8728,
+              "title": "ウンディーネ",
+              "artist": "ARIA The ANIMATION（2005）",
+              "raw": "2:25:28 ウンディーネ / ARIA The ANIMATION（2005）"
+            },
+            {
+              "index": 22,
+              "time": "2:34:07",
+              "seconds": 9247,
+              "title": "WINNERS FOREVER ～勝利者よ～",
+              "artist": "機動戦士Vガンダム（1993）",
+              "raw": "2:34:07 WINNERS FOREVER ～勝利者よ～ / 機動戦士Vガンダム（1993）"
+            },
+            {
+              "index": 23,
+              "time": "2:38:24",
+              "seconds": 9504,
+              "title": "Glossy:MMM",
+              "artist": "咲-Saki-（2009）",
+              "raw": "2:38:24 Glossy:MMM / 咲-Saki-（2009）"
+            },
+            {
+              "index": 24,
+              "time": "2:44:00",
+              "seconds": 9840,
+              "title": "本日、満開ワタシ色!",
+              "artist": "ハヤテのごとく!!（2009）",
+              "raw": "2:44:00 本日、満開ワタシ色! / ハヤテのごとく!!（2009）"
+            },
+            {
+              "index": 25,
+              "time": "2:49:44",
+              "seconds": 10184,
+              "title": "Treasure",
+              "artist": "生徒会の一存（2010）",
+              "raw": "2:49:44 Treasure / 生徒会の一存（2010）"
+            },
+            {
+              "index": 26,
+              "time": "3:04:27",
+              "seconds": 11067,
+              "title": "Super Driver",
+              "artist": "涼宮ハルヒの憂鬱（2009）",
+              "raw": "3:04:27 Super Driver / 涼宮ハルヒの憂鬱（2009）"
+            },
+            {
+              "index": 27,
+              "time": "3:08:51",
+              "seconds": 11331,
+              "title": "God knows...",
+              "artist": "涼宮ハルヒの憂鬱（2006）",
+              "raw": "3:08:51 God knows... / 涼宮ハルヒの憂鬱（2006）"
+            },
+            {
+              "index": 28,
+              "time": "3:13:42",
+              "seconds": 11622,
+              "title": "ハレ晴レユカイ",
+              "artist": "涼宮ハルヒの憂鬱（2006）",
+              "raw": "3:13:42 ハレ晴レユカイ / 涼宮ハルヒの憂鬱（2006）"
+            },
+            {
+              "index": 29,
+              "time": "3:29:09",
+              "seconds": 12549,
+              "title": "トライアングラー",
+              "artist": "マクロスF（2008）",
+              "raw": "3:29:09 トライアングラー  / マクロスF（2008）"
+            },
+            {
+              "index": 30,
+              "time": "3:34:03",
+              "seconds": 12843,
+              "title": "アナタノオト",
+              "artist": "マクロスF（2008）",
+              "raw": "3:34:03 アナタノオト  / マクロスF（2008）"
+            },
+            {
+              "index": 31,
+              "time": "3:39:03",
+              "seconds": 13143,
+              "title": "ノーザンクロス",
+              "artist": "マクロスF（2008）",
+              "raw": "3:39:03 ノーザンクロス / マクロスF（2008）"
+            },
+            {
+              "index": 32,
+              "time": "3:44:28",
+              "seconds": 13468,
+              "title": "インフィニティ",
+              "artist": "マクロスF（2008）",
+              "raw": "3:44:28 インフィニティ / マクロスF（2008）"
             }
           ]
         },
@@ -47180,7 +49471,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -47331,7 +49622,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -47466,7 +49757,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -47859,7 +50150,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -48034,7 +50325,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -48825,7 +51116,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -49307,7 +51598,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -49514,7 +51805,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -49705,7 +51996,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -49858,7 +52149,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -50033,7 +52324,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -50426,7 +52717,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -50596,7 +52887,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -50906,7 +53197,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -51152,7 +53443,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -51382,7 +53673,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -51737,7 +54028,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -51951,7 +54242,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -52157,7 +54448,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -52347,7 +54638,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -52505,7 +54796,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -52647,7 +54938,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -52789,7 +55080,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -52976,7 +55267,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -53110,7 +55401,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -53244,7 +55535,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -53362,7 +55653,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -53466,7 +55757,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -53602,7 +55893,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -53696,7 +55987,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -53774,7 +56065,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -53951,7 +56242,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -54254,7 +56545,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -54393,8 +56684,375 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
+        },
+        {
+          "videoId": "D0M3OLFsyEg",
+          "title": "7/8【歌枠】ゆったり深夜の歌枠【KARAOKE STREAM】",
+          "channelName": "NORISTRY Official",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "month"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D"
+          ],
+          "publishedText": "2 日前 に配信済み",
+          "publishedTimestamp": 1783610728078,
+          "durationText": "2:54:55",
+          "thumbnailUrl": "https://i.ytimg.com/vi/D0M3OLFsyEg/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCJmLhzK3-71J2aRV2BQkhDNh0m7Q",
+          "sourceCount": 1,
+          "rejectedSourceCount": 2,
+          "rejectedSources": [
+            {
+              "sourceType": "comment",
+              "reason": "too_few_timestamp_songs",
+              "originalCount": 1,
+              "keptCount": 1,
+              "artistCount": 0,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 1,
+              "sample": [
+                "1:15:10 「スナックのんでる」という歌舞伎町のお店がレンタルスペースとしても貸しているみたいなので、本当にやって欲しい！『スナックのり』"
+              ],
+              "rejectedEntryCount": 0,
+              "rejectedEntryReasons": {},
+              "rejectedSamples": [],
+              "rejectedEntries": []
+            },
+            {
+              "sourceType": "comment",
+              "reason": "no_song_after_filter",
+              "originalCount": 1,
+              "keptCount": 0,
+              "artistCount": 0,
+              "topicCount": 0,
+              "structuralCount": 1,
+              "sentenceLikeCount": 0,
+              "sample": [],
+              "rejectedEntryCount": 1,
+              "rejectedEntryReasons": {
+                "title_only_non_song_candidate": 1
+              },
+              "rejectedSamples": [
+                {
+                  "reason": "title_only_non_song_candidate",
+                  "time": "0:19:20",
+                  "title": "てぇてぇTS失礼します😊‪🙏🏻",
+                  "artist": "未記載",
+                  "line": "19:20 🌻💣てぇてぇTS失礼します😊‪🙏🏻"
+                }
+              ],
+              "rejectedEntries": [
+                {
+                  "reason": "title_only_non_song_candidate",
+                  "time": "0:19:20",
+                  "title": "てぇてぇTS失礼します😊‪🙏🏻",
+                  "artist": "未記載",
+                  "line": "19:20 🌻💣てぇてぇTS失礼します😊‪🙏🏻"
+                }
+              ]
+            }
+          ],
+          "rejectedEntryCount": 1,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 23,
+            "keptCount": 23,
+            "artistCount": 18,
+            "topicCount": 1,
+            "structuralCount": 23,
+            "sentenceLikeCount": 3
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:04:47",
+              "seconds": 287,
+              "title": "ベイビー・アイラブユー",
+              "artist": "TEE",
+              "raw": "4:47 ベイビー・アイラブユー　/　TEE"
+            },
+            {
+              "index": 2,
+              "time": "0:14:04",
+              "seconds": 844,
+              "title": "TSUNAMI",
+              "artist": "サザンオールスターズ",
+              "raw": "14:04 TSUNAMI　/　サザンオールスターズ"
+            },
+            {
+              "index": 3,
+              "time": "0:23:07",
+              "seconds": 1387,
+              "title": "遥か彼方",
+              "artist": "ASIAN KUNG-FU GENERATION",
+              "raw": "23:07 遥か彼方 　/　ASIAN KUNG-FU GENERATION"
+            },
+            {
+              "index": 4,
+              "time": "0:28:34",
+              "seconds": 1714,
+              "title": "ゴールデン　　　※ワンコーラスのみ",
+              "artist": "お試し",
+              "raw": "28:34 ゴールデン　　　※ワンコーラスのみ（お試し）"
+            },
+            {
+              "index": 5,
+              "time": "0:30:42",
+              "seconds": 1842,
+              "title": "夏の日の1993",
+              "artist": "",
+              "raw": "30:42 夏の日の1993"
+            },
+            {
+              "index": 6,
+              "time": "0:36:51",
+              "seconds": 2211,
+              "title": "STEADY",
+              "artist": "SPEED",
+              "raw": "36:51 STEADY 　/　SPEED"
+            },
+            {
+              "index": 7,
+              "time": "0:42:49",
+              "seconds": 2569,
+              "title": "Body & Soul",
+              "artist": "SPEED",
+              "raw": "42:49 Body & Soul 　/　SPEED"
+            },
+            {
+              "index": 8,
+              "time": "0:49:57",
+              "seconds": 2997,
+              "title": "散歩道",
+              "artist": "JUDY AND MARY",
+              "raw": "49:57 散歩道　/　JUDY AND MARY"
+            },
+            {
+              "index": 9,
+              "time": "0:56:32",
+              "seconds": 3392,
+              "title": "乙女パスタに感動",
+              "artist": "タンポポ",
+              "raw": "56:32 乙女パスタに感動 　/　タンポポ"
+            },
+            {
+              "index": 10,
+              "time": "1:04:57",
+              "seconds": 3897,
+              "title": "いい日旅立ち",
+              "artist": "山口百恵",
+              "raw": "1:04:57 いい日旅立ち　/　山口百恵"
+            },
+            {
+              "index": 11,
+              "time": "1:10:42",
+              "seconds": 4242,
+              "title": "ロンリー・チャップリン",
+              "artist": "鈴木聖美 with RATS&STAR",
+              "raw": "1:10:42 ロンリー・チャップリン　/　鈴木聖美 with RATS&STAR"
+            },
+            {
+              "index": 12,
+              "time": "1:19:10",
+              "seconds": 4750,
+              "title": "恋におちて - Fall in love",
+              "artist": "小林明子",
+              "raw": "1:19:10 恋におちて - Fall in love -　 /　小林明子"
+            },
+            {
+              "index": 13,
+              "time": "1:26:22",
+              "seconds": 5182,
+              "title": "運命のヒト",
+              "artist": "EXILE",
+              "raw": "1:26:22 運命のヒト　/ 　EXILE"
+            },
+            {
+              "index": 14,
+              "time": "1:34:03",
+              "seconds": 5643,
+              "title": "夏の終わり",
+              "artist": "森山直太朗",
+              "raw": "1:34:03 夏の終わり　/ 　森山直太朗"
+            },
+            {
+              "index": 15,
+              "time": "1:42:16",
+              "seconds": 6136,
+              "title": "みんな空の下",
+              "artist": "絢香",
+              "raw": "1:42:16 みんな空の下 　/　 絢香"
+            },
+            {
+              "index": 16,
+              "time": "1:47:04",
+              "seconds": 6424,
+              "title": "歌が上手くなるにはどんな練習をしたらいいの？",
+              "artist": "",
+              "raw": "1:47:04 歌が上手くなるにはどんな練習をしたらいいの？"
+            },
+            {
+              "index": 17,
+              "time": "2:00:53",
+              "seconds": 7253,
+              "title": "HEAVEN",
+              "artist": "浜崎あゆみ",
+              "raw": "2:00:53 HEAVEN 　/　浜崎あゆみ"
+            },
+            {
+              "index": 18,
+              "time": "2:05:56",
+              "seconds": 7556,
+              "title": "雪の華",
+              "artist": "",
+              "raw": "2:05:56 雪の華"
+            },
+            {
+              "index": 19,
+              "time": "2:23:48",
+              "seconds": 8628,
+              "title": "未来予想図II",
+              "artist": "DREAMS COME TRUE",
+              "raw": "2:23:48 未来予想図II 　/　DREAMS COME TRUE"
+            },
+            {
+              "index": 20,
+              "time": "2:32:24",
+              "seconds": 9144,
+              "title": "フライングゲット",
+              "artist": "AKB48",
+              "raw": "2:32:24 フライングゲット　/　AKB48"
+            },
+            {
+              "index": 21,
+              "time": "2:38:12",
+              "seconds": 9492,
+              "title": "雨とペトラ Prod.",
+              "artist": "東京スカパラダイスオーケストラ（Official Audio From「Fall Apart」）",
+              "raw": "2:38:12 雨とペトラ Prod. by 東京スカパラダイスオーケストラ（Official Audio From「Fall Apart」）"
+            },
+            {
+              "index": 22,
+              "time": "2:41:42",
+              "seconds": 9702,
+              "title": "ファンサ（のりワン2025ライブ映像）　※助骨にヒビ入ってます",
+              "artist": "",
+              "raw": "2:41:42 ファンサ（のりワン2025ライブ映像）　※助骨にヒビ入ってます"
+            },
+            {
+              "index": 23,
+              "time": "2:46:02",
+              "seconds": 9962,
+              "title": "小悪魔だってかまわない（のりワン2025ライブ映像）　※助骨にヒビ入ってます",
+              "artist": "",
+              "raw": "2:46:02 小悪魔だってかまわない（のりワン2025ライブ映像）　※助骨にヒビ入ってます"
+            }
+          ]
+        },
+        {
+          "videoId": "SLJzNjJ0Cm4",
+          "title": "【歌枠】kawaii uta【#無原唱レコード / #くぐる屋さん】",
+          "channelName": "傘屋くぐる / KUGURU KASAYA",
+          "keyword": "歌枠",
+          "keywords": [
+            "歌枠"
+          ],
+          "sourceGroups": [
+            "month"
+          ],
+          "sourceUrls": [
+            "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D"
+          ],
+          "publishedText": "2 日前 に配信済み",
+          "publishedTimestamp": 1783610728078,
+          "durationText": "1:16:06",
+          "thumbnailUrl": "https://i.ytimg.com/vi/SLJzNjJ0Cm4/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBhwPSas-f6dKJ6CDcENAl7GiQ2sQ",
+          "sourceCount": 2,
+          "rejectedSourceCount": 0,
+          "rejectedSources": [],
+          "rejectedEntryCount": 1,
+          "sourceQuality": {
+            "sourceType": "comment",
+            "originalCount": 8,
+            "keptCount": 8,
+            "artistCount": 8,
+            "topicCount": 0,
+            "structuralCount": 8,
+            "sentenceLikeCount": 0
+          },
+          "songs": [
+            {
+              "index": 1,
+              "time": "0:04:18",
+              "seconds": 258,
+              "title": "インドア派ならトラックメイカー",
+              "artist": "Yunomi 🐟☂️",
+              "raw": "4:18 ├ インドア派ならトラックメイカー / Yunomi 🐟☂️"
+            },
+            {
+              "index": 2,
+              "time": "0:11:41",
+              "seconds": 701,
+              "title": "fancy baby doll",
+              "artist": "田村 ゆかり (Yukari Tamura) 🐟☂️",
+              "raw": "11:41 └ fancy baby doll / 田村 ゆかり (Yukari Tamura) 🐟☂️"
+            },
+            {
+              "index": 3,
+              "time": "0:20:18",
+              "seconds": 1218,
+              "title": "ラプラスショコラ",
+              "artist": "Kai 🐟☂️",
+              "raw": "20:18 └ ラプラスショコラ (Laplace's Chocolat) / Kai 🐟☂️"
+            },
+            {
+              "index": 4,
+              "time": "0:35:33",
+              "seconds": 2133,
+              "title": "キャットラビング",
+              "artist": "香椎 モイミ 🐟☂️",
+              "raw": "35:33 ├ キャットラビング / 香椎 モイミ 🐟☂️"
+            },
+            {
+              "index": 5,
+              "time": "0:42:10",
+              "seconds": 2530,
+              "title": "恋愛サーキュレーション",
+              "artist": "千石撫子 (花澤香菜) 🐟☂️",
+              "raw": "42:10 ├ 恋愛サーキュレーション / 千石撫子 (花澤香菜) 🐟☂️"
+            },
+            {
+              "index": 6,
+              "time": "0:51:20",
+              "seconds": 3080,
+              "title": "ファっとして桃源郷",
+              "artist": "新庄 かなえ  (三森 すずこ) 🐟☂️",
+              "raw": "51:20 ├ ファっとして桃源郷 / 新庄 かなえ  (三森 すずこ) 🐟☂️"
+            },
+            {
+              "index": 7,
+              "time": "1:01:07",
+              "seconds": 3667,
+              "title": "チェリーポップ",
+              "artist": "DECO*27 🐟☂️",
+              "raw": "1:01:07 ├ チェリーポップ / DECO*27 🐟☂️"
+            },
+            {
+              "index": 8,
+              "time": "1:08:31",
+              "seconds": 4111,
+              "title": "有頂天ビバーチェ",
+              "artist": "Last note. 🐟☂️",
+              "raw": "1:08:31 ├ 有頂天ビバーチェ / Last note. 🐟☂️"
+            }
+          ]
         },
         {
           "videoId": "jyjBy6Vir0I",
@@ -54405,7 +57063,8 @@
             "歌枠"
           ],
           "sourceGroups": [
-            "month"
+            "month",
+            "today"
           ],
           "sourceUrls": [
             "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D"
@@ -54766,7 +57425,10 @@
               "artist": "",
               "raw": "1:57:57 〆の言葉3、明日のお外でれた報告を楽しみにしといて"
             }
-          ]
+          ],
+          "carriedFromPrevious": true,
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
+          "keywordKeys": []
         },
         {
           "videoId": "OVgxZDvrkPA",
@@ -55053,7 +57715,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -55291,7 +57953,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -55531,7 +58193,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -55737,7 +58399,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -55975,7 +58637,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -56143,7 +58805,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -56657,7 +59319,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -57105,7 +59767,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -57511,7 +60173,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -57781,7 +60443,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -58029,7 +60691,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -58259,7 +60921,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -58467,7 +61129,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -58625,7 +61287,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -58895,7 +61557,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -59053,7 +61715,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -59390,7 +62052,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -59606,7 +62268,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -59788,7 +62450,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -59996,7 +62658,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -60188,7 +62850,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -60398,7 +63060,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -60637,7 +63299,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -60763,7 +63425,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -61047,7 +63709,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -61176,7 +63838,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z",
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z",
           "keywordKeys": []
         },
         {
@@ -62063,7 +64725,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "_lKgLhWSCCM",
@@ -62363,7 +65025,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "8xXlGcSWNR0",
@@ -62647,7 +65309,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "cC4Wcf1I8ec",
@@ -62949,7 +65611,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "8fAJlFEVmBU",
@@ -63177,7 +65839,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "7seYXTk8_tg",
@@ -63389,7 +66051,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "Txeelvxh90Y",
@@ -63627,7 +66289,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "y94jdVItDQQ",
@@ -63849,7 +66511,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "08oRHaerrNI",
@@ -64029,7 +66691,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "ZGN0IflyT4E",
@@ -64201,7 +66863,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "8F5KrRPGUCE",
@@ -64365,7 +67027,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "KzCO7uCvbm4",
@@ -64539,7 +67201,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "QHUwexY_8jw",
@@ -64679,7 +67341,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "FrC3WIvKgpQ",
@@ -64853,7 +67515,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "nmfEpgnMEtQ",
@@ -64953,7 +67615,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "k3whdZpmSA4",
@@ -65053,7 +67715,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "6UmkAp6-fNs",
@@ -65145,7 +67807,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "SD3JMIS0FLw",
@@ -65613,7 +68275,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "JJc_HICmBrU",
@@ -66023,7 +68685,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "dD5M9J40wvM",
@@ -66174,7 +68836,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "p-y1-iTkmgM",
@@ -66358,7 +69020,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         },
         {
           "videoId": "3fsZulsmdgE",
@@ -66450,7 +69112,7 @@
             }
           ],
           "carriedFromPrevious": true,
-          "carriedFromSnapshot": "2026-07-11T14:58:51.603Z"
+          "carriedFromSnapshot": "2026-07-11T15:11:36.696Z"
         }
       ]
     }
