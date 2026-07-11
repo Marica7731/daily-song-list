@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Daily Song List</title>
     <meta
       name="description"
-      content="YouTube 72H 和月度时间戳歌单快照，支持直接跳转到歌曲时间点。"
+      content="YouTube 72H and one-month timestamp song-list snapshots with direct jump links."
     />
-    <link rel="stylesheet" href="assets/styles.css?v=ui2" />
+    <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
     <header class="topbar">
@@ -20,49 +20,34 @@
     </header>
 
     <main class="layout">
-      <section class="controls" id="controls" aria-label="榜单筛选">
+      <section class="controls" aria-label="榜单筛选">
+        <div class="segmented range-mode" role="tablist" aria-label="Range">
+          <button class="tab active" type="button" data-range="72h" role="tab" aria-selected="true">最近72小时</button>
+          <button class="tab" type="button" data-range="1m" role="tab" aria-selected="false">本月</button>
+        </div>
+
+        <div class="segmented view-mode" role="tablist" aria-label="View">
+          <button class="tab active" type="button" data-view="songRank" role="tab" aria-selected="true">歌曲榜</button>
+          <button class="tab" type="button" data-view="artistRank" role="tab" aria-selected="false">歌手榜</button>
+          <button class="tab" type="button" data-view="songAz" role="tab" aria-selected="false">歌曲索引</button>
+          <button class="tab" type="button" data-view="videos" role="tab" aria-selected="false">视频</button>
+        </div>
+
         <label class="field search-field">
           <span class="sr-only">搜索</span>
           <input id="filterInput" type="search" placeholder="搜索歌曲、歌手、频道或视频" autocomplete="off" />
         </label>
 
-        <div class="control-strip">
-          <div class="segmented range-mode" role="group" aria-label="范围">
-            <button class="tab active" type="button" data-range="72h" aria-pressed="true">最近72小时</button>
-            <button
-              class="tab"
-              type="button"
-              data-range="1m"
-              aria-pressed="false"
-              title="来自 YouTube 月度搜索筛选"
-              aria-description="来自 YouTube 月度搜索筛选"
-            >
-              月度
-            </button>
-          </div>
-
-          <div class="segmented view-mode" role="group" aria-label="视图">
-            <button class="tab active" type="button" data-view="songRank" aria-pressed="true">歌曲榜</button>
-            <button class="tab" type="button" data-view="artistRank" aria-pressed="false">歌手榜</button>
-            <button class="tab" type="button" data-view="songAz" aria-pressed="false">歌曲索引</button>
-            <button class="tab" type="button" data-view="videos" aria-pressed="false">视频</button>
-          </div>
-
-          <label class="field snapshot-field">
-            <span class="sr-only">历史快照</span>
-            <select id="snapshotSelect" aria-label="历史快照"></select>
-          </label>
-        </div>
+        <label class="field snapshot-field">
+          <span class="sr-only">历史快照</span>
+          <select id="snapshotSelect" aria-label="历史快照"></select>
+        </label>
       </section>
 
       <section class="summary" id="summary" aria-live="polite"></section>
-      <section class="content-shell" id="videoList" aria-busy="true"></section>
+      <section class="content-shell" id="videoList"></section>
     </main>
 
-    <div class="toast" id="toast" aria-live="polite" hidden></div>
-
-    <script src="assets/frontend-utils.js?v=ui2" defer></script>
-    <script src="assets/ranking-utils.js?v=ui2" defer></script>
-    <script src="assets/app.js?v=ui2" defer></script>
+    <script src="assets/app.js" defer></script>
   </body>
 </html>
