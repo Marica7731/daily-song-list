@@ -2,6 +2,7 @@
 :root {
   color-scheme: light;
   --bg: #f5f7fa;
+  --surface: #ffffff;
   --panel: #ffffff;
   --ink: #111827;
   --muted: #667085;
@@ -107,7 +108,7 @@ h1 {
 }
 
 .status {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   max-width: min(42vw, 420px);
   color: var(--muted);
   font-size: 13px;
@@ -171,10 +172,10 @@ h1 {
 .tab {
   flex: 0 0 auto;
   min-height: 34px;
-  border: 1px solid transparent;
+  border: 1px solid var(--line);
   border-radius: 6px;
   padding: 0 12px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.72);
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
@@ -226,17 +227,13 @@ input::placeholder {
 .summary {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   min-height: 36px;
   margin-bottom: 10px;
   color: var(--muted);
   font-size: 13px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.summary::-webkit-scrollbar {
-  display: none;
+  overflow: visible;
 }
 
 .summary-title {
@@ -258,6 +255,8 @@ input::placeholder {
   background: rgba(255, 255, 255, 0.72);
   color: var(--muted);
   font-weight: 650;
+  min-width: 0;
+  max-width: 100%;
   white-space: nowrap;
 }
 
@@ -435,12 +434,14 @@ input::placeholder {
 
 .source-preview-more {
   flex: 0 0 auto;
-  border: 0;
-  padding: 0;
-  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 2px 5px;
+  background: var(--panel);
   color: var(--accent);
   font-size: 12.5px;
   font-weight: 800;
+  line-height: 1.2;
 }
 
 .rank-video-count,
@@ -477,10 +478,10 @@ input::placeholder {
 .rank-expand,
 .rank-open {
   min-width: 0;
-  border: 1px solid transparent;
+  border: 1px solid var(--line);
   border-radius: 6px;
   padding: 4px 6px;
-  background: transparent;
+  background: var(--panel);
   color: var(--accent);
   font-size: 12.5px;
   font-weight: 800;
@@ -790,10 +791,10 @@ input::placeholder {
 
 .video-more {
   justify-self: start;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 3px 0;
-  background: transparent;
+  padding: 3px 7px;
+  background: var(--panel);
   color: var(--accent);
   font-size: 12.5px;
   font-weight: 850;
@@ -882,30 +883,49 @@ input::placeholder {
 }
 
 @media (max-width: 620px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     min-height: 58px;
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: start;
     gap: 4px;
-    padding-top: 9px;
-    padding-bottom: 9px;
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 
   .brand {
-    width: 100%;
+    flex: 0 1 auto;
+    min-width: 0;
+    width: auto;
+    overflow: hidden;
   }
 
   h1 {
-    font-size: 21px;
+    font-size: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .brand p {
-    font-size: 12px;
+    display: none;
   }
 
   .status {
+    justify-self: start;
+    min-width: 0;
     max-width: 100%;
+    font-size: 10.5px;
+    line-height: 1.25;
     text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .controls {
@@ -928,14 +948,35 @@ input::placeholder {
   .summary {
     min-height: 34px;
     margin-bottom: 8px;
+    gap: 5px;
+  }
+
+  .summary-title {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .summary-chip,
+  .summary-note {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    min-height: 26px;
+    padding: 2px 6px;
+    font-size: 12px;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .summary-note {
+    flex-basis: 100%;
+    justify-content: flex-start;
     margin-left: 0;
+    text-align: left;
   }
 
   .rank-row {
-    grid-template-columns: 40px minmax(0, 1fr) 48px 32px;
+    grid-template-columns: 40px minmax(0, 1fr) 42px 30px;
     min-height: 66px;
     column-gap: 8px;
     padding: 8px 9px;
@@ -956,14 +997,14 @@ input::placeholder {
   }
 
   .rank-count {
-    min-width: 44px;
+    min-width: 38px;
     padding: 3px 5px;
-    font-size: 12px;
+    font-size: 11.5px;
   }
 
   .rank-expand,
   .rank-open {
-    width: 30px;
+    width: 28px;
     overflow: hidden;
     padding: 4px 0;
     text-align: center;
@@ -971,7 +1012,7 @@ input::placeholder {
   }
 
   .source-preview-more {
-    max-width: 104px;
+    max-width: 86px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
