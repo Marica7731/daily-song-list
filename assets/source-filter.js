@@ -167,6 +167,10 @@
     const key = normalizeNoiseTitleKey(text);
     if (!key) return false;
     if (/^(?:第)?\d+個目$/u.test(key)) return true;
+    if (/^(?:前半|後半)?再開$/u.test(key)) return true;
+    if (/^おつ[\p{L}\p{N}ー]{1,18}$/iu.test(key)) return true;
+    if (/^せーの.*おつ/u.test(key)) return true;
+    if (/^こん[\p{L}\p{N}ー]{2,16}$/iu.test(key)) return true;
     return new Set([
       "この曲について",
       "待機",
@@ -198,6 +202,10 @@
       "エンディング",
       "cパート",
       "お名前呼び",
+      "tunamipon",
+      "換気タイム",
+      "tタイム",
+      "オケが止まった",
     ]).has(key);
   }
 
@@ -252,6 +260,7 @@
       const stripped = value
         .replace(/(^|[\s\u3000])[:：]_[A-Za-z0-9]+[:：]?(?=$|[\s\u3000])/gu, " ")
         .replace(/(^|[\s\u3000])[_:：][A-Za-z0-9]+[:：]?(?=$|[\s\u3000])/gu, " ")
+        .replace(/(^|[\s\u3000])_[A-Za-z0-9]+[;；]\s*/gu, " ")
         .replace(/(^|[\s\u3000])[A-Za-z0-9]+(?:smile|cheers|clap|face|penlight|kp)(?=$|[\s\u3000])/giu, " ");
       if (stripped === value) break;
       value = stripped;

@@ -608,11 +608,15 @@ input::placeholder {
 .pagination-controls {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 5px;
   justify-content: flex-end;
 }
 
 .pagination-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 34px;
   min-height: 34px;
   border: 1px solid var(--line);
@@ -622,6 +626,25 @@ input::placeholder {
   color: var(--muted);
   font-size: 13px;
   font-weight: 850;
+  line-height: 1;
+}
+
+.pagination-status,
+.pagination-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.pagination-ellipsis {
+  min-width: 20px;
+  color: var(--muted);
 }
 
 .pagination-button:hover:not(:disabled) {
