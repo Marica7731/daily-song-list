@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:vu9vo2UeJmY:f1812b4d26e1a6b384b0",
   "video": {
     "videoId": "vu9vo2UeJmY",
@@ -18,10 +18,11 @@
     "snapshotId": "20260711T190000Z"
   },
   "risk": {
-    "riskScore": 20,
-    "riskLevel": "low",
+    "riskScore": 60,
+    "riskLevel": "medium",
     "riskReasons": [
       "source_many_topic_entries",
+      "conversation_entry",
       "niche_unknown_artist"
     ]
   },
@@ -142,10 +143,11 @@
       "sourceId": "selected:vu9vo2UeJmY:f1812b4d26e1a6b3",
       "sourceHash": "f1812b4d26e1a6b384b03da7e55e626812636ffa27f0d8165665de23b7610fdb",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist"
       ],
       "positiveEvidence": [
@@ -163,10 +165,11 @@
       "sourceId": "selected:vu9vo2UeJmY:f1812b4d26e1a6b3",
       "sourceHash": "f1812b4d26e1a6b384b03da7e55e626812636ffa27f0d8165665de23b7610fdb",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist"
       ],
       "positiveEvidence": [

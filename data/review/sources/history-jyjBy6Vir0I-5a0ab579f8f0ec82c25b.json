@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:jyjBy6Vir0I:5a0ab579f8f0ec82c25b",
   "video": {
     "videoId": "jyjBy6Vir0I",
@@ -24,8 +24,8 @@
       "source_many_topic_entries",
       "niche_unknown_artist",
       "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles",
-      "conversation_entry"
+      "conversation_entry",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -126,10 +126,11 @@
       "sourceId": "selected:jyjBy6Vir0I:5a0ab579f8f0ec82",
       "sourceHash": "5a0ab579f8f0ec82c25b6e99be441a23669f7f02657547212ff570c67345d731",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -232,10 +233,11 @@
       "sourceId": "selected:jyjBy6Vir0I:5a0ab579f8f0ec82",
       "sourceHash": "5a0ab579f8f0ec82c25b6e99be441a23669f7f02657547212ff570c67345d731",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -483,10 +485,11 @@
       "sourceId": "selected:jyjBy6Vir0I:5a0ab579f8f0ec82",
       "sourceHash": "5a0ab579f8f0ec82c25b6e99be441a23669f7f02657547212ff570c67345d731",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -590,10 +593,11 @@
       "sourceId": "selected:jyjBy6Vir0I:5a0ab579f8f0ec82",
       "sourceHash": "5a0ab579f8f0ec82c25b6e99be441a23669f7f02657547212ff570c67345d731",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:Txeelvxh90Y:72ff204db49e1f2a9cd3",
   "video": {
     "videoId": "Txeelvxh90Y",
@@ -18,7 +18,7 @@
     "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 92,
+    "riskScore": 100,
     "riskLevel": "high",
     "riskReasons": [
       "source_many_topic_entries",
@@ -85,10 +85,11 @@
       "sourceId": "selected:Txeelvxh90Y:72ff204db49e1f2a",
       "sourceHash": "72ff204db49e1f2a9cd34f1ef1349ccd9372c7b1e83738c4ba93caf73b070912",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -300,10 +301,11 @@
       "sourceId": "selected:Txeelvxh90Y:72ff204db49e1f2a",
       "sourceHash": "72ff204db49e1f2a9cd34f1ef1349ccd9372c7b1e83738c4ba93caf73b070912",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -454,10 +456,11 @@
       "sourceId": "selected:Txeelvxh90Y:72ff204db49e1f2a",
       "sourceHash": "72ff204db49e1f2a9cd34f1ef1349ccd9372c7b1e83738c4ba93caf73b070912",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

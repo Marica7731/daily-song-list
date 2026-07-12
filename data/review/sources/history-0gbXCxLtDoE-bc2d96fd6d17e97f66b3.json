@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:0gbXCxLtDoE:bc2d96fd6d17e97f66b3",
   "video": {
     "videoId": "0gbXCxLtDoE",
@@ -18,12 +18,13 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 74,
+    "riskScore": 100,
     "riskLevel": "high",
     "riskReasons": [
       "source_many_topic_entries",
       "source_multiple_unknown_artists",
       "short_unknown_title",
+      "conversation_entry",
       "activity_marker_title"
     ]
   },
@@ -206,10 +207,11 @@
       "sourceId": "selected:0gbXCxLtDoE:bc2d96fd6d17e97f",
       "sourceHash": "bc2d96fd6d17e97f66b38c0025b398a993577b1484571d3ca78cffeab2d530bc",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
@@ -548,10 +550,11 @@
       "sourceId": "selected:0gbXCxLtDoE:bc2d96fd6d17e97f",
       "sourceHash": "bc2d96fd6d17e97f66b38c0025b398a993577b1484571d3ca78cffeab2d530bc",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [

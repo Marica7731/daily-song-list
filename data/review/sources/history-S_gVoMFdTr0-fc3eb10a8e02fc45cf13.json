@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:S_gVoMFdTr0:fc3eb10a8e02fc45cf13",
   "video": {
     "videoId": "S_gVoMFdTr0",
@@ -18,10 +18,11 @@
     "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 20,
-    "riskLevel": "low",
+    "riskScore": 73,
+    "riskLevel": "high",
     "riskReasons": [
       "source_multiple_unknown_artists",
+      "conversation_entry",
       "niche_unknown_artist"
     ]
   },
@@ -81,10 +82,11 @@
       "sourceId": "selected:S_gVoMFdTr0:fc3eb10a8e02fc45",
       "sourceHash": "fc3eb10a8e02fc45cf13d53ba4e0f453f47fbc6bddc012d5723c175d0a1b97d4",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -279,10 +281,11 @@
       "sourceId": "selected:S_gVoMFdTr0:fc3eb10a8e02fc45",
       "sourceHash": "fc3eb10a8e02fc45cf13d53ba4e0f453f47fbc6bddc012d5723c175d0a1b97d4",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -411,10 +414,11 @@
       "sourceId": "selected:S_gVoMFdTr0:fc3eb10a8e02fc45",
       "sourceHash": "fc3eb10a8e02fc45cf13d53ba4e0f453f47fbc6bddc012d5723c175d0a1b97d4",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

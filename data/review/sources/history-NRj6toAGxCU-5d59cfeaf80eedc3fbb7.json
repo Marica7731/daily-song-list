@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:NRj6toAGxCU:5d59cfeaf80eedc3fbb7",
   "video": {
     "videoId": "NRj6toAGxCU",
@@ -328,10 +328,14 @@
       "sourceId": "selected:NRj6toAGxCU:5d59cfeaf80eedc3",
       "sourceHash": "5d59cfeaf80eedc3fbb747cd8c766162713077e87efe57ecdf38395c58a29dc3",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "eMPIRE SOUND SYSTeMS feat. ルピコ(CV:指出毬亜)／ダピコ(CV:河野ひより) ※アカペラ"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:fw1_Eo1_J1Y:3f3bbaba65c49db67dd6",
   "video": {
     "videoId": "fw1_Eo1_J1Y",
@@ -413,10 +413,14 @@
       "sourceId": "UgzqVrqtM9ukP1HCUnx4AaABAg",
       "sourceHash": "3f3bbaba65c49db67dd692c57b0ac1cf009573120b2c65b301c4b94164dd8572",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "三輪明日美 (加藤和彦＆北山修)"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"

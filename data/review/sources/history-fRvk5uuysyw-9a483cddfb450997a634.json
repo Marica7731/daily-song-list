@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:fRvk5uuysyw:9a483cddfb450997a634",
   "video": {
     "videoId": "fRvk5uuysyw",
@@ -18,10 +18,13 @@
     "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 70,
+    "riskScore": 100,
     "riskLevel": "high",
     "riskReasons": [
+      "source_conversation_timeline",
       "source_many_topic_entries",
+      "activity_or_announcement",
+      "conversation_entry",
       "niche_unknown_artist",
       "short_unknown_title",
       "source_multiple_unknown_artists",
@@ -40,13 +43,15 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -63,11 +68,16 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "わたがし"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]
@@ -83,10 +93,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -105,10 +116,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -127,11 +139,16 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "フィクサー"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]
@@ -147,10 +164,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -169,10 +187,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -191,10 +210,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -213,10 +233,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -235,10 +256,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -257,10 +279,14 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "未完成婚姻論"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -277,10 +303,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -299,10 +326,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -321,10 +349,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -343,12 +372,14 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -365,11 +396,16 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "fake face dance music"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]
@@ -385,11 +421,16 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "君と羊と青"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]
@@ -405,11 +446,16 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "キミシダイ列車"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]
@@ -425,10 +471,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -447,11 +494,16 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "夜永唄"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]
@@ -467,10 +519,14 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "Burn!"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -487,10 +543,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -509,10 +566,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -531,10 +589,14 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "また逢う日まで"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -551,10 +613,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -573,10 +636,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -595,10 +659,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -617,12 +682,14 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -639,10 +706,11 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -661,12 +729,14 @@
       "sourceId": "selected:fRvk5uuysyw:9a483cddfb450997",
       "sourceHash": "9a483cddfb450997a63477f8468bcdc796835aa54775acf6b2976febb9343de8",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
       ],
       "positiveEvidence": [
         "structured_setlist"

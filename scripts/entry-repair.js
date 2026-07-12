@@ -12,13 +12,19 @@ function repairParsedEntry(song, lookupInput = null) {
   const signals = entryRepairSignals(song);
   const repairs = [];
   let title = String(song.title || "").trim();
-  let artist = normalizeArtist(song.artist);
+  let artist = cleanSafeArtistCandidate(normalizeArtist(song.artist)) || UNKNOWN_ARTIST;
   const raw = String(song.raw || "");
 
   const cleanedTitle = cleanSafeTitleCandidate(title);
   if (cleanedTitle && cleanedTitle !== title) {
     title = cleanedTitle;
     repairs.push("safe_title_cleanup");
+  }
+
+  const parserCorruptionRepair = parserCorruptionTitleCandidate(song, title);
+  if (parserCorruptionRepair && parserCorruptionRepair !== title) {
+    title = parserCorruptionRepair;
+    repairs.push("parser_corruption_title_restore");
   }
 
   const delimiterRepair = bestDelimiterRepairCandidate(song, lookup);
@@ -135,11 +141,17 @@ function scoreTitleArtistSplit(text, split, lookupInput = null) {
 function cleanSafeTitleCandidate(value) {
   let text = String(value || "").trim();
   if (!text) return "";
+  text = stripCustomEmojiAliases(text);
   text = text
     .replace(/^[\s\u3000\u200b-\u200f\u202a-\u202e│┃┏┗┣┳┻━─┬┴┌┐┘┤┼├└╟╠╚╔╩╦╬╞╰╭╮╯꒱]+/u, "")
     .replace(/^(?:【\s*(?:セットリスト|セトリ|リクエスト)\s*】|\[\s*(?:set\s*list|request)\s*\])\s*/iu, "")
     .trim();
-  text = text.replace(/^(?:[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*|\d{1,3}\s*[≫»>]+\s*|[#＃]?\d{1,3}[.．](?!\d)\s*)/u, "").trim();
+  text = text
+    .replace(
+      /^(?:[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*|[mｍ]\d{1,3}[.．]\s*|\d{1,3}\s*[≫»>]+\s*|[#＃]?\d{1,3}[.．](?!\d)\s*|[#＃]?\d{1,3}\s*[)）、:：]\s*)/iu,
+      "",
+    )
+    .trim();
   text = text.replace(/\s*(?:🆕|←\s*NEW!?|<-\s*NEW!?|NEW!)\s*$/iu, "").trim();
   for (let index = 0; index < 3; index += 1) {
     const unwrapped = unwrapPairedQuote(text);
@@ -150,7 +162,7 @@ function cleanSafeTitleCandidate(value) {
 }
 
 function cleanSafeArtistCandidate(value) {
-  return String(value || "")
+  return stripCustomEmojiAliases(value)
     .replace(/\s+/gu, " ")
     .replace(/\s+(?:19|20)\d{2}\s*[\/／.-]\s*(?:0?[1-9]|1[0-2])\b.*$/u, "")
     .replace(/\s+(?:19|20)\d{2}$/u, "")
@@ -177,6 +189,21 @@ function entryRepairSignals(song) {
     suggestedAction: customEmojiOnly || reactionTextOnly || numericPseudoTitle || activityOrAnnouncement ? "drop_entry" : "",
     reasons,
   };
+}
+
+function parserCorruptionTitleCandidate(song, currentTitle) {
+  const raw = String(song?.raw || "").normalize("NFKC");
+  const title = String(currentTitle || song?.title || "").normalize("NFKC").trim();
+  if (!raw || !title) return "";
+  const rawText = rawSongText(raw);
+  const decimalMatches = rawText.match(/\b\d+(?:\.\d+)+(?:[^\s/／|｜]*)?/gu) || [];
+  for (const candidate of decimalMatches) {
+    const normalizedCandidate = cleanSafeTitleCandidate(candidate);
+    if (!normalizedCandidate || normalizedCandidate === title || title.startsWith(normalizedCandidate)) continue;
+    const truncated = normalizedCandidate.replace(/^\d+\./u, "");
+    if (title === truncated || title.startsWith(truncated)) return normalizedCandidate;
+  }
+  return "";
 }
 
 function bestCombinedTitleArtistCandidate(title, lookupInput = null) {
@@ -328,7 +355,7 @@ function isActivityOrAnnouncementText(value, song = {}) {
   const artist = String(song?.artist || "").trim();
   const combined = `${title} ${artist} ${song?.raw || ""}`;
   if (/^(?:閉会式|開会式)$/u.test(title)) return true;
-  return /(?:手で表現した|お写真公開|写真公開|ライブ開催決定|お披露目で.+やりたい|スタンドマイク回したかった)/iu.test(combined);
+  return /(?:手で表現した|お写真公開|写真公開|ライブ開催決定|出演決定|フェス.*決定|お披露目で.+やりたい|スタンドマイク回したかった|謝罪会見|改めて謝罪|ばいちょろり.*終了|マリパのわさび事件)/iu.test(combined);
 }
 
 function unwrapPairedQuote(value) {
@@ -350,6 +377,19 @@ function unwrapPairedQuote(value) {
   return text;
 }
 
+function stripCustomEmojiAliases(value) {
+  let text = String(value || "");
+  for (let index = 0; index < 6; index += 1) {
+    const next = text
+      .replace(/[:：]_[^\s　:：/／|｜￤∣丨]+[:：]?/gu, " ")
+      .replace(/(^|[\s\u3000])_[A-Za-z0-9][A-Za-z0-9_-]*[:：]?(?=$|[\s\u3000])/gu, " ")
+      .replace(/(^|[\s\u3000])[A-Za-z0-9_-]+(?:smile|cheers|clap|face|penlight|kp)(?=$|[\s\u3000])/giu, " ");
+    if (next === text) break;
+    text = next;
+  }
+  return text.trim();
+}
+
 function uniqueValues(values) {
   return [...new Set((values || []).map((value) => String(value || "").trim()).filter(Boolean))];
 }
@@ -358,7 +398,9 @@ module.exports = {
   bestCombinedTitleArtistCandidate,
   bestDelimiterRepairCandidate,
   cleanSafeTitleCandidate,
+  cleanSafeArtistCandidate,
   entryRepairSignals,
+  parserCorruptionTitleCandidate,
   repairParsedEntry,
   scoreTitleArtistSplit,
   songSearchRecognition,

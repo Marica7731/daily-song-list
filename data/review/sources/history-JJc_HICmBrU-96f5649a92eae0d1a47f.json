@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:JJc_HICmBrU:96f5649a92eae0d1a47f",
   "video": {
     "videoId": "JJc_HICmBrU",
@@ -269,10 +269,15 @@
       "sourceId": "selected:JJc_HICmBrU:96f5649a92eae0d1",
       "sourceHash": "96f5649a92eae0d1a47f20f8297a9e39c5acf463795fa16284846c3bd9619024",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "本日の     タイム",
+        "artist": "未記載"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "structured_setlist"
       ]

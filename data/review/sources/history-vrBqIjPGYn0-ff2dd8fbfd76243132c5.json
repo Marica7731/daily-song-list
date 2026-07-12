@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:vrBqIjPGYn0:ff2dd8fbfd76243132c5",
   "video": {
     "videoId": "vrBqIjPGYn0",
@@ -18,9 +18,10 @@
     "snapshotId": "20260711T190000Z"
   },
   "risk": {
-    "riskScore": 6,
-    "riskLevel": "low",
+    "riskScore": 40,
+    "riskLevel": "medium",
     "riskReasons": [
+      "conversation_entry",
       "niche_unknown_artist"
     ]
   },
@@ -142,6 +143,7 @@
         "title": "【重要】走り回る方向"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "parser_corruption"
       ],

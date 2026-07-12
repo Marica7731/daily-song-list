@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:11:12.404Z",
-  "dataSource": "data/latest.json",
+  "generatedAt": "2026-07-12T22:19:21.957Z",
+  "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
   "latestGeneratedAt": "2026-07-12T22:10:29.951Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
   "counts": {
-    "totalCandidates": 116,
-    "uniqueVideos": 30,
-    "uniqueSources": 44,
-    "confirmedNoiseCount": 116,
+    "totalCandidates": 130,
+    "uniqueVideos": 38,
+    "uniqueSources": 54,
+    "confirmedNoiseCount": 130,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 116,
+      "confirmed_noise": 130,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -24,6 +24,333 @@
     }
   },
   "items": [
+    {
+      "title": "8",
+      "artist": "29 おりづるVTuberフェス(広島県) 出演決定",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 5314,
+      "time": "1:28:34",
+      "raw": "01:28:34 8/29 おりづるVTuberフェス(広島県) 出演決定",
+      "rawHash": "d8eb03009af3034fbd74b2b50b5aeb1bfca1bd1894b26ec1f05ca2d430d24340",
+      "videoId": "gORDBq5IpBo",
+      "videoTitle": "【#歌枠】 エルセさんと初めましての歌コラボ！✨ #エルゆる 【エルセ /三日月ちゆる /Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gORDBq5IpBo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gORDBq5IpBo&t=5314s",
+      "sourceId": "selected:gORDBq5IpBo:17d6ef2c25811226",
+      "sourceHash": "17d6ef2c258112269e6d5de92e4f92f4e5f8c18f02430bf0c213090142aeb969",
+      "sourceOrigin": "review:history-gORDBq5IpBo-17d6ef2c258112269e6d.json;review:history-gORDBq5IpBo-5637b7bc24ce618a45ab.json;review:history-gORDBq5IpBo-660c0f885a3e3ac0518a.json;review:history-gORDBq5IpBo-6c2fd4e3018b88bb9415.json;review:history-gORDBq5IpBo-b62f9f690ffd550a738d.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260711T150000Z",
+        "snapshot:20260712T220000Z",
+        "snapshot:20260711T180000Z",
+        "snapshot:20260711T170000Z",
+        "snapshot:20260712T190000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "known_artist",
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "conversation_entry",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "activity_or_announcement",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:gORDBq5IpBo:17d6ef2c258112269e6d",
+      "sourcePath": "data/review/sources/history-gORDBq5IpBo-17d6ef2c258112269e6d.json",
+      "reviewUrl": "review.html?review=review%3AgORDBq5IpBo%3A17d6ef2c258112269e6d&entry=d8eb03009af3034fbd74b2b50b5aeb1bfca1bd1894b26ec1f05ca2d430d24340"
+    },
+    {
+      "title": "8/29、8",
+      "artist": "30 おりづるVTuberフェス(広島県)出演決定",
+      "isNiche": true,
+      "isUnknownArtist": false,
+      "seconds": 5124,
+      "time": "1:25:24",
+      "raw": "01:25:24 8/29、8/30 おりづるVTuberフェス(広島県)出演決定",
+      "rawHash": "71166a0967ce19a99db022c14a2cd4c0d4566a1fecdc537586f19c758ad54d34",
+      "videoId": "RJZKQyNjrOQ",
+      "videoTitle": "【#歌枠】土曜の昼はアニソンでアゲていく！💥💥【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=RJZKQyNjrOQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=RJZKQyNjrOQ&t=5124s",
+      "sourceId": "selected:RJZKQyNjrOQ:2419b0e29aeb1329",
+      "sourceHash": "2419b0e29aeb1329a357d68bc6cb1632df8ffa3a1bd6129db2ba96212c55e9c8",
+      "sourceOrigin": "review:history-RJZKQyNjrOQ-2419b0e29aeb1329a357.json;review:history-RJZKQyNjrOQ-3a98e6993ba8c7404185.json;review:history-RJZKQyNjrOQ-76b98b69cd2cacdd4566.json;review:history-RJZKQyNjrOQ-daec3d15d33237eac025.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z",
+        "snapshot:20260712T220000Z",
+        "snapshot:20260711T150000Z",
+        "snapshot:20260711T180000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "known_artist",
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "activity_or_announcement",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:RJZKQyNjrOQ:2419b0e29aeb1329a357",
+      "sourcePath": "data/review/sources/history-RJZKQyNjrOQ-2419b0e29aeb1329a357.json",
+      "reviewUrl": "review.html?review=review%3ARJZKQyNjrOQ%3A2419b0e29aeb1329a357&entry=71166a0967ce19a99db022c14a2cd4c0d4566a1fecdc537586f19c758ad54d34"
+    },
+    {
+      "title": "謝罪会見",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 152,
+      "time": "0:02:32",
+      "raw": "2:32 ）謝罪会見",
+      "rawHash": "0956c6df2f2481f45acb58d589a67fe08d88a7c40febae6fef118456f028b0e1",
+      "videoId": "fRvk5uuysyw",
+      "videoTitle": "【#歌枠】レオの謝罪歌配信🙏",
+      "channelName": "FouRTe Project -フォルテプロジェクト-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fRvk5uuysyw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fRvk5uuysyw&t=152s",
+      "sourceId": "selected:fRvk5uuysyw:86c3fb2d00b56796",
+      "sourceHash": "86c3fb2d00b56796e5486cc8efcb706488a8fcf765258f9a6120ac71c5bb2f5d",
+      "sourceOrigin": "review:history-fRvk5uuysyw-86c3fb2d00b56796e548.json;review:history-fRvk5uuysyw-9a483cddfb450997a634.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z",
+        "snapshot:20260712T220000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
+      "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
+      "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=0956c6df2f2481f45acb58d589a67fe08d88a7c40febae6fef118456f028b0e1"
+    },
+    {
+      "title": "マリパのわさび事件",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1839,
+      "time": "0:30:39",
+      "raw": "30:39 ）マリパのわさび事件",
+      "rawHash": "ed44e6eb0d5bebc3fd1022b4fa09fed4958d52a9cca5ba7aae041a6452553a12",
+      "videoId": "fRvk5uuysyw",
+      "videoTitle": "【#歌枠】レオの謝罪歌配信🙏",
+      "channelName": "FouRTe Project -フォルテプロジェクト-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fRvk5uuysyw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fRvk5uuysyw&t=1839s",
+      "sourceId": "selected:fRvk5uuysyw:86c3fb2d00b56796",
+      "sourceHash": "86c3fb2d00b56796e5486cc8efcb706488a8fcf765258f9a6120ac71c5bb2f5d",
+      "sourceOrigin": "review:history-fRvk5uuysyw-86c3fb2d00b56796e548.json;review:history-fRvk5uuysyw-9a483cddfb450997a634.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z",
+        "snapshot:20260712T220000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
+      "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
+      "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=ed44e6eb0d5bebc3fd1022b4fa09fed4958d52a9cca5ba7aae041a6452553a12"
+    },
+    {
+      "title": "改めて謝罪",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4376,
+      "time": "1:12:56",
+      "raw": "1:12:56 改めて謝罪",
+      "rawHash": "a6bb69edd811f2613c702ff58b865fb5580082afe96363ff52d8819a0a9df471",
+      "videoId": "fRvk5uuysyw",
+      "videoTitle": "【#歌枠】レオの謝罪歌配信🙏",
+      "channelName": "FouRTe Project -フォルテプロジェクト-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fRvk5uuysyw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fRvk5uuysyw&t=4376s",
+      "sourceId": "selected:fRvk5uuysyw:86c3fb2d00b56796",
+      "sourceHash": "86c3fb2d00b56796e5486cc8efcb706488a8fcf765258f9a6120ac71c5bb2f5d",
+      "sourceOrigin": "review:history-fRvk5uuysyw-86c3fb2d00b56796e548.json;review:history-fRvk5uuysyw-9a483cddfb450997a634.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z",
+        "snapshot:20260712T220000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
+      "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
+      "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=a6bb69edd811f2613c702ff58b865fb5580082afe96363ff52d8819a0a9df471"
+    },
+    {
+      "title": "ばいちょろり（終了）",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4641,
+      "time": "1:17:21",
+      "raw": "1:17:21 ばいちょろり（終了）:_leo::_otsu:",
+      "rawHash": "a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a",
+      "videoId": "fRvk5uuysyw",
+      "videoTitle": "【#歌枠】レオの謝罪歌配信🙏",
+      "channelName": "FouRTe Project -フォルテプロジェクト-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fRvk5uuysyw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fRvk5uuysyw&t=4641s",
+      "sourceId": "selected:fRvk5uuysyw:86c3fb2d00b56796",
+      "sourceHash": "86c3fb2d00b56796e5486cc8efcb706488a8fcf765258f9a6120ac71c5bb2f5d",
+      "sourceOrigin": "review:history-fRvk5uuysyw-86c3fb2d00b56796e548.json;review:history-fRvk5uuysyw-9a483cddfb450997a634.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z",
+        "snapshot:20260712T220000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
+      "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
+      "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
+    },
     {
       "title": "終わりのあいさつ",
       "artist": "未記載",
@@ -43,6 +370,7 @@
       "sourceId": "selected:bxffMK15LHs:5cf57224d41b2930",
       "sourceHash": "5cf57224d41b2930387285645beb8090ef4a112da381bc70bd1a5fbc84b53fa5",
       "sourceOrigin": "review:history-bxffMK15LHs-5cf57224d41b29303872.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -50,6 +378,11 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [
         "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "activity_marker_title"
       ],
       "riskReasons": [
         "activity_marker_title",
@@ -79,6 +412,7 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "sourceOrigin": "review:history-zREfHIYyb1M-94bf1eecf968bf5bd964.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -86,6 +420,10 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [
         "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "activity_marker_title",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "activity_marker_title",
@@ -95,6 +433,96 @@
       "reviewId": "review:zREfHIYyb1M:94bf1eecf968bf5bd964",
       "sourcePath": "data/review/sources/history-zREfHIYyb1M-94bf1eecf968bf5bd964.json",
       "reviewUrl": "review.html?review=review%3AzREfHIYyb1M%3A94bf1eecf968bf5bd964&entry=48fea5b826b2e681e68b721a26940a22bdadf0a86ad15cefd603b5b1badf983a"
+    },
+    {
+      "title": "〜3Dライブ開催決定!!!!",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1260,
+      "time": "0:21:00",
+      "raw": "21:00〜3Dライブ開催決定!!!!",
+      "rawHash": "8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4",
+      "videoId": "71OSYnx-Vy0",
+      "videoTitle": "【 歌枠 】 この時間のゲリラなら誰も見つけられない！ 【 雨海ルカ / WeatherPlanet 】",
+      "channelName": "Ruka Ch. 雨海ルカ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=71OSYnx-Vy0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=71OSYnx-Vy0&t=1260s",
+      "sourceId": "selected:71OSYnx-Vy0:2fb7d6f710f49d3c",
+      "sourceHash": "2fb7d6f710f49d3cb1722420ddf8d4f32786f7c83da69e0bfb412532442d20de",
+      "sourceOrigin": "review:history-71OSYnx-Vy0-2fb7d6f710f49d3cb172.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260711T150000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:71OSYnx-Vy0:2fb7d6f710f49d3cb172",
+      "sourcePath": "data/review/sources/history-71OSYnx-Vy0-2fb7d6f710f49d3cb172.json",
+      "reviewUrl": "review.html?review=review%3A71OSYnx-Vy0%3A2fb7d6f710f49d3cb172&entry=8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4"
+    },
+    {
+      "title": "〜3Dライブ開催決定!!!!",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1260,
+      "time": "0:21:00",
+      "raw": "21:00〜3Dライブ開催決定!!!!",
+      "rawHash": "8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4",
+      "videoId": "71OSYnx-Vy0",
+      "videoTitle": "【 歌枠 】 この時間のゲリラなら誰も見つけられない！ 【 雨海ルカ / WeatherPlanet 】",
+      "channelName": "Ruka Ch. 雨海ルカ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=71OSYnx-Vy0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=71OSYnx-Vy0&t=1260s",
+      "sourceId": "selected:71OSYnx-Vy0:6bb534ac466b1ca2",
+      "sourceHash": "6bb534ac466b1ca219744eb068c0703ef15a04706f5cbf86748a4b56057909ab",
+      "sourceOrigin": "review:history-71OSYnx-Vy0-6bb534ac466b1ca21974.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_niche_short_titles"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:71OSYnx-Vy0:6bb534ac466b1ca21974",
+      "sourcePath": "data/review/sources/history-71OSYnx-Vy0-6bb534ac466b1ca21974.json",
+      "reviewUrl": "review.html?review=review%3A71OSYnx-Vy0%3A6bb534ac466b1ca21974&entry=8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4"
     },
     {
       "title": "おつウタノン",
@@ -115,6 +543,7 @@
       "sourceId": "selected:1rCEayGJi54:0c2f16f9fd5431eb",
       "sourceHash": "0c2f16f9fd5431eb7a53fc450d04aa52e5ae351e0ea21a931aadd14b8225359c",
       "sourceOrigin": "review:history-1rCEayGJi54-0c2f16f9fd5431eb7a53.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -123,10 +552,18 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:1rCEayGJi54:0c2f16f9fd5431eb7a53",
@@ -152,6 +589,7 @@
       "sourceId": "selected:37XJM6EIrns:214ab576a131538d",
       "sourceHash": "214ab576a131538d548292a59a57cdb3f0cf3831d1dc37dc0b6cec21e883652a",
       "sourceOrigin": "review:history-37XJM6EIrns-214ab576a131538d5482.json;review:history-37XJM6EIrns-d3fc466adbed907035f8.json;review:history-37XJM6EIrns-f0d168ca572ba70a63be.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z",
         "snapshot:20260711T180000Z",
@@ -162,10 +600,20 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:37XJM6EIrns:214ab576a131538d5482",
@@ -191,6 +639,7 @@
       "sourceId": "selected:YZLK9V0oPTw:58872227afd4c507",
       "sourceHash": "58872227afd4c507569be3a63b7f8cfc9ea71da1b114b0f708b09032c2caf0ef",
       "sourceOrigin": "review:history-YZLK9V0oPTw-58872227afd4c507569b.json;review:history-YZLK9V0oPTw-f046c8b83817ac355dfa.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z",
         "snapshot:20260711T180000Z"
@@ -200,10 +649,21 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:YZLK9V0oPTw:58872227afd4c507569b",
@@ -229,6 +689,7 @@
       "sourceId": "selected:YZLK9V0oPTw:ed9b29499e75543d",
       "sourceHash": "ed9b29499e75543d047508d4bb0aa8d8fa82d46aecc8651e402a03bb84322c1f",
       "sourceOrigin": "review:history-YZLK9V0oPTw-ed9b29499e75543d0475.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -237,9 +698,17 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:YZLK9V0oPTw:ed9b29499e75543d0475",
@@ -265,6 +734,7 @@
       "sourceId": "selected:YdM4OewAJ8E:593d50e4158c2491",
       "sourceHash": "593d50e4158c2491f8a5a2bb0c38d1207cb0739e990183b4e2994c32d6bdac58",
       "sourceOrigin": "review:history-YdM4OewAJ8E-593d50e4158c2491f8a5.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -272,6 +742,11 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [
         "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "activity_marker_title"
       ],
       "riskReasons": [
         "activity_marker_title",
@@ -301,6 +776,7 @@
       "sourceId": "selected:YdM4OewAJ8E:8ab605e83465bdc3",
       "sourceHash": "8ab605e83465bdc3d53be98e06367b6aa6e66cd79d87297365c82ad1addf7095",
       "sourceOrigin": "review:history-YdM4OewAJ8E-8ab605e83465bdc3d53b.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -309,10 +785,18 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:YdM4OewAJ8E:8ab605e83465bdc3d53b",
@@ -338,14 +822,19 @@
       "sourceId": "UgxjzBPFRSVAOdVu02t4AaABAg",
       "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
       "sourceOrigin": "review:M9-YywmcTJw-6931becf04cedf033b64.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high"
+      ],
       "riskReasons": [
-        "obvious_non_song_text"
+        "obvious_non_song_text",
+        "source_activity_marker_ratio_high"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:M9-YywmcTJw:6931becf04cedf033b64",
@@ -371,6 +860,7 @@
       "sourceId": "selected:OCULwDtQ8Bs:a5f12251209c4a3d",
       "sourceHash": "a5f12251209c4a3d1b6af67015433de074d25a2f936884260af074cac0bd5fb6",
       "sourceOrigin": "review:history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T190000Z"
       ],
@@ -379,11 +869,19 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:OCULwDtQ8Bs:a5f12251209c4a3d1b6a",
@@ -409,6 +907,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -417,11 +916,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -447,6 +961,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -455,11 +970,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -485,6 +1015,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -493,11 +1024,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -523,6 +1069,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -531,11 +1078,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -561,6 +1123,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -569,11 +1132,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -599,6 +1177,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -607,11 +1186,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -637,6 +1231,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -645,11 +1240,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -675,6 +1285,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -683,11 +1294,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -713,6 +1339,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -721,11 +1348,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -751,6 +1393,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -759,11 +1402,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -789,6 +1447,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -797,11 +1456,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -827,6 +1501,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -835,11 +1510,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -865,6 +1555,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -873,11 +1564,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -903,6 +1609,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -911,11 +1618,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -941,6 +1663,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -949,11 +1672,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -979,6 +1717,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -987,11 +1726,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1017,6 +1771,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1025,11 +1780,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1055,6 +1825,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1063,11 +1834,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1093,6 +1879,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1101,11 +1888,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1131,6 +1933,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1139,11 +1942,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1169,6 +1987,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1177,11 +1996,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1207,6 +2041,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1215,11 +2050,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1245,6 +2095,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1253,11 +2104,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1283,6 +2149,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1291,11 +2158,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1321,6 +2203,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1329,11 +2212,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1359,6 +2257,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1367,11 +2266,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1397,6 +2311,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1405,11 +2320,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1435,6 +2365,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1443,11 +2374,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1473,6 +2419,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1481,11 +2428,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1511,6 +2473,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1519,11 +2482,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1549,6 +2527,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1557,11 +2536,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1587,6 +2581,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1595,11 +2590,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1625,6 +2635,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1633,11 +2644,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1663,6 +2689,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1671,11 +2698,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1701,6 +2743,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1709,11 +2752,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1739,6 +2797,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1747,11 +2806,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1777,6 +2851,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1785,11 +2860,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1815,6 +2905,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1823,11 +2914,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1853,6 +2959,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1861,11 +2968,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1891,6 +3013,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1899,11 +3022,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1929,6 +3067,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1937,11 +3076,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -1967,6 +3121,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -1975,11 +3130,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -2005,6 +3175,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -2013,11 +3184,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -2043,6 +3229,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -2051,11 +3238,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -2081,6 +3283,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -2089,11 +3292,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -2119,6 +3337,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -2127,11 +3346,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -2157,6 +3391,7 @@
       "sourceId": "selected:qENxBvbn29Y:cde891fc8636c0b3",
       "sourceHash": "cde891fc8636c0b31ff39a352f4acd6f062a65cf983b6cd761d59e35f2de205f",
       "sourceOrigin": "review:history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -2165,11 +3400,26 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
@@ -2195,6 +3445,7 @@
       "sourceId": "selected:qENxBvbn29Y:d20b81982796f791",
       "sourceHash": "d20b81982796f791041da726595099eb05edb481ac78311a5f867cd81bcad0a6",
       "sourceOrigin": "review:history-qENxBvbn29Y-d20b81982796f791041d.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -2203,11 +3454,22 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_marker_title",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:d20b81982796f791041d",
@@ -2233,6 +3495,7 @@
       "sourceId": "selected:0gbXCxLtDoE:bc2d96fd6d17e97f",
       "sourceHash": "bc2d96fd6d17e97f66b38c0025b398a993577b1484571d3ca78cffeab2d530bc",
       "sourceOrigin": "review:history-0gbXCxLtDoE-bc2d96fd6d17e97f66b3.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -2241,9 +3504,17 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "conversation_entry",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:0gbXCxLtDoE:bc2d96fd6d17e97f66b3",
@@ -2269,6 +3540,7 @@
       "sourceId": "selected:0gbXCxLtDoE:d05e3b686c5f2510",
       "sourceHash": "d05e3b686c5f25109e61d0d8362a545a2862d1ebda77d83989accab2dd6cfcbe",
       "sourceOrigin": "review:history-0gbXCxLtDoE-d05e3b686c5f25109e61.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -2277,10 +3549,21 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title",
+        "conversation_entry",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:0gbXCxLtDoE:d05e3b686c5f25109e61",
@@ -2306,6 +3589,7 @@
       "sourceId": "selected:S_XxDfBoMxA:0efd2ad277201ff7",
       "sourceHash": "0efd2ad277201ff7e5f1831af04f08b7c7bff38bc31f6e26e3bf790d28a5745d",
       "sourceOrigin": "review:history-S_XxDfBoMxA-0efd2ad277201ff7e5f1.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -2313,6 +3597,12 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [
         "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "conversation_entry",
+        "activity_marker_title"
       ],
       "riskReasons": [
         "activity_marker_title",
@@ -2343,6 +3633,7 @@
       "sourceId": "selected:S_XxDfBoMxA:7cc95c9ce0087f7d",
       "sourceHash": "7cc95c9ce0087f7dd48f41d1aa367c6daa1a629d8b560ebce08464b03be3c470",
       "sourceOrigin": "review:history-S_XxDfBoMxA-7cc95c9ce0087f7dd48f.json;review:history-S_XxDfBoMxA-8d018b0acf8809284e14.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z",
         "snapshot:20260711T180000Z"
@@ -2352,11 +3643,20 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:S_XxDfBoMxA:7cc95c9ce0087f7dd48f",
@@ -2382,6 +3682,7 @@
       "sourceId": "selected:9hgQ0Qbv0iM:100d1340384bfffe",
       "sourceHash": "100d1340384bfffe6e257e3083019dc5ba6b98e73fc6fd71966aec345292179c",
       "sourceOrigin": "review:history-9hgQ0Qbv0iM-100d1340384bfffe6e25.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -2390,11 +3691,22 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:9hgQ0Qbv0iM:100d1340384bfffe6e25",
@@ -2420,6 +3732,7 @@
       "sourceId": "selected:9hgQ0Qbv0iM:bde69793cef445c0",
       "sourceHash": "bde69793cef445c039d7a3b57e59b14cbc122b4aa05168e15b8e45d5bb0cff74",
       "sourceOrigin": "review:history-9hgQ0Qbv0iM-bde69793cef445c039d7.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -2428,15 +3741,72 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "activity_marker_title",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:9hgQ0Qbv0iM:bde69793cef445c039d7",
       "sourcePath": "data/review/sources/history-9hgQ0Qbv0iM-bde69793cef445c039d7.json",
       "reviewUrl": "review.html?review=review%3A9hgQ0Qbv0iM%3Abde69793cef445c039d7&entry=9d4f9fca8470dad9bb6c857e2fc1a04bd38153a2e1d4bbbc4f24a9a6d9607646"
+    },
+    {
+      "title": "1を手で表現した",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 8778,
+      "time": "2:26:18",
+      "raw": "2:26:18 1を手で表現した",
+      "rawHash": "b5e8f6f1e36c31b08d7c517412adb850b283b80cf8b34f5d5f6d9233627a4ab2",
+      "videoId": "ELqKe7RYai0",
+      "videoTitle": "【#歌枠・#雑談】ねぇねぇ！朝枠だぜ。【VEE/#甘楽デイティー】",
+      "channelName": "甘楽デイティー / Kanra Deity",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ELqKe7RYai0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ELqKe7RYai0&t=8778s",
+      "sourceId": "selected:ELqKe7RYai0:c2f39a5fb479d4d1",
+      "sourceHash": "c2f39a5fb479d4d148f076609150d3662d0bef7611973817c5f56f2ea7d6af4e",
+      "sourceOrigin": "review:history-ELqKe7RYai0-c2f39a5fb479d4d148f0.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ELqKe7RYai0:c2f39a5fb479d4d148f0",
+      "sourcePath": "data/review/sources/history-ELqKe7RYai0-c2f39a5fb479d4d148f0.json",
+      "reviewUrl": "review.html?review=review%3AELqKe7RYai0%3Ac2f39a5fb479d4d148f0&entry=b5e8f6f1e36c31b08d7c517412adb850b283b80cf8b34f5d5f6d9233627a4ab2"
     },
     {
       "title": "チューニング",
@@ -2457,6 +3827,7 @@
       "sourceId": "selected:U1VskIZthjM:0d12ff496ed4245e",
       "sourceHash": "0d12ff496ed4245eaee81a64b59e025a32ce2799678e2c067e88bd2ce0cb6e0a",
       "sourceOrigin": "review:history-U1VskIZthjM-0d12ff496ed4245eaee8.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -2465,10 +3836,20 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:U1VskIZthjM:0d12ff496ed4245eaee8",
@@ -2494,6 +3875,7 @@
       "sourceId": "selected:U1VskIZthjM:6c438ca8a819e5f6",
       "sourceHash": "6c438ca8a819e5f62b46d73149ccb8d027d14107f1c1d707ab59b0bbe3e76b19",
       "sourceOrigin": "review:history-U1VskIZthjM-6c438ca8a819e5f62b46.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -2502,9 +3884,15 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
-      "riskReasons": [
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
         "activity_marker_title",
         "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_multiple_unknown_artists",
+        "source_unknown_artist_ratio_high"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:U1VskIZthjM:6c438ca8a819e5f62b46",
@@ -2530,6 +3918,7 @@
       "sourceId": "selected:bQtUhOfrJC0:369ea67228f3b93b",
       "sourceHash": "369ea67228f3b93b75b0909e3a95eb7c99402d6e925d7874375c87c65d7a21b8",
       "sourceOrigin": "review:history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T190000Z"
       ],
@@ -2538,10 +3927,24 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_many_topic_entries",
+        "kept_count_high_low_known_song_density",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_marker_title",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_unknown_artist_ratio_high",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
@@ -2567,6 +3970,7 @@
       "sourceId": "selected:vu9vo2UeJmY:4c4f9cc27d1d95d5",
       "sourceHash": "4c4f9cc27d1d95d51f6227e8be5e9146b0307dad92808781a37a18673d5eb053",
       "sourceOrigin": "review:history-vu9vo2UeJmY-4c4f9cc27d1d95d51f62.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -2575,11 +3979,21 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:vu9vo2UeJmY:4c4f9cc27d1d95d51f62",
@@ -2605,6 +4019,7 @@
       "sourceId": "selected:vu9vo2UeJmY:4c4f9cc27d1d95d5",
       "sourceHash": "4c4f9cc27d1d95d51f6227e8be5e9146b0307dad92808781a37a18673d5eb053",
       "sourceOrigin": "review:history-vu9vo2UeJmY-4c4f9cc27d1d95d51f62.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -2613,11 +4028,21 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:vu9vo2UeJmY:4c4f9cc27d1d95d51f62",
@@ -2643,6 +4068,7 @@
       "sourceId": "selected:zaPAqsqcC0k:7158af31feaaf86d",
       "sourceHash": "7158af31feaaf86ddbf95ebd3b856a6ea8e91e9305932102d2b4d281363f1ca3",
       "sourceOrigin": "review:history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -2651,11 +4077,24 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
@@ -2681,6 +4120,7 @@
       "sourceId": "selected:zaPAqsqcC0k:7158af31feaaf86d",
       "sourceHash": "7158af31feaaf86ddbf95ebd3b856a6ea8e91e9305932102d2b4d281363f1ca3",
       "sourceOrigin": "review:history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -2689,11 +4129,24 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
@@ -2719,6 +4172,7 @@
       "sourceId": "selected:zaPAqsqcC0k:7158af31feaaf86d",
       "sourceHash": "7158af31feaaf86ddbf95ebd3b856a6ea8e91e9305932102d2b4d281363f1ca3",
       "sourceOrigin": "review:history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -2727,11 +4181,24 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
@@ -2757,6 +4224,7 @@
       "sourceId": "selected:zaPAqsqcC0k:7158af31feaaf86d",
       "sourceHash": "7158af31feaaf86ddbf95ebd3b856a6ea8e91e9305932102d2b4d281363f1ca3",
       "sourceOrigin": "review:history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -2765,11 +4233,24 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
@@ -2795,6 +4276,7 @@
       "sourceId": "selected:zaPAqsqcC0k:7158af31feaaf86d",
       "sourceHash": "7158af31feaaf86ddbf95ebd3b856a6ea8e91e9305932102d2b4d281363f1ca3",
       "sourceOrigin": "review:history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -2803,11 +4285,24 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
@@ -2833,6 +4328,7 @@
       "sourceId": "selected:zaPAqsqcC0k:7158af31feaaf86d",
       "sourceHash": "7158af31feaaf86ddbf95ebd3b856a6ea8e91e9305932102d2b4d281363f1ca3",
       "sourceOrigin": "review:history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -2841,11 +4337,24 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
@@ -2871,12 +4380,14 @@
       "sourceId": "UgxR7d6aprpzgA8S9oN4AaABAg",
       "sourceHash": "a4f974914b344e2d22b8069e797f0c7e6c37eb7b63ca00b64288568906ae1cfc",
       "sourceOrigin": "review:SgaXqdakVZ8-a4f974914b344e2d22b8.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [],
       "riskReasons": [
         "title_only_non_song_candidate"
       ],
@@ -2884,6 +4395,51 @@
       "reviewId": "review:SgaXqdakVZ8:a4f974914b344e2d22b8",
       "sourcePath": "data/review/sources/SgaXqdakVZ8-a4f974914b344e2d22b8.json",
       "reviewUrl": "review.html?review=review%3ASgaXqdakVZ8%3Aa4f974914b344e2d22b8&entry=b86e5334adaa880c3f2870c170d674604ab80de1f544d4ba0e293a420c30968b"
+    },
+    {
+      "title": "2周年記念お写真公開！",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2856,
+      "time": "0:47:36",
+      "raw": "0:47:36 2周年記念お写真公開！",
+      "rawHash": "f8ffdd2e900c59a53890c676eda6dccf63ef5df5a2b9af9115ec0480a2630780",
+      "videoId": "wkmPLI98ccU",
+      "videoTitle": "【 2周年🎉/ #歌枠 】枠立てなおし！！２周年記念配信‼️お披露目・お知らせあります‼️YouTubeデビューして2年が経ちました📖【語部シオン/ #新人VTuber 】",
+      "channelName": "語部店主の趣味部屋",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=wkmPLI98ccU",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=wkmPLI98ccU&t=2856s",
+      "sourceId": "selected:wkmPLI98ccU:c42bc673a091cab8",
+      "sourceHash": "c42bc673a091cab8fb3a026527c7452440b7b34814debb56a9b944b7248811f1",
+      "sourceOrigin": "review:history-wkmPLI98ccU-c42bc673a091cab8fb3a.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:wkmPLI98ccU:c42bc673a091cab8fb3a",
+      "sourcePath": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json",
+      "reviewUrl": "review.html?review=review%3AwkmPLI98ccU%3Ac42bc673a091cab8fb3a&entry=f8ffdd2e900c59a53890c676eda6dccf63ef5df5a2b9af9115ec0480a2630780"
     },
     {
       "title": "こんひなー",
@@ -2904,6 +4460,7 @@
       "sourceId": "selected:3npLfTe1xmU:465079c23f6d7969",
       "sourceHash": "465079c23f6d7969ec43dd777edbbeb1c9e37715eb83d1a583d372a472886788",
       "sourceOrigin": "review:history-3npLfTe1xmU-465079c23f6d7969ec43.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -2912,10 +4469,19 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:3npLfTe1xmU:465079c23f6d7969ec43",
@@ -2941,6 +4507,7 @@
       "sourceId": "selected:3npLfTe1xmU:465079c23f6d7969",
       "sourceHash": "465079c23f6d7969ec43dd777edbbeb1c9e37715eb83d1a583d372a472886788",
       "sourceOrigin": "review:history-3npLfTe1xmU-465079c23f6d7969ec43.json;review:history-3npLfTe1xmU-b291152ba5bb5a3da255.json;review:history-3npLfTe1xmU-ea9abecfc8452273c871.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z",
         "snapshot:20260712T190000Z",
@@ -2951,10 +4518,19 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:3npLfTe1xmU:465079c23f6d7969ec43",
@@ -2980,6 +4556,7 @@
       "sourceId": "selected:3npLfTe1xmU:76b0f6f99cdcc7b7",
       "sourceHash": "76b0f6f99cdcc7b7669e23915a9fc1e30348f497e27c1e9ab12e57a1def6de57",
       "sourceOrigin": "review:history-3npLfTe1xmU-76b0f6f99cdcc7b7669e.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -2988,9 +4565,15 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:3npLfTe1xmU:76b0f6f99cdcc7b7669e",
@@ -3016,6 +4599,7 @@
       "sourceId": "selected:Igp81Rj-QHc:c7feb4a6661f5158",
       "sourceHash": "c7feb4a6661f5158db1355cdc25e5f1132760de8f0da7dfba7e072ef84ee5d37",
       "sourceOrigin": "review:history-Igp81Rj-QHc-c7feb4a6661f5158db13.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -3024,10 +4608,21 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Igp81Rj-QHc:c7feb4a6661f5158db13",
@@ -3053,6 +4648,7 @@
       "sourceId": "selected:Igp81Rj-QHc:aeafada74cdf5930",
       "sourceHash": "aeafada74cdf593089f9feb53c3aa1af448386693dc0d33c87b6f70923befe27",
       "sourceOrigin": "review:history-Igp81Rj-QHc-aeafada74cdf593089f9.json;review:history-Igp81Rj-QHc-c7feb4a6661f5158db13.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T190000Z",
         "snapshot:20260711T180000Z"
@@ -3062,9 +4658,17 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "activity_marker_title",
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Igp81Rj-QHc:aeafada74cdf593089f9",
@@ -3090,6 +4694,7 @@
       "sourceId": "selected:Igp81Rj-QHc:f2c8512d5d09b31d",
       "sourceHash": "f2c8512d5d09b31d39727b5506a5fc11292697ca1ab254a350e0d4575dcbcb69",
       "sourceOrigin": "review:history-Igp81Rj-QHc-f2c8512d5d09b31d3972.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -3098,9 +4703,15 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Igp81Rj-QHc:f2c8512d5d09b31d3972",
@@ -3126,6 +4737,7 @@
       "sourceId": "selected:GsWidWYRJXg:cbcb66178f85620d",
       "sourceHash": "cbcb66178f85620dc433220efd55ef8da026637535eae161b44583470837a98e",
       "sourceOrigin": "review:history-GsWidWYRJXg-cbcb66178f85620dc433.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T190000Z"
       ],
@@ -3134,9 +4746,17 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "activity_marker_title",
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:GsWidWYRJXg:cbcb66178f85620dc433",
@@ -3162,14 +4782,19 @@
       "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
       "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
       "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "artist_rich_source_title_only_entry"
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
@@ -3195,14 +4820,19 @@
       "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
       "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
       "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "title_only_non_song_candidate"
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
@@ -3228,14 +4858,19 @@
       "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
       "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
       "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "title_only_non_song_candidate"
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
@@ -3261,14 +4896,19 @@
       "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
       "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
       "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "artist_rich_source_title_only_entry"
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
@@ -3294,14 +4934,19 @@
       "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
       "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
       "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "artist_rich_source_title_only_entry"
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
@@ -3327,14 +4972,19 @@
       "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
       "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
       "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "title_only_non_song_candidate"
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
@@ -3360,14 +5010,19 @@
       "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
       "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
       "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "artist_rich_source_title_only_entry"
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
@@ -3393,14 +5048,19 @@
       "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
       "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
       "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "artist_rich_source_title_only_entry"
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
@@ -3426,6 +5086,7 @@
       "sourceId": "selected:FlhwC9s1Nk8:4aa61da2d1b34d7d",
       "sourceHash": "4aa61da2d1b34d7d38e85459bb0e7ee747a93d9b4799a81d8512a4dd2bde1175",
       "sourceOrigin": "review:history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json;review:history-FlhwC9s1Nk8-ed8d253f80305f5a654c.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z",
         "snapshot:20260711T170000Z"
@@ -3435,16 +5096,121 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:FlhwC9s1Nk8:4aa61da2d1b34d7d38e8",
       "sourcePath": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json",
       "reviewUrl": "review.html?review=review%3AFlhwC9s1Nk8%3A4aa61da2d1b34d7d38e8&entry=b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
+    },
+    {
+      "title": "閉会式",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2019,
+      "time": "0:33:39",
+      "raw": "0:33:39 閉会式",
+      "rawHash": "594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216",
+      "videoId": "vdqlFJD0e7c",
+      "videoTitle": "【 #光をつなぐウルトラソング歌枠リレー 】 光の力、お借りします！【 特撮オタクVTuber忠犬しず 】",
+      "channelName": "忠犬しず 特撮オタクVTuber",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=vdqlFJD0e7c",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2019s",
+      "sourceId": "selected:vdqlFJD0e7c:0d63e5c4ca38df91",
+      "sourceHash": "0d63e5c4ca38df917fb58c74f1b5be81c8a54a893fdd1050b81aad849e18314d",
+      "sourceOrigin": "review:history-vdqlFJD0e7c-0d63e5c4ca38df917fb5.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_niche_short_titles",
+        "activity_or_announcement",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:vdqlFJD0e7c:0d63e5c4ca38df917fb5",
+      "sourcePath": "data/review/sources/history-vdqlFJD0e7c-0d63e5c4ca38df917fb5.json",
+      "reviewUrl": "review.html?review=review%3AvdqlFJD0e7c%3A0d63e5c4ca38df917fb5&entry=594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216"
+    },
+    {
+      "title": "閉会式",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2019,
+      "time": "0:33:39",
+      "raw": "0:33:39 閉会式",
+      "rawHash": "594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216",
+      "videoId": "vdqlFJD0e7c",
+      "videoTitle": "【 #光をつなぐウルトラソング歌枠リレー 】 光の力、お借りします！【 特撮オタクVTuber忠犬しず 】",
+      "channelName": "忠犬しず 特撮オタクVTuber",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=vdqlFJD0e7c",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2019s",
+      "sourceId": "selected:vdqlFJD0e7c:d6aae283833834bb",
+      "sourceHash": "d6aae283833834bbc00a24768904da96c6ff4bb343d7a975c9fa987639a15499",
+      "sourceOrigin": "review:history-vdqlFJD0e7c-d6aae283833834bbc00a.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260711T150000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "activity_or_announcement",
+        "conversation_entry",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:vdqlFJD0e7c:d6aae283833834bbc00a",
+      "sourcePath": "data/review/sources/history-vdqlFJD0e7c-d6aae283833834bbc00a.json",
+      "reviewUrl": "review.html?review=review%3AvdqlFJD0e7c%3Ad6aae283833834bbc00a&entry=594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216"
     },
     {
       "title": "離席",
@@ -3465,6 +5231,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -3473,11 +5240,25 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
@@ -3503,6 +5284,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json;review:history-Nera7o9MuwM-bf3fb76c83f3cf26050b.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z",
         "snapshot:20260712T190000Z"
@@ -3512,16 +5294,84 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
       "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=f587b0d632fb0ad8ec8b484e9ac24ba9838095af226c98039e7feccb25238105"
+    },
+    {
+      "title": "3Dお披露目でスタンドマイク回したかった",
+      "artist": "永ちゃんやりたい",
+      "isNiche": true,
+      "isUnknownArtist": false,
+      "seconds": 7394,
+      "time": "2:03:14",
+      "raw": "2:03:14 3Dお披露目でスタンドマイク回したかった/永ちゃんやりたい",
+      "rawHash": "15515cd440950a90a2c0d76b796f214108cecc3e4d1059090b39279f1d790673",
+      "videoId": "Nera7o9MuwM",
+      "videoTitle": "【耐久】55万人or55曲耐久歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Nera7o9MuwM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Nera7o9MuwM&t=7394s",
+      "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
+      "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
+      "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json;review:history-Nera7o9MuwM-bf3fb76c83f3cf26050b.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T170000Z",
+        "snapshot:20260712T190000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "known_artist",
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "activity_or_announcement",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
+      "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
+      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=15515cd440950a90a2c0d76b796f214108cecc3e4d1059090b39279f1d790673"
     },
     {
       "title": "離席",
@@ -3542,6 +5392,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -3550,11 +5401,25 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
@@ -3580,6 +5445,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -3588,11 +5454,25 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
@@ -3618,6 +5498,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -3626,11 +5507,25 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
@@ -3656,6 +5551,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json;review:history-Nera7o9MuwM-bf3fb76c83f3cf26050b.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z",
         "snapshot:20260712T190000Z"
@@ -3665,11 +5561,25 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
@@ -3695,6 +5605,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -3703,11 +5614,25 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
@@ -3733,6 +5658,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json;review:history-Nera7o9MuwM-bf3fb76c83f3cf26050b.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z",
         "snapshot:20260712T190000Z"
@@ -3742,11 +5668,25 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
@@ -3772,6 +5712,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z"
       ],
@@ -3780,11 +5721,25 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
@@ -3810,6 +5765,7 @@
       "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
       "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
       "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json;review:history-Nera7o9MuwM-bf3fb76c83f3cf26050b.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T170000Z",
         "snapshot:20260712T190000Z"
@@ -3819,16 +5775,77 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
       "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=4f866c2f357403d49a0b8e4cacb9176291743f7952c9313431811aa70c5c9ae4"
+    },
+    {
+      "title": "閉会式",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2181,
+      "time": "0:36:21",
+      "raw": "36:21 閉会式",
+      "rawHash": "f66c1fbf05611f76ae8c8fb6e63d2c690ebfe67fe67e174abd5776d8586e802e",
+      "videoId": "gxftjQhHf2I",
+      "videoTitle": "【#光蔦喫茶へようこそ歌枠リレー】僕の熱い想い受け取ってよ！🔥╎閉会式☕✨🍃 【#燈璃ライト/ #個人vtuber 】",
+      "channelName": "燈璃ライト",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gxftjQhHf2I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gxftjQhHf2I&t=2181s",
+      "sourceId": "selected:gxftjQhHf2I:47295e4f168d566e",
+      "sourceHash": "47295e4f168d566e2c4b6ecdeb1cec2c9b39442d3d7ed98ba2d845934d76c23d",
+      "sourceOrigin": "review:history-gxftjQhHf2I-47295e4f168d566e2c4b.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_niche_short_titles",
+        "activity_or_announcement",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "activity_or_announcement",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:gxftjQhHf2I:47295e4f168d566e2c4b",
+      "sourcePath": "data/review/sources/history-gxftjQhHf2I-47295e4f168d566e2c4b.json",
+      "reviewUrl": "review.html?review=review%3AgxftjQhHf2I%3A47295e4f168d566e2c4b&entry=f66c1fbf05611f76ae8c8fb6e63d2c690ebfe67fe67e174abd5776d8586e802e"
     },
     {
       "title": "待機画面",
@@ -3849,12 +5866,16 @@
       "sourceId": "Ugz3VKZXEN1O5fdnqvF4AaABAg",
       "sourceHash": "401adaa520f8e84434c4e8581ede7277564e44dc0448fe962bccd7fe78d6046a",
       "sourceOrigin": "review:zFZgawUHBas-401adaa520f8e84434c4.json",
+      "sourceScope": "current",
       "ranges": [
         "review"
       ],
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "likely_non_song_entry"
       ],
@@ -3882,6 +5903,7 @@
       "sourceId": "selected:h8bEx1lrTQk:095bd00de81f4d44",
       "sourceHash": "095bd00de81f4d441f291ba6a0cfafc1abdd97934d3344117224ad90d9e0e958",
       "sourceOrigin": "review:history-h8bEx1lrTQk-095bd00de81f4d441f29.json;review:history-h8bEx1lrTQk-31e7709053a2d0a2b763.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z",
         "snapshot:20260711T170000Z"
@@ -3891,10 +5913,20 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:h8bEx1lrTQk:095bd00de81f4d441f29",
@@ -3920,6 +5952,7 @@
       "sourceId": "selected:nRgMw8dnlG8:10be262faf2e2a39",
       "sourceHash": "10be262faf2e2a39162a5e0d6f2ec8025f61c9c7020018db42df77e8086910fe",
       "sourceOrigin": "review:history-nRgMw8dnlG8-10be262faf2e2a39162a.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -3928,10 +5961,18 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:nRgMw8dnlG8:10be262faf2e2a39162a",
@@ -3957,6 +5998,7 @@
       "sourceId": "selected:nRgMw8dnlG8:62b83dd8aa2d847d",
       "sourceHash": "62b83dd8aa2d847da9371e365d2449ea2ca5c94e99ef77b17e6d8bc976f9b87d",
       "sourceOrigin": "review:history-nRgMw8dnlG8-62b83dd8aa2d847da937.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -3964,6 +6006,11 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [
         "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "activity_marker_title",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
       ],
       "riskReasons": [
         "activity_marker_title",
@@ -3993,6 +6040,7 @@
       "sourceId": "selected:nRgMw8dnlG8:10be262faf2e2a39",
       "sourceHash": "10be262faf2e2a39162a5e0d6f2ec8025f61c9c7020018db42df77e8086910fe",
       "sourceOrigin": "review:history-nRgMw8dnlG8-10be262faf2e2a39162a.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -4001,10 +6049,18 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:nRgMw8dnlG8:10be262faf2e2a39162a",
@@ -4030,6 +6086,7 @@
       "sourceId": "selected:nRgMw8dnlG8:62b83dd8aa2d847d",
       "sourceHash": "62b83dd8aa2d847da9371e365d2449ea2ca5c94e99ef77b17e6d8bc976f9b87d",
       "sourceOrigin": "review:history-nRgMw8dnlG8-62b83dd8aa2d847da937.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -4037,6 +6094,11 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [
         "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "activity_marker_title",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
       ],
       "riskReasons": [
         "activity_marker_title",
@@ -4066,6 +6128,7 @@
       "sourceId": "selected:C0ABKi9DGTs:ee77fcec7c9effc5",
       "sourceHash": "ee77fcec7c9effc55c252df38a7dfd532ad8a1e64b2b22b6dfcce32e8bd0dc3e",
       "sourceOrigin": "review:history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -4074,9 +6137,17 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
-      "riskReasons": [
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
         "activity_marker_title",
+        "conversation_entry",
         "short_unknown_title"
+      ],
+      "riskReasons": [
+        "conversation_entry",
+        "activity_marker_title",
+        "short_unknown_title",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:C0ABKi9DGTs:ee77fcec7c9effc55c25",
@@ -4102,6 +6173,7 @@
       "sourceId": "selected:C0ABKi9DGTs:e692413908a8b88e",
       "sourceHash": "e692413908a8b88ec2252a7a1dd8ebd5ad8a0a5ef5ad6d5bb872c816fa9277e8",
       "sourceOrigin": "review:history-C0ABKi9DGTs-e692413908a8b88ec225.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T180000Z"
       ],
@@ -4110,10 +6182,19 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
-      "riskReasons": [
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles",
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:C0ABKi9DGTs:e692413908a8b88ec225",
@@ -4139,6 +6220,7 @@
       "sourceId": "selected:C0ABKi9DGTs:ee77fcec7c9effc5",
       "sourceHash": "ee77fcec7c9effc55c252df38a7dfd532ad8a1e64b2b22b6dfcce32e8bd0dc3e",
       "sourceOrigin": "review:history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -4147,9 +6229,16 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "activity_marker_title",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
       "riskReasons": [
         "activity_marker_title",
-        "short_unknown_title"
+        "short_unknown_title",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:C0ABKi9DGTs:ee77fcec7c9effc55c25",
@@ -4175,6 +6264,7 @@
       "sourceId": "selected:uRKNhEOx0Hs:32dac2d03f3f75ae",
       "sourceHash": "32dac2d03f3f75aea9adb00c8c01126d4f8c7a74a5aa74653fa65ccfbbba7821",
       "sourceOrigin": "review:history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260712T190000Z"
       ],
@@ -4183,11 +6273,19 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:uRKNhEOx0Hs:32dac2d03f3f75aea9ad",
@@ -4213,6 +6311,7 @@
       "sourceId": "selected:cC4Wcf1I8ec:5458e4ecc07f9cf4",
       "sourceHash": "5458e4ecc07f9cf48aff99034a148b1feb98bbe066ae49950cc4cc3cb4cb18e0",
       "sourceOrigin": "review:history-cC4Wcf1I8ec-5458e4ecc07f9cf48aff.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -4221,11 +6320,19 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "conversation_entry",
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:cC4Wcf1I8ec:5458e4ecc07f9cf48aff",
@@ -4251,6 +6358,7 @@
       "sourceId": "selected:cC4Wcf1I8ec:f266e515e3eece63",
       "sourceHash": "f266e515e3eece63a4f045a38ec9e3defd4a27a40a4d25a79a822e53ee13c637",
       "sourceOrigin": "review:history-cC4Wcf1I8ec-f266e515e3eece63a4f0.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -4258,6 +6366,11 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [
         "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "conversation_entry",
+        "source_multiple_unknown_artists",
+        "activity_marker_title"
       ],
       "riskReasons": [
         "conversation_entry",
@@ -4288,6 +6401,7 @@
       "sourceId": "selected:oWwBzyRG93o:a490b151deefc3a3",
       "sourceHash": "a490b151deefc3a3e0e8dbd88c5033d30c47e76caa66f0aaaacd09e0964947a5",
       "sourceOrigin": "review:history-oWwBzyRG93o-a490b151deefc3a3e0e8.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T170000Z"
       ],
@@ -4296,11 +6410,21 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "conversation_entry",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "conversation_entry",
         "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:oWwBzyRG93o:a490b151deefc3a3e0e8",
@@ -4326,6 +6450,7 @@
       "sourceId": "selected:oWwBzyRG93o:e732b263375652f4",
       "sourceHash": "e732b263375652f45a4aa2ff82902f4f922f9ac2e7eee7187d8e51b736cc0c0a",
       "sourceOrigin": "review:history-oWwBzyRG93o-e732b263375652f45a4a.json",
+      "sourceScope": "history",
       "ranges": [
         "snapshot:20260711T150000Z"
       ],
@@ -4334,10 +6459,17 @@
       "positiveEvidence": [
         "structured_setlist"
       ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "conversation_entry",
+        "source_multiple_unknown_artists",
+        "activity_marker_title"
+      ],
       "riskReasons": [
         "conversation_entry",
         "activity_marker_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:oWwBzyRG93o:e732b263375652f45a4a",

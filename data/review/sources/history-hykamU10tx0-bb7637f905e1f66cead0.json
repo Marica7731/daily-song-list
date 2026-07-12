@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:hykamU10tx0:bb7637f905e1f66cead0",
   "video": {
     "videoId": "hykamU10tx0",
@@ -18,13 +18,14 @@
     "snapshotId": "20260711T160000Z"
   },
   "risk": {
-    "riskScore": 44,
+    "riskScore": 54,
     "riskLevel": "medium",
     "riskReasons": [
       "niche_unknown_artist",
       "short_unknown_title",
       "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles"
+      "source_multiple_niche_short_titles",
+      "reaction_text_only"
     ]
   },
   "entries": [
@@ -146,13 +147,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -572,13 +574,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -698,13 +701,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -999,13 +1003,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -1022,10 +1027,12 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
-      "riskReasons": [],
+      "riskReasons": [
+        "reaction_text_only"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -1339,13 +1346,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -1383,13 +1391,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -1406,13 +1415,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -1603,13 +1613,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -1732,13 +1743,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -1755,13 +1767,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -1824,13 +1837,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -1931,13 +1945,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -2101,13 +2116,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"

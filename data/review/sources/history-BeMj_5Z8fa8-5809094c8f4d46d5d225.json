@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:BeMj_5Z8fa8:5809094c8f4d46d5d225",
   "video": {
     "videoId": "BeMj_5Z8fa8",
@@ -18,11 +18,12 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 48,
+    "riskScore": 64,
     "riskLevel": "medium",
     "riskReasons": [
       "source_multiple_unknown_artists",
-      "conversation_entry"
+      "conversation_entry",
+      "custom_emoji_only"
     ]
   },
   "entries": [
@@ -192,11 +193,12 @@
       "sourceId": "selected:BeMj_5Z8fa8:5809094c8f4d46d5",
       "sourceHash": "5809094c8f4d46d5d2256c0fc513364964ac35e5ecf7f46a535596f7029462e1",
       "isNiche": false,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
+      "replacementSuggestion": null,
       "riskReasons": [
-        "source_multiple_unknown_artists",
-        "no_positive_song_evidence"
+        "conversation_entry",
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": []
     },
@@ -428,11 +430,15 @@
       "sourceId": "selected:BeMj_5Z8fa8:5809094c8f4d46d5",
       "sourceHash": "5809094c8f4d46d5d2256c0fc513364964ac35e5ecf7f46a535596f7029462e1",
       "isNiche": false,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "_おつつ",
+        "artist": "未記載"
+      },
       "riskReasons": [
         "source_multiple_unknown_artists",
-        "no_positive_song_evidence"
+        "parser_corruption"
       ],
       "positiveEvidence": []
     }

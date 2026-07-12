@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:1EguqeWtniQ:586b6c6ad8fba7f0d2ad",
   "video": {
     "videoId": "1EguqeWtniQ",
@@ -18,13 +18,14 @@
     "snapshotId": "20260711T170000Z"
   },
   "risk": {
-    "riskScore": 44,
-    "riskLevel": "medium",
+    "riskScore": 90,
+    "riskLevel": "high",
     "riskReasons": [
       "niche_unknown_artist",
       "short_unknown_title",
       "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles"
+      "source_multiple_niche_short_titles",
+      "conversation_entry"
     ]
   },
   "entries": [
@@ -397,6 +398,7 @@
         "title": "ジツワァソウナノォ！"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -422,6 +424,7 @@
         "title": "声じゃなく音なんだよ"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -469,6 +472,7 @@
         "title": "おやすみ"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"

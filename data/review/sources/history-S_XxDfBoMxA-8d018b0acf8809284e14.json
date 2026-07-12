@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:S_XxDfBoMxA:8d018b0acf8809284e14",
   "video": {
     "videoId": "S_XxDfBoMxA",
@@ -237,10 +237,11 @@
       "sourceId": "selected:S_XxDfBoMxA:8d018b0acf880928",
       "sourceHash": "8d018b0acf8809284e145c258aa8d2cce5cea988b5c41ddf0482d39723fb00b6",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -343,10 +344,11 @@
       "sourceId": "selected:S_XxDfBoMxA:8d018b0acf880928",
       "sourceHash": "8d018b0acf8809284e145c258aa8d2cce5cea988b5c41ddf0482d39723fb00b6",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"

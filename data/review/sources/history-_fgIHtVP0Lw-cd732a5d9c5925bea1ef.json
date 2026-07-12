@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:_fgIHtVP0Lw:cd732a5d9c5925bea1ef",
   "video": {
     "videoId": "_fgIHtVP0Lw",
@@ -18,9 +18,10 @@
     "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 6,
-    "riskLevel": "low",
+    "riskScore": 40,
+    "riskLevel": "medium",
     "riskReasons": [
+      "conversation_entry",
       "niche_unknown_artist"
     ]
   },
@@ -78,10 +79,11 @@
       "sourceId": "selected:_fgIHtVP0Lw:cd732a5d9c5925be",
       "sourceHash": "cd732a5d9c5925bea1efd9e967f5ddf8b2fff7b29e5bb2915e873f174ae7f389",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist"
       ],
       "positiveEvidence": [

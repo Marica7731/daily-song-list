@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:RJZKQyNjrOQ:3a98e6993ba8c7404185",
   "video": {
     "videoId": "RJZKQyNjrOQ",
@@ -18,13 +18,15 @@
     "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 55,
-    "riskLevel": "medium",
+    "riskScore": 100,
+    "riskLevel": "high",
     "riskReasons": [
       "source_many_topic_entries",
       "niche_unknown_artist",
       "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles"
+      "source_multiple_niche_short_titles",
+      "conversation_entry",
+      "activity_or_announcement"
     ]
   },
   "entries": [
@@ -168,10 +170,11 @@
       "sourceId": "selected:RJZKQyNjrOQ:3a98e6993ba8c740",
       "sourceHash": "3a98e6993ba8c740418598f8fa3e119deab378c61a8cd3a5b25f52bd1fc81b49",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -212,10 +215,13 @@
       "sourceId": "selected:RJZKQyNjrOQ:3a98e6993ba8c740",
       "sourceHash": "3a98e6993ba8c740418598f8fa3e119deab378c61a8cd3a5b25f52bd1fc81b49",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
-      "riskReasons": [],
+      "riskReasons": [
+        "conversation_entry",
+        "activity_or_announcement"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -232,10 +238,11 @@
       "sourceId": "selected:RJZKQyNjrOQ:3a98e6993ba8c740",
       "sourceHash": "3a98e6993ba8c740418598f8fa3e119deab378c61a8cd3a5b25f52bd1fc81b49",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

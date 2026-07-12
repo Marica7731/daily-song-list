@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:jT-l8E9Xsow:26b8ec1bdfc25b76f62f",
   "video": {
     "videoId": "jT-l8E9Xsow",
@@ -18,11 +18,12 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 55,
+    "riskScore": 65,
     "riskLevel": "medium",
     "riskReasons": [
       "source_multiple_unknown_artists",
-      "conversation_entry"
+      "conversation_entry",
+      "custom_emoji_only"
     ]
   },
   "entries": [
@@ -37,11 +38,15 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "あーあーあ”ーあ”ぁ”ー",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -161,10 +166,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "ハムちゃんず ※さびのみ"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -261,10 +270,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "矢野顕子『あたしンち』アニメ映画主題歌 ※"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -281,10 +294,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "ザ・タチバナーズ(母)『あたしンち』挿入歌 ※"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -301,10 +318,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "キンモクセイ『あたしンち』初代OP ※"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -361,10 +382,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "Kaede+Cheek Fairy（中原麻衣）『わがまま☆フェアリー ミルモでポン!』OP ※"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -401,10 +426,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "パーキッツ『わがままフェアリー☆ミルモでポン!』OP ※"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -421,10 +450,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "千綿偉功 『金色のガッシュベル!!』OP"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -441,10 +474,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "五條真由美さんとコーラスグループのヤング・フレッシュ『ふたりはプリキュア Max Heart』前期ED ※"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -562,10 +599,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "かいけつゾロリ（山寺宏一）『まじめにふまじめ かいけつゾロリ』OP ※"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -682,10 +723,14 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "放課後ティータイム『けいおん!!』（第2期）前期OP ※6割くらい"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -822,11 +867,15 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "_teteｗｗｗ",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -864,11 +913,15 @@
       "sourceId": "selected:jT-l8E9Xsow:26b8ec1bdfc25b76",
       "sourceHash": "26b8ec1bdfc25b76f62fa11d127b74b758ec1d9d1bfd8f7b6824043b0fab8498",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "今日歌えなかったのは次回に",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:S_gVoMFdTr0:28ae8e6a90ad5b9dd3f7",
   "video": {
     "videoId": "S_gVoMFdTr0",
@@ -18,10 +18,11 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 14,
-    "riskLevel": "low",
+    "riskScore": 67,
+    "riskLevel": "medium",
     "riskReasons": [
-      "source_multiple_unknown_artists"
+      "source_multiple_unknown_artists",
+      "conversation_entry"
     ]
   },
   "entries": [
@@ -80,10 +81,11 @@
       "sourceId": "selected:S_gVoMFdTr0:28ae8e6a90ad5b9d",
       "sourceHash": "28ae8e6a90ad5b9dd3f7bd0b018a52850b9136c3cb4dc599d6014bf40da7039b",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
@@ -273,10 +275,11 @@
       "sourceId": "selected:S_gVoMFdTr0:28ae8e6a90ad5b9d",
       "sourceHash": "28ae8e6a90ad5b9dd3f7bd0b018a52850b9136c3cb4dc599d6014bf40da7039b",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
@@ -404,10 +407,11 @@
       "sourceId": "selected:S_gVoMFdTr0:28ae8e6a90ad5b9d",
       "sourceHash": "28ae8e6a90ad5b9dd3f7bd0b018a52850b9136c3cb4dc599d6014bf40da7039b",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [

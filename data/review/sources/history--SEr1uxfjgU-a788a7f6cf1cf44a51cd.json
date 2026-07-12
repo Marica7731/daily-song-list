@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:-SEr1uxfjgU:a788a7f6cf1cf44a51cd",
   "video": {
     "videoId": "-SEr1uxfjgU",
@@ -18,10 +18,12 @@
     "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 60,
-    "riskLevel": "medium",
+    "riskScore": 100,
+    "riskLevel": "high",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
+      "source_conversation_timeline",
+      "conversation_entry",
       "niche_unknown_artist",
       "source_multiple_unknown_artists"
     ]
@@ -45,6 +47,7 @@
         "artist": "EGOIST/アニメ「ギルティクラウン」OP/2012"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -73,6 +76,7 @@
         "artist": "EGOIST/ PCゲーム「ギルティクラウン ロストクリスマス」のOVA「ギルティクラウン」主題歌/2012"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -148,6 +152,7 @@
         "artist": "ユナ(cv.神田沙也加)/劇場版「ソードアート・オンライン -オーディナル・スケール-」劇中歌/2017"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -175,6 +180,7 @@
         "artist": "YOASOBI/アニメ「機動戦士ガンダム 彗星の魔女」OP/2022"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -203,6 +209,7 @@
         "artist": "鈴木このみ/劇場版「ノーゲーム・ノーライフゼロ」主題歌/2017"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -231,6 +238,7 @@
         "artist": "MAISONdes/アニメ「うる星やつら」ED/2022"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -259,6 +267,7 @@
         "artist": "放課後ティータイム/アニメ「けいおん‼︎」ED/2010"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -287,6 +296,7 @@
         "artist": "Mrs. GREEN APPLE/アニメ「炎炎ノ消防隊」OP/2019"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -315,6 +325,7 @@
         "artist": "Mrs. GREEN APPLE/アニメ「忘却バッテリー」OP/2024"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -343,6 +354,7 @@
         "artist": "ヨルシカ/アニメ「葬送のフリーレン」OP/2024"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -371,6 +383,7 @@
         "artist": "TRUE/アニメ「ヴァイオレット・エヴァーガーデン」OP/2018"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"

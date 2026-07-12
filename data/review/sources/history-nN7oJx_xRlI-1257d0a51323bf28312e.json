@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:nN7oJx_xRlI:1257d0a51323bf28312e",
   "video": {
     "videoId": "nN7oJx_xRlI",
@@ -78,10 +78,14 @@
       "sourceId": "selected:nN7oJx_xRlI:1257d0a51323bf28",
       "sourceHash": "1257d0a51323bf28312e53d7aa0e6b697dadfcc3fc63049964535c518fad85d7",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "銀魂 Gintama"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist",
@@ -200,10 +204,14 @@
       "sourceId": "selected:nN7oJx_xRlI:1257d0a51323bf28",
       "sourceHash": "1257d0a51323bf28312e53d7aa0e6b697dadfcc3fc63049964535c518fad85d7",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "明日のナージャ Ashita no Nadja:the song arround the world"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist",

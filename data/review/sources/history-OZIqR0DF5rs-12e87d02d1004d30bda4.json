@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:OZIqR0DF5rs:12e87d02d1004d30bda4",
   "video": {
     "videoId": "OZIqR0DF5rs",
@@ -18,11 +18,11 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 55,
-    "riskLevel": "medium",
+    "riskScore": 74,
+    "riskLevel": "high",
     "riskReasons": [
-      "source_multiple_unknown_artists",
-      "conversation_entry"
+      "conversation_entry",
+      "source_multiple_unknown_artists"
     ]
   },
   "entries": [
@@ -104,6 +104,7 @@
         "artist": "未記載"
       },
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists",
         "parser_corruption"
       ],
@@ -230,6 +231,7 @@
         "artist": "未記載"
       },
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists",
         "parser_corruption"
       ],
@@ -255,6 +257,7 @@
         "artist": "未記載"
       },
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists",
         "parser_corruption"
       ],
@@ -443,6 +446,7 @@
         "artist": "未記載"
       },
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists",
         "parser_corruption"
       ],

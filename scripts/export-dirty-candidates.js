@@ -38,8 +38,12 @@ function main() {
 
   const latestRecords = collectRecords(latest, lookup, currentEntryLookup);
   const reviewRecords = collectReviewRecords();
+  const currentReviewRecords = reviewRecords.filter((record) => record.sourceScope !== "history");
+  const classifiedReviewRecords = reviewRecords.filter((record) => record.classification !== "needs_review");
   const allRecords = mergeRecords([...latestRecords, ...reviewRecords]);
-  const allNicheUnknown = latestRecords.filter((record) => record.isNiche === true && record.isUnknownArtist === true);
+  const allNicheUnknown = mergeRecords([...latestRecords, ...currentReviewRecords, ...classifiedReviewRecords]).filter(
+    (record) => record.isNiche === true && record.isUnknownArtist === true,
+  );
   const parserCorruptions = allRecords.filter((record) => record.classification === "parser_corruption");
   const confirmedNoise = allRecords.filter((record) => record.classification === "confirmed_noise");
 
@@ -116,10 +120,12 @@ function buildRecord({ rangeId, item, song, lookup, currentEntryLookup = null })
     sourceId,
     sourceHash,
     sourceOrigin: "latest",
+    sourceScope: "current",
     ranges: [rangeId],
     classification: classification.classification,
     suggestedAction: classification.suggestedAction,
     positiveEvidence: classification.positiveEvidence || [],
+    sourceRiskReasons: [],
     riskReasons,
     replacementSuggestion,
     reviewId,
@@ -156,6 +162,8 @@ function recordFromReviewEntry(payload, entry, fileName) {
       : classifyEntry(entry);
   const reviewId = payload.reviewId || "";
   const sourcePath = `data/review/sources/${fileName}`;
+  const sourceScope = fileName.startsWith("history-") ? "history" : "current";
+  const sourceRiskReasons = payload.risk?.riskReasons || [];
   return {
     title: entry.title || "",
     artist: entry.artist || "",
@@ -175,11 +183,17 @@ function recordFromReviewEntry(payload, entry, fileName) {
     sourceId: entry.sourceId || source.sourceId || "",
     sourceHash: entry.sourceHash || source.sourceHash || "",
     sourceOrigin: `review:${fileName}`,
+    sourceScope,
     ranges: source.snapshotId ? [`snapshot:${source.snapshotId}`] : ["review"],
     classification: classification.classification,
     suggestedAction: classification.suggestedAction,
     positiveEvidence: entry.positiveEvidence || [],
-    riskReasons: uniqueValues(classification.riskReasons || entry.riskReasons || []),
+    sourceRiskReasons,
+    riskReasons: uniqueValues([
+      ...(classification.riskReasons || []),
+      ...(entry.riskReasons || []),
+      ...sourceRiskReasons.filter((reason) => reason.startsWith("source_")),
+    ]),
     replacementSuggestion: entry.replacementSuggestion || null,
     reviewId,
     sourcePath,
@@ -191,7 +205,7 @@ function reportPayload({ generatedAt, latest, records }) {
   return {
     schemaVersion: 1,
     generatedAt,
-    dataSource: "data/latest.json",
+    dataSource: "data/latest.json + current review sources + classified historical review sources",
     reviewSourceDir: "data/review/sources",
     latestGeneratedAt: latest.generatedAt || "",
     curationVersion: latest.curationVersion || latest.source?.curationVersion || "",
@@ -254,11 +268,11 @@ function renderMarkdownReport({ generatedAt, records }) {
       lines.push(`- 视频：${linkOrText(first.videoId, first.youtubeUrl)}`);
       lines.push(`- 频道：${escapeMarkdown(first.channelName || "")}`);
       lines.push("");
-      lines.push("| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |");
-      lines.push("| --- | --- | --- | --- | --- | --- | --- |");
+      lines.push("| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核定位 |");
+      lines.push("| --- | --- | --- | --- | --- | --- | --- | --- |");
       for (const record of videoRecords.sort(compareRecord)) {
         lines.push(
-          `| ${linkOrText(record.time || formatSeconds(record.seconds), record.youtubeTimestampUrl)} | ${escapeMarkdown(record.title)} | ${escapeMarkdown(record.artist)} | ${record.ranges.join(", ")} | ${record.riskReasons.join(", ")} | ${record.suggestedAction} | ${linkOrText(record.rawHash || "review", record.reviewUrl)} |`,
+          `| ${linkOrText(record.time || formatSeconds(record.seconds), record.youtubeTimestampUrl)} | ${escapeMarkdown(record.title)} | ${escapeMarkdown(record.artist)} | ${record.ranges.join(", ")} | ${record.riskReasons.join(", ")} | ${(record.positiveEvidence || []).join(", ")} | ${record.suggestedAction} | ${linkOrText(record.rawHash || "review", record.reviewUrl)} |`,
         );
       }
       lines.push("");

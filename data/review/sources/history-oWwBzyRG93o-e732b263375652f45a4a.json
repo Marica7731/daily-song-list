@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:oWwBzyRG93o:e732b263375652f45a4a",
   "video": {
     "videoId": "oWwBzyRG93o",
@@ -363,11 +363,15 @@
       "sourceId": "selected:oWwBzyRG93o:e732b263375652f4",
       "sourceHash": "e732b263375652f45a4aa2ff82902f4f922f9ac2e7eee7187d8e51b736cc0c0a",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "アンパンマンチョコ減った",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -384,11 +388,15 @@
       "sourceId": "selected:oWwBzyRG93o:e732b263375652f4",
       "sourceHash": "e732b263375652f45a4aa2ff82902f4f922f9ac2e7eee7187d8e51b736cc0c0a",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "増えたくないやや vs 増やしたいややっこ",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:3q75gMZNjbo:946936550fa3b88b8fe4",
   "video": {
     "videoId": "3q75gMZNjbo",
@@ -18,12 +18,13 @@
     "snapshotId": "20260711T190000Z"
   },
   "risk": {
-    "riskScore": 34,
-    "riskLevel": "low",
+    "riskScore": 87,
+    "riskLevel": "high",
     "riskReasons": [
       "source_multiple_niche_short_titles",
       "source_multiple_unknown_artists",
-      "niche_unknown_artist"
+      "niche_unknown_artist",
+      "conversation_entry"
     ]
   },
   "entries": [
@@ -237,10 +238,14 @@
       "sourceId": "selected:3q75gMZNjbo:946936550fa3b88b",
       "sourceHash": "946936550fa3b88b8fe4cfd4c16f1a0129c9fd421ab00b22eb1c8f1cae22e951",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "HY (2006)"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -282,10 +287,14 @@
       "sourceId": "selected:3q75gMZNjbo:946936550fa3b88b",
       "sourceHash": "946936550fa3b88b8fe4cfd4c16f1a0129c9fd421ab00b22eb1c8f1cae22e951",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "初音ミク - Omoi (2020)"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"
@@ -603,10 +612,11 @@
       "sourceId": "selected:3q75gMZNjbo:946936550fa3b88b",
       "sourceHash": "946936550fa3b88b8fe4cfd4c16f1a0129c9fd421ab00b22eb1c8f1cae22e951",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

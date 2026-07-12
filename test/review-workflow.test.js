@@ -130,10 +130,13 @@ test("all niche unknown report contains entry fields, count metadata, and classi
       "sourceId",
       "sourceHash",
       "sourceOrigin",
+      "sourceScope",
       "ranges",
       "classification",
       "suggestedAction",
       "riskReasons",
+      "sourceRiskReasons",
+      "positiveEvidence",
     ],
     "all niche unknown item",
   );
@@ -142,5 +145,11 @@ test("all niche unknown report contains entry fields, count metadata, and classi
   assert.ok(
     [...classifications].some((classification) => classification !== "needs_review"),
     "target behavior: all-niche-unknown should not classify every report row as needs_review",
+  );
+  assert.ok(report.counts.confirmedNoiseCount > 0 || report.counts.likelyNoiseCount > 0);
+  assert.equal(
+    report.items.some((item) => item.classification === "parser_corruption" && !item.replacementSuggestion),
+    false,
+    "parser corruption rows should carry replacement suggestions",
   );
 });

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:_Oe-nuMiM2I:e760d0923d90ff3c456e",
   "video": {
     "videoId": "_Oe-nuMiM2I",
@@ -18,7 +18,7 @@
     "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 84,
+    "riskScore": 97,
     "riskLevel": "high",
     "riskReasons": [
       "source_multiple_unknown_artists",
@@ -304,10 +304,11 @@
       "sourceId": "selected:_Oe-nuMiM2I:e760d0923d90ff3c",
       "sourceHash": "e760d0923d90ff3c456e59fc080f8ae93d184f9dd37b25c471307c1918f67553",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -680,10 +681,11 @@
       "sourceId": "selected:_Oe-nuMiM2I:e760d0923d90ff3c",
       "sourceHash": "e760d0923d90ff3c456e59fc080f8ae93d184f9dd37b25c471307c1918f67553",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -790,10 +792,11 @@
       "sourceId": "selected:_Oe-nuMiM2I:e760d0923d90ff3c",
       "sourceHash": "e760d0923d90ff3c456e59fc080f8ae93d184f9dd37b25c471307c1918f67553",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

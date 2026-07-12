@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:ZTi1cpRaW8U:b89d06dc2b6b1f04d5f9",
   "video": {
     "videoId": "ZTi1cpRaW8U",
@@ -21,9 +21,9 @@
     "riskScore": 100,
     "riskLevel": "high",
     "riskReasons": [
+      "conversation_entry",
       "niche_unknown_artist",
       "source_multiple_unknown_artists",
-      "conversation_entry",
       "parser_corruption",
       "source_multiple_niche_short_titles"
     ]
@@ -40,10 +40,11 @@
       "sourceId": "selected:ZTi1cpRaW8U:b89d06dc2b6b1f04",
       "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -87,7 +88,9 @@
       "isNiche": true,
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
-      "replacementSuggestion": null,
+      "replacementSuggestion": {
+        "title": "37.5°Cのファンタジー"
+      },
       "riskReasons": [
         "parser_corruption"
       ],

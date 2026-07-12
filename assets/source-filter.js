@@ -141,7 +141,7 @@
       value = value.replace(/[\u200b-\u200f\u202a-\u202e\ufe0e\ufe0f]/gu, "").trim();
       value = value
         .replace(
-          /^\s*(?:[#＃]?\d{1,3}\s+)?(?:[#＃]?\d{1,3}\s*[)）、:：|｜≫>]\s*|[#＃]?\d{1,3}\s*[.．](?![\d０-９])\s*)/u,
+          /^\s*(?:[#＃]?\d{1,3}\s+)?(?:[mｍ]\d{1,3}\s*[.．]\s*|[#＃]?\d{1,3}\s*[)）、:：|｜≫>]\s*|[#＃]?\d{1,3}\s*[.．](?![\d０-９])\s*)/iu,
           "",
         )
         .trim();
@@ -260,6 +260,12 @@
     if (/(?:周年記念)?(?:お)?写真公開/u.test(value)) return true;
     if (/3Dライブ開催決定/u.test(value)) return true;
     if (/3Dお披露目でスタンドマイク回したかった/u.test(value)) return true;
+    if (/\d{1,2}[\/／]\d{1,2}.+(?:出演決定|開催決定|フェス|イベント|告知)/u.test(value)) return true;
+    if (/(?:アルバム)?発売記念キャンペーン開催/u.test(value)) return true;
+    if (/(?:地声|歌声|バラード).+(?:すごい|合ってる|透明感)/u.test(value)) return true;
+    if (/(?:免許の適正性|声がサイレン|楽しそう|触れれる|褒め合って体にいい|難しい曲を挑戦|花火大会.*行きたい|すぐ会えるよって意味で歌いたい|謝罪会見|改めて謝罪|ばいちょろり.*終了|マリパのわさび事件)/u.test(value)) {
+      return true;
+    }
     return false;
   }
 
@@ -313,7 +319,7 @@
     let value = String(text || "");
     for (let idx = 0; idx < 8; idx += 1) {
       const stripped = value
-        .replace(/(^|[\s\u3000])[:：]_[A-Za-z0-9]+[:：]?(?=$|[\s\u3000])/gu, " ")
+        .replace(/(^|[\s\u3000])[:：]_[^\s\u3000:：/／|｜]+[:：]?(?=$|[\s\u3000]|[:：]_[^\s\u3000:：/／|｜]+)/gu, " ")
         .replace(/(^|[\s\u3000])[_:：][A-Za-z0-9]+[:：]?(?=$|[\s\u3000])/gu, " ")
         .replace(/(^|[\s\u3000])_[A-Za-z0-9]+[;；]\s*/gu, " ")
         .replace(/(^|[\s\u3000])[A-Za-z0-9]+(?:smile|cheers|clap|face|penlight|kp)(?=$|[\s\u3000])/giu, " ");

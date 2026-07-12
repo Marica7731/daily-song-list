@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:fnDcGmE0duc:fcf933101a2114459a66",
   "video": {
     "videoId": "fnDcGmE0duc",
@@ -18,11 +18,12 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 38,
-    "riskLevel": "medium",
+    "riskScore": 78,
+    "riskLevel": "high",
     "riskReasons": [
       "source_many_topic_entries",
       "source_multiple_unknown_artists",
+      "conversation_entry",
       "short_unknown_title"
     ]
   },
@@ -66,6 +67,7 @@
         "artist": "未記載"
       },
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists",
         "parser_corruption"
       ],
@@ -220,6 +222,7 @@
         "artist": "未記載"
       },
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists",
         "parser_corruption"
       ],
@@ -600,10 +603,14 @@
       "sourceId": "selected:fnDcGmE0duc:fcf933101a211445",
       "sourceHash": "fcf933101a2114459a66456e1198470a8822699cebe9dfe49e39436be3774e6f",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "初音ミク - Omoi (2020)"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"

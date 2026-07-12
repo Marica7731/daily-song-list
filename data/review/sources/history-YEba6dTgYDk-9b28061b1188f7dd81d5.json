@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:YEba6dTgYDk:9b28061b1188f7dd81d5",
   "video": {
     "videoId": "YEba6dTgYDk",
@@ -18,10 +18,11 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 54,
-    "riskLevel": "medium",
+    "riskScore": 70,
+    "riskLevel": "high",
     "riskReasons": [
       "source_multiple_unknown_artists",
+      "reaction_text_only",
       "conversation_entry"
     ]
   },
@@ -128,7 +129,8 @@
       "replacementSuggestion": null,
       "riskReasons": [
         "conversation_entry",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "reaction_text_only"
       ],
       "positiveEvidence": [
         "structured_setlist"

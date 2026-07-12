@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:S_XxDfBoMxA:0efd2ad277201ff7e5f1",
   "video": {
     "videoId": "S_XxDfBoMxA",
@@ -230,10 +230,11 @@
       "sourceId": "selected:S_XxDfBoMxA:0efd2ad277201ff7",
       "sourceHash": "0efd2ad277201ff7e5f1831af04f08b7c7bff38bc31f6e26e3bf790d28a5745d",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
@@ -335,10 +336,11 @@
       "sourceId": "selected:S_XxDfBoMxA:0efd2ad277201ff7",
       "sourceHash": "0efd2ad277201ff7e5f1831af04f08b7c7bff38bc31f6e26e3bf790d28a5745d",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],

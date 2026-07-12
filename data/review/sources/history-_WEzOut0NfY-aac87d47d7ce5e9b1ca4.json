@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:_WEzOut0NfY:aac87d47d7ce5e9b1ca4",
   "video": {
     "videoId": "_WEzOut0NfY",
@@ -18,10 +18,11 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 10,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
-      "short_unknown_title"
+      "short_unknown_title",
+      "custom_emoji_only"
     ]
   },
   "entries": [
@@ -309,10 +310,15 @@
       "sourceId": "selected:_WEzOut0NfY:aac87d47d7ce5e9b",
       "sourceHash": "aac87d47d7ce5e9b1ca482a197b102be3eb55d6c0dc072f26d27b2dcc70adde7",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "_おつりんね",
+        "artist": "未記載"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "structured_setlist"
       ]

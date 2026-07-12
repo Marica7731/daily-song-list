@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:uDVoQq2O9YU:94dfee5b7a0426859c48",
   "video": {
     "videoId": "uDVoQq2O9YU",
@@ -18,7 +18,7 @@
     "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 92,
+    "riskScore": 100,
     "riskLevel": "high",
     "riskReasons": [
       "source_many_topic_entries",
@@ -268,6 +268,7 @@
         "title": "歌いやすいどういうことだ"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -561,6 +562,7 @@
         "title": "みんなで踊りたいの！"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -829,10 +831,11 @@
       "sourceId": "selected:uDVoQq2O9YU:94dfee5b7a042685",
       "sourceHash": "94dfee5b7a0426859c4850652511b1e86a8867b231946b6cd09b521f010acf43",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -879,6 +882,7 @@
         "title": "しばらくお菓子作りはいいかな"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"

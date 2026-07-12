@@ -5,6 +5,7 @@ const {
   bestCombinedTitleArtistCandidate,
   cleanSafeTitleCandidate,
   entryRepairSignals,
+  parserCorruptionTitleCandidate,
   repairParsedEntry,
   titleArtistSplitCandidates,
 } = require("../scripts/entry-repair");
@@ -126,6 +127,7 @@ test("cleans safe title decorations without overwriting raw text", () => {
   assert.equal(cleanSafeTitleCandidate("01≫アンノウン・マザーグース"), "アンノウン・マザーグース");
   assert.equal(cleanSafeTitleCandidate("꒱‬ 01. 初恋サイダー"), "初恋サイダー");
   assert.equal(cleanSafeTitleCandidate("②どんな色が好き"), "どんな色が好き");
+  assert.equal(cleanSafeTitleCandidate("M1.わたがし:_レオペンライト:"), "わたがし");
 
   const repaired = repairParsedEntry({
     title: "╟ 『NEVER SURRENDER』🆕",
@@ -134,6 +136,14 @@ test("cleans safe title decorations without overwriting raw text", () => {
   });
   assert.equal(repaired.title, "NEVER SURRENDER");
   assert.equal(repaired.raw, "0:07 ╟ 『NEVER SURRENDER』🆕");
+
+  const numbered = repairParsedEntry({
+    title: "M2.フィクサー",
+    artist: "ぬゆり:_レオペンライト:",
+    raw: "14:54 M2.フィクサー／ぬゆり:_レオペンライト:",
+  });
+  assert.equal(numbered.title, "フィクサー");
+  assert.equal(numbered.artist, "ぬゆり");
 });
 
 test("exposes curation signals for custom emoji and reaction text", () => {
@@ -164,4 +174,20 @@ test("exposes curation signals for announcement action and numeric pseudo titles
     assert.equal(repaired.curationSignals.suggestedAction, "drop_entry", sample.title);
     assert.equal(repaired.curationSignals.reasons.includes(sample.reason), true, sample.title);
   }
+});
+
+test("restores decimal titles truncated by parser corruption", () => {
+  assert.equal(parserCorruptionTitleCandidate({ title: "500♪", raw: "0:08:08  2.500♪" }, "500♪"), "2.500♪");
+
+  const repaired = repairParsedEntry({
+    time: "0:08:08",
+    seconds: 488,
+    title: "500♪",
+    artist: "未記載",
+    raw: "0:08:08  2.500♪",
+  });
+
+  assert.equal(repaired.title, "2.500♪");
+  assert.equal(repaired.repair.changed, true);
+  assert.ok(repaired.repair.reasons.includes("parser_corruption_title_restore"));
 });

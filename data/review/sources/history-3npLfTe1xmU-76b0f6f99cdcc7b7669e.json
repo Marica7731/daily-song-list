@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:3npLfTe1xmU:76b0f6f99cdcc7b7669e",
   "video": {
     "videoId": "3npLfTe1xmU",
@@ -38,11 +38,15 @@
       "sourceId": "selected:3npLfTe1xmU:76b0f6f99cdcc7b7",
       "sourceHash": "76b0f6f99cdcc7b7669e23915a9fc1e30348f497e27c1e9ab12e57a1def6de57",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "こんひなー",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -373,11 +377,15 @@
       "sourceId": "selected:3npLfTe1xmU:76b0f6f99cdcc7b7",
       "sourceHash": "76b0f6f99cdcc7b7669e23915a9fc1e30348f497e27c1e9ab12e57a1def6de57",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "せーの！おつひなーぽぽんぽんぽん",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"

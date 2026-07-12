@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:U1VskIZthjM:6c438ca8a819e5f62b46",
   "video": {
     "videoId": "U1VskIZthjM",
@@ -184,11 +184,15 @@
       "sourceId": "selected:U1VskIZthjM:6c438ca8a819e5f6",
       "sourceHash": "6c438ca8a819e5f62b46d73149ccb8d027d14107f1c1d707ab59b0bbe3e76b19",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "発見",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -352,11 +356,15 @@
       "sourceId": "selected:U1VskIZthjM:6c438ca8a819e5f6",
       "sourceHash": "6c438ca8a819e5f62b46d73149ccb8d027d14107f1c1d707ab59b0bbe3e76b19",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "今週のおさらい 感謝のことば",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"

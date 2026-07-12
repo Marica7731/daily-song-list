@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:7heFdhZovHg:2dceec0855302ffdc9d6",
   "video": {
     "videoId": "7heFdhZovHg",
@@ -225,10 +225,14 @@
       "sourceId": "selected:7heFdhZovHg:2dceec0855302ffd",
       "sourceHash": "2dceec0855302ffdc9d67a505e0cdd34930911af080e18b92e1321e54a976f49",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "Alajima 🧡オリジナル楽曲"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"

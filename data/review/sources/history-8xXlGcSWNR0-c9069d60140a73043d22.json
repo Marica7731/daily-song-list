@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:8xXlGcSWNR0:c9069d60140a73043d22",
   "video": {
     "videoId": "8xXlGcSWNR0",
@@ -18,12 +18,13 @@
     "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 44,
-    "riskLevel": "medium",
+    "riskScore": 84,
+    "riskLevel": "high",
     "riskReasons": [
       "source_multiple_niche_short_titles",
       "niche_unknown_artist",
       "source_multiple_unknown_artists",
+      "conversation_entry",
       "short_unknown_title"
     ]
   },
@@ -125,10 +126,11 @@
       "sourceId": "selected:8xXlGcSWNR0:c9069d60140a7304",
       "sourceHash": "c9069d60140a73043d2200370c04576cba9b9e6f22c14a54412ce5acab41ed1f",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -483,10 +485,11 @@
       "sourceId": "selected:8xXlGcSWNR0:c9069d60140a7304",
       "sourceHash": "c9069d60140a73043d2200370c04576cba9b9e6f22c14a54412ce5acab41ed1f",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

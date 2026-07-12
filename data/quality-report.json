@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-  "totalSongs": 13130,
-  "unknownArtistCount": 2918,
-  "nicheUnknownArtistCount": 1520,
-  "highRiskEntryCount": 427,
-  "highRiskSourceCount": 16,
+  "totalSongs": 12950,
+  "unknownArtistCount": 2745,
+  "nicheUnknownArtistCount": 1407,
+  "highRiskEntryCount": 395,
+  "highRiskSourceCount": 15,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 17,
-  "conversationDroppedEntryCount": 0,
-  "qualityDroppedEntryCount": 0,
+  "ruleDroppedEntryCount": 175,
+  "conversationDroppedEntryCount": 157,
+  "qualityDroppedEntryCount": 15,
   "forceRefreshVideoCount": 0,
   "confirmedNoiseCount": 11,
-  "parserCorruptionCount": 158,
+  "parserCorruptionCount": 133,
   "likelyNoiseCount": 0,
-  "needsReviewCount": 1399,
-  "likelySongCount": 7661,
+  "needsReviewCount": 1290,
+  "likelySongCount": 7615,
   "topRiskTitles": [
     {
       "value": "少女レイ",
@@ -38,16 +38,6 @@
       },
       "riskReasons": {
         "known_song_unknown_artist": 14
-      }
-    },
-    {
-      "value": "プロポーズ",
-      "count": 12,
-      "classifications": {
-        "likely_song": 12
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 12
       }
     },
     {
@@ -216,6 +206,16 @@
     },
     {
       "value": "ダーリンダンス",
+      "count": 5,
+      "classifications": {
+        "likely_song": 5
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 5
+      }
+    },
+    {
+      "value": "千本桜",
       "count": 5,
       "classifications": {
         "likely_song": 5
@@ -523,20 +523,6 @@
       ]
     },
     {
-      "videoId": "fRvk5uuysyw",
-      "title": "【#歌枠】レオの謝罪歌配信🙏",
-      "channelName": "FouRTe Project -フォルテプロジェクト-",
-      "riskScore": 70,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
       "videoId": "pv0BsotH36E",
       "title": "【 #歌枠/#karaoke 】初見さん求む！高評価10増えるごとに歌える歌枠✨【 #shorts #vtuber #宵十めむ 】",
       "channelName": "宵十めむ",
@@ -587,10 +573,30 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
+    },
+    {
+      "videoId": "ITsDGzPeHiY",
+      "title": "【弾き語り/歌枠】日曜日まったりしていきませぬか？ #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "riskScore": 64,
+      "riskLevel": "medium",
+      "riskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title"
+      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-12T22:18:16.912Z",
+      "totalSongs": 12950,
+      "unknownArtistCount": 2745,
+      "nicheUnknownArtistCount": 1407,
+      "highRiskEntryCount": 395,
+      "highRiskSourceCount": 15
+    },
     {
       "generatedAt": "2026-07-12T22:10:35.849Z",
       "totalSongs": 13130,

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:G3qWZNb5Z8Y:c63baf3464fb16419d1c",
   "video": {
     "videoId": "G3qWZNb5Z8Y",
@@ -18,11 +18,13 @@
     "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 74,
+    "riskScore": 100,
     "riskLevel": "high",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
+      "source_conversation_timeline",
       "source_many_topic_entries",
+      "conversation_entry",
       "niche_unknown_artist",
       "source_multiple_unknown_artists"
     ]
@@ -46,6 +48,7 @@
         "artist": "結束バンド/アニメ「ぼっち・ざ・ろっく！」劇中歌/2022"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -74,6 +77,7 @@
         "artist": "結束バンド/アニメ「ぼっち・ざ・ろっく！」OP/2022"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -102,6 +106,7 @@
         "artist": "YUI/アニメ「RE:LIFE 完結編」ED/2007"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -156,6 +161,7 @@
         "artist": "GRe4N BOYZ(GReeeeN)/ドラマ「ROOKIES」主題歌etc…/2008"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -184,6 +190,7 @@
         "artist": "平井堅/ドラマ「危険なアネキ」主題歌/2005"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -212,6 +219,7 @@
         "artist": "Vaundy/「Spotify Premium『Spotify Town』編」CM曲/2020"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -240,6 +248,7 @@
         "artist": "THE ORAL CIGARETTES/アニメ「ノラガミ ARAGOTO」OP/2015"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"
@@ -268,6 +277,7 @@
         "artist": "さユり/アニメ「リコリス・リコイル」ED/2022"
       },
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "parser_corruption"

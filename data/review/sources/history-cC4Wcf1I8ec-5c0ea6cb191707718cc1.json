@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:cC4Wcf1I8ec:5c0ea6cb191707718cc1",
   "video": {
     "videoId": "cC4Wcf1I8ec",
@@ -18,10 +18,11 @@
     "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 14,
-    "riskLevel": "low",
+    "riskScore": 48,
+    "riskLevel": "medium",
     "riskReasons": [
-      "source_multiple_niche_short_titles"
+      "source_multiple_niche_short_titles",
+      "conversation_entry"
     ]
   },
   "entries": [
@@ -472,10 +473,12 @@
       "sourceId": "selected:cC4Wcf1I8ec:5c0ea6cb19170771",
       "sourceHash": "5c0ea6cb191707718cc1cd45a81ce8d27d401cc47d6af7f81d90eaf5a87bf3f9",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
-      "riskReasons": [],
+      "riskReasons": [
+        "conversation_entry"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"

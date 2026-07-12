@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:_Oe-nuMiM2I:c41ee6e74606be81ebb1",
   "video": {
     "videoId": "_Oe-nuMiM2I",
@@ -18,12 +18,13 @@
     "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 44,
-    "riskLevel": "medium",
+    "riskScore": 90,
+    "riskLevel": "high",
     "riskReasons": [
       "source_multiple_unknown_artists",
       "niche_unknown_artist",
       "source_multiple_niche_short_titles",
+      "conversation_entry",
       "short_unknown_title"
     ]
   },
@@ -303,10 +304,11 @@
       "sourceId": "selected:_Oe-nuMiM2I:c41ee6e74606be81",
       "sourceHash": "c41ee6e74606be81ebb183ac137eff800e0c2fc42677d0246884d3e13309c30b",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -634,10 +636,11 @@
       "sourceId": "selected:_Oe-nuMiM2I:c41ee6e74606be81",
       "sourceHash": "c41ee6e74606be81ebb183ac137eff800e0c2fc42677d0246884d3e13309c30b",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
@@ -744,10 +747,11 @@
       "sourceId": "selected:_Oe-nuMiM2I:c41ee6e74606be81",
       "sourceHash": "c41ee6e74606be81ebb183ac137eff800e0c2fc42677d0246884d3e13309c30b",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

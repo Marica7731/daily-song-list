@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const { entryRepairSignals } = require("./entry-repair");
 
 const ROOT = path.resolve(__dirname, "..");
 const CONFIG_DIR = path.join(ROOT, "config");
@@ -280,13 +281,15 @@ function isConversationEntry(song) {
   const raw = String(song?.raw || "");
   const value = normalizeConversationText(title);
   if (!value) return false;
-  if (isStrongNonSongActivityText(value)) return true;
+  if (isStrongNonSongActivityText(value) || isStrongNonSongActivityText(raw) || isStrongNonSongActivityText(`${title} ${artist}`)) return true;
   if (!isUnknownArtist(artist)) return false;
   if (isEmojiOrReactionOnly(title)) return true;
   if (/^(?:や|やー|やあ|やほ|やっほ|わあ|あ|え|お|ん|うん|はい|ええ)[…~〜～!！?？。.\s]*$/iu.test(value)) return true;
-  if (/(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう|気がする|したい|してほしい|かな|かも|だよ|だね|なの)$/iu.test(value)) return true;
-  if (/(?:背景を変える|横に置く|食べる|飲む|お名前呼び|配信告知|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|告知|登録|コメント|ギフト)/iu.test(value)) return true;
-  if (/(?:クッキング|ケーキ|テーマは|浮かれて|よっこいしょ|歌声|バラード|透明感|触れれる|楽しそう|褒め合って)/iu.test(value)) return true;
+  if (/^「.+」$/u.test(value) || /「.+」/u.test(raw)) return true;
+  if (/[?？]$/u.test(value)) return true;
+  if (/(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう|気がする|したい|したいな|してほしい|してください|してあげる|ちゃうね|なんで|かな|かも|だよ|だね|なの|か)$/iu.test(value)) return true;
+  if (/(?:背景を変える|横に置く|食べる|飲む|お名前呼び|配信告知|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|告知|登録|コメント|ギフト|リクエスト|メンバー|キャンペーン|アルバム発売記念)/iu.test(value)) return true;
+  if (/(?:クッキング|ケーキ|テーマは|浮かれて|よっこいしょ|歌声|地声|バラード|透明感|触れれる|楽しそう|褒め合って|適正性|サイレン|プロポーズ|結婚|苗字|謝罪|わさび事件|始まりました|終了|さんとの|発売記念|開催)/iu.test(value)) return true;
   if (/[\u{1F300}-\u{1FAFF}]/u.test(title) && title.length <= 18) return true;
   return /(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます)/iu.test(raw);
 }
@@ -299,6 +302,12 @@ function isStrongNonSongActivityText(value) {
   if (/(?:周年記念)?(?:お)?写真公開/u.test(text)) return true;
   if (/3Dライブ開催決定/u.test(text)) return true;
   if (/3Dお披露目でスタンドマイク回したかった/u.test(text)) return true;
+  if (/\d{1,2}[\/／]\d{1,2}.+(?:出演決定|開催決定|フェス|イベント|告知)/u.test(text)) return true;
+  if (/(?:アルバム)?発売記念キャンペーン開催/u.test(text)) return true;
+  if (/(?:地声|歌声|バラード).+(?:すごい|合ってる|透明感)/u.test(text)) return true;
+  if (/(?:免許の適正性|声がサイレン|楽しそう|触れれる|褒め合って体にいい|難しい曲を挑戦|花火大会.*行きたい|すぐ会えるよって意味で歌いたい|謝罪会見|改めて謝罪|ばいちょろり.*終了|マリパのわさび事件)/u.test(text)) {
+    return true;
+  }
   return false;
 }
 
@@ -332,6 +341,12 @@ function isParserCorruptionEntry(song) {
 function classifyEntry(song, options = {}) {
   const knownSong = options.knownSong === true || (typeof options.knownSongMatcher === "function" && options.knownSongMatcher(song));
   const unknownArtist = isUnknownArtist(song?.artist);
+  const signals = song?.curationSignals || entryRepairSignals(song);
+  if (!knownSong && signals?.suppressLikelySong) {
+    const reasons = signals.reasons?.length ? signals.reasons : ["non_song_signal"];
+    const classification = reasons.some((reason) => reason === "custom_emoji_only" || reason === "reaction_text_only") ? "likely_noise" : "confirmed_noise";
+    return { classification, suggestedAction: "drop_entry", riskReasons: reasons };
+  }
   if (isParserCorruptionEntry(song)) {
     return { classification: "parser_corruption", suggestedAction: "replace_entry", riskReasons: ["parser_corruption"] };
   }
@@ -528,7 +543,9 @@ function entryRiskReasons({ song, knownSongMatcher, sourceStats = {} }) {
   const title = String(song?.title || "");
   const artist = String(song?.artist || "");
   const knownSong = knownSongMatcher ? knownSongMatcher(song) : false;
+  const signals = song?.curationSignals || entryRepairSignals(song);
   if (isParserCorruptionEntry(song)) reasons.push("parser_corruption");
+  if (!knownSong && signals?.suppressLikelySong) reasons.push(...(signals.reasons || ["non_song_signal"]));
   if (!knownSong && isActivityMarkerTitle(title, artist)) reasons.push("activity_marker_title");
   if (!knownSong && isConversationEntry(song)) reasons.push("conversation_entry");
   if (song?.isNiche === true && isUnknownArtist(artist) && !knownSong) reasons.push("niche_unknown_artist");

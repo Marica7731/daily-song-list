@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:10:35.849Z",
+  "generatedAt": "2026-07-12T22:18:16.912Z",
   "reviewId": "review:YZLK9V0oPTw:ed9b29499e75543d0475",
   "video": {
     "videoId": "YZLK9V0oPTw",
@@ -18,12 +18,13 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 74,
+    "riskScore": 100,
     "riskLevel": "high",
     "riskReasons": [
       "source_many_topic_entries",
       "short_unknown_title",
       "source_multiple_unknown_artists",
+      "conversation_entry",
       "activity_marker_title"
     ]
   },
@@ -285,11 +286,15 @@
       "sourceId": "selected:YZLK9V0oPTw:ed9b29499e75543d",
       "sourceHash": "ed9b29499e75543d047508d4bb0aa8d8fa82d46aecc8651e402a03bb84322c1f",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "舌を噛んだ",
+        "artist": "未記載"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "structured_setlist"
@@ -614,10 +619,11 @@
       "sourceId": "selected:YZLK9V0oPTw:ed9b29499e75543d",
       "sourceHash": "ed9b29499e75543d047508d4bb0aa8d8fa82d46aecc8651e402a03bb84322c1f",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [

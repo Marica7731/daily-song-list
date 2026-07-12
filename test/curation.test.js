@@ -185,7 +185,97 @@ test("curation drops announcement and action rows from current dirty samples", (
   );
 
   assert.deepEqual(videos[0].songs.map((item) => item.title), ["アンノウン・マザーグース"]);
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 6);
+});
+
+test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "gORDBq5IpBo",
+        songs: [
+          {
+            title: "ライオン",
+            artist: "シェリル・ノーム(May'n), ランカ・リー(中島愛)",
+            seconds: 1265,
+            raw: "00:21:05 ライオン/シェリル・ノーム(May'n), ランカ・リー(中島愛) 2008/08/20 マクロスΔ 挿入歌",
+          },
+          { title: "ゆるちの幅広い地声がすごい", artist: "未記載", seconds: 2661, raw: "00:44:21 　　ゆるちの幅広い地声がすごい" },
+          { title: "星座になれたら", artist: "結束バンド", seconds: 3155, raw: "00:52:35 星座になれたら/結束バンド 2022/12/25" },
+          { title: "免許の適正性は仲間", artist: "未記載", seconds: 3868, raw: "01:04:28 　　免許の適正性は仲間" },
+          {
+            title: "8",
+            artist: "29 おりづるVTuberフェス(広島県) 出演決定",
+            seconds: 5314,
+            raw: "01:28:34 8/29 おりづるVTuberフェス(広島県) 出演決定",
+          },
+          { title: "うれしすぎて声がサイレン", artist: "未記載", seconds: 5450, raw: "01:30:50 　　うれしすぎて声がサイレン" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos[0].songs.map((item) => item.title),
+    ["ライオン", "星座になれたら"],
+  );
+  assert.equal(videos.curationStats.ruleDroppedEntries, 1);
+  assert.equal(videos.curationStats.conversationDroppedEntries, 3);
+});
+
+test("curation drops fRvk5uuysyw chatter without rejecting normal unknown-artist setlists", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "fRvk5uuysyw",
+        songs: [
+          { title: "謝罪会見", artist: "未記載", seconds: 152, raw: "2:32 ）謝罪会見" },
+          { title: "わたがし", artist: "back number", seconds: 383, raw: "6:23 M1.わたがし／back number:_レオペンライト:" },
+          { title: "甚平か私服か", artist: "未記載", seconds: 736, raw: "12:16 甚平か私服か" },
+          { title: "花火大会とかメンバーと行きたいな", artist: "未記載", seconds: 760, raw: "12:40 花火大会とかメンバーと行きたいな" },
+          { title: "フィクサー", artist: "ぬゆり", seconds: 894, raw: "14:54 M2.フィクサー／ぬゆり:_レオペンライト:" },
+          { title: "難しい曲を挑戦していくのが玖音レオなんで", artist: "未記載", seconds: 1207, raw: "20:07 難しい曲を挑戦していくのが玖音レオなんで" },
+          { title: "俺と結婚したい？", artist: "未記載", seconds: 1359, raw: "22:39 「俺と結婚したい？」" },
+          { title: "マリパのわさび事件", artist: "未記載", seconds: 1839, raw: "30:39 ）マリパのわさび事件" },
+          { title: "アルテさんとのﾃｨｯﾁ", artist: "未記載", seconds: 2959, raw: "└ 49:19 アルテさんとのﾃｨｯﾁ:_arte::_leo:" },
+          { title: "オリジナル", artist: "未記載", seconds: 2400, raw: "40:00 オリジナル" },
+          { title: "寂しくない？", artist: "未記載", seconds: 3895, raw: "1:04:55 寂しくない？" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos[0].songs.map((item) => item.title),
+    ["わたがし", "フィクサー", "オリジナル"],
+  );
+  assert.equal(videos.curationStats.ruleDroppedEntries, 2);
   assert.equal(videos.curationStats.conversationDroppedEntries, 6);
+});
+
+test("curation drops campaign and announcement rows from production data", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "CAMPAIGN01",
+        songs: [
+          {
+            title: "AZKi復刻版アルバム発売記念キャンペーン開催 7月1日～7月8日",
+            artist: "未記載",
+            seconds: 10,
+            raw: "0:10 AZKi復刻版アルバム発売記念キャンペーン開催 7月1日～7月8日",
+          },
+          { title: "オリジナル", artist: "未記載", seconds: 20, raw: "0:20 オリジナル" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(videos[0].songs.map((item) => item.title), ["オリジナル"]);
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 1);
 });
 
 test("curation patch merge dedupes identical records and reports conflicts", () => {
