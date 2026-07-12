@@ -4,6 +4,8 @@ const test = require("node:test");
 process.env.DAILY_SONG_VIDEO_LIMIT = "10";
 process.env.DAILY_SONG_RECENT_BUCKET_LIMIT = "2";
 process.env.DAILY_SONG_MONTH_REFRESH_LIMIT = "1";
+process.env.DAILY_SONG_MONTH_BACKFILL_TARGET = "20";
+process.env.DAILY_SONG_MONTH_BACKFILL_RECENT_BUCKET_LIMIT = "1";
 process.env.DAILY_SONG_429_COOLDOWN_MS = "9000";
 
 const {
