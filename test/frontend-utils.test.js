@@ -268,6 +268,7 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     rankMetric: "occurrences",
     videoLayout: "cards",
     outside: true,
+    showUnknown: false,
     q: "First Good-Bye",
     snapshotPath: "data/snapshots/2026-07-10.json",
   });
@@ -285,6 +286,22 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     snapshot: "archive-20260710",
   });
   assert.deepEqual(parseUrlState(serialized, options), parsed);
+});
+
+test("url state uses showUnknown=1 only when unknown artists are visible", () => {
+  const options = urlStateOptions();
+  const parsed = parseUrlState("?showUnknown=1&outside=1", options);
+
+  assert.equal(parsed.showUnknown, true);
+  assert.equal(parsed.outside, true);
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(parsed, options))), {
+    outside: "1",
+    showUnknown: "1",
+  });
+
+  const defaults = parseUrlState("?showUnknown=0", options);
+  assert.equal(defaults.showUnknown, false);
+  assert.equal(new URLSearchParams(serializeUrlState(defaults, options)).has("showUnknown"), false);
 });
 
 test("runtime range path follows URL range and meta paths", () => {
@@ -350,6 +367,7 @@ test("url state falls back to safe defaults and only accepts configured snapshot
   assert.equal(parsed.pageSize, 50);
   assert.equal(parsed.bucket, "全部");
   assert.equal(parsed.outside, false);
+  assert.equal(parsed.showUnknown, false);
   assert.equal(parsed.q, "x".repeat(200));
   assert.equal(parsed.snapshotPath, "data/latest.json");
 
@@ -367,6 +385,7 @@ test("url state falls back to safe defaults and only accepts configured snapshot
         pageSize: 50,
         bucket: "全部",
         outside: false,
+        showUnknown: false,
         q: "",
         snapshotPath: "data/snapshots/not-listed.json",
       },
@@ -587,6 +606,7 @@ function urlStateOptions() {
       pageSize: 50,
       bucket: "全部",
       outside: false,
+      showUnknown: false,
       q: "",
     },
   };

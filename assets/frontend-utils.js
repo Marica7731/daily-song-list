@@ -186,6 +186,7 @@
       rankMetric: validRankMetrics.has(rankMetric) ? rankMetric : defaults.rankMetric || "occurrences",
       videoLayout: validVideoLayouts.has(videoLayout) ? videoLayout : defaults.videoLayout || "cards",
       outside: parseBooleanParam(params.get("outside") ?? params.get("libraryOutside"), Boolean(defaults.outside)),
+      showUnknown: parseBooleanParam(params.get("showUnknown"), Boolean(defaults.showUnknown)),
       q: params.has("q") ? String(params.get("q") || "").slice(0, 200) : defaults.q || "",
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
     };
@@ -221,6 +222,7 @@
     }
     if (view === "videos" && videoLayout !== defaults.videoLayout) params.set("layout", videoLayout);
     if (state.outside) params.set("outside", "1");
+    if (state.showUnknown) params.set("showUnknown", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
 
     const snapshotParam = snapshotParamForPath(state.snapshotPath, options);
@@ -408,10 +410,18 @@
   }
 
   function stripLeadingSongListMarker(value) {
-    return cleanSongSearchCandidateText(value).replace(
-      /^(?:[#＃]?\s*[0-9０-９]+[\s.)\]）．、。:：|｜\-_/／]+|[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*)/u,
-      "",
-    );
+    let result = cleanSongSearchCandidateText(value);
+    for (let index = 0; index < 4; index += 1) {
+      const next = result
+        .replace(/^[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*/u, "")
+        .replace(
+          /^(?:[#＃]?\s*[0-9０-９]{1,3}[\s\]）)、。:：|｜\-_/／]+|[#＃]?\s*[0-9０-９]{1,3}[.．](?![0-9０-９])\s*)/u,
+          "",
+        );
+      if (next === result) break;
+      result = cleanSongSearchCandidateText(next);
+    }
+    return result;
   }
 
   function createCombinedTitleArtistKeys(titleArtistKeys) {

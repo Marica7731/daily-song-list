@@ -1,97 +1,257 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
-  "curationVersion": "curation-v1:4a0d0261af37",
-  "curationHash": "4a0d0261af370621e15f5bf858bc1085d6d327b9f45aeec8e1bbe2634e95dc65",
-  "totalSongs": 13001,
-  "unknownArtistCount": 3296,
-  "nicheUnknownArtistCount": 1743,
-  "highRiskEntryCount": 5111,
-  "highRiskSourceCount": 301,
-  "manualDroppedEntryCount": 0,
+  "generatedAt": "2026-07-12T20:10:29.288Z",
+  "curationVersion": "curation-v1:78fe53608afd",
+  "curationHash": "78fe53608afdb593071ec58dfe8aae749ae5a86e84ea6e1f1d0e933004c1d16e",
+  "totalSongs": 12882,
+  "unknownArtistCount": 3134,
+  "nicheUnknownArtistCount": 1612,
+  "highRiskEntryCount": 2409,
+  "highRiskSourceCount": 167,
+  "manualDroppedEntryCount": 18,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 0,
+  "ruleDroppedEntryCount": 114,
+  "conversationDroppedEntryCount": 114,
+  "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
+  "confirmedNoiseCount": 171,
+  "parserCorruptionCount": 17,
+  "likelyNoiseCount": 203,
+  "needsReviewCount": 3178,
+  "likelySongCount": 14178,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
-      "count": 88
+      "count": 88,
+      "classifications": {
+        "needs_review": 88
+      },
+      "riskReasons": {
+        "niche_unknown_artist": 88,
+        "source_multiple_unknown_artists": 88
+      }
     },
     {
       "value": "曲終わり",
-      "count": 47
-    },
-    {
-      "value": "天城越え",
-      "count": 31
-    },
-    {
-      "value": "少女レイ",
-      "count": 29
-    },
-    {
-      "value": "IRIS OUT",
-      "count": 20
-    },
-    {
-      "value": "花に亡霊",
-      "count": 19
-    },
-    {
-      "value": "睡蓮花",
-      "count": 19
-    },
-    {
-      "value": "プロポーズ",
-      "count": 16
-    },
-    {
-      "value": "青と夏",
-      "count": 14
-    },
-    {
-      "value": "ray",
-      "count": 13
-    },
-    {
-      "value": "モニタリング",
-      "count": 13
-    },
-    {
-      "value": "ただ君に晴れ",
-      "count": 12
+      "count": 47,
+      "classifications": {
+        "confirmed_noise": 47
+      },
+      "riskReasons": {
+        "activity_marker_title": 47,
+        "niche_unknown_artist": 47,
+        "short_unknown_title": 47,
+        "source_multiple_unknown_artists": 47
+      }
     },
     {
       "value": "結束",
-      "count": 12
+      "count": 12,
+      "classifications": {
+        "likely_song": 12
+      },
+      "riskReasons": {
+        "short_unknown_title": 12,
+        "source_multiple_unknown_artists": 12
+      }
     },
     {
-      "value": "夜明けと蛍",
-      "count": 12
+      "value": "戻り",
+      "count": 12,
+      "classifications": {
+        "needs_review": 12
+      },
+      "riskReasons": {
+        "activity_marker_title": 12,
+        "niche_unknown_artist": 12,
+        "short_unknown_title": 12,
+        "source_multiple_unknown_artists": 12
+      }
     },
     {
-      "value": "8",
-      "count": 11
+      "value": "少女レイ",
+      "count": 10,
+      "classifications": {
+        "likely_song": 10
+      },
+      "riskReasons": {
+        "short_unknown_title": 10,
+        "source_multiple_unknown_artists": 10
+      }
     },
     {
-      "value": "HOT LIMIT",
-      "count": 11
+      "value": "イントロドン",
+      "count": 9,
+      "classifications": {
+        "needs_review": 9
+      },
+      "riskReasons": {
+        "niche_unknown_artist": 9,
+        "source_multiple_unknown_artists": 9
+      }
     },
     {
-      "value": "ヴィラン",
-      "count": 11
+      "value": "おつウタノン",
+      "count": 9,
+      "classifications": {
+        "confirmed_noise": 9
+      },
+      "riskReasons": {
+        "activity_marker_title": 9,
+        "source_multiple_unknown_artists": 9,
+        "niche_unknown_artist": 7
+      }
     },
     {
-      "value": "君の知らない物語",
-      "count": 11
+      "value": "本日も〜？ひなたびよりー☀️",
+      "count": 9,
+      "classifications": {
+        "likely_song": 2,
+        "needs_review": 7
+      },
+      "riskReasons": {
+        "niche_unknown_artist": 7,
+        "source_multiple_unknown_artists": 4
+      }
     },
     {
-      "value": "Talk Time",
-      "count": 10
+      "value": "_可愛い:ぷくっ",
+      "count": 8,
+      "classifications": {
+        "likely_song": 8
+      },
+      "riskReasons": {
+        "source_multiple_unknown_artists": 8
+      }
     },
     {
-      "value": "からくりピエロ",
-      "count": 10
+      "value": "ぷくっ",
+      "count": 8,
+      "classifications": {
+        "needs_review": 8
+      },
+      "riskReasons": {
+        "niche_unknown_artist": 8,
+        "short_unknown_title": 8,
+        "source_multiple_unknown_artists": 8
+      }
+    },
+    {
+      "value": "_hotsmile",
+      "count": 6,
+      "classifications": {
+        "likely_song": 6
+      },
+      "riskReasons": {
+        "source_multiple_unknown_artists": 6
+      }
+    },
+    {
+      "value": "ただ君に晴れ",
+      "count": 6,
+      "classifications": {
+        "likely_song": 6
+      },
+      "riskReasons": {
+        "source_multiple_unknown_artists": 6
+      }
+    },
+    {
+      "value": "はじまり",
+      "count": 6,
+      "classifications": {
+        "likely_song": 3,
+        "needs_review": 3
+      },
+      "riskReasons": {
+        "short_unknown_title": 6,
+        "niche_unknown_artist": 3,
+        "source_multiple_unknown_artists": 2
+      }
+    },
+    {
+      "value": "ぷいっっ",
+      "count": 6,
+      "classifications": {
+        "needs_review": 6
+      },
+      "riskReasons": {
+        "niche_unknown_artist": 6,
+        "short_unknown_title": 6,
+        "source_multiple_unknown_artists": 6
+      }
+    },
+    {
+      "value": "フリフリ",
+      "count": 6,
+      "classifications": {
+        "needs_review": 6
+      },
+      "riskReasons": {
+        "niche_unknown_artist": 6,
+        "short_unknown_title": 6,
+        "source_multiple_unknown_artists": 6
+      }
+    },
+    {
+      "value": "ほごしゃに褒められて嬉しそうな所",
+      "count": 6,
+      "classifications": {
+        "likely_song": 2,
+        "needs_review": 4
+      },
+      "riskReasons": {
+        "source_multiple_unknown_artists": 6,
+        "niche_unknown_artist": 4
+      }
+    },
+    {
+      "value": "花に亡霊",
+      "count": 6,
+      "classifications": {
+        "likely_song": 6
+      },
+      "riskReasons": {
+        "short_unknown_title": 6,
+        "source_multiple_unknown_artists": 6
+      }
+    },
+    {
+      "value": "狂ったように聞いてた",
+      "count": 6,
+      "classifications": {
+        "needs_review": 6
+      },
+      "riskReasons": {
+        "niche_unknown_artist": 6,
+        "source_multiple_unknown_artists": 6
+      }
+    },
+    {
+      "value": "曲紹介",
+      "count": 6,
+      "classifications": {
+        "confirmed_noise": 6
+      },
+      "riskReasons": {
+        "activity_marker_title": 6,
+        "niche_unknown_artist": 6,
+        "short_unknown_title": 6,
+        "source_multiple_unknown_artists": 6
+      }
+    },
+    {
+      "value": "離席",
+      "count": 6,
+      "classifications": {
+        "confirmed_noise": 6
+      },
+      "riskReasons": {
+        "activity_marker_title": 6,
+        "niche_unknown_artist": 6,
+        "short_unknown_title": 6,
+        "source_multiple_unknown_artists": 6
+      }
     }
   ],
   "topRiskChannels": [
@@ -100,15 +260,15 @@
       "count": 21
     },
     {
-      "value": "音魂ヒビクHibiku Otodama",
-      "count": 9
-    },
-    {
       "value": "菜鳥ひなた / Hinata Natori",
       "count": 9
     },
     {
       "value": "音ノ乃のの / NononoNono",
+      "count": 8
+    },
+    {
+      "value": "芽森ひより",
       "count": 8
     },
     {
@@ -120,19 +280,11 @@
       "count": 7
     },
     {
-      "value": "ミナミイズミ / IZUMI MINAMI",
-      "count": 7
-    },
-    {
-      "value": "芽森ひより",
-      "count": 7
-    },
-    {
       "value": "獅子神レオナ/レオナちゃんねる",
       "count": 7
     },
     {
-      "value": "深影",
+      "value": "汐音ベリーちゃん Berry Ch",
       "count": 7
     },
     {
@@ -140,46 +292,54 @@
       "count": 6
     },
     {
+      "value": "Ruka Ch. 雨海ルカ",
+      "count": 6
+    },
+    {
       "value": "くゅ汰。- Kuyuta. -",
       "count": 6
     },
     {
-      "value": "メラ・アカル MelaakaruVtuber",
+      "value": "ミナミイズミ / IZUMI MINAMI",
+      "count": 6
+    },
+    {
+      "value": "羽緒",
+      "count": 6
+    },
+    {
+      "value": "音魂ヒビクHibiku Otodama",
+      "count": 6
+    },
+    {
+      "value": "字ぴろぱる / AZANA PIROPARU",
+      "count": 6
+    },
+    {
+      "value": "宵月コハク🌙‪‪🤍",
+      "count": 6
+    },
+    {
+      "value": "深影",
+      "count": 6
+    },
+    {
+      "value": "Hinata Ch. 天晴ひなた",
       "count": 5
     },
     {
-      "value": "空奏イト / Ito Channel【ミクスト】",
+      "value": "Kyoka Ch. -響架-",
       "count": 5
     },
     {
-      "value": "汐音ベリーちゃん Berry Ch",
+      "value": "xea",
       "count": 5
-    },
-    {
-      "value": "赤彩みあ / Akairo Mia Ch.【すずみあ】",
-      "count": 5
-    },
-    {
-      "value": "白波瀬ソル / Sol Shirahase",
-      "count": 5
-    },
-    {
-      "value": "鴉紋ゆうく / Amon Yuuku",
-      "count": 5
-    },
-    {
-      "value": "DELUTAYA Δ.",
-      "count": 4
-    },
-    {
-      "value": "MUZU‐むずちゃんねる‐【Vtuber】",
-      "count": 4
     }
   ],
   "topRiskVideos": [
     {
-      "videoId": "H0P5mJPmoSk",
-      "title": "【夜の弾き語り】ハナレグミ『発光帯』から始まる、生演奏と雑談20260630",
+      "videoId": "8ddC8VUr0xw",
+      "title": "【夜の弾き語り】ハナレグミ『発光帯』から始まる、生演奏と雑談202607",
       "channelName": "Akinori IZAWA 『GAIB!!!』",
       "riskScore": 100,
       "riskLevel": "high",
@@ -188,77 +348,24 @@
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
-        "short_unknown_title"
+        "conversation_entry"
       ]
     },
     {
-      "videoId": "GO8HLO9vl6I",
-      "title": "【歌枠】たくさん歌ってわくわくしたい！【Vtuber/星降あめる】",
-      "channelName": "Ameru Ch.星降 あめる",
+      "videoId": "H0P5mJPmoSk",
+      "title": "【夜の弾き語り】ハナレグミ『発光帯』から始まる、生演奏と雑談20260630",
+      "channelName": "Akinori IZAWA 『GAIB!!!』",
       "riskScore": 100,
       "riskLevel": "high",
       "riskReasons": [
         "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "gORDBq5IpBo",
-      "title": "【#歌枠】 エルセさんと初めましての歌コラボ！✨ #エルゆる 【エルセ /三日月ちゆる /Vsinger】",
-      "channelName": "CHIYURU ch.三日月ちゆる",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_many_topic_entries",
+        "source_conversation_timeline",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "gORDBq5IpBo",
-      "title": "【#歌枠】 エルセさんと初めましての歌コラボ！✨ #エルゆる 【エルセ /三日月ちゆる /Vsinger】",
-      "channelName": "CHIYURU ch.三日月ちゆる",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "gORDBq5IpBo",
-      "title": "【#歌枠】 エルセさんと初めましての歌コラボ！✨ #エルゆる 【エルセ /三日月ちゆる /Vsinger】",
-      "channelName": "CHIYURU ch.三日月ちゆる",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "RJZKQyNjrOQ",
-      "title": "【#歌枠】土曜の昼はアニソンでアゲていく！💥💥【#ちゆるの縁側 /KARAOKE/Vsinger】",
-      "channelName": "CHIYURU ch.三日月ちゆる",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
+        "parser_corruption",
+        "short_unknown_title",
+        "conversation_entry"
       ]
     },
     {
@@ -270,62 +377,10 @@
       "riskReasons": [
         "source_unknown_artist_ratio_high",
         "source_many_topic_entries",
+        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "short_unknown_title",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "zAqcZDpOM1Q",
-      "title": "【雑＆歌枠】どでかいお知らせあります！！！！！！ハニカムステーション！-204【HACHI 】",
-      "channelName": "HACHI",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "short_unknown_title",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "KzCO7uCvbm4",
-      "title": "🌻歌枠🍖おまたせ～～！！！！歌ってみた投稿した！！！！",
-      "channelName": "HaNaTan Music Channel",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "kept_count_high_low_known_song_density",
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "8S6f0gcfQOk",
-      "title": "🎤 歌枠 ｜ 盛りあげるよ！ マクロスシリーズ歌枠！ #花うさ singing vtuber vsinger karaoke アニソン 歌回 懐メロ 立花うさ 花うさ",
-      "channelName": "Hanausa Ch. 花うさ",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists",
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "MUI0wCHRbmI",
-      "title": "🎤 歌枠 ｜ 懐かしい名曲 J-POP 1980-1990 #花うさ singing vtuber vsinger karaoke アニソン 歌回 懐メロ 花うさ 立花うさ 作業用BGM 昭和 平成",
-      "channelName": "Hanausa Ch. 花うさ",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists",
-        "niche_unknown_artist",
         "source_multiple_niche_short_titles"
       ]
     },
@@ -336,112 +391,12 @@
       "riskScore": 100,
       "riskLevel": "high",
       "riskReasons": [
-        "source_unknown_artist_ratio_high",
         "source_many_topic_entries",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "Txeelvxh90Y",
-      "title": "【歌枠】今日は七夕なので星っぽいの歌ってく！【 天晴ひなた / WeatherPlanet 】",
-      "channelName": "Hinata Ch. 天晴ひなた",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "8xXlGcSWNR0",
-      "title": "【歌枠 / KARAOKE】初の同期コラボ！楽しくデュエットします🎶【心響咲良 / 華美雲ののあ】",
-      "channelName": "KOKONE Ch.心響咲良",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_niche_short_titles",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "8xXlGcSWNR0",
-      "title": "【歌枠 / KARAOKE】初の同期コラボ！楽しくデュエットします🎶【心響咲良 / 華美雲ののあ】",
-      "channelName": "KOKONE Ch.心響咲良",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_niche_short_titles",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "zJEa2XSxky4",
-      "title": "【歌枠 / KARAOKE】名探偵コナン縛り歌枠！ #響け咲良【心響咲良 / UniVIRTUAL】",
-      "channelName": "KOKONE Ch.心響咲良",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "zJEa2XSxky4",
-      "title": "【歌枠 / KARAOKE】名探偵コナン縛り歌枠！ #響け咲良【心響咲良 / UniVIRTUAL】",
-      "channelName": "KOKONE Ch.心響咲良",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "zjFwKLjxwaI",
-      "title": "【告知あり！】昭和レトロな歌枠♬【ホロライブ/夏色まつり】",
-      "channelName": "Matsuri Channel 夏色まつり",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists",
-        "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "ZUYcc-MtfBc",
-      "title": "【#歌枠｜高評価100目標】今宵もお歌の時間だよ～🌟【おとなしめんま｜vtuber 】#shorts #縦型配信",
-      "channelName": "Menma Ch. おとなしめんま",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_niche_short_titles"
+        "conversation_entry"
       ]
     },
     {
@@ -454,12 +409,246 @@
         "source_unknown_artist_ratio_high",
         "source_many_topic_entries",
         "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ]
+    },
+    {
+      "videoId": "MWjlsKgWO_8",
+      "title": "【＃歌枠】雑談多め！おしゃべりしよ～！ #歌枠 #個人Vtuber #Vtuber雑談",
+      "channelName": "MUZU‐むずちゃんねる‐【Vtuber】",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_many_topic_entries",
+        "kept_count_high_low_known_song_density",
+        "conversation_entry",
         "source_multiple_unknown_artists"
+      ]
+    },
+    {
+      "videoId": "_Qx99bvHrVU",
+      "title": "【初超誕祭】歌枠、凸待ち、秘蔵写真etc…この世の全ての感動がここにある。【#らいむ稲妻超誕祭2026 / #ブラフラ】",
+      "channelName": "Raimu Ch. 天來らいむ",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
+      "videoId": "I82L8E7O8Sw",
+      "title": "【 歌枠 】 リクエスト◎ 台風だし雨海の出番っしょ！ 【 雨海ルカ / WeatherPlanet 】",
+      "channelName": "Ruka Ch. 雨海ルカ",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "1rCEayGJi54",
+      "title": "【ロボソン歌枠】BGM大歓迎⚡️憂鬱な平日をぶち上げる🔥 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_marker_title"
+      ]
+    },
+    {
+      "videoId": "8KDs7OP6_KM",
+      "title": "【DAM KARAOKE歌枠】Having some hero fun! わちゃわちゃヒーローズ！【NIJISANJI EN | Vezalius Bandage】",
+      "channelName": "Vezalius Bandage 【NIJISANJI EN】",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "jT-l8E9Xsow",
+      "title": "【 歌枠 / Karaoke 】懐かしいアニメソング歌枠！普段歌わないアニソン聞いてって！ #アールテテ配信",
+      "channelName": "アール・テテ / Are Tete",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ]
+    },
+    {
+      "videoId": "dY1DbsZ6nHU",
+      "title": "猫のゆるジャズ喫茶【Vtuber 歌枠】 / 初見様リクエスト１曲どうぞ♪ 広告無 BGMに最適♪プロ歌手が Jazz, Bossa, Pop, Soul など歌うよ",
+      "channelName": "さばしろ JazzVocal",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
+      "videoId": "bUb_oMOzuf4",
+      "title": "【 #歌枠 】スパロボ歌枠番外編 勝利のマシンロボ100回歌唱耐久ロボォ～♪【VTuber】",
+      "channelName": "みんも / 奈良のVTuber【セシんもーZ】",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
+      "videoId": "qENxBvbn29Y",
+      "title": "【#歌枠 】一番アツいフェス会場 #メラフェス 🔥邦ロックでぶちあげ【#メラメライブ 】",
+      "channelName": "メラ・アカル MelaakaruVtuber",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "ZTi1cpRaW8U",
+      "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
+      "channelName": "闇咲とうか",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
+      "videoId": "7B4hawJeGFo",
+      "title": "早い者勝ちリクエスト歌枠🎤🎶【歌枠/healing】",
+      "channelName": "羽月ころん.Vsinger",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ]
+    },
+    {
+      "videoId": "9hgQ0Qbv0iM",
+      "title": "【歌枠】ぶち上げていくよ～！┊︎#音ノ乃のの #ののん家",
+      "channelName": "音ノ乃のの / NononoNono",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "9hgQ0Qbv0iM",
+      "title": "【歌枠】ぶち上げていくよ～！┊︎#音ノ乃のの #ののん家",
+      "channelName": "音ノ乃のの / NononoNono",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "activity_marker_title",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "U1VskIZthjM",
+      "title": "【#弾き語り 】寝る前にふわもちボイスの弾き語り【 #輝キライブ / りあぷろ 】",
+      "channelName": "輝星いのり / Kiraboshi inori",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "bQtUhOfrJC0",
+      "title": "【歌枠】2周年ありがとう！50曲歌います！歌ったら告知します！【鬼ヶ谷テン/ネオポルテ】",
+      "channelName": "鬼ヶ谷 テン / Onigaya Ten",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_many_topic_entries",
+        "kept_count_high_low_known_song_density",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
       ]
     }
   ],
-  "newUnseenPatterns": [],
+  "newUnseenPatterns": [
+    "曲終わり",
+    "戻り",
+    "おつウタノン",
+    "曲紹介",
+    "離席"
+  ],
   "history": [
+    {
+      "generatedAt": "2026-07-12T20:10:29.288Z",
+      "totalSongs": 12882,
+      "unknownArtistCount": 3134,
+      "nicheUnknownArtistCount": 1612,
+      "highRiskEntryCount": 2409,
+      "highRiskSourceCount": 167
+    },
     {
       "generatedAt": "2026-07-12T19:26:39.318Z",
       "totalSongs": 13001,

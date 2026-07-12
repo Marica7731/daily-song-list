@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:PzWNzyO6M60:17c5576d76ed88ceb2d0",
   "video": {
     "videoId": "PzWNzyO6M60",
@@ -15,12 +15,13 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": ""
+    "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 18,
-    "riskLevel": "low",
+    "riskScore": 52,
+    "riskLevel": "medium",
     "riskReasons": [
+      "parser_corruption",
       "source_multiple_niche_short_titles"
     ]
   },
@@ -36,6 +37,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -49,7 +52,11 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
-      "riskReasons": []
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "riskReasons": [
+        "parser_corruption"
+      ]
     },
     {
       "status": "accepted",
@@ -62,6 +69,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -75,6 +84,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": true,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -88,6 +99,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -101,6 +114,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -114,6 +129,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -127,6 +144,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -140,6 +159,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -153,6 +174,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -166,6 +189,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -179,6 +204,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -192,6 +219,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -205,6 +234,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -218,6 +249,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -231,6 +264,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -244,6 +279,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -257,6 +294,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -270,6 +309,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -283,6 +324,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -296,6 +339,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -309,6 +354,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": true,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -322,6 +369,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -335,6 +384,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -348,6 +399,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -361,6 +414,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -374,6 +429,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -387,6 +444,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -400,6 +459,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -413,6 +474,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -426,6 +489,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -439,6 +504,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -452,6 +519,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -465,6 +534,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -478,6 +549,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -491,6 +564,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -504,6 +579,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -517,6 +594,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -530,6 +609,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -543,6 +624,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -556,6 +639,8 @@
       "sourceId": "selected:PzWNzyO6M60:17c5576d76ed88ce",
       "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
       "isNiche": true,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     }
   ]

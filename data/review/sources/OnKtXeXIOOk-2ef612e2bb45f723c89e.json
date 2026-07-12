@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:OnKtXeXIOOk:2ef612e2bb45f723c89e",
   "video": {
     "videoId": "OnKtXeXIOOk",
@@ -18,9 +18,11 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 2,
-    "riskLevel": "low",
-    "riskReasons": []
+    "riskScore": 35,
+    "riskLevel": "medium",
+    "riskReasons": [
+      "conversation_entry"
+    ]
   },
   "entries": [
     {
@@ -34,7 +36,11 @@
       "sourceId": "UgynTvaF8TTaNT7mIGx4AaABAg",
       "sourceHash": "2ef612e2bb45f723c89ef248928696d911f97e678c65993b9f7462eea893bcca",
       "isNiche": false,
-      "riskReasons": []
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "conversation_entry"
+      ]
     }
   ]
 }

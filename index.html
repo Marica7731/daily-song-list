@@ -51,7 +51,6 @@
             >
               月度
             </button>
-            <button class="info-button" type="button" data-info-topic="month" aria-label="月度说明">i</button>
           </div>
 
           <div class="segmented view-mode" role="group" aria-label="视图">
@@ -76,7 +75,11 @@
               >未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。</span
             >
           </label>
-          <button class="info-button niche-info-button" type="button" data-info-topic="niche" aria-label="小众说明">i</button>
+          <label class="unknown-toggle" title="隐藏没有明确歌手的收录；取消后会在链接中写入 showUnknown=1。">
+            <input id="hideUnknownToggle" type="checkbox" aria-describedby="hideUnknownHelp" checked />
+            <span>隐藏无歌手</span>
+            <span id="hideUnknownHelp" class="sr-only">隐藏空歌手、未記載、待补歌手、unknown、n/a 等无歌手收录。</span>
+          </label>
 
           <label class="field snapshot-date-field">
             <span class="sr-only">快照日期</span>

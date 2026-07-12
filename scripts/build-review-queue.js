@@ -2,8 +2,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { createSongSearchLookup, isSongSearchKnown } = require("../assets/frontend-utils");
 const {
+  classifyEntry,
   hashNormalizedText,
   isCandidateActivityTitle,
+  isConversationEntry,
+  isParserCorruptionEntry,
   isUnknownArtist,
   loadCurationContext,
   normalizeCurationTitle,
@@ -199,8 +202,11 @@ function sourceFromVideoItem(item) {
     stats: {
       ...(item.sourceQuality || {}),
       keptCount: songs.length,
+      knownArtistCount: songs.filter((song) => !isUnknownArtist(song.artist)).length,
       unknownArtistCount: songs.filter((song) => isUnknownArtist(song.artist)).length,
       activityMarkerCount: songs.filter((song) => isCandidateActivityTitle(song.title)).length,
+      conversationEntryCount: songs.filter((song) => isConversationEntry(song)).length,
+      parserCorruptionCount: songs.filter((song) => isParserCorruptionEntry(song)).length,
       nicheCount: songs.filter((song) => song.isNiche === true).length,
       knownSongCount: songs.filter((song) => isKnownSong(song, null)).length,
     },
@@ -213,8 +219,7 @@ function analyzeSourceRisk(source, lookup) {
   const sourceForRisk = { ...source, stats };
   const riskReasons = sourceRiskReasons(sourceForRisk, (song) => isKnownSong(song, lookup));
   for (const song of source.songs || []) {
-    if (isCandidateActivityTitle(song.title)) addUnique(riskReasons, "activity_marker_title");
-    if (song.isNiche === true && isUnknownArtist(song.artist)) addUnique(riskReasons, "niche_unknown_artist");
+    for (const reason of entryReasons(song, stats, lookup)) addUnique(riskReasons, reason);
   }
   const riskScore = riskScoreFromReasons(riskReasons, stats);
   return {
@@ -233,30 +238,43 @@ function analyzeSourceRisk(source, lookup) {
 
 function completeStats(source, lookup) {
   const songs = source.songs || [];
+  const knownArtistCount = source.stats?.knownArtistCount ?? source.stats?.artistCount ?? songs.filter((song) => !isUnknownArtist(song.artist)).length;
   const unknownArtistCount = source.stats?.unknownArtistCount ?? songs.filter((song) => isUnknownArtist(song.artist)).length;
   const activityMarkerCount = source.stats?.activityMarkerCount ?? songs.filter((song) => isCandidateActivityTitle(song.title)).length;
+  const conversationEntryCount = source.stats?.conversationEntryCount ?? songs.filter((song) => isConversationEntry(song)).length;
+  const parserCorruptionCount = source.stats?.parserCorruptionCount ?? songs.filter((song) => isParserCorruptionEntry(song)).length;
   const nicheCount = source.stats?.nicheCount ?? songs.filter((song) => song.isNiche === true).length;
   const knownSongCount = source.stats?.knownSongCount ?? songs.filter((song) => isKnownSong(song, lookup)).length;
   return {
     ...(source.stats || {}),
     keptCount: source.stats?.keptCount ?? songs.length,
     parsedEntryCount: source.stats?.parsedEntryCount ?? songs.length + listValues(source.rejectedEntries).length,
+    knownArtistCount,
+    artistCount: knownArtistCount,
     unknownArtistCount,
     unknownArtistRatio: songs.length ? unknownArtistCount / songs.length : 0,
     activityMarkerCount,
     activityMarkerRatio: songs.length ? activityMarkerCount / songs.length : 0,
+    conversationEntryCount,
+    conversationRatio: songs.length ? conversationEntryCount / songs.length : 0,
+    parserCorruptionCount,
+    parserCorruptionRatio: songs.length ? parserCorruptionCount / songs.length : 0,
     nicheCount,
     nicheRatio: songs.length ? nicheCount / songs.length : 0,
     knownSongCount,
+    knownSongRatio: songs.length ? knownSongCount / songs.length : 0,
   };
 }
 
 function entryReasons(song, stats, lookup) {
   const reasons = [];
-  if (song.isNiche === true && isUnknownArtist(song.artist)) reasons.push("niche_unknown_artist");
-  if (isCandidateActivityTitle(song.title)) reasons.push("activity_marker_title");
-  if (normalizeCurationTitle(song.title).length <= 4 && !isKnownSong(song, lookup)) reasons.push("short_unknown_title");
-  if ((stats.unknownArtistCount || 0) >= 3 && isUnknownArtist(song.artist)) reasons.push("source_multiple_unknown_artists");
+  const knownSong = isKnownSong(song, lookup);
+  if (isParserCorruptionEntry(song)) reasons.push("parser_corruption");
+  if (!knownSong && isConversationEntry(song)) reasons.push("conversation_entry");
+  if (!knownSong && isCandidateActivityTitle(song.title)) reasons.push("activity_marker_title");
+  if (!knownSong && song.isNiche === true && isUnknownArtist(song.artist)) reasons.push("niche_unknown_artist");
+  if (normalizeCurationTitle(song.title).length <= 4 && !knownSong && isUnknownArtist(song.artist)) reasons.push("short_unknown_title");
+  if ((stats.unknownArtistCount || 0) >= 3 && isUnknownArtist(song.artist) && !knownSong) reasons.push("source_multiple_unknown_artists");
   return reasons;
 }
 
@@ -331,6 +349,7 @@ function buildSourcePayload({ generatedAt, item, source, risk, sourceTextAvailab
         sourceId: source.sourceId,
         sourceHash: source.sourceHash,
         isNiche: song.isNiche === true,
+        ...classificationFields(song),
         riskReasons: entryReasons(song, risk.stats, null),
       })),
       ...listValues(source.rejectedEntries).map((entry) => ({
@@ -344,6 +363,8 @@ function buildSourcePayload({ generatedAt, item, source, risk, sourceTextAvailab
         rawHash: entry.rawHash || hashNormalizedText(entry.line || entry.title || ""),
         sourceId: source.sourceId,
         sourceHash: source.sourceHash,
+        classification: entry.reason === "parser_corruption" ? "parser_corruption" : "confirmed_noise",
+        suggestedAction: entry.reason === "parser_corruption" ? "replace_entry" : "drop_entry",
         riskReasons: [entry.reason || "rejected_entry"],
       })),
     ],
@@ -385,7 +406,9 @@ function buildQualityReport({ generatedAt, latest, audit, queue, curation, previ
     }
   }
   const songs = [...uniqueSongs.values()];
-  const topRiskTitles = topCounts(queue.flatMap((item) => item.sourceFilePayload.entries || []).filter((entry) => entry.riskReasons?.length), (entry) => entry.title);
+  const sourceEntries = queue.flatMap((item) => item.sourceFilePayload.entries || []);
+  const topRiskTitles = topRiskTitleSummary(sourceEntries.filter((entry) => entry.riskReasons?.length));
+  const classificationCounts = countClassifications(sourceEntries);
   const topRiskChannels = topCounts(queue, (item) => item.channelName);
   const topRiskVideos = queue
     .slice()
@@ -410,8 +433,15 @@ function buildQualityReport({ generatedAt, latest, audit, queue, curation, previ
     highRiskSourceCount: queue.filter((item) => item.riskLevel === "high").length,
     manualDroppedEntryCount: latest.source?.curationSummary?.manualDroppedEntryCount || 0,
     manualRejectedSourceCount: countAuditSources(audit, "manual_reject_source"),
-    ruleDroppedEntryCount: countAuditRejectedEntries(audit, "activity_marker_title"),
+    ruleDroppedEntryCount: latest.source?.curationSummary?.ruleDroppedEntryCount || countAuditRejectedEntries(audit, "activity_marker_title"),
+    conversationDroppedEntryCount: latest.source?.curationSummary?.conversationDroppedEntryCount || 0,
+    qualityDroppedEntryCount: latest.source?.curationSummary?.qualityDroppedEntryCount || 0,
     forceRefreshVideoCount: latest.source?.curationSummary?.forceRefreshVideoCount || 0,
+    confirmedNoiseCount: classificationCounts.confirmed_noise || 0,
+    parserCorruptionCount: classificationCounts.parser_corruption || 0,
+    likelyNoiseCount: classificationCounts.likely_noise || 0,
+    needsReviewCount: classificationCounts.needs_review || 0,
+    likelySongCount: classificationCounts.likely_song || 0,
     topRiskTitles,
     topRiskChannels,
     topRiskVideos,
@@ -481,9 +511,59 @@ function topCounts(items, keyFn, limit = 20) {
     .slice(0, limit);
 }
 
+function topRiskTitleSummary(entries, limit = 20) {
+  const byTitle = new Map();
+  for (const entry of entries || []) {
+    const title = String(entry.title || "").trim();
+    if (!title) continue;
+    if (!byTitle.has(title)) {
+      byTitle.set(title, {
+        value: title,
+        count: 0,
+        classifications: {},
+        riskReasons: {},
+      });
+    }
+    const summary = byTitle.get(title);
+    summary.count += 1;
+    if (entry.classification) summary.classifications[entry.classification] = (summary.classifications[entry.classification] || 0) + 1;
+    for (const reason of entry.riskReasons || []) summary.riskReasons[reason] = (summary.riskReasons[reason] || 0) + 1;
+  }
+  return [...byTitle.values()]
+    .map((entry) => ({
+      ...entry,
+      classifications: Object.fromEntries(Object.entries(entry.classifications).sort(([a], [b]) => a.localeCompare(b))),
+      riskReasons: Object.fromEntries(Object.entries(entry.riskReasons).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))),
+    }))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value, "ja"))
+    .slice(0, limit);
+}
+
+function countClassifications(entries) {
+  const counts = {
+    confirmed_noise: 0,
+    parser_corruption: 0,
+    likely_noise: 0,
+    needs_review: 0,
+    likely_song: 0,
+  };
+  for (const entry of entries || []) {
+    if (entry.classification && entry.classification in counts) counts[entry.classification] += 1;
+  }
+  return counts;
+}
+
 function isKnownSong(song, lookup) {
   if (!lookup?.available) return song?.isNiche === false;
   return isSongSearchKnown(song, lookup);
+}
+
+function classificationFields(song) {
+  const classification = classifyEntry(song, { knownSong: isKnownSong(song, null) });
+  return {
+    classification: classification.classification,
+    suggestedAction: classification.suggestedAction,
+  };
 }
 
 function clearReviewSources() {

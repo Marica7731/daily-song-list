@@ -16,6 +16,7 @@ The homepage runtime stays compact. `index.html` loads `data/ui/*`; `review.html
 node scripts/update-songlist.js
 node scripts/apply-song-search-niche.js
 node scripts/build-review-queue.js
+node scripts/export-dirty-candidates.js
 node scripts/build-runtime-data.js
 ```
 
@@ -24,9 +25,20 @@ node scripts/build-runtime-data.js
 - `data/review/queue.json`: source-level review queue.
 - `data/review/sources/<videoId>-<sourceHash>.json`: detail file for each suspicious source.
 - `data/review/manifest.json`: small pointer file for review tooling.
+- `data/review/all-niche-unknown.json` and `.md`: complete current public-output list of niche songs whose artist is unknown.
+- `data/review/parser-corruptions.json`: parser-corruption candidates from current data and review source files.
+- `data/review/confirmed-noise.json`: confirmed non-song candidates from current data and review source files.
 - `data/quality-report.json`: aggregate quality metrics and recent history.
 
 Old snapshots often do not have full raw comments. Those queue items have `sourceTextAvailable:false` and `forceRefreshSuggested:true`.
+
+For local parser, rule, or manual-override fixes that should update the current data without touching YouTube, run:
+
+```powershell
+npm run rebuild:derived
+```
+
+This rebuilds from local `data/latest.json` raw rows, reapplies curation, reuses local song-search niche data, and rewrites public, review, diff, and runtime artifacts.
 
 ## Manual Patch Format
 
@@ -93,7 +105,7 @@ Use manual overrides first. Promote only after review:
 - repeated same-channel format: `channelScopedExactTitles` or `channelScopedPatterns`
 - at least three unrelated channels with positive and negative tests: global rule
 
-Do not add broad regexes for words such as `紹介` or `離席`. The current global rule is exact-title only and applies only when artist is unknown.
+Do not add broad regexes for words such as `紹介` or `離席`. Global rules may use exact titles or tightly anchored patterns, and they must apply only when artist is unknown unless there is a channel-scoped override and a negative test proving known songs are not removed.
 
 ## Carry-Forward Behavior
 
@@ -112,13 +124,16 @@ Use these commands after changing rules or overrides:
 npm test
 npm run validate
 node scripts/build-review-queue.js
+node scripts/export-dirty-candidates.js
 npm run check
 ```
 
 After a full update, verify:
 
-- `曲紹介` and `離席` are absent from public `data/latest.json` song rows when artist is unknown.
+- `曲紹介`, `離席`, `曲終わり`, `休憩入り`, stream reading/break/setup markers, and reviewed conversation entries are absent from public `data/latest.json` song rows when artist is unknown.
+- `8.32` and `2.500♪` remain intact while list prefixes such as `01. Song` and `01) Song` are stripped.
 - suspicious sources remain in `data/review/queue.json`.
+- full dirty-candidate exports exist under `data/review/all-niche-unknown.*`, `parser-corruptions.json`, and `confirmed-noise.json`.
 - `review.html` can load source details and export a patch.
 - `data/ui/*` contains no raw source text.
 - YouTube timestamp links still use `watch?v=<videoId>&t=<seconds>s`.

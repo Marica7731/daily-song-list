@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:7B4hawJeGFo:d46695b75a35fd430bf5",
   "video": {
     "videoId": "7B4hawJeGFo",
@@ -18,12 +18,14 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 88,
+    "riskScore": 100,
     "riskLevel": "high",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
+      "source_conversation_timeline",
       "kept_count_high_low_known_song_density",
-      "source_multiple_unknown_artists"
+      "source_multiple_unknown_artists",
+      "conversation_entry"
     ]
   },
   "entries": [
@@ -38,6 +40,8 @@
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": [
         "source_multiple_unknown_artists"
       ]
@@ -53,7 +57,10 @@
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     },
@@ -68,7 +75,10 @@
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     },
@@ -83,7 +93,10 @@
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     },
@@ -98,6 +111,8 @@
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -111,7 +126,10 @@
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     },
@@ -126,7 +144,10 @@
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     },
@@ -141,7 +162,10 @@
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     },
@@ -156,6 +180,8 @@
       "rawHash": "26a8bd0158611bf2066c5f8331ae1b5a58d4cb4a31e6593803c8ab4ec633e237",
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
         "title_only_non_song_candidate"
       ]
@@ -171,6 +197,8 @@
       "rawHash": "f3589d3a4db116da7b42c3c82dfba6cfa55c2948e07bda1b7b62885034140120",
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
         "title_only_non_song_candidate"
       ]
@@ -186,6 +214,8 @@
       "rawHash": "72db2b9cc50e8c8416d607010c92cd2eaf0722bbd28b37d7b6ae9662690d7857",
       "sourceId": "Ugz-xnyANjwnwfxpnuR4AaABAg",
       "sourceHash": "d46695b75a35fd430bf51cab7d85d820e3aa07a6449893ccbc7c3e8a80d0fd70",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
         "title_only_non_song_candidate"
       ]

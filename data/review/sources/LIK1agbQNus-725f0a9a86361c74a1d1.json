@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:LIK1agbQNus:725f0a9a86361c74a1d1",
   "video": {
     "videoId": "LIK1agbQNus",
@@ -18,10 +18,9 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 92,
-    "riskLevel": "high",
+    "riskScore": 30,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_unknown_artist_ratio_high",
       "source_multiple_unknown_artists",
       "niche_unknown_artist",
       "short_unknown_title"
@@ -39,9 +38,9 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -54,9 +53,9 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -69,9 +68,9 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -84,9 +83,9 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -99,6 +98,8 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
@@ -115,9 +116,9 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -130,9 +131,9 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -145,6 +146,8 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
@@ -162,9 +165,9 @@
       "sourceId": "selected:LIK1agbQNus:725f0a9a86361c74",
       "sourceHash": "725f0a9a86361c74a1d1ceb0bccd669581bb6aa7fbc3e47b716d826a3bc8d415",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:ptIpuZ2IwZ0:ed53670bfbfe5749c4b3",
   "video": {
     "videoId": "ptIpuZ2IwZ0",
@@ -18,10 +18,9 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 28,
+    "riskScore": 14,
     "riskLevel": "low",
     "riskReasons": [
-      "short_unknown_title",
       "source_multiple_niche_short_titles"
     ]
   },
@@ -37,9 +36,9 @@
       "sourceId": "selected:ptIpuZ2IwZ0:ed53670bfbfe5749",
       "sourceHash": "ed53670bfbfe5749c4b3997dfbbc3395db809d4145d55aaa5b0485ee99d8f1de",
       "isNiche": true,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -52,6 +51,8 @@
       "sourceId": "selected:ptIpuZ2IwZ0:ed53670bfbfe5749",
       "sourceHash": "ed53670bfbfe5749c4b3997dfbbc3395db809d4145d55aaa5b0485ee99d8f1de",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -65,6 +66,8 @@
       "sourceId": "selected:ptIpuZ2IwZ0:ed53670bfbfe5749",
       "sourceHash": "ed53670bfbfe5749c4b3997dfbbc3395db809d4145d55aaa5b0485ee99d8f1de",
       "isNiche": true,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -78,6 +81,8 @@
       "sourceId": "selected:ptIpuZ2IwZ0:ed53670bfbfe5749",
       "sourceHash": "ed53670bfbfe5749c4b3997dfbbc3395db809d4145d55aaa5b0485ee99d8f1de",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -91,6 +96,8 @@
       "sourceId": "selected:ptIpuZ2IwZ0:ed53670bfbfe5749",
       "sourceHash": "ed53670bfbfe5749c4b3997dfbbc3395db809d4145d55aaa5b0485ee99d8f1de",
       "isNiche": true,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -104,9 +111,9 @@
       "sourceId": "selected:ptIpuZ2IwZ0:ed53670bfbfe5749",
       "sourceHash": "ed53670bfbfe5749c4b3997dfbbc3395db809d4145d55aaa5b0485ee99d8f1de",
       "isNiche": true,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     }
   ]
 }

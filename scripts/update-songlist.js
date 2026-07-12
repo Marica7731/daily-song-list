@@ -16,6 +16,8 @@ const {
   hashNormalizedText,
   isActivityMarkerTitle,
   isCandidateActivityTitle,
+  isConversationEntry,
+  isParserCorruptionEntry,
   isUnknownArtist,
   loadCurationContext,
   riskLevel,
@@ -811,6 +813,9 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
       unknownArtistCount: stats.unknownArtistCount,
       activityMarkerCount: stats.activityMarkerCount,
       activityMarkerRatio: stats.activityMarkerRatio,
+      conversationEntryCount: stats.conversationEntryCount,
+      conversationRatio: stats.conversationRatio,
+      parserCorruptionCount: stats.parserCorruptionCount,
       nicheCount: stats.nicheCount,
       nicheRatio: stats.nicheRatio,
       topicCount: stats.topicCount,
@@ -867,6 +872,12 @@ function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType)
   const activityMarkerCount =
     cleaned.filter((song) => isCandidateActivityTitle(song.title)).length +
     rejectedEntries.filter((entry) => entry.reason === "activity_marker_title" || isCandidateActivityTitle(entry.title)).length;
+  const conversationEntryCount =
+    cleaned.filter((song) => isConversationEntry(song)).length +
+    rejectedEntries.filter((entry) => entry.reason === "conversation_entry" || isConversationEntry(entry)).length;
+  const parserCorruptionCount =
+    cleaned.filter((song) => isParserCorruptionEntry(song)).length +
+    rejectedEntries.filter((entry) => entry.reason === "parser_corruption" || isParserCorruptionEntry(entry)).length;
   const nicheCount = cleaned.filter((song) => song.isNiche === true).length;
   const knownSongCount = cleaned.filter((song) => isUsableArtist(song.artist) || song.isNiche === false).length;
   const structuralCount =
@@ -883,6 +894,9 @@ function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType)
     unknownArtistRatio: cleaned.length ? unknownArtistCount / cleaned.length : 0,
     activityMarkerCount,
     activityMarkerRatio: rawCount ? activityMarkerCount / rawCount : 0,
+    conversationEntryCount,
+    conversationRatio: rawCount ? conversationEntryCount / rawCount : 0,
+    parserCorruptionCount,
     nicheCount,
     nicheRatio: cleaned.length ? nicheCount / cleaned.length : 0,
     topicCount,
@@ -900,6 +914,12 @@ function rejectedSongSourceReason(stats, candidate) {
   if (stats.keptCount < 2 && !stats.hasSetlistKeyword) return "too_few_timestamp_songs";
   if (stats.originalCount >= 6 && stats.artistCount === 0 && stats.topicCount >= 2 && !stats.hasSetlistKeyword) {
     return "topic_timeline_without_artists";
+  }
+  if (stats.conversationEntryCount >= 3 && stats.conversationRatio >= 0.35 && stats.knownSongCount <= 2) {
+    return "activity_session_timeline";
+  }
+  if (stats.parserCorruptionCount >= 2) {
+    return "parser_corruption_source";
   }
   if (stats.originalCount >= 10 && stats.topicRatio >= 0.25 && stats.artistRatio < 0.25) {
     return "topic_heavy_low_artist_source";
@@ -1117,7 +1137,8 @@ function applyGroupQualityFilters(groups) {
             songs: (item.songs || [])
               .map(normalizeParsedSong)
               .filter((song) => !isLikelyNonSongEntry(song))
-              .filter((song) => !isActivityMarkerTitle(song.title, song.artist)),
+              .filter((song) => !isActivityMarkerTitle(song.title, song.artist))
+              .filter((song) => !isConversationEntry(song)),
           }))
           .filter((item) => !isLowQualitySelectedItem(item)),
       },
@@ -1675,6 +1696,9 @@ function selectBestSongs(sources) {
     topicCount: best.stats.topicCount,
     structuralCount: best.stats.structuralCount,
     sentenceLikeCount: best.stats.sentenceLikeCount,
+    conversationEntryCount: best.stats.conversationEntryCount,
+    conversationRatio: best.stats.conversationRatio,
+    parserCorruptionCount: best.stats.parserCorruptionCount,
   };
   return best.songs;
 }
@@ -1711,6 +1735,9 @@ function mergeOrderedSources(sources) {
       topicCount: 0,
       topicRatio: 0,
       structuralCount: songs.length,
+      conversationEntryCount: 0,
+      conversationRatio: 0,
+      parserCorruptionCount: 0,
       hasSetlistKeyword: true,
     },
   };
@@ -1795,6 +1822,8 @@ function sourceScore(source) {
     (stats.hasSetlistKeyword ? 5 : 0) +
     (stats.keptCount || 0) * 0.5 -
     (stats.activityMarkerCount || 0) * 24 -
+    (stats.conversationEntryCount || 0) * 20 -
+    (stats.parserCorruptionCount || 0) * 28 -
     (stats.topicCount || 0) * 8 -
     (stats.sentenceLikeCount || 0) * 3
   );
@@ -2033,6 +2062,7 @@ function nonNegativeInteger(value, fallback = 0) {
 }
 
 module.exports = {
+  applyGroupQualityFilters,
   buildGroups,
   buildRankDiffForRange,
   buildRankDiffs,

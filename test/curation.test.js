@@ -4,8 +4,11 @@ const test = require("node:test");
 const {
   applyCurationToSources,
   applyCurationToVideos,
+  classifyEntry,
   createSourceRecord,
   hashNormalizedText,
+  isConversationEntry,
+  isParserCorruptionEntry,
   mergeCurationPatch,
 } = require("../scripts/curation");
 const { buildRankDiffs, extractCommentTexts, sourceScore } = require("../scripts/update-songlist");
@@ -89,6 +92,54 @@ test("curation overrides drop, replace, force keep, and carry forward videos", (
   );
 });
 
+test("curation classifies parser corruptions and conversation-only rows", () => {
+  assert.equal(
+    isParserCorruptionEntry({
+      title: "32",
+      artist: "*Luna",
+      raw: "01:59:19 15. 8.32 / *Luna",
+    }),
+    true,
+  );
+  assert.equal(
+    classifyEntry({
+      title: "32",
+      artist: "*Luna",
+      raw: "01:59:19 15. 8.32 / *Luna",
+    }).classification,
+    "parser_corruption",
+  );
+  assert.equal(isConversationEntry({ title: "何ケーキを食べるか問題", artist: "未記載" }), true);
+  assert.equal(classifyEntry({ title: "何ケーキを食べるか問題", artist: "未記載" }).classification, "likely_noise");
+});
+
+test("curation drops high-confidence activity titles but keeps known songs", () => {
+  const context = {
+    nonSongRules: {
+      exactUnknownArtistTitles: ["曲終わり", "マイクテスト"],
+      candidateActivityTitles: [],
+      activityTitlePatterns: [],
+    },
+    overrides: { records: [] },
+  };
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "AAAAAAAAAAA",
+        songs: [
+          { title: "曲終わり", artist: "未記載", seconds: 10, raw: "0:10 曲終わり" },
+          { title: "マイクテスト", artist: "未記載", seconds: 20, raw: "0:20 マイクテスト" },
+          { title: "曲紹介", artist: "Known Artist", seconds: 30, raw: "0:30 曲紹介 / Known Artist" },
+        ],
+      },
+    ],
+    context,
+  );
+
+  assert.deepEqual(videos[0].songs.map((item) => item.title), ["曲紹介"]);
+  assert.equal(videos.curationStats.ruleDroppedEntries, 2);
+});
+
 test("curation patch merge dedupes identical records and reports conflicts", () => {
   const baseRecord = { action: "drop_entry", videoId: "AAAAAAAAAAA", sourceId: "source", seconds: 10, rawHash: "raw" };
   const deduped = mergeCurationPatch({ schemaVersion: 1, records: [baseRecord] }, { schemaVersion: 1, records: [baseRecord] });
@@ -108,6 +159,23 @@ test("high risk source scores below clean song list source", () => {
   const dirty = { stats: { keptCount: 12, knownSongCount: 0, artistCount: 0, structuralCount: 12, topicCount: 4, sentenceLikeCount: 4, activityMarkerCount: 6, riskLevel: "high" } };
 
   assert.ok(sourceScore(clean) > sourceScore(dirty));
+});
+
+test("conversation-heavy source scores below clean song list source", () => {
+  const clean = { stats: { keptCount: 8, knownSongCount: 8, artistCount: 8, conversationEntryCount: 0, parserCorruptionCount: 0, riskLevel: "low" } };
+  const conversation = {
+    stats: {
+      keptCount: 9,
+      knownSongCount: 0,
+      artistCount: 0,
+      unknownArtistCount: 9,
+      conversationEntryCount: 6,
+      parserCorruptionCount: 0,
+      riskLevel: "high",
+    },
+  };
+
+  assert.ok(sourceScore(clean) > sourceScore(conversation));
 });
 
 test("rank diffs carry the same current curation version for previous snapshot", () => {

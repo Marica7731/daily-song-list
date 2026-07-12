@@ -26,6 +26,26 @@ test("parses timestamp before song index without truncating minutes", () => {
   );
 });
 
+test("keeps decimal-looking numeric song titles while stripping real list indexes", () => {
+  const songs = parseTimestampSongs([
+    [
+      "0:10 8.32 / *Luna",
+      "0:20 2.500♪",
+      "0:30 01. Song / Artist",
+      "0:40 01) Another Song / Another Artist",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["8.32", "2.500♪", "Song", "Another Song"],
+  );
+  assert.deepEqual(
+    songs.map((song) => song.artist),
+    ["*Luna", "未記載", "Artist", "Another Artist"],
+  );
+});
+
 test("rejects timestamped regular comment sentences", () => {
   const songs = parseTimestampSongs([
     ["1:45:24 むあんちゃん with JOY子の寄り酔いも", "2:49:33 COOLな酔いどれ知らずも良すぎてするする晩酌が進みました"].join(
@@ -57,14 +77,14 @@ test("filters common non-song timestamp sections", () => {
 
 test("rejects exact activity marker titles only for unknown artists", () => {
   const rejected = [];
-  const songs = parseTimestampSongs(["0:06:44 曲紹介\n0:22:24 離席"], {
+  const songs = parseTimestampSongs(["0:06:44 曲紹介\n0:22:24 離席\n0:30:00 曲終わり\n0:31:00 曲紹介タイム\n0:32:00 休憩入り\n0:33:00 スパチャ・メンシ読み\n0:34:00 配信開始\n0:35:00 マイクテスト"], {
     onReject: (entry) => rejected.push(entry),
   });
 
   assert.deepEqual(songs, []);
   assert.deepEqual(
     rejected.map((entry) => entry.reason),
-    ["activity_marker_title", "activity_marker_title"],
+    Array.from({ length: 8 }, () => "activity_marker_title"),
   );
 });
 

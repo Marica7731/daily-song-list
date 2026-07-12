@@ -198,11 +198,20 @@ function validateCurationConfig() {
   } else {
     const rules = readJson(NON_SONG_RULES_PATH);
     if (rules.schemaVersion !== 1) errors.push("non-song-rules.schemaVersion must be 1");
-    for (const field of ["exactUnknownArtistTitles", "channelScopedExactTitles", "channelScopedPatterns"]) {
+    for (const field of ["exactUnknownArtistTitles", "candidateActivityTitles", "activityTitlePatterns", "channelScopedExactTitles", "channelScopedPatterns"]) {
       if (!Array.isArray(rules[field])) errors.push(`non-song-rules.${field} must be array`);
     }
-    if (!Array.isArray(rules.exactUnknownArtistTitles) || !rules.exactUnknownArtistTitles.includes("曲紹介") || !rules.exactUnknownArtistTitles.includes("離席")) {
-      errors.push("non-song-rules.exactUnknownArtistTitles must include 曲紹介 and 離席");
+    const requiredExactTitles = ["曲紹介", "離席", "曲終わり", "曲紹介タイム", "休憩入り", "スパチャ・メンシ読み", "配信開始", "マイクテスト"];
+    const missingExactTitles = requiredExactTitles.filter((title) => !rules.exactUnknownArtistTitles?.includes(title));
+    if (missingExactTitles.length) {
+      errors.push(`non-song-rules.exactUnknownArtistTitles missing required titles: ${missingExactTitles.join(", ")}`);
+    }
+    for (const [index, pattern] of (rules.activityTitlePatterns || []).entries()) {
+      try {
+        new RegExp(pattern, "iu");
+      } catch (error) {
+        errors.push(`non-song-rules.activityTitlePatterns[${index}] invalid regex: ${error.message}`);
+      }
     }
   }
 }

@@ -201,6 +201,7 @@ const state = {
   view: "songRank",
   filter: "",
   nicheOnly: false,
+  hideUnknownArtist: true,
   indexBucket: INDEX_ALL_BUCKET,
   pageSize: DEFAULT_LIST_PAGE_SIZE,
   rankMetric: "occurrences",
@@ -235,6 +236,7 @@ const els = {
   snapshotDateSelect: document.querySelector("#snapshotDateSelect"),
   filterInput: document.querySelector("#filterInput"),
   nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
+  hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
   backToTop: document.querySelector("#backToTop"),
   toast: document.querySelector("#toast"),
   rangeTabs: Array.from(document.querySelectorAll("[data-range]")),
@@ -400,12 +402,11 @@ function bindEvents() {
     renderOrSyncUrl({ urlMode: "push" });
   });
 
-  els.controls?.addEventListener("click", (event) => {
-    const infoButton = event.target.closest("[data-info-topic]");
-    if (!infoButton) return;
-    event.preventDefault();
-    event.stopPropagation();
-    showToast(infoText(infoButton.dataset.infoTopic));
+  els.hideUnknownToggle?.addEventListener("change", () => {
+    state.hideUnknownArtist = Boolean(els.hideUnknownToggle.checked);
+    state.expandedRows.clear();
+    resetPagination();
+    renderOrSyncUrl({ urlMode: "push" });
   });
 
   els.summary?.addEventListener("click", async (event) => {
@@ -516,18 +517,12 @@ function setActiveTab(tabs, activeTab) {
 }
 
 function applyInitialUrlState() {
+  const defaults = {
+    ...defaultUrlState(),
+    pageSize: readStoredPageSize(),
+  };
   const parsed = window.FrontendUtils.parseUrlState(window.location.search, {
-    defaults: {
-      range: state.range,
-      view: state.view,
-      page: state.page,
-      pageSize: readStoredPageSize(),
-      bucket: state.indexBucket,
-      rankMetric: state.rankMetric,
-      videoLayout: state.videoLayout,
-      outside: state.nicheOnly,
-      q: state.filter,
-    },
+    defaults,
     validRanges: Object.keys(RANGE_LABELS),
     validViews: Object.keys(VIEWS),
     validPageSizes: LIST_PAGE_SIZE_OPTIONS,
@@ -545,6 +540,7 @@ function applyInitialUrlState() {
   state.rankMetric = parsed.rankMetric;
   state.videoLayout = parsed.videoLayout;
   state.nicheOnly = parsed.outside;
+  state.hideUnknownArtist = !parsed.showUnknown;
   state.filter = parsed.q;
   state.currentSnapshotPath = parsed.snapshotPath;
   writeStoredPageSize(state.pageSize);
@@ -555,6 +551,7 @@ function syncControlsFromState() {
   setActiveTab(els.viewTabs, els.viewTabs.find((tab) => tab.dataset.view === state.view) || els.viewTabs[0]);
   if (els.filterInput) els.filterInput.value = state.filter;
   if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = state.nicheOnly;
+  if (els.hideUnknownToggle) els.hideUnknownToggle.checked = state.hideUnknownArtist;
   syncSnapshotControlsFromState();
 }
 
@@ -570,6 +567,7 @@ function syncUrlState(mode = "replace") {
       rankMetric: state.rankMetric,
       videoLayout: state.videoLayout,
       outside: state.nicheOnly,
+      showUnknown: !state.hideUnknownArtist,
       q: state.filter,
       snapshotPath: state.currentSnapshotPath,
     },
@@ -604,6 +602,7 @@ function defaultUrlState() {
     rankMetric: "occurrences",
     videoLayout: "cards",
     outside: false,
+    showUnknown: false,
     q: "",
   };
 }
@@ -1208,9 +1207,13 @@ async function prewarmRangeCache(group, snapshotPath, rangeId) {
   const occurrences = measureSync("collect-occurrences", () => collectSongOccurrences(items));
   await yieldToBrowser();
   const nicheOccurrences = filterNicheOccurrences(occurrences);
+  const visibleOccurrences = filterUnknownArtistOccurrences(occurrences);
+  const visibleNicheOccurrences = filterUnknownArtistOccurrences(nicheOccurrences);
   const allSongRecords = measureSync("build-song-records", () => buildSongRecords(occurrences));
   await yieldToBrowser();
   const nicheSongRecords = buildSongRecords(nicheOccurrences);
+  const visibleSongRecords = buildSongRecords(visibleOccurrences);
+  const visibleNicheSongRecords = buildSongRecords(visibleNicheOccurrences);
   await yieldToBrowser();
   const allArtistResult = measureSync("build-artist-records", () => buildArtistRecords(occurrences));
   await yieldToBrowser();
@@ -1219,8 +1222,12 @@ async function prewarmRangeCache(group, snapshotPath, rangeId) {
     items,
     occurrences,
     nicheOccurrences,
+    visibleOccurrences,
+    visibleNicheOccurrences,
     allSongRecords,
     nicheSongRecords,
+    visibleSongRecords,
+    visibleNicheSongRecords,
     allArtistResult,
     nicheArtistResult,
   });
@@ -1231,8 +1238,9 @@ async function prewarmRangeCache(group, snapshotPath, rangeId) {
 async function prewarmDefaultSorts(cache) {
   const filterKey = normalizeSearch(state.filter);
   if (filterKey) return;
-  const scope = state.nicheOnly ? "niche" : "all";
-  const songRecords = state.nicheOnly ? cache.nicheSongRecords : cache.allSongRecords;
+  const hideUnknownForView = shouldHideUnknownForCurrentView();
+  const scope = `${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}`;
+  const songRecords = selectedSongRecords(cache, { hideUnknownForView });
   const artistRecords = state.nicheOnly ? cache.nicheArtistRecords : cache.allArtistRecords;
   if (state.view === "artistRank") {
     cacheRankModel(cache, `artist-rank::${scope}::${filterKey}::${state.rankMetric}`, [...artistRecords].sort(compareRankRecords));
@@ -1247,16 +1255,24 @@ function createRangeCache(group) {
   const items = group.items || [];
   const occurrences = measureSync("collect-occurrences", () => collectSongOccurrences(items));
   const nicheOccurrences = filterNicheOccurrences(occurrences);
+  const visibleOccurrences = filterUnknownArtistOccurrences(occurrences);
+  const visibleNicheOccurrences = filterUnknownArtistOccurrences(nicheOccurrences);
   const allSongRecords = measureSync("build-song-records", () => buildSongRecords(occurrences));
   const nicheSongRecords = buildSongRecords(nicheOccurrences);
+  const visibleSongRecords = buildSongRecords(visibleOccurrences);
+  const visibleNicheSongRecords = buildSongRecords(visibleNicheOccurrences);
   const allArtistResult = measureSync("build-artist-records", () => buildArtistRecords(occurrences));
   const nicheArtistResult = buildArtistRecords(nicheOccurrences);
   return createRangeCacheObject({
     items,
     occurrences,
     nicheOccurrences,
+    visibleOccurrences,
+    visibleNicheOccurrences,
     allSongRecords,
     nicheSongRecords,
+    visibleSongRecords,
+    visibleNicheSongRecords,
     allArtistResult,
     nicheArtistResult,
   });
@@ -1266,8 +1282,12 @@ function createRangeCacheObject({
   items,
   occurrences,
   nicheOccurrences,
+  visibleOccurrences,
+  visibleNicheOccurrences,
   allSongRecords,
   nicheSongRecords,
+  visibleSongRecords,
+  visibleNicheSongRecords,
   allArtistResult,
   nicheArtistResult,
 }) {
@@ -1275,14 +1295,20 @@ function createRangeCacheObject({
     items,
     occurrences,
     nicheOccurrences,
+    visibleOccurrences,
+    visibleNicheOccurrences,
     allSongRecords,
     nicheSongRecords,
+    visibleSongRecords,
+    visibleNicheSongRecords,
     allArtistRecords: allArtistResult.records,
     nicheArtistRecords: nicheArtistResult.records,
     allMissingArtistCount: allArtistResult.missingArtistCount,
     nicheMissingArtistCount: nicheArtistResult.missingArtistCount,
     allVideoCount: uniqueVideoCount(occurrences),
     nicheVideoCount: uniqueVideoCount(nicheOccurrences),
+    visibleVideoCount: uniqueVideoCount(visibleOccurrences),
+    visibleNicheVideoCount: uniqueVideoCount(visibleNicheOccurrences),
     normalizedVideoSearchData: items.map((item) => ({
       item,
       searchText: normalizeSearch([item.title, item.channelName, item.keyword, ...(item.songs || []).flatMap((song) => [song.title, song.artist])].join(" ")),
@@ -1294,13 +1320,15 @@ function createRangeCacheObject({
 
 function currentSelection(rangeCache) {
   const filterKey = normalizeSearch(state.filter);
-  const key = `${state.nicheOnly ? "niche" : "all"}::${filterKey}`;
+  const hideUnknownForView = shouldHideUnknownForCurrentView();
+  const key = `${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}::${filterKey}`;
   if (rangeCache.selectionCache.has(key)) return rangeCache.selectionCache.get(key);
 
-  const baseOccurrences = state.nicheOnly ? rangeCache.nicheOccurrences : rangeCache.occurrences;
-  const baseSongRecords = state.nicheOnly ? rangeCache.nicheSongRecords : rangeCache.allSongRecords;
+  const baseOccurrences = selectedOccurrences(rangeCache, { hideUnknownForView });
+  const baseSongRecords = selectedSongRecords(rangeCache, { hideUnknownForView });
   const baseArtistRecords = state.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords;
   const baseMissingArtistCount = state.nicheOnly ? rangeCache.nicheMissingArtistCount : rangeCache.allMissingArtistCount;
+  const hiddenUnknownCount = hideUnknownForView ? hiddenUnknownOccurrenceCount(rangeCache) : 0;
 
   let selection;
   if (!filterKey) {
@@ -1309,7 +1337,14 @@ function currentSelection(rangeCache) {
       songRecords: baseSongRecords,
       artistRecords: baseArtistRecords,
       missingArtistCount: baseMissingArtistCount,
-      videoCount: state.nicheOnly ? rangeCache.nicheVideoCount : rangeCache.allVideoCount,
+      videoCount: state.nicheOnly
+        ? hideUnknownForView
+          ? rangeCache.visibleNicheVideoCount
+          : rangeCache.nicheVideoCount
+        : hideUnknownForView
+          ? rangeCache.visibleVideoCount
+          : rangeCache.allVideoCount,
+      hiddenUnknownCount,
       videoItems: null,
     };
   } else {
@@ -1321,11 +1356,31 @@ function currentSelection(rangeCache) {
       artistRecords: artistResult.records,
       missingArtistCount: artistResult.missingArtistCount,
       videoCount: uniqueVideoCount(occurrences),
+      hiddenUnknownCount,
       videoItems: null,
     };
   }
   rangeCache.selectionCache.set(key, selection);
   return selection;
+}
+
+function selectedOccurrences(rangeCache, options = {}) {
+  if (state.nicheOnly) return options.hideUnknownForView ? rangeCache.visibleNicheOccurrences : rangeCache.nicheOccurrences;
+  return options.hideUnknownForView ? rangeCache.visibleOccurrences : rangeCache.occurrences;
+}
+
+function selectedSongRecords(rangeCache, options = {}) {
+  if (state.nicheOnly) return options.hideUnknownForView ? rangeCache.visibleNicheSongRecords : rangeCache.nicheSongRecords;
+  return options.hideUnknownForView ? rangeCache.visibleSongRecords : rangeCache.allSongRecords;
+}
+
+function shouldHideUnknownForCurrentView() {
+  return state.hideUnknownArtist && state.view !== "artistRank";
+}
+
+function hiddenUnknownOccurrenceCount(rangeCache) {
+  if (state.nicheOnly) return Math.max(0, rangeCache.nicheOccurrences.length - rangeCache.visibleNicheOccurrences.length);
+  return Math.max(0, rangeCache.occurrences.length - rangeCache.visibleOccurrences.length);
 }
 
 function sortedSelectionRecords(rangeCache, selection, type, compare) {
@@ -1357,7 +1412,8 @@ function cacheRankModel(rangeCache, key, records) {
 }
 
 function sortedRecordsKey(type) {
-  return `${type}::${state.nicheOnly ? "niche" : "all"}::${normalizeSearch(state.filter)}::${state.rankMetric}`;
+  const hideKey = shouldHideUnknownForCurrentView() ? "hide-unknown" : "show-unknown";
+  return `${type}::${state.nicheOnly ? "niche" : "all"}::${hideKey}::${normalizeSearch(state.filter)}::${state.rankMetric}`;
 }
 
 function resetContentClasses() {
@@ -1366,16 +1422,16 @@ function resetContentClasses() {
 }
 
 function renderVideoList(group, rangeCache, selection) {
-  const sourceItems = rangeCache.items;
+  const sourceItems = videoItemsForRange(rangeCache, { nicheOnly: false, hideUnknownArtists: shouldHideUnknownForCurrentView(), ignoreSearch: true });
   const items = videoItemsForSelection(rangeCache, selection);
-  const nicheItems = videoItemsForRange(rangeCache, { nicheOnly: true, ignoreSearch: true });
+  const nicheItems = videoItemsForRange(rangeCache, { nicheOnly: true, hideUnknownArtists: shouldHideUnknownForCurrentView(), ignoreSearch: true });
   const denominatorItems = state.filter && state.nicheOnly ? nicheItems : sourceItems;
   const visibleSongs = items.reduce((sum, item) => sum + (item._displaySongs?.length || item.songs?.length || 0), 0);
   const denominatorSongs = denominatorItems.reduce((sum, item) => sum + (item._displaySongs?.length || item.songs?.length || 0), 0);
   renderSummary(group, [
     visibilityMetric(items.length, sourceItems.length, nicheItems.length, "个视频", "个小众视频"),
     countRatioMetric(visibleSongs, denominatorSongs, "个时间戳"),
-  ]);
+  ], hiddenUnknownNote(selection));
 
   if (!items.length) {
     renderEmpty(emptyMessage("这个范围还没有时间戳歌曲列表", "没有找到符合条件的视频", "没有找到小众歌曲视频"), {
@@ -1396,16 +1452,18 @@ function renderVideoList(group, rangeCache, selection) {
 
 function renderSongRank(group, rangeCache, selection) {
   const sourceOccurrences = rangeCache.occurrences;
-  const allRecords = rangeCache.allSongRecords;
-  const nicheRecords = rangeCache.nicheSongRecords;
+  const hideUnknownForView = shouldHideUnknownForCurrentView();
+  const sourceVisibleOccurrences = hideUnknownForView ? rangeCache.visibleOccurrences : sourceOccurrences;
+  const allRecords = hideUnknownForView ? rangeCache.visibleSongRecords : rangeCache.allSongRecords;
+  const nicheRecords = hideUnknownForView ? rangeCache.visibleNicheSongRecords : rangeCache.nicheSongRecords;
   const occurrences = selection.occurrences;
   const { records, ranks, countFrequencies } = rankingModelForSelection(rangeCache, selection, "song-rank", compareSongRank);
 
   renderSummary(group, [
     visibilityMetric(records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
-    occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
+    occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
     metric(selection.videoCount, "个视频"),
-  ]);
+  ], hiddenUnknownNote(selection));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌曲", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
@@ -1491,16 +1549,18 @@ function renderArtistRank(group, rangeCache, selection) {
 
 function renderSongIndexView(group, rangeCache, selection) {
   const sourceOccurrences = rangeCache.occurrences;
-  const allRecords = rangeCache.allSongRecords;
-  const nicheRecords = rangeCache.nicheSongRecords;
+  const hideUnknownForView = shouldHideUnknownForCurrentView();
+  const sourceVisibleOccurrences = hideUnknownForView ? rangeCache.visibleOccurrences : sourceOccurrences;
+  const allRecords = hideUnknownForView ? rangeCache.visibleSongRecords : rangeCache.allSongRecords;
+  const nicheRecords = hideUnknownForView ? rangeCache.visibleNicheSongRecords : rangeCache.nicheSongRecords;
   const occurrences = selection.occurrences;
   const records = sortedSelectionRecords(rangeCache, selection, "song-az", compareSongAz);
 
   renderSummary(group, [
     visibilityMetric(records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
-    occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
+    occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
     metric(selection.videoCount, "个视频"),
-  ]);
+  ], hiddenUnknownNote(selection));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌曲索引", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
@@ -1561,6 +1621,7 @@ function videoItemsForSelection(rangeCache, selection) {
   selection.videoItems = videoItemsForRange(rangeCache, {
     filter: state.filter,
     nicheOnly: state.nicheOnly,
+    hideUnknownArtists: shouldHideUnknownForCurrentView(),
   });
   return selection.videoItems;
 }
@@ -1568,9 +1629,10 @@ function videoItemsForSelection(rangeCache, selection) {
 function videoItemsForRange(rangeCache, options = {}) {
   const filter = options.ignoreSearch ? "" : options.filter ?? state.filter;
   const nicheOnly = options.nicheOnly ?? state.nicheOnly;
-  const key = `videos::${nicheOnly ? "niche" : "all"}::${normalizeSearch(filter)}`;
+  const hideUnknownArtists = options.hideUnknownArtists ?? shouldHideUnknownForCurrentView();
+  const key = `videos::${nicheOnly ? "niche" : "all"}::${hideUnknownArtists ? "hide-unknown" : "show-unknown"}::${normalizeSearch(filter)}`;
   if (!rangeCache.sortedRecords.has(key)) {
-    rangeCache.sortedRecords.set(key, buildVideoViewItems(rangeCache.items, { filter, nicheOnly }));
+    rangeCache.sortedRecords.set(key, buildVideoViewItems(rangeCache.items, { filter, nicheOnly, hideUnknownArtists }));
   }
   return rangeCache.sortedRecords.get(key);
 }
@@ -1617,6 +1679,11 @@ function renderSummary(group, metrics, note = "") {
   }
 
   els.summary.append(renderSummaryActions());
+}
+
+function hiddenUnknownNote(selection) {
+  const count = Number(selection?.hiddenUnknownCount) || 0;
+  return state.hideUnknownArtist && count > 0 ? `已隐藏 ${count} 条无歌手收录` : "";
 }
 
 function renderSummaryActions() {
@@ -1905,11 +1972,16 @@ function renderLoadError(error, prefix = "读取失败") {
 function buildVideoViewItems(items, options = {}) {
   const filter = options.ignoreSearch ? "" : options.filter ?? state.filter;
   const nicheOnly = options.nicheOnly ?? state.nicheOnly;
+  const hideUnknownArtists = options.hideUnknownArtists ?? shouldHideUnknownForCurrentView();
   const normalizedFilter = normalizeSearch(filter);
   const result = [];
   for (const item of items || []) {
-    const sourceSongs = (item.songs || []).filter((song) => !nicheOnly || window.FrontendUtils.isNicheSong(song));
-    if (nicheOnly && !sourceSongs.length) continue;
+    const sourceSongs = (item.songs || []).filter(
+      (song) =>
+        (!nicheOnly || window.FrontendUtils.isNicheSong(song)) &&
+        (!hideUnknownArtists || !window.RankingUtils.isUnknownArtistName(song?.artist)),
+    );
+    if (!sourceSongs.length) continue;
     if (!normalizedFilter) {
       result.push({ ...item, songs: sourceSongs, _displaySongs: sourceSongs, _songSearchMatchCount: 0 });
       continue;
@@ -1951,6 +2023,10 @@ function collectSongOccurrences(items) {
 
 function filterNicheOccurrences(occurrences) {
   return window.FrontendUtils.filterOccurrencesByNiche(occurrences, true);
+}
+
+function filterUnknownArtistOccurrences(occurrences) {
+  return (occurrences || []).filter(({ song }) => !window.RankingUtils.isUnknownArtistName(song?.artist));
 }
 
 function matchesSearch(parts) {
@@ -2822,15 +2898,6 @@ function renderTrendBadge(trend) {
     badge.append(countNode);
   }
   return badge;
-}
-
-function infoText(topic) {
-  if (topic === "month") {
-    return "月度只收录 YouTube 月度搜索命中的结果，可延续同源历史结果，不会自动包含 72H。";
-  }
-  const generatedAt = state.songSearchLookup.generatedAt || state.payload?.generatedAt || "";
-  const dateText = generatedAt ? ` 曲库更新时间：${formatDate(generatedAt)}。` : "";
-  return `“小众”表示未匹配到本站使用的 song-search 已知曲库，不等同于播放量、知名度或质量评价。${dateText}`;
 }
 
 async function copyCurrentLink() {

@@ -4,6 +4,7 @@ const path = require("node:path");
 const test = require("node:test");
 
 const appSource = fs.readFileSync(path.join(__dirname, "..", "assets", "app.js"), "utf8");
+const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 
 test("initial app load does not fetch full latest or rank diffs in init", () => {
   const initBody = functionBody("async function init");
@@ -16,7 +17,16 @@ test("initial app load does not fetch full latest or rank diffs in init", () => 
 test("range cache and trend Map are wired into rendering", () => {
   assert.match(appSource, /rangeCache:\s*new Map\(\)/u);
   assert.match(appSource, /currentSelection\(rangeCache\)/u);
+  assert.match(functionBody("function currentSelection"), /hideUnknownForView/u);
   assert.match(functionBody("function trendForRecord"), /\.get\(record\.key\)/u);
+});
+
+test("home controls remove legacy info buttons and expose hide-unknown toggle", () => {
+  assert.doesNotMatch(indexSource, /data-info-topic/u);
+  assert.doesNotMatch(appSource, /data-info-topic/u);
+  assert.doesNotMatch(appSource, /function infoText/u);
+  assert.match(indexSource, /id="hideUnknownToggle"/u);
+  assert.match(appSource, /hideUnknownToggle/u);
 });
 
 test("record videoCount is used for rank values and row rendering", () => {

@@ -86,6 +86,9 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "はじまりはいつも雨", artist: "未記載" }), false);
 
   assert.equal(cleanSongTitleNoise("01| ハートアンドハート"), "ハートアンドハート");
+  assert.equal(cleanSongTitleNoise("8.32"), "8.32");
+  assert.equal(cleanSongTitleNoise("2.500♪"), "2.500♪");
+  assert.equal(cleanSongTitleNoise("01. Song"), "Song");
   assert.equal(cleanSongTitleNoise("10曲目   Brave Shine"), "Brave Shine");
   assert.equal(cleanSongTitleNoise("3 01. 初恋サイダー"), "初恋サイダー");
   assert.deepEqual(normalizeSongEntry({ title: "02| キュートなキューたい", artist: "CUTIE STREET" }), {

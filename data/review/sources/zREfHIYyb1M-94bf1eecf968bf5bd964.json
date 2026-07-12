@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:zREfHIYyb1M:94bf1eecf968bf5bd964",
   "video": {
     "videoId": "zREfHIYyb1M",
@@ -18,9 +18,10 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 12,
-    "riskLevel": "low",
+    "riskScore": 47,
+    "riskLevel": "medium",
     "riskReasons": [
+      "activity_marker_title",
       "short_unknown_title"
     ]
   },
@@ -36,7 +37,10 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "activity_marker_title",
         "short_unknown_title"
       ]
     },
@@ -51,6 +55,8 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -64,6 +70,8 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -77,6 +85,8 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -90,6 +100,8 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -103,6 +115,8 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -116,6 +130,8 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -129,9 +145,9 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -144,6 +160,8 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -157,9 +175,9 @@
       "sourceId": "selected:zREfHIYyb1M:94bf1eecf968bf5b",
       "sourceHash": "94bf1eecf968bf5bd96432d940c57103f2101804080cd54a3af26421838d4ed6",
       "isNiche": false,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     }
   ]
 }

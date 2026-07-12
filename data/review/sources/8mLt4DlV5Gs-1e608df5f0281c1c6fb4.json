@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:8mLt4DlV5Gs:1e608df5f0281c1c6fb4",
   "video": {
     "videoId": "8mLt4DlV5Gs",
@@ -18,11 +18,10 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 28,
+    "riskScore": 14,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_niche_short_titles",
-      "short_unknown_title"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -37,6 +36,8 @@
       "sourceId": "selected:8mLt4DlV5Gs:1e608df5f0281c1c",
       "sourceHash": "1e608df5f0281c1c6fb48d6295bffbc9aa7c0b313c6e8c4753ffe3675c94779a",
       "isNiche": true,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -50,6 +51,8 @@
       "sourceId": "selected:8mLt4DlV5Gs:1e608df5f0281c1c",
       "sourceHash": "1e608df5f0281c1c6fb48d6295bffbc9aa7c0b313c6e8c4753ffe3675c94779a",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -63,6 +66,8 @@
       "sourceId": "selected:8mLt4DlV5Gs:1e608df5f0281c1c",
       "sourceHash": "1e608df5f0281c1c6fb48d6295bffbc9aa7c0b313c6e8c4753ffe3675c94779a",
       "isNiche": true,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -76,9 +81,9 @@
       "sourceId": "selected:8mLt4DlV5Gs:1e608df5f0281c1c",
       "sourceHash": "1e608df5f0281c1c6fb48d6295bffbc9aa7c0b313c6e8c4753ffe3675c94779a",
       "isNiche": true,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -91,6 +96,8 @@
       "sourceId": "selected:8mLt4DlV5Gs:1e608df5f0281c1c",
       "sourceHash": "1e608df5f0281c1c6fb48d6295bffbc9aa7c0b313c6e8c4753ffe3675c94779a",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     }
   ]

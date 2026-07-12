@@ -4,7 +4,8 @@
   "private": true,
   "description": "Hourly YouTube timestamp song-list snapshots for 72H and one-month views.",
   "scripts": {
-    "update": "node scripts/update-songlist.js && node scripts/apply-song-search-niche.js && node scripts/build-review-queue.js && node scripts/build-runtime-data.js",
+    "update": "node scripts/update-songlist.js && node scripts/apply-song-search-niche.js && node scripts/build-review-queue.js && node scripts/export-dirty-candidates.js && node scripts/build-runtime-data.js",
+    "rebuild:derived": "node scripts/rebuild-derived-data.js && node scripts/build-review-queue.js && node scripts/export-dirty-candidates.js && node scripts/build-runtime-data.js",
     "build:runtime": "node scripts/build-runtime-data.js",
     "version:assets": "node scripts/update-asset-version.js",
     "compare:runtime-ranks": "node scripts/compare-runtime-ranks.js",
@@ -18,5 +19,13 @@
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

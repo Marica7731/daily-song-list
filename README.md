@@ -15,7 +15,7 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - If the previous successful snapshot is missing or too old, the script falls back to a full recovery queue covering today's, one-day-old, and two-day-old candidates before filling the remaining budget with monthly-filter candidates.
 2. It fetches each candidate watch page, extracts description and first comment continuations, parses timestamped song lists, and skips videos without usable songs.
    - Timestamp sources now keep stable review identity: YouTube comments and replies use their `commentId`, descriptions use `description:<videoId>:<hash>`, and hash fallback uses normalized source text SHA-256.
-   - `config/non-song-rules.json` contains conservative non-song rules. The global `exactUnknownArtistTitles` rule currently rejects only unknown-artist `曲紹介` and `離席` rows with reason `activity_marker_title`; the same titles with explicit known artists are kept for review instead of being automatically dropped.
+   - `config/non-song-rules.json` contains conservative non-song rules. Global activity rules apply only to unknown-artist rows and cover high-confidence section markers such as song intro/end labels, breaks, stream start/end notes, superchat/member reading, and sound checks. The same titles with explicit known artists are kept for review instead of being automatically dropped.
    - `config/curation-overrides.json` is the durable manual correction file. It supports `drop_entry`, `replace_entry`, `reject_source`, `drop_video`, and `force_keep`, keyed by `videoId` plus stable source and row identity.
    - Non-song chapter rows, chat highlights, setup sections, channel metrics, custom emoji prefixes, and low-quality mixed comment timelines are filtered before write.
    - When one timestamp source already contains many explicit `song / artist` rows, remaining title-only rows from that same source are treated as timeline notes rather than songs and are dropped during generation and carry-forward.
@@ -35,6 +35,10 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - `data/review/queue.json`
    - `data/review/sources/<videoId>-<sourceHash>.json`
    - `data/review/manifest.json`
+   - `data/review/all-niche-unknown.json`
+   - `data/review/all-niche-unknown.md`
+   - `data/review/parser-corruptions.json`
+   - `data/review/confirmed-noise.json`
    - `data/quality-report.json`
    - `data/snapshots/<hour>.json`
    - `data/snapshots/index.json`
@@ -51,6 +55,7 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - Initial load skips `song-search-known-songs.json` when payload songs already contain `isNiche`; older snapshots load that index only when niche annotation is missing. Current data with a supported `filterVersion` skips the full front-end safety filter, while older snapshots still run it for compatibility.
    - Each range keeps derived occurrences, song records, artist records, video search data, and per-record `videoCount` in memory. Pagination and page-size changes reuse those records and only rebuild the visible page DOM. Prepared historical snapshots keep the existing 5-entry in-memory LRU cache, while immutable hourly snapshot JSON uses browser cache.
    - URL state omits defaults, uses browser history for range/view/page/snapshot changes, and keeps search typing on `replaceState`. Song index bucket params are written only for the song index view.
+   - Unknown-artist rows are hidden by default in song ranking, song index, and video views. The URL writes `showUnknown=1` only when the user explicitly shows them; artist ranking is intentionally unaffected.
    - Video search keeps song-only matches visible before the fold. Rank views can switch between `按收录` and `按视频`, and latest song/artist ranks display movement from `data/diff`.
 5. `review.html` is a separate local review surface.
    - It loads only `data/review/queue.json` and per-source files under `data/review/sources/`.
@@ -69,6 +74,8 @@ npm test
 npm run update
 npm run build:runtime
 node scripts/build-review-queue.js
+node scripts/export-dirty-candidates.js
+npm run rebuild:derived
 node scripts/apply-curation-patch.js path/to/curation_patch.json
 npm run validate
 npm run check:budget
@@ -76,6 +83,8 @@ npm run version:assets
 npm run check
 python -m http.server 8080
 ```
+
+`npm run rebuild:derived` never fetches YouTube. It rereads local `data/latest.json` song `raw` fields with the current parser, reapplies durable curation rules and manual overrides, reuses local `data/song-search-known-songs.json`, rewrites `data/latest.json`, `data/72h.json`, `data/1m.json`, rank diffs, review reports, and compact `data/ui/*` runtime files. Use it for parser/rule/report fixes that should update the current published dataset without changing the remote scrape input.
 
 Useful environment variables:
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:jFEmsTpjCzU:6bc2cc12a6990f6d0812",
   "video": {
     "videoId": "jFEmsTpjCzU",
@@ -15,12 +15,13 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": ""
+    "snapshotId": "20260712T190000Z"
   },
   "risk": {
-    "riskScore": 50,
+    "riskScore": 66,
     "riskLevel": "medium",
     "riskReasons": [
+      "conversation_entry",
       "niche_unknown_artist",
       "source_multiple_niche_short_titles",
       "short_unknown_title"
@@ -38,6 +39,8 @@
       "sourceId": "selected:jFEmsTpjCzU:6bc2cc12a6990f6d",
       "sourceHash": "6bc2cc12a6990f6d0812743d79c6d7aaec0863c0427146b7adb1fda1c5506f24",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -51,7 +54,10 @@
       "sourceId": "selected:jFEmsTpjCzU:6bc2cc12a6990f6d",
       "sourceHash": "6bc2cc12a6990f6d0812743d79c6d7aaec0863c0427146b7adb1fda1c5506f24",
       "isNiche": true,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "niche_unknown_artist"
       ]
     },
@@ -66,6 +72,8 @@
       "sourceId": "selected:jFEmsTpjCzU:6bc2cc12a6990f6d",
       "sourceHash": "6bc2cc12a6990f6d0812743d79c6d7aaec0863c0427146b7adb1fda1c5506f24",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -79,6 +87,8 @@
       "sourceId": "selected:jFEmsTpjCzU:6bc2cc12a6990f6d",
       "sourceHash": "6bc2cc12a6990f6d0812743d79c6d7aaec0863c0427146b7adb1fda1c5506f24",
       "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title"
@@ -95,6 +105,8 @@
       "sourceId": "selected:jFEmsTpjCzU:6bc2cc12a6990f6d",
       "sourceHash": "6bc2cc12a6990f6d0812743d79c6d7aaec0863c0427146b7adb1fda1c5506f24",
       "isNiche": true,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     }
   ]

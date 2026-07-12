@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:4Fr59rRo_sw:7f47fb3bdb69f9d2a013",
   "video": {
     "videoId": "4Fr59rRo_sw",
@@ -18,10 +18,9 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 92,
-    "riskLevel": "high",
+    "riskScore": 30,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_unknown_artist_ratio_high",
       "source_multiple_unknown_artists",
       "niche_unknown_artist",
       "short_unknown_title"
@@ -39,9 +38,9 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -54,9 +53,9 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -69,9 +68,9 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -84,9 +83,9 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -99,9 +98,9 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -114,6 +113,8 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
@@ -131,9 +132,9 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -146,9 +147,9 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -161,9 +162,9 @@
       "sourceId": "selected:4Fr59rRo_sw:7f47fb3bdb69f9d2",
       "sourceHash": "7f47fb3bdb69f9d2a013f9e5e74c0bef3ac4bbe4911d8d1d5f07e026fce9fee5",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:Wr4HVxsDvPs:f50db3b618119edf3b10",
   "video": {
     "videoId": "Wr4HVxsDvPs",
@@ -18,10 +18,10 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 12,
-    "riskLevel": "low",
+    "riskScore": 35,
+    "riskLevel": "medium",
     "riskReasons": [
-      "short_unknown_title"
+      "conversation_entry"
     ]
   },
   "entries": [
@@ -36,9 +36,9 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -51,6 +51,8 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -64,6 +66,8 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -77,9 +81,9 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -92,6 +96,8 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -105,6 +111,8 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -118,9 +126,9 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -133,6 +141,8 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -146,7 +156,11 @@
       "sourceId": "selected:Wr4HVxsDvPs:f50db3b618119edf",
       "sourceHash": "f50db3b618119edf3b102d7f45eddc7215785c5763a1ef9f4266b79f5966bf01",
       "isNiche": false,
-      "riskReasons": []
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "conversation_entry"
+      ]
     }
   ]
 }

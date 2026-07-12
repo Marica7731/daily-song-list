@@ -1,7 +1,14 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 
-const { buildArtistRecords, buildArtistSongGroups, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
+const {
+  buildArtistRecords,
+  buildArtistSongGroups,
+  buildCompetitionRanks,
+  buildSongRecords,
+  isUnknownArtistName,
+  normalizeSongTitleKey,
+} = require("../assets/ranking-utils");
 
 test("merges same title with the same known artist", () => {
   const records = buildSongRecords([occurrence("花に亡霊", "ヨルシカ", "A"), occurrence("花に亡霊", "ヨルシカ", "B")]);
@@ -93,6 +100,20 @@ test("normalizes song title punctuation and list markers before grouping", () =>
   assert.equal(records[0].count, 4);
 });
 
+test("numeric dot title keys stay distinct from stripped list indexes", () => {
+  assert.equal(normalizeSongTitleKey("01. Song"), "song");
+  assert.equal(normalizeSongTitleKey("01) Song"), "song");
+  assert.notEqual(normalizeSongTitleKey("8.32"), normalizeSongTitleKey("32"));
+  assert.notEqual(normalizeSongTitleKey("2.500♪"), normalizeSongTitleKey("500♪"));
+
+  const records = buildSongRecords([occurrence("8.32", "*Luna", "A"), occurrence("32", "*Luna", "B")]);
+  assert.equal(records.length, 2);
+  assert.deepEqual(
+    records.map((record) => record.title).sort(),
+    ["32", "8.32"],
+  );
+});
+
 test("uses a clean title variant even when a dirty title appears first", () => {
   const records = buildSongRecords([
     occurrence("⑭HOT LIMIT", "T.M.Revolution", "A"),
@@ -151,6 +172,13 @@ test("artist ranking excludes unknown artist placeholders", () => {
   assert.deepEqual(records.map((record) => record.name), ["Known Artist"]);
   assert.equal(records[0].count, 1);
   assert.equal(missingArtistCount, 3);
+});
+
+test("unknown artist helper covers user-facing placeholder variants", () => {
+  for (const value of ["", "未記載", "未记载", "不明", "なし", "无", "待补", "待補", "unknown", "n/a", "na", "none", "null", "-"]) {
+    assert.equal(isUnknownArtistName(value), true, value);
+  }
+  assert.equal(isUnknownArtistName("Known Artist"), false);
 });
 
 test("artist ranking merges conservative non-identity artist annotations", () => {

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:YucHy0Kp-5o:6ebd809cbdd6954f3b9b",
   "video": {
     "videoId": "YucHy0Kp-5o",
@@ -18,9 +18,11 @@
     "snapshotId": "20260711T150000Z"
   },
   "risk": {
-    "riskScore": 24,
-    "riskLevel": "low",
+    "riskScore": 91,
+    "riskLevel": "high",
     "riskReasons": [
+      "source_conversation_timeline",
+      "conversation_entry",
       "source_multiple_unknown_artists"
     ]
   },
@@ -36,7 +38,10 @@
       "sourceId": "selected:YucHy0Kp-5o:6ebd809cbdd6954f",
       "sourceHash": "6ebd809cbdd6954f3b9b1e951617aabe68782fccfa3d79620a32225bbd21cf71",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     },
@@ -51,7 +56,10 @@
       "sourceId": "selected:YucHy0Kp-5o:6ebd809cbdd6954f",
       "sourceHash": "6ebd809cbdd6954f3b9b1e951617aabe68782fccfa3d79620a32225bbd21cf71",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     },
@@ -66,6 +74,8 @@
       "sourceId": "selected:YucHy0Kp-5o:6ebd809cbdd6954f",
       "sourceHash": "6ebd809cbdd6954f3b9b1e951617aabe68782fccfa3d79620a32225bbd21cf71",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -79,6 +89,8 @@
       "sourceId": "selected:YucHy0Kp-5o:6ebd809cbdd6954f",
       "sourceHash": "6ebd809cbdd6954f3b9b1e951617aabe68782fccfa3d79620a32225bbd21cf71",
       "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "riskReasons": []
     },
     {
@@ -92,7 +104,10 @@
       "sourceId": "selected:YucHy0Kp-5o:6ebd809cbdd6954f",
       "sourceHash": "6ebd809cbdd6954f3b9b1e951617aabe68782fccfa3d79620a32225bbd21cf71",
       "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
       "riskReasons": [
+        "conversation_entry",
         "source_multiple_unknown_artists"
       ]
     }

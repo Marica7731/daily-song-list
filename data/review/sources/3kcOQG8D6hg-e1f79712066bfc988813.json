@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:3kcOQG8D6hg:e1f79712066bfc988813",
   "video": {
     "videoId": "3kcOQG8D6hg",
@@ -18,10 +18,9 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 100,
-    "riskLevel": "high",
+    "riskScore": 44,
+    "riskLevel": "medium",
     "riskReasons": [
-      "source_unknown_artist_ratio_high",
       "niche_unknown_artist",
       "source_multiple_unknown_artists",
       "short_unknown_title",
@@ -40,6 +39,8 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
@@ -56,6 +57,8 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
@@ -73,9 +76,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -88,9 +91,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -103,6 +106,8 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
         "niche_unknown_artist",
         "short_unknown_title",
@@ -120,9 +125,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -135,9 +140,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -150,9 +155,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -165,9 +170,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -180,9 +185,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -195,9 +200,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -210,9 +215,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -225,9 +230,9 @@
       "sourceId": "selected:3kcOQG8D6hg:e1f79712066bfc98",
       "sourceHash": "e1f79712066bfc9888131117fff3ee0c9ca3bfd2b67614e688f4f3a271c5450e",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     }
   ]
 }

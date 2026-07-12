@@ -6,7 +6,7 @@ const ROOT = path.resolve(__dirname, "..");
 const CONFIG_DIR = path.join(ROOT, "config");
 const OVERRIDES_PATH = path.join(CONFIG_DIR, "curation-overrides.json");
 const NON_SONG_RULES_PATH = path.join(CONFIG_DIR, "non-song-rules.json");
-const UNKNOWN_ARTIST_RE = /^(?:未記載|未记载|待补歌手|待補歌手|待补|待補)$/u;
+const UNKNOWN_ARTIST_KEYS = new Set(["", "unknown", "n/a", "na", "none", "null", "未記載", "未记载", "不明", "なし", "无", "待补歌手", "待補歌手", "待补", "待補", "-"]);
 const VALID_ACTIONS = new Set(["drop_entry", "replace_entry", "reject_source", "drop_video", "force_keep"]);
 const ENTRY_ACTIONS = new Set(["drop_entry", "replace_entry", "force_keep"]);
 const SOURCE_ACTIONS = new Set(["reject_source"]);
@@ -38,6 +38,7 @@ function normalizeNonSongRules(rules) {
     schemaVersion: Number(rules.schemaVersion) || 1,
     exactUnknownArtistTitles: uniqueNormalizedTitles(rules.exactUnknownArtistTitles),
     candidateActivityTitles: uniqueNormalizedTitles(rules.candidateActivityTitles),
+    activityTitlePatterns: Array.isArray(rules.activityTitlePatterns) ? rules.activityTitlePatterns.map((value) => String(value || "").trim()).filter(Boolean) : [],
     channelScopedExactTitles: Array.isArray(rules.channelScopedExactTitles) ? rules.channelScopedExactTitles : [],
     channelScopedPatterns: Array.isArray(rules.channelScopedPatterns) ? rules.channelScopedPatterns : [],
   };
@@ -237,19 +238,103 @@ function uniqueNormalizedTitles(values) {
 }
 
 function isUnknownArtist(artist) {
-  const value = String(artist || "").trim();
-  return !value || UNKNOWN_ARTIST_RE.test(value);
+  return UNKNOWN_ARTIST_KEYS.has(normalizeUnknownArtistKey(artist));
 }
 
-function isActivityMarkerTitle(title, artist, rules = loadNonSongRulesSafe()) {
+function normalizeUnknownArtistKey(value) {
+  return String(value || "").normalize("NFKC").replace(/\s+/g, " ").trim().toLocaleLowerCase();
+}
+
+function isActivityMarkerTitle(title, artist, rules = loadNonSongRulesSafe(), options = {}) {
+  if (options.knownSong === true) return false;
   if (!isUnknownArtist(artist)) return false;
   const normalizedTitle = normalizeCurationTitle(title);
-  return rules.exactUnknownArtistTitles.includes(normalizedTitle);
+  return rules.exactUnknownArtistTitles.includes(normalizedTitle) || matchesActivityTitlePattern(title, rules);
 }
 
 function isCandidateActivityTitle(title, rules = loadNonSongRulesSafe()) {
   const normalizedTitle = normalizeCurationTitle(title);
-  return rules.exactUnknownArtistTitles.includes(normalizedTitle) || rules.candidateActivityTitles.includes(normalizedTitle);
+  return (
+    rules.exactUnknownArtistTitles.includes(normalizedTitle) ||
+    rules.candidateActivityTitles.includes(normalizedTitle) ||
+    matchesActivityTitlePattern(title, rules)
+  );
+}
+
+function matchesActivityTitlePattern(title, rules = loadNonSongRulesSafe()) {
+  const value = String(title || "").normalize("NFKC").trim();
+  for (const pattern of rules.activityTitlePatterns || []) {
+    try {
+      if (new RegExp(pattern, "iu").test(value)) return true;
+    } catch {
+      continue;
+    }
+  }
+  return false;
+}
+
+function isConversationEntry(song) {
+  const title = String(song?.title || "").trim();
+  const artist = String(song?.artist || "").trim();
+  const raw = String(song?.raw || "");
+  if (!isUnknownArtist(artist)) return false;
+  const value = normalizeConversationText(title);
+  if (!value) return false;
+  if (isEmojiOrReactionOnly(title)) return true;
+  if (/^(?:や|やー|やあ|やほ|やっほ|わあ|あ|え|お|ん|うん|はい|ええ)[…~〜～!！?？。.\s]*$/iu.test(value)) return true;
+  if (/(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう)$/iu.test(value)) return true;
+  if (/(?:背景を変える|横に置く|食べる|飲む|お名前呼び|配信告知|チャンネル登録|スパチャ|メンシ|スクショ|サムネ)/iu.test(value)) return true;
+  if (/(?:クッキング|ケーキ|テーマは|浮かれて|よっこいしょ)/iu.test(value)) return true;
+  if (/[\u{1F300}-\u{1FAFF}]/u.test(title) && title.length <= 18) return true;
+  return /(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます)/iu.test(raw);
+}
+
+function normalizeConversationText(text) {
+  return String(text || "")
+    .normalize("NFKC")
+    .replace(/[:：]_[^\s　:：]+[:：]?/gu, "")
+    .replace(/[\u200b-\u200f\u202a-\u202e\ufe0e\ufe0f]/gu, "")
+    .replace(/\s+/g, "")
+    .trim();
+}
+
+function isEmojiOrReactionOnly(text) {
+  const value = normalizeConversationText(text).replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
+  return Boolean(value && value.length <= 4 && !/[\p{Letter}\p{Number}一-龯ぁ-んァ-ヶ]/u.test(value));
+}
+
+function isParserCorruptionEntry(song) {
+  const raw = String(song?.raw || "").normalize("NFKC");
+  const title = String(song?.title || "").normalize("NFKC").trim();
+  if (!raw || !title) return false;
+  const decimalMatches = raw.match(/\b\d+(?:\.\d+)+(?:[^\s/／|｜]*)?/gu) || [];
+  for (const candidate of decimalMatches) {
+    if (!candidate || title === candidate || title.startsWith(candidate)) continue;
+    const truncated = candidate.replace(/^\d+\./u, "");
+    if (title === truncated || title.startsWith(truncated)) return true;
+  }
+  return false;
+}
+
+function classifyEntry(song, options = {}) {
+  const knownSong = options.knownSong === true || (typeof options.knownSongMatcher === "function" && options.knownSongMatcher(song));
+  const unknownArtist = isUnknownArtist(song?.artist);
+  if (isParserCorruptionEntry(song)) {
+    return { classification: "parser_corruption", suggestedAction: "replace_entry", riskReasons: ["parser_corruption"] };
+  }
+  if (unknownArtist && !knownSong && isActivityMarkerTitle(song?.title, song?.artist, options.rules || loadNonSongRulesSafe())) {
+    return { classification: "confirmed_noise", suggestedAction: "drop_entry", riskReasons: ["activity_marker_title"] };
+  }
+  if (unknownArtist && !knownSong && isConversationEntry(song)) {
+    return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["conversation_entry"] };
+  }
+  if (unknownArtist && knownSong) {
+    return { classification: "likely_song", suggestedAction: "keep", riskReasons: ["known_song_unknown_artist"] };
+  }
+  if (song?.isNiche === true && unknownArtist) {
+    return { classification: "needs_review", suggestedAction: "manual_review", riskReasons: ["niche_unknown_artist"] };
+  }
+  return { classification: "likely_song", suggestedAction: "keep", riskReasons: [] };
 }
 
 function applyCurationToSources(sources, context, candidate = {}) {
@@ -296,7 +381,14 @@ function applyCurationToSources(sources, context, candidate = {}) {
 
 function applyCurationToVideos(videos, context) {
   const overrides = context?.overrides?.records || [];
-  const stats = { droppedVideos: 0, droppedEntries: 0, replacedEntries: 0, forceRefreshVideoIds: collectForceRefreshVideoIds(context).size };
+  const stats = {
+    droppedVideos: 0,
+    droppedEntries: 0,
+    replacedEntries: 0,
+    ruleDroppedEntries: 0,
+    conversationDroppedEntries: 0,
+    forceRefreshVideoIds: collectForceRefreshVideoIds(context).size,
+  };
   const result = [];
   for (const video of videos || []) {
     if (matchesAnyOverride(overrides, "drop_video", { videoId: video.videoId })) {
@@ -308,8 +400,11 @@ function applyCurationToVideos(videos, context) {
       continue;
     }
     const source = {
-      sourceId: video.selectedSourceId || video.sourceId || "",
-      sourceHash: video.selectedSourceHash || video.sourceHash || "",
+      sourceId: video.selectedSourceId || video.sourceId || (video.videoId ? `legacy:${video.videoId}` : ""),
+      sourceHash:
+        video.selectedSourceHash ||
+        video.sourceHash ||
+        hashNormalizedText(JSON.stringify((video.songs || []).map((song) => [song.seconds, song.title, song.artist, song.raw || ""]))),
     };
     const songs = [];
     for (const song of video.songs || []) {
@@ -322,6 +417,15 @@ function applyCurationToVideos(videos, context) {
       const matchContext = { videoId: video.videoId, source, song: enriched };
       if (matchesAnyOverride(overrides, "drop_entry", matchContext)) {
         stats.droppedEntries += 1;
+        continue;
+      }
+      const classification = classifyEntry(enriched, { rules: context?.nonSongRules });
+      if (classification.suggestedAction === "drop_entry" && classification.classification === "confirmed_noise") {
+        stats.ruleDroppedEntries += 1;
+        continue;
+      }
+      if (classification.suggestedAction === "drop_entry" && classification.classification === "likely_noise") {
+        stats.conversationDroppedEntries += 1;
         continue;
       }
       const replacement = findOverride(overrides, "replace_entry", matchContext);
@@ -354,6 +458,8 @@ function recomputeSourceStats(stats, songs) {
   const artistCount = songs.filter((song) => !isUnknownArtist(song.artist)).length;
   const unknownArtistCount = songs.length - artistCount;
   const activityMarkerCount = songs.filter((song) => isCandidateActivityTitle(song.title)).length;
+  const conversationEntryCount = songs.filter((song) => isConversationEntry(song)).length;
+  const parserCorruptionCount = songs.filter((song) => isParserCorruptionEntry(song)).length;
   const nicheCount = songs.filter((song) => song.isNiche === true).length;
   return {
     ...stats,
@@ -364,6 +470,9 @@ function recomputeSourceStats(stats, songs) {
     unknownArtistRatio: songs.length ? unknownArtistCount / songs.length : 0,
     activityMarkerCount,
     activityMarkerRatio: songs.length ? activityMarkerCount / songs.length : 0,
+    conversationEntryCount,
+    conversationRatio: songs.length ? conversationEntryCount / songs.length : 0,
+    parserCorruptionCount,
     nicheCount,
     nicheRatio: songs.length ? nicheCount / songs.length : 0,
   };
@@ -406,9 +515,11 @@ function entryRiskReasons({ song, knownSongMatcher, sourceStats = {} }) {
   const title = String(song?.title || "");
   const artist = String(song?.artist || "");
   const knownSong = knownSongMatcher ? knownSongMatcher(song) : false;
-  if (song?.isNiche === true && isUnknownArtist(artist)) reasons.push("niche_unknown_artist");
-  if (isCandidateActivityTitle(title)) reasons.push("activity_marker_title");
-  if (normalizeCurationTitle(title).length <= 4 && !knownSong) reasons.push("short_unknown_title");
+  if (isParserCorruptionEntry(song)) reasons.push("parser_corruption");
+  if (!knownSong && isActivityMarkerTitle(title, artist)) reasons.push("activity_marker_title");
+  if (!knownSong && isConversationEntry(song)) reasons.push("conversation_entry");
+  if (song?.isNiche === true && isUnknownArtist(artist) && !knownSong) reasons.push("niche_unknown_artist");
+  if (normalizeCurationTitle(title).length <= 4 && !knownSong && isUnknownArtist(artist)) reasons.push("short_unknown_title");
   if (isUnknownArtist(artist) && sourceStats.unknownArtistCount >= 3) reasons.push("source_multiple_unknown_artists");
   if (song?.isNiche === true && normalizeCurationTitle(title).length <= 8 && sourceStats.nicheCount >= 3) {
     reasons.push("source_multiple_niche_short_titles");
@@ -419,8 +530,14 @@ function entryRiskReasons({ song, knownSongMatcher, sourceStats = {} }) {
 function sourceRiskReasons(source, knownSongMatcher) {
   const stats = source.stats || source;
   const reasons = [];
-  if ((stats.unknownArtistRatio || 0) >= 0.75 && (stats.keptCount || 0) >= 4) reasons.push("source_unknown_artist_ratio_high");
+  if ((stats.unknownArtistRatio || 0) >= 0.75 && (stats.keptCount || 0) >= 4 && (stats.knownSongCount || 0) <= 2) {
+    reasons.push("source_unknown_artist_ratio_high");
+  }
   if ((stats.activityMarkerRatio || 0) >= 0.15 && (stats.activityMarkerCount || 0) >= 1) reasons.push("source_activity_marker_ratio_high");
+  if ((stats.conversationEntryCount || 0) >= 3 && (stats.conversationRatio || 0) >= 0.35 && (stats.knownSongCount || 0) <= 2) {
+    reasons.push("source_conversation_timeline");
+  }
+  if ((stats.parserCorruptionCount || 0) >= 2) reasons.push("source_parser_corruption");
   if ((stats.topicCount || 0) >= 3) reasons.push("source_many_topic_entries");
   if ((stats.activityMarkerCount || 0) >= 3) reasons.push("source_many_activity_entries");
   if ((stats.suspiciousEntryCount || 0) > Math.max(2, (stats.knownSongCount || 0) * 2)) reasons.push("suspicious_rows_exceed_known_songs");
@@ -434,12 +551,16 @@ function sourceRiskReasons(source, knownSongMatcher) {
 function riskScoreFromReasons(reasons, stats = {}) {
   let score = 0;
   for (const reason of reasons || []) {
-    if (/activity|exceed|low_known|ratio_high/.test(reason)) score += 28;
-    else if (/multiple|topic|niche/.test(reason)) score += 18;
+    if (/activity|conversation|parser|exceed|low_known|ratio_high/.test(reason)) score += 28;
+    else if (/multiple|topic/.test(reason)) score += 14;
+    else if (/niche_unknown_artist/.test(reason)) score += 6;
+    else if (/known_song_unknown_artist/.test(reason)) score += 2;
     else score += 10;
   }
   score += Math.min(25, (stats.activityMarkerCount || 0) * 8);
-  score += Math.min(20, (stats.unknownArtistCount || 0) * 2);
+  score += Math.min(25, (stats.conversationEntryCount || 0) * 6);
+  score += Math.min(25, (stats.parserCorruptionCount || 0) * 10);
+  if ((stats.knownSongCount || 0) <= 2) score += Math.min(12, (stats.unknownArtistCount || 0));
   return Math.min(100, score);
 }
 
@@ -480,6 +601,7 @@ module.exports = {
   VALID_ACTIONS,
   applyCurationToSources,
   applyCurationToVideos,
+  classifyEntry,
   collectForceRefreshVideoIds,
   createSourceRecord,
   entryRiskReasons,
@@ -487,6 +609,8 @@ module.exports = {
   hasRejectSourceOverride,
   isActivityMarkerTitle,
   isCandidateActivityTitle,
+  isConversationEntry,
+  isParserCorruptionEntry,
   isUnknownArtist,
   loadCurationContext,
   mergeCurationPatch,

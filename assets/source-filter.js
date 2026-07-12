@@ -139,7 +139,10 @@
       const original = value;
       value = stripCustomEmojiAliases(value).trim();
       value = value
-        .replace(/^\s*(?:[#＃]?\d{1,3}\s+)?[#＃]?\d{1,3}\s*[.)．、:：|｜]\s*/u, "")
+        .replace(
+          /^\s*(?:[#＃]?\d{1,3}\s+)?(?:[#＃]?\d{1,3}\s*[)）、:：|｜]\s*|[#＃]?\d{1,3}\s*[.．](?![\d０-９])\s*)/u,
+          "",
+        )
         .trim();
       value = value
         .replace(/^\s*(?:[#＃]?\d{1,3}\s+)?[#＃]?\d{1,3}\s*曲目\s*(?:[.)．、:：|｜\-—–−]\s*)?/u, "")
@@ -263,6 +266,7 @@
       "待補歌手",
       "待补",
       "待補",
+      "-",
     ]).has(String(value || "").trim());
   }
 

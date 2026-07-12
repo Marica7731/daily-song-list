@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T19:26:39.318Z",
+  "generatedAt": "2026-07-12T20:10:29.288Z",
   "reviewId": "review:wcH48K_F3yI:4444ed92f16487e20033",
   "video": {
     "videoId": "wcH48K_F3yI",
@@ -18,10 +18,9 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 72,
-    "riskLevel": "high",
+    "riskScore": 20,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_unknown_artist_ratio_high",
       "source_multiple_unknown_artists",
       "niche_unknown_artist"
     ]
@@ -38,9 +37,9 @@
       "sourceId": "selected:wcH48K_F3yI:4444ed92f16487e2",
       "sourceHash": "4444ed92f16487e200334d731777ad0335c754ce5d769fa703a8fe110159e8aa",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -53,9 +52,9 @@
       "sourceId": "selected:wcH48K_F3yI:4444ed92f16487e2",
       "sourceHash": "4444ed92f16487e200334d731777ad0335c754ce5d769fa703a8fe110159e8aa",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -68,6 +67,8 @@
       "sourceId": "selected:wcH48K_F3yI:4444ed92f16487e2",
       "sourceHash": "4444ed92f16487e200334d731777ad0335c754ce5d769fa703a8fe110159e8aa",
       "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
@@ -84,9 +85,9 @@
       "sourceId": "selected:wcH48K_F3yI:4444ed92f16487e2",
       "sourceHash": "4444ed92f16487e200334d731777ad0335c754ce5d769fa703a8fe110159e8aa",
       "isNiche": false,
-      "riskReasons": [
-        "source_multiple_unknown_artists"
-      ]
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "riskReasons": []
     }
   ]
 }
