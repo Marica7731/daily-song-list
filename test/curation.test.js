@@ -7,6 +7,7 @@ const {
   classifyEntry,
   createSourceRecord,
   hashNormalizedText,
+  isActivityMarkerTitle,
   isConversationEntry,
   isParserCorruptionEntry,
   mergeCurationPatch,
@@ -137,6 +138,30 @@ test("curation drops high-confidence activity titles but keeps known songs", () 
   );
 
   assert.deepEqual(videos[0].songs.map((item) => item.title), ["曲紹介"]);
+  assert.equal(videos.curationStats.ruleDroppedEntries, 2);
+});
+
+test("curation drops reviewed unknown-artist activity leftovers from production data", () => {
+  assert.equal(isActivityMarkerTitle("戻り", "未記載"), true);
+  assert.equal(isActivityMarkerTitle("本日も〜？ひなたびよりー☀️", "未記載"), true);
+  assert.equal(isActivityMarkerTitle("戻り", "Known Artist"), false);
+
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "Nera7o9MuwM",
+        songs: [
+          { title: "戻り", artist: "未記載", seconds: 1438, raw: "23:58  戻り" },
+          { title: "本日も〜？ひなたびよりー☀️", artist: "未記載", seconds: 545, raw: "0:09:05 本日も〜？ひなたびよりー☀️" },
+          { title: "戻り", artist: "Known Artist", seconds: 2000, raw: "33:20 戻り / Known Artist" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(videos[0].songs.map((item) => item.title), ["戻り"]);
+  assert.equal(videos[0].songs[0].artist, "Known Artist");
   assert.equal(videos.curationStats.ruleDroppedEntries, 2);
 });
 

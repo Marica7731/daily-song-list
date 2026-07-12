@@ -72,22 +72,7 @@ function main() {
     source: {
       ...(latest.source || {}),
       rebuiltDerivedAt: new Date().toISOString(),
-      curationSummary: {
-        ...(latest.source?.curationSummary || {}),
-        manualDroppedEntryCount: stats.manualDroppedEntryCount,
-        manualReplacedEntryCount: stats.manualReplacedEntryCount,
-        ruleDroppedEntryCount: stats.ruleDroppedEntryCount + stats.conversationDroppedEntryCount + stats.qualityDroppedEntryCount,
-        conversationDroppedEntryCount: stats.conversationDroppedEntryCount,
-        qualityDroppedEntryCount: stats.qualityDroppedEntryCount,
-        manualDroppedVideoCount: stats.droppedVideoCount,
-        forceRefreshVideoCount: stats.forceRefreshVideoIds.length,
-        forceRefreshVideoIds: [...new Set(stats.forceRefreshVideoIds)].sort(),
-        fixedTitleCount: stats.fixedTitleCount,
-        fixedArtistCount: stats.fixedArtistCount,
-        fixedSecondsCount: stats.fixedSecondsCount,
-        parsedFromRawCount: stats.parsedFromRaw,
-        missingRawCount: stats.missingRawCount,
-      },
+      curationSummary: buildCurationSummary(latest.source?.curationSummary, stats),
     },
   };
 
@@ -192,6 +177,37 @@ function selectParsedSong(parsed, original) {
 
 function countSongs(items) {
   return (items || []).reduce((sum, item) => sum + (item.songs || []).length, 0);
+}
+
+function buildCurationSummary(previous = {}, stats) {
+  const newRuleDropped = stats.ruleDroppedEntryCount + stats.conversationDroppedEntryCount + stats.qualityDroppedEntryCount;
+  return {
+    ...(previous || {}),
+    manualDroppedEntryCount: carryCount(previous.manualDroppedEntryCount, stats.manualDroppedEntryCount),
+    manualReplacedEntryCount: carryCount(previous.manualReplacedEntryCount, stats.manualReplacedEntryCount),
+    ruleDroppedEntryCount: carryCount(previous.ruleDroppedEntryCount, newRuleDropped),
+    conversationDroppedEntryCount: carryCount(previous.conversationDroppedEntryCount, stats.conversationDroppedEntryCount),
+    qualityDroppedEntryCount: carryCount(previous.qualityDroppedEntryCount, stats.qualityDroppedEntryCount),
+    manualDroppedVideoCount: carryCount(previous.manualDroppedVideoCount, stats.droppedVideoCount),
+    forceRefreshVideoCount: Math.max(numberOrZero(previous.forceRefreshVideoCount), stats.forceRefreshVideoIds.length),
+    forceRefreshVideoIds: [...new Set([...(previous.forceRefreshVideoIds || []), ...stats.forceRefreshVideoIds])].sort(),
+    fixedTitleCount: carryCount(previous.fixedTitleCount, stats.fixedTitleCount),
+    fixedArtistCount: carryCount(previous.fixedArtistCount, stats.fixedArtistCount),
+    fixedSecondsCount: carryCount(previous.fixedSecondsCount, stats.fixedSecondsCount),
+    parsedFromRawCount: Math.max(numberOrZero(previous.parsedFromRawCount), stats.parsedFromRaw),
+    missingRawCount: Math.max(numberOrZero(previous.missingRawCount), stats.missingRawCount),
+  };
+}
+
+function carryCount(previousValue, newValue) {
+  const previous = numberOrZero(previousValue);
+  const current = numberOrZero(newValue);
+  return current > 0 ? previous + current : previous;
+}
+
+function numberOrZero(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : 0;
 }
 
 function attachSongSearchSummary(payload, summary) {

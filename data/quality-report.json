@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T20:10:29.288Z",
-  "curationVersion": "curation-v1:78fe53608afd",
-  "curationHash": "78fe53608afdb593071ec58dfe8aae749ae5a86e84ea6e1f1d0e933004c1d16e",
-  "totalSongs": 12882,
-  "unknownArtistCount": 3134,
-  "nicheUnknownArtistCount": 1612,
-  "highRiskEntryCount": 2409,
-  "highRiskSourceCount": 167,
+  "generatedAt": "2026-07-12T20:43:44.020Z",
+  "curationVersion": "curation-v1:247c48f55755",
+  "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
+  "totalSongs": 12874,
+  "unknownArtistCount": 3126,
+  "nicheUnknownArtistCount": 1604,
+  "highRiskEntryCount": 2292,
+  "highRiskSourceCount": 171,
   "manualDroppedEntryCount": 18,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 114,
+  "ruleDroppedEntryCount": 122,
   "conversationDroppedEntryCount": 114,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 171,
+  "confirmedNoiseCount": 187,
   "parserCorruptionCount": 17,
   "likelyNoiseCount": 203,
-  "needsReviewCount": 3178,
-  "likelySongCount": 14178,
+  "needsReviewCount": 3159,
+  "likelySongCount": 14206,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -51,19 +51,6 @@
         "likely_song": 12
       },
       "riskReasons": {
-        "short_unknown_title": 12,
-        "source_multiple_unknown_artists": 12
-      }
-    },
-    {
-      "value": "戻り",
-      "count": 12,
-      "classifications": {
-        "needs_review": 12
-      },
-      "riskReasons": {
-        "activity_marker_title": 12,
-        "niche_unknown_artist": 12,
         "short_unknown_title": 12,
         "source_multiple_unknown_artists": 12
       }
@@ -103,18 +90,6 @@
       }
     },
     {
-      "value": "本日も〜？ひなたびよりー☀️",
-      "count": 9,
-      "classifications": {
-        "likely_song": 2,
-        "needs_review": 7
-      },
-      "riskReasons": {
-        "niche_unknown_artist": 7,
-        "source_multiple_unknown_artists": 4
-      }
-    },
-    {
       "value": "_可愛い:ぷくっ",
       "count": 8,
       "classifications": {
@@ -131,6 +106,31 @@
         "needs_review": 8
       },
       "riskReasons": {
+        "niche_unknown_artist": 8,
+        "short_unknown_title": 8,
+        "source_multiple_unknown_artists": 8
+      }
+    },
+    {
+      "value": "本日も〜？ひなたびよりー☀️",
+      "count": 8,
+      "classifications": {
+        "confirmed_noise": 8
+      },
+      "riskReasons": {
+        "activity_marker_title": 8,
+        "niche_unknown_artist": 6,
+        "source_multiple_unknown_artists": 4
+      }
+    },
+    {
+      "value": "戻り",
+      "count": 8,
+      "classifications": {
+        "confirmed_noise": 8
+      },
+      "riskReasons": {
+        "activity_marker_title": 8,
         "niche_unknown_artist": 8,
         "short_unknown_title": 8,
         "source_multiple_unknown_artists": 8
@@ -261,7 +261,7 @@
     },
     {
       "value": "菜鳥ひなた / Hinata Natori",
-      "count": 9
+      "count": 12
     },
     {
       "value": "音ノ乃のの / NononoNono",
@@ -635,12 +635,29 @@
   ],
   "newUnseenPatterns": [
     "曲終わり",
-    "戻り",
     "おつウタノン",
+    "本日も〜？ひなたびよりー☀️",
+    "戻り",
     "曲紹介",
     "離席"
   ],
   "history": [
+    {
+      "generatedAt": "2026-07-12T20:43:44.020Z",
+      "totalSongs": 12874,
+      "unknownArtistCount": 3126,
+      "nicheUnknownArtistCount": 1604,
+      "highRiskEntryCount": 2292,
+      "highRiskSourceCount": 171
+    },
+    {
+      "generatedAt": "2026-07-12T20:40:10.608Z",
+      "totalSongs": 12874,
+      "unknownArtistCount": 3126,
+      "nicheUnknownArtistCount": 1604,
+      "highRiskEntryCount": 2292,
+      "highRiskSourceCount": 171
+    },
     {
       "generatedAt": "2026-07-12T20:10:29.288Z",
       "totalSongs": 12882,

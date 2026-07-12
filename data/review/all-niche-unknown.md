@@ -1,14 +1,14 @@
 # 全量小众无歌手人工审核清单
 
-生成时间：2026-07-12T20:12:51.313Z
+生成时间：2026-07-12T20:44:35.764Z
 
-候选总数：1612
-唯一视频数：209
-唯一来源数：209
+候选总数：1604
+唯一视频数：205
+唯一来源数：205
 已确认非歌曲：0
 已确认解析错误：0
 高概率非歌曲：0
-需要人工判断：1612
+需要人工判断：1604
 高概率真实歌曲：0
 
 ## 已确认非歌曲
@@ -1835,38 +1835,6 @@
 | --- | --- | --- | --- | --- | --- |
 | [9:45:40](https://www.youtube.com/watch?v=k27-6IVBksg&t=35140s) | ㊗ 1,000人達成 ㊗ | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 
-### 【耐久】 チャンネル登録2万人耐久歌枠！ 【弾き語り】 \#菜鳥ひなた
-- 视频：[3npLfTe1xmU](https://www.youtube.com/watch?v=3npLfTe1xmU)
-- 频道：菜鳥ひなた / Hinata Natori
-
-| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 |
-| --- | --- | --- | --- | --- | --- |
-| [0:09:05](https://www.youtube.com/watch?v=3npLfTe1xmU&t=545s) | 本日も〜？ひなたびよりー☀️ | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
-
-### 【弾き語り】 チャンネル登録2万人目前！決起集歌！ 【歌枠】 \#shorts \#菜鳥ひなた \#karaoke Singing Stream
-- 视频：[Igp81Rj\-QHc](https://www.youtube.com/watch?v=Igp81Rj-QHc)
-- 频道：菜鳥ひなた / Hinata Natori
-
-| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 |
-| --- | --- | --- | --- | --- | --- |
-| [0:10:54](https://www.youtube.com/watch?v=Igp81Rj-QHc&t=654s) | 本日も〜？ひなたびよりー☀️ | 未記載 | 1m | niche_unknown_artist | manual_review |
-
-### 【弾き語り】 のんびり昼歌 【歌枠】 \#shorts \#菜鳥ひなた \#karaoke Singing Stream
-- 视频：[oVpe2gnqdAU](https://www.youtube.com/watch?v=oVpe2gnqdAU)
-- 频道：菜鳥ひなた / Hinata Natori
-
-| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 |
-| --- | --- | --- | --- | --- | --- |
-| [0:07:34](https://www.youtube.com/watch?v=oVpe2gnqdAU&t=454s) | 本日も〜？ひなたびよりー☀️ | 未記載 | 1m | niche_unknown_artist | manual_review |
-
-### 【弾き語り】 ワールドカップ 決勝T ブラジル戦、キックオフまで寝られなくない？ 【歌枠】 \#shorts \#菜鳥ひなた \#karaoke Singing Stream
-- 视频：[GsWidWYRJXg](https://www.youtube.com/watch?v=GsWidWYRJXg)
-- 频道：菜鳥ひなた / Hinata Natori
-
-| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 |
-| --- | --- | --- | --- | --- | --- |
-| [0:06:53](https://www.youtube.com/watch?v=GsWidWYRJXg&t=413s) | 本日も〜？ひなたびよりー☀️ | 未記載 | 1m | niche_unknown_artist | manual_review |
-
 ### 【 \#キラッと輝く歌枠リレー】初の歌枠リレー！！！キラっと輝けるのか！？輝く歌うたうぞ！！【埼凰リンネ / YUMENOS】\#新人vtuber
 - 视频：[d7\-88bfRMhE](https://www.youtube.com/watch?v=d7-88bfRMhE)
 - 频道：埼凰リンネ / rinne\_saio
@@ -2458,7 +2426,6 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 |
 | --- | --- | --- | --- | --- | --- |
 | [0:17:38](https://www.youtube.com/watch?v=Nera7o9MuwM&t=1058s) | そのうちshortあげる | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
-| [0:23:58](https://www.youtube.com/watch?v=Nera7o9MuwM&t=1438s) | 戻り | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [0:24:47](https://www.youtube.com/watch?v=Nera7o9MuwM&t=1487s) | 自分で全部管理すんのえぐい | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [0:29:04](https://www.youtube.com/watch?v=Nera7o9MuwM&t=1744s) | ファンボ | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [0:38:02](https://www.youtube.com/watch?v=Nera7o9MuwM&t=2282s) | 歌詞がまっすぐな曲作ってみたい | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
@@ -2522,7 +2489,6 @@
 | [3:15:19](https://www.youtube.com/watch?v=Nera7o9MuwM&t=11719s) | とこさんの真似 | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [3:21:06](https://www.youtube.com/watch?v=Nera7o9MuwM&t=12066s) | あとで見直す | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [3:30:28](https://www.youtube.com/watch?v=Nera7o9MuwM&t=12628s) | 喉の疲労感はどんな感じ？ | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
-| [3:31:34](https://www.youtube.com/watch?v=Nera7o9MuwM&t=12694s) | 戻り | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [3:31:42](https://www.youtube.com/watch?v=Nera7o9MuwM&t=12702s) | 俺喉強ぇんだな | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [3:33:58](https://www.youtube.com/watch?v=Nera7o9MuwM&t=12838s) | セトリ完璧 | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [3:34:33](https://www.youtube.com/watch?v=Nera7o9MuwM&t=12873s) | \(新しい曲\)入れなよ景くん | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
@@ -2551,7 +2517,6 @@
 | [4:31:03](https://www.youtube.com/watch?v=Nera7o9MuwM&t=16263s) | 改めて55万人達成 | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [4:49:29](https://www.youtube.com/watch?v=Nera7o9MuwM&t=17369s) | この後転調ある | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [4:52:13](https://www.youtube.com/watch?v=Nera7o9MuwM&t=17533s) | ライブでやりたい | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
-| [4:59:55](https://www.youtube.com/watch?v=Nera7o9MuwM&t=17995s) | 戻り | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [5:00:15](https://www.youtube.com/watch?v=Nera7o9MuwM&t=18015s) | ~休憩~ | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [5:01:37](https://www.youtube.com/watch?v=Nera7o9MuwM&t=18097s) | 低血糖大丈夫か？ | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [5:03:00](https://www.youtube.com/watch?v=Nera7o9MuwM&t=18180s) | カーテンコールで締まったやんけ | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
@@ -2573,7 +2538,6 @@
 | [5:54:00](https://www.youtube.com/watch?v=Nera7o9MuwM&t=21240s) | ごめん、忘れた | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [5:54:22](https://www.youtube.com/watch?v=Nera7o9MuwM&t=21262s) | 消えたはずの曲をやる | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [5:56:22](https://www.youtube.com/watch?v=Nera7o9MuwM&t=21382s) | NHKのアニメの曲 | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
-| [5:59:12](https://www.youtube.com/watch?v=Nera7o9MuwM&t=21552s) | 戻り | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [5:59:48](https://www.youtube.com/watch?v=Nera7o9MuwM&t=21588s) | 怪談のオケ調整 | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [6:04:47](https://www.youtube.com/watch?v=Nera7o9MuwM&t=21887s) | インストール | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
 | [6:12:38](https://www.youtube.com/watch?v=Nera7o9MuwM&t=22358s) | ぽっと出の企画 | 未記載 | 72h, 1m | niche_unknown_artist | manual_review |
