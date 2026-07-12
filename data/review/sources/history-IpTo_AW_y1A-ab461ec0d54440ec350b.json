@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T21:32:53.123Z",
+  "generatedAt": "2026-07-12T22:10:35.849Z",
   "reviewId": "review:IpTo_AW_y1A:ab461ec0d54440ec350b",
   "video": {
     "videoId": "IpTo_AW_y1A",
@@ -15,15 +15,14 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260712T190000Z"
+    "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 34,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
       "source_multiple_unknown_artists",
-      "niche_unknown_artist",
-      "source_multiple_niche_short_titles"
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -169,15 +168,15 @@
       "rawHash": "2452bd7a7cc4772236b090720ce52712da308e4a8f54e849f69fdcf3f92aef70",
       "sourceId": "selected:IpTo_AW_y1A:ab461ec0d54440ec",
       "sourceHash": "ab461ec0d54440ec350b29441e86c22ea7d9295f3d49e61fdda8e15603d50eed",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "known_song_unknown_artist"
       ],
       "positiveEvidence": [
+        "known_song",
         "structured_setlist"
       ]
     },
@@ -433,15 +432,15 @@
       "rawHash": "618cca03e044fd65dd43ebbf8d4ad62ecb5f5acaf20718deeaa0e0b6e536af2f",
       "sourceId": "selected:IpTo_AW_y1A:ab461ec0d54440ec",
       "sourceHash": "ab461ec0d54440ec350b29441e86c22ea7d9295f3d49e61fdda8e15603d50eed",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "known_song_unknown_artist"
       ],
       "positiveEvidence": [
+        "known_song",
         "structured_setlist"
       ]
     },

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T21:32:53.123Z",
+  "generatedAt": "2026-07-12T22:10:35.849Z",
   "reviewId": "review:SlXkGknOdr4:ba4b69efc9081954854b",
   "video": {
     "videoId": "SlXkGknOdr4",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260712T190000Z"
+    "snapshotId": "20260712T220000Z"
   },
   "risk": {
     "riskScore": 20,
@@ -52,20 +52,16 @@
       "seconds": 913,
       "time": "0:15:13",
       "title": "アイワナムチュー",
-      "artist": "MAISONdes  feat. asmi, すりぃ",
+      "artist": "MAISONdes feat. asmi, すりぃ",
       "raw": "0:15:13 02. アイワナムチュー / MAISONdes  feat. asmi, すりぃ",
       "rawHash": "94f9fa730bd733f516d3b13017fae2ccc611303c697c1e8f7445719fa8146678",
       "sourceId": "selected:SlXkGknOdr4:ba4b69efc9081954",
       "sourceHash": "ba4b69efc9081954854badf4fcebfa49dfc983b4b217fcda130937078b6619f8",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "MAISONdes feat. asmi, すりぃ"
-      },
-      "riskReasons": [
-        "parser_corruption"
-      ],
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
       "positiveEvidence": [
         "known_song",
         "known_artist",

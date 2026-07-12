@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T21:33:34.782Z",
+  "generatedAt": "2026-07-12T22:11:12.404Z",
   "dataSource": "data/latest.json",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-12T19:26:35.083Z",
+  "latestGeneratedAt": "2026-07-12T22:10:29.951Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
   "counts": {
-    "totalCandidates": 1525,
+    "totalCandidates": 1520,
     "uniqueVideos": 196,
     "uniqueSources": 196,
     "confirmedNoiseCount": 0,
-    "parserCorruptionCount": 123,
+    "parserCorruptionCount": 120,
     "likelyNoiseCount": 0,
-    "needsReviewCount": 1402,
+    "needsReviewCount": 1400,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 0,
-      "parser_corruption": 123,
+      "parser_corruption": 120,
       "likely_noise": 0,
-      "needs_review": 1402,
+      "needs_review": 1400,
       "likely_song": 0
     }
   },
@@ -15222,6 +15222,78 @@
       "sourcePath": "data/review/sources/B1AoYBQFfhA-df8b30b51933c4a09656.json",
       "reviewUrl": "review.html?review=review%3AB1AoYBQFfhA%3Adf8b30b51933c4a09656&entry=35b8917a16a1e72f17ec410f12f060f869b949832cbe369f1c081a54aac7e1ab",
       "repairedTitle": "ミットシュルディガーは恋人",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Help me, ERINNNNNN!!(COOL&CREATE)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1773,
+      "time": "0:29:33",
+      "raw": "29:33 6. Help me, ERINNNNNN!!(COOL&CREATE)",
+      "rawHash": "2d715135b063f7c3408505f3c07a219a1b43f7db08a9704a3b3684236017a556",
+      "videoId": "M9-YywmcTJw",
+      "videoTitle": "【 #ネタ曲歌枠リレー 】この曲を知ってるか～？ネタ曲で盛り上げていくぞー！【男性Vtuber / 夜氏音 】",
+      "channelName": "Yoshinon Ch. 夜氏音",
+      "channelId": "UCsR4s88DCEXQugxTPFZr3lw",
+      "channelHandle": "/@yoshinon_jsong",
+      "youtubeUrl": "https://www.youtube.com/watch?v=M9-YywmcTJw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=M9-YywmcTJw&t=1773s",
+      "sourceId": "UgxjzBPFRSVAOdVu02t4AaABAg",
+      "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
+      "sourceOrigin": "latest",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:M9-YywmcTJw:6931becf04cedf033b64",
+      "sourcePath": "data/review/sources/M9-YywmcTJw-6931becf04cedf033b64.json",
+      "reviewUrl": "review.html?review=review%3AM9-YywmcTJw%3A6931becf04cedf033b64&entry=2d715135b063f7c3408505f3c07a219a1b43f7db08a9704a3b3684236017a556",
+      "repairedTitle": "Help me, ERINNNNNN!!(COOL&CREATE)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "こいのぼり",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4134,
+      "time": "1:08:54",
+      "raw": "1:08:54 こいのぼり",
+      "rawHash": "4b1f04c930254c37f5f451828f0531010cc3c0d19a8dcffa4c9b12ec5cdd2fde",
+      "videoId": "0LRtgvFNsoU",
+      "videoTitle": "【#歌枠 / ＃karaoke 】「か」行ソング縛り歌枠！本日は「こ」から！初見さん大歓迎！【#新人Vtuber 】＃shorts",
+      "channelName": "Yuyusiki Ch. 湯ヶ式ユエ",
+      "channelId": "UC37JYCpl8auaBYIn78xX9_A",
+      "channelHandle": "/@Yuyusikiyue",
+      "youtubeUrl": "https://www.youtube.com/watch?v=0LRtgvFNsoU",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=0LRtgvFNsoU&t=4134s",
+      "sourceId": "Ugx5C5lBxZKmNrIcMsJ4AaABAg",
+      "sourceHash": "54d387bc5821e57e0a9567d2003c8b96568b1dc746b5481b1e0f0da1ec492a47",
+      "sourceOrigin": "latest",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:0LRtgvFNsoU:54d387bc5821e57e0a95",
+      "sourcePath": "data/review/sources/0LRtgvFNsoU-54d387bc5821e57e0a95.json",
+      "reviewUrl": "review.html?review=review%3A0LRtgvFNsoU%3A54d387bc5821e57e0a95&entry=4b1f04c930254c37f5f451828f0531010cc3c0d19a8dcffa4c9b12ec5cdd2fde",
+      "repairedTitle": "こいのぼり",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -36536,6 +36608,42 @@
       "repairReasons": []
     },
     {
+      "title": "顔がよくてごめん",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 7020,
+      "time": "1:57:00",
+      "raw": "『1:57:00』顔がよくてごめん",
+      "rawHash": "f4ae932eef49f96db95a594fde4c4d2198c6e1ccceacd9ed20d8dc0d1e91b9fa",
+      "videoId": "SgaXqdakVZ8",
+      "videoTitle": "【 リクエスト歌枠 】初見さんも歓迎、君の為に歌わせてよ singing stream【 新人vtuber/五木つかさ 】",
+      "channelName": "五木つかさ -Itsuki Tsukasa -",
+      "channelId": "UCwPyvHGH9fidXrHMD3bWXRA",
+      "channelHandle": "/@itk_tks",
+      "youtubeUrl": "https://www.youtube.com/watch?v=SgaXqdakVZ8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=SgaXqdakVZ8&t=7020s",
+      "sourceId": "Ugwhl3xaNqZfAnF8GkJ4AaABAg",
+      "sourceHash": "84bb23d8137f6a708e0561b7ce603c0ff2dc7c087fde197aeac5fdd3c054c3b3",
+      "sourceOrigin": "latest",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:SgaXqdakVZ8:84bb23d8137f6a708e05",
+      "sourcePath": "data/review/sources/SgaXqdakVZ8-84bb23d8137f6a708e05.json",
+      "reviewUrl": "review.html?review=review%3ASgaXqdakVZ8%3A84bb23d8137f6a708e05&entry=f4ae932eef49f96db95a594fde4c4d2198c6e1ccceacd9ed20d8dc0d1e91b9fa",
+      "repairedTitle": "顔がよくてごめん",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "メインchにて歌ってみた『嗤うマネキン』公開！",
       "artist": "未記載",
       "isNiche": true,
@@ -44190,78 +44298,6 @@
       "repairReasons": []
     },
     {
-      "title": "ズルいよズルいね =LOVE",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1248,
-      "time": "0:20:48",
-      "raw": "2\tズルいよズルいね\t　=LOVE\t0:20:48",
-      "rawHash": "65b76be2bf1640bcd0ab2ebbc07ddcb5a8cf69582559fc34cdee83299f69e4e2",
-      "videoId": "5-qelaIZQAI",
-      "videoTitle": "【歌枠】週末を彩るSinging Stream🤍❄️【#vtuber /#vsinger /#蒼星すい】",
-      "channelName": "蒼星すい",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=5-qelaIZQAI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=5-qelaIZQAI&t=1248s",
-      "sourceId": "legacy:5-qelaIZQAI",
-      "sourceHash": "6ab94e05faa26d2628fc815b210b4ac95aa65900568bebfc53d1cf6b7e235e08",
-      "sourceOrigin": "latest",
-      "ranges": [
-        "72h"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "riskReasons": [
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:5-qelaIZQAI:b378c34f9a306c01ef2d",
-      "sourcePath": "data/review/sources/5-qelaIZQAI-b378c34f9a306c01ef2d.json",
-      "reviewUrl": "review.html?review=review%3A5-qelaIZQAI%3Ab378c34f9a306c01ef2d&entry=65b76be2bf1640bcd0ab2ebbc07ddcb5a8cf69582559fc34cdee83299f69e4e2",
-      "repairedTitle": "ズルいよズルいね =LOVE",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "とくベチュ、して =LOVE",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1695,
-      "time": "0:28:15",
-      "raw": "3\tとくベチュ、して\t　=LOVE\t0:28:15",
-      "rawHash": "bd2f85fb9b80b00a244e09851474bc267c3cc58790a1644c5fc89e65a901464a",
-      "videoId": "5-qelaIZQAI",
-      "videoTitle": "【歌枠】週末を彩るSinging Stream🤍❄️【#vtuber /#vsinger /#蒼星すい】",
-      "channelName": "蒼星すい",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=5-qelaIZQAI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=5-qelaIZQAI&t=1695s",
-      "sourceId": "legacy:5-qelaIZQAI",
-      "sourceHash": "6ab94e05faa26d2628fc815b210b4ac95aa65900568bebfc53d1cf6b7e235e08",
-      "sourceOrigin": "latest",
-      "ranges": [
-        "72h"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "riskReasons": [
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:5-qelaIZQAI:b378c34f9a306c01ef2d",
-      "sourcePath": "data/review/sources/5-qelaIZQAI-b378c34f9a306c01ef2d.json",
-      "reviewUrl": "review.html?review=review%3A5-qelaIZQAI%3Ab378c34f9a306c01ef2d&entry=bd2f85fb9b80b00a244e09851474bc267c3cc58790a1644c5fc89e65a901464a",
-      "repairedTitle": "とくベチュ、して =LOVE",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "準備＆注意事項",
       "artist": "未記載",
       "isNiche": true,
@@ -50368,96 +50404,6 @@
       "repairReasons": []
     },
     {
-      "title": "ジャックポットサッドガール / 25時、ナイトコードで",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1235,
-      "time": "0:20:35",
-      "raw": "20:35 『ジャックポットサッドガール / 25時、ナイトコードで。』",
-      "rawHash": "8e0ebc5680c6cedeaa64bb471fa2231e5a6208b0cd7cb9d0913616d73a06472e",
-      "videoId": "4X_Kmi5kxTQ",
-      "videoTitle": "〖歌枠〗ゆったり歌っていこう♪supported by DAM〖猫屋敷美紅 / にじさんじ〗",
-      "channelName": "猫屋敷美紅 / Nekoyashiki Miku【にじさんじ】",
-      "channelId": "UCaAu0DXNSPXCZPg6iHVwRVw",
-      "channelHandle": "/@NekoyashikiMiku",
-      "youtubeUrl": "https://www.youtube.com/watch?v=4X_Kmi5kxTQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4X_Kmi5kxTQ&t=1235s",
-      "sourceId": "legacy:4X_Kmi5kxTQ",
-      "sourceHash": "474ad52191e98c1d004f996215cb2c958fb9303ecd7def2d31284b20e05776e6",
-      "sourceOrigin": "latest",
-      "ranges": [
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "inferred_artist"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "title": "ジャックポットサッドガール",
-        "artist": "25時、ナイトコードで"
-      },
-      "reviewId": "review:4X_Kmi5kxTQ:e5c1585d7070d9b88204",
-      "sourcePath": "data/review/sources/4X_Kmi5kxTQ-e5c1585d7070d9b88204.json",
-      "reviewUrl": "review.html?review=review%3A4X_Kmi5kxTQ%3Ae5c1585d7070d9b88204&entry=8e0ebc5680c6cedeaa64bb471fa2231e5a6208b0cd7cb9d0913616d73a06472e",
-      "repairedTitle": "ジャックポットサッドガール",
-      "repairedArtist": "25時、ナイトコードで",
-      "repairReasons": [
-        "delimiter_split"
-      ]
-    },
-    {
-      "title": "化けの花 / 25時、ナイトコードで",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 2030,
-      "time": "0:33:50",
-      "raw": "33:50 『化けの花 / 25時、ナイトコードで。』",
-      "rawHash": "98eef5c47b4fc7c811b0b982b9fe84016ced1f178f114c3015eafd54fd9ed210",
-      "videoId": "4X_Kmi5kxTQ",
-      "videoTitle": "〖歌枠〗ゆったり歌っていこう♪supported by DAM〖猫屋敷美紅 / にじさんじ〗",
-      "channelName": "猫屋敷美紅 / Nekoyashiki Miku【にじさんじ】",
-      "channelId": "UCaAu0DXNSPXCZPg6iHVwRVw",
-      "channelHandle": "/@NekoyashikiMiku",
-      "youtubeUrl": "https://www.youtube.com/watch?v=4X_Kmi5kxTQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4X_Kmi5kxTQ&t=2030s",
-      "sourceId": "legacy:4X_Kmi5kxTQ",
-      "sourceHash": "474ad52191e98c1d004f996215cb2c958fb9303ecd7def2d31284b20e05776e6",
-      "sourceOrigin": "latest",
-      "ranges": [
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "inferred_artist"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "title": "化けの花",
-        "artist": "25時、ナイトコードで"
-      },
-      "reviewId": "review:4X_Kmi5kxTQ:e5c1585d7070d9b88204",
-      "sourcePath": "data/review/sources/4X_Kmi5kxTQ-e5c1585d7070d9b88204.json",
-      "reviewUrl": "review.html?review=review%3A4X_Kmi5kxTQ%3Ae5c1585d7070d9b88204&entry=98eef5c47b4fc7c811b0b982b9fe84016ced1f178f114c3015eafd54fd9ed210",
-      "repairedTitle": "化けの花",
-      "repairedArtist": "25時、ナイトコードで",
-      "repairReasons": [
-        "delimiter_split"
-      ]
-    },
-    {
       "title": "激動",
       "artist": "未記載",
       "isNiche": true,
@@ -50605,89 +50551,6 @@
       "repairedTitle": "みむかゥナイストライ",
       "repairedArtist": "未記載",
       "repairReasons": []
-    },
-    {
-      "title": "ぐーてんれな",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 123,
-      "time": "0:02:03",
-      "raw": "0:02:03  ぐーてんれな",
-      "rawHash": "9c4039dd4b5951da7a784ac81da2c08d327f7fcc3c5c5baf664ec0b352a24f37",
-      "videoId": "2D6dhfyxLgw",
-      "videoTitle": "【歌枠】お昼休憩に1曲聴いてって🎶リハビリでのんびり歌う！【白鳥怜奈/Vtuber/声優】",
-      "channelName": "白鳥怜奈 / Shiratori Rena",
-      "channelId": "UCL4UZHX-26xAtVT4Jys5A1Q",
-      "channelHandle": "/@shiratori-rena",
-      "youtubeUrl": "https://www.youtube.com/watch?v=2D6dhfyxLgw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=2D6dhfyxLgw&t=123s",
-      "sourceId": "legacy:2D6dhfyxLgw",
-      "sourceHash": "fb6b2551c1802d5ce0e22e0921863cb0980d7bbaed3bf554b989f2752e40b71b",
-      "sourceOrigin": "latest",
-      "ranges": [
-        "72h",
-        "1m"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "riskReasons": [
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:2D6dhfyxLgw:0a19e47d9d2d9371e604",
-      "sourcePath": "data/review/sources/2D6dhfyxLgw-0a19e47d9d2d9371e604.json",
-      "reviewUrl": "review.html?review=review%3A2D6dhfyxLgw%3A0a19e47d9d2d9371e604&entry=9c4039dd4b5951da7a784ac81da2c08d327f7fcc3c5c5baf664ec0b352a24f37",
-      "repairedTitle": "ぐーてんれな",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "思いを巡らす00の事象 / EGOIST",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4851,
-      "time": "1:20:51",
-      "raw": "1:20:51 ⑨『思いを巡らす00の事象 / EGOIST』",
-      "rawHash": "94b576f232cbea331835edc6827f34e1e812af6626b99fcf5fff70fbb7bd2d99",
-      "videoId": "2D6dhfyxLgw",
-      "videoTitle": "【歌枠】お昼休憩に1曲聴いてって🎶リハビリでのんびり歌う！【白鳥怜奈/Vtuber/声優】",
-      "channelName": "白鳥怜奈 / Shiratori Rena",
-      "channelId": "UCL4UZHX-26xAtVT4Jys5A1Q",
-      "channelHandle": "/@shiratori-rena",
-      "youtubeUrl": "https://www.youtube.com/watch?v=2D6dhfyxLgw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=2D6dhfyxLgw&t=4851s",
-      "sourceId": "legacy:2D6dhfyxLgw",
-      "sourceHash": "fb6b2551c1802d5ce0e22e0921863cb0980d7bbaed3bf554b989f2752e40b71b",
-      "sourceOrigin": "latest",
-      "ranges": [
-        "72h",
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "inferred_artist"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "title": "思いを巡らす00の事象",
-        "artist": "EGOIST"
-      },
-      "reviewId": "review:2D6dhfyxLgw:0a19e47d9d2d9371e604",
-      "sourcePath": "data/review/sources/2D6dhfyxLgw-0a19e47d9d2d9371e604.json",
-      "reviewUrl": "review.html?review=review%3A2D6dhfyxLgw%3A0a19e47d9d2d9371e604&entry=94b576f232cbea331835edc6827f34e1e812af6626b99fcf5fff70fbb7bd2d99",
-      "repairedTitle": "思いを巡らす00の事象",
-      "repairedArtist": "EGOIST",
-      "repairReasons": [
-        "delimiter_split"
-      ]
     },
     {
       "title": "ワルキューレのバースデイソング",
@@ -56641,80 +56504,6 @@
       "sourcePath": "data/review/sources/IpTo_AW_y1A-ab461ec0d54440ec350b.json",
       "reviewUrl": "review.html?review=review%3AIpTo_AW_y1A%3Aab461ec0d54440ec350b&entry=ffd0748de737ad86baad414253ded0143e7b30d9983b21e6d13df345646169b9",
       "repairedTitle": "fix-Acoustic ver",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "Strawberry",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3260,
-      "time": "0:54:20",
-      "raw": "0:54:20 🎶 Strawberry",
-      "rawHash": "2452bd7a7cc4772236b090720ce52712da308e4a8f54e849f69fdcf3f92aef70",
-      "videoId": "IpTo_AW_y1A",
-      "videoTitle": "【歌枠】今週の歌枠【來-Ray-】",
-      "channelName": "來-Ray-",
-      "channelId": "UCw7iM67NS0RXhYHoxv-lpPg",
-      "channelHandle": "/channel/UCw7iM67NS0RXhYHoxv-lpPg",
-      "youtubeUrl": "https://www.youtube.com/watch?v=IpTo_AW_y1A",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=IpTo_AW_y1A&t=3260s",
-      "sourceId": "legacy:IpTo_AW_y1A",
-      "sourceHash": "ab461ec0d54440ec350b29441e86c22ea7d9295f3d49e61fdda8e15603d50eed",
-      "sourceOrigin": "latest",
-      "ranges": [
-        "72h"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:IpTo_AW_y1A:ab461ec0d54440ec350b",
-      "sourcePath": "data/review/sources/IpTo_AW_y1A-ab461ec0d54440ec350b.json",
-      "reviewUrl": "review.html?review=review%3AIpTo_AW_y1A%3Aab461ec0d54440ec350b&entry=2452bd7a7cc4772236b090720ce52712da308e4a8f54e849f69fdcf3f92aef70",
-      "repairedTitle": "Strawberry",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "Violeta",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 10600,
-      "time": "2:56:40",
-      "raw": "2:56:40 🎶 Violeta",
-      "rawHash": "618cca03e044fd65dd43ebbf8d4ad62ecb5f5acaf20718deeaa0e0b6e536af2f",
-      "videoId": "IpTo_AW_y1A",
-      "videoTitle": "【歌枠】今週の歌枠【來-Ray-】",
-      "channelName": "來-Ray-",
-      "channelId": "UCw7iM67NS0RXhYHoxv-lpPg",
-      "channelHandle": "/channel/UCw7iM67NS0RXhYHoxv-lpPg",
-      "youtubeUrl": "https://www.youtube.com/watch?v=IpTo_AW_y1A",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=IpTo_AW_y1A&t=10600s",
-      "sourceId": "legacy:IpTo_AW_y1A",
-      "sourceHash": "ab461ec0d54440ec350b29441e86c22ea7d9295f3d49e61fdda8e15603d50eed",
-      "sourceOrigin": "latest",
-      "ranges": [
-        "72h"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:IpTo_AW_y1A:ab461ec0d54440ec350b",
-      "sourcePath": "data/review/sources/IpTo_AW_y1A-ab461ec0d54440ec350b.json",
-      "reviewUrl": "review.html?review=review%3AIpTo_AW_y1A%3Aab461ec0d54440ec350b&entry=618cca03e044fd65dd43ebbf8d4ad62ecb5f5acaf20718deeaa0e0b6e536af2f",
-      "repairedTitle": "Violeta",
       "repairedArtist": "未記載",
       "repairReasons": []
     },

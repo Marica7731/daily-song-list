@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T21:32:53.123Z",
+  "generatedAt": "2026-07-12T22:10:35.849Z",
   "reviewId": "review:8ddC8VUr0xw:ddbf2d423911e16f6eca",
   "video": {
     "videoId": "8ddC8VUr0xw",
@@ -15,17 +15,16 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260712T190000Z"
+    "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 100,
-    "riskLevel": "high",
+    "riskScore": 68,
+    "riskLevel": "medium",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
       "niche_unknown_artist",
       "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles",
-      "conversation_entry"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -110,29 +109,6 @@
       "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 2106,
-      "time": "0:35:06",
-      "title": "2500🎵",
-      "artist": "未記載",
-      "raw": "0:35:06 2500🎵",
-      "rawHash": "4d1c78ef5ac20fb68dd9a16e159956af7ba5abfed3274ff655ead7ef88d496e6",
-      "sourceId": "UgyF4W6kiMV6gNaLAUF4AaABAg",
-      "sourceHash": "ddbf2d423911e16f6ecae5d57481245fc69922c85dbaa7f69fc46cb17c9f0ab1",
-      "isNiche": true,
-      "classification": "likely_noise",
-      "suggestedAction": "drop_entry",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "conversation_entry",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

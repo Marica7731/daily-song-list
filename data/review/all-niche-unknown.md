@@ -1,14 +1,14 @@
 # 全量小众无歌手人工审核清单
 
-生成时间：2026-07-12T21:33:34.782Z
+生成时间：2026-07-12T22:11:12.404Z
 
-候选总数：1525
+候选总数：1520
 唯一视频数：196
 唯一来源数：196
 已确认非歌曲：0
-已确认解析错误：123
+已确认解析错误：120
 高概率非歌曲：0
-需要人工判断：1402
+需要人工判断：1400
 高概率真实歌曲：0
 
 ## 已确认非歌曲
@@ -169,23 +169,6 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
 | --- | --- | --- | --- | --- | --- | --- |
 | [2:44:33](https://www.youtube.com/watch?v=Nera7o9MuwM&t=9873s) | ポケモンコラボ/フロンターレがイルカマン | 未記載 | 72h, 1m | parser_corruption, delimiter_split, niche_unknown_artist, source_multiple_unknown_artists | replace_entry | [7d680d1fcc5e99886f03c923047d748aca9256c73e80a32402a2227c35bf3538](review.html?review=review%3ANera7o9MuwM%3A9baf1e54c7ad50afec2a&entry=7d680d1fcc5e99886f03c923047d748aca9256c73e80a32402a2227c35bf3538) |
-
-### 〖歌枠〗ゆったり歌っていこう♪supported by DAM〖猫屋敷美紅 / にじさんじ〗
-- 视频：[4X\_Kmi5kxTQ](https://www.youtube.com/watch?v=4X_Kmi5kxTQ)
-- 频道：猫屋敷美紅 / Nekoyashiki Miku【にじさんじ】
-
-| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
-| --- | --- | --- | --- | --- | --- | --- |
-| [0:20:35](https://www.youtube.com/watch?v=4X_Kmi5kxTQ&t=1235s) | ジャックポットサッドガール / 25時、ナイトコードで | 未記載 | 1m | parser_corruption, delimiter_split, niche_unknown_artist | replace_entry | [8e0ebc5680c6cedeaa64bb471fa2231e5a6208b0cd7cb9d0913616d73a06472e](review.html?review=review%3A4X_Kmi5kxTQ%3Ae5c1585d7070d9b88204&entry=8e0ebc5680c6cedeaa64bb471fa2231e5a6208b0cd7cb9d0913616d73a06472e) |
-| [0:33:50](https://www.youtube.com/watch?v=4X_Kmi5kxTQ&t=2030s) | 化けの花 / 25時、ナイトコードで | 未記載 | 1m | parser_corruption, delimiter_split, niche_unknown_artist | replace_entry | [98eef5c47b4fc7c811b0b982b9fe84016ced1f178f114c3015eafd54fd9ed210](review.html?review=review%3A4X_Kmi5kxTQ%3Ae5c1585d7070d9b88204&entry=98eef5c47b4fc7c811b0b982b9fe84016ced1f178f114c3015eafd54fd9ed210) |
-
-### 【歌枠】お昼休憩に1曲聴いてって🎶リハビリでのんびり歌う！【白鳥怜奈/Vtuber/声優】
-- 视频：[2D6dhfyxLgw](https://www.youtube.com/watch?v=2D6dhfyxLgw)
-- 频道：白鳥怜奈 / Shiratori Rena
-
-| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
-| --- | --- | --- | --- | --- | --- | --- |
-| [1:20:51](https://www.youtube.com/watch?v=2D6dhfyxLgw&t=4851s) | 思いを巡らす00の事象 / EGOIST | 未記載 | 72h, 1m | parser_corruption, delimiter_split, niche_unknown_artist | replace_entry | [94b576f232cbea331835edc6827f34e1e812af6626b99fcf5fff70fbb7bd2d99](review.html?review=review%3A2D6dhfyxLgw%3A0a19e47d9d2d9371e604&entry=94b576f232cbea331835edc6827f34e1e812af6626b99fcf5fff70fbb7bd2d99) |
 
 ### 【歌枠 / karaoke 】初見様、ROM勢、作業用BGM◎ ゲリラで少し！ 【\#武田玄愛 / ゆにふぃ！】\#shortsfeed \#shorts
 - 视频：[JCxQPTg1f2I](https://www.youtube.com/watch?v=JCxQPTg1f2I)
@@ -953,6 +936,22 @@
 | [1:02:42](https://www.youtube.com/watch?v=B1AoYBQFfhA&t=3762s) | caramel city | 未記載 | 1m | niche_unknown_artist, source_multiple_unknown_artists | manual_review | [6758e2b7a946171acb2287cf95fa982b2b7c06d7278f40afebabb8e4a115100f](review.html?review=review%3AB1AoYBQFfhA%3Adf8b30b51933c4a09656&entry=6758e2b7a946171acb2287cf95fa982b2b7c06d7278f40afebabb8e4a115100f) |
 | [2:10:55](https://www.youtube.com/watch?v=B1AoYBQFfhA&t=7855s) | modify Youth | 未記載 | 1m | niche_unknown_artist, source_multiple_unknown_artists | manual_review | [06a4096b271715f31423889f071aafdc1810c30f37f6a7ad132a7fa6b35e65ba](review.html?review=review%3AB1AoYBQFfhA%3Adf8b30b51933c4a09656&entry=06a4096b271715f31423889f071aafdc1810c30f37f6a7ad132a7fa6b35e65ba) |
 | [2:17:09](https://www.youtube.com/watch?v=B1AoYBQFfhA&t=8229s) | ミットシュルディガーは恋人 | 未記載 | 1m | niche_unknown_artist, source_multiple_unknown_artists | manual_review | [35b8917a16a1e72f17ec410f12f060f869b949832cbe369f1c081a54aac7e1ab](review.html?review=review%3AB1AoYBQFfhA%3Adf8b30b51933c4a09656&entry=35b8917a16a1e72f17ec410f12f060f869b949832cbe369f1c081a54aac7e1ab) |
+
+### 【 \#ネタ曲歌枠リレー 】この曲を知ってるか～？ネタ曲で盛り上げていくぞー！【男性Vtuber / 夜氏音 】
+- 视频：[M9\-YywmcTJw](https://www.youtube.com/watch?v=M9-YywmcTJw)
+- 频道：Yoshinon Ch\. 夜氏音
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
+| --- | --- | --- | --- | --- | --- | --- |
+| [0:29:33](https://www.youtube.com/watch?v=M9-YywmcTJw&t=1773s) | Help me, ERINNNNNN\!\!\(COOL&CREATE\) | 未記載 | 72h | niche_unknown_artist | manual_review | [2d715135b063f7c3408505f3c07a219a1b43f7db08a9704a3b3684236017a556](review.html?review=review%3AM9-YywmcTJw%3A6931becf04cedf033b64&entry=2d715135b063f7c3408505f3c07a219a1b43f7db08a9704a3b3684236017a556) |
+
+### 【\#歌枠 / ＃karaoke 】「か」行ソング縛り歌枠！本日は「こ」から！初見さん大歓迎！【\#新人Vtuber 】＃shorts
+- 视频：[0LRtgvFNsoU](https://www.youtube.com/watch?v=0LRtgvFNsoU)
+- 频道：Yuyusiki Ch\. 湯ヶ式ユエ
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
+| --- | --- | --- | --- | --- | --- | --- |
+| [1:08:54](https://www.youtube.com/watch?v=0LRtgvFNsoU&t=4134s) | こいのぼり | 未記載 | 72h | niche_unknown_artist | manual_review | [4b1f04c930254c37f5f451828f0531010cc3c0d19a8dcffa4c9b12ec5cdd2fde](review.html?review=review%3A0LRtgvFNsoU%3A54d387bc5821e57e0a95&entry=4b1f04c930254c37f5f451828f0531010cc3c0d19a8dcffa4c9b12ec5cdd2fde) |
 
 ### 【 歌枠 / Karaoke 】懐かしいアニメソング歌枠！普段歌わないアニソン聞いてって！ \#アールテテ配信
 - 视频：[jT\-l8E9Xsow](https://www.youtube.com/watch?v=jT-l8E9Xsow)
@@ -1773,6 +1772,14 @@
 | --- | --- | --- | --- | --- | --- | --- |
 | [1:07:10](https://www.youtube.com/watch?v=1dFa_GH8eCs&t=4030s) | しわ | 未記載 | 72h | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists | manual_review | [428200fad8fa71e5c3c8af7f3aa0719cd183ab741c9776f94b7b32c1c621ba6f](review.html?review=review%3A1dFa_GH8eCs%3A18f1a125a0d4fec1ebfd&entry=428200fad8fa71e5c3c8af7f3aa0719cd183ab741c9776f94b7b32c1c621ba6f) |
 
+### 【 リクエスト歌枠 】初見さんも歓迎、君の為に歌わせてよ singing stream【 新人vtuber/五木つかさ 】
+- 视频：[SgaXqdakVZ8](https://www.youtube.com/watch?v=SgaXqdakVZ8)
+- 频道：五木つかさ \-Itsuki Tsukasa \-
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
+| --- | --- | --- | --- | --- | --- | --- |
+| [1:57:00](https://www.youtube.com/watch?v=SgaXqdakVZ8&t=7020s) | 顔がよくてごめん | 未記載 | 72h | niche_unknown_artist | manual_review | [f4ae932eef49f96db95a594fde4c4d2198c6e1ccceacd9ed20d8dc0d1e91b9fa](review.html?review=review%3ASgaXqdakVZ8%3A84bb23d8137f6a708e05&entry=f4ae932eef49f96db95a594fde4c4d2198c6e1ccceacd9ed20d8dc0d1e91b9fa) |
+
 ### 【 2周年🎉/ \#歌枠 】枠立てなおし！！２周年記念配信‼️お披露目・お知らせあります‼️YouTubeデビューして2年が経ちました📖【語部シオン/ \#新人VTuber 】
 - 视频：[wkmPLI98ccU](https://www.youtube.com/watch?v=wkmPLI98ccU)
 - 频道：語部店主の趣味部屋
@@ -2273,15 +2280,6 @@
 | [0:05:51](https://www.youtube.com/watch?v=tP7ybBimIB0&t=351s) | ポンコツ王子w | 未記載 | 72h | niche_unknown_artist, source_multiple_unknown_artists | manual_review | [5ece232d798c7a0677df41c7b83348c8f67496a34c51d551b8105741a61f75b6](review.html?review=review%3AtP7ybBimIB0%3A219df98a79318a2eeaec&entry=5ece232d798c7a0677df41c7b83348c8f67496a34c51d551b8105741a61f75b6) |
 | [0:06:52](https://www.youtube.com/watch?v=tP7ybBimIB0&t=412s) | オリジナルカクテル | 未記載 | 72h | niche_unknown_artist, source_multiple_unknown_artists | manual_review | [b12fdab9d099b64fd119c47d5a68b1971ad45beca87afe7159e6f2f5c18e5570](review.html?review=review%3AtP7ybBimIB0%3A219df98a79318a2eeaec&entry=b12fdab9d099b64fd119c47d5a68b1971ad45beca87afe7159e6f2f5c18e5570) |
 
-### 【歌枠】週末を彩るSinging Stream🤍❄️【\#vtuber /\#vsinger /\#蒼星すい】
-- 视频：[5\-qelaIZQAI](https://www.youtube.com/watch?v=5-qelaIZQAI)
-- 频道：蒼星すい
-
-| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
-| --- | --- | --- | --- | --- | --- | --- |
-| [0:20:48](https://www.youtube.com/watch?v=5-qelaIZQAI&t=1248s) | ズルいよズルいね =LOVE | 未記載 | 72h | niche_unknown_artist | manual_review | [65b76be2bf1640bcd0ab2ebbc07ddcb5a8cf69582559fc34cdee83299f69e4e2](review.html?review=review%3A5-qelaIZQAI%3Ab378c34f9a306c01ef2d&entry=65b76be2bf1640bcd0ab2ebbc07ddcb5a8cf69582559fc34cdee83299f69e4e2) |
-| [0:28:15](https://www.youtube.com/watch?v=5-qelaIZQAI&t=1695s) | とくベチュ、して =LOVE | 未記載 | 72h | niche_unknown_artist | manual_review | [bd2f85fb9b80b00a244e09851474bc267c3cc58790a1644c5fc89e65a901464a](review.html?review=review%3A5-qelaIZQAI%3Ab378c34f9a306c01ef2d&entry=bd2f85fb9b80b00a244e09851474bc267c3cc58790a1644c5fc89e65a901464a) |
-
 ### 【\#光蔦喫茶へようこそ歌枠リレー 】今日も今日とて大忙し！アイドルって大変なんですね・・・【 速水らいむ /＃個人vtuber】
 - 视频：[PJp3mczz0X8](https://www.youtube.com/watch?v=PJp3mczz0X8)
 - 频道：速水らいむ【Hayamizu ch\.】
@@ -2564,14 +2562,6 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
 | --- | --- | --- | --- | --- | --- | --- |
 | [1:11:16](https://www.youtube.com/watch?v=Xm-xihCkbo8&t=4276s) | みむかゥナイストライ | 未記載 | 72h | niche_unknown_artist | manual_review | [ee6b23dd1347f436dded7ae62264dd0b87d3b020af669f57f2d4f61918d9f657](review.html?review=review%3AXm-xihCkbo8%3A5a445d532cc91d3f439f&entry=ee6b23dd1347f436dded7ae62264dd0b87d3b020af669f57f2d4f61918d9f657) |
-
-### 【歌枠】お昼休憩に1曲聴いてって🎶リハビリでのんびり歌う！【白鳥怜奈/Vtuber/声優】
-- 视频：[2D6dhfyxLgw](https://www.youtube.com/watch?v=2D6dhfyxLgw)
-- 频道：白鳥怜奈 / Shiratori Rena
-
-| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
-| --- | --- | --- | --- | --- | --- | --- |
-| [0:02:03](https://www.youtube.com/watch?v=2D6dhfyxLgw&t=123s) | ぐーてんれな | 未記載 | 72h, 1m | niche_unknown_artist | manual_review | [9c4039dd4b5951da7a784ac81da2c08d327f7fcc3c5c5baf664ec0b352a24f37](review.html?review=review%3A2D6dhfyxLgw%3A0a19e47d9d2d9371e604&entry=9c4039dd4b5951da7a784ac81da2c08d327f7fcc3c5c5baf664ec0b352a24f37) |
 
 ### 【 \#歌枠 】君と過ごす夏は何色？？夏曲多め歌枠⛱ 【 \#VTuber / \#白餅だんご】
 - 视频：[VT\_BX1yjCZQ](https://www.youtube.com/watch?v=VT_BX1yjCZQ)
@@ -2877,8 +2867,6 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |
 | --- | --- | --- | --- | --- | --- | --- |
 | [0:48:06](https://www.youtube.com/watch?v=IpTo_AW_y1A&t=2886s) | fix\-Acoustic ver | 未記載 | 72h | niche_unknown_artist, source_multiple_unknown_artists | manual_review | [ffd0748de737ad86baad414253ded0143e7b30d9983b21e6d13df345646169b9](review.html?review=review%3AIpTo_AW_y1A%3Aab461ec0d54440ec350b&entry=ffd0748de737ad86baad414253ded0143e7b30d9983b21e6d13df345646169b9) |
-| [0:54:20](https://www.youtube.com/watch?v=IpTo_AW_y1A&t=3260s) | Strawberry | 未記載 | 72h | niche_unknown_artist, source_multiple_unknown_artists | manual_review | [2452bd7a7cc4772236b090720ce52712da308e4a8f54e849f69fdcf3f92aef70](review.html?review=review%3AIpTo_AW_y1A%3Aab461ec0d54440ec350b&entry=2452bd7a7cc4772236b090720ce52712da308e4a8f54e849f69fdcf3f92aef70) |
-| [2:56:40](https://www.youtube.com/watch?v=IpTo_AW_y1A&t=10600s) | Violeta | 未記載 | 72h | niche_unknown_artist, source_multiple_unknown_artists | manual_review | [618cca03e044fd65dd43ebbf8d4ad62ecb5f5acaf20718deeaa0e0b6e536af2f](review.html?review=review%3AIpTo_AW_y1A%3Aab461ec0d54440ec350b&entry=618cca03e044fd65dd43ebbf8d4ad62ecb5f5acaf20718deeaa0e0b6e536af2f) |
 
 ### 〖 \#歌枠┊KARAOKE 〗お歌の時間 ✧ Singing Stream〖 \#儚牙紺┊\#vsinger 〗
 - 视频：[LKxELysfe5I](https://www.youtube.com/watch?v=LKxELysfe5I)

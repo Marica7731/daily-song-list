@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T21:32:53.123Z",
+  "generatedAt": "2026-07-12T22:10:35.849Z",
   "reviewId": "review:oVpe2gnqdAU:c08814dd753998e9b4e9",
   "video": {
     "videoId": "oVpe2gnqdAU",
@@ -15,41 +15,17 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260712T190000Z"
+    "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 70,
-    "riskLevel": "high",
+    "riskScore": 28,
+    "riskLevel": "low",
     "riskReasons": [
       "source_many_topic_entries",
-      "activity_marker_title",
-      "niche_unknown_artist",
       "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
-    {
-      "status": "accepted",
-      "seconds": 454,
-      "time": "0:07:34",
-      "title": "本日も〜？ひなたびよりー☀️",
-      "artist": "未記載",
-      "raw": "0:07:34 本日も〜？ひなたびよりー☀️",
-      "rawHash": "ab19f4be509b2bcecc751a7abb9fec36deb0574981aeb4a36a781165ef6d9929",
-      "sourceId": "UgyFldENHp9v0gW5h9F4AaABAg",
-      "sourceHash": "c08814dd753998e9b4e92197084a78c6fec13e561706393b991446ad51477d54",
-      "isNiche": true,
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "activity_marker_title",
-        "niche_unknown_artist"
-      ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
-    },
     {
       "status": "accepted",
       "seconds": 835,

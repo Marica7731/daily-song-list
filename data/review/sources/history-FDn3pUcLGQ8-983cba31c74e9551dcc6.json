@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T21:32:53.123Z",
+  "generatedAt": "2026-07-12T22:10:35.849Z",
   "reviewId": "review:FDn3pUcLGQ8:983cba31c74e9551dcc6",
   "video": {
     "videoId": "FDn3pUcLGQ8",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260712T190000Z"
+    "snapshotId": "20260712T220000Z"
   },
   "risk": {
     "riskScore": 14,
@@ -451,12 +451,13 @@
       "rawHash": "14f2929bcea7917795911df79681d30a5ff2e2cf4ec79a9af6309a37d69b968c",
       "sourceId": "selected:FDn3pUcLGQ8:983cba31c74e9551",
       "sourceHash": "983cba31c74e9551dcc60ee72b8f7b452a074532d3d1e8b3ea23fde3774a05a1",
-      "isNiche": true,
+      "isNiche": false,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]
