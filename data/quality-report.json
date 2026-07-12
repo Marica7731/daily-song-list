@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T18:49:27.668Z",
+  "generatedAt": "2026-07-12T19:26:39.318Z",
   "curationVersion": "curation-v1:4a0d0261af37",
   "curationHash": "4a0d0261af370621e15f5bf858bc1085d6d327b9f45aeec8e1bbe2634e95dc65",
-  "totalSongs": 12932,
-  "unknownArtistCount": 3287,
-  "nicheUnknownArtistCount": 1742,
-  "highRiskEntryCount": 5159,
-  "highRiskSourceCount": 306,
+  "totalSongs": 13001,
+  "unknownArtistCount": 3296,
+  "nicheUnknownArtistCount": 1743,
+  "highRiskEntryCount": 5111,
+  "highRiskSourceCount": 301,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
   "ruleDroppedEntryCount": 0,
@@ -23,14 +23,18 @@
     },
     {
       "value": "天城越え",
-      "count": 30
+      "count": 31
     },
     {
       "value": "少女レイ",
-      "count": 27
+      "count": 29
     },
     {
       "value": "IRIS OUT",
+      "count": 20
+    },
+    {
+      "value": "花に亡霊",
       "count": 19
     },
     {
@@ -42,19 +46,19 @@
       "count": 16
     },
     {
-      "value": "花に亡霊",
-      "count": 16
-    },
-    {
       "value": "青と夏",
-      "count": 13
+      "count": 14
     },
     {
       "value": "ray",
-      "count": 12
+      "count": 13
     },
     {
       "value": "モニタリング",
+      "count": 13
+    },
+    {
+      "value": "ただ君に晴れ",
       "count": 12
     },
     {
@@ -78,19 +82,15 @@
       "count": 11
     },
     {
-      "value": "からくりピエロ",
-      "count": 10
-    },
-    {
-      "value": "ただ君に晴れ",
-      "count": 10
-    },
-    {
       "value": "君の知らない物語",
+      "count": 11
+    },
+    {
+      "value": "Talk Time",
       "count": 10
     },
     {
-      "value": "千本桜",
+      "value": "からくりピエロ",
       "count": 10
     }
   ],
@@ -101,15 +101,11 @@
     },
     {
       "value": "音魂ヒビクHibiku Otodama",
-      "count": 12
+      "count": 9
     },
     {
       "value": "菜鳥ひなた / Hinata Natori",
-      "count": 11
-    },
-    {
-      "value": "ちよみch. 千代浦蝶美 /あおぎり高校",
-      "count": 8
+      "count": 9
     },
     {
       "value": "音ノ乃のの / NononoNono",
@@ -144,16 +140,8 @@
       "count": 6
     },
     {
-      "value": "町田ちま【にじさんじ】",
-      "count": 6
-    },
-    {
-      "value": "xea",
-      "count": 5
-    },
-    {
       "value": "くゅ汰。- Kuyuta. -",
-      "count": 5
+      "count": 6
     },
     {
       "value": "メラ・アカル MelaakaruVtuber",
@@ -174,6 +162,18 @@
     {
       "value": "白波瀬ソル / Sol Shirahase",
       "count": 5
+    },
+    {
+      "value": "鴉紋ゆうく / Amon Yuuku",
+      "count": 5
+    },
+    {
+      "value": "DELUTAYA Δ.",
+      "count": 4
+    },
+    {
+      "value": "MUZU‐むずちゃんねる‐【Vtuber】",
+      "count": 4
     }
   ],
   "topRiskVideos": [
@@ -417,19 +417,6 @@
       ]
     },
     {
-      "videoId": "GNIO8wL2rX0",
-      "title": "【 定期歌枠 】5ヶ月ぶりに「B'z」を歌うのら～！！！🎶 KARAOKE【姫森ルーナ/ホロライブ】",
-      "channelName": "Luna Ch. 姫森ルーナ",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
-        "kept_count_high_low_known_song_density",
-        "source_multiple_unknown_artists"
-      ]
-    },
-    {
       "videoId": "zjFwKLjxwaI",
       "title": "【告知あり！】昭和レトロな歌枠♬【ホロライブ/夏色まつり】",
       "channelName": "Matsuri Channel 夏色まつり",
@@ -456,10 +443,31 @@
         "short_unknown_title",
         "source_multiple_niche_short_titles"
       ]
+    },
+    {
+      "videoId": "MWjlsKgWO_8",
+      "title": "【＃歌枠】雑談多め！おしゃべりしよ～！ #歌枠 #個人Vtuber #Vtuber雑談",
+      "channelName": "MUZU‐むずちゃんねる‐【Vtuber】",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_many_topic_entries",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists"
+      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-12T19:26:39.318Z",
+      "totalSongs": 13001,
+      "unknownArtistCount": 3296,
+      "nicheUnknownArtistCount": 1743,
+      "highRiskEntryCount": 5111,
+      "highRiskSourceCount": 301
+    },
     {
       "generatedAt": "2026-07-12T18:49:27.668Z",
       "totalSongs": 12932,

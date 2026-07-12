@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T18:49:27.668Z",
+  "generatedAt": "2026-07-12T19:26:39.318Z",
   "reviewId": "review:xtkm7esReyk:7d0500f46db35257998d",
   "video": {
     "videoId": "xtkm7esReyk",
@@ -13,16 +13,18 @@
     "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
     "sourceType": "comment",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "≪セットリスト≫\r\n0:05:43 Family Song / 星野源\r\n0:32:41 明日も / MUSH&Co.\r\n0:52:08 鏡に恋して / 礼賛\r\n0:56:40 気まぐれロマンティック / いきものがかり\r\n1:31:38 キラキラ / aiko\r\n1:44:23 幸福論 / 椎名林檎\r\n\r\n－ＭＣパート－\r\n0:11:07 配信開始挨拶 / 配信開始ポストのリポスト者お名前読み\r\n0:14:12 ライブ振り返り①\r\n0:37:52 ライブ振り返り②\r\n1:02:10 ダンスを基礎から学び直してる / ライブやグッズの話\r\n1:14:51 ライブ振り返り③\r\n1:37:43 ライブ振り返り④\r\n1:49:18 告知：8/10 Wonderful Journey Vol.2 開催\r\n1:53:22 告知：各種ライブ出演情報の紹介\r\n1:56:57 告知：NEPHLA 4th Anniversary T-shirt（全22種）販売中\r\n1:58:59 とーくたいむ\r\n2:11:19 エンディング",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 46,
-    "riskLevel": "medium",
+    "riskScore": 82,
+    "riskLevel": "high",
     "riskReasons": [
       "source_many_topic_entries",
-      "source_multiple_unknown_artists"
+      "niche_unknown_artist",
+      "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -49,8 +51,9 @@
       "rawHash": "8920d07b956300d796fbbc1274a4cdae1967fa932f0fdac8a6c8c8a8d1946e30",
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": false,
+      "isNiche": true,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ]
     },
@@ -65,9 +68,7 @@
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
       "isNiche": false,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -79,8 +80,9 @@
       "rawHash": "47f850e0404680c471efc815a28613ad58b0e52bfc9a2067e9a272695ac8ee37",
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": false,
+      "isNiche": true,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ]
     },
@@ -94,7 +96,7 @@
       "rawHash": "ed7fc0f9e396a6a6f0fc1c28e959785f1f2feb76c01cad8d9810e707665a6a50",
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": false,
+      "isNiche": true,
       "riskReasons": []
     },
     {
@@ -120,7 +122,7 @@
       "rawHash": "d499e4d77167db253a85392df37a75bb94108d6d58e897964e71081e1e50fcdd",
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": false,
+      "isNiche": true,
       "riskReasons": []
     },
     {
@@ -133,8 +135,9 @@
       "rawHash": "41b2cfd2c7a5e93fc6790a03da3f1ae9cc3108fbb917cddb44c63ddea213da63",
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": false,
+      "isNiche": true,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ]
     },
@@ -149,9 +152,7 @@
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
       "isNiche": false,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -163,8 +164,9 @@
       "rawHash": "89c19999899df273142a1b3c08eaac0effe865b06878e94fde4b9f3434fa2bfd",
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": false,
+      "isNiche": true,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ]
     },
@@ -179,9 +181,7 @@
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
       "isNiche": false,
-      "riskReasons": [
-        "short_unknown_title"
-      ]
+      "riskReasons": []
     },
     {
       "status": "accepted",
@@ -193,84 +193,10 @@
       "rawHash": "ed051e946e4cbe7f713ec0d24938e6e2f09f724149673f1696a5bc251712dbc5",
       "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
       "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "isNiche": false,
+      "isNiche": true,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 667,
-      "time": "0:11:07",
-      "title": "配信開始挨拶",
-      "artist": "配信開始ポストのリポスト者お名前読み",
-      "raw": "0:11:07 配信開始挨拶 / 配信開始ポストのリポスト者お名前読み",
-      "rawHash": "7e8f170b6b18f5a1c5b6adc1e204e0c34ca582354547226967cd674b4d40b796",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 6558,
-      "time": "1:49:18",
-      "title": "告知:8",
-      "artist": "10 Wonderful Journey Vol.2 開催",
-      "raw": "1:49:18 告知:8/10 Wonderful Journey Vol.2 開催",
-      "rawHash": "6c2e12460b9942aebb6bf9367aef576ded194ea4f6663e1c708497ae4c3fdd3f",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 6802,
-      "time": "1:53:22",
-      "title": "告知:各種ライブ出演情報の紹介",
-      "artist": "未記載",
-      "raw": "1:53:22 告知:各種ライブ出演情報の紹介",
-      "rawHash": "9db69e3c526ed523587d1b0184ab510c89db2256003504371dc68e97ff843852",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 7017,
-      "time": "1:56:57",
-      "title": "告知:NEPHLA 4th Anniversary T-shirt（全22種）販売中",
-      "artist": "未記載",
-      "raw": "1:56:57 告知:NEPHLA 4th Anniversary T-shirt（全22種）販売中",
-      "rawHash": "44153d949fc2dcb91929087e71a649090fdadb29521d1cacc61beea258e3d5dc",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 7879,
-      "time": "2:11:19",
-      "title": "エンディング",
-      "artist": "未記載",
-      "raw": "2:11:19 エンディング",
-      "rawHash": "55019f86feda1859ba24387e1d5926dd432147f435332089f42c0749e212e030",
-      "sourceId": "Ugx4jI9LfC4M3J160W94AaABAg",
-      "sourceHash": "7d0500f46db35257998dff961483de99e4467c0fed554fe2f29f1c6c4fe7cd33",
-      "riskReasons": [
-        "likely_non_song_entry"
       ]
     }
   ]
