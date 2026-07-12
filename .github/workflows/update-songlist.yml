@@ -49,18 +49,24 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Check code without refreshing data
+        if: github.event_name == 'push'
+        run: npm run check
+
       - name: Update data with previous-data fallback
+        if: github.event_name != 'push'
         id: update
         continue-on-error: true
         run: npm run update
 
       - name: Keep previous data after update failure
-        if: steps.update.outcome == 'failure'
+        if: github.event_name != 'push' && steps.update.outcome == 'failure'
         env:
           DAILY_SONG_FAILURE_MESSAGE: "Scheduled update failed; previous latest data kept."
         run: npm run mark:failure
 
       - name: Validate data if latest exists
+        if: github.event_name != 'push'
         run: |
           if [ -f data/latest.json ]; then
             npm run validate
@@ -69,6 +75,7 @@ jobs:
           fi
 
       - name: Commit data changes
+        if: github.event_name != 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
