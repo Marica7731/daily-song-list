@@ -1141,7 +1141,7 @@ function renderStatus(status) {
     els.status.textContent = "状态不可用";
     return;
   }
-  const at = formatDate(status.completedAt || status.generatedAt || status.attemptedAt);
+  const at = formatDate(status.rebuiltDerivedAt || status.completedAt || status.generatedAt || status.attemptedAt);
   els.status.textContent = status.status === "success" ? `更新于 ${at}` : `正在使用上次成功数据 · ${at}`;
 }
 

@@ -70,11 +70,14 @@ test("runtime meta uses the expected range and diff paths", () => {
       generatedAt: "2026-07-12T15:00:00Z",
       capturedAt: "2026-07-12T15:00:00Z",
       status: { status: "success" },
+      source: { rebuiltDerivedAt: "2026-07-12T16:30:00Z" },
     },
     rangePayloads,
   );
 
   assert.equal(meta.filterVersion, CURRENT_FILTER_VERSION);
+  assert.equal(meta.rebuiltDerivedAt, "2026-07-12T16:30:00Z");
+  assert.equal(meta.status.rebuiltDerivedAt, "2026-07-12T16:30:00Z");
   assert.equal(meta.nicheAnnotated, true);
   assert.deepEqual(meta.ranges["72h"], { path: "data/ui/72h.json", itemCount: 1 });
   assert.deepEqual(meta.ranges["1m"], { path: "data/ui/1m.json", itemCount: 2 });

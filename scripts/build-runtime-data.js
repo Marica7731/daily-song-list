@@ -39,9 +39,10 @@ function buildRuntimeMeta(payload, rangePayloads) {
     schemaVersion: RUNTIME_SCHEMA_VERSION,
     generatedAt: payload.generatedAt || "",
     capturedAt: payload.capturedAt || payload.generatedAt || "",
+    rebuiltDerivedAt: payload.source?.rebuiltDerivedAt || "",
     curationVersion: payload.curationVersion || "",
     curationHash: payload.curationHash || "",
-    status: payload.status || null,
+    status: runtimeStatus(payload),
     filterVersion: CURRENT_FILTER_VERSION,
     nicheAnnotated: RANGES.every((rangeId) => rangePayloads[rangeId]?.nicheAnnotated === true),
     ranges: Object.fromEntries(
@@ -61,6 +62,14 @@ function buildRuntimeMeta(payload, rangePayloads) {
         },
       ]),
     ),
+  };
+}
+
+function runtimeStatus(payload) {
+  if (!payload.status) return null;
+  return {
+    ...payload.status,
+    rebuiltDerivedAt: payload.source?.rebuiltDerivedAt || payload.status.rebuiltDerivedAt || "",
   };
 }
 
