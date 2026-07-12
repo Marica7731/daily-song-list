@@ -36,6 +36,7 @@ const KEYWORDS = [
     },
   },
 ];
+const MONTH_SEARCH_URLS = new Set(KEYWORDS.map((keyword) => keyword.urls.month));
 
 const SEARCH_GROUPS = {
   today: {
@@ -353,6 +354,7 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now) {
   for (const item of previousPayload.groups["1m"]?.items || []) {
     if (isBlockedSource(item)) continue;
     if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS)) continue;
+    if (!hasMonthlySearchSource(item)) continue;
     if (upsertCarriedVideo(videos, item, ["month"], from)) counts.month += 1;
   }
 
@@ -498,7 +500,7 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
     .sort(candidateSort);
   add(recentCandidates, null);
 
-  const monthCandidates = availableCandidates.filter((item) => item.sourceGroups?.includes("month") || item.sourceGroup === "month").sort(candidateSort);
+  const monthCandidates = availableCandidates.filter((item) => hasMonthlySearchSource(item)).sort(candidateSort);
   add(monthCandidates, carryForwardEnabled ? MONTH_REFRESH_LIMIT : null);
   if (!carryForwardEnabled) add(availableCandidates, null);
 
@@ -905,7 +907,7 @@ function incrementPlainCount(target, key, amount = 1) {
 function buildGroups(videos, capturedAt) {
   const nowMs = capturedAt.getTime();
   const in72h = (item) => Boolean(item.publishedTimestamp && nowMs - item.publishedTimestamp <= H72_MS);
-  const inMonthSearch = (item) => item.sourceGroups?.includes("month") || item.sourceGroup === "month";
+  const inMonthSearch = (item) => hasMonthlySearchSource(item);
   const inMonthWindow = (item) => isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS);
   const sortVideos = (items) =>
     [...items].sort((a, b) => {
@@ -927,9 +929,13 @@ function buildGroups(videos, capturedAt) {
       title: "Monthly timestamp song lists",
       generatedAt: capturedAt.toISOString(),
       updatedAt: capturedAt.toISOString(),
-      items: sortVideos(videos.filter((item) => inMonthWindow(item) || inMonthSearch(item))),
+      items: sortVideos(videos.filter((item) => inMonthSearch(item) && inMonthWindow(item))),
     },
   };
+}
+
+function hasMonthlySearchSource(item) {
+  return listValues(item?.sourceUrls).some((url) => MONTH_SEARCH_URLS.has(url));
 }
 
 function applyGroupQualityFilters(groups) {

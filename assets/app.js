@@ -2286,7 +2286,7 @@ function renderTrendBadge(trend) {
 
 function infoText(topic) {
   if (topic === "month") {
-    return "月度来自 YouTube 月度搜索与可延续历史结果，不等同于严格自然月。";
+    return "月度只收录 YouTube 月度搜索命中的结果，可延续同源历史结果，不会自动包含 72H。";
   }
   const generatedAt = state.songSearchLookup.generatedAt || state.payload?.generatedAt || "";
   const dateText = generatedAt ? ` 曲库更新时间：${formatDate(generatedAt)}。` : "";

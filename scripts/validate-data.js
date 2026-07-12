@@ -10,6 +10,10 @@ const DIFF_PATHS = {
   "72h": path.join(DATA_DIR, "diff", "latest-72h.json"),
   "1m": path.join(DATA_DIR, "diff", "latest-1m.json"),
 };
+const MONTH_SEARCH_URLS = new Set([
+  "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D",
+  "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D",
+]);
 
 const payload = readJson(LATEST_PATH);
 const errors = [];
@@ -26,6 +30,9 @@ for (const groupId of ["72h", "1m"]) {
   for (const [videoIndex, item] of (group.items || []).entries()) {
     if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`${groupId}[${videoIndex}].videoId invalid`);
     if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`${groupId}[${videoIndex}].songs empty`);
+    if (groupId === "1m" && !hasMonthlySearchSource(item)) {
+      errors.push(`${groupId}[${videoIndex}].sourceUrls must include a YouTube monthly search URL`);
+    }
     for (const [songIndex, song] of (item.songs || []).entries()) {
       if (!song.title) errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].title missing`);
       if (!Number.isInteger(song.seconds) || song.seconds < 0) errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].seconds invalid`);
@@ -68,6 +75,15 @@ console.log(
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function hasMonthlySearchSource(item) {
+  return listValues(item.sourceUrls).some((url) => MONTH_SEARCH_URLS.has(url));
+}
+
+function listValues(value) {
+  if (Array.isArray(value)) return value;
+  return value ? [value] : [];
 }
 
 function validateDiffFile(groupId, diffPath) {

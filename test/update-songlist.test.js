@@ -21,6 +21,12 @@ const {
 } = require("../scripts/update-songlist");
 
 const NOW = new Date("2026-07-11T13:00:00Z");
+const TODAY_SEARCH_URL = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D";
+const MONTH_SEARCH_URL = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D";
+const SOURCE_URLS = {
+  today: TODAY_SEARCH_URL,
+  month: MONTH_SEARCH_URL,
+};
 
 test("carries fresh previous song lists and skips previously inspected stable videos", () => {
   const previous = {
@@ -36,6 +42,8 @@ test("carries fresh previous song lists and skips previously inspected stable vi
         items: [
           video("CCCCCCCCCCC", 24 * 10, ["month"]),
           video("DDDDDDDDDDD", 24 * 40, ["month"]),
+          video("GGGGGGGGGGG", 24, ["today"]),
+          video("HHHHHHHHHHH", 24, ["month"], { sourceUrls: [TODAY_SEARCH_URL] }),
         ],
       },
     },
@@ -58,6 +66,8 @@ test("carries fresh previous song lists and skips previously inspected stable vi
   assert.deepEqual(carry.counts, { h72: 1, month: 1 });
   assert.equal(carry.skipVideoIds.has("AAAAAAAAAAA"), true);
   assert.equal(carry.skipVideoIds.has("CCCCCCCCCCC"), true);
+  assert.equal(carry.skipVideoIds.has("GGGGGGGGGGG"), false);
+  assert.equal(carry.skipVideoIds.has("HHHHHHHHHHH"), false);
   assert.equal(carry.skipVideoIds.has("EEEEEEEEEEE"), true);
   assert.equal(carry.skipVideoIds.has("FFFFFFFFFFF"), false);
 });
@@ -183,23 +193,26 @@ test("fetched videos win over carried videos while preserving month membership",
   assert.deepEqual(merged[0].sourceGroups.sort(), ["month", "today"]);
 });
 
-test("monthly group includes recent videos found through the 72h search", () => {
+test("monthly group only includes monthly-source videos within the carry-forward window", () => {
   const groups = buildGroups(
     [
       video("AAAAAAAAAAA", 2, ["today"]),
       video("BBBBBBBBBBB", 24 * 10, ["month"]),
       video("CCCCCCCCCCC", 24 * 40, ["today"]),
+      video("DDDDDDDDDDD", 3, ["today", "month"]),
+      video("EEEEEEEEEEE", 24 * 40, ["month"]),
+      video("FFFFFFFFFFF", 4, ["today", "month"], { sourceUrls: [TODAY_SEARCH_URL] }),
     ],
     NOW,
   );
 
   assert.deepEqual(
     groups["72h"].items.map((item) => item.videoId),
-    ["AAAAAAAAAAA"],
+    ["AAAAAAAAAAA", "DDDDDDDDDDD", "FFFFFFFFFFF"],
   );
   assert.deepEqual(
     groups["1m"].items.map((item) => item.videoId),
-    ["AAAAAAAAAAA", "BBBBBBBBBBB"],
+    ["DDDDDDDDDDD", "BBBBBBBBBBB"],
   );
 });
 
@@ -415,6 +428,7 @@ function candidate(videoId, hoursAgo, sourceGroups, overrides = {}) {
     title: videoId,
     channelName: "channel",
     sourceGroups,
+    sourceUrls: sourceGroups.map((groupId) => SOURCE_URLS[groupId]).filter(Boolean),
     publishedTimestamp: NOW.getTime() - hoursAgo * 60 * 60 * 1000,
     ...overrides,
   };
