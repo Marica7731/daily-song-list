@@ -88,13 +88,31 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(cleanSongTitleNoise("01| ハートアンドハート"), "ハートアンドハート");
   assert.equal(cleanSongTitleNoise("8.32"), "8.32");
   assert.equal(cleanSongTitleNoise("2.500♪"), "2.500♪");
+  assert.equal(cleanSongTitleNoise("02.441"), "441");
   assert.equal(cleanSongTitleNoise("01. Song"), "Song");
+  assert.equal(cleanSongTitleNoise("01≫アンノウン・マザーグース"), "アンノウン・マザーグース");
+  assert.equal(cleanSongTitleNoise("02≫テオ"), "テオ");
+  assert.equal(cleanSongTitleNoise("꒱‬ 01. 初恋サイダー"), "初恋サイダー");
+  assert.equal(cleanSongTitleNoise("꒱‬ 03. ブルーハワイレモン"), "ブルーハワイレモン");
+  assert.equal(cleanSongTitleNoise("②どんな色が好き"), "どんな色が好き");
+  assert.equal(cleanSongTitleNoise("③クリープ"), "クリープ");
   assert.equal(cleanSongTitleNoise("10曲目   Brave Shine"), "Brave Shine");
   assert.equal(cleanSongTitleNoise("3 01. 初恋サイダー"), "初恋サイダー");
   assert.deepEqual(normalizeSongEntry({ title: "02| キュートなキューたい", artist: "CUTIE STREET" }), {
     title: "キュートなキューたい",
     artist: "CUTIE STREET",
   });
+  assert.deepEqual(normalizeSongEntry({ title: "01≫アンノウン・マザーグース", artist: "wowaka" }), {
+    title: "アンノウン・マザーグース",
+    artist: "wowaka",
+  });
+
+  assert.equal(isBlockedSongEntry({ title: "閉会式", artist: "待补歌手" }), true);
+  assert.equal(isBlockedSongEntry({ title: "閉会式も見てください", artist: "待补歌手" }), true);
+  assert.equal(isBlockedSongEntry({ title: "1を手で表現した", artist: "待补歌手" }), true);
+  assert.equal(isBlockedSongEntry({ title: "2周年記念お写真公開！", artist: "待补歌手" }), true);
+  assert.equal(isBlockedSongEntry({ title: "〜3Dライブ開催決定!!!!", artist: "待补歌手" }), true);
+  assert.equal(isBlockedSongEntry({ title: "3Dお披露目でスタンドマイク回したかった", artist: "永ちゃんやりたい" }), true);
 
   const payload = {
     source: { name: "fixture" },

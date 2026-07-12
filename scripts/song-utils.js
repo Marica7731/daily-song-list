@@ -120,13 +120,18 @@ function isLikelyNonSongEntry(song) {
   const hasArtist = Boolean(artist && artist !== "未記載");
 
   if (isCustomEmojiOnlyText(title)) return true;
+  if (/^0\d+[.．]\d+(?:\s*[\/／].*)?$/u.test(title)) return true;
   if (isBlockedSongEntry({ title, artist, raw })) return true;
   if (!hasArtist && isChatReactionShoutText(title)) return true;
   if (isReactionActivityEntry(title, artist, raw)) return true;
   if (/^(音入り|音入[り]?|声入り|マイクテスト|開始|終了|曲始まり|オープニング|エンディング|登場|退場|ゲスト|スパチャ読み|読み開始|コメント読み|告知|雑談|休憩|ただいま|まで)$/iu.test(title)) {
     return true;
   }
+  if (/^(?:閉会式|開会式)$/u.test(title)) return true;
   if (/(?:曲始まり|オープニング|エンディング|登場|退場|スパチャ読み|コメント読み|チャット読み|ギフト(?:は)?読|読み開始|読み上げ|告知|宣伝|配信終了|配信開始|高評価|ch登録|チャンネル登録|登録者(?:数)?|視聴者|OBS|お手洗い休憩|チャットお題|\d+\s*達成|開始\s*[\/／]|虚空|クリックとは|クリックあるもの|ゲスト匂わせ|ゲストでよく呼ばれる|スパチャ|メモは紙|ライブでやる曲|チャンネルで.+歌ってみた|明日の曲について|ござるさん)/iu.test(combined)) {
+    return true;
+  }
+  if (/(?:手で表現した|お写真公開|写真公開|ライブ開催決定|お披露目で.+やりたい|スタンドマイク回したかった)/iu.test(combined)) {
     return true;
   }
   if (!hasArtist && /^(?:本編開始|全曲終了|開始[・\s]?|終了[・\s]?|ライブ開催決定|特別ゲスト|突然の)/iu.test(title)) {
@@ -288,7 +293,7 @@ function stripLeadingTimelineDecorations(text) {
     value = value.replace(/^(?:Re\s*[:：]\s*|【\s*\d{1,3}\s*】\s*|\[\s*\d{1,3}\s*\]\s*|\(\s*\d{1,3}\s*\)\s*)/iu, "").trim();
     value = value.replace(/^\d{1,3}\s*(?:曲\s*[\/／]|[,，\-—–−:：]\s*|[.)．。、]\s+)/u, "").trim();
     value = value
-      .replace(/^[\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼→⇒\s]+/u, "")
+      .replace(/^[\u200b-\u200f\u202a-\u202e\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼→⇒꒱\s]+/u, "")
       .trim();
     if (value === original) break;
   }
@@ -373,15 +378,20 @@ function splitArtistBeforeWorkMetadata(text) {
 function cleanSongOrArtistPart(text) {
   let value = stripTrailingLatinAnnotation(String(text || "").trim());
   value = stripCustomEmojiAliases(value).trim();
-  value = cleanSongTitleNoise(value).trim();
+  if (!shouldPreserveDecimalSongTitle(value)) value = cleanSongTitleNoise(value).trim();
   value = value.replace(/^_[A-Za-z0-9]+:\s*/u, "").trim();
   const preserveTrailingDoubleSlash = /[A-Za-z0-9)\]）]\/\/\s*$/.test(value);
-  value = value.replace(/^\s*(?:\d{1,3}\s*[\-—–−]|[#＃]\s*\d{1,3}\s*[.)．。、:：\-—–−]?|encore|アンコール)\s*/iu, "").trim();
-  value = cleanSongTitleNoise(value).trim();
+  value = value.replace(/^\s*(?:[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*|\d{1,3}\s*[≫»>]+\s*|\d{1,3}\s*[\-—–−]|[#＃]\s*\d{1,3}\s*[.)．。、:：\-—–−]?|encore|アンコール)\s*/iu, "").trim();
+  if (!shouldPreserveDecimalSongTitle(value)) value = cleanSongTitleNoise(value).trim();
   value = value.replace(/^[\[［]+|[\]］]+$/g, "").trim();
   value = value.replace(/^[\-—–−/／|｜￤∣丨✦:：;；]+|[\-—–−/／|｜￤∣丨✦:：;；]+$/g, "").trim();
   if (preserveTrailingDoubleSlash && !value.endsWith("//")) value = `${value}//`;
   return value;
+}
+
+function shouldPreserveDecimalSongTitle(value) {
+  const text = String(value || "").trim();
+  return !/^0\d+[.．]/u.test(text) && /^\d+[.．]\d+(?:\S*|\s*[\/／].*)?$/u.test(text);
 }
 
 function cleanArtistPart(text) {
@@ -535,6 +545,7 @@ function isBadSongField(text) {
   if (!value || /^(歌名|歌手|编号|未確定|未确定)$/iu.test(value)) return true;
   if (TIMESTAMP_RE.test(value) && value.match(TIMESTAMP_RE)?.[0] === value) return true;
   if (!/[A-Za-z0-9ぁ-んァ-ヶ一-龯々]/u.test(value)) return true;
+  if (/^0\d+[.．]\d+$/u.test(value)) return true;
   if (/^(talk|mc|雑談|聊天|感想|开场|開始|结束|終了|告知|返场|休息)$/iu.test(value)) return true;
   return false;
 }
@@ -638,9 +649,17 @@ function findLastDelimiterOutsideBrackets(text, delimiters) {
     const ch = text[idx];
     if (BRACKET_OPEN.includes(ch)) depth += 1;
     else if (BRACKET_CLOSE.includes(ch)) depth = Math.max(0, depth - 1);
-    else if (depth === 0 && delimiters.includes(ch)) found = idx;
+    else if (depth === 0 && delimiters.includes(ch) && !isDateSlashDelimiter(text, idx)) found = idx;
   }
   return found;
+}
+
+function isDateSlashDelimiter(text, index) {
+  const ch = text[index];
+  if (ch !== "/" && ch !== "／") return false;
+  const before = text.slice(0, index);
+  const after = text.slice(index + 1);
+  return /\b(?:19|20)\d{2}\s*$/u.test(before) && /^\s*(?:0?[1-9]|1[0-2])\b/u.test(after);
 }
 
 function isSpace(ch) {

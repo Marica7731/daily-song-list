@@ -7,7 +7,7 @@ const CONFIG_DIR = path.join(ROOT, "config");
 const OVERRIDES_PATH = path.join(CONFIG_DIR, "curation-overrides.json");
 const NON_SONG_RULES_PATH = path.join(CONFIG_DIR, "non-song-rules.json");
 const UNKNOWN_ARTIST_KEYS = new Set(["", "unknown", "n/a", "na", "none", "null", "未記載", "未记载", "不明", "なし", "无", "待补歌手", "待補歌手", "待补", "待補", "-"]);
-const VALID_ACTIONS = new Set(["drop_entry", "replace_entry", "reject_source", "drop_video", "force_keep"]);
+const VALID_ACTIONS = new Set(["drop_entry", "replace_entry", "reject_source", "force_refresh", "drop_video", "force_keep"]);
 const ENTRY_ACTIONS = new Set(["drop_entry", "replace_entry", "force_keep"]);
 const SOURCE_ACTIONS = new Set(["reject_source"]);
 
@@ -123,6 +123,7 @@ function overrideConflictKey(record) {
   if (!record.action || !record.videoId) return "";
   const sourceKey = record.sourceId || `hash:${record.sourceHash || ""}`;
   if (record.action === "drop_video") return `video:${record.videoId}`;
+  if (record.action === "force_refresh") return `refresh:${record.videoId}`;
   if (record.action === "reject_source") return `source:${record.videoId}:${sourceKey}`;
   if (!sourceKey || !Number.isInteger(record.seconds) || !record.rawHash) return "";
   return `entry:${record.videoId}:${sourceKey}:${record.seconds}:${record.rawHash}`;
@@ -277,16 +278,28 @@ function isConversationEntry(song) {
   const title = String(song?.title || "").trim();
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "");
-  if (!isUnknownArtist(artist)) return false;
   const value = normalizeConversationText(title);
   if (!value) return false;
+  if (isStrongNonSongActivityText(value)) return true;
+  if (!isUnknownArtist(artist)) return false;
   if (isEmojiOrReactionOnly(title)) return true;
   if (/^(?:や|やー|やあ|やほ|やっほ|わあ|あ|え|お|ん|うん|はい|ええ)[…~〜～!！?？。.\s]*$/iu.test(value)) return true;
-  if (/(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう)$/iu.test(value)) return true;
-  if (/(?:背景を変える|横に置く|食べる|飲む|お名前呼び|配信告知|チャンネル登録|スパチャ|メンシ|スクショ|サムネ)/iu.test(value)) return true;
-  if (/(?:クッキング|ケーキ|テーマは|浮かれて|よっこいしょ)/iu.test(value)) return true;
+  if (/(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう|気がする|したい|してほしい|かな|かも|だよ|だね|なの)$/iu.test(value)) return true;
+  if (/(?:背景を変える|横に置く|食べる|飲む|お名前呼び|配信告知|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|告知|登録|コメント|ギフト)/iu.test(value)) return true;
+  if (/(?:クッキング|ケーキ|テーマは|浮かれて|よっこいしょ|歌声|バラード|透明感|触れれる|楽しそう|褒め合って)/iu.test(value)) return true;
   if (/[\u{1F300}-\u{1FAFF}]/u.test(title) && title.length <= 18) return true;
   return /(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます)/iu.test(raw);
+}
+
+function isStrongNonSongActivityText(value) {
+  const text = String(value || "").normalize("NFKC").replace(/[\s\u3000]+/gu, "").replace(/[!！?？。．.]+$/gu, "");
+  if (!text) return false;
+  if (/^(?:閉会式|閉会|開会式)(?:も?(?:見てください|みてください|見てね|みてね))?$/u.test(text)) return true;
+  if (/^\d+を手で表現した$/u.test(text)) return true;
+  if (/(?:周年記念)?(?:お)?写真公開/u.test(text)) return true;
+  if (/3Dライブ開催決定/u.test(text)) return true;
+  if (/3Dお披露目でスタンドマイク回したかった/u.test(text)) return true;
+  return false;
 }
 
 function normalizeConversationText(text) {
@@ -325,7 +338,7 @@ function classifyEntry(song, options = {}) {
   if (unknownArtist && !knownSong && isActivityMarkerTitle(song?.title, song?.artist, options.rules || loadNonSongRulesSafe())) {
     return { classification: "confirmed_noise", suggestedAction: "drop_entry", riskReasons: ["activity_marker_title"] };
   }
-  if (unknownArtist && !knownSong && isConversationEntry(song)) {
+  if (!knownSong && isConversationEntry(song)) {
     return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["conversation_entry"] };
   }
   if (unknownArtist && knownSong) {
@@ -501,7 +514,7 @@ function matchesOverride(record, { videoId, source = {}, song = {} }) {
 function collectForceRefreshVideoIds(context) {
   const ids = new Set();
   for (const record of context?.overrides?.records || []) {
-    if (record.action === "reject_source" && record.videoId) ids.add(record.videoId);
+    if (record.action === "force_refresh" && record.videoId) ids.add(record.videoId);
   }
   return ids;
 }

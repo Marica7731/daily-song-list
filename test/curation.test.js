@@ -165,6 +165,29 @@ test("curation drops reviewed unknown-artist activity leftovers from production 
   assert.equal(videos.curationStats.ruleDroppedEntries, 2);
 });
 
+test("curation drops announcement and action rows from current dirty samples", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "DIRTY000001",
+        songs: [
+          { title: "閉会式", artist: "待补歌手", seconds: 1, raw: "0:01 閉会式" },
+          { title: "閉会式も見てください", artist: "待补歌手", seconds: 7, raw: "0:07 閉会式も見てください" },
+          { title: "1を手で表現した", artist: "待补歌手", seconds: 2, raw: "0:02 1を手で表現した" },
+          { title: "2周年記念お写真公開！", artist: "待补歌手", seconds: 3, raw: "0:03 2周年記念お写真公開！" },
+          { title: "〜3Dライブ開催決定!!!!", artist: "待补歌手", seconds: 4, raw: "0:04 〜3Dライブ開催決定!!!!" },
+          { title: "3Dお披露目でスタンドマイク回したかった", artist: "永ちゃんやりたい", seconds: 5, raw: "0:05 3Dお披露目でスタンドマイク回したかった / 永ちゃんやりたい" },
+          { title: "アンノウン・マザーグース", artist: "wowaka", seconds: 6, raw: "0:06 01≫アンノウン・マザーグース / wowaka" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(videos[0].songs.map((item) => item.title), ["アンノウン・マザーグース"]);
+  assert.equal(videos.curationStats.conversationDroppedEntries, 6);
+});
+
 test("curation patch merge dedupes identical records and reports conflicts", () => {
   const baseRecord = { action: "drop_entry", videoId: "AAAAAAAAAAA", sourceId: "source", seconds: 10, rawHash: "raw" };
   const deduped = mergeCurationPatch({ schemaVersion: 1, records: [baseRecord] }, { schemaVersion: 1, records: [baseRecord] });

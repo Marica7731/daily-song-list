@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { createSongSearchLookup, isSongSearchKnown } = require("../assets/frontend-utils");
+const { repairParsedEntry } = require("./entry-repair");
 const {
   classifyEntry,
   hashNormalizedText,
@@ -24,7 +25,10 @@ const AUDIT_PATH = path.join(DATA_DIR, "audit.json");
 const SNAPSHOT_INDEX_PATH = path.join(DATA_DIR, "snapshots", "index.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 const QUALITY_REPORT_PATH = path.join(DATA_DIR, "quality-report.json");
-const QUEUE_PATH = path.join(REVIEW_DIR, "queue.json");
+const LEGACY_QUEUE_PATH = path.join(REVIEW_DIR, "queue.json");
+const QUEUE_CURRENT_PATH = path.join(REVIEW_DIR, "queue-current.json");
+const QUEUE_HISTORY_PATH = path.join(REVIEW_DIR, "queue-history.json");
+const CURRENT_ENTRY_INDEX_PATH = path.join(REVIEW_DIR, "current-entry-index.json");
 const MANIFEST_PATH = path.join(REVIEW_DIR, "manifest.json");
 
 if (require.main === module) {
@@ -42,39 +46,56 @@ function main() {
   fs.mkdirSync(REVIEW_SOURCE_DIR, { recursive: true });
   clearReviewSources();
 
-  const queueById = new Map();
-  addLatestRiskSources(queueById, latest, lookup, generatedAt);
-  addAuditRiskSources(queueById, audit, lookup, generatedAt);
-  addSnapshotRiskSources(queueById, lookup, generatedAt);
+  const currentVideoIds = new Set(iteratePayloadItems(latest).map(({ item }) => item.videoId).filter(Boolean));
+  const currentQueueById = new Map();
+  const historyQueueById = new Map();
+  addLatestRiskSources(currentQueueById, latest, lookup, generatedAt);
+  addAuditRiskSources(currentQueueById, audit, lookup, generatedAt, { currentVideoIds });
+  addSnapshotRiskSources(historyQueueById, lookup, generatedAt);
 
-  const queue = [...queueById.values()].sort(compareQueueItems);
-  for (const item of queue) writeSourceFile(item);
+  const currentQueue = [...currentQueueById.values()].sort(compareQueueItems);
+  const historyQueue = [...historyQueueById.values()].sort(compareQueueItems);
+  for (const item of [...currentQueue, ...historyQueue]) writeSourceFile(item);
+  const currentEntryIndex = buildCurrentEntryIndex(currentQueue);
 
   const qualityReport = buildQualityReport({
     generatedAt,
     latest,
     audit,
-    queue,
+    queue: currentQueue,
     curation,
     previousReport: readJsonIfExists(QUALITY_REPORT_PATH),
   });
-  writeJson(QUEUE_PATH, {
+  const currentQueuePayload = queuePayload({ generatedAt, curation, queue: currentQueue, scope: "current" });
+  writeJson(QUEUE_CURRENT_PATH, currentQueuePayload);
+  writeJson(LEGACY_QUEUE_PATH, currentQueuePayload);
+  writeJson(QUEUE_HISTORY_PATH, queuePayload({ generatedAt, curation, queue: historyQueue, scope: "history" }));
+  writeCompactJson(CURRENT_ENTRY_INDEX_PATH, {
     schemaVersion: 1,
     generatedAt,
     curationVersion: curation.version,
     curationHash: curation.hash,
-    itemCount: queue.length,
-    items: queue.map(({ sourceFilePayload, sourceText, ...item }) => item),
+    itemCount: currentEntryIndex.length,
+    items: currentEntryIndex,
   });
   writeJson(MANIFEST_PATH, {
     schemaVersion: 1,
     generatedAt,
     curationVersion: curation.version,
-    queuePath: "data/review/queue.json",
+    curationHash: curation.hash,
+    currentQueuePath: "data/review/queue-current.json",
+    historyQueuePath: "data/review/queue-history.json",
+    legacyQueuePath: "data/review/queue.json",
+    currentEntryIndexPath: "data/review/current-entry-index.json",
     qualityReportPath: "data/quality-report.json",
     sourceDir: "data/review/sources",
-    itemCount: queue.length,
-    highRiskSourceCount: queue.filter((item) => item.riskLevel === "high").length,
+    currentSourceCount: currentQueue.length,
+    currentEntryCount: currentEntryIndex.length,
+    currentHighRiskCount: currentQueue.filter((item) => item.riskLevel === "high").length,
+    historySourceCount: historyQueue.length,
+    historyEntryCount: countSourceEntries(historyQueue),
+    itemCount: currentQueue.length,
+    highRiskSourceCount: currentQueue.filter((item) => item.riskLevel === "high").length,
   });
   writeJson(QUALITY_REPORT_PATH, qualityReport);
 
@@ -85,31 +106,34 @@ function main() {
     );
   }
   console.log(
-    `[review-queue] items=${queue.length} high=${qualityReport.highRiskSourceCount} nicheUnknown=${qualityReport.nicheUnknownArtistCount}`,
+    `[review-queue] current=${currentQueue.length} history=${historyQueue.length} entries=${currentEntryIndex.length} high=${qualityReport.highRiskSourceCount} nicheUnknown=${qualityReport.nicheUnknownArtistCount}`,
   );
 }
 
 function addLatestRiskSources(queueById, latest, lookup, generatedAt) {
   const seenVideoSources = new Set();
   for (const { groupId, item } of iteratePayloadItems(latest)) {
-    const source = sourceFromVideoItem(item);
-    const key = `${item.videoId}:${source.sourceId || source.sourceHash}`;
+    const source = sourceFromVideoItem(item, lookup);
+    const key = `${item.videoId}:${source.sourceHash}`;
     if (seenVideoSources.has(key)) continue;
     seenVideoSources.add(key);
     const risk = analyzeSourceRisk(source, lookup);
     if (!risk.riskReasons.length) continue;
     upsertQueue(queueById, {
       ...baseQueueItem({ generatedAt, item, source, risk }),
+      scope: "current",
       ranges: [groupId],
-      sourcePath: sourcePathFor(item.videoId, source.sourceHash),
-      sourceFilePayload: buildSourcePayload({ generatedAt, item, source, risk, sourceTextAvailable: false }),
+      sourcePath: sourcePathFor(item.videoId, source.sourceHash, "current"),
+      sourceFilePayload: buildSourcePayload({ generatedAt, item, source, risk, lookup, sourceTextAvailable: false }),
       forceRefreshSuggested: true,
     });
   }
 }
 
-function addAuditRiskSources(queueById, audit, lookup, generatedAt) {
+function addAuditRiskSources(queueById, audit, lookup, generatedAt, options = {}) {
+  const currentVideoIds = options.currentVideoIds || null;
   for (const video of audit.videos || []) {
+    if (currentVideoIds && !currentVideoIds.has(video.videoId)) continue;
     for (const summary of video.sources || []) {
       const entries = listValues(summary.entries).map((entry) => ({
         ...entry,
@@ -145,12 +169,14 @@ function addAuditRiskSources(queueById, audit, lookup, generatedAt) {
       if (!risk.riskReasons.length && !summary.reason) continue;
       upsertQueue(queueById, {
         ...baseQueueItem({ generatedAt, item, source, risk }),
-        sourcePath: sourcePathFor(video.videoId, source.sourceHash),
+        scope: "current",
+        sourcePath: sourcePathFor(video.videoId, source.sourceHash, "current"),
         sourceFilePayload: buildSourcePayload({
           generatedAt,
           item,
           source,
           risk,
+          lookup,
           sourceTextAvailable: Boolean(source.sourceText),
         }),
         forceRefreshSuggested: !source.sourceText,
@@ -166,21 +192,22 @@ function addSnapshotRiskSources(queueById, lookup, generatedAt) {
     const snapshot = readJsonIfExists(path.join(ROOT, entry.path));
     if (!snapshot?.groups) continue;
     for (const { item } of iteratePayloadItems(snapshot)) {
-      const source = sourceFromVideoItem(item);
+      const source = sourceFromVideoItem(item, lookup);
       const risk = analyzeSourceRisk(source, lookup);
       if (!risk.riskReasons.length) continue;
       upsertQueue(queueById, {
         ...baseQueueItem({ generatedAt, item, source, risk }),
+        scope: "history",
         snapshotIds: [entry.id],
-        sourcePath: sourcePathFor(item.videoId, source.sourceHash),
-        sourceFilePayload: buildSourcePayload({ generatedAt, item, source, risk, sourceTextAvailable: false, snapshotId: entry.id }),
+        sourcePath: sourcePathFor(item.videoId, source.sourceHash, "history"),
+        sourceFilePayload: buildSourcePayload({ generatedAt, item, source, risk, lookup, sourceTextAvailable: false, snapshotId: entry.id }),
         forceRefreshSuggested: true,
       });
     }
   }
 }
 
-function sourceFromVideoItem(item) {
+function sourceFromVideoItem(item, lookup = null) {
   const sourceId = item.selectedSourceId || item.sourceQuality?.sourceId || item.sourceId || "";
   const sourceHash =
     item.selectedSourceHash ||
@@ -208,7 +235,7 @@ function sourceFromVideoItem(item) {
       conversationEntryCount: songs.filter((song) => isConversationEntry(song)).length,
       parserCorruptionCount: songs.filter((song) => isParserCorruptionEntry(song)).length,
       nicheCount: songs.filter((song) => song.isNiche === true).length,
-      knownSongCount: songs.filter((song) => isKnownSong(song, null)).length,
+      knownSongCount: songs.filter((song) => isKnownSong(song, lookup)).length,
     },
     sourceText: "",
   };
@@ -312,7 +339,7 @@ function baseQueueItem({ generatedAt, item, source, risk }) {
   };
 }
 
-function buildSourcePayload({ generatedAt, item, source, risk, sourceTextAvailable, snapshotId = "" }) {
+function buildSourcePayload({ generatedAt, item, source, risk, lookup, sourceTextAvailable, snapshotId = "" }) {
   return {
     schemaVersion: 1,
     generatedAt,
@@ -338,20 +365,23 @@ function buildSourcePayload({ generatedAt, item, source, risk, sourceTextAvailab
       riskReasons: risk.riskReasons,
     },
     entries: [
-      ...(source.songs || []).map((song) => ({
-        status: "accepted",
-        seconds: song.seconds,
-        time: song.time || secondsToTime(song.seconds),
-        title: song.title || "",
-        artist: song.artist || "",
-        raw: song.raw || "",
-        rawHash: song.rawHash || hashNormalizedText(song.raw || `${song.seconds}:${song.title}`),
-        sourceId: source.sourceId,
-        sourceHash: source.sourceHash,
-        isNiche: song.isNiche === true,
-        ...classificationFields(song),
-        riskReasons: entryReasons(song, risk.stats, null),
-      })),
+      ...(source.songs || []).map((song) => {
+        const fields = classificationFields(song, lookup, risk.stats);
+        return {
+          status: "accepted",
+          seconds: song.seconds,
+          time: song.time || secondsToTime(song.seconds),
+          title: song.title || "",
+          artist: song.artist || "",
+          raw: song.raw || "",
+          rawHash: song.rawHash || hashNormalizedText(song.raw || `${song.seconds}:${song.title}`),
+          sourceId: source.sourceId,
+          sourceHash: source.sourceHash,
+          isNiche: song.isNiche === true,
+          ...fields,
+          riskReasons: uniqueValues([...entryReasons(song, risk.stats, lookup), ...(fields.riskReasons || [])]),
+        };
+      }),
       ...listValues(source.rejectedEntries).map((entry) => ({
         status: "rejected",
         reason: entry.reason || "unknown",
@@ -393,8 +423,75 @@ function writeSourceFile(item) {
   writeJson(path.join(ROOT, item.sourcePath), item.sourceFilePayload);
 }
 
-function sourcePathFor(videoId, sourceHash) {
-  return `data/review/sources/${videoId}-${sourceHash.slice(0, 20)}.json`;
+function sourcePathFor(videoId, sourceHash, scope = "current") {
+  const prefix = scope === "history" ? "history-" : "";
+  return `data/review/sources/${prefix}${videoId}-${sourceHash.slice(0, 20)}.json`;
+}
+
+function queuePayload({ generatedAt, curation, queue, scope }) {
+  return {
+    schemaVersion: 1,
+    generatedAt,
+    curationVersion: curation.version,
+    curationHash: curation.hash,
+    scope,
+    itemCount: queue.length,
+    items: queue.map(({ sourceFilePayload, sourceText, ...item }) => ({
+      ...item,
+      entryPreview: entryPreview(sourceFilePayload.entries || []),
+    })),
+  };
+}
+
+function entryPreview(entries, limit = 3) {
+  return entries
+    .filter((entry) => entry.riskReasons?.length || entry.classification !== "likely_song")
+    .slice(0, limit)
+    .map((entry) => ({
+      rawHash: entry.rawHash,
+      time: entry.time,
+      title: entry.title,
+      artist: entry.artist,
+      classification: entry.classification,
+      riskReasons: entry.riskReasons || [],
+    }));
+}
+
+function buildCurrentEntryIndex(queue) {
+  const entries = [];
+  const seen = new Set();
+  for (const item of queue || []) {
+    for (const entry of item.sourceFilePayload?.entries || []) {
+      const key = `${item.reviewId}:${entry.rawHash || ""}:${entry.seconds ?? ""}:${entry.status || ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      entries.push({
+        reviewId: item.reviewId,
+        sourcePath: item.sourcePath,
+        videoId: item.videoId,
+        videoTitle: item.videoTitle,
+        channelName: item.channelName,
+        sourceId: item.sourceId,
+        sourceHash: item.sourceHash,
+        rawHash: entry.rawHash || "",
+        seconds: Number.isInteger(entry.seconds) ? entry.seconds : null,
+        time: entry.time || "",
+        title: entry.title || "",
+        artist: entry.artist || "",
+        raw: entry.raw || "",
+        status: entry.status || "",
+        isNiche: entry.isNiche === true,
+        classification: entry.classification || "needs_review",
+        suggestedAction: entry.suggestedAction || "manual_review",
+        riskReasons: entry.riskReasons || [],
+      });
+    }
+  }
+  return entries.sort((a, b) => a.videoTitle.localeCompare(b.videoTitle, "ja") || (a.seconds ?? 0) - (b.seconds ?? 0));
+}
+
+function countSourceEntries(queue) {
+  return (queue || []).reduce((sum, item) => sum + (item.sourceFilePayload?.entries?.length || 0), 0);
 }
 
 function buildQualityReport({ generatedAt, latest, audit, queue, curation, previousReport }) {
@@ -558,12 +655,47 @@ function isKnownSong(song, lookup) {
   return isSongSearchKnown(song, lookup);
 }
 
-function classificationFields(song) {
-  const classification = classifyEntry(song, { knownSong: isKnownSong(song, null) });
+function classificationFields(song, lookup, sourceStats = {}) {
+  const repaired = repairParsedEntry(song, lookup);
+  const repairChanged = Boolean(repaired.repair?.changed);
+  const knownSong = isKnownSong(repaired, lookup);
+  const classification = repairChanged
+    ? { classification: "parser_corruption", suggestedAction: "replace_entry", riskReasons: ["parser_corruption"] }
+    : classifyEntry(repaired, { knownSong });
+  const evidence = positiveEvidence(repaired, knownSong, sourceStats);
+  if (classification.classification === "likely_song" && !evidence.length) {
+    return {
+      classification: "needs_review",
+      suggestedAction: "manual_review",
+      riskReasons: ["no_positive_song_evidence"],
+      positiveEvidence: [],
+    };
+  }
   return {
     classification: classification.classification,
     suggestedAction: classification.suggestedAction,
+    replacementSuggestion: buildReplacementSuggestion(song, repaired, classification.classification),
+    riskReasons: uniqueValues(classification.riskReasons || []),
+    positiveEvidence: evidence,
   };
+}
+
+function buildReplacementSuggestion(original, repaired, classification) {
+  if (classification !== "parser_corruption") return null;
+  const replacement = {};
+  if (String(repaired.title || "") !== String(original.title || "")) replacement.title = repaired.title || "";
+  if (String(repaired.artist || "") !== String(original.artist || "")) replacement.artist = repaired.artist || "";
+  if (Number.isInteger(repaired.seconds) && repaired.seconds !== original.seconds) replacement.seconds = repaired.seconds;
+  return Object.keys(replacement).length ? replacement : null;
+}
+
+function positiveEvidence(song, knownSong, sourceStats = {}) {
+  const evidence = [];
+  if (knownSong) evidence.push("known_song");
+  if (song?.forceKept === true) evidence.push("force_keep");
+  if (!isUnknownArtist(song?.artist)) evidence.push("known_artist");
+  if ((sourceStats.structuralCount || 0) > 0) evidence.push("structured_setlist");
+  return evidence;
 }
 
 function clearReviewSources() {
@@ -584,6 +716,11 @@ function readJsonIfExists(filePath) {
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+function writeCompactJson(filePath, value) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, `${JSON.stringify(value)}\n`, "utf8");
 }
 
 function addUnique(list, value) {

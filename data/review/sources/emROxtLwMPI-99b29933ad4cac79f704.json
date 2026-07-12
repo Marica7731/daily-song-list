@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T20:48:18.288Z",
+  "generatedAt": "2026-07-12T21:32:53.123Z",
   "reviewId": "review:emROxtLwMPI:99b29933ad4cac79f704",
   "video": {
     "videoId": "emROxtLwMPI",
@@ -34,9 +34,20 @@
       "sourceId": "description:emROxtLwMPI:99b29933ad4cac79",
       "sourceHash": "99b29933ad4cac79f704775cfe1b15a41ddd25e5c7f0f9b3bae32195f85b46f0",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "riskReasons": []
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "12",
+        "artist": "06/2026"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
+      "positiveEvidence": [
+        "known_song",
+        "known_artist",
+        "structured_setlist"
+      ]
     }
   ]
 }

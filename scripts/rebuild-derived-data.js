@@ -2,6 +2,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { annotatePayloadWithSongSearchNiche, songSearchSourceSummary } = require("./song-search-index");
 const { applyCurationToVideos, hashNormalizedText, isParserCorruptionEntry, loadCurationContext } = require("./curation");
+const { createSongSearchLookup } = require("../assets/frontend-utils");
+const { repairParsedEntry } = require("./entry-repair");
 const { normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
 const { applyGroupQualityFilters, writeRankDiffFiles } = require("./update-songlist");
 
@@ -20,12 +22,15 @@ function main() {
   if (!latest?.groups) throw new Error("data/latest.json missing groups");
 
   const curationContext = loadCurationContext();
+  const songSearchIndex = readJsonIfExists(SONG_SEARCH_INDEX_PATH);
+  const songSearchLookup = createSongSearchLookup(songSearchIndex || {});
   const stats = {
     inputSongs: 0,
     parsedFromRaw: 0,
     fixedTitleCount: 0,
     fixedArtistCount: 0,
     fixedSecondsCount: 0,
+    repairedEntryCount: 0,
     parseRejectedCount: 0,
     missingRawCount: 0,
     manualDroppedEntryCount: 0,
@@ -39,7 +44,7 @@ function main() {
 
   const rebuiltGroups = {};
   for (const [groupId, group] of Object.entries(latest.groups || {})) {
-    const rebuiltItems = (group.items || []).map((item) => rebuildVideoItem(item, stats)).filter((item) => item.songs.length);
+    const rebuiltItems = (group.items || []).map((item) => rebuildVideoItem(item, stats, songSearchLookup)).filter((item) => item.songs.length);
     const curatedItems = applyCurationToVideos(rebuiltItems, curationContext);
     const curationStats = curatedItems.curationStats || {};
     stats.manualDroppedEntryCount += curationStats.droppedEntries || 0;
@@ -76,7 +81,6 @@ function main() {
     },
   };
 
-  const songSearchIndex = readJsonIfExists(SONG_SEARCH_INDEX_PATH);
   if (songSearchIndex?.titleKeys?.length || songSearchIndex?.titleArtistKeys?.length) {
     payload = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(payload, songSearchIndex), songSearchSourceSummary(songSearchIndex));
   }
@@ -92,6 +96,7 @@ function main() {
       `[rebuild-derived] songs=${stats.inputSongs}`,
       `parsedRaw=${stats.parsedFromRaw}`,
       `fixedTitles=${stats.fixedTitleCount}`,
+      `repaired=${stats.repairedEntryCount}`,
       `manualDropped=${stats.manualDroppedEntryCount}`,
       `ruleDropped=${payload.source.curationSummary.ruleDroppedEntryCount}`,
       `forceRefresh=${payload.source.curationSummary.forceRefreshVideoCount}`,
@@ -99,17 +104,17 @@ function main() {
   );
 }
 
-function rebuildVideoItem(item, stats) {
+function rebuildVideoItem(item, stats, lookup = null) {
   const songs = [];
   for (const song of item.songs || []) {
     stats.inputSongs += 1;
-    const rebuilt = rebuildSong(song, item, stats);
+    const rebuilt = rebuildSong(song, item, stats, lookup);
     songs.push(...rebuilt);
   }
   return { ...item, songs: songs.map((song, index) => ({ ...song, index: index + 1 })) };
 }
 
-function rebuildSong(song, item, stats) {
+function rebuildSong(song, item, stats, lookup = null) {
   const raw = String(song.raw || "").trim();
   if (!raw) {
     stats.missingRawCount += 1;
@@ -125,7 +130,9 @@ function rebuildSong(song, item, stats) {
   }
 
   stats.parsedFromRaw += 1;
-  const selected = selectParsedSong(parsed, song);
+  const parsedSelected = selectParsedSong(parsed, song);
+  const selected = repairParsedEntry(parsedSelected, lookup);
+  if (selected.repair?.changed) stats.repairedEntryCount += 1;
   if (selected.title !== song.title) stats.fixedTitleCount += 1;
   if (normalizeArtist(selected.artist) !== normalizeArtist(song.artist)) stats.fixedArtistCount += 1;
   if (selected.seconds !== song.seconds) stats.fixedSecondsCount += 1;
@@ -137,6 +144,7 @@ function rebuildSong(song, item, stats) {
       seconds: selected.seconds,
       title: selected.title,
       artist: selected.artist,
+      ...repairMetadata(selected),
       raw,
       rawHash: hashNormalizedText(raw),
       sourceId: song.sourceId || item.selectedSourceId || item.sourceId || (item.videoId ? `legacy:${item.videoId}` : ""),
@@ -175,6 +183,13 @@ function selectParsedSong(parsed, original) {
   return parsed[0];
 }
 
+function repairMetadata(song) {
+  const metadata = {};
+  if (song?.repair?.changed) metadata.repair = song.repair;
+  if (song?.curationSignals?.reasons?.length) metadata.curationSignals = song.curationSignals;
+  return metadata;
+}
+
 function countSongs(items) {
   return (items || []).reduce((sum, item) => sum + (item.songs || []).length, 0);
 }
@@ -194,6 +209,7 @@ function buildCurationSummary(previous = {}, stats) {
     fixedTitleCount: carryCount(previous.fixedTitleCount, stats.fixedTitleCount),
     fixedArtistCount: carryCount(previous.fixedArtistCount, stats.fixedArtistCount),
     fixedSecondsCount: carryCount(previous.fixedSecondsCount, stats.fixedSecondsCount),
+    repairedEntryCount: carryCount(previous.repairedEntryCount, stats.repairedEntryCount),
     parsedFromRawCount: Math.max(numberOrZero(previous.parsedFromRawCount), stats.parsedFromRaw),
     missingRawCount: Math.max(numberOrZero(previous.missingRawCount), stats.missingRawCount),
   };

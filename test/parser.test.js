@@ -228,6 +228,54 @@ test("parses artist before a trailing slash metadata block", () => {
   );
 });
 
+test("does not treat year-month dates as title artist delimiters", () => {
+  const songs = parseTimestampSongs([
+    [
+      "0:03 ライオン/シェリル・ノーム(May'n), ランカ・リー(中島愛) 2008/08",
+      "0:04 星座になれたら/結束バンド 2022/12",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["ライオン", "星座になれたら"],
+  );
+  assert.deepEqual(
+    songs.map((song) => song.artist),
+    ["シェリル・ノーム(May'n), ランカ・リー(中島愛) 2008/08", "結束バンド 2022/12"],
+  );
+});
+
+test("cleans decorated indexes and rejects announcement action dirty samples", () => {
+  const songs = parseTimestampSongs([
+    [
+      "0:01 閉会式",
+      "0:02 01≫アンノウン・マザーグース / wowaka",
+      "0:03 1を手で表現した",
+      "0:04 ꒱‬ 01. 初恋サイダー / Buono!",
+      "0:05 02.441 / miwa",
+      "0:06 ②どんな色が好き / 坂田おさむ＆神崎ゆう子",
+      "0:07 02≫テオ / Omoi",
+      "0:08 2周年記念お写真公開！",
+      "0:09 ꒱‬ 02. 夏祭り恋慕う / ＝LOVE",
+      "0:10 03≫ボッカデラベリタ / 柊キライ",
+      "0:11 ꒱‬ 03. ブルーハワイレモン / ≒JOY",
+      "0:12 3Dお披露目でスタンドマイク回したかった / 永ちゃんやりたい",
+      "0:13 〜3Dライブ開催決定!!!!",
+      "0:14 ③クリープ",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["アンノウン・マザーグース", "初恋サイダー", "441", "どんな色が好き", "テオ", "夏祭り恋慕う", "ボッカデラベリタ", "ブルーハワイレモン", "クリープ"],
+  );
+  assert.deepEqual(
+    songs.map((song) => song.artist),
+    ["wowaka", "Buono!", "miwa", "坂田おさむ＆神崎ゆう子", "Omoi", "＝LOVE", "柊キライ", "≒JOY", "未記載"],
+  );
+});
+
 test("keeps song rows with guest annotations in work metadata", () => {
   const songs = parseTimestampSongs(["60曲目 3:58:12 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(特別ゲスト ケンリュウ)"]);
 

@@ -18,16 +18,23 @@
       --ok: #256f3a;
     }
     * { box-sizing: border-box; }
+    html, body {
+      height: 100%;
+    }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
-    header, main { max-width: 1440px; margin: 0 auto; padding: 16px; }
-    header { display: flex; gap: 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    header, main { width: min(100%, 1440px); margin: 0 auto; padding: 16px; }
+    header { flex: 0 0 auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
     h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
-    button, select, input[type="search"] {
+    button, select, input[type="search"], input[type="text"], input[type="number"] {
       min-height: 34px;
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -38,33 +45,49 @@
     button { padding: 6px 10px; cursor: pointer; }
     button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
     button.danger { color: var(--danger); }
+    button.ghost { background: transparent; }
     button:disabled { opacity: .55; cursor: not-allowed; }
     .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .layout { display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: 16px; align-items: start; }
-    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
-    .panel h2 { margin: 0; padding: 12px 14px; font-size: 15px; border-bottom: 1px solid var(--line); }
-    .queue { max-height: calc(100vh - 164px); overflow: auto; }
+    .layout { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(320px, 430px) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+    .panel h2 { flex: 0 0 auto; margin: 0; padding: 12px 14px; font-size: 15px; border-bottom: 1px solid var(--line); }
+    .panel-tools { flex: 0 0 auto; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+    .queue { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; }
     .queue-item { width: 100%; display: block; text-align: left; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 10px 12px; background: transparent; }
     .queue-item[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+    .queue-item.is-match { display: grid; gap: 4px; }
     .queue-title { font-weight: 650; overflow-wrap: anywhere; }
     .meta { color: var(--muted); font-size: 12px; line-height: 1.45; }
     .badge { display: inline-flex; align-items: center; min-height: 22px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
     .badge.high { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
     .badge.medium { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
     .badge.low { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
-    .detail { display: grid; gap: 12px; padding: 14px; }
-    .source-text { max-height: 240px; overflow: auto; white-space: pre-wrap; border: 1px solid var(--line); border-radius: 6px; padding: 10px; background: color-mix(in srgb, var(--panel) 70%, var(--bg)); }
+    .detail { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; display: grid; align-content: start; gap: 12px; padding: 14px; }
+    .detail-sticky { position: sticky; top: -14px; z-index: 5; background: var(--panel); border-bottom: 1px solid var(--line); padding: 0 0 10px; }
+    .entry-filter-bar { position: sticky; top: 76px; z-index: 4; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+    .source-text { white-space: pre-wrap; border: 1px solid var(--line); border-radius: 6px; padding: 10px; background: color-mix(in srgb, var(--panel) 70%, var(--bg)); }
+    details.source-details > summary { cursor: pointer; color: var(--accent); font-weight: 650; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
-    th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
-    td.actions { min-width: 260px; }
-    .entry-table { max-height: 420px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; }
+    th { position: sticky; top: 146px; background: var(--panel); z-index: 3; }
+    td.actions { min-width: 210px; }
+    tr.is-target { outline: 2px solid var(--accent); outline-offset: -2px; background: color-mix(in srgb, var(--accent) 10%, transparent); scroll-margin-top: 180px; }
+    tr.is-drafted { background: color-mix(in srgb, var(--ok) 8%, transparent); }
+    .entry-table { border: 1px solid var(--line); border-radius: 6px; overflow: visible; }
     .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
     .empty { padding: 24px; color: var(--muted); }
+    .mobile-tabs { display: none; }
+    .edit-grid { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) 90px; gap: 6px; }
     @media (max-width: 900px) {
       header { align-items: flex-start; flex-direction: column; }
-      .layout { grid-template-columns: 1fr; }
-      .queue { max-height: 360px; }
+      body { overflow: hidden; }
+      .mobile-tabs { display: flex; padding: 8px 16px 0; gap: 8px; }
+      .layout { grid-template-columns: 1fr; padding-top: 8px; }
+      .layout[data-mobile-panel="queue"] .detail-panel { display: none; }
+      .layout[data-mobile-panel="detail"] .queue-panel { display: none; }
+      .entry-filter-bar { top: 56px; }
+      th { top: 126px; }
+      .edit-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -80,26 +103,45 @@
       <label class="badge">导入 <input id="importPatch" type="file" accept="application/json" hidden></label>
     </div>
   </header>
-  <main class="layout">
-    <section class="panel">
+  <div class="mobile-tabs" aria-label="审核页视图">
+    <button id="showQueuePanel" class="primary">队列</button>
+    <button id="showDetailPanel">详情</button>
+  </div>
+  <main id="layout" class="layout" data-mobile-panel="queue">
+    <section class="panel queue-panel">
       <h2>审核队列</h2>
-      <div class="toolbar" style="padding: 10px 12px; border-bottom: 1px solid var(--line);">
+      <div class="toolbar panel-tools">
+        <select id="scopeFilter" aria-label="队列范围">
+          <option value="current">当前</option>
+          <option value="history">历史</option>
+        </select>
         <select id="riskFilter" aria-label="风险等级">
           <option value="">全部风险</option>
           <option value="high">高风险</option>
           <option value="medium">中风险</option>
           <option value="low">低风险</option>
         </select>
+        <select id="classificationFilter" aria-label="分类">
+          <option value="">全部分类</option>
+          <option value="confirmed_noise">confirmed_noise</option>
+          <option value="parser_corruption">parser_corruption</option>
+          <option value="likely_noise">likely_noise</option>
+          <option value="needs_review">needs_review</option>
+          <option value="likely_song">likely_song</option>
+        </select>
         <label class="badge"><input id="nicheUnknownOnly" type="checkbox"> 小众+待补歌手</label>
-        <input id="searchBox" type="search" placeholder="视频、频道、来源">
+        <label class="badge"><input id="onlyUnreviewed" type="checkbox"> 未处理</label>
+        <input id="searchBox" type="search" placeholder="搜索全部审核条目" autocomplete="off">
+        <button id="prevMatch" type="button">上一条</button>
+        <button id="nextMatch" type="button">下一条</button>
       </div>
       <div id="queue" class="queue"></div>
     </section>
-    <section class="panel">
+    <section class="panel detail-panel">
       <h2>来源详情</h2>
       <div id="detail" class="detail"><div class="empty">选择一个来源</div></div>
     </section>
   </main>
-  <script src="assets/review.js"></script>
+  <script src="assets/review.js?v=h1545b4476334"></script>
 </body>
 </html>

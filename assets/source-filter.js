@@ -138,12 +138,18 @@
     for (let idx = 0; idx < 4; idx += 1) {
       const original = value;
       value = stripCustomEmojiAliases(value).trim();
+      value = value.replace(/[\u200b-\u200f\u202a-\u202e\ufe0e\ufe0f]/gu, "").trim();
       value = value
         .replace(
-          /^\s*(?:[#＃]?\d{1,3}\s+)?(?:[#＃]?\d{1,3}\s*[)）、:：|｜]\s*|[#＃]?\d{1,3}\s*[.．](?![\d０-９])\s*)/u,
+          /^\s*(?:[#＃]?\d{1,3}\s+)?(?:[#＃]?\d{1,3}\s*[)）、:：|｜≫>]\s*|[#＃]?\d{1,3}\s*[.．](?![\d０-９])\s*)/u,
           "",
         )
         .trim();
+      value = value
+        .replace(/^\s*(?:[꒱〉》»≫>]+[\s\u3000]*)?(?:[#＃]?\d{1,3}|[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])\s*(?:(?:[.．](?![\d０-９]))|[、)）:：|｜≫>])\s*/u, "")
+        .trim();
+      value = value.replace(/^\s*[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳]\s*/u, "").trim();
+      value = value.replace(/^\s*0\d{1,2}[.．](?=[\d０-９]{2,}\b)/u, "").trim();
       value = value
         .replace(/^\s*(?:[#＃]?\d{1,3}\s+)?[#＃]?\d{1,3}\s*曲目\s*(?:[.)．、:：|｜\-—–−]\s*)?/u, "")
         .trim();
@@ -157,6 +163,7 @@
     const hasArtist = hasKnownArtist(song);
     const artist = String(song?.artist || "").trim();
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
+    if (isStrongNonSongActivityText(title)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
     return !hasArtist && isChatReactionShoutText(title);
   }
@@ -192,6 +199,7 @@
     if (/^(?:第)?\d+個目$/u.test(key)) return true;
     if (/^\d+\s*(?:人|名)(?:達成|に目標変更)$/u.test(key)) return true;
     if (/^(?:本日の)?目標[:：]?.*(?:目指|達成|人|名)/u.test(key)) return true;
+    if (isStrongNonSongActivityText(text)) return true;
     if (/チャンネル登録者?\d*(?:人|名)?達成/u.test(key)) return true;
     if (/^(?:今晩の)?メニューと配信時間/u.test(key)) return true;
     if (/^(?:朝食|配信の食事事情|心音asmr|ギターの話|お声も起きてきた|告知とed)$/iu.test(key)) return true;
@@ -238,6 +246,21 @@
       "tタイム",
       "オケが止まった",
     ]).has(key);
+  }
+
+  function isStrongNonSongActivityText(text) {
+    const value = stripCustomEmojiAliases(text)
+      .normalize("NFKC")
+      .replace(/[\s\u3000]+/gu, "")
+      .replace(/[!！?？。．.]+$/gu, "")
+      .trim();
+    if (!value) return false;
+    if (/^(?:閉会式|閉会|開会式)(?:も?(?:見てください|みてください|見てね|みてね))?$/u.test(value)) return true;
+    if (/^\d+を手で表現した$/u.test(value)) return true;
+    if (/(?:周年記念)?(?:お)?写真公開/u.test(value)) return true;
+    if (/3Dライブ開催決定/u.test(value)) return true;
+    if (/3Dお披露目でスタンドマイク回したかった/u.test(value)) return true;
+    return false;
   }
 
   function normalizeNoiseTitleKey(text) {

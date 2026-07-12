@@ -2,11 +2,13 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { createSongSearchLookup, isSongSearchKnown } = require("../assets/frontend-utils");
 const { classifyEntry, hashNormalizedText, isUnknownArtist } = require("./curation");
+const { repairParsedEntry } = require("./entry-repair");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
 const REVIEW_DIR = path.join(DATA_DIR, "review");
 const REVIEW_SOURCE_DIR = path.join(REVIEW_DIR, "sources");
+const CURRENT_ENTRY_INDEX_PATH = path.join(REVIEW_DIR, "current-entry-index.json");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 const ALL_NICHE_UNKNOWN_JSON = path.join(REVIEW_DIR, "all-niche-unknown.json");
@@ -32,8 +34,9 @@ function main() {
   const latest = readJson(LATEST_PATH);
   if (!latest?.groups) throw new Error("data/latest.json missing groups");
   const lookup = createSongSearchLookup(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
+  const currentEntryLookup = buildCurrentEntryLookup(readJsonIfExists(CURRENT_ENTRY_INDEX_PATH)?.items || []);
 
-  const latestRecords = collectRecords(latest, lookup);
+  const latestRecords = collectRecords(latest, lookup, currentEntryLookup);
   const reviewRecords = collectReviewRecords();
   const allRecords = mergeRecords([...latestRecords, ...reviewRecords]);
   const allNicheUnknown = latestRecords.filter((record) => record.isNiche === true && record.isUnknownArtist === true);
@@ -50,12 +53,12 @@ function main() {
   );
 }
 
-function collectRecords(latest, lookup) {
+function collectRecords(latest, lookup, currentEntryLookup = null) {
   const byKey = new Map();
   for (const [rangeId, group] of Object.entries(latest.groups || {})) {
     for (const item of group.items || []) {
       for (const song of item.songs || []) {
-        const record = buildRecord({ rangeId, item, song, lookup });
+        const record = buildRecord({ rangeId, item, song, lookup, currentEntryLookup });
         const key = `${record.videoId}:${record.seconds}:${record.rawHash}:${record.title}:${record.artist}`;
         const existing = byKey.get(key);
         if (existing) {
@@ -69,7 +72,7 @@ function collectRecords(latest, lookup) {
   return [...byKey.values()].sort(compareRecord);
 }
 
-function buildRecord({ rangeId, item, song, lookup }) {
+function buildRecord({ rangeId, item, song, lookup, currentEntryLookup = null }) {
   const sourceId = song.sourceId || item.selectedSourceId || item.sourceQuality?.sourceId || item.sourceId || (item.videoId ? `legacy:${item.videoId}` : "");
   const sourceHash =
     song.sourceHash ||
@@ -79,13 +82,20 @@ function buildRecord({ rangeId, item, song, lookup }) {
     hashNormalizedText(JSON.stringify((item.songs || []).map((entry) => [entry.seconds, entry.title, entry.artist, entry.raw || ""])));
   const raw = String(song.raw || "");
   const rawHash = song.rawHash || hashNormalizedText(raw || `${song.seconds}:${song.title}:${song.artist}`);
-  const knownSong = song.isNiche === false || isSongSearchKnown(song, lookup);
-  const classification = classifyEntry({ ...song, sourceId, sourceHash, rawHash }, { knownSong });
+  const repaired = repairParsedEntry({ ...song, raw, rawHash, sourceId, sourceHash }, lookup);
+  const knownSong = song.isNiche === false || isSongSearchKnown(repaired, lookup);
+  const computed = classifyRecord(repaired, { knownSong });
+  const reviewEntry = findCurrentEntry(currentEntryLookup, { ...song, videoId: item.videoId, sourceHash, rawHash });
+  const classification = mergeClassification(computed, reviewEntry);
   const riskReasons = uniqueValues([
     ...classification.riskReasons,
     ...(song.isNiche === true && isUnknownArtist(song.artist) && !knownSong ? ["niche_unknown_artist"] : []),
     ...(knownSong && isUnknownArtist(song.artist) ? ["known_song_unknown_artist"] : []),
+    ...(repaired.repair?.reasons || []),
   ]);
+  const replacementSuggestion = buildReplacementSuggestion(song, repaired, classification.classification);
+  const reviewId = reviewEntry?.reviewId || "";
+  const sourcePath = reviewEntry?.sourcePath || "";
 
   return {
     title: song.title || "",
@@ -109,7 +119,15 @@ function buildRecord({ rangeId, item, song, lookup }) {
     ranges: [rangeId],
     classification: classification.classification,
     suggestedAction: classification.suggestedAction,
+    positiveEvidence: classification.positiveEvidence || [],
     riskReasons,
+    replacementSuggestion,
+    reviewId,
+    sourcePath,
+    reviewUrl: reviewUrl(reviewId, rawHash),
+    repairedTitle: repaired.title || "",
+    repairedArtist: repaired.artist || "",
+    repairReasons: repaired.repair?.reasons || [],
   };
 }
 
@@ -136,6 +154,8 @@ function recordFromReviewEntry(payload, entry, fileName) {
     entry.classification && CLASSIFICATIONS.includes(entry.classification)
       ? { classification: entry.classification, suggestedAction: entry.suggestedAction || "manual_review", riskReasons: entry.riskReasons || [] }
       : classifyEntry(entry);
+  const reviewId = payload.reviewId || "";
+  const sourcePath = `data/review/sources/${fileName}`;
   return {
     title: entry.title || "",
     artist: entry.artist || "",
@@ -158,7 +178,12 @@ function recordFromReviewEntry(payload, entry, fileName) {
     ranges: source.snapshotId ? [`snapshot:${source.snapshotId}`] : ["review"],
     classification: classification.classification,
     suggestedAction: classification.suggestedAction,
+    positiveEvidence: entry.positiveEvidence || [],
     riskReasons: uniqueValues(classification.riskReasons || entry.riskReasons || []),
+    replacementSuggestion: entry.replacementSuggestion || null,
+    reviewId,
+    sourcePath,
+    reviewUrl: reviewUrl(reviewId, entry.rawHash || hashNormalizedText(entry.raw || `${entry.seconds}:${entry.title}:${entry.artist}`)),
   };
 }
 
@@ -229,11 +254,11 @@ function renderMarkdownReport({ generatedAt, records }) {
       lines.push(`- 视频：${linkOrText(first.videoId, first.youtubeUrl)}`);
       lines.push(`- 频道：${escapeMarkdown(first.channelName || "")}`);
       lines.push("");
-      lines.push("| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 |");
-      lines.push("| --- | --- | --- | --- | --- | --- |");
+      lines.push("| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 建议 | 审核定位 |");
+      lines.push("| --- | --- | --- | --- | --- | --- | --- |");
       for (const record of videoRecords.sort(compareRecord)) {
         lines.push(
-          `| ${linkOrText(record.time || formatSeconds(record.seconds), record.youtubeTimestampUrl)} | ${escapeMarkdown(record.title)} | ${escapeMarkdown(record.artist)} | ${record.ranges.join(", ")} | ${record.riskReasons.join(", ")} | ${record.suggestedAction} |`,
+          `| ${linkOrText(record.time || formatSeconds(record.seconds), record.youtubeTimestampUrl)} | ${escapeMarkdown(record.title)} | ${escapeMarkdown(record.artist)} | ${record.ranges.join(", ")} | ${record.riskReasons.join(", ")} | ${record.suggestedAction} | ${linkOrText(record.rawHash || "review", record.reviewUrl)} |`,
         );
       }
       lines.push("");
@@ -270,6 +295,115 @@ function mergeRecords(records) {
     if (!existing.sourceOrigin.includes(record.sourceOrigin)) existing.sourceOrigin = `${existing.sourceOrigin};${record.sourceOrigin}`;
   }
   return [...byKey.values()].sort(compareRecord);
+}
+
+function buildCurrentEntryLookup(entries) {
+  const byKey = new Map();
+  for (const entry of entries || []) {
+    for (const key of currentEntryKeys(entry)) {
+      if (!byKey.has(key)) byKey.set(key, entry);
+    }
+  }
+  return byKey;
+}
+
+function findCurrentEntry(lookup, record) {
+  if (!lookup) return null;
+  for (const key of currentEntryKeys(record)) {
+    const found = lookup.get(key);
+    if (found) return found;
+  }
+  return null;
+}
+
+function currentEntryKeys(entry) {
+  const videoId = String(entry?.videoId || "");
+  const rawHash = String(entry?.rawHash || "");
+  const sourceHash = String(entry?.sourceHash || "");
+  const seconds = Number.isInteger(entry?.seconds) ? String(entry.seconds) : "";
+  const title = normalizeKeyText(entry?.title);
+  const artist = normalizeKeyText(entry?.artist);
+  return uniqueValues([
+    videoId && rawHash ? `${videoId}:raw:${rawHash}` : "",
+    videoId && sourceHash && rawHash ? `${videoId}:source:${sourceHash}:raw:${rawHash}` : "",
+    videoId && seconds && title ? `${videoId}:time-title:${seconds}:${title}:${artist}` : "",
+  ]);
+}
+
+function classifyRecord(song, options = {}) {
+  const classification = classifyEntry(song, options);
+  const evidence = positiveEvidence(song, options.knownSong === true);
+  if (classification.classification === "likely_song" && !evidence.length) {
+    return {
+      classification: "needs_review",
+      suggestedAction: "manual_review",
+      riskReasons: ["no_positive_song_evidence"],
+      positiveEvidence: [],
+    };
+  }
+  if (song.repair?.changed) {
+    return {
+      classification: "parser_corruption",
+      suggestedAction: "replace_entry",
+      riskReasons: ["parser_corruption", ...(song.repair.reasons || [])],
+      positiveEvidence: evidence,
+    };
+  }
+  return {
+    classification: classification.classification,
+    suggestedAction: classification.suggestedAction,
+    riskReasons: classification.riskReasons || [],
+    positiveEvidence: evidence,
+  };
+}
+
+function mergeClassification(computed, reviewEntry) {
+  if (!reviewEntry?.classification || !CLASSIFICATIONS.includes(reviewEntry.classification)) return computed;
+  if (classificationRank(reviewEntry.classification) >= classificationRank(computed.classification)) {
+    return {
+      classification: reviewEntry.classification,
+      suggestedAction: reviewEntry.suggestedAction || computed.suggestedAction,
+      riskReasons: uniqueValues([...(computed.riskReasons || []), ...(reviewEntry.riskReasons || [])]),
+      positiveEvidence: uniqueValues([...(computed.positiveEvidence || []), ...(reviewEntry.positiveEvidence || [])]),
+    };
+  }
+  return computed;
+}
+
+function classificationRank(classification) {
+  return {
+    likely_song: 0,
+    needs_review: 1,
+    likely_noise: 2,
+    parser_corruption: 3,
+    confirmed_noise: 4,
+  }[classification] ?? 0;
+}
+
+function positiveEvidence(song, knownSong) {
+  const evidence = [];
+  if (knownSong) evidence.push(song.repair?.knownTitleArtist ? "known_title_artist" : "known_title");
+  if (song.forceKept === true) evidence.push("force_keep");
+  if (!isUnknownArtist(song.artist)) evidence.push("inferred_artist");
+  return evidence;
+}
+
+function buildReplacementSuggestion(original, repaired, classification) {
+  if (classification !== "parser_corruption" || !repaired?.repair?.changed) return null;
+  const replacement = {};
+  if (String(repaired.title || "") !== String(original.title || "")) replacement.title = repaired.title || "";
+  if (String(repaired.artist || "") !== String(original.artist || "")) replacement.artist = repaired.artist || "";
+  if (Number.isInteger(repaired.seconds) && repaired.seconds !== original.seconds) replacement.seconds = repaired.seconds;
+  return Object.keys(replacement).length ? replacement : null;
+}
+
+function reviewUrl(reviewId, rawHash) {
+  if (!reviewId || !rawHash) return "";
+  return `review.html?review=${encodeURIComponent(reviewId)}&entry=${encodeURIComponent(rawHash)}`;
+}
+
+function normalizeKeyText(value) {
+  return String(value || "").normalize("NFKC").replace(/\s+/g, " ").trim().toLocaleLowerCase();
 }
 
 function compareRecord(a, b) {

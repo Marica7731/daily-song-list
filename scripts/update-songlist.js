@@ -6,8 +6,10 @@ const {
   matchBlockedSource,
   TAIWAN_VTUBER_BLACKLIST,
 } = require("../assets/source-filter");
+const { createSongSearchLookup } = require("../assets/frontend-utils");
 const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
 const { compactRankDiff, writeRuntimeJson } = require("./build-runtime-data");
+const { repairParsedEntry } = require("./entry-repair");
 const {
   applyCurationToSources,
   applyCurationToVideos,
@@ -34,6 +36,7 @@ const DIFF_DIR = path.join(DATA_DIR, "diff");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const STATUS_PATH = path.join(DATA_DIR, "status.json");
 const AUDIT_PATH = path.join(DATA_DIR, "audit.json");
+const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 
 const KEYWORDS = [
   {
@@ -111,7 +114,7 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
   const startedAt = new Date();
-  const curationContext = loadCurationContext();
+  const curationContext = { ...loadCurationContext(), songSearchLookup: loadSongSearchLookup() };
   const forceRefreshVideoIds = collectForceRefreshVideoIds(curationContext);
   const previousPayload = readJsonIfExists(LATEST_PATH);
   const previousAudit = readJsonIfExists(AUDIT_PATH);
@@ -744,13 +747,16 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   const sourceType = sourceRecord.sourceType || "unknown";
   const sourceId = sourceRecord.sourceId || "";
   const sourceHash = sourceRecord.sourceHash || hashNormalizedText(sourceText);
-  const identifiedSongs = songs.map((song) => ({
-    ...song,
-    sourceId,
-    sourceHash,
-    sourceType,
-    rawHash: hashNormalizedText(song.raw || `${song.time || ""} ${song.title || ""}`),
-  }));
+  const lookup = curationContext.songSearchLookup || null;
+  const identifiedSongs = songs
+    .map((song) => ({
+      ...song,
+      sourceId,
+      sourceHash,
+      sourceType,
+      rawHash: hashNormalizedText(song.raw || `${song.time || ""} ${song.title || ""}`),
+    }))
+    .map((song) => repairParsedEntry(song, lookup));
   const preSource = {
     sourceId,
     sourceHash,
@@ -809,6 +815,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
       originalCount: stats.originalCount,
       keptCount: cleaned.length,
       knownSongCount: stats.knownSongCount,
+      repairedKnownSongCount: stats.repairedKnownSongCount,
       artistCount: stats.artistCount,
       unknownArtistCount: stats.unknownArtistCount,
       activityMarkerCount: stats.activityMarkerCount,
@@ -822,7 +829,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
       structuralCount: stats.structuralCount,
       sentenceLikeCount: stats.sentenceLikeCount,
       sample: songs.slice(0, 8).map((song) => `${song.time} ${song.title}`),
-      entries: cleaned.slice(0, 120).map(compactAcceptedEntry),
+      entries: cleaned.map(compactAcceptedEntry),
       rejectedEntryCount: allRejectedEntries.length,
       rejectedEntryReasons: countBy(allRejectedEntries, (entry) => entry.reason),
       rejectedSamples: allRejectedEntries.slice(0, 8),
@@ -880,6 +887,7 @@ function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType)
     rejectedEntries.filter((entry) => entry.reason === "parser_corruption" || isParserCorruptionEntry(entry)).length;
   const nicheCount = cleaned.filter((song) => song.isNiche === true).length;
   const knownSongCount = cleaned.filter((song) => isUsableArtist(song.artist) || song.isNiche === false).length;
+  const repairedKnownSongCount = cleaned.filter((song) => song.repair?.knownTitle || song.repair?.knownTitleArtist).length;
   const structuralCount =
     original.filter((song) => hasSetlistStructure(song.raw)).length +
     rejectedEntries.filter((entry) => hasSetlistStructure(entry.line)).length;
@@ -888,6 +896,7 @@ function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType)
     originalCount: rawCount,
     keptCount: cleaned.length,
     knownSongCount,
+    repairedKnownSongCount,
     artistCount,
     artistRatio: cleaned.length ? artistCount / cleaned.length : 0,
     unknownArtistCount,
@@ -1816,6 +1825,7 @@ function sourceScore(source) {
   const stats = source.stats;
   if (stats.riskLevel === "high") return -100000 + (stats.knownSongCount || 0);
   return (
+    (stats.repairedKnownSongCount || 0) * 9 +
     (stats.knownSongCount || 0) * 7 +
     (stats.artistCount || 0) * 4 +
     (stats.structuralCount || 0) * 1.5 +
@@ -1827,6 +1837,10 @@ function sourceScore(source) {
     (stats.topicCount || 0) * 8 -
     (stats.sentenceLikeCount || 0) * 3
   );
+}
+
+function loadSongSearchLookup() {
+  return createSongSearchLookup(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
 }
 
 function parsePublishedTimestamp(text, nowMs) {
