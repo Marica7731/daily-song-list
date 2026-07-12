@@ -213,6 +213,7 @@ const state = {
   songSearchIndexPromise: null,
   songSearchLookup: window.FrontendUtils.createSongSearchLookup(null),
   rankDiffs: {},
+  eventsBound: false,
 };
 
 const els = {
@@ -238,6 +239,10 @@ init().catch((error) => {
 async function init() {
   setupSnapshotLoader();
   setupControlsObserver();
+  applyInitialUrlState();
+  bindEvents();
+  syncControlsFromState();
+  setupBackToTopButton();
   setSnapshotBusy(true, "正在载入数据");
   const [latest, snapshotIndex, status, rankDiffs] = await Promise.all([
     readJson(SNAPSHOT_LATEST_PATH),
@@ -250,9 +255,7 @@ async function init() {
   state.snapshots = Array.isArray(snapshotIndex.snapshots) ? snapshotIndex.snapshots : [];
   renderSnapshotOptions();
   applyInitialUrlState();
-  bindEvents();
   syncControlsFromState();
-  setupBackToTopButton();
   const requestedSnapshotPath = state.currentSnapshotPath;
   await applySnapshotPayload(latest, SNAPSHOT_LATEST_PATH, { resetPage: false, syncUrl: false });
   if (requestedSnapshotPath !== SNAPSHOT_LATEST_PATH) {
@@ -263,6 +266,8 @@ async function init() {
 }
 
 function bindEvents() {
+  if (state.eventsBound) return;
+  state.eventsBound = true;
   for (const tab of els.rangeTabs) {
     tab.addEventListener("click", () => {
       if (state.range === tab.dataset.range) return;
@@ -270,7 +275,7 @@ function bindEvents() {
       state.expandedRows.clear();
       resetPagination();
       setActiveTab(els.rangeTabs, tab);
-      render({ urlMode: "push" });
+      renderOrSyncUrl({ urlMode: "push" });
     });
   }
 
@@ -281,7 +286,7 @@ function bindEvents() {
       state.expandedRows.clear();
       resetPagination();
       setActiveTab(els.viewTabs, tab);
-      render({ urlMode: "push" });
+      renderOrSyncUrl({ urlMode: "push" });
     });
   }
 
@@ -293,11 +298,11 @@ function bindEvents() {
     const renderRevision = advanceRenderRevision();
     window.clearTimeout(state.filterTimer);
     if (!state.filter) {
-      render({ urlMode: "replace" });
+      renderOrSyncUrl({ urlMode: "replace" });
       return;
     }
     state.filterTimer = window.setTimeout(() => {
-      if (renderRevision === state.renderRevision) render({ urlMode: "replace" });
+      if (renderRevision === state.renderRevision) renderOrSyncUrl({ urlMode: "replace" });
     }, SEARCH_DEBOUNCE_MS);
   });
 
@@ -317,7 +322,7 @@ function bindEvents() {
     state.nicheOnly = Boolean(els.nicheOnlyToggle.checked);
     state.expandedRows.clear();
     resetPagination();
-    render({ urlMode: "push" });
+    renderOrSyncUrl({ urlMode: "push" });
   });
 
   els.controls?.addEventListener("click", (event) => {
@@ -504,6 +509,14 @@ function syncUrlState(mode = "replace") {
   if (nextUrl === currentUrl) return;
   const method = mode === "push" && window.history.pushState ? "pushState" : "replaceState";
   window.history[method]({ dailySongList: true }, "", nextUrl);
+}
+
+function renderOrSyncUrl(options = {}) {
+  if (state.payload) {
+    render(options);
+    return;
+  }
+  if (options.syncUrl !== false) syncUrlState(options.urlMode || "replace");
 }
 
 function defaultUrlState() {

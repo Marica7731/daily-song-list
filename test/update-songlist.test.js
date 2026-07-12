@@ -182,6 +182,48 @@ test("incremental selection skips known videos, scans 48h, and caps monthly refr
   );
 });
 
+test("low monthly carry-forward prioritizes monthly backfill within the inspection budget", () => {
+  const candidates = [
+    candidate("AAAAAAAAAAA", 2, ["today"]),
+    candidate("BBBBBBBBBBB", 3, ["today"]),
+    candidate("CCCCCCCCCCC", 26, ["today"]),
+    candidate("DDDDDDDDDDD", 27, ["today"]),
+    candidate("EEEEEEEEEEE", 24 * 4, ["month"]),
+    candidate("FFFFFFFFFFF", 24 * 5, ["month"]),
+    candidate("GGGGGGGGGGG", 24 * 6, ["month"]),
+    candidate("HHHHHHHHHHH", 24 * 7, ["month"]),
+    candidate("IIIIIIIIIII", 24 * 8, ["month"]),
+    candidate("JJJJJJJJJJJ", 24 * 9, ["month"]),
+    candidate("KKKKKKKKKKK", 24 * 10, ["month"]),
+    candidate("LLLLLLLLLLL", 24 * 11, ["month"]),
+    candidate("MMMMMMMMMMM", 24 * 12, ["month"]),
+    candidate("NNNNNNNNNNN", 24 * 13, ["month"]),
+  ];
+  const selection = selectCandidatesForInspection(candidates, NOW, {
+    carryForwardEnabled: true,
+    carriedMonthVideoCount: 1,
+  });
+
+  assert.equal(selection.mode, "incremental_month_backfill_with_carry_forward");
+  assert.equal(selection.monthBackfillEnabled, true);
+  assert.equal(selection.monthBackfillRecentBucketLimit, 1);
+  assert.deepEqual(
+    selection.items.map((item) => item.videoId),
+    [
+      "AAAAAAAAAAA",
+      "CCCCCCCCCCC",
+      "EEEEEEEEEEE",
+      "FFFFFFFFFFF",
+      "GGGGGGGGGGG",
+      "HHHHHHHHHHH",
+      "IIIIIIIIIII",
+      "JJJJJJJJJJJ",
+      "KKKKKKKKKKK",
+      "LLLLLLLLLLL",
+    ],
+  );
+});
+
 test("fetched videos win over carried videos while preserving month membership", () => {
   const fetched = [{ ...video("AAAAAAAAAAA", 3, ["today"]), songs: [song("new")] }];
   const carried = [{ ...video("AAAAAAAAAAA", 3, ["month"]), songs: [song("old")] }];

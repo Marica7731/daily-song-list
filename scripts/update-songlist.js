@@ -64,6 +64,11 @@ const MAX_429_ERRORS = nonNegativeInteger(process.env.DAILY_SONG_MAX_429_ERRORS,
 const SNAPSHOT_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_SNAPSHOT_RETENTION_DAYS, 35);
 const CARRY_FORWARD_MAX_AGE_HOURS = positiveInteger(process.env.DAILY_SONG_CARRY_FORWARD_MAX_AGE_HOURS, 36);
 const MONTH_REFRESH_LIMIT = positiveInteger(process.env.DAILY_SONG_MONTH_REFRESH_LIMIT, Math.max(20, Math.floor(VIDEO_LIMIT / 8)));
+const MONTH_BACKFILL_TARGET = positiveInteger(process.env.DAILY_SONG_MONTH_BACKFILL_TARGET, VIDEO_LIMIT * 2);
+const MONTH_BACKFILL_RECENT_BUCKET_LIMIT = positiveInteger(
+  process.env.DAILY_SONG_MONTH_BACKFILL_RECENT_BUCKET_LIMIT,
+  Math.max(1, Math.floor(VIDEO_LIMIT / 8)),
+);
 const H72_MS = 72 * 60 * 60 * 1000;
 const H48_MS = 48 * 60 * 60 * 1000;
 const MONTH_CARRY_MS = 35 * 24 * 60 * 60 * 1000;
@@ -96,6 +101,7 @@ async function main() {
   const selection = selectCandidatesForInspection(candidates, startedAt, {
     carryForwardEnabled: carryForward.enabled,
     excludeVideoIds: carryForward.skipVideoIds,
+    carriedMonthVideoCount: carryForward.counts.month,
   });
   const inspectionCandidates = selection.items;
   console.log(
@@ -147,6 +153,9 @@ async function main() {
       rateLimitErrorCount: requestLimiter.error429Count,
       recentBucketLimit: RECENT_BUCKET_LIMIT,
       monthRefreshLimit: MONTH_REFRESH_LIMIT,
+      monthBackfillTarget: MONTH_BACKFILL_TARGET,
+      monthBackfillRecentBucketLimit: selection.monthBackfillRecentBucketLimit,
+      monthBackfillEnabled: selection.monthBackfillEnabled,
       recentScanHorizonHours: selection.recentScanHorizonHours,
       auditPath: "data/audit.json",
       auditSummary: summarizeAudits(audits),
@@ -176,6 +185,7 @@ async function main() {
       counts: carryForward.counts,
       knownVideoSkipCount: carryForward.skipVideoIds.size,
       skippedKnownCandidateCount: selection.skippedKnownCandidateCount,
+      monthBackfillEnabled: selection.monthBackfillEnabled,
     },
     usableVideoCount: videos.length,
     searches: searchSummaries,
@@ -455,6 +465,12 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
   const carryForwardEnabled = Boolean(options.carryForwardEnabled);
   const excludeVideoIds = options.excludeVideoIds || new Set();
   const recentScanHorizonMs = carryForwardEnabled ? H48_MS : H72_MS;
+  const carriedMonthVideoCount = Number(options.carriedMonthVideoCount);
+  const monthBackfillEnabled =
+    carryForwardEnabled && Number.isFinite(carriedMonthVideoCount) && carriedMonthVideoCount < MONTH_BACKFILL_TARGET;
+  const recentBucketLimit = monthBackfillEnabled
+    ? Math.min(RECENT_BUCKET_LIMIT, MONTH_BACKFILL_RECENT_BUCKET_LIMIT)
+    : RECENT_BUCKET_LIMIT;
   let skippedBlacklistedCandidateCount = 0;
   let skippedKnownCandidateCount = 0;
   const sourceAllowedCandidates = candidates.filter((item) => {
@@ -492,22 +508,34 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
       .filter((item) => item.publishedTimestamp && item.publishedTimestamp >= bucket.from && item.publishedTimestamp < bucket.to)
       .map((item) => ({ ...item, __bucket: bucket.id }))
       .sort(candidateSort);
-    add(bucketItems, RECENT_BUCKET_LIMIT);
+    add(bucketItems, recentBucketLimit);
   }
 
   const recentCandidates = availableCandidates
     .filter((item) => item.publishedTimestamp && nowMs - item.publishedTimestamp >= 0 && nowMs - item.publishedTimestamp <= recentScanHorizonMs)
     .sort(candidateSort);
-  add(recentCandidates, null);
 
   const monthCandidates = availableCandidates.filter((item) => hasMonthlySearchSource(item)).sort(candidateSort);
-  add(monthCandidates, carryForwardEnabled ? MONTH_REFRESH_LIMIT : null);
-  if (!carryForwardEnabled) add(availableCandidates, null);
+  if (monthBackfillEnabled) {
+    add(monthCandidates, null);
+    add(recentCandidates, null);
+  } else {
+    add(recentCandidates, null);
+    add(monthCandidates, carryForwardEnabled ? MONTH_REFRESH_LIMIT : null);
+    if (!carryForwardEnabled) add(availableCandidates, null);
+  }
 
   return {
     items: selected.map(({ __bucket, ...item }) => item),
-    mode: carryForwardEnabled ? "incremental_48h_with_carry_forward" : "full_72h_recovery",
+    mode: monthBackfillEnabled
+      ? "incremental_month_backfill_with_carry_forward"
+      : carryForwardEnabled
+        ? "incremental_48h_with_carry_forward"
+        : "full_72h_recovery",
     recentScanHorizonHours: Math.round(recentScanHorizonMs / (60 * 60 * 1000)),
+    monthBackfillEnabled,
+    monthBackfillTarget: MONTH_BACKFILL_TARGET,
+    monthBackfillRecentBucketLimit: recentBucketLimit,
     skippedBlacklistedCandidateCount,
     skippedKnownCandidateCount,
   };
