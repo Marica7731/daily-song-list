@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:18:16.912Z",
+  "generatedAt": "2026-07-12T23:11:55.539Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-  "totalSongs": 12950,
-  "unknownArtistCount": 2745,
-  "nicheUnknownArtistCount": 1407,
-  "highRiskEntryCount": 395,
-  "highRiskSourceCount": 15,
+  "totalSongs": 13115,
+  "unknownArtistCount": 2780,
+  "nicheUnknownArtistCount": 1420,
+  "highRiskEntryCount": 399,
+  "highRiskSourceCount": 16,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 175,
-  "conversationDroppedEntryCount": 157,
-  "qualityDroppedEntryCount": 15,
+  "ruleDroppedEntryCount": 1,
+  "conversationDroppedEntryCount": 0,
+  "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 11,
+  "confirmedNoiseCount": 20,
   "parserCorruptionCount": 133,
-  "likelyNoiseCount": 0,
-  "needsReviewCount": 1290,
-  "likelySongCount": 7615,
+  "likelyNoiseCount": 4,
+  "needsReviewCount": 1280,
+  "likelySongCount": 7769,
   "topRiskTitles": [
     {
       "value": "少女レイ",
@@ -215,7 +215,7 @@
       }
     },
     {
-      "value": "千本桜",
+      "value": "ビビデバ",
       "count": 5,
       "classifications": {
         "likely_song": 5
@@ -233,10 +233,6 @@
     {
       "value": "音ノ乃のの / NononoNono",
       "count": 5
-    },
-    {
-      "value": "ただのかえる【TADANO KAERU】",
-      "count": 4
     },
     {
       "value": "菜鳥ひなた / Hinata Natori",
@@ -259,6 +255,10 @@
       "count": 3
     },
     {
+      "value": "ただのかえる【TADANO KAERU】",
+      "count": 3
+    },
+    {
       "value": "むんもっしゅ",
       "count": 3
     },
@@ -272,10 +272,6 @@
     },
     {
       "value": "芽森ひより",
-      "count": 3
-    },
-    {
-      "value": "五木つかさ -Itsuki Tsukasa -",
       "count": 3
     },
     {
@@ -303,11 +299,29 @@
       "count": 2
     },
     {
+      "value": "Alpha Betta【V-Dere】",
+      "count": 2
+    },
+    {
       "value": "Ameru Ch.星降 あめる",
       "count": 2
     }
   ],
   "topRiskVideos": [
+    {
+      "videoId": "Cdl7Lgpv7qY",
+      "title": "【#歌枠 】人の歌枠聴いて歌枠したくなった女の３０分限定歌枠 #初見さん大歓迎 #関西弁vtuber",
+      "channelName": "Morty Ch. モーティ･アストラベータ",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ]
+    },
     {
       "videoId": "_Qx99bvHrVU",
       "title": "【初超誕祭】歌枠、凸待ち、秘蔵写真etc…この世の全ての感動がここにある。【#らいむ稲妻超誕祭2026 / #ブラフラ】",
@@ -573,22 +587,18 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
-    },
-    {
-      "videoId": "ITsDGzPeHiY",
-      "title": "【弾き語り/歌枠】日曜日まったりしていきませぬか？ #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "riskScore": 64,
-      "riskLevel": "medium",
-      "riskReasons": [
-        "source_many_topic_entries",
-        "source_multiple_niche_short_titles",
-        "activity_marker_title"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-12T23:11:55.539Z",
+      "totalSongs": 13115,
+      "unknownArtistCount": 2780,
+      "nicheUnknownArtistCount": 1420,
+      "highRiskEntryCount": 399,
+      "highRiskSourceCount": 16
+    },
     {
       "generatedAt": "2026-07-12T22:18:16.912Z",
       "totalSongs": 12950,

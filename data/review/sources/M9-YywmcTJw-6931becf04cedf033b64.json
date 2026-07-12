@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:18:16.912Z",
+  "generatedAt": "2026-07-12T23:11:55.539Z",
   "reviewId": "review:M9-YywmcTJw:6931becf04cedf033b64",
   "video": {
     "videoId": "M9-YywmcTJw",
@@ -13,15 +13,16 @@
     "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
     "sourceType": "comment",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "自分用タイムスタンプ📝\n(本編のネタバレあり)\n\n2:21　開始\n\n🥖🎶🥖🎶\n\n6:40 1.ウマーベラス(MONKEY MAJIKとサンドウィッチマン)\n12:53 2.健全ロボ ダイミダラー(遠藤会)\n18:21 3.きょういくばんぐみのテーマ(やみのおねえさん)\n22:36 4.家に帰ると妻が必ず死んだふりをしています。(ほぼ日P)\n26:30 5.男女(太郎)\n29:33 6. Help me, ERINNNNNN!!(COOL&CREATE)\n\n🎶🥖🎶🥖",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 36,
-    "riskLevel": "medium",
+    "riskScore": 20,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_activity_marker_ratio_high"
+      "source_multiple_niche_short_titles",
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -35,7 +36,7 @@
       "rawHash": "8075a106fee1601c11fb4610789071cc3cfe5c49095a2a60c9de4077020fd5da",
       "sourceId": "UgxjzBPFRSVAOdVu02t4AaABAg",
       "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
@@ -55,7 +56,7 @@
       "rawHash": "7a02075295aeba266fbcceaf32ed1a3f9e2c6b8843470efd49362a8d51ca229e",
       "sourceId": "UgxjzBPFRSVAOdVu02t4AaABAg",
       "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
@@ -138,30 +139,15 @@
       "rawHash": "2d715135b063f7c3408505f3c07a219a1b43f7db08a9704a3b3684236017a556",
       "sourceId": "UgxjzBPFRSVAOdVu02t4AaABAg",
       "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
-      "riskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
       "positiveEvidence": [
         "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "obvious_non_song_text",
-      "seconds": 141,
-      "time": "0:02:21",
-      "title": "開始",
-      "artist": "",
-      "raw": "2:21 開始",
-      "rawHash": "3fed0fe3d6aa307b7b893edfd0c98460b6ec1db886b35d338bb122afda6ad71d",
-      "sourceId": "UgxjzBPFRSVAOdVu02t4AaABAg",
-      "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "obvious_non_song_text"
       ]
     }
   ]

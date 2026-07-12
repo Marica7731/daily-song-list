@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:19:21.957Z",
+  "generatedAt": "2026-07-12T23:12:57.344Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-12T22:10:29.951Z",
+  "latestGeneratedAt": "2026-07-12T23:11:48.987Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
   "counts": {
-    "totalCandidates": 130,
-    "uniqueVideos": 38,
-    "uniqueSources": 54,
-    "confirmedNoiseCount": 130,
+    "totalCandidates": 139,
+    "uniqueVideos": 37,
+    "uniqueSources": 53,
+    "confirmedNoiseCount": 139,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 130,
+      "confirmed_noise": 139,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -352,6 +352,231 @@
       "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
     },
     {
+      "title": "歌枠久しぶり過ぎてリバーブかけるの忘れてた草",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 293,
+      "time": "0:04:53",
+      "raw": "4:53 歌枠久しぶり過ぎてリバーブかけるの忘れてた草",
+      "rawHash": "5f64aab8905c792d64e8d694a459965dbb9a6a5066300b0a8aafc24027d49420",
+      "videoId": "Cdl7Lgpv7qY",
+      "videoTitle": "【#歌枠 】人の歌枠聴いて歌枠したくなった女の３０分限定歌枠 #初見さん大歓迎 #関西弁vtuber",
+      "channelName": "Morty Ch. モーティ･アストラベータ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY&t=293s",
+      "sourceId": "UgyoGZidzZgNoAvpDKV4AaABAg",
+      "sourceHash": "9fe4f14b77e7f0d46c43d976668485ee1943623949c4b07760e609f8557451b8",
+      "sourceOrigin": "review:Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Cdl7Lgpv7qY:9fe4f14b77e7f0d46c43",
+      "sourcePath": "data/review/sources/Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "reviewUrl": "review.html?review=review%3ACdl7Lgpv7qY%3A9fe4f14b77e7f0d46c43&entry=5f64aab8905c792d64e8d694a459965dbb9a6a5066300b0a8aafc24027d49420"
+    },
+    {
+      "title": "ラスイチ！これ好きやから",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1417,
+      "time": "0:23:37",
+      "raw": "23:37 ラスイチ！これ好きやから",
+      "rawHash": "8075c4ad4cc78cddc7ca83389ce404bf5bb09c3df2c1817900b16324829a541c",
+      "videoId": "Cdl7Lgpv7qY",
+      "videoTitle": "【#歌枠 】人の歌枠聴いて歌枠したくなった女の３０分限定歌枠 #初見さん大歓迎 #関西弁vtuber",
+      "channelName": "Morty Ch. モーティ･アストラベータ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY&t=1417s",
+      "sourceId": "UgyoGZidzZgNoAvpDKV4AaABAg",
+      "sourceHash": "9fe4f14b77e7f0d46c43d976668485ee1943623949c4b07760e609f8557451b8",
+      "sourceOrigin": "review:Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Cdl7Lgpv7qY:9fe4f14b77e7f0d46c43",
+      "sourcePath": "data/review/sources/Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "reviewUrl": "review.html?review=review%3ACdl7Lgpv7qY%3A9fe4f14b77e7f0d46c43&entry=8075c4ad4cc78cddc7ca83389ce404bf5bb09c3df2c1817900b16324829a541c"
+    },
+    {
+      "title": "爆速歌枠！別の配信媒体でやってた時に草",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1654,
+      "time": "0:27:34",
+      "raw": "27:34 爆速歌枠！別の配信媒体でやってた時に草",
+      "rawHash": "c64ffceae363205edcb7a7ddbb1c547ab5dcedc23de9652c69ec261737a12ce1",
+      "videoId": "Cdl7Lgpv7qY",
+      "videoTitle": "【#歌枠 】人の歌枠聴いて歌枠したくなった女の３０分限定歌枠 #初見さん大歓迎 #関西弁vtuber",
+      "channelName": "Morty Ch. モーティ･アストラベータ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY&t=1654s",
+      "sourceId": "UgyoGZidzZgNoAvpDKV4AaABAg",
+      "sourceHash": "9fe4f14b77e7f0d46c43d976668485ee1943623949c4b07760e609f8557451b8",
+      "sourceOrigin": "review:Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Cdl7Lgpv7qY:9fe4f14b77e7f0d46c43",
+      "sourcePath": "data/review/sources/Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "reviewUrl": "review.html?review=review%3ACdl7Lgpv7qY%3A9fe4f14b77e7f0d46c43&entry=c64ffceae363205edcb7a7ddbb1c547ab5dcedc23de9652c69ec261737a12ce1"
+    },
+    {
+      "title": "定期配信は月曜日と水曜日！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1707,
+      "time": "0:28:27",
+      "raw": "28:27 定期配信は月曜日と水曜日！",
+      "rawHash": "6f68ca707e562b0faadad056d6a08e7ca614ec28ab021966ff2812d1546a3dc6",
+      "videoId": "Cdl7Lgpv7qY",
+      "videoTitle": "【#歌枠 】人の歌枠聴いて歌枠したくなった女の３０分限定歌枠 #初見さん大歓迎 #関西弁vtuber",
+      "channelName": "Morty Ch. モーティ･アストラベータ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY&t=1707s",
+      "sourceId": "UgyoGZidzZgNoAvpDKV4AaABAg",
+      "sourceHash": "9fe4f14b77e7f0d46c43d976668485ee1943623949c4b07760e609f8557451b8",
+      "sourceOrigin": "review:Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Cdl7Lgpv7qY:9fe4f14b77e7f0d46c43",
+      "sourcePath": "data/review/sources/Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "reviewUrl": "review.html?review=review%3ACdl7Lgpv7qY%3A9fe4f14b77e7f0d46c43&entry=6f68ca707e562b0faadad056d6a08e7ca614ec28ab021966ff2812d1546a3dc6"
+    },
+    {
+      "title": "Ending",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1823,
+      "time": "0:30:23",
+      "raw": "30:23 Ending",
+      "rawHash": "fb0be404f65cae97ba1ba4827f2b4c68f6237e57f88904c0b953f96e0ff78b71",
+      "videoId": "Cdl7Lgpv7qY",
+      "videoTitle": "【#歌枠 】人の歌枠聴いて歌枠したくなった女の３０分限定歌枠 #初見さん大歓迎 #関西弁vtuber",
+      "channelName": "Morty Ch. モーティ･アストラベータ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY&t=1823s",
+      "sourceId": "UgyoGZidzZgNoAvpDKV4AaABAg",
+      "sourceHash": "9fe4f14b77e7f0d46c43d976668485ee1943623949c4b07760e609f8557451b8",
+      "sourceOrigin": "review:Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Cdl7Lgpv7qY:9fe4f14b77e7f0d46c43",
+      "sourcePath": "data/review/sources/Cdl7Lgpv7qY-9fe4f14b77e7f0d46c43.json",
+      "reviewUrl": "review.html?review=review%3ACdl7Lgpv7qY%3A9fe4f14b77e7f0d46c43&entry=fb0be404f65cae97ba1ba4827f2b4c68f6237e57f88904c0b953f96e0ff78b71"
+    },
+    {
       "title": "終わりのあいさつ",
       "artist": "未記載",
       "isNiche": true,
@@ -433,6 +658,357 @@
       "reviewId": "review:zREfHIYyb1M:94bf1eecf968bf5bd964",
       "sourcePath": "data/review/sources/history-zREfHIYyb1M-94bf1eecf968bf5bd964.json",
       "reviewUrl": "review.html?review=review%3AzREfHIYyb1M%3A94bf1eecf968bf5bd964&entry=48fea5b826b2e681e68b721a26940a22bdadf0a86ad15cefd603b5b1badf983a"
+    },
+    {
+      "title": "(Opening! おはようございます!) 01-青い葉",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 135,
+      "time": "0:02:15",
+      "raw": "0:02:15 (Opening! おはようございます!) 01-青い葉",
+      "rawHash": "c68473eef9812a3d6becdc0087cdab493694b5f49ac818df261d682be1f41d2a",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=135s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=c68473eef9812a3d6becdc0087cdab493694b5f49ac818df261d682be1f41d2a"
+    },
+    {
+      "title": "(れいちゃんがれいかちゃんにコンソールの操作方法を教えている )",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1387,
+      "time": "0:23:07",
+      "raw": "0:23:07 (れいちゃんがれいかちゃんにコンソールの操作方法を教えている :_heart::_heart::_heart:)",
+      "rawHash": "f180e0ed9b878966a59816f97632ed89328da4a3b287277b073b2610cc97cba0",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=1387s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=f180e0ed9b878966a59816f97632ed89328da4a3b287277b073b2610cc97cba0"
+    },
+    {
+      "title": "かわいいだけじゃ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1714,
+      "time": "0:28:34",
+      "raw": "0:28:34 06-かわいいだけじゃ",
+      "rawHash": "f54318278004c20ab8e70068702fd5462d3ecf6b5e6cc0de4da8bfcba097f60c",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=1714s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=f54318278004c20ab8e70068702fd5462d3ecf6b5e6cc0de4da8bfcba097f60c"
+    },
+    {
+      "title": "好きすぎて滅!",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1965,
+      "time": "0:32:45",
+      "raw": "0:32:45 07-好きすぎて滅!",
+      "rawHash": "47a0615daffcfd9eb702f9307de4b1bcc59cd010f336f9fc9ba47e4615df4a49",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=1965s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=47a0615daffcfd9eb702f9307de4b1bcc59cd010f336f9fc9ba47e4615df4a49"
+    },
+    {
+      "title": "(Request closed!)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2820,
+      "time": "0:47:00",
+      "raw": "0:47:00 (Request closed!)",
+      "rawHash": "e93108f9299844df49d92b80772ea303621b367cbf7cb51e79614f2f180f1fff",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=2820s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=e93108f9299844df49d92b80772ea303621b367cbf7cb51e79614f2f180f1fff"
+    },
+    {
+      "title": "(チャンネル登録、高評価是非ぜひ 。そしてね、配信のシもいただけると とてもとっても嬉しいです。)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3871,
+      "time": "1:04:31",
+      "raw": "1:04:31 (チャンネル登録、高評価是非ぜひ 。そしてね、配信のシもいただけると とてもとっても嬉しいです。)",
+      "rawHash": "5dcb51e10c148f4aedee858e4ea9ee77bf2a2c5a50b0a22158cdba9921106aaa",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=3871s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=5dcb51e10c148f4aedee858e4ea9ee77bf2a2c5a50b0a22158cdba9921106aaa"
+    },
+    {
+      "title": "(れいかちゃん手裏剣を作った! すごいね!)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5053,
+      "time": "1:24:13",
+      "raw": "1:24:13 (れいかちゃん手裏剣を作った! すごいね!)",
+      "rawHash": "e2bc3a79bf560b1b98d237a9da58c6afbd97e319637101618710150e7b3dd334",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=5053s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=e2bc3a79bf560b1b98d237a9da58c6afbd97e319637101618710150e7b3dd334"
+    },
+    {
+      "title": "(やった! れいかちゃんは欲しかったおもちゃを手に入れました！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6351,
+      "time": "1:45:51",
+      "raw": "1:45:51 (やった! れいかちゃんは欲しかったおもちゃを手に入れました！",
+      "rawHash": "3d219bd7bdaacd8308ca0463f56e95f85a1766ccc5058ba27ab50398c2701209",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=6351s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=3d219bd7bdaacd8308ca0463f56e95f85a1766ccc5058ba27ab50398c2701209"
+    },
+    {
+      "title": "(れいちゃんがナゲットを召喚するよ！)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7309,
+      "time": "2:01:49",
+      "raw": "2:01:49 (れいちゃんがナゲットを召喚するよ！)",
+      "rawHash": "f2cf88c27c46628373e271415ed27a5e2b34f8d7459309d82d0909e1c4464060",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=7309s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=f2cf88c27c46628373e271415ed27a5e2b34f8d7459309d82d0909e1c4464060"
     },
     {
       "title": "〜3Dライブ開催決定!!!!",
@@ -802,44 +1378,6 @@
       "reviewId": "review:YdM4OewAJ8E:8ab605e83465bdc3d53b",
       "sourcePath": "data/review/sources/history-YdM4OewAJ8E-8ab605e83465bdc3d53b.json",
       "reviewUrl": "review.html?review=review%3AYdM4OewAJ8E%3A8ab605e83465bdc3d53b&entry=710022534335f3b8a56a757e8c352dccbfed646d6b63c44fef3f620e16c7d9f2"
-    },
-    {
-      "title": "開始",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 141,
-      "time": "0:02:21",
-      "raw": "2:21 開始",
-      "rawHash": "3fed0fe3d6aa307b7b893edfd0c98460b6ec1db886b35d338bb122afda6ad71d",
-      "videoId": "M9-YywmcTJw",
-      "videoTitle": "【 #ネタ曲歌枠リレー 】この曲を知ってるか～？ネタ曲で盛り上げていくぞー！【男性Vtuber / 夜氏音 】",
-      "channelName": "Yoshinon Ch. 夜氏音",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=M9-YywmcTJw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=M9-YywmcTJw&t=141s",
-      "sourceId": "UgxjzBPFRSVAOdVu02t4AaABAg",
-      "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
-      "sourceOrigin": "review:M9-YywmcTJw-6931becf04cedf033b64.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_activity_marker_ratio_high"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_activity_marker_ratio_high"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:M9-YywmcTJw:6931becf04cedf033b64",
-      "sourcePath": "data/review/sources/M9-YywmcTJw-6931becf04cedf033b64.json",
-      "reviewUrl": "review.html?review=review%3AM9-YywmcTJw%3A6931becf04cedf033b64&entry=3fed0fe3d6aa307b7b893edfd0c98460b6ec1db886b35d338bb122afda6ad71d"
     },
     {
       "title": "企画説明",
@@ -3477,6 +4015,246 @@
       "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Ad20b81982796f791041d&entry=1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
     },
     {
+      "title": "人助けから始まった素敵な1日の話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 881,
+      "time": "0:14:41",
+      "raw": "0:14:41 人助けから始まった素敵な1日の話",
+      "rawHash": "2a5f47463f1a53177dcfb48ad51c425efedc3c24cbb4ad359229e9f66d75f1d6",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=881s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=2a5f47463f1a53177dcfb48ad51c425efedc3c24cbb4ad359229e9f66d75f1d6"
+    },
+    {
+      "title": "AERU-LIVE お疲れ様のKP🍻",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1632,
+      "time": "0:27:12",
+      "raw": "0:27:12 AERU-LIVE お疲れ様のKP🍻",
+      "rawHash": "bfb2c795a436480797613246bee30b51d53ff1a635f631a65051e103016879bf",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=1632s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=bfb2c795a436480797613246bee30b51d53ff1a635f631a65051e103016879bf"
+    },
+    {
+      "title": "AERU-LIVE 出演者さんの話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2796,
+      "time": "0:46:36",
+      "raw": "0:46:36 AERU-LIVE 出演者さんの話",
+      "rawHash": "5ac7cf2d781fd90e0ebd64a408bfa9d8bc971c177ed09c7c851500ad6b48576a",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=2796s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=5ac7cf2d781fd90e0ebd64a408bfa9d8bc971c177ed09c7c851500ad6b48576a"
+    },
+    {
+      "title": "『ラブドリ！』を歌った時の話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3633,
+      "time": "1:00:33",
+      "raw": "1:00:33 『ラブドリ！』を歌った時の話",
+      "rawHash": "14ee82487c48a7fc015ec3dc6d43f6ad046b427b32e082bfd80d5dadc5d9a97f",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=3633s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=14ee82487c48a7fc015ec3dc6d43f6ad046b427b32e082bfd80d5dadc5d9a97f"
+    },
+    {
+      "title": "マシュマロ配信で🔋が削られるロム",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5233,
+      "time": "1:27:13",
+      "raw": "1:27:13 マシュマロ配信で🔋が削られるロム",
+      "rawHash": "d4865095f62d7598ef2d9c6828cea2c5ff8bffefd69b83a2ed2ffd44dd9e0af6",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=5233s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=d4865095f62d7598ef2d9c6828cea2c5ff8bffefd69b83a2ed2ffd44dd9e0af6"
+    },
+    {
+      "title": "『エンディング』",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6275,
+      "time": "1:44:35",
+      "raw": "1:44:35 『エンディング』",
+      "rawHash": "7d678d9f98a8f13b5e585c133b45098bc75e1e6a18f68d167888affd78ca9ff5",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=6275s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=7d678d9f98a8f13b5e585c133b45098bc75e1e6a18f68d167888affd78ca9ff5"
+    },
+    {
       "title": "おつくわタイム",
       "artist": "",
       "isNiche": false,
@@ -4362,41 +5140,6 @@
       "reviewUrl": "review.html?review=review%3AzaPAqsqcC0k%3A7158af31feaaf86ddbf9&entry=c24465d5d26f2e820af43b1c7d7886264b2a8d37e384c26cdf4eb83a126ec8d4"
     },
     {
-      "title": "猫いじりからのリスナーさん暴走は最高に面白かった😂",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 3713,
-      "time": "1:01:53",
-      "raw": "1:01:53 猫いじりからのリスナーさん暴走は最高に面白かった😂",
-      "rawHash": "b86e5334adaa880c3f2870c170d674604ab80de1f544d4ba0e293a420c30968b",
-      "videoId": "SgaXqdakVZ8",
-      "videoTitle": "【 リクエスト歌枠 】初見さんも歓迎、君の為に歌わせてよ singing stream【 新人vtuber/五木つかさ 】",
-      "channelName": "五木つかさ -Itsuki Tsukasa -",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=SgaXqdakVZ8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=SgaXqdakVZ8&t=3713s",
-      "sourceId": "UgxR7d6aprpzgA8S9oN4AaABAg",
-      "sourceHash": "a4f974914b344e2d22b8069e797f0c7e6c37eb7b63ca00b64288568906ae1cfc",
-      "sourceOrigin": "review:SgaXqdakVZ8-a4f974914b344e2d22b8.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:SgaXqdakVZ8:a4f974914b344e2d22b8",
-      "sourcePath": "data/review/sources/SgaXqdakVZ8-a4f974914b344e2d22b8.json",
-      "reviewUrl": "review.html?review=review%3ASgaXqdakVZ8%3Aa4f974914b344e2d22b8&entry=b86e5334adaa880c3f2870c170d674604ab80de1f544d4ba0e293a420c30968b"
-    },
-    {
       "title": "2周年記念お写真公開！",
       "artist": "未記載",
       "isNiche": true,
@@ -4762,310 +5505,6 @@
       "reviewId": "review:GsWidWYRJXg:cbcb66178f85620dc433",
       "sourcePath": "data/review/sources/history-GsWidWYRJXg-cbcb66178f85620dc433.json",
       "reviewUrl": "review.html?review=review%3AGsWidWYRJXg%3Acbcb66178f85620dc433&entry=e3e2e18c9e9118fe4e2a6e379d4e33b3e1e312114936734d48fb78ec41ab966b"
-    },
-    {
-      "title": "ローディング🎶",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 0,
-      "time": "0:00:00",
-      "raw": "00:00:00 🎶ローディング🎶",
-      "rawHash": "98785ca63566e16d948d329401fb6efad086d9facf6ba1c9d931bc3e8825a310",
-      "videoId": "zoecN2iEf5w",
-      "videoTitle": "【歌枠】80~90年代🌟深夜歌枠【 アニソン / Jpop 】初見さんも大歓迎✨ライブ配信中！",
-      "channelName": "時羽あいの",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w&t=0s",
-      "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
-      "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
-      "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
-      "sourcePath": "data/review/sources/zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "reviewUrl": "review.html?review=review%3AzoecN2iEf5w%3A0a1c157bbebb09eb4001&entry=98785ca63566e16d948d329401fb6efad086d9facf6ba1c9d931bc3e8825a310"
-    },
-    {
-      "title": "Opening MV Start！",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 74,
-      "time": "0:01:14",
-      "raw": "00:01:14 🔯Opening MV Start！",
-      "rawHash": "516d4e902b783bed65c5be3d461b17ddd5b7b18675c953498ade4303f8f7a564",
-      "videoId": "zoecN2iEf5w",
-      "videoTitle": "【歌枠】80~90年代🌟深夜歌枠【 アニソン / Jpop 】初見さんも大歓迎✨ライブ配信中！",
-      "channelName": "時羽あいの",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w&t=74s",
-      "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
-      "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
-      "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
-      "sourcePath": "data/review/sources/zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "reviewUrl": "review.html?review=review%3AzoecN2iEf5w%3A0a1c157bbebb09eb4001&entry=516d4e902b783bed65c5be3d461b17ddd5b7b18675c953498ade4303f8f7a564"
-    },
-    {
-      "title": "2nd ONE-MAN LIVE 告知動画",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 118,
-      "time": "0:01:58",
-      "raw": "00:01:58 2nd ONE-MAN LIVE 告知動画",
-      "rawHash": "06267a264ea96b6d2b55e82fbb79bd19f462d75c9bb0de01546aeebfebf32db0",
-      "videoId": "zoecN2iEf5w",
-      "videoTitle": "【歌枠】80~90年代🌟深夜歌枠【 アニソン / Jpop 】初見さんも大歓迎✨ライブ配信中！",
-      "channelName": "時羽あいの",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w&t=118s",
-      "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
-      "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
-      "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
-      "sourcePath": "data/review/sources/zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "reviewUrl": "review.html?review=review%3AzoecN2iEf5w%3A0a1c157bbebb09eb4001&entry=06267a264ea96b6d2b55e82fbb79bd19f462d75c9bb0de01546aeebfebf32db0"
-    },
-    {
-      "title": "ダークアビス🔯❤🩹",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 181,
-      "time": "0:03:01",
-      "raw": "00:03:01 ダークアビス🔯❤‍🩹",
-      "rawHash": "55d0178b1583c7e0adac34c54c0623f9b16c3123d2faa4c56b76d7d093d032bc",
-      "videoId": "zoecN2iEf5w",
-      "videoTitle": "【歌枠】80~90年代🌟深夜歌枠【 アニソン / Jpop 】初見さんも大歓迎✨ライブ配信中！",
-      "channelName": "時羽あいの",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w&t=181s",
-      "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
-      "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
-      "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
-      "sourcePath": "data/review/sources/zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "reviewUrl": "review.html?review=review%3AzoecN2iEf5w%3A0a1c157bbebb09eb4001&entry=55d0178b1583c7e0adac34c54c0623f9b16c3123d2faa4c56b76d7d093d032bc"
-    },
-    {
-      "title": "夢見る少女じゃいられない",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6574,
-      "time": "1:49:34",
-      "raw": "01:49:34 13. 夢見る少女じゃいられない /",
-      "rawHash": "f4bad1af450bcf9bc8946dec0aceaab02a90d542eaf597b07ee150aa12935946",
-      "videoId": "zoecN2iEf5w",
-      "videoTitle": "【歌枠】80~90年代🌟深夜歌枠【 アニソン / Jpop 】初見さんも大歓迎✨ライブ配信中！",
-      "channelName": "時羽あいの",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w&t=6574s",
-      "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
-      "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
-      "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
-      "sourcePath": "data/review/sources/zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "reviewUrl": "review.html?review=review%3AzoecN2iEf5w%3A0a1c157bbebb09eb4001&entry=f4bad1af450bcf9bc8946dec0aceaab02a90d542eaf597b07ee150aa12935946"
-    },
-    {
-      "title": "エンディングトーク",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 14370,
-      "time": "3:59:30",
-      "raw": "03:59:30 ❤‍🩹 エンディングトーク",
-      "rawHash": "e720990799860c7a71462af8e1d72cc6570e703dcc185e66f3a14728b461e0fd",
-      "videoId": "zoecN2iEf5w",
-      "videoTitle": "【歌枠】80~90年代🌟深夜歌枠【 アニソン / Jpop 】初見さんも大歓迎✨ライブ配信中！",
-      "channelName": "時羽あいの",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w&t=14370s",
-      "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
-      "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
-      "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
-      "sourcePath": "data/review/sources/zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "reviewUrl": "review.html?review=review%3AzoecN2iEf5w%3A0a1c157bbebb09eb4001&entry=e720990799860c7a71462af8e1d72cc6570e703dcc185e66f3a14728b461e0fd"
-    },
-    {
-      "title": "アンケート結果",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 15337,
-      "time": "4:15:37",
-      "raw": "04:15:37 📝アンケート結果",
-      "rawHash": "26f6dfc6a1deeb65d7f657d2f2a107fb79502ebb706f0581a8866ff29354964b",
-      "videoId": "zoecN2iEf5w",
-      "videoTitle": "【歌枠】80~90年代🌟深夜歌枠【 アニソン / Jpop 】初見さんも大歓迎✨ライブ配信中！",
-      "channelName": "時羽あいの",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w&t=15337s",
-      "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
-      "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
-      "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
-      "sourcePath": "data/review/sources/zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "reviewUrl": "review.html?review=review%3AzoecN2iEf5w%3A0a1c157bbebb09eb4001&entry=26f6dfc6a1deeb65d7f657d2f2a107fb79502ebb706f0581a8866ff29354964b"
-    },
-    {
-      "title": "⁉ おつあい＆謎歌",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 15590,
-      "time": "4:19:50",
-      "raw": "04:19:50 ⁉ おつあい＆謎歌",
-      "rawHash": "3069c75a685daf934342c1d7e5d5f3eee9f43a16b99228fa234cb2b8560f6181",
-      "videoId": "zoecN2iEf5w",
-      "videoTitle": "【歌枠】80~90年代🌟深夜歌枠【 アニソン / Jpop 】初見さんも大歓迎✨ライブ配信中！",
-      "channelName": "時羽あいの",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zoecN2iEf5w&t=15590s",
-      "sourceId": "UgyOg-Ii1pRH2kKEHEV4AaABAg",
-      "sourceHash": "0a1c157bbebb09eb40019193f2d82298895b6c1616df67a69235fbaad2dadf4c",
-      "sourceOrigin": "review:zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zoecN2iEf5w:0a1c157bbebb09eb4001",
-      "sourcePath": "data/review/sources/zoecN2iEf5w-0a1c157bbebb09eb4001.json",
-      "reviewUrl": "review.html?review=review%3AzoecN2iEf5w%3A0a1c157bbebb09eb4001&entry=3069c75a685daf934342c1d7e5d5f3eee9f43a16b99228fa234cb2b8560f6181"
     },
     {
       "title": "おつにょ",
@@ -5846,43 +6285,6 @@
       "reviewId": "review:gxftjQhHf2I:47295e4f168d566e2c4b",
       "sourcePath": "data/review/sources/history-gxftjQhHf2I-47295e4f168d566e2c4b.json",
       "reviewUrl": "review.html?review=review%3AgxftjQhHf2I%3A47295e4f168d566e2c4b&entry=f66c1fbf05611f76ae8c8fb6e63d2c690ebfe67fe67e174abd5776d8586e802e"
-    },
-    {
-      "title": "待機画面",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 0,
-      "time": "0:00:00",
-      "raw": "0:00 待機画面",
-      "rawHash": "8444ada80b4095c67157cb6617e7fdb740aee3f074d0a108eafdb9f3636c994b",
-      "videoId": "zFZgawUHBas",
-      "videoTitle": "【歌枠】 アニソン歌枠！ 【日音野なちゅらる/ 新人ソロVシンガー】",
-      "channelName": "日音野なちゅらるソロVシンガー",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=zFZgawUHBas",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=zFZgawUHBas&t=0s",
-      "sourceId": "Ugz3VKZXEN1O5fdnqvF4AaABAg",
-      "sourceHash": "401adaa520f8e84434c4e8581ede7277564e44dc0448fe962bccd7fe78d6046a",
-      "sourceOrigin": "review:zFZgawUHBas-401adaa520f8e84434c4.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "activity_marker_title"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:zFZgawUHBas:401adaa520f8e84434c4",
-      "sourcePath": "data/review/sources/zFZgawUHBas-401adaa520f8e84434c4.json",
-      "reviewUrl": "review.html?review=review%3AzFZgawUHBas%3A401adaa520f8e84434c4&entry=8444ada80b4095c67157cb6617e7fdb740aee3f074d0a108eafdb9f3636c994b"
     },
     {
       "title": "おつもく名前呼び",

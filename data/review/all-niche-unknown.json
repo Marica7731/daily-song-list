@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T22:19:21.957Z",
+  "generatedAt": "2026-07-12T23:12:57.344Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-12T22:10:29.951Z",
+  "latestGeneratedAt": "2026-07-12T23:11:48.987Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
   "counts": {
-    "totalCandidates": 2095,
-    "uniqueVideos": 268,
-    "uniqueSources": 351,
+    "totalCandidates": 2108,
+    "uniqueVideos": 273,
+    "uniqueSources": 355,
     "confirmedNoiseCount": 99,
     "parserCorruptionCount": 413,
     "likelyNoiseCount": 292,
-    "needsReviewCount": 1291,
+    "needsReviewCount": 1304,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 99,
       "parser_corruption": 413,
       "likely_noise": 292,
-      "needs_review": 1291,
+      "needs_review": 1304,
       "likely_song": 0
     }
   },
@@ -13723,6 +13723,44 @@
       "repairReasons": []
     },
     {
+      "title": "まなざしは光",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1213,
+      "time": "0:20:13",
+      "raw": "0:20:13 5曲目 まなざしは光",
+      "rawHash": "782980b904989eb8737ae22ac0757c3f9d2c0c212e173375316902738c329e7c",
+      "videoId": "Cdl7Lgpv7qY",
+      "videoTitle": "【#歌枠 】人の歌枠聴いて歌枠したくなった女の３０分限定歌枠 #初見さん大歓迎 #関西弁vtuber",
+      "channelName": "Morty Ch. モーティ･アストラベータ",
+      "channelId": "UCvwafCM3Wrttthuayg0JNFQ",
+      "channelHandle": "/@MortyAstravete",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Cdl7Lgpv7qY&t=1213s",
+      "sourceId": "UgyoGZidzZgNoAvpDKV4AaABAg.AZ9i7lgFcYIAZ9iGjj1spI",
+      "sourceHash": "b574468e4970c307986ae8ab00c9c0c659318542ac3c060d3569c3035e3253c6",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Cdl7Lgpv7qY:b574468e4970c307986a",
+      "sourcePath": "data/review/sources/Cdl7Lgpv7qY-b574468e4970c307986a.json",
+      "reviewUrl": "review.html?review=review%3ACdl7Lgpv7qY%3Ab574468e4970c307986a&entry=782980b904989eb8737ae22ac0757c3f9d2c0c212e173375316902738c329e7c",
+      "repairedTitle": "まなざしは光",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "ごあいさつ",
       "artist": "未記載",
       "isNiche": true,
@@ -15202,6 +15240,747 @@
       "reviewUrl": "review.html?review=review%3Aj8AeciGQV5o%3A898c500632eaa8b4951d&entry=a2b6c901a8009c8dd284f808994b026ddaeadb863b43a0ddf4de5a40e6d1dd12"
     },
     {
+      "title": "(Who is Otsuka Ray?)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 506,
+      "time": "0:08:26",
+      "raw": "0:08:26 (Who is Otsuka Ray?)",
+      "rawHash": "a3ed72c6b7f1b2afe1af469065165301090c980e6c79ecd9e4921abd3c27fb01",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=506s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=a3ed72c6b7f1b2afe1af469065165301090c980e6c79ecd9e4921abd3c27fb01",
+      "repairedTitle": "(Who is Otsuka Ray?)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(What is Ray's standard greeting?)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 544,
+      "time": "0:09:04",
+      "raw": "0:09:04 (What is Ray's standard greeting?)",
+      "rawHash": "cffacd56cd72a256017c682286853e3383fe91249fefa99225d76ecef62bd628",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=544s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=cffacd56cd72a256017c682286853e3383fe91249fefa99225d76ecef62bd628",
+      "repairedTitle": "(What is Ray's standard greeting?)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(Who is Reika?)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 593,
+      "time": "0:09:53",
+      "raw": "0:09:53 (Who is Reika?)",
+      "rawHash": "835f104539de612204c610f91420768635f0b0870823614c6137199042c57b5e",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=593s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=835f104539de612204c610f91420768635f0b0870823614c6137199042c57b5e",
+      "repairedTitle": "(Who is Reika?)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(What is Ray fan name?)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 666,
+      "time": "0:11:06",
+      "raw": "0:11:06 (What is Ray fan name?)",
+      "rawHash": "2a11c08e6552121bd3494113c506241137777176a1185245c16103c4b4c0da90",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=666s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=2a11c08e6552121bd3494113c506241137777176a1185245c16103c4b4c0da90",
+      "repairedTitle": "(What is Ray fan name?)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(What is Ray's dream?)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 711,
+      "time": "0:11:51",
+      "raw": "0:11:51 (What is Ray's dream?)",
+      "rawHash": "f6195be46b6a72104d3d2f1e4225d3860f32d33a5e134a3f5314bef32312e50a",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=711s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=f6195be46b6a72104d3d2f1e4225d3860f32d33a5e134a3f5314bef32312e50a",
+      "repairedTitle": "(What is Ray's dream?)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(What are Ray's activity goals?)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 783,
+      "time": "0:13:03",
+      "raw": "0:13:03 (What are Ray's activity goals?)",
+      "rawHash": "6eea21266e4e0d3e283e8b8319f7a44800a2fd3da711c3a60502f3eda49aefd0",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=783s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=6eea21266e4e0d3e283e8b8319f7a44800a2fd3da711c3a60502f3eda49aefd0",
+      "repairedTitle": "(What are Ray's activity goals?)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(This Year's Goals! Aiming for 500,000 channel sub! Please subscribe!)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 805,
+      "time": "0:13:25",
+      "raw": "0:13:25 (This Year's Goals! Aiming for 500,000 channel sub! Please subscribe!)",
+      "rawHash": "39acd0830c5cd0fd8d72ecccc1cc3cc079ac9e805ba235221f2ebc56610b806d",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=805s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=39acd0830c5cd0fd8d72ecccc1cc3cc079ac9e805ba235221f2ebc56610b806d",
+      "repairedTitle": "(This Year's Goals! Aiming for 500,000 channel sub! Please subscribe!)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(ご飯何にするの?)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2625,
+      "time": "0:43:45",
+      "raw": "0:43:45 (ご飯何にするの?)",
+      "rawHash": "8ac3b2a698556f474624e093e5f8f5787324548a8f135e323ecdd802b4f04e24",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=2625s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=8ac3b2a698556f474624e093e5f8f5787324548a8f135e323ecdd802b4f04e24",
+      "repairedTitle": "(ご飯何にするの?)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "そこにあるかも知",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3661,
+      "time": "1:01:01",
+      "raw": "1:01:01 12-そこにあるかも知",
+      "rawHash": "abe5469cf749d29ac35fb0e84195a8d3123103207e78225dbd1a39d1c7b2629f",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=3661s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=abe5469cf749d29ac35fb0e84195a8d3123103207e78225dbd1a39d1c7b2629f",
+      "repairedTitle": "そこにあるかも知",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(れいちゃんは台湾へ旅行したい！)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4697,
+      "time": "1:18:17",
+      "raw": "1:18:17 (れいちゃんは台湾へ旅行したい！)",
+      "rawHash": "f4f166a1beec61e5455facd7f3ea5ce8a5f371c440e63329187aa860dfb38b64",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=4697s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=f4f166a1beec61e5455facd7f3ea5ce8a5f371c440e63329187aa860dfb38b64",
+      "repairedTitle": "(れいちゃんは台湾へ旅行したい！)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ヘビーローテーシ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4739,
+      "time": "1:18:59",
+      "raw": "1:18:59 16-ヘビーローテーシ",
+      "rawHash": "a6054d73069d512bddfd5df01d32266282f0b526e7a66203a919077924422117",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=4739s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=a6054d73069d512bddfd5df01d32266282f0b526e7a66203a919077924422117",
+      "repairedTitle": "ヘビーローテーシ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(Purple Superchat!)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 5076,
+      "time": "1:24:36",
+      "raw": "1:24:36 (Purple Superchat!)",
+      "rawHash": "e3f8f7fd6ebe3ce7725915b38adac21e73986531337e38e86409536275189231",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=5076s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=e3f8f7fd6ebe3ce7725915b38adac21e73986531337e38e86409536275189231",
+      "repairedTitle": "(Purple Superchat!)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Paradisus-Parad",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 5556,
+      "time": "1:32:36",
+      "raw": "1:32:36 18-Paradisus-Parad",
+      "rawHash": "8f132780d33d4245cab351b386329efd4418ccb24761d686a1dec05d20065a84",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=5556s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=8f132780d33d4245cab351b386329efd4418ccb24761d686a1dec05d20065a84",
+      "repairedTitle": "Paradisus-Parad",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "きゅんっ!ヴァン",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 5796,
+      "time": "1:36:36",
+      "raw": "1:36:36 19-きゅんっ!ヴァン",
+      "rawHash": "e74557e57db7d4d5d5f9f11be1e20e204dc207a96bc1fda3f0b20c5b71c54b2a",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=5796s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=e74557e57db7d4d5d5f9f11be1e20e204dc207a96bc1fda3f0b20c5b71c54b2a",
+      "repairedTitle": "きゅんっ!ヴァン",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(スティーブが ちょっと待って!)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 9610,
+      "time": "2:40:10",
+      "raw": "2:40:10 (スティーブが ちょっと待って!)",
+      "rawHash": "5bf9b8b65bf8d7992dd6e8dbfcdb731f01721383635096a15639276f29b367b1",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=9610s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=5bf9b8b65bf8d7992dd6e8dbfcdb731f01721383635096a15639276f29b367b1",
+      "repairedTitle": "(スティーブが ちょっと待って!)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(れいかちゃん上手上手)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 9721,
+      "time": "2:42:01",
+      "raw": "2:42:01 (れいかちゃん上手上手)",
+      "rawHash": "634aebe1d1dbf122ddc9fa719a03f61728a39ceaf332cda27216804be63fcc8c",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=9721s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=634aebe1d1dbf122ddc9fa719a03f61728a39ceaf332cda27216804be63fcc8c",
+      "repairedTitle": "(れいかちゃん上手上手)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(乙夏れいゲーミングマウスパッド)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 10923,
+      "time": "3:02:03",
+      "raw": "3:02:03 (乙夏れいゲーミングマウスパッド)",
+      "rawHash": "65628520cae1d801414beda131be6777fe95fc7ae803ba4d76ce2a72b1038a81",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=10923s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=65628520cae1d801414beda131be6777fe95fc7ae803ba4d76ce2a72b1038a81",
+      "repairedTitle": "(乙夏れいゲーミングマウスパッド)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(Comments Ranking!)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 10983,
+      "time": "3:03:03",
+      "raw": "3:03:03 (Comments Ranking!)",
+      "rawHash": "87e64f0d0c5b360aaf1010aae214073ba24b208b669b1e82116ed22dcbd02c97",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=10983s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=87e64f0d0c5b360aaf1010aae214073ba24b208b669b1e82116ed22dcbd02c97",
+      "repairedTitle": "(Comments Ranking!)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(予告の時間だよ)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 11055,
+      "time": "3:04:15",
+      "raw": "3:04:15 (予告の時間だよ)",
+      "rawHash": "1d9ddad57c9b28d69cf053011e9ca5a8868b9ab14f0bf10a10ed40f1a6e5541a",
+      "videoId": "FNs4kpdpWGM",
+      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
+      "channelName": "Otsuka Ray ch.乙夏れい",
+      "channelId": "UCrAsByHNIFObjr2sEaZHkCg",
+      "channelHandle": "/@OtsukaRay",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=11055s",
+      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
+      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
+      "sourcePath": "data/review/sources/FNs4kpdpWGM-9ef1860f9676617e865c.json",
+      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=1d9ddad57c9b28d69cf053011e9ca5a8868b9ab14f0bf10a10ed40f1a6e5541a",
+      "repairedTitle": "(予告の時間だよ)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "すぱちゃ よみよみっ！",
       "artist": "未記載",
       "isNiche": true,
@@ -15733,6 +16512,44 @@
       "sourcePath": "data/review/sources/_Qx99bvHrVU-a6f03bea46d116314d47.json",
       "reviewUrl": "review.html?review=review%3A_Qx99bvHrVU%3Aa6f03bea46d116314d47&entry=b37952e24dd8d66339d357e4d4ac6341b307599acf2e4c9b226741aee70aeb4e",
       "repairedTitle": "おてまみタイム②",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Almond chocolate",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3342,
+      "time": "0:55:42",
+      "raw": "55:42 Almond chocolate",
+      "rawHash": "e22119d94aba519f4152bced68f83563b6a2525783c303b6d44900d8bab67a0d",
+      "videoId": "t7sfhp6JFbM",
+      "videoTitle": "【歌枠】半年記念だし歌ってみる【Razul / ラズル】",
+      "channelName": "Razul / ラズル",
+      "channelId": "UCZRzuwaNIuTfjiqQXXSPHQQ",
+      "channelHandle": "/@Razul_wolf0211",
+      "youtubeUrl": "https://www.youtube.com/watch?v=t7sfhp6JFbM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=t7sfhp6JFbM&t=3342s",
+      "sourceId": "UgwuOnFDfR_QDRIWmm94AaABAg",
+      "sourceHash": "b66e99883c0db5b250a9dfafbf120784814036f87f71fcd892769d66fd4cb04b",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:t7sfhp6JFbM:b66e99883c0db5b250a9",
+      "sourcePath": "data/review/sources/t7sfhp6JFbM-b66e99883c0db5b250a9.json",
+      "reviewUrl": "review.html?review=review%3At7sfhp6JFbM%3Ab66e99883c0db5b250a9&entry=e22119d94aba519f4152bced68f83563b6a2525783c303b6d44900d8bab67a0d",
+      "repairedTitle": "Almond chocolate",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -23611,10 +24428,11 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=M9-YywmcTJw&t=1773s",
       "sourceId": "UgxjzBPFRSVAOdVu02t4AaABAg",
       "sourceHash": "6931becf04cedf033b64128c736a3bb568cada965156b73df77e2fbfb592187d",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:M9-YywmcTJw-6931becf04cedf033b64.json",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
@@ -23862,11 +24680,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=994s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -23961,11 +24780,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=1301s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24060,11 +24880,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=1727s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24159,11 +24980,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2141s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24258,11 +25080,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2291s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24357,11 +25180,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2735s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24456,11 +25280,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=3122s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24555,11 +25380,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=3832s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24654,11 +25480,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=4060s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24803,11 +25630,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=4930s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24902,11 +25730,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=5432s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25041,11 +25870,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=5963s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25140,11 +25970,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=6473s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25239,11 +26070,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=6745s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25338,11 +26170,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7070s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25437,11 +26270,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7556s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25536,11 +26370,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7813s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25635,11 +26470,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8135s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25734,11 +26570,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8529s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25833,11 +26670,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8821s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25932,11 +26770,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9118s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26031,11 +26870,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9578s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26130,11 +26970,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9949s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26229,11 +27070,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=10378s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
+      "sourceOrigin": "latest;review:jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -28738,126 +29580,6 @@
       "repairReasons": []
     },
     {
-      "title": "6月が終わる&雨模様という事で雨の歌",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 74,
-      "time": "0:01:14",
-      "raw": "1:14 6月が終わる&雨模様という事で雨の歌",
-      "rawHash": "5190786c4ba5ce5e8da6d618331f13c6393ad85e45c8bf19ab5480b4dfc4c000",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=74s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=5190786c4ba5ce5e8da6d618331f13c6393ad85e45c8bf19ab5480b4dfc4c000",
-      "repairedTitle": "6月が終わる&雨模様という事で雨の歌",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "雨の曲が少なかったので 新しくがんばって曲を覚えたソフィ",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 430,
-      "time": "0:07:10",
-      "raw": "7:10 雨の曲が少なかったので 新しくがんばって曲を覚えたソフィ:_genius:",
-      "rawHash": "b2724e7620cbab6ccc2d7db293da603313eb0a1bbd0d937341b429d44d6ed882",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=430s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=b2724e7620cbab6ccc2d7db293da603313eb0a1bbd0d937341b429d44d6ed882",
-      "repairedTitle": "雨の曲が少なかったので 新しくがんばって曲を覚えたソフィ",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "歌詞の電話BOX等がエモく感じる曲",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 749,
-      "time": "0:12:29",
-      "raw": "12:29 歌詞の電話BOX等がエモく感じる曲",
-      "rawHash": "b3ee1d220c94a019d01808f0ebc7ee50f8959728996b1a8fd052d9fa1f448b74",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=749s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=b3ee1d220c94a019d01808f0ebc7ee50f8959728996b1a8fd052d9fa1f448b74",
-      "repairedTitle": "歌詞の電話BOX等がエモく感じる曲",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "次の曲は雨の曲ではないかも？",
       "artist": "未記載",
       "isNiche": true,
@@ -28948,366 +29670,6 @@
       "reviewId": "review:HUzK_6JiXI8:25554c0b70998ca0f6f0",
       "sourcePath": "data/review/sources/history-HUzK_6JiXI8-25554c0b70998ca0f6f0.json",
       "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3A25554c0b70998ca0f6f0&entry=4bcbfdd60cfe26758a6d369b05206b7a5f7645ffde67e6de0ca882526941327b"
-    },
-    {
-      "title": "早口過ぎて口が回らなくなっていく",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 2586,
-      "time": "0:43:06",
-      "raw": "43:06 早口過ぎて口が回らなくなっていく",
-      "rawHash": "87df7e4dc8d77ad8dfb52567d3aa9257c1684cebe5f5a07d998aab53c21e4330",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=2586s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=87df7e4dc8d77ad8dfb52567d3aa9257c1684cebe5f5a07d998aab53c21e4330",
-      "repairedTitle": "早口過ぎて口が回らなくなっていく",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "カラオケに一人で行く時に入れる曲の理由",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 2627,
-      "time": "0:43:47",
-      "raw": "43:47 カラオケに一人で行く時に入れる曲の理由",
-      "rawHash": "f4faf26ac42aefc68bca808f4858e7b19bb3b9413c47e27c40cd4b4b1859a7fd",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=2627s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=f4faf26ac42aefc68bca808f4858e7b19bb3b9413c47e27c40cd4b4b1859a7fd",
-      "repairedTitle": "カラオケに一人で行く時に入れる曲の理由",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "超かっこいいけど 本当に難しい曲で練習していた話と 『カワキヲアメク』との対比",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3142,
-      "time": "0:52:22",
-      "raw": "52:22 超かっこいいけど 本当に難しい曲で練習していた話と 『カワキヲアメク』との対比",
-      "rawHash": "0694d9e0cca5c21cc90fd7052f4682aa1ed49b1c92734332ea07a9d39081b0de",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=3142s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=0694d9e0cca5c21cc90fd7052f4682aa1ed49b1c92734332ea07a9d39081b0de",
-      "repairedTitle": "超かっこいいけど 本当に難しい曲で練習していた話と 『カワキヲアメク』との対比",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "舞台袖に捌けるソフィ",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3207,
-      "time": "0:53:27",
-      "raw": "53:27 舞台袖に捌けるソフィ:_くさああ:",
-      "rawHash": "570e7c5f51e022258d2681c20fdcf03ca7ef1c62a1944ca56a077d1c282a95da",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=3207s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=570e7c5f51e022258d2681c20fdcf03ca7ef1c62a1944ca56a077d1c282a95da",
-      "repairedTitle": "舞台袖に捌けるソフィ",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "曲を準備するソフィ",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3242,
-      "time": "0:54:02",
-      "raw": "54:02 アンコール曲を準備するソフィ",
-      "rawHash": "35b11f527be5a9dccc039bd85220cedb4c44f6957e293216fa9457688200c6d0",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=3242s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=35b11f527be5a9dccc039bd85220cedb4c44f6957e293216fa9457688200c6d0",
-      "repairedTitle": "曲を準備するソフィ",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "ソフィの声が左耳からだけ聞こえる現象",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3671,
-      "time": "1:01:11",
-      "raw": "1:01:11 ソフィの声が左耳からだけ聞こえる現象",
-      "rawHash": "9f4d2769dc97cd066d7387136937a773a51567e92202b9406e04c2c418140c19",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=3671s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=9f4d2769dc97cd066d7387136937a773a51567e92202b9406e04c2c418140c19",
-      "repairedTitle": "ソフィの声が左耳からだけ聞こえる現象",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "今回の画面構成に合ってないとの事で ChatGPT君との相談の結果表示してなかった時計",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3724,
-      "time": "1:02:04",
-      "raw": "1:02:04 今回の画面構成に合ってないとの事で ChatGPT君との相談の結果表示してなかった時計",
-      "rawHash": "3a24b7e30556576cc31168d37ce5ef7fe47938f1fd5bc1122e62059e237cd9df",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=3724s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=3a24b7e30556576cc31168d37ce5ef7fe47938f1fd5bc1122e62059e237cd9df",
-      "repairedTitle": "今回の画面構成に合ってないとの事で ChatGPT君との相談の結果表示してなかった時計",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "ソフィが今回覚えた2曲のエピソード",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4148,
-      "time": "1:09:08",
-      "raw": "1:09:08 ソフィが今回覚えた2曲のエピソード",
-      "rawHash": "d20157583bf8a83703ebd57782e1ebef8d770be7c4e859a94dc53c6db0a11e1b",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=4148s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=d20157583bf8a83703ebd57782e1ebef8d770be7c4e859a94dc53c6db0a11e1b",
-      "repairedTitle": "ソフィが今回覚えた2曲のエピソード",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "肺活量を鍛えようと思ったパート",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4263,
-      "time": "1:11:03",
-      "raw": "1:11:03 肺活量を鍛えようと思ったパート",
-      "rawHash": "7d7353ee7f05029fb36e98ada236efd9703861de8599492c7c8b0ba760c9fbdd",
-      "videoId": "HUzK_6JiXI8",
-      "videoTitle": "【雨の歌枠☔】Rainy day Karaoke Stream🐰✨【ソフィア・ヴァレンタイン/にじさんじ】",
-      "channelName": "ソフィア・ヴァレンタイン / Sophia Valentine【にじさんじ】",
-      "channelId": "UCivwPlOp0ojnMPZj5pNOPPA",
-      "channelHandle": "/@Sophia_Valentine",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HUzK_6JiXI8&t=4263s",
-      "sourceId": "legacy:HUzK_6JiXI8",
-      "sourceHash": "25554c0b70998ca0f6f0930f9724c6bdb4bb7b7fa9bb7f41ad5a80db0c6f914a",
-      "sourceOrigin": "latest;review:HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HUzK_6JiXI8:dff4f64b04f6be28a2a3",
-      "sourcePath": "data/review/sources/HUzK_6JiXI8-dff4f64b04f6be28a2a3.json",
-      "reviewUrl": "review.html?review=review%3AHUzK_6JiXI8%3Adff4f64b04f6be28a2a3&entry=7d7353ee7f05029fb36e98ada236efd9703861de8599492c7c8b0ba760c9fbdd",
-      "repairedTitle": "肺活量を鍛えようと思ったパート",
-      "repairedArtist": "未記載",
-      "repairReasons": []
     },
     {
       "title": "生温かくなってしまった セブンイレブン「塩レモンわらび ぷるぷる食感」",
@@ -33227,7 +33589,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33329,7 +33691,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33431,7 +33793,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33533,7 +33895,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33635,7 +33997,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33737,7 +34099,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33839,7 +34201,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33941,7 +34303,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34043,7 +34405,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34145,7 +34507,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34247,7 +34609,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34349,7 +34711,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34451,7 +34813,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34553,7 +34915,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34655,7 +35017,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34757,7 +35119,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34859,7 +35221,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34961,7 +35323,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35063,7 +35425,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35165,7 +35527,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35267,7 +35629,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35369,7 +35731,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35471,7 +35833,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35573,7 +35935,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35675,7 +36037,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35777,7 +36139,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35879,7 +36241,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35981,7 +36343,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36083,7 +36445,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36185,7 +36547,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36287,7 +36649,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36389,7 +36751,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36491,7 +36853,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36593,7 +36955,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36695,7 +37057,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36797,7 +37159,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36899,7 +37261,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37001,7 +37363,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37103,7 +37465,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37205,7 +37567,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37307,7 +37669,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37409,7 +37771,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37511,7 +37873,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37613,7 +37975,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37715,7 +38077,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37817,7 +38179,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37919,7 +38281,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38021,7 +38383,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38123,7 +38485,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38225,7 +38587,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38327,7 +38689,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38429,7 +38791,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38531,7 +38893,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38633,7 +38995,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38735,7 +39097,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38837,7 +39199,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38939,7 +39301,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39041,7 +39403,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39143,7 +39505,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39245,7 +39607,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39347,7 +39709,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39449,7 +39811,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39551,7 +39913,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39653,7 +40015,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39755,7 +40117,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39857,7 +40219,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39959,7 +40321,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40061,7 +40423,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40163,7 +40525,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40265,7 +40627,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40367,7 +40729,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40469,7 +40831,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40571,7 +40933,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40673,7 +41035,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40775,7 +41137,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40877,7 +41239,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40979,7 +41341,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41081,7 +41443,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41183,7 +41545,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41285,7 +41647,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41387,7 +41749,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41489,7 +41851,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41591,7 +41953,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41693,7 +42055,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41795,7 +42157,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41897,7 +42259,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41999,7 +42361,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -42101,7 +42463,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -42178,6 +42540,45 @@
       "reviewId": "review:bUb_oMOzuf4:8a02dadd27cb15ad7400",
       "sourcePath": "data/review/sources/history-bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "reviewUrl": "review.html?review=review%3AbUb_oMOzuf4%3A8a02dadd27cb15ad7400&entry=bcdfd1e724ac00f2a677d5ae6019eeb866fd4c73d367f267c481b61e8333bfeb"
+    },
+    {
+      "title": "次の方紹介:尾前くうさん",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1354,
+      "time": "0:22:34",
+      "raw": "22:34 　💬次の方紹介:尾前くうさん",
+      "rawHash": "3439e2e0781a4971e8fceb8f6ad90f29fb00675e7bdb3fb036e2cd2d89a643f6",
+      "videoId": "o5mN9pPqYoY",
+      "videoTitle": "【#招き猫歌枠リレー】夏のパワーで、福招き！🌺【#メーレv #歌枠 #Vtuber #KARAOKE】",
+      "channelName": "メーレ-mele-",
+      "channelId": "UCQv2tAM3HMA7rwkLmDHIJYA",
+      "channelHandle": "/@meleVch",
+      "youtubeUrl": "https://www.youtube.com/watch?v=o5mN9pPqYoY",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=o5mN9pPqYoY&t=1354s",
+      "sourceId": "UgxCFraXD1FCxfaEyTh4AaABAg",
+      "sourceHash": "d558a3da4c45b136ddc2a299a5bab5342e2ac6c9c3631de63d1ef5a538fb2859",
+      "sourceOrigin": "latest;review:o5mN9pPqYoY-d558a3da4c45b136ddc2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:o5mN9pPqYoY:d558a3da4c45b136ddc2",
+      "sourcePath": "data/review/sources/o5mN9pPqYoY-d558a3da4c45b136ddc2.json",
+      "reviewUrl": "review.html?review=review%3Ao5mN9pPqYoY%3Ad558a3da4c45b136ddc2&entry=3439e2e0781a4971e8fceb8f6ad90f29fb00675e7bdb3fb036e2cd2d89a643f6",
+      "repairedTitle": "次の方紹介:尾前くうさん",
+      "repairedArtist": "未記載",
+      "repairReasons": []
     },
     {
       "title": "曲終わり",
@@ -45569,6 +45970,120 @@
       "repairReasons": []
     },
     {
+      "title": "起動 -START",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 190,
+      "time": "0:03:10",
+      "raw": "0:03:10　『起動 -START-』",
+      "rawHash": "12df80d19617f99f4089fdce6ef6a30aa78f3952b7288225e3f51a9ec1e8bea1",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "UCi-RFlRj6gIpSoJAEp5_MnQ",
+      "channelHandle": "/channel/UCi-RFlRj6gIpSoJAEp5_MnQ",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=190s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=12df80d19617f99f4089fdce6ef6a30aa78f3952b7288225e3f51a9ec1e8bea1",
+      "repairedTitle": "起動 -START",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "AERU-LIVE セトリの振り返り",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2246,
+      "time": "0:37:26",
+      "raw": "0:37:26　AERU-LIVE セトリの振り返り",
+      "rawHash": "14fbcb13c1941a761bc3b0b2eae358b5191e221f222776473fbc20e51ac13787",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "UCi-RFlRj6gIpSoJAEp5_MnQ",
+      "channelHandle": "/channel/UCi-RFlRj6gIpSoJAEp5_MnQ",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=2246s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=14fbcb13c1941a761bc3b0b2eae358b5191e221f222776473fbc20e51ac13787",
+      "repairedTitle": "AERU-LIVE セトリの振り返り",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ロムがみんなのために改めて思うこと",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 5660,
+      "time": "1:34:20",
+      "raw": "1:34:20　ロムがみんなのために改めて思うこと",
+      "rawHash": "286422fe3a65322b90ad189e41620e63cddf1dda0b43b534912c0b7ae915876a",
+      "videoId": "bKXiQO9kkeA",
+      "videoTitle": "【 #歌枠 / 弾き語り 】7/12 [ sun ] アエルライブ vol.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】#romlive",
+      "channelName": "ロマニードットアイオー / ROMANY. io",
+      "channelId": "UCi-RFlRj6gIpSoJAEp5_MnQ",
+      "channelHandle": "/channel/UCi-RFlRj6gIpSoJAEp5_MnQ",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bKXiQO9kkeA&t=5660s",
+      "sourceId": "UgwsGBTGYnuUo4mbf094AaABAg",
+      "sourceHash": "8c4da34922c46dc95f572643cf823ec19e0eb131aab1b5563a63be25a1355875",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bKXiQO9kkeA:8c4da34922c46dc95f57",
+      "sourcePath": "data/review/sources/bKXiQO9kkeA-8c4da34922c46dc95f57.json",
+      "reviewUrl": "review.html?review=review%3AbKXiQO9kkeA%3A8c4da34922c46dc95f57&entry=286422fe3a65322b90ad189e41620e63cddf1dda0b43b534912c0b7ae915876a",
+      "repairedTitle": "ロムがみんなのために改めて思うこと",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "揺れてる…？",
       "artist": "未記載",
       "isNiche": true,
@@ -46976,7 +47491,7 @@
         "1m",
         "review",
         "snapshot:20260712T190000Z",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -75824,12 +76339,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Nera7o9MuwM&t=9873s",
       "sourceId": "legacy:Nera7o9MuwM",
       "sourceHash": "bf3fb76c83f3cf26050b3c95e677c4cc51f29dd288ca1c6ff5d38bb5cb6ce7d6",
-      "sourceOrigin": "latest;review:Nera7o9MuwM-64e5a9961af6d9952040.json;review:history-Nera7o9MuwM-9baf1e54c7ad50afec2a.json",
+      "sourceOrigin": "latest;review:Nera7o9MuwM-64e5a9961af6d9952040.json;review:history-Nera7o9MuwM-64e5a9961af6d9952040.json;review:history-Nera7o9MuwM-9baf1e54c7ad50afec2a.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "1m",
         "review",
+        "snapshot:20260712T230000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -82373,7 +82889,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -82469,7 +82985,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T220000Z"
+        "snapshot:20260712T230000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
