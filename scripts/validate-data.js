@@ -6,10 +6,24 @@ const DATA_DIR = path.join(ROOT, "data");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const INDEX_PATH = path.join(DATA_DIR, "snapshots", "index.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
+const UI_META_PATH = path.join(DATA_DIR, "ui", "meta.json");
 const DIFF_PATHS = {
   "72h": path.join(DATA_DIR, "diff", "latest-72h.json"),
   "1m": path.join(DATA_DIR, "diff", "latest-1m.json"),
 };
+const RUNTIME_VIDEO_FIELDS = new Set([
+  "videoId",
+  "title",
+  "channelName",
+  "channelId",
+  "channelHandle",
+  "channelUrl",
+  "keyword",
+  "publishedText",
+  "thumbnailUrl",
+  "songs",
+]);
+const RUNTIME_SONG_FIELDS = new Set(["seconds", "title", "artist", "isNiche"]);
 const MONTH_SEARCH_URLS = new Set([
   "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D",
   "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D",
@@ -56,6 +70,8 @@ for (const entry of index.snapshots || []) {
 for (const [groupId, diffPath] of Object.entries(DIFF_PATHS)) {
   validateDiffFile(groupId, diffPath);
 }
+
+validateRuntimeUiFiles();
 
 if (fs.existsSync(SONG_SEARCH_INDEX_PATH)) {
   const songSearchIndex = readJson(SONG_SEARCH_INDEX_PATH);
@@ -120,22 +136,97 @@ function validateDiffRankEntry(label, entry) {
     return;
   }
   if (typeof entry.entityKey !== "string" || !entry.entityKey) errors.push(`${label}.entityKey must be non-empty string`);
-  if (entry.label !== undefined && typeof entry.label !== "string") errors.push(`${label}.label must be string`);
-  if (!isNullablePositiveInteger(entry.previousRank)) errors.push(`${label}.previousRank must be positive integer or null`);
-  if (!isPositiveInteger(entry.currentRank)) errors.push(`${label}.currentRank must be positive integer`);
+  for (const removedField of ["label", "previousRank", "currentRank", "previousCount", "currentCount"]) {
+    if (removedField in entry) errors.push(`${label}.${removedField} must not be present in compact diff`);
+  }
   if (!isNullableInteger(entry.rankDelta)) errors.push(`${label}.rankDelta must be integer or null`);
-  if (!isNonNegativeInteger(entry.previousCount)) errors.push(`${label}.previousCount must be non-negative integer`);
-  if (!isNonNegativeInteger(entry.currentCount)) errors.push(`${label}.currentCount must be non-negative integer`);
   if (!Number.isInteger(entry.countDelta)) errors.push(`${label}.countDelta must be integer`);
   if (typeof entry.isNew !== "boolean") errors.push(`${label}.isNew must be boolean`);
-  if (Number.isInteger(entry.currentCount) && Number.isInteger(entry.previousCount) && entry.countDelta !== entry.currentCount - entry.previousCount) {
-    errors.push(`${label}.countDelta must equal currentCount - previousCount`);
+  if (entry.rankDelta === 0 && entry.countDelta === 0 && entry.isNew === false) {
+    errors.push(`${label} must omit unchanged compact diff entries`);
   }
-  if (entry.previousRank === null && entry.rankDelta !== null) errors.push(`${label}.rankDelta must be null when previousRank is null`);
-  if (Number.isInteger(entry.previousRank) && Number.isInteger(entry.currentRank) && entry.rankDelta !== entry.previousRank - entry.currentRank) {
-    errors.push(`${label}.rankDelta must equal previousRank - currentRank`);
+}
+
+function validateRuntimeUiFiles() {
+  if (!fs.existsSync(UI_META_PATH)) {
+    errors.push("missing runtime UI meta: data/ui/meta.json");
+    return;
   }
-  if (entry.isNew !== (entry.previousRank === null)) errors.push(`${label}.isNew must match previousRank null state`);
+  const meta = readJson(UI_META_PATH);
+  if (meta.schemaVersion !== 1) errors.push("ui.meta.schemaVersion must be 1");
+  if (typeof meta.generatedAt !== "string") errors.push("ui.meta.generatedAt must be string");
+  if (typeof meta.capturedAt !== "string") errors.push("ui.meta.capturedAt must be string");
+  if (meta.status !== null && (typeof meta.status !== "object" || Array.isArray(meta.status))) {
+    errors.push("ui.meta.status must be object or null");
+  }
+  if (!Number.isInteger(meta.filterVersion)) errors.push("ui.meta.filterVersion must be integer");
+  if (typeof meta.nicheAnnotated !== "boolean") errors.push("ui.meta.nicheAnnotated must be boolean");
+
+  for (const groupId of ["72h", "1m"]) {
+    const rangeMeta = meta.ranges?.[groupId];
+    if (!rangeMeta) {
+      errors.push(`ui.meta.ranges.${groupId} missing`);
+      continue;
+    }
+    const expectedPath = `data/ui/${groupId}.json`;
+    if (rangeMeta.path !== expectedPath) errors.push(`ui.meta.ranges.${groupId}.path must be ${expectedPath}`);
+    if (!Number.isInteger(rangeMeta.itemCount) || rangeMeta.itemCount < 0) {
+      errors.push(`ui.meta.ranges.${groupId}.itemCount must be non-negative integer`);
+    }
+    if (meta.diffs?.[groupId]?.path !== `data/diff/latest-${groupId}.json`) {
+      errors.push(`ui.meta.diffs.${groupId}.path invalid`);
+    }
+    validateRuntimeRangeFile(groupId, rangeMeta);
+  }
+}
+
+function validateRuntimeRangeFile(groupId, rangeMeta) {
+  const relativePath = rangeMeta?.path || `data/ui/${groupId}.json`;
+  const filePath = path.join(ROOT, relativePath);
+  if (!fs.existsSync(filePath)) {
+    errors.push(`missing runtime UI range: ${relativePath}`);
+    return;
+  }
+  const range = readJson(filePath);
+  if (range.schemaVersion !== 1) errors.push(`ui.${groupId}.schemaVersion must be 1`);
+  if (range.id !== groupId) errors.push(`ui.${groupId}.id must be ${groupId}`);
+  if (typeof range.generatedAt !== "string") errors.push(`ui.${groupId}.generatedAt must be string`);
+  if (typeof range.capturedAt !== "string") errors.push(`ui.${groupId}.capturedAt must be string`);
+  if (!Number.isInteger(range.filterVersion)) errors.push(`ui.${groupId}.filterVersion must be integer`);
+  if (typeof range.nicheAnnotated !== "boolean") errors.push(`ui.${groupId}.nicheAnnotated must be boolean`);
+  if (!Array.isArray(range.items)) {
+    errors.push(`ui.${groupId}.items must be array`);
+    return;
+  }
+  if (Number.isInteger(rangeMeta?.itemCount) && range.items.length !== rangeMeta.itemCount) {
+    errors.push(`ui.${groupId}.items length must match meta itemCount`);
+  }
+  for (const [videoIndex, item] of range.items.entries()) {
+    validateAllowedFields(`ui.${groupId}.items[${videoIndex}]`, item, RUNTIME_VIDEO_FIELDS);
+    if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`ui.${groupId}[${videoIndex}].videoId invalid`);
+    if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`ui.${groupId}[${videoIndex}].songs empty`);
+    for (const [songIndex, song] of (item.songs || []).entries()) {
+      validateAllowedFields(`ui.${groupId}.items[${videoIndex}].songs[${songIndex}]`, song, RUNTIME_SONG_FIELDS);
+      if (!Number.isInteger(song.seconds) || song.seconds < 0) {
+        errors.push(`ui.${groupId}[${videoIndex}].songs[${songIndex}].seconds invalid`);
+      }
+      if (!song.title) errors.push(`ui.${groupId}[${videoIndex}].songs[${songIndex}].title missing`);
+      if (typeof song.isNiche !== "boolean") errors.push(`ui.${groupId}[${videoIndex}].songs[${songIndex}].isNiche must be boolean`);
+      for (const removedField of ["index", "time", "raw"]) {
+        if (removedField in song) errors.push(`ui.${groupId}[${videoIndex}].songs[${songIndex}].${removedField} must not be present`);
+      }
+    }
+  }
+}
+
+function validateAllowedFields(label, value, allowedFields) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    errors.push(`${label} must be object`);
+    return;
+  }
+  for (const field of Object.keys(value)) {
+    if (!allowedFields.has(field)) errors.push(`${label}.${field} is not allowed in runtime UI data`);
+  }
 }
 
 function isPositiveInteger(value) {

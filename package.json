@@ -4,11 +4,15 @@
   "private": true,
   "description": "Hourly YouTube timestamp song-list snapshots for 72H and one-month views.",
   "scripts": {
-    "update": "node scripts/update-songlist.js && node scripts/apply-song-search-niche.js",
+    "update": "node scripts/update-songlist.js && node scripts/apply-song-search-niche.js && node scripts/build-runtime-data.js",
+    "build:runtime": "node scripts/build-runtime-data.js",
+    "version:assets": "node scripts/update-asset-version.js",
+    "compare:runtime-ranks": "node scripts/compare-runtime-ranks.js",
     "refresh:song-search": "node scripts/refresh-song-search-index.js",
     "mark:failure": "node scripts/mark-failure.js",
     "validate": "node scripts/validate-data.js",
-    "check": "node scripts/check-js-syntax.js && npm test && npm run validate",
+    "check:budget": "node scripts/check-runtime-budgets.js",
+    "check": "node scripts/check-js-syntax.js && npm test && npm run validate && npm run check:budget",
     "serve": "python -m http.server 8080",
     "test": "node --test"
   },

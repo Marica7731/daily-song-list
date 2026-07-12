@@ -606,6 +606,32 @@
       : `${minutes}:${String(seconds).padStart(2, "0")}`;
   }
 
+  function runtimeRangePath(rangeId, meta) {
+    return meta?.ranges?.[rangeId]?.path || `data/ui/${rangeId}.json`;
+  }
+
+  function createTrendLookup(diff) {
+    return {
+      songRank: trendMapFromEntries(diff?.songRank),
+      artistRank: trendMapFromEntries(diff?.artistRank),
+    };
+  }
+
+  function trendMapFromEntries(entries) {
+    return new Map((entries || []).map((entry) => [entry.entityKey, entry]));
+  }
+
+  function shouldPrefetchRuntimeRange(options = {}) {
+    if (options.visibilityState === "hidden") return false;
+    const connection = options.connection || {};
+    if (connection.saveData) return false;
+    return !["2g", "slow-2g"].includes(connection.effectiveType || "");
+  }
+
+  function shouldSkipSourceFilter(payload, currentFilterVersion) {
+    return Number(payload?.filterVersion) >= Number(currentFilterVersion);
+  }
+
   function cleanText(value) {
     return String(value ?? "").replace(/\s+/g, " ").trim();
   }
@@ -617,10 +643,12 @@
     buildSourcePreview,
     createSnapshotLoader,
     createSongSearchLookup,
+    createTrendLookup,
     filterItemsBySearch,
     filterItemsByNiche,
     filterOccurrencesBySearch,
     filterOccurrencesByNiche,
+    formatSeconds,
     hasNicheAnnotations,
     isNicheSong,
     isSongSearchKnown,
@@ -631,7 +659,10 @@
     paginateItems,
     parseUrlState,
     rankToggleModel,
+    runtimeRangePath,
     serializeUrlState,
+    shouldPrefetchRuntimeRange,
+    shouldSkipSourceFilter,
     visiblePageTokens,
     youtubeChannelLink,
     youtubeTimeUrl,

@@ -47,8 +47,9 @@ update step.
 
 ## Frontend Behavior
 
-- `assets/app.js` reads `data/song-search-known-songs.json` beside
-  `data/latest.json`.
+- `assets/app.js` reads compact latest runtime data from `data/ui/meta.json`
+  and `data/ui/<range>.json`. It reads `data/song-search-known-songs.json`
+  only for older snapshots or payloads that do not already contain `isNiche`.
 - `assets/source-filter.js` is loaded before the app and removes known blocked
   Taiwan/HK VTuber channels from the in-memory payload. The same rule list is
   reused by `scripts/update-songlist.js` so future snapshots are filtered before

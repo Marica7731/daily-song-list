@@ -8,10 +8,12 @@ const {
   buildSourcePreview,
   createSnapshotLoader,
   createSongSearchLookup,
+  createTrendLookup,
   filterItemsBySearch,
   filterItemsByNiche,
   filterOccurrencesBySearch,
   filterOccurrencesByNiche,
+  formatSeconds,
   isSongSearchKnown,
   indexBucketButtonModel,
   normalizeSearch,
@@ -19,7 +21,10 @@ const {
   paginateItems,
   parseUrlState,
   rankToggleModel,
+  runtimeRangePath,
   serializeUrlState,
+  shouldPrefetchRuntimeRange,
+  shouldSkipSourceFilter,
   visiblePageTokens,
   youtubeChannelLink,
 } = require("../assets/frontend-utils");
@@ -282,6 +287,20 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
   assert.deepEqual(parseUrlState(serialized, options), parsed);
 });
 
+test("runtime range path follows URL range and meta paths", () => {
+  const parsed = parseUrlState("?range=1m", urlStateOptions());
+  assert.equal(parsed.range, "1m");
+  assert.equal(
+    runtimeRangePath(parsed.range, {
+      ranges: {
+        "1m": { path: "data/ui/1m.json" },
+      },
+    }),
+    "data/ui/1m.json",
+  );
+  assert.equal(runtimeRangePath("72h", null), "data/ui/72h.json");
+});
+
 test("url state keeps rank metric and video layout only when relevant", () => {
   const options = urlStateOptions();
   const metricState = {
@@ -399,6 +418,37 @@ test("song index bucket model uses all records and falls back when the current b
 
   assert.equal(afterBucketDisappears.currentBucket, "全部");
   assert.equal(afterBucketDisappears.records.length, 51);
+});
+
+test("runtime prefetch is disabled for saveData, 2g, slow-2g, and hidden pages", () => {
+  assert.equal(shouldPrefetchRuntimeRange({ connection: {}, visibilityState: "visible" }), true);
+  assert.equal(shouldPrefetchRuntimeRange({ connection: { saveData: true }, visibilityState: "visible" }), false);
+  assert.equal(shouldPrefetchRuntimeRange({ connection: { effectiveType: "2g" }, visibilityState: "visible" }), false);
+  assert.equal(shouldPrefetchRuntimeRange({ connection: { effectiveType: "slow-2g" }, visibilityState: "visible" }), false);
+  assert.equal(shouldPrefetchRuntimeRange({ connection: {}, visibilityState: "hidden" }), false);
+});
+
+test("trend lookup converts arrays into Map lookups", () => {
+  const lookup = createTrendLookup({
+    songRank: [{ entityKey: "song-a", rankDelta: 1, countDelta: 2, isNew: false }],
+    artistRank: [{ entityKey: "artist-a", rankDelta: null, countDelta: 1, isNew: true }],
+  });
+
+  assert.equal(lookup.songRank.get("song-a").countDelta, 2);
+  assert.equal(lookup.artistRank.get("artist-a").isNew, true);
+  assert.equal(lookup.songRank.get("missing"), undefined);
+});
+
+test("current filterVersion skips latest SourceFilter while old snapshots do not", () => {
+  assert.equal(shouldSkipSourceFilter({ filterVersion: 3 }, 3), true);
+  assert.equal(shouldSkipSourceFilter({ filterVersion: 4 }, 3), true);
+  assert.equal(shouldSkipSourceFilter({ filterVersion: 2 }, 3), false);
+  assert.equal(shouldSkipSourceFilter({}, 3), false);
+});
+
+test("formatSeconds derives display time from seconds", () => {
+  assert.equal(formatSeconds(75), "1:15");
+  assert.equal(formatSeconds(3723), "1:02:03");
 });
 
 test("outside-library filters keep songs marked outside the known index", () => {

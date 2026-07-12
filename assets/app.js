@@ -11,6 +11,7 @@ const RANGE_LABELS = {
 };
 
 const SNAPSHOT_LATEST_PATH = "data/latest.json";
+const UI_META_PATH = "data/ui/meta.json";
 const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
@@ -21,6 +22,7 @@ const LIST_PAGE_SIZE_KEY = "dailySongList.pageSize";
 const LIST_PAGE_SIZE_OPTIONS = [50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
 const VIDEO_PAGE_SIZE = 24;
+const CURRENT_FILTER_VERSION = 3;
 const RANK_METRICS = {
   occurrences: "收录次数",
   videos: "不同视频数",
@@ -210,9 +212,17 @@ const state = {
   snapshotLoader: null,
   snapshotApplyOptions: null,
   preparedPayloadCache: new Map(),
+  runtimeMeta: null,
+  runtimeRangePayloads: new Map(),
+  runtimeRangeLoads: new Map(),
+  rangeCache: new Map(),
+  latestRangeLoadError: null,
   songSearchIndexPromise: null,
   songSearchLookup: window.FrontendUtils.createSongSearchLookup(null),
   rankDiffs: {},
+  rankDiffLoads: new Map(),
+  loadedResources: [],
+  firstContentMeasured: false,
   eventsBound: false,
 };
 
@@ -231,12 +241,70 @@ const els = {
   viewTabs: Array.from(document.querySelectorAll("[data-view]")),
 };
 
+window.printSongListPerformance = function printSongListPerformance() {
+  const measures = performanceAvailable()
+    ? performance.getEntriesByType("measure")
+        .filter((entry) => entry.name.startsWith("song-list:"))
+        .map((entry) => ({
+          stage: entry.name.replace(/^song-list:/, ""),
+          durationMs: Math.round(entry.duration * 10) / 10,
+        }))
+    : [];
+  const resources = state.loadedResources.map((entry) => ({ ...entry }));
+  if (typeof console?.table === "function") {
+    console.table(measures);
+    console.table(resources);
+  }
+  return { measures, resources };
+};
+
 init().catch((error) => {
   setSnapshotBusy(false);
   renderLoadError(error);
 });
 
+function performanceAvailable() {
+  return typeof performance !== "undefined" && typeof performance.mark === "function" && typeof performance.measure === "function";
+}
+
+function perfMark(name) {
+  if (!performanceAvailable()) return "";
+  const markName = `song-list:${name}:${performance.now()}`;
+  performance.mark(markName);
+  return markName;
+}
+
+function perfMeasure(name, startMark, endMark = "") {
+  if (!performanceAvailable() || !startMark) return;
+  const finalEndMark = endMark || `song-list:${name}:end:${performance.now()}`;
+  if (!endMark) performance.mark(finalEndMark);
+  try {
+    performance.measure(`song-list:${name}`, startMark, finalEndMark);
+  } catch {
+    // Performance marks are diagnostic only.
+  }
+}
+
+async function measureAsync(name, callback) {
+  const start = perfMark(`${name}:start`);
+  try {
+    return await callback();
+  } finally {
+    perfMeasure(name, start);
+  }
+}
+
+function measureSync(name, callback) {
+  const start = perfMark(`${name}:start`);
+  try {
+    return callback();
+  } finally {
+    perfMeasure(name, start);
+  }
+}
+
 async function init() {
+  const initMark = perfMark("app-init:start");
   setupSnapshotLoader();
   setupControlsObserver();
   applyInitialUrlState();
@@ -244,38 +312,45 @@ async function init() {
   syncControlsFromState();
   setupBackToTopButton();
   setSnapshotBusy(true, "正在载入数据");
-  const [latest, snapshotIndex, status, rankDiffs] = await Promise.all([
-    readJson(SNAPSHOT_LATEST_PATH),
+  renderInitialSkeleton();
+  await yieldToBrowser();
+  const initialRange = state.range;
+  const [meta, snapshotIndex, rangePayload] = await Promise.all([
+    measureAsync("fetch-meta", () => readJson(UI_META_PATH, { cache: "no-cache" })),
     readJson("data/snapshots/index.json").catch(() => ({ snapshots: [] })),
-    readJson("data/status.json").catch(() => null),
-    loadRankDiffs(),
+    measureAsync("fetch-active-range", () => loadRuntimeRange(initialRange)),
   ]);
-  state.rankDiffs = rankDiffs;
-  state.status = status || latest.status || null;
+  state.runtimeMeta = meta;
+  state.status = meta.status || null;
   state.snapshots = Array.isArray(snapshotIndex.snapshots) ? snapshotIndex.snapshots : [];
   renderSnapshotOptions();
   applyInitialUrlState();
   syncControlsFromState();
   const requestedSnapshotPath = state.currentSnapshotPath;
-  await applySnapshotPayload(latest, SNAPSHOT_LATEST_PATH, { resetPage: false, syncUrl: false });
+  if (state.range !== initialRange) {
+    await loadRuntimeRange(state.range);
+  }
+  await applyRuntimeRangePayload(state.runtimeRangePayloads.get(state.range) || rangePayload, {
+    resetPage: false,
+    syncUrl: false,
+  });
   if (requestedSnapshotPath !== SNAPSHOT_LATEST_PATH) {
     await loadSnapshotPath(requestedSnapshotPath, SNAPSHOT_LATEST_PATH);
   } else {
     syncUrlState();
+    scheduleCurrentRankDiffLoad();
+    scheduleOtherRangePrefetch();
   }
+  perfMeasure("app-init", initMark);
 }
 
 function bindEvents() {
   if (state.eventsBound) return;
   state.eventsBound = true;
   for (const tab of els.rangeTabs) {
-    tab.addEventListener("click", () => {
+    tab.addEventListener("click", async () => {
       if (state.range === tab.dataset.range) return;
-      state.range = tab.dataset.range;
-      state.expandedRows.clear();
-      resetPagination();
-      setActiveTab(els.rangeTabs, tab);
-      renderOrSyncUrl({ urlMode: "push" });
+      await switchRange(tab.dataset.range, { urlMode: "push" });
     });
   }
 
@@ -539,8 +614,23 @@ async function restoreStateFromUrl() {
   syncControlsFromState();
   state.expandedRows.clear();
   if (state.currentSnapshotPath !== previousPath) {
+    if (state.currentSnapshotPath === SNAPSHOT_LATEST_PATH) {
+      const rangePayload = await loadRuntimeRange(state.range);
+      await applyRuntimeRangePayload(rangePayload, { resetPage: false, syncUrl: false });
+      scheduleCurrentRankDiffLoad();
+      scheduleOtherRangePrefetch();
+      return;
+    }
     await loadSnapshotPath(state.currentSnapshotPath, previousPath, { syncUrl: false });
     return;
+  }
+  if (isLatestSnapshot()) {
+    try {
+      await ensureLatestRange(state.range);
+    } catch (error) {
+      showToast(`范围读取失败：${error.message}`);
+      return;
+    }
   }
   render({ syncUrl: false });
 }
@@ -630,10 +720,112 @@ async function loadSnapshotPath(path, previousPath = state.currentSnapshotPath, 
   return state.snapshotLoader.loadSnapshot({ path, previousPath });
 }
 
+async function switchRange(nextRange, options = {}) {
+  if (!nextRange || state.range === nextRange) return;
+  const previousRange = state.range;
+  state.range = nextRange;
+  state.expandedRows.clear();
+  resetPagination();
+  setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === nextRange) || els.rangeTabs[0]);
+  if (!isLatestSnapshot()) {
+    renderOrSyncUrl(options);
+    return;
+  }
+
+  try {
+    await ensureLatestRange(nextRange);
+    renderOrSyncUrl(options);
+    scheduleCurrentRankDiffLoad();
+  } catch (error) {
+    state.range = previousRange;
+    setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === previousRange) || els.rangeTabs[0]);
+    renderOrSyncUrl({ syncUrl: false });
+    showToast(`范围读取失败，已保留当前内容：${error.message}`);
+  }
+}
+
+async function ensureLatestRange(rangeId) {
+  if (state.payload?.groups?.[rangeId]) return state.payload.groups[rangeId];
+  const payload = await loadRuntimeRange(rangeId);
+  await applyRuntimeRangePayload(payload, { resetPage: false, syncUrl: false, merge: true });
+  return state.payload?.groups?.[rangeId];
+}
+
+async function loadRuntimeRange(rangeId) {
+  const existing = state.runtimeRangePayloads.get(rangeId);
+  if (existing) return existing;
+  if (state.runtimeRangeLoads.has(rangeId)) return state.runtimeRangeLoads.get(rangeId);
+  const path = runtimeRangePath(rangeId);
+  const promise = readJson(path, { cache: "default" })
+    .then((payload) => {
+      state.runtimeRangePayloads.set(rangeId, payload);
+      return payload;
+    })
+    .finally(() => {
+      state.runtimeRangeLoads.delete(rangeId);
+    });
+  state.runtimeRangeLoads.set(rangeId, promise);
+  return promise;
+}
+
+function runtimeRangePath(rangeId) {
+  return window.FrontendUtils.runtimeRangePath(rangeId, state.runtimeMeta);
+}
+
+async function applyRuntimeRangePayload(rangePayload, options = {}) {
+  const payload = latestPayloadFromRuntimeRange(rangePayload, state.runtimeMeta);
+  const prepared = await measureAsync("prepare-payload", () => preparePayload(payload));
+  const rangeId = rangePayload.id;
+  if (!options.merge) state.rangeCache.clear();
+  await prewarmRangeCache(prepared.groups?.[rangeId], SNAPSHOT_LATEST_PATH, rangeId);
+  await yieldToBrowser();
+  if (options.merge && state.payload?.groups) {
+    const merged = {
+      ...state.payload,
+      ...prepared,
+      groups: {
+        ...state.payload.groups,
+        ...prepared.groups,
+      },
+    };
+    applyPreparedSnapshotPayload(merged, SNAPSHOT_LATEST_PATH, { ...options, preserveRangeCache: true });
+    return;
+  }
+  applyPreparedSnapshotPayload(prepared, SNAPSHOT_LATEST_PATH, { ...options, preserveRangeCache: true });
+  if (rangeId && prepared.groups?.[rangeId]) {
+    state.runtimeRangePayloads.set(rangeId, rangePayload);
+  }
+}
+
+function latestPayloadFromRuntimeRange(rangePayload, meta) {
+  const rangeId = rangePayload?.id || state.range;
+  const group = {
+    id: rangeId,
+    title: rangePayload?.title || RANGE_LABELS[rangeId] || rangeId,
+    generatedAt: rangePayload?.generatedAt || meta?.generatedAt || "",
+    updatedAt: rangePayload?.generatedAt || meta?.generatedAt || "",
+    items: Array.isArray(rangePayload?.items) ? rangePayload.items : [],
+  };
+  return {
+    schemaVersion: rangePayload?.schemaVersion || meta?.schemaVersion || 1,
+    generatedAt: meta?.generatedAt || rangePayload?.generatedAt || "",
+    capturedAt: meta?.capturedAt || rangePayload?.capturedAt || rangePayload?.generatedAt || "",
+    status: meta?.status || null,
+    filterVersion: rangePayload?.filterVersion ?? meta?.filterVersion ?? 0,
+    nicheAnnotated: rangePayload?.nicheAnnotated === true || meta?.nicheAnnotated === true,
+    groups: {
+      [rangeId]: group,
+    },
+  };
+}
+
 async function applySnapshotPayload(payload, path, options = {}) {
-  const prepared = await preparePayload(payload);
+  const prepared = await measureAsync("prepare-payload", () => preparePayload(payload));
+  state.rangeCache.clear();
+  await prewarmRangeCache(prepared.groups?.[state.range], path, state.range);
+  await yieldToBrowser();
   cachePreparedPayload(path, prepared);
-  applyPreparedSnapshotPayload(prepared, path, options);
+  applyPreparedSnapshotPayload(prepared, path, { ...options, preserveRangeCache: true });
 }
 
 function applyPreparedSnapshotPayload(payload, path, options = {}) {
@@ -641,6 +833,7 @@ function applyPreparedSnapshotPayload(payload, path, options = {}) {
   state.status = payload.status || state.status;
   state.currentSnapshotPath = path;
   state.expandedRows.clear();
+  if (!options.preserveRangeCache) state.rangeCache.clear();
   if (options.resetPage !== false) resetPagination();
   syncSnapshotControlsFromState();
   syncNicheToggle();
@@ -650,13 +843,18 @@ function applyPreparedSnapshotPayload(payload, path, options = {}) {
 }
 
 async function preparePayload(payload) {
-  const sourceFiltered = window.SourceFilter?.filterPayloadBlockedSources
-    ? window.SourceFilter.filterPayloadBlockedSources(payload)
-    : payload;
+  const sourceFiltered =
+    shouldSkipSourceFilter(payload) || !window.SourceFilter?.filterPayloadBlockedSources
+      ? payload
+      : measureSync("source-filter", () => window.SourceFilter.filterPayloadBlockedSources(payload));
   if (window.FrontendUtils.hasNicheAnnotations(sourceFiltered)) return sourceFiltered;
   await ensureSongSearchLookup();
   if (!state.songSearchLookup.available) return sourceFiltered;
   return window.FrontendUtils.annotatePayloadWithNiche(sourceFiltered, state.songSearchLookup);
+}
+
+function shouldSkipSourceFilter(payload) {
+  return window.FrontendUtils.shouldSkipSourceFilter(payload, CURRENT_FILTER_VERSION);
 }
 
 async function ensureSongSearchLookup() {
@@ -695,6 +893,112 @@ function syncNicheToggle() {
   } else {
     els.nicheOnlyToggle.checked = state.nicheOnly;
   }
+}
+
+function renderInitialSkeleton() {
+  resetContentClasses();
+  els.content.classList.add("rank-panel", "skeleton-panel");
+  els.summary.replaceChildren();
+  const summarySkeleton = document.createElement("div");
+  summarySkeleton.className = "summary-skeleton";
+  summarySkeleton.setAttribute("aria-hidden", "true");
+  els.summary.append(summarySkeleton);
+  const fragment = document.createDocumentFragment();
+  const header = document.createElement("div");
+  header.className = "rank-header skeleton-header";
+  header.setAttribute("aria-hidden", "true");
+  for (const label of ["排名", "歌曲", "次数"]) {
+    const item = document.createElement("span");
+    item.textContent = label;
+    header.append(item);
+  }
+  fragment.append(header);
+  for (let index = 0; index < 8; index += 1) {
+    const row = document.createElement("div");
+    row.className = "rank-row skeleton-row";
+    row.setAttribute("aria-hidden", "true");
+    row.innerHTML = '<span class="skeleton-rank"></span><span class="skeleton-lines"><span></span><span></span></span><span class="skeleton-count"></span>';
+    fragment.append(row);
+  }
+  els.content.replaceChildren(fragment);
+}
+
+async function yieldToBrowser() {
+  if (typeof scheduler !== "undefined" && typeof scheduler.yield === "function") {
+    await scheduler.yield();
+    return;
+  }
+  if (typeof requestAnimationFrame === "function") {
+    await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+    return;
+  }
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+function scheduleCurrentRankDiffLoad() {
+  if (!isLatestSnapshot() || state.view === "videos") return;
+  loadRankDiffForRange(state.range)
+    .then((loaded) => {
+      if (loaded && isLatestSnapshot()) render({ syncUrl: false, lowPriority: true });
+    })
+    .catch((error) => {
+      showToast(`趋势读取失败，榜单已正常显示：${error.message}`);
+    });
+}
+
+async function loadRankDiffForRange(rangeId) {
+  if (state.rankDiffs?.[rangeId]) return false;
+  if (state.rankDiffLoads.has(rangeId)) return state.rankDiffLoads.get(rangeId);
+  const path = state.runtimeMeta?.diffs?.[rangeId]?.path || `data/diff/latest-${rangeId}.json`;
+  const promise = measureAsync("load-rank-diff", () => readJson(path, { cache: "no-cache" }))
+    .then((diff) => {
+      state.rankDiffs = {
+        ...state.rankDiffs,
+        [rangeId]: buildRankDiffLookup(diff),
+      };
+      return true;
+    })
+    .catch((error) => {
+      state.rankDiffs = {
+        ...state.rankDiffs,
+        [rangeId]: null,
+      };
+      throw error;
+    })
+    .finally(() => {
+      state.rankDiffLoads.delete(rangeId);
+    });
+  state.rankDiffLoads.set(rangeId, promise);
+  return promise;
+}
+
+function buildRankDiffLookup(diff) {
+  return window.FrontendUtils.createTrendLookup(diff);
+}
+
+function scheduleOtherRangePrefetch() {
+  if (!isLatestSnapshot() || !canPrefetchOtherRange()) return;
+  const otherRange = Object.keys(RANGE_LABELS).find((rangeId) => rangeId !== state.range);
+  if (!otherRange || state.runtimeRangePayloads.has(otherRange)) return;
+  const run = () => {
+    if (document.visibilityState === "hidden" || state.runtimeRangePayloads.has(otherRange)) return;
+    loadRuntimeRange(otherRange).catch(() => {});
+  };
+  setTimeout(() => {
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(run, { timeout: 6000 });
+    } else {
+      run();
+    }
+  }, 1800);
+}
+
+function canPrefetchOtherRange() {
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  return window.FrontendUtils.shouldPrefetchRuntimeRange({
+    connection,
+    visibilityState: document.visibilityState,
+  });
 }
 
 function setSnapshotBusy(isBusy, message = "") {
@@ -843,12 +1147,11 @@ function renderStatus(status) {
 }
 
 function render(options = {}) {
-  const group = state.payload?.groups?.[state.range] || { title: state.range, items: [] };
-  const sourceItems = group.items || [];
-  const allOccurrences = collectSongOccurrences(sourceItems);
-  const videoItems = buildVideoViewItems(sourceItems);
-  const occurrences = filterOccurrences(allOccurrences);
-  if (state.view !== "songAz") ensureIndexBucketExists(occurrences);
+  const renderMark = perfMark("render-dom:start");
+  const group = currentGroup();
+  const rangeCache = getRangeCache(group);
+  const selection = currentSelection(rangeCache);
+  if (state.view !== "songAz") ensureIndexBucketExists(selection.songRecords);
 
   resetContentClasses();
   els.content.replaceChildren();
@@ -856,21 +1159,205 @@ function render(options = {}) {
   if (state.view === "videos") {
     els.content.classList.add("video-grid");
     if (state.videoLayout === "compact") els.content.classList.add("video-compact");
-    renderVideoList(group, videoItems);
+    renderVideoList(group, rangeCache, selection);
   } else if (state.view === "artistRank") {
     els.content.classList.add("rank-panel");
-    renderArtistRank(group, occurrences);
+    renderArtistRank(group, rangeCache, selection);
   } else if (state.view === "songAz") {
     els.content.classList.add("song-index");
-    renderSongIndexView(group, occurrences);
+    renderSongIndexView(group, rangeCache, selection);
   } else {
     els.content.classList.add("rank-panel");
-    renderSongRank(group, occurrences);
+    renderSongRank(group, rangeCache, selection);
   }
 
   if (options.syncUrl !== false) syncUrlState(options.urlMode || "replace");
   if (options.focusAfterPageChange) schedulePageChangeFocus();
   updateBackToTopVisibility();
+  if (!state.firstContentMeasured) {
+    state.firstContentMeasured = true;
+    perfMeasure("first-content", renderMark);
+  }
+  perfMeasure("render-dom", renderMark);
+  scheduleCurrentRankDiffLoad();
+}
+
+function currentGroup() {
+  return state.payload?.groups?.[state.range] || { id: state.range, title: state.range, items: [] };
+}
+
+function getRangeCache(group) {
+  const key = rangeCacheKey(state.currentSnapshotPath, state.range);
+  const cached = state.rangeCache.get(key);
+  if (cached && cached.items === group.items) return cached;
+  const next = createRangeCache(group);
+  state.rangeCache.set(key, next);
+  return next;
+}
+
+function rangeCacheKey(snapshotPath, rangeId) {
+  return `${snapshotPath}::${rangeId}`;
+}
+
+async function prewarmRangeCache(group, snapshotPath, rangeId) {
+  if (!group) return;
+  const key = rangeCacheKey(snapshotPath, rangeId);
+  const existing = state.rangeCache.get(key);
+  if (existing && existing.items === group.items) return;
+  const items = group.items || [];
+  const occurrences = measureSync("collect-occurrences", () => collectSongOccurrences(items));
+  await yieldToBrowser();
+  const nicheOccurrences = filterNicheOccurrences(occurrences);
+  const allSongRecords = measureSync("build-song-records", () => buildSongRecords(occurrences));
+  await yieldToBrowser();
+  const nicheSongRecords = buildSongRecords(nicheOccurrences);
+  await yieldToBrowser();
+  const allArtistResult = measureSync("build-artist-records", () => buildArtistRecords(occurrences));
+  await yieldToBrowser();
+  const nicheArtistResult = buildArtistRecords(nicheOccurrences);
+  const cache = createRangeCacheObject({
+    items,
+    occurrences,
+    nicheOccurrences,
+    allSongRecords,
+    nicheSongRecords,
+    allArtistResult,
+    nicheArtistResult,
+  });
+  state.rangeCache.set(key, cache);
+  await prewarmDefaultSorts(cache);
+}
+
+async function prewarmDefaultSorts(cache) {
+  const filterKey = normalizeSearch(state.filter);
+  if (filterKey) return;
+  const scope = state.nicheOnly ? "niche" : "all";
+  const songRecords = state.nicheOnly ? cache.nicheSongRecords : cache.allSongRecords;
+  const artistRecords = state.nicheOnly ? cache.nicheArtistRecords : cache.allArtistRecords;
+  if (state.view === "artistRank") {
+    cacheRankModel(cache, `artist-rank::${scope}::${filterKey}::${state.rankMetric}`, [...artistRecords].sort(compareRankRecords));
+  } else if (state.view === "songAz") {
+    cache.sortedRecords.set(`song-az::${scope}::${filterKey}::${state.rankMetric}`, [...songRecords].sort(compareSongAz));
+  } else {
+    cacheRankModel(cache, `song-rank::${scope}::${filterKey}::${state.rankMetric}`, [...songRecords].sort(compareSongRank));
+  }
+}
+
+function createRangeCache(group) {
+  const items = group.items || [];
+  const occurrences = measureSync("collect-occurrences", () => collectSongOccurrences(items));
+  const nicheOccurrences = filterNicheOccurrences(occurrences);
+  const allSongRecords = measureSync("build-song-records", () => buildSongRecords(occurrences));
+  const nicheSongRecords = buildSongRecords(nicheOccurrences);
+  const allArtistResult = measureSync("build-artist-records", () => buildArtistRecords(occurrences));
+  const nicheArtistResult = buildArtistRecords(nicheOccurrences);
+  return createRangeCacheObject({
+    items,
+    occurrences,
+    nicheOccurrences,
+    allSongRecords,
+    nicheSongRecords,
+    allArtistResult,
+    nicheArtistResult,
+  });
+}
+
+function createRangeCacheObject({
+  items,
+  occurrences,
+  nicheOccurrences,
+  allSongRecords,
+  nicheSongRecords,
+  allArtistResult,
+  nicheArtistResult,
+}) {
+  return {
+    items,
+    occurrences,
+    nicheOccurrences,
+    allSongRecords,
+    nicheSongRecords,
+    allArtistRecords: allArtistResult.records,
+    nicheArtistRecords: nicheArtistResult.records,
+    allMissingArtistCount: allArtistResult.missingArtistCount,
+    nicheMissingArtistCount: nicheArtistResult.missingArtistCount,
+    allVideoCount: uniqueVideoCount(occurrences),
+    nicheVideoCount: uniqueVideoCount(nicheOccurrences),
+    normalizedVideoSearchData: items.map((item) => ({
+      item,
+      searchText: normalizeSearch([item.title, item.channelName, item.keyword, ...(item.songs || []).flatMap((song) => [song.title, song.artist])].join(" ")),
+    })),
+    sortedRecords: new Map(),
+    selectionCache: new Map(),
+  };
+}
+
+function currentSelection(rangeCache) {
+  const filterKey = normalizeSearch(state.filter);
+  const key = `${state.nicheOnly ? "niche" : "all"}::${filterKey}`;
+  if (rangeCache.selectionCache.has(key)) return rangeCache.selectionCache.get(key);
+
+  const baseOccurrences = state.nicheOnly ? rangeCache.nicheOccurrences : rangeCache.occurrences;
+  const baseSongRecords = state.nicheOnly ? rangeCache.nicheSongRecords : rangeCache.allSongRecords;
+  const baseArtistRecords = state.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords;
+  const baseMissingArtistCount = state.nicheOnly ? rangeCache.nicheMissingArtistCount : rangeCache.allMissingArtistCount;
+
+  let selection;
+  if (!filterKey) {
+    selection = {
+      occurrences: baseOccurrences,
+      songRecords: baseSongRecords,
+      artistRecords: baseArtistRecords,
+      missingArtistCount: baseMissingArtistCount,
+      videoCount: state.nicheOnly ? rangeCache.nicheVideoCount : rangeCache.allVideoCount,
+      videoItems: null,
+    };
+  } else {
+    const occurrences = baseOccurrences.filter((occurrence) => occurrence.searchText.includes(filterKey));
+    const artistResult = buildArtistRecords(occurrences);
+    selection = {
+      occurrences,
+      songRecords: buildSongRecords(occurrences),
+      artistRecords: artistResult.records,
+      missingArtistCount: artistResult.missingArtistCount,
+      videoCount: uniqueVideoCount(occurrences),
+      videoItems: null,
+    };
+  }
+  rangeCache.selectionCache.set(key, selection);
+  return selection;
+}
+
+function sortedSelectionRecords(rangeCache, selection, type, compare) {
+  const key = sortedRecordsKey(type);
+  if (!rangeCache.sortedRecords.has(key)) {
+    const source = type.startsWith("artist") ? selection.artistRecords : selection.songRecords;
+    rangeCache.sortedRecords.set(key, [...source].sort(compare));
+  }
+  return rangeCache.sortedRecords.get(key);
+}
+
+function rankingModelForSelection(rangeCache, selection, type, compare) {
+  const key = sortedRecordsKey(type);
+  const modelKey = `model::${key}`;
+  if (rangeCache.sortedRecords.has(modelKey)) return rangeCache.sortedRecords.get(modelKey);
+  const records = sortedSelectionRecords(rangeCache, selection, type, compare);
+  return cacheRankModel(rangeCache, key, records);
+}
+
+function cacheRankModel(rangeCache, key, records) {
+  rangeCache.sortedRecords.set(key, records);
+  const model = {
+    records,
+    ranks: buildCompetitionRanks(records),
+    countFrequencies: buildCountFrequencies(records, rankValue),
+  };
+  rangeCache.sortedRecords.set(`model::${key}`, model);
+  return model;
+}
+
+function sortedRecordsKey(type) {
+  return `${type}::${state.nicheOnly ? "niche" : "all"}::${normalizeSearch(state.filter)}::${state.rankMetric}`;
 }
 
 function resetContentClasses() {
@@ -878,9 +1365,10 @@ function resetContentClasses() {
   els.content.classList.add(`view-${state.view}`);
 }
 
-function renderVideoList(group, items) {
-  const sourceItems = group.items || [];
-  const nicheItems = buildVideoViewItems(sourceItems, { ignoreSearch: true });
+function renderVideoList(group, rangeCache, selection) {
+  const sourceItems = rangeCache.items;
+  const items = videoItemsForSelection(rangeCache, selection);
+  const nicheItems = videoItemsForRange(rangeCache, { nicheOnly: true, ignoreSearch: true });
   const denominatorItems = state.filter && state.nicheOnly ? nicheItems : sourceItems;
   const visibleSongs = items.reduce((sum, item) => sum + (item._displaySongs?.length || item.songs?.length || 0), 0);
   const denominatorSongs = denominatorItems.reduce((sum, item) => sum + (item._displaySongs?.length || item.songs?.length || 0), 0);
@@ -906,18 +1394,17 @@ function renderVideoList(group, items) {
   els.content.append(fragment);
 }
 
-function renderSongRank(group, occurrences) {
-  const sourceOccurrences = collectSongOccurrences(group.items || []);
-  const allRecords = buildSongRecords(sourceOccurrences);
-  const nicheRecords = buildSongRecords(filterNicheOccurrences(sourceOccurrences));
-  const records = buildSongRecords(occurrences).sort(compareSongRank);
-  const ranks = buildCompetitionRanks(records);
-  const countFrequencies = buildCountFrequencies(records, rankValue);
+function renderSongRank(group, rangeCache, selection) {
+  const sourceOccurrences = rangeCache.occurrences;
+  const allRecords = rangeCache.allSongRecords;
+  const nicheRecords = rangeCache.nicheSongRecords;
+  const occurrences = selection.occurrences;
+  const { records, ranks, countFrequencies } = rankingModelForSelection(rangeCache, selection, "song-rank", compareSongRank);
 
   renderSummary(group, [
     visibilityMetric(records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
-    occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, filterNicheOccurrences(sourceOccurrences).length),
-    metric(uniqueVideoCount(occurrences), "个视频"),
+    occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
+    metric(selection.videoCount, "个视频"),
   ]);
 
   if (!records.length) {
@@ -941,7 +1428,7 @@ function renderSongRank(group, occurrences) {
         title: record.title,
         meta: songMeta(record),
         isNiche: isNicheRecord(record),
-        videoCount: uniqueVideoCount(record.occurrences),
+        videoCount: record.videoCount,
         count: rankValue(record),
         countUnit: rankCountUnit(),
         occurrences: record.occurrences,
@@ -953,19 +1440,18 @@ function renderSongRank(group, occurrences) {
   els.content.append(fragment);
 }
 
-function renderArtistRank(group, occurrences) {
-  const sourceOccurrences = collectSongOccurrences(group.items || []);
-  const allArtistRecords = buildArtistRecords(sourceOccurrences).records;
-  const nicheArtistRecords = buildArtistRecords(filterNicheOccurrences(sourceOccurrences)).records;
-  const { records, missingArtistCount } = buildArtistRecords(occurrences);
-  records.sort(compareRankRecords);
-  const ranks = buildCompetitionRanks(records);
-  const countFrequencies = buildCountFrequencies(records, rankValue);
+function renderArtistRank(group, rangeCache, selection) {
+  const sourceOccurrences = rangeCache.occurrences;
+  const allArtistRecords = rangeCache.allArtistRecords;
+  const nicheArtistRecords = rangeCache.nicheArtistRecords;
+  const occurrences = selection.occurrences;
+  const { records, ranks, countFrequencies } = rankingModelForSelection(rangeCache, selection, "artist-rank", compareRankRecords);
+  const missingArtistCount = selection.missingArtistCount;
 
   renderSummary(group, [
     visibilityMetric(records.length, allArtistRecords.length, nicheArtistRecords.length, "位歌手", "位小众歌曲歌手"),
-    occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, filterNicheOccurrences(sourceOccurrences).length),
-    metric(uniqueVideoCount(occurrences), "个视频"),
+    occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
+    metric(selection.videoCount, "个视频"),
   ], missingArtistCount ? `${missingArtistCount} 条待补歌手` : "");
 
   if (!records.length) {
@@ -988,7 +1474,7 @@ function renderArtistRank(group, occurrences) {
         isTied: countFrequencies.get(rankValue(record)) > 1,
         title: record.name,
         meta: artistMeta(record),
-        videoCount: uniqueVideoCount(record.occurrences),
+        videoCount: record.videoCount,
         count: rankValue(record),
         countUnit: rankCountUnit(),
         occurrences: record.occurrences,
@@ -1003,16 +1489,17 @@ function renderArtistRank(group, occurrences) {
   els.content.append(fragment);
 }
 
-function renderSongIndexView(group, occurrences) {
-  const sourceOccurrences = collectSongOccurrences(group.items || []);
-  const allRecords = buildSongRecords(sourceOccurrences);
-  const nicheRecords = buildSongRecords(filterNicheOccurrences(sourceOccurrences));
-  const records = buildSongRecords(occurrences).sort(compareSongAz);
+function renderSongIndexView(group, rangeCache, selection) {
+  const sourceOccurrences = rangeCache.occurrences;
+  const allRecords = rangeCache.allSongRecords;
+  const nicheRecords = rangeCache.nicheSongRecords;
+  const occurrences = selection.occurrences;
+  const records = sortedSelectionRecords(rangeCache, selection, "song-az", compareSongAz);
 
   renderSummary(group, [
     visibilityMetric(records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
-    occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, filterNicheOccurrences(sourceOccurrences).length),
-    metric(uniqueVideoCount(occurrences), "个视频"),
+    occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
+    metric(selection.videoCount, "个视频"),
   ]);
 
   if (!records.length) {
@@ -1062,12 +1549,30 @@ function renderSongIndexView(group, occurrences) {
   els.content.append(fragment);
 }
 
-function ensureIndexBucketExists(occurrences) {
+function ensureIndexBucketExists(records) {
   if (state.indexBucket === INDEX_ALL_BUCKET) return;
-  const records = buildSongRecords(occurrences);
   if (!records.some((record) => songIndexBucket(record) === state.indexBucket)) {
     state.indexBucket = INDEX_ALL_BUCKET;
   }
+}
+
+function videoItemsForSelection(rangeCache, selection) {
+  if (selection.videoItems) return selection.videoItems;
+  selection.videoItems = videoItemsForRange(rangeCache, {
+    filter: state.filter,
+    nicheOnly: state.nicheOnly,
+  });
+  return selection.videoItems;
+}
+
+function videoItemsForRange(rangeCache, options = {}) {
+  const filter = options.ignoreSearch ? "" : options.filter ?? state.filter;
+  const nicheOnly = options.nicheOnly ?? state.nicheOnly;
+  const key = `videos::${nicheOnly ? "niche" : "all"}::${normalizeSearch(filter)}`;
+  if (!rangeCache.sortedRecords.has(key)) {
+    rangeCache.sortedRecords.set(key, buildVideoViewItems(rangeCache.items, { filter, nicheOnly }));
+  }
+  return rangeCache.sortedRecords.get(key);
 }
 
 function renderSummary(group, metrics, note = "") {
@@ -1398,12 +1903,13 @@ function renderLoadError(error, prefix = "读取失败") {
 }
 
 function buildVideoViewItems(items, options = {}) {
-  const filter = options.ignoreSearch ? "" : state.filter;
+  const filter = options.ignoreSearch ? "" : options.filter ?? state.filter;
+  const nicheOnly = options.nicheOnly ?? state.nicheOnly;
   const normalizedFilter = normalizeSearch(filter);
   const result = [];
   for (const item of items || []) {
-    const sourceSongs = (item.songs || []).filter((song) => !state.nicheOnly || window.FrontendUtils.isNicheSong(song));
-    if (state.nicheOnly && !sourceSongs.length) continue;
+    const sourceSongs = (item.songs || []).filter((song) => !nicheOnly || window.FrontendUtils.isNicheSong(song));
+    if (nicheOnly && !sourceSongs.length) continue;
     if (!normalizedFilter) {
       result.push({ ...item, songs: sourceSongs, _displaySongs: sourceSongs, _songSearchMatchCount: 0 });
       continue;
@@ -1433,31 +1939,18 @@ function collectSongOccurrences(items) {
   for (const item of items) {
     for (const song of item.songs || []) {
       if (!cleanText(song.title)) continue;
-      occurrences.push({ item, song });
+      occurrences.push({
+        item,
+        song,
+        searchText: normalizeSearch([item.title, item.channelName, item.keyword, song.title, song.artist].join(" ")),
+      });
     }
   }
   return occurrences;
 }
 
-function filterOccurrences(occurrences) {
-  return window.FrontendUtils.filterOccurrencesByNiche(
-    window.FrontendUtils.filterOccurrencesBySearch(occurrences, state.filter),
-    state.nicheOnly,
-  );
-}
-
 function filterNicheOccurrences(occurrences) {
   return window.FrontendUtils.filterOccurrencesByNiche(occurrences, true);
-}
-
-async function loadRankDiffs() {
-  const entries = await Promise.all(
-    [
-      ["72h", "data/diff/latest-72h.json"],
-      ["1m", "data/diff/latest-1m.json"],
-    ].map(async ([rangeId, path]) => [rangeId, await readJson(path, { cache: "no-cache" }).catch(() => null)]),
-  );
-  return Object.fromEntries(entries);
 }
 
 function matchesSearch(parts) {
@@ -1465,20 +1958,24 @@ function matchesSearch(parts) {
 }
 
 function buildSongRecords(occurrences) {
-  return window.RankingUtils.buildSongRecords(occurrences, {
+  return addRecordRuntimeFields(window.RankingUtils.buildSongRecords(occurrences, {
     cleanText,
     incrementCount,
     makeSongSortKey,
     normalizeEntityKey,
-  });
+  }));
 }
 
 function buildArtistRecords(occurrences) {
-  return window.RankingUtils.buildArtistRecords(occurrences, {
+  const result = window.RankingUtils.buildArtistRecords(occurrences, {
     cleanText,
     incrementCount,
     normalizeEntityKey,
   });
+  return {
+    ...result,
+    records: addRecordRuntimeFields(result.records),
+  };
 }
 
 function buildArtistSongGroups(occurrences) {
@@ -1490,6 +1987,21 @@ function buildArtistSongGroups(occurrences) {
     makeSongSortKey,
     normalizeEntityKey,
   });
+}
+
+function addRecordRuntimeFields(records) {
+  for (const record of records || []) {
+    if (typeof record.videoCount !== "number") record.videoCount = uniqueVideoCount(record.occurrences || []);
+    if (!record.searchText) {
+      record.searchText = normalizeSearch([
+        record.title,
+        record.name,
+        ...Array.from(record.artists?.values?.() || []).map((entry) => entry.name),
+        ...Array.from(record.songs?.values?.() || []).map((entry) => entry.name),
+      ].join(" "));
+    }
+  }
+  return records;
 }
 
 function buildCompetitionRanks(records) {
@@ -1517,7 +2029,7 @@ function buildCountFrequencies(records, valueFn = (record) => record.count) {
 }
 
 function rankValue(record) {
-  return state.rankMetric === "videos" ? uniqueVideoCount(record.occurrences || []) : record.count;
+  return state.rankMetric === "videos" ? record.videoCount || 0 : record.count;
 }
 
 function rankCountUnit() {
@@ -1638,7 +2150,7 @@ function renderIndexRecord(record) {
       occurrences: record.occurrences,
       drawerId,
       isExpanded,
-      videoCount: uniqueVideoCount(record.occurrences),
+      videoCount: record.videoCount,
       headingLevel: 3,
     }),
   );
@@ -2190,14 +2702,29 @@ function indexBucketWeight(label) {
 }
 
 async function readJson(path, options = {}) {
+  const startedAt = performanceAvailable() ? performance.now() : 0;
   const response = await fetch(path, { cache: options.cache || cacheModeForPath(path), signal: options.signal });
   if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-  return response.json();
+  const text = await response.text();
+  const parseMark = perfMark("json-parse:start");
+  try {
+    return JSON.parse(text);
+  } finally {
+    perfMeasure("json-parse", parseMark);
+    state.loadedResources.push({
+      path,
+      bytes: text.length,
+      cache: options.cache || cacheModeForPath(path),
+      durationMs: startedAt ? Math.round((performance.now() - startedAt) * 10) / 10 : 0,
+    });
+  }
 }
 
 function cacheModeForPath(path) {
   if (/^data\/snapshots\/[^/]+\.json$/u.test(path)) return "force-cache";
-  if (path === SNAPSHOT_LATEST_PATH || path === "data/status.json" || path === "data/snapshots/index.json") return "no-cache";
+  if (path === UI_META_PATH || path === SNAPSHOT_LATEST_PATH || path === "data/status.json" || path === "data/snapshots/index.json") return "no-cache";
+  if (/^data\/ui\/(?:72h|1m)\.json$/u.test(path)) return "default";
+  if (/^data\/diff\/latest-(?:72h|1m)\.json$/u.test(path)) return "no-cache";
   if (path === SONG_SEARCH_INDEX_PATH) return "default";
   return "no-cache";
 }
@@ -2262,8 +2789,8 @@ function getArtistSongGroups(record) {
 function trendForRecord(mode, record) {
   if (!isLatestSnapshot() || state.rankMetric !== "occurrences") return null;
   const diff = state.rankDiffs?.[state.range]?.[mode];
-  if (!Array.isArray(diff)) return null;
-  return diff.find((entry) => entry.entityKey === record.key) || null;
+  if (!(diff instanceof Map)) return null;
+  return diff.get(record.key) || null;
 }
 
 function renderTrendBadge(trend) {

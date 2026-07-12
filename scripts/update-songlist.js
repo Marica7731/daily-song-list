@@ -7,6 +7,7 @@ const {
   TAIWAN_VTUBER_BLACKLIST,
 } = require("../assets/source-filter");
 const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
+const { compactRankDiff, writeRuntimeJson } = require("./build-runtime-data");
 const { isLikelyNonSongEntry, isTimestampCandidateText, normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -986,7 +987,7 @@ function applyGroupQualityFilters(groups) {
 function writeRankDiffFiles(payload, previousSnapshot = readPreviousSuccessfulSnapshot(payload)) {
   const diffs = buildRankDiffs(payload, previousSnapshot);
   for (const range of DIFF_RANGES) {
-    writeJson(path.join(DIFF_DIR, range.file), diffs[range.id]);
+    writeRuntimeJson(path.join(DIFF_DIR, range.file), compactRankDiff(diffs[range.id]));
   }
   return diffs;
 }

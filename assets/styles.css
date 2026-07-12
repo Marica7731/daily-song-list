@@ -415,6 +415,65 @@ input::placeholder {
   cursor: progress;
 }
 
+.skeleton-panel {
+  min-height: 536px;
+}
+
+.summary-skeleton {
+  width: min(420px, 88vw);
+  height: 28px;
+  border-radius: var(--radius);
+  background: #e8edf3;
+}
+
+.skeleton-header {
+  color: transparent;
+}
+
+.skeleton-row {
+  grid-template-areas: "rank content count";
+  pointer-events: none;
+}
+
+.skeleton-rank,
+.skeleton-lines span,
+.skeleton-count {
+  display: block;
+  border-radius: 999px;
+  background: #e8edf3;
+}
+
+.skeleton-rank {
+  grid-area: rank;
+  justify-self: center;
+  width: 24px;
+  height: 14px;
+}
+
+.skeleton-lines {
+  grid-area: content;
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.skeleton-lines span:first-child {
+  width: min(420px, 82%);
+  height: 15px;
+}
+
+.skeleton-lines span:last-child {
+  width: min(300px, 56%);
+  height: 12px;
+}
+
+.skeleton-count {
+  grid-area: count;
+  justify-self: end;
+  width: 48px;
+  height: 22px;
+}
+
 .rank-panel,
 .song-index {
   overflow: hidden;
