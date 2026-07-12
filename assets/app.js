@@ -755,7 +755,7 @@ async function loadRuntimeRange(rangeId) {
   if (existing) return existing;
   if (state.runtimeRangeLoads.has(rangeId)) return state.runtimeRangeLoads.get(rangeId);
   const path = runtimeRangePath(rangeId);
-  const promise = readJson(path, { cache: "default" })
+  const promise = readJson(path, { cache: "no-cache" })
     .then((payload) => {
       state.runtimeRangePayloads.set(rangeId, payload);
       return payload;
@@ -859,7 +859,7 @@ function shouldSkipSourceFilter(payload) {
 async function ensureSongSearchLookup() {
   if (state.songSearchLookup.available) return state.songSearchLookup;
   if (!state.songSearchIndexPromise) {
-    state.songSearchIndexPromise = readJson(SONG_SEARCH_INDEX_PATH, { cache: "default" })
+    state.songSearchIndexPromise = readJson(SONG_SEARCH_INDEX_PATH, { cache: "no-cache" })
       .then((index) => {
         state.songSearchLookup = window.FrontendUtils.createSongSearchLookup(index);
         return state.songSearchLookup;
@@ -2799,9 +2799,9 @@ async function readJson(path, options = {}) {
 function cacheModeForPath(path) {
   if (/^data\/snapshots\/[^/]+\.json$/u.test(path)) return "force-cache";
   if (path === UI_META_PATH || path === SNAPSHOT_LATEST_PATH || path === "data/status.json" || path === "data/snapshots/index.json") return "no-cache";
-  if (/^data\/ui\/(?:72h|1m)\.json$/u.test(path)) return "default";
+  if (/^data\/ui\/(?:72h|1m)\.json$/u.test(path)) return "no-cache";
   if (/^data\/diff\/latest-(?:72h|1m)\.json$/u.test(path)) return "no-cache";
-  if (path === SONG_SEARCH_INDEX_PATH) return "default";
+  if (path === SONG_SEARCH_INDEX_PATH) return "no-cache";
   return "no-cache";
 }
 
