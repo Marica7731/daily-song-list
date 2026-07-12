@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const { NON_SONG_RULES_PATH, OVERRIDES_PATH, validateCurationOverrides } = require("./curation");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -31,6 +32,8 @@ const MONTH_SEARCH_URLS = new Set([
 
 const payload = readJson(LATEST_PATH);
 const errors = [];
+
+validateCurationConfig();
 
 if (payload.schemaVersion !== 1) errors.push("latest.schemaVersion must be 1");
 if (!payload.groups || typeof payload.groups !== "object") errors.push("latest.groups missing");
@@ -161,6 +164,8 @@ function validateRuntimeUiFiles() {
   }
   if (!Number.isInteger(meta.filterVersion)) errors.push("ui.meta.filterVersion must be integer");
   if (typeof meta.nicheAnnotated !== "boolean") errors.push("ui.meta.nicheAnnotated must be boolean");
+  if ("curationVersion" in meta && typeof meta.curationVersion !== "string") errors.push("ui.meta.curationVersion must be string");
+  if ("curationHash" in meta && typeof meta.curationHash !== "string") errors.push("ui.meta.curationHash must be string");
 
   for (const groupId of ["72h", "1m"]) {
     const rangeMeta = meta.ranges?.[groupId];
@@ -177,6 +182,28 @@ function validateRuntimeUiFiles() {
       errors.push(`ui.meta.diffs.${groupId}.path invalid`);
     }
     validateRuntimeRangeFile(groupId, rangeMeta);
+  }
+}
+
+function validateCurationConfig() {
+  if (!fs.existsSync(OVERRIDES_PATH)) {
+    errors.push("missing curation overrides: config/curation-overrides.json");
+  } else {
+    const validation = validateCurationOverrides(readJson(OVERRIDES_PATH));
+    for (const error of validation.errors) errors.push(`curation-overrides: ${error}`);
+  }
+
+  if (!fs.existsSync(NON_SONG_RULES_PATH)) {
+    errors.push("missing non-song rules: config/non-song-rules.json");
+  } else {
+    const rules = readJson(NON_SONG_RULES_PATH);
+    if (rules.schemaVersion !== 1) errors.push("non-song-rules.schemaVersion must be 1");
+    for (const field of ["exactUnknownArtistTitles", "channelScopedExactTitles", "channelScopedPatterns"]) {
+      if (!Array.isArray(rules[field])) errors.push(`non-song-rules.${field} must be array`);
+    }
+    if (!Array.isArray(rules.exactUnknownArtistTitles) || !rules.exactUnknownArtistTitles.includes("曲紹介") || !rules.exactUnknownArtistTitles.includes("離席")) {
+      errors.push("non-song-rules.exactUnknownArtistTitles must include 曲紹介 and 離席");
+    }
   }
 }
 

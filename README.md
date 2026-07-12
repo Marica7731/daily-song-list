@@ -14,6 +14,9 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - When the previous successful snapshot is fresh, already inspected videos are carried forward and skipped. The `72h` and `1m` views keep separate source membership: a recent video enters `1m` only when it also came from the monthly search filter. The new inspection queue usually scans today's and one-day-old candidates, then refreshes a small number of monthly-filter candidates. If carried monthly results are below the backfill target, the queue reserves less of the inspection budget for recent-only videos and fills the remaining budget from monthly-filter candidates first.
    - If the previous successful snapshot is missing or too old, the script falls back to a full recovery queue covering today's, one-day-old, and two-day-old candidates before filling the remaining budget with monthly-filter candidates.
 2. It fetches each candidate watch page, extracts description and first comment continuations, parses timestamped song lists, and skips videos without usable songs.
+   - Timestamp sources now keep stable review identity: YouTube comments and replies use their `commentId`, descriptions use `description:<videoId>:<hash>`, and hash fallback uses normalized source text SHA-256.
+   - `config/non-song-rules.json` contains conservative non-song rules. The global `exactUnknownArtistTitles` rule currently rejects only unknown-artist `曲紹介` and `離席` rows with reason `activity_marker_title`; the same titles with explicit known artists are kept for review instead of being automatically dropped.
+   - `config/curation-overrides.json` is the durable manual correction file. It supports `drop_entry`, `replace_entry`, `reject_source`, `drop_video`, and `force_keep`, keyed by `videoId` plus stable source and row identity.
    - Non-song chapter rows, chat highlights, setup sections, channel metrics, custom emoji prefixes, and low-quality mixed comment timelines are filtered before write.
    - When one timestamp source already contains many explicit `song / artist` rows, remaining title-only rows from that same source are treated as timeline notes rather than songs and are dropped during generation and carry-forward.
    - Existing snapshots also pass through a front-end in-memory safety filter for high-confidence unknown-artist section markers such as waiting/ending/resume notes, stream sign-off catchphrases, and obvious ordinal title prefixes like `01|`, `10曲目`, or `3 01.`.
@@ -29,12 +32,17 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - `data/diff/latest-72h.json`
    - `data/diff/latest-1m.json`
    - `data/audit.json`
+   - `data/review/queue.json`
+   - `data/review/sources/<videoId>-<sourceHash>.json`
+   - `data/review/manifest.json`
+   - `data/quality-report.json`
    - `data/snapshots/<hour>.json`
    - `data/snapshots/index.json`
    - `data/status.json`
    - `data/latest.json`, `data/72h.json`, `data/1m.json`, snapshots, and `data/audit.json` remain readable generation/review artifacts.
    - `data/ui/*.json` is the compact browser runtime payload. It keeps only the fields the UI needs, uses `seconds` to format timestamp labels, and carries `filterVersion` plus `nicheAnnotated` so current data can skip the front-end compatibility safety scan.
    - The diff files compare latest ranks against the previous successful snapshot but are written in compact runtime form. Each `songRank` and `artistRank` entry keeps only `entityKey`, `rankDelta`, `countDelta`, and `isNew`; unchanged entries are omitted. `rankDelta` is `previousRank - currentRank`, so positive values mean the entity moved up and negative values mean it moved down.
+   - `curationVersion` and `curationHash` are written into latest payloads, runtime meta, snapshots, and rank diff metadata. Rank diffs clean the previous snapshot in memory with the same current curation rules before comparing, so a new correction does not silently compare cleaned current data with dirty previous data.
 4. `index.html` + `assets/app.js` render the latest data and allow switching to an hourly snapshot.
    - Default view is song appearance ranking.
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
@@ -44,9 +52,15 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - Each range keeps derived occurrences, song records, artist records, video search data, and per-record `videoCount` in memory. Pagination and page-size changes reuse those records and only rebuild the visible page DOM. Prepared historical snapshots keep the existing 5-entry in-memory LRU cache, while immutable hourly snapshot JSON uses browser cache.
    - URL state omits defaults, uses browser history for range/view/page/snapshot changes, and keeps search typing on `replaceState`. Song index bucket params are written only for the song index view.
    - Video search keeps song-only matches visible before the fold. Rank views can switch between `按收录` and `按视频`, and latest song/artist ranks display movement from `data/diff`.
-5. `.github/workflows/update-songlist.yml` runs hourly and commits only data changes.
+5. `review.html` is a separate local review surface.
+   - It loads only `data/review/queue.json` and per-source files under `data/review/sources/`.
+   - The normal homepage does not load review data, raw comments, queue data, or GitHub credentials.
+   - Draft review actions are saved in IndexedDB, with localStorage as a fallback, then exported as `curation_patch.json`.
+6. `.github/workflows/update-songlist.yml` runs hourly and commits only data changes.
 
 `data/audit.json` is intentionally generated for review. It records inspected videos, rejected source reasons, rejected timestamp rows, and top channels producing non-song timestamp data.
+
+See `docs/quality-review.md` for the full review queue schema, patch merge flow, rule promotion policy, and carry-forward behavior.
 
 ## Commands
 
@@ -54,6 +68,8 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
 npm test
 npm run update
 npm run build:runtime
+node scripts/build-review-queue.js
+node scripts/apply-curation-patch.js path/to/curation_patch.json
 npm run validate
 npm run check:budget
 npm run version:assets

@@ -55,6 +55,27 @@ test("filters common non-song timestamp sections", () => {
   assert.equal(songs[0].artist, "tayori");
 });
 
+test("rejects exact activity marker titles only for unknown artists", () => {
+  const rejected = [];
+  const songs = parseTimestampSongs(["0:06:44 曲紹介\n0:22:24 離席"], {
+    onReject: (entry) => rejected.push(entry),
+  });
+
+  assert.deepEqual(songs, []);
+  assert.deepEqual(
+    rejected.map((entry) => entry.reason),
+    ["activity_marker_title", "activity_marker_title"],
+  );
+});
+
+test("keeps exact activity marker title when a known artist is explicit", () => {
+  const songs = parseTimestampSongs(["0:06:44 曲紹介 / Known Artist"]);
+
+  assert.equal(songs.length, 1);
+  assert.equal(songs[0].title, "曲紹介");
+  assert.equal(songs[0].artist, "Known Artist");
+});
+
 test("parses split number start end song blocks using start time", () => {
   const songs = parseTimestampSongs([
     [

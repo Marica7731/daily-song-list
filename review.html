@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>歌曲榜来源审核</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f7f4;
+      --panel: #ffffff;
+      --text: #202124;
+      --muted: #666b70;
+      --line: #d9d9d2;
+      --accent: #256f6f;
+      --danger: #b3261e;
+      --warn: #a15c00;
+      --ok: #256f3a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header, main { max-width: 1440px; margin: 0 auto; padding: 16px; }
+    header { display: flex; gap: 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    h1 { margin: 0; font-size: 22px; letter-spacing: 0; }
+    button, select, input[type="search"] {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+    }
+    button { padding: 6px 10px; cursor: pointer; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button.danger { color: var(--danger); }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .layout { display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: 16px; align-items: start; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+    .panel h2 { margin: 0; padding: 12px 14px; font-size: 15px; border-bottom: 1px solid var(--line); }
+    .queue { max-height: calc(100vh - 164px); overflow: auto; }
+    .queue-item { width: 100%; display: block; text-align: left; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 10px 12px; background: transparent; }
+    .queue-item[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+    .queue-title { font-weight: 650; overflow-wrap: anywhere; }
+    .meta { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .badge { display: inline-flex; align-items: center; min-height: 22px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+    .badge.high { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+    .badge.medium { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
+    .badge.low { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+    .detail { display: grid; gap: 12px; padding: 14px; }
+    .source-text { max-height: 240px; overflow: auto; white-space: pre-wrap; border: 1px solid var(--line); border-radius: 6px; padding: 10px; background: color-mix(in srgb, var(--panel) 70%, var(--bg)); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+    th { position: sticky; top: 0; background: var(--panel); z-index: 1; }
+    td.actions { min-width: 260px; }
+    .entry-table { max-height: 420px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; }
+    .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .empty { padding: 24px; color: var(--muted); }
+    @media (max-width: 900px) {
+      header { align-items: flex-start; flex-direction: column; }
+      .layout { grid-template-columns: 1fr; }
+      .queue { max-height: 360px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>歌曲榜来源审核</h1>
+    <div class="toolbar">
+      <span id="summary" class="badge">loading</span>
+      <button id="exportPatch" class="primary">导出 curation_patch.json</button>
+      <button id="copyPatch">复制修正 JSON</button>
+      <button id="copyCodex">复制 Codex 说明</button>
+      <button id="clearDrafts" class="danger">清空未提交修改</button>
+      <label class="badge">导入 <input id="importPatch" type="file" accept="application/json" hidden></label>
+    </div>
+  </header>
+  <main class="layout">
+    <section class="panel">
+      <h2>审核队列</h2>
+      <div class="toolbar" style="padding: 10px 12px; border-bottom: 1px solid var(--line);">
+        <select id="riskFilter" aria-label="风险等级">
+          <option value="">全部风险</option>
+          <option value="high">高风险</option>
+          <option value="medium">中风险</option>
+          <option value="low">低风险</option>
+        </select>
+        <label class="badge"><input id="nicheUnknownOnly" type="checkbox"> 小众+待补歌手</label>
+        <input id="searchBox" type="search" placeholder="视频、频道、来源">
+      </div>
+      <div id="queue" class="queue"></div>
+    </section>
+    <section class="panel">
+      <h2>来源详情</h2>
+      <div id="detail" class="detail"><div class="empty">选择一个来源</div></div>
+    </section>
+  </main>
+  <script src="assets/review.js"></script>
+</body>
+</html>

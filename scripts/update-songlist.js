@@ -8,6 +8,20 @@ const {
 } = require("../assets/source-filter");
 const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
 const { compactRankDiff, writeRuntimeJson } = require("./build-runtime-data");
+const {
+  applyCurationToSources,
+  applyCurationToVideos,
+  collectForceRefreshVideoIds,
+  createSourceRecord,
+  hashNormalizedText,
+  isActivityMarkerTitle,
+  isCandidateActivityTitle,
+  isUnknownArtist,
+  loadCurationContext,
+  riskLevel,
+  riskScoreFromReasons,
+  sourceRiskReasons,
+} = require("./curation");
 const { isLikelyNonSongEntry, isTimestampCandidateText, normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -95,9 +109,11 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
   const startedAt = new Date();
+  const curationContext = loadCurationContext();
+  const forceRefreshVideoIds = collectForceRefreshVideoIds(curationContext);
   const previousPayload = readJsonIfExists(LATEST_PATH);
   const previousAudit = readJsonIfExists(AUDIT_PATH);
-  const carryForward = collectCarryForwardVideos(previousPayload, previousAudit, startedAt);
+  const carryForward = collectCarryForwardVideos(previousPayload, previousAudit, startedAt, { forceRefreshVideoIds });
   const { candidates, searchSummaries } = await collectCandidates(startedAt);
   const selection = selectCandidatesForInspection(candidates, startedAt, {
     carryForwardEnabled: carryForward.enabled,
@@ -109,8 +125,9 @@ async function main() {
     `[update] candidates=${candidates.length} inspect=${inspectionCandidates.length} carry=${carryForward.videos.length} skippedKnown=${selection.skippedKnownCandidateCount} mode=${selection.mode}`,
   );
 
-  const { inspected, videos: fetchedVideos, audits } = await inspectCandidates(inspectionCandidates);
-  const videos = filterBlockedVideos(mergeFetchedAndCarriedVideos(fetchedVideos, carryForward.videos));
+  const { inspected, videos: fetchedVideos, audits } = await inspectCandidates(inspectionCandidates, curationContext);
+  const curatedMergedVideos = applyCurationToVideos(mergeFetchedAndCarriedVideos(fetchedVideos, carryForward.videos), curationContext);
+  const videos = filterBlockedVideos(curatedMergedVideos);
 
   const capturedAt = new Date();
   const groups = applyGroupQualityFilters(buildGroups(videos, capturedAt));
@@ -124,6 +141,8 @@ async function main() {
     schemaVersion: 1,
     generatedAt: capturedAt.toISOString(),
     capturedAt: capturedAt.toISOString(),
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
     source: {
       name: "YouTube search + watch comments/descriptions",
       keywords: KEYWORDS.map((keyword) => ({ keyword: keyword.keyword, key: keyword.key })),
@@ -152,6 +171,14 @@ async function main() {
       rateLimitCooldownMs: RATE_LIMIT_COOLDOWN_MS,
       max429Errors: MAX_429_ERRORS,
       rateLimitErrorCount: requestLimiter.error429Count,
+      curationVersion: curationContext.version,
+      curationHash: curationContext.hash,
+      curationSummary: {
+        manualDroppedEntryCount: curatedMergedVideos.curationStats?.droppedEntries || 0,
+        manualReplacedEntryCount: curatedMergedVideos.curationStats?.replacedEntries || 0,
+        manualDroppedVideoCount: curatedMergedVideos.curationStats?.droppedVideos || 0,
+        forceRefreshVideoCount: forceRefreshVideoIds.size,
+      },
       recentBucketLimit: RECENT_BUCKET_LIMIT,
       monthRefreshLimit: MONTH_REFRESH_LIMIT,
       monthBackfillTarget: MONTH_BACKFILL_TARGET,
@@ -174,6 +201,8 @@ async function main() {
   writeJson(AUDIT_PATH, {
     schemaVersion: 1,
     generatedAt: capturedAt.toISOString(),
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
     candidateCount: candidates.length,
     inspectedCount: inspected.length,
     fetchedUsableVideoCount: fetchedVideos.length,
@@ -187,6 +216,7 @@ async function main() {
       knownVideoSkipCount: carryForward.skipVideoIds.size,
       skippedKnownCandidateCount: selection.skippedKnownCandidateCount,
       monthBackfillEnabled: selection.monthBackfillEnabled,
+      forceRefreshVideoCount: forceRefreshVideoIds.size,
     },
     usableVideoCount: videos.length,
     searches: searchSummaries,
@@ -198,7 +228,7 @@ async function main() {
   });
   writeJson(path.join(DATA_DIR, "72h.json"), groups["72h"]);
   writeJson(path.join(DATA_DIR, "1m.json"), groups["1m"]);
-  writeRankDiffFiles(payload, previousSnapshot);
+  writeRankDiffFiles(payload, previousSnapshot, curationContext);
   writeSnapshot(payload, capturedAt);
   writeJson(STATUS_PATH, payload.status);
   console.log(`[update] success totalItems=${totalItems} snapshot=${hourSnapshotId(capturedAt)}`);
@@ -335,7 +365,7 @@ function candidateSort(a, b) {
   return (b.sourceGroups?.length || 0) - (a.sourceGroups?.length || 0);
 }
 
-function collectCarryForwardVideos(previousPayload, previousAudit, now) {
+function collectCarryForwardVideos(previousPayload, previousAudit, now, options = {}) {
   const nowMs = now.getTime();
   const counts = { h72: 0, month: 0 };
   const empty = (reason, from = "", ageHours = null) => ({
@@ -372,6 +402,7 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now) {
   if (!videos.size) return empty("no_carryable_previous_videos", from, ageHours);
   const skipVideoIds = new Set([...videos.values()].filter((video) => !video.needsRefreshFromDirtyCarryForward).map((video) => video.videoId));
   addKnownAuditSkipIds(skipVideoIds, previousAudit);
+  for (const videoId of options.forceRefreshVideoIds || []) skipVideoIds.delete(videoId);
   return {
     enabled: true,
     reason: "previous_latest_fresh",
@@ -398,7 +429,11 @@ function upsertCarriedVideo(videos, item, sourceGroups, from) {
 function normalizeCarryForwardItem(item, sourceGroups, from) {
   if (!isValidVideoId(item?.videoId)) return null;
   const originalSongs = item.songs || [];
-  const normalizedSongs = originalSongs.map(normalizeParsedSong).filter(isValidSong).filter((song) => !isLikelyNonSongEntry(song));
+  const normalizedSongs = originalSongs
+    .map(normalizeParsedSong)
+    .filter(isValidSong)
+    .filter((song) => !isLikelyNonSongEntry(song))
+    .filter((song) => !isActivityMarkerTitle(song.title, song.artist));
   const { songs } = filterArtistRichMixedSourceSongs(normalizedSongs);
   if (!songs.length) return null;
   const needsRefreshFromDirtyCarryForward = hasDirtyCarriedSongs(originalSongs, songs);
@@ -552,7 +587,7 @@ function recentBuckets(nowMs, horizonMs = H72_MS) {
   return buckets.filter((bucket) => bucket.to > cutoff);
 }
 
-async function inspectCandidates(candidates) {
+async function inspectCandidates(candidates, curationContext = loadCurationContext()) {
   const results = new Array(candidates.length);
   let nextIndex = 0;
   const workerCount = Math.min(VIDEO_CONCURRENCY, Math.max(1, candidates.length));
@@ -562,7 +597,7 @@ async function inspectCandidates(candidates) {
       nextIndex += 1;
       const candidate = candidates[index];
       try {
-        const result = await fetchVideoSongList(candidate);
+        const result = await fetchVideoSongList(candidate, curationContext);
         const detail = result?.detail || null;
         results[index] = {
           inspected: { videoId: candidate.videoId, ok: Boolean(detail), songCount: detail?.songs.length || 0 },
@@ -600,17 +635,19 @@ async function inspectCandidates(candidates) {
   };
 }
 
-async function fetchVideoSongList(candidate) {
+async function fetchVideoSongList(candidate, curationContext = loadCurationContext()) {
   const html = await fetchText(`https://www.youtube.com/watch?v=${candidate.videoId}&hl=ja&persist_hl=1`);
   const apiKey = extractRegex(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
   const clientVersion = extractRegex(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/) || "2.20260601.00.00";
   const initialData = extractJsonAfter(html, "ytInitialData");
-  const comments = extractDescriptionCandidates(initialData).map((text) => ({ text, sourceType: "description" }));
+  const comments = extractDescriptionCandidates(initialData).map((text, index) =>
+    createSourceRecord({ videoId: candidate.videoId, sourceType: "description", text, index }),
+  );
   const continuation = findCommentsContinuation(initialData);
   if (apiKey && continuation) {
     const response = await fetchYouTubeContinuation(apiKey, clientVersion, continuation);
-    comments.push(...extractCommentTexts(response).map((text) => ({ text, sourceType: "comment" })));
-    comments.push(...(await fetchCommentReplyTexts(apiKey, clientVersion, response, REPLY_LIMIT)).map((text) => ({ text, sourceType: "reply" })));
+    comments.push(...extractCommentTexts(response, "comment", candidate.videoId));
+    comments.push(...(await fetchCommentReplyTexts(apiKey, clientVersion, response, REPLY_LIMIT, candidate.videoId)));
   }
 
   const audit = {
@@ -632,13 +669,14 @@ async function fetchVideoSongList(candidate) {
   };
   const sources = [];
   const rejectedSources = [];
-  for (const { text, sourceType } of comments) {
+  for (const sourceRecord of comments) {
+    const { text } = sourceRecord;
     const rejectedEntries = [];
     const songs = parseTimestampSongs([text], {
       onReject: (entry) => rejectedEntries.push(compactRejectedEntry(entry)),
     });
     if (!songs.length && !rejectedEntries.length) continue;
-    const source = buildSongSource(songs, rejectedEntries, text, sourceType, candidate);
+    const source = buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curationContext);
     audit.sources.push(source.summary);
     audit.rejectedEntryCount += source.summary.rejectedEntryCount;
     if (source.rejected) {
@@ -652,6 +690,13 @@ async function fetchVideoSongList(candidate) {
   audit.rejectedSourceCount = rejectedSources.length;
   audit.result = selected.length ? "selected" : audit.sources.length ? "no_usable_song_source" : audit.result;
   audit.selectedSongCount = selected.length;
+  const selectedSourceId = selected.sourceQuality?.sourceId || "";
+  const selectedSourceHash = selected.sourceQuality?.sourceHash || "";
+  for (const source of audit.sources) {
+    source.selected = Boolean(
+      (selectedSourceId && source.sourceId === selectedSourceId) || (selectedSourceHash && source.sourceHash === selectedSourceHash),
+    );
+  }
   if (!selected.length) return { detail: null, audit };
 
   return {
@@ -674,6 +719,8 @@ async function fetchVideoSongList(candidate) {
       rejectedSources: rejectedSources.slice(0, 5),
       rejectedEntryCount: audit.rejectedEntryCount,
       sourceQuality: selected.sourceQuality || null,
+      selectedSourceId,
+      selectedSourceHash,
       songs: selected.map(normalizeParsedSong).map((song, index) => ({
         index: index + 1,
         time: song.time,
@@ -681,16 +728,44 @@ async function fetchVideoSongList(candidate) {
         title: song.title,
         artist: displayArtist(song.artist),
         raw: song.raw,
+        rawHash: song.rawHash || hashNormalizedText(song.raw || ""),
+        sourceId: song.sourceId || selectedSourceId,
+        sourceHash: song.sourceHash || selectedSourceHash,
       })),
     },
     audit,
   };
 }
 
-function buildSongSource(songs, rejectedEntries, sourceText, sourceType, candidate) {
-  const likelySongEntries = songs.filter((song) => !isLikelyNonSongEntry(song));
-  const additionallyRejected = songs
-    .filter((song) => isLikelyNonSongEntry(song))
+function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curationContext = loadCurationContext()) {
+  const sourceText = sourceRecord.text || "";
+  const sourceType = sourceRecord.sourceType || "unknown";
+  const sourceId = sourceRecord.sourceId || "";
+  const sourceHash = sourceRecord.sourceHash || hashNormalizedText(sourceText);
+  const identifiedSongs = songs.map((song) => ({
+    ...song,
+    sourceId,
+    sourceHash,
+    sourceType,
+    rawHash: hashNormalizedText(song.raw || `${song.time || ""} ${song.title || ""}`),
+  }));
+  const preSource = {
+    sourceId,
+    sourceHash,
+    sourceType,
+    songs: identifiedSongs,
+    stats: { sourceType, keptCount: identifiedSongs.length },
+  };
+  const curatedSources = applyCurationToSources([preSource], curationContext, candidate);
+  const curatedSongs = curatedSources[0]?.songs || [];
+  const manuallyRejectedSource = !curatedSources.length && identifiedSongs.length > 0;
+  const likelySongEntries = curatedSongs.filter((song) => song.forceKept || !isLikelyNonSongEntry(song));
+  const curatedByRawHash = new Map(curatedSongs.map((song) => [song.rawHash, song]));
+  const additionallyRejected = identifiedSongs
+    .filter((song) => {
+      const curated = curatedByRawHash.get(song.rawHash);
+      return !curated || (!curated.forceKept && isLikelyNonSongEntry(song));
+    })
     .map((song) =>
       compactRejectedEntry({
         reason: "source_level_likely_non_song_entry",
@@ -704,26 +779,50 @@ function buildSongSource(songs, rejectedEntries, sourceText, sourceType, candida
   const cleaned = mixedSourceFilter.songs;
   const allRejectedEntries = [...rejectedEntries, ...additionallyRejected, ...mixedSourceFilter.rejectedEntries];
   const stats = sourceStats(cleaned, songs, allRejectedEntries, sourceText, sourceType);
-  const rejectedReason = rejectedSongSourceReason(stats, candidate);
+  stats.sourceId = sourceId;
+  stats.sourceHash = sourceHash;
+  const riskReasons = sourceRiskReasons({ songs: cleaned, stats });
+  stats.riskReasons = riskReasons;
+  stats.riskScore = riskScoreFromReasons(riskReasons, stats);
+  stats.riskLevel = riskLevel(stats.riskScore);
+  const rejectedReason = manuallyRejectedSource ? "manual_reject_source" : rejectedSongSourceReason(stats, candidate);
+  const sourceTextIsNeeded = stats.riskScore > 0 || Boolean(rejectedReason);
   return {
     songs: cleaned,
     stats,
     rejected: Boolean(rejectedReason),
     rejectedReason,
     summary: {
+      sourceId,
+      sourceHash,
       sourceType,
+      sourceIndex: sourceRecord.sourceIndex || 0,
+      commentId: sourceRecord.commentId || "",
+      authorName: sourceRecord.authorName || "",
       reason: rejectedReason,
+      sourceScore: sourceScore({ songs: cleaned, stats }),
+      riskScore: stats.riskScore,
+      riskLevel: stats.riskLevel,
+      riskReasons,
       originalCount: stats.originalCount,
       keptCount: cleaned.length,
+      knownSongCount: stats.knownSongCount,
       artistCount: stats.artistCount,
+      unknownArtistCount: stats.unknownArtistCount,
+      activityMarkerCount: stats.activityMarkerCount,
+      activityMarkerRatio: stats.activityMarkerRatio,
+      nicheCount: stats.nicheCount,
+      nicheRatio: stats.nicheRatio,
       topicCount: stats.topicCount,
       structuralCount: stats.structuralCount,
       sentenceLikeCount: stats.sentenceLikeCount,
       sample: songs.slice(0, 8).map((song) => `${song.time} ${song.title}`),
+      entries: cleaned.slice(0, 120).map(compactAcceptedEntry),
       rejectedEntryCount: allRejectedEntries.length,
       rejectedEntryReasons: countBy(allRejectedEntries, (entry) => entry.reason),
       rejectedSamples: allRejectedEntries.slice(0, 8),
       rejectedEntries: allRejectedEntries,
+      ...(sourceTextIsNeeded ? { sourceText } : {}),
     },
   };
 }
@@ -764,6 +863,12 @@ function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType)
     rejectedEntries.filter((entry) => isTopicLikeEntry(entry)).length;
   const sentenceLikeCount = original.filter((song) => isSentenceLikeNoArtistEntry(song)).length;
   const artistCount = cleaned.filter((song) => isUsableArtist(song.artist)).length;
+  const unknownArtistCount = cleaned.filter((song) => isUnknownArtist(song.artist)).length;
+  const activityMarkerCount =
+    cleaned.filter((song) => isCandidateActivityTitle(song.title)).length +
+    rejectedEntries.filter((entry) => entry.reason === "activity_marker_title" || isCandidateActivityTitle(entry.title)).length;
+  const nicheCount = cleaned.filter((song) => song.isNiche === true).length;
+  const knownSongCount = cleaned.filter((song) => isUsableArtist(song.artist) || song.isNiche === false).length;
   const structuralCount =
     original.filter((song) => hasSetlistStructure(song.raw)).length +
     rejectedEntries.filter((entry) => hasSetlistStructure(entry.line)).length;
@@ -771,8 +876,15 @@ function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType)
     sourceType,
     originalCount: rawCount,
     keptCount: cleaned.length,
+    knownSongCount,
     artistCount,
     artistRatio: cleaned.length ? artistCount / cleaned.length : 0,
+    unknownArtistCount,
+    unknownArtistRatio: cleaned.length ? unknownArtistCount / cleaned.length : 0,
+    activityMarkerCount,
+    activityMarkerRatio: rawCount ? activityMarkerCount / rawCount : 0,
+    nicheCount,
+    nicheRatio: cleaned.length ? nicheCount / cleaned.length : 0,
     topicCount,
     topicRatio: rawCount ? topicCount / rawCount : 0,
     sentenceLikeCount,
@@ -784,6 +896,7 @@ function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType)
 
 function rejectedSongSourceReason(stats, candidate) {
   if (stats.keptCount <= 0) return "no_song_after_filter";
+  if (stats.riskLevel === "high") return "high_risk_source";
   if (stats.keptCount < 2 && !stats.hasSetlistKeyword) return "too_few_timestamp_songs";
   if (stats.originalCount >= 6 && stats.artistCount === 0 && stats.topicCount >= 2 && !stats.hasSetlistKeyword) {
     return "topic_timeline_without_artists";
@@ -842,10 +955,35 @@ function compactRejectedEntry(entry) {
   return {
     reason: entry.reason || "unknown",
     time: entry.time || "",
+    seconds: entry.time ? timeStringToSeconds(entry.time) : null,
     title: entry.title || entry.tail || "",
     artist: entry.artist || "",
     line: truncateAuditText(entry.line || entry.tail || "", 180),
+    rawHash: hashNormalizedText(entry.line || entry.tail || ""),
   };
+}
+
+function compactAcceptedEntry(song) {
+  return {
+    status: "accepted",
+    time: song.time || "",
+    seconds: song.seconds,
+    title: song.title || "",
+    artist: song.artist || "",
+    raw: song.raw || "",
+    rawHash: song.rawHash || hashNormalizedText(song.raw || `${song.time || ""} ${song.title || ""}`),
+    sourceId: song.sourceId || "",
+    sourceHash: song.sourceHash || "",
+    riskReasons: sourceRiskReasons({ songs: [song], stats: { keptCount: 1, unknownArtistCount: isUnknownArtist(song.artist) ? 1 : 0 } }),
+  };
+}
+
+function timeStringToSeconds(time) {
+  const parts = String(time || "")
+    .split(":")
+    .map((part) => Number.parseInt(part, 10));
+  if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return null;
+  return parts[0] * 3600 + parts[1] * 60 + parts[2];
 }
 
 function truncateAuditText(text, limit) {
@@ -976,7 +1114,10 @@ function applyGroupQualityFilters(groups) {
         items: group.items
           .map((item) => ({
             ...item,
-            songs: (item.songs || []).map(normalizeParsedSong).filter((song) => !isLikelyNonSongEntry(song)),
+            songs: (item.songs || [])
+              .map(normalizeParsedSong)
+              .filter((song) => !isLikelyNonSongEntry(song))
+              .filter((song) => !isActivityMarkerTitle(song.title, song.artist)),
           }))
           .filter((item) => !isLowQualitySelectedItem(item)),
       },
@@ -984,18 +1125,18 @@ function applyGroupQualityFilters(groups) {
   );
 }
 
-function writeRankDiffFiles(payload, previousSnapshot = readPreviousSuccessfulSnapshot(payload)) {
-  const diffs = buildRankDiffs(payload, previousSnapshot);
+function writeRankDiffFiles(payload, previousSnapshot = readPreviousSuccessfulSnapshot(payload), curationContext = null) {
+  const diffs = buildRankDiffs(payload, previousSnapshot, curationContext);
   for (const range of DIFF_RANGES) {
     writeRuntimeJson(path.join(DIFF_DIR, range.file), compactRankDiff(diffs[range.id]));
   }
   return diffs;
 }
 
-function buildRankDiffs(payload, previousSnapshot = null) {
-  const previousPayload = previousSnapshotPayload(previousSnapshot);
-  const previous = previousSnapshotMetadata(previousSnapshot);
-  const current = currentSnapshotMetadata(payload);
+function buildRankDiffs(payload, previousSnapshot = null, curationContext = null) {
+  const previousPayload = cleanSnapshotPayloadForCuration(previousSnapshotPayload(previousSnapshot), curationContext);
+  const previous = previousSnapshotMetadata(previousSnapshot, curationContext);
+  const current = currentSnapshotMetadata(payload, curationContext);
   return Object.fromEntries(
     DIFF_RANGES.map((range) => [
       range.id,
@@ -1091,7 +1232,7 @@ function compareValues(a, b) {
   return rankCollator.compare(String(a || ""), String(b || ""));
 }
 
-function currentSnapshotMetadata(payload) {
+function currentSnapshotMetadata(payload, curationContext = null) {
   const generatedAt = payload?.generatedAt || payload?.capturedAt || "";
   const capturedAt = payload?.capturedAt || payload?.generatedAt || "";
   const capturedDate = new Date(capturedAt);
@@ -1100,6 +1241,8 @@ function currentSnapshotMetadata(payload) {
     path: "",
     generatedAt,
     capturedAt,
+    curationVersion: curationContext?.version || payload?.curationVersion || "",
+    curationHash: curationContext?.hash || payload?.curationHash || "",
   };
 }
 
@@ -1109,7 +1252,7 @@ function previousSnapshotPayload(previousSnapshot) {
   return previousSnapshot.groups ? previousSnapshot : null;
 }
 
-function previousSnapshotMetadata(previousSnapshot) {
+function previousSnapshotMetadata(previousSnapshot, curationContext = null) {
   const payload = previousSnapshotPayload(previousSnapshot);
   if (!payload) return null;
   const entry = previousSnapshot?.entry || {};
@@ -1118,6 +1261,29 @@ function previousSnapshotMetadata(previousSnapshot) {
     path: entry.path || "",
     generatedAt: payload.generatedAt || entry.generatedAt || "",
     capturedAt: payload.capturedAt || entry.capturedAt || payload.generatedAt || entry.generatedAt || "",
+    curationVersion: curationContext?.version || payload.curationVersion || "",
+    curationHash: curationContext?.hash || payload.curationHash || "",
+  };
+}
+
+function cleanSnapshotPayloadForCuration(payload, curationContext = null) {
+  if (!payload?.groups) return payload;
+  const cleanedGroups = {};
+  for (const [groupId, group] of Object.entries(payload.groups)) {
+    const items = applyCurationToVideos(group.items || [], curationContext || loadCurationContext());
+    cleanedGroups[groupId] = {
+      ...group,
+      items: applyGroupQualityFilters({
+        [groupId]: {
+          ...group,
+          items,
+        },
+      })[groupId].items,
+    };
+  }
+  return {
+    ...payload,
+    groups: cleanedGroups,
   };
 }
 
@@ -1185,6 +1351,8 @@ function writeSnapshot(payload, capturedAt) {
     path: `data/snapshots/${snapshotId}.json`,
     generatedAt: payload.generatedAt,
     capturedAt: payload.capturedAt,
+    curationVersion: payload.curationVersion || "",
+    curationHash: payload.curationHash || "",
     label: formatSnapshotLabel(capturedAt),
     itemCounts: {
       "72h": payload.groups["72h"].items.length,
@@ -1334,7 +1502,7 @@ function looksLikeCommentsContinuation(item) {
   return /comment|コメント/i.test(text);
 }
 
-async function fetchCommentReplyTexts(apiKey, clientVersion, commentsResponse, maxContinuations) {
+async function fetchCommentReplyTexts(apiKey, clientVersion, commentsResponse, maxContinuations, videoId = "") {
   const comments = [];
   const seen = new Set();
   const pending = extractCommentReplyContinuationTokens(commentsResponse);
@@ -1343,7 +1511,7 @@ async function fetchCommentReplyTexts(apiKey, clientVersion, commentsResponse, m
     if (seen.has(token)) continue;
     seen.add(token);
     const response = await fetchYouTubeContinuation(apiKey, clientVersion, token);
-    comments.push(...extractCommentTexts(response));
+    comments.push(...extractCommentTexts(response, "reply", videoId));
     for (const nextToken of extractCommentReplyContinuationTokens(response)) {
       if (!seen.has(nextToken)) pending.push(nextToken);
     }
@@ -1364,18 +1532,55 @@ function extractCommentReplyContinuationTokens(data) {
   return tokens;
 }
 
-function extractCommentTexts(data) {
+function extractCommentTexts(data, sourceType = "comment", videoId = "") {
   const comments = [];
   for (const item of walkDicts(data)) {
+    const commentId = commentIdFromItem(item);
+    const authorName = authorNameFromItem(item);
     const entityContent = item.commentEntityPayload?.properties?.content?.content;
-    if (typeof entityContent === "string") comments.push(entityContent);
+    if (typeof entityContent === "string") {
+      comments.push(createSourceRecord({ videoId, sourceType, commentId, authorName, text: entityContent, index: comments.length }));
+    }
     const rendererRuns = item.commentRenderer?.contentText?.runs;
     if (Array.isArray(rendererRuns)) {
       const text = rendererRuns.map((run) => run.text || "").join("");
-      if (text) comments.push(text);
+      if (text) comments.push(createSourceRecord({ videoId, sourceType, commentId, authorName, text, index: comments.length }));
     }
   }
-  return [...new Set(comments)];
+  return dedupeSourceRecords(comments);
+}
+
+function dedupeSourceRecords(records) {
+  const seen = new Set();
+  const result = [];
+  for (const record of records || []) {
+    const key = `${record.sourceId}:${record.sourceHash}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(record);
+  }
+  return result;
+}
+
+function commentIdFromItem(item) {
+  return (
+    item.commentEntityPayload?.properties?.commentId ||
+    item.commentEntityPayload?.properties?.commentKey ||
+    item.commentRenderer?.commentId ||
+    item.commentRenderer?.comment?.commentId ||
+    item.commentThreadRenderer?.comment?.commentRenderer?.commentId ||
+    ""
+  );
+}
+
+function authorNameFromItem(item) {
+  return (
+    item.commentEntityPayload?.author?.displayName ||
+    item.commentRenderer?.authorText?.simpleText ||
+    textFrom(item.commentRenderer?.authorText) ||
+    textFrom(item.commentThreadRenderer?.comment?.commentRenderer?.authorText) ||
+    ""
+  );
 }
 
 async function fetchYouTubeContinuation(apiKey, clientVersion, continuation) {
@@ -1451,10 +1656,22 @@ function selectBestSongs(sources) {
     return a.songs[0].seconds - b.songs[0].seconds;
   })[0];
   best.songs.sourceQuality = {
+    sourceId: best.stats.sourceId || "",
+    sourceHash: best.stats.sourceHash || "",
     sourceType: best.stats.sourceType,
+    sourceScore: sourceScore(best),
+    riskScore: best.stats.riskScore || 0,
+    riskLevel: best.stats.riskLevel || "low",
+    riskReasons: best.stats.riskReasons || [],
     originalCount: best.stats.originalCount,
     keptCount: best.stats.keptCount,
+    knownSongCount: best.stats.knownSongCount,
     artistCount: best.stats.artistCount,
+    unknownArtistCount: best.stats.unknownArtistCount,
+    activityMarkerCount: best.stats.activityMarkerCount,
+    activityMarkerRatio: best.stats.activityMarkerRatio,
+    nicheCount: best.stats.nicheCount,
+    nicheRatio: best.stats.nicheRatio,
     topicCount: best.stats.topicCount,
     structuralCount: best.stats.structuralCount,
     sentenceLikeCount: best.stats.sentenceLikeCount,
@@ -1570,7 +1787,17 @@ function roundNumber(value, digits = 2) {
 
 function sourceScore(source) {
   const stats = source.stats;
-  return stats.keptCount + stats.artistCount * 4 + stats.structuralCount * 1.5 + (stats.hasSetlistKeyword ? 5 : 0) - stats.topicCount * 8;
+  if (stats.riskLevel === "high") return -100000 + (stats.knownSongCount || 0);
+  return (
+    (stats.knownSongCount || 0) * 7 +
+    (stats.artistCount || 0) * 4 +
+    (stats.structuralCount || 0) * 1.5 +
+    (stats.hasSetlistKeyword ? 5 : 0) +
+    (stats.keptCount || 0) * 0.5 -
+    (stats.activityMarkerCount || 0) * 24 -
+    (stats.topicCount || 0) * 8 -
+    (stats.sentenceLikeCount || 0) * 3
+  );
 }
 
 function parsePublishedTimestamp(text, nowMs) {
@@ -1811,6 +2038,7 @@ module.exports = {
   buildRankDiffs,
   collectCarryForwardVideos,
   createRequestLimiter,
+  extractCommentTexts,
   filterBlockedVideos,
   filterArtistRichMixedSourceSongs,
   isBlockedSource,
@@ -1819,6 +2047,8 @@ module.exports = {
   parseRetryAfterMs,
   retryDelayMs,
   selectCandidatesForInspection,
+  selectBestSongs,
+  sourceScore,
   writeRankDiffFiles,
   TAIWAN_VTUBER_BLACKLIST,
 };

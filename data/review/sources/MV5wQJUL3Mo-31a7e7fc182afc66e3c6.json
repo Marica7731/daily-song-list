@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T18:49:27.668Z",
+  "reviewId": "review:MV5wQJUL3Mo:31a7e7fc182afc66e3c6",
+  "video": {
+    "videoId": "MV5wQJUL3Mo",
+    "title": "【告知あり歌枠】まったり歌いながら告知があったり。【柘榴シロ】",
+    "channelName": "柘榴シロ@Zakuro shiro",
+    "youtubeUrl": "https://www.youtube.com/watch?v=MV5wQJUL3Mo"
+  },
+  "source": {
+    "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+    "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+    "sourceType": "comment",
+    "selected": true,
+    "sourceTextAvailable": true,
+    "sourceText": "おつしろでした〜♪\n身を削りながらも歌を歌い続けるその姿勢に配信者魂を感じる素敵な配信でした…！\n↓以下タイムスタンプです\n♪悪ノ召使 8:44 - 13:06\n\n♪フランちゃんがものすごい狂っとる 物凄いうた22:04- 26:30 \n\n28:28 告知\n\n♪おこちゃま戦争 33:31 - 36:50\n\n♪スキキライ 43:33 - 45:19",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 38,
+    "riskLevel": "medium",
+    "riskReasons": [
+      "source_activity_marker_ratio_high"
+    ]
+  },
+  "entries": [
+    {
+      "status": "accepted",
+      "seconds": 2210,
+      "time": "0:36:50",
+      "title": "スキキライ",
+      "artist": "未記載",
+      "raw": "36:50 ♪スキキライ",
+      "rawHash": "17f787670eddbd47678e478f86e75403e6772298604d3238278efeb37f6f2e72",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "isNiche": false,
+      "riskReasons": []
+    },
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 524,
+      "time": "0:08:44",
+      "title": "",
+      "artist": "",
+      "raw": "8:44 -",
+      "rawHash": "6db1924fb6a2c0e38a99f63b124434f61a9dd73930c6eb98f94802cfb4915d2a",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 786,
+      "time": "0:13:06",
+      "title": "フランちゃんがものすごい狂っとる 物凄いうた",
+      "artist": "未記載",
+      "raw": "13:06 ♪フランちゃんがものすごい狂っとる 物凄いうた",
+      "rawHash": "1949a0f881f54836ed4f9aaea7e0179a575acd87518ae51e16d91dba9c58aa08",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 1324,
+      "time": "0:22:04",
+      "title": "",
+      "artist": "",
+      "raw": "22:04-",
+      "rawHash": "3cc67a3722577f5f8da9561dee706a83d25e9bf5a71cc6f0ff008036c238b7b7",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 1590,
+      "time": "0:26:30",
+      "title": "",
+      "artist": "",
+      "raw": "26:30",
+      "rawHash": "8440a266ef956e63115f0b72133814ef6a71d14f09002d1042a4edd4f3748f29",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "obvious_non_song_text",
+      "seconds": 1708,
+      "time": "0:28:28",
+      "title": "告知",
+      "artist": "",
+      "raw": "28:28 告知",
+      "rawHash": "9219004a18a63574885cc8874c78621e237342eee65e464d6c130de4aa1956cf",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "riskReasons": [
+        "obvious_non_song_text"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 2011,
+      "time": "0:33:31",
+      "title": "",
+      "artist": "",
+      "raw": "33:31 -",
+      "rawHash": "63b7be1da7851382c41e92894c050ed42cdce764e7b535a1b791f272dde65fd6",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 2613,
+      "time": "0:43:33",
+      "title": "",
+      "artist": "",
+      "raw": "43:33 -",
+      "rawHash": "7861a87c21d2c516c34f11cb9cbd915f948b5f745fa825f22c6ddf523ac157c2",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 2719,
+      "time": "0:45:19",
+      "title": "",
+      "artist": "",
+      "raw": "45:19",
+      "rawHash": "a62c697cbf886d9a4358c6dd13a99d697f599362deadf3e245774506a1fa7819",
+      "sourceId": "UgzS0w3_pZbVGmF0qrd4AaABAg",
+      "sourceHash": "31a7e7fc182afc66e3c647c0a8817c9d145a9a9d9e8668302c32a5f845ac812c",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    }
+  ]
+}

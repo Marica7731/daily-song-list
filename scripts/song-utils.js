@@ -1,4 +1,5 @@
 const { cleanSongTitleNoise, isBlockedSongEntry, isChatReactionShoutText } = require("../assets/source-filter");
+const { isActivityMarkerTitle } = require("./curation");
 
 const TIMESTAMP_RE = /(?<![\dA-Za-z_:])(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)(?!\d)/;
 const TIMESTAMP_TOKEN_RE = /(?<![\dA-Za-z_:])(?:[\[【(（]\s*)?(?:\d{1,2}:[0-5]\d:[0-5]\d|[0-5]?\d:[0-5]\d)(?:\s*[\]】)）])?(?!\d)/g;
@@ -59,6 +60,7 @@ function parseTimestampSongs(comments, options = {}) {
         (isBadSongField(artist) && "bad_artist") ||
         (isCustomEmojiOnlyEntry(title, artist) && "custom_emoji_only") ||
         (isNonSongSectionPair(title, artist) && "section_marker_pair") ||
+        (isActivityMarkerTitle(title, artist) && "activity_marker_title") ||
         (isObviouslyNonSongActivityTitle(title) && "activity_title");
       if (basicRejectReason) {
         rejectTimestampLine(onReject, basicRejectReason, { line, time, tail, title, artist });
