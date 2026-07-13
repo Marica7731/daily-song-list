@@ -75,6 +75,11 @@
     tr.is-drafted { background: color-mix(in srgb, var(--ok) 8%, transparent); }
     .entry-table { border: 1px solid var(--line); border-radius: 6px; overflow: visible; }
     .row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .row-more { position: relative; }
+    .row-more > summary { cursor: pointer; min-height: 34px; display: inline-flex; align-items: center; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; list-style: none; }
+    .row-more > summary::-webkit-details-marker { display: none; }
+    .row-more-menu { position: absolute; right: 0; z-index: 8; min-width: 150px; display: grid; gap: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); box-shadow: 0 8px 24px rgb(0 0 0 / 16%); }
+    .row-more-menu button { width: 100%; text-align: left; }
     .empty { padding: 24px; color: var(--muted); }
     .mobile-tabs { display: none; }
     .edit-grid { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) 90px; gap: 6px; }
@@ -142,6 +147,6 @@
       <div id="detail" class="detail"><div class="empty">选择一个来源</div></div>
     </section>
   </main>
-  <script src="assets/review.js?v=h71a0fbe29284"></script>
+  <script src="assets/review.js?v=h6564a519653d"></script>
 </body>
 </html>

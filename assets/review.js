@@ -29,6 +29,9 @@ const state = {
   selectedEntryHashes: new Set(),
   editingRawHash: "",
   autoAdvance: false,
+  pendingQueueScroll: 0,
+  pendingDetailScroll: 0,
+  scrollSyncTimer: null,
   sourceFilters: {
     q: "",
     onlyMatches: false,
@@ -73,6 +76,7 @@ async function init() {
   await loadScope("current");
   await loadEntryIndex();
   restoreUrlState();
+  await loadScope(els.scopeFilter.value);
   bindEvents();
   await ensureSelectedFromUrl();
   renderSummary();
@@ -81,7 +85,7 @@ async function init() {
 }
 
 async function loadScope(scope) {
-  if (scope === "history" && state.queues.history) return;
+  if (state.queuePayloads[scope]) return;
   const path = queuePathForScope(scope);
   const payload = await fetchJson(path);
   state.queuePayloads[scope] = payload;
@@ -155,6 +159,8 @@ function bindEvents() {
   els.importPatch.addEventListener("change", importPatch);
   els.showQueuePanel?.addEventListener("click", () => setMobilePanel("queue"));
   els.showDetailPanel?.addEventListener("click", () => setMobilePanel("detail"));
+  els.queue.addEventListener("scroll", scheduleScrollUrlSync, { passive: true });
+  els.detail.addEventListener("scroll", scheduleScrollUrlSync, { passive: true });
   window.addEventListener("keydown", handleGlobalKeys, { capture: true });
   window.addEventListener("popstate", async () => {
     restoreUrlState();
@@ -184,7 +190,15 @@ function restoreUrlState() {
   els.nicheUnknownOnly.checked = params.get("onlyNicheUnknown") === "1";
   els.onlyUnreviewed.checked = params.get("onlyUnreviewed") === "1";
   state.targetRawHash = params.get("entry") || "";
+  state.sourceFilters.q = params.get("sourceQ") || "";
   state.sourceFilters.onlyMatches = params.get("onlyMatches") === "1";
+  state.sourceFilters.accepted = params.get("filterAccepted") === "1";
+  state.sourceFilters.rejected = params.get("filterRejected") === "1";
+  state.sourceFilters.niche = params.get("filterNiche") === "1";
+  state.sourceFilters.unknown = params.get("filterUnknown") === "1";
+  state.sourceFilters.modified = params.get("filterModified") === "1";
+  state.pendingQueueScroll = readScrollParam(params.get("queueScroll"));
+  state.pendingDetailScroll = readScrollParam(params.get("detailScroll"));
 }
 
 function syncUrl(mode = "replace") {
@@ -195,12 +209,33 @@ function syncUrl(mode = "replace") {
   if (els.classificationFilter.value) params.set("classification", els.classificationFilter.value);
   if (state.selected?.reviewId) params.set("review", state.selected.reviewId);
   if (state.targetRawHash) params.set("entry", state.targetRawHash);
+  if (state.sourceFilters.q.trim()) params.set("sourceQ", state.sourceFilters.q.trim());
   if (state.sourceFilters.onlyMatches) params.set("onlyMatches", "1");
+  if (state.sourceFilters.accepted) params.set("filterAccepted", "1");
+  if (state.sourceFilters.rejected) params.set("filterRejected", "1");
+  if (state.sourceFilters.niche) params.set("filterNiche", "1");
+  if (state.sourceFilters.unknown) params.set("filterUnknown", "1");
+  if (state.sourceFilters.modified) params.set("filterModified", "1");
+  if (els.queue.scrollTop > 0) params.set("queueScroll", String(Math.round(els.queue.scrollTop)));
+  if (els.detail.scrollTop > 0) params.set("detailScroll", String(Math.round(els.detail.scrollTop)));
   if (els.nicheUnknownOnly.checked) params.set("onlyNicheUnknown", "1");
   if (els.onlyUnreviewed.checked) params.set("onlyUnreviewed", "1");
   const query = params.toString();
   const url = `${window.location.pathname}${query ? `?${query}` : ""}`;
   window.history[mode === "push" ? "pushState" : "replaceState"]({}, "", url);
+}
+
+function readScrollParam(value) {
+  const number = Number(value || 0);
+  return Number.isFinite(number) && number > 0 ? number : 0;
+}
+
+function scheduleScrollUrlSync() {
+  if (state.scrollSyncTimer) window.clearTimeout(state.scrollSyncTimer);
+  state.scrollSyncTimer = window.setTimeout(() => {
+    state.scrollSyncTimer = null;
+    syncUrl();
+  }, 150);
 }
 
 function handleGlobalKeys(event) {
@@ -277,6 +312,7 @@ function renderQueue() {
   const items = filteredQueue();
   if (!items.length) {
     els.queue.innerHTML = `<div class="empty">没有匹配来源</div>`;
+    restorePendingQueueScroll();
     return;
   }
   els.queue.innerHTML = items
@@ -298,6 +334,7 @@ function renderQueue() {
       `,
     )
     .join("");
+  restorePendingQueueScroll();
 }
 
 function renderEntryMatches() {
@@ -305,6 +342,7 @@ function renderEntryMatches() {
   state.globalMatches = matches;
   if (!matches.length) {
     els.queue.innerHTML = `<div class="empty">没有匹配条目</div>`;
+    restorePendingQueueScroll();
     return;
   }
   els.queue.innerHTML = `
@@ -330,6 +368,7 @@ function renderEntryMatches() {
       )
       .join("")}
   `;
+  restorePendingQueueScroll();
 }
 
 function renderEntryPreview(entries) {
@@ -460,7 +499,9 @@ async function selectReview(reviewId, rawHash = "", options = {}) {
     state.sourceFilters.onlyMatches = true;
   }
   setMobilePanel("detail");
+  const hadPendingQueueScroll = Boolean(state.pendingQueueScroll);
   renderQueue();
+  if (!hadPendingQueueScroll) scrollSelectedQueueIntoView();
   renderDetail({ focusTarget: Boolean(rawHash) || options.focusDetail !== false });
   if (options.syncUrl !== false) syncUrl(options.pushUrl ? "push" : "replace");
 }
@@ -543,6 +584,7 @@ function renderDetail(options = {}) {
   updateSourceMatches(entries);
   updateDraftDecorations();
   if (options.preserveScroll) els.detail.scrollTop = scrollTop;
+  else if (!(options.focusTarget && state.targetRawHash)) restorePendingDetailScroll();
   if (options.focusTarget && state.targetRawHash) scrollTargetIntoView();
 }
 
@@ -591,9 +633,14 @@ function renderEntryRow(entry) {
         <button data-row-action="keep">保留</button>
         <button data-row-action="drop" class="danger">删除</button>
         <button data-row-action="edit">编辑</button>
-        <button data-row-action="copy">复制原始行</button>
-        <button data-row-action="copy-json">复制条目 JSON</button>
-        <button data-row-action="open-time">打开时间戳</button>
+        <details class="row-more">
+          <summary>更多</summary>
+          <div class="row-more-menu">
+            <button data-row-action="copy">复制原始行</button>
+            <button data-row-action="copy-json">复制条目 JSON</button>
+            <button data-row-action="open-time">打开时间戳</button>
+          </div>
+        </details>
       </div></td>
     </tr>
   `;
@@ -640,6 +687,7 @@ function handleDetailInput(event) {
     state.sourceFilters.q = event.target.value;
     state.sourceMatchIndex = -1;
     renderDetail({ preserveScroll: true });
+    syncUrl();
   } else if (id === "onlySourceMatches") {
     state.sourceFilters.onlyMatches = event.target.checked;
     renderDetail({ preserveScroll: true });
@@ -647,18 +695,23 @@ function handleDetailInput(event) {
   } else if (id === "filterAccepted") {
     state.sourceFilters.accepted = event.target.checked;
     renderDetail({ preserveScroll: true });
+    syncUrl();
   } else if (id === "filterRejected") {
     state.sourceFilters.rejected = event.target.checked;
     renderDetail({ preserveScroll: true });
+    syncUrl();
   } else if (id === "filterNiche") {
     state.sourceFilters.niche = event.target.checked;
     renderDetail({ preserveScroll: true });
+    syncUrl();
   } else if (id === "filterUnknown") {
     state.sourceFilters.unknown = event.target.checked;
     renderDetail({ preserveScroll: true });
+    syncUrl();
   } else if (id === "filterModified") {
     state.sourceFilters.modified = event.target.checked;
     renderDetail({ preserveScroll: true });
+    syncUrl();
   } else if (id === "autoAdvance") {
     state.autoAdvance = event.target.checked;
   } else if (event.target.classList.contains("entry-select")) {
@@ -717,12 +770,12 @@ async function handleRowAction(action, rawHash, row) {
   if (action === "drop") return addEntryDraft("drop_entry", entry, { reason: "review_drop_entry" });
   if (action === "edit") {
     state.editingRawHash = rawHash;
-    renderDetail({ preserveScroll: true });
+    replaceEntryRow(rawHash);
     return;
   }
   if (action === "cancel-edit") {
     state.editingRawHash = "";
-    renderDetail({ preserveScroll: true });
+    replaceEntryRow(rawHash);
     return;
   }
   if (action === "save-edit") {
@@ -735,9 +788,24 @@ async function handleRowAction(action, rawHash, row) {
       replacement: { title, artist, seconds: secondsValue },
       reason: "review_replace_entry",
     });
+    replaceEntryRow(rawHash);
+    return;
+  }
+}
+
+function replaceEntryRow(rawHash) {
+  const row = els.detail.querySelector(`tr[data-raw-hash="${cssEscape(rawHash)}"]`);
+  const entry = entryByRawHash(rawHash);
+  if (!row || !entry) {
     renderDetail({ preserveScroll: true });
     return;
   }
+  const wrapper = document.createElement("tbody");
+  wrapper.innerHTML = renderEntryRow(entry);
+  const replacement = wrapper.firstElementChild;
+  if (!replacement) return;
+  row.replaceWith(replacement);
+  updateDraftDecorations();
 }
 
 function entryByRawHash(rawHash) {
@@ -773,6 +841,7 @@ async function addDraft(record) {
 function renderAfterDraft() {
   renderSummary();
   updateDraftDecorations();
+  updateQueueDraftDecorations();
   renderQueueSelectionAndDrafts();
 }
 
@@ -792,6 +861,37 @@ function renderQueueSelectionAndDrafts() {
     const reviewId = button.dataset.reviewId;
     button.setAttribute("aria-selected", String(state.selected?.reviewId === reviewId && (!button.dataset.rawHash || state.targetRawHash === button.dataset.rawHash)));
   }
+}
+
+function updateQueueDraftDecorations() {
+  for (const button of els.queue.querySelectorAll("[data-review-id]")) {
+    const reviewId = button.dataset.reviewId;
+    const rawHash = button.dataset.rawHash || "";
+    const item = state.queueByReviewId.get(reviewId);
+    if (rawHash) {
+      const entry = state.entryIndex.find((candidate) => candidate.reviewId === reviewId && candidate.rawHash === rawHash);
+      updateInlineDraftBadge(button, "[data-entry-draft-badge]", entry ? draftForEntry(entry) : null);
+      if (els.onlyUnreviewed.checked) button.hidden = Boolean(entry && isEntryProcessed(entry));
+      continue;
+    }
+    updateInlineDraftBadge(button, "[data-source-draft-badge]", item ? draftForSource(item) : null);
+    if (els.onlyUnreviewed.checked) button.hidden = Boolean(item && isSourceProcessed(item));
+  }
+}
+
+function updateInlineDraftBadge(container, selector, draft) {
+  let badge = container.querySelector(selector);
+  if (!draft) {
+    badge?.remove();
+    return;
+  }
+  if (!badge) {
+    badge = document.createElement("span");
+    badge.className = "badge";
+    badge.dataset[selector.includes("entry") ? "entryDraftBadge" : "sourceDraftBadge"] = "";
+    container.querySelector(".toolbar")?.append(badge);
+  }
+  badge.textContent = draftStatusText(draft);
 }
 
 function upsertRecord(records, record) {
@@ -830,12 +930,12 @@ function draftForSource(item) {
 
 function draftBadgeForEntry(entry) {
   const draft = draftForEntry(entry);
-  return draft ? `<span class="badge">${escapeHtml(draftStatusText(draft))}</span>` : "";
+  return draft ? `<span class="badge" data-entry-draft-badge>${escapeHtml(draftStatusText(draft))}</span>` : "";
 }
 
 function draftBadgeForSource(item) {
   const draft = draftForSource(item);
-  return draft ? `<span class="badge">${escapeHtml(draftStatusText(draft))}</span>` : "";
+  return draft ? `<span class="badge" data-source-draft-badge>${escapeHtml(draftStatusText(draft))}</span>` : "";
 }
 
 function draftStatusText(draft) {
@@ -1077,6 +1177,34 @@ function scrollTargetIntoView() {
   requestAnimationFrame(() => {
     const row = els.detail.querySelector(`tr[data-raw-hash="${cssEscape(state.targetRawHash)}"]`);
     if (row) row.scrollIntoView({ block: "center", behavior: "smooth" });
+  });
+}
+
+function scrollSelectedQueueIntoView() {
+  if (!state.selected?.reviewId) return;
+  const reviewSelector = `[data-review-id="${cssEscape(state.selected.reviewId)}"]`;
+  const entrySelector = state.targetRawHash ? `${reviewSelector}[data-raw-hash="${cssEscape(state.targetRawHash)}"]` : "";
+  requestAnimationFrame(() => {
+    const item = (entrySelector && els.queue.querySelector(entrySelector)) || els.queue.querySelector(reviewSelector);
+    item?.scrollIntoView({ block: "nearest" });
+  });
+}
+
+function restorePendingQueueScroll() {
+  if (!state.pendingQueueScroll) return;
+  const top = state.pendingQueueScroll;
+  state.pendingQueueScroll = 0;
+  requestAnimationFrame(() => {
+    els.queue.scrollTop = top;
+  });
+}
+
+function restorePendingDetailScroll() {
+  if (!state.pendingDetailScroll) return;
+  const top = state.pendingDetailScroll;
+  state.pendingDetailScroll = 0;
+  requestAnimationFrame(() => {
+    els.detail.scrollTop = top;
   });
 }
 

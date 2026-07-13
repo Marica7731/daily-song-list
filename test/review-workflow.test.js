@@ -43,6 +43,21 @@ test("review frontend loads split queues, current entry index, search shortcuts,
   assert.match(script, /event\.metaKey/);
   assert.match(script, /focusGlobalSearch\(\)/);
   assert.match(script, /force_refresh/);
+  assert.match(script, /sourceQ/);
+  assert.match(script, /filterAccepted/);
+  assert.match(script, /queueScroll/);
+  assert.match(script, /detailScroll/);
+  assert.match(script, /await loadScope\(els\.scopeFilter\.value\)/);
+  assert.match(script, /if \(state\.queuePayloads\[scope\]\) return/);
+  assert.match(script, /scrollSelectedQueueIntoView/);
+  assert.match(script, /function replaceEntryRow/);
+  assert.match(script, /function updateQueueDraftDecorations/);
+  assert.match(script, /row\.replaceWith\(replacement\)/);
+  assert.match(script, /class="row-more"/);
+  assert.match(script, /sourceSearchBox[\s\S]*syncUrl\(\)/);
+  assert.match(script, /filterModified[\s\S]*syncUrl\(\)/);
+  const renderAfterDraftBody = script.match(/function renderAfterDraft\(\) \{([\s\S]*?)\n\}/)?.[1] || "";
+  assert.doesNotMatch(renderAfterDraftBody, /renderQueue\(\)/);
   assert.doesNotMatch(script, /\b(?:window\.)?prompt\s*\(/);
 });
 
