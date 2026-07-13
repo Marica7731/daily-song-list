@@ -164,11 +164,11 @@ test("artist rank toggle uses unique song count", () => {
 
 test("song rank toggle uses hidden source count", () => {
   const collapsed = rankToggleModel({ mode: "song", isExpanded: false, hiddenCount: 3, songCount: 1 });
-  assert.equal(collapsed.text, "+3 来源");
-  assert.equal(collapsed.ariaLabel, "查看该歌曲的全部来源");
+  assert.equal(collapsed.text, "+3");
+  assert.equal(collapsed.ariaLabel, "查看其余3个来源");
 
   const expanded = rankToggleModel({ mode: "song", isExpanded: true, hiddenCount: 3 });
-  assert.equal(expanded.text, "收起来源");
+  assert.equal(expanded.text, "收起");
   assert.equal(expanded.ariaLabel, "收起该歌曲来源");
 });
 
@@ -273,6 +273,9 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     showUnknown: false,
     q: "First Good-Bye",
     snapshotPath: "data/snapshots/2026-07-10.json",
+    trend: "all",
+    minCount: 1,
+    detail: "",
   });
 
   const serialized = serializeUrlState(parsed, options);
@@ -288,6 +291,44 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     snapshot: "archive-20260710",
   });
   assert.deepEqual(parseUrlState(serialized, options), parsed);
+});
+
+test("url state parses and serializes trend, minCount, and safe detail targets", () => {
+  const options = urlStateOptions();
+  const parsed = parseUrlState("?trend=up&minCount=5&detail=song%3Atitle%253A%253Aartist", options);
+
+  assert.equal(parsed.trend, "up");
+  assert.equal(parsed.minCount, 5);
+  assert.equal(parsed.detail, "song:title%3A%3Aartist");
+
+  const serialized = serializeUrlState(
+    {
+      range: "72h",
+      view: "songRank",
+      page: 1,
+      pageSize: 50,
+      bucket: "全部",
+      rankMetric: "occurrences",
+      videoLayout: "cards",
+      outside: false,
+      showUnknown: false,
+      q: "",
+      snapshotPath: "data/latest.json",
+      trend: "up",
+      minCount: 5,
+      detail: "song:title%3A%3Aartist",
+    },
+    options,
+  );
+
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serialized)), {
+    trend: "up",
+    minCount: "5",
+    detail: "song:title%3A%3Aartist",
+  });
+  assert.equal(parseUrlState("?trend=sideways&minCount=999&detail=javascript:alert(1)", options).trend, "all");
+  assert.equal(parseUrlState("?trend=sideways&minCount=999&detail=javascript:alert(1)", options).minCount, 1);
+  assert.equal(parseUrlState("?detail=javascript:alert(1)", options).detail, "");
 });
 
 test("url state uses showUnknown=1 only when unknown artists are visible", () => {

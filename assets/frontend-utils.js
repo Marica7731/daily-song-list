@@ -174,8 +174,12 @@
     const fallbackPageSize = positiveInteger(defaults.pageSize, 50);
     const hasPageSizeParam = params.has("pageSize");
     const parsedPageSize = Number.parseInt(params.get("pageSize") || "", 10);
+    const parsedMinCount = Number.parseInt(params.get("minCount") || "", 10);
     const rankMetric = params.get("metric");
     const videoLayout = params.get("layout");
+    const trend = params.get("trend");
+    const validTrendFilters = new Set(options.validTrendFilters || ["all", "new", "up", "down"]);
+    const validMinCounts = new Set((options.validMinCounts || [1, 2, 5, 10]).map(Number));
 
     return {
       range: validRanges.has(params.get("range")) ? params.get("range") : fallbackRange,
@@ -189,6 +193,9 @@
       showUnknown: parseBooleanParam(params.get("showUnknown"), Boolean(defaults.showUnknown)),
       q: params.has("q") ? String(params.get("q") || "").slice(0, 200) : defaults.q || "",
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
+      trend: validTrendFilters.has(trend) ? trend : defaults.trend || "all",
+      minCount: validMinCounts.has(parsedMinCount) ? parsedMinCount : positiveInteger(defaults.minCount, 1),
+      detail: parseDetailParam(params.get("detail")),
     };
   }
 
@@ -202,6 +209,8 @@
       bucket: "全部",
       rankMetric: "occurrences",
       videoLayout: "cards",
+      trend: "all",
+      minCount: 1,
       ...(options.defaults || {}),
     };
     const range = state.range || defaults.range;
@@ -211,6 +220,8 @@
     const bucket = cleanBucketLabel(state.bucket || defaults.bucket);
     const rankMetric = state.rankMetric || defaults.rankMetric;
     const videoLayout = state.videoLayout || defaults.videoLayout;
+    const trend = state.trend || defaults.trend;
+    const minCount = positiveInteger(state.minCount, defaults.minCount);
 
     if (range !== defaults.range) params.set("range", range);
     if (view !== defaults.view) params.set("view", view);
@@ -224,10 +235,29 @@
     if (state.outside) params.set("outside", "1");
     if (state.showUnknown) params.set("showUnknown", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
+    if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
+    if (view !== "videos" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
+    if (state.detail) params.set("detail", serializeDetailParam(state.detail));
 
     const snapshotParam = snapshotParamForPath(state.snapshotPath, options);
     if (snapshotParam) params.set("snapshot", snapshotParam);
     return params.toString();
+  }
+
+  function parseDetailParam(value) {
+    const raw = String(value || "").trim();
+    if (!raw || raw.length > 260) return "";
+    const separator = raw.indexOf(":");
+    if (separator <= 0) return "";
+    const type = raw.slice(0, separator);
+    const key = raw.slice(separator + 1);
+    if (!["song", "artist"].includes(type) || !key || key.length > 240) return "";
+    if (!/^[A-Za-z0-9%._~!$&'()*+,;=:@-]+$/u.test(key)) return "";
+    return `${type}:${key}`;
+  }
+
+  function serializeDetailParam(value) {
+    return parseDetailParam(value);
   }
 
   function parseBooleanParam(value, fallback) {
@@ -532,8 +562,8 @@
 
     const hiddenCount = Math.max(0, Number(options.hiddenCount) || 0);
     return {
-      text: isExpanded ? "收起来源" : `+${hiddenCount} 来源`,
-      ariaLabel: isExpanded ? "收起该歌曲来源" : "查看该歌曲的全部来源",
+      text: isExpanded ? "收起" : `+${hiddenCount}`,
+      ariaLabel: isExpanded ? "收起该歌曲来源" : `查看其余${hiddenCount}个来源`,
     };
   }
 

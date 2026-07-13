@@ -24,10 +24,20 @@ const LIST_PAGE_SIZE_OPTIONS = [50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
 const VIDEO_PAGE_SIZE = 24;
 const CURRENT_FILTER_VERSION = 3;
+const RECENT_SEARCHES_KEY = "dailySongList.recentSearches";
+const DETAIL_BATCH_SIZE = 20;
+const DETAIL_MAX_KEY_LENGTH = 240;
 const RANK_METRICS = {
   occurrences: "收录次数",
   videos: "不同视频数",
 };
+const TREND_FILTERS = {
+  all: "全部",
+  new: "新上榜",
+  up: "上升",
+  down: "下降",
+};
+const MIN_COUNT_OPTIONS = [1, 2, 5, 10];
 const VIDEO_LAYOUTS = {
   cards: "卡片",
   compact: "紧凑",
@@ -208,6 +218,9 @@ const state = {
   indexBucket: INDEX_ALL_BUCKET,
   pageSize: DEFAULT_LIST_PAGE_SIZE,
   rankMetric: "occurrences",
+  trend: "all",
+  minCount: 1,
+  detail: "",
   videoLayout: "cards",
   expandedRows: new Set(),
   filterTimer: null,
@@ -230,11 +243,19 @@ const state = {
   loadedResources: [],
   firstContentMeasured: false,
   eventsBound: false,
+  activeOverlay: "",
+  overlayTrigger: null,
+  filterDraft: null,
+  detailRecord: null,
+  detailSourceLimit: DETAIL_BATCH_SIZE,
+  detailSourceQuery: "",
+  detailTrigger: null,
 };
 
 const els = {
   controls: document.querySelector("#controls"),
   status: document.querySelector("#status"),
+  statusAlerts: document.querySelector("#statusAlerts"),
   summary: document.querySelector("#summary"),
   content: document.querySelector("#videoList"),
   snapshotSelect: document.querySelector("#snapshotSelect"),
@@ -242,11 +263,53 @@ const els = {
   filterInput: document.querySelector("#filterInput"),
   nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
   hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
+  shareButton: document.querySelector("#shareButton"),
+  openSearchButton: document.querySelector("#openSearchButton"),
+  searchDialog: document.querySelector("#searchDialog"),
+  searchPanel: document.querySelector("#searchDialog .search-panel"),
+  searchPanelInput: document.querySelector("#searchPanelInput"),
+  cancelSearchButton: document.querySelector("#cancelSearchButton"),
+  clearSearchButton: document.querySelector("#clearSearchButton"),
+  clearRecentSearchesButton: document.querySelector("#clearRecentSearchesButton"),
+  recentSearches: document.querySelector("#recentSearches"),
+  recentSearchSection: document.querySelector("#recentSearchSection"),
+  searchSuggestions: document.querySelector("#searchSuggestions"),
+  openFilterButton: document.querySelector("#openFilterButton"),
+  desktopFilterButton: document.querySelector("#desktopFilterButton"),
+  filterDialog: document.querySelector("#filterDialog"),
+  filterSheet: document.querySelector("#filterDialog .filter-sheet"),
+  filterCountBadge: document.querySelector("#filterCountBadge"),
+  mobileFilterCountBadge: document.querySelector("#mobileFilterCountBadge"),
+  cancelFilterButton: document.querySelector("#cancelFilterButton"),
+  applyFiltersButton: document.querySelector("#applyFiltersButton"),
+  resetFiltersButton: document.querySelector("#resetFiltersButton"),
+  metricFilterGroup: document.querySelector("#metricFilterGroup"),
+  trendFilterGroup: document.querySelector("#trendFilterGroup"),
+  trendFilterSelect: document.querySelector("#trendFilterSelect"),
+  trendFilterHint: document.querySelector("#trendFilterHint"),
+  minCountSelect: document.querySelector("#minCountSelect"),
+  filterPageSizeSelect: document.querySelector("#filterPageSizeSelect"),
+  filterSnapshotDateSelect: document.querySelector("#filterSnapshotDateSelect"),
+  filterSnapshotSelect: document.querySelector("#filterSnapshotSelect"),
+  mobileBottomNav: document.querySelector("#mobileBottomNav"),
+  detailDialog: document.querySelector("#detailDialog"),
+  detailDrawer: document.querySelector("#detailDialog .detail-drawer"),
+  detailKicker: document.querySelector("#detailKicker"),
+  detailTitle: document.querySelector("#detailTitle"),
+  detailSubtitle: document.querySelector("#detailSubtitle"),
+  detailStats: document.querySelector("#detailStats"),
+  detailSourceSearch: document.querySelector("#detailSourceSearch"),
+  detailSourceCount: document.querySelector("#detailSourceCount"),
+  detailSourceList: document.querySelector("#detailSourceList"),
+  detailMoreButton: document.querySelector("#detailMoreButton"),
+  closeDetailButton: document.querySelector("#closeDetailButton"),
+  shareDetailButton: document.querySelector("#shareDetailButton"),
   backToTop: document.querySelector("#backToTop"),
   toast: document.querySelector("#toast"),
   debugPanel: null,
   rangeTabs: Array.from(document.querySelectorAll("[data-range]")),
   viewTabs: Array.from(document.querySelectorAll("[data-view]")),
+  bottomViewTabs: Array.from(document.querySelectorAll("#mobileBottomNav [data-view]")),
 };
 
 window.printSongListPerformance = function printSongListPerformance() {
@@ -374,12 +437,13 @@ function bindEvents() {
 
   for (const tab of els.viewTabs) {
     tab.addEventListener("click", () => {
-      if (state.view === tab.dataset.view) return;
-      state.view = tab.dataset.view;
-      state.expandedRows.clear();
-      resetPagination();
-      setActiveTab(els.viewTabs, tab);
-      renderOrSyncUrl({ urlMode: "push" });
+      switchView(tab.dataset.view, { urlMode: "push" });
+    });
+  }
+
+  for (const tab of els.bottomViewTabs) {
+    tab.addEventListener("click", () => {
+      switchView(tab.dataset.view, { urlMode: "push" });
     });
   }
 
@@ -411,19 +475,13 @@ function bindEvents() {
     await loadSnapshotPath(path, state.currentSnapshotPath, { urlMode: "push" });
   });
 
-  els.nicheOnlyToggle?.addEventListener("change", () => {
-    state.nicheOnly = Boolean(els.nicheOnlyToggle.checked);
-    state.expandedRows.clear();
-    resetPagination();
-    renderOrSyncUrl({ urlMode: "push" });
+  els.shareButton?.addEventListener("click", () => {
+    shareCurrentLink();
   });
 
-  els.hideUnknownToggle?.addEventListener("change", () => {
-    state.hideUnknownArtist = Boolean(els.hideUnknownToggle.checked);
-    state.expandedRows.clear();
-    resetPagination();
-    renderOrSyncUrl({ urlMode: "push" });
-  });
+  bindSearchOverlayEvents();
+  bindFilterOverlayEvents();
+  bindDetailEvents();
 
   els.summary?.addEventListener("click", async (event) => {
     const copy = event.target.closest("[data-copy-link]");
@@ -450,6 +508,13 @@ function bindEvents() {
   });
 
   els.content.addEventListener("click", (event) => {
+    const detailButton = event.target.closest("[data-open-detail]");
+    if (detailButton) {
+      event.preventDefault();
+      openDetail(detailButton.dataset.detail || "", detailButton);
+      return;
+    }
+
     const clear = event.target.closest("[data-clear-search]");
     if (clear) {
       els.filterInput.value = "";
@@ -516,13 +581,770 @@ function bindEvents() {
     const sourceToggle = event.target.closest("[data-toggle-source]");
     if (sourceToggle) {
       event.preventDefault();
-      toggleSourceDrawer(sourceToggle.closest(".rank-row, .index-row"));
+      openDetail(sourceToggle.dataset.detail || sourceToggle.closest(".rank-row, .index-row")?.dataset.detail || "", sourceToggle);
     }
+  });
+
+  els.content.addEventListener("keydown", (event) => {
+    const input = event.target.closest("[data-jump-page]");
+    if (!input || event.key !== "Enter") return;
+    event.preventDefault();
+    const page = Number.parseInt(input.value || "1", 10);
+    setPage(page);
+    render({ focusAfterPageChange: true, urlMode: "push" });
   });
 
   window.addEventListener("popstate", () => {
     restoreStateFromUrl();
   });
+
+  window.visualViewport?.addEventListener("resize", updateViewportVars, { passive: true });
+  window.visualViewport?.addEventListener("scroll", updateViewportVars, { passive: true });
+  updateViewportVars();
+}
+
+function switchView(nextView, options = {}) {
+  if (!nextView || state.view === nextView) return;
+  storeViewPosition();
+  state.view = nextView;
+  state.expandedRows.clear();
+  state.detail = "";
+  resetPagination();
+  syncControlsFromState();
+  renderOrSyncUrl({ urlMode: options.urlMode || "push" });
+  restoreViewPosition();
+}
+
+function bindSearchOverlayEvents() {
+  els.openSearchButton?.addEventListener("click", () => openSearchOverlay(els.openSearchButton));
+  els.cancelSearchButton?.addEventListener("click", () => closeOverlay("search"));
+  els.clearSearchButton?.addEventListener("click", () => {
+    if (!els.searchPanelInput) return;
+    els.searchPanelInput.value = "";
+    renderSearchSuggestions("");
+    els.searchPanelInput.focus();
+  });
+  els.clearRecentSearchesButton?.addEventListener("click", () => {
+    writeRecentSearches([]);
+    renderRecentSearches();
+  });
+  els.searchDialog?.querySelector("[data-close-overlay='search']")?.addEventListener("click", () => closeOverlay("search"));
+  els.searchPanelInput?.addEventListener("input", () => renderSearchSuggestions(els.searchPanelInput.value));
+  els.searchPanelInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      applySearchFromOverlay(els.searchPanelInput.value);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      closeOverlay("search");
+    }
+  });
+  els.searchSuggestions?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-search-value]");
+    if (!button) return;
+    applySearchFromOverlay(button.dataset.searchValue || button.textContent || "");
+  });
+  els.recentSearches?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-search-value]");
+    if (!button) return;
+    applySearchFromOverlay(button.dataset.searchValue || button.textContent || "");
+  });
+}
+
+function bindFilterOverlayEvents() {
+  els.openFilterButton?.addEventListener("click", () => openFilterOverlay(els.openFilterButton));
+  els.desktopFilterButton?.addEventListener("click", () => openFilterOverlay(els.desktopFilterButton));
+  els.cancelFilterButton?.addEventListener("click", () => closeOverlay("filter"));
+  els.filterDialog?.querySelector("[data-close-overlay='filter']")?.addEventListener("click", () => closeOverlay("filter"));
+  els.applyFiltersButton?.addEventListener("click", () => {
+    applyFilterDraft().catch((error) => showToast(`筛选应用失败：${error.message}`));
+  });
+  els.resetFiltersButton?.addEventListener("click", () => {
+    state.filterDraft = defaultFilterDraft();
+    syncFilterControlsFromDraft(state.filterDraft);
+  });
+  els.filterSnapshotDateSelect?.addEventListener("change", () => {
+    syncDraftSnapshotTimes(els.filterSnapshotDateSelect.value);
+  });
+}
+
+function bindDetailEvents() {
+  els.closeDetailButton?.addEventListener("click", () => closeDetail({ urlMode: "push" }));
+  els.detailDialog?.querySelector("[data-close-overlay='detail']")?.addEventListener("click", () => closeDetail({ urlMode: "push" }));
+  els.detailSourceSearch?.addEventListener("input", () => {
+    state.detailSourceQuery = els.detailSourceSearch.value.trim();
+    state.detailSourceLimit = DETAIL_BATCH_SIZE;
+    renderDetailSources();
+  });
+  els.detailMoreButton?.addEventListener("click", () => {
+    state.detailSourceLimit += DETAIL_BATCH_SIZE;
+    renderDetailSources();
+  });
+  els.shareDetailButton?.addEventListener("click", () => {
+    shareCurrentLink({ label: "详情链接" });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      if (state.activeOverlay) {
+        event.preventDefault();
+        closeOverlay(state.activeOverlay);
+        return;
+      }
+      if (state.detail) {
+        event.preventDefault();
+        closeDetail({ urlMode: "push" });
+        return;
+      }
+    }
+    if (event.key === "Tab") trapModalFocus(event);
+  });
+}
+
+function openSearchOverlay(trigger) {
+  state.overlayTrigger = trigger || document.activeElement;
+  state.activeOverlay = "search";
+  if (els.searchPanelInput) els.searchPanelInput.value = state.filter;
+  renderRecentSearches();
+  renderSearchSuggestions(state.filter);
+  setDialogOpen(els.searchDialog, true);
+  setPageInert(true);
+  window.requestAnimationFrame(() => {
+    focusWithoutScrolling(els.searchPanelInput || els.searchPanel);
+  });
+}
+
+function openFilterOverlay(trigger) {
+  state.overlayTrigger = trigger || document.activeElement;
+  state.activeOverlay = "filter";
+  state.filterDraft = makeFilterDraftFromState();
+  syncFilterControlsFromDraft(state.filterDraft);
+  updateFilterAvailability();
+  setDialogOpen(els.filterDialog, true);
+  setPageInert(true);
+  measureSync("sheet-open", () => {});
+  window.requestAnimationFrame(() => {
+    focusWithoutScrolling(els.filterSheet || els.filterDialog);
+  });
+}
+
+function closeOverlay(kind) {
+  if (kind && state.activeOverlay !== kind) return;
+  const overlay = state.activeOverlay;
+  if (!overlay) return;
+  setDialogOpen(overlay === "search" ? els.searchDialog : els.filterDialog, false);
+  state.activeOverlay = "";
+  state.filterDraft = null;
+  setPageInert(Boolean(state.detail));
+  const trigger = state.overlayTrigger;
+  state.overlayTrigger = null;
+  if (trigger && document.contains(trigger)) focusWithoutScrolling(trigger);
+}
+
+function setDialogOpen(dialog, isOpen) {
+  if (!dialog) return;
+  dialog.hidden = !isOpen;
+  document.body.classList.toggle("is-modal-open", isOpen || Boolean(state.detail));
+}
+
+function setPageInert(isInert) {
+  for (const element of [document.querySelector(".topbar"), document.querySelector(".layout"), els.mobileBottomNav, els.backToTop]) {
+    if (!element) continue;
+    if ("inert" in element) element.inert = isInert;
+    element.setAttribute("aria-hidden", isInert ? "true" : "false");
+  }
+}
+
+function activeModalElement() {
+  if (state.activeOverlay === "search") return els.searchDialog;
+  if (state.activeOverlay === "filter") return els.filterDialog;
+  if (state.detail) return els.detailDialog;
+  return null;
+}
+
+function trapModalFocus(event) {
+  const root = activeModalElement();
+  if (!root || root.hidden) return;
+  const focusable = Array.from(
+    root.querySelectorAll("a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex='-1'])"),
+  ).filter((node) => node.offsetParent !== null || node === document.activeElement);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function applySearchFromOverlay(value) {
+  const next = String(value || "").trim().slice(0, 200);
+  state.filter = next;
+  if (els.filterInput) els.filterInput.value = next;
+  if (next) writeRecentSearches([next, ...readRecentSearches().filter((item) => item !== next)].slice(0, 10));
+  state.expandedRows.clear();
+  state.detail = "";
+  resetPagination();
+  advanceRenderRevision();
+  closeOverlay("search");
+  render({ urlMode: "push" });
+}
+
+function renderRecentSearches() {
+  if (!els.recentSearches || !els.recentSearchSection) return;
+  const recent = readRecentSearches();
+  els.recentSearchSection.hidden = !recent.length;
+  els.recentSearches.replaceChildren();
+  for (const item of recent) {
+    const button = document.createElement("button");
+    button.className = "search-chip";
+    button.type = "button";
+    button.dataset.searchValue = item;
+    button.textContent = item;
+    els.recentSearches.append(button);
+  }
+}
+
+function readRecentSearches() {
+  try {
+    const value = JSON.parse(window.localStorage?.getItem(RECENT_SEARCHES_KEY) || "[]");
+    return Array.isArray(value) ? value.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 10) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeRecentSearches(items) {
+  try {
+    window.localStorage?.setItem(RECENT_SEARCHES_KEY, JSON.stringify(items.slice(0, 10)));
+  } catch {
+    // localStorage can be unavailable in restricted browser modes.
+  }
+}
+
+function renderSearchSuggestions(query) {
+  if (!els.searchSuggestions) return;
+  const suggestions = measureSync("search-suggest", () => buildSearchSuggestions(query));
+  els.searchSuggestions.replaceChildren();
+  if (!String(query || "").trim()) {
+    const empty = document.createElement("p");
+    empty.className = "suggestion-empty";
+    empty.textContent = "输入关键词后显示建议";
+    els.searchSuggestions.append(empty);
+    return;
+  }
+  for (const group of suggestions) {
+    if (!group.items.length) continue;
+    const section = document.createElement("section");
+    section.className = "suggestion-group";
+    const title = document.createElement("h4");
+    title.textContent = group.label;
+    section.append(title);
+    for (const item of group.items) {
+      const button = document.createElement("button");
+      button.className = "suggestion-item";
+      button.type = "button";
+      button.dataset.searchValue = item.value;
+      appendHighlightedText(button, item.label, query);
+      if (item.meta) {
+        const meta = document.createElement("span");
+        meta.textContent = item.meta;
+        button.append(meta);
+      }
+      section.append(button);
+    }
+    els.searchSuggestions.append(section);
+  }
+  if (!els.searchSuggestions.childElementCount) {
+    const empty = document.createElement("p");
+    empty.className = "suggestion-empty";
+    empty.textContent = "没有匹配建议";
+    els.searchSuggestions.append(empty);
+  }
+}
+
+function appendHighlightedText(container, text, query) {
+  const source = String(text || "");
+  const needle = String(query || "").trim();
+  if (!needle) {
+    container.append(document.createTextNode(source));
+    return;
+  }
+  const haystack = source.toLocaleLowerCase();
+  const lowerNeedle = needle.toLocaleLowerCase();
+  const index = haystack.indexOf(lowerNeedle);
+  if (index < 0) {
+    container.append(document.createTextNode(source));
+    return;
+  }
+  container.append(document.createTextNode(source.slice(0, index)));
+  const mark = document.createElement("mark");
+  mark.textContent = source.slice(index, index + needle.length);
+  container.append(mark, document.createTextNode(source.slice(index + needle.length)));
+}
+
+function buildSearchSuggestions(query) {
+  const filterKey = normalizeSearch(query);
+  if (!filterKey || !state.payload) return [];
+  const rangeCache = getRangeCache(currentGroup());
+  const hideUnknownForView = shouldHideUnknownForCurrentView();
+  const baseOccurrences = selectedOccurrences(rangeCache, { hideUnknownForView });
+  const songRecords = selectedSongRecords(rangeCache, { hideUnknownForView });
+  const songSuggestions = songRecords
+    .filter((record) => normalizeSearch([record.title, songMeta(record).primary].join(" ")).includes(filterKey))
+    .slice(0, 5)
+    .map((record) => ({
+      label: record.title,
+      value: record.title,
+      meta: songMeta(record).primary,
+    }));
+
+  const artistRecords = (state.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords)
+    .filter((record) => normalizeSearch(record.name).includes(filterKey))
+    .slice(0, 3)
+    .map((record) => ({
+      label: record.name,
+      value: record.name,
+      meta: `${record.count}次`,
+    }));
+
+  const channelMap = new Map();
+  for (const occurrence of baseOccurrences) {
+    const channel = cleanText(occurrence?.item?.channelName || "");
+    if (!channel || !normalizeSearch(channel).includes(filterKey)) continue;
+    channelMap.set(channel, (channelMap.get(channel) || 0) + 1);
+  }
+  const channelSuggestions = Array.from(channelMap.entries())
+    .sort((a, b) => b[1] - a[1] || compareValues(a[0], b[0]))
+    .slice(0, 3)
+    .map(([channel, count]) => ({
+      label: channel,
+      value: channel,
+      meta: `${count}次`,
+    }));
+
+  return [
+    { label: "歌曲", items: songSuggestions },
+    { label: "歌手", items: artistRecords },
+    { label: "频道", items: channelSuggestions },
+  ];
+}
+
+function makeFilterDraftFromState() {
+  return {
+    q: state.filter,
+    nicheOnly: state.nicheOnly,
+    hideUnknownArtist: state.hideUnknownArtist,
+    rankMetric: state.rankMetric,
+    trend: state.trend,
+    minCount: state.minCount,
+    pageSize: state.pageSize,
+    snapshotPath: state.currentSnapshotPath,
+  };
+}
+
+function defaultFilterDraft() {
+  return {
+    q: "",
+    nicheOnly: false,
+    hideUnknownArtist: true,
+    rankMetric: "occurrences",
+    trend: "all",
+    minCount: 1,
+    pageSize: state.pageSize,
+    snapshotPath: SNAPSHOT_LATEST_PATH,
+  };
+}
+
+function syncFilterControlsFromDraft(draft) {
+  if (!draft) return;
+  if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = Boolean(draft.nicheOnly);
+  if (els.hideUnknownToggle) els.hideUnknownToggle.checked = Boolean(draft.hideUnknownArtist);
+  for (const input of document.querySelectorAll("input[name='filterMetric']")) {
+    input.checked = input.value === draft.rankMetric;
+  }
+  if (els.trendFilterSelect) els.trendFilterSelect.value = draft.trend;
+  if (els.minCountSelect) els.minCountSelect.value = String(draft.minCount);
+  if (els.filterPageSizeSelect) els.filterPageSizeSelect.value = String(draft.pageSize);
+  const dateValue = snapshotDateValueForPath(draft.snapshotPath);
+  if (els.filterSnapshotDateSelect) els.filterSnapshotDateSelect.value = dateValue;
+  syncDraftSnapshotTimes(dateValue, draft.snapshotPath);
+  updateFilterAvailability();
+}
+
+function syncDraftSnapshotTimes(dateValue, selectedPath = "") {
+  if (!els.filterSnapshotSelect) return;
+  els.filterSnapshotSelect.replaceChildren();
+  if (dateValue === "latest") {
+    const option = document.createElement("option");
+    option.value = SNAPSHOT_LATEST_PATH;
+    option.textContent = "最新快照";
+    els.filterSnapshotSelect.append(option);
+    els.filterSnapshotSelect.value = SNAPSHOT_LATEST_PATH;
+    return;
+  }
+  for (const entry of snapshotEntriesForDate(dateValue)) {
+    const option = document.createElement("option");
+    option.value = entry.path;
+    option.textContent = snapshotOptionLabel(entry);
+    els.filterSnapshotSelect.append(option);
+  }
+  els.filterSnapshotSelect.value = selectedPath || firstSnapshotPathForDate(dateValue);
+}
+
+function readFilterDraftFromControls() {
+  const selectedMetric = document.querySelector("input[name='filterMetric']:checked")?.value || "occurrences";
+  return {
+    q: state.filter,
+    nicheOnly: Boolean(els.nicheOnlyToggle?.checked),
+    hideUnknownArtist: Boolean(els.hideUnknownToggle?.checked),
+    rankMetric: Object.hasOwn(RANK_METRICS, selectedMetric) ? selectedMetric : "occurrences",
+    trend: Object.hasOwn(TREND_FILTERS, els.trendFilterSelect?.value) ? els.trendFilterSelect.value : "all",
+    minCount: MIN_COUNT_OPTIONS.includes(Number(els.minCountSelect?.value)) ? Number(els.minCountSelect.value) : 1,
+    pageSize: LIST_PAGE_SIZE_OPTIONS.includes(Number(els.filterPageSizeSelect?.value)) ? Number(els.filterPageSizeSelect.value) : DEFAULT_LIST_PAGE_SIZE,
+    snapshotPath: els.filterSnapshotSelect?.value || SNAPSHOT_LATEST_PATH,
+  };
+}
+
+async function applyFilterDraft() {
+  const draft = readFilterDraftFromControls();
+  const previousPath = state.currentSnapshotPath;
+  closeOverlay("filter");
+  state.filter = draft.q;
+  state.nicheOnly = draft.nicheOnly;
+  state.hideUnknownArtist = draft.hideUnknownArtist;
+  state.rankMetric = draft.rankMetric;
+  state.trend = draft.trend;
+  state.minCount = draft.minCount;
+  state.pageSize = draft.pageSize;
+  state.detail = "";
+  writeStoredPageSize(state.pageSize);
+  state.expandedRows.clear();
+  resetPagination();
+  syncControlsFromState();
+  if (previousPath !== draft.snapshotPath) {
+    await applySnapshotPath(draft.snapshotPath, previousPath, { urlMode: "push" });
+    return;
+  }
+  measureSync("filter-apply", () => render({ urlMode: "push" }));
+}
+
+async function applySnapshotPath(path, previousPath, options = {}) {
+  const nextPath = path || SNAPSHOT_LATEST_PATH;
+  if (nextPath === SNAPSHOT_LATEST_PATH) {
+    state.currentSnapshotPath = SNAPSHOT_LATEST_PATH;
+    const rangePayload = await loadRuntimeRange(state.range);
+    await applyRuntimeRangePayload(rangePayload, { resetPage: false, syncUrl: options.syncUrl !== false, urlMode: options.urlMode || "replace" });
+    scheduleCurrentRankDiffLoad();
+    scheduleOtherRangePrefetch();
+    return;
+  }
+  await loadSnapshotPath(nextPath, previousPath, options);
+}
+
+function updateFilterAvailability() {
+  const rankView = state.view === "songRank" || state.view === "artistRank";
+  if (els.metricFilterGroup) els.metricFilterGroup.hidden = !rankView || state.view === "videos";
+  if (els.trendFilterGroup) els.trendFilterGroup.hidden = state.view === "songAz" || state.view === "videos";
+  if (els.trendFilterSelect) {
+    const disabled = !rankView || !isLatestSnapshot() || state.rankDiffLoads.has(state.range) || state.rankDiffs[state.range] === null;
+    els.trendFilterSelect.disabled = disabled;
+    if (els.trendFilterHint) {
+      els.trendFilterHint.textContent = !isLatestSnapshot()
+        ? "历史快照不支持趋势筛选"
+        : state.rankDiffLoads.has(state.range)
+          ? "趋势载入中"
+          : state.rankDiffs[state.range] === null
+            ? "趋势读取失败"
+            : "";
+    }
+  }
+}
+
+function syncBottomNavFromState() {
+  for (const tab of els.bottomViewTabs) {
+    const active = tab.dataset.view === state.view;
+    tab.classList.toggle("active", active);
+    if (active) tab.setAttribute("aria-current", "page");
+    else tab.removeAttribute("aria-current");
+  }
+}
+
+function activeFilterCount() {
+  let count = 0;
+  if (state.nicheOnly) count += 1;
+  if (!state.hideUnknownArtist) count += 1;
+  if ((state.view === "songRank" || state.view === "artistRank") && state.rankMetric !== "occurrences") count += 1;
+  if ((state.view === "songRank" || state.view === "artistRank") && state.trend !== "all") count += 1;
+  if (state.view !== "videos" && state.minCount > 1) count += 1;
+  if (!isLatestSnapshot()) count += 1;
+  return count;
+}
+
+function syncFilterButtonCount() {
+  const count = activeFilterCount();
+  for (const badge of [els.filterCountBadge, els.mobileFilterCountBadge]) {
+    if (!badge) continue;
+    badge.hidden = count <= 0;
+    badge.textContent = String(count);
+  }
+}
+
+function snapshotDateValueForPath(path) {
+  if (path === SNAPSHOT_LATEST_PATH) return "latest";
+  const entry = snapshotEntryForPath(path);
+  return entry ? snapshotDateValue(entry) : "latest";
+}
+
+function storeViewPosition() {
+  try {
+    window.sessionStorage?.setItem(`dailySongList.scroll.${state.view}`, String(Math.max(0, window.scrollY)));
+    window.sessionStorage?.setItem(`dailySongList.page.${state.view}`, String(state.page));
+  } catch {
+    // sessionStorage can be unavailable in restricted browser modes.
+  }
+}
+
+function restoreViewPosition() {
+  window.requestAnimationFrame(() => {
+    try {
+      const raw = window.sessionStorage?.getItem(`dailySongList.scroll.${state.view}`);
+      const top = Number(raw);
+      if (Number.isFinite(top) && top > 0) window.scrollTo({ top, behavior: "auto" });
+    } catch {
+      // sessionStorage can be unavailable in restricted browser modes.
+    }
+  });
+}
+
+function updateViewportVars() {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+  document.documentElement.style.setProperty("--visual-viewport-height", `${Math.round(viewport.height)}px`);
+  document.documentElement.style.setProperty("--visual-viewport-offset-top", `${Math.round(viewport.offsetTop)}px`);
+}
+
+function detailParam(type, key) {
+  const safeType = type === "artist" ? "artist" : "song";
+  const rawKey = String(key || "").slice(0, DETAIL_MAX_KEY_LENGTH);
+  return rawKey ? `${safeType}:${encodeURIComponent(rawKey)}` : "";
+}
+
+function parseDetailTarget(value = state.detail) {
+  const raw = String(value || "");
+  const separator = raw.indexOf(":");
+  if (separator <= 0) return null;
+  const type = raw.slice(0, separator);
+  if (type !== "song" && type !== "artist") return null;
+  try {
+    const key = decodeURIComponent(raw.slice(separator + 1));
+    if (!key || key.length > DETAIL_MAX_KEY_LENGTH) return null;
+    return { type, key };
+  } catch {
+    return null;
+  }
+}
+
+function openDetail(detail, trigger) {
+  if (!detail) return;
+  const target = parseDetailTarget(detail);
+  if (!target) return;
+  state.detail = detailParam(target.type, target.key);
+  state.detailTrigger = trigger || document.activeElement;
+  const row = trigger?.closest?.(".rank-row, .index-row");
+  state.detailRecord = row?.dataset.detail === state.detail ? row._detailRecord || null : null;
+  state.detailSourceLimit = DETAIL_BATCH_SIZE;
+  state.detailSourceQuery = "";
+  if (els.detailSourceSearch) els.detailSourceSearch.value = "";
+  syncUrlState("push");
+  measureSync("open-detail", () => syncDetailFromState({ focus: true }));
+}
+
+function closeDetail(options = {}) {
+  if (!state.detail && els.detailDialog?.hidden) return;
+  state.detail = "";
+  state.detailRecord = null;
+  state.detailSourceQuery = "";
+  state.detailSourceLimit = DETAIL_BATCH_SIZE;
+  if (els.detailDialog) els.detailDialog.hidden = true;
+  document.body.classList.toggle("is-modal-open", Boolean(state.activeOverlay));
+  setPageInert(Boolean(state.activeOverlay));
+  applySelectedDetailRow();
+  if (options.syncUrl !== false) syncUrlState(options.urlMode || "replace");
+  const trigger = state.detailTrigger;
+  state.detailTrigger = null;
+  if (trigger && document.contains(trigger)) focusWithoutScrolling(trigger);
+}
+
+function syncDetailFromState(options = {}) {
+  if (!state.detail) {
+    if (els.detailDialog) els.detailDialog.hidden = true;
+    applySelectedDetailRow();
+    return;
+  }
+  const cachedDetail =
+    state.detailRecord && detailParam(state.detailRecord.type, state.detailRecord.record?.key) === state.detail
+      ? state.detailRecord
+      : null;
+  const detail = cachedDetail || resolveDetailRecord(state.detail);
+  if (!detail) {
+    const missing = state.detail;
+    state.detail = "";
+    syncUrlState("replace");
+    showToast(`详情记录不存在：${missing}`);
+    if (els.detailDialog) els.detailDialog.hidden = true;
+    applySelectedDetailRow();
+    return;
+  }
+  state.detailRecord = detail;
+  renderDetailHeader(detail);
+  renderDetailSources();
+  if (els.detailDialog) els.detailDialog.hidden = false;
+  document.body.classList.add("is-modal-open");
+  setPageInert(true);
+  applySelectedDetailRow();
+  if (options.focus) {
+    window.requestAnimationFrame(() => focusWithoutScrolling(els.detailDrawer || els.detailDialog));
+  }
+}
+
+function resolveDetailRecord(detailValue) {
+  if (!state.payload) return null;
+  const target = parseDetailTarget(detailValue);
+  if (!target) return null;
+  const rangeCache = getRangeCache(currentGroup());
+  if (target.type === "artist") {
+    const record = rangeCache.allArtistRecords.find((item) => item.key === target.key);
+    return record ? { type: "artist", record, title: record.name, subtitle: artistSongPreview(record).join("、"), occurrences: record.occurrences } : null;
+  }
+  const record = rangeCache.allSongRecords.find((item) => item.key === target.key);
+  return record ? { type: "song", record, title: record.title, subtitle: songMeta(record).primary, occurrences: record.occurrences } : null;
+}
+
+function renderDetailHeader(detail) {
+  if (!detail) return;
+  const occurrences = detail.occurrences || [];
+  if (els.detailKicker) els.detailKicker.textContent = detail.type === "artist" ? "歌手详情" : "歌曲详情";
+  if (els.detailTitle) els.detailTitle.textContent = detail.title;
+  if (els.detailSubtitle) els.detailSubtitle.textContent = detail.subtitle || "";
+  if (!els.detailStats) return;
+  els.detailStats.replaceChildren();
+  const stats = [
+    `${occurrences.length}次`,
+    `${uniqueVideoCount(occurrences)}个视频`,
+    isNicheRecord(detail.record) ? "小众" : "",
+  ].filter(Boolean);
+  for (const item of stats) {
+    const chip = document.createElement("span");
+    chip.textContent = item;
+    els.detailStats.append(chip);
+  }
+}
+
+function renderDetailSources() {
+  const detail = state.detailRecord;
+  if (!detail || !els.detailSourceList) return;
+  const queryKey = normalizeSearch(state.detailSourceQuery);
+  const allSources = detail.occurrences || [];
+  const filtered = queryKey
+    ? allSources.filter((occurrence) =>
+        normalizeSearch([
+          occurrence?.song?.time,
+          occurrence?.item?.channelName,
+          occurrence?.item?.title,
+          occurrence?.item?.videoId,
+        ].join(" ")).includes(queryKey),
+      )
+    : allSources;
+  const visible = filtered.slice(0, state.detailSourceLimit);
+  els.detailSourceList.replaceChildren();
+  for (const group of groupOccurrencesByVideo(visible)) {
+    const section = document.createElement("section");
+    section.className = "detail-source-group";
+    const header = document.createElement("h3");
+    header.textContent = group.title;
+    section.append(header);
+    for (const occurrence of group.occurrences) {
+      section.append(renderDetailSourceLink(occurrence));
+    }
+    els.detailSourceList.append(section);
+  }
+  if (els.detailSourceCount) {
+    els.detailSourceCount.textContent = `${filtered.length} 个来源${filtered.length !== allSources.length ? ` / 全部 ${allSources.length}` : ""}`;
+  }
+  if (els.detailMoreButton) {
+    els.detailMoreButton.hidden = filtered.length <= state.detailSourceLimit;
+    els.detailMoreButton.textContent = `显示更多${Math.min(DETAIL_BATCH_SIZE, Math.max(0, filtered.length - state.detailSourceLimit))}条`;
+  }
+}
+
+function groupOccurrencesByVideo(occurrences) {
+  const map = new Map();
+  for (const occurrence of occurrences) {
+    const item = occurrence.item || {};
+    const key = item.videoId || item.title || "unknown";
+    if (!map.has(key)) {
+      map.set(key, {
+        title: item.title || item.channelName || item.videoId || "来源视频",
+        occurrences: [],
+      });
+    }
+    map.get(key).occurrences.push(occurrence);
+  }
+  return Array.from(map.values());
+}
+
+function renderDetailSourceLink(occurrence) {
+  const item = occurrence.item || {};
+  const song = occurrence.song || {};
+  const link = document.createElement("a");
+  link.className = "detail-source-link";
+  link.href = youtubeTimeUrl(item.videoId, song.seconds);
+  link.target = "_blank";
+  link.rel = "noreferrer";
+
+  const time = document.createElement("span");
+  time.className = "time";
+  time.textContent = song.time || formatSeconds(song.seconds);
+
+  const channel = document.createElement("span");
+  channel.className = "detail-source-channel";
+  channel.textContent = item.channelName || "未知频道";
+
+  const action = document.createElement("span");
+  action.className = "detail-source-action";
+  action.textContent = "打开时间戳";
+
+  link.append(time, channel, action);
+  return link;
+}
+
+function applySelectedDetailRow() {
+  for (const row of els.content?.querySelectorAll("[data-detail]") || []) {
+    row.classList.toggle("is-detail-active", Boolean(state.detail && row.dataset.detail === state.detail));
+  }
+}
+
+async function shareCurrentLink(options = {}) {
+  syncUrlState("replace");
+  const href = window.location.href;
+  const title = options.label || "当前榜单链接";
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, url: href });
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+    }
+  }
+  try {
+    await navigator.clipboard?.writeText(href);
+    showToast(`已复制${title}`);
+  } catch {
+    showToast(href);
+  }
 }
 
 function setActiveTab(tabs, activeTab) {
@@ -544,6 +1366,8 @@ function applyInitialUrlState() {
     validPageSizes: LIST_PAGE_SIZE_OPTIONS,
     validRankMetrics: Object.keys(RANK_METRICS),
     validVideoLayouts: Object.keys(VIDEO_LAYOUTS),
+    validTrendFilters: Object.keys(TREND_FILTERS),
+    validMinCounts: MIN_COUNT_OPTIONS,
     latestSnapshotPath: SNAPSHOT_LATEST_PATH,
     snapshots: state.snapshots,
   });
@@ -554,6 +1378,9 @@ function applyInitialUrlState() {
   state.pageSize = parsed.pageSize;
   state.indexBucket = parsed.bucket;
   state.rankMetric = parsed.rankMetric;
+  state.trend = parsed.trend;
+  state.minCount = parsed.minCount;
+  state.detail = parsed.detail;
   state.videoLayout = parsed.videoLayout;
   state.nicheOnly = parsed.outside;
   state.hideUnknownArtist = !parsed.showUnknown;
@@ -565,10 +1392,12 @@ function applyInitialUrlState() {
 function syncControlsFromState() {
   setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === state.range) || els.rangeTabs[0]);
   setActiveTab(els.viewTabs, els.viewTabs.find((tab) => tab.dataset.view === state.view) || els.viewTabs[0]);
+  syncBottomNavFromState();
   if (els.filterInput) els.filterInput.value = state.filter;
   if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = state.nicheOnly;
   if (els.hideUnknownToggle) els.hideUnknownToggle.checked = state.hideUnknownArtist;
   syncSnapshotControlsFromState();
+  syncFilterButtonCount();
 }
 
 function syncUrlState(mode = "replace") {
@@ -581,11 +1410,14 @@ function syncUrlState(mode = "replace") {
       pageSize: state.pageSize,
       bucket: state.indexBucket,
       rankMetric: state.rankMetric,
+      trend: state.trend,
+      minCount: state.minCount,
       videoLayout: state.videoLayout,
       outside: state.nicheOnly,
       showUnknown: !state.hideUnknownArtist,
       q: state.filter,
       snapshotPath: state.currentSnapshotPath,
+      detail: state.detail,
     },
     {
       defaults: defaultUrlState(),
@@ -616,18 +1448,27 @@ function defaultUrlState() {
     pageSize: DEFAULT_LIST_PAGE_SIZE,
     bucket: INDEX_ALL_BUCKET,
     rankMetric: "occurrences",
+    trend: "all",
+    minCount: 1,
     videoLayout: "cards",
     outside: false,
     showUnknown: false,
     q: "",
+    detail: "",
   };
 }
 
 async function restoreStateFromUrl() {
   const previousPath = state.currentSnapshotPath;
+  const previousListKey = listStateKey();
+  const previousDetail = state.detail;
   applyInitialUrlState();
   syncControlsFromState();
   state.expandedRows.clear();
+  if (previousPath === state.currentSnapshotPath && previousListKey === listStateKey() && previousDetail !== state.detail) {
+    syncDetailFromState({ focus: Boolean(state.detail) });
+    return;
+  }
   if (state.currentSnapshotPath !== previousPath) {
     if (state.currentSnapshotPath === SNAPSHOT_LATEST_PATH) {
       const rangePayload = await loadRuntimeRange(state.range);
@@ -648,6 +1489,23 @@ async function restoreStateFromUrl() {
     }
   }
   render({ syncUrl: false });
+}
+
+function listStateKey() {
+  return [
+    state.range,
+    state.view,
+    state.page,
+    state.pageSize,
+    state.indexBucket,
+    state.rankMetric,
+    state.trend,
+    state.minCount,
+    state.videoLayout,
+    state.nicheOnly ? "outside" : "inside",
+    state.hideUnknownArtist ? "hide" : "show",
+    state.filter,
+  ].join("::");
 }
 
 function readStoredPageSize() {
@@ -1095,6 +1953,8 @@ function setSnapshotBusy(isBusy, message = "") {
   els.content.setAttribute("aria-busy", isBusy ? "true" : "false");
   if (els.snapshotSelect) els.snapshotSelect.disabled = isBusy;
   if (els.snapshotDateSelect) els.snapshotDateSelect.disabled = isBusy;
+  if (els.filterSnapshotSelect) els.filterSnapshotSelect.disabled = isBusy;
+  if (els.filterSnapshotDateSelect) els.filterSnapshotDateSelect.disabled = isBusy;
   if (isBusy && message) els.status.textContent = message;
 }
 
@@ -1139,6 +1999,7 @@ function renderSnapshotOptions() {
   renderSnapshotDateOptions();
   renderSnapshotTimeOptions(selectedSnapshotDateValue());
   syncSnapshotControlsFromState();
+  syncFilterSnapshotControlsFromState();
 }
 
 function renderSnapshotDateOptions() {
@@ -1184,6 +2045,17 @@ function syncSnapshotControlsFromState() {
   }
   renderSnapshotTimeOptions(dateValue);
   if (els.snapshotSelect) els.snapshotSelect.value = state.currentSnapshotPath;
+  syncFilterSnapshotControlsFromState();
+}
+
+function syncFilterSnapshotControlsFromState() {
+  if (!els.filterSnapshotDateSelect || !els.filterSnapshotSelect || !els.snapshotDateSelect || !els.snapshotSelect) return;
+  els.filterSnapshotDateSelect.replaceChildren(...Array.from(els.snapshotDateSelect.options).map((option) => option.cloneNode(true)));
+  els.filterSnapshotSelect.replaceChildren(...Array.from(els.snapshotSelect.options).map((option) => option.cloneNode(true)));
+  els.filterSnapshotDateSelect.value = els.snapshotDateSelect.value;
+  els.filterSnapshotSelect.value = els.snapshotSelect.value;
+  els.filterSnapshotDateSelect.disabled = els.snapshotDateSelect.disabled;
+  els.filterSnapshotSelect.disabled = els.snapshotSelect.disabled;
 }
 
 function selectedSnapshotDateValue() {
@@ -1224,8 +2096,11 @@ function snapshotDateOptionLabel(dateValue) {
 }
 
 function renderStatus(status) {
+  renderStatusAlerts([]);
   if (!isLatestSnapshot()) {
-    els.status.textContent = "正在查看历史快照";
+    els.status.textContent = "历史快照";
+    els.status.title = `历史快照 · ${capturedDate()}`;
+    renderStatusAlerts([`历史快照 · ${capturedDate()}`]);
     renderDebugPanel();
     return;
   }
@@ -1248,11 +2123,19 @@ function renderStatus(status) {
   }
   if (rebuiltDerivedAt && rebuiltDerivedAt !== capturedAt) parts.push(`页面数据重建于 ${formatDate(rebuiltDerivedAt)}`);
   const staleAge = capturedAt ? Date.now() - Date.parse(capturedAt) : 0;
-  if (Number.isFinite(staleAge) && staleAge > STATUS_STALE_MS) parts.push("超过90分钟未更新");
+  const alerts = [];
+  if (Number.isFinite(staleAge) && staleAge > STATUS_STALE_MS) {
+    parts.push("超过90分钟未更新");
+    alerts.push("数据已超过2小时未更新");
+  }
   const warning = state.runtimeWarnings.get(state.range);
-  if (warning?.fallbackPath) parts.push("当前使用备用数据");
-  els.status.textContent = parts.filter(Boolean).join(" · ");
+  if (warning?.fallbackPath) {
+    parts.push("当前使用备用数据");
+    alerts.push("精简数据读取失败，当前使用备用数据");
+  }
+  els.status.textContent = relativeUpdateLabel(capturedAt || rebuiltDerivedAt || attemptedAt);
   els.status.title = [
+    parts.filter(Boolean).join(" · "),
     `status=${currentStatus.status || "unknown"}`,
     `capturedAt=${capturedAt || ""}`,
     `attemptedAt=${attemptedAt || ""}`,
@@ -1262,7 +2145,30 @@ function renderStatus(status) {
   ]
     .filter(Boolean)
     .join("\n");
+  renderStatusAlerts(alerts);
   renderDebugPanel();
+}
+
+function renderStatusAlerts(messages) {
+  if (!els.statusAlerts) return;
+  els.statusAlerts.replaceChildren();
+  for (const message of messages.filter(Boolean)) {
+    const item = document.createElement("div");
+    item.className = "status-alert";
+    item.textContent = message;
+    els.statusAlerts.append(item);
+  }
+}
+
+function relativeUpdateLabel(value) {
+  const timestamp = Date.parse(value || "");
+  if (!Number.isFinite(timestamp)) return "状态不可用";
+  const minutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+  if (minutes < 1) return "刚刚更新";
+  if (minutes < 60) return `${minutes}分钟前`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}小时前`;
+  return formatDate(value);
 }
 
 function mergeRuntimeStatus(metaStatus, statusFile, meta) {
@@ -1321,7 +2227,7 @@ function render(options = {}) {
   const group = currentGroup();
   const rangeCache = getRangeCache(group);
   const selection = currentSelection(rangeCache);
-  if (state.view !== "songAz") ensureIndexBucketExists(selection.songRecords);
+  if (state.view === "songAz") ensureIndexBucketExists(selection.songRecords);
 
   resetContentClasses();
   els.content.replaceChildren();
@@ -1343,6 +2249,9 @@ function render(options = {}) {
 
   if (options.syncUrl !== false) syncUrlState(options.urlMode || "replace");
   if (options.focusAfterPageChange) schedulePageChangeFocus();
+  syncFilterButtonCount();
+  updateFilterAvailability();
+  syncDetailFromState({ focus: false });
   updateBackToTopVisibility();
   if (!state.firstContentMeasured) {
     state.firstContentMeasured = true;
@@ -1380,21 +2289,12 @@ async function prewarmRangeCache(group, snapshotPath, rangeId) {
   const nicheOccurrences = filterNicheOccurrences(occurrences);
   const visibleOccurrences = filterUnknownArtistOccurrences(occurrences);
   const visibleNicheOccurrences = filterUnknownArtistOccurrences(nicheOccurrences);
-  const allSongRecords = measureSync("build-song-records", () => buildSongRecords(occurrences));
-  await yieldToBrowser();
-  const nicheSongRecords = buildSongRecords(nicheOccurrences);
-  const visibleSongRecords = buildSongRecords(visibleOccurrences);
-  const visibleNicheSongRecords = buildSongRecords(visibleNicheOccurrences);
   const cache = createRangeCacheObject({
     items,
     occurrences,
     nicheOccurrences,
     visibleOccurrences,
     visibleNicheOccurrences,
-    allSongRecords,
-    nicheSongRecords,
-    visibleSongRecords,
-    visibleNicheSongRecords,
   });
   state.rangeCache.set(key, cache);
   await prewarmDefaultSorts(cache);
@@ -1422,20 +2322,12 @@ function createRangeCache(group) {
   const nicheOccurrences = filterNicheOccurrences(occurrences);
   const visibleOccurrences = filterUnknownArtistOccurrences(occurrences);
   const visibleNicheOccurrences = filterUnknownArtistOccurrences(nicheOccurrences);
-  const allSongRecords = measureSync("build-song-records", () => buildSongRecords(occurrences));
-  const nicheSongRecords = buildSongRecords(nicheOccurrences);
-  const visibleSongRecords = buildSongRecords(visibleOccurrences);
-  const visibleNicheSongRecords = buildSongRecords(visibleNicheOccurrences);
   return createRangeCacheObject({
     items,
     occurrences,
     nicheOccurrences,
     visibleOccurrences,
     visibleNicheOccurrences,
-    allSongRecords,
-    nicheSongRecords,
-    visibleSongRecords,
-    visibleNicheSongRecords,
   });
 }
 
@@ -1445,10 +2337,6 @@ function createRangeCacheObject({
   nicheOccurrences,
   visibleOccurrences,
   visibleNicheOccurrences,
-  allSongRecords,
-  nicheSongRecords,
-  visibleSongRecords,
-  visibleNicheSongRecords,
 }) {
   const cache = {
     items,
@@ -1456,10 +2344,6 @@ function createRangeCacheObject({
     nicheOccurrences,
     visibleOccurrences,
     visibleNicheOccurrences,
-    allSongRecords,
-    nicheSongRecords,
-    visibleSongRecords,
-    visibleNicheSongRecords,
     allVideoCount: uniqueVideoCount(occurrences),
     nicheVideoCount: uniqueVideoCount(nicheOccurrences),
     visibleVideoCount: uniqueVideoCount(visibleOccurrences),
@@ -1467,6 +2351,10 @@ function createRangeCacheObject({
     sortedRecords: new Map(),
     selectionCache: new Map(),
   };
+  defineLazySongCache(cache, "allSongRecords", occurrences);
+  defineLazySongCache(cache, "nicheSongRecords", nicheOccurrences);
+  defineLazySongCache(cache, "visibleSongRecords", visibleOccurrences);
+  defineLazySongCache(cache, "visibleNicheSongRecords", visibleNicheOccurrences);
   defineLazyArtistCache(cache, "all", occurrences);
   defineLazyArtistCache(cache, "niche", nicheOccurrences);
   defineLazyValue(cache, "normalizedVideoSearchData", () =>
@@ -1476,6 +2364,10 @@ function createRangeCacheObject({
     })),
   );
   return cache;
+}
+
+function defineLazySongCache(cache, key, occurrences) {
+  defineLazyValue(cache, key, () => measureSync("build-song-records", () => buildSongRecords(occurrences)));
 }
 
 function defineLazyArtistCache(cache, prefix, occurrences) {
@@ -1614,6 +2506,65 @@ function sortedRecordsKey(type) {
   return `${type}::${state.nicheOnly ? "niche" : "all"}::${hideKey}::${normalizeSearch(state.filter)}::${state.rankMetric}`;
 }
 
+function filteredRankModel(records, mode) {
+  const minFiltered = filterRecordsByMinCount(records);
+  const trendFiltered = filterRecordsByTrend(minFiltered, mode);
+  return {
+    records: trendFiltered,
+    ranks: buildCompetitionRanks(trendFiltered),
+    countFrequencies: buildCountFrequencies(trendFiltered, rankValue),
+    baseCount: records.length,
+    minCountApplied: state.minCount > 1,
+    trendApplied: state.trend !== "all" && trendFiltered.length !== minFiltered.length,
+  };
+}
+
+function filterRecordsByMinCount(records) {
+  if (state.view === "videos" || state.minCount <= 1) return records;
+  return records.filter((record) => rankValue(record) >= state.minCount);
+}
+
+function filterRecordsByTrend(records, mode) {
+  if (state.trend === "all" || !canApplyTrendFilter(mode)) return records;
+  return records.filter((record) => recordMatchesTrendFilter(record, mode));
+}
+
+function canApplyTrendFilter(mode) {
+  if (!isLatestSnapshot()) return false;
+  if (mode !== "songRank" && mode !== "artistRank") return false;
+  const diff = state.rankDiffs?.[state.range]?.[mode];
+  return diff instanceof Map;
+}
+
+function recordMatchesTrendFilter(record, mode) {
+  const trend = state.rankDiffs?.[state.range]?.[mode]?.get(record.key);
+  if (!trend) return false;
+  if (state.trend === "new") return trend.isNew === true;
+  const rankDelta = Number(trend.rankDelta) || 0;
+  if (state.trend === "up") return rankDelta > 0;
+  if (state.trend === "down") return rankDelta < 0;
+  return true;
+}
+
+function filterStatusNote(mode, filteredModel) {
+  const parts = [];
+  if (filteredModel?.minCountApplied) parts.push(`最低${state.minCount}${rankCountUnit()}以上`);
+  if (state.trend !== "all") {
+    if (canApplyTrendFilter(mode)) {
+      parts.push(`趋势：${TREND_FILTERS[state.trend] || state.trend}`);
+    } else if (!isLatestSnapshot()) {
+      parts.push("历史快照不支持趋势筛选");
+    } else if (state.rankDiffLoads.has(state.range)) {
+      parts.push("趋势载入中");
+    } else if (state.rankDiffs[state.range] === null) {
+      parts.push("趋势读取失败，暂未过滤");
+    } else {
+      parts.push("趋势载入中");
+    }
+  }
+  return parts.join(" · ");
+}
+
 function resetContentClasses() {
   els.content.className = "content-shell";
   els.content.classList.add(`view-${state.view}`);
@@ -1655,13 +2606,15 @@ function renderSongRank(group, rangeCache, selection) {
   const allRecords = hideUnknownForView ? rangeCache.visibleSongRecords : rangeCache.allSongRecords;
   const nicheRecords = hideUnknownForView ? rangeCache.visibleNicheSongRecords : rangeCache.nicheSongRecords;
   const occurrences = selection.occurrences;
-  const { records, ranks, countFrequencies } = rankingModelForSelection(rangeCache, selection, "song-rank", compareSongRank);
+  const baseModel = rankingModelForSelection(rangeCache, selection, "song-rank", compareSongRank);
+  const filteredModel = filteredRankModel(baseModel.records, "songRank");
+  const { records, ranks, countFrequencies } = filteredModel;
 
   renderSummary(group, [
-    visibilityMetric(records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
+    recordVisibilityMetric(records.length, baseModel.records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
     occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
     metric(selection.videoCount, "个视频"),
-  ], summaryNote(selection));
+  ], summaryNote(selection, filterStatusNote("songRank", filteredModel)));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌曲", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
@@ -1679,9 +2632,11 @@ function renderSongRank(group, rangeCache, selection) {
       renderRankRecord({
         mode: "song",
         key: `song-${record.key}`,
+        detail: detailParam("song", record.key),
         rank: ranks.get(record.key),
         isTied: countFrequencies.get(rankValue(record)) > 1,
         title: record.title,
+        record,
         meta: songMeta(record),
         isNiche: isNicheRecord(record),
         videoCount: record.videoCount,
@@ -1701,14 +2656,16 @@ function renderArtistRank(group, rangeCache, selection) {
   const allArtistRecords = rangeCache.allArtistRecords;
   const nicheArtistRecords = rangeCache.nicheArtistRecords;
   const occurrences = selection.occurrences;
-  const { records, ranks, countFrequencies } = rankingModelForSelection(rangeCache, selection, "artist-rank", compareRankRecords);
+  const baseModel = rankingModelForSelection(rangeCache, selection, "artist-rank", compareRankRecords);
+  const filteredModel = filteredRankModel(baseModel.records, "artistRank");
+  const { records, ranks, countFrequencies } = filteredModel;
   const missingArtistCount = selection.missingArtistCount;
 
   renderSummary(group, [
-    visibilityMetric(records.length, allArtistRecords.length, nicheArtistRecords.length, "位歌手", "位小众歌曲歌手"),
+    recordVisibilityMetric(records.length, baseModel.records.length, allArtistRecords.length, nicheArtistRecords.length, "位歌手", "位小众歌曲歌手"),
     occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
     metric(selection.videoCount, "个视频"),
-  ], summaryNote(selection, missingArtistCount ? `${missingArtistCount} 条待补歌手` : ""));
+  ], summaryNote(selection, [missingArtistCount ? `${missingArtistCount} 条待补歌手` : "", filterStatusNote("artistRank", filteredModel)].filter(Boolean).join(" · ")));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌手资料", "没有找到符合条件的歌手", "没有找到小众歌曲歌手"), {
@@ -1726,9 +2683,11 @@ function renderArtistRank(group, rangeCache, selection) {
       renderRankRecord({
         mode: "artist",
         key: `artist-${record.key}`,
+        detail: detailParam("artist", record.key),
         rank: ranks.get(record.key),
         isTied: countFrequencies.get(rankValue(record)) > 1,
         title: record.name,
+        record,
         meta: artistMeta(record),
         videoCount: record.videoCount,
         count: rankValue(record),
@@ -1752,10 +2711,11 @@ function renderSongIndexView(group, rangeCache, selection) {
   const allRecords = hideUnknownForView ? rangeCache.visibleSongRecords : rangeCache.allSongRecords;
   const nicheRecords = hideUnknownForView ? rangeCache.visibleNicheSongRecords : rangeCache.nicheSongRecords;
   const occurrences = selection.occurrences;
-  const records = sortedSelectionRecords(rangeCache, selection, "song-az", compareSongAz);
+  const baseRecords = sortedSelectionRecords(rangeCache, selection, "song-az", compareSongAz);
+  const records = filterRecordsByMinCount(baseRecords);
 
   renderSummary(group, [
-    visibilityMetric(records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
+    recordVisibilityMetric(records.length, baseRecords.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
     occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
     metric(selection.videoCount, "个视频"),
   ], summaryNote(selection));
@@ -1838,36 +2798,33 @@ function videoItemsForRange(rangeCache, options = {}) {
 function renderSummary(group, metrics, note = "") {
   els.summary.replaceChildren();
 
+  const main = document.createElement("div");
+  main.className = "summary-main";
+
   const title = document.createElement("strong");
   title.className = "summary-title";
   title.textContent = VIEWS[state.view] || state.view;
-  els.summary.append(title);
+  main.append(title);
 
   const range = document.createElement("span");
   range.className = "summary-chip summary-range";
   range.textContent = RANGE_LABELS[state.range] || group.title || state.range;
-  els.summary.append(range);
+  main.append(range);
 
   if (state.nicheOnly) {
     const niche = document.createElement("span");
     niche.className = "summary-chip niche-summary";
-    niche.textContent = "小众歌曲";
-    els.summary.append(niche);
+    niche.textContent = "小众";
+    main.append(niche);
   }
 
   for (const item of metrics.filter(Boolean)) {
     const chip = document.createElement("span");
     chip.className = "summary-chip";
     chip.textContent = item;
-    els.summary.append(chip);
+    main.append(chip);
   }
-
-  if (!isLatestSnapshot()) {
-    const history = document.createElement("span");
-    history.className = "summary-chip history-chip";
-    history.textContent = `历史快照 · ${capturedDate()}`;
-    els.summary.append(history);
-  }
+  els.summary.append(main);
 
   if (note) {
     const noteNode = document.createElement("span");
@@ -1876,7 +2833,8 @@ function renderSummary(group, metrics, note = "") {
     els.summary.append(noteNode);
   }
 
-  els.summary.append(renderSummaryActions());
+  const actions = renderSummaryActions();
+  if (actions.childElementCount) els.summary.append(actions);
 }
 
 function hiddenUnknownNote(selection) {
@@ -1885,7 +2843,7 @@ function hiddenUnknownNote(selection) {
 }
 
 function summaryNote(selection, extra = "") {
-  return [extra, hiddenUnknownNote(selection), monthlyCoverageNote(), rangeFallbackNote()].filter(Boolean).join(" · ");
+  return [extra, hiddenUnknownNote(selection), monthlyCoverageNote()].filter(Boolean).join(" · ");
 }
 
 function monthlyCoverageNote() {
@@ -1992,7 +2950,10 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
 
   const note = document.createElement("span");
   note.className = "pagination-note";
-  note.textContent = `第 ${pageInfo.page} / ${pageInfo.pageCount} 页 · ${pageInfo.startIndex + 1}-${pageInfo.endIndex} / ${pageInfo.total} ${unit}`;
+  note.textContent =
+    variant === "top"
+      ? `${pageInfo.startIndex + 1}-${pageInfo.endIndex} / ${pageInfo.total} ${unit}`
+      : `第 ${pageInfo.page} / ${pageInfo.pageCount} 页 · ${pageInfo.startIndex + 1}-${pageInfo.endIndex} / ${pageInfo.total} ${unit}`;
   footer.append(note);
 
   if (showPageSizeControl) {
@@ -2006,7 +2967,7 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
     if (!showPageControls) return footer;
     controls.append(
       renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1),
-      renderPageStatus(pageInfo),
+      renderPageStatus(pageInfo, { compact: true }),
       renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount),
     );
     footer.append(controls);
@@ -2030,13 +2991,15 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
       renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount),
       renderPageButton("末页", pageInfo.pageCount, pageInfo.page === pageInfo.pageCount),
     );
+    controls.append(renderPageJumpControl(pageInfo));
     footer.append(controls);
   }
 
   return footer;
 }
 
-function shouldShowPageSizeControl(pageInfo) {
+function shouldShowPageSizeControl(pageInfo, variant = "bottom") {
+  if (variant === "top") return false;
   if (state.view === "videos") return false;
   return pageInfo.total > Math.min(...LIST_PAGE_SIZE_OPTIONS);
 }
@@ -2078,11 +3041,30 @@ function renderPageButton(label, page, disabled, isCurrent = false) {
   return button;
 }
 
-function renderPageStatus(pageInfo) {
+function renderPageStatus(pageInfo, options = {}) {
   const status = document.createElement("span");
   status.className = "pagination-status";
-  status.textContent = `第 ${pageInfo.page} / ${pageInfo.pageCount} 页`;
+  status.textContent = options.compact ? `${pageInfo.page}/${pageInfo.pageCount}` : `第 ${pageInfo.page} / ${pageInfo.pageCount} 页`;
   return status;
+}
+
+function renderPageJumpControl(pageInfo) {
+  const label = document.createElement("label");
+  label.className = "page-jump";
+  const text = document.createElement("span");
+  text.textContent = "跳转到第";
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = "1";
+  input.max = String(pageInfo.pageCount);
+  input.inputMode = "numeric";
+  input.dataset.jumpPage = "true";
+  input.value = String(pageInfo.page);
+  input.setAttribute("aria-label", `跳转到第几页，范围 1 到 ${pageInfo.pageCount}`);
+  const suffix = document.createElement("span");
+  suffix.textContent = "页";
+  label.append(text, input, suffix);
+  return label;
 }
 
 function renderPageEllipsis() {
@@ -2368,9 +3350,11 @@ function formatCountEntry(entry) {
 function renderRankRecord({
   mode = "song",
   key,
+  detail = "",
   rank,
   isTied,
   title,
+  record = null,
   meta,
   videoCount,
   count,
@@ -2403,10 +3387,18 @@ function renderRankRecord({
     .join(" ");
   row.dataset.rowKey = rowKey;
   row.dataset.drawerMode = mode;
+  row.dataset.detail = detail;
   row._sourceOccurrences = occurrences;
   row._artistSongGroups = songGroups.length ? songGroups : null;
   row._getArtistSongGroups = getSongGroups;
   row._artistSongCount = artistSongCount;
+  row._detailRecord = {
+    type: mode === "artist" ? "artist" : "song",
+    record,
+    title,
+    subtitle: mode === "artist" ? (songPreview || []).slice(0, 2).join("、") : meta.primary,
+    occurrences,
+  };
   if (isTied) row.title = "同收录次数共享名次";
 
   const rankNumber = document.createElement("div");
@@ -2415,8 +3407,8 @@ function renderRankRecord({
   rankNumber.setAttribute("aria-label", `第 ${rank} 名`);
   row.append(rankNumber);
 
-  row.append(renderRecordContent(title, meta, { mode, occurrences, songGroups, songCount, songPreview, drawerId, isExpanded, videoCount, trend }));
-  row.append(renderCount(count, countUnit));
+  row.append(renderRecordContent(title, meta, { mode, detail, occurrences, songGroups, songCount, songPreview, drawerId, isExpanded, videoCount, trend }));
+  row.append(renderCount(count, countUnit, trend));
   if (expandable) row.append(renderSourceDrawer({ mode, occurrences, songGroups, drawerId, isExpanded, getSongGroups }));
 
   return row;
@@ -2432,13 +3424,23 @@ function renderIndexRecord(record) {
   row.className = ["index-row", expandable ? "is-expandable" : "", isExpanded ? "is-expanded" : "", isNicheRecord(record) ? "is-niche" : ""]
     .filter(Boolean)
     .join(" ");
+  const detail = detailParam("song", record.key);
   row.dataset.rowKey = rowKey;
   row.dataset.drawerMode = "index";
+  row.dataset.detail = detail;
   row._sourceOccurrences = record.occurrences;
+  row._detailRecord = {
+    type: "song",
+    record,
+    title: record.title,
+    subtitle: songMeta(record).primary,
+    occurrences: record.occurrences,
+  };
 
   row.append(
     renderRecordContent(record.title, songMeta(record), {
       mode: "index",
+      detail,
       occurrences: record.occurrences,
       drawerId,
       isExpanded,
@@ -2470,6 +3472,7 @@ function renderRankHeader(mode = "song") {
 function renderRecordContent(title, meta, options) {
   const {
     mode = "song",
+    detail = "",
     occurrences,
     songGroups = [],
     songCount = songGroups.length,
@@ -2485,40 +3488,46 @@ function renderRecordContent(title, meta, options) {
 
   const heading = document.createElement(`h${headingLevel}`);
   heading.className = "rank-title";
-  heading.append(document.createTextNode(title));
+  const titleButton = document.createElement("button");
+  titleButton.className = "rank-title-button";
+  titleButton.type = "button";
+  titleButton.dataset.openDetail = "true";
+  titleButton.dataset.detail = detail;
+  titleButton.setAttribute("aria-label", mode === "artist" ? `打开歌手详情：${title}` : `打开歌曲详情：${title}`);
+  titleButton.append(document.createTextNode(title));
   for (const badgeText of meta.badges || []) {
     const badge = document.createElement("span");
     badge.className = "song-badge niche-badge";
     badge.textContent = badgeText;
-    heading.append(" ", badge);
+    titleButton.append(" ", badge);
   }
+  heading.append(titleButton);
   content.append(heading);
 
   const subline = document.createElement("div");
   subline.className = "rank-subline";
   if (mode === "artist") {
-    appendArtistSubline(subline, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount });
+    appendArtistSubline(subline, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount, detail });
   } else {
     appendSublinePart(subline, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(subline, `${videoCount} 个视频`, "subline-video-count");
-    appendSublineSource(subline, { mode, occurrences, drawerId, isExpanded });
+    appendSublineSource(subline, { mode, occurrences, drawerId, isExpanded, detail });
   }
-  if (trend) appendSublineNode(subline, renderTrendBadge(trend));
   content.append(subline);
 
   return content;
 }
 
-function appendArtistSubline(container, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount }) {
-  appendSublinePart(container, `${songCount}首歌曲`, "subline-song-count");
+function appendArtistSubline(container, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount, detail }) {
   appendSublinePart(container, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
+  appendSublinePart(container, `${songCount} 首歌曲`, "subline-song-count");
+  appendSublinePart(container, `${videoCount} 个视频`, "subline-video-count");
   if (songCount === 1 && occurrences.length === 1) {
     appendSublineNode(container, renderInlineSource(occurrences[0]));
   }
-  appendSublinePart(container, `${videoCount} 个视频`, "subline-video-count");
 
   if (songCount > 1 || occurrences.length > 1) {
-    const button = renderSourceToggleButton({ mode: "artist", drawerId, isExpanded, songCount });
+    const button = renderSourceToggleButton({ mode: "artist", drawerId, isExpanded, songCount, detail });
     appendSublineNode(container, button);
   }
 }
@@ -2537,14 +3546,18 @@ function appendSublinePart(container, text, className = "") {
   container.append(part);
 }
 
-function renderCount(count, unit = "次") {
+function renderCount(count, unit = "次", trend = null) {
   const node = document.createElement("div");
   node.className = count > 1 ? "rank-count is-strong" : "rank-count";
-  node.textContent = `${count}${unit}`;
+  const value = document.createElement("span");
+  value.className = "rank-count-value";
+  value.textContent = `${count}${unit}`;
+  node.append(value);
+  if (trend) node.append(renderTrendBadge(trend));
   return node;
 }
 
-function appendSublineSource(container, { mode, occurrences, drawerId, isExpanded }) {
+function appendSublineSource(container, { mode, occurrences, drawerId, isExpanded, detail }) {
   if (!occurrences.length) {
     appendSublinePart(container, "无来源");
     return;
@@ -2557,24 +3570,27 @@ function appendSublineSource(container, { mode, occurrences, drawerId, isExpande
   const sourcePreview = window.FrontendUtils.buildSourcePreview(occurrences, {
     limit: INLINE_SOURCE_PREVIEW_LIMIT,
   });
-  appendSublineNode(container, renderSourcePreviewLinks(sourcePreview.preview));
-
   const button = renderSourceToggleButton({
     mode,
     drawerId,
     isExpanded,
     hiddenCount: sourcePreview.hiddenCount,
     total: sourcePreview.total,
+    detail,
   });
-  appendSublineNode(container, button);
+  const sourceLine = document.createElement("span");
+  sourceLine.className = "source-line";
+  sourceLine.append(renderSourcePreviewLinks(sourcePreview.preview), button);
+  appendSublineNode(container, sourceLine);
 }
 
-function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0, total = 0, songCount = 0 }) {
+function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0, total = 0, songCount = 0, detail = "" }) {
   const model = window.FrontendUtils.rankToggleModel({ mode, isExpanded, hiddenCount, total, songCount });
   const button = document.createElement("button");
   button.className = "rank-expand";
   button.type = "button";
   button.dataset.toggleSource = "true";
+  button.dataset.detail = detail;
   button.dataset.sourceMode = mode;
   button.dataset.sourceTotal = String(total);
   button.dataset.sourceHiddenCount = String(hiddenCount);
@@ -3055,6 +4071,11 @@ function visibilityMetric(visible, total, nicheTotal, label, nicheLabel = label)
   if (state.filter && state.nicheOnly) return `显示 ${visible} / ${nicheTotal} ${nicheLabel}`;
   if (state.filter || state.nicheOnly) return `${state.nicheOnly ? "小众" : "显示"} ${visible} / ${total} ${label}`;
   return `${total} ${label}`;
+}
+
+function recordVisibilityMetric(visible, baseVisible, total, nicheTotal, label, nicheLabel = label) {
+  if (visible !== baseVisible) return `${visible} / ${baseVisible} ${label}`;
+  return visibilityMetric(visible, total, nicheTotal, label, nicheLabel);
 }
 
 function countRatioMetric(visible, total, label) {

@@ -20,7 +20,7 @@
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles.css?v=h6564a519653d" />
+    <link rel="stylesheet" href="assets/styles.css?v=hde433b30381d" />
   </head>
   <body>
     <header class="topbar">
@@ -60,26 +60,13 @@
             <button class="tab" type="button" data-view="videos" aria-pressed="false">视频</button>
           </div>
 
-          <label
-            class="niche-toggle"
-            title="未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。"
-          >
-            <input
-              id="nicheOnlyToggle"
-              type="checkbox"
-              aria-describedby="nicheHelp"
-              title="未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。"
-            />
-            <span>只看小众</span>
-            <span id="nicheHelp" class="sr-only"
-              >未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。</span
-            >
-          </label>
-          <label class="unknown-toggle" title="隐藏没有明确歌手的收录；取消后会在链接中写入 showUnknown=1。">
-            <input id="hideUnknownToggle" type="checkbox" aria-describedby="hideUnknownHelp" checked />
-            <span>隐藏无歌手</span>
-            <span id="hideUnknownHelp" class="sr-only">隐藏空歌手、未記載、待补歌手、unknown、n/a 等无歌手收录。</span>
-          </label>
+          <button class="toolbar-button desktop-filter-button" id="desktopFilterButton" type="button" aria-haspopup="dialog" aria-controls="filterDialog">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h16M7 12h10M10 18h4" />
+            </svg>
+            <span>筛选</span>
+            <span class="filter-count" id="filterCountBadge" hidden></span>
+          </button>
 
           <label class="field snapshot-date-field">
             <span class="sr-only">快照日期</span>
@@ -90,9 +77,32 @@
             <span class="sr-only">快照时间</span>
             <select id="snapshotSelect" aria-label="快照时间"></select>
           </label>
+
+          <button class="toolbar-button share-button" id="shareButton" type="button" aria-label="分享当前榜单链接">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 12h8M14 6l6 6-6 6M4 6v12" />
+            </svg>
+            <span>分享</span>
+          </button>
+
+          <div class="mobile-toolbar-actions" aria-label="移动端工具">
+            <button class="toolbar-icon-button" id="openSearchButton" type="button" aria-haspopup="dialog" aria-controls="searchDialog" aria-label="打开搜索">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" />
+              </svg>
+            </button>
+            <button class="toolbar-button mobile-filter-button" id="openFilterButton" type="button" aria-haspopup="dialog" aria-controls="filterDialog">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 6h16M7 12h10M10 18h4" />
+              </svg>
+              <span>筛选</span>
+              <span class="filter-count" id="mobileFilterCountBadge" hidden></span>
+            </button>
+          </div>
         </div>
       </section>
 
+      <section class="status-alerts" id="statusAlerts" aria-live="polite"></section>
       <section class="summary" id="summary" aria-live="polite"></section>
       <section class="content-shell rank-panel skeleton-panel" id="videoList" aria-busy="true">
         <div class="rank-header skeleton-header" aria-hidden="true">
@@ -127,14 +137,179 @@
       </section>
     </main>
 
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="主视图">
+      <button class="bottom-nav-item active" type="button" data-view="songRank" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 18V5l10-2v13M9 10l10-2M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm10-2a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z" />
+        </svg>
+        <span>歌曲榜</span>
+      </button>
+      <button class="bottom-nav-item" type="button" data-view="artistRank">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0" />
+        </svg>
+        <span>歌手榜</span>
+      </button>
+      <button class="bottom-nav-item" type="button" data-view="songAz">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 5h14M5 12h14M5 19h10" />
+        </svg>
+        <span>歌曲索引</span>
+      </button>
+      <button class="bottom-nav-item" type="button" data-view="videos">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16v12H4zM10 9l5 3-5 3z" />
+        </svg>
+        <span>视频</span>
+      </button>
+    </nav>
+
+    <div class="overlay-root" id="searchDialog" hidden role="dialog" aria-modal="true" aria-labelledby="searchDialogTitle">
+      <div class="overlay-backdrop" data-close-overlay="search"></div>
+      <section class="search-panel" tabindex="-1">
+        <div class="search-panel-header">
+          <h2 id="searchDialogTitle">搜索</h2>
+          <button class="text-button" id="cancelSearchButton" type="button">取消</button>
+        </div>
+        <label class="panel-search-field">
+          <span class="sr-only">搜索歌曲、歌手、频道或视频</span>
+          <input id="searchPanelInput" type="search" autocomplete="off" placeholder="搜索歌曲、歌手、频道或视频" />
+          <button class="icon-button clear-search-button" id="clearSearchButton" type="button" aria-label="清空搜索">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </label>
+        <div class="search-panel-body">
+          <section class="search-section" id="recentSearchSection">
+            <div class="panel-section-heading">
+              <h3>最近搜索</h3>
+              <button class="text-button subtle" id="clearRecentSearchesButton" type="button">清空</button>
+            </div>
+            <div class="search-chip-list" id="recentSearches"></div>
+          </section>
+          <section class="search-section">
+            <h3>匹配建议</h3>
+            <div class="search-suggestions" id="searchSuggestions"></div>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <div class="overlay-root" id="filterDialog" hidden role="dialog" aria-modal="true" aria-labelledby="filterDialogTitle">
+      <div class="overlay-backdrop" data-close-overlay="filter"></div>
+      <section class="filter-sheet" tabindex="-1">
+        <header class="sheet-header">
+          <h2 id="filterDialogTitle">筛选</h2>
+          <button class="icon-button" id="cancelFilterButton" type="button" aria-label="关闭筛选">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </header>
+        <div class="sheet-body">
+          <label class="sheet-toggle niche-toggle" title="未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。">
+            <input id="nicheOnlyToggle" type="checkbox" aria-describedby="nicheHelp" />
+            <span>只看小众</span>
+            <span id="nicheHelp" class="sr-only">未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。</span>
+          </label>
+          <label class="sheet-toggle unknown-toggle" title="隐藏没有明确歌手的收录；取消后会在链接中写入 showUnknown=1。">
+            <input id="hideUnknownToggle" type="checkbox" aria-describedby="hideUnknownHelp" checked />
+            <span>隐藏无歌手</span>
+            <span id="hideUnknownHelp" class="sr-only">隐藏空歌手、未記載、待补歌手、unknown、n/a 等无歌手收录。</span>
+          </label>
+
+          <fieldset class="sheet-field" id="metricFilterGroup">
+            <legend>排行口径</legend>
+            <div class="sheet-segmented" role="group" aria-label="排行口径">
+              <label><input type="radio" name="filterMetric" value="occurrences" checked />按收录</label>
+              <label><input type="radio" name="filterMetric" value="videos" />按视频</label>
+            </div>
+          </fieldset>
+
+          <label class="sheet-field" id="trendFilterGroup">
+            <span>趋势筛选</span>
+            <select id="trendFilterSelect">
+              <option value="all">全部</option>
+              <option value="new">新上榜</option>
+              <option value="up">上升</option>
+              <option value="down">下降</option>
+            </select>
+            <small id="trendFilterHint"></small>
+          </label>
+
+          <label class="sheet-field" id="minCountFilterGroup">
+            <span>最低收录</span>
+            <select id="minCountSelect">
+              <option value="1">不限</option>
+              <option value="2">2次以上</option>
+              <option value="5">5次以上</option>
+              <option value="10">10次以上</option>
+            </select>
+          </label>
+
+          <label class="sheet-field page-size-filter">
+            <span>每页数量</span>
+            <select id="filterPageSizeSelect">
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </label>
+
+          <label class="sheet-field">
+            <span>历史快照日期</span>
+            <select id="filterSnapshotDateSelect"></select>
+          </label>
+
+          <label class="sheet-field">
+            <span>历史快照时间</span>
+            <select id="filterSnapshotSelect"></select>
+          </label>
+        </div>
+        <footer class="sheet-actions">
+          <button class="secondary-button" id="resetFiltersButton" type="button">重置全部筛选</button>
+          <button class="primary-button" id="applyFiltersButton" type="button">应用</button>
+        </footer>
+      </section>
+    </div>
+
+    <div class="detail-layer" id="detailDialog" hidden role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="overlay-backdrop" data-close-overlay="detail"></div>
+      <aside class="detail-drawer" tabindex="-1">
+        <header class="detail-header">
+          <div>
+            <p class="detail-kicker" id="detailKicker"></p>
+            <h2 id="detailTitle">详情</h2>
+            <p class="detail-subtitle" id="detailSubtitle"></p>
+          </div>
+          <button class="icon-button" id="closeDetailButton" type="button" aria-label="关闭详情">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
+          </button>
+        </header>
+        <div class="detail-stats" id="detailStats"></div>
+        <div class="detail-actions">
+          <button class="secondary-button" id="shareDetailButton" type="button" aria-label="分享当前详情">分享</button>
+        </div>
+        <label class="detail-search">
+          <span class="sr-only">来源内搜索</span>
+          <input id="detailSourceSearch" type="search" placeholder="搜索来源、频道或视频" autocomplete="off" />
+        </label>
+        <div class="detail-source-count" id="detailSourceCount"></div>
+        <div class="detail-source-list" id="detailSourceList"></div>
+        <button class="secondary-button detail-more-button" id="detailMoreButton" type="button" hidden>显示更多20条</button>
+      </aside>
+    </div>
+
     <button class="back-to-top" id="backToTop" type="button" aria-label="返回顶部" title="返回顶部" hidden>
       &uarr;
     </button>
     <div class="toast" id="toast" aria-live="polite" hidden></div>
 
-    <script src="assets/source-filter.js?v=h6564a519653d" defer></script>
-    <script src="assets/frontend-utils.js?v=h6564a519653d" defer></script>
-    <script src="assets/ranking-utils.js?v=h6564a519653d" defer></script>
-    <script src="assets/app.js?v=h6564a519653d" defer></script>
+    <script src="assets/source-filter.js?v=hde433b30381d" defer></script>
+    <script src="assets/frontend-utils.js?v=hde433b30381d" defer></script>
+    <script src="assets/ranking-utils.js?v=hde433b30381d" defer></script>
+    <script src="assets/app.js?v=hde433b30381d" defer></script>
   </body>
 </html>

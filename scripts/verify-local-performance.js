@@ -1,4 +1,6 @@
 const { chromium } = require("playwright");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const args = process.argv.slice(2);
 const latestOnly = args.includes("--latest-only");
@@ -6,12 +8,16 @@ const baseUrl = args.find((arg) => !arg.startsWith("--")) || "http://127.0.0.1:8
 const viewports = [
   [1920, 1080],
   [1366, 768],
+  [1024, 768],
   [768, 1024],
-  [414, 896],
+  [430, 932],
   [390, 844],
+  [360, 800],
   [320, 700],
 ];
 const results = [];
+const screenshotDir = path.join(process.cwd(), "artifacts", "h5-redesign");
+fs.mkdirSync(screenshotDir, { recursive: true });
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -74,6 +80,75 @@ async function waitForRows(page, errors = [], requests = []) {
   }
 }
 
+async function assertUiShape(page, viewport, range) {
+  const result = await page.evaluate(({ width }) => {
+    const rect = (selector) => {
+      const node = document.querySelector(selector);
+      if (!node) return null;
+      const box = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return {
+        width: box.width,
+        height: box.height,
+        top: box.top,
+        display: style.display,
+        overflowX: style.overflowX,
+        text: node.textContent || "",
+      };
+    };
+    const controls = rect("#controls");
+    const searchField = rect(".search-field");
+    const bottomNav = rect("#mobileBottomNav");
+    const summary = rect("#summary");
+    const summaryRange = rect("#summary .summary-range");
+    const topPagination = rect(".pagination-top");
+    const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row), .index-row, .video-card"));
+    const fullyVisibleRows = rows.filter((node) => {
+      const box = node.getBoundingClientRect();
+      return box.top >= 0 && box.bottom <= window.innerHeight;
+    }).length;
+    const bottomItems = Array.from(document.querySelectorAll("#mobileBottomNav [data-view]")).map((node) => {
+      const box = node.getBoundingClientRect();
+      return { text: node.textContent || "", width: box.width, display: getComputedStyle(node).display };
+    });
+    const rankCount = rect(".rank-count");
+    const rankSubline = rect(".rank-subline");
+    return {
+      width,
+      controls,
+      searchField,
+      bottomNav,
+      bottomItems,
+      summary,
+      summaryRange,
+      topPagination,
+      fullyVisibleRows,
+      rankCount,
+      rankSubline,
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    };
+  }, { width: viewport[0], range });
+
+  if (result.scrollWidth > result.clientWidth + 1) throw new Error(`horizontal overflow ${JSON.stringify(result)}`);
+  if (viewport[0] <= 720) {
+    if (!result.controls || result.controls.height > 60) throw new Error(`mobile controls not one row ${JSON.stringify(result.controls)}`);
+    if (result.searchField && result.searchField.display !== "none") throw new Error("mobile search field is still resident in toolbar");
+    if (!result.bottomNav || result.bottomNav.display === "none") throw new Error("mobile bottom nav missing");
+    if (result.bottomItems.length !== 4 || result.bottomItems.some((item) => item.width < 60 || item.display === "none")) {
+      throw new Error(`mobile bottom nav items invalid ${JSON.stringify(result.bottomItems)}`);
+    }
+    if (result.summaryRange && result.summaryRange.display !== "none") {
+      throw new Error(`mobile summary repeats range: ${result.summary.text}`);
+    }
+    if (result.topPagination && result.topPagination.height > 52) throw new Error(`mobile top pagination too tall ${result.topPagination.height}`);
+    if (viewport[0] >= 390 && result.fullyVisibleRows < 5) throw new Error(`mobile visible rows below target: ${result.fullyVisibleRows}`);
+    if (viewport[0] <= 360 && result.fullyVisibleRows < 4) throw new Error(`narrow mobile visible rows below target: ${result.fullyVisibleRows}`);
+  } else if (viewport[0] >= 1024 && result.fullyVisibleRows < (viewport[0] >= 1600 ? 10 : 7)) {
+    throw new Error(`desktop visible rows below target: ${result.fullyVisibleRows}`);
+  }
+}
+
 async function firstLoad(browser, range, viewport) {
   const { context, page, errors } = await newPage(browser, viewport);
   const requests = [];
@@ -89,6 +164,7 @@ async function firstLoad(browser, range, viewport) {
   const url = range === "72h" ? baseUrl : `${baseUrl}?range=1m`;
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await waitForRows(page, errors, requests);
+  await assertUiShape(page, viewport, range);
   firstRowTime = Date.now();
   const beforeFirstContentRequests = [...requests];
   const perf = await page.evaluate(() => window.printSongListPerformance());
@@ -101,6 +177,8 @@ async function firstLoad(browser, range, viewport) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
   const longTasks = await page.evaluate(() => window.__longTasks || []);
   const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+  const screenshotPath = path.join(screenshotDir, `${range}-${viewport.join("x")}.png`);
+  await page.screenshot({ path: screenshotPath, fullPage: false });
   await context.close();
 
   const forbidden =
@@ -131,7 +209,7 @@ async function firstLoad(browser, range, viewport) {
       })}`,
     );
   }
-  results.push({ scenario: `first-${range}-${viewport.join("x")}`, requests: beforeFirstContentRequests, measures: perf.measures, longTasks: longTasks.length });
+  results.push({ scenario: `first-${range}-${viewport.join("x")}`, requests: beforeFirstContentRequests, measures: perf.measures, longTasks: longTasks.length, screenshotPath });
 }
 
 async function interactionFlow(browser) {
@@ -147,18 +225,44 @@ async function interactionFlow(browser) {
   await waitForRows(page, errors, requests);
   await page.locator("#filterInput").fill("夜");
   await waitForRows(page, errors, requests);
+  await page.locator("#desktopFilterButton").click();
   await page.locator("#nicheOnlyToggle").check();
+  await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
-  await page.locator('[data-rank-metric="videos"]').first().click();
+  await page.locator("#desktopFilterButton").click();
+  await page.locator("#metricFilterGroup label").filter({ hasText: "按视频" }).click();
+  await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
   await page.locator("#filterInput").fill("");
+  await page.locator("#desktopFilterButton").click();
   await page.locator("#nicheOnlyToggle").uncheck();
+  await page.locator("#metricFilterGroup label").filter({ hasText: "按收录" }).click();
+  await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
-  await page.getByRole("button", { name: "歌手榜" }).click();
+  const buildSongRecordCountBeforeDetail = await page.evaluate(
+    () => performance.getEntriesByName("song-list:build-song-records").length,
+  );
+  await page.locator("[data-open-detail]").first().click();
+  await page.waitForSelector("#detailDialog:not([hidden]) .detail-source-link, #detailDialog:not([hidden]) #detailTitle", { timeout: 15000 });
+  const detailPerf = await page.evaluate(() => ({
+    buildSongRecordCount: performance.getEntriesByName("song-list:build-song-records").length,
+    openDetailDuration: performance.getEntriesByName("song-list:open-detail").at(-1)?.duration || 0,
+  }));
+  if (detailPerf.buildSongRecordCount !== buildSongRecordCountBeforeDetail) {
+    throw new Error(`opening detail rebuilt song records: ${JSON.stringify(detailPerf)}`);
+  }
+  if (detailPerf.openDetailDuration > 300) {
+    throw new Error(`open-detail exceeded 300ms: ${JSON.stringify(detailPerf)}`);
+  }
+  const renderedSources = await page.locator("#detailDialog .detail-source-link").count();
+  if (renderedSources > 20) throw new Error(`detail rendered too many source links initially: ${renderedSources}`);
+  await page.locator("#detailSourceSearch").fill("a");
+  await page.locator("#closeDetailButton").click();
+  await page.locator('.view-mode [data-view="artistRank"]').click();
   await waitForRows(page, errors, requests);
-  await page.locator('[data-view="videos"]').click();
+  await page.locator('.view-mode [data-view="videos"]').click();
   await page.waitForSelector(".video-card .video-title", { timeout: 15000 });
-  await page.getByRole("button", { name: "歌曲榜" }).click();
+  await page.locator('.view-mode [data-view="songRank"]').click();
   await waitForRows(page, errors, requests);
   if (!latestOnly) {
     const dateOptions = await page
@@ -254,9 +358,10 @@ async function monthlyFallbackScenarios(browser) {
     await waitForRows(page, errors);
     const summary = await page.locator("#summary").textContent();
     const status = await page.locator("#status").textContent();
+    const alerts = await page.locator("#statusAlerts").textContent();
     const debug = await page.locator("#debugPanel").textContent();
     await context.close();
-    if (!summary.includes("备用数据") && !status.includes("备用数据")) {
+    if (!summary.includes("备用数据") && !status.includes("备用数据") && !alerts.includes("备用数据")) {
       throw new Error(`fallback ${scenario.label} did not expose fallback state`);
     }
     if (!debug.includes("data/1m.json") && !debug.includes("data/latest.json")) {
