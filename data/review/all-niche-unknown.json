@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T04:46:18.523Z",
+  "generatedAt": "2026-07-13T12:24:00.185Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-13T04:45:07.206Z",
+  "latestGeneratedAt": "2026-07-13T12:22:43.972Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
   "counts": {
-    "totalCandidates": 2109,
-    "uniqueVideos": 274,
-    "uniqueSources": 356,
+    "totalCandidates": 2112,
+    "uniqueVideos": 277,
+    "uniqueSources": 359,
     "confirmedNoiseCount": 99,
-    "parserCorruptionCount": 413,
+    "parserCorruptionCount": 414,
     "likelyNoiseCount": 292,
-    "needsReviewCount": 1305,
+    "needsReviewCount": 1307,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 99,
-      "parser_corruption": 413,
+      "parser_corruption": 414,
       "likely_noise": 292,
-      "needs_review": 1305,
+      "needs_review": 1307,
       "likely_song": 0
     }
   },
@@ -13763,6 +13763,54 @@
       "repairReasons": []
     },
     {
+      "title": "VIVID VICE",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 8279,
+      "time": "2:17:59",
+      "raw": "2:17:59 ⑳VIVID VICE/Who-ya Extended",
+      "rawHash": "055fffe9a7e64f9d3068741e4f2f669d474706ff86a3788131275e5be6a59288",
+      "videoId": "lyBssLfWtow",
+      "videoTitle": "【＃歌枠】初見さん歓迎！リクエストおｋ！1曲きいてこ！ #歌枠 #個人Vtuber #Vtuber雑談",
+      "channelName": "MUZU‐むずちゃんねる‐【Vtuber】",
+      "channelId": "UCBY1b_TPZx3rA0F1KJnXkNQ",
+      "channelHandle": "/channel/UCBY1b_TPZx3rA0F1KJnXkNQ",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lyBssLfWtow",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lyBssLfWtow&t=8279s",
+      "sourceId": "UgziJFwEiqyojYjn6qN4AaABAg",
+      "sourceHash": "c1a10cefc55d13feca7e6ed01ee5033653c06503d6b04fcd20210735141f9516",
+      "sourceOrigin": "latest;review:lyBssLfWtow-c1a10cefc55d13feca7e.json;review:history-lyBssLfWtow-c1a10cefc55d13feca7e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "review",
+        "snapshot:20260713T120000Z"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "delimiter_split",
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": {
+        "artist": "Who-ya Extended"
+      },
+      "reviewId": "review:lyBssLfWtow:c1a10cefc55d13feca7e",
+      "sourcePath": "data/review/sources/lyBssLfWtow-c1a10cefc55d13feca7e.json",
+      "reviewUrl": "review.html?review=review%3AlyBssLfWtow%3Ac1a10cefc55d13feca7e&entry=055fffe9a7e64f9d3068741e4f2f669d474706ff86a3788131275e5be6a59288",
+      "repairedTitle": "VIVID VICE",
+      "repairedArtist": "Who-ya Extended",
+      "repairReasons": [
+        "delimiter_split"
+      ]
+    },
+    {
       "title": "ごあいさつ",
       "artist": "未記載",
       "isNiche": true,
@@ -24727,7 +24775,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24827,7 +24875,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -24927,7 +24975,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25027,7 +25075,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25127,7 +25175,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25227,7 +25275,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25327,7 +25375,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25427,7 +25475,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25527,7 +25575,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25677,7 +25725,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25777,7 +25825,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -25917,7 +25965,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26017,7 +26065,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26117,7 +26165,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26217,7 +26265,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26317,7 +26365,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26417,7 +26465,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26517,7 +26565,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26617,7 +26665,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26717,7 +26765,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26817,7 +26865,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -26917,7 +26965,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -27017,7 +27065,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -27117,7 +27165,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -31803,6 +31851,44 @@
       "reviewUrl": "review.html?review=review%3AhykamU10tx0%3Abb7637f905e1f66cead0&entry=9298400c83f36c84344f97dd8bbf0c8d72d7e939c8d4a5a4437bfba4ce13db90"
     },
     {
+      "title": "すたーと",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 73,
+      "time": "0:01:13",
+      "raw": "1:13 すたーと",
+      "rawHash": "9ddab1e52ca4bbb7669ee51849912c935cf1b16df4197eda56ccfdb56138a686",
+      "videoId": "iZkAOabHlZM",
+      "videoTitle": "【朝活/歌枠】憂鬱な月曜日に癒しを。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "UCp1H5Jt_ihUIUAIQCc-9hzw",
+      "channelHandle": "/@nepin0318",
+      "youtubeUrl": "https://www.youtube.com/watch?v=iZkAOabHlZM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iZkAOabHlZM&t=73s",
+      "sourceId": "UgyuVodGKK_omTup6_N4AaABAg",
+      "sourceHash": "44db30d330943f06c2a292a199a0bb1c119a4fe0483b1929d2c712e55152eed4",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:iZkAOabHlZM:44db30d330943f06c2a2",
+      "sourcePath": "data/review/sources/iZkAOabHlZM-44db30d330943f06c2a2.json",
+      "reviewUrl": "review.html?review=review%3AiZkAOabHlZM%3A44db30d330943f06c2a2&entry=9ddab1e52ca4bbb7669ee51849912c935cf1b16df4197eda56ccfdb56138a686",
+      "repairedTitle": "すたーと",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "枠Start",
       "artist": "未記載",
       "isNiche": true,
@@ -33670,7 +33756,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33772,7 +33858,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33874,7 +33960,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33976,7 +34062,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34078,7 +34164,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34180,7 +34266,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34282,7 +34368,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34384,7 +34470,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34486,7 +34572,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34588,7 +34674,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34690,7 +34776,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34792,7 +34878,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34894,7 +34980,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34996,7 +35082,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35098,7 +35184,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35200,7 +35286,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35302,7 +35388,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35404,7 +35490,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35506,7 +35592,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35608,7 +35694,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35710,7 +35796,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35812,7 +35898,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35914,7 +36000,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36016,7 +36102,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36118,7 +36204,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36220,7 +36306,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36322,7 +36408,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36424,7 +36510,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36526,7 +36612,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36628,7 +36714,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36730,7 +36816,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36832,7 +36918,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36934,7 +37020,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37036,7 +37122,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37138,7 +37224,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37240,7 +37326,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37342,7 +37428,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37444,7 +37530,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37546,7 +37632,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37648,7 +37734,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37750,7 +37836,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37852,7 +37938,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37954,7 +38040,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38056,7 +38142,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38158,7 +38244,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38260,7 +38346,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38362,7 +38448,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38464,7 +38550,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38566,7 +38652,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38668,7 +38754,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38770,7 +38856,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38872,7 +38958,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -38974,7 +39060,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39076,7 +39162,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39178,7 +39264,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39280,7 +39366,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39382,7 +39468,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39484,7 +39570,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39586,7 +39672,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39688,7 +39774,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39790,7 +39876,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39892,7 +39978,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -39994,7 +40080,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40096,7 +40182,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40198,7 +40284,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40300,7 +40386,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40402,7 +40488,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40504,7 +40590,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40606,7 +40692,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40708,7 +40794,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40810,7 +40896,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -40912,7 +40998,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41014,7 +41100,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41116,7 +41202,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41218,7 +41304,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41320,7 +41406,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41422,7 +41508,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41524,7 +41610,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41626,7 +41712,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41728,7 +41814,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41830,7 +41916,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -41932,7 +42018,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -42034,7 +42120,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -42136,7 +42222,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -42238,7 +42324,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -42340,7 +42426,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -42442,7 +42528,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -42544,7 +42630,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -47578,7 +47664,7 @@
         "1m",
         "review",
         "snapshot:20260712T190000Z",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -61452,6 +61538,45 @@
       "reviewId": "review:GsWidWYRJXg:cbcb66178f85620dc433",
       "sourcePath": "data/review/sources/history-GsWidWYRJXg-cbcb66178f85620dc433.json",
       "reviewUrl": "review.html?review=review%3AGsWidWYRJXg%3Acbcb66178f85620dc433&entry=e3e2e18c9e9118fe4e2a6e379d4e33b3e1e312114936734d48fb78ec41ab966b"
+    },
+    {
+      "title": "本日も〜？ひなたびよりー☀",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 455,
+      "time": "0:07:35",
+      "raw": "0:07:35  本日も〜？ひなたびよりー☀️",
+      "rawHash": "a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e",
+      "videoId": "pI-sk5vxg3E",
+      "videoTitle": "【弾き語り】 少しだけ歌うよっ 【歌枠】 #shorts #菜鳥ひなた #karaoke Singing Stream",
+      "channelName": "菜鳥ひなた / Hinata Natori",
+      "channelId": "UCahlYbdb3AHrNQdojztSMvQ",
+      "channelHandle": "/@natori_hinata",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E&t=455s",
+      "sourceId": "UgzHhvuoCL45Cl2Wy2B4AaABAg",
+      "sourceHash": "c36865484826660b7d25d85531b35aee0ef74259a5e1bd4df8a83110acd4041f",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
+      "sourcePath": "data/review/sources/pI-sk5vxg3E-c36865484826660b7d25.json",
+      "reviewUrl": "review.html?review=review%3ApI-sk5vxg3E%3Ac36865484826660b7d25&entry=a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e",
+      "repairedTitle": "本日も〜？ひなたびよりー☀",
+      "repairedArtist": "未記載",
+      "repairReasons": []
     },
     {
       "title": "白日夢",
@@ -76432,7 +76557,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T040000Z",
+        "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -82976,7 +83101,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -83072,7 +83197,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260713T040000Z"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",

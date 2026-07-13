@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T04:45:12.479Z",
+  "generatedAt": "2026-07-13T12:22:50.673Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-  "totalSongs": 13447,
-  "unknownArtistCount": 2782,
-  "nicheUnknownArtistCount": 1421,
-  "highRiskEntryCount": 402,
-  "highRiskSourceCount": 16,
+  "totalSongs": 13866,
+  "unknownArtistCount": 2786,
+  "nicheUnknownArtistCount": 1424,
+  "highRiskEntryCount": 409,
+  "highRiskSourceCount": 17,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 7,
+  "ruleDroppedEntryCount": 11,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 19,
+  "confirmedNoiseCount": 34,
   "parserCorruptionCount": 135,
-  "likelyNoiseCount": 6,
+  "likelyNoiseCount": 3,
   "needsReviewCount": 1305,
-  "likelySongCount": 7925,
+  "likelySongCount": 8272,
   "topRiskTitles": [
     {
       "value": "少女レイ",
@@ -235,23 +235,15 @@
       "count": 5
     },
     {
-      "value": "ノア・ポラリス -Noa Polaris-",
-      "count": 4
-    },
-    {
-      "value": "音魂ヒビクHibiku Otodama",
-      "count": 4
-    },
-    {
       "value": "菜鳥ひなた / Hinata Natori",
-      "count": 4
-    },
-    {
-      "value": "astel ch.アステル",
-      "count": 3
+      "count": 5
     },
     {
       "value": "Kyoka Ch. -響架-",
+      "count": 3
+    },
+    {
+      "value": "MUZU‐むずちゃんねる‐【Vtuber】",
       "count": 3
     },
     {
@@ -271,7 +263,15 @@
       "count": 3
     },
     {
+      "value": "ノア・ポラリス -Noa Polaris-",
+      "count": 3
+    },
+    {
       "value": "むんもっしゅ",
+      "count": 3
+    },
+    {
+      "value": "飲酒じめさん【hajime】",
       "count": 3
     },
     {
@@ -283,7 +283,15 @@
       "count": 3
     },
     {
+      "value": "音魂ヒビクHibiku Otodama",
+      "count": 3
+    },
+    {
       "value": "芽森ひより",
+      "count": 3
+    },
+    {
+      "value": "君影すず / Kimikage Suzu💌弾き語りVtuber",
       "count": 3
     },
     {
@@ -297,14 +305,6 @@
     {
       "value": "時羽あいの",
       "count": 3
-    },
-    {
-      "value": "-sumica-澄花",
-      "count": 2
-    },
-    {
-      "value": "Akane Ch. 七福あかね",
-      "count": 2
     }
   ],
   "topRiskVideos": [
@@ -337,6 +337,20 @@
       ]
     },
     {
+      "videoId": "VIpAo2YNDFc",
+      "title": "のんびり弾き語り練習～【ねむぴぴ/Vtuber】",
+      "channelName": "ねむぴぴ*-Nemupipi-",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "conversation_entry"
+      ]
+    },
+    {
       "videoId": "bUb_oMOzuf4",
       "title": "【 #歌枠 】スパロボ歌枠番外編 勝利のマシンロボ100回歌唱耐久ロボォ～♪【VTuber】",
       "channelName": "みんも / 奈良のVTuber【セシんもーZ】",
@@ -363,21 +377,6 @@
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "EJxij7L35Ss",
-      "title": "【 #おうち3D歌枠 】椎名林檎さん縛り🎤 / singing stream【 #朔炭パリカ】",
-      "channelName": "朔炭パリカParica Ch.",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "kept_count_high_low_known_song_density",
-        "conversation_entry",
-        "source_multiple_unknown_artists",
         "short_unknown_title"
       ]
     },
@@ -439,6 +438,18 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
         "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "Sua1soXqEps",
+      "title": "【歌枠/Karaoke 】夜のまったり時間のお供に。寝る前に一曲聞いてってくださいな🦊歌うの大好きVtuber #新人vtuber 【初見さん・作業用・寝落ち歓迎】",
+      "channelName": "飲酒じめさん【hajime】",
+      "riskScore": 86,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "conversation_entry",
+        "source_multiple_unknown_artists"
       ]
     },
     {
@@ -575,23 +586,18 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
-    },
-    {
-      "videoId": "-YwBj3v2flU",
-      "title": "【 #オリ曲V歌枠リレー 】オリ曲いっぱい覚えて帰ってください💗【 #雪豹メイドお給仕中 】",
-      "channelName": "雛森 アンシア【Hinamori Anthea】",
-      "riskScore": 65,
-      "riskLevel": "medium",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-13T12:22:50.673Z",
+      "totalSongs": 13866,
+      "unknownArtistCount": 2786,
+      "nicheUnknownArtistCount": 1424,
+      "highRiskEntryCount": 409,
+      "highRiskSourceCount": 17
+    },
     {
       "generatedAt": "2026-07-13T04:45:12.479Z",
       "totalSongs": 13447,

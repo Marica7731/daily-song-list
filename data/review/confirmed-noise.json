@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T04:46:18.523Z",
+  "generatedAt": "2026-07-13T12:24:00.185Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-13T04:45:07.206Z",
+  "latestGeneratedAt": "2026-07-13T12:22:43.972Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
   "counts": {
-    "totalCandidates": 138,
-    "uniqueVideos": 38,
-    "uniqueSources": 54,
-    "confirmedNoiseCount": 138,
+    "totalCandidates": 153,
+    "uniqueVideos": 44,
+    "uniqueSources": 60,
+    "confirmedNoiseCount": 153,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 138,
+      "confirmed_noise": 153,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -24,6 +24,41 @@
     }
   },
   "items": [
+    {
+      "title": "猫耳ハート目ウインクかわいいい！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6835,
+      "time": "1:53:55",
+      "raw": "1:53:55 猫耳ハート目ウインクかわいいい！",
+      "rawHash": "0e32dbbfe19c3ff6ae2f0045eae58cd953e6bfcfd88f79467f626b986f062dbb",
+      "videoId": "4GwtBdk_T_o",
+      "videoTitle": "【 #歌枠 | SING 】初見さん◎BGM◎お昼のお供にいかがですか？ singing stream - #323みすみ #shorts",
+      "channelName": "323(みすみ) -Misumi-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4GwtBdk_T_o",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4GwtBdk_T_o&t=6835s",
+      "sourceId": "UgyKgpFuFr1Ev0JhYPx4AaABAg",
+      "sourceHash": "6a7fcf34934684acd28c89fdcada44f960391aa1686c80c1ce5c4fbe8c4d0cda",
+      "sourceOrigin": "review:4GwtBdk_T_o-6a7fcf34934684acd28c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4GwtBdk_T_o:6a7fcf34934684acd28c",
+      "sourcePath": "data/review/sources/4GwtBdk_T_o-6a7fcf34934684acd28c.json",
+      "reviewUrl": "review.html?review=review%3A4GwtBdk_T_o%3A6a7fcf34934684acd28c&entry=0e32dbbfe19c3ff6ae2f0045eae58cd953e6bfcfd88f79467f626b986f062dbb"
+    },
     {
       "title": "8",
       "artist": "29 おりづるVTuberフェス(広島県) 出演決定",
@@ -352,6 +387,41 @@
       "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
     },
     {
+      "title": "くしゃみ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3289,
+      "time": "0:54:49",
+      "raw": "54:49 - くしゃみ",
+      "rawHash": "9c578bdbaf1cecf15d3fd62205264430affba4a01078c1254fffbeaa6076281d",
+      "videoId": "lHP7VYd55KE",
+      "videoTitle": "【歌枠】オハと申す者 #KMNZNERO",
+      "channelName": "KMNZ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lHP7VYd55KE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lHP7VYd55KE&t=3289s",
+      "sourceId": "UgyrlXoIdL8Qpcapt214AaABAg",
+      "sourceHash": "9c578bdbaf1cecf15d3fd62205264430affba4a01078c1254fffbeaa6076281d",
+      "sourceOrigin": "review:lHP7VYd55KE-9c578bdbaf1cecf15d3f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:lHP7VYd55KE:9c578bdbaf1cecf15d3f",
+      "sourcePath": "data/review/sources/lHP7VYd55KE-9c578bdbaf1cecf15d3f.json",
+      "reviewUrl": "review.html?review=review%3AlHP7VYd55KE%3A9c578bdbaf1cecf15d3f&entry=9c578bdbaf1cecf15d3fd62205264430affba4a01078c1254fffbeaa6076281d"
+    },
+    {
       "title": "終わりのあいさつ",
       "artist": "未記載",
       "isNiche": true,
@@ -621,538 +691,6 @@
       "reviewUrl": "review.html?review=review%3A37XJM6EIrns%3A214ab576a131538d5482&entry=6c272111dfdf019e81b62412af600c43a8ef88500af32c31335547eb3de64e56"
     },
     {
-      "title": "ハロウタノン",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 113,
-      "time": "0:01:53",
-      "raw": "00:01:53 ハロウタノン",
-      "rawHash": "95b7c63a17ae773521263bf7dacc16d5d4d6f03165cbb51a9f055a3d22437422",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=113s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=95b7c63a17ae773521263bf7dacc16d5d4d6f03165cbb51a9f055a3d22437422"
-    },
-    {
-      "title": "アニサマの序盤で腹痛",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 153,
-      "time": "0:02:33",
-      "raw": "00:02:33 アニサマの序盤で腹痛",
-      "rawHash": "fe41b89033f0ee3ea28db37b473cb819635b89c7b58387fa23c4d5d483fecf3d",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=153s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=fe41b89033f0ee3ea28db37b473cb819635b89c7b58387fa23c4d5d483fecf3d"
-    },
-    {
-      "title": "~",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 413,
-      "time": "0:06:53",
-      "raw": "00:06:53~",
-      "rawHash": "c9dd3b2898288a1573e4d23e0f91b049171cf8172a5348781e10fe1229dd2125",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=413s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "bad_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=c9dd3b2898288a1573e4d23e0f91b049171cf8172a5348781e10fe1229dd2125"
-    },
-    {
-      "title": "_UTANO010",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 465,
-      "time": "0:07:45",
-      "raw": "00:07:45 :_UTANO010:",
-      "rawHash": "e1e34c1246c1b5a0a5f097026756e8b1000dd6c401dcb29371f76b5b11f0921e",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=465s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "custom_emoji_only",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=e1e34c1246c1b5a0a5f097026756e8b1000dd6c401dcb29371f76b5b11f0921e"
-    },
-    {
-      "title": "ウタノンは雨に怯えてる",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4699,
-      "time": "1:18:19",
-      "raw": "01:18:19 ウタノンは雨に怯えてる",
-      "rawHash": "682350b6896858b94e7444ab6cd09651801c42b604d4fd791c901b29caf9da35",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=4699s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=682350b6896858b94e7444ab6cd09651801c42b604d4fd791c901b29caf9da35"
-    },
-    {
-      "title": "イベント宣伝",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6769,
-      "time": "1:52:49",
-      "raw": "01:52:49 イベント宣伝",
-      "rawHash": "a7bb34d81b4c73fc9f7bd6369349bf1ecb9ff1d92c2d968437713cda3155664f",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=6769s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=a7bb34d81b4c73fc9f7bd6369349bf1ecb9ff1d92c2d968437713cda3155664f"
-    },
-    {
-      "title": "くしゃみ",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6867,
-      "time": "1:54:27",
-      "raw": "01:54:27 00:07:34 くしゃみ",
-      "rawHash": "4ed988d7e9dcdb29007511d04957cdb70e03d0f8524abba8677365a9292b80cf",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=6867s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=4ed988d7e9dcdb29007511d04957cdb70e03d0f8524abba8677365a9292b80cf"
-    },
-    {
-      "title": "歌い終えて",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7251,
-      "time": "2:00:51",
-      "raw": "02:00:51 歌い終えて",
-      "rawHash": "0c55275efa29aa75f435620be582bdd03821f2c86f1c3a9ac3844d3dccba1428",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=7251s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=0c55275efa29aa75f435620be582bdd03821f2c86f1c3a9ac3844d3dccba1428"
-    },
-    {
-      "title": "来年のアニサマは福岡公演もある",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7325,
-      "time": "2:02:05",
-      "raw": "02:02:05 来年のアニサマは福岡公演もある",
-      "rawHash": "75e1be9af819a693c2fd5aefb85abecb66bc112a6e9a02445398954693e2f745",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=7325s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=75e1be9af819a693c2fd5aefb85abecb66bc112a6e9a02445398954693e2f745"
-    },
-    {
-      "title": "今音楽活動をしてて最大の武器",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 8013,
-      "time": "2:13:33",
-      "raw": "02:13:33 今音楽活動をしてて最大の武器",
-      "rawHash": "6109ef98d25c065ba483c0d20056e50b841df6efc920161a95b797fe99f65c0f",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=8013s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=6109ef98d25c065ba483c0d20056e50b841df6efc920161a95b797fe99f65c0f"
-    },
-    {
-      "title": "名曲は世代関係なく色褪せない",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 8606,
-      "time": "2:23:26",
-      "raw": "02:23:26 名曲は世代関係なく色褪せない",
-      "rawHash": "1ffd7227a92245b2eddf8f6f14c88bc3fcf534f7403d0795507cc24e2174be4a",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=8606s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=1ffd7227a92245b2eddf8f6f14c88bc3fcf534f7403d0795507cc24e2174be4a"
-    },
-    {
-      "title": "VTuber文化は消えることはなさそう",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 8788,
-      "time": "2:26:28",
-      "raw": "02:26:28 VTuber文化は消えることはなさそう",
-      "rawHash": "eebdcbd8929e28d508e8bb4f3bdc84a9458be9ea942365967c3b7e1836c1342d",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=8788s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=eebdcbd8929e28d508e8bb4f3bdc84a9458be9ea942365967c3b7e1836c1342d"
-    },
-    {
-      "title": "Vの活動を始めてから若くなった",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 8973,
-      "time": "2:29:33",
-      "raw": "02:29:33 Vの活動を始めてから若くなった",
-      "rawHash": "c844d0051c08638fc156bf58390b0d5cb3c56324ddbdb743d82caebe92def8b4",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=8973s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=c844d0051c08638fc156bf58390b0d5cb3c56324ddbdb743d82caebe92def8b4"
-    },
-    {
-      "title": "おつウタノン",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 9787,
-      "time": "2:43:07",
-      "raw": "02:43:07 おつウタノン",
-      "rawHash": "b3e1bd00fbc2681a5467c5d626f434189c20866e50dacce97e41e99e15d20276",
-      "videoId": "aUNkV7c48fw",
-      "videoTitle": "【歌枠】アニサマ3日目ただいま！！最終日ブチアゲロ🔥🔥🔥 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aUNkV7c48fw&t=9787s",
-      "sourceId": "UgxMM6iw5cSgRoGCGKl4AaABAg",
-      "sourceHash": "39e800ec3f16c980359e34caeda5b645198337734f7add2f7cc71c10baaf3da4",
-      "sourceOrigin": "review:aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "activity_marker_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:aUNkV7c48fw:39e800ec3f16c980359e",
-      "sourcePath": "data/review/sources/aUNkV7c48fw-39e800ec3f16c980359e.json",
-      "reviewUrl": "review.html?review=review%3AaUNkV7c48fw%3A39e800ec3f16c980359e&entry=b3e1bd00fbc2681a5467c5d626f434189c20866e50dacce97e41e99e15d20276"
-    },
-    {
       "title": "おつウタノン",
       "artist": "未記載",
       "isNiche": true,
@@ -1336,41 +874,6 @@
       "reviewUrl": "review.html?review=review%3AYdM4OewAJ8E%3A8ab605e83465bdc3d53b&entry=710022534335f3b8a56a757e8c352dccbfed646d6b63c44fef3f620e16c7d9f2"
     },
     {
-      "title": "歌ってもらいながら、運転までしてもらって申し訳ない...😆",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 487,
-      "time": "0:08:07",
-      "raw": "0:08:07 歌ってもらいながら、運転までしてもらって申し訳ない...😆",
-      "rawHash": "4d3c12a7041b81a629f9cf6deca20c69fd5448b3deff6c64cf306b1f6cd74a0d",
-      "videoId": "h2TiJNfAaZo",
-      "videoTitle": "【 #SDM歌枠リレー 】ネオソウルでノってくドライブ時間 【#まあいっか放送 #vtuber 】",
-      "channelName": "おもや いっか -Omoya Icca-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=h2TiJNfAaZo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=h2TiJNfAaZo&t=487s",
-      "sourceId": "UgwKGaWWafx9AzAZrCd4AaABAg",
-      "sourceHash": "424e4f58995c6bb1a176c63eeedb821e6f99042ff4a3d4d58bcf12e2307c88aa",
-      "sourceOrigin": "review:h2TiJNfAaZo-424e4f58995c6bb1a176.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:h2TiJNfAaZo:424e4f58995c6bb1a176",
-      "sourcePath": "data/review/sources/h2TiJNfAaZo-424e4f58995c6bb1a176.json",
-      "reviewUrl": "review.html?review=review%3Ah2TiJNfAaZo%3A424e4f58995c6bb1a176&entry=4d3c12a7041b81a629f9cf6deca20c69fd5448b3deff6c64cf306b1f6cd74a0d"
-    },
-    {
       "title": "企画説明",
       "artist": "未記載",
       "isNiche": true,
@@ -1416,6 +919,446 @@
       "reviewId": "review:OCULwDtQ8Bs:a5f12251209c4a3d1b6a",
       "sourcePath": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json",
       "reviewUrl": "review.html?review=review%3AOCULwDtQ8Bs%3Aa5f12251209c4a3d1b6a&entry=157a1fd8246db0b268cff62bf11c52381f7dbf657bc3a6342fe9372512776e0a"
+    },
+    {
+      "title": "_可愛い:ぷはぁ",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2788,
+      "time": "0:46:28",
+      "raw": "46:28 :_可愛い:ぷはぁ",
+      "rawHash": "af789a960b56df099c8a0bfc0228d3190c34087899d4671d7840c8c5eb05726c",
+      "videoId": "iZkAOabHlZM",
+      "videoTitle": "【朝活/歌枠】憂鬱な月曜日に癒しを。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=iZkAOabHlZM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iZkAOabHlZM&t=2788s",
+      "sourceId": "UgyuVodGKK_omTup6_N4AaABAg",
+      "sourceHash": "44db30d330943f06c2a292a199a0bb1c119a4fe0483b1929d2c712e55152eed4",
+      "sourceOrigin": "review:iZkAOabHlZM-44db30d330943f06c2a2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "custom_emoji_only",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:iZkAOabHlZM:44db30d330943f06c2a2",
+      "sourcePath": "data/review/sources/iZkAOabHlZM-44db30d330943f06c2a2.json",
+      "reviewUrl": "review.html?review=review%3AiZkAOabHlZM%3A44db30d330943f06c2a2&entry=af789a960b56df099c8a0bfc0228d3190c34087899d4671d7840c8c5eb05726c"
+    },
+    {
+      "title": "_可愛い:ぷくっ",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5244,
+      "time": "1:27:24",
+      "raw": "1:27:24 :_可愛い:ぷくっ",
+      "rawHash": "1d8183fe68695bfadde5ad34709a3073aa30f86554624f9594660a177190ff65",
+      "videoId": "iZkAOabHlZM",
+      "videoTitle": "【朝活/歌枠】憂鬱な月曜日に癒しを。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=iZkAOabHlZM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iZkAOabHlZM&t=5244s",
+      "sourceId": "UgyuVodGKK_omTup6_N4AaABAg",
+      "sourceHash": "44db30d330943f06c2a292a199a0bb1c119a4fe0483b1929d2c712e55152eed4",
+      "sourceOrigin": "review:iZkAOabHlZM-44db30d330943f06c2a2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "custom_emoji_only",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:iZkAOabHlZM:44db30d330943f06c2a2",
+      "sourcePath": "data/review/sources/iZkAOabHlZM-44db30d330943f06c2a2.json",
+      "reviewUrl": "review.html?review=review%3AiZkAOabHlZM%3A44db30d330943f06c2a2&entry=1d8183fe68695bfadde5ad34709a3073aa30f86554624f9594660a177190ff65"
+    },
+    {
+      "title": "_可愛い:食べれそう",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6778,
+      "time": "1:52:58",
+      "raw": "1:52:58 :_可愛い:食べれそう",
+      "rawHash": "636a74ca9a8fa7adb927ca1993eebda07140e9ac100d0ccb90ac062a4ea121ac",
+      "videoId": "iZkAOabHlZM",
+      "videoTitle": "【朝活/歌枠】憂鬱な月曜日に癒しを。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=iZkAOabHlZM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iZkAOabHlZM&t=6778s",
+      "sourceId": "UgyuVodGKK_omTup6_N4AaABAg",
+      "sourceHash": "44db30d330943f06c2a292a199a0bb1c119a4fe0483b1929d2c712e55152eed4",
+      "sourceOrigin": "review:iZkAOabHlZM-44db30d330943f06c2a2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "custom_emoji_only",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:iZkAOabHlZM:44db30d330943f06c2a2",
+      "sourcePath": "data/review/sources/iZkAOabHlZM-44db30d330943f06c2a2.json",
+      "reviewUrl": "review.html?review=review%3AiZkAOabHlZM%3A44db30d330943f06c2a2&entry=636a74ca9a8fa7adb927ca1993eebda07140e9ac100d0ccb90ac062a4ea121ac"
+    },
+    {
+      "title": "蚊にさされたお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4630,
+      "time": "1:17:10",
+      "raw": "1:17:10 蚊にさされたお話",
+      "rawHash": "c269c5d56090376d5ce8ee1ed7f0f8d288e6839981431abc6e7d5e15447d5d60",
+      "videoId": "VIpAo2YNDFc",
+      "videoTitle": "のんびり弾き語り練習～【ねむぴぴ/Vtuber】",
+      "channelName": "ねむぴぴ*-Nemupipi-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=VIpAo2YNDFc",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=VIpAo2YNDFc&t=4630s",
+      "sourceId": "UgxixyGMRRoHkbHwIBB4AaABAg",
+      "sourceHash": "8601eb42ff4bedacc8863a1111c09bcc3b9417bb22e067da42814b5d3c58b164",
+      "sourceOrigin": "review:VIpAo2YNDFc-8601eb42ff4bedacc886.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:VIpAo2YNDFc:8601eb42ff4bedacc886",
+      "sourcePath": "data/review/sources/VIpAo2YNDFc-8601eb42ff4bedacc886.json",
+      "reviewUrl": "review.html?review=review%3AVIpAo2YNDFc%3A8601eb42ff4bedacc886&entry=c269c5d56090376d5ce8ee1ed7f0f8d288e6839981431abc6e7d5e15447d5d60"
+    },
+    {
+      "title": "開始・オープニングトーク",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 321,
+      "time": "0:05:21",
+      "raw": "【00:05:21】開始・オープニングトーク",
+      "rawHash": "bada029af13f73309fa5cb02922523dff116bbb991bbdd1728732c0d79210ddf",
+      "videoId": "yflebke-Cb8",
+      "videoTitle": "【 歌枠┋KARAOKE 】月曜日の初見さん大歓迎歌枠🎐歌枠後にshort動画公開？！【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yflebke-Cb8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yflebke-Cb8&t=321s",
+      "sourceId": "UgzhccvQiHHHieTin3N4AaABAg",
+      "sourceHash": "3b3465ed1cbacf2e000b656a0b117162b74a97becb10314b6f93f57a39c805f6",
+      "sourceOrigin": "review:yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yflebke-Cb8:3b3465ed1cbacf2e000b",
+      "sourcePath": "data/review/sources/yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "reviewUrl": "review.html?review=review%3Ayflebke-Cb8%3A3b3465ed1cbacf2e000b&entry=bada029af13f73309fa5cb02922523dff116bbb991bbdd1728732c0d79210ddf"
+    },
+    {
+      "title": "こんソラタイム",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 466,
+      "time": "0:07:46",
+      "raw": "【00:07:46】こんソラタイム",
+      "rawHash": "41ecf11fdb0ce53c52c6cf87b6df6523f799ff5e4b13b905cbf9f37634c7b8e5",
+      "videoId": "yflebke-Cb8",
+      "videoTitle": "【 歌枠┋KARAOKE 】月曜日の初見さん大歓迎歌枠🎐歌枠後にshort動画公開？！【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yflebke-Cb8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yflebke-Cb8&t=466s",
+      "sourceId": "UgzhccvQiHHHieTin3N4AaABAg",
+      "sourceHash": "3b3465ed1cbacf2e000b656a0b117162b74a97becb10314b6f93f57a39c805f6",
+      "sourceOrigin": "review:yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yflebke-Cb8:3b3465ed1cbacf2e000b",
+      "sourcePath": "data/review/sources/yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "reviewUrl": "review.html?review=review%3Ayflebke-Cb8%3A3b3465ed1cbacf2e000b&entry=41ecf11fdb0ce53c52c6cf87b6df6523f799ff5e4b13b905cbf9f37634c7b8e5"
+    },
+    {
+      "title": "雑談タイム①",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 556,
+      "time": "0:09:16",
+      "raw": "【00:09:16】雑談タイム①",
+      "rawHash": "92b95d18a5dee40a359f903a6b2b2b2609ba504483bc36ca93700f41bae01d06",
+      "videoId": "yflebke-Cb8",
+      "videoTitle": "【 歌枠┋KARAOKE 】月曜日の初見さん大歓迎歌枠🎐歌枠後にshort動画公開？！【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yflebke-Cb8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yflebke-Cb8&t=556s",
+      "sourceId": "UgzhccvQiHHHieTin3N4AaABAg",
+      "sourceHash": "3b3465ed1cbacf2e000b656a0b117162b74a97becb10314b6f93f57a39c805f6",
+      "sourceOrigin": "review:yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yflebke-Cb8:3b3465ed1cbacf2e000b",
+      "sourcePath": "data/review/sources/yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "reviewUrl": "review.html?review=review%3Ayflebke-Cb8%3A3b3465ed1cbacf2e000b&entry=92b95d18a5dee40a359f903a6b2b2b2609ba504483bc36ca93700f41bae01d06"
+    },
+    {
+      "title": "雑談タイム②",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2122,
+      "time": "0:35:22",
+      "raw": "【00:35:22】雑談タイム②",
+      "rawHash": "2afd5d39e040590d586e2ee37b92d8fc307db185729ed12ae4685dc6b76fdbcf",
+      "videoId": "yflebke-Cb8",
+      "videoTitle": "【 歌枠┋KARAOKE 】月曜日の初見さん大歓迎歌枠🎐歌枠後にshort動画公開？！【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yflebke-Cb8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yflebke-Cb8&t=2122s",
+      "sourceId": "UgzhccvQiHHHieTin3N4AaABAg",
+      "sourceHash": "3b3465ed1cbacf2e000b656a0b117162b74a97becb10314b6f93f57a39c805f6",
+      "sourceOrigin": "review:yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yflebke-Cb8:3b3465ed1cbacf2e000b",
+      "sourcePath": "data/review/sources/yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "reviewUrl": "review.html?review=review%3Ayflebke-Cb8%3A3b3465ed1cbacf2e000b&entry=2afd5d39e040590d586e2ee37b92d8fc307db185729ed12ae4685dc6b76fdbcf"
+    },
+    {
+      "title": "雑談タイム③",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5268,
+      "time": "1:27:48",
+      "raw": "【01:27:48】雑談タイム③",
+      "rawHash": "101b5562d3e35b490457108812aad75d14b16a7043ccb1210d2ce73f0539fc92",
+      "videoId": "yflebke-Cb8",
+      "videoTitle": "【 歌枠┋KARAOKE 】月曜日の初見さん大歓迎歌枠🎐歌枠後にshort動画公開？！【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yflebke-Cb8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yflebke-Cb8&t=5268s",
+      "sourceId": "UgzhccvQiHHHieTin3N4AaABAg",
+      "sourceHash": "3b3465ed1cbacf2e000b656a0b117162b74a97becb10314b6f93f57a39c805f6",
+      "sourceOrigin": "review:yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yflebke-Cb8:3b3465ed1cbacf2e000b",
+      "sourcePath": "data/review/sources/yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "reviewUrl": "review.html?review=review%3Ayflebke-Cb8%3A3b3465ed1cbacf2e000b&entry=101b5562d3e35b490457108812aad75d14b16a7043ccb1210d2ce73f0539fc92"
+    },
+    {
+      "title": "本日のショート動画公開",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7175,
+      "time": "1:59:35",
+      "raw": "【01:59:35】本日のショート動画公開",
+      "rawHash": "a2c2acb879587e663a8c2730b73afe8a45b87f11fd7c95d6b9081adf39145b2b",
+      "videoId": "yflebke-Cb8",
+      "videoTitle": "【 歌枠┋KARAOKE 】月曜日の初見さん大歓迎歌枠🎐歌枠後にshort動画公開？！【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yflebke-Cb8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yflebke-Cb8&t=7175s",
+      "sourceId": "UgzhccvQiHHHieTin3N4AaABAg",
+      "sourceHash": "3b3465ed1cbacf2e000b656a0b117162b74a97becb10314b6f93f57a39c805f6",
+      "sourceOrigin": "review:yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yflebke-Cb8:3b3465ed1cbacf2e000b",
+      "sourcePath": "data/review/sources/yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "reviewUrl": "review.html?review=review%3Ayflebke-Cb8%3A3b3465ed1cbacf2e000b&entry=a2c2acb879587e663a8c2730b73afe8a45b87f11fd7c95d6b9081adf39145b2b"
+    },
+    {
+      "title": "おつソラ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7207,
+      "time": "2:00:07",
+      "raw": "【02:00:07】おつソラ",
+      "rawHash": "ea16fb2af9bf36870b942b296f973a537d03f32d8a723ca065da4846350d1940",
+      "videoId": "yflebke-Cb8",
+      "videoTitle": "【 歌枠┋KARAOKE 】月曜日の初見さん大歓迎歌枠🎐歌枠後にshort動画公開？！【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yflebke-Cb8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yflebke-Cb8&t=7207s",
+      "sourceId": "UgzhccvQiHHHieTin3N4AaABAg",
+      "sourceHash": "3b3465ed1cbacf2e000b656a0b117162b74a97becb10314b6f93f57a39c805f6",
+      "sourceOrigin": "review:yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yflebke-Cb8:3b3465ed1cbacf2e000b",
+      "sourcePath": "data/review/sources/yflebke-Cb8-3b3465ed1cbacf2e000b.json",
+      "reviewUrl": "review.html?review=review%3Ayflebke-Cb8%3A3b3465ed1cbacf2e000b&entry=ea16fb2af9bf36870b942b296f973a537d03f32d8a723ca065da4846350d1940"
     },
     {
       "title": "曲終わり",
@@ -4006,6 +3949,310 @@
       "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Ad20b81982796f791041d&entry=1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
     },
     {
+      "title": "～ 待機 ～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1,
+      "time": "0:00:01",
+      "raw": "0:01 ～ :_待機中: 待機 :_待機中: ～",
+      "rawHash": "775cba98f389c9934d53230bd9b74e834b969392975c07beb4ed77162549ecc4",
+      "videoId": "uy9bdFtow2M",
+      "videoTitle": "【#歌枠 /#karaoke 】週末はゆっくり歌を！！【#新人VTuber #ルーチェといっしょ】",
+      "channelName": "ルーチェ / Luce",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M&t=1s",
+      "sourceId": "UgwA1bOlQJtIvmQVWsp4AaABAg",
+      "sourceHash": "7835c2b67c4171e81a574fe54a649f3b7be49285ccd9d284784c39fcd949da4b",
+      "sourceOrigin": "review:uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:uy9bdFtow2M:7835c2b67c4171e81a57",
+      "sourcePath": "data/review/sources/uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "reviewUrl": "review.html?review=review%3Auy9bdFtow2M%3A7835c2b67c4171e81a57&entry=775cba98f389c9934d53230bd9b74e834b969392975c07beb4ed77162549ecc4"
+    },
+    {
+      "title": "～ 歌枠start ～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 121,
+      "time": "0:02:01",
+      "raw": "2:01 ～ :_こんー: 歌枠start :_こんー: ～",
+      "rawHash": "e5129b4b43eb1962e81be6c249ea794fc8c34e2965e8dc6a6ff8c293bd46dc5c",
+      "videoId": "uy9bdFtow2M",
+      "videoTitle": "【#歌枠 /#karaoke 】週末はゆっくり歌を！！【#新人VTuber #ルーチェといっしょ】",
+      "channelName": "ルーチェ / Luce",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M&t=121s",
+      "sourceId": "UgwA1bOlQJtIvmQVWsp4AaABAg",
+      "sourceHash": "7835c2b67c4171e81a574fe54a649f3b7be49285ccd9d284784c39fcd949da4b",
+      "sourceOrigin": "review:uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:uy9bdFtow2M:7835c2b67c4171e81a57",
+      "sourcePath": "data/review/sources/uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "reviewUrl": "review.html?review=review%3Auy9bdFtow2M%3A7835c2b67c4171e81a57&entry=e5129b4b43eb1962e81be6c249ea794fc8c34e2965e8dc6a6ff8c293bd46dc5c"
+    },
+    {
+      "title": "可愛い笑い声",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1926,
+      "time": "0:32:06",
+      "raw": "32:06 可愛い笑い声 :_ルーチェハート:",
+      "rawHash": "a654b0a7957f3b1c971eb82017f71bb5f9cb28a757d39f05c7fb4b4ae10b4132",
+      "videoId": "uy9bdFtow2M",
+      "videoTitle": "【#歌枠 /#karaoke 】週末はゆっくり歌を！！【#新人VTuber #ルーチェといっしょ】",
+      "channelName": "ルーチェ / Luce",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M&t=1926s",
+      "sourceId": "UgwA1bOlQJtIvmQVWsp4AaABAg",
+      "sourceHash": "7835c2b67c4171e81a574fe54a649f3b7be49285ccd9d284784c39fcd949da4b",
+      "sourceOrigin": "review:uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:uy9bdFtow2M:7835c2b67c4171e81a57",
+      "sourcePath": "data/review/sources/uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "reviewUrl": "review.html?review=review%3Auy9bdFtow2M%3A7835c2b67c4171e81a57&entry=a654b0a7957f3b1c971eb82017f71bb5f9cb28a757d39f05c7fb4b4ae10b4132"
+    },
+    {
+      "title": "台パン助かる！ルーちゃんは偉い",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2464,
+      "time": "0:41:04",
+      "raw": "41:04 台パン助かる！ルーちゃんは偉い",
+      "rawHash": "b365ac289f2fbda417b4c6f7b4d3c00d8a0e314b07ebfb3ac17b70b3d6552644",
+      "videoId": "uy9bdFtow2M",
+      "videoTitle": "【#歌枠 /#karaoke 】週末はゆっくり歌を！！【#新人VTuber #ルーチェといっしょ】",
+      "channelName": "ルーチェ / Luce",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M&t=2464s",
+      "sourceId": "UgwA1bOlQJtIvmQVWsp4AaABAg",
+      "sourceHash": "7835c2b67c4171e81a574fe54a649f3b7be49285ccd9d284784c39fcd949da4b",
+      "sourceOrigin": "review:uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:uy9bdFtow2M:7835c2b67c4171e81a57",
+      "sourcePath": "data/review/sources/uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "reviewUrl": "review.html?review=review%3Auy9bdFtow2M%3A7835c2b67c4171e81a57&entry=b365ac289f2fbda417b4c6f7b4d3c00d8a0e314b07ebfb3ac17b70b3d6552644"
+    },
+    {
+      "title": "なんつう笑い声してんねんww",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2521,
+      "time": "0:42:01",
+      "raw": "42:01 なんつう笑い声してんねんww",
+      "rawHash": "1203fb4d4f62e0ac40723b7971a51e9ea7bc432652942703f3a0ccb0ada68e96",
+      "videoId": "uy9bdFtow2M",
+      "videoTitle": "【#歌枠 /#karaoke 】週末はゆっくり歌を！！【#新人VTuber #ルーチェといっしょ】",
+      "channelName": "ルーチェ / Luce",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M&t=2521s",
+      "sourceId": "UgwA1bOlQJtIvmQVWsp4AaABAg",
+      "sourceHash": "7835c2b67c4171e81a574fe54a649f3b7be49285ccd9d284784c39fcd949da4b",
+      "sourceOrigin": "review:uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:uy9bdFtow2M:7835c2b67c4171e81a57",
+      "sourcePath": "data/review/sources/uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "reviewUrl": "review.html?review=review%3Auy9bdFtow2M%3A7835c2b67c4171e81a57&entry=1203fb4d4f62e0ac40723b7971a51e9ea7bc432652942703f3a0ccb0ada68e96"
+    },
+    {
+      "title": "本当に楽しそうにしてるルーちゃん可愛い",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6574,
+      "time": "1:49:34",
+      "raw": "1:49:34 本当に楽しそうにしてるルーちゃん可愛い",
+      "rawHash": "ef0ac0d025913f452232680512f9924c94b64c82e28eb6d66e8347b407f7b9f0",
+      "videoId": "uy9bdFtow2M",
+      "videoTitle": "【#歌枠 /#karaoke 】週末はゆっくり歌を！！【#新人VTuber #ルーチェといっしょ】",
+      "channelName": "ルーチェ / Luce",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M&t=6574s",
+      "sourceId": "UgwA1bOlQJtIvmQVWsp4AaABAg",
+      "sourceHash": "7835c2b67c4171e81a574fe54a649f3b7be49285ccd9d284784c39fcd949da4b",
+      "sourceOrigin": "review:uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:uy9bdFtow2M:7835c2b67c4171e81a57",
+      "sourcePath": "data/review/sources/uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "reviewUrl": "review.html?review=review%3Auy9bdFtow2M%3A7835c2b67c4171e81a57&entry=ef0ac0d025913f452232680512f9924c94b64c82e28eb6d66e8347b407f7b9f0"
+    },
+    {
+      "title": "LEAFShade様が開催する『 FUKUOKA WALK 』に出演します♪",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7432,
+      "time": "2:03:52",
+      "raw": "2:03:52 ① LEAFShade様が開催する『 FUKUOKA WALK 』に出演します♪",
+      "rawHash": "096a8b4b9ae9fa807a25d5039abbe0ddedab516c085201dafa5460dd264695c7",
+      "videoId": "uy9bdFtow2M",
+      "videoTitle": "【#歌枠 /#karaoke 】週末はゆっくり歌を！！【#新人VTuber #ルーチェといっしょ】",
+      "channelName": "ルーチェ / Luce",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M&t=7432s",
+      "sourceId": "UgwA1bOlQJtIvmQVWsp4AaABAg",
+      "sourceHash": "7835c2b67c4171e81a574fe54a649f3b7be49285ccd9d284784c39fcd949da4b",
+      "sourceOrigin": "review:uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:uy9bdFtow2M:7835c2b67c4171e81a57",
+      "sourcePath": "data/review/sources/uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "reviewUrl": "review.html?review=review%3Auy9bdFtow2M%3A7835c2b67c4171e81a57&entry=096a8b4b9ae9fa807a25d5039abbe0ddedab516c085201dafa5460dd264695c7"
+    },
+    {
+      "title": "～ エンディング ～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7547,
+      "time": "2:05:47",
+      "raw": "2:05:47 ～ :_おつー: エンディング :_おつー: ～",
+      "rawHash": "7b0c238e2735bad2cf83f2ecb69fbedcb8c06714280efa3e782a09b509487cf1",
+      "videoId": "uy9bdFtow2M",
+      "videoTitle": "【#歌枠 /#karaoke 】週末はゆっくり歌を！！【#新人VTuber #ルーチェといっしょ】",
+      "channelName": "ルーチェ / Luce",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=uy9bdFtow2M&t=7547s",
+      "sourceId": "UgwA1bOlQJtIvmQVWsp4AaABAg",
+      "sourceHash": "7835c2b67c4171e81a574fe54a649f3b7be49285ccd9d284784c39fcd949da4b",
+      "sourceOrigin": "review:uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:uy9bdFtow2M:7835c2b67c4171e81a57",
+      "sourcePath": "data/review/sources/uy9bdFtow2M-7835c2b67c4171e81a57.json",
+      "reviewUrl": "review.html?review=review%3Auy9bdFtow2M%3A7835c2b67c4171e81a57&entry=7b0c238e2735bad2cf83f2ecb69fbedcb8c06714280efa3e782a09b509487cf1"
+    },
+    {
       "title": "おつくわタイム",
       "artist": "",
       "isNiche": false,
@@ -4098,6 +4345,129 @@
       "reviewId": "review:0gbXCxLtDoE:d05e3b686c5f25109e61",
       "sourcePath": "data/review/sources/history-0gbXCxLtDoE-d05e3b686c5f25109e61.json",
       "reviewUrl": "review.html?review=review%3A0gbXCxLtDoE%3Ad05e3b686c5f25109e61&entry=84a9c3b396d111ecc887dacf81bc1df9ab8bec24942be0ed2f5ec9fe3737cf4d"
+    },
+    {
+      "title": "鼻歌も綺麗でかわいいです",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2885,
+      "time": "0:48:05",
+      "raw": "0:48:05 鼻歌も綺麗でかわいいです",
+      "rawHash": "37d6dfa059d1ba186c18092ee76cc2ab63956956469faa650dff071bf9093704",
+      "videoId": "Sua1soXqEps",
+      "videoTitle": "【歌枠/Karaoke 】夜のまったり時間のお供に。寝る前に一曲聞いてってくださいな🦊歌うの大好きVtuber #新人vtuber 【初見さん・作業用・寝落ち歓迎】",
+      "channelName": "飲酒じめさん【hajime】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Sua1soXqEps",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Sua1soXqEps&t=2885s",
+      "sourceId": "Ugz1U_nhRxRyEdqOsh54AaABAg",
+      "sourceHash": "acf015f4d297e1d84fedfe6d4c964bdaad0848ecf8b0b889a86fed32015f6a8b",
+      "sourceOrigin": "review:Sua1soXqEps-acf015f4d297e1d84fed.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "conversation_entry",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Sua1soXqEps:acf015f4d297e1d84fed",
+      "sourcePath": "data/review/sources/Sua1soXqEps-acf015f4d297e1d84fed.json",
+      "reviewUrl": "review.html?review=review%3ASua1soXqEps%3Aacf015f4d297e1d84fed&entry=37d6dfa059d1ba186c18092ee76cc2ab63956956469faa650dff071bf9093704"
+    },
+    {
+      "title": "ﾑﾘﾑﾘﾑﾘﾑﾘ!かわいい",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6735,
+      "time": "1:52:15",
+      "raw": "1:52:15 ﾑﾘﾑﾘﾑﾘﾑﾘ!かわいい",
+      "rawHash": "52ca384bf0c17454fb0e066900ef2fec0c3c8ce3ae3161cecb192e8304ccc619",
+      "videoId": "Sua1soXqEps",
+      "videoTitle": "【歌枠/Karaoke 】夜のまったり時間のお供に。寝る前に一曲聞いてってくださいな🦊歌うの大好きVtuber #新人vtuber 【初見さん・作業用・寝落ち歓迎】",
+      "channelName": "飲酒じめさん【hajime】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Sua1soXqEps",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Sua1soXqEps&t=6735s",
+      "sourceId": "Ugz1U_nhRxRyEdqOsh54AaABAg",
+      "sourceHash": "acf015f4d297e1d84fedfe6d4c964bdaad0848ecf8b0b889a86fed32015f6a8b",
+      "sourceOrigin": "review:Sua1soXqEps-acf015f4d297e1d84fed.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "conversation_entry",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Sua1soXqEps:acf015f4d297e1d84fed",
+      "sourcePath": "data/review/sources/Sua1soXqEps-acf015f4d297e1d84fed.json",
+      "reviewUrl": "review.html?review=review%3ASua1soXqEps%3Aacf015f4d297e1d84fed&entry=52ca384bf0c17454fb0e066900ef2fec0c3c8ce3ae3161cecb192e8304ccc619"
+    },
+    {
+      "title": "かわいい",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8635,
+      "time": "2:23:55",
+      "raw": "2:23:55 かわいい",
+      "rawHash": "ba6ad1d1ec3fb1087255ffc7a6fe5ab67679c7aefeae511fe7289fdf7ac9993d",
+      "videoId": "Sua1soXqEps",
+      "videoTitle": "【歌枠/Karaoke 】夜のまったり時間のお供に。寝る前に一曲聞いてってくださいな🦊歌うの大好きVtuber #新人vtuber 【初見さん・作業用・寝落ち歓迎】",
+      "channelName": "飲酒じめさん【hajime】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Sua1soXqEps",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Sua1soXqEps&t=8635s",
+      "sourceId": "Ugz1U_nhRxRyEdqOsh54AaABAg",
+      "sourceHash": "acf015f4d297e1d84fedfe6d4c964bdaad0848ecf8b0b889a86fed32015f6a8b",
+      "sourceOrigin": "review:Sua1soXqEps-acf015f4d297e1d84fed.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "conversation_entry",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Sua1soXqEps:acf015f4d297e1d84fed",
+      "sourcePath": "data/review/sources/Sua1soXqEps-acf015f4d297e1d84fed.json",
+      "reviewUrl": "review.html?review=review%3ASua1soXqEps%3Aacf015f4d297e1d84fed&entry=ba6ad1d1ec3fb1087255ffc7a6fe5ab67679c7aefeae511fe7289fdf7ac9993d"
     },
     {
       "title": "おつほた",
@@ -4891,6 +5261,196 @@
       "reviewUrl": "review.html?review=review%3AzaPAqsqcC0k%3A7158af31feaaf86ddbf9&entry=c24465d5d26f2e820af43b1c7d7886264b2a8d37e384c26cdf4eb83a126ec8d4"
     },
     {
+      "title": "Start",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 151,
+      "time": "0:02:31",
+      "raw": "2:31 Start",
+      "rawHash": "2a20d03c060640e18966926e157cc177a6cd0553ea9dbea29eb6d97210691d58",
+      "videoId": "-rfGPtJBr4U",
+      "videoTitle": "〖#弾き語り〗高評価100目標⟡.·*. ひとり時間のおともに！歌詞を深く味わえるのが弾き語りの良さ～！作業BGM にも◎〖君影すず┊個人Vtuber 〗",
+      "channelName": "君影すず / Kimikage Suzu💌弾き語りVtuber",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U&t=151s",
+      "sourceId": "UgwKPfd6P4tHX9a9G3J4AaABAg",
+      "sourceHash": "b6a9a73dfc92b2846ba85beca2d753b0dba9bd39b950620604ca42b4c1888517",
+      "sourceOrigin": "review:-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:-rfGPtJBr4U:b6a9a73dfc92b2846ba8",
+      "sourcePath": "data/review/sources/-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "reviewUrl": "review.html?review=review%3A-rfGPtJBr4U%3Ab6a9a73dfc92b2846ba8&entry=2a20d03c060640e18966926e157cc177a6cd0553ea9dbea29eb6d97210691d58"
+    },
+    {
+      "title": "お名前呼び",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 186,
+      "time": "0:03:06",
+      "raw": "3:06 お名前呼び",
+      "rawHash": "2c6254caa929a04bf4a727976ef78bd9d9bf3e87d1331f119a25997e116e8024",
+      "videoId": "-rfGPtJBr4U",
+      "videoTitle": "〖#弾き語り〗高評価100目標⟡.·*. ひとり時間のおともに！歌詞を深く味わえるのが弾き語りの良さ～！作業BGM にも◎〖君影すず┊個人Vtuber 〗",
+      "channelName": "君影すず / Kimikage Suzu💌弾き語りVtuber",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U&t=186s",
+      "sourceId": "UgwKPfd6P4tHX9a9G3J4AaABAg",
+      "sourceHash": "b6a9a73dfc92b2846ba85beca2d753b0dba9bd39b950620604ca42b4c1888517",
+      "sourceOrigin": "review:-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:-rfGPtJBr4U:b6a9a73dfc92b2846ba8",
+      "sourcePath": "data/review/sources/-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "reviewUrl": "review.html?review=review%3A-rfGPtJBr4U%3Ab6a9a73dfc92b2846ba8&entry=2c6254caa929a04bf4a727976ef78bd9d9bf3e87d1331f119a25997e116e8024"
+    },
+    {
+      "title": "～お知らせ～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 363,
+      "time": "0:06:03",
+      "raw": "6:03 ～お知らせ～",
+      "rawHash": "176236a85b7afcd9b704499b679b9c251ee541bc8c4856632a3625c4bfc8cf47",
+      "videoId": "-rfGPtJBr4U",
+      "videoTitle": "〖#弾き語り〗高評価100目標⟡.·*. ひとり時間のおともに！歌詞を深く味わえるのが弾き語りの良さ～！作業BGM にも◎〖君影すず┊個人Vtuber 〗",
+      "channelName": "君影すず / Kimikage Suzu💌弾き語りVtuber",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U&t=363s",
+      "sourceId": "UgwKPfd6P4tHX9a9G3J4AaABAg",
+      "sourceHash": "b6a9a73dfc92b2846ba85beca2d753b0dba9bd39b950620604ca42b4c1888517",
+      "sourceOrigin": "review:-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:-rfGPtJBr4U:b6a9a73dfc92b2846ba8",
+      "sourcePath": "data/review/sources/-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "reviewUrl": "review.html?review=review%3A-rfGPtJBr4U%3Ab6a9a73dfc92b2846ba8&entry=176236a85b7afcd9b704499b679b9c251ee541bc8c4856632a3625c4bfc8cf47"
+    },
+    {
+      "title": "～前髪の重要性～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1020,
+      "time": "0:17:00",
+      "raw": "17:00 ～前髪の重要性～",
+      "rawHash": "3049ac3564426b9fdd7b9e944568429e4656fc3e28f0747fb44d8fc4b31795b3",
+      "videoId": "-rfGPtJBr4U",
+      "videoTitle": "〖#弾き語り〗高評価100目標⟡.·*. ひとり時間のおともに！歌詞を深く味わえるのが弾き語りの良さ～！作業BGM にも◎〖君影すず┊個人Vtuber 〗",
+      "channelName": "君影すず / Kimikage Suzu💌弾き語りVtuber",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U&t=1020s",
+      "sourceId": "UgwKPfd6P4tHX9a9G3J4AaABAg",
+      "sourceHash": "b6a9a73dfc92b2846ba85beca2d753b0dba9bd39b950620604ca42b4c1888517",
+      "sourceOrigin": "review:-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:-rfGPtJBr4U:b6a9a73dfc92b2846ba8",
+      "sourcePath": "data/review/sources/-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "reviewUrl": "review.html?review=review%3A-rfGPtJBr4U%3Ab6a9a73dfc92b2846ba8&entry=3049ac3564426b9fdd7b9e944568429e4656fc3e28f0747fb44d8fc4b31795b3"
+    },
+    {
+      "title": "～夏の歌口ずさみゾーン～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5662,
+      "time": "1:34:22",
+      "raw": "1:34:22 ～夏の歌口ずさみゾーン～",
+      "rawHash": "b71bd5981c9094b4c01fc3d3ab883c4c8921cd7267877ca1a14c0669000c08d3",
+      "videoId": "-rfGPtJBr4U",
+      "videoTitle": "〖#弾き語り〗高評価100目標⟡.·*. ひとり時間のおともに！歌詞を深く味わえるのが弾き語りの良さ～！作業BGM にも◎〖君影すず┊個人Vtuber 〗",
+      "channelName": "君影すず / Kimikage Suzu💌弾き語りVtuber",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-rfGPtJBr4U&t=5662s",
+      "sourceId": "UgwKPfd6P4tHX9a9G3J4AaABAg",
+      "sourceHash": "b6a9a73dfc92b2846ba85beca2d753b0dba9bd39b950620604ca42b4c1888517",
+      "sourceOrigin": "review:-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:-rfGPtJBr4U:b6a9a73dfc92b2846ba8",
+      "sourcePath": "data/review/sources/-rfGPtJBr4U-b6a9a73dfc92b2846ba8.json",
+      "reviewUrl": "review.html?review=review%3A-rfGPtJBr4U%3Ab6a9a73dfc92b2846ba8&entry=b71bd5981c9094b4c01fc3d3ab883c4c8921cd7267877ca1a14c0669000c08d3"
+    },
+    {
       "title": "2周年記念お写真公開！",
       "artist": "未記載",
       "isNiche": true,
@@ -5258,24 +5818,24 @@
       "reviewUrl": "review.html?review=review%3AGsWidWYRJXg%3Acbcb66178f85620dc433&entry=e3e2e18c9e9118fe4e2a6e379d4e33b3e1e312114936734d48fb78ec41ab966b"
     },
     {
-      "title": "開幕ぼっちOP🗣",
+      "title": "こんひなー",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 1,
-      "time": "0:00:01",
-      "raw": "0:01 開幕ぼっちOP🗣️",
-      "rawHash": "f53d26bab5e0ba29ffcb04a28014dee2d956f184247a88cc46a80fdf5b2108bc",
-      "videoId": "EJxij7L35Ss",
-      "videoTitle": "【 #おうち3D歌枠 】椎名林檎さん縛り🎤 / singing stream【 #朔炭パリカ】",
-      "channelName": "朔炭パリカParica Ch.",
+      "seconds": 295,
+      "time": "0:04:55",
+      "raw": "0:04:55 こんひなー:_はーと:",
+      "rawHash": "229566a90ed6d1bf80f251f8ca70869f810d8a1526f663d5fc19ff6fb1140b87",
+      "videoId": "pI-sk5vxg3E",
+      "videoTitle": "【弾き語り】 少しだけ歌うよっ 【歌枠】 #shorts #菜鳥ひなた #karaoke Singing Stream",
+      "channelName": "菜鳥ひなた / Hinata Natori",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EJxij7L35Ss",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EJxij7L35Ss&t=1s",
-      "sourceId": "UgyVX2T-PK4-0QETWU54AaABAg",
-      "sourceHash": "7646977f1a9d59fbfa75b3d0bd6a85bab77e3404d96ae38e9f5afdcce970d8b8",
-      "sourceOrigin": "review:EJxij7L35Ss-7646977f1a9d59fbfa75.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E&t=295s",
+      "sourceId": "UgzHhvuoCL45Cl2Wy2B4AaABAg",
+      "sourceHash": "c36865484826660b7d25d85531b35aee0ef74259a5e1bd4df8a83110acd4041f",
+      "sourceOrigin": "review:pI-sk5vxg3E-c36865484826660b7d25.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -5284,43 +5844,38 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
       "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "kept_count_high_low_known_song_density",
-        "conversation_entry",
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
       ],
       "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_multiple_unknown_artists"
+        "activity_marker_title",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:EJxij7L35Ss:7646977f1a9d59fbfa75",
-      "sourcePath": "data/review/sources/EJxij7L35Ss-7646977f1a9d59fbfa75.json",
-      "reviewUrl": "review.html?review=review%3AEJxij7L35Ss%3A7646977f1a9d59fbfa75&entry=f53d26bab5e0ba29ffcb04a28014dee2d956f184247a88cc46a80fdf5b2108bc"
+      "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
+      "sourcePath": "data/review/sources/pI-sk5vxg3E-c36865484826660b7d25.json",
+      "reviewUrl": "review.html?review=review%3ApI-sk5vxg3E%3Ac36865484826660b7d25&entry=229566a90ed6d1bf80f251f8ca70869f810d8a1526f663d5fc19ff6fb1140b87"
     },
     {
-      "title": "やらかしエピソードの真相😱🎐",
+      "title": "登録者20050名様達成🎉",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 335,
-      "time": "0:05:35",
-      "raw": "5:35 やらかしエピソードの真相😱🎐",
-      "rawHash": "396978a2bd8a8fbd254cb906792274e279329ad2e05453884a9768f694c4f096",
-      "videoId": "EJxij7L35Ss",
-      "videoTitle": "【 #おうち3D歌枠 】椎名林檎さん縛り🎤 / singing stream【 #朔炭パリカ】",
-      "channelName": "朔炭パリカParica Ch.",
+      "seconds": 4052,
+      "time": "1:07:32",
+      "raw": "1:07:32 登録者20050名様達成🎉",
+      "rawHash": "de50b466cfcc945cbae95760fcb775e288a3ca1f242023f9e757fb6b085cc955",
+      "videoId": "pI-sk5vxg3E",
+      "videoTitle": "【弾き語り】 少しだけ歌うよっ 【歌枠】 #shorts #菜鳥ひなた #karaoke Singing Stream",
+      "channelName": "菜鳥ひなた / Hinata Natori",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EJxij7L35Ss",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EJxij7L35Ss&t=335s",
-      "sourceId": "UgyVX2T-PK4-0QETWU54AaABAg",
-      "sourceHash": "7646977f1a9d59fbfa75b3d0bd6a85bab77e3404d96ae38e9f5afdcce970d8b8",
-      "sourceOrigin": "review:EJxij7L35Ss-7646977f1a9d59fbfa75.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E&t=4052s",
+      "sourceId": "UgzHhvuoCL45Cl2Wy2B4AaABAg",
+      "sourceHash": "c36865484826660b7d25d85531b35aee0ef74259a5e1bd4df8a83110acd4041f",
+      "sourceOrigin": "review:pI-sk5vxg3E-c36865484826660b7d25.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -5329,43 +5884,38 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
       "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "kept_count_high_low_known_song_density",
-        "conversation_entry",
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
       ],
       "riskReasons": [
         "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_multiple_unknown_artists"
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:EJxij7L35Ss:7646977f1a9d59fbfa75",
-      "sourcePath": "data/review/sources/EJxij7L35Ss-7646977f1a9d59fbfa75.json",
-      "reviewUrl": "review.html?review=review%3AEJxij7L35Ss%3A7646977f1a9d59fbfa75&entry=396978a2bd8a8fbd254cb906792274e279329ad2e05453884a9768f694c4f096"
+      "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
+      "sourcePath": "data/review/sources/pI-sk5vxg3E-c36865484826660b7d25.json",
+      "reviewUrl": "review.html?review=review%3ApI-sk5vxg3E%3Ac36865484826660b7d25&entry=de50b466cfcc945cbae95760fcb775e288a3ca1f242023f9e757fb6b085cc955"
     },
     {
-      "title": "サイレントお水を飲みます🥤",
-      "artist": "未記載",
+      "title": "告知・宣伝",
+      "artist": "",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 2942,
-      "time": "0:49:02",
-      "raw": "49:02 サイレントお水を飲みます🥤",
-      "rawHash": "9d9aefaca0126790b1ee2f6044f8cffe35bb257c94a7a22dd9cb424a7e64b5ab",
-      "videoId": "EJxij7L35Ss",
-      "videoTitle": "【 #おうち3D歌枠 】椎名林檎さん縛り🎤 / singing stream【 #朔炭パリカ】",
-      "channelName": "朔炭パリカParica Ch.",
+      "seconds": 5370,
+      "time": "1:29:30",
+      "raw": "1:29:30 告知・宣伝",
+      "rawHash": "19d649fe63e4f732d3c141b2dd9aae03f9e8cfa6cc7e855d73f9bef9cbbc8227",
+      "videoId": "pI-sk5vxg3E",
+      "videoTitle": "【弾き語り】 少しだけ歌うよっ 【歌枠】 #shorts #菜鳥ひなた #karaoke Singing Stream",
+      "channelName": "菜鳥ひなた / Hinata Natori",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EJxij7L35Ss",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EJxij7L35Ss&t=2942s",
-      "sourceId": "UgyVX2T-PK4-0QETWU54AaABAg",
-      "sourceHash": "7646977f1a9d59fbfa75b3d0bd6a85bab77e3404d96ae38e9f5afdcce970d8b8",
-      "sourceOrigin": "review:EJxij7L35Ss-7646977f1a9d59fbfa75.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E&t=5370s",
+      "sourceId": "UgzHhvuoCL45Cl2Wy2B4AaABAg",
+      "sourceHash": "c36865484826660b7d25d85531b35aee0ef74259a5e1bd4df8a83110acd4041f",
+      "sourceOrigin": "review:pI-sk5vxg3E-c36865484826660b7d25.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -5374,23 +5924,58 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
       "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "kept_count_high_low_known_song_density",
-        "conversation_entry",
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
       ],
       "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_multiple_unknown_artists"
+        "obvious_non_song_text",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:EJxij7L35Ss:7646977f1a9d59fbfa75",
-      "sourcePath": "data/review/sources/EJxij7L35Ss-7646977f1a9d59fbfa75.json",
-      "reviewUrl": "review.html?review=review%3AEJxij7L35Ss%3A7646977f1a9d59fbfa75&entry=9d9aefaca0126790b1ee2f6044f8cffe35bb257c94a7a22dd9cb424a7e64b5ab"
+      "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
+      "sourcePath": "data/review/sources/pI-sk5vxg3E-c36865484826660b7d25.json",
+      "reviewUrl": "review.html?review=review%3ApI-sk5vxg3E%3Ac36865484826660b7d25&entry=19d649fe63e4f732d3c141b2dd9aae03f9e8cfa6cc7e855d73f9bef9cbbc8227"
+    },
+    {
+      "title": "せーの！おつひなーぽぽんぽんぽん",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5720,
+      "time": "1:35:20",
+      "raw": "1:35:20 せーの！おつひなーぽぽんぽんぽん:_ペンラ:",
+      "rawHash": "9accc589bfc47c3e717c57b2ddf1ce8bc0a741ece85922c85709d66daacdbb87",
+      "videoId": "pI-sk5vxg3E",
+      "videoTitle": "【弾き語り】 少しだけ歌うよっ 【歌枠】 #shorts #菜鳥ひなた #karaoke Singing Stream",
+      "channelName": "菜鳥ひなた / Hinata Natori",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E&t=5720s",
+      "sourceId": "UgzHhvuoCL45Cl2Wy2B4AaABAg",
+      "sourceHash": "c36865484826660b7d25d85531b35aee0ef74259a5e1bd4df8a83110acd4041f",
+      "sourceOrigin": "review:pI-sk5vxg3E-c36865484826660b7d25.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
+      "sourcePath": "data/review/sources/pI-sk5vxg3E-c36865484826660b7d25.json",
+      "reviewUrl": "review.html?review=review%3ApI-sk5vxg3E%3Ac36865484826660b7d25&entry=9accc589bfc47c3e717c57b2ddf1ce8bc0a741ece85922c85709d66daacdbb87"
     },
     {
       "title": "おつにょ",
@@ -5444,24 +6029,24 @@
       "reviewUrl": "review.html?review=review%3AFlhwC9s1Nk8%3A4aa61da2d1b34d7d38e8&entry=b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
     },
     {
-      "title": "配信開始",
-      "artist": "未記載",
+      "title": "start",
+      "artist": "",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 239,
-      "time": "0:03:59",
-      "raw": "03:59 配信開始",
-      "rawHash": "03878749e809e7c6f89bb88bf121ef61f02f8cfbdcc5a63b69c7d36572045abb",
-      "videoId": "3omBqIU2E2I",
-      "videoTitle": "【#歌枠】初見さん大歓迎✨まったりしていきませんか☕？【#vtuber /織田詩信】＃KARAOKE ＃Shorts #shortsfeed",
-      "channelName": "織田詩信 / oda shinobu",
+      "seconds": 68,
+      "time": "0:01:08",
+      "raw": "01:08 start",
+      "rawHash": "67bf0d931b39ec6c3aad43a4adccace6ffb7e552966ae21340f4e6d1137bb22c",
+      "videoId": "9fnS_aBjRwU",
+      "videoTitle": "【歌枠/karaoke】朝からビビビッとクセになる声をどうぞ！アニソン/jpop/ボカロ/歌回【茶々プラムム/vtuber】",
+      "channelName": "茶々プラムム / Pulamumu",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=3omBqIU2E2I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3omBqIU2E2I&t=239s",
-      "sourceId": "UgwjgdKrQIIW_Q_5sNx4AaABAg",
-      "sourceHash": "22bee3f8fa4468e6c7cd7629a251e0e8a998671624e737ddbc9cbc53491635c3",
-      "sourceOrigin": "review:3omBqIU2E2I-22bee3f8fa4468e6c7cd.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=9fnS_aBjRwU",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=9fnS_aBjRwU&t=68s",
+      "sourceId": "UgyChR58oh3Rvrt1nmd4AaABAg",
+      "sourceHash": "46f1337cd22ba3dbeb093371a1fb5788332ea034197b83cf52b4384cffc2d371",
+      "sourceOrigin": "review:9fnS_aBjRwU-46f1337cd22ba3dbeb09.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -5470,16 +6055,15 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
       "sourceRiskReasons": [
-        "source_activity_marker_ratio_high"
+        "conversation_entry"
       ],
       "riskReasons": [
-        "activity_marker_title",
-        "source_activity_marker_ratio_high"
+        "obvious_non_song_text"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:3omBqIU2E2I:22bee3f8fa4468e6c7cd",
-      "sourcePath": "data/review/sources/3omBqIU2E2I-22bee3f8fa4468e6c7cd.json",
-      "reviewUrl": "review.html?review=review%3A3omBqIU2E2I%3A22bee3f8fa4468e6c7cd&entry=03878749e809e7c6f89bb88bf121ef61f02f8cfbdcc5a63b69c7d36572045abb"
+      "reviewId": "review:9fnS_aBjRwU:46f1337cd22ba3dbeb09",
+      "sourcePath": "data/review/sources/9fnS_aBjRwU-46f1337cd22ba3dbeb09.json",
+      "reviewUrl": "review.html?review=review%3A9fnS_aBjRwU%3A46f1337cd22ba3dbeb09&entry=67bf0d931b39ec6c3aad43a4adccace6ffb7e552966ae21340f4e6d1137bb22c"
     },
     {
       "title": "閉会式",
