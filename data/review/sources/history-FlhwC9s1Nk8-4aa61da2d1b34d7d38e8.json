@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:FlhwC9s1Nk8:4aa61da2d1b34d7d38e8",
   "video": {
     "videoId": "FlhwC9s1Nk8",
@@ -105,14 +105,18 @@
       "sourceId": "selected:FlhwC9s1Nk8:4aa61da2d1b34d7d",
       "sourceHash": "4aa61da2d1b34d7d38e85459bb0e7ee747a93d9b4799a81d8512a4dd2bde1175",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "星屑ビーナス",
+        "artist": "Aimer"
+      },
       "riskReasons": [
-        "known_song_unknown_artist"
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "known_song",
+        "known_artist",
         "structured_setlist"
       ]
     },
@@ -448,14 +452,18 @@
       "sourceId": "selected:FlhwC9s1Nk8:4aa61da2d1b34d7d",
       "sourceHash": "4aa61da2d1b34d7d38e85459bb0e7ee747a93d9b4799a81d8512a4dd2bde1175",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "だから僕は音楽を辞めた",
+        "artist": "ヨルシカ"
+      },
       "riskReasons": [
-        "known_song_unknown_artist"
+        "parser_corruption"
       ],
       "positiveEvidence": [
         "known_song",
+        "known_artist",
         "structured_setlist"
       ]
     },

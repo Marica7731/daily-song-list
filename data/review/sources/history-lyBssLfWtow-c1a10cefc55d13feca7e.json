@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:lyBssLfWtow:c1a10cefc55d13feca7e",
   "video": {
     "videoId": "lyBssLfWtow",
@@ -431,17 +431,13 @@
       "sourceId": "UgziJFwEiqyojYjn6qN4AaABAg",
       "sourceHash": "c1a10cefc55d13feca7e6ed01ee5033653c06503d6b04fcd20210735141f9516",
       "isNiche": true,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "Who-ya Extended"
-      },
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "parser_corruption"
+        "niche_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_artist",
         "structured_setlist"
       ]
     },

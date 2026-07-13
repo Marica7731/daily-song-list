@@ -10,6 +10,7 @@ const { createSongSearchLookup } = require("../assets/frontend-utils");
 const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
 const { compactRankDiff, writeRuntimeJson } = require("./build-runtime-data");
 const { repairParsedEntry } = require("./entry-repair");
+const { canonicalizePayloadSongAliases, canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
 const {
   applyCurationToSources,
   applyCurationToVideos,
@@ -114,7 +115,8 @@ async function main() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
   const startedAt = new Date();
-  const curationContext = { ...loadCurationContext(), songSearchLookup: loadSongSearchLookup() };
+  const songAliasContext = loadSongAliasContext();
+  const curationContext = { ...loadCurationContext(), songSearchLookup: loadSongSearchLookup(), songAliasContext };
   const forceRefreshVideoIds = collectForceRefreshVideoIds(curationContext);
   const previousPayload = readJsonIfExists(LATEST_PATH);
   const previousAudit = readJsonIfExists(AUDIT_PATH);
@@ -142,7 +144,7 @@ async function main() {
   }
   const previousSnapshot = readPreviousSuccessfulSnapshot();
 
-  const payload = {
+  let payload = {
     schemaVersion: 1,
     generatedAt: capturedAt.toISOString(),
     capturedAt: capturedAt.toISOString(),
@@ -201,6 +203,7 @@ async function main() {
     },
     groups,
   };
+  payload = canonicalizePayloadSongAliases(payload, songAliasContext);
 
   writeJson(LATEST_PATH, payload);
   writeJson(AUDIT_PATH, {
@@ -436,6 +439,7 @@ function normalizeCarryForwardItem(item, sourceGroups, from) {
   const originalSongs = item.songs || [];
   const normalizedSongs = originalSongs
     .map(normalizeParsedSong)
+    .map((song) => repairParsedEntry(song))
     .filter(isValidSong)
     .filter((song) => !isLikelyNonSongEntry(song))
     .filter((song) => !isActivityMarkerTitle(song.title, song.artist));
@@ -748,6 +752,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   const sourceId = sourceRecord.sourceId || "";
   const sourceHash = sourceRecord.sourceHash || hashNormalizedText(sourceText);
   const lookup = curationContext.songSearchLookup || null;
+  const aliasContext = curationContext.songAliasContext || loadSongAliasContext();
   const identifiedSongs = songs
     .map((song) => ({
       ...song,
@@ -756,7 +761,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
       sourceType,
       rawHash: hashNormalizedText(song.raw || `${song.time || ""} ${song.title || ""}`),
     }))
-    .map((song) => repairParsedEntry(song, lookup));
+    .map((song) => canonicalizeSongIdentity(repairParsedEntry(song, lookup), aliasContext));
   const preSource = {
     sourceId,
     sourceHash,
@@ -1164,6 +1169,7 @@ function writeRankDiffFiles(payload, previousSnapshot = readPreviousSuccessfulSn
 }
 
 function buildRankDiffs(payload, previousSnapshot = null, curationContext = null) {
+  const aliasContext = curationContext?.songAliasContext || loadSongAliasContext();
   const previousPayload = cleanSnapshotPayloadForCuration(previousSnapshotPayload(previousSnapshot), curationContext);
   const previous = previousSnapshotMetadata(previousSnapshot, curationContext);
   const current = currentSnapshotMetadata(payload, curationContext);
@@ -1176,12 +1182,13 @@ function buildRankDiffs(payload, previousSnapshot = null, curationContext = null
         previous,
         currentGroup: payload?.groups?.[range.id],
         previousGroup: previousPayload?.groups?.[range.id],
+        aliasContext,
       }),
     ]),
   );
 }
 
-function buildRankDiffForRange({ rangeId, current, previous, currentGroup, previousGroup }) {
+function buildRankDiffForRange({ rangeId, current, previous, currentGroup, previousGroup, aliasContext = null }) {
   return {
     schemaVersion: 1,
     generatedAt: current.generatedAt,
@@ -1189,13 +1196,13 @@ function buildRankDiffForRange({ rangeId, current, previous, currentGroup, previ
     range: rangeId,
     current,
     previous,
-    songRank: buildRankDiffEntries(buildSongRankState(currentGroup), buildSongRankState(previousGroup)),
+    songRank: buildRankDiffEntries(buildSongRankState(currentGroup, aliasContext), buildSongRankState(previousGroup, aliasContext)),
     artistRank: buildRankDiffEntries(buildArtistRankState(currentGroup), buildArtistRankState(previousGroup)),
   };
 }
 
-function buildSongRankState(group) {
-  const records = buildSongRecords(collectSongOccurrences(group?.items || [])).sort(compareSongRankRecords);
+function buildSongRankState(group, aliasContext = null) {
+  const records = buildSongRecords(canonicalizeSongOccurrences(collectSongOccurrences(group?.items || []), aliasContext)).sort(compareSongRankRecords);
   return buildRankState(records, (record) => record.title || record.key);
 }
 
@@ -1248,6 +1255,14 @@ function collectSongOccurrences(items) {
     }
   }
   return occurrences;
+}
+
+function canonicalizeSongOccurrences(occurrences, aliasContext = null) {
+  if (!aliasContext?.aliasesByKey?.size) return occurrences || [];
+  return (occurrences || []).map((occurrence) => ({
+    ...occurrence,
+    song: canonicalizeSongIdentity(occurrence.song, aliasContext),
+  }));
 }
 
 function compareSongRankRecords(a, b) {

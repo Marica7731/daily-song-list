@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:fnDcGmE0duc:8134e226b89aa0cb63c2",
   "video": {
     "videoId": "fnDcGmE0duc",
@@ -312,17 +312,14 @@
       "sourceId": "selected:fnDcGmE0duc:8134e226b89aa0cb",
       "sourceHash": "8134e226b89aa0cb63c24c71f27c33589f05bce6192c73ad131d91c8822d7f14",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "松谷祐子 (1981) / TVアニメ「うる星やつら」初代OP"
-      },
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
       "riskReasons": [
-        "parser_corruption"
+        "known_song_unknown_artist"
       ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
         "structured_setlist"
       ]
     },
@@ -337,17 +334,14 @@
       "sourceId": "selected:fnDcGmE0duc:8134e226b89aa0cb",
       "sourceHash": "8134e226b89aa0cb63c24c71f27c33589f05bce6192c73ad131d91c8822d7f14",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "桜高軽音部 (2009) / TVアニメ「けいおん!」劇中歌"
-      },
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
       "riskReasons": [
-        "parser_corruption"
+        "known_song_unknown_artist"
       ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
         "structured_setlist"
       ]
     },
@@ -384,20 +378,16 @@
       "sourceId": "selected:fnDcGmE0duc:8134e226b89aa0cb",
       "sourceHash": "8134e226b89aa0cb63c24c71f27c33589f05bce6192c73ad131d91c8822d7f14",
       "isNiche": true,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "ナナヲアカリ (2022) / TVアニメ「Engage Kiss」ED"
-      },
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
+      "replacementSuggestion": null,
       "riskReasons": [
         "conversation_entry",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "parser_corruption"
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_artist",
         "structured_setlist"
       ]
     },
@@ -744,19 +734,15 @@
       "sourceId": "selected:fnDcGmE0duc:8134e226b89aa0cb",
       "sourceHash": "8134e226b89aa0cb63c24c71f27c33589f05bce6192c73ad131d91c8822d7f14",
       "isNiche": true,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "広末涼子 (1997) / TVドラマ「木曜の怪談'97 悪霊学園」主題歌"
-      },
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
+      "replacementSuggestion": null,
       "riskReasons": [
         "conversation_entry",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "parser_corruption"
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_artist",
         "structured_setlist"
       ]
     },
@@ -858,17 +844,14 @@
       "sourceId": "selected:fnDcGmE0duc:8134e226b89aa0cb",
       "sourceHash": "8134e226b89aa0cb63c24c71f27c33589f05bce6192c73ad131d91c8822d7f14",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "千石撫子(CV:花澤香菜) (2009) / TVアニメ 「化物語 」第10話OP"
-      },
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
       "riskReasons": [
-        "parser_corruption"
+        "known_song_unknown_artist"
       ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
         "structured_setlist"
       ]
     },

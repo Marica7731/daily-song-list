@@ -5,6 +5,7 @@ const {
   refreshSongSearchIndex,
   songSearchSourceSummary,
 } = require("./song-search-index");
+const { loadSongAliasContext } = require("./song-aliases");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -23,6 +24,7 @@ if (require.main === module) {
 async function main() {
   const previousIndex = readJsonIfExists(SONG_SEARCH_INDEX_PATH);
   const songSearchIndex = await refreshSongSearchIndex({ previousIndex });
+  const songAliasContext = loadSongAliasContext();
   const summary = songSearchSourceSummary(songSearchIndex);
   writeJson(SONG_SEARCH_INDEX_PATH, songSearchIndex);
 
@@ -32,7 +34,7 @@ async function main() {
     return;
   }
 
-  const annotatedLatest = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(latest, songSearchIndex), summary);
+  const annotatedLatest = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(latest, songSearchIndex, songAliasContext), summary);
   writeJson(LATEST_PATH, annotatedLatest);
   if (annotatedLatest.groups["72h"]) writeJson(path.join(DATA_DIR, "72h.json"), annotatedLatest.groups["72h"]);
   if (annotatedLatest.groups["1m"]) writeJson(path.join(DATA_DIR, "1m.json"), annotatedLatest.groups["1m"]);

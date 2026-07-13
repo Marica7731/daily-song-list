@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:MWVdc1Fc8BU:9cbc8fd9b1f9f5bc24b2",
   "video": {
     "videoId": "MWVdc1Fc8BU",
@@ -63,19 +63,13 @@
       "sourceId": "selected:MWVdc1Fc8BU:9cbc8fd9b1f9f5bc",
       "sourceHash": "9cbc8fd9b1f9f5bc24b2ae7929994e406e7b574af0eda8d0ef74b6a666535e1e",
       "isNiche": true,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "title": "Silly-Go-Round",
-        "artist": "FictionJunction／.hack//Roots OP"
-      },
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "parser_corruption"
+        "niche_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "known_artist",
         "structured_setlist"
       ]
     },

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:O1L9OdA0miA:b725926a7fbbeea6afe1",
   "video": {
     "videoId": "O1L9OdA0miA",
@@ -596,10 +596,14 @@
       "sourceId": "selected:O1L9OdA0miA:b725926a7fbbeea6",
       "sourceHash": "b725926a7fbbeea6afe11b4c8255384f504cdbcb4b0a5452b2c0ec3f71df20e7",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "からっと"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist",
         "structured_setlist"

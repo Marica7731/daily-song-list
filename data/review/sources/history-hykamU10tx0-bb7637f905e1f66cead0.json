@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:hykamU10tx0:bb7637f905e1f66cead0",
   "video": {
     "videoId": "hykamU10tx0",
@@ -1110,17 +1110,14 @@
       "sourceId": "selected:hykamU10tx0:bb7637f905e1f66c",
       "sourceHash": "bb7637f905e1f66cead07994d0bf14f5caf596a7ab9c9fd22d61dd26692afc47",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "EasyPop"
-      },
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
       "riskReasons": [
-        "parser_corruption"
+        "known_song_unknown_artist"
       ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
         "structured_setlist"
       ]
     },

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:NlVARrAKxsQ:a8dc3d9a92463a2a7dc2",
   "video": {
     "videoId": "NlVARrAKxsQ",
@@ -542,13 +542,16 @@
       "sourceId": "selected:NlVARrAKxsQ:a8dc3d9a92463a2a",
       "sourceHash": "a8dc3d9a92463a2a7dc221310c8e5ec3fe7c73e7f890e49441fc82498e979291",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "未記載"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
         "structured_setlist"
       ]
     },
@@ -563,13 +566,16 @@
       "sourceId": "selected:NlVARrAKxsQ:a8dc3d9a92463a2a",
       "sourceHash": "a8dc3d9a92463a2a7dc221310c8e5ec3fe7c73e7f890e49441fc82498e979291",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "未記載"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
         "structured_setlist"
       ]
     },

@@ -21,6 +21,7 @@ const {
   selectCandidatesForInspection,
   TAIWAN_VTUBER_BLACKLIST,
 } = require("../scripts/update-songlist");
+const { createSongAliasContext } = require("../scripts/song-aliases");
 
 const NOW = new Date("2026-07-11T13:00:00Z");
 const TODAY_SEARCH_URL = "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBAgCGAI%253D";
@@ -319,6 +320,36 @@ test("rank diffs compare current ranks and counts to previous snapshot", () => {
     countDelta: 2,
     isNew: false,
   });
+});
+
+test("rank diffs compare configured aliases using canonical song entity keys", () => {
+  const songAliasContext = createSongAliasContext({
+    schemaVersion: 1,
+    records: [{ artist: "AliA", canonicalTitle: "かくれんぼ", aliases: ["Kakurenbo", "かくれんぼ"] }],
+  });
+  const previous = payloadWithItems({
+    "72h": [rankedItem("AAAAAAAAAAA", [song("Kakurenbo", "AliA"), song("Filler", "Artist F")])],
+    "1m": [],
+  });
+  const current = payloadWithItems({
+    "72h": [rankedItem("BBBBBBBBBBB", [song("かくれんぼ", "AliA"), song("かくれんぼ", "AliA")])],
+    "1m": [],
+  });
+
+  const diff = buildRankDiffs(
+    current,
+    {
+      entry: { id: "20260711T120000Z", path: "data/snapshots/20260711T120000Z.json" },
+      payload: previous,
+    },
+    { songAliasContext },
+  )["72h"];
+  const entry = rankDiffByLabel(diff.songRank, "かくれんぼ");
+
+  assert.equal(entry.entityKey, "かくれんぼ::alia");
+  assert.equal(entry.previousCount, 1);
+  assert.equal(entry.currentCount, 2);
+  assert.equal(entry.isNew, false);
 });
 
 test("rank diffs use stable new-entry fields without previous snapshot", () => {

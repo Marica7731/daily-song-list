@@ -7,6 +7,7 @@ const {
   fetchSongSearchIndex,
   parseSongSearchDataFile,
 } = require("../scripts/song-search-index");
+const { createSongAliasContext } = require("../scripts/song-aliases");
 
 test("parses song-search data files without executing remote code", () => {
   const entries = parseSongSearchDataFile(
@@ -121,6 +122,36 @@ test("annotates noisy title matches as known song-search entries", () => {
     annotated.groups["72h"].items[0].songs.map((song) => song.isNiche),
     [false, false, false, true],
   );
+});
+
+test("canonicalizes configured aliases before niche annotation", () => {
+  const index = buildSongSearchIndex([{ title: "かくれんぼ", artist: "AliA" }], {
+    generatedAt: "2026-07-11T00:00:00.000Z",
+    files: ["known.js"],
+  });
+  const aliasContext = createSongAliasContext({
+    schemaVersion: 1,
+    records: [{ artist: "AliA", canonicalTitle: "かくれんぼ", aliases: ["Kakurenbo", "かくれんぼ"] }],
+  });
+  const payload = {
+    groups: {
+      "72h": {
+        items: [
+          {
+            videoId: "CCCCCCCCCCC",
+            songs: [{ title: "Kakurenbo", artist: "AliA", seconds: 1, time: "0:00:01" }],
+          },
+        ],
+      },
+    },
+  };
+
+  const annotated = annotatePayloadWithSongSearchNiche(payload, index, aliasContext);
+  const song = annotated.groups["72h"].items[0].songs[0];
+
+  assert.equal(song.title, "かくれんぼ");
+  assert.equal(song.originalTitle, "Kakurenbo");
+  assert.equal(song.isNiche, false);
 });
 
 test("fetches manifest files with fallback and skips missing files", async () => {

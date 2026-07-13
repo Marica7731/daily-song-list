@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:FFf6vhBvezY:92987d3b3d231f4bf21d",
   "video": {
     "videoId": "FFf6vhBvezY",
@@ -38,19 +38,14 @@
       "sourceId": "selected:FFf6vhBvezY:92987d3b3d231f4b",
       "sourceHash": "92987d3b3d231f4bf21d00a88f5b78d72ab0c420ff29d40142db2a59d43fb8c4",
       "isNiche": true,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "title": "Heart of Sword ～夜明け前～ - T.M.Revolution 《神劍闖江湖",
-        "artist": "浪客劍心》ED"
-      },
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "parser_corruption"
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_artist",
         "structured_setlist"
       ]
     },

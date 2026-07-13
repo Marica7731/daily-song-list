@@ -5,6 +5,7 @@ const { applyCurationToVideos, hashNormalizedText, isParserCorruptionEntry, load
 const { createSongSearchLookup } = require("../assets/frontend-utils");
 const { repairParsedEntry } = require("./entry-repair");
 const { normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
+const { canonicalizePayloadSongAliases, canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
 const { applyGroupQualityFilters, writeRankDiffFiles } = require("./update-songlist");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -21,7 +22,8 @@ function main() {
   const latest = readJson(LATEST_PATH);
   if (!latest?.groups) throw new Error("data/latest.json missing groups");
 
-  const curationContext = loadCurationContext();
+  const songAliasContext = loadSongAliasContext();
+  const curationContext = { ...loadCurationContext(), songAliasContext };
   const songSearchIndex = readJsonIfExists(SONG_SEARCH_INDEX_PATH);
   const songSearchLookup = createSongSearchLookup(songSearchIndex || {});
   const stats = {
@@ -44,7 +46,9 @@ function main() {
 
   const rebuiltGroups = {};
   for (const [groupId, group] of Object.entries(latest.groups || {})) {
-    const rebuiltItems = (group.items || []).map((item) => rebuildVideoItem(item, stats, songSearchLookup)).filter((item) => item.songs.length);
+    const rebuiltItems = (group.items || [])
+      .map((item) => rebuildVideoItem(item, stats, songSearchLookup, songAliasContext))
+      .filter((item) => item.songs.length);
     const curatedItems = applyCurationToVideos(rebuiltItems, curationContext);
     const curationStats = curatedItems.curationStats || {};
     stats.manualDroppedEntryCount += curationStats.droppedEntries || 0;
@@ -81,8 +85,10 @@ function main() {
     },
   };
 
+  payload = canonicalizePayloadSongAliases(payload, songAliasContext);
+
   if (songSearchIndex?.titleKeys?.length || songSearchIndex?.titleArtistKeys?.length) {
-    payload = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(payload, songSearchIndex), songSearchSourceSummary(songSearchIndex));
+    payload = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(payload, songSearchIndex, songAliasContext), songSearchSourceSummary(songSearchIndex));
   }
 
   writeJson(LATEST_PATH, payload);
@@ -104,22 +110,22 @@ function main() {
   );
 }
 
-function rebuildVideoItem(item, stats, lookup = null) {
+function rebuildVideoItem(item, stats, lookup = null, aliasContext = null) {
   const songs = [];
   for (const song of item.songs || []) {
     stats.inputSongs += 1;
-    const rebuilt = rebuildSong(song, item, stats, lookup);
+    const rebuilt = rebuildSong(song, item, stats, lookup, aliasContext);
     songs.push(...rebuilt);
   }
   return { ...item, songs: songs.map((song, index) => ({ ...song, index: index + 1 })) };
 }
 
-function rebuildSong(song, item, stats, lookup = null) {
+function rebuildSong(song, item, stats, lookup = null, aliasContext = null) {
   const raw = String(song.raw || "").trim();
   if (!raw) {
     stats.missingRawCount += 1;
     if (isParserCorruptionEntry(song)) stats.forceRefreshVideoIds.push(item.videoId);
-    return [normalizeCarriedSong(song, item)];
+    return [normalizeCarriedSong(song, item, aliasContext)];
   }
 
   const rejected = [];
@@ -131,7 +137,7 @@ function rebuildSong(song, item, stats, lookup = null) {
 
   stats.parsedFromRaw += 1;
   const parsedSelected = selectParsedSong(parsed, song);
-  const selected = repairParsedEntry(parsedSelected, lookup);
+  const selected = canonicalizeSongIdentity(repairParsedEntry(parsedSelected, lookup), aliasContext);
   if (selected.repair?.changed) stats.repairedEntryCount += 1;
   if (selected.title !== song.title) stats.fixedTitleCount += 1;
   if (normalizeArtist(selected.artist) !== normalizeArtist(song.artist)) stats.fixedArtistCount += 1;
@@ -157,8 +163,8 @@ function rebuildSong(song, item, stats, lookup = null) {
   ];
 }
 
-function normalizeCarriedSong(song, item) {
-  const normalized = normalizeParsedSong(song);
+function normalizeCarriedSong(song, item, aliasContext = null) {
+  const normalized = canonicalizeSongIdentity(repairParsedEntry(normalizeParsedSong(song)), aliasContext);
   return {
     ...song,
     ...normalized,

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
   "video": {
     "videoId": "pI-sk5vxg3E",
@@ -18,11 +18,12 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 62,
-    "riskLevel": "medium",
+    "riskScore": 90,
+    "riskLevel": "high",
     "riskReasons": [
       "source_activity_marker_ratio_high",
-      "source_many_topic_entries"
+      "source_many_topic_entries",
+      "activity_marker_title"
     ]
   },
   "entries": [
@@ -37,10 +38,12 @@
       "sourceId": "UgzHhvuoCL45Cl2Wy2B4AaABAg",
       "sourceHash": "c36865484826660b7d25d85531b35aee0ef74259a5e1bd4df8a83110acd4041f",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
-      "riskReasons": [],
+      "riskReasons": [
+        "activity_marker_title"
+      ],
       "positiveEvidence": [
         "structured_setlist"
       ]

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:D0M3OLFsyEg:0a5a707e5fe07c9249bf",
   "video": {
     "videoId": "D0M3OLFsyEg",
@@ -143,18 +143,14 @@
       "sourceId": "selected:D0M3OLFsyEg:0a5a707e5fe07c92",
       "sourceHash": "0a5a707e5fe07c9249bf327441a7868c71fb9470b3a70662ad74f03adc759759",
       "isNiche": true,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "SPEED"
-      },
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "parser_corruption"
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_artist",
         "structured_setlist"
       ]
     },
@@ -169,18 +165,14 @@
       "sourceId": "selected:D0M3OLFsyEg:0a5a707e5fe07c92",
       "sourceHash": "0a5a707e5fe07c9249bf327441a7868c71fb9470b3a70662ad74f03adc759759",
       "isNiche": true,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "SPEED"
-      },
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "replacementSuggestion": null,
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "parser_corruption"
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_artist",
         "structured_setlist"
       ]
     },

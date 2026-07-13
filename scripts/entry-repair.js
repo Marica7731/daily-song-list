@@ -2,8 +2,19 @@ const { createSongSearchLookup, normalizeSongSearchText } = require("../assets/f
 
 const UNKNOWN_ARTIST = "未記載";
 const DELIMITER_CHARS = "/／|｜￤∣丨";
-const BRACKET_OPEN = "([{（［【「『";
-const BRACKET_CLOSE = ")]}）］】」』";
+const BRACKET_PAIRS = [
+  ["【", "】"],
+  ["［", "］"],
+  ["[", "]"],
+  ["「", "」"],
+  ["『", "』"],
+  ["（", "）"],
+  ["(", ")"],
+  ["{", "}"],
+];
+const BRACKET_OPEN = BRACKET_PAIRS.map(([open]) => open).join("");
+const BRACKET_CLOSE = BRACKET_PAIRS.map(([, close]) => close).join("");
+const BRACKET_CLOSE_BY_OPEN = new Map(BRACKET_PAIRS);
 
 function repairParsedEntry(song, lookupInput = null) {
   if (!song || typeof song !== "object") return song;
@@ -14,6 +25,13 @@ function repairParsedEntry(song, lookupInput = null) {
   let title = String(song.title || "").trim();
   let artist = cleanSafeArtistCandidate(normalizeArtist(song.artist)) || UNKNOWN_ARTIST;
   const raw = String(song.raw || "");
+
+  const crossFieldWrapper = stripCrossFieldWrapper(title, artist);
+  if (crossFieldWrapper.changed) {
+    title = crossFieldWrapper.title;
+    artist = cleanSafeArtistCandidate(crossFieldWrapper.artist) || UNKNOWN_ARTIST;
+    repairs.push(...crossFieldWrapper.reasons);
+  }
 
   const cleanedTitle = cleanSafeTitleCandidate(title);
   if (cleanedTitle && cleanedTitle !== title) {
@@ -72,7 +90,7 @@ function bestDelimiterRepairCandidate(song, lookupInput = null) {
 }
 
 function titleArtistSplitCandidates(text) {
-  const value = String(text || "").trim();
+  const value = stripOuterTitleArtistContainer(String(text || "").trim());
   const candidates = [];
   let depth = 0;
   for (let index = 0; index < value.length; index += 1) {
@@ -145,6 +163,10 @@ function cleanSafeTitleCandidate(value) {
   text = text
     .replace(/^[\s\u3000\u200b-\u200f\u202a-\u202e│┃┏┗┣┳┻━─┬┴┌┐┘┤┼├└╟╠╚╔╩╦╬╞╰╭╮╯꒱]+/u, "")
     .replace(/^(?:【\s*(?:セットリスト|セトリ|リクエスト)\s*】|\[\s*(?:set\s*list|request)\s*\])\s*/iu, "")
+    .replace(
+      /^(?:未記載|未记载|待补歌手|待補歌手|待补|待補)\s+(?=(?:[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]|[mｍ]?\d{1,3}[.．]|[#＃]?\d{1,3}\s*[≫»>]|[#＃]?\d{1,3}\s*[)）、:：]))/iu,
+      "",
+    )
     .trim();
   text = text
     .replace(
@@ -166,7 +188,50 @@ function cleanSafeArtistCandidate(value) {
     .replace(/\s+/gu, " ")
     .replace(/\s+(?:19|20)\d{2}\s*[\/／.-]\s*(?:0?[1-9]|1[0-2])\b.*$/u, "")
     .replace(/\s+(?:19|20)\d{2}$/u, "")
+    .replace(/\s*(?:ピアノ伴奏|アカペラ|お試し枠|海外ニキミームVer\.?|ワンコーラス|1番のみ)\s*$/iu, "")
+    .replace(/\s*[☆★]+\s*$/u, "")
+    .replace(/\s*[-ー–—]?\s*[【［\[(（「『]\s*$/u, "")
     .trim();
+}
+
+function stripCrossFieldWrapper(titleInput, artistInput) {
+  const title = String(titleInput || "").trim();
+  const artist = String(artistInput || "").trim();
+  for (const [open, close] of BRACKET_PAIRS) {
+    if (!title.startsWith(open) || !artist.endsWith(close)) continue;
+    const nextTitle = title.slice(open.length).trim();
+    const nextArtist = artist.slice(0, artist.length - close.length).trim();
+    if (!nextTitle || !nextArtist) continue;
+    return {
+      title: nextTitle,
+      artist: nextArtist,
+      changed: true,
+      reasons: ["cross_field_wrapper"],
+    };
+  }
+  return { title, artist, changed: false, reasons: [] };
+}
+
+function stripOuterTitleArtistContainer(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const open = text[0];
+  const close = BRACKET_CLOSE_BY_OPEN.get(open);
+  if (!close || !text.endsWith(close)) return text;
+  const inner = text.slice(open.length, text.length - close.length).trim();
+  if (!inner || !hasTopLevelDelimiter(inner)) return text;
+  return inner;
+}
+
+function hasTopLevelDelimiter(value) {
+  let depth = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+    if (BRACKET_OPEN.includes(char)) depth += 1;
+    else if (BRACKET_CLOSE.includes(char)) depth = Math.max(0, depth - 1);
+    else if (depth === 0 && DELIMITER_CHARS.includes(char) && !isDateSlashAt(value, index)) return true;
+  }
+  return false;
 }
 
 function entryRepairSignals(song) {
@@ -263,6 +328,7 @@ function rawSongText(raw) {
   let value = String(raw || "").trim();
   value = value.replace(/^(?:[\[【(（]\s*)?\d{1,2}:\d{2}(?::\d{2})?\s*(?:[\]】)）])?\s*/u, "").trim();
   value = value.replace(/^(?:[#＃]?\d{1,3}[)）、:：]\s*|[#＃]?\d{1,3}[.．](?!\d)\s*|[#＃]?\d{1,3}\s+)/u, "").trim();
+  value = stripOuterTitleArtistContainer(value);
   return value;
 }
 
@@ -270,8 +336,10 @@ function shouldApplyDelimiterRepair(song, candidate, lookup) {
   if (!candidate) return false;
   const currentArtist = normalizeArtist(song?.artist);
   const currentTitle = String(song?.title || "").trim();
+  if (isLikelyWorkMetadataCandidate(candidate.artist)) return false;
   if (candidate.score >= 10) return true;
   if (isNumericMonthOnly(currentArtist) && candidate.score > 0) return true;
+  if (hasCrossFieldBracketLeak(currentTitle, currentArtist) && candidate.score > 0 && !isBadArtistCandidate(candidate.artist)) return true;
   if (isUnknownArtist(currentArtist) && songSearchRecognition(candidate, lookup).knownTitleArtist) return true;
   if (isUnknownArtist(currentArtist) && candidate.score >= 4 && isLikelyArtistCredit(candidate.artist)) return true;
   return cleanSafeTitleCandidate(currentTitle) !== candidate.title && songSearchRecognition(candidate, lookup).knownTitle;
@@ -296,9 +364,24 @@ function isLikelyArtistCredit(value) {
   const artist = String(value || "").trim();
   if (isBadArtistCandidate(artist)) return false;
   if (artist.length > 60) return false;
+  if (isLikelyWorkMetadataCandidate(artist)) return false;
   if (/^(?:cover|covered\s+by|歌ってみた|弾き語り|karaoke|inst|off\s*vocal)$/iu.test(artist)) return false;
   if (/(?:です|ます|でした|だった|してください|しよう|したい|気がする|公開|開催|開始|終了)$/u.test(artist)) return false;
   return /[\p{Letter}\p{Number}一-龯ぁ-んァ-ヶ]/u.test(artist);
+}
+
+function hasCrossFieldBracketLeak(title, artist) {
+  const titleText = String(title || "").trim();
+  const artistText = String(artist || "").trim();
+  for (const [open, close] of BRACKET_PAIRS) {
+    if (titleText.startsWith(open) && artistText.includes(close)) return true;
+  }
+  return false;
+}
+
+function isLikelyWorkMetadataCandidate(value) {
+  const text = String(value || "").trim();
+  return /(?:TV\s*size|TV\s*アニメ|TV\s*anime|アニメ|動畫|动画|映画|ドラマ|ゲーム|特撮|番組|作品|第\d+期|シーズン\d+|主題歌|主题歌|挿入歌|劇中歌|テーマ|opening|ending|OP|ED)(?:\s*[\[(（【].*[\])）】])?$/iu.test(text);
 }
 
 function isNumericMonthOnly(value) {
@@ -404,5 +487,6 @@ module.exports = {
   repairParsedEntry,
   scoreTitleArtistSplit,
   songSearchRecognition,
+  stripCrossFieldWrapper,
   titleArtistSplitCandidates,
 };

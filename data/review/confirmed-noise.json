@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:24:00.185Z",
+  "generatedAt": "2026-07-13T13:05:11.619Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
   "latestGeneratedAt": "2026-07-13T12:22:43.972Z",
-  "curationVersion": "curation-v1:247c48f55755",
-  "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
+  "curationVersion": "curation-v1:6193201176e1",
+  "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
   "counts": {
-    "totalCandidates": 153,
-    "uniqueVideos": 44,
-    "uniqueSources": 60,
-    "confirmedNoiseCount": 153,
+    "totalCandidates": 155,
+    "uniqueVideos": 45,
+    "uniqueSources": 61,
+    "confirmedNoiseCount": 155,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 153,
+      "confirmed_noise": 155,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -872,6 +872,57 @@
       "reviewId": "review:YdM4OewAJ8E:8ab605e83465bdc3d53b",
       "sourcePath": "data/review/sources/history-YdM4OewAJ8E-8ab605e83465bdc3d53b.json",
       "reviewUrl": "review.html?review=review%3AYdM4OewAJ8E%3A8ab605e83465bdc3d53b&entry=710022534335f3b8a56a757e8c352dccbfed646d6b63c44fef3f620e16c7d9f2"
+    },
+    {
+      "title": "ヒゲオトコ𝑜𝑟蹴り戻り𝑜𝑟風船",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3063,
+      "time": "0:51:03",
+      "raw": "51:03　ヒゲオトコ𝑜𝑟蹴り戻り𝑜𝑟風船",
+      "rawHash": "aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7",
+      "videoId": "8KDs7OP6_KM",
+      "videoTitle": "【DAM KARAOKE歌枠】Having some hero fun! わちゃわちゃヒーローズ！【NIJISANJI EN | Vezalius Bandage】",
+      "channelName": "Vezalius Bandage 【NIJISANJI EN】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8KDs7OP6_KM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8KDs7OP6_KM&t=3063s",
+      "sourceId": "selected:8KDs7OP6_KM:92d430c2418abbe5",
+      "sourceHash": "92d430c2418abbe57f0671ac944c438e3cdd0952b35052955bc25933e95ecc8c",
+      "sourceOrigin": "review:history-8KDs7OP6_KM-92d430c2418abbe57f06.json;review:history-8KDs7OP6_KM-ae9a67b4a59214c5b593.json;review:history-8KDs7OP6_KM-dedf6a189fee97e7cd20.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T220000Z",
+        "snapshot:20260712T190000Z",
+        "snapshot:20260713T120000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles",
+        "activity_marker_title"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_many_topic_entries",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8KDs7OP6_KM:92d430c2418abbe57f06",
+      "sourcePath": "data/review/sources/history-8KDs7OP6_KM-92d430c2418abbe57f06.json",
+      "reviewUrl": "review.html?review=review%3A8KDs7OP6_KM%3A92d430c2418abbe57f06&entry=aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7"
     },
     {
       "title": "企画説明",
@@ -5845,7 +5896,8 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [
         "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
+        "source_many_topic_entries",
+        "activity_marker_title"
       ],
       "riskReasons": [
         "activity_marker_title",
@@ -5856,6 +5908,52 @@
       "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
       "sourcePath": "data/review/sources/pI-sk5vxg3E-c36865484826660b7d25.json",
       "reviewUrl": "review.html?review=review%3ApI-sk5vxg3E%3Ac36865484826660b7d25&entry=229566a90ed6d1bf80f251f8ca70869f810d8a1526f663d5fc19ff6fb1140b87"
+    },
+    {
+      "title": "本日も〜？ひなたびよりー☀",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 455,
+      "time": "0:07:35",
+      "raw": "0:07:35  本日も〜？ひなたびよりー☀️",
+      "rawHash": "a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e",
+      "videoId": "pI-sk5vxg3E",
+      "videoTitle": "【弾き語り】 少しだけ歌うよっ 【歌枠】 #shorts #菜鳥ひなた #karaoke Singing Stream",
+      "channelName": "菜鳥ひなた / Hinata Natori",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pI-sk5vxg3E&t=455s",
+      "sourceId": "UgzHhvuoCL45Cl2Wy2B4AaABAg",
+      "sourceHash": "c36865484826660b7d25d85531b35aee0ef74259a5e1bd4df8a83110acd4041f",
+      "sourceOrigin": "review:history-pI-sk5vxg3E-c36865484826660b7d25.json;review:pI-sk5vxg3E-c36865484826660b7d25.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260713T120000Z",
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
+        "activity_marker_title",
+        "niche_unknown_artist"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
+      "sourcePath": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json",
+      "reviewUrl": "review.html?review=review%3ApI-sk5vxg3E%3Ac36865484826660b7d25&entry=a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
     },
     {
       "title": "登録者20050名様達成🎉",
@@ -5885,7 +5983,8 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [
         "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
+        "source_many_topic_entries",
+        "activity_marker_title"
       ],
       "riskReasons": [
         "title_only_non_song_candidate",
@@ -5925,7 +6024,8 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [
         "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
+        "source_many_topic_entries",
+        "activity_marker_title"
       ],
       "riskReasons": [
         "obvious_non_song_text",
@@ -5965,7 +6065,8 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [
         "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
+        "source_many_topic_entries",
+        "activity_marker_title"
       ],
       "riskReasons": [
         "likely_non_song_entry",

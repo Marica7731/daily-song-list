@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:8KDs7OP6_KM:ae9a67b4a59214c5b593",
   "video": {
     "videoId": "8KDs7OP6_KM",
@@ -26,7 +26,8 @@
       "source_multiple_unknown_artists",
       "conversation_entry",
       "source_multiple_niche_short_titles",
-      "short_unknown_title"
+      "short_unknown_title",
+      "activity_marker_title"
     ]
   },
   "entries": [
@@ -929,10 +930,11 @@
       "sourceId": "selected:8KDs7OP6_KM:ae9a67b4a59214c5",
       "sourceHash": "ae9a67b4a59214c5b5936d095e43ea9e11c46133b79891c2d968cc5f65db219f",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "activity_marker_title",
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],

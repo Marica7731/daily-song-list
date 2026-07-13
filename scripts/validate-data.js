@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { NON_SONG_RULES_PATH, OVERRIDES_PATH, validateCurationOverrides } = require("./curation");
+const { SONG_ALIASES_PATH, canonicalizeSongIdentity, loadSongAliasContext, validateSongAliasConfig } = require("./song-aliases");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -12,6 +13,15 @@ const DIFF_PATHS = {
   "72h": path.join(DATA_DIR, "diff", "latest-72h.json"),
   "1m": path.join(DATA_DIR, "diff", "latest-1m.json"),
 };
+const BRACKET_PAIRS = [
+  ["【", "】"],
+  ["［", "］"],
+  ["[", "]"],
+  ["「", "」"],
+  ["『", "』"],
+];
+const BRACKET_CLOSE_BY_OPEN = new Map(BRACKET_PAIRS);
+const BRACKET_OPEN_BY_CLOSE = new Map(BRACKET_PAIRS.map(([open, close]) => [close, open]));
 const RUNTIME_VIDEO_FIELDS = new Set([
   "videoId",
   "title",
@@ -32,6 +42,7 @@ const MONTH_SEARCH_URLS = new Set([
 
 const payload = readJson(LATEST_PATH);
 const errors = [];
+const songAliasContext = validateSongAliases();
 
 validateCurationConfig();
 
@@ -57,6 +68,7 @@ for (const groupId of ["72h", "1m"]) {
       if (song.isNiche !== undefined && typeof song.isNiche !== "boolean") {
         errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].isNiche must be boolean`);
       }
+      validateSongIdentity(groupId, videoIndex, songIndex, item, song, songAliasContext);
     }
   }
 }
@@ -214,6 +226,59 @@ function validateCurationConfig() {
       }
     }
   }
+}
+
+function validateSongAliases() {
+  if (!fs.existsSync(SONG_ALIASES_PATH)) {
+    errors.push("missing song aliases: config/song-aliases.json");
+    return loadSongAliasContext();
+  }
+  const config = readJson(SONG_ALIASES_PATH);
+  const validation = validateSongAliasConfig(config);
+  for (const error of validation.errors) errors.push(`song-aliases: ${error}`);
+  return validation.context;
+}
+
+function validateSongIdentity(groupId, videoIndex, songIndex, item, song, aliasContext) {
+  const label = `${groupId}[${videoIndex}].songs[${songIndex}]`;
+  const context = `videoId=${item.videoId || ""} seconds=${song.seconds ?? ""} title=${JSON.stringify(song.title || "")} artist=${JSON.stringify(song.artist || "")}`;
+  const title = String(song.title || "").trim();
+  const artist = String(song.artist || "").trim();
+  const splitWrapper = splitBracketWrapper(title, artist);
+  if (splitWrapper) {
+    errors.push(`${label} has split ${splitWrapper} wrapper across title/artist: ${context}`);
+  }
+  if (hasUnpairedLeadingBracket(title)) {
+    errors.push(`${label}.title has unpaired leading bracket: ${context}`);
+  }
+  if (hasUnpairedTrailingBracket(artist)) {
+    errors.push(`${label}.artist has unpaired trailing bracket: ${context}`);
+  }
+  const canonical = canonicalizeSongIdentity(song, aliasContext);
+  if (canonical?.title && canonical.title !== song.title) {
+    errors.push(`${label} must use canonical song alias title ${JSON.stringify(canonical.title)}: ${context}`);
+  }
+}
+
+function splitBracketWrapper(title, artist) {
+  for (const [open, close] of BRACKET_PAIRS) {
+    if (title.startsWith(open) && artist.endsWith(close)) return `${open}${close}`;
+  }
+  return "";
+}
+
+function hasUnpairedLeadingBracket(value) {
+  const text = String(value || "").trim();
+  const open = text[0];
+  const close = BRACKET_CLOSE_BY_OPEN.get(open);
+  return Boolean(close && !text.includes(close));
+}
+
+function hasUnpairedTrailingBracket(value) {
+  const text = String(value || "").trim();
+  const close = text[text.length - 1];
+  const open = BRACKET_OPEN_BY_CLOSE.get(close);
+  return Boolean(open && !text.includes(open));
 }
 
 function validateRuntimeRangeFile(groupId, rangeMeta) {

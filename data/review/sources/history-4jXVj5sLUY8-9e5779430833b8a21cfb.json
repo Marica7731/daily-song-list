@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:4jXVj5sLUY8:9e5779430833b8a21cfb",
   "video": {
     "videoId": "4jXVj5sLUY8",
@@ -57,13 +57,16 @@
       "sourceId": "selected:4jXVj5sLUY8:9e5779430833b8a2",
       "sourceHash": "9e5779430833b8a21cfb38af101952ce3af48218c4796d7d57e4d2eeb13614a4",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "未記載"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
         "structured_setlist"
       ]
     },

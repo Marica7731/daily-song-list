@@ -3,6 +3,7 @@ const {
   isSongSearchKnown,
   normalizeSongSearchText,
 } = require("../assets/frontend-utils");
+const { canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
 
 const SOURCE_REPOSITORY = "Marica7731/song-search";
 const SOURCE_BRANCH = "main";
@@ -186,26 +187,29 @@ function buildSongSearchIndex(entries, options = {}) {
   };
 }
 
-function annotatePayloadWithSongSearchNiche(payload, index) {
+function annotatePayloadWithSongSearchNiche(payload, index, aliasContext = loadSongAliasContext()) {
   const lookup = createSongSearchLookup(index);
   if (!payload || !lookup.available) return payload;
   return {
     ...payload,
     groups: Object.fromEntries(
-      Object.entries(payload.groups || {}).map(([groupId, group]) => [groupId, annotateGroupWithSongSearchNiche(group, lookup)]),
+      Object.entries(payload.groups || {}).map(([groupId, group]) => [groupId, annotateGroupWithSongSearchNiche(group, lookup, aliasContext)]),
     ),
   };
 }
 
-function annotateGroupWithSongSearchNiche(group, lookup) {
+function annotateGroupWithSongSearchNiche(group, lookup, aliasContext = null) {
   return {
     ...group,
     items: (group.items || []).map((item) => ({
       ...item,
-      songs: (item.songs || []).map((song) => ({
-        ...song,
-        isNiche: !isKnownSong(song, lookup),
-      })),
+      songs: (item.songs || []).map((song) => {
+        const canonical = canonicalizeSongIdentity(song, aliasContext);
+        return {
+          ...canonical,
+          isNiche: !isKnownSong(canonical, lookup),
+        };
+      }),
     })),
   };
 }

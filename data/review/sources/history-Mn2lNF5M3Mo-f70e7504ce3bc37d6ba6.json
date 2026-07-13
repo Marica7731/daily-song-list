@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:Mn2lNF5M3Mo:f70e7504ce3bc37d6ba6",
   "video": {
     "videoId": "Mn2lNF5M3Mo",
@@ -38,10 +38,14 @@
       "sourceId": "selected:Mn2lNF5M3Mo:f70e7504ce3bc37d",
       "sourceHash": "f70e7504ce3bc37d6ba640050e84c5a3cd4dac632d8ef20ebb549f22a25f70e6",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "40mP"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist",
@@ -81,10 +85,14 @@
       "sourceId": "selected:Mn2lNF5M3Mo:f70e7504ce3bc37d",
       "sourceHash": "f70e7504ce3bc37d6ba640050e84c5a3cd4dac632d8ef20ebb549f22a25f70e6",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "Chinozo"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist",
@@ -122,14 +130,19 @@
       "sourceId": "selected:Mn2lNF5M3Mo:f70e7504ce3bc37d",
       "sourceHash": "f70e7504ce3bc37d6ba640050e84c5a3cd4dac632d8ef20ebb549f22a25f70e6",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "Rainy Boots",
+        "artist": "Inabakumori"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
+        "known_artist",
         "structured_setlist"
       ]
     },
@@ -165,14 +178,19 @@
       "sourceId": "selected:Mn2lNF5M3Mo:f70e7504ce3bc37d",
       "sourceHash": "f70e7504ce3bc37d6ba640050e84c5a3cd4dac632d8ef20ebb549f22a25f70e6",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "Why Don't You Play in Hell?",
+        "artist": "Gen Hoshino"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
+        "known_artist",
         "structured_setlist"
       ]
     },
@@ -187,10 +205,14 @@
       "sourceId": "selected:Mn2lNF5M3Mo:f70e7504ce3bc37d",
       "sourceHash": "f70e7504ce3bc37d6ba640050e84c5a3cd4dac632d8ef20ebb549f22a25f70e6",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "Giga"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist",
@@ -208,10 +230,14 @@
       "sourceId": "selected:Mn2lNF5M3Mo:f70e7504ce3bc37d",
       "sourceHash": "f70e7504ce3bc37d6ba640050e84c5a3cd4dac632d8ef20ebb549f22a25f70e6",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "Creepy Nuts"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist",
@@ -249,14 +275,19 @@
       "sourceId": "selected:Mn2lNF5M3Mo:f70e7504ce3bc37d",
       "sourceHash": "f70e7504ce3bc37d6ba640050e84c5a3cd4dac632d8ef20ebb549f22a25f70e6",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "Lower One's Eyes",
+        "artist": "nulut"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
+        "known_artist",
         "structured_setlist"
       ]
     },
@@ -292,14 +323,19 @@
       "sourceId": "selected:Mn2lNF5M3Mo:f70e7504ce3bc37d",
       "sourceHash": "f70e7504ce3bc37d6ba640050e84c5a3cd4dac632d8ef20ebb549f22a25f70e6",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "Venom",
+        "artist": "Kairiki Bear"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": [
+        "known_artist",
         "structured_setlist"
       ]
     }

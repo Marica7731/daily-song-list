@@ -1,25 +1,36 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
-  "curationVersion": "curation-v1:247c48f55755",
-  "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-  "totalSongs": 13866,
-  "unknownArtistCount": 2786,
-  "nicheUnknownArtistCount": 1424,
-  "highRiskEntryCount": 409,
-  "highRiskSourceCount": 17,
+  "generatedAt": "2026-07-13T13:04:16.315Z",
+  "curationVersion": "curation-v1:6193201176e1",
+  "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
+  "totalSongs": 13861,
+  "unknownArtistCount": 2782,
+  "nicheUnknownArtistCount": 1423,
+  "highRiskEntryCount": 410,
+  "highRiskSourceCount": 18,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 11,
-  "conversationDroppedEntryCount": 0,
+  "ruleDroppedEntryCount": 3,
+  "conversationDroppedEntryCount": 3,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 34,
-  "parserCorruptionCount": 135,
+  "confirmedNoiseCount": 35,
+  "parserCorruptionCount": 11,
   "likelyNoiseCount": 3,
-  "needsReviewCount": 1305,
-  "likelySongCount": 8272,
+  "needsReviewCount": 1421,
+  "likelySongCount": 8287,
   "topRiskTitles": [
+    {
+      "value": "勝利のマシンロボ",
+      "count": 88,
+      "classifications": {
+        "needs_review": 88
+      },
+      "riskReasons": {
+        "niche_unknown_artist": 88,
+        "source_multiple_unknown_artists": 88
+      }
+    },
     {
       "value": "少女レイ",
       "count": 17,
@@ -213,16 +224,6 @@
       "riskReasons": {
         "known_song_unknown_artist": 5
       }
-    },
-    {
-      "value": "ビビデバ",
-      "count": 5,
-      "classifications": {
-        "likely_song": 5
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 5
-      }
     }
   ],
   "topRiskChannels": [
@@ -389,10 +390,10 @@
       "riskReasons": [
         "source_unknown_artist_ratio_high",
         "kept_count_high_low_known_song_density",
-        "source_multiple_niche_short_titles",
         "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
       ]
     },
     {
@@ -438,6 +439,18 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
         "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "pI-sk5vxg3E",
+      "title": "【弾き語り】 少しだけ歌うよっ 【歌枠】 #shorts #菜鳥ひなた #karaoke Singing Stream",
+      "channelName": "菜鳥ひなた / Hinata Natori",
+      "riskScore": 90,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_many_topic_entries",
+        "source_activity_marker_ratio_high",
+        "activity_marker_title"
       ]
     },
     {
@@ -573,23 +586,34 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
-    },
-    {
-      "videoId": "H0P5mJPmoSk",
-      "title": "【夜の弾き語り】ハナレグミ『発光帯』から始まる、生演奏と雑談20260630",
-      "channelName": "Akinori IZAWA 『GAIB!!!』",
-      "riskScore": 66,
-      "riskLevel": "medium",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-13T13:04:16.315Z",
+      "totalSongs": 13861,
+      "unknownArtistCount": 2782,
+      "nicheUnknownArtistCount": 1423,
+      "highRiskEntryCount": 410,
+      "highRiskSourceCount": 18
+    },
+    {
+      "generatedAt": "2026-07-13T13:01:53.796Z",
+      "totalSongs": 13863,
+      "unknownArtistCount": 2784,
+      "nicheUnknownArtistCount": 1425,
+      "highRiskEntryCount": 410,
+      "highRiskSourceCount": 17
+    },
+    {
+      "generatedAt": "2026-07-13T12:59:25.966Z",
+      "totalSongs": 13863,
+      "unknownArtistCount": 2784,
+      "nicheUnknownArtistCount": 1425,
+      "highRiskEntryCount": 410,
+      "highRiskSourceCount": 17
+    },
     {
       "generatedAt": "2026-07-13T12:22:50.673Z",
       "totalSongs": 13866,
@@ -725,14 +749,6 @@
       "nicheUnknownArtistCount": 1742,
       "highRiskEntryCount": 5159,
       "highRiskSourceCount": 306
-    },
-    {
-      "generatedAt": "2026-07-12T18:45:23.662Z",
-      "totalSongs": 12773,
-      "unknownArtistCount": 3286,
-      "nicheUnknownArtistCount": 1788,
-      "highRiskEntryCount": 4835,
-      "highRiskSourceCount": 291
     }
   ]
 }

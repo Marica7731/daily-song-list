@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T12:22:50.673Z",
+  "generatedAt": "2026-07-13T13:04:16.315Z",
   "reviewId": "review:ktbhqRT-6go:a9c3f36c7e060f0beb76",
   "video": {
     "videoId": "ktbhqRT-6go",
@@ -255,12 +255,15 @@
       "sourceId": "selected:ktbhqRT-6go:a9c3f36c7e060f0b",
       "sourceHash": "a9c3f36c7e060f0beb769d9037a46aabea5c5034c8bda3924a2586486e5b3eff",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "未記載"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
-        "known_artist",
         "structured_setlist"
       ]
     },

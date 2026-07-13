@@ -125,6 +125,7 @@ test("cleans safe title decorations without overwriting raw text", () => {
   assert.equal(cleanSafeTitleCandidate("【セットリスト】『Song』←NEW!"), "Song");
   assert.equal(cleanSafeTitleCandidate("【リクエスト】「Song」"), "Song");
   assert.equal(cleanSafeTitleCandidate("01≫アンノウン・マザーグース"), "アンノウン・マザーグース");
+  assert.equal(cleanSafeTitleCandidate("待补歌手 01≫アンノウン・マザーグース"), "アンノウン・マザーグース");
   assert.equal(cleanSafeTitleCandidate("꒱‬ 01. 初恋サイダー"), "初恋サイダー");
   assert.equal(cleanSafeTitleCandidate("②どんな色が好き"), "どんな色が好き");
   assert.equal(cleanSafeTitleCandidate("M1.わたがし:_レオペンライト:"), "わたがし");
@@ -144,6 +145,37 @@ test("cleans safe title decorations without overwriting raw text", () => {
   });
   assert.equal(numbered.title, "フィクサー");
   assert.equal(numbered.artist, "ぬゆり");
+});
+
+test("repairs cross-field wrappers and dangling artist brackets", () => {
+  const wrapped = repairParsedEntry({
+    time: "2:32:34",
+    seconds: 9154,
+    title: "【Kakurenbo",
+    artist: "AliA】",
+    raw: "2:32:34 【Kakurenbo - AliA】",
+  });
+  const dangling = repairParsedEntry({
+    time: "1:24:05",
+    seconds: 5045,
+    title: "かくれんぼ",
+    artist: "AliA -【",
+    raw: "かくれんぼ/AliA -【01:24:05】",
+  });
+  const byTitle = repairParsedEntry({
+    time: "6:15:35",
+    seconds: 22535,
+    title: "【Stand",
+    artist: "Me】/ Ben E.King",
+    raw: "6:15:35 【Stand By Me】/ Ben E.King",
+  });
+
+  assert.equal(wrapped.title, "Kakurenbo");
+  assert.equal(wrapped.artist, "AliA");
+  assert.equal(wrapped.repair.reasons.includes("cross_field_wrapper"), true);
+  assert.equal(dangling.artist, "AliA");
+  assert.equal(byTitle.title, "Stand By Me");
+  assert.equal(byTitle.artist, "Ben E.King");
 });
 
 test("exposes curation signals for custom emoji and reaction text", () => {
