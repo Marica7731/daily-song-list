@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T00:14:54.717Z",
+  "generatedAt": "2026-07-13T04:45:12.479Z",
   "reviewId": "review:3E9Lw5JEzIs:651bbb513e69198e0d6e",
   "video": {
     "videoId": "3E9Lw5JEzIs",
@@ -18,13 +18,11 @@
     "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 91,
-    "riskLevel": "high",
+    "riskScore": 53,
+    "riskLevel": "medium",
     "riskReasons": [
       "source_many_topic_entries",
-      "source_multiple_unknown_artists",
-      "conversation_entry",
-      "short_unknown_title"
+      "source_multiple_unknown_artists"
     ]
   },
   "entries": [
@@ -182,12 +180,10 @@
         "artist": "いきものがかり (2012) / 劇場版 「名探偵コナン 11人目のストライカー」主題歌"
       },
       "riskReasons": [
-        "conversation_entry",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
         "parser_corruption"
       ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T00:14:54.717Z",
+  "generatedAt": "2026-07-13T04:45:12.479Z",
   "reviewId": "review:3OOb1Jxcivs:05eab2063bf7fff8d182",
   "video": {
     "videoId": "3OOb1Jxcivs",
@@ -18,12 +18,10 @@
     "snapshotId": "20260712T220000Z"
   },
   "risk": {
-    "riskScore": 59,
-    "riskLevel": "medium",
+    "riskScore": 20,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_niche_short_titles",
-      "conversation_entry",
-      "short_unknown_title"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -145,11 +143,10 @@
         "artist": "影山ヒロノブ、こおろぎ'73 / 「宇宙船サジタリウス」ED"
       },
       "riskReasons": [
-        "conversation_entry",
-        "short_unknown_title",
         "parser_corruption"
       ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]

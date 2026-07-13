@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T00:14:54.717Z",
+  "generatedAt": "2026-07-13T04:45:12.479Z",
   "reviewId": "review:r1d2SyvEmiE:6188a6e72402c0673470",
   "video": {
     "videoId": "r1d2SyvEmiE",
@@ -13,15 +13,16 @@
     "sourceHash": "6188a6e72402c06734707ab55e7e396eef781f389961b9c657b543ea941d107b",
     "sourceType": "comment",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "【🍅🥛タイムスタンプ🥛🍅】\n00:04:11 開始のチャイム\n00:04:42 こんきゅい🍅🥛\n00:06:45 今日は「は」からスタート\n02:42:57 宣伝タイム\n\n【本日のお歌】\n00:09:42 Butter-Fly / 和田光司\n00:15:10 秒針を噛む / ずっと真夜中でいいのに。\n00:23:16 Prayer X / King Gnu\n00:28:40 ヘビーローテーション / AKB48\n00:37:19 ホワイトハッピー / MARETU\n00:45:29 Magia / Kalafina\n00:53:11 ミカヅキ / さユり\n00:59:56 ムーンライト伝説 / DALI\n01:05:11 メリュー / 25時、ナイトコードで。\n01:12:53 紋白蝶 / 東京スカパラダイスオーケストラ\n01:20:18 やさしさに包まれたなら / 松任谷由実\n01:27:02 憂、燦々 / クリープハイプ\n01:33:54 夜に駆ける / YOASOBI\n01:41:58 ライアーダンス / DECO*27\n01:50:38 理想絵図 / 健音テイ\n01:55:52 ルカルカ☆ナイトフィーバー / 鹿乃\n02:02:38 恋愛サーキュレーション / 千石撫子(花澤香菜)\n02:11:01 六本木心中 / アン・ルイス\n02:18:33 分かってないよ / WurtS\n02:24:05 ヲズワルド / 宮下遊と煮ル果実\n02:31:38 『んっあっあっ。』 / 宮下遊\n02:37:22 ファンサ / mona(夏川椎菜) \n02:44:10 蛍の光",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 20,
+    "riskScore": 28,
     "riskLevel": "low",
     "riskReasons": [
-      "source_many_topic_entries"
+      "source_many_topic_entries",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -329,7 +330,7 @@
       "rawHash": "a5408c0d4720d90f1d27eaca898fbd8de18f626bfbc5bbc6cc1dde93953b592d",
       "sourceId": "UgyTCPiRZ7TIfZBHXr14AaABAg",
       "sourceHash": "6188a6e72402c06734707ab55e7e396eef781f389961b9c657b543ea941d107b",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
@@ -391,7 +392,7 @@
       "rawHash": "a79d70d5f4ccdfd00931dd617cb62d4afc3c8741180a2d24ab710076386504b3",
       "sourceId": "UgyTCPiRZ7TIfZBHXr14AaABAg",
       "sourceHash": "6188a6e72402c06734707ab55e7e396eef781f389961b9c657b543ea941d107b",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
@@ -432,7 +433,7 @@
       "rawHash": "018ecc23906579080f719bda55842a060f5c27d3ce452b247baac269c13dc0c1",
       "sourceId": "UgyTCPiRZ7TIfZBHXr14AaABAg",
       "sourceHash": "6188a6e72402c06734707ab55e7e396eef781f389961b9c657b543ea941d107b",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
@@ -504,74 +505,6 @@
       "positiveEvidence": [
         "known_song",
         "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 251,
-      "time": "0:04:11",
-      "title": "開始のチャイム",
-      "artist": "未記載",
-      "raw": "00:04:11 開始のチャイム",
-      "rawHash": "99cfc93a92daf9ef44a9dceaf85d9a567a0b9d185bae4ac9641ecb2e461f3bb9",
-      "sourceId": "UgyTCPiRZ7TIfZBHXr14AaABAg",
-      "sourceHash": "6188a6e72402c06734707ab55e7e396eef781f389961b9c657b543ea941d107b",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 282,
-      "time": "0:04:42",
-      "title": "こんきゅい🍅🥛",
-      "artist": "未記載",
-      "raw": "00:04:42 こんきゅい🍅🥛",
-      "rawHash": "e6517291a351a9e0080f6c9ac77cf6753872188202fce2aee97f57aac8e0fa67",
-      "sourceId": "UgyTCPiRZ7TIfZBHXr14AaABAg",
-      "sourceHash": "6188a6e72402c06734707ab55e7e396eef781f389961b9c657b543ea941d107b",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 405,
-      "time": "0:06:45",
-      "title": "今日は「は」からスタート",
-      "artist": "未記載",
-      "raw": "00:06:45 今日は「は」からスタート",
-      "rawHash": "a010ca925d4aec16b5777d9d27b2e6848cacfe22606d962b61df38466d527cc5",
-      "sourceId": "UgyTCPiRZ7TIfZBHXr14AaABAg",
-      "sourceHash": "6188a6e72402c06734707ab55e7e396eef781f389961b9c657b543ea941d107b",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 9777,
-      "time": "2:42:57",
-      "title": "宣伝タイム",
-      "artist": "未記載",
-      "raw": "02:42:57 宣伝タイム",
-      "rawHash": "bdcec98ffe2077c449c737d27d8077d19ba803893e60ab357f1eb8e0c4a23c92",
-      "sourceId": "UgyTCPiRZ7TIfZBHXr14AaABAg",
-      "sourceHash": "6188a6e72402c06734707ab55e7e396eef781f389961b9c657b543ea941d107b",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
       ]
     }
   ]
