@@ -81,6 +81,45 @@ async function waitForRows(page, errors = [], requests = []) {
   }
 }
 
+async function openFilterSheet(page) {
+  await page.locator("#desktopFilterButton").click();
+  await page.waitForSelector("#filterDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
+}
+
+async function setCheckbox(page, selector, checked) {
+  const checkbox = page.locator(selector);
+  await checkbox.waitFor({ state: "visible", timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  if ((await checkbox.isChecked()) === checked) return;
+  try {
+    if (checked) {
+      await checkbox.check({ timeout: 5000 });
+    } else {
+      await checkbox.uncheck({ timeout: 5000 });
+    }
+  } catch {
+    await checkbox.evaluate((input) => input.closest("label")?.click());
+  }
+  if ((await checkbox.isChecked()) !== checked) throw new Error(`${selector} did not become ${checked ? "checked" : "unchecked"}`);
+}
+
+async function waitForPerformanceEntryIdle(page, name, idleMs = 300, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  let lastCount = -1;
+  let stableSince = Date.now();
+  while (Date.now() < deadline) {
+    const count = await page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
+    if (count !== lastCount) {
+      lastCount = count;
+      stableSince = Date.now();
+    } else if (Date.now() - stableSince >= idleMs) {
+      return count;
+    }
+    await page.waitForTimeout(50);
+  }
+  return page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
+}
+
 async function assertUiShape(page, viewport, range) {
   const result = await page.evaluate(({ width }) => {
     const rect = (selector) => {
@@ -233,23 +272,21 @@ async function interactionFlow(browser) {
   await waitForRows(page, errors, requests);
   await page.locator("#filterInput").fill("夜");
   await waitForRows(page, errors, requests);
-  await page.locator("#desktopFilterButton").click();
-  await page.locator("#nicheOnlyToggle").check();
+  await openFilterSheet(page);
+  await setCheckbox(page, "#nicheOnlyToggle", true);
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
-  await page.locator("#desktopFilterButton").click();
+  await openFilterSheet(page);
   await page.locator("#metricFilterGroup label").filter({ hasText: "按视频" }).click();
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
   await page.locator("#filterInput").fill("");
-  await page.locator("#desktopFilterButton").click();
-  await page.locator("#nicheOnlyToggle").uncheck();
+  await openFilterSheet(page);
+  await setCheckbox(page, "#nicheOnlyToggle", false);
   await page.locator("#metricFilterGroup label").filter({ hasText: "按收录" }).click();
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
-  const buildSongRecordCountBeforeSource = await page.evaluate(
-    () => performance.getEntriesByName("song-list:build-song-records").length,
-  );
+  const buildSongRecordCountBeforeSource = await waitForPerformanceEntryIdle(page, "song-list:build-song-records");
   await page.locator("[data-toggle-source]").first().click();
   await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
     timeout: 15000,
