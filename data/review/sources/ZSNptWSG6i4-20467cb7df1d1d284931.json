@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T15:56:17.872Z",
+  "generatedAt": "2026-07-13T20:02:20.467Z",
   "reviewId": "review:ZSNptWSG6i4:20467cb7df1d1d284931",
   "video": {
     "videoId": "ZSNptWSG6i4",
@@ -11,18 +11,20 @@
   "source": {
     "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
     "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "歌枠お疲れ様でした🐨🩵\nゆそる君の歌声聴いてると癒されます！\n最高に楽しい日曜日でした♪\n\n14:11 めちゃ横見るゆそる君\n28:13 鼻噛むゆそる君\n47:52 53:44 練習中\n1:00:56 喜び方がばぶなゆそる君\nそしてぽたみんとばぶでコントするゆそる君w\n1:06:00 ゆそる君の気持ち届きますように🩵💛\n1:24:12 お寿司で喜ぶゆそる君\n1:28:07 雑談始まります😂",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 63,
-    "riskLevel": "medium",
+    "riskScore": 77,
+    "riskLevel": "high",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
+      "niche_unknown_artist",
       "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles",
       "short_unknown_title"
     ]
   },
@@ -37,16 +39,15 @@
       "rawHash": "3b2ed3bc752ddfe9ab42bf35c066c250c57c234a2fa298cc6c03f612fd192ea8",
       "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
       "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -58,16 +59,15 @@
       "rawHash": "282cb45426dac50418331999b70b245086c333d4be20686d0143e6655806a30c",
       "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
       "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -79,17 +79,16 @@
       "rawHash": "9de0a82184bf3e219e672d46f64b7472e4945bbf5be0dc43ff64633acef65758",
       "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
       "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -101,16 +100,15 @@
       "rawHash": "c14ab016b0e2095f33fe3711bbb555eb125336a8b812f412c98bf1cced8ad658",
       "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
       "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -122,50 +120,15 @@
       "rawHash": "3db3423d9fdb79a8be8322155b273e33ccf3811d6c4125526336269dea21910e",
       "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
       "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 3960,
-      "time": "1:06:00",
-      "title": "ゆそる君の気持ち届きますように🩵💛",
-      "artist": "未記載",
-      "raw": "1:06:00 ゆそる君の気持ち届きますように🩵💛",
-      "rawHash": "5890f4b86d8a4fe1494edfca37ccf8ee224542f7e832dd31d5e27dc7d63f2fcd",
-      "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
-      "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 5287,
-      "time": "1:28:07",
-      "title": "雑談始まります😂",
-      "artist": "未記載",
-      "raw": "1:28:07 雑談始まります😂",
-      "rawHash": "c5c465bee8d3f7dfd3f10e73c8e3f83b3561d3acb3d87456bf673f897c05f602",
-      "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
-      "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
+      "positiveEvidence": []
     }
   ]
 }

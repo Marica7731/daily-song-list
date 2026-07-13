@@ -3,6 +3,7 @@ const test = require("node:test");
 
 const {
   annotatePayloadWithNiche,
+  buildSetlistText,
   buildIndexBucketModel,
   buildInlineSourceModel,
   buildSourcePreview,
@@ -13,10 +14,13 @@ const {
   filterItemsByNiche,
   filterOccurrencesBySearch,
   filterOccurrencesByNiche,
+  formatSetlistTime,
   formatSeconds,
+  groupOccurrencesByVideo,
   isSongSearchKnown,
   indexBucketButtonModel,
   normalizeSearch,
+  normalizeSetlistSongs,
   normalizeSongSearchText,
   paginateItems,
   parseUrlState,
@@ -162,14 +166,70 @@ test("artist rank toggle uses unique song count", () => {
   assert.equal(expanded.ariaLabel, "收起该歌手曲目");
 });
 
-test("song rank toggle uses hidden source count", () => {
-  const collapsed = rankToggleModel({ mode: "song", isExpanded: false, hiddenCount: 3, songCount: 1 });
-  assert.equal(collapsed.text, "+3");
-  assert.equal(collapsed.ariaLabel, "查看其余3个来源");
+test("song rank toggle uses video and timestamp counts", () => {
+  const multiVideo = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 3, occurrenceCount: 8 });
+  assert.equal(multiVideo.text, "查看3个视频");
+  assert.equal(multiVideo.ariaLabel, "查看该歌曲的 3 个来源视频");
+
+  const sameVideo = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 1, occurrenceCount: 4 });
+  assert.equal(sameVideo.text, "查看4个时间戳");
+  assert.equal(sameVideo.ariaLabel, "查看该歌曲的 4 个时间戳");
+
+  const compact = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 3, occurrenceCount: 8, compact: true });
+  assert.equal(compact.text, "展开");
+  assert.equal(compact.ariaLabel, "查看该歌曲的 3 个来源视频");
 
   const expanded = rankToggleModel({ mode: "song", isExpanded: true, hiddenCount: 3 });
   assert.equal(expanded.text, "收起");
   assert.equal(expanded.ariaLabel, "收起该歌曲来源");
+});
+
+test("groups source occurrences by video with sorted timestamps", () => {
+  const groups = groupOccurrencesByVideo([
+    occurrence("B", "channel B", { seconds: 30, title: "song" }),
+    occurrence("A", "channel A", { seconds: 90, title: "song" }),
+    occurrence("A", "channel A", { seconds: 12, title: "song" }),
+  ]);
+
+  assert.deepEqual(
+    groups.map((group) => [group.videoId, group.occurrences.map(({ song }) => song.seconds)]),
+    [
+      ["A", [12, 90]],
+      ["B", [30]],
+    ],
+  );
+});
+
+test("builds whole-video setlist text from original songs", () => {
+  const item = {
+    _allSongs: [
+      { seconds: 352, title: "KING", artist: "Kanaria" },
+      { seconds: 352, title: "KING", artist: "Kanaria" },
+      { seconds: 12, title: "Opening", artist: "待补歌手" },
+      { seconds: 4200, title: "Long Song", artist: "" },
+      { seconds: 353, title: "KING", artist: "Kanaria" },
+    ],
+    songs: [{ seconds: 999, title: "filtered", artist: "artist" }],
+  };
+
+  assert.equal(formatSetlistTime(352), "05:52");
+  assert.deepEqual(
+    normalizeSetlistSongs(item._allSongs, { isUnknownArtistName: (value) => value === "待补歌手" }).map((song) => [
+      song.seconds,
+      song.title,
+      song.artist,
+    ]),
+    [
+      [12, "Opening", ""],
+      [352, "KING", "Kanaria"],
+      [353, "KING", "Kanaria"],
+      [4200, "Long Song", ""],
+    ],
+  );
+  assert.equal(
+    buildSetlistText(item, { isUnknownArtistName: (value) => value === "待补歌手" }),
+    ["00:12 01. Opening", "05:52 02. KING - Kanaria", "05:53 03. KING - Kanaria", "1:10:00 04. Long Song"].join("\n"),
+  );
 });
 
 test("inline source timestamp link points to YouTube watch time", () => {
@@ -275,7 +335,6 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     snapshotPath: "data/snapshots/2026-07-10.json",
     trend: "all",
     minCount: 1,
-    detail: "",
   });
 
   const serialized = serializeUrlState(parsed, options);
@@ -293,13 +352,13 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
   assert.deepEqual(parseUrlState(serialized, options), parsed);
 });
 
-test("url state parses and serializes trend, minCount, and safe detail targets", () => {
+test("url state parses trend and minCount and serializes explicit share links", () => {
   const options = urlStateOptions();
   const parsed = parseUrlState("?trend=up&minCount=5&detail=song%3Atitle%253A%253Aartist", options);
 
   assert.equal(parsed.trend, "up");
   assert.equal(parsed.minCount, 5);
-  assert.equal(parsed.detail, "song:title%3A%3Aartist");
+  assert.equal(Object.hasOwn(parsed, "detail"), false);
 
   const serialized = serializeUrlState(
     {
@@ -316,19 +375,18 @@ test("url state parses and serializes trend, minCount, and safe detail targets",
       snapshotPath: "data/latest.json",
       trend: "up",
       minCount: 5,
-      detail: "song:title%3A%3Aartist",
     },
-    options,
+    { ...options, includeShared: true },
   );
 
   assert.deepEqual(Object.fromEntries(new URLSearchParams(serialized)), {
     trend: "up",
     minCount: "5",
-    detail: "song:title%3A%3Aartist",
+    shared: "1",
   });
   assert.equal(parseUrlState("?trend=sideways&minCount=999&detail=javascript:alert(1)", options).trend, "all");
   assert.equal(parseUrlState("?trend=sideways&minCount=999&detail=javascript:alert(1)", options).minCount, 1);
-  assert.equal(parseUrlState("?detail=javascript:alert(1)", options).detail, "");
+  assert.equal(Object.hasOwn(parseUrlState("?detail=javascript:alert(1)", options), "detail"), false);
 });
 
 test("url state uses showUnknown=1 only when unknown artists are visible", () => {

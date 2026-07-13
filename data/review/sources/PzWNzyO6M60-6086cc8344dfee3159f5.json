@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T15:56:17.872Z",
+  "generatedAt": "2026-07-13T20:02:20.467Z",
   "reviewId": "review:PzWNzyO6M60:6086cc8344dfee3159f5",
   "video": {
     "videoId": "PzWNzyO6M60",
@@ -11,17 +11,17 @@
   "source": {
     "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
     "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "--- 2026.07.11 SET LIST ---\n0:07:47　start\n0:27:23　01.カタオモイ/Aimer\n0:31:13　02.441/miwa\n0:40:07　03.晩餐歌/tuki.\n0:51:24　04.北ウイング/中森明菜\n0:56:17　05.ヒカリへ/miwa\n1:01:30　06.新時代/Ado\n1:08:16　07.正しくなれない/ずっと真夜中で良いのに。\n1:13:29　08.Movin'on without you/宇多田ヒカル\n1:18:31　09.ベテルギウス/優里\n1:25:50　10.宙船/TOKIO\n1:30:44　11.花火/aiko\n1:36:05　12.好きすぎて滅/M!LK\n1:39:52　13.フリージア/Uru\n1:51:44　14.シルシ/LiSA\n1:56:52　15.テレキャスタービーボーイ/すりぃ\n2:00:57　16.Stellar Stellar/星街すいせい\n2:06:33　17.妄想感傷代償連盟/DECO*27\n2:12:52　18.ツキミソウ/Novelbright\n2:18:17　19.創聖のアクエリオン/AKINO\n2:24:29　20.カワキヲアメク/美波\n2:29:16　21.おやすみ泣き声、さよなら歌姫/クリープハイプ\n2:40:37　22.夏の日の1993/Class\n2:45:41　23.Over drive/JUDY AND MARY\n2:50:15　24.猫/DISH//\n2:55:09　25.心という名の不可解/Ado\n3:07:23　26.永遠のあくる日/Ado\n3:11:55　27.Everything/MISIA\n3:22:29　28.ビリーヴ/シェネル\n3:27:44　29.シャルル/バルーン\n3:32:08　30.ダンシング・ヒーロー/荻野目洋子\n3:37:39　31.プロポーズ/9Lana\n3:43:33　32.炎/LiSA\n3:49:48　33.心做し/蝶々P\n3:54:28　34.フレンズ/レベッカ\n3:59:12　35.All Alone With You/EGOIST\n4:05:50　36.夢をかなえてドラえもん/mao\n4:10:19　37.First Love/宇多田ヒカル\n4:15:01　38.Story/AI\n4:20:30　39.かくれんぼ/AliA\n4:26:27　40.ファンサ/HoneyWorks\n4:31:57　41.たばこ/コレサワ\n4:39:38　42.ダダダダ天使/ナナヲアカリ\n4:43:22　end talk(新衣装サムネ公開)",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 38,
-    "riskLevel": "medium",
+    "riskScore": 14,
+    "riskLevel": "low",
     "riskReasons": [
-      "parser_corruption"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -42,31 +42,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 1873,
-      "time": "0:31:13",
-      "title": "441",
-      "artist": "miwa",
-      "raw": "0:31:13　02.441/miwa",
-      "rawHash": "2afdef3077de402726bc5c256cca82d44895a11ea4e01238d69d3b2efc6c84a4",
-      "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
-      "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
-      "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "parser_corruption"
-      ],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -86,8 +62,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -100,14 +75,13 @@
       "rawHash": "7ea4f0934693df1f64f897f2c69872ba337acaf2694ea742dc03c6857c19089d",
       "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
       "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -127,8 +101,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -148,8 +121,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -169,8 +141,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -190,8 +161,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -211,8 +181,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -232,8 +201,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -253,8 +221,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -274,8 +241,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -295,8 +261,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -316,8 +281,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -337,8 +301,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -358,8 +321,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -379,8 +341,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -400,8 +361,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -421,8 +381,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -442,8 +401,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -463,8 +421,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -484,8 +441,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -498,14 +454,13 @@
       "rawHash": "9aa92c157cdd0b7c247eadab0c616dfdf40c599621e5d34ba6932d8da8cd240d",
       "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
       "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -525,8 +480,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -546,8 +500,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -567,8 +520,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -588,8 +540,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -609,8 +560,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -630,8 +580,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -651,8 +600,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -672,8 +620,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -693,8 +640,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -714,8 +660,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -735,8 +680,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -756,8 +700,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -777,8 +720,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -798,8 +740,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -819,8 +760,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -840,8 +780,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -861,8 +800,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -882,8 +820,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -903,8 +840,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -917,31 +853,13 @@
       "rawHash": "3dec449882e54fadffe96d599ba7731c603af38a30635531d299539c11569dcd",
       "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
       "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "obvious_non_song_text",
-      "seconds": 467,
-      "time": "0:07:47",
-      "title": "start",
-      "artist": "",
-      "raw": "0:07:47 start",
-      "rawHash": "4c91a5819aeaf0c9c3d234c291c9e6b663292fb3bf32e247afeb3b24350f72ed",
-      "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
-      "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "obvious_non_song_text"
+        "known_artist"
       ]
     }
   ]

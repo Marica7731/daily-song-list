@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T15:56:17.872Z",
+  "generatedAt": "2026-07-13T20:02:20.467Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-  "totalSongs": 14098,
-  "unknownArtistCount": 2675,
-  "nicheUnknownArtistCount": 1318,
-  "highRiskEntryCount": 410,
-  "highRiskSourceCount": 19,
+  "totalSongs": 14421,
+  "unknownArtistCount": 2703,
+  "nicheUnknownArtistCount": 1323,
+  "highRiskEntryCount": 408,
+  "highRiskSourceCount": 18,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 11,
+  "ruleDroppedEntryCount": 14,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 22,
+  "confirmedNoiseCount": 24,
   "parserCorruptionCount": 20,
-  "likelyNoiseCount": 1,
-  "needsReviewCount": 1309,
-  "likelySongCount": 7967,
+  "likelyNoiseCount": 0,
+  "needsReviewCount": 1320,
+  "likelySongCount": 8085,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -33,12 +33,12 @@
     },
     {
       "value": "少女レイ",
-      "count": 17,
+      "count": 18,
       "classifications": {
-        "likely_song": 17
+        "likely_song": 18
       },
       "riskReasons": {
-        "known_song_unknown_artist": 17
+        "known_song_unknown_artist": 18
       }
     },
     {
@@ -65,12 +65,12 @@
     },
     {
       "value": "青と夏",
-      "count": 9,
+      "count": 10,
       "classifications": {
-        "likely_song": 9
+        "likely_song": 10
       },
       "riskReasons": {
-        "known_song_unknown_artist": 9
+        "known_song_unknown_artist": 10
       }
     },
     {
@@ -81,6 +81,16 @@
       },
       "riskReasons": {
         "known_song_unknown_artist": 8
+      }
+    },
+    {
+      "value": "～",
+      "count": 7,
+      "classifications": {
+        "confirmed_noise": 7
+      },
+      "riskReasons": {
+        "bad_title": 7
       }
     },
     {
@@ -114,6 +124,28 @@
       }
     },
     {
+      "value": "サムライハート",
+      "count": 7,
+      "classifications": {
+        "likely_song": 5,
+        "parser_corruption": 2
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 5,
+        "parser_corruption": 2
+      }
+    },
+    {
+      "value": "ただ君に晴れ",
+      "count": 7,
+      "classifications": {
+        "likely_song": 7
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 7
+      }
+    },
+    {
       "value": "ロミオとシンデレラ",
       "count": 7,
       "classifications": {
@@ -134,16 +166,6 @@
       }
     },
     {
-      "value": "君の知らない物語",
-      "count": 7,
-      "classifications": {
-        "likely_song": 7
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 7
-      }
-    },
-    {
       "value": "アイネクライネ",
       "count": 6,
       "classifications": {
@@ -151,18 +173,6 @@
       },
       "riskReasons": {
         "known_song_unknown_artist": 6
-      }
-    },
-    {
-      "value": "サムライハート",
-      "count": 6,
-      "classifications": {
-        "likely_song": 5,
-        "parser_corruption": 1
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 5,
-        "parser_corruption": 1
       }
     },
     {
@@ -176,7 +186,7 @@
       }
     },
     {
-      "value": "ただ君に晴れ",
+      "value": "怪獣の花唄",
       "count": 6,
       "classifications": {
         "likely_song": 6
@@ -186,7 +196,7 @@
       }
     },
     {
-      "value": "怪獣の花唄",
+      "value": "君の知らない物語",
       "count": 6,
       "classifications": {
         "likely_song": 6
@@ -214,16 +224,6 @@
       "riskReasons": {
         "known_song_unknown_artist": 5
       }
-    },
-    {
-      "value": "ダーリンダンス",
-      "count": 5,
-      "classifications": {
-        "likely_song": 5
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 5
-      }
     }
   ],
   "topRiskChannels": [
@@ -232,24 +232,20 @@
       "count": 8
     },
     {
-      "value": "音魂ヒビクHibiku Otodama",
-      "count": 5
-    },
-    {
-      "value": "Ellise Ch.",
-      "count": 4
-    },
-    {
-      "value": "羽緒",
-      "count": 4
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 8
     },
     {
       "value": "音ノ乃のの / NononoNono",
       "count": 4
     },
     {
-      "value": "汐音ベリーちゃん Berry Ch",
+      "value": "音魂ヒビクHibiku Otodama",
       "count": 4
+    },
+    {
+      "value": "Ellise Ch.",
+      "count": 3
     },
     {
       "value": "Kyoka Ch. -響架-",
@@ -280,15 +276,11 @@
       "count": 3
     },
     {
-      "value": "ゆそる",
-      "count": 3
-    },
-    {
-      "value": "リリーパッドLilypad",
-      "count": 3
-    },
-    {
       "value": "羽月うずな / Hazuki Uzuna",
+      "count": 3
+    },
+    {
+      "value": "羽緒",
       "count": 3
     },
     {
@@ -306,6 +298,14 @@
     {
       "value": "緑仙 / Ryushen",
       "count": 3
+    },
+    {
+      "value": "-sumica-澄花",
+      "count": 2
+    },
+    {
+      "value": "Akane Ch. 七福あかね",
+      "count": 2
     }
   ],
   "topRiskVideos": [
@@ -532,17 +532,6 @@
       ]
     },
     {
-      "videoId": "DuDkasY22Mc",
-      "title": "【 歌枠 / #karaoke 】RADWIMPSさんの曲だけをたんまり歌う会🦉 【羽緒 / RK Music】#羽緒集魂中 #vtuber #vsinger #歌枠",
-      "channelName": "羽緒",
-      "riskScore": 76,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_parser_corruption",
-        "parser_corruption"
-      ]
-    },
-    {
       "videoId": "n6EQoAdmQMA",
       "title": "【朝活/雑談歌枠】初見歓迎✨️150人におはよう目標☀あなたのお姉さんアイドルVtuber🪼💜【天辻ゆらぐ/パレデミア学園】 #新人Vtuber #ゆらぐっどたいむ",
       "channelName": "天辻 ゆらぐ",
@@ -581,10 +570,39 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
+    },
+    {
+      "videoId": "8ddC8VUr0xw",
+      "title": "【夜の弾き語り】ハナレグミ『発光帯』から始まる、生演奏と雑談202607",
+      "channelName": "Akinori IZAWA 『GAIB!!!』",
+      "riskScore": 68,
+      "riskLevel": "medium",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-13T20:02:20.467Z",
+      "totalSongs": 14421,
+      "unknownArtistCount": 2703,
+      "nicheUnknownArtistCount": 1323,
+      "highRiskEntryCount": 408,
+      "highRiskSourceCount": 18
+    },
+    {
+      "generatedAt": "2026-07-13T19:52:00.994Z",
+      "totalSongs": 14421,
+      "unknownArtistCount": 2703,
+      "nicheUnknownArtistCount": 1323,
+      "highRiskEntryCount": 408,
+      "highRiskSourceCount": 18
+    },
     {
       "generatedAt": "2026-07-13T15:56:17.872Z",
       "totalSongs": 14098,
@@ -727,22 +745,6 @@
       "unknownArtistCount": 3107,
       "nicheUnknownArtistCount": 1585,
       "highRiskEntryCount": 440,
-      "highRiskSourceCount": 17
-    },
-    {
-      "generatedAt": "2026-07-12T21:17:02.014Z",
-      "totalSongs": 12854,
-      "unknownArtistCount": 3108,
-      "nicheUnknownArtistCount": 1586,
-      "highRiskEntryCount": 440,
-      "highRiskSourceCount": 17
-    },
-    {
-      "generatedAt": "2026-07-12T20:55:32.920Z",
-      "totalSongs": 12874,
-      "unknownArtistCount": 3126,
-      "nicheUnknownArtistCount": 1604,
-      "highRiskEntryCount": 443,
       "highRiskSourceCount": 17
     }
   ]

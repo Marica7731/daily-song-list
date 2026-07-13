@@ -19,46 +19,11 @@ function assertHasKeys(value, keys, label) {
   }
 }
 
-test("review page exposes one review workflow control set", () => {
-  const html = readText("review.html");
-  const forceKeepLabels = html.match(/强制保留/g) || [];
-
-  assert.ok(forceKeepLabels.length <= 1, "review.html should not duplicate the 强制保留 label");
-  assert.match(html, /id="scopeFilter"/);
-  assert.match(html, /id="classificationFilter"/);
-  assert.match(html, /id="searchBox"/);
-  assert.match(html, /id="prevMatch"/);
-  assert.match(html, /id="nextMatch"/);
-  assert.match(html, /<script src="assets\/review\.js(?:\?v=[^"]+)?"><\/script>/);
-});
-
-test("review frontend loads split queues, current entry index, search shortcuts, and safe actions", () => {
-  const script = readText("assets/review.js");
-
-  assert.match(script, /data\/review\/queue-current\.json/);
-  assert.match(script, /data\/review\/queue-history\.json/);
-  assert.match(script, /data\/review\/current-entry-index\.json/);
-  assert.match(script, /event\.key\.toLowerCase\(\)\s*===\s*"f"/);
-  assert.match(script, /event\.ctrlKey/);
-  assert.match(script, /event\.metaKey/);
-  assert.match(script, /focusGlobalSearch\(\)/);
-  assert.match(script, /force_refresh/);
-  assert.match(script, /sourceQ/);
-  assert.match(script, /filterAccepted/);
-  assert.match(script, /queueScroll/);
-  assert.match(script, /detailScroll/);
-  assert.match(script, /await loadScope\(els\.scopeFilter\.value\)/);
-  assert.match(script, /if \(state\.queuePayloads\[scope\]\) return/);
-  assert.match(script, /scrollSelectedQueueIntoView/);
-  assert.match(script, /function replaceEntryRow/);
-  assert.match(script, /function updateQueueDraftDecorations/);
-  assert.match(script, /row\.replaceWith\(replacement\)/);
-  assert.match(script, /class="row-more"/);
-  assert.match(script, /sourceSearchBox[\s\S]*syncUrl\(\)/);
-  assert.match(script, /filterModified[\s\S]*syncUrl\(\)/);
-  const renderAfterDraftBody = script.match(/function renderAfterDraft\(\) \{([\s\S]*?)\n\}/)?.[1] || "";
-  assert.doesNotMatch(renderAfterDraftBody, /renderQueue\(\)/);
-  assert.doesNotMatch(script, /\b(?:window\.)?prompt\s*\(/);
+test("public review UI files are not shipped", () => {
+  assert.equal(fs.existsSync(path.join(ROOT, "review.html")), false);
+  assert.equal(fs.existsSync(path.join(ROOT, "assets", "review.js")), false);
+  assert.doesNotMatch(readText("scripts/update-asset-version.js"), /review\.html|assets\/review\.js/);
+  assert.doesNotMatch(readText("data/review/all-niche-unknown.md"), /review\.html\?/);
 });
 
 test("review manifest records current and history queue counts", () => {

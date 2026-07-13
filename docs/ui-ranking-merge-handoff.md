@@ -102,15 +102,15 @@ payload.groups[range].items[]
 
 如果新增了更可靠的歌手字段或规范化字段，建议在上述聚合函数里做兼容适配，不要让 UI 直接依赖抓取脚本的临时中间字段。
 
-## 和审核页面的边界
+## 和审核数据的边界
 
-`review.html` 是独立入口，不挂在 `index.html` 的首屏链路上。主页继续只加载 `data/ui/meta.json`、当前 range 的 `data/ui/*.json`、快照索引，以及按需加载的 diff；审核队列、原始评论和人工补丁草稿只由 `assets/review.js` 读取。
+当前不发布公开审核页面。主页继续只加载 `data/ui/meta.json`、当前 range 的 `data/ui/*.json`、快照索引，以及按需加载的 diff；审核队列、原始评论和人工补丁草稿只保留在 `data/review/*`、`data/quality-report.json` 和本地补丁流程中。
 
 如果后续 UI 合并冲突涉及审核功能：
 
 - 不要把 `data/review/*` 加进 `assets/app.js` 的 `init()`。
 - 不要把原始评论、审核队列或 GitHub 凭据写入 `data/ui/*`。
-- `review.html` 导出的补丁仍应通过 `scripts/apply-curation-patch.js` 合并，不从浏览器直写仓库。
+- 人工补丁仍应通过 `scripts/apply-curation-patch.js` 合并，不从浏览器直写仓库。
 
 ## 合并冲突处理建议
 

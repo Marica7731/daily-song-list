@@ -6,7 +6,7 @@ This project separates three things that used to be easy to mix together:
 - durable manual decisions in `config/curation-overrides.json`
 - generated review artifacts in `data/review/*` and `data/quality-report.json`
 
-The homepage runtime stays compact. `index.html` loads `data/ui/*`; `review.html` loads review data only when opened.
+The homepage runtime stays compact. `index.html` loads `data/ui/*`; generated review artifacts remain data files for local/offline tooling and are not exposed through a public review page.
 
 ## Generated Artifacts
 
@@ -58,7 +58,7 @@ Persistent fixes live in `config/curation-overrides.json`:
       "reason": "review_drop_entry",
       "note": "",
       "reviewedAt": "2026-07-12T00:00:00.000Z",
-      "reviewedBy": "review.html"
+      "reviewedBy": "manual-review"
     }
   ]
 }
@@ -74,21 +74,9 @@ Supported actions:
 
 Entry actions must use stable identity: `videoId`, `sourceId` or `sourceHash`, `seconds`, and `rawHash`. `npm run validate` fails on invalid actions, missing `videoId`, invalid `seconds`, and conflicting duplicate rules.
 
-## Review Page
+## Manual Review Data
 
-Run a local server:
-
-```powershell
-npm run serve
-```
-
-Open:
-
-```text
-http://127.0.0.1:8080/review.html
-```
-
-The page supports high/medium/low filtering, the “小众 + 待补歌手” filter, source grouping, full source text when available, per-row actions, source rejection, video drop, import/export, undo, and patch copy. It never contains a GitHub PAT and does not write to the repository directly.
+The public review surface has been removed. Use the generated JSON and Markdown reports under `data/review/*` plus `data/quality-report.json` to inspect suspicious rows, then create a patch or edit `config/curation-overrides.json` locally.
 
 To merge an exported patch:
 
@@ -134,6 +122,6 @@ After a full update, verify:
 - `8.32` and `2.500♪` remain intact while list prefixes such as `01. Song` and `01) Song` are stripped.
 - suspicious sources remain in `data/review/queue.json`.
 - full dirty-candidate exports exist under `data/review/all-niche-unknown.*`, `parser-corruptions.json`, and `confirmed-noise.json`.
-- `review.html` can load source details and export a patch.
+- review data files under `data/review/*` can locate source details by `sourcePath` and `rawHash`.
 - `data/ui/*` contains no raw source text.
 - YouTube timestamp links still use `watch?v=<videoId>&t=<seconds>s`.

@@ -130,7 +130,7 @@ function buildRecord({ rangeId, item, song, lookup, currentEntryLookup = null })
     replacementSuggestion,
     reviewId,
     sourcePath,
-    reviewUrl: reviewUrl(reviewId, rawHash),
+    reviewLocator: reviewLocator(sourcePath, rawHash),
     repairedTitle: repaired.title || "",
     repairedArtist: repaired.artist || "",
     repairReasons: repaired.repair?.reasons || [],
@@ -197,7 +197,7 @@ function recordFromReviewEntry(payload, entry, fileName) {
     replacementSuggestion: entry.replacementSuggestion || null,
     reviewId,
     sourcePath,
-    reviewUrl: reviewUrl(reviewId, entry.rawHash || hashNormalizedText(entry.raw || `${entry.seconds}:${entry.title}:${entry.artist}`)),
+    reviewLocator: reviewLocator(sourcePath, entry.rawHash || hashNormalizedText(entry.raw || `${entry.seconds}:${entry.title}:${entry.artist}`)),
   };
 }
 
@@ -268,11 +268,12 @@ function renderMarkdownReport({ generatedAt, records }) {
       lines.push(`- 视频：${linkOrText(first.videoId, first.youtubeUrl)}`);
       lines.push(`- 频道：${escapeMarkdown(first.channelName || "")}`);
       lines.push("");
-      lines.push("| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核定位 |");
+      lines.push("| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |");
       lines.push("| --- | --- | --- | --- | --- | --- | --- | --- |");
       for (const record of videoRecords.sort(compareRecord)) {
+        const reviewLocator = [record.sourcePath, record.rawHash].filter(Boolean).join("#");
         lines.push(
-          `| ${linkOrText(record.time || formatSeconds(record.seconds), record.youtubeTimestampUrl)} | ${escapeMarkdown(record.title)} | ${escapeMarkdown(record.artist)} | ${record.ranges.join(", ")} | ${record.riskReasons.join(", ")} | ${(record.positiveEvidence || []).join(", ")} | ${record.suggestedAction} | ${linkOrText(record.rawHash || "review", record.reviewUrl)} |`,
+          `| ${linkOrText(record.time || formatSeconds(record.seconds), record.youtubeTimestampUrl)} | ${escapeMarkdown(record.title)} | ${escapeMarkdown(record.artist)} | ${record.ranges.join(", ")} | ${record.riskReasons.join(", ")} | ${(record.positiveEvidence || []).join(", ")} | ${record.suggestedAction} | ${escapeMarkdown(reviewLocator || "review data")} |`,
         );
       }
       lines.push("");
@@ -411,9 +412,8 @@ function buildReplacementSuggestion(original, repaired, classification) {
   return Object.keys(replacement).length ? replacement : null;
 }
 
-function reviewUrl(reviewId, rawHash) {
-  if (!reviewId || !rawHash) return "";
-  return `review.html?review=${encodeURIComponent(reviewId)}&entry=${encodeURIComponent(rawHash)}`;
+function reviewLocator(sourcePath, rawHash) {
+  return [sourcePath, rawHash].filter(Boolean).join("#");
 }
 
 function normalizeKeyText(value) {

@@ -178,6 +178,20 @@ test("repairs cross-field wrappers and dangling artist brackets", () => {
   assert.equal(byTitle.artist, "Ben E.King");
 });
 
+test("strips unpaired trailing close bracket from artist fields", () => {
+  const repaired = repairParsedEntry({
+    time: "1:06:46",
+    seconds: 4006,
+    title: "寄り酔い",
+    artist: "和ぬか」",
+    raw: "1:06:46 🎤7曲目:寄り酔い/和ぬか」",
+  });
+
+  assert.equal(repaired.title, "寄り酔い");
+  assert.equal(repaired.artist, "和ぬか");
+  assert.equal(repaired.repair.reasons.includes("safe_artist_cleanup"), true);
+});
+
 test("exposes curation signals for custom emoji and reaction text", () => {
   for (const title of ["_可愛い:ぷくっ", "_hotsmile", "ぷくっ", "ぷいっっ"]) {
     const signals = entryRepairSignals({ title, artist: "未記載", raw: `0:01 ${title}` });

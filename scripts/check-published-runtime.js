@@ -20,6 +20,17 @@ async function main() {
     errors.push(`status.json unavailable: ${error.message}`);
     return null;
   });
+  if (status) {
+    assert(status.status === "success", `status.json must be success, got ${status.status || "missing"}`);
+    if (status.dataVersion) assert(status.dataVersion === meta.dataVersion, "status.json dataVersion must match meta");
+    if (status.capturedAt) assert(status.capturedAt === meta.capturedAt, "status.json capturedAt must match meta");
+    if (status.dataCapturedAt) assert(status.dataCapturedAt === meta.dataCapturedAt, "status.json dataCapturedAt must match meta");
+  }
+  if (meta.status) {
+    assert(meta.status.status === "success", `meta.status must be success, got ${meta.status.status || "missing"}`);
+    if (meta.status.dataVersion) assert(meta.status.dataVersion === meta.dataVersion, "meta.status dataVersion must match meta");
+    if (meta.status.capturedAt) assert(meta.status.capturedAt === meta.capturedAt, "meta.status capturedAt must match meta");
+  }
 
   for (const rangeId of ["72h", "1m"]) {
     const rangeMeta = meta.ranges?.[rangeId];

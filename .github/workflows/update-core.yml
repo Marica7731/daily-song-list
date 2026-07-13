@@ -3,6 +3,7 @@ name: Update core song-list data
 on:
   schedule:
     - cron: "7 * * * *"
+    - cron: "37 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -10,7 +11,7 @@ permissions:
 
 concurrency:
   group: daily-song-list-core
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   update:
@@ -55,14 +56,21 @@ jobs:
 
       - name: Update compact runtime data
         id: core
+        timeout-minutes: 35
         continue-on-error: true
-        run: npm run update:core
+        env:
+          DAILY_SONG_EVENT_SCHEDULE: ${{ github.event.schedule }}
+        run: node scripts/run-core-update.js
 
-      - name: Keep previous data after core failure
-        if: steps.core.outcome == 'failure'
+      - name: Restore core data after core failure
+        if: always() && steps.core.outcome != 'success'
         env:
           DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
-        run: npm run mark:failure
+          DAILY_SONG_FAILURE_OUTCOME: ${{ steps.core.outcome }}
+        run: |
+          git restore --worktree -- data/latest.json data/72h.json data/1m.json data/audit.json data/video-catalog.json data/song-search-known-songs.json data/snapshots data/diff data/ui
+          git clean -fd -- data/snapshots data/diff data/ui
+          npm run mark:failure
 
       - name: Commit core data or failure status
         if: always()
@@ -85,6 +93,12 @@ jobs:
           echo "::error::Failed to push core data changes after retries."
           exit 1
 
+      - name: Published runtime health check
+        if: steps.core.outcome == 'success'
+        run: |
+          sleep 75
+          npm run check:published -- https://ytb-song-rank.culua.com/
+
       - name: Finish run summary
         if: always()
         run: |
@@ -94,5 +108,5 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Fail when core update failed
-        if: steps.core.outcome == 'failure'
+        if: always() && steps.core.outcome != 'success'
         run: exit 1

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T15:56:17.872Z",
+  "generatedAt": "2026-07-13T20:02:20.467Z",
   "reviewId": "review:PzWNzyO6M60:6086cc8344dfee3159f5",
   "video": {
     "videoId": "PzWNzyO6M60",
@@ -15,13 +15,12 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260713T150000Z"
+    "snapshotId": "20260713T180000Z"
   },
   "risk": {
-    "riskScore": 52,
-    "riskLevel": "medium",
+    "riskScore": 14,
+    "riskLevel": "low",
     "riskReasons": [
-      "parser_corruption",
       "source_multiple_niche_short_titles"
     ]
   },
@@ -41,28 +40,6 @@
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 1873,
-      "time": "0:31:13",
-      "title": "441",
-      "artist": "miwa",
-      "raw": "0:31:13　02.441/miwa",
-      "rawHash": "2afdef3077de402726bc5c256cca82d44895a11ea4e01238d69d3b2efc6c84a4",
-      "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
-      "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
-      "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "parser_corruption"
-      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"

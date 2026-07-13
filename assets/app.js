@@ -19,14 +19,13 @@ const SEARCH_DEBOUNCE_MS = 140;
 const INLINE_SOURCE_PREVIEW_LIMIT = 1;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SOURCE_INITIAL_LIMIT = 3;
-const LIST_PAGE_SIZE_KEY = "dailySongList.pageSize";
+const SOURCE_TIMESTAMP_INITIAL_LIMIT = 10;
+const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 5;
 const LIST_PAGE_SIZE_OPTIONS = [50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
 const VIDEO_PAGE_SIZE = 24;
 const CURRENT_FILTER_VERSION = 3;
 const RECENT_SEARCHES_KEY = "dailySongList.recentSearches";
-const DETAIL_BATCH_SIZE = 20;
-const DETAIL_MAX_KEY_LENGTH = 240;
 const RANK_METRICS = {
   occurrences: "收录次数",
   videos: "不同视频数",
@@ -220,7 +219,6 @@ const state = {
   rankMetric: "occurrences",
   trend: "all",
   minCount: 1,
-  detail: "",
   videoLayout: "cards",
   expandedRows: new Set(),
   filterTimer: null,
@@ -246,10 +244,7 @@ const state = {
   activeOverlay: "",
   overlayTrigger: null,
   filterDraft: null,
-  detailRecord: null,
-  detailSourceLimit: DETAIL_BATCH_SIZE,
-  detailSourceQuery: "",
-  detailTrigger: null,
+  sharedUrlApplied: false,
 };
 
 const els = {
@@ -292,18 +287,6 @@ const els = {
   filterSnapshotDateSelect: document.querySelector("#filterSnapshotDateSelect"),
   filterSnapshotSelect: document.querySelector("#filterSnapshotSelect"),
   mobileBottomNav: document.querySelector("#mobileBottomNav"),
-  detailDialog: document.querySelector("#detailDialog"),
-  detailDrawer: document.querySelector("#detailDialog .detail-drawer"),
-  detailKicker: document.querySelector("#detailKicker"),
-  detailTitle: document.querySelector("#detailTitle"),
-  detailSubtitle: document.querySelector("#detailSubtitle"),
-  detailStats: document.querySelector("#detailStats"),
-  detailSourceSearch: document.querySelector("#detailSourceSearch"),
-  detailSourceCount: document.querySelector("#detailSourceCount"),
-  detailSourceList: document.querySelector("#detailSourceList"),
-  detailMoreButton: document.querySelector("#detailMoreButton"),
-  closeDetailButton: document.querySelector("#closeDetailButton"),
-  shareDetailButton: document.querySelector("#shareDetailButton"),
   backToTop: document.querySelector("#backToTop"),
   toast: document.querySelector("#toast"),
   debugPanel: null,
@@ -418,9 +401,9 @@ async function init() {
   if (requestedSnapshotPath !== SNAPSHOT_LATEST_PATH) {
     await loadSnapshotPath(requestedSnapshotPath, SNAPSHOT_LATEST_PATH);
   } else {
-    syncUrlState();
     scheduleCurrentRankDiffLoad();
     scheduleOtherRangePrefetch();
+    cleanSharedUrlAfterRender();
   }
   perfMeasure("app-init", initMark);
 }
@@ -481,7 +464,6 @@ function bindEvents() {
 
   bindSearchOverlayEvents();
   bindFilterOverlayEvents();
-  bindDetailEvents();
 
   els.summary?.addEventListener("click", async (event) => {
     const copy = event.target.closest("[data-copy-link]");
@@ -508,10 +490,11 @@ function bindEvents() {
   });
 
   els.content.addEventListener("click", (event) => {
-    const detailButton = event.target.closest("[data-open-detail]");
-    if (detailButton) {
+    const copySetlist = event.target.closest("[data-copy-setlist]");
+    if (copySetlist) {
       event.preventDefault();
-      openDetail(detailButton.dataset.detail || "", detailButton);
+      event.stopPropagation();
+      copyVideoSetlist(copySetlist._videoItem).catch((error) => showToast(`复制失败：${error.message}`));
       return;
     }
 
@@ -540,10 +523,9 @@ function bindEvents() {
       const nextPageSize = Number.parseInt(pageSizeButton.dataset.pageSize || "", 10);
       if (LIST_PAGE_SIZE_OPTIONS.includes(nextPageSize) && state.pageSize !== nextPageSize) {
         state.pageSize = nextPageSize;
-        writeStoredPageSize(state.pageSize);
         state.expandedRows.clear();
         resetPagination();
-        render({ focusAfterPageChange: true, urlMode: "push" });
+        render({ focusAfterPageChange: true });
       }
       return;
     }
@@ -581,7 +563,7 @@ function bindEvents() {
     const sourceToggle = event.target.closest("[data-toggle-source]");
     if (sourceToggle) {
       event.preventDefault();
-      openDetail(sourceToggle.dataset.detail || sourceToggle.closest(".rank-row, .index-row")?.dataset.detail || "", sourceToggle);
+      toggleSourceDrawer(sourceToggle.closest(".rank-row, .index-row"));
     }
   });
 
@@ -591,7 +573,32 @@ function bindEvents() {
     event.preventDefault();
     const page = Number.parseInt(input.value || "1", 10);
     setPage(page);
-    render({ focusAfterPageChange: true, urlMode: "push" });
+    render({ focusAfterPageChange: true });
+  });
+
+  els.content.addEventListener("click", (event) => {
+    const jump = event.target.closest("[data-jump-page-button]");
+    if (jump) {
+      event.preventDefault();
+      const input = jump.closest(".page-jump")?.querySelector("[data-jump-page]");
+      const page = Number.parseInt(input?.value || "1", 10);
+      setPage(page);
+      render({ focusAfterPageChange: true });
+      return;
+    }
+
+    const sourceTimes = event.target.closest("[data-toggle-source-times]");
+    if (sourceTimes) {
+      event.preventDefault();
+      expandSourceGroupTimestamps(sourceTimes);
+      return;
+    }
+
+    const sourceGroups = event.target.closest("[data-toggle-source-groups]");
+    if (sourceGroups) {
+      event.preventDefault();
+      expandSourceVideoGroups(sourceGroups);
+    }
   });
 
   window.addEventListener("popstate", () => {
@@ -608,7 +615,6 @@ function switchView(nextView, options = {}) {
   storeViewPosition();
   state.view = nextView;
   state.expandedRows.clear();
-  state.detail = "";
   resetPagination();
   syncControlsFromState();
   renderOrSyncUrl({ urlMode: options.urlMode || "push" });
@@ -668,37 +674,14 @@ function bindFilterOverlayEvents() {
   });
 }
 
-function bindDetailEvents() {
-  els.closeDetailButton?.addEventListener("click", () => closeDetail({ urlMode: "push" }));
-  els.detailDialog?.querySelector("[data-close-overlay='detail']")?.addEventListener("click", () => closeDetail({ urlMode: "push" }));
-  els.detailSourceSearch?.addEventListener("input", () => {
-    state.detailSourceQuery = els.detailSourceSearch.value.trim();
-    state.detailSourceLimit = DETAIL_BATCH_SIZE;
-    renderDetailSources();
-  });
-  els.detailMoreButton?.addEventListener("click", () => {
-    state.detailSourceLimit += DETAIL_BATCH_SIZE;
-    renderDetailSources();
-  });
-  els.shareDetailButton?.addEventListener("click", () => {
-    shareCurrentLink({ label: "详情链接" });
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      if (state.activeOverlay) {
-        event.preventDefault();
-        closeOverlay(state.activeOverlay);
-        return;
-      }
-      if (state.detail) {
-        event.preventDefault();
-        closeDetail({ urlMode: "push" });
-        return;
-      }
-    }
-    if (event.key === "Tab") trapModalFocus(event);
-  });
-}
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.activeOverlay) {
+    event.preventDefault();
+    closeOverlay(state.activeOverlay);
+    return;
+  }
+  if (event.key === "Tab") trapModalFocus(event);
+});
 
 function openSearchOverlay(trigger) {
   state.overlayTrigger = trigger || document.activeElement;
@@ -734,7 +717,7 @@ function closeOverlay(kind) {
   setDialogOpen(overlay === "search" ? els.searchDialog : els.filterDialog, false);
   state.activeOverlay = "";
   state.filterDraft = null;
-  setPageInert(Boolean(state.detail));
+  setPageInert(false);
   const trigger = state.overlayTrigger;
   state.overlayTrigger = null;
   if (trigger && document.contains(trigger)) focusWithoutScrolling(trigger);
@@ -743,7 +726,7 @@ function closeOverlay(kind) {
 function setDialogOpen(dialog, isOpen) {
   if (!dialog) return;
   dialog.hidden = !isOpen;
-  document.body.classList.toggle("is-modal-open", isOpen || Boolean(state.detail));
+  document.body.classList.toggle("is-modal-open", isOpen);
 }
 
 function setPageInert(isInert) {
@@ -757,7 +740,6 @@ function setPageInert(isInert) {
 function activeModalElement() {
   if (state.activeOverlay === "search") return els.searchDialog;
   if (state.activeOverlay === "filter") return els.filterDialog;
-  if (state.detail) return els.detailDialog;
   return null;
 }
 
@@ -785,7 +767,6 @@ function applySearchFromOverlay(value) {
   if (els.filterInput) els.filterInput.value = next;
   if (next) writeRecentSearches([next, ...readRecentSearches().filter((item) => item !== next)].slice(0, 10));
   state.expandedRows.clear();
-  state.detail = "";
   resetPagination();
   advanceRenderRevision();
   closeOverlay("search");
@@ -1019,8 +1000,6 @@ async function applyFilterDraft() {
   state.trend = draft.trend;
   state.minCount = draft.minCount;
   state.pageSize = draft.pageSize;
-  state.detail = "";
-  writeStoredPageSize(state.pageSize);
   state.expandedRows.clear();
   resetPagination();
   syncControlsFromState();
@@ -1126,210 +1105,8 @@ function updateViewportVars() {
   document.documentElement.style.setProperty("--visual-viewport-offset-top", `${Math.round(viewport.offsetTop)}px`);
 }
 
-function detailParam(type, key) {
-  const safeType = type === "artist" ? "artist" : "song";
-  const rawKey = String(key || "").slice(0, DETAIL_MAX_KEY_LENGTH);
-  return rawKey ? `${safeType}:${encodeURIComponent(rawKey)}` : "";
-}
-
-function parseDetailTarget(value = state.detail) {
-  const raw = String(value || "");
-  const separator = raw.indexOf(":");
-  if (separator <= 0) return null;
-  const type = raw.slice(0, separator);
-  if (type !== "song" && type !== "artist") return null;
-  try {
-    const key = decodeURIComponent(raw.slice(separator + 1));
-    if (!key || key.length > DETAIL_MAX_KEY_LENGTH) return null;
-    return { type, key };
-  } catch {
-    return null;
-  }
-}
-
-function openDetail(detail, trigger) {
-  if (!detail) return;
-  const target = parseDetailTarget(detail);
-  if (!target) return;
-  state.detail = detailParam(target.type, target.key);
-  state.detailTrigger = trigger || document.activeElement;
-  const row = trigger?.closest?.(".rank-row, .index-row");
-  state.detailRecord = row?.dataset.detail === state.detail ? row._detailRecord || null : null;
-  state.detailSourceLimit = DETAIL_BATCH_SIZE;
-  state.detailSourceQuery = "";
-  if (els.detailSourceSearch) els.detailSourceSearch.value = "";
-  syncUrlState("push");
-  measureSync("open-detail", () => syncDetailFromState({ focus: true }));
-}
-
-function closeDetail(options = {}) {
-  if (!state.detail && els.detailDialog?.hidden) return;
-  state.detail = "";
-  state.detailRecord = null;
-  state.detailSourceQuery = "";
-  state.detailSourceLimit = DETAIL_BATCH_SIZE;
-  if (els.detailDialog) els.detailDialog.hidden = true;
-  document.body.classList.toggle("is-modal-open", Boolean(state.activeOverlay));
-  setPageInert(Boolean(state.activeOverlay));
-  applySelectedDetailRow();
-  if (options.syncUrl !== false) syncUrlState(options.urlMode || "replace");
-  const trigger = state.detailTrigger;
-  state.detailTrigger = null;
-  if (trigger && document.contains(trigger)) focusWithoutScrolling(trigger);
-}
-
-function syncDetailFromState(options = {}) {
-  if (!state.detail) {
-    if (els.detailDialog) els.detailDialog.hidden = true;
-    applySelectedDetailRow();
-    return;
-  }
-  const cachedDetail =
-    state.detailRecord && detailParam(state.detailRecord.type, state.detailRecord.record?.key) === state.detail
-      ? state.detailRecord
-      : null;
-  const detail = cachedDetail || resolveDetailRecord(state.detail);
-  if (!detail) {
-    const missing = state.detail;
-    state.detail = "";
-    syncUrlState("replace");
-    showToast(`详情记录不存在：${missing}`);
-    if (els.detailDialog) els.detailDialog.hidden = true;
-    applySelectedDetailRow();
-    return;
-  }
-  state.detailRecord = detail;
-  renderDetailHeader(detail);
-  renderDetailSources();
-  if (els.detailDialog) els.detailDialog.hidden = false;
-  document.body.classList.add("is-modal-open");
-  setPageInert(true);
-  applySelectedDetailRow();
-  if (options.focus) {
-    window.requestAnimationFrame(() => focusWithoutScrolling(els.detailDrawer || els.detailDialog));
-  }
-}
-
-function resolveDetailRecord(detailValue) {
-  if (!state.payload) return null;
-  const target = parseDetailTarget(detailValue);
-  if (!target) return null;
-  const rangeCache = getRangeCache(currentGroup());
-  if (target.type === "artist") {
-    const record = rangeCache.allArtistRecords.find((item) => item.key === target.key);
-    return record ? { type: "artist", record, title: record.name, subtitle: artistSongPreview(record).join("、"), occurrences: record.occurrences } : null;
-  }
-  const record = rangeCache.allSongRecords.find((item) => item.key === target.key);
-  return record ? { type: "song", record, title: record.title, subtitle: songMeta(record).primary, occurrences: record.occurrences } : null;
-}
-
-function renderDetailHeader(detail) {
-  if (!detail) return;
-  const occurrences = detail.occurrences || [];
-  if (els.detailKicker) els.detailKicker.textContent = detail.type === "artist" ? "歌手详情" : "歌曲详情";
-  if (els.detailTitle) els.detailTitle.textContent = detail.title;
-  if (els.detailSubtitle) els.detailSubtitle.textContent = detail.subtitle || "";
-  if (!els.detailStats) return;
-  els.detailStats.replaceChildren();
-  const stats = [
-    `${occurrences.length}次`,
-    `${uniqueVideoCount(occurrences)}个视频`,
-    isNicheRecord(detail.record) ? "小众" : "",
-  ].filter(Boolean);
-  for (const item of stats) {
-    const chip = document.createElement("span");
-    chip.textContent = item;
-    els.detailStats.append(chip);
-  }
-}
-
-function renderDetailSources() {
-  const detail = state.detailRecord;
-  if (!detail || !els.detailSourceList) return;
-  const queryKey = normalizeSearch(state.detailSourceQuery);
-  const allSources = detail.occurrences || [];
-  const filtered = queryKey
-    ? allSources.filter((occurrence) =>
-        normalizeSearch([
-          occurrence?.song?.time,
-          occurrence?.item?.channelName,
-          occurrence?.item?.title,
-          occurrence?.item?.videoId,
-        ].join(" ")).includes(queryKey),
-      )
-    : allSources;
-  const visible = filtered.slice(0, state.detailSourceLimit);
-  els.detailSourceList.replaceChildren();
-  for (const group of groupOccurrencesByVideo(visible)) {
-    const section = document.createElement("section");
-    section.className = "detail-source-group";
-    const header = document.createElement("h3");
-    header.textContent = group.title;
-    section.append(header);
-    for (const occurrence of group.occurrences) {
-      section.append(renderDetailSourceLink(occurrence));
-    }
-    els.detailSourceList.append(section);
-  }
-  if (els.detailSourceCount) {
-    els.detailSourceCount.textContent = `${filtered.length} 个来源${filtered.length !== allSources.length ? ` / 全部 ${allSources.length}` : ""}`;
-  }
-  if (els.detailMoreButton) {
-    els.detailMoreButton.hidden = filtered.length <= state.detailSourceLimit;
-    els.detailMoreButton.textContent = `显示更多${Math.min(DETAIL_BATCH_SIZE, Math.max(0, filtered.length - state.detailSourceLimit))}条`;
-  }
-}
-
-function groupOccurrencesByVideo(occurrences) {
-  const map = new Map();
-  for (const occurrence of occurrences) {
-    const item = occurrence.item || {};
-    const key = item.videoId || item.title || "unknown";
-    if (!map.has(key)) {
-      map.set(key, {
-        title: item.title || item.channelName || item.videoId || "来源视频",
-        occurrences: [],
-      });
-    }
-    map.get(key).occurrences.push(occurrence);
-  }
-  return Array.from(map.values());
-}
-
-function renderDetailSourceLink(occurrence) {
-  const item = occurrence.item || {};
-  const song = occurrence.song || {};
-  const link = document.createElement("a");
-  link.className = "detail-source-link";
-  link.href = youtubeTimeUrl(item.videoId, song.seconds);
-  link.target = "_blank";
-  link.rel = "noreferrer";
-
-  const time = document.createElement("span");
-  time.className = "time";
-  time.textContent = song.time || formatSeconds(song.seconds);
-
-  const channel = document.createElement("span");
-  channel.className = "detail-source-channel";
-  channel.textContent = item.channelName || "未知频道";
-
-  const action = document.createElement("span");
-  action.className = "detail-source-action";
-  action.textContent = "打开时间戳";
-
-  link.append(time, channel, action);
-  return link;
-}
-
-function applySelectedDetailRow() {
-  for (const row of els.content?.querySelectorAll("[data-detail]") || []) {
-    row.classList.toggle("is-detail-active", Boolean(state.detail && row.dataset.detail === state.detail));
-  }
-}
-
 async function shareCurrentLink(options = {}) {
-  syncUrlState("replace");
-  const href = window.location.href;
+  const href = buildShareUrl();
   const title = options.label || "当前榜单链接";
   if (navigator.share) {
     try {
@@ -1340,7 +1117,7 @@ async function shareCurrentLink(options = {}) {
     }
   }
   try {
-    await navigator.clipboard?.writeText(href);
+    await writeClipboardText(href);
     showToast(`已复制${title}`);
   } catch {
     showToast(href);
@@ -1355,10 +1132,28 @@ function setActiveTab(tabs, activeTab) {
 }
 
 function applyInitialUrlState() {
-  const defaults = {
-    ...defaultUrlState(),
-    pageSize: readStoredPageSize(),
-  };
+  const defaults = defaultUrlState();
+  const urlParams = new URLSearchParams(window.location.search);
+  const shouldApplySharedState = urlParams.get("shared") === "1";
+  if (!shouldApplySharedState) {
+    Object.assign(state, {
+      range: defaults.range,
+      view: defaults.view,
+      page: defaults.page,
+      pageSize: defaults.pageSize,
+      indexBucket: defaults.bucket,
+      rankMetric: defaults.rankMetric,
+      trend: defaults.trend,
+      minCount: defaults.minCount,
+      videoLayout: defaults.videoLayout,
+      nicheOnly: defaults.outside,
+      hideUnknownArtist: !defaults.showUnknown,
+      filter: defaults.q,
+      currentSnapshotPath: SNAPSHOT_LATEST_PATH,
+    });
+    state.sharedUrlApplied = false;
+    return;
+  }
   const parsed = window.FrontendUtils.parseUrlState(window.location.search, {
     defaults,
     validRanges: Object.keys(RANGE_LABELS),
@@ -1380,13 +1175,12 @@ function applyInitialUrlState() {
   state.rankMetric = parsed.rankMetric;
   state.trend = parsed.trend;
   state.minCount = parsed.minCount;
-  state.detail = parsed.detail;
   state.videoLayout = parsed.videoLayout;
   state.nicheOnly = parsed.outside;
   state.hideUnknownArtist = !parsed.showUnknown;
   state.filter = parsed.q;
   state.currentSnapshotPath = parsed.snapshotPath;
-  writeStoredPageSize(state.pageSize);
+  state.sharedUrlApplied = true;
 }
 
 function syncControlsFromState() {
@@ -1400,36 +1194,42 @@ function syncControlsFromState() {
   syncFilterButtonCount();
 }
 
-function syncUrlState(mode = "replace") {
-  if (!window.history?.replaceState) return;
+function syncUrlState() {
+  return;
+}
+
+function buildShareUrl(sourceState = state) {
   const query = window.FrontendUtils.serializeUrlState(
     {
-      range: state.range,
-      view: state.view,
-      page: state.page,
-      pageSize: state.pageSize,
-      bucket: state.indexBucket,
-      rankMetric: state.rankMetric,
-      trend: state.trend,
-      minCount: state.minCount,
-      videoLayout: state.videoLayout,
-      outside: state.nicheOnly,
-      showUnknown: !state.hideUnknownArtist,
-      q: state.filter,
-      snapshotPath: state.currentSnapshotPath,
-      detail: state.detail,
+      range: sourceState.range,
+      view: sourceState.view,
+      page: sourceState.page,
+      pageSize: sourceState.pageSize,
+      bucket: sourceState.indexBucket,
+      rankMetric: sourceState.rankMetric,
+      trend: sourceState.trend,
+      minCount: sourceState.minCount,
+      videoLayout: sourceState.videoLayout,
+      outside: sourceState.nicheOnly,
+      showUnknown: !sourceState.hideUnknownArtist,
+      q: sourceState.filter,
+      snapshotPath: sourceState.currentSnapshotPath,
     },
     {
       defaults: defaultUrlState(),
       latestSnapshotPath: SNAPSHOT_LATEST_PATH,
       snapshots: state.snapshots,
+      includeShared: true,
     },
   );
-  const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || ""}`;
-  const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash || ""}`;
-  if (nextUrl === currentUrl) return;
-  const method = mode === "push" && window.history.pushState ? "pushState" : "replaceState";
-  window.history[method]({ dailySongList: true }, "", nextUrl);
+  return `${window.location.origin}${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || ""}`;
+}
+
+function cleanSharedUrlAfterRender() {
+  if (!state.sharedUrlApplied || !window.history?.replaceState) return;
+  const cleanUrl = `${window.location.pathname}${window.location.hash || ""}`;
+  window.history.replaceState({ dailySongList: true }, "", cleanUrl);
+  state.sharedUrlApplied = false;
 }
 
 function renderOrSyncUrl(options = {}) {
@@ -1454,21 +1254,15 @@ function defaultUrlState() {
     outside: false,
     showUnknown: false,
     q: "",
-    detail: "",
   };
 }
 
 async function restoreStateFromUrl() {
   const previousPath = state.currentSnapshotPath;
   const previousListKey = listStateKey();
-  const previousDetail = state.detail;
   applyInitialUrlState();
   syncControlsFromState();
   state.expandedRows.clear();
-  if (previousPath === state.currentSnapshotPath && previousListKey === listStateKey() && previousDetail !== state.detail) {
-    syncDetailFromState({ focus: Boolean(state.detail) });
-    return;
-  }
   if (state.currentSnapshotPath !== previousPath) {
     if (state.currentSnapshotPath === SNAPSHOT_LATEST_PATH) {
       const rangePayload = await loadRuntimeRange(state.range);
@@ -1506,24 +1300,6 @@ function listStateKey() {
     state.hideUnknownArtist ? "hide" : "show",
     state.filter,
   ].join("::");
-}
-
-function readStoredPageSize() {
-  try {
-    const value = Number.parseInt(window.localStorage?.getItem(LIST_PAGE_SIZE_KEY) || "", 10);
-    return LIST_PAGE_SIZE_OPTIONS.includes(value) ? value : DEFAULT_LIST_PAGE_SIZE;
-  } catch {
-    return DEFAULT_LIST_PAGE_SIZE;
-  }
-}
-
-function writeStoredPageSize(pageSize) {
-  if (!LIST_PAGE_SIZE_OPTIONS.includes(pageSize)) return;
-  try {
-    window.localStorage?.setItem(LIST_PAGE_SIZE_KEY, String(pageSize));
-  } catch {
-    // localStorage can be unavailable in restricted browser modes.
-  }
 }
 
 function resetPagination() {
@@ -2251,7 +2027,7 @@ function render(options = {}) {
   if (options.focusAfterPageChange) schedulePageChangeFocus();
   syncFilterButtonCount();
   updateFilterAvailability();
-  syncDetailFromState({ focus: false });
+  cleanSharedUrlAfterRender();
   updateBackToTopVisibility();
   if (!state.firstContentMeasured) {
     state.firstContentMeasured = true;
@@ -2632,7 +2408,6 @@ function renderSongRank(group, rangeCache, selection) {
       renderRankRecord({
         mode: "song",
         key: `song-${record.key}`,
-        detail: detailParam("song", record.key),
         rank: ranks.get(record.key),
         isTied: countFrequencies.get(rankValue(record)) > 1,
         title: record.title,
@@ -2683,7 +2458,6 @@ function renderArtistRank(group, rangeCache, selection) {
       renderRankRecord({
         mode: "artist",
         key: `artist-${record.key}`,
-        detail: detailParam("artist", record.key),
         rank: ranks.get(record.key),
         isTied: countFrequencies.get(rankValue(record)) > 1,
         title: record.name,
@@ -2968,6 +2742,7 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
     controls.append(
       renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1),
       renderPageStatus(pageInfo, { compact: true }),
+      renderPageJumpControl(pageInfo),
       renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount),
     );
     footer.append(controls);
@@ -3063,7 +2838,12 @@ function renderPageJumpControl(pageInfo) {
   input.setAttribute("aria-label", `跳转到第几页，范围 1 到 ${pageInfo.pageCount}`);
   const suffix = document.createElement("span");
   suffix.textContent = "页";
-  label.append(text, input, suffix);
+  const button = document.createElement("button");
+  button.className = "pagination-button page-jump-button";
+  button.type = "button";
+  button.dataset.jumpPageButton = "true";
+  button.textContent = "跳转";
+  label.append(text, input, suffix, button);
   return label;
 }
 
@@ -3117,6 +2897,10 @@ function controlsHeightPx() {
 
 function prefersReducedMotion() {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
+}
+
+function isMobileViewport() {
+  return window.matchMedia?.("(max-width: 720px)")?.matches === true;
 }
 
 function emptyMessage(defaultMessage, searchMessage, nicheMessage) {
@@ -3180,8 +2964,10 @@ function buildVideoViewItems(items, options = {}) {
         (!hideUnknownArtists || !window.RankingUtils.isUnknownArtistName(song?.artist)),
     );
     if (!sourceSongs.length) continue;
+    const originalSongs = item._allSongs || item.songs || [];
+    const sourceItem = item._sourceItem || item;
     if (!normalizedFilter) {
-      result.push({ ...item, songs: sourceSongs, _displaySongs: sourceSongs, _songSearchMatchCount: 0 });
+      result.push({ ...item, songs: sourceSongs, _displaySongs: sourceSongs, _allSongs: originalSongs, _sourceItem: sourceItem, _songSearchMatchCount: 0 });
       continue;
     }
 
@@ -3197,6 +2983,8 @@ function buildVideoViewItems(items, options = {}) {
       ...item,
       songs: sourceSongs,
       _displaySongs: displaySongs,
+      _allSongs: originalSongs,
+      _sourceItem: sourceItem,
       _songSearchMatchCount: matchedSongs.length,
       _videoSearchMatched: videoMatched,
     });
@@ -3350,7 +3138,6 @@ function formatCountEntry(entry) {
 function renderRankRecord({
   mode = "song",
   key,
-  detail = "",
   rank,
   isTied,
   title,
@@ -3387,18 +3174,10 @@ function renderRankRecord({
     .join(" ");
   row.dataset.rowKey = rowKey;
   row.dataset.drawerMode = mode;
-  row.dataset.detail = detail;
   row._sourceOccurrences = occurrences;
   row._artistSongGroups = songGroups.length ? songGroups : null;
   row._getArtistSongGroups = getSongGroups;
   row._artistSongCount = artistSongCount;
-  row._detailRecord = {
-    type: mode === "artist" ? "artist" : "song",
-    record,
-    title,
-    subtitle: mode === "artist" ? (songPreview || []).slice(0, 2).join("、") : meta.primary,
-    occurrences,
-  };
   if (isTied) row.title = "同收录次数共享名次";
 
   const rankNumber = document.createElement("div");
@@ -3407,8 +3186,9 @@ function renderRankRecord({
   rankNumber.setAttribute("aria-label", `第 ${rank} 名`);
   row.append(rankNumber);
 
-  row.append(renderRecordContent(title, meta, { mode, detail, occurrences, songGroups, songCount, songPreview, drawerId, isExpanded, videoCount, trend }));
-  row.append(renderCount(count, countUnit, trend));
+  row.append(renderRecordContent(title, meta, { mode, occurrences, songGroups, songCount, songPreview, drawerId, isExpanded, videoCount, trend }));
+  row.append(renderTrend(trend));
+  row.append(renderCount(count, countUnit));
   if (expandable) row.append(renderSourceDrawer({ mode, occurrences, songGroups, drawerId, isExpanded, getSongGroups }));
 
   return row;
@@ -3424,23 +3204,13 @@ function renderIndexRecord(record) {
   row.className = ["index-row", expandable ? "is-expandable" : "", isExpanded ? "is-expanded" : "", isNicheRecord(record) ? "is-niche" : ""]
     .filter(Boolean)
     .join(" ");
-  const detail = detailParam("song", record.key);
   row.dataset.rowKey = rowKey;
   row.dataset.drawerMode = "index";
-  row.dataset.detail = detail;
   row._sourceOccurrences = record.occurrences;
-  row._detailRecord = {
-    type: "song",
-    record,
-    title: record.title,
-    subtitle: songMeta(record).primary,
-    occurrences: record.occurrences,
-  };
 
   row.append(
     renderRecordContent(record.title, songMeta(record), {
       mode: "index",
-      detail,
       occurrences: record.occurrences,
       drawerId,
       isExpanded,
@@ -3460,7 +3230,7 @@ function renderRankHeader(mode = "song") {
 
   const contentLabel = mode === "artist" ? "歌手与曲目" : "歌曲与来源";
   const countLabel = state.rankMetric === "videos" ? "视频" : "收录";
-  for (const label of ["排名", contentLabel, countLabel]) {
+  for (const label of ["排名", contentLabel, "趋势", countLabel]) {
     const item = document.createElement("span");
     item.textContent = label;
     header.append(item);
@@ -3472,7 +3242,6 @@ function renderRankHeader(mode = "song") {
 function renderRecordContent(title, meta, options) {
   const {
     mode = "song",
-    detail = "",
     occurrences,
     songGroups = [],
     songCount = songGroups.length,
@@ -3488,37 +3257,35 @@ function renderRecordContent(title, meta, options) {
 
   const heading = document.createElement(`h${headingLevel}`);
   heading.className = "rank-title";
-  const titleButton = document.createElement("button");
-  titleButton.className = "rank-title-button";
-  titleButton.type = "button";
-  titleButton.dataset.openDetail = "true";
-  titleButton.dataset.detail = detail;
-  titleButton.setAttribute("aria-label", mode === "artist" ? `打开歌手详情：${title}` : `打开歌曲详情：${title}`);
-  titleButton.append(document.createTextNode(title));
+  heading.append(document.createTextNode(title));
   for (const badgeText of meta.badges || []) {
     const badge = document.createElement("span");
     badge.className = "song-badge niche-badge";
     badge.textContent = badgeText;
-    titleButton.append(" ", badge);
+    heading.append(" ", badge);
   }
-  heading.append(titleButton);
   content.append(heading);
 
   const subline = document.createElement("div");
   subline.className = "rank-subline";
   if (mode === "artist") {
-    appendArtistSubline(subline, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount, detail });
+    appendArtistSubline(subline, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount });
   } else {
     appendSublinePart(subline, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(subline, `${videoCount} 个视频`, "subline-video-count");
-    appendSublineSource(subline, { mode, occurrences, drawerId, isExpanded, detail });
+    appendSublineSource(subline, { mode, occurrences, drawerId, isExpanded });
+  }
+  const inlineTrend = renderTrendBadge(trend);
+  if (inlineTrend) {
+    inlineTrend.classList.add("rank-trend-inline");
+    appendSublineNode(subline, inlineTrend);
   }
   content.append(subline);
 
   return content;
 }
 
-function appendArtistSubline(container, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount, detail }) {
+function appendArtistSubline(container, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount }) {
   appendSublinePart(container, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
   appendSublinePart(container, `${songCount} 首歌曲`, "subline-song-count");
   appendSublinePart(container, `${videoCount} 个视频`, "subline-video-count");
@@ -3527,7 +3294,7 @@ function appendArtistSubline(container, { occurrences, songCount, songPreview, d
   }
 
   if (songCount > 1 || occurrences.length > 1) {
-    const button = renderSourceToggleButton({ mode: "artist", drawerId, isExpanded, songCount, detail });
+    const button = renderSourceToggleButton({ mode: "artist", drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount });
     appendSublineNode(container, button);
   }
 }
@@ -3546,18 +3313,29 @@ function appendSublinePart(container, text, className = "") {
   container.append(part);
 }
 
-function renderCount(count, unit = "次", trend = null) {
+function renderCount(count, unit = "次") {
   const node = document.createElement("div");
   node.className = count > 1 ? "rank-count is-strong" : "rank-count";
   const value = document.createElement("span");
   value.className = "rank-count-value";
   value.textContent = `${count}${unit}`;
   node.append(value);
-  if (trend) node.append(renderTrendBadge(trend));
   return node;
 }
 
-function appendSublineSource(container, { mode, occurrences, drawerId, isExpanded, detail }) {
+function renderTrend(trend) {
+  const node = document.createElement("div");
+  node.className = "rank-trend";
+  const badge = renderTrendBadge(trend);
+  if (badge) {
+    node.append(badge);
+  } else {
+    node.setAttribute("aria-hidden", "true");
+  }
+  return node;
+}
+
+function appendSublineSource(container, { mode, occurrences, drawerId, isExpanded }) {
   if (!occurrences.length) {
     appendSublinePart(container, "无来源");
     return;
@@ -3570,13 +3348,15 @@ function appendSublineSource(container, { mode, occurrences, drawerId, isExpande
   const sourcePreview = window.FrontendUtils.buildSourcePreview(occurrences, {
     limit: INLINE_SOURCE_PREVIEW_LIMIT,
   });
+  const groupedSources = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   const button = renderSourceToggleButton({
     mode,
     drawerId,
     isExpanded,
     hiddenCount: sourcePreview.hiddenCount,
     total: sourcePreview.total,
-    detail,
+    videoCount: groupedSources.length,
+    occurrenceCount: occurrences.length,
   });
   const sourceLine = document.createElement("span");
   sourceLine.className = "source-line";
@@ -3584,17 +3364,27 @@ function appendSublineSource(container, { mode, occurrences, drawerId, isExpande
   appendSublineNode(container, sourceLine);
 }
 
-function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0, total = 0, songCount = 0, detail = "" }) {
-  const model = window.FrontendUtils.rankToggleModel({ mode, isExpanded, hiddenCount, total, songCount });
+function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0, total = 0, songCount = 0, videoCount = 0, occurrenceCount = 0 }) {
+  const model = window.FrontendUtils.rankToggleModel({
+    mode,
+    isExpanded,
+    hiddenCount,
+    total,
+    songCount,
+    videoCount,
+    occurrenceCount,
+    compact: isMobileViewport(),
+  });
   const button = document.createElement("button");
   button.className = "rank-expand";
   button.type = "button";
   button.dataset.toggleSource = "true";
-  button.dataset.detail = detail;
   button.dataset.sourceMode = mode;
   button.dataset.sourceTotal = String(total);
   button.dataset.sourceHiddenCount = String(hiddenCount);
   button.dataset.songCount = String(songCount);
+  button.dataset.videoCount = String(videoCount);
+  button.dataset.occurrenceCount = String(occurrenceCount || total);
   button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
   button.setAttribute("aria-controls", drawerId);
   button.setAttribute("aria-label", model.ariaLabel);
@@ -3685,28 +3475,119 @@ function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] 
 }
 
 function appendSourceDrawerLinks(drawer, occurrences) {
-  for (const occurrence of occurrences) {
-    const link = document.createElement("a");
-    link.className = "source-link";
-    link.href = youtubeTimeUrl(occurrence.item.videoId, occurrence.song.seconds);
-    link.target = "_blank";
-    link.rel = "noreferrer";
+  drawer._sourceOccurrences = occurrences;
+  const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  const showAllGroups = drawer.dataset.videoGroupsExpanded === "true" || !isMobileViewport();
+  const visibleGroups = showAllGroups ? groups : groups.slice(0, SOURCE_MOBILE_GROUP_INITIAL_LIMIT);
 
-    const time = document.createElement("span");
-    time.className = "time";
-    time.textContent = occurrence.song.time || formatSeconds(occurrence.song.seconds);
-
-    const source = document.createElement("span");
-    source.className = "source-name";
-    source.textContent = occurrence.item.channelName || occurrence.item.title || occurrence.item.videoId;
-
-    const video = document.createElement("span");
-    video.className = "source-video";
-    video.textContent = occurrence.item.title || occurrence.item.videoId;
-
-    link.append(time, source, video);
-    drawer.append(link);
+  for (const group of visibleGroups) {
+    drawer.append(renderSourceVideoGroup(group));
   }
+
+  if (groups.length > visibleGroups.length) {
+    const more = document.createElement("button");
+    more.className = "source-group-more";
+    more.type = "button";
+    more.dataset.toggleSourceGroups = "true";
+    more.textContent = `显示其余 ${groups.length - visibleGroups.length} 个视频`;
+    drawer.append(more);
+  }
+}
+
+function renderSourceVideoGroup(group) {
+  const section = document.createElement("section");
+  section.className = "source-video-group";
+
+  const header = document.createElement("div");
+  header.className = "source-video-header";
+
+  const titleWrap = document.createElement("div");
+  titleWrap.className = "source-video-title-wrap";
+  const title = document.createElement("a");
+  title.className = "source-video-title";
+  title.href = youtubeTimeUrl(group.item?.videoId || group.videoId, group.firstSeconds || 0);
+  title.target = "_blank";
+  title.rel = "noreferrer";
+  title.textContent = group.title || group.videoId || "来源视频";
+  title.setAttribute("aria-label", `打开来源视频：${title.textContent}`);
+  titleWrap.append(title);
+
+  const channel = document.createElement("span");
+  channel.className = "source-video-channel";
+  channel.textContent = group.channelName || "未知频道";
+  titleWrap.append(channel);
+  header.append(titleWrap);
+
+  const actions = document.createElement("div");
+  actions.className = "source-video-actions";
+  const open = document.createElement("a");
+  open.className = "source-action";
+  open.href = group.item?.videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(group.item.videoId)}` : title.href;
+  open.target = "_blank";
+  open.rel = "noreferrer";
+  open.textContent = "打开视频";
+  actions.append(open);
+  actions.append(renderCopySetlistButton(group.item, "复制歌单", "source-action source-copy"));
+  header.append(actions);
+  section.append(header);
+
+  const timestamps = document.createElement("div");
+  timestamps.className = "source-timestamps";
+  group.occurrences.forEach((occurrence, index) => {
+    const link = renderSourceTimestampLink(occurrence);
+    if (index >= SOURCE_TIMESTAMP_INITIAL_LIMIT) {
+      link.hidden = true;
+      link.dataset.sourceTimeOverflow = "true";
+    }
+    timestamps.append(link);
+  });
+
+  if (group.occurrences.length > SOURCE_TIMESTAMP_INITIAL_LIMIT) {
+    const more = document.createElement("button");
+    more.className = "source-time-more";
+    more.type = "button";
+    more.dataset.toggleSourceTimes = "true";
+    more.textContent = `显示其余 ${group.occurrences.length - SOURCE_TIMESTAMP_INITIAL_LIMIT} 个时间戳`;
+    timestamps.append(more);
+  }
+
+  section.append(timestamps);
+  return section;
+}
+
+function renderSourceTimestampLink(occurrence) {
+  const link = document.createElement("a");
+  link.className = "source-link source-time-link";
+  link.href = youtubeTimeUrl(occurrence.item.videoId, occurrence.song.seconds);
+  link.target = "_blank";
+  link.rel = "noreferrer";
+
+  const time = document.createElement("span");
+  time.className = "time";
+  time.textContent = occurrence.song.time || formatSeconds(occurrence.song.seconds);
+
+  const song = document.createElement("span");
+  song.className = "source-song";
+  song.textContent = cleanText(occurrence.song.title) || "未命名歌曲";
+
+  const artist = document.createElement("span");
+  artist.className = "source-artist";
+  artist.textContent = cleanText(occurrence.song.artist);
+
+  link.append(time, song);
+  if (artist.textContent) link.append(artist);
+  return link;
+}
+
+function renderCopySetlistButton(item, label = "复制歌单", className = "copy-setlist-button") {
+  const button = document.createElement("button");
+  button.className = className;
+  button.type = "button";
+  button.dataset.copySetlist = "true";
+  button._videoItem = item || {};
+  button.textContent = label;
+  button.setAttribute("aria-label", `复制整场歌单：${item?.title || item?.videoId || "来源视频"}`);
+  return button;
 }
 
 function appendArtistSongGroups(drawer, songGroups) {
@@ -3800,8 +3681,19 @@ function toggleSourceDrawer(row) {
     const total = Number(button.dataset.sourceTotal || count);
     const hiddenCount = Number(button.dataset.sourceHiddenCount || Math.max(0, count - INLINE_SOURCE_PREVIEW_LIMIT));
     const songCount = Number(button.dataset.songCount || row._artistSongCount || row._artistSongGroups?.length || 0);
+    const videoCount = Number(button.dataset.videoCount || window.FrontendUtils.groupOccurrencesByVideo(row._sourceOccurrences || []).length);
+    const occurrenceCount = Number(button.dataset.occurrenceCount || count);
     const mode = button.dataset.sourceMode || row.dataset.drawerMode || "song";
-    const model = window.FrontendUtils.rankToggleModel({ mode, isExpanded: nextExpanded, total, hiddenCount, songCount });
+    const model = window.FrontendUtils.rankToggleModel({
+      mode,
+      isExpanded: nextExpanded,
+      total,
+      hiddenCount,
+      songCount,
+      videoCount,
+      occurrenceCount,
+      compact: isMobileViewport(),
+    });
     button.setAttribute("aria-label", model.ariaLabel);
     button.textContent = model.text;
   }
@@ -3830,6 +3722,25 @@ function expandArtistSongSources(button) {
   if (!sources || !occurrences.length) return;
   button.remove();
   appendSourceDrawerLinks(sources, occurrences);
+}
+
+function expandSourceGroupTimestamps(button) {
+  const group = button.closest(".source-video-group");
+  if (!group) return;
+  for (const link of group.querySelectorAll("[data-source-time-overflow]")) {
+    link.hidden = false;
+    delete link.dataset.sourceTimeOverflow;
+  }
+  button.remove();
+}
+
+function expandSourceVideoGroups(button) {
+  const drawer = button.closest(".source-drawer");
+  if (!drawer) return;
+  const occurrences = drawer._sourceOccurrences || [];
+  drawer.dataset.videoGroupsExpanded = "true";
+  drawer.replaceChildren();
+  appendSourceDrawerLinks(drawer, occurrences);
 }
 
 function renderVideo(item) {
@@ -3884,7 +3795,10 @@ function renderVideo(item) {
   count.className = "song-count";
   const matchCount = item._songSearchMatchCount || 0;
   count.textContent = matchCount && !item._videoSearchMatched ? `匹配 ${matchCount} 首` : `${item.songs?.length || 0} 首`;
-  heading.append(count);
+  const headingActions = document.createElement("div");
+  headingActions.className = "video-heading-actions";
+  headingActions.append(count, renderCopySetlistButton(item, "复制歌单", "video-copy-setlist"));
+  heading.append(headingActions);
   body.append(heading);
 
   const list = document.createElement("ol");
@@ -4108,11 +4022,13 @@ function trendForRecord(mode, record) {
 }
 
 function renderTrendBadge(trend) {
+  if (!trend) return null;
   const badge = document.createElement("span");
   badge.className = "trend-badge";
   if (trend.isNew) {
     badge.classList.add("trend-new");
-    badge.textContent = "NEW";
+    badge.textContent = "新上榜";
+    badge.title = "本期新进入榜单";
     return badge;
   }
 
@@ -4120,33 +4036,87 @@ function renderTrendBadge(trend) {
   const countDelta = Number(trend.countDelta) || 0;
   if (rankDelta > 0) {
     badge.classList.add("trend-up");
-    badge.textContent = `↑${rankDelta}`;
+    badge.textContent = `升 ${rankDelta}`;
+    badge.title = countDelta ? `排名上升 ${rankDelta}，收录 ${formatSignedDelta(countDelta)}` : `排名上升 ${rankDelta}`;
   } else if (rankDelta < 0) {
     badge.classList.add("trend-down");
-    badge.textContent = `↓${Math.abs(rankDelta)}`;
+    badge.textContent = `降 ${Math.abs(rankDelta)}`;
+    badge.title = countDelta ? `排名下降 ${Math.abs(rankDelta)}，收录 ${formatSignedDelta(countDelta)}` : `排名下降 ${Math.abs(rankDelta)}`;
+  } else if (countDelta) {
+    badge.classList.add(countDelta > 0 ? "trend-up" : "trend-down");
+    badge.textContent = `收录 ${formatSignedDelta(countDelta)}`;
+    badge.title = `收录变化 ${formatSignedDelta(countDelta)}`;
   } else {
-    badge.classList.add("trend-flat");
-    badge.textContent = "→";
-  }
-
-  if (countDelta) {
-    const countNode = document.createElement("span");
-    countNode.className = "trend-count";
-    countNode.textContent = countDelta > 0 ? `+${countDelta}` : String(countDelta);
-    badge.append(countNode);
+    return null;
   }
   return badge;
 }
 
+function formatSignedDelta(value) {
+  const delta = Number(value) || 0;
+  return delta > 0 ? `+${delta}` : String(delta);
+}
+
 async function copyCurrentLink() {
-  syncUrlState("replace");
-  const href = window.location.href;
+  const href = buildShareUrl();
   try {
-    await navigator.clipboard?.writeText(href);
+    await writeClipboardText(href);
     showToast("已复制当前视图链接");
   } catch {
     showToast(href);
   }
+}
+
+async function copyVideoSetlist(item) {
+  const text = window.FrontendUtils.buildSetlistText(item, {
+    isUnknownArtistName: window.RankingUtils.isUnknownArtistName,
+  });
+  if (!text) {
+    showToast("这场视频没有可复制的歌单");
+    return;
+  }
+  await writeClipboardText(text);
+  const count = text.split("\n").filter(Boolean).length;
+  showToast(`已复制整场歌单 · ${count}首`);
+}
+
+async function writeClipboardText(text) {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  if (copyWithHiddenTextarea(text)) return;
+  showManualCopyTextarea(text);
+  throw new Error("需要手动复制");
+}
+
+function copyWithHiddenTextarea(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "readonly");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "0";
+  document.body.append(textarea);
+  textarea.select();
+  let ok = false;
+  try {
+    ok = document.execCommand("copy");
+  } catch {
+    ok = false;
+  }
+  textarea.remove();
+  return ok;
+}
+
+function showManualCopyTextarea(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.readOnly = true;
+  textarea.className = "manual-copy-textarea";
+  document.body.append(textarea);
+  textarea.focus();
+  textarea.select();
 }
 
 function capturedDate() {

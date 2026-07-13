@@ -12,12 +12,18 @@ test("core, review, and code checks use separate workflow files and concurrency 
 
   assert.match(core, /name:\s*Update core song-list data/u);
   assert.match(core, /group:\s*daily-song-list-core/u);
-  assert.match(core, /cancel-in-progress:\s*true/u);
-  assert.match(core, /npm run update:core/u);
+  assert.match(core, /cancel-in-progress:\s*false/u);
+  assert.match(core, /cron:\s*"37 \* \* \* \*"/u);
+  assert.match(core, /timeout-minutes:\s*35/u);
+  assert.match(core, /node scripts\/run-core-update\.js/u);
   assert.doesNotMatch(core, /review:build|build-review-queue|export-dirty-candidates/u);
   assert.match(core, /npm run mark:failure/u);
+  assert.match(core, /git restore --worktree -- data\/latest\.json/u);
+  assert.match(core, /git clean -fd -- data\/snapshots data\/diff data\/ui/u);
   assert.match(core, /git add data\/latest\.json/u);
   assert.match(core, /git pull --rebase origin main/u);
+  assert.match(core, /npm run check:published -- https:\/\/ytb-song-rank\.culua\.com\//u);
+  assert.match(core, /if:\s*always\(\) && steps\.core\.outcome != 'success'/u);
 
   assert.match(review, /name:\s*Build review reports/u);
   assert.match(review, /group:\s*daily-song-list-review/u);

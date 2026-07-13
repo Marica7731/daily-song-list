@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T15:56:17.872Z",
+  "generatedAt": "2026-07-13T20:02:20.467Z",
   "reviewId": "review:HEnguuz2PU0:cb89427128d7d01ad7ea",
   "video": {
     "videoId": "HEnguuz2PU0",
@@ -11,17 +11,16 @@
   "source": {
     "sourceId": "Ugz-Q88bXJtZCM6uHNN4AaABAg",
     "sourceHash": "cb89427128d7d01ad7eaee77a9b9eddf0cc5878894ec7cec8454d1962ba02c9a",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "歌ったリスト【12曲】\r\n01. 0:03:24 ルージュの伝言（荒井由実）\r\n02. 0:17:08 風になる（つじあやの） ※何度も歌い直しがありますが、最初にしています\r\n03. 0:32:03 やさしさに包まれたなら（荒井由実）\r\n04. 0:41:09 大きな古時計（平井堅）\r\n05. 0:53:39 時には昔の話を（加藤登紀子）\r\n06. 1:21:20 瞬き（Back number）\r\n07. 1:32:10 儚向花（オリ曲）\r\n08. 1:34:27 未完成（オリ曲）\r\n09. 1:39:39 高嶺の花子さん（Back number）\r\n10. 1:51:21 夜明けと蛍（n-buna）\r\n11. 2:00:44 プロポーズ（なとり）\r\n12. 2:08:24 東京フラッシュ（Vaundy）\r\n\r\n不備は教えてください。ご要望はお気軽にコメントください。",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 48,
-    "riskLevel": "medium",
+    "riskScore": 14,
+    "riskLevel": "low",
     "riskReasons": [
-      "conversation_entry",
       "source_multiple_unknown_artists"
     ]
   },
@@ -43,30 +42,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 1028,
-      "time": "0:17:08",
-      "title": "風になる（つじあやの） ※何度も歌い直しがありますが、最初にしています",
-      "artist": "未記載",
-      "raw": "02. 0:17:08 風になる（つじあやの） ※何度も歌い直しがありますが、最初にしています",
-      "rawHash": "aae0e62be7f0a68b91f74b3281f4e74c1b9c03c1ad382f2d8cca6c5ff16d0f15",
-      "sourceId": "Ugz-Q88bXJtZCM6uHNN4AaABAg",
-      "sourceHash": "cb89427128d7d01ad7eaee77a9b9eddf0cc5878894ec7cec8454d1962ba02c9a",
-      "isNiche": false,
-      "classification": "likely_noise",
-      "suggestedAction": "drop_entry",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "conversation_entry",
-        "source_multiple_unknown_artists"
-      ],
-      "positiveEvidence": [
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -86,8 +62,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -107,8 +82,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -128,8 +102,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -150,8 +123,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -164,14 +136,13 @@
       "rawHash": "e60249d18bc9bb8e8fb479d79a7680b48f76ac2163ac2244bd763817bb160ddf",
       "sourceId": "Ugz-Q88bXJtZCM6uHNN4AaABAg",
       "sourceHash": "cb89427128d7d01ad7eaee77a9b9eddf0cc5878894ec7cec8454d1962ba02c9a",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -191,8 +162,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -213,8 +183,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -235,8 +204,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -256,8 +224,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -278,8 +245,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     }
   ]

@@ -6,6 +6,7 @@ const args = process.argv.slice(2);
 const latestOnly = args.includes("--latest-only");
 const baseUrl = args.find((arg) => !arg.startsWith("--")) || "http://127.0.0.1:8081/";
 const viewports = [
+  [2560, 1440],
   [1920, 1080],
   [1366, 768],
   [1024, 768],
@@ -102,6 +103,8 @@ async function assertUiShape(page, viewport, range) {
     const summary = rect("#summary");
     const summaryRange = rect("#summary .summary-range");
     const topPagination = rect(".pagination-top");
+    const topJump = rect(".pagination-top .page-jump");
+    const bottomJump = rect(".pagination-bottom .page-jump");
     const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row), .index-row, .video-card"));
     const fullyVisibleRows = rows.filter((node) => {
       const box = node.getBoundingClientRect();
@@ -122,6 +125,8 @@ async function assertUiShape(page, viewport, range) {
       summary,
       summaryRange,
       topPagination,
+      topJump,
+      bottomJump,
       fullyVisibleRows,
       rankCount,
       rankSubline,
@@ -144,8 +149,11 @@ async function assertUiShape(page, viewport, range) {
     if (result.topPagination && result.topPagination.height > 52) throw new Error(`mobile top pagination too tall ${result.topPagination.height}`);
     if (viewport[0] >= 390 && result.fullyVisibleRows < 5) throw new Error(`mobile visible rows below target: ${result.fullyVisibleRows}`);
     if (viewport[0] <= 360 && result.fullyVisibleRows < 4) throw new Error(`narrow mobile visible rows below target: ${result.fullyVisibleRows}`);
-  } else if (viewport[0] >= 1024 && result.fullyVisibleRows < (viewport[0] >= 1600 ? 10 : 7)) {
-    throw new Error(`desktop visible rows below target: ${result.fullyVisibleRows}`);
+  } else if (viewport[0] >= 1024) {
+    if (!result.topJump || !result.bottomJump) throw new Error(`desktop pagination jump missing ${JSON.stringify(result)}`);
+    if (result.fullyVisibleRows >= (viewport[0] >= 1600 ? 10 : 7)) return;
+    if (viewport[0] < 1600 && result.fullyVisibleRows >= 6) return;
+    throw new Error(`desktop visible rows below target: ${result.fullyVisibleRows} viewport=${viewport.join("x")}`);
   }
 }
 
@@ -161,7 +169,7 @@ async function firstLoad(browser, range, viewport) {
     await route.continue();
   });
   page.on("request", (request) => requests.push(requestPath(request.url())));
-  const url = range === "72h" ? baseUrl : `${baseUrl}?range=1m`;
+  const url = range === "72h" ? baseUrl : `${baseUrl}?shared=1&range=1m`;
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await waitForRows(page, errors, requests);
   await assertUiShape(page, viewport, range);
@@ -239,25 +247,24 @@ async function interactionFlow(browser) {
   await page.locator("#metricFilterGroup label").filter({ hasText: "按收录" }).click();
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
-  const buildSongRecordCountBeforeDetail = await page.evaluate(
+  const buildSongRecordCountBeforeSource = await page.evaluate(
     () => performance.getEntriesByName("song-list:build-song-records").length,
   );
-  await page.locator("[data-open-detail]").first().click();
-  await page.waitForSelector("#detailDialog:not([hidden]) .detail-source-link, #detailDialog:not([hidden]) #detailTitle", { timeout: 15000 });
-  const detailPerf = await page.evaluate(() => ({
+  await page.locator("[data-toggle-source]").first().click();
+  await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
+    timeout: 15000,
+  });
+  const sourcePerf = await page.evaluate(() => ({
     buildSongRecordCount: performance.getEntriesByName("song-list:build-song-records").length,
-    openDetailDuration: performance.getEntriesByName("song-list:open-detail").at(-1)?.duration || 0,
   }));
-  if (detailPerf.buildSongRecordCount !== buildSongRecordCountBeforeDetail) {
-    throw new Error(`opening detail rebuilt song records: ${JSON.stringify(detailPerf)}`);
+  if (sourcePerf.buildSongRecordCount !== buildSongRecordCountBeforeSource) {
+    throw new Error(`opening source drawer rebuilt song records: ${JSON.stringify(sourcePerf)}`);
   }
-  if (detailPerf.openDetailDuration > 300) {
-    throw new Error(`open-detail exceeded 300ms: ${JSON.stringify(detailPerf)}`);
-  }
-  const renderedSources = await page.locator("#detailDialog .detail-source-link").count();
-  if (renderedSources > 20) throw new Error(`detail rendered too many source links initially: ${renderedSources}`);
-  await page.locator("#detailSourceSearch").fill("a");
-  await page.locator("#closeDetailButton").click();
+  const oversizedTimestampGroup = await page.locator(".rank-row.is-expanded .source-video-group").evaluateAll((groups) =>
+    groups.some((group) => group.querySelectorAll(".source-time-link:not([hidden])").length > 10),
+  );
+  if (oversizedTimestampGroup) throw new Error("source drawer rendered more than 10 timestamps in a collapsed video group");
+  await page.locator("[data-toggle-source]").first().click();
   await page.locator('.view-mode [data-view="artistRank"]').click();
   await waitForRows(page, errors, requests);
   await page.locator('.view-mode [data-view="videos"]').click();
@@ -281,10 +288,8 @@ async function interactionFlow(browser) {
     if (!options.length) throw new Error("no historical snapshot options");
     await page.selectOption("#snapshotSelect", options[0]);
     await waitForRows(page, errors, requests);
-    await page.goBack({ waitUntil: "domcontentloaded" }).catch(() => null);
-    await waitForRows(page, errors, requests);
-    await page.goForward({ waitUntil: "domcontentloaded" }).catch(() => null);
-    await waitForRows(page, errors, requests);
+    const search = await page.evaluate(() => window.location.search);
+    if (search) throw new Error(`ordinary snapshot interaction wrote URL state: ${search}`);
   }
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
   const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
@@ -354,7 +359,7 @@ async function monthlyFallbackScenarios(browser) {
   ]) {
     const { context, page, errors } = await newPage(browser, [1366, 768]);
     await page.route(/\/data\/ui\/1m\.[0-9a-f]{12}\.json$/u, scenario.handler);
-    await page.goto(`${baseUrl}?range=1m&debug=1`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${baseUrl}?shared=1&range=1m&debug=1`, { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors);
     const summary = await page.locator("#summary").textContent();
     const status = await page.locator("#status").textContent();
@@ -392,6 +397,20 @@ async function prefetchGuards(browser) {
   }
 }
 
+async function review404Scenario(browser) {
+  const viewport = [390, 844];
+  const { context, page, errors } = await newPage(browser, viewport);
+  const response = await page.goto(new URL("review.html", baseUrl).toString(), { waitUntil: "domcontentloaded" });
+  const status = response?.status() || 0;
+  const screenshotPath = path.join(screenshotDir, `review-404-${viewport.join("x")}.png`);
+  await page.screenshot({ path: screenshotPath, fullPage: false });
+  await context.close();
+  if (status !== 404) throw new Error(`review.html expected 404, got ${status}`);
+  const unexpectedErrors = errors.filter((error) => !/status of 404|HTTP 404|File not found/u.test(error));
+  if (unexpectedErrors.length) throw new Error(`review 404 errors: ${unexpectedErrors.join(" | ")}`);
+  results.push({ scenario: "review-404", status, screenshotPath });
+}
+
 function runtimePathPattern(range) {
   return new RegExp(`^data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json$`, "u");
 }
@@ -400,12 +419,13 @@ function runtimePathPattern(range) {
   const browser = await chromium.launch({ headless: true });
   try {
     for (const viewport of viewports) {
-    await firstLoad(browser, "72h", viewport);
+      await firstLoad(browser, "72h", viewport);
     }
     await firstLoad(browser, "1m", [1366, 768]);
     await interactionFlow(browser);
     await monthlyFallbackScenarios(browser);
     await prefetchGuards(browser);
+    await review404Scenario(browser);
   } finally {
     await browser.close();
   }

@@ -52,20 +52,20 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
 4. `index.html` + `assets/app.js` render the latest data and allow switching to an hourly snapshot.
    - Default view is song appearance ranking.
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
-   - Ranking rows preview one primary source channel inline; `+N 来源` opens the source drawer with every matching timestamp link.
+   - Ranking rows preview one primary source channel inline; source buttons open an inline drawer grouped by video, with sorted timestamp links and whole-video setlist copy.
    - Initial load reads `data/ui/meta.json` first, then loads only the active hash range file from `meta.ranges`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact monthly range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
    - `debug=1` adds a read-only runtime panel with `dataVersion`, active range path, status fields, fallback state, and recent resource timings.
    - Initial load skips `song-search-known-songs.json` when payload songs already contain `isNiche`; older snapshots load that index only when niche annotation is missing. Current data with a supported `filterVersion` skips the full front-end safety filter, while older snapshots still run it for compatibility.
    - Each range keeps derived occurrences, song records, artist records, video search data, and per-record `videoCount` in memory. Pagination and page-size changes reuse those records and only rebuild the visible page DOM. Prepared historical snapshots keep the existing 5-entry in-memory LRU cache, while immutable hourly snapshot JSON uses browser cache.
-   - URL state omits defaults, uses browser history for range/view/page/snapshot changes, and keeps search typing on `replaceState`. Song index bucket params are written only for the song index view.
+   - Ordinary interactions keep the address bar clean. Share links are explicit `shared=1` URLs; the shared state is applied once and then removed from the visible URL.
    - Unknown-artist rows are hidden by default in song ranking, song index, and video views. The URL writes `showUnknown=1` only when the user explicitly shows them; artist ranking is intentionally unaffected.
    - Video search keeps song-only matches visible before the fold. Rank views can switch between `按收录` and `按视频`, and latest song/artist ranks display movement from `data/diff`.
-5. `review.html` is a separate local review surface.
-   - It loads only `data/review/queue.json` and per-source files under `data/review/sources/`.
+5. Public review UI is not shipped.
+   - `scripts/build-review-queue.js` and `scripts/export-dirty-candidates.js` still generate `data/review/*` and `data/quality-report.json` for local or offline audit tooling.
    - The normal homepage does not load review data, raw comments, queue data, or GitHub credentials.
-   - Draft review actions are saved in IndexedDB, with localStorage as a fallback, then exported as `curation_patch.json`.
+   - Dirty-candidate reports use review data file paths and raw hashes for定位; they do not generate public review-page links.
 6. GitHub Actions are split by responsibility.
-   - `.github/workflows/update-core.yml` runs hourly, builds only core data/runtime files, commits core data or a failure `data/status.json`, and uses `daily-song-list-core` concurrency with cancellation.
+   - `.github/workflows/update-core.yml` runs hourly, builds only core data/runtime files, keeps core runs from cancelling each other, and writes failure status without treating local files as proof that the published runtime is healthy.
    - `.github/workflows/build-review.yml` builds review reports every 6 hours and cannot block the core hourly data update.
    - `.github/workflows/check-code.yml` runs tests and validation on code/workflow pushes.
 

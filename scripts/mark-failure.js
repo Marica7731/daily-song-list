@@ -10,19 +10,35 @@ fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const previous = readJsonIfExists(LATEST_PATH);
 const now = new Date().toISOString();
+const itemCounts = previous?.ranges
+  ? {
+      "72h": Array.isArray(previous.ranges["72h"]?.items) ? previous.ranges["72h"].items.length : 0,
+      "1m": Array.isArray(previous.ranges["1m"]?.items) ? previous.ranges["1m"].items.length : 0,
+    }
+  : {};
+const retainedCapturedAt = previous?.capturedAt || previous?.generatedAt || "";
+const retainedCompletedAt = previous?.completedAt || previous?.generatedAt || retainedCapturedAt;
 writeJson(STATUS_PATH, {
   status: "failed",
   attemptedAt: now,
-  completedAt: now,
   failedAt: now,
-  capturedAt: previous?.capturedAt || previous?.generatedAt || "",
-  dataCapturedAt: previous?.capturedAt || previous?.generatedAt || "",
+  completedAt: retainedCompletedAt,
+  capturedAt: retainedCapturedAt,
+  dataCapturedAt: retainedCapturedAt,
   rebuiltDerivedAt: previous?.source?.rebuiltDerivedAt || "",
+  dataVersion: previous?.dataVersion || previous?.source?.dataVersion || "",
+  itemCounts,
   message: process.env.DAILY_SONG_FAILURE_MESSAGE || "Update workflow failed before writing a successful snapshot.",
-  fallback: previous ? "kept previous data/latest.json" : "no previous data available",
+  fallback: previous ? "kept previous validated data/latest.json" : "no previous data available",
+  failureOutcome: process.env.DAILY_SONG_FAILURE_OUTCOME || "",
+  failureStage: process.env.DAILY_SONG_FAILURE_STAGE || "core",
+  retainedDataCapturedAt: retainedCapturedAt,
+  retainedCompletedAt,
+  retainedDataVersion: previous?.dataVersion || previous?.source?.dataVersion || "",
   runId: process.env.GITHUB_RUN_ID || "",
   runAttempt: process.env.GITHUB_RUN_ATTEMPT || "",
   workflow: process.env.GITHUB_WORKFLOW || "",
+  headSha: process.env.GITHUB_SHA || "",
 });
 
 console.log(previous ? "[mark-failure] previous latest data kept." : "[mark-failure] no previous latest data exists.");

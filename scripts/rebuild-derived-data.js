@@ -18,6 +18,7 @@ const {
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
+const STATUS_PATH = path.join(DATA_DIR, "status.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 const RANGES = ["72h", "1m"];
 
@@ -125,6 +126,7 @@ function main() {
   for (const rangeId of RANGES) {
     if (payload.groups?.[rangeId]) writeJson(path.join(DATA_DIR, `${rangeId}.json`), payload.groups[rangeId]);
   }
+  writeDerivedStatus(payload);
   writeRankDiffFiles(payload, undefined, curationContext);
 
   console.log(
@@ -270,6 +272,20 @@ function attachSongSearchSummary(payload, summary) {
       songSearch: summary,
     },
   };
+}
+
+function writeDerivedStatus(payload) {
+  const capturedAt = payload.capturedAt || payload.generatedAt || "";
+  const status = {
+    ...(payload.status || {}),
+    status: "success",
+    completedAt: payload.status?.completedAt || capturedAt,
+    capturedAt,
+    dataCapturedAt: capturedAt,
+    rebuiltDerivedAt: payload.source?.rebuiltDerivedAt || payload.status?.rebuiltDerivedAt || "",
+    itemCounts: Object.fromEntries(RANGES.map((rangeId) => [rangeId, payload.groups?.[rangeId]?.items?.length || 0])),
+  };
+  writeJson(STATUS_PATH, status);
 }
 
 function collectUniqueGroupVideos(groups) {

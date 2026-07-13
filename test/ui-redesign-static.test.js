@@ -7,35 +7,37 @@ const appSource = fs.readFileSync(path.join(__dirname, "..", "assets", "app.js")
 const cssSource = fs.readFileSync(path.join(__dirname, "..", "assets", "styles.css"), "utf8");
 const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 
-test("mobile information architecture exposes one-row toolbar, bottom nav, search, filter, and detail dialogs", () => {
+test("mobile information architecture exposes one-row toolbar, bottom nav, search, and filter dialogs", () => {
   assert.match(indexSource, /id="openSearchButton"/u);
   assert.match(indexSource, /id="openFilterButton"/u);
   assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /id="searchDialog"[\s\S]*role="dialog"[\s\S]*id="searchSuggestions"/u);
   assert.match(indexSource, /id="filterDialog"[\s\S]*role="dialog"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
-  assert.match(indexSource, /id="detailDialog"[\s\S]*role="dialog"[\s\S]*id="detailSourceList"/u);
+  assert.doesNotMatch(indexSource, /id="detailDialog"/u);
+  assert.match(indexSource, /class="filter-toggle-list"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*grid-template-areas: "range actions"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
 });
 
-test("new URL state, filter draft, and detail state are wired through app state", () => {
+test("new URL state, filter draft, and share state are wired through app state", () => {
   assert.match(appSource, /trend:\s*"all"/u);
   assert.match(appSource, /minCount:\s*1/u);
-  assert.match(appSource, /detail:\s*""/u);
+  assert.match(appSource, /sharedUrlApplied:\s*false/u);
   assert.match(appSource, /validTrendFilters: Object\.keys\(TREND_FILTERS\)/u);
   assert.match(appSource, /validMinCounts: MIN_COUNT_OPTIONS/u);
   assert.match(appSource, /function makeFilterDraftFromState/u);
   assert.match(appSource, /function applyFilterDraft/u);
-  assert.match(appSource, /function detailParam/u);
+  assert.match(appSource, /function buildShareUrl/u);
+  assert.match(appSource, /includeShared:\s*true/u);
 });
 
-test("source detail is external and initially batched", () => {
-  assert.match(appSource, /const DETAIL_BATCH_SIZE = 20/u);
-  assert.match(appSource, /data-open-detail/u);
-  assert.match(appSource, /function renderDetailSources/u);
-  assert.match(appSource, /filtered\.slice\(0, state\.detailSourceLimit\)/u);
-  assert.match(appSource, /function groupOccurrencesByVideo/u);
-  assert.match(appSource, /openDetail\(sourceToggle\.dataset\.detail/u);
+test("source drawer is inline, grouped, and visible on mobile", () => {
+  assert.doesNotMatch(appSource, /DETAIL_BATCH_SIZE|data-open-detail|function renderDetailSources|openDetail\(/u);
+  assert.match(appSource, /toggleSourceDrawer\(sourceToggle\.closest\("\.rank-row, \.index-row"\)\)/u);
+  assert.match(appSource, /FrontendUtils\.groupOccurrencesByVideo\(occurrences\)/u);
+  assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 10/u);
+  assert.match(appSource, /const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 5/u);
+  assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*display: none/u);
 });
 
 test("search suggestions highlight safely without assigning untrusted innerHTML", () => {

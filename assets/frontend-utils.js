@@ -195,7 +195,6 @@
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
       trend: validTrendFilters.has(trend) ? trend : defaults.trend || "all",
       minCount: validMinCounts.has(parsedMinCount) ? parsedMinCount : positiveInteger(defaults.minCount, 1),
-      detail: parseDetailParam(params.get("detail")),
     };
   }
 
@@ -237,27 +236,11 @@
     if (state.q) params.set("q", String(state.q).slice(0, 200));
     if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
     if (view !== "videos" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
-    if (state.detail) params.set("detail", serializeDetailParam(state.detail));
 
     const snapshotParam = snapshotParamForPath(state.snapshotPath, options);
     if (snapshotParam) params.set("snapshot", snapshotParam);
+    if (options.includeShared) params.set("shared", "1");
     return params.toString();
-  }
-
-  function parseDetailParam(value) {
-    const raw = String(value || "").trim();
-    if (!raw || raw.length > 260) return "";
-    const separator = raw.indexOf(":");
-    if (separator <= 0) return "";
-    const type = raw.slice(0, separator);
-    const key = raw.slice(separator + 1);
-    if (!["song", "artist"].includes(type) || !key || key.length > 240) return "";
-    if (!/^[A-Za-z0-9%._~!$&'()*+,;=:@-]+$/u.test(key)) return "";
-    return `${type}:${key}`;
-  }
-
-  function serializeDetailParam(value) {
-    return parseDetailParam(value);
   }
 
   function parseBooleanParam(value, fallback) {
@@ -528,6 +511,103 @@
     return normalizeSearch(item.channelName || item.title || item.videoId || "");
   }
 
+  function groupOccurrencesByVideo(occurrences) {
+    const groups = new Map();
+    for (const occurrence of occurrences || []) {
+      if (!occurrence) continue;
+      const item = occurrence.item || {};
+      const key = cleanText(item.videoId) || `${cleanText(item.channelName)}::${cleanText(item.title)}` || "unknown";
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          videoId: cleanText(item.videoId),
+          item,
+          title: cleanText(item.title || item.videoId || item.channelName || "来源视频"),
+          channelName: cleanText(item.channelName),
+          occurrences: [],
+          firstSeconds: Number.POSITIVE_INFINITY,
+          occurrenceCount: 0,
+        });
+      }
+      const group = groups.get(key);
+      group.occurrences.push(occurrence);
+      group.occurrenceCount += 1;
+      const seconds = Number(occurrence?.song?.seconds);
+      if (Number.isFinite(seconds) && seconds >= 0) group.firstSeconds = Math.min(group.firstSeconds, seconds);
+    }
+
+    return Array.from(groups.values())
+      .map((group) => {
+        group.occurrences.sort(compareOccurrenceSeconds);
+        if (!Number.isFinite(group.firstSeconds)) group.firstSeconds = null;
+        return group;
+      })
+      .sort((a, b) => {
+        const secondsA = a.firstSeconds === null ? Number.POSITIVE_INFINITY : a.firstSeconds;
+        const secondsB = b.firstSeconds === null ? Number.POSITIVE_INFINITY : b.firstSeconds;
+        return secondsA - secondsB || a.title.localeCompare(b.title);
+      });
+  }
+
+  function compareOccurrenceSeconds(a, b) {
+    const secondsA = validSeconds(a?.song?.seconds);
+    const secondsB = validSeconds(b?.song?.seconds);
+    if (secondsA === null && secondsB === null) return 0;
+    if (secondsA === null) return 1;
+    if (secondsB === null) return -1;
+    return secondsA - secondsB;
+  }
+
+  function validSeconds(value) {
+    const seconds = Number(value);
+    return Number.isFinite(seconds) && seconds >= 0 ? seconds : null;
+  }
+
+  function formatSetlistTime(value) {
+    const total = Math.max(0, Math.floor(Number(value) || 0));
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const seconds = total % 60;
+    return hours
+      ? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+      : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  function normalizeSetlistSongs(songs, options = {}) {
+    const isUnknownArtistName =
+      typeof options.isUnknownArtistName === "function"
+        ? options.isUnknownArtistName
+        : globalThis.RankingUtils?.isUnknownArtistName || (() => false);
+    const seen = new Set();
+    const normalized = [];
+    for (const song of songs || []) {
+      const seconds = validSeconds(song?.seconds);
+      const title = cleanText(song?.title);
+      if (seconds === null || !title) continue;
+      const artist = cleanText(song?.artist);
+      const key = `${seconds}::${title}::${artist}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      normalized.push({
+        seconds,
+        title,
+        artist: artist && !isUnknownArtistName(artist) ? artist : "",
+      });
+    }
+    return normalized.sort((a, b) => a.seconds - b.seconds);
+  }
+
+  function buildSetlistText(item, options = {}) {
+    const songs = normalizeSetlistSongs(item?._allSongs || item?.songs || [], options);
+    return songs
+      .map((song, index) => {
+        const ordinal = String(index + 1).padStart(2, "0");
+        const base = `${formatSetlistTime(song.seconds)} ${ordinal}. ${song.title}`;
+        return song.artist ? `${base} - ${song.artist}` : base;
+      })
+      .join("\n");
+  }
+
   function buildInlineSourceModel(occurrence) {
     const item = occurrence?.item || {};
     const song = occurrence?.song || {};
@@ -552,18 +632,26 @@
   function rankToggleModel(options = {}) {
     const mode = options.mode || "song";
     const isExpanded = Boolean(options.isExpanded);
+    const compact = Boolean(options.compact);
     if (mode === "artist") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
       return {
-        text: isExpanded ? "收起曲目" : `查看${songCount}首`,
+        text: compact ? (isExpanded ? "收起" : "展开") : isExpanded ? "收起曲目" : `查看${songCount}首`,
         ariaLabel: isExpanded ? "收起该歌手曲目" : `查看该歌手的 ${songCount} 首歌曲`,
       };
     }
 
-    const hiddenCount = Math.max(0, Number(options.hiddenCount) || 0);
+    const videoCount = Math.max(0, Number(options.videoCount) || 0);
+    const occurrenceCount = Math.max(0, Number(options.occurrenceCount ?? options.total) || 0);
+    const text = compact ? (isExpanded ? "收起" : "展开") : isExpanded ? "收起" : videoCount > 1 ? `查看${videoCount}个视频` : `查看${occurrenceCount}个时间戳`;
+    const ariaLabel = isExpanded
+      ? "收起该歌曲来源"
+      : videoCount > 1
+        ? `查看该歌曲的 ${videoCount} 个来源视频`
+        : `查看该歌曲的 ${occurrenceCount} 个时间戳`;
     return {
-      text: isExpanded ? "收起" : `+${hiddenCount}`,
-      ariaLabel: isExpanded ? "收起该歌曲来源" : `查看其余${hiddenCount}个来源`,
+      text,
+      ariaLabel,
     };
   }
 
@@ -760,6 +848,7 @@
 
   return {
     annotatePayloadWithNiche,
+    buildSetlistText,
     buildIndexBucketModel,
     buildInlineSourceModel,
     buildSourcePreview,
@@ -770,13 +859,16 @@
     filterItemsByNiche,
     filterOccurrencesBySearch,
     filterOccurrencesByNiche,
+    formatSetlistTime,
     formatSeconds,
+    groupOccurrencesByVideo,
     hasNicheAnnotations,
     isNicheSong,
     isSongSearchKnown,
     indexBucketButtonModel,
     matchesSearch,
     normalizeSearch,
+    normalizeSetlistSongs,
     normalizeSongSearchText,
     paginateItems,
     parseUrlState,

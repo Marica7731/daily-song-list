@@ -23,7 +23,7 @@ function repairParsedEntry(song, lookupInput = null) {
   const signals = entryRepairSignals(song);
   const repairs = [];
   let title = String(song.title || "").trim();
-  let artist = cleanSafeArtistCandidate(normalizeArtist(song.artist)) || UNKNOWN_ARTIST;
+  let artist = normalizeArtist(song.artist);
   const raw = String(song.raw || "");
 
   const crossFieldWrapper = stripCrossFieldWrapper(title, artist);
@@ -32,6 +32,10 @@ function repairParsedEntry(song, lookupInput = null) {
     artist = cleanSafeArtistCandidate(crossFieldWrapper.artist) || UNKNOWN_ARTIST;
     repairs.push(...crossFieldWrapper.reasons);
   }
+
+  const cleanedArtist = cleanSafeArtistCandidate(artist) || UNKNOWN_ARTIST;
+  if (cleanedArtist !== artist) repairs.push("safe_artist_cleanup");
+  artist = cleanedArtist;
 
   const cleanedTitle = cleanSafeTitleCandidate(title);
   if (cleanedTitle && cleanedTitle !== title) {
@@ -184,14 +188,30 @@ function cleanSafeTitleCandidate(value) {
 }
 
 function cleanSafeArtistCandidate(value) {
-  return stripCustomEmojiAliases(value)
+  return stripUnpairedTrailingCloseBracket(
+    stripCustomEmojiAliases(value)
     .replace(/\s+/gu, " ")
     .replace(/\s+(?:19|20)\d{2}\s*[\/／.-]\s*(?:0?[1-9]|1[0-2])\b.*$/u, "")
     .replace(/\s+(?:19|20)\d{2}$/u, "")
     .replace(/\s*(?:ピアノ伴奏|アカペラ|お試し枠|海外ニキミームVer\.?|ワンコーラス|1番のみ)\s*$/iu, "")
     .replace(/\s*[☆★]+\s*$/u, "")
     .replace(/\s*[-ー–—]?\s*[【［\[(（「『]\s*$/u, "")
-    .trim();
+      .trim(),
+  );
+}
+
+function stripUnpairedTrailingCloseBracket(value) {
+  let text = String(value || "").trim();
+  for (const [open, close] of BRACKET_PAIRS) {
+    while (text.endsWith(close) && countChar(text, close) > countChar(text, open)) {
+      text = text.slice(0, text.length - close.length).trim();
+    }
+  }
+  return text;
+}
+
+function countChar(value, char) {
+  return [...String(value || "")].filter((item) => item === char).length;
 }
 
 function stripCrossFieldWrapper(titleInput, artistInput) {

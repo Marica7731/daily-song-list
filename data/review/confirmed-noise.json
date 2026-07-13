@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T15:57:26.789Z",
+  "generatedAt": "2026-07-13T20:03:45.530Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-13T15:56:10.026Z",
+  "latestGeneratedAt": "2026-07-13T18:53:20.659Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
   "counts": {
-    "totalCandidates": 143,
+    "totalCandidates": 145,
     "uniqueVideos": 44,
-    "uniqueSources": 62,
-    "confirmedNoiseCount": 143,
+    "uniqueSources": 61,
+    "confirmedNoiseCount": 145,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 143,
+      "confirmed_noise": 145,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -74,7 +74,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:gORDBq5IpBo:17d6ef2c258112269e6d",
       "sourcePath": "data/review/sources/history-gORDBq5IpBo-17d6ef2c258112269e6d.json",
-      "reviewUrl": "review.html?review=review%3AgORDBq5IpBo%3A17d6ef2c258112269e6d&entry=d8eb03009af3034fbd74b2b50b5aeb1bfca1bd1894b26ec1f05ca2d430d24340"
+      "reviewLocator": "data/review/sources/history-gORDBq5IpBo-17d6ef2c258112269e6d.json#d8eb03009af3034fbd74b2b50b5aeb1bfca1bd1894b26ec1f05ca2d430d24340"
     },
     {
       "title": "8/29、8",
@@ -128,7 +128,42 @@
       "replacementSuggestion": null,
       "reviewId": "review:RJZKQyNjrOQ:2419b0e29aeb1329a357",
       "sourcePath": "data/review/sources/history-RJZKQyNjrOQ-2419b0e29aeb1329a357.json",
-      "reviewUrl": "review.html?review=review%3ARJZKQyNjrOQ%3A2419b0e29aeb1329a357&entry=71166a0967ce19a99db022c14a2cd4c0d4566a1fecdc537586f19c758ad54d34"
+      "reviewLocator": "data/review/sources/history-RJZKQyNjrOQ-2419b0e29aeb1329a357.json#71166a0967ce19a99db022c14a2cd4c0d4566a1fecdc537586f19c758ad54d34"
+    },
+    {
+      "title": "～【歌枠】Ch登録5000名様耐久♪ リクエストOK #ちゆとり #Vsinger",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1395,
+      "time": "0:23:15",
+      "raw": "23:15～【歌枠】Ch登録5000名様耐久♪ リクエストOK #ちゆとり #Vsinger",
+      "rawHash": "c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565",
+      "videoId": "NBSGIrT4dZ0",
+      "videoTitle": "【歌枠】うたいます｜Mellow PlayList 35【CULUA】",
+      "channelName": "CULUA",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=NBSGIrT4dZ0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=NBSGIrT4dZ0&t=1395s",
+      "sourceId": "description:NBSGIrT4dZ0:c605998e902172f4",
+      "sourceHash": "c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565",
+      "sourceOrigin": "review:NBSGIrT4dZ0-c605998e902172f4bfcf.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:NBSGIrT4dZ0:c605998e902172f4bfcf",
+      "sourcePath": "data/review/sources/NBSGIrT4dZ0-c605998e902172f4bfcf.json",
+      "reviewLocator": "data/review/sources/NBSGIrT4dZ0-c605998e902172f4bfcf.json#c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565"
     },
     {
       "title": "謝罪会見",
@@ -184,7 +219,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
       "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
-      "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=0956c6df2f2481f45acb58d589a67fe08d88a7c40febae6fef118456f028b0e1"
+      "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#0956c6df2f2481f45acb58d589a67fe08d88a7c40febae6fef118456f028b0e1"
     },
     {
       "title": "マリパのわさび事件",
@@ -239,7 +274,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
       "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
-      "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=ed44e6eb0d5bebc3fd1022b4fa09fed4958d52a9cca5ba7aae041a6452553a12"
+      "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#ed44e6eb0d5bebc3fd1022b4fa09fed4958d52a9cca5ba7aae041a6452553a12"
     },
     {
       "title": "改めて謝罪",
@@ -294,7 +329,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
       "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
-      "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=a6bb69edd811f2613c702ff58b865fb5580082afe96363ff52d8819a0a9df471"
+      "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6bb69edd811f2613c702ff58b865fb5580082afe96363ff52d8819a0a9df471"
     },
     {
       "title": "ばいちょろり（終了）",
@@ -349,27 +384,27 @@
       "replacementSuggestion": null,
       "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
       "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
-      "reviewUrl": "review.html?review=review%3AfRvk5uuysyw%3A86c3fb2d00b56796e548&entry=a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
+      "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
     },
     {
-      "title": "こんみくりーん",
+      "title": "スタート",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 190,
-      "time": "0:03:10",
-      "raw": "3:10 こんみくりーん",
-      "rawHash": "5fcf59984409e6d70ece83426f75564fe7ba1e0d663a8772601a90e8ee1d7080",
-      "videoId": "_KgJH5qwbr4",
-      "videoTitle": "【 歌枠 / 雑談 】ROM歓迎◎ 楽しい気分になりたい人集合♡🌃アニソン/初見さん大歓迎【 #星衣未空莉 #UniVIRTUAL #vtuber 】",
-      "channelName": "MIKURI Ch. 星衣未空莉",
+      "seconds": 136,
+      "time": "0:02:16",
+      "raw": "2:16 スタート",
+      "rawHash": "e8fcb911306d2ece4ee9c6a6ad33e32e722c3337f442c92ae28d430102509b5a",
+      "videoId": "fMtt4nxzdVU",
+      "videoTitle": "Singing stream❄ 1時間、ミニライブ！🕊𓈒𓏸❄ #歌枠 ＊ #karaoke ໒꒱ 【 #Mirea_time 】",
+      "channelName": "Mirea Sheltzs／ミレア・シェルツ",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_KgJH5qwbr4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_KgJH5qwbr4&t=190s",
-      "sourceId": "Ugzt0COThDQQ3yv1z-N4AaABAg",
-      "sourceHash": "11b191dc10305a5bb4fbbd8c4ed2fa5371229cf7c1eb326e1a4853da78f6f02c",
-      "sourceOrigin": "review:_KgJH5qwbr4-11b191dc10305a5bb4fb.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fMtt4nxzdVU",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fMtt4nxzdVU&t=136s",
+      "sourceId": "UgyvUvMcDl2hJvnYrI14AaABAg",
+      "sourceHash": "279b485689d3820412657e1b71c4e4eb1bae482a2d080e8e0eca1d8b2e293b21",
+      "sourceOrigin": "review:fMtt4nxzdVU-279b485689d382041265.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -378,150 +413,36 @@
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
       "sourceRiskReasons": [
-        "source_many_topic_entries"
+        "source_activity_marker_ratio_high"
       ],
       "riskReasons": [
         "activity_marker_title",
-        "source_many_topic_entries"
+        "source_activity_marker_ratio_high"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:_KgJH5qwbr4:11b191dc10305a5bb4fb",
-      "sourcePath": "data/review/sources/_KgJH5qwbr4-11b191dc10305a5bb4fb.json",
-      "reviewUrl": "review.html?review=review%3A_KgJH5qwbr4%3A11b191dc10305a5bb4fb&entry=5fcf59984409e6d70ece83426f75564fe7ba1e0d663a8772601a90e8ee1d7080"
+      "reviewId": "review:fMtt4nxzdVU:279b485689d382041265",
+      "sourcePath": "data/review/sources/fMtt4nxzdVU-279b485689d382041265.json",
+      "reviewLocator": "data/review/sources/fMtt4nxzdVU-279b485689d382041265.json#e8fcb911306d2ece4ee9c6a6ad33e32e722c3337f442c92ae28d430102509b5a"
     },
     {
-      "title": "_ohamu:🐹",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 5621,
-      "time": "1:33:41",
-      "raw": "1:33:41 🐹:_ohamu:🐹",
-      "rawHash": "e560293635bd036ea38a792534c4722c418b48b61da1db4cd5aaeb01af3f882e",
-      "videoId": "_KgJH5qwbr4",
-      "videoTitle": "【 歌枠 / 雑談 】ROM歓迎◎ 楽しい気分になりたい人集合♡🌃アニソン/初見さん大歓迎【 #星衣未空莉 #UniVIRTUAL #vtuber 】",
-      "channelName": "MIKURI Ch. 星衣未空莉",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_KgJH5qwbr4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_KgJH5qwbr4&t=5621s",
-      "sourceId": "Ugzt0COThDQQ3yv1z-N4AaABAg",
-      "sourceHash": "11b191dc10305a5bb4fbbd8c4ed2fa5371229cf7c1eb326e1a4853da78f6f02c",
-      "sourceOrigin": "review:_KgJH5qwbr4-11b191dc10305a5bb4fb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "custom_emoji_only",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:_KgJH5qwbr4:11b191dc10305a5bb4fb",
-      "sourcePath": "data/review/sources/_KgJH5qwbr4-11b191dc10305a5bb4fb.json",
-      "reviewUrl": "review.html?review=review%3A_KgJH5qwbr4%3A11b191dc10305a5bb4fb&entry=e560293635bd036ea38a792534c4722c418b48b61da1db4cd5aaeb01af3f882e"
-    },
-    {
-      "title": "スパチャ読み開始",
+      "title": "～【歌枠】Ch登録5000名様耐久♪ リクエストOK #ちゆとり #Vsinger",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 6773,
-      "time": "1:52:53",
-      "raw": "1:52:53 スパチャ読み開始",
-      "rawHash": "d03a96d7057446e77aa463bdf9fda76fd863042f4b523676b1fe9597db2ba7cd",
-      "videoId": "_KgJH5qwbr4",
-      "videoTitle": "【 歌枠 / 雑談 】ROM歓迎◎ 楽しい気分になりたい人集合♡🌃アニソン/初見さん大歓迎【 #星衣未空莉 #UniVIRTUAL #vtuber 】",
-      "channelName": "MIKURI Ch. 星衣未空莉",
+      "seconds": 1395,
+      "time": "0:23:15",
+      "raw": "23:15～【歌枠】Ch登録5000名様耐久♪ リクエストOK #ちゆとり #Vsinger",
+      "rawHash": "c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565",
+      "videoId": "hWCFDqTOPwk",
+      "videoTitle": "【 #歌枠 】月曜定期🎙ボカロ曲歌います！２ 初見さん歓迎【 茨むあん︙Vsinger 】#vtuber #karaoke",
+      "channelName": "Muan ch.茨むあん",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_KgJH5qwbr4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_KgJH5qwbr4&t=6773s",
-      "sourceId": "Ugzt0COThDQQ3yv1z-N4AaABAg",
-      "sourceHash": "11b191dc10305a5bb4fbbd8c4ed2fa5371229cf7c1eb326e1a4853da78f6f02c",
-      "sourceOrigin": "review:_KgJH5qwbr4-11b191dc10305a5bb4fb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:_KgJH5qwbr4:11b191dc10305a5bb4fb",
-      "sourcePath": "data/review/sources/_KgJH5qwbr4-11b191dc10305a5bb4fb.json",
-      "reviewUrl": "review.html?review=review%3A_KgJH5qwbr4%3A11b191dc10305a5bb4fb&entry=d03a96d7057446e77aa463bdf9fda76fd863042f4b523676b1fe9597db2ba7cd"
-    },
-    {
-      "title": "おつみくりーん",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6853,
-      "time": "1:54:13",
-      "raw": "1:54:13 おつみくりーん",
-      "rawHash": "c32605993e657a7e9ebcb02777014b480f70df2b96f489b71e562e08b8a87868",
-      "videoId": "_KgJH5qwbr4",
-      "videoTitle": "【 歌枠 / 雑談 】ROM歓迎◎ 楽しい気分になりたい人集合♡🌃アニソン/初見さん大歓迎【 #星衣未空莉 #UniVIRTUAL #vtuber 】",
-      "channelName": "MIKURI Ch. 星衣未空莉",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_KgJH5qwbr4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_KgJH5qwbr4&t=6853s",
-      "sourceId": "Ugzt0COThDQQ3yv1z-N4AaABAg",
-      "sourceHash": "11b191dc10305a5bb4fbbd8c4ed2fa5371229cf7c1eb326e1a4853da78f6f02c",
-      "sourceOrigin": "review:_KgJH5qwbr4-11b191dc10305a5bb4fb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "activity_marker_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:_KgJH5qwbr4:11b191dc10305a5bb4fb",
-      "sourcePath": "data/review/sources/_KgJH5qwbr4-11b191dc10305a5bb4fb.json",
-      "reviewUrl": "review.html?review=review%3A_KgJH5qwbr4%3A11b191dc10305a5bb4fb&entry=c32605993e657a7e9ebcb02777014b480f70df2b96f489b71e562e08b8a87868"
-    },
-    {
-      "title": "まで 【 #新人Vtuber / #りんごの御茶会 】",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 510,
-      "time": "0:08:30",
-      "raw": "コメント大歓迎！皆さまへあいさつしたい枠 8:30まで 【 #新人Vtuber / #りんごの御茶会 】",
-      "rawHash": "7d7b56c38b037f7964e1636db1c3cba6b59e224884a1f647a263c7f3a9ab57dc",
-      "videoId": "SKxLjZvYlp4",
-      "videoTitle": "【歌枠 】バラード中心になりそう 【 #新人Vtuber / #りんごの御茶会 】",
-      "channelName": "mimori_ch 水森りんご",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=SKxLjZvYlp4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=SKxLjZvYlp4&t=510s",
-      "sourceId": "description:SKxLjZvYlp4:6b6e95a3035ad07d",
-      "sourceHash": "6b6e95a3035ad07df2857ec0c8db5f51cc0b8c38209bb234e1e1a180ecc9cb57",
-      "sourceOrigin": "review:SKxLjZvYlp4-6b6e95a3035ad07df285.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=hWCFDqTOPwk",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hWCFDqTOPwk&t=1395s",
+      "sourceId": "description:hWCFDqTOPwk:c605998e902172f4",
+      "sourceHash": "c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565",
+      "sourceOrigin": "review:hWCFDqTOPwk-c605998e902172f4bfcf.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -531,12 +452,12 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "likely_non_song_entry"
+        "activity_title"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:SKxLjZvYlp4:6b6e95a3035ad07df285",
-      "sourcePath": "data/review/sources/SKxLjZvYlp4-6b6e95a3035ad07df285.json",
-      "reviewUrl": "review.html?review=review%3ASKxLjZvYlp4%3A6b6e95a3035ad07df285&entry=7d7b56c38b037f7964e1636db1c3cba6b59e224884a1f647a263c7f3a9ab57dc"
+      "reviewId": "review:hWCFDqTOPwk:c605998e902172f4bfcf",
+      "sourcePath": "data/review/sources/hWCFDqTOPwk-c605998e902172f4bfcf.json",
+      "reviewLocator": "data/review/sources/hWCFDqTOPwk-c605998e902172f4bfcf.json#c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565"
     },
     {
       "title": "終わりのあいさつ",
@@ -578,7 +499,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:bxffMK15LHs:5cf57224d41b29303872",
       "sourcePath": "data/review/sources/history-bxffMK15LHs-5cf57224d41b29303872.json",
-      "reviewUrl": "review.html?review=review%3AbxffMK15LHs%3A5cf57224d41b29303872&entry=fd6a5cd683bca5b171dc6311e2df242c285a278d7bef351e8f45c31d1e76dc41"
+      "reviewLocator": "data/review/sources/history-bxffMK15LHs-5cf57224d41b29303872.json#fd6a5cd683bca5b171dc6311e2df242c285a278d7bef351e8f45c31d1e76dc41"
     },
     {
       "title": "本編開始",
@@ -619,7 +540,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:zREfHIYyb1M:94bf1eecf968bf5bd964",
       "sourcePath": "data/review/sources/history-zREfHIYyb1M-94bf1eecf968bf5bd964.json",
-      "reviewUrl": "review.html?review=review%3AzREfHIYyb1M%3A94bf1eecf968bf5bd964&entry=48fea5b826b2e681e68b721a26940a22bdadf0a86ad15cefd603b5b1badf983a"
+      "reviewLocator": "data/review/sources/history-zREfHIYyb1M-94bf1eecf968bf5bd964.json#48fea5b826b2e681e68b721a26940a22bdadf0a86ad15cefd603b5b1badf983a"
     },
     {
       "title": "〜3Dライブ開催決定!!!!",
@@ -662,7 +583,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:71OSYnx-Vy0:2fb7d6f710f49d3cb172",
       "sourcePath": "data/review/sources/history-71OSYnx-Vy0-2fb7d6f710f49d3cb172.json",
-      "reviewUrl": "review.html?review=review%3A71OSYnx-Vy0%3A2fb7d6f710f49d3cb172&entry=8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4"
+      "reviewLocator": "data/review/sources/history-71OSYnx-Vy0-2fb7d6f710f49d3cb172.json#8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4"
     },
     {
       "title": "〜3Dライブ開催決定!!!!",
@@ -709,7 +630,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:71OSYnx-Vy0:6bb534ac466b1ca21974",
       "sourcePath": "data/review/sources/history-71OSYnx-Vy0-6bb534ac466b1ca21974.json",
-      "reviewUrl": "review.html?review=review%3A71OSYnx-Vy0%3A6bb534ac466b1ca21974&entry=8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4"
+      "reviewLocator": "data/review/sources/history-71OSYnx-Vy0-6bb534ac466b1ca21974.json#8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4"
     },
     {
       "title": "おつウタノン",
@@ -755,7 +676,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:1rCEayGJi54:0c2f16f9fd5431eb7a53",
       "sourcePath": "data/review/sources/history-1rCEayGJi54-0c2f16f9fd5431eb7a53.json",
-      "reviewUrl": "review.html?review=review%3A1rCEayGJi54%3A0c2f16f9fd5431eb7a53&entry=d666ea7b1f54b3f61ef96c1a74453c89b183202a6616c1b209c2a7c84e5da5d0"
+      "reviewLocator": "data/review/sources/history-1rCEayGJi54-0c2f16f9fd5431eb7a53.json#d666ea7b1f54b3f61ef96c1a74453c89b183202a6616c1b209c2a7c84e5da5d0"
     },
     {
       "title": "おつウタノン",
@@ -805,7 +726,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:37XJM6EIrns:214ab576a131538d5482",
       "sourcePath": "data/review/sources/history-37XJM6EIrns-214ab576a131538d5482.json",
-      "reviewUrl": "review.html?review=review%3A37XJM6EIrns%3A214ab576a131538d5482&entry=6c272111dfdf019e81b62412af600c43a8ef88500af32c31335547eb3de64e56"
+      "reviewLocator": "data/review/sources/history-37XJM6EIrns-214ab576a131538d5482.json#6c272111dfdf019e81b62412af600c43a8ef88500af32c31335547eb3de64e56"
     },
     {
       "title": "おつウタノン",
@@ -855,7 +776,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:YZLK9V0oPTw:58872227afd4c507569b",
       "sourcePath": "data/review/sources/history-YZLK9V0oPTw-58872227afd4c507569b.json",
-      "reviewUrl": "review.html?review=review%3AYZLK9V0oPTw%3A58872227afd4c507569b&entry=ad74ee708b40a592d219f8588daf921d70035e1c548890096881d058fc48d0e1"
+      "reviewLocator": "data/review/sources/history-YZLK9V0oPTw-58872227afd4c507569b.json#ad74ee708b40a592d219f8588daf921d70035e1c548890096881d058fc48d0e1"
     },
     {
       "title": "おつウタノン",
@@ -900,7 +821,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:YZLK9V0oPTw:ed9b29499e75543d0475",
       "sourcePath": "data/review/sources/history-YZLK9V0oPTw-ed9b29499e75543d0475.json",
-      "reviewUrl": "review.html?review=review%3AYZLK9V0oPTw%3Aed9b29499e75543d0475&entry=ad74ee708b40a592d219f8588daf921d70035e1c548890096881d058fc48d0e1"
+      "reviewLocator": "data/review/sources/history-YZLK9V0oPTw-ed9b29499e75543d0475.json#ad74ee708b40a592d219f8588daf921d70035e1c548890096881d058fc48d0e1"
     },
     {
       "title": "おつウタノン",
@@ -942,7 +863,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:YdM4OewAJ8E:593d50e4158c2491f8a5",
       "sourcePath": "data/review/sources/history-YdM4OewAJ8E-593d50e4158c2491f8a5.json",
-      "reviewUrl": "review.html?review=review%3AYdM4OewAJ8E%3A593d50e4158c2491f8a5&entry=710022534335f3b8a56a757e8c352dccbfed646d6b63c44fef3f620e16c7d9f2"
+      "reviewLocator": "data/review/sources/history-YdM4OewAJ8E-593d50e4158c2491f8a5.json#710022534335f3b8a56a757e8c352dccbfed646d6b63c44fef3f620e16c7d9f2"
     },
     {
       "title": "おつウタノン",
@@ -988,7 +909,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:YdM4OewAJ8E:8ab605e83465bdc3d53b",
       "sourcePath": "data/review/sources/history-YdM4OewAJ8E-8ab605e83465bdc3d53b.json",
-      "reviewUrl": "review.html?review=review%3AYdM4OewAJ8E%3A8ab605e83465bdc3d53b&entry=710022534335f3b8a56a757e8c352dccbfed646d6b63c44fef3f620e16c7d9f2"
+      "reviewLocator": "data/review/sources/history-YdM4OewAJ8E-8ab605e83465bdc3d53b.json#710022534335f3b8a56a757e8c352dccbfed646d6b63c44fef3f620e16c7d9f2"
     },
     {
       "title": "ヒゲオトコ𝑜𝑟蹴り戻り𝑜𝑟風船",
@@ -1039,7 +960,612 @@
       "replacementSuggestion": null,
       "reviewId": "review:8KDs7OP6_KM:92d430c2418abbe57f06",
       "sourcePath": "data/review/sources/history-8KDs7OP6_KM-92d430c2418abbe57f06.json",
-      "reviewUrl": "review.html?review=review%3A8KDs7OP6_KM%3A92d430c2418abbe57f06&entry=aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7"
+      "reviewLocator": "data/review/sources/history-8KDs7OP6_KM-92d430c2418abbe57f06.json#aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "8_2Q4mt4YYc",
+      "videoTitle": "【歌枠】何曲知ってる？平成のアニソンで懐かしさに浸ろう！【#新人Vtuber /無印ヨグ #shorts 】",
+      "channelName": "Yogu Ch. 無印ヨグ【エアプロ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8_2Q4mt4YYc",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8_2Q4mt4YYc&t=240s",
+      "sourceId": "description:8_2Q4mt4YYc:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:8_2Q4mt4YYc-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8_2Q4mt4YYc:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/8_2Q4mt4YYc-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/8_2Q4mt4YYc-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+    },
+    {
+      "title": "～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 426,
+      "time": "0:07:06",
+      "raw": "7:06～",
+      "rawHash": "30d686132c3b7815c0005ec3f77f1adfc96a232fa7100224080fb2363e94d023",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=426s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "bad_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#30d686132c3b7815c0005ec3f77f1adfc96a232fa7100224080fb2363e94d023"
+    },
+    {
+      "title": "「私は、わたしの事が好き。/Honey Woeks」",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 655,
+      "time": "0:10:55",
+      "raw": "10:55 🎤2曲目:「私は、わたしの事が好き。/Honey Woeks」",
+      "rawHash": "154780e2a0141e8b7b78760868564d658b06ece8f1f7877697157dff1ed763ae",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=655s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#154780e2a0141e8b7b78760868564d658b06ece8f1f7877697157dff1ed763ae"
+    },
+    {
+      "title": "水着の話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 705,
+      "time": "0:11:45",
+      "raw": "11:45 💭水着の話",
+      "rawHash": "2bedaadd77dd46fd419f02f2b63b87b4118463c0e64692332df890970583d199",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=705s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#2bedaadd77dd46fd419f02f2b63b87b4118463c0e64692332df890970583d199"
+    },
+    {
+      "title": "新しく買ったイヤホンの話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 869,
+      "time": "0:14:29",
+      "raw": "14:29 💭新しく買ったイヤホンの話",
+      "rawHash": "36d814786863d10f9ffa0047e601f6351a9d137dcfcd5c7598198fbe3b1763a5",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=869s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#36d814786863d10f9ffa0047e601f6351a9d137dcfcd5c7598198fbe3b1763a5"
+    },
+    {
+      "title": "映画の話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1019,
+      "time": "0:16:59",
+      "raw": "16:59 💭映画の話",
+      "rawHash": "30599001b8a13cf68976c7bf55ad31d0be71a8a852486c5d7e5c6a61fbfc4703",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=1019s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#30599001b8a13cf68976c7bf55ad31d0be71a8a852486c5d7e5c6a61fbfc4703"
+    },
+    {
+      "title": "～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1256,
+      "time": "0:20:56",
+      "raw": "20:56～",
+      "rawHash": "59c6b85fe49f4a4676a3802527913721d274c9d1080493b5edb34c6d58c15065",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=1256s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "bad_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#59c6b85fe49f4a4676a3802527913721d274c9d1080493b5edb34c6d58c15065"
+    },
+    {
+      "title": "Setlogの話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1598,
+      "time": "0:26:38",
+      "raw": "26:38 💭Setlogの話",
+      "rawHash": "fbeea3c605a904e4efadc66a27e8eb05fa7ec38e3cc63ed1b8cb0ebd8c06bc6e",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=1598s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#fbeea3c605a904e4efadc66a27e8eb05fa7ec38e3cc63ed1b8cb0ebd8c06bc6e"
+    },
+    {
+      "title": "～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1896,
+      "time": "0:31:36",
+      "raw": "31:36～",
+      "rawHash": "cf04e9db939e5c1feef2685f5eabb263ff3fdad40a70875d92a1105937ba7e00",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=1896s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "bad_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#cf04e9db939e5c1feef2685f5eabb263ff3fdad40a70875d92a1105937ba7e00"
+    },
+    {
+      "title": "～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2188,
+      "time": "0:36:28",
+      "raw": "36:28～",
+      "rawHash": "2421894f7abb4e6950c807fcf1ab77bf71dee05e77a9345db3ddce5e45e723c8",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=2188s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "bad_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#2421894f7abb4e6950c807fcf1ab77bf71dee05e77a9345db3ddce5e45e723c8"
+    },
+    {
+      "title": "～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2893,
+      "time": "0:48:13",
+      "raw": "48:13～",
+      "rawHash": "d722668bfce9957621e9db06c5ebd9e24decac1d5d19416d54d5e549338edfb6",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=2893s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "bad_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#d722668bfce9957621e9db06c5ebd9e24decac1d5d19416d54d5e549338edfb6"
+    },
+    {
+      "title": "おつがお～🐾",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3380,
+      "time": "0:56:20",
+      "raw": "56:20 🤍おつがお～🐾",
+      "rawHash": "292e0d1ad7532bc1cca8489fffbfd8adc91fbf9f7dd99496b16821d59c0fc310",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=3380s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#292e0d1ad7532bc1cca8489fffbfd8adc91fbf9f7dd99496b16821d59c0fc310"
+    },
+    {
+      "title": "～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3865,
+      "time": "1:04:25",
+      "raw": "1:04:25～",
+      "rawHash": "1602f8e51272502e8e9f94a0aea462a15e6809448c848d91469a2538e804de72",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=3865s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "bad_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#1602f8e51272502e8e9f94a0aea462a15e6809448c848d91469a2538e804de72"
+    },
+    {
+      "title": "～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4261,
+      "time": "1:11:01",
+      "raw": "1:11:01～",
+      "rawHash": "c397c30fdf47b05f45c8ee7c2531815ff807960e4e0de58f76f1565e8c692981",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=4261s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "bad_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#c397c30fdf47b05f45c8ee7c2531815ff807960e4e0de58f76f1565e8c692981"
+    },
+    {
+      "title": "【雑談パート】",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4480,
+      "time": "1:14:40",
+      "raw": "1:14:40 【雑談パート】",
+      "rawHash": "dfa300ebe611489a61b0fae29b46def526c90cf0261da1a20bae21765c120c11",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=4480s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#dfa300ebe611489a61b0fae29b46def526c90cf0261da1a20bae21765c120c11"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4612,
+      "time": "1:16:52",
+      "raw": "1:16:52",
+      "rawHash": "36929a679bb6cad5ebe31267dfcbd1a55ffbaf577d69085e64dbcb70e0e284be",
+      "videoId": "OWSABUDlx2E",
+      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
+      "channelName": "Yona Ch. 獅ノ月ヨナ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=4612s",
+      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
+      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
+      "sourceOrigin": "review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
+      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
+      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#36929a679bb6cad5ebe31267dfcbd1a55ffbaf577d69085e64dbcb70e0e284be"
     },
     {
       "title": "企画説明",
@@ -1086,7 +1612,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:OCULwDtQ8Bs:a5f12251209c4a3d1b6a",
       "sourcePath": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json",
-      "reviewUrl": "review.html?review=review%3AOCULwDtQ8Bs%3Aa5f12251209c4a3d1b6a&entry=157a1fd8246db0b268cff62bf11c52381f7dbf657bc3a6342fe9372512776e0a"
+      "reviewLocator": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json#157a1fd8246db0b268cff62bf11c52381f7dbf657bc3a6342fe9372512776e0a"
     },
     {
       "title": "曲終わり",
@@ -1140,7 +1666,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=65377fff498d3bb6d9ba5cb831ef17225af165cca3363284ae3fd1a9bcb281f7"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#65377fff498d3bb6d9ba5cb831ef17225af165cca3363284ae3fd1a9bcb281f7"
     },
     {
       "title": "曲終わり",
@@ -1194,7 +1720,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=3711a76942fa2b33b1b9bbe2a50fdb542aad40f8f9abcb26a3c4edfd819923f7"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#3711a76942fa2b33b1b9bbe2a50fdb542aad40f8f9abcb26a3c4edfd819923f7"
     },
     {
       "title": "曲終わり",
@@ -1248,7 +1774,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=71b3e47796723ea9b144be4edbfda26196220fd34f26b4f0216aa7142d776316"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#71b3e47796723ea9b144be4edbfda26196220fd34f26b4f0216aa7142d776316"
     },
     {
       "title": "曲終わり",
@@ -1302,7 +1828,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=37a5b47355ff8672237916c95b12db259f2b97295c4617958b06141212b4a59c"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#37a5b47355ff8672237916c95b12db259f2b97295c4617958b06141212b4a59c"
     },
     {
       "title": "曲終わり",
@@ -1356,7 +1882,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=e0e5aa55903c2606cc8c6a4cbaf8f0999d5144266f301a396a85552c384fdf06"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#e0e5aa55903c2606cc8c6a4cbaf8f0999d5144266f301a396a85552c384fdf06"
     },
     {
       "title": "曲終わり",
@@ -1410,7 +1936,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=61a65e6ec6346472fe9f31a8fd7735e34d326074e0f955d184fa0df63df554ed"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#61a65e6ec6346472fe9f31a8fd7735e34d326074e0f955d184fa0df63df554ed"
     },
     {
       "title": "曲終わり",
@@ -1464,7 +1990,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=3b4c9266d7c1ecbd8232a59dee6a617413810e67e7f8af7405acf38ec9a0934e"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#3b4c9266d7c1ecbd8232a59dee6a617413810e67e7f8af7405acf38ec9a0934e"
     },
     {
       "title": "曲終わり",
@@ -1518,7 +2044,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=1e450cdbf82f48181f094393f4331f0a098c247a2a786b1c165f5040ed34af66"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#1e450cdbf82f48181f094393f4331f0a098c247a2a786b1c165f5040ed34af66"
     },
     {
       "title": "曲終わり",
@@ -1572,7 +2098,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=426c0ebe1a120a45245693e6a81fe105a7e2285635070b0e8c84eeddb094116b"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#426c0ebe1a120a45245693e6a81fe105a7e2285635070b0e8c84eeddb094116b"
     },
     {
       "title": "曲終わり",
@@ -1626,7 +2152,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=63da08f1ce75740207fcf8c446ee305cbd6abeb13d9c75399f00da3bd66f7057"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#63da08f1ce75740207fcf8c446ee305cbd6abeb13d9c75399f00da3bd66f7057"
     },
     {
       "title": "曲終わり",
@@ -1680,7 +2206,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=87a00809d4f5dcafe235de442e384030ad143ff7757570b147566b3a9f332ff9"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#87a00809d4f5dcafe235de442e384030ad143ff7757570b147566b3a9f332ff9"
     },
     {
       "title": "曲終わり",
@@ -1734,7 +2260,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=2840a5369d2221cf5a72692b3fb52486c862fcd3218b0b1abf1e1686d6c4ae2c"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#2840a5369d2221cf5a72692b3fb52486c862fcd3218b0b1abf1e1686d6c4ae2c"
     },
     {
       "title": "曲終わり",
@@ -1788,7 +2314,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=fd92c954bca6ccffdf464b91ef96c39940c11d39fa4a9e1870ce3c66e8c03d47"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#fd92c954bca6ccffdf464b91ef96c39940c11d39fa4a9e1870ce3c66e8c03d47"
     },
     {
       "title": "曲終わり",
@@ -1842,7 +2368,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=b345443fd1d3392f5cff93c8d118e60c66b4c0dcfebe2c402506bdcc4571e475"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#b345443fd1d3392f5cff93c8d118e60c66b4c0dcfebe2c402506bdcc4571e475"
     },
     {
       "title": "曲終わり",
@@ -1896,7 +2422,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=73ad9ce046d37bd385821fefe3cb65612488cd10a37f089666b210d988e64b1a"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#73ad9ce046d37bd385821fefe3cb65612488cd10a37f089666b210d988e64b1a"
     },
     {
       "title": "曲終わり",
@@ -1950,7 +2476,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=bc990c2c349ae99176d0142876c5116ea3dca8e784fddacb4e0544fc713bdc1f"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#bc990c2c349ae99176d0142876c5116ea3dca8e784fddacb4e0544fc713bdc1f"
     },
     {
       "title": "曲終わり",
@@ -2004,7 +2530,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=4630f844282ae673b90d16e41ce280ad96644250d526bc105a3a6e49c136984b"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#4630f844282ae673b90d16e41ce280ad96644250d526bc105a3a6e49c136984b"
     },
     {
       "title": "曲終わり",
@@ -2058,7 +2584,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=3b53228d74ee9893b53d03e272183452b132b87b121543b9c945509878b6c653"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#3b53228d74ee9893b53d03e272183452b132b87b121543b9c945509878b6c653"
     },
     {
       "title": "曲終わり",
@@ -2112,7 +2638,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=5b6fdce2897f90c423ac22549c5586d2cb3d046a84379fa1631819c8d95eb595"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#5b6fdce2897f90c423ac22549c5586d2cb3d046a84379fa1631819c8d95eb595"
     },
     {
       "title": "曲終わり",
@@ -2166,7 +2692,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=79b1aff4a50829b29ec6aef37038a41b376f2097540ef647747532441d3206e9"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#79b1aff4a50829b29ec6aef37038a41b376f2097540ef647747532441d3206e9"
     },
     {
       "title": "曲終わり",
@@ -2220,7 +2746,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=679d6e9c9f8707996324362b3b53ff9d4e25a47fa4f62c0ab9367439dd90419a"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#679d6e9c9f8707996324362b3b53ff9d4e25a47fa4f62c0ab9367439dd90419a"
     },
     {
       "title": "曲終わり",
@@ -2274,7 +2800,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=c34330408e86e8db21386aaae86ff29793a40d117a2de590944e0647b2319a9e"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#c34330408e86e8db21386aaae86ff29793a40d117a2de590944e0647b2319a9e"
     },
     {
       "title": "曲終わり",
@@ -2328,7 +2854,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=44c7ea22e7503c29b6719e27a4f82369422aad93f142418c55abb8cc9cc5f2ba"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#44c7ea22e7503c29b6719e27a4f82369422aad93f142418c55abb8cc9cc5f2ba"
     },
     {
       "title": "曲終わり",
@@ -2382,7 +2908,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=6a6aaa4306a0b8f6df6b22bb5720c7f9b7a70eeb37504bdbd76be01174de4d28"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#6a6aaa4306a0b8f6df6b22bb5720c7f9b7a70eeb37504bdbd76be01174de4d28"
     },
     {
       "title": "曲終わり",
@@ -2436,7 +2962,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=f9a71c53e5a28728d57440a355c693239a33e46ea53d481f498e7c16e35c8fd8"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#f9a71c53e5a28728d57440a355c693239a33e46ea53d481f498e7c16e35c8fd8"
     },
     {
       "title": "曲終わり",
@@ -2490,7 +3016,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=9c2ce4d72422c506623b08abfb56886f593c09797b806efcb2308208db7e1b1c"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#9c2ce4d72422c506623b08abfb56886f593c09797b806efcb2308208db7e1b1c"
     },
     {
       "title": "曲終わり",
@@ -2544,7 +3070,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=69de90509ddb0efbb12d06489a08efdf638ab7d97497841051a0c5253f6e0156"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#69de90509ddb0efbb12d06489a08efdf638ab7d97497841051a0c5253f6e0156"
     },
     {
       "title": "曲終わり",
@@ -2598,7 +3124,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=f014d709c9b7c4d4cd7fc7f87f768cb35fd076f74e8f3bb001baed45638a4c1a"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#f014d709c9b7c4d4cd7fc7f87f768cb35fd076f74e8f3bb001baed45638a4c1a"
     },
     {
       "title": "曲終わり",
@@ -2652,7 +3178,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=4890bc4bb395686ce7b8f3f6d03d23acfdd401c09b4d5c78297b13f79502232f"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#4890bc4bb395686ce7b8f3f6d03d23acfdd401c09b4d5c78297b13f79502232f"
     },
     {
       "title": "曲終わり",
@@ -2706,7 +3232,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=5b9b15c89462aaf7478bcc9605fb9128a31f673a492a0e749a9f9a0e3cba828f"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#5b9b15c89462aaf7478bcc9605fb9128a31f673a492a0e749a9f9a0e3cba828f"
     },
     {
       "title": "曲終わり",
@@ -2760,7 +3286,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=2f0fd2b6c37e8e70445c8ae5e4aedd84dd2bb239adb4022e4ad1ef4c8b1aa6fb"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#2f0fd2b6c37e8e70445c8ae5e4aedd84dd2bb239adb4022e4ad1ef4c8b1aa6fb"
     },
     {
       "title": "曲終わり",
@@ -2814,7 +3340,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=1f1e19b678ce9b052a49e14bccb16b7925facdce0927a01caadd4b52ee725d9c"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#1f1e19b678ce9b052a49e14bccb16b7925facdce0927a01caadd4b52ee725d9c"
     },
     {
       "title": "曲終わり",
@@ -2868,7 +3394,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=afbac943bda0e028646a6dcb8b56c30879764b75808468c132b095bed7efb24e"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#afbac943bda0e028646a6dcb8b56c30879764b75808468c132b095bed7efb24e"
     },
     {
       "title": "曲終わり",
@@ -2922,7 +3448,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=03ff646646af907705a222da20a83d8aef4eec4e58f5ed1b5520104af433cf38"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#03ff646646af907705a222da20a83d8aef4eec4e58f5ed1b5520104af433cf38"
     },
     {
       "title": "曲終わり",
@@ -2976,7 +3502,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=53b5ef85c6628ac46f75334018eb411e7b22d92fa929f1659c8a3442494fe7a5"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#53b5ef85c6628ac46f75334018eb411e7b22d92fa929f1659c8a3442494fe7a5"
     },
     {
       "title": "曲終わり",
@@ -3030,7 +3556,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=0600a2e087f275a5b69f2b5d0fad12a723f0d3add6a7dd5d13e0ee6dd98546fc"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#0600a2e087f275a5b69f2b5d0fad12a723f0d3add6a7dd5d13e0ee6dd98546fc"
     },
     {
       "title": "曲終わり",
@@ -3084,7 +3610,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=c8510e05f65cbc438986ea610130d6f2520e3b6763c93a64b4a57cc3858bfba3"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#c8510e05f65cbc438986ea610130d6f2520e3b6763c93a64b4a57cc3858bfba3"
     },
     {
       "title": "曲終わり",
@@ -3138,7 +3664,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=e589a24c2fa9148f79179446aaffac24f03de09b1bad27df9e7e1f76e907702d"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#e589a24c2fa9148f79179446aaffac24f03de09b1bad27df9e7e1f76e907702d"
     },
     {
       "title": "曲終わり",
@@ -3192,7 +3718,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=0a95bfbd184313ff603a0381d45380b41adf94b7eb0126df79803eed90f76d2e"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#0a95bfbd184313ff603a0381d45380b41adf94b7eb0126df79803eed90f76d2e"
     },
     {
       "title": "曲終わり",
@@ -3246,7 +3772,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=9ff616bbaefb63516399a5422534c0a2d438ca5cec399f019aa9f570912303a7"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#9ff616bbaefb63516399a5422534c0a2d438ca5cec399f019aa9f570912303a7"
     },
     {
       "title": "曲終わり",
@@ -3300,7 +3826,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=ff029a421ef30051ac0013d566ab4ece1702cbcc66c3635db5d52d95257961ce"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#ff029a421ef30051ac0013d566ab4ece1702cbcc66c3635db5d52d95257961ce"
     },
     {
       "title": "曲終わり",
@@ -3354,7 +3880,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=5f5ba2ff395da8a0a05135a38985b00bd838c61c15fe53aea2c2aad3fd4fb335"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#5f5ba2ff395da8a0a05135a38985b00bd838c61c15fe53aea2c2aad3fd4fb335"
     },
     {
       "title": "曲終わり",
@@ -3408,7 +3934,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=cf0c067a3d9400fc77b913807c147a74b673b5db137632497e9faa65781b786b"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#cf0c067a3d9400fc77b913807c147a74b673b5db137632497e9faa65781b786b"
     },
     {
       "title": "曲終わり",
@@ -3462,7 +3988,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=72de26ec15c63d3793923d1939211345f4c31d82e3608f5218f0729446662459"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#72de26ec15c63d3793923d1939211345f4c31d82e3608f5218f0729446662459"
     },
     {
       "title": "曲終わり",
@@ -3516,7 +4042,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=3fa5139a48673911cc9edef97fca51bcb4609da233445f1000e4aa0060c04d7e"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#3fa5139a48673911cc9edef97fca51bcb4609da233445f1000e4aa0060c04d7e"
     },
     {
       "title": "曲終わり",
@@ -3570,7 +4096,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=1562f69faeeab2045ccc74d9d806044dcf17c893c264d57eaef856921b18c9e4"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#1562f69faeeab2045ccc74d9d806044dcf17c893c264d57eaef856921b18c9e4"
     },
     {
       "title": "曲終わり",
@@ -3624,7 +4150,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:cde891fc8636c0b31ff3",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Acde891fc8636c0b31ff3&entry=446417b85d9d6606208e3afd3fd8faabc73f9318dd46e2cfb32a081b29838cf5"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-cde891fc8636c0b31ff3.json#446417b85d9d6606208e3afd3fd8faabc73f9318dd46e2cfb32a081b29838cf5"
     },
     {
       "title": "おつメラ",
@@ -3674,200 +4200,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:qENxBvbn29Y:d20b81982796f791041d",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-d20b81982796f791041d.json",
-      "reviewUrl": "review.html?review=review%3AqENxBvbn29Y%3Ad20b81982796f791041d&entry=1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
-    },
-    {
-      "title": "JANE DOE",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 2875,
-      "time": "0:47:55",
-      "raw": "47:55JANE DOE",
-      "rawHash": "3751436f1a2357724108de4b5dd4f6744ae2d24237e8107957721ce477a15ddb",
-      "videoId": "ZSNptWSG6i4",
-      "videoTitle": "【 歌枠￤KARAOKE 】1曲だけでも聴いてかない？【ゆそる／ピスパレ】",
-      "channelName": "ゆそる",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZSNptWSG6i4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZSNptWSG6i4&t=2875s",
-      "sourceId": "UgyAKGTW6sA9QLrSyml4AaABAg",
-      "sourceHash": "8cb46db9fe80b031d8292cd80bbacbf29e12b6ca33f1ecf3c99c4d80c6c6ed4c",
-      "sourceOrigin": "review:ZSNptWSG6i4-8cb46db9fe80b031d829.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZSNptWSG6i4:8cb46db9fe80b031d829",
-      "sourcePath": "data/review/sources/ZSNptWSG6i4-8cb46db9fe80b031d829.json",
-      "reviewUrl": "review.html?review=review%3AZSNptWSG6i4%3A8cb46db9fe80b031d829&entry=3751436f1a2357724108de4b5dd4f6744ae2d24237e8107957721ce477a15ddb"
-    },
-    {
-      "title": "ゆそる君の気持ち届きますように🩵💛",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 3960,
-      "time": "1:06:00",
-      "raw": "1:06:00 ゆそる君の気持ち届きますように🩵💛",
-      "rawHash": "5890f4b86d8a4fe1494edfca37ccf8ee224542f7e832dd31d5e27dc7d63f2fcd",
-      "videoId": "ZSNptWSG6i4",
-      "videoTitle": "【 歌枠￤KARAOKE 】1曲だけでも聴いてかない？【ゆそる／ピスパレ】",
-      "channelName": "ゆそる",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZSNptWSG6i4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZSNptWSG6i4&t=3960s",
-      "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
-      "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "sourceOrigin": "review:ZSNptWSG6i4-20467cb7df1d1d284931.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZSNptWSG6i4:20467cb7df1d1d284931",
-      "sourcePath": "data/review/sources/ZSNptWSG6i4-20467cb7df1d1d284931.json",
-      "reviewUrl": "review.html?review=review%3AZSNptWSG6i4%3A20467cb7df1d1d284931&entry=5890f4b86d8a4fe1494edfca37ccf8ee224542f7e832dd31d5e27dc7d63f2fcd"
-    },
-    {
-      "title": "雑談始まります😂",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 5287,
-      "time": "1:28:07",
-      "raw": "1:28:07 雑談始まります😂",
-      "rawHash": "c5c465bee8d3f7dfd3f10e73c8e3f83b3561d3acb3d87456bf673f897c05f602",
-      "videoId": "ZSNptWSG6i4",
-      "videoTitle": "【 歌枠￤KARAOKE 】1曲だけでも聴いてかない？【ゆそる／ピスパレ】",
-      "channelName": "ゆそる",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZSNptWSG6i4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZSNptWSG6i4&t=5287s",
-      "sourceId": "UgyoVod0rDGsPjKOCld4AaABAg",
-      "sourceHash": "20467cb7df1d1d284931ab186fb5446fa196542fef2839f6336c705e8c7f7e88",
-      "sourceOrigin": "review:ZSNptWSG6i4-20467cb7df1d1d284931.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZSNptWSG6i4:20467cb7df1d1d284931",
-      "sourcePath": "data/review/sources/ZSNptWSG6i4-20467cb7df1d1d284931.json",
-      "reviewUrl": "review.html?review=review%3AZSNptWSG6i4%3A20467cb7df1d1d284931&entry=c5c465bee8d3f7dfd3f10e73c8e3f83b3561d3acb3d87456bf673f897c05f602"
-    },
-    {
-      "title": "ドーナツとおみそ汁の話",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6296,
-      "time": "1:44:56",
-      "raw": "1:44:56ドーナツとおみそ汁の話",
-      "rawHash": "54279fd90e544314d7fcde3b84814d96b6a2491ef40f95f393905e0cc6707fbe",
-      "videoId": "ZSNptWSG6i4",
-      "videoTitle": "【 歌枠￤KARAOKE 】1曲だけでも聴いてかない？【ゆそる／ピスパレ】",
-      "channelName": "ゆそる",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZSNptWSG6i4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZSNptWSG6i4&t=6296s",
-      "sourceId": "UgyAKGTW6sA9QLrSyml4AaABAg",
-      "sourceHash": "8cb46db9fe80b031d8292cd80bbacbf29e12b6ca33f1ecf3c99c4d80c6c6ed4c",
-      "sourceOrigin": "review:ZSNptWSG6i4-8cb46db9fe80b031d829.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZSNptWSG6i4:8cb46db9fe80b031d829",
-      "sourcePath": "data/review/sources/ZSNptWSG6i4-8cb46db9fe80b031d829.json",
-      "reviewUrl": "review.html?review=review%3AZSNptWSG6i4%3A8cb46db9fe80b031d829&entry=54279fd90e544314d7fcde3b84814d96b6a2491ef40f95f393905e0cc6707fbe"
-    },
-    {
-      "title": "～今夜もまったりアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1350,
-      "time": "0:22:30",
-      "raw": "22:30～今夜もまったりアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "rawHash": "bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61",
-      "videoId": "dwXBImsg2aY",
-      "videoTitle": "【#歌枠/睡眠導入】🐰睡眠導入 癒しの歌枠ワクワク🐰【#リリーパッド/#vtuber】#初見歓迎 #Vsinger #Karaoke #Shorts",
-      "channelName": "リリーパッドLilypad",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=dwXBImsg2aY",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=dwXBImsg2aY&t=1350s",
-      "sourceId": "description:dwXBImsg2aY:bbdc421e4adea4c7",
-      "sourceHash": "bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61",
-      "sourceOrigin": "review:dwXBImsg2aY-bbdc421e4adea4c7f0be.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:dwXBImsg2aY:bbdc421e4adea4c7f0be",
-      "sourcePath": "data/review/sources/dwXBImsg2aY-bbdc421e4adea4c7f0be.json",
-      "reviewUrl": "review.html?review=review%3AdwXBImsg2aY%3Abbdc421e4adea4c7f0be&entry=bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61"
+      "reviewLocator": "data/review/sources/history-qENxBvbn29Y-d20b81982796f791041d.json#1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
     },
     {
       "title": "おつくわタイム",
@@ -3912,7 +4245,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:0gbXCxLtDoE:bc2d96fd6d17e97f66b3",
       "sourcePath": "data/review/sources/history-0gbXCxLtDoE-bc2d96fd6d17e97f66b3.json",
-      "reviewUrl": "review.html?review=review%3A0gbXCxLtDoE%3Abc2d96fd6d17e97f66b3&entry=84a9c3b396d111ecc887dacf81bc1df9ab8bec24942be0ed2f5ec9fe3737cf4d"
+      "reviewLocator": "data/review/sources/history-0gbXCxLtDoE-bc2d96fd6d17e97f66b3.json#84a9c3b396d111ecc887dacf81bc1df9ab8bec24942be0ed2f5ec9fe3737cf4d"
     },
     {
       "title": "おつくわタイム",
@@ -3961,7 +4294,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:0gbXCxLtDoE:d05e3b686c5f25109e61",
       "sourcePath": "data/review/sources/history-0gbXCxLtDoE-d05e3b686c5f25109e61.json",
-      "reviewUrl": "review.html?review=review%3A0gbXCxLtDoE%3Ad05e3b686c5f25109e61&entry=84a9c3b396d111ecc887dacf81bc1df9ab8bec24942be0ed2f5ec9fe3737cf4d"
+      "reviewLocator": "data/review/sources/history-0gbXCxLtDoE-d05e3b686c5f25109e61.json#84a9c3b396d111ecc887dacf81bc1df9ab8bec24942be0ed2f5ec9fe3737cf4d"
     },
     {
       "title": "おつほた",
@@ -4005,7 +4338,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:S_XxDfBoMxA:0efd2ad277201ff7e5f1",
       "sourcePath": "data/review/sources/history-S_XxDfBoMxA-0efd2ad277201ff7e5f1.json",
-      "reviewUrl": "review.html?review=review%3AS_XxDfBoMxA%3A0efd2ad277201ff7e5f1&entry=5604002840e963a83cdb89eb40912a7f337c879744fc71dfc77e4f42e4269f5b"
+      "reviewLocator": "data/review/sources/history-S_XxDfBoMxA-0efd2ad277201ff7e5f1.json#5604002840e963a83cdb89eb40912a7f337c879744fc71dfc77e4f42e4269f5b"
     },
     {
       "title": "おつほた",
@@ -4054,7 +4387,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:S_XxDfBoMxA:7cc95c9ce0087f7dd48f",
       "sourcePath": "data/review/sources/history-S_XxDfBoMxA-7cc95c9ce0087f7dd48f.json",
-      "reviewUrl": "review.html?review=review%3AS_XxDfBoMxA%3A7cc95c9ce0087f7dd48f&entry=5604002840e963a83cdb89eb40912a7f337c879744fc71dfc77e4f42e4269f5b"
+      "reviewLocator": "data/review/sources/history-S_XxDfBoMxA-7cc95c9ce0087f7dd48f.json#5604002840e963a83cdb89eb40912a7f337c879744fc71dfc77e4f42e4269f5b"
     },
     {
       "title": "曲導入",
@@ -4104,7 +4437,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:9hgQ0Qbv0iM:100d1340384bfffe6e25",
       "sourcePath": "data/review/sources/history-9hgQ0Qbv0iM-100d1340384bfffe6e25.json",
-      "reviewUrl": "review.html?review=review%3A9hgQ0Qbv0iM%3A100d1340384bfffe6e25&entry=9d4f9fca8470dad9bb6c857e2fc1a04bd38153a2e1d4bbbc4f24a9a6d9607646"
+      "reviewLocator": "data/review/sources/history-9hgQ0Qbv0iM-100d1340384bfffe6e25.json#9d4f9fca8470dad9bb6c857e2fc1a04bd38153a2e1d4bbbc4f24a9a6d9607646"
     },
     {
       "title": "曲導入",
@@ -4150,304 +4483,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:9hgQ0Qbv0iM:bde69793cef445c039d7",
       "sourcePath": "data/review/sources/history-9hgQ0Qbv0iM-bde69793cef445c039d7.json",
-      "reviewUrl": "review.html?review=review%3A9hgQ0Qbv0iM%3Abde69793cef445c039d7&entry=9d4f9fca8470dad9bb6c857e2fc1a04bd38153a2e1d4bbbc4f24a9a6d9607646"
-    },
-    {
-      "title": "7月14日㈫22時から配信予定",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 8061,
-      "time": "2:14:21",
-      "raw": "📢2:14:21 7月14日㈫22時から配信予定",
-      "rawHash": "154cd38973ee0bf913c5574c507fc5522791f31944810602f6a13075adfe16d9",
-      "videoId": "HEnguuz2PU0",
-      "videoTitle": "【歌枠】音質UP！癒しの弾き語り【vtuber/音魂ヒビク】",
-      "channelName": "音魂ヒビクHibiku Otodama",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=HEnguuz2PU0",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=HEnguuz2PU0&t=8061s",
-      "sourceId": "UgxgVzu88li3l7UQlGp4AaABAg",
-      "sourceHash": "19c27598b293863537908bfe5a2281d975074e2460f06e5bbd6b5c8c30b8a395",
-      "sourceOrigin": "review:HEnguuz2PU0-19c27598b29386353790.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:HEnguuz2PU0:19c27598b29386353790",
-      "sourcePath": "data/review/sources/HEnguuz2PU0-19c27598b29386353790.json",
-      "reviewUrl": "review.html?review=review%3AHEnguuz2PU0%3A19c27598b29386353790&entry=154cd38973ee0bf913c5574c507fc5522791f31944810602f6a13075adfe16d9"
-    },
-    {
-      "title": "start",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 467,
-      "time": "0:07:47",
-      "raw": "0:07:47 start",
-      "rawHash": "4c91a5819aeaf0c9c3d234c291c9e6b663292fb3bf32e247afeb3b24350f72ed",
-      "videoId": "PzWNzyO6M60",
-      "videoTitle": "【 歌枠 】現モデル最後歌枠に同接３００人目指します！！！！ 【 Utano neru / Karaoke / #作業用bgm 】",
-      "channelName": "歌野ねる / Utano neru",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PzWNzyO6M60",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PzWNzyO6M60&t=467s",
-      "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
-      "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
-      "sourceOrigin": "review:PzWNzyO6M60-6086cc8344dfee3159f5.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "parser_corruption"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:PzWNzyO6M60:6086cc8344dfee3159f5",
-      "sourcePath": "data/review/sources/PzWNzyO6M60-6086cc8344dfee3159f5.json",
-      "reviewUrl": "review.html?review=review%3APzWNzyO6M60%3A6086cc8344dfee3159f5&entry=4c91a5819aeaf0c9c3d234c291c9e6b663292fb3bf32e247afeb3b24350f72ed"
-    },
-    {
-      "title": "～【歌枠】Ch登録5000名様耐久♪ リクエストOK #ちゆとり #Vsinger",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1395,
-      "time": "0:23:15",
-      "raw": "23:15～【歌枠】Ch登録5000名様耐久♪ リクエストOK #ちゆとり #Vsinger",
-      "rawHash": "c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565",
-      "videoId": "PzWNzyO6M60",
-      "videoTitle": "【 歌枠 】現モデル最後歌枠に同接３００人目指します！！！！ 【 Utano neru / Karaoke / #作業用bgm 】",
-      "channelName": "歌野ねる / Utano neru",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PzWNzyO6M60",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PzWNzyO6M60&t=1395s",
-      "sourceId": "description:PzWNzyO6M60:c605998e902172f4",
-      "sourceHash": "c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565",
-      "sourceOrigin": "review:PzWNzyO6M60-c605998e902172f4bfcf.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:PzWNzyO6M60:c605998e902172f4bfcf",
-      "sourcePath": "data/review/sources/PzWNzyO6M60-c605998e902172f4bfcf.json",
-      "reviewUrl": "review.html?review=review%3APzWNzyO6M60%3Ac605998e902172f4bfcf&entry=c605998e902172f4bfcf36b7553371b737b6d63050a26f3ad363c3ffd9f6b565"
-    },
-    {
-      "title": "START",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 92,
-      "time": "0:01:32",
-      "raw": "01:32 START",
-      "rawHash": "7f456a59a979559f61567d75472618d5b210290ffd181b6f7767524ff0178b33",
-      "videoId": "iNg0epYblLc",
-      "videoTitle": "【#真っ赤に染めろ真夏の灼熱歌枠リレー】はじめてのトップバッター❤️‍🔥盛り上げていくぞ！！！【 芽々守あん￤VEE 】",
-      "channelName": "芽々守あん",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=iNg0epYblLc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iNg0epYblLc&t=92s",
-      "sourceId": "Ugya8KaaCUp_e2zPrCF4AaABAg",
-      "sourceHash": "f3eef86ad2822291be0d4e3eafdac6bf388db9d47b5e31f69343be9c21fc37a7",
-      "sourceOrigin": "review:iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:iNg0epYblLc:f3eef86ad2822291be0d",
-      "sourcePath": "data/review/sources/iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "reviewUrl": "review.html?review=review%3AiNg0epYblLc%3Af3eef86ad2822291be0d&entry=7f456a59a979559f61567d75472618d5b210290ffd181b6f7767524ff0178b33"
-    },
-    {
-      "title": "START ✧",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 92,
-      "time": "0:01:32",
-      "raw": "✧︎ 01:32 START ✧︎",
-      "rawHash": "35cdeefff4aa32f0fddd836f7507c3128ae09f7e5d19db998e7615df0b5daa5d",
-      "videoId": "iNg0epYblLc",
-      "videoTitle": "【#真っ赤に染めろ真夏の灼熱歌枠リレー】はじめてのトップバッター❤️‍🔥盛り上げていくぞ！！！【 芽々守あん￤VEE 】",
-      "channelName": "芽々守あん",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=iNg0epYblLc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iNg0epYblLc&t=92s",
-      "sourceId": "Ugya8KaaCUp_e2zPrCF4AaABAg",
-      "sourceHash": "f3eef86ad2822291be0d4e3eafdac6bf388db9d47b5e31f69343be9c21fc37a7",
-      "sourceOrigin": "review:iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:iNg0epYblLc:f3eef86ad2822291be0d",
-      "sourcePath": "data/review/sources/iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "reviewUrl": "review.html?review=review%3AiNg0epYblLc%3Af3eef86ad2822291be0d&entry=35cdeefff4aa32f0fddd836f7507c3128ae09f7e5d19db998e7615df0b5daa5d"
-    },
-    {
-      "title": "いつもの挨拶",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 353,
-      "time": "0:05:53",
-      "raw": "05:53 いつもの挨拶",
-      "rawHash": "2954849dfef40a2673dfb61dfe5edc3f2e40ce8f560bf1c6a7753bac2393d5ff",
-      "videoId": "iNg0epYblLc",
-      "videoTitle": "【#真っ赤に染めろ真夏の灼熱歌枠リレー】はじめてのトップバッター❤️‍🔥盛り上げていくぞ！！！【 芽々守あん￤VEE 】",
-      "channelName": "芽々守あん",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=iNg0epYblLc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iNg0epYblLc&t=353s",
-      "sourceId": "Ugya8KaaCUp_e2zPrCF4AaABAg",
-      "sourceHash": "f3eef86ad2822291be0d4e3eafdac6bf388db9d47b5e31f69343be9c21fc37a7",
-      "sourceOrigin": "review:iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:iNg0epYblLc:f3eef86ad2822291be0d",
-      "sourcePath": "data/review/sources/iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "reviewUrl": "review.html?review=review%3AiNg0epYblLc%3Af3eef86ad2822291be0d&entry=2954849dfef40a2673dfb61dfe5edc3f2e40ce8f560bf1c6a7753bac2393d5ff"
-    },
-    {
-      "title": "スクショタイム",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 658,
-      "time": "0:10:58",
-      "raw": "10:58 スクショタイム",
-      "rawHash": "9c749f671ec8565f10cb2bbbea5d327edaad2cb9e62414e11dbe46093fc85ed8",
-      "videoId": "iNg0epYblLc",
-      "videoTitle": "【#真っ赤に染めろ真夏の灼熱歌枠リレー】はじめてのトップバッター❤️‍🔥盛り上げていくぞ！！！【 芽々守あん￤VEE 】",
-      "channelName": "芽々守あん",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=iNg0epYblLc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iNg0epYblLc&t=658s",
-      "sourceId": "Ugya8KaaCUp_e2zPrCF4AaABAg",
-      "sourceHash": "f3eef86ad2822291be0d4e3eafdac6bf388db9d47b5e31f69343be9c21fc37a7",
-      "sourceOrigin": "review:iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "activity_marker_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:iNg0epYblLc:f3eef86ad2822291be0d",
-      "sourcePath": "data/review/sources/iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "reviewUrl": "review.html?review=review%3AiNg0epYblLc%3Af3eef86ad2822291be0d&entry=9c749f671ec8565f10cb2bbbea5d327edaad2cb9e62414e11dbe46093fc85ed8"
-    },
-    {
-      "title": "バースデーグッズ",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1046,
-      "time": "0:17:26",
-      "raw": "17:26 バースデーグッズ",
-      "rawHash": "10aad8e307c0f028516bf9c14f5869583f6a10e63425db1502028211991ee264",
-      "videoId": "iNg0epYblLc",
-      "videoTitle": "【#真っ赤に染めろ真夏の灼熱歌枠リレー】はじめてのトップバッター❤️‍🔥盛り上げていくぞ！！！【 芽々守あん￤VEE 】",
-      "channelName": "芽々守あん",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=iNg0epYblLc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iNg0epYblLc&t=1046s",
-      "sourceId": "Ugya8KaaCUp_e2zPrCF4AaABAg",
-      "sourceHash": "f3eef86ad2822291be0d4e3eafdac6bf388db9d47b5e31f69343be9c21fc37a7",
-      "sourceOrigin": "review:iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "activity_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:iNg0epYblLc:f3eef86ad2822291be0d",
-      "sourcePath": "data/review/sources/iNg0epYblLc-f3eef86ad2822291be0d.json",
-      "reviewUrl": "review.html?review=review%3AiNg0epYblLc%3Af3eef86ad2822291be0d&entry=10aad8e307c0f028516bf9c14f5869583f6a10e63425db1502028211991ee264"
+      "reviewLocator": "data/review/sources/history-9hgQ0Qbv0iM-bde69793cef445c039d7.json#9d4f9fca8470dad9bb6c857e2fc1a04bd38153a2e1d4bbbc4f24a9a6d9607646"
     },
     {
       "title": "1を手で表現した",
@@ -4496,7 +4532,83 @@
       "replacementSuggestion": null,
       "reviewId": "review:ELqKe7RYai0:c2f39a5fb479d4d148f0",
       "sourcePath": "data/review/sources/history-ELqKe7RYai0-c2f39a5fb479d4d148f0.json",
-      "reviewUrl": "review.html?review=review%3AELqKe7RYai0%3Ac2f39a5fb479d4d148f0&entry=b5e8f6f1e36c31b08d7c517412adb850b283b80cf8b34f5d5f6d9233627a4ab2"
+      "reviewLocator": "data/review/sources/history-ELqKe7RYai0-c2f39a5fb479d4d148f0.json#b5e8f6f1e36c31b08d7c517412adb850b283b80cf8b34f5d5f6d9233627a4ab2"
+    },
+    {
+      "title": "開始",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 0,
+      "time": "0:00:00",
+      "raw": "0:00 開始",
+      "rawHash": "ddcd930ec759bbb3ec8f4361e053f3d730a6ba70073a349e642b53d57f4e0cb1",
+      "videoId": "RWVB9gXEjc0",
+      "videoTitle": "【#ネタ曲歌枠リレー】🔥誕生日の前日にネタ曲で盛り上げるぞ～！🔥【#館西智也 #vtuber】",
+      "channelName": "館西智也 Tatenishi_Tomoya",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=RWVB9gXEjc0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=RWVB9gXEjc0&t=0s",
+      "sourceId": "Ugz6qCU9bWYsb30D9T94AaABAg",
+      "sourceHash": "e8f5350c556f0ce68905c486fc4e513c9b07c2421b5701a812418601c20cdf7f",
+      "sourceOrigin": "review:RWVB9gXEjc0-e8f5350c556f0ce68905.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:RWVB9gXEjc0:e8f5350c556f0ce68905",
+      "sourcePath": "data/review/sources/RWVB9gXEjc0-e8f5350c556f0ce68905.json",
+      "reviewLocator": "data/review/sources/RWVB9gXEjc0-e8f5350c556f0ce68905.json#ddcd930ec759bbb3ec8f4361e053f3d730a6ba70073a349e642b53d57f4e0cb1"
+    },
+    {
+      "title": "チャンネル登録よろしくお願いします",
+      "artist": "ココアシガレットP",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 1080,
+      "time": "0:18:00",
+      "raw": "18:00 チャンネル登録よろしくお願いします / GYARI(ココアシガレットP)",
+      "rawHash": "326dbcb816383a550c2e9b0c47a6a7f1cc4bd5f234eed1fe5e49450b88467c37",
+      "videoId": "RWVB9gXEjc0",
+      "videoTitle": "【#ネタ曲歌枠リレー】🔥誕生日の前日にネタ曲で盛り上げるぞ～！🔥【#館西智也 #vtuber】",
+      "channelName": "館西智也 Tatenishi_Tomoya",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=RWVB9gXEjc0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=RWVB9gXEjc0&t=1080s",
+      "sourceId": "Ugz6qCU9bWYsb30D9T94AaABAg",
+      "sourceHash": "e8f5350c556f0ce68905c486fc4e513c9b07c2421b5701a812418601c20cdf7f",
+      "sourceOrigin": "review:RWVB9gXEjc0-e8f5350c556f0ce68905.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:RWVB9gXEjc0:e8f5350c556f0ce68905",
+      "sourcePath": "data/review/sources/RWVB9gXEjc0-e8f5350c556f0ce68905.json",
+      "reviewLocator": "data/review/sources/RWVB9gXEjc0-e8f5350c556f0ce68905.json#326dbcb816383a550c2e9b0c47a6a7f1cc4bd5f234eed1fe5e49450b88467c37"
     },
     {
       "title": "チューニング",
@@ -4544,7 +4656,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:U1VskIZthjM:0d12ff496ed4245eaee8",
       "sourcePath": "data/review/sources/history-U1VskIZthjM-0d12ff496ed4245eaee8.json",
-      "reviewUrl": "review.html?review=review%3AU1VskIZthjM%3A0d12ff496ed4245eaee8&entry=ca7a6b5ca7168bb0be564f55398b812fdac3eead321da123bf17df8dea8c9d9f"
+      "reviewLocator": "data/review/sources/history-U1VskIZthjM-0d12ff496ed4245eaee8.json#ca7a6b5ca7168bb0be564f55398b812fdac3eead321da123bf17df8dea8c9d9f"
     },
     {
       "title": "チューニング",
@@ -4587,7 +4699,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:U1VskIZthjM:6c438ca8a819e5f62b46",
       "sourcePath": "data/review/sources/history-U1VskIZthjM-6c438ca8a819e5f62b46.json",
-      "reviewUrl": "review.html?review=review%3AU1VskIZthjM%3A6c438ca8a819e5f62b46&entry=ca7a6b5ca7168bb0be564f55398b812fdac3eead321da123bf17df8dea8c9d9f"
+      "reviewLocator": "data/review/sources/history-U1VskIZthjM-6c438ca8a819e5f62b46.json#ca7a6b5ca7168bb0be564f55398b812fdac3eead321da123bf17df8dea8c9d9f"
     },
     {
       "title": "トイレ休憩",
@@ -4639,7 +4751,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
       "sourcePath": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
-      "reviewUrl": "review.html?review=review%3AbQtUhOfrJC0%3A369ea67228f3b93b75b0&entry=6da1d84406c0472862af7c6152abdd30ef75d584de9c0b18c6c3eba607b7236d"
+      "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#6da1d84406c0472862af7c6152abdd30ef75d584de9c0b18c6c3eba607b7236d"
     },
     {
       "title": "再開",
@@ -4688,7 +4800,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:vu9vo2UeJmY:4c4f9cc27d1d95d51f62",
       "sourcePath": "data/review/sources/history-vu9vo2UeJmY-4c4f9cc27d1d95d51f62.json",
-      "reviewUrl": "review.html?review=review%3Avu9vo2UeJmY%3A4c4f9cc27d1d95d51f62&entry=2733233ed035d1246625f987b19503fdcaed528219d9f1aca532331948be79f7"
+      "reviewLocator": "data/review/sources/history-vu9vo2UeJmY-4c4f9cc27d1d95d51f62.json#2733233ed035d1246625f987b19503fdcaed528219d9f1aca532331948be79f7"
     },
     {
       "title": "再開",
@@ -4737,7 +4849,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:vu9vo2UeJmY:4c4f9cc27d1d95d51f62",
       "sourcePath": "data/review/sources/history-vu9vo2UeJmY-4c4f9cc27d1d95d51f62.json",
-      "reviewUrl": "review.html?review=review%3Avu9vo2UeJmY%3A4c4f9cc27d1d95d51f62&entry=5722226ec773dd90c8874bf3398c3915a151c6b68041b4ec5be1fc23d638e88f"
+      "reviewLocator": "data/review/sources/history-vu9vo2UeJmY-4c4f9cc27d1d95d51f62.json#5722226ec773dd90c8874bf3398c3915a151c6b68041b4ec5be1fc23d638e88f"
     },
     {
       "title": "曲紹介",
@@ -4789,7 +4901,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
       "sourcePath": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
-      "reviewUrl": "review.html?review=review%3AzaPAqsqcC0k%3A7158af31feaaf86ddbf9&entry=a6dab7797d9b63ec50b90224882f7704893035a159978fb5910d2aeef4c99145"
+      "reviewLocator": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json#a6dab7797d9b63ec50b90224882f7704893035a159978fb5910d2aeef4c99145"
     },
     {
       "title": "曲紹介",
@@ -4841,7 +4953,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
       "sourcePath": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
-      "reviewUrl": "review.html?review=review%3AzaPAqsqcC0k%3A7158af31feaaf86ddbf9&entry=7c1b43968f4ed1a090350c1ae8684477655560616a0908156930daddd90bb59d"
+      "reviewLocator": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json#7c1b43968f4ed1a090350c1ae8684477655560616a0908156930daddd90bb59d"
     },
     {
       "title": "曲紹介",
@@ -4893,7 +5005,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
       "sourcePath": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
-      "reviewUrl": "review.html?review=review%3AzaPAqsqcC0k%3A7158af31feaaf86ddbf9&entry=f76601e82387fc48546569985391bc73606d4f6f8a97b303d3e07e4c77452f2c"
+      "reviewLocator": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json#f76601e82387fc48546569985391bc73606d4f6f8a97b303d3e07e4c77452f2c"
     },
     {
       "title": "曲紹介",
@@ -4945,7 +5057,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
       "sourcePath": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
-      "reviewUrl": "review.html?review=review%3AzaPAqsqcC0k%3A7158af31feaaf86ddbf9&entry=14d539ac23b5b918144645fe6a8865b16b5dc99d8a422bca729674c8fce6c9cb"
+      "reviewLocator": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json#14d539ac23b5b918144645fe6a8865b16b5dc99d8a422bca729674c8fce6c9cb"
     },
     {
       "title": "曲紹介",
@@ -4997,7 +5109,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
       "sourcePath": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
-      "reviewUrl": "review.html?review=review%3AzaPAqsqcC0k%3A7158af31feaaf86ddbf9&entry=f97a22f9a3ab05e0e9319e812dcf7aa1e0a8f7e49eff845a3d127420ebdeeb25"
+      "reviewLocator": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json#f97a22f9a3ab05e0e9319e812dcf7aa1e0a8f7e49eff845a3d127420ebdeeb25"
     },
     {
       "title": "曲紹介",
@@ -5049,7 +5161,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:zaPAqsqcC0k:7158af31feaaf86ddbf9",
       "sourcePath": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json",
-      "reviewUrl": "review.html?review=review%3AzaPAqsqcC0k%3A7158af31feaaf86ddbf9&entry=c24465d5d26f2e820af43b1c7d7886264b2a8d37e384c26cdf4eb83a126ec8d4"
+      "reviewLocator": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json#c24465d5d26f2e820af43b1c7d7886264b2a8d37e384c26cdf4eb83a126ec8d4"
     },
     {
       "title": "2周年記念お写真公開！",
@@ -5094,7 +5206,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:wkmPLI98ccU:c42bc673a091cab8fb3a",
       "sourcePath": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json",
-      "reviewUrl": "review.html?review=review%3AwkmPLI98ccU%3Ac42bc673a091cab8fb3a&entry=f8ffdd2e900c59a53890c676eda6dccf63ef5df5a2b9af9115ec0480a2630780"
+      "reviewLocator": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json#f8ffdd2e900c59a53890c676eda6dccf63ef5df5a2b9af9115ec0480a2630780"
     },
     {
       "title": "こんひなー",
@@ -5141,7 +5253,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:3npLfTe1xmU:465079c23f6d7969ec43",
       "sourcePath": "data/review/sources/history-3npLfTe1xmU-465079c23f6d7969ec43.json",
-      "reviewUrl": "review.html?review=review%3A3npLfTe1xmU%3A465079c23f6d7969ec43&entry=34dafa0cc3cb363e329fe1ea619763687b9337849200a5243ff3c5d54b38c838"
+      "reviewLocator": "data/review/sources/history-3npLfTe1xmU-465079c23f6d7969ec43.json#34dafa0cc3cb363e329fe1ea619763687b9337849200a5243ff3c5d54b38c838"
     },
     {
       "title": "本日も〜？ひなたびよりー☀️",
@@ -5190,7 +5302,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:3npLfTe1xmU:465079c23f6d7969ec43",
       "sourcePath": "data/review/sources/history-3npLfTe1xmU-465079c23f6d7969ec43.json",
-      "reviewUrl": "review.html?review=review%3A3npLfTe1xmU%3A465079c23f6d7969ec43&entry=eda361682217a0257511987028591d5f58e85dba114a17817d747e5ac268abaa"
+      "reviewLocator": "data/review/sources/history-3npLfTe1xmU-465079c23f6d7969ec43.json#eda361682217a0257511987028591d5f58e85dba114a17817d747e5ac268abaa"
     },
     {
       "title": "本日も〜？ひなたびよりー☀️",
@@ -5233,7 +5345,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:3npLfTe1xmU:76b0f6f99cdcc7b7669e",
       "sourcePath": "data/review/sources/history-3npLfTe1xmU-76b0f6f99cdcc7b7669e.json",
-      "reviewUrl": "review.html?review=review%3A3npLfTe1xmU%3A76b0f6f99cdcc7b7669e&entry=eda361682217a0257511987028591d5f58e85dba114a17817d747e5ac268abaa"
+      "reviewLocator": "data/review/sources/history-3npLfTe1xmU-76b0f6f99cdcc7b7669e.json#eda361682217a0257511987028591d5f58e85dba114a17817d747e5ac268abaa"
     },
     {
       "title": "こんひなー",
@@ -5282,7 +5394,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Igp81Rj-QHc:c7feb4a6661f5158db13",
       "sourcePath": "data/review/sources/history-Igp81Rj-QHc-c7feb4a6661f5158db13.json",
-      "reviewUrl": "review.html?review=review%3AIgp81Rj-QHc%3Ac7feb4a6661f5158db13&entry=1901fe6d23aa5769b87bb02f0499a9b302b2f8e24d675848bc2303f1cc6a13fc"
+      "reviewLocator": "data/review/sources/history-Igp81Rj-QHc-c7feb4a6661f5158db13.json#1901fe6d23aa5769b87bb02f0499a9b302b2f8e24d675848bc2303f1cc6a13fc"
     },
     {
       "title": "本日も〜？ひなたびよりー☀️",
@@ -5328,7 +5440,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Igp81Rj-QHc:aeafada74cdf593089f9",
       "sourcePath": "data/review/sources/history-Igp81Rj-QHc-aeafada74cdf593089f9.json",
-      "reviewUrl": "review.html?review=review%3AIgp81Rj-QHc%3Aaeafada74cdf593089f9&entry=7bb71e674ae154a99ff7a37ad635dc76ad740f9c248101620bfb705e9318ad6c"
+      "reviewLocator": "data/review/sources/history-Igp81Rj-QHc-aeafada74cdf593089f9.json#7bb71e674ae154a99ff7a37ad635dc76ad740f9c248101620bfb705e9318ad6c"
     },
     {
       "title": "本日も〜？ひなたびよりー☀️",
@@ -5371,7 +5483,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Igp81Rj-QHc:f2c8512d5d09b31d3972",
       "sourcePath": "data/review/sources/history-Igp81Rj-QHc-f2c8512d5d09b31d3972.json",
-      "reviewUrl": "review.html?review=review%3AIgp81Rj-QHc%3Af2c8512d5d09b31d3972&entry=7bb71e674ae154a99ff7a37ad635dc76ad740f9c248101620bfb705e9318ad6c"
+      "reviewLocator": "data/review/sources/history-Igp81Rj-QHc-f2c8512d5d09b31d3972.json#7bb71e674ae154a99ff7a37ad635dc76ad740f9c248101620bfb705e9318ad6c"
     },
     {
       "title": "本日も〜？ひなたびよりー☀️",
@@ -5416,7 +5528,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:GsWidWYRJXg:cbcb66178f85620dc433",
       "sourcePath": "data/review/sources/history-GsWidWYRJXg-cbcb66178f85620dc433.json",
-      "reviewUrl": "review.html?review=review%3AGsWidWYRJXg%3Acbcb66178f85620dc433&entry=e3e2e18c9e9118fe4e2a6e379d4e33b3e1e312114936734d48fb78ec41ab966b"
+      "reviewLocator": "data/review/sources/history-GsWidWYRJXg-cbcb66178f85620dc433.json#e3e2e18c9e9118fe4e2a6e379d4e33b3e1e312114936734d48fb78ec41ab966b"
     },
     {
       "title": "本日も〜？ひなたびよりー☀",
@@ -5461,7 +5573,77 @@
       "replacementSuggestion": null,
       "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
       "sourcePath": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json",
-      "reviewUrl": "review.html?review=review%3ApI-sk5vxg3E%3Ac36865484826660b7d25&entry=a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
+      "reviewLocator": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json#a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
+    },
+    {
+      "title": "～今夜もまったりアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～今夜もまったりアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:bbdc421e4adea4c7",
+      "sourceHash": "bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61",
+      "sourceOrigin": "review:GkmXWhgz1QA-bbdc421e4adea4c7f0be.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:bbdc421e4adea4c7f0be",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-bbdc421e4adea4c7f0be.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-bbdc421e4adea4c7f0be.json#bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61"
+    },
+    {
+      "title": "～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:5d44a7135bb15e6a",
+      "sourceHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
+      "sourceOrigin": "review:GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:5d44a7135bb15e6a43df",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json#5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb"
     },
     {
       "title": "おつにょ",
@@ -5512,7 +5694,45 @@
       "replacementSuggestion": null,
       "reviewId": "review:FlhwC9s1Nk8:4aa61da2d1b34d7d38e8",
       "sourcePath": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json",
-      "reviewUrl": "review.html?review=review%3AFlhwC9s1Nk8%3A4aa61da2d1b34d7d38e8&entry=b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
+      "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
+    },
+    {
+      "title": "配信開始",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 126,
+      "time": "0:02:06",
+      "raw": "00:02:06 配信開始",
+      "rawHash": "bddfae3854e40fe3de570ec76d682c063c1ddfb38ee62467ea3ed16b03442bc7",
+      "videoId": "1K8486twdv4",
+      "videoTitle": "【歌枠】初見さんもROMさんもウェルカム～！【#織姫はるか/#vtuber 】",
+      "channelName": "織姫はるか / Orihime Haruka",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=1K8486twdv4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=1K8486twdv4&t=126s",
+      "sourceId": "UgwhZPQwHZXVA40oOSJ4AaABAg",
+      "sourceHash": "125a63a99b79db9250e0667188df09385217e6ecdeb804143f1863ba14c6fae2",
+      "sourceOrigin": "review:1K8486twdv4-125a63a99b79db9250e0.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:1K8486twdv4:125a63a99b79db9250e0",
+      "sourcePath": "data/review/sources/1K8486twdv4-125a63a99b79db9250e0.json",
+      "reviewLocator": "data/review/sources/1K8486twdv4-125a63a99b79db9250e0.json#bddfae3854e40fe3de570ec76d682c063c1ddfb38ee62467ea3ed16b03442bc7"
     },
     {
       "title": "閉会式",
@@ -5561,7 +5781,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:vdqlFJD0e7c:0d63e5c4ca38df917fb5",
       "sourcePath": "data/review/sources/history-vdqlFJD0e7c-0d63e5c4ca38df917fb5.json",
-      "reviewUrl": "review.html?review=review%3AvdqlFJD0e7c%3A0d63e5c4ca38df917fb5&entry=594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216"
+      "reviewLocator": "data/review/sources/history-vdqlFJD0e7c-0d63e5c4ca38df917fb5.json#594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216"
     },
     {
       "title": "閉会式",
@@ -5606,7 +5826,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:vdqlFJD0e7c:d6aae283833834bbc00a",
       "sourcePath": "data/review/sources/history-vdqlFJD0e7c-d6aae283833834bbc00a.json",
-      "reviewUrl": "review.html?review=review%3AvdqlFJD0e7c%3Ad6aae283833834bbc00a&entry=594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216"
+      "reviewLocator": "data/review/sources/history-vdqlFJD0e7c-d6aae283833834bbc00a.json#594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216"
     },
     {
       "title": "離席",
@@ -5659,7 +5879,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=24e293d4c126838f44620a94aa6536b9bb1aacaca20265e99c362f256c786f7a"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#24e293d4c126838f44620a94aa6536b9bb1aacaca20265e99c362f256c786f7a"
     },
     {
       "title": "戻り",
@@ -5713,7 +5933,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=f587b0d632fb0ad8ec8b484e9ac24ba9838095af226c98039e7feccb25238105"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#f587b0d632fb0ad8ec8b484e9ac24ba9838095af226c98039e7feccb25238105"
     },
     {
       "title": "3Dお披露目でスタンドマイク回したかった",
@@ -5767,7 +5987,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=15515cd440950a90a2c0d76b796f214108cecc3e4d1059090b39279f1d790673"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#15515cd440950a90a2c0d76b796f214108cecc3e4d1059090b39279f1d790673"
     },
     {
       "title": "離席",
@@ -5820,7 +6040,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=337d3fb7d825d06f0cc89940dd1212c53225a4ed63d75bff4fa8b41d0a8bf796"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#337d3fb7d825d06f0cc89940dd1212c53225a4ed63d75bff4fa8b41d0a8bf796"
     },
     {
       "title": "離席",
@@ -5873,7 +6093,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=09fc81066360899d5cdd846c28007ad01317ec52638fc71c6545b58055d736d8"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#09fc81066360899d5cdd846c28007ad01317ec52638fc71c6545b58055d736d8"
     },
     {
       "title": "離席",
@@ -5926,7 +6146,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=37c91e574639bbf25d0ba8c75ffb396d0ff7938ff29fe57505651ca350d10263"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#37c91e574639bbf25d0ba8c75ffb396d0ff7938ff29fe57505651ca350d10263"
     },
     {
       "title": "戻り",
@@ -5980,7 +6200,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=219177d1c60c78187b8f319e59e5a02ca97b7830d93348232f9d8102d8988e38"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#219177d1c60c78187b8f319e59e5a02ca97b7830d93348232f9d8102d8988e38"
     },
     {
       "title": "離席",
@@ -6033,7 +6253,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=aa80645ceb05d1d6d7984576fbf60ef3ccc715216abd7193bb4e1a3386d5cdec"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#aa80645ceb05d1d6d7984576fbf60ef3ccc715216abd7193bb4e1a3386d5cdec"
     },
     {
       "title": "戻り",
@@ -6087,7 +6307,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=ecf8c0d92cfd83486afa27b76b0d1aee8b749bd1cab246b048c6aae906dcf6e1"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#ecf8c0d92cfd83486afa27b76b0d1aee8b749bd1cab246b048c6aae906dcf6e1"
     },
     {
       "title": "離席",
@@ -6140,7 +6360,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=59fb874bb972bd604942e05cb4604b6b45b96c0c9a0bb7ca16d072bdc3c5a997"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#59fb874bb972bd604942e05cb4604b6b45b96c0c9a0bb7ca16d072bdc3c5a997"
     },
     {
       "title": "戻り",
@@ -6194,7 +6414,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=4f866c2f357403d49a0b8e4cacb9176291743f7952c9313431811aa70c5c9ae4"
+      "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#4f866c2f357403d49a0b8e4cacb9176291743f7952c9313431811aa70c5c9ae4"
     },
     {
       "title": "閉会式",
@@ -6241,7 +6461,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:gxftjQhHf2I:47295e4f168d566e2c4b",
       "sourcePath": "data/review/sources/history-gxftjQhHf2I-47295e4f168d566e2c4b.json",
-      "reviewUrl": "review.html?review=review%3AgxftjQhHf2I%3A47295e4f168d566e2c4b&entry=f66c1fbf05611f76ae8c8fb6e63d2c690ebfe67fe67e174abd5776d8586e802e"
+      "reviewLocator": "data/review/sources/history-gxftjQhHf2I-47295e4f168d566e2c4b.json#f66c1fbf05611f76ae8c8fb6e63d2c690ebfe67fe67e174abd5776d8586e802e"
     },
     {
       "title": "おつもく名前呼び",
@@ -6290,7 +6510,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:h8bEx1lrTQk:095bd00de81f4d441f29",
       "sourcePath": "data/review/sources/history-h8bEx1lrTQk-095bd00de81f4d441f29.json",
-      "reviewUrl": "review.html?review=review%3Ah8bEx1lrTQk%3A095bd00de81f4d441f29&entry=436045b1736ce1ed9b760b3414207cbbe02b94e779620232f75637b4fde8db3b"
+      "reviewLocator": "data/review/sources/history-h8bEx1lrTQk-095bd00de81f4d441f29.json#436045b1736ce1ed9b760b3414207cbbe02b94e779620232f75637b4fde8db3b"
     },
     {
       "title": "チューニング",
@@ -6336,7 +6556,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:nRgMw8dnlG8:10be262faf2e2a39162a",
       "sourcePath": "data/review/sources/history-nRgMw8dnlG8-10be262faf2e2a39162a.json",
-      "reviewUrl": "review.html?review=review%3AnRgMw8dnlG8%3A10be262faf2e2a39162a&entry=c14c090e5192dc88cce495dcca573225e363b80da8a7a12004126821478444be"
+      "reviewLocator": "data/review/sources/history-nRgMw8dnlG8-10be262faf2e2a39162a.json#c14c090e5192dc88cce495dcca573225e363b80da8a7a12004126821478444be"
     },
     {
       "title": "チューニング",
@@ -6378,7 +6598,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:nRgMw8dnlG8:62b83dd8aa2d847da937",
       "sourcePath": "data/review/sources/history-nRgMw8dnlG8-62b83dd8aa2d847da937.json",
-      "reviewUrl": "review.html?review=review%3AnRgMw8dnlG8%3A62b83dd8aa2d847da937&entry=c14c090e5192dc88cce495dcca573225e363b80da8a7a12004126821478444be"
+      "reviewLocator": "data/review/sources/history-nRgMw8dnlG8-62b83dd8aa2d847da937.json#c14c090e5192dc88cce495dcca573225e363b80da8a7a12004126821478444be"
     },
     {
       "title": "終わりの会",
@@ -6424,7 +6644,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:nRgMw8dnlG8:10be262faf2e2a39162a",
       "sourcePath": "data/review/sources/history-nRgMw8dnlG8-10be262faf2e2a39162a.json",
-      "reviewUrl": "review.html?review=review%3AnRgMw8dnlG8%3A10be262faf2e2a39162a&entry=0dce89020e61409914da0c5b40ed55716f9293cdc7099f25640b598c6bef4f29"
+      "reviewLocator": "data/review/sources/history-nRgMw8dnlG8-10be262faf2e2a39162a.json#0dce89020e61409914da0c5b40ed55716f9293cdc7099f25640b598c6bef4f29"
     },
     {
       "title": "終わりの会",
@@ -6466,7 +6686,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:nRgMw8dnlG8:62b83dd8aa2d847da937",
       "sourcePath": "data/review/sources/history-nRgMw8dnlG8-62b83dd8aa2d847da937.json",
-      "reviewUrl": "review.html?review=review%3AnRgMw8dnlG8%3A62b83dd8aa2d847da937&entry=0dce89020e61409914da0c5b40ed55716f9293cdc7099f25640b598c6bef4f29"
+      "reviewLocator": "data/review/sources/history-nRgMw8dnlG8-62b83dd8aa2d847da937.json#0dce89020e61409914da0c5b40ed55716f9293cdc7099f25640b598c6bef4f29"
     },
     {
       "title": "全曲終了",
@@ -6511,7 +6731,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:C0ABKi9DGTs:ee77fcec7c9effc55c25",
       "sourcePath": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json",
-      "reviewUrl": "review.html?review=review%3AC0ABKi9DGTs%3Aee77fcec7c9effc55c25&entry=5c5c3453b6d5d66077b7f4082bbcc959e500213480db72dd09e3db3ee2d5ecbf"
+      "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json#5c5c3453b6d5d66077b7f4082bbcc959e500213480db72dd09e3db3ee2d5ecbf"
     },
     {
       "title": "おつえる",
@@ -6558,7 +6778,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:C0ABKi9DGTs:e692413908a8b88ec225",
       "sourcePath": "data/review/sources/history-C0ABKi9DGTs-e692413908a8b88ec225.json",
-      "reviewUrl": "review.html?review=review%3AC0ABKi9DGTs%3Ae692413908a8b88ec225&entry=fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
+      "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-e692413908a8b88ec225.json#fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
     },
     {
       "title": "おつえる",
@@ -6602,159 +6822,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:C0ABKi9DGTs:ee77fcec7c9effc55c25",
       "sourcePath": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json",
-      "reviewUrl": "review.html?review=review%3AC0ABKi9DGTs%3Aee77fcec7c9effc55c25&entry=fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
-    },
-    {
-      "title": "声入り",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 250,
-      "time": "0:04:10",
-      "raw": "0:04:10 声入り",
-      "rawHash": "e9425db619b7aeb3f927249d41ffde6c15197450991ca9f043e6fe70ccd32ad5",
-      "videoId": "62tIsTLTG44",
-      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎気ままな短め歌枠✨ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
-      "channelName": "魔ノむえる -Mano Mueru-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=62tIsTLTG44",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=62tIsTLTG44&t=250s",
-      "sourceId": "UgxvGqcTXjDo3optxgZ4AaABAg",
-      "sourceHash": "24b43608c478a2e268cac4dde5c1ee81b75a39544dc3af11066538f5fe19e0e9",
-      "sourceOrigin": "review:62tIsTLTG44-24b43608c478a2e268ca.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:62tIsTLTG44:24b43608c478a2e268ca",
-      "sourcePath": "data/review/sources/62tIsTLTG44-24b43608c478a2e268ca.json",
-      "reviewUrl": "review.html?review=review%3A62tIsTLTG44%3A24b43608c478a2e268ca&entry=e9425db619b7aeb3f927249d41ffde6c15197450991ca9f043e6fe70ccd32ad5"
-    },
-    {
-      "title": "～　高評価200達成",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1690,
-      "time": "0:28:10",
-      "raw": "0:28:10～ 高評価200達成",
-      "rawHash": "c573cc8c83ca94426d191c868342b1c76f969fdce5e1937cc97257fa4e1e5071",
-      "videoId": "62tIsTLTG44",
-      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎気ままな短め歌枠✨ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
-      "channelName": "魔ノむえる -Mano Mueru-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=62tIsTLTG44",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=62tIsTLTG44&t=1690s",
-      "sourceId": "UgxvGqcTXjDo3optxgZ4AaABAg",
-      "sourceHash": "24b43608c478a2e268cac4dde5c1ee81b75a39544dc3af11066538f5fe19e0e9",
-      "sourceOrigin": "review:62tIsTLTG44-24b43608c478a2e268ca.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:62tIsTLTG44:24b43608c478a2e268ca",
-      "sourcePath": "data/review/sources/62tIsTLTG44-24b43608c478a2e268ca.json",
-      "reviewUrl": "review.html?review=review%3A62tIsTLTG44%3A24b43608c478a2e268ca&entry=c573cc8c83ca94426d191c868342b1c76f969fdce5e1937cc97257fa4e1e5071"
-    },
-    {
-      "title": "～　高評価300達成",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 3350,
-      "time": "0:55:50",
-      "raw": "0:55:50～ 高評価300達成",
-      "rawHash": "df75fb4c6ca73bab45231d4261de4ee55f2d2b5b3b6bf08a8c4e7c2fbd4e4c24",
-      "videoId": "62tIsTLTG44",
-      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎気ままな短め歌枠✨ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
-      "channelName": "魔ノむえる -Mano Mueru-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=62tIsTLTG44",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=62tIsTLTG44&t=3350s",
-      "sourceId": "UgxvGqcTXjDo3optxgZ4AaABAg",
-      "sourceHash": "24b43608c478a2e268cac4dde5c1ee81b75a39544dc3af11066538f5fe19e0e9",
-      "sourceOrigin": "review:62tIsTLTG44-24b43608c478a2e268ca.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:62tIsTLTG44:24b43608c478a2e268ca",
-      "sourcePath": "data/review/sources/62tIsTLTG44-24b43608c478a2e268ca.json",
-      "reviewUrl": "review.html?review=review%3A62tIsTLTG44%3A24b43608c478a2e268ca&entry=df75fb4c6ca73bab45231d4261de4ee55f2d2b5b3b6bf08a8c4e7c2fbd4e4c24"
-    },
-    {
-      "title": "～　高評価400達成",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6525,
-      "time": "1:48:45",
-      "raw": "1:48:45～ 高評価400達成",
-      "rawHash": "fc0b185d8843d05afbe76646cd7265af6c9350bf6a7936a5ca253a4eb359cbb5",
-      "videoId": "62tIsTLTG44",
-      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎気ままな短め歌枠✨ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
-      "channelName": "魔ノむえる -Mano Mueru-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=62tIsTLTG44",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=62tIsTLTG44&t=6525s",
-      "sourceId": "UgxvGqcTXjDo3optxgZ4AaABAg",
-      "sourceHash": "24b43608c478a2e268cac4dde5c1ee81b75a39544dc3af11066538f5fe19e0e9",
-      "sourceOrigin": "review:62tIsTLTG44-24b43608c478a2e268ca.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:62tIsTLTG44:24b43608c478a2e268ca",
-      "sourcePath": "data/review/sources/62tIsTLTG44-24b43608c478a2e268ca.json",
-      "reviewUrl": "review.html?review=review%3A62tIsTLTG44%3A24b43608c478a2e268ca&entry=fc0b185d8843d05afbe76646cd7265af6c9350bf6a7936a5ca253a4eb359cbb5"
+      "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json#fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
     },
     {
       "title": "スタート",
@@ -6801,7 +6869,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:uRKNhEOx0Hs:32dac2d03f3f75aea9ad",
       "sourcePath": "data/review/sources/history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json",
-      "reviewUrl": "review.html?review=review%3AuRKNhEOx0Hs%3A32dac2d03f3f75aea9ad&entry=7e6723d1d7e7e90574847735677c486e4259fc7a18344450abe4532c34ad3d74"
+      "reviewLocator": "data/review/sources/history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json#7e6723d1d7e7e90574847735677c486e4259fc7a18344450abe4532c34ad3d74"
     },
     {
       "title": "お名前呼び",
@@ -6848,7 +6916,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:cC4Wcf1I8ec:5458e4ecc07f9cf48aff",
       "sourcePath": "data/review/sources/history-cC4Wcf1I8ec-5458e4ecc07f9cf48aff.json",
-      "reviewUrl": "review.html?review=review%3AcC4Wcf1I8ec%3A5458e4ecc07f9cf48aff&entry=2e19e495904299a4902913092e3df6dff166fbd8c77267a2599e4c0c4c9de41e"
+      "reviewLocator": "data/review/sources/history-cC4Wcf1I8ec-5458e4ecc07f9cf48aff.json#2e19e495904299a4902913092e3df6dff166fbd8c77267a2599e4c0c4c9de41e"
     },
     {
       "title": "お名前呼び",
@@ -6891,7 +6959,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:cC4Wcf1I8ec:f266e515e3eece63a4f0",
       "sourcePath": "data/review/sources/history-cC4Wcf1I8ec-f266e515e3eece63a4f0.json",
-      "reviewUrl": "review.html?review=review%3AcC4Wcf1I8ec%3Af266e515e3eece63a4f0&entry=2e19e495904299a4902913092e3df6dff166fbd8c77267a2599e4c0c4c9de41e"
+      "reviewLocator": "data/review/sources/history-cC4Wcf1I8ec-f266e515e3eece63a4f0.json#2e19e495904299a4902913092e3df6dff166fbd8c77267a2599e4c0c4c9de41e"
     },
     {
       "title": "お名前呼び",
@@ -6940,7 +7008,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:oWwBzyRG93o:a490b151deefc3a3e0e8",
       "sourcePath": "data/review/sources/history-oWwBzyRG93o-a490b151deefc3a3e0e8.json",
-      "reviewUrl": "review.html?review=review%3AoWwBzyRG93o%3Aa490b151deefc3a3e0e8&entry=1bc3a86aa3ee2d40c9ef27031ba4f3bed67a6c043e7c8d68394a81b2483b231c"
+      "reviewLocator": "data/review/sources/history-oWwBzyRG93o-a490b151deefc3a3e0e8.json#1bc3a86aa3ee2d40c9ef27031ba4f3bed67a6c043e7c8d68394a81b2483b231c"
     },
     {
       "title": "お名前呼び",
@@ -6985,7 +7053,7 @@
       "replacementSuggestion": null,
       "reviewId": "review:oWwBzyRG93o:e732b263375652f45a4a",
       "sourcePath": "data/review/sources/history-oWwBzyRG93o-e732b263375652f45a4a.json",
-      "reviewUrl": "review.html?review=review%3AoWwBzyRG93o%3Ae732b263375652f45a4a&entry=1bc3a86aa3ee2d40c9ef27031ba4f3bed67a6c043e7c8d68394a81b2483b231c"
+      "reviewLocator": "data/review/sources/history-oWwBzyRG93o-e732b263375652f45a4a.json#1bc3a86aa3ee2d40c9ef27031ba4f3bed67a6c043e7c8d68394a81b2483b231c"
     }
   ]
 }
