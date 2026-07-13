@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T13:54:41.173Z",
+  "generatedAt": "2026-07-13T15:57:26.789Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-13T12:22:43.972Z",
+  "latestGeneratedAt": "2026-07-13T15:56:10.026Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
   "counts": {
-    "totalCandidates": 1632,
-    "uniqueVideos": 233,
-    "uniqueSources": 283,
+    "totalCandidates": 1613,
+    "uniqueVideos": 231,
+    "uniqueSources": 282,
     "confirmedNoiseCount": 0,
-    "parserCorruptionCount": 1632,
+    "parserCorruptionCount": 1613,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 0,
-      "parser_corruption": 1632,
+      "parser_corruption": 1613,
       "likely_noise": 0,
       "needs_review": 0,
       "likely_song": 0
@@ -3240,7 +3240,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260713T120000Z",
+        "snapshot:20260713T150000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -9533,7 +9533,7 @@
       "ranges": [
         "72h",
         "1m",
-        "snapshot:20260713T120000Z",
+        "snapshot:20260713T150000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -10861,7 +10861,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260712T190000Z",
+        "snapshot:20260713T150000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -16468,53 +16468,6 @@
       "reviewUrl": "review.html?review=review%3Aj8AeciGQV5o%3A898c500632eaa8b4951d&entry=07f5d02fda8ab343a2d7edc2d4adc0c9129f5c5acd363a616c6384ada4048ab9"
     },
     {
-      "title": "(れいちゃんが「スナックミー」を推奨しています。 https",
-      "artist": "www.youtube.com/live/4DkKyAx6TGw?si=2VQLimoP-gig3x-t)",
-      "isNiche": true,
-      "isUnknownArtist": false,
-      "seconds": 10143,
-      "time": "2:49:03",
-      "raw": "2:49:03 (れいちゃんが「スナックミー」を推奨しています。 https://www.youtube.com/live/4DkKyAx6TGw?si=2VQLimoP-gig3x-t)",
-      "rawHash": "60c69f847b04ed8c03b19bcb01c8e23ca77295657deb63d7c50cd0784dbf56e1",
-      "videoId": "FNs4kpdpWGM",
-      "videoTitle": "【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】",
-      "channelName": "Otsuka Ray ch.乙夏れい",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FNs4kpdpWGM&t=10143s",
-      "sourceId": "Ugw_G9Jn7HHJPBi-Pet4AaABAg",
-      "sourceHash": "9ef1860f9676617e865cc613ba0a58db75fbf30fb1ffd8f903682b7cdf0d8ca1",
-      "sourceOrigin": "review:history-FNs4kpdpWGM-9ef1860f9676617e865c.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "title": "れいちゃんが「スナックミー」を推奨しています。 https",
-        "artist": "/www.youtube.com/live/4DkKyAx6TGw?si=2VQLimoP-gig3x-t"
-      },
-      "reviewId": "review:FNs4kpdpWGM:9ef1860f9676617e865c",
-      "sourcePath": "data/review/sources/history-FNs4kpdpWGM-9ef1860f9676617e865c.json",
-      "reviewUrl": "review.html?review=review%3AFNs4kpdpWGM%3A9ef1860f9676617e865c&entry=60c69f847b04ed8c03b19bcb01c8e23ca77295657deb63d7c50cd0784dbf56e1"
-    },
-    {
       "title": "『milk』",
       "artist": "Aiko(2010)",
       "isNiche": false,
@@ -20518,11 +20471,11 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8135s",
       "sourceId": "legacy:jT-l8E9Xsow",
       "sourceHash": "addd6bca4c4f9b4bb19a2dc2dbc195044e86388410caefd7e93eb53d2fb57c88",
-      "sourceOrigin": "latest;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json;review:jT-l8E9Xsow-07eb54c01819ff9e79b4.json",
+      "sourceOrigin": "latest;review:history-jT-l8E9Xsow-07eb54c01819ff9e79b4.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json;review:jT-l8E9Xsow-07eb54c01819ff9e79b4.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
+        "snapshot:20260713T150000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z",
         "review"
@@ -24588,856 +24541,6 @@
       "reviewUrl": "review.html?review=review%3AcuM2MpG_I5A%3A17c25009798b3a9b195c&entry=bc8169914b52c1047dbd09d9e9ce75f67d049ae50c32cc6f89af38cbab7697d8"
     },
     {
-      "title": "革命道中",
-      "artist": "アイナ・ジ・エンド ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 3836,
-      "time": "1:03:56",
-      "raw": "1:03:56 革命道中/アイナ・ジ・エンド ☆",
-      "rawHash": "1d711f8fb579f4210ec21cca9babf46819dc9bc274276bde665ff15e8e0a45f3",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=3836s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "アイナ・ジ・エンド"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=1d711f8fb579f4210ec21cca9babf46819dc9bc274276bde665ff15e8e0a45f3"
-    },
-    {
-      "title": "夏霞",
-      "artist": "あたらよ ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 4129,
-      "time": "1:08:49",
-      "raw": "1:08:49 夏霞/あたらよ ☆",
-      "rawHash": "8476e583287b2c420c9229273105f9157d98b9f883df7b0a8addbcd2d2950f7b",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=4129s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "あたらよ"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=8476e583287b2c420c9229273105f9157d98b9f883df7b0a8addbcd2d2950f7b"
-    },
-    {
-      "title": "祈り花",
-      "artist": "平井大 ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 4495,
-      "time": "1:14:55",
-      "raw": "1:14:55 祈り花/平井大 ☆",
-      "rawHash": "76b2975a004bddafcf13ae1407883970c36012f7da98891ca61d29c3a20d8dcd",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=4495s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "平井大"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=76b2975a004bddafcf13ae1407883970c36012f7da98891ca61d29c3a20d8dcd"
-    },
-    {
-      "title": "初めての恋が終わる時",
-      "artist": "ryo(supercell) feat. 初音ミク ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 6327,
-      "time": "1:45:27",
-      "raw": "1:45:27 初めての恋が終わる時/ryo(supercell) feat. 初音ミク ☆",
-      "rawHash": "714ac603259e98fa7078ca5e616e652f6ed26620473a914622f28f00f35dd86d",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=6327s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "ryo(supercell) feat. 初音ミク"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=714ac603259e98fa7078ca5e616e652f6ed26620473a914622f28f00f35dd86d"
-    },
-    {
-      "title": "スターナイトスノウ",
-      "artist": "n-buna×Orangestar feat. 初音ミク ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 6664,
-      "time": "1:51:04",
-      "raw": "1:51:04 スターナイトスノウ/n-buna×Orangestar feat. 初音ミク ☆",
-      "rawHash": "611f2da36e59c32c44248d70d54c8680bccff88c5526365ebf9d7d59791ce184",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=6664s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "n-buna×Orangestar feat. 初音ミク"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=611f2da36e59c32c44248d70d54c8680bccff88c5526365ebf9d7d59791ce184"
-    },
-    {
-      "title": "ジェーンは凍っていた",
-      "artist": "うずら feat. 初音ミク ☆",
-      "isNiche": true,
-      "isUnknownArtist": false,
-      "seconds": 7106,
-      "time": "1:58:26",
-      "raw": "1:58:26 ジェーンは凍っていた/うずら feat. 初音ミク ☆",
-      "rawHash": "7d4fa1823d26d3f405cf7d438f907f7665d30ca753d9b25ec8b3348453e494b8",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=7106s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "うずら feat. 初音ミク"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=7d4fa1823d26d3f405cf7d438f907f7665d30ca753d9b25ec8b3348453e494b8"
-    },
-    {
-      "title": "我爱你-上海蟹",
-      "artist": "カニ研究会 ☆",
-      "isNiche": true,
-      "isUnknownArtist": false,
-      "seconds": 7432,
-      "time": "2:03:52",
-      "raw": "2:03:52 我爱你-上海蟹-/カニ研究会 ☆",
-      "rawHash": "2b08585a3dcf1ffeddd6f13816eeb3d7018b716785f8ac65bf5278a95c958385",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=7432s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "カニ研究会"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=2b08585a3dcf1ffeddd6f13816eeb3d7018b716785f8ac65bf5278a95c958385"
-    },
-    {
-      "title": "JANE DOE",
-      "artist": "米津玄師,宇多田ヒカル ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 7763,
-      "time": "2:09:23",
-      "raw": "2:09:23 JANE DOE/米津玄師,宇多田ヒカル ☆",
-      "rawHash": "6839711e60f7fde7d2b083893a3bc763af772a21b829907ac28dc4c1e21cbde6",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=7763s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "米津玄師,宇多田ヒカル"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=6839711e60f7fde7d2b083893a3bc763af772a21b829907ac28dc4c1e21cbde6"
-    },
-    {
-      "title": "シリウスの心臓",
-      "artist": "ヰ世界情緒 ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 10536,
-      "time": "2:55:36",
-      "raw": "2:55:36 シリウスの心臓/ヰ世界情緒 ☆",
-      "rawHash": "a5af36059de5a60bacc0514347d2b0a5ef05c7829b72220b185accb603a20951",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=10536s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "ヰ世界情緒"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=a5af36059de5a60bacc0514347d2b0a5ef05c7829b72220b185accb603a20951"
-    },
-    {
-      "title": "The beginning",
-      "artist": "絢香 ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 11004,
-      "time": "3:03:24",
-      "raw": "3:03:24 The beginning/絢香 ☆",
-      "rawHash": "fbf841a457cea524955919e8cb2e3ef6cbb6b7dd7d44cde1717a97f0e2d2cd8b",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=11004s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "絢香"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=fbf841a457cea524955919e8cb2e3ef6cbb6b7dd7d44cde1717a97f0e2d2cd8b"
-    },
-    {
-      "title": "Only Human",
-      "artist": "K ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 11520,
-      "time": "3:12:00",
-      "raw": "3:12:00 Only Human/K ☆",
-      "rawHash": "1572b278a7bfd4dbbb828ab72192879cd5ff36e3ef81727f1dc1c08850a7bbe2",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=11520s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "K"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=1572b278a7bfd4dbbb828ab72192879cd5ff36e3ef81727f1dc1c08850a7bbe2"
-    },
-    {
-      "title": "Arrietty's Song",
-      "artist": "Cécile Corbel ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 13638,
-      "time": "3:47:18",
-      "raw": "3:47:18 Arrietty's Song/Cécile Corbel ☆",
-      "rawHash": "d0885fa96b05e3449401cb639623ba7bdadd161ed246ea560740917955d062a5",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=13638s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "Cécile Corbel"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=d0885fa96b05e3449401cb639623ba7bdadd161ed246ea560740917955d062a5"
-    },
-    {
-      "title": "First Love",
-      "artist": "宇多田ヒカル ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 14115,
-      "time": "3:55:15",
-      "raw": "3:55:15 First Love/宇多田ヒカル ☆",
-      "rawHash": "c04eca08660700a4e895829c9b808eee2f823a3c9d4e10bfea77a01c97b52f4a",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=14115s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "宇多田ヒカル"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=c04eca08660700a4e895829c9b808eee2f823a3c9d4e10bfea77a01c97b52f4a"
-    },
-    {
-      "title": "ノーチラス",
-      "artist": "ヨルシカ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 14672,
-      "time": "4:04:32",
-      "raw": "4:04:32 ノーチラス/ヨルシカ☆",
-      "rawHash": "b77a52aa72d7c644459b20193be3c49d9f5d131e8545a7bab6a1c7d8ab56b3bb",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=14672s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "ヨルシカ"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=b77a52aa72d7c644459b20193be3c49d9f5d131e8545a7bab6a1c7d8ab56b3bb"
-    },
-    {
-      "title": "乙女解剖 ―TeddyLoid Alllies Remix―",
-      "artist": "Giga(DECO*27 feat.初音ミク) ☆",
-      "isNiche": true,
-      "isUnknownArtist": false,
-      "seconds": 14979,
-      "time": "4:09:39",
-      "raw": "4:09:39 乙女解剖 ―TeddyLoid Alllies Remix―/Giga(DECO*27 feat.初音ミク) ☆",
-      "rawHash": "9b843b100ce3cf288ac09206742e20dcef2139eb936ae90676adb83d6c88ec70",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=14979s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "Giga(DECO*27 feat.初音ミク)"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=9b843b100ce3cf288ac09206742e20dcef2139eb936ae90676adb83d6c88ec70"
-    },
-    {
-      "title": "ノンブレス・オブリージュ",
-      "artist": "ピノキオピー feat.初音ミク ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 15530,
-      "time": "4:18:50",
-      "raw": "4:18:50 ノンブレス・オブリージュ/ピノキオピー feat.初音ミク ☆",
-      "rawHash": "cfb3b4798adbb9020e1cae52859aba99ffb7a2118d69f49a1c736f602fe3cfc6",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=15530s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "ピノキオピー feat.初音ミク"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=cfb3b4798adbb9020e1cae52859aba99ffb7a2118d69f49a1c736f602fe3cfc6"
-    },
-    {
-      "title": "待ってて、彼岸で",
-      "artist": "rinri feat, 音街ウナSV ☆",
-      "isNiche": true,
-      "isUnknownArtist": false,
-      "seconds": 16009,
-      "time": "4:26:49",
-      "raw": "4:26:49 待ってて、彼岸で/rinri feat, 音街ウナSV ☆",
-      "rawHash": "aee7b1304e2516881c3d393b6961b45c1c21bef0737a6c428bd693ae81e8b8ca",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=16009s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "rinri feat, 音街ウナSV"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=aee7b1304e2516881c3d393b6961b45c1c21bef0737a6c428bd693ae81e8b8ca"
-    },
-    {
-      "title": "私の最後の日",
-      "artist": "ユアネス ☆",
-      "isNiche": true,
-      "isUnknownArtist": false,
-      "seconds": 16484,
-      "time": "4:34:44",
-      "raw": "4:34:44 私の最後の日/ユアネス ☆",
-      "rawHash": "5a03492c6555602edadc00f27e12a4cb94bed081a8a584c564d015b1b37c7e60",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=16484s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "ユアネス"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=5a03492c6555602edadc00f27e12a4cb94bed081a8a584c564d015b1b37c7e60"
-    },
-    {
-      "title": "だから僕は音楽を辞めた",
-      "artist": "ヨルシカ ☆",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 17038,
-      "time": "4:43:58",
-      "raw": "4:43:58 だから僕は音楽を辞めた/ヨルシカ ☆",
-      "rawHash": "2a402001ddb2f74f4565c01458ef855d5c6251571d40a9042b61cafc63ff4ec5",
-      "videoId": "j8BuqM_a4g4",
-      "videoTitle": "【KARAOKE┊︎高評価400耐久】📣告知アリ!! 感情を込めて。高評価耐久歌枠🤍໒꒱【#ノアポラリス】#vsinger #歌枠",
-      "channelName": "ノア・ポラリス -Noa Polaris-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j8BuqM_a4g4&t=17038s",
-      "sourceId": "UgxsmKP6GvXlrUd4fJN4AaABAg",
-      "sourceHash": "3b84bf96ed4e7c6234c4b9593a84a7ccbc200e417249501ff10929e1a6f9ab11",
-      "sourceOrigin": "review:history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T120000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "ヨルシカ"
-      },
-      "reviewId": "review:j8BuqM_a4g4:3b84bf96ed4e7c6234c4",
-      "sourcePath": "data/review/sources/history-j8BuqM_a4g4-3b84bf96ed4e7c6234c4.json",
-      "reviewUrl": "review.html?review=review%3Aj8BuqM_a4g4%3A3b84bf96ed4e7c6234c4&entry=2a402001ddb2f74f4565c01458ef855d5c6251571d40a9042b61cafc63ff4ec5"
-    },
-    {
       "title": "いかないで",
       "artist": "想太 feat. 歌愛ユキ ☆",
       "isNiche": false,
@@ -26694,6 +25797,53 @@
       "reviewId": "review:8F5KrRPGUCE:2821fe7761100430abf4",
       "sourcePath": "data/review/sources/history-8F5KrRPGUCE-2821fe7761100430abf4.json",
       "reviewUrl": "review.html?review=review%3A8F5KrRPGUCE%3A2821fe7761100430abf4&entry=cf318c3ee58665da086e7c44d853c399ea85e650bec85a89ccbd769ab622526f"
+    },
+    {
+      "title": "妄想疾患▫ガール",
+      "artist": "もじゃ",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 10472,
+      "time": "2:54:32",
+      "raw": "2:54:32 妄想疾患▫️ガール/もじゃ",
+      "rawHash": "fb57f4c3e8cd2adc68bb9e63db1bcb5dcf273944f796e1c16dba17a6325b73e1",
+      "videoId": "CWMNRKkTh-g",
+      "videoTitle": "【挑戦歌枠￤#karaoke 】同接130人目指しながら歌を届けます🔥初見さん、ROM勢さん歓迎【#ひーライブ 】",
+      "channelName": "ひーくん / hi-kun",
+      "channelId": "UCzKqZ_Z2Qg-Wl3fiy5hCzLg",
+      "channelHandle": "/@Ko_hi_kun",
+      "youtubeUrl": "https://www.youtube.com/watch?v=CWMNRKkTh-g",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=CWMNRKkTh-g&t=10472s",
+      "sourceId": "Ugxt3e-V8NfWMgaQDd94AaABAg",
+      "sourceHash": "61f4bb9b7d8f67a85d20229dfab95deebac3a99b34693ac7177e9e0a774b89ed",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "delimiter_split"
+      ],
+      "replacementSuggestion": {
+        "title": "妄想疾患▫️ガール"
+      },
+      "reviewId": "",
+      "sourcePath": "",
+      "reviewUrl": "",
+      "repairedTitle": "妄想疾患▫️ガール",
+      "repairedArtist": "もじゃ",
+      "repairReasons": [
+        "delimiter_split"
+      ]
     },
     {
       "title": "果てないそら",
@@ -33717,12 +32867,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U&t=1305s",
       "sourceId": "legacy:ZTi1cpRaW8U",
       "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
-      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json;review:history-ZTi1cpRaW8U-938d64179a2e87620ead.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "1m",
-        "review"
+        "review",
+        "snapshot:20260713T150000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34173,6 +33324,49 @@
       "artist": "RADWIMPS",
       "isNiche": false,
       "isUnknownArtist": false,
+      "seconds": 4342,
+      "time": "1:12:22",
+      "raw": "1:12:22　13.05410-(ん) / RADWIMPS",
+      "rawHash": "e76b30d98a326a7ed5879fe78afc7697e148bbe6aa028fe7675068161f010b0c",
+      "videoId": "DuDkasY22Mc",
+      "videoTitle": "【 歌枠 / #karaoke 】RADWIMPSさんの曲だけをたんまり歌う会🦉 【羽緒 / RK Music】#羽緒集魂中 #vtuber #vsinger #歌枠",
+      "channelName": "羽緒",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc&t=4342s",
+      "sourceId": "Ugy4DgBp0efuBozH8nB4AaABAg",
+      "sourceHash": "acb1a4fcaf2a255938b1d94d56794201f691bef90b194fe6d6b51c8b074f3e58",
+      "sourceOrigin": "review:DuDkasY22Mc-acb1a4fcaf2a255938b1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_song",
+        "known_artist",
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_parser_corruption",
+        "parser_corruption"
+      ],
+      "riskReasons": [
+        "parser_corruption",
+        "source_parser_corruption"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:DuDkasY22Mc:acb1a4fcaf2a255938b1",
+      "sourcePath": "data/review/sources/DuDkasY22Mc-acb1a4fcaf2a255938b1.json",
+      "reviewUrl": "review.html?review=review%3ADuDkasY22Mc%3Aacb1a4fcaf2a255938b1&entry=e76b30d98a326a7ed5879fe78afc7697e148bbe6aa028fe7675068161f010b0c"
+    },
+    {
+      "title": "05410-(ん)",
+      "artist": "RADWIMPS",
+      "isNiche": false,
+      "isUnknownArtist": false,
       "seconds": 4343,
       "time": "1:12:23",
       "raw": "1:12:23　13.05410-(ん) / RADWIMPS",
@@ -34186,12 +33380,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc&t=4343s",
       "sourceId": "legacy:DuDkasY22Mc",
       "sourceHash": "e044153fc703f3bc54c5704c172f0ded8ca0561264282b22c164ecf842227f04",
-      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
+      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "1m",
         "review",
+        "snapshot:20260713T150000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -34235,12 +33430,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc&t=7035s",
       "sourceId": "legacy:DuDkasY22Mc",
       "sourceHash": "e044153fc703f3bc54c5704c172f0ded8ca0561264282b22c164ecf842227f04",
-      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-9bd5b9883224f18a6191.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
+      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-9bd5b9883224f18a6191.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "1m",
         "review",
+        "snapshot:20260713T150000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T190000Z"
       ],
@@ -34285,12 +33481,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc&t=7532s",
       "sourceId": "legacy:DuDkasY22Mc",
       "sourceHash": "e044153fc703f3bc54c5704c172f0ded8ca0561264282b22c164ecf842227f04",
-      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
+      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:DuDkasY22Mc-acb1a4fcaf2a255938b1.json;review:history-DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "1m",
         "review",
+        "snapshot:20260713T150000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -34550,14 +33747,15 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM&t=6954s",
       "sourceId": "legacy:_lKgLhWSCCM",
       "sourceHash": "ba5c9cc71aa9b31e467ab2ab07bd66ffea6cc13a7c538f216b78e77b3abc38cc",
-      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:history-_lKgLhWSCCM-ce6d964f00e006a457bc.json;review:_lKgLhWSCCM-373b0c82505415e34abb.json",
+      "sourceOrigin": "latest;review:_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:history-_lKgLhWSCCM-ce6d964f00e006a457bc.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
+        "review",
         "snapshot:20260711T150000Z",
+        "snapshot:20260713T150000Z",
         "snapshot:20260712T190000Z",
-        "snapshot:20260713T120000Z",
-        "review"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34600,13 +33798,14 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM&t=10329s",
       "sourceId": "legacy:_lKgLhWSCCM",
       "sourceHash": "ba5c9cc71aa9b31e467ab2ab07bd66ffea6cc13a7c538f216b78e77b3abc38cc",
-      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:_lKgLhWSCCM-373b0c82505415e34abb.json",
+      "sourceOrigin": "latest;review:_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
+        "review",
         "snapshot:20260711T150000Z",
-        "snapshot:20260712T190000Z",
-        "review"
+        "snapshot:20260713T150000Z",
+        "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36153,18 +35352,19 @@
       "channelHandle": "/@neru_utano",
       "youtubeUrl": "https://www.youtube.com/watch?v=PzWNzyO6M60",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PzWNzyO6M60&t=1873s",
-      "sourceId": "legacy:PzWNzyO6M60",
-      "sourceHash": "17c5576d76ed88ceb2d0fd5c096c02f105b8679db5d08ca0743aa94bac3efcb8",
-      "sourceOrigin": "latest;review:history-PzWNzyO6M60-17c5576d76ed88ceb2d0.json;review:history-PzWNzyO6M60-2603dcbef66d187aee97.json;review:history-PzWNzyO6M60-b49184ebb581e494cf9c.json;review:history-PzWNzyO6M60-fc62465ce151593e8a1f.json;review:PzWNzyO6M60-fc62465ce151593e8a1f.json",
+      "sourceId": "UgzgUBsRmBxpTtCELAF4AaABAg",
+      "sourceHash": "6086cc8344dfee3159f5b6d6bcc338ef04d47a823d7a036c16f0ee36aba67391",
+      "sourceOrigin": "latest;review:PzWNzyO6M60-6086cc8344dfee3159f5.json;review:history-PzWNzyO6M60-17c5576d76ed88ceb2d0.json;review:history-PzWNzyO6M60-2603dcbef66d187aee97.json;review:history-PzWNzyO6M60-6086cc8344dfee3159f5.json;review:history-PzWNzyO6M60-b49184ebb581e494cf9c.json;review:history-PzWNzyO6M60-fc62465ce151593e8a1f.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "1m",
+        "review",
         "snapshot:20260712T190000Z",
         "snapshot:20260711T190000Z",
+        "snapshot:20260713T150000Z",
         "snapshot:20260711T150000Z",
-        "snapshot:20260713T120000Z",
-        "review"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36179,9 +35379,9 @@
         "delimiter_split"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:PzWNzyO6M60:fc62465ce151593e8a1f",
-      "sourcePath": "data/review/sources/PzWNzyO6M60-fc62465ce151593e8a1f.json",
-      "reviewUrl": "review.html?review=review%3APzWNzyO6M60%3Afc62465ce151593e8a1f&entry=2afdef3077de402726bc5c256cca82d44895a11ea4e01238d69d3b2efc6c84a4",
+      "reviewId": "review:PzWNzyO6M60:6086cc8344dfee3159f5",
+      "sourcePath": "data/review/sources/PzWNzyO6M60-6086cc8344dfee3159f5.json",
+      "reviewUrl": "review.html?review=review%3APzWNzyO6M60%3A6086cc8344dfee3159f5&entry=2afdef3077de402726bc5c256cca82d44895a11ea4e01238d69d3b2efc6c84a4",
       "repairedTitle": "441",
       "repairedArtist": "miwa",
       "repairReasons": [
@@ -47500,13 +46700,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=JJc_HICmBrU&t=4438s",
       "sourceId": "legacy:JJc_HICmBrU",
       "sourceHash": "52ac8eb415fdeb60c844810baef33ac473cbd33d8e7801c1ff8f40a03cf97cca",
-      "sourceOrigin": "latest;review:history-JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-96f5649a92eae0d1a47f.json;review:JJc_HICmBrU-52ac8eb415fdeb60c844.json",
+      "sourceOrigin": "latest;review:JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-96f5649a92eae0d1a47f.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260712T190000Z",
-        "snapshot:20260711T150000Z",
-        "review"
+        "review",
+        "snapshot:20260713T150000Z",
+        "snapshot:20260711T150000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -47591,12 +46791,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=K4ODEKmZw2M&t=4446s",
       "sourceId": "legacy:K4ODEKmZw2M",
       "sourceHash": "8513628ce54958e285669af5504b7f13eb7fe596e9ab85930262ad149030c07d",
-      "sourceOrigin": "latest;review:history-K4ODEKmZw2M-8513628ce54958e28566.json;review:K4ODEKmZw2M-8513628ce54958e28566.json",
+      "sourceOrigin": "latest;review:K4ODEKmZw2M-8513628ce54958e28566.json;review:history-K4ODEKmZw2M-8513628ce54958e28566.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260712T190000Z",
-        "review"
+        "review",
+        "snapshot:20260713T150000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -47639,12 +46839,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=RNi5KJKQm04&t=456s",
       "sourceId": "legacy:RNi5KJKQm04",
       "sourceHash": "df87c41c0267ba4c06d8d82b5e8bea6ce32d98e63a9b2dc284e160e08b58c713",
-      "sourceOrigin": "latest;review:history-RNi5KJKQm04-df87c41c0267ba4c06d8.json;review:RNi5KJKQm04-df87c41c0267ba4c06d8.json",
+      "sourceOrigin": "latest;review:RNi5KJKQm04-df87c41c0267ba4c06d8.json;review:history-RNi5KJKQm04-df87c41c0267ba4c06d8.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260712T190000Z",
-        "review"
+        "review",
+        "snapshot:20260713T150000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -54451,7 +53651,7 @@
       "ranges": [
         "1m",
         "snapshot:20260712T220000Z",
-        "snapshot:20260713T120000Z",
+        "snapshot:20260713T150000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -56291,54 +55491,6 @@
       "reviewId": "review:eF-XelhsSEU:ad19406bff26a2a720d9",
       "sourcePath": "data/review/sources/history-eF-XelhsSEU-ad19406bff26a2a720d9.json",
       "reviewUrl": "review.html?review=review%3AeF-XelhsSEU%3Aad19406bff26a2a720d9&entry=452c9722d51051e07dcdf4b208a5134f5ec58f1f7ea5f86bba992d5795d64735"
-    },
-    {
-      "title": "君は僕に似ている",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 11640,
-      "time": "3:14:00",
-      "raw": "3:14:00 君は僕に似ている/See-Saw（アカペラ）",
-      "rawHash": "aa62d6ac0c95a7104131b5667bc6311e6c8dca44f041ecdc40955cbf01e57185",
-      "videoId": "7VNWlyfFQzM",
-      "videoTitle": "【歌枠 / 耐久】初見さん来ないと24時間歌枠！？初見さん・常連さん・ROM専さん大歓迎【 星瑠璃メロウ 】",
-      "channelName": "星瑠璃メロウ / Hoshiruri Mellow",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=7VNWlyfFQzM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=7VNWlyfFQzM&t=11640s",
-      "sourceId": "legacy:7VNWlyfFQzM",
-      "sourceHash": "3ea49c4ac65dd57fc8cdfb066431a58e25d082848b631c3c13021143f76cc585",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "known_song_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "artist": "See-Saw（アカペラ）"
-      },
-      "reviewId": "",
-      "sourcePath": "",
-      "reviewUrl": "",
-      "repairedTitle": "君は僕に似ている",
-      "repairedArtist": "See-Saw（アカペラ）",
-      "repairReasons": [
-        "delimiter_split"
-      ]
     },
     {
       "title": "_おつつ::_みああ",
@@ -61084,7 +60236,6 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m"
       ],
       "classification": "parser_corruption",
@@ -68054,7 +67205,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T120000Z"
+        "snapshot:20260713T150000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -74820,7 +73971,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T120000Z",
+        "snapshot:20260713T150000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -74912,7 +74063,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260713T120000Z",
+        "snapshot:20260713T150000Z",
         "review"
       ],
       "classification": "parser_corruption",
