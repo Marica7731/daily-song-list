@@ -6,7 +6,14 @@ const { createSongSearchLookup } = require("../assets/frontend-utils");
 const { repairParsedEntry } = require("./entry-repair");
 const { normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
 const { canonicalizePayloadSongAliases, canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
-const { applyGroupQualityFilters, writeRankDiffFiles } = require("./update-songlist");
+const { applyGroupQualityFilters, buildGroups, writeRankDiffFiles } = require("./update-songlist");
+const {
+  VIDEO_CATALOG_PATH,
+  catalogSummary,
+  catalogToVideos,
+  loadVideoCatalog,
+  rebuildVideoCatalogFromVideos,
+} = require("./video-catalog");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -90,6 +97,29 @@ function main() {
   if (songSearchIndex?.titleKeys?.length || songSearchIndex?.titleArtistKeys?.length) {
     payload = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(payload, songSearchIndex, songAliasContext), songSearchSourceSummary(songSearchIndex));
   }
+
+  const capturedAt = new Date(payload.capturedAt || payload.generatedAt || Date.now());
+  const catalogRefresh = rebuildVideoCatalogFromVideos(collectUniqueGroupVideos(payload.groups), capturedAt, {
+    previousCatalog: loadVideoCatalog(),
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
+  });
+  writeJson(VIDEO_CATALOG_PATH, catalogRefresh.catalog);
+  payload = {
+    ...payload,
+    groups: applyGroupQualityFilters(buildGroups(catalogToVideos(catalogRefresh.catalog), capturedAt)),
+    source: {
+      ...(payload.source || {}),
+      videoCatalog: {
+        ...catalogSummary(catalogRefresh.catalog, capturedAt),
+        addedVideoCount: catalogRefresh.stats.addedVideoCount,
+        updatedVideoCount: catalogRefresh.stats.updatedVideoCount,
+        expiredVideoCount: catalogRefresh.stats.expiredVideoCount,
+        h72VideoCount: catalogRefresh.catalog.videos.filter((item) => capturedAt.getTime() - item.publishedTimestamp <= 72 * 60 * 60 * 1000).length,
+        monthVideoCount: catalogRefresh.stats.catalogVideoCount,
+      },
+    },
+  };
 
   writeJson(LATEST_PATH, payload);
   for (const rangeId of RANGES) {
@@ -240,6 +270,18 @@ function attachSongSearchSummary(payload, summary) {
       songSearch: summary,
     },
   };
+}
+
+function collectUniqueGroupVideos(groups) {
+  const byVideoId = new Map();
+  for (const group of Object.values(groups || {})) {
+    for (const item of group.items || []) {
+      if (!item?.videoId) continue;
+      const existing = byVideoId.get(item.videoId);
+      if (!existing || (item.songs?.length || 0) > (existing.songs?.length || 0)) byVideoId.set(item.videoId, item);
+    }
+  }
+  return [...byVideoId.values()];
 }
 
 function normalizeArtist(value) {

@@ -12,6 +12,14 @@ const { compactRankDiff, writeRuntimeJson } = require("./build-runtime-data");
 const { repairParsedEntry } = require("./entry-repair");
 const { canonicalizePayloadSongAliases, canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
 const {
+  VIDEO_CATALOG_PATH,
+  catalogSummary,
+  catalogToVideos,
+  loadVideoCatalog,
+  mergeVideosIntoCatalog,
+  rebuildVideoCatalogFromVideos,
+} = require("./video-catalog");
+const {
   applyCurationToSources,
   applyCurationToVideos,
   collectForceRefreshVideoIds,
@@ -137,7 +145,20 @@ async function main() {
   const videos = filterBlockedVideos(curatedMergedVideos);
 
   const capturedAt = new Date();
-  const groups = applyGroupQualityFilters(buildGroups(videos, capturedAt));
+  const catalogUpdate = mergeVideosIntoCatalog(loadVideoCatalog(), videos, capturedAt, {
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
+  });
+  const catalogVideos = filterBlockedVideos(applyCurationToVideos(catalogToVideos(catalogUpdate.catalog), curationContext));
+  const catalogRefresh = rebuildVideoCatalogFromVideos(catalogVideos, capturedAt, {
+    previousCatalog: catalogUpdate.catalog,
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
+  });
+  writeJson(VIDEO_CATALOG_PATH, catalogRefresh.catalog);
+
+  const groupVideos = catalogToVideos(catalogRefresh.catalog);
+  const groups = applyGroupQualityFilters(buildGroups(groupVideos, capturedAt));
   const totalItems = Object.values(groups).reduce((sum, group) => sum + group.items.length, 0);
   if (totalItems <= 0) {
     throw new Error(`No usable timestamp song lists found after inspecting ${inspected.length} videos.`);
@@ -171,6 +192,7 @@ async function main() {
       knownVideoSkipCount: carryForward.skipVideoIds.size,
       skippedKnownCandidateCount: selection.skippedKnownCandidateCount,
       usableVideoCount: videos.length,
+      catalogVideoCount: catalogRefresh.stats.catalogVideoCount,
       candidateCount: candidates.length,
       inspectionLimit: VIDEO_LIMIT,
       videoConcurrency: VIDEO_CONCURRENCY,
@@ -194,6 +216,15 @@ async function main() {
       recentScanHorizonHours: selection.recentScanHorizonHours,
       auditPath: "data/audit.json",
       auditSummary: summarizeAudits(audits),
+      videoCatalog: {
+        ...catalogSummary(catalogRefresh.catalog, capturedAt),
+        addedVideoCount: catalogRefresh.stats.addedVideoCount,
+        updatedVideoCount: catalogRefresh.stats.updatedVideoCount,
+        expiredVideoCount: catalogRefresh.stats.expiredVideoCount,
+        fromCurrentRunVideoCount: videos.length,
+        h72VideoCount: groups["72h"]?.items?.length || 0,
+        monthVideoCount: groups["1m"]?.items?.length || 0,
+      },
     },
     status: {
       status: "success",
@@ -403,7 +434,6 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now, options 
   for (const item of previousPayload.groups["1m"]?.items || []) {
     if (isBlockedSource(item)) continue;
     if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS)) continue;
-    if (!hasMonthlySearchSource(item)) continue;
     if (upsertCarriedVideo(videos, item, ["month"], from)) counts.month += 1;
   }
 
@@ -1108,7 +1138,6 @@ function incrementPlainCount(target, key, amount = 1) {
 function buildGroups(videos, capturedAt) {
   const nowMs = capturedAt.getTime();
   const in72h = (item) => Boolean(item.publishedTimestamp && nowMs - item.publishedTimestamp <= H72_MS);
-  const inMonthSearch = (item) => hasMonthlySearchSource(item);
   const inMonthWindow = (item) => isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS);
   const sortVideos = (items) =>
     [...items].sort((a, b) => {
@@ -1127,10 +1156,10 @@ function buildGroups(videos, capturedAt) {
     },
     "1m": {
       id: "1m",
-      title: "Monthly timestamp song lists",
+      title: "Last 35 days timestamp song lists",
       generatedAt: capturedAt.toISOString(),
       updatedAt: capturedAt.toISOString(),
-      items: sortVideos(videos.filter((item) => inMonthSearch(item) && inMonthWindow(item))),
+      items: sortVideos(videos.filter((item) => inMonthWindow(item))),
     },
   };
 }

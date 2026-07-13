@@ -29,6 +29,13 @@ test("home controls remove legacy info buttons and expose hide-unknown toggle", 
   assert.match(appSource, /hideUnknownToggle/u);
 });
 
+test("monthly range copy describes 35 day catalog semantics", () => {
+  assert.doesNotMatch(indexSource, /来自 YouTube 月度搜索筛选/u);
+  assert.match(indexSource, /最近35天累计；YouTube 月度搜索用于补充发现视频。/u);
+  assert.match(indexSource, /最近72小时和最近35天累计时间戳歌单快照/u);
+  assert.match(appSource, /monthlyCoverageNote/u);
+});
+
 test("record videoCount is used for rank values and row rendering", () => {
   assert.match(functionBody("function rankValue"), /record\.videoCount/u);
   assert.doesNotMatch(functionBody("function rankValue"), /uniqueVideoCount/u);

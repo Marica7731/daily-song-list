@@ -89,6 +89,10 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(cleanSongTitleNoise("8.32"), "8.32");
   assert.equal(cleanSongTitleNoise("2.500♪"), "2.500♪");
   assert.equal(cleanSongTitleNoise("02.441"), "441");
+  assert.equal(cleanSongTitleNoise("01.1時間"), "1時間");
+  assert.equal(cleanSongTitleNoise("07.3月9日"), "3月9日");
+  assert.equal(cleanSongTitleNoise("13.05410-(ん)"), "05410-(ん)");
+  assert.equal(cleanSongTitleNoise("28.366日"), "366日");
   assert.equal(cleanSongTitleNoise("01. Song"), "Song");
   assert.equal(cleanSongTitleNoise("01≫アンノウン・マザーグース"), "アンノウン・マザーグース");
   assert.equal(cleanSongTitleNoise("02≫テオ"), "テオ");
@@ -113,6 +117,13 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "2周年記念お写真公開！", artist: "待补歌手" }), true);
   assert.equal(isBlockedSongEntry({ title: "〜3Dライブ開催決定!!!!", artist: "待补歌手" }), true);
   assert.equal(isBlockedSongEntry({ title: "3Dお披露目でスタンドマイク回したかった", artist: "永ちゃんやりたい" }), true);
+  assert.equal(isBlockedSongEntry({ title: "8", artist: "29(土) ワンマンライブ開催！＆クラファン開催中！(追加ゴール)" }), true);
+  assert.equal(isBlockedSongEntry({ title: "7", artist: "13（月）ニコニコ生放送デビュー配信" }), true);
+  assert.equal(isBlockedSongEntry({ title: "1", artist: "3の純情な感情", raw: "0:01 1/3の純情な感情" }), true);
+  assert.equal(isBlockedSongEntry({ title: "01", artist: "ハートアンドハート(Heart and Heart) | 苺咲べりぃ(Maisaki Berry)" }), true);
+  assert.equal(isBlockedSongEntry({ title: "27", artist: "SUPER BEAVER（💡）" }), false);
+  assert.equal(isBlockedSongEntry({ title: "8.32", artist: "*Luna" }), false);
+  assert.equal(isBlockedSongEntry({ title: "1.0", artist: "amazarashi" }), false);
 
   const payload = {
     source: { name: "fixture" },
@@ -128,6 +139,7 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
               { title: "おつウタノン", artist: "未記載", seconds: 7967, time: "2:12:47" },
               { title: "Tunami(PON)", artist: "未記載", seconds: 1739, time: "0:28:59" },
               { title: "再開", artist: "待补歌手", seconds: 1975, time: "0:32:55" },
+              { title: "8", artist: "29(土) ワンマンライブ開催！＆クラファン開催中！(追加ゴール)", seconds: 2000, time: "0:33:20" },
               { title: "02| キュートなキューたい", artist: "CUTIE STREET", seconds: 1361, time: "0:22:41" },
             ],
           },
@@ -141,7 +153,7 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.deepEqual(filtered.groups["72h"].items[0].songs, [
     { title: "キュートなキューたい", artist: "CUTIE STREET", seconds: 1361, time: "0:22:41" },
   ]);
-  assert.equal(filtered.source.clientFilteredBlockedSongCount, 6);
+  assert.equal(filtered.source.clientFilteredBlockedSongCount, 7);
   assert.equal(filtered.source.clientNormalizedSongCount, 1);
 });
 

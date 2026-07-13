@@ -33,16 +33,18 @@ test("keeps decimal-looking numeric song titles while stripping real list indexe
       "0:20 2.500♪",
       "0:30 01. Song / Artist",
       "0:40 01) Another Song / Another Artist",
+      "0:50 07.3月9日 / レミオロメン",
+      "1:00 13.05410-(ん) / RADWIMPS",
     ].join("\n"),
   ]);
 
   assert.deepEqual(
     songs.map((song) => song.title),
-    ["8.32", "2.500♪", "Song", "Another Song"],
+    ["8.32", "2.500♪", "Song", "Another Song", "3月9日", "05410-(ん)"],
   );
   assert.deepEqual(
     songs.map((song) => song.artist),
-    ["*Luna", "未記載", "Artist", "Another Artist"],
+    ["*Luna", "未記載", "Artist", "Another Artist", "レミオロメン", "RADWIMPS"],
   );
 });
 

@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { NON_SONG_RULES_PATH, OVERRIDES_PATH, validateCurationOverrides } = require("./curation");
 const { SONG_ALIASES_PATH, canonicalizeSongIdentity, loadSongAliasContext, validateSongAliasConfig } = require("./song-aliases");
+const { MONTH_CATALOG_DAYS, VIDEO_CATALOG_PATH, isWithinCatalogWindow } = require("./video-catalog");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -35,14 +36,12 @@ const RUNTIME_VIDEO_FIELDS = new Set([
   "songs",
 ]);
 const RUNTIME_SONG_FIELDS = new Set(["seconds", "title", "artist", "isNiche"]);
-const MONTH_SEARCH_URLS = new Set([
-  "https://www.youtube.com/results?search_query=%E6%AD%8C%E6%9E%A0&sp=CAMSBggEEAEYAg%253D%253D",
-  "https://www.youtube.com/results?search_query=%E5%BC%BE%E3%81%8D%E8%AA%9E%E3%82%8A&sp=CAMSBggEEAEYAg%253D%253D",
-]);
+const H72_MS = 72 * 60 * 60 * 1000;
 
 const payload = readJson(LATEST_PATH);
 const errors = [];
 const songAliasContext = validateSongAliases();
+const capturedMs = Date.parse(payload.capturedAt || payload.generatedAt || "");
 
 validateCurationConfig();
 
@@ -58,8 +57,11 @@ for (const groupId of ["72h", "1m"]) {
   for (const [videoIndex, item] of (group.items || []).entries()) {
     if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`${groupId}[${videoIndex}].videoId invalid`);
     if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`${groupId}[${videoIndex}].songs empty`);
-    if (groupId === "1m" && !hasMonthlySearchSource(item)) {
-      errors.push(`${groupId}[${videoIndex}].sourceUrls must include a YouTube monthly search URL`);
+    if (groupId === "72h" && Number.isFinite(capturedMs) && !isWithinWindow(item.publishedTimestamp, capturedMs, H72_MS)) {
+      errors.push(`${groupId}[${videoIndex}].publishedTimestamp must be within 72 hours`);
+    }
+    if (groupId === "1m" && Number.isFinite(capturedMs) && !isWithinCatalogWindow(item.publishedTimestamp, capturedMs)) {
+      errors.push(`${groupId}[${videoIndex}].publishedTimestamp must be within ${MONTH_CATALOG_DAYS} days`);
     }
     for (const [songIndex, song] of (item.songs || []).entries()) {
       if (!song.title) errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].title missing`);
@@ -87,6 +89,7 @@ for (const [groupId, diffPath] of Object.entries(DIFF_PATHS)) {
 }
 
 validateRuntimeUiFiles();
+validateVideoCatalog();
 
 if (fs.existsSync(SONG_SEARCH_INDEX_PATH)) {
   const songSearchIndex = readJson(SONG_SEARCH_INDEX_PATH);
@@ -108,13 +111,11 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
-function hasMonthlySearchSource(item) {
-  return listValues(item.sourceUrls).some((url) => MONTH_SEARCH_URLS.has(url));
-}
-
-function listValues(value) {
-  if (Array.isArray(value)) return value;
-  return value ? [value] : [];
+function isWithinWindow(publishedTimestamp, nowMs, windowMs) {
+  const time = Number(publishedTimestamp);
+  if (!Number.isFinite(time)) return false;
+  const age = nowMs - time;
+  return age >= 0 && age <= windowMs;
 }
 
 function validateDiffFile(groupId, diffPath) {
@@ -194,6 +195,42 @@ function validateRuntimeUiFiles() {
       errors.push(`ui.meta.diffs.${groupId}.path invalid`);
     }
     validateRuntimeRangeFile(groupId, rangeMeta);
+  }
+}
+
+function validateVideoCatalog() {
+  if (!fs.existsSync(VIDEO_CATALOG_PATH)) {
+    errors.push("missing video catalog: data/video-catalog.json");
+    return;
+  }
+  const catalog = readJson(VIDEO_CATALOG_PATH);
+  if (catalog.schemaVersion !== 1) errors.push("video-catalog.schemaVersion must be 1");
+  if (catalog.retentionDays !== MONTH_CATALOG_DAYS) errors.push(`video-catalog.retentionDays must be ${MONTH_CATALOG_DAYS}`);
+  if (!Array.isArray(catalog.videos)) {
+    errors.push("video-catalog.videos must be array");
+    return;
+  }
+  const seen = new Set();
+  const catalogIds = new Set();
+  for (const [index, item] of catalog.videos.entries()) {
+    const label = `video-catalog.videos[${index}]`;
+    if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`${label}.videoId invalid`);
+    if (seen.has(item.videoId)) errors.push(`${label}.videoId duplicated: ${item.videoId}`);
+    seen.add(item.videoId);
+    catalogIds.add(item.videoId);
+    if (Number.isFinite(capturedMs) && !isWithinCatalogWindow(item.publishedTimestamp, capturedMs)) {
+      errors.push(`${label}.publishedTimestamp must be within ${MONTH_CATALOG_DAYS} days`);
+    }
+    for (const field of ["title", "channelName", "firstSeenAt", "lastSeenAt", "lastInspectedAt", "qualityStatus"]) {
+      if (typeof item[field] !== "string") errors.push(`${label}.${field} must be string`);
+    }
+    if (item.qualityStatus !== "usable") errors.push(`${label}.qualityStatus must be usable`);
+    if (!Array.isArray(item.discoveryGroups)) errors.push(`${label}.discoveryGroups must be array`);
+    if (!Array.isArray(item.sourceUrls)) errors.push(`${label}.sourceUrls must be array`);
+    if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`${label}.songs must be non-empty array`);
+  }
+  for (const [videoIndex, item] of (payload.groups?.["1m"]?.items || []).entries()) {
+    if (!catalogIds.has(item.videoId)) errors.push(`1m[${videoIndex}].videoId missing from video catalog: ${item.videoId}`);
   }
 }
 

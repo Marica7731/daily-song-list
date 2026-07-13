@@ -1431,7 +1431,7 @@ function renderVideoList(group, rangeCache, selection) {
   renderSummary(group, [
     visibilityMetric(items.length, sourceItems.length, nicheItems.length, "个视频", "个小众视频"),
     countRatioMetric(visibleSongs, denominatorSongs, "个时间戳"),
-  ], hiddenUnknownNote(selection));
+  ], summaryNote(selection));
 
   if (!items.length) {
     renderEmpty(emptyMessage("这个范围还没有时间戳歌曲列表", "没有找到符合条件的视频", "没有找到小众歌曲视频"), {
@@ -1463,7 +1463,7 @@ function renderSongRank(group, rangeCache, selection) {
     visibilityMetric(records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
     occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
     metric(selection.videoCount, "个视频"),
-  ], hiddenUnknownNote(selection));
+  ], summaryNote(selection));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌曲", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
@@ -1510,7 +1510,7 @@ function renderArtistRank(group, rangeCache, selection) {
     visibilityMetric(records.length, allArtistRecords.length, nicheArtistRecords.length, "位歌手", "位小众歌曲歌手"),
     occurrenceVisibilityMetric(occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
     metric(selection.videoCount, "个视频"),
-  ], missingArtistCount ? `${missingArtistCount} 条待补歌手` : "");
+  ], summaryNote(selection, missingArtistCount ? `${missingArtistCount} 条待补歌手` : ""));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌手资料", "没有找到符合条件的歌手", "没有找到小众歌曲歌手"), {
@@ -1560,7 +1560,7 @@ function renderSongIndexView(group, rangeCache, selection) {
     visibilityMetric(records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
     occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
     metric(selection.videoCount, "个视频"),
-  ], hiddenUnknownNote(selection));
+  ], summaryNote(selection));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌曲索引", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
@@ -1684,6 +1684,19 @@ function renderSummary(group, metrics, note = "") {
 function hiddenUnknownNote(selection) {
   const count = Number(selection?.hiddenUnknownCount) || 0;
   return state.hideUnknownArtist && count > 0 ? `已隐藏 ${count} 条无歌手收录` : "";
+}
+
+function summaryNote(selection, extra = "") {
+  return [extra, hiddenUnknownNote(selection), monthlyCoverageNote()].filter(Boolean).join(" · ");
+}
+
+function monthlyCoverageNote() {
+  if (state.range !== "1m" || !isLatestSnapshot()) return "";
+  const catalog = state.runtimeMeta?.catalog;
+  const catalogVideoCount = Number(catalog?.catalogVideoCount);
+  const retentionDays = Number(catalog?.retentionDays) || 35;
+  if (!Number.isFinite(catalogVideoCount) || catalogVideoCount <= 0) return "最近35天累计";
+  return `最近${retentionDays}天累计 · 视频目录 ${catalogVideoCount} 个`;
 }
 
 function renderSummaryActions() {

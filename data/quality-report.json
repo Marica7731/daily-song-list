@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T13:04:16.315Z",
+  "generatedAt": "2026-07-13T13:53:41.296Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-  "totalSongs": 13861,
+  "totalSongs": 13853,
   "unknownArtistCount": 2782,
   "nicheUnknownArtistCount": 1423,
-  "highRiskEntryCount": 410,
-  "highRiskSourceCount": 18,
+  "highRiskEntryCount": 418,
+  "highRiskSourceCount": 20,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 3,
+  "ruleDroppedEntryCount": 5,
   "conversationDroppedEntryCount": 3,
-  "qualityDroppedEntryCount": 0,
+  "qualityDroppedEntryCount": 2,
   "forceRefreshVideoCount": 0,
   "confirmedNoiseCount": 35,
-  "parserCorruptionCount": 11,
+  "parserCorruptionCount": 18,
   "likelyNoiseCount": 3,
   "needsReviewCount": 1421,
-  "likelySongCount": 8287,
+  "likelySongCount": 7799,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -104,18 +104,6 @@
       }
     },
     {
-      "value": "サムライハート",
-      "count": 7,
-      "classifications": {
-        "likely_song": 5,
-        "parser_corruption": 2
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 5,
-        "parser_corruption": 2
-      }
-    },
-    {
       "value": "ロミオとシンデレラ",
       "count": 7,
       "classifications": {
@@ -153,6 +141,18 @@
       },
       "riskReasons": {
         "known_song_unknown_artist": 6
+      }
+    },
+    {
+      "value": "サムライハート",
+      "count": 6,
+      "classifications": {
+        "likely_song": 5,
+        "parser_corruption": 1
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 5,
+        "parser_corruption": 1
       }
     },
     {
@@ -229,15 +229,15 @@
   "topRiskChannels": [
     {
       "value": "UTANO ch. 白玖ウタノ",
-      "count": 9
+      "count": 8
     },
     {
       "value": "音ノ乃のの / NononoNono",
-      "count": 5
+      "count": 4
     },
     {
-      "value": "菜鳥ひなた / Hinata Natori",
-      "count": 5
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 4
     },
     {
       "value": "Kyoka Ch. -響架-",
@@ -268,10 +268,6 @@
       "count": 3
     },
     {
-      "value": "むんもっしゅ",
-      "count": 3
-    },
-    {
       "value": "飲酒じめさん【hajime】",
       "count": 3
     },
@@ -288,11 +284,11 @@
       "count": 3
     },
     {
-      "value": "芽森ひより",
+      "value": "君影すず / Kimikage Suzu💌弾き語りVtuber",
       "count": 3
     },
     {
-      "value": "君影すず / Kimikage Suzu💌弾き語りVtuber",
+      "value": "菜鳥ひなた / Hinata Natori",
       "count": 3
     },
     {
@@ -304,8 +300,12 @@
       "count": 3
     },
     {
-      "value": "時羽あいの",
+      "value": "茶々プラムム / Pulamumu",
       "count": 3
+    },
+    {
+      "value": "-sumica-澄花",
+      "count": 2
     }
   ],
   "topRiskVideos": [
@@ -373,7 +373,6 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
         "kept_count_high_low_known_song_density",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
@@ -397,48 +396,15 @@
       ]
     },
     {
-      "videoId": "pKh2oq-clhI",
-      "title": "【七海うらら】7月3日 #七海の日 ワンマン開催記念歌枠 #うらすとりーむ",
-      "channelName": "七海うらら*歌channel",
-      "riskScore": 98,
+      "videoId": "DuDkasY22Mc",
+      "title": "【 歌枠 / #karaoke 】RADWIMPSさんの曲だけをたんまり歌う会🦉 【羽緒 / RK Music】#羽緒集魂中 #vtuber #vsinger #歌枠",
+      "channelName": "羽緒",
+      "riskScore": 90,
       "riskLevel": "high",
       "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "dvXHoYo54O8",
-      "title": "【 #歌枠 】のんびり歌った日。｜KARAOKE｜Singing Stream【 無々ひさぎ / Vsinger 】 #ひさぎの羽休み",
-      "channelName": "無々ひさぎ - Hisagi Nana -",
-      "riskScore": 98,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "8rx98ujzukk",
-      "title": "【#ピアノ弾き語り 】ジャズっぽい弾き語り練習【 #Vsinger 】Singing while playing the piano to help you sleep.",
-      "channelName": "朱の唄 Akane's Lullaby",
-      "riskScore": 97,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_many_topic_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
+        "source_parser_corruption",
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
       ]
     },
     {
@@ -448,8 +414,8 @@
       "riskScore": 90,
       "riskLevel": "high",
       "riskReasons": [
-        "source_many_topic_entries",
         "source_activity_marker_ratio_high",
+        "source_many_topic_entries",
         "activity_marker_title"
       ]
     },
@@ -479,6 +445,20 @@
       ]
     },
     {
+      "videoId": "pKh2oq-clhI",
+      "title": "【七海うらら】7月3日 #七海の日 ワンマン開催記念歌枠 #うらすとりーむ",
+      "channelName": "七海うらら*歌channel",
+      "riskScore": 84,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
+      ]
+    },
+    {
       "videoId": "_iQSnxRMFN0",
       "title": "【#歌枠】🎙B'z歌枠🎙 ⚠スパチャメンギフ等禁止⚠【煎妻あんこ】#VTuber",
       "channelName": "煎妻あんこ",
@@ -490,6 +470,34 @@
         "source_multiple_unknown_artists",
         "short_unknown_title",
         "source_multiple_niche_short_titles"
+      ]
+    },
+    {
+      "videoId": "dvXHoYo54O8",
+      "title": "【 #歌枠 】のんびり歌った日。｜KARAOKE｜Singing Stream【 無々ひさぎ / Vsinger 】 #ひさぎの羽休み",
+      "channelName": "無々ひさぎ - Hisagi Nana -",
+      "riskScore": 84,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "8rx98ujzukk",
+      "title": "【#ピアノ弾き語り 】ジャズっぽい弾き語り練習【 #Vsinger 】Singing while playing the piano to help you sleep.",
+      "channelName": "朱の唄 Akane's Lullaby",
+      "riskScore": 83,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
       ]
     },
     {
@@ -517,6 +525,19 @@
         "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
+      "videoId": "ZTi1cpRaW8U",
+      "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
+      "channelName": "闇咲とうか",
+      "riskScore": 78,
+      "riskLevel": "high",
+      "riskReasons": [
+        "parser_corruption",
+        "source_multiple_unknown_artists",
+        "niche_unknown_artist",
         "source_multiple_niche_short_titles"
       ]
     },
@@ -560,36 +581,50 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
-    },
-    {
-      "videoId": "pv0BsotH36E",
-      "title": "【 #歌枠/#karaoke 】初見さん求む！高評価10増えるごとに歌える歌枠✨【 #shorts #vtuber #宵十めむ 】",
-      "channelName": "宵十めむ",
-      "riskScore": 69,
-      "riskLevel": "medium",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "8ddC8VUr0xw",
-      "title": "【夜の弾き語り】ハナレグミ『発光帯』から始まる、生演奏と雑談202607",
-      "channelName": "Akinori IZAWA 『GAIB!!!』",
-      "riskScore": 68,
-      "riskLevel": "medium",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-13T13:53:41.296Z",
+      "totalSongs": 13853,
+      "unknownArtistCount": 2782,
+      "nicheUnknownArtistCount": 1423,
+      "highRiskEntryCount": 418,
+      "highRiskSourceCount": 20
+    },
+    {
+      "generatedAt": "2026-07-13T13:51:30.989Z",
+      "totalSongs": 13853,
+      "unknownArtistCount": 2782,
+      "nicheUnknownArtistCount": 1423,
+      "highRiskEntryCount": 418,
+      "highRiskSourceCount": 20
+    },
+    {
+      "generatedAt": "2026-07-13T13:48:58.220Z",
+      "totalSongs": 13853,
+      "unknownArtistCount": 2782,
+      "nicheUnknownArtistCount": 1423,
+      "highRiskEntryCount": 411,
+      "highRiskSourceCount": 18
+    },
+    {
+      "generatedAt": "2026-07-13T13:36:49.136Z",
+      "totalSongs": 13861,
+      "unknownArtistCount": 2782,
+      "nicheUnknownArtistCount": 1423,
+      "highRiskEntryCount": 411,
+      "highRiskSourceCount": 18
+    },
+    {
+      "generatedAt": "2026-07-13T13:34:22.348Z",
+      "totalSongs": 13861,
+      "unknownArtistCount": 2782,
+      "nicheUnknownArtistCount": 1423,
+      "highRiskEntryCount": 411,
+      "highRiskSourceCount": 18
+    },
     {
       "generatedAt": "2026-07-13T13:04:16.315Z",
       "totalSongs": 13861,
@@ -709,46 +744,6 @@
       "nicheUnknownArtistCount": 1604,
       "highRiskEntryCount": 2292,
       "highRiskSourceCount": 171
-    },
-    {
-      "generatedAt": "2026-07-12T20:43:44.020Z",
-      "totalSongs": 12874,
-      "unknownArtistCount": 3126,
-      "nicheUnknownArtistCount": 1604,
-      "highRiskEntryCount": 2292,
-      "highRiskSourceCount": 171
-    },
-    {
-      "generatedAt": "2026-07-12T20:40:10.608Z",
-      "totalSongs": 12874,
-      "unknownArtistCount": 3126,
-      "nicheUnknownArtistCount": 1604,
-      "highRiskEntryCount": 2292,
-      "highRiskSourceCount": 171
-    },
-    {
-      "generatedAt": "2026-07-12T20:10:29.288Z",
-      "totalSongs": 12882,
-      "unknownArtistCount": 3134,
-      "nicheUnknownArtistCount": 1612,
-      "highRiskEntryCount": 2409,
-      "highRiskSourceCount": 167
-    },
-    {
-      "generatedAt": "2026-07-12T19:26:39.318Z",
-      "totalSongs": 13001,
-      "unknownArtistCount": 3296,
-      "nicheUnknownArtistCount": 1743,
-      "highRiskEntryCount": 5111,
-      "highRiskSourceCount": 301
-    },
-    {
-      "generatedAt": "2026-07-12T18:49:27.668Z",
-      "totalSongs": 12932,
-      "unknownArtistCount": 3287,
-      "nicheUnknownArtistCount": 1742,
-      "highRiskEntryCount": 5159,
-      "highRiskSourceCount": 306
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T13:04:16.315Z",
+  "generatedAt": "2026-07-13T13:53:41.296Z",
   "reviewId": "review:YEba6dTgYDk:2f272b7cbd7e2906cd9f",
   "video": {
     "videoId": "YEba6dTgYDk",
@@ -11,17 +11,16 @@
   "source": {
     "sourceId": "selected:YEba6dTgYDk:2f272b7cbd7e2906",
     "sourceHash": "2f272b7cbd7e2906cd9f7f22be26026f114729dcf89ed69dbf1e3eec2a5cb038",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 34,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
-      "source_many_topic_entries",
       "source_multiple_unknown_artists",
       "niche_unknown_artist"
     ]
@@ -45,8 +44,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -65,8 +63,7 @@
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -87,8 +84,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -109,8 +105,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -131,8 +126,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -151,8 +145,7 @@
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -173,8 +166,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -195,8 +187,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -217,8 +208,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -239,9 +229,7 @@
         "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     }
   ]
 }

@@ -64,13 +64,13 @@ test("carries fresh previous song lists and skips previously inspected stable vi
   assert.equal(carry.reason, "previous_latest_fresh");
   assert.deepEqual(
     carry.videos.map((item) => item.videoId).sort(),
-    ["AAAAAAAAAAA", "CCCCCCCCCCC"],
+    ["AAAAAAAAAAA", "CCCCCCCCCCC", "GGGGGGGGGGG", "HHHHHHHHHHH"],
   );
-  assert.deepEqual(carry.counts, { h72: 1, month: 1 });
+  assert.deepEqual(carry.counts, { h72: 1, month: 3 });
   assert.equal(carry.skipVideoIds.has("AAAAAAAAAAA"), true);
   assert.equal(carry.skipVideoIds.has("CCCCCCCCCCC"), true);
-  assert.equal(carry.skipVideoIds.has("GGGGGGGGGGG"), false);
-  assert.equal(carry.skipVideoIds.has("HHHHHHHHHHH"), false);
+  assert.equal(carry.skipVideoIds.has("GGGGGGGGGGG"), true);
+  assert.equal(carry.skipVideoIds.has("HHHHHHHHHHH"), true);
   assert.equal(carry.skipVideoIds.has("EEEEEEEEEEE"), true);
   assert.equal(carry.skipVideoIds.has("FFFFFFFFFFF"), false);
 });
@@ -238,7 +238,7 @@ test("fetched videos win over carried videos while preserving month membership",
   assert.deepEqual(merged[0].sourceGroups.sort(), ["month", "today"]);
 });
 
-test("monthly group only includes monthly-source videos within the carry-forward window", () => {
+test("monthly group includes every usable video within the 35 day carry-forward window", () => {
   const groups = buildGroups(
     [
       video("AAAAAAAAAAA", 2, ["today"]),
@@ -257,7 +257,7 @@ test("monthly group only includes monthly-source videos within the carry-forward
   );
   assert.deepEqual(
     groups["1m"].items.map((item) => item.videoId),
-    ["DDDDDDDDDDD", "BBBBBBBBBBB"],
+    ["AAAAAAAAAAA", "DDDDDDDDDDD", "FFFFFFFFFFF", "BBBBBBBBBBB"],
   );
 });
 

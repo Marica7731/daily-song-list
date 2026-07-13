@@ -391,7 +391,7 @@ function cleanSongOrArtistPart(text) {
 
 function shouldPreserveDecimalSongTitle(value) {
   const text = String(value || "").trim();
-  return !/^0\d+[.．]/u.test(text) && /^\d+[.．]\d+(?:\S*|\s*[\/／].*)?$/u.test(text);
+  return /^\d[.．]\d+(?:\S*|\s*[\/／].*)?$/u.test(text);
 }
 
 function cleanArtistPart(text) {

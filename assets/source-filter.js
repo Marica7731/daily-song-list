@@ -149,7 +149,8 @@
         .replace(/^\s*(?:[꒱〉》»≫>]+[\s\u3000]*)?(?:[#＃]?\d{1,3}|[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳])\s*(?:(?:[.．](?![\d０-９]))|[、)）:：|｜≫>])\s*/u, "")
         .trim();
       value = value.replace(/^\s*[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳]\s*/u, "").trim();
-      value = value.replace(/^\s*0\d{1,2}[.．](?=[\d０-９]{2,}\b)/u, "").trim();
+      value = value.replace(/^\s*0\d{1,2}[.．](?=[\d０-９])/u, "").trim();
+      value = value.replace(/^\s*[1-9]\d{1,2}[.．](?=[\d０-９]+(?:[^\d０-９.]|$))/u, "").trim();
       value = value
         .replace(/^\s*(?:[#＃]?\d{1,3}\s+)?[#＃]?\d{1,3}\s*曲目\s*(?:[.)．、:：|｜\-—–−]\s*)?/u, "")
         .trim();
@@ -164,8 +165,32 @@
     const artist = String(song?.artist || "").trim();
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
     if (isStrongNonSongActivityText(title)) return true;
+    if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
     return !hasArtist && isChatReactionShoutText(title);
+  }
+
+  function isNumericIndexFragmentEntry(title, artist, raw) {
+    const numericTitle = String(title || "").normalize("NFKC").trim();
+    if (!/^(?:0?[1-9]|[1-9]\d{1,2})$/u.test(numericTitle)) return false;
+
+    const artistText = String(artist || "").normalize("NFKC").trim();
+    if (!artistText || isUnknownArtist(artistText)) return true;
+    if (isStrongNonSongMarker(artistText) || isStrongNonSongActivityText(artistText) || isNonSongNoiseTitle(artistText)) return true;
+    if (isNumericFragmentArtistText(artistText)) return true;
+
+    const rawText = String(raw || "").normalize("NFKC");
+    return Boolean(rawText && new RegExp(`(?:^|\\s)0?${Number(numericTitle)}\\s*[／/]\\s*${escapeRegExp(artistText)}`, "u").test(rawText));
+  }
+
+  function isNumericFragmentArtistText(text) {
+    const value = stripCustomEmojiAliases(text).normalize("NFKC").trim();
+    const compact = value.replace(/[\s\u3000]+/gu, "");
+    if (!compact) return false;
+    if (/^\d+(?:の|コ目|個目|時間|分|月|日|人|周年)/u.test(compact)) return true;
+    if (/^\d{1,2}(?:[\/／]\d{1,2}|\([月火水木金土日]\)|（[月火水木金土日]）|[月火水木金土日]曜?)/u.test(compact)) return true;
+    if (/[|｜￤∣丨]/u.test(value) && /[A-Za-zぁ-んァ-ヶ一-龯々]/u.test(value)) return true;
+    return /(?:配信予定|デビュー配信|ニコニコ生放送|ワンマンライブ|クラファン|追加ゴール|ライブ開催|開催決定|出演決定|お写真公開|写真公開|周年記念|チャンネル登録|登録者|達成|CROSS\s*REALITY|Vol\.?\s*\d+)/iu.test(value);
   }
 
   function isArtistRichMixedSongList(songs) {
@@ -331,6 +356,10 @@
 
   function normalizeMatcherText(value) {
     return normalizeWhitespace(String(value || "").normalize("NFKC")).toLocaleLowerCase();
+  }
+
+  function escapeRegExp(value) {
+    return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   function normalizeWhitespace(value) {

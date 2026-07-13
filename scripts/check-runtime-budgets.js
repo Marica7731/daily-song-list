@@ -6,6 +6,7 @@ const ROOT = path.resolve(__dirname, "..");
 const FILE_BUDGETS = [
   { path: "data/ui/72h.json", gzipBudget: 800 * 1024 },
   { path: "data/ui/1m.json", gzipBudget: 800 * 1024 },
+  { path: "data/ui/meta.json", gzipBudget: 16 * 1024 },
   { path: "data/diff/latest-72h.json", gzipBudget: 120 * 1024 },
   { path: "data/diff/latest-1m.json", gzipBudget: 120 * 1024 },
 ];

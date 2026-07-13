@@ -42,6 +42,7 @@ function buildRuntimeMeta(payload, rangePayloads) {
     rebuiltDerivedAt: payload.source?.rebuiltDerivedAt || "",
     curationVersion: payload.curationVersion || "",
     curationHash: payload.curationHash || "",
+    catalog: payload.source?.videoCatalog || null,
     status: runtimeStatus(payload),
     filterVersion: CURRENT_FILTER_VERSION,
     nicheAnnotated: RANGES.every((rangeId) => rangePayloads[rangeId]?.nicheAnnotated === true),

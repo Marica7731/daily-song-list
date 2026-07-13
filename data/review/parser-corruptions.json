@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T13:05:11.619Z",
+  "generatedAt": "2026-07-13T13:54:41.173Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
   "latestGeneratedAt": "2026-07-13T12:22:43.972Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
   "counts": {
-    "totalCandidates": 1631,
+    "totalCandidates": 1632,
     "uniqueVideos": 233,
-    "uniqueSources": 282,
+    "uniqueSources": 283,
     "confirmedNoiseCount": 0,
-    "parserCorruptionCount": 1631,
+    "parserCorruptionCount": 1632,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 0,
-      "parser_corruption": 1631,
+      "parser_corruption": 1632,
       "likely_noise": 0,
       "needs_review": 0,
       "likely_song": 0
@@ -9532,6 +9532,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
+        "1m",
         "snapshot:20260713T120000Z",
         "review"
       ],
@@ -10850,36 +10851,41 @@
       "videoId": "lUbnHmfYqeA",
       "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
       "channelName": "Kyoka Ch. -響架-",
-      "channelId": "",
-      "channelHandle": "",
+      "channelId": "UC37P2To-pPbd11ocMZ9SyWg",
+      "channelHandle": "/channel/UC37P2To-pPbd11ocMZ9SyWg",
       "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=8214s",
-      "sourceId": "selected:lUbnHmfYqeA:35e4863b5bf0a629",
+      "sourceId": "legacy:lUbnHmfYqeA",
       "sourceHash": "35e4863b5bf0a629440c108003cde15340c9b97f93f697ef9ec0f9aa5181f31c",
-      "sourceOrigin": "review:history-lUbnHmfYqeA-35e4863b5bf0a629440c.json",
-      "sourceScope": "history",
+      "sourceOrigin": "latest;review:history-lUbnHmfYqeA-35e4863b5bf0a629440c.json;review:lUbnHmfYqeA-35e4863b5bf0a629440c.json",
+      "sourceScope": "current",
       "ranges": [
-        "snapshot:20260712T190000Z"
+        "1m",
+        "snapshot:20260712T190000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_title_artist",
+        "inferred_artist"
       ],
-      "sourceRiskReasons": [
-        "source_multiple_niche_short_titles",
-        "parser_corruption"
-      ],
+      "sourceRiskReasons": [],
       "riskReasons": [
         "parser_corruption",
-        "source_multiple_niche_short_titles"
+        "parser_corruption_title_restore",
+        "delimiter_split"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:lUbnHmfYqeA:35e4863b5bf0a629440c",
-      "sourcePath": "data/review/sources/history-lUbnHmfYqeA-35e4863b5bf0a629440c.json",
-      "reviewUrl": "review.html?review=review%3AlUbnHmfYqeA%3A35e4863b5bf0a629440c&entry=8233d65a8595ecb9e62a56e47cab72e46fbfa1cd25691612b2ca7fcf97aa2e1a"
+      "sourcePath": "data/review/sources/lUbnHmfYqeA-35e4863b5bf0a629440c.json",
+      "reviewUrl": "review.html?review=review%3AlUbnHmfYqeA%3A35e4863b5bf0a629440c&entry=8233d65a8595ecb9e62a56e47cab72e46fbfa1cd25691612b2ca7fcf97aa2e1a",
+      "repairedTitle": "1×",
+      "repairedArtist": "響架",
+      "repairReasons": [
+        "parser_corruption_title_restore",
+        "delimiter_split"
+      ]
     },
     {
       "title": "I AM",
@@ -20516,6 +20522,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
+        "1m",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z",
         "review"
@@ -33693,6 +33700,53 @@
       "reviewUrl": "review.html?review=review%3AMQBlydpkgJU%3Add8795f4f68c1f79b756&entry=d931805cc0714895400fbd037695b1166aa2b1c6dd70f2a4c3f527df0b7d2a39"
     },
     {
+      "title": "5°Cのファンタジー",
+      "artist": "スリーズブーケ",
+      "isNiche": true,
+      "isUnknownArtist": false,
+      "seconds": 1305,
+      "time": "0:21:45",
+      "raw": "21:45　37.5℃のファンタジー (スリーズブーケ)",
+      "rawHash": "7077eaf943b2957c9749eb34ad67a82d98515bf2cd32a0b25bd540a3933b55ad",
+      "videoId": "ZTi1cpRaW8U",
+      "videoTitle": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
+      "channelName": "闇咲とうか",
+      "channelId": "UCvKR-yItME-8VLv5pEM-yDA",
+      "channelHandle": "/@yamisakitoka",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U&t=1305s",
+      "sourceId": "legacy:ZTi1cpRaW8U",
+      "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
+      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "parser_corruption_title_restore"
+      ],
+      "replacementSuggestion": {
+        "title": "37.5°Cのファンタジー"
+      },
+      "reviewId": "review:ZTi1cpRaW8U:938d64179a2e87620ead",
+      "sourcePath": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "reviewUrl": "review.html?review=review%3AZTi1cpRaW8U%3A938d64179a2e87620ead&entry=7077eaf943b2957c9749eb34ad67a82d98515bf2cd32a0b25bd540a3933b55ad",
+      "repairedTitle": "37.5°Cのファンタジー",
+      "repairedArtist": "スリーズブーケ",
+      "repairReasons": [
+        "parser_corruption_title_restore"
+      ]
+    },
+    {
       "title": "5℃のファンタジー",
       "artist": "スリーズブーケ",
       "isNiche": true,
@@ -33849,11 +33903,10 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GOVCYwJ2xu0&t=4678s",
       "sourceId": "legacy:GOVCYwJ2xu0",
       "sourceHash": "b47f6c93905e490535fc845269b17307b3cdfbaee1aacf87f33651e7bd755d02",
-      "sourceOrigin": "latest;review:GOVCYwJ2xu0-6ab1df19bffc56270c06.json;review:history-GOVCYwJ2xu0-6ab1df19bffc56270c06.json;review:history-GOVCYwJ2xu0-b47f6c93905e490535fc.json",
+      "sourceOrigin": "latest;review:history-GOVCYwJ2xu0-6ab1df19bffc56270c06.json;review:history-GOVCYwJ2xu0-b47f6c93905e490535fc.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "review",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T190000Z"
       ],
@@ -33871,9 +33924,9 @@
       "replacementSuggestion": {
         "title": "サムライハート(Some Like It Hot!!)"
       },
-      "reviewId": "review:GOVCYwJ2xu0:6ab1df19bffc56270c06",
-      "sourcePath": "data/review/sources/GOVCYwJ2xu0-6ab1df19bffc56270c06.json",
-      "reviewUrl": "review.html?review=review%3AGOVCYwJ2xu0%3A6ab1df19bffc56270c06&entry=7a046e75c5a25c55f4dffba7d2f0f6bd917f4da4fdcf0ea3e4890ee8b5278e04",
+      "reviewId": "",
+      "sourcePath": "",
+      "reviewUrl": "",
       "repairedTitle": "サムライハート(Some Like It Hot!!)",
       "repairedArtist": "SPYAIR",
       "repairReasons": [
@@ -34131,34 +34184,38 @@
       "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc&t=4343s",
-      "sourceId": "selected:DuDkasY22Mc:e044153fc703f3bc",
+      "sourceId": "legacy:DuDkasY22Mc",
       "sourceHash": "e044153fc703f3bc54c5704c172f0ded8ca0561264282b22c164ecf842227f04",
-      "sourceOrigin": "review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
-      "sourceScope": "history",
+      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
+      "sourceScope": "current",
       "ranges": [
+        "72h",
+        "1m",
+        "review",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_title_artist",
+        "inferred_artist"
       ],
-      "sourceRiskReasons": [
-        "source_parser_corruption",
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
+      "sourceRiskReasons": [],
       "riskReasons": [
         "parser_corruption",
-        "source_parser_corruption",
-        "source_multiple_niche_short_titles"
+        "parser_corruption_title_restore",
+        "delimiter_split"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:DuDkasY22Mc:e044153fc703f3bc54c5",
-      "sourcePath": "data/review/sources/history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
-      "reviewUrl": "review.html?review=review%3ADuDkasY22Mc%3Ae044153fc703f3bc54c5&entry=167b99d370908081f5fad83a9455b474a3133fd63541b92687992b64f0ebbec8"
+      "reviewId": "review:DuDkasY22Mc:2257ba3c337830479cc8",
+      "sourcePath": "data/review/sources/DuDkasY22Mc-2257ba3c337830479cc8.json",
+      "reviewUrl": "review.html?review=review%3ADuDkasY22Mc%3A2257ba3c337830479cc8&entry=167b99d370908081f5fad83a9455b474a3133fd63541b92687992b64f0ebbec8",
+      "repairedTitle": "05410-(ん)",
+      "repairedArtist": "RADWIMPS",
+      "repairReasons": [
+        "parser_corruption_title_restore",
+        "delimiter_split"
+      ]
     },
     {
       "title": "スパークル",
@@ -34178,10 +34235,11 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc&t=7035s",
       "sourceId": "legacy:DuDkasY22Mc",
       "sourceHash": "e044153fc703f3bc54c5704c172f0ded8ca0561264282b22c164ecf842227f04",
-      "sourceOrigin": "latest;review:DuDkasY22Mc-9bd5b9883224f18a6191.json;review:history-DuDkasY22Mc-9bd5b9883224f18a6191.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
+      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-9bd5b9883224f18a6191.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
+        "1m",
         "review",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T190000Z"
@@ -34200,9 +34258,9 @@
       "replacementSuggestion": {
         "title": "スパークル (original ver.)"
       },
-      "reviewId": "review:DuDkasY22Mc:9bd5b9883224f18a6191",
-      "sourcePath": "data/review/sources/DuDkasY22Mc-9bd5b9883224f18a6191.json",
-      "reviewUrl": "review.html?review=review%3ADuDkasY22Mc%3A9bd5b9883224f18a6191&entry=34bb65dbf74bc2c30e155aa691b602249fa309810577332c0c6dcc5fc45a3fd4",
+      "reviewId": "review:DuDkasY22Mc:2257ba3c337830479cc8",
+      "sourcePath": "data/review/sources/DuDkasY22Mc-2257ba3c337830479cc8.json",
+      "reviewUrl": "review.html?review=review%3ADuDkasY22Mc%3A2257ba3c337830479cc8&entry=34bb65dbf74bc2c30e155aa691b602249fa309810577332c0c6dcc5fc45a3fd4",
       "repairedTitle": "スパークル (original ver.)",
       "repairedArtist": "RADWIMPS",
       "repairReasons": [
@@ -34225,34 +34283,38 @@
       "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DuDkasY22Mc&t=7532s",
-      "sourceId": "selected:DuDkasY22Mc:e044153fc703f3bc",
+      "sourceId": "legacy:DuDkasY22Mc",
       "sourceHash": "e044153fc703f3bc54c5704c172f0ded8ca0561264282b22c164ecf842227f04",
-      "sourceOrigin": "review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
-      "sourceScope": "history",
+      "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
+      "sourceScope": "current",
       "ranges": [
+        "72h",
+        "1m",
+        "review",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_title_artist",
+        "inferred_artist"
       ],
-      "sourceRiskReasons": [
-        "source_parser_corruption",
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
+      "sourceRiskReasons": [],
       "riskReasons": [
         "parser_corruption",
-        "source_parser_corruption",
-        "source_multiple_niche_short_titles"
+        "parser_corruption_title_restore",
+        "delimiter_split"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:DuDkasY22Mc:e044153fc703f3bc54c5",
-      "sourcePath": "data/review/sources/history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
-      "reviewUrl": "review.html?review=review%3ADuDkasY22Mc%3Ae044153fc703f3bc54c5&entry=45cc18b5ae259ff23d2666536e4cddc2abbd0c0b84e6bb5bfa3a73325783efe2"
+      "reviewId": "review:DuDkasY22Mc:2257ba3c337830479cc8",
+      "sourcePath": "data/review/sources/DuDkasY22Mc-2257ba3c337830479cc8.json",
+      "reviewUrl": "review.html?review=review%3ADuDkasY22Mc%3A2257ba3c337830479cc8&entry=45cc18b5ae259ff23d2666536e4cddc2abbd0c0b84e6bb5bfa3a73325783efe2",
+      "repairedTitle": "25コ目の染色体",
+      "repairedArtist": "RADWIMPS",
+      "repairReasons": [
+        "parser_corruption_title_restore",
+        "delimiter_split"
+      ]
     },
     {
       "title": "Calc.",
@@ -34488,7 +34550,7 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM&t=6954s",
       "sourceId": "legacy:_lKgLhWSCCM",
       "sourceHash": "ba5c9cc71aa9b31e467ab2ab07bd66ffea6cc13a7c538f216b78e77b3abc38cc",
-      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:history-_lKgLhWSCCM-ce6d964f00e006a457bc.json;review:_lKgLhWSCCM-ce6d964f00e006a457bc.json",
+      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:history-_lKgLhWSCCM-ce6d964f00e006a457bc.json;review:_lKgLhWSCCM-373b0c82505415e34abb.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
@@ -34511,9 +34573,9 @@
       "replacementSuggestion": {
         "title": "スパークル (original ver.)"
       },
-      "reviewId": "review:_lKgLhWSCCM:ce6d964f00e006a457bc",
-      "sourcePath": "data/review/sources/_lKgLhWSCCM-ce6d964f00e006a457bc.json",
-      "reviewUrl": "review.html?review=review%3A_lKgLhWSCCM%3Ace6d964f00e006a457bc&entry=1edda52cdc2d27c5448ac615b164aa6352c64097948f28eac273e018f3d2d978",
+      "reviewId": "review:_lKgLhWSCCM:373b0c82505415e34abb",
+      "sourcePath": "data/review/sources/_lKgLhWSCCM-373b0c82505415e34abb.json",
+      "reviewUrl": "review.html?review=review%3A_lKgLhWSCCM%3A373b0c82505415e34abb&entry=1edda52cdc2d27c5448ac615b164aa6352c64097948f28eac273e018f3d2d978",
       "repairedTitle": "スパークル (original ver.)",
       "repairedArtist": "RADWIMPS",
       "repairReasons": [
@@ -34536,31 +34598,38 @@
       "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM&t=10329s",
-      "sourceId": "selected:_lKgLhWSCCM:0dc7cae1159c6de4",
-      "sourceHash": "0dc7cae1159c6de43f9a1d22f27c7b463b717db738cd827e03f45a2226bd89b5",
-      "sourceOrigin": "review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json",
-      "sourceScope": "history",
+      "sourceId": "legacy:_lKgLhWSCCM",
+      "sourceHash": "ba5c9cc71aa9b31e467ab2ab07bd66ffea6cc13a7c538f216b78e77b3abc38cc",
+      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:_lKgLhWSCCM-373b0c82505415e34abb.json",
+      "sourceScope": "current",
       "ranges": [
+        "1m",
         "snapshot:20260711T150000Z",
-        "snapshot:20260712T190000Z"
+        "snapshot:20260712T190000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_title_artist",
+        "inferred_artist"
       ],
-      "sourceRiskReasons": [
-        "parser_corruption"
-      ],
+      "sourceRiskReasons": [],
       "riskReasons": [
-        "parser_corruption"
+        "parser_corruption",
+        "parser_corruption_title_restore",
+        "delimiter_split"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:_lKgLhWSCCM:0dc7cae1159c6de43f9a",
-      "sourcePath": "data/review/sources/history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json",
-      "reviewUrl": "review.html?review=review%3A_lKgLhWSCCM%3A0dc7cae1159c6de43f9a&entry=bf0295a4d0d80bd06c9923c951f38dcc9598c7024fc00415c5afb5b051d87e75"
+      "reviewId": "review:_lKgLhWSCCM:373b0c82505415e34abb",
+      "sourcePath": "data/review/sources/_lKgLhWSCCM-373b0c82505415e34abb.json",
+      "reviewUrl": "review.html?review=review%3A_lKgLhWSCCM%3A373b0c82505415e34abb&entry=bf0295a4d0d80bd06c9923c951f38dcc9598c7024fc00415c5afb5b051d87e75",
+      "repairedTitle": "366日",
+      "repairedArtist": "HY",
+      "repairReasons": [
+        "parser_corruption_title_restore",
+        "delimiter_split"
+      ]
     },
     {
       "title": "Aurora",
@@ -47429,34 +47498,38 @@
       "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=JJc_HICmBrU",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=JJc_HICmBrU&t=4438s",
-      "sourceId": "selected:JJc_HICmBrU:52ac8eb415fdeb60",
+      "sourceId": "legacy:JJc_HICmBrU",
       "sourceHash": "52ac8eb415fdeb60c844810baef33ac473cbd33d8e7801c1ff8f40a03cf97cca",
-      "sourceOrigin": "review:history-JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-96f5649a92eae0d1a47f.json",
-      "sourceScope": "history",
+      "sourceOrigin": "latest;review:history-JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-96f5649a92eae0d1a47f.json;review:JJc_HICmBrU-52ac8eb415fdeb60c844.json",
+      "sourceScope": "current",
       "ranges": [
+        "1m",
         "snapshot:20260712T190000Z",
-        "snapshot:20260711T150000Z"
+        "snapshot:20260711T150000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_title_artist",
+        "inferred_artist"
       ],
-      "sourceRiskReasons": [
-        "parser_corruption",
-        "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
-      ],
+      "sourceRiskReasons": [],
       "riskReasons": [
         "parser_corruption",
-        "source_multiple_niche_short_titles"
+        "parser_corruption_title_restore",
+        "delimiter_split"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:JJc_HICmBrU:52ac8eb415fdeb60c844",
-      "sourcePath": "data/review/sources/history-JJc_HICmBrU-52ac8eb415fdeb60c844.json",
-      "reviewUrl": "review.html?review=review%3AJJc_HICmBrU%3A52ac8eb415fdeb60c844&entry=50640cec9eb3e692354c01f75d0f4bd8aa154c9f65e155e50bbd7303559fe9b4"
+      "sourcePath": "data/review/sources/JJc_HICmBrU-52ac8eb415fdeb60c844.json",
+      "reviewUrl": "review.html?review=review%3AJJc_HICmBrU%3A52ac8eb415fdeb60c844&entry=50640cec9eb3e692354c01f75d0f4bd8aa154c9f65e155e50bbd7303559fe9b4",
+      "repairedTitle": "3月9日",
+      "repairedArtist": "レミオロメン",
+      "repairReasons": [
+        "parser_corruption_title_restore",
+        "delimiter_split"
+      ]
     },
     {
       "title": "本日の:_汐音のし::_汐音のお::_とぼがん::_汐音のね::_はーと:タイム",
@@ -47512,34 +47585,41 @@
       "videoId": "K4ODEKmZw2M",
       "videoTitle": "22:30～眠れない夜の優しいアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
       "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
+      "channelId": "UCIbaYUBG8e7j_uq6_T2XM8g",
+      "channelHandle": "/@Berrych0623",
       "youtubeUrl": "https://www.youtube.com/watch?v=K4ODEKmZw2M",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=K4ODEKmZw2M&t=4446s",
-      "sourceId": "selected:K4ODEKmZw2M:8513628ce54958e2",
+      "sourceId": "legacy:K4ODEKmZw2M",
       "sourceHash": "8513628ce54958e285669af5504b7f13eb7fe596e9ab85930262ad149030c07d",
-      "sourceOrigin": "review:history-K4ODEKmZw2M-8513628ce54958e28566.json",
-      "sourceScope": "history",
+      "sourceOrigin": "latest;review:history-K4ODEKmZw2M-8513628ce54958e28566.json;review:K4ODEKmZw2M-8513628ce54958e28566.json",
+      "sourceScope": "current",
       "ranges": [
-        "snapshot:20260712T190000Z"
+        "1m",
+        "snapshot:20260712T190000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_title_artist",
+        "inferred_artist"
       ],
-      "sourceRiskReasons": [
-        "parser_corruption"
-      ],
+      "sourceRiskReasons": [],
       "riskReasons": [
-        "parser_corruption"
+        "parser_corruption",
+        "parser_corruption_title_restore",
+        "delimiter_split"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:K4ODEKmZw2M:8513628ce54958e28566",
-      "sourcePath": "data/review/sources/history-K4ODEKmZw2M-8513628ce54958e28566.json",
-      "reviewUrl": "review.html?review=review%3AK4ODEKmZw2M%3A8513628ce54958e28566&entry=0028f63512cca9ab80624f700782cd13dd60f5410f92ae4b4f936c986a0c0817"
+      "sourcePath": "data/review/sources/K4ODEKmZw2M-8513628ce54958e28566.json",
+      "reviewUrl": "review.html?review=review%3AK4ODEKmZw2M%3A8513628ce54958e28566&entry=0028f63512cca9ab80624f700782cd13dd60f5410f92ae4b4f936c986a0c0817",
+      "repairedTitle": "1時間",
+      "repairedArtist": "ハンバート ハンバート",
+      "repairReasons": [
+        "parser_corruption_title_restore",
+        "delimiter_split"
+      ]
     },
     {
       "title": "1時間",
@@ -47557,30 +47637,37 @@
       "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=RNi5KJKQm04",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=RNi5KJKQm04&t=456s",
-      "sourceId": "selected:RNi5KJKQm04:df87c41c0267ba4c",
+      "sourceId": "legacy:RNi5KJKQm04",
       "sourceHash": "df87c41c0267ba4c06d8d82b5e8bea6ce32d98e63a9b2dc284e160e08b58c713",
-      "sourceOrigin": "review:history-RNi5KJKQm04-df87c41c0267ba4c06d8.json",
-      "sourceScope": "history",
+      "sourceOrigin": "latest;review:history-RNi5KJKQm04-df87c41c0267ba4c06d8.json;review:RNi5KJKQm04-df87c41c0267ba4c06d8.json",
+      "sourceScope": "current",
       "ranges": [
-        "snapshot:20260712T190000Z"
+        "1m",
+        "snapshot:20260712T190000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_title_artist",
+        "inferred_artist"
       ],
-      "sourceRiskReasons": [
-        "parser_corruption"
-      ],
+      "sourceRiskReasons": [],
       "riskReasons": [
-        "parser_corruption"
+        "parser_corruption",
+        "parser_corruption_title_restore",
+        "delimiter_split"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:RNi5KJKQm04:df87c41c0267ba4c06d8",
-      "sourcePath": "data/review/sources/history-RNi5KJKQm04-df87c41c0267ba4c06d8.json",
-      "reviewUrl": "review.html?review=review%3ARNi5KJKQm04%3Adf87c41c0267ba4c06d8&entry=13b70ab66361ec4fb13096c14e907a289d2eba1ba7cec649c698dd69bbf06cea"
+      "sourcePath": "data/review/sources/RNi5KJKQm04-df87c41c0267ba4c06d8.json",
+      "reviewUrl": "review.html?review=review%3ARNi5KJKQm04%3Adf87c41c0267ba4c06d8&entry=13b70ab66361ec4fb13096c14e907a289d2eba1ba7cec649c698dd69bbf06cea",
+      "repairedTitle": "1時間",
+      "repairedArtist": "ハンバート ハンバート",
+      "repairReasons": [
+        "parser_corruption_title_restore",
+        "delimiter_split"
+      ]
     },
     {
       "title": "（星屑ビーナス／Aimer）",
@@ -56226,7 +56313,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -60996,7 +61084,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -64863,7 +64952,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -64909,7 +64999,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -64955,7 +65046,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -65001,7 +65093,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -65047,7 +65140,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -65093,7 +65187,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -65139,7 +65234,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -65185,7 +65281,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -65231,7 +65328,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -65277,7 +65375,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h"
+        "72h",
+        "1m"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -67953,6 +68052,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
+        "1m",
         "review",
         "snapshot:20260713T120000Z"
       ],
@@ -74718,6 +74818,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
+        "1m",
         "review",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T190000Z"

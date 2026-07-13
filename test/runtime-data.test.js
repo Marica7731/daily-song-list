@@ -70,7 +70,15 @@ test("runtime meta uses the expected range and diff paths", () => {
       generatedAt: "2026-07-12T15:00:00Z",
       capturedAt: "2026-07-12T15:00:00Z",
       status: { status: "success" },
-      source: { rebuiltDerivedAt: "2026-07-12T16:30:00Z" },
+      source: {
+        rebuiltDerivedAt: "2026-07-12T16:30:00Z",
+        videoCatalog: {
+          path: "data/video-catalog.json",
+          retentionDays: 35,
+          catalogVideoCount: 12,
+          monthVideoCount: 12,
+        },
+      },
     },
     rangePayloads,
   );
@@ -81,6 +89,12 @@ test("runtime meta uses the expected range and diff paths", () => {
   assert.equal(meta.nicheAnnotated, true);
   assert.deepEqual(meta.ranges["72h"], { path: "data/ui/72h.json", itemCount: 1 });
   assert.deepEqual(meta.ranges["1m"], { path: "data/ui/1m.json", itemCount: 2 });
+  assert.deepEqual(meta.catalog, {
+    path: "data/video-catalog.json",
+    retentionDays: 35,
+    catalogVideoCount: 12,
+    monthVideoCount: 12,
+  });
   assert.deepEqual(meta.diffs["72h"], { path: "data/diff/latest-72h.json" });
 });
 
