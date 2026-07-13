@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T23:11:55.539Z",
+  "generatedAt": "2026-07-13T00:14:54.717Z",
   "reviewId": "review:Cdl7Lgpv7qY:b574468e4970c307986a",
   "video": {
     "videoId": "Cdl7Lgpv7qY",
@@ -13,15 +13,16 @@
     "sourceHash": "b574468e4970c307986ae8ab00c9c0c659318542ac3c060d3569c3035e3253c6",
     "sourceType": "reply",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "以下セトリ　ネタバレ注意\n\n\n\n0:00:03 １曲目 夜の踊り子\n\r\n0:05:47 ２曲目 火種\n\r\n0:11:00 ３曲目 メーベル\n\r\n0:15:13 ４曲目 晩餐歌\n\r\n0:20:13 ５曲目 まなざしは光\n\r\n0:23:48 ６曲目 悪魔の踊り方",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 14,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_unknown_artists"
+      "source_multiple_unknown_artists",
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -123,11 +124,12 @@
       "rawHash": "782980b904989eb8737ae22ac0757c3f9d2c0c212e173375316902738c329e7c",
       "sourceId": "UgyoGZidzZgNoAvpDKV4AaABAg.AZ9i7lgFcYIAZ9iGjj1spI",
       "sourceHash": "b574468e4970c307986ae8ab00c9c0c659318542ac3c060d3569c3035e3253c6",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [

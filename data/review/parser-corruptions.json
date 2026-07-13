@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T23:12:57.344Z",
+  "generatedAt": "2026-07-13T00:16:00.204Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-12T23:11:48.987Z",
+  "latestGeneratedAt": "2026-07-13T00:14:47.892Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
   "counts": {
-    "totalCandidates": 1773,
-    "uniqueVideos": 226,
+    "totalCandidates": 1766,
+    "uniqueVideos": 227,
     "uniqueSources": 278,
     "confirmedNoiseCount": 0,
-    "parserCorruptionCount": 1773,
+    "parserCorruptionCount": 1766,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 0,
-      "parser_corruption": 1773,
+      "parser_corruption": 1766,
       "likely_noise": 0,
       "needs_review": 0,
       "likely_song": 0
@@ -464,7 +464,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -2677,14 +2676,17 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
       "sourceRiskReasons": [
-        "source_multiple_niche_short_titles"
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
+        "conversation_entry",
+        "short_unknown_title",
         "parser_corruption",
         "source_multiple_niche_short_titles"
       ],
@@ -2694,50 +2696,6 @@
       "reviewId": "review:3OOb1Jxcivs:05eab2063bf7fff8d182",
       "sourcePath": "data/review/sources/history-3OOb1Jxcivs-05eab2063bf7fff8d182.json",
       "reviewUrl": "review.html?review=review%3A3OOb1Jxcivs%3A05eab2063bf7fff8d182&entry=e4e2242a63e8ba9544cbdaa649a1a9da02b64ef208726e6a2eee85e4af0d875e"
-    },
-    {
-      "title": "夢光年",
-      "artist": "影山ヒロノブ、こおろぎ'73",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 2511,
-      "time": "0:41:51",
-      "raw": "0:41:51 夢光年 / 影山ヒロノブ、こおろぎ'73 / 「宇宙船サジタリウス」ED",
-      "rawHash": "e4e2242a63e8ba9544cbdaa649a1a9da02b64ef208726e6a2eee85e4af0d875e",
-      "videoId": "3OOb1Jxcivs",
-      "videoTitle": "【歌枠】🌕ワンマンチケット販売開始!!メカソングで盛り上がるNight！！✨【 #月城ティータイム 】",
-      "channelName": "Cecil Ch.月城セシル【セシんもーZ】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=3OOb1Jxcivs",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3OOb1Jxcivs&t=2511s",
-      "sourceId": "selected:3OOb1Jxcivs:b8827dca310f8fdd",
-      "sourceHash": "b8827dca310f8fdd40402fa90aebdd35b1f0561fda26237ed39bfc17fadd6d29",
-      "sourceOrigin": "review:history-3OOb1Jxcivs-b8827dca310f8fdd4040.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260712T190000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "artist": "影山ヒロノブ、こおろぎ'73 / 「宇宙船サジタリウス」ED"
-      },
-      "reviewId": "review:3OOb1Jxcivs:b8827dca310f8fdd4040",
-      "sourcePath": "data/review/sources/history-3OOb1Jxcivs-b8827dca310f8fdd4040.json",
-      "reviewUrl": "review.html?review=review%3A3OOb1Jxcivs%3Ab8827dca310f8fdd4040&entry=e4e2242a63e8ba9544cbdaa649a1a9da02b64ef208726e6a2eee85e4af0d875e"
     },
     {
       "title": "夏恋花火",
@@ -3286,7 +3244,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -9299,7 +9257,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -11807,50 +11765,6 @@
       "reviewId": "review:hrYT1a0GmDw:73a265ac7b0bc7f12a6d",
       "sourcePath": "data/review/sources/history-hrYT1a0GmDw-73a265ac7b0bc7f12a6d.json",
       "reviewUrl": "review.html?review=review%3AhrYT1a0GmDw%3A73a265ac7b0bc7f12a6d&entry=51577464a397a5346d61b7bcad9517ebf9ee6f8f84e654c26eba7475a93ec55a"
-    },
-    {
-      "title": "魔法戦隊マジレンジャー",
-      "artist": "岩崎貴文",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 4598,
-      "time": "1:16:38",
-      "raw": "1:16:38  ・魔法戦隊マジレンジャー / 岩崎貴文",
-      "rawHash": "56681fa131acb3cc65022ae8f55633b8f4ea61da4b6d45e294b49cf769a31b2f",
-      "videoId": "hrYT1a0GmDw",
-      "videoTitle": "【#歌枠】特撮縛り歌枠┊︎7月10日はウルトラマンの日！歌で光を届けます✨【#MUS1CA / #Vsinger】",
-      "channelName": "MUS1CA",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=hrYT1a0GmDw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hrYT1a0GmDw&t=4598s",
-      "sourceId": "selected:hrYT1a0GmDw:73a265ac7b0bc7f1",
-      "sourceHash": "73a265ac7b0bc7f12a6d7ab0db33ff3ced53c13219cc5ddacd42afda333da5e1",
-      "sourceOrigin": "review:history-hrYT1a0GmDw-73a265ac7b0bc7f12a6d.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260712T190000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "title": "・魔法戦隊マジレンジャー"
-      },
-      "reviewId": "review:hrYT1a0GmDw:73a265ac7b0bc7f12a6d",
-      "sourcePath": "data/review/sources/history-hrYT1a0GmDw-73a265ac7b0bc7f12a6d.json",
-      "reviewUrl": "review.html?review=review%3AhrYT1a0GmDw%3A73a265ac7b0bc7f12a6d&entry=56681fa131acb3cc65022ae8f55633b8f4ea61da4b6d45e294b49cf769a31b2f"
     },
     {
       "title": "Anything Goes!",
@@ -19908,7 +19822,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -20008,7 +19922,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -20108,7 +20022,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -20255,7 +20169,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -20355,7 +20269,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -20455,7 +20369,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -20555,7 +20469,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -20794,7 +20708,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -20894,7 +20808,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -21183,7 +21097,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -21330,7 +21244,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -21430,7 +21344,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -21577,7 +21491,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -21677,7 +21591,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -21777,7 +21691,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -21877,7 +21791,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -21977,7 +21891,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -22122,7 +22036,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -22222,7 +22136,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -22322,7 +22236,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -22422,7 +22336,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -22522,7 +22436,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -22622,7 +22536,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -22722,7 +22636,7 @@
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z",
         "review"
       ],
@@ -22936,53 +22850,6 @@
       "reviewUrl": "review.html?review=review%3AWr4HVxsDvPs%3A604003a6a5cf57f551f1&entry=79983441598d9124242a352d50c3055cf8b95de75c7238228fac82cd42d1ff96"
     },
     {
-      "title": "INTERNET OVERDOSE",
-      "artist": "Aiobahn feat. KOTOKO",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 1427,
-      "time": "0:23:47",
-      "raw": "00:23:47 🎵 INTERNET OVERDOSE / Aiobahn feat. KOTOKO",
-      "rawHash": "a9a92776ac5b572508a48bd157f26eccf8efa00746bd1d3047d2c6bb8d3a0fe5",
-      "videoId": "Wr4HVxsDvPs",
-      "videoTitle": "【コラボ歌枠】わたしたち、るんるんしにきました♥Singing Stream【花園セレナ / あまねもも / VTuber】",
-      "channelName": "あまねもも / Amane Momo",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Wr4HVxsDvPs",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Wr4HVxsDvPs&t=1427s",
-      "sourceId": "selected:Wr4HVxsDvPs:604003a6a5cf57f5",
-      "sourceHash": "604003a6a5cf57f551f1a2edcbd997004e1ca9da97bbdb8d2a05c28915211439",
-      "sourceOrigin": "review:history-Wr4HVxsDvPs-604003a6a5cf57f551f1.json;review:history-Wr4HVxsDvPs-f50db3b618119edf3b10.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260712T190000Z",
-        "snapshot:20260711T150000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "source_multiple_niche_short_titles",
-        "conversation_entry",
-        "niche_unknown_artist"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "title": "🎵 INTERNET OVERDOSE"
-      },
-      "reviewId": "review:Wr4HVxsDvPs:604003a6a5cf57f551f1",
-      "sourcePath": "data/review/sources/history-Wr4HVxsDvPs-604003a6a5cf57f551f1.json",
-      "reviewUrl": "review.html?review=review%3AWr4HVxsDvPs%3A604003a6a5cf57f551f1&entry=a9a92776ac5b572508a48bd157f26eccf8efa00746bd1d3047d2c6bb8d3a0fe5"
-    },
-    {
       "title": "デビルじゃないもん",
       "artist": "DECO*27",
       "isNiche": false,
@@ -23075,53 +22942,6 @@
       "reviewId": "review:Wr4HVxsDvPs:604003a6a5cf57f551f1",
       "sourcePath": "data/review/sources/history-Wr4HVxsDvPs-604003a6a5cf57f551f1.json",
       "reviewUrl": "review.html?review=review%3AWr4HVxsDvPs%3A604003a6a5cf57f551f1&entry=b51d3b4dc3da0573f4b5675b985de47d2e5aee4ffd74eea0fc7d11c58e1f6757"
-    },
-    {
-      "title": "INTERNET OVERDOSE",
-      "artist": "Aiobahn feat. KOTOKO",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 3122,
-      "time": "0:52:02",
-      "raw": "00:52:02 🎵 INTERNET OVERDOSE / Aiobahn feat. KOTOKO",
-      "rawHash": "dd5e9e9887caca786fd0acb95a3168e235ed2f5c6a451458bcc671c223a88d8b",
-      "videoId": "Wr4HVxsDvPs",
-      "videoTitle": "【コラボ歌枠】わたしたち、るんるんしにきました♥Singing Stream【花園セレナ / あまねもも / VTuber】",
-      "channelName": "あまねもも / Amane Momo",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Wr4HVxsDvPs",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Wr4HVxsDvPs&t=3122s",
-      "sourceId": "selected:Wr4HVxsDvPs:604003a6a5cf57f5",
-      "sourceHash": "604003a6a5cf57f551f1a2edcbd997004e1ca9da97bbdb8d2a05c28915211439",
-      "sourceOrigin": "review:history-Wr4HVxsDvPs-604003a6a5cf57f551f1.json;review:history-Wr4HVxsDvPs-f50db3b618119edf3b10.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260712T190000Z",
-        "snapshot:20260711T150000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "source_multiple_niche_short_titles",
-        "conversation_entry",
-        "niche_unknown_artist"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "title": "🎵 INTERNET OVERDOSE"
-      },
-      "reviewId": "review:Wr4HVxsDvPs:604003a6a5cf57f551f1",
-      "sourcePath": "data/review/sources/history-Wr4HVxsDvPs-604003a6a5cf57f551f1.json",
-      "reviewUrl": "review.html?review=review%3AWr4HVxsDvPs%3A604003a6a5cf57f551f1&entry=dd5e9e9887caca786fd0acb95a3168e235ed2f5c6a451458bcc671c223a88d8b"
     },
     {
       "title": "ウォーアイニー/らんま1",
@@ -24436,7 +24256,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "structured_setlist"
       ],
       "sourceRiskReasons": [
@@ -24447,8 +24266,8 @@
         "conversation_entry"
       ],
       "riskReasons": [
-        "parser_corruption",
         "source_multiple_unknown_artists",
+        "parser_corruption",
         "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
@@ -27605,7 +27424,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -27707,7 +27526,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -27809,7 +27628,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -27911,7 +27730,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28013,7 +27832,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28115,7 +27934,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28217,7 +28036,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28319,7 +28138,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28421,7 +28240,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28523,7 +28342,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28625,7 +28444,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28727,7 +28546,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28829,7 +28648,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -28931,7 +28750,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29033,7 +28852,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29135,7 +28954,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29237,7 +29056,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29339,7 +29158,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29441,7 +29260,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29543,7 +29362,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29645,7 +29464,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29747,7 +29566,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29849,7 +29668,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29951,7 +29770,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30053,7 +29872,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30155,7 +29974,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30257,7 +30076,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30359,7 +30178,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30461,7 +30280,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30563,7 +30382,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30665,7 +30484,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30767,7 +30586,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30869,7 +30688,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -30971,7 +30790,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31073,7 +30892,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31175,7 +30994,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31277,7 +31096,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31379,7 +31198,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31481,7 +31300,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31583,7 +31402,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31685,7 +31504,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31787,7 +31606,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31889,7 +31708,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -31991,7 +31810,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32093,7 +31912,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32195,7 +32014,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32297,7 +32116,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32399,7 +32218,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32501,7 +32320,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32603,7 +32422,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32705,7 +32524,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32807,7 +32626,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -32909,7 +32728,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33011,7 +32830,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33113,7 +32932,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33215,7 +33034,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33317,7 +33136,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33419,7 +33238,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33521,7 +33340,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33623,7 +33442,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33725,7 +33544,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33827,7 +33646,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33929,7 +33748,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34031,7 +33850,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34133,7 +33952,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34235,7 +34054,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34337,7 +34156,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34439,7 +34258,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34541,7 +34360,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34643,7 +34462,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34745,7 +34564,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34847,7 +34666,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34949,7 +34768,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35051,7 +34870,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35153,7 +34972,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35255,7 +35074,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35357,7 +35176,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35459,7 +35278,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35561,7 +35380,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35663,7 +35482,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35765,7 +35584,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35867,7 +35686,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -35969,7 +35788,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36071,7 +35890,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36173,7 +35992,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36275,7 +36094,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36377,7 +36196,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -36479,7 +36298,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37981,7 +37800,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -38767,7 +38585,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -41922,7 +41739,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -41974,7 +41791,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -42251,7 +42067,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -42563,7 +42379,7 @@
         "review",
         "snapshot:20260711T150000Z",
         "snapshot:20260712T190000Z",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -43396,7 +43212,7 @@
       "ranges": [
         "1m",
         "snapshot:20260712T190000Z",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -43581,7 +43397,7 @@
         "snapshot:20260712T190000Z",
         "snapshot:20260711T190000Z",
         "snapshot:20260711T150000Z",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -44633,7 +44449,7 @@
         "72h",
         "review",
         "snapshot:20260712T190000Z",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -46225,7 +46041,9 @@
       ],
       "sourceRiskReasons": [
         "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "parser_corruption",
@@ -46315,7 +46133,9 @@
       ],
       "sourceRiskReasons": [
         "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "parser_corruption",
@@ -46537,7 +46357,9 @@
       ],
       "sourceRiskReasons": [
         "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "parser_corruption",
@@ -46550,50 +46372,6 @@
       "reviewId": "review:3E9Lw5JEzIs:651bbb513e69198e0d6e",
       "sourcePath": "data/review/sources/history-3E9Lw5JEzIs-651bbb513e69198e0d6e.json",
       "reviewUrl": "review.html?review=review%3A3E9Lw5JEzIs%3A651bbb513e69198e0d6e&entry=9798b3e1158f81916eccfbd1b570f30faad276b9c63b1c957fd275cf614acdc4"
-    },
-    {
-      "title": "ハルウタ",
-      "artist": "いきものがかり (2012)",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 19745,
-      "time": "5:29:05",
-      "raw": "05:29:05 ハルウタ / いきものがかり (2012) / 劇場版 「名探偵コナン 11人目のストライカー」主題歌",
-      "rawHash": "21c7ec52866323a959e481f6fa1c6e3b14dfd609c48a0e70eaec914cdb80e898",
-      "videoId": "3E9Lw5JEzIs",
-      "videoTitle": "【 朝活歌枠 】３００人におはようしたい☀️初見さん・ROM勢さんも大歓迎✨️【 #新人vtuber 】【 #朝活 】【 #歌枠 】",
-      "channelName": "芽森ひより",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=3E9Lw5JEzIs",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3E9Lw5JEzIs&t=19745s",
-      "sourceId": "selected:3E9Lw5JEzIs:013636641490b15d",
-      "sourceHash": "013636641490b15d1b0c1a588ff498e0ca36f65e16c0c7456f660d4fcce3624e",
-      "sourceOrigin": "review:history-3E9Lw5JEzIs-013636641490b15d1b0c.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260712T190000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": {
-        "artist": "いきものがかり (2012) / 劇場版 「名探偵コナン 11人目のストライカー」主題歌"
-      },
-      "reviewId": "review:3E9Lw5JEzIs:013636641490b15d1b0c",
-      "sourcePath": "data/review/sources/history-3E9Lw5JEzIs-013636641490b15d1b0c.json",
-      "reviewUrl": "review.html?review=review%3A3E9Lw5JEzIs%3A013636641490b15d1b0c&entry=21c7ec52866323a959e481f6fa1c6e3b14dfd609c48a0e70eaec914cdb80e898"
     },
     {
       "title": "ハルウタ",
@@ -46621,18 +46399,21 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
       "sourceRiskReasons": [
         "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
+        "conversation_entry",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
         "parser_corruption",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": {
         "artist": "いきものがかり (2012) / 劇場版 「名探偵コナン 11人目のストライカー」主題歌"
@@ -46717,7 +46498,9 @@
       ],
       "sourceRiskReasons": [
         "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "parser_corruption",
@@ -46763,7 +46546,9 @@
       ],
       "sourceRiskReasons": [
         "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "parser_corruption",
@@ -46898,7 +46683,9 @@
       ],
       "sourceRiskReasons": [
         "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "parser_corruption",
@@ -47032,7 +46819,9 @@
       ],
       "sourceRiskReasons": [
         "source_many_topic_entries",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "parser_corruption",
@@ -47440,50 +47229,6 @@
       "reviewId": "review:78kNixB0wh8:6276500bb9ba89bdbc48",
       "sourcePath": "data/review/sources/history-78kNixB0wh8-6276500bb9ba89bdbc48.json",
       "reviewUrl": "review.html?review=review%3A78kNixB0wh8%3A6276500bb9ba89bdbc48&entry=fda26ac5ea540dc4123f52884fdf3280266fd38299f0a4ae39e1583a25d5f2be"
-    },
-    {
-      "title": "I’m a mess",
-      "artist": "MY FIRST STORY",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 9663,
-      "time": "2:41:03",
-      "raw": "2:41:03 🎤 I’m a mess / MY FIRST STORY",
-      "rawHash": "86e4437dc483bb660ae53155622e6962a7fd4e7d6334fcedcd2bdc0176ca1313",
-      "videoId": "78kNixB0wh8",
-      "videoTitle": "【#歌枠 / Karaoke】50分遅刻しました。うどんを見つけて~!!一曲だけでもどうですか？✦ 【作業用BGM】【＃輝常うどん】【＃新人Vtuber】【＃初見さん大歓迎】",
-      "channelName": "輝常うどん",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=78kNixB0wh8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=78kNixB0wh8&t=9663s",
-      "sourceId": "selected:78kNixB0wh8:6276500bb9ba89bd",
-      "sourceHash": "6276500bb9ba89bdbc4871d4b115e9d1e856aa889c0efe01fb4d6c71863ad7f2",
-      "sourceOrigin": "review:history-78kNixB0wh8-6276500bb9ba89bdbc48.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260712T190000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "source_multiple_niche_short_titles"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "title": "🎤 I’m a mess"
-      },
-      "reviewId": "review:78kNixB0wh8:6276500bb9ba89bdbc48",
-      "sourcePath": "data/review/sources/history-78kNixB0wh8-6276500bb9ba89bdbc48.json",
-      "reviewUrl": "review.html?review=review%3A78kNixB0wh8%3A6276500bb9ba89bdbc48&entry=86e4437dc483bb660ae53155622e6962a7fd4e7d6334fcedcd2bdc0176ca1313"
     },
     {
       "title": "発見:_araxa::_araxa",
@@ -48808,7 +48553,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "structured_setlist"
       ],
       "sourceRiskReasons": [
@@ -48817,8 +48561,9 @@
         "niche_unknown_artist"
       ],
       "riskReasons": [
-        "parser_corruption",
-        "source_multiple_unknown_artists"
+        "conversation_entry",
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "replacementSuggestion": {
         "title": "Song for...／HY"
@@ -48853,7 +48598,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -48863,8 +48607,9 @@
         "niche_unknown_artist"
       ],
       "riskReasons": [
-        "parser_corruption",
-        "source_multiple_unknown_artists"
+        "conversation_entry",
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "replacementSuggestion": {
         "title": "Song for",
@@ -51098,7 +50843,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -51541,7 +51285,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -61106,7 +60849,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -61242,7 +60984,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -62795,7 +62536,7 @@
       "ranges": [
         "1m",
         "snapshot:20260712T220000Z",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -63386,7 +63127,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -63398,7 +63138,7 @@
         "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
-        "title": "☆好きだから"
+        "title": "好きだから"
       },
       "reviewId": "review:kZLLmyXOpWo:3045f5b34950d5f9e585",
       "sourcePath": "data/review/sources/history-kZLLmyXOpWo-3045f5b34950d5f9e585.json",
@@ -64816,52 +64556,6 @@
       "reviewUrl": "review.html?review=review%3AZScmvA51-Bs%3Adc730f5e769784e168e0&entry=489e36dc532e45832c497609b912d660fe8b60702e8bd186bb02dfc0a2fe593e"
     },
     {
-      "title": "あの子コンプレックス =LOVE",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 825,
-      "time": "0:13:45",
-      "raw": "1\tあの子コンプレックス\t　=LOVE\t0:13:45",
-      "rawHash": "f29d6748b193a905894af4fbc9975314b8044e2ac7384e56cbeecd0424521aa5",
-      "videoId": "5-qelaIZQAI",
-      "videoTitle": "【歌枠】週末を彩るSinging Stream🤍❄️【#vtuber /#vsinger /#蒼星すい】",
-      "channelName": "蒼星すい",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=5-qelaIZQAI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=5-qelaIZQAI&t=825s",
-      "sourceId": "selected:5-qelaIZQAI:6ab94e05faa26d26",
-      "sourceHash": "6ab94e05faa26d2628fc815b210b4ac95aa65900568bebfc53d1cf6b7e235e08",
-      "sourceOrigin": "review:history-5-qelaIZQAI-6ab94e05faa26d2628fc.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260712T190000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "niche_unknown_artist"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": {
-        "title": "あの子コンプレックス",
-        "artist": "=LOVE"
-      },
-      "reviewId": "review:5-qelaIZQAI:6ab94e05faa26d2628fc",
-      "sourcePath": "data/review/sources/history-5-qelaIZQAI-6ab94e05faa26d2628fc.json",
-      "reviewUrl": "review.html?review=review%3A5-qelaIZQAI%3A6ab94e05faa26d2628fc&entry=f29d6748b193a905894af4fbc9975314b8044e2ac7384e56cbeecd0424521aa5"
-    },
-    {
       "title": "夏祭り\tWhiteberry",
       "artist": "未記載",
       "isNiche": false,
@@ -65939,7 +65633,8 @@
       "sourceRiskReasons": [
         "source_multiple_unknown_artists",
         "niche_unknown_artist",
-        "source_multiple_niche_short_titles"
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
       ],
       "riskReasons": [
         "niche_unknown_artist",
@@ -66625,62 +66320,6 @@
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
       "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=35a72ff9f75dcdf7ec0cf11fac6ff55ecec3e310b1c2bf93adb9b0870d64ab4a"
-    },
-    {
-      "title": "SHAMROCK",
-      "artist": "UVERworld",
-      "isNiche": true,
-      "isUnknownArtist": false,
-      "seconds": 4449,
-      "time": "1:14:09",
-      "raw": "1:14:09 ♪ SHAMROCK / UVERworld",
-      "rawHash": "583fc7d17c350ca84a8fd5c5ed68ea28f3f469174ebeef6893c4a5bcd2b54b2a",
-      "videoId": "Nera7o9MuwM",
-      "videoTitle": "【耐久】55万人or55曲耐久歌枠【長尾景/にじさんじ】",
-      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Nera7o9MuwM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Nera7o9MuwM&t=4449s",
-      "sourceId": "selected:Nera7o9MuwM:a419475fe8504a93",
-      "sourceHash": "a419475fe8504a93d6aab973df9986d424e95df3e1561e72d33e77e21c4616aa",
-      "sourceOrigin": "review:history-Nera7o9MuwM-a419475fe8504a93d6aa.json;review:history-Nera7o9MuwM-bf3fb76c83f3cf26050b.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260712T170000Z",
-        "snapshot:20260712T190000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ],
-      "sourceRiskReasons": [
-        "source_many_topic_entries",
-        "source_many_activity_entries",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "activity_marker_title",
-        "short_unknown_title",
-        "source_multiple_niche_short_titles",
-        "conversation_entry",
-        "activity_or_announcement"
-      ],
-      "riskReasons": [
-        "parser_corruption",
-        "source_many_topic_entries",
-        "source_many_activity_entries",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ],
-      "replacementSuggestion": {
-        "title": "♪ SHAMROCK"
-      },
-      "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
-      "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
-      "reviewUrl": "review.html?review=review%3ANera7o9MuwM%3Aa419475fe8504a93d6aa&entry=583fc7d17c350ca84a8fd5c5ed68ea28f3f469174ebeef6893c4a5bcd2b54b2a"
     },
     {
       "title": "カサブタ",
@@ -67544,7 +67183,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T220000Z"
       ],
       "classification": "parser_corruption",
@@ -75756,6 +75395,54 @@
       "reviewUrl": "review.html?review=review%3AuRQJhSnOb-I%3Aa46d21285888636ea31f&entry=c03c1d0bf89545631dd3c40a85d768918c8503313e334334de4d3756588fe0ef"
     },
     {
+      "title": "モニタリング",
+      "artist": "DECO*27",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 2666,
+      "time": "0:44:26",
+      "raw": "0:44:26 モニタリング (Best Friend Remix)／DECO*27",
+      "rawHash": "041d1b75f2c0585406047a20c633e0db881048621b7edd103a7c78a9c3ba6ab3",
+      "videoId": "5_B31kedAE4",
+      "videoTitle": "【#歌枠 】初見さん歓迎！週末恒例のやつですよ#shorts #vtuber",
+      "channelName": "氷乃渚 / Hino Nagisa",
+      "channelId": "UCe5mbpYA9Yym4lZTdj06G6Q",
+      "channelHandle": "/@hinonagi3",
+      "youtubeUrl": "https://www.youtube.com/watch?v=5_B31kedAE4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=5_B31kedAE4&t=2666s",
+      "sourceId": "Ugzo0JqpgV2e0J4raj94AaABAg",
+      "sourceHash": "5cf114dc51ce3e4ead89c4a5c3e69dab3806fb1f1a0e89d95c1790c93bc1ab44",
+      "sourceOrigin": "latest;review:5_B31kedAE4-5cf114dc51ce3e4ead89.json;review:history-5_B31kedAE4-5cf114dc51ce3e4ead89.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "review",
+        "snapshot:20260713T000000Z"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title_artist",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "delimiter_split"
+      ],
+      "replacementSuggestion": {
+        "title": "モニタリング (Best Friend Remix)"
+      },
+      "reviewId": "review:5_B31kedAE4:5cf114dc51ce3e4ead89",
+      "sourcePath": "data/review/sources/5_B31kedAE4-5cf114dc51ce3e4ead89.json",
+      "reviewUrl": "review.html?review=review%3A5_B31kedAE4%3A5cf114dc51ce3e4ead89&entry=041d1b75f2c0585406047a20c633e0db881048621b7edd103a7c78a9c3ba6ab3",
+      "repairedTitle": "モニタリング (Best Friend Remix)",
+      "repairedArtist": "DECO*27",
+      "repairReasons": [
+        "delimiter_split"
+      ]
+    },
+    {
       "title": "lulu.",
       "artist": "Mrs. GREEN APPLE",
       "isNiche": false,
@@ -75868,7 +75555,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -75964,7 +75651,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -76060,7 +75747,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -76156,7 +75843,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -76252,7 +75939,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -76348,7 +76035,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -76444,7 +76131,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -76540,7 +76227,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -76636,7 +76323,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z"
+        "snapshot:20260713T000000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -76735,7 +76422,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -81677,7 +81363,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -81974,7 +81659,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -81985,13 +81669,13 @@
         "niche_unknown_artist"
       ],
       "riskReasons": [
+        "source_multiple_unknown_artists",
         "parser_corruption",
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists"
+        "source_unknown_artist_ratio_high"
       ],
       "replacementSuggestion": {
         "title": "チェリボム",
-        "artist": "SILENT SIREN"
+        "artist": "SILENT SIREN/2016"
       },
       "reviewId": "review:IVNayNo7j0E:6cda1d806a687bf11611",
       "sourcePath": "data/review/sources/history-IVNayNo7j0E-6cda1d806a687bf11611.json",
@@ -82023,7 +81707,6 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -82495,7 +82178,7 @@
       "ranges": [
         "72h",
         "review",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -82587,7 +82270,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260712T230000Z",
+        "snapshot:20260713T000000Z",
         "review"
       ],
       "classification": "parser_corruption",

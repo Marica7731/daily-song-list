@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T23:11:55.539Z",
+  "generatedAt": "2026-07-13T00:14:54.717Z",
   "curationVersion": "curation-v1:247c48f55755",
   "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-  "totalSongs": 13115,
-  "unknownArtistCount": 2780,
-  "nicheUnknownArtistCount": 1420,
-  "highRiskEntryCount": 399,
-  "highRiskSourceCount": 16,
+  "totalSongs": 13240,
+  "unknownArtistCount": 2781,
+  "nicheUnknownArtistCount": 1462,
+  "highRiskEntryCount": 418,
+  "highRiskSourceCount": 17,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 1,
+  "ruleDroppedEntryCount": 34,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 20,
-  "parserCorruptionCount": 133,
-  "likelyNoiseCount": 4,
-  "needsReviewCount": 1280,
-  "likelySongCount": 7769,
+  "confirmedNoiseCount": 39,
+  "parserCorruptionCount": 134,
+  "likelyNoiseCount": 5,
+  "needsReviewCount": 1346,
+  "likelySongCount": 8056,
   "topRiskTitles": [
     {
       "value": "少女レイ",
@@ -42,14 +42,14 @@
     },
     {
       "value": "モニタリング",
-      "count": 10,
+      "count": 11,
       "classifications": {
         "likely_song": 9,
-        "parser_corruption": 1
+        "parser_corruption": 2
       },
       "riskReasons": {
         "known_song_unknown_artist": 9,
-        "parser_corruption": 1
+        "parser_corruption": 2
       }
     },
     {
@@ -125,6 +125,16 @@
       }
     },
     {
+      "value": "君の知らない物語",
+      "count": 7,
+      "classifications": {
+        "likely_song": 7
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 7
+      }
+    },
+    {
       "value": "夜明けと蛍",
       "count": 7,
       "classifications": {
@@ -166,16 +176,6 @@
     },
     {
       "value": "怪獣の花唄",
-      "count": 6,
-      "classifications": {
-        "likely_song": 6
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 6
-      }
-    },
-    {
-      "value": "君の知らない物語",
       "count": 6,
       "classifications": {
         "likely_song": 6
@@ -239,6 +239,10 @@
       "count": 4
     },
     {
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 4
+    },
+    {
       "value": "Kyoka Ch. -響架-",
       "count": 3
     },
@@ -256,6 +260,10 @@
     },
     {
       "value": "ただのかえる【TADANO KAERU】",
+      "count": 3
+    },
+    {
+      "value": "ひーくん / hi-kun",
       "count": 3
     },
     {
@@ -287,41 +295,19 @@
       "count": 3
     },
     {
-      "value": "-sumica-澄花",
-      "count": 2
+      "value": "茶々プラムム / Pulamumu",
+      "count": 3
     },
     {
-      "value": "Akane Ch. 七福あかね",
-      "count": 2
+      "value": "氷乃渚 / Hino Nagisa",
+      "count": 3
     },
     {
-      "value": "Akinori IZAWA 『GAIB!!!』",
-      "count": 2
-    },
-    {
-      "value": "Alpha Betta【V-Dere】",
-      "count": 2
-    },
-    {
-      "value": "Ameru Ch.星降 あめる",
-      "count": 2
+      "value": "幽音しの Shino Channel - ななしいんく",
+      "count": 3
     }
   ],
   "topRiskVideos": [
-    {
-      "videoId": "Cdl7Lgpv7qY",
-      "title": "【#歌枠 】人の歌枠聴いて歌枠したくなった女の３０分限定歌枠 #初見さん大歓迎 #関西弁vtuber",
-      "channelName": "Morty Ch. モーティ･アストラベータ",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ]
-    },
     {
       "videoId": "_Qx99bvHrVU",
       "title": "【初超誕祭】歌枠、凸待ち、秘蔵写真etc…この世の全ての感動がここにある。【#らいむ稲妻超誕祭2026 / #ブラフラ】",
@@ -441,6 +427,19 @@
       ]
     },
     {
+      "videoId": "5_B31kedAE4",
+      "title": "【#歌枠 】初見さん歓迎！週末恒例のやつですよ#shorts #vtuber",
+      "channelName": "氷乃渚 / Hino Nagisa",
+      "riskScore": 91,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ]
+    },
+    {
       "videoId": "xdGz1WKg4Mo",
       "title": "【歌枠】2000年～2010年代のアニソン縛り！君のリアクションでステージも変わるよ！",
       "channelName": "銀華 鈴",
@@ -485,6 +484,20 @@
       "videoId": "rjkpOwMiGek",
       "title": "〖#歌枠 〗真夜中だけど歌います✨ #vsinger #凰牙人類攻略",
       "channelName": "RUKI Ch. 凰牙るき",
+      "riskScore": 78,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
+      "videoId": "hWv55PnjmEo",
+      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
+      "channelName": "ミナミイズミ / IZUMI MINAMI",
       "riskScore": 78,
       "riskLevel": "high",
       "riskReasons": [
@@ -574,23 +587,18 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
-    },
-    {
-      "videoId": "-YwBj3v2flU",
-      "title": "【 #オリ曲V歌枠リレー 】オリ曲いっぱい覚えて帰ってください💗【 #雪豹メイドお給仕中 】",
-      "channelName": "雛森 アンシア【Hinamori Anthea】",
-      "riskScore": 65,
-      "riskLevel": "medium",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-13T00:14:54.717Z",
+      "totalSongs": 13240,
+      "unknownArtistCount": 2781,
+      "nicheUnknownArtistCount": 1462,
+      "highRiskEntryCount": 418,
+      "highRiskSourceCount": 17
+    },
     {
       "generatedAt": "2026-07-12T23:11:55.539Z",
       "totalSongs": 13115,

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T23:11:55.539Z",
+  "generatedAt": "2026-07-13T00:14:54.717Z",
   "reviewId": "review:37WV6tXih-8:a94d9ff308ff1d5dbc27",
   "video": {
     "videoId": "37WV6tXih-8",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260712T230000Z"
+    "snapshotId": "20260713T000000Z"
   },
   "risk": {
     "riskScore": 44,
@@ -434,15 +434,15 @@
       "rawHash": "9f7fb26b421423060c8c73b160b0518264620606a074f4dfae8e9c870c1d3f5f",
       "sourceId": "selected:37WV6tXih-8:a94d9ff308ff1d5d",
       "sourceHash": "a94d9ff308ff1d5dbc279a5b01961acee786aa93ecc03ae9ade8d48b446006b4",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_song",
         "structured_setlist"
       ]
     },
