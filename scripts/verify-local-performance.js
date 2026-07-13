@@ -1,6 +1,8 @@
 const { chromium } = require("playwright");
 
-const baseUrl = process.argv[2] || "http://127.0.0.1:8081/";
+const args = process.argv.slice(2);
+const latestOnly = args.includes("--latest-only");
+const baseUrl = args.find((arg) => !arg.startsWith("--")) || "http://127.0.0.1:8081/";
 const viewports = [
   [1920, 1080],
   [1366, 768],
@@ -51,10 +53,25 @@ async function newPage(browser, viewport, options = {}) {
   return { context, page, errors };
 }
 
-async function waitForRows(page) {
-  await page.waitForSelector(".rank-row:not(.skeleton-row) .rank-title, .video-card .video-title, .index-row .rank-title, .empty", {
-    timeout: 15000,
-  });
+async function waitForRows(page, errors = [], requests = []) {
+  try {
+    await page.waitForSelector(".rank-row:not(.skeleton-row) .rank-title, .video-card .video-title, .index-row .rank-title, .empty", {
+      timeout: baseUrl.startsWith("https://") ? 30000 : 15000,
+    });
+    await page.waitForFunction(() => document.querySelector("#videoList")?.getAttribute("aria-busy") !== "true", null, {
+      timeout: baseUrl.startsWith("https://") ? 30000 : 15000,
+    });
+  } catch (error) {
+    const diagnostics = await page
+      .evaluate(() => ({
+        status: document.querySelector("#status")?.textContent || "",
+        title: document.title,
+        bodyText: document.body?.innerText?.slice(0, 1000) || "",
+        resources: window.printSongListPerformance?.().resources || [],
+      }))
+      .catch((diagError) => ({ evaluateError: diagError.message }));
+    throw new Error(`${error.message}\nerrors=${errors.join(" | ")}\nrequests=${requests.join(" | ")}\ndiagnostics=${JSON.stringify(diagnostics)}`);
+  }
 }
 
 async function firstLoad(browser, range, viewport) {
@@ -71,7 +88,7 @@ async function firstLoad(browser, range, viewport) {
   page.on("request", (request) => requests.push(requestPath(request.url())));
   const url = range === "72h" ? baseUrl : `${baseUrl}?range=1m`;
   await page.goto(url, { waitUntil: "domcontentloaded" });
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   firstRowTime = Date.now();
   const beforeFirstContentRequests = [...requests];
   const perf = await page.evaluate(() => window.printSongListPerformance());
@@ -122,52 +139,83 @@ async function interactionFlow(browser) {
   const requests = [];
   page.on("request", (request) => requests.push(requestPath(request.url())));
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   await page.locator('[data-range="1m"]').click();
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   if (!requests.some((item) => runtimePathPattern("1m").test(item))) throw new Error("range switch did not load monthly runtime");
   await page.locator('[data-page-size="100"]').first().click();
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   await page.locator("#filterInput").fill("夜");
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   await page.locator("#nicheOnlyToggle").check();
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   await page.locator('[data-rank-metric="videos"]').first().click();
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   await page.locator("#filterInput").fill("");
   await page.locator("#nicheOnlyToggle").uncheck();
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   await page.getByRole("button", { name: "歌手榜" }).click();
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
   await page.locator('[data-view="videos"]').click();
   await page.waitForSelector(".video-card .video-title", { timeout: 15000 });
   await page.getByRole("button", { name: "歌曲榜" }).click();
-  await waitForRows(page);
-  const dateOptions = await page
-    .locator("#snapshotDateSelect option")
-    .evaluateAll((items) => items.map((item) => item.value).filter((value) => value !== "latest"));
-  if (!dateOptions.length) throw new Error("no historical snapshot dates");
-  await page.selectOption("#snapshotDateSelect", dateOptions[0]);
-  await page.waitForFunction(() => Array.from(document.querySelectorAll("#snapshotSelect option")).some((item) => item.value !== "data/latest.json"), null, {
-    timeout: 10000,
-  });
-  const options = await page
-    .locator("#snapshotSelect option")
-    .evaluateAll((items) => items.map((item) => item.value).filter((value) => value !== "data/latest.json"));
-  if (!options.length) throw new Error("no historical snapshot options");
-  await page.selectOption("#snapshotSelect", options[0]);
-  await waitForRows(page);
-  await page.goBack({ waitUntil: "domcontentloaded" }).catch(() => null);
-  await waitForRows(page);
-  await page.goForward({ waitUntil: "domcontentloaded" }).catch(() => null);
-  await waitForRows(page);
+  await waitForRows(page, errors, requests);
+  if (!latestOnly) {
+    const dateOptions = await page
+      .locator("#snapshotDateSelect option")
+      .evaluateAll((items) => items.map((item) => item.value).filter((value) => value !== "latest"));
+    if (!dateOptions.length) throw new Error("no historical snapshot dates");
+    let options = [];
+    for (const dateOption of dateOptions) {
+      await selectSnapshotDate(page, dateOption);
+      await sleep(150);
+      options = await page
+        .locator("#snapshotSelect option")
+        .evaluateAll((items) => items.map((item) => item.value).filter((value) => value !== "data/latest.json"));
+      if (options.length) break;
+    }
+    if (!options.length) throw new Error("no historical snapshot options");
+    await page.selectOption("#snapshotSelect", options[0]);
+    await waitForRows(page, errors, requests);
+    await page.goBack({ waitUntil: "domcontentloaded" }).catch(() => null);
+    await waitForRows(page, errors, requests);
+    await page.goForward({ waitUntil: "domcontentloaded" }).catch(() => null);
+    await waitForRows(page, errors, requests);
+  }
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
   const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
   const perf = await page.evaluate(() => window.printSongListPerformance());
   await context.close();
   if (!overflow) throw new Error("interaction viewport overflow");
   if (errors.length || unhandled) throw new Error(`interaction errors: ${errors.join(" | ")} ${unhandled}`);
-  results.push({ scenario: "interaction-flow", requests: [...new Set(requests)], measures: perf.measures });
+  results.push({ scenario: latestOnly ? "interaction-flow-latest" : "interaction-flow", requests: [...new Set(requests)], measures: perf.measures });
+}
+
+async function selectSnapshotDate(page, value) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    try {
+      await page.waitForFunction(() => document.querySelector("#snapshotDateSelect")?.disabled === false, null, { timeout: 30000 });
+    } catch (error) {
+      const diagnostics = await page.evaluate(() => ({
+        status: document.querySelector("#status")?.textContent || "",
+        busy: document.querySelector("#videoList")?.getAttribute("aria-busy") || "",
+        dateDisabled: document.querySelector("#snapshotDateSelect")?.disabled ?? null,
+        timeDisabled: document.querySelector("#snapshotSelect")?.disabled ?? null,
+        activeView: document.querySelector("[data-view].is-active")?.textContent || "",
+        resources: window.printSongListPerformance?.().resources || [],
+      }));
+      throw new Error(`${error.message}\nsnapshot diagnostics=${JSON.stringify(diagnostics)}`);
+    }
+    try {
+      await page.selectOption("#snapshotDateSelect", value, { timeout: 5000 });
+      return;
+    } catch (error) {
+      lastError = error;
+      await sleep(300);
+    }
+  }
+  throw lastError;
 }
 
 async function monthlyFallbackScenarios(browser) {
@@ -203,7 +251,7 @@ async function monthlyFallbackScenarios(browser) {
     const { context, page, errors } = await newPage(browser, [1366, 768]);
     await page.route(/\/data\/ui\/1m\.[0-9a-f]{12}\.json$/u, scenario.handler);
     await page.goto(`${baseUrl}?range=1m&debug=1`, { waitUntil: "domcontentloaded" });
-    await waitForRows(page);
+    await waitForRows(page, errors);
     const summary = await page.locator("#summary").textContent();
     const status = await page.locator("#status").textContent();
     const debug = await page.locator("#debugPanel").textContent();
@@ -230,7 +278,7 @@ async function prefetchGuards(browser) {
     const requests = [];
     page.on("request", (request) => requests.push(requestPath(request.url())));
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-    await waitForRows(page);
+    await waitForRows(page, errors, requests);
     await sleep(2500);
     await context.close();
     if (requests.some((item) => runtimePathPattern("1m").test(item))) throw new Error(`${label} prefetched inactive range`);
