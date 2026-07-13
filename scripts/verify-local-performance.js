@@ -75,6 +75,7 @@ async function firstLoad(browser, range, viewport) {
   firstRowTime = Date.now();
   const beforeFirstContentRequests = [...requests];
   const perf = await page.evaluate(() => window.printSongListPerformance());
+  const activeRuntimePath = perf.runtime?.rangePath || beforeFirstContentRequests.find((item) => runtimePathPattern(range).test(item));
   const linksOk = await page.evaluate(() =>
     Array.from(document.querySelectorAll(".inline-source-time,.song-list a"))
       .slice(0, 12)
@@ -87,14 +88,17 @@ async function firstLoad(browser, range, viewport) {
 
   const forbidden =
     range === "72h"
-      ? ["data/latest.json", "data/ui/1m.json", "data/diff/latest-1m.json", "data/song-search-known-songs.json"]
-      : ["data/latest.json", "data/ui/72h.json", "data/diff/latest-72h.json", "data/song-search-known-songs.json"];
-  const seenForbidden = forbidden.filter((item) => beforeFirstContentRequests.includes(item));
+      ? ["data/latest.json", "data/diff/latest-1m.json", "data/song-search-known-songs.json"]
+      : ["data/latest.json", "data/diff/latest-72h.json", "data/song-search-known-songs.json"];
+  const inactiveRange = range === "72h" ? "1m" : "72h";
+  const seenForbidden = beforeFirstContentRequests.filter(
+    (item) => forbidden.includes(item) || runtimePathPattern(inactiveRange).test(item),
+  );
   if (seenForbidden.length) {
     throw new Error(`${range} first load requested forbidden resources before first content: ${seenForbidden.join(", ")}`);
   }
-  if (!beforeFirstContentRequests.includes(`data/ui/${range}.json`)) {
-    throw new Error(`${range} did not request active range runtime before first content`);
+  if (!activeRuntimePath || !beforeFirstContentRequests.includes(activeRuntimePath)) {
+    throw new Error(`${range} did not request active runtime path before first content: ${activeRuntimePath || "missing"}`);
   }
   if (diffContinueTime && firstRowTime >= diffContinueTime) throw new Error(`${range} first row waited for delayed diff`);
   if (!linksOk) throw new Error(`${range} timestamp links missing t=seconds`);
@@ -121,7 +125,7 @@ async function interactionFlow(browser) {
   await waitForRows(page);
   await page.locator('[data-range="1m"]').click();
   await waitForRows(page);
-  if (!requests.includes("data/ui/1m.json")) throw new Error("range switch did not load monthly runtime");
+  if (!requests.some((item) => runtimePathPattern("1m").test(item))) throw new Error("range switch did not load monthly runtime");
   await page.locator('[data-page-size="100"]').first().click();
   await waitForRows(page);
   await page.locator("#filterInput").fill("夜");
@@ -166,6 +170,57 @@ async function interactionFlow(browser) {
   results.push({ scenario: "interaction-flow", requests: [...new Set(requests)], measures: perf.measures });
 }
 
+async function monthlyFallbackScenarios(browser) {
+  for (const scenario of [
+    {
+      label: "404",
+      handler: (route) => route.fulfill({ status: 404, contentType: "text/plain", body: "missing" }),
+    },
+    {
+      label: "empty",
+      handler: (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            schemaVersion: 1,
+            id: "1m",
+            title: "月度",
+            generatedAt: "2026-07-13T15:56:10.026Z",
+            capturedAt: "2026-07-13T15:56:10.026Z",
+            dataVersion: "0".repeat(64),
+            filterVersion: 3,
+            nicheAnnotated: true,
+            items: [],
+          }),
+        }),
+    },
+    {
+      label: "truncated-json",
+      handler: (route) => route.fulfill({ status: 200, contentType: "application/json", body: "{\"schemaVersion\":" }),
+    },
+  ]) {
+    const { context, page, errors } = await newPage(browser, [1366, 768]);
+    await page.route(/\/data\/ui\/1m\.[0-9a-f]{12}\.json$/u, scenario.handler);
+    await page.goto(`${baseUrl}?range=1m&debug=1`, { waitUntil: "domcontentloaded" });
+    await waitForRows(page);
+    const summary = await page.locator("#summary").textContent();
+    const status = await page.locator("#status").textContent();
+    const debug = await page.locator("#debugPanel").textContent();
+    await context.close();
+    if (!summary.includes("备用数据") && !status.includes("备用数据")) {
+      throw new Error(`fallback ${scenario.label} did not expose fallback state`);
+    }
+    if (!debug.includes("data/1m.json") && !debug.includes("data/latest.json")) {
+      throw new Error(`fallback ${scenario.label} did not record fallback path`);
+    }
+    const unexpectedErrors =
+      scenario.label === "404" ? errors.filter((error) => !/status of 404|HTTP 404/u.test(error)) : errors;
+    if (unexpectedErrors.length) throw new Error(`fallback ${scenario.label} errors: ${unexpectedErrors.join(" | ")}`);
+    results.push({ scenario: `fallback-${scenario.label}` });
+  }
+}
+
 async function prefetchGuards(browser) {
   for (const [label, connection] of [
     ["saveData", { saveData: true, effectiveType: "4g" }],
@@ -178,20 +233,25 @@ async function prefetchGuards(browser) {
     await waitForRows(page);
     await sleep(2500);
     await context.close();
-    if (requests.includes("data/ui/1m.json")) throw new Error(`${label} prefetched inactive range`);
+    if (requests.some((item) => runtimePathPattern("1m").test(item))) throw new Error(`${label} prefetched inactive range`);
     if (errors.length) throw new Error(`${label} errors: ${errors.join(" | ")}`);
     results.push({ scenario: `prefetch-${label}`, requests: [...new Set(requests)] });
   }
+}
+
+function runtimePathPattern(range) {
+  return new RegExp(`^data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json$`, "u");
 }
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     for (const viewport of viewports) {
-      await firstLoad(browser, "72h", viewport);
+    await firstLoad(browser, "72h", viewport);
     }
     await firstLoad(browser, "1m", [1366, 768]);
     await interactionFlow(browser);
+    await monthlyFallbackScenarios(browser);
     await prefetchGuards(browser);
   } finally {
     await browser.close();

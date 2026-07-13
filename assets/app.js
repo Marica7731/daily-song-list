@@ -12,6 +12,7 @@ const RANGE_LABELS = {
 
 const SNAPSHOT_LATEST_PATH = "data/latest.json";
 const UI_META_PATH = "data/ui/meta.json";
+const STATUS_PATH = "data/status.json";
 const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
@@ -38,6 +39,8 @@ const PAGE_SIZES = {
   videos: VIDEO_PAGE_SIZE,
 };
 const INDEX_ALL_BUCKET = "全部";
+const STATUS_STALE_MS = 90 * 60 * 1000;
+const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
 
 const KANA_BUCKETS = [
   { label: "あ", pattern: /^[ぁ-お]/u },
@@ -216,8 +219,10 @@ const state = {
   runtimeMeta: null,
   runtimeRangePayloads: new Map(),
   runtimeRangeLoads: new Map(),
+  runtimeWarnings: new Map(),
   rangeCache: new Map(),
   latestRangeLoadError: null,
+  statusRefreshTimer: null,
   songSearchIndexPromise: null,
   songSearchLookup: window.FrontendUtils.createSongSearchLookup(null),
   rankDiffs: {},
@@ -239,6 +244,7 @@ const els = {
   hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
   backToTop: document.querySelector("#backToTop"),
   toast: document.querySelector("#toast"),
+  debugPanel: null,
   rangeTabs: Array.from(document.querySelectorAll("[data-range]")),
   viewTabs: Array.from(document.querySelectorAll("[data-view]")),
 };
@@ -253,11 +259,19 @@ window.printSongListPerformance = function printSongListPerformance() {
         }))
     : [];
   const resources = state.loadedResources.map((entry) => ({ ...entry }));
+  const runtime = {
+    dataVersion: state.runtimeMeta?.dataVersion || "",
+    range: state.range,
+    rangePath: state.runtimeMeta?.ranges?.[state.range]?.path || "",
+    rangeDataVersion: state.runtimeRangePayloads.get(state.range)?.dataVersion || "",
+    status: state.status || null,
+    warning: state.runtimeWarnings.get(state.range) || null,
+  };
   if (typeof console?.table === "function") {
     console.table(measures);
     console.table(resources);
   }
-  return { measures, resources };
+  return { measures, resources, runtime };
 };
 
 init().catch((error) => {
@@ -317,18 +331,20 @@ async function init() {
   renderInitialSkeleton();
   await yieldToBrowser();
   const initialRange = state.range;
-  const [meta, snapshotIndex, rangePayload] = await Promise.all([
-    measureAsync("fetch-meta", () => readJson(UI_META_PATH, { cache: "no-cache" })),
-    readJson("data/snapshots/index.json").catch(() => ({ snapshots: [] })),
-    measureAsync("fetch-active-range", () => loadRuntimeRange(initialRange)),
-  ]);
+  const metaPromise = measureAsync("fetch-meta", () => readJson(UI_META_PATH, { cache: "no-cache" }));
+  const statusPromise = readJson(STATUS_PATH, { cache: "no-cache" }).catch(() => null);
+  const snapshotIndexPromise = readJson("data/snapshots/index.json").catch(() => ({ snapshots: [] }));
+  const meta = await metaPromise;
   state.runtimeMeta = meta;
-  state.status = meta.status || null;
+  state.status = mergeRuntimeStatus(meta.status || null, await statusPromise, meta);
+  startStatusTicker();
+  const snapshotIndex = await snapshotIndexPromise;
   state.snapshots = Array.isArray(snapshotIndex.snapshots) ? snapshotIndex.snapshots : [];
   renderSnapshotOptions();
   applyInitialUrlState();
   syncControlsFromState();
   const requestedSnapshotPath = state.currentSnapshotPath;
+  const rangePayload = await measureAsync("fetch-active-range", () => loadRuntimeRange(initialRange));
   if (state.range !== initialRange) {
     await loadRuntimeRange(state.range);
   }
@@ -754,8 +770,8 @@ async function loadRuntimeRange(rangeId) {
   const existing = state.runtimeRangePayloads.get(rangeId);
   if (existing) return existing;
   if (state.runtimeRangeLoads.has(rangeId)) return state.runtimeRangeLoads.get(rangeId);
-  const path = runtimeRangePath(rangeId);
-  const promise = readJson(path, { cache: "no-cache" })
+  if (!state.runtimeMeta) throw new Error(`runtime meta missing before loading ${rangeId}`);
+  const promise = loadRuntimeRangeWithFallback(rangeId)
     .then((payload) => {
       state.runtimeRangePayloads.set(rangeId, payload);
       return payload;
@@ -768,10 +784,85 @@ async function loadRuntimeRange(rangeId) {
 }
 
 function runtimeRangePath(rangeId) {
-  return window.FrontendUtils.runtimeRangePath(rangeId, state.runtimeMeta);
+  return window.FrontendUtils.runtimeRangePath(rangeId, state.runtimeMeta, { requireMeta: true });
+}
+
+async function loadRuntimeRangeWithFallback(rangeId) {
+  const primaryPath = runtimeRangePath(rangeId);
+  const primaryError = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: cacheModeForPath(primaryPath) });
+  if (primaryError.ok) {
+    state.runtimeWarnings.delete(rangeId);
+    return primaryError.payload;
+  }
+
+  const retry = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: "reload" });
+  if (retry.ok) {
+    state.runtimeWarnings.delete(rangeId);
+    return retry.payload;
+  }
+
+  const fallback = await loadRuntimeRangeFallback(rangeId, [primaryError.error, retry.error]);
+  if (fallback) return fallback;
+  throw new Error(`运行时范围读取失败：${retry.error?.message || primaryError.error?.message || primaryPath}`);
+}
+
+async function tryRuntimeRangeLoad(rangeId, path, options = {}) {
+  try {
+    const payload = await readJson(path, options);
+    return {
+      ok: true,
+      payload: window.FrontendUtils.validateRuntimeRangePayload(payload, {
+        rangeId,
+        meta: state.runtimeMeta,
+        path,
+      }),
+    };
+  } catch (error) {
+    return { ok: false, error };
+  }
+}
+
+async function loadRuntimeRangeFallback(rangeId, errors) {
+  const attempts = [`data/${rangeId}.json`, SNAPSHOT_LATEST_PATH];
+  for (const fallbackPath of attempts) {
+    try {
+      const raw = await readJson(fallbackPath, { cache: "no-cache" });
+      const group = fallbackPath === SNAPSHOT_LATEST_PATH ? raw.groups?.[rangeId] : raw;
+      const payload = window.FrontendUtils.runtimeRangePayloadFromGroup(group, {
+        rangeId,
+        generatedAt: raw.generatedAt || group?.generatedAt || state.runtimeMeta?.generatedAt || "",
+        capturedAt: raw.capturedAt || state.runtimeMeta?.capturedAt || "",
+        filterVersion: Number.isInteger(state.runtimeMeta?.filterVersion) ? state.runtimeMeta.filterVersion : CURRENT_FILTER_VERSION,
+        fallbackFrom: fallbackPath,
+      });
+      window.FrontendUtils.validateRuntimeRangePayload(payload, {
+        rangeId,
+        path: fallbackPath,
+        allowLegacyDataVersion: true,
+      });
+      const message = `${RANGE_LABELS[rangeId] || rangeId}精简数据读取失败，当前使用备用数据 ${fallbackPath}`;
+      state.runtimeWarnings.set(rangeId, {
+        message,
+        fallbackPath,
+        primaryError: errors.map((error) => error?.message || String(error)).filter(Boolean).join(" | "),
+      });
+      showToast(message);
+      return payload;
+    } catch {
+      // Try the next fallback source.
+    }
+  }
+  return null;
 }
 
 async function applyRuntimeRangePayload(rangePayload, options = {}) {
+  const isFallbackPayload = Boolean(rangePayload?.fallbackFrom);
+  window.FrontendUtils.validateRuntimeRangePayload(rangePayload, {
+    rangeId: rangePayload?.id || state.range,
+    meta: isFallbackPayload ? null : state.runtimeMeta,
+    path: rangePayload?.fallbackFrom || state.runtimeMeta?.ranges?.[rangePayload?.id || state.range]?.path,
+    allowLegacyDataVersion: isFallbackPayload,
+  });
   const payload = latestPayloadFromRuntimeRange(rangePayload, state.runtimeMeta);
   const prepared = await measureAsync("prepare-payload", () => preparePayload(payload));
   const rangeId = rangePayload.id;
@@ -809,7 +900,7 @@ function latestPayloadFromRuntimeRange(rangePayload, meta) {
     schemaVersion: rangePayload?.schemaVersion || meta?.schemaVersion || 1,
     generatedAt: meta?.generatedAt || rangePayload?.generatedAt || "",
     capturedAt: meta?.capturedAt || rangePayload?.capturedAt || rangePayload?.generatedAt || "",
-    status: meta?.status || null,
+    status: mergeRuntimeStatus(meta?.status || null, state.status, meta),
     filterVersion: rangePayload?.filterVersion ?? meta?.filterVersion ?? 0,
     nicheAnnotated: rangePayload?.nicheAnnotated === true || meta?.nicheAnnotated === true,
     groups: {
@@ -1135,14 +1226,94 @@ function snapshotDateOptionLabel(dateValue) {
 function renderStatus(status) {
   if (!isLatestSnapshot()) {
     els.status.textContent = "正在查看历史快照";
+    renderDebugPanel();
     return;
   }
-  if (!status) {
+  const currentStatus = mergeRuntimeStatus(state.runtimeMeta?.status || null, status || state.status, state.runtimeMeta);
+  if (!currentStatus) {
     els.status.textContent = "状态不可用";
+    renderDebugPanel();
     return;
   }
-  const at = formatDate(status.rebuiltDerivedAt || status.completedAt || status.generatedAt || status.attemptedAt);
-  els.status.textContent = status.status === "success" ? `更新于 ${at}` : `正在使用上次成功数据 · ${at}`;
+  const capturedAt = currentStatus.completedAt || currentStatus.capturedAt || currentStatus.dataCapturedAt || state.runtimeMeta?.capturedAt || "";
+  const attemptedAt = currentStatus.attemptedAt || "";
+  const rebuiltDerivedAt = currentStatus.rebuiltDerivedAt || state.runtimeMeta?.rebuiltDerivedAt || "";
+  const parts = [];
+  if (currentStatus.status === "success") {
+    parts.push(`数据抓取于 ${formatDate(capturedAt)}`);
+  } else {
+    const failureAt = attemptedAt ? `最近尝试 ${formatDate(attemptedAt)}` : "最近尝试时间不可用";
+    parts.push(`正在使用上次成功数据 · ${failureAt}`);
+    if (capturedAt) parts.push(`上次抓取 ${formatDate(capturedAt)}`);
+  }
+  if (rebuiltDerivedAt && rebuiltDerivedAt !== capturedAt) parts.push(`页面数据重建于 ${formatDate(rebuiltDerivedAt)}`);
+  const staleAge = capturedAt ? Date.now() - Date.parse(capturedAt) : 0;
+  if (Number.isFinite(staleAge) && staleAge > STATUS_STALE_MS) parts.push("超过90分钟未更新");
+  const warning = state.runtimeWarnings.get(state.range);
+  if (warning?.fallbackPath) parts.push("当前使用备用数据");
+  els.status.textContent = parts.filter(Boolean).join(" · ");
+  els.status.title = [
+    `status=${currentStatus.status || "unknown"}`,
+    `capturedAt=${capturedAt || ""}`,
+    `attemptedAt=${attemptedAt || ""}`,
+    `rebuiltDerivedAt=${rebuiltDerivedAt || ""}`,
+    `dataVersion=${state.runtimeMeta?.dataVersion || ""}`,
+    warning?.primaryError ? `warning=${warning.primaryError}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  renderDebugPanel();
+}
+
+function mergeRuntimeStatus(metaStatus, statusFile, meta) {
+  const candidates = [metaStatus, statusFile].filter((item) => item && typeof item === "object");
+  if (!candidates.length) return null;
+  const newest = candidates
+    .map((item) => ({
+      ...item,
+      _time: Date.parse(item.attemptedAt || item.completedAt || item.capturedAt || item.generatedAt || ""),
+    }))
+    .sort((a, b) => (Number.isFinite(b._time) ? b._time : 0) - (Number.isFinite(a._time) ? a._time : 0))[0];
+  const { _time, ...status } = newest;
+  return {
+    ...status,
+    capturedAt: status.capturedAt || status.dataCapturedAt || meta?.capturedAt || metaStatus?.capturedAt || "",
+    dataCapturedAt: status.dataCapturedAt || status.capturedAt || meta?.capturedAt || metaStatus?.dataCapturedAt || "",
+    rebuiltDerivedAt: status.rebuiltDerivedAt || meta?.rebuiltDerivedAt || metaStatus?.rebuiltDerivedAt || "",
+    dataVersion: status.dataVersion || meta?.dataVersion || metaStatus?.dataVersion || "",
+  };
+}
+
+function startStatusTicker() {
+  if (state.statusRefreshTimer) window.clearInterval(state.statusRefreshTimer);
+  state.statusRefreshTimer = window.setInterval(() => renderStatus(state.status), 60_000);
+}
+
+function renderDebugPanel() {
+  if (!DEBUG_MODE) return;
+  if (!els.debugPanel) {
+    els.debugPanel = document.createElement("pre");
+    els.debugPanel.id = "debugPanel";
+    els.debugPanel.className = "debug-panel";
+    els.debugPanel.setAttribute("aria-label", "运行时诊断");
+    els.summary?.after(els.debugPanel);
+  }
+  const rangeMeta = state.runtimeMeta?.ranges?.[state.range] || null;
+  const rangePayload = state.runtimeRangePayloads.get(state.range) || null;
+  els.debugPanel.textContent = JSON.stringify(
+    {
+      dataVersion: state.runtimeMeta?.dataVersion || "",
+      range: state.range,
+      rangePath: rangeMeta?.path || "",
+      rangeItemCount: rangeMeta?.itemCount ?? null,
+      rangeDataVersion: rangePayload?.dataVersion || "",
+      status: state.status || null,
+      warning: state.runtimeWarnings.get(state.range) || null,
+      resources: state.loadedResources.slice(-8),
+    },
+    null,
+    2,
+  );
 }
 
 function render(options = {}) {
@@ -1214,10 +1385,6 @@ async function prewarmRangeCache(group, snapshotPath, rangeId) {
   const nicheSongRecords = buildSongRecords(nicheOccurrences);
   const visibleSongRecords = buildSongRecords(visibleOccurrences);
   const visibleNicheSongRecords = buildSongRecords(visibleNicheOccurrences);
-  await yieldToBrowser();
-  const allArtistResult = measureSync("build-artist-records", () => buildArtistRecords(occurrences));
-  await yieldToBrowser();
-  const nicheArtistResult = buildArtistRecords(nicheOccurrences);
   const cache = createRangeCacheObject({
     items,
     occurrences,
@@ -1228,8 +1395,6 @@ async function prewarmRangeCache(group, snapshotPath, rangeId) {
     nicheSongRecords,
     visibleSongRecords,
     visibleNicheSongRecords,
-    allArtistResult,
-    nicheArtistResult,
   });
   state.rangeCache.set(key, cache);
   await prewarmDefaultSorts(cache);
@@ -1241,8 +1406,8 @@ async function prewarmDefaultSorts(cache) {
   const hideUnknownForView = shouldHideUnknownForCurrentView();
   const scope = `${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}`;
   const songRecords = selectedSongRecords(cache, { hideUnknownForView });
-  const artistRecords = state.nicheOnly ? cache.nicheArtistRecords : cache.allArtistRecords;
   if (state.view === "artistRank") {
+    const artistRecords = state.nicheOnly ? cache.nicheArtistRecords : cache.allArtistRecords;
     cacheRankModel(cache, `artist-rank::${scope}::${filterKey}::${state.rankMetric}`, [...artistRecords].sort(compareRankRecords));
   } else if (state.view === "songAz") {
     cache.sortedRecords.set(`song-az::${scope}::${filterKey}::${state.rankMetric}`, [...songRecords].sort(compareSongAz));
@@ -1261,8 +1426,6 @@ function createRangeCache(group) {
   const nicheSongRecords = buildSongRecords(nicheOccurrences);
   const visibleSongRecords = buildSongRecords(visibleOccurrences);
   const visibleNicheSongRecords = buildSongRecords(visibleNicheOccurrences);
-  const allArtistResult = measureSync("build-artist-records", () => buildArtistRecords(occurrences));
-  const nicheArtistResult = buildArtistRecords(nicheOccurrences);
   return createRangeCacheObject({
     items,
     occurrences,
@@ -1273,8 +1436,6 @@ function createRangeCache(group) {
     nicheSongRecords,
     visibleSongRecords,
     visibleNicheSongRecords,
-    allArtistResult,
-    nicheArtistResult,
   });
 }
 
@@ -1288,10 +1449,8 @@ function createRangeCacheObject({
   nicheSongRecords,
   visibleSongRecords,
   visibleNicheSongRecords,
-  allArtistResult,
-  nicheArtistResult,
 }) {
-  return {
+  const cache = {
     items,
     occurrences,
     nicheOccurrences,
@@ -1301,21 +1460,59 @@ function createRangeCacheObject({
     nicheSongRecords,
     visibleSongRecords,
     visibleNicheSongRecords,
-    allArtistRecords: allArtistResult.records,
-    nicheArtistRecords: nicheArtistResult.records,
-    allMissingArtistCount: allArtistResult.missingArtistCount,
-    nicheMissingArtistCount: nicheArtistResult.missingArtistCount,
     allVideoCount: uniqueVideoCount(occurrences),
     nicheVideoCount: uniqueVideoCount(nicheOccurrences),
     visibleVideoCount: uniqueVideoCount(visibleOccurrences),
     visibleNicheVideoCount: uniqueVideoCount(visibleNicheOccurrences),
-    normalizedVideoSearchData: items.map((item) => ({
-      item,
-      searchText: normalizeSearch([item.title, item.channelName, item.keyword, ...(item.songs || []).flatMap((song) => [song.title, song.artist])].join(" ")),
-    })),
     sortedRecords: new Map(),
     selectionCache: new Map(),
   };
+  defineLazyArtistCache(cache, "all", occurrences);
+  defineLazyArtistCache(cache, "niche", nicheOccurrences);
+  defineLazyValue(cache, "normalizedVideoSearchData", () =>
+    items.map((item) => ({
+      item,
+      searchText: normalizeSearch([item.title, item.channelName, item.keyword, ...(item.songs || []).flatMap((song) => [song.title, song.artist])].join(" ")),
+    })),
+  );
+  return cache;
+}
+
+function defineLazyArtistCache(cache, prefix, occurrences) {
+  const resultKey = `${prefix}ArtistResult`;
+  const recordsKey = `${prefix}ArtistRecords`;
+  const missingKey = `${prefix}MissingArtistCount`;
+  defineLazyValue(cache, resultKey, () => measureSync("build-artist-records", () => buildArtistRecords(occurrences)));
+  Object.defineProperty(cache, recordsKey, {
+    configurable: true,
+    enumerable: true,
+    get() {
+      return cache[resultKey].records;
+    },
+  });
+  Object.defineProperty(cache, missingKey, {
+    configurable: true,
+    enumerable: true,
+    get() {
+      return cache[resultKey].missingArtistCount;
+    },
+  });
+}
+
+function defineLazyValue(target, key, factory) {
+  Object.defineProperty(target, key, {
+    configurable: true,
+    enumerable: true,
+    get() {
+      const value = factory();
+      Object.defineProperty(target, key, {
+        configurable: true,
+        enumerable: true,
+        value,
+      });
+      return value;
+    },
+  });
 }
 
 function currentSelection(rangeCache) {
@@ -1326,8 +1523,9 @@ function currentSelection(rangeCache) {
 
   const baseOccurrences = selectedOccurrences(rangeCache, { hideUnknownForView });
   const baseSongRecords = selectedSongRecords(rangeCache, { hideUnknownForView });
-  const baseArtistRecords = state.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords;
-  const baseMissingArtistCount = state.nicheOnly ? rangeCache.nicheMissingArtistCount : rangeCache.allMissingArtistCount;
+  const needsArtistRecords = state.view === "artistRank";
+  const baseArtistRecords = needsArtistRecords ? (state.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords) : [];
+  const baseMissingArtistCount = needsArtistRecords ? (state.nicheOnly ? rangeCache.nicheMissingArtistCount : rangeCache.allMissingArtistCount) : 0;
   const hiddenUnknownCount = hideUnknownForView ? hiddenUnknownOccurrenceCount(rangeCache) : 0;
 
   let selection;
@@ -1687,7 +1885,7 @@ function hiddenUnknownNote(selection) {
 }
 
 function summaryNote(selection, extra = "") {
-  return [extra, hiddenUnknownNote(selection), monthlyCoverageNote()].filter(Boolean).join(" · ");
+  return [extra, hiddenUnknownNote(selection), monthlyCoverageNote(), rangeFallbackNote()].filter(Boolean).join(" · ");
 }
 
 function monthlyCoverageNote() {
@@ -1697,6 +1895,11 @@ function monthlyCoverageNote() {
   const retentionDays = Number(catalog?.retentionDays) || 35;
   if (!Number.isFinite(catalogVideoCount) || catalogVideoCount <= 0) return "最近35天累计";
   return `最近${retentionDays}天累计 · 视频目录 ${catalogVideoCount} 个`;
+}
+
+function rangeFallbackNote() {
+  const warning = state.runtimeWarnings.get(state.range);
+  return warning?.fallbackPath ? `备用数据：${warning.fallbackPath}` : "";
 }
 
 function renderSummaryActions() {
@@ -2811,7 +3014,8 @@ async function readJson(path, options = {}) {
 
 function cacheModeForPath(path) {
   if (/^data\/snapshots\/[^/]+\.json$/u.test(path)) return "force-cache";
-  if (path === UI_META_PATH || path === SNAPSHOT_LATEST_PATH || path === "data/status.json" || path === "data/snapshots/index.json") return "no-cache";
+  if (path === UI_META_PATH || path === SNAPSHOT_LATEST_PATH || path === STATUS_PATH || path === "data/snapshots/index.json") return "no-cache";
+  if (/^data\/ui\/(?:72h|1m)\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/(?:72h|1m)\.json$/u.test(path)) return "no-cache";
   if (/^data\/diff\/latest-(?:72h|1m)\.json$/u.test(path)) return "no-cache";
   if (path === SONG_SEARCH_INDEX_PATH) return "no-cache";

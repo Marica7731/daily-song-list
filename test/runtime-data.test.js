@@ -62,8 +62,13 @@ test("buildClientGroup keeps only runtime video and song fields", () => {
 
 test("runtime meta uses the expected range and diff paths", () => {
   const rangePayloads = {
-    "72h": { items: [{ videoId: "AAAAAAAAAAA" }], nicheAnnotated: true },
-    "1m": { items: [{ videoId: "BBBBBBBBBBB" }, { videoId: "CCCCCCCCCCC" }], nicheAnnotated: true },
+    "72h": { id: "72h", generatedAt: "2026-07-12T15:00:00Z", items: [{ videoId: "AAAAAAAAAAA" }], nicheAnnotated: true },
+    "1m": {
+      id: "1m",
+      generatedAt: "2026-07-12T15:00:00Z",
+      items: [{ videoId: "BBBBBBBBBBB" }, { videoId: "CCCCCCCCCCC" }],
+      nicheAnnotated: true,
+    },
   };
   const meta = buildRuntimeMeta(
     {
@@ -83,12 +88,22 @@ test("runtime meta uses the expected range and diff paths", () => {
     rangePayloads,
   );
 
+  assert.match(meta.dataVersion, /^[0-9a-f]{64}$/u);
   assert.equal(meta.filterVersion, CURRENT_FILTER_VERSION);
   assert.equal(meta.rebuiltDerivedAt, "2026-07-12T16:30:00Z");
   assert.equal(meta.status.rebuiltDerivedAt, "2026-07-12T16:30:00Z");
+  assert.equal(meta.status.capturedAt, "2026-07-12T15:00:00Z");
+  assert.equal(meta.status.dataVersion, meta.dataVersion);
   assert.equal(meta.nicheAnnotated, true);
-  assert.deepEqual(meta.ranges["72h"], { path: "data/ui/72h.json", itemCount: 1 });
-  assert.deepEqual(meta.ranges["1m"], { path: "data/ui/1m.json", itemCount: 2 });
+  assert.equal(meta.latestCapture.capturedAt, "2026-07-12T15:00:00Z");
+  assert.equal(meta.latestDerived.rebuiltDerivedAt, "2026-07-12T16:30:00Z");
+  assert.deepEqual(meta.latestCapture.itemCounts, { "72h": 1, "1m": 2 });
+  assert.equal(meta.ranges["72h"].path, "data/ui/72h.json");
+  assert.equal(meta.ranges["72h"].legacyPath, "data/ui/72h.json");
+  assert.match(meta.ranges["72h"].sha256, /^[0-9a-f]{64}$/u);
+  assert.equal(meta.ranges["72h"].dataVersion, meta.dataVersion);
+  assert.equal(meta.ranges["72h"].itemCount, 1);
+  assert.equal(meta.ranges["1m"].itemCount, 2);
   assert.deepEqual(meta.catalog, {
     path: "data/video-catalog.json",
     retentionDays: 35,

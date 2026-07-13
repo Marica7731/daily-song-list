@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const { NON_SONG_RULES_PATH, OVERRIDES_PATH, validateCurationOverrides } = require("./curation");
 const { SONG_ALIASES_PATH, canonicalizeSongIdentity, loadSongAliasContext, validateSongAliasConfig } = require("./song-aliases");
 const { MONTH_CATALOG_DAYS, VIDEO_CATALOG_PATH, isWithinCatalogWindow } = require("./video-catalog");
@@ -10,6 +11,7 @@ const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const INDEX_PATH = path.join(DATA_DIR, "snapshots", "index.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 const UI_META_PATH = path.join(DATA_DIR, "ui", "meta.json");
+const RANGES = ["72h", "1m"];
 const DIFF_PATHS = {
   "72h": path.join(DATA_DIR, "diff", "latest-72h.json"),
   "1m": path.join(DATA_DIR, "diff", "latest-1m.json"),
@@ -37,6 +39,7 @@ const RUNTIME_VIDEO_FIELDS = new Set([
 ]);
 const RUNTIME_SONG_FIELDS = new Set(["seconds", "title", "artist", "isNiche"]);
 const H72_MS = 72 * 60 * 60 * 1000;
+const scope = parseValidationScope(process.argv.slice(2));
 
 const payload = readJson(LATEST_PATH);
 const errors = [];
@@ -88,8 +91,11 @@ for (const [groupId, diffPath] of Object.entries(DIFF_PATHS)) {
   validateDiffFile(groupId, diffPath);
 }
 
-validateRuntimeUiFiles();
-validateVideoCatalog();
+if (scope !== "review") {
+  validateRuntimeUiFiles();
+  validateVideoCatalog();
+}
+if (scope !== "core") validateReviewFiles();
 
 if (fs.existsSync(SONG_SEARCH_INDEX_PATH)) {
   const songSearchIndex = readJson(SONG_SEARCH_INDEX_PATH);
@@ -104,8 +110,19 @@ if (errors.length) {
 }
 
 console.log(
-  `[validate] ok 72h=${payload.groups["72h"].items.length} 1m=${payload.groups["1m"].items.length} snapshots=${index.snapshots.length}`,
+  `[validate] ok scope=${scope} 72h=${payload.groups["72h"].items.length} 1m=${payload.groups["1m"].items.length} snapshots=${index.snapshots.length}`,
 );
+
+function parseValidationScope(args) {
+  if (args.includes("--core")) return "core";
+  if (args.includes("--review")) return "review";
+  const scopeArg = args.find((arg) => arg.startsWith("--scope="));
+  if (scopeArg) {
+    const value = scopeArg.slice("--scope=".length);
+    if (["all", "core", "review"].includes(value)) return value;
+  }
+  return "all";
+}
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -170,8 +187,17 @@ function validateRuntimeUiFiles() {
   }
   const meta = readJson(UI_META_PATH);
   if (meta.schemaVersion !== 1) errors.push("ui.meta.schemaVersion must be 1");
+  if (!isSha256(meta.dataVersion)) errors.push("ui.meta.dataVersion must be sha256 string");
   if (typeof meta.generatedAt !== "string") errors.push("ui.meta.generatedAt must be string");
   if (typeof meta.capturedAt !== "string") errors.push("ui.meta.capturedAt must be string");
+  if (typeof meta.dataCapturedAt !== "string") errors.push("ui.meta.dataCapturedAt must be string");
+  if (typeof meta.derivedBuiltAt !== "string") errors.push("ui.meta.derivedBuiltAt must be string");
+  if (meta.latestCapture !== null && (typeof meta.latestCapture !== "object" || Array.isArray(meta.latestCapture))) {
+    errors.push("ui.meta.latestCapture must be object or null");
+  }
+  if (meta.latestDerived !== null && (typeof meta.latestDerived !== "object" || Array.isArray(meta.latestDerived))) {
+    errors.push("ui.meta.latestDerived must be object or null");
+  }
   if (meta.status !== null && (typeof meta.status !== "object" || Array.isArray(meta.status))) {
     errors.push("ui.meta.status must be object or null");
   }
@@ -180,21 +206,37 @@ function validateRuntimeUiFiles() {
   if ("curationVersion" in meta && typeof meta.curationVersion !== "string") errors.push("ui.meta.curationVersion must be string");
   if ("curationHash" in meta && typeof meta.curationHash !== "string") errors.push("ui.meta.curationHash must be string");
 
-  for (const groupId of ["72h", "1m"]) {
+  for (const groupId of RANGES) {
     const rangeMeta = meta.ranges?.[groupId];
     if (!rangeMeta) {
       errors.push(`ui.meta.ranges.${groupId} missing`);
       continue;
     }
-    const expectedPath = `data/ui/${groupId}.json`;
-    if (rangeMeta.path !== expectedPath) errors.push(`ui.meta.ranges.${groupId}.path must be ${expectedPath}`);
+    const expectedPathPattern = new RegExp(`^data/ui/${groupId}\\.[0-9a-f]{12}\\.json$`, "u");
+    if (!expectedPathPattern.test(rangeMeta.path || "")) {
+      errors.push(`ui.meta.ranges.${groupId}.path must be content-hashed runtime path`);
+    }
+    if (rangeMeta.legacyPath !== `data/ui/${groupId}.json`) {
+      errors.push(`ui.meta.ranges.${groupId}.legacyPath must be data/ui/${groupId}.json`);
+    }
+    if (!isSha256(rangeMeta.sha256)) errors.push(`ui.meta.ranges.${groupId}.sha256 must be sha256 string`);
+    if (rangeMeta.dataVersion !== meta.dataVersion) {
+      errors.push(`ui.meta.ranges.${groupId}.dataVersion must match ui.meta.dataVersion`);
+    }
+    if (typeof rangeMeta.generatedAt !== "string") errors.push(`ui.meta.ranges.${groupId}.generatedAt must be string`);
+    if (!Number.isInteger(rangeMeta.bytes) || rangeMeta.bytes <= 0) {
+      errors.push(`ui.meta.ranges.${groupId}.bytes must be positive integer`);
+    }
     if (!Number.isInteger(rangeMeta.itemCount) || rangeMeta.itemCount < 0) {
       errors.push(`ui.meta.ranges.${groupId}.itemCount must be non-negative integer`);
     }
     if (meta.diffs?.[groupId]?.path !== `data/diff/latest-${groupId}.json`) {
       errors.push(`ui.meta.diffs.${groupId}.path invalid`);
     }
-    validateRuntimeRangeFile(groupId, rangeMeta);
+    validateRuntimeRangeFile(groupId, rangeMeta, meta);
+    validateRuntimeRangeFile(groupId, { ...rangeMeta, path: rangeMeta.legacyPath, sha256: null }, meta, {
+      label: `ui.${groupId}.legacy`,
+    });
   }
 }
 
@@ -318,40 +360,71 @@ function hasUnpairedTrailingBracket(value) {
   return Boolean(open && !text.includes(open));
 }
 
-function validateRuntimeRangeFile(groupId, rangeMeta) {
+function validateReviewFiles() {
+  const reviewDir = path.join(DATA_DIR, "review");
+  const queuePath = path.join(reviewDir, "queue.json");
+  const manifestPath = path.join(reviewDir, "manifest.json");
+  if (!fs.existsSync(queuePath)) {
+    errors.push("missing review queue: data/review/queue.json");
+  } else {
+    const queue = readJson(queuePath);
+    if (queue.schemaVersion !== 1) errors.push("review.queue.schemaVersion must be 1");
+    if (!Array.isArray(queue.items)) errors.push("review.queue.items must be array");
+  }
+  if (!fs.existsSync(manifestPath)) {
+    errors.push("missing review manifest: data/review/manifest.json");
+  } else {
+    const manifest = readJson(manifestPath);
+    if (manifest.schemaVersion !== 1) errors.push("review.manifest.schemaVersion must be 1");
+    for (const field of ["currentQueuePath", "historyQueuePath", "legacyQueuePath", "currentEntryIndexPath", "qualityReportPath", "sourceDir"]) {
+      if (typeof manifest[field] !== "string" || !manifest[field]) errors.push(`review.manifest.${field} must be string`);
+    }
+    for (const field of ["currentSourceCount", "currentEntryCount", "historySourceCount", "historyEntryCount", "itemCount"]) {
+      if (!Number.isInteger(manifest[field]) || manifest[field] < 0) errors.push(`review.manifest.${field} must be non-negative integer`);
+    }
+  }
+}
+
+function validateRuntimeRangeFile(groupId, rangeMeta, meta, options = {}) {
+  const label = options.label || `ui.${groupId}`;
   const relativePath = rangeMeta?.path || `data/ui/${groupId}.json`;
   const filePath = path.join(ROOT, relativePath);
   if (!fs.existsSync(filePath)) {
     errors.push(`missing runtime UI range: ${relativePath}`);
     return;
   }
-  const range = readJson(filePath);
-  if (range.schemaVersion !== 1) errors.push(`ui.${groupId}.schemaVersion must be 1`);
-  if (range.id !== groupId) errors.push(`ui.${groupId}.id must be ${groupId}`);
-  if (typeof range.generatedAt !== "string") errors.push(`ui.${groupId}.generatedAt must be string`);
-  if (typeof range.capturedAt !== "string") errors.push(`ui.${groupId}.capturedAt must be string`);
-  if (!Number.isInteger(range.filterVersion)) errors.push(`ui.${groupId}.filterVersion must be integer`);
-  if (typeof range.nicheAnnotated !== "boolean") errors.push(`ui.${groupId}.nicheAnnotated must be boolean`);
+  const text = fs.readFileSync(filePath, "utf8");
+  if (rangeMeta?.sha256 && sha256Text(text) !== rangeMeta.sha256) {
+    errors.push(`${label}.sha256 must match file contents`);
+  }
+  const range = JSON.parse(text);
+  if (range.schemaVersion !== 1) errors.push(`${label}.schemaVersion must be 1`);
+  if (range.id !== groupId) errors.push(`${label}.id must be ${groupId}`);
+  if (typeof range.generatedAt !== "string") errors.push(`${label}.generatedAt must be string`);
+  if (typeof range.capturedAt !== "string") errors.push(`${label}.capturedAt must be string`);
+  if (range.dataVersion !== meta.dataVersion) errors.push(`${label}.dataVersion must match ui.meta.dataVersion`);
+  if (!Number.isInteger(range.filterVersion)) errors.push(`${label}.filterVersion must be integer`);
+  if (typeof range.nicheAnnotated !== "boolean") errors.push(`${label}.nicheAnnotated must be boolean`);
   if (!Array.isArray(range.items)) {
-    errors.push(`ui.${groupId}.items must be array`);
+    errors.push(`${label}.items must be array`);
     return;
   }
   if (Number.isInteger(rangeMeta?.itemCount) && range.items.length !== rangeMeta.itemCount) {
-    errors.push(`ui.${groupId}.items length must match meta itemCount`);
+    errors.push(`${label}.items length must match meta itemCount`);
   }
   for (const [videoIndex, item] of range.items.entries()) {
-    validateAllowedFields(`ui.${groupId}.items[${videoIndex}]`, item, RUNTIME_VIDEO_FIELDS);
-    if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`ui.${groupId}[${videoIndex}].videoId invalid`);
-    if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`ui.${groupId}[${videoIndex}].songs empty`);
+    validateAllowedFields(`${label}.items[${videoIndex}]`, item, RUNTIME_VIDEO_FIELDS);
+    if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`${label}[${videoIndex}].videoId invalid`);
+    if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`${label}[${videoIndex}].songs empty`);
     for (const [songIndex, song] of (item.songs || []).entries()) {
-      validateAllowedFields(`ui.${groupId}.items[${videoIndex}].songs[${songIndex}]`, song, RUNTIME_SONG_FIELDS);
+      validateAllowedFields(`${label}.items[${videoIndex}].songs[${songIndex}]`, song, RUNTIME_SONG_FIELDS);
       if (!Number.isInteger(song.seconds) || song.seconds < 0) {
-        errors.push(`ui.${groupId}[${videoIndex}].songs[${songIndex}].seconds invalid`);
+        errors.push(`${label}[${videoIndex}].songs[${songIndex}].seconds invalid`);
       }
-      if (!song.title) errors.push(`ui.${groupId}[${videoIndex}].songs[${songIndex}].title missing`);
-      if (typeof song.isNiche !== "boolean") errors.push(`ui.${groupId}[${videoIndex}].songs[${songIndex}].isNiche must be boolean`);
+      if (!song.title) errors.push(`${label}[${videoIndex}].songs[${songIndex}].title missing`);
+      if (typeof song.isNiche !== "boolean") errors.push(`${label}[${videoIndex}].songs[${songIndex}].isNiche must be boolean`);
       for (const removedField of ["index", "time", "raw"]) {
-        if (removedField in song) errors.push(`ui.${groupId}[${videoIndex}].songs[${songIndex}].${removedField} must not be present`);
+        if (removedField in song) errors.push(`${label}[${videoIndex}].songs[${songIndex}].${removedField} must not be present`);
       }
     }
   }
@@ -381,4 +454,12 @@ function isNullablePositiveInteger(value) {
 
 function isNullableInteger(value) {
   return value === null || Number.isInteger(value);
+}
+
+function isSha256(value) {
+  return /^[0-9a-f]{64}$/u.test(String(value || ""));
+}
+
+function sha256Text(text) {
+  return crypto.createHash("sha256").update(text).digest("hex");
 }

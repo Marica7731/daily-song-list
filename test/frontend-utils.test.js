@@ -21,10 +21,12 @@ const {
   paginateItems,
   parseUrlState,
   rankToggleModel,
+  runtimeRangePayloadFromGroup,
   runtimeRangePath,
   serializeUrlState,
   shouldPrefetchRuntimeRange,
   shouldSkipSourceFilter,
+  validateRuntimeRangePayload,
   visiblePageTokens,
   youtubeChannelLink,
 } = require("../assets/frontend-utils");
@@ -310,12 +312,52 @@ test("runtime range path follows URL range and meta paths", () => {
   assert.equal(
     runtimeRangePath(parsed.range, {
       ranges: {
-        "1m": { path: "data/ui/1m.json" },
+        "1m": { path: "data/ui/1m.abcdef123456.json" },
       },
     }),
-    "data/ui/1m.json",
+    "data/ui/1m.abcdef123456.json",
   );
   assert.equal(runtimeRangePath("72h", null), "data/ui/72h.json");
+  assert.throws(() => runtimeRangePath("72h", null, { requireMeta: true }), /runtime meta missing/u);
+});
+
+test("runtime range validation rejects version mismatches and empty current ranges", () => {
+  const meta = {
+    dataVersion: "a".repeat(64),
+    ranges: {
+      "1m": { itemCount: 1, dataVersion: "a".repeat(64), path: "data/ui/1m.abcdef123456.json" },
+    },
+  };
+  const valid = runtimePayloadFixture({ dataVersion: "a".repeat(64) });
+  assert.equal(validateRuntimeRangePayload(valid, { rangeId: "1m", meta }).items.length, 1);
+
+  assert.throws(
+    () => validateRuntimeRangePayload(runtimePayloadFixture({ dataVersion: "b".repeat(64) }), { rangeId: "1m", meta }),
+    /dataVersion mismatch/u,
+  );
+  assert.throws(
+    () => validateRuntimeRangePayload(runtimePayloadFixture({ items: [] }), { rangeId: "1m", meta }),
+    /items length does not match meta/u,
+  );
+});
+
+test("runtime legacy group fallback converts to a validated runtime payload", () => {
+  const group = {
+    id: "1m",
+    title: "月度",
+    generatedAt: "2026-07-13T15:56:10.026Z",
+    items: [video("AAAAAAAAAAA", "video", "channel", [song("song", "artist", { isNiche: false })])],
+  };
+  const payload = runtimeRangePayloadFromGroup(group, {
+    rangeId: "1m",
+    capturedAt: "2026-07-13T15:56:10.026Z",
+    filterVersion: 3,
+    fallbackFrom: "data/1m.json",
+  });
+
+  assert.equal(payload.id, "1m");
+  assert.equal(payload.fallbackFrom, "data/1m.json");
+  assert.equal(validateRuntimeRangePayload(payload, { rangeId: "1m", allowLegacyDataVersion: true }), payload);
 });
 
 test("url state keeps rank metric and video layout only when relevant", () => {
@@ -649,5 +691,20 @@ function occurrence(videoId, channelName, songOverrides = {}, itemOverrides = {}
       ...itemOverrides,
     },
     song: song("song", "artist", songOverrides),
+  };
+}
+
+function runtimePayloadFixture(overrides = {}) {
+  return {
+    schemaVersion: 1,
+    id: "1m",
+    title: "月度",
+    generatedAt: "2026-07-13T15:56:10.026Z",
+    capturedAt: "2026-07-13T15:56:10.026Z",
+    dataVersion: "a".repeat(64),
+    filterVersion: 3,
+    nicheAnnotated: true,
+    items: [video("AAAAAAAAAAA", "video", "channel", [song("song", "artist", { isNiche: false })])],
+    ...overrides,
   };
 }

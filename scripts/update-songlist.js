@@ -230,6 +230,8 @@ async function main() {
       status: "success",
       attemptedAt: startedAt.toISOString(),
       completedAt: capturedAt.toISOString(),
+      capturedAt: capturedAt.toISOString(),
+      dataCapturedAt: capturedAt.toISOString(),
       message: `Captured ${totalItems} videos with timestamp song lists.`,
     },
     groups,

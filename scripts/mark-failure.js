@@ -14,8 +14,15 @@ writeJson(STATUS_PATH, {
   status: "failed",
   attemptedAt: now,
   completedAt: now,
+  failedAt: now,
+  capturedAt: previous?.capturedAt || previous?.generatedAt || "",
+  dataCapturedAt: previous?.capturedAt || previous?.generatedAt || "",
+  rebuiltDerivedAt: previous?.source?.rebuiltDerivedAt || "",
   message: process.env.DAILY_SONG_FAILURE_MESSAGE || "Update workflow failed before writing a successful snapshot.",
   fallback: previous ? "kept previous data/latest.json" : "no previous data available",
+  runId: process.env.GITHUB_RUN_ID || "",
+  runAttempt: process.env.GITHUB_RUN_ATTEMPT || "",
+  workflow: process.env.GITHUB_WORKFLOW || "",
 });
 
 console.log(previous ? "[mark-failure] previous latest data kept." : "[mark-failure] no previous latest data exists.");

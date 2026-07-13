@@ -27,8 +27,9 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - `data/72h.json`
    - `data/1m.json`
    - `data/ui/meta.json`
-   - `data/ui/72h.json`
-   - `data/ui/1m.json`
+   - `data/ui/72h.<hash>.json`
+   - `data/ui/1m.<hash>.json`
+   - `data/ui/72h.json` and `data/ui/1m.json` as legacy fallback files
    - `data/diff/latest-72h.json`
    - `data/diff/latest-1m.json`
    - `data/audit.json`
@@ -44,14 +45,16 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - `data/snapshots/index.json`
    - `data/status.json`
    - `data/latest.json`, `data/72h.json`, `data/1m.json`, snapshots, and `data/audit.json` remain readable generation/review artifacts.
-   - `data/ui/*.json` is the compact browser runtime payload. It keeps only the fields the UI needs, uses `seconds` to format timestamp labels, and carries `filterVersion` plus `nicheAnnotated` so current data can skip the front-end compatibility safety scan.
+   - `data/ui/meta.json` is written last and points to content-hashed compact runtime range files. `dataVersion` and range `sha256` bind the meta file to the exact range payloads so the browser can reject mismatched or empty runtime data instead of rendering a normal empty page.
+   - `data/ui/*.json` is the compact browser runtime payload. It keeps only the fields the UI needs, uses `seconds` to format timestamp labels, and carries `filterVersion`, `nicheAnnotated`, and `dataVersion` so current data can skip the front-end compatibility safety scan.
    - The diff files compare latest ranks against the previous successful snapshot but are written in compact runtime form. Each `songRank` and `artistRank` entry keeps only `entityKey`, `rankDelta`, `countDelta`, and `isNew`; unchanged entries are omitted. `rankDelta` is `previousRank - currentRank`, so positive values mean the entity moved up and negative values mean it moved down.
    - `curationVersion` and `curationHash` are written into latest payloads, runtime meta, snapshots, and rank diff metadata. Rank diffs clean the previous snapshot in memory with the same current curation rules before comparing, so a new correction does not silently compare cleaned current data with dirty previous data.
 4. `index.html` + `assets/app.js` render the latest data and allow switching to an hourly snapshot.
    - Default view is song appearance ranking.
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
    - Ranking rows preview one primary source channel inline; `+N 来源` opens the source drawer with every matching timestamp link.
-   - Initial load reads `data/ui/meta.json`, `data/snapshots/index.json`, and only the active range file (`data/ui/72h.json` or `data/ui/1m.json`). It does not read `data/latest.json` for the latest page, and rank diff files load after the first榜单 render.
+   - Initial load reads `data/ui/meta.json` first, then loads only the active hash range file from `meta.ranges`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact monthly range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
+   - `debug=1` adds a read-only runtime panel with `dataVersion`, active range path, status fields, fallback state, and recent resource timings.
    - Initial load skips `song-search-known-songs.json` when payload songs already contain `isNiche`; older snapshots load that index only when niche annotation is missing. Current data with a supported `filterVersion` skips the full front-end safety filter, while older snapshots still run it for compatibility.
    - Each range keeps derived occurrences, song records, artist records, video search data, and per-record `videoCount` in memory. Pagination and page-size changes reuse those records and only rebuild the visible page DOM. Prepared historical snapshots keep the existing 5-entry in-memory LRU cache, while immutable hourly snapshot JSON uses browser cache.
    - URL state omits defaults, uses browser history for range/view/page/snapshot changes, and keeps search typing on `replaceState`. Song index bucket params are written only for the song index view.
@@ -61,7 +64,10 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - It loads only `data/review/queue.json` and per-source files under `data/review/sources/`.
    - The normal homepage does not load review data, raw comments, queue data, or GitHub credentials.
    - Draft review actions are saved in IndexedDB, with localStorage as a fallback, then exported as `curation_patch.json`.
-6. `.github/workflows/update-songlist.yml` runs hourly and commits only data changes.
+6. GitHub Actions are split by responsibility.
+   - `.github/workflows/update-core.yml` runs hourly, builds only core data/runtime files, commits core data or a failure `data/status.json`, and uses `daily-song-list-core` concurrency with cancellation.
+   - `.github/workflows/build-review.yml` builds review reports every 6 hours and cannot block the core hourly data update.
+   - `.github/workflows/check-code.yml` runs tests and validation on code/workflow pushes.
 
 `data/audit.json` is intentionally generated for review. It records inspected videos, rejected source reasons, rejected timestamp rows, and top channels producing non-song timestamp data.
 
@@ -72,13 +78,19 @@ See `docs/quality-review.md` for the full review queue schema, patch merge flow,
 ```powershell
 npm test
 npm run update
+npm run update:core
+npm run review:build
 npm run build:runtime
 node scripts/build-review-queue.js
 node scripts/export-dirty-candidates.js
 npm run rebuild:derived
 node scripts/apply-curation-patch.js path/to/curation_patch.json
 npm run validate
+npm run validate:core
+npm run validate:review
 npm run check:budget
+npm run check:published
+npm run verify:local
 npm run version:assets
 npm run check
 python -m http.server 8080

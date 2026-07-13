@@ -12,6 +12,9 @@ test("initial app load does not fetch full latest or rank diffs in init", () => 
   assert.doesNotMatch(initBody, /loadRankDiff/u);
   assert.match(initBody, /loadRuntimeRange\(initialRange\)/u);
   assert.match(initBody, /UI_META_PATH/u);
+  assert.match(initBody, /STATUS_PATH/u);
+  assert.doesNotMatch(initBody, /Promise\.all\(\[[\s\S]*loadRuntimeRange\(initialRange\)/u);
+  assert.ok(initBody.indexOf("state.runtimeMeta = meta") < initBody.indexOf("loadRuntimeRange(initialRange)"));
 });
 
 test("range cache and trend Map are wired into rendering", () => {
@@ -19,6 +22,22 @@ test("range cache and trend Map are wired into rendering", () => {
   assert.match(appSource, /currentSelection\(rangeCache\)/u);
   assert.match(functionBody("function currentSelection"), /hideUnknownForView/u);
   assert.match(functionBody("function trendForRecord"), /\.get\(record\.key\)/u);
+  assert.match(appSource, /function createRangeCacheObject[\s\S]*defineLazyArtistCache/u);
+  assert.match(appSource, /function createRangeCacheObject[\s\S]*normalizedVideoSearchData/u);
+});
+
+test("runtime range load validates meta-bound payloads and has fallback paths", () => {
+  assert.match(functionBody("async function loadRuntimeRange"), /runtime meta missing/u);
+  assert.match(appSource, /async function tryRuntimeRangeLoad[\s\S]*validateRuntimeRangePayload/u);
+  assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*data\/\$\{rangeId\}\.json/u);
+  assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*SNAPSHOT_LATEST_PATH/u);
+});
+
+test("status display separates capture time from derived rebuild time", () => {
+  const body = functionBody("function renderStatus");
+  assert.match(body, /数据抓取于/u);
+  assert.match(body, /页面数据重建于/u);
+  assert.doesNotMatch(body, /rebuiltDerivedAt \|\| status\.completedAt/u);
 });
 
 test("home controls remove legacy info buttons and expose hide-unknown toggle", () => {

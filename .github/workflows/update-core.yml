@@ -1,0 +1,98 @@
+name: Update core song-list data
+
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-song-list-core
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DAILY_SONG_SEARCH_LIMIT: "500"
+      DAILY_SONG_VIDEO_LIMIT: "160"
+      DAILY_SONG_VIDEO_CONCURRENCY: "1"
+      DAILY_SONG_RECENT_BUCKET_LIMIT: "70"
+      DAILY_SONG_MONTH_REFRESH_LIMIT: "20"
+      DAILY_SONG_MONTH_BACKFILL_TARGET: "320"
+      DAILY_SONG_MONTH_BACKFILL_RECENT_BUCKET_LIMIT: "20"
+      DAILY_SONG_CARRY_FORWARD_MAX_AGE_HOURS: "36"
+      DAILY_SONG_SEARCH_CONTINUATION_ROUNDS: "120"
+      DAILY_SONG_FETCH_RETRIES: "3"
+      DAILY_SONG_REQUEST_DELAY_MS: "750"
+      DAILY_SONG_429_COOLDOWN_MS: "15000"
+      DAILY_SONG_MAX_429_ERRORS: "8"
+      DAILY_SONG_SNAPSHOT_RETENTION_DAYS: "35"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Record run start
+        id: runmeta
+        run: |
+          echo "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Core update"
+            echo "- run_id: $GITHUB_RUN_ID"
+            echo "- run_attempt: $GITHUB_RUN_ATTEMPT"
+            echo "- started_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Update compact runtime data
+        id: core
+        continue-on-error: true
+        run: npm run update:core
+
+      - name: Keep previous data after core failure
+        if: steps.core.outcome == 'failure'
+        env:
+          DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
+        run: npm run mark:failure
+
+      - name: Commit core data or failure status
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/latest.json data/72h.json data/1m.json data/audit.json data/status.json data/video-catalog.json data/song-search-known-songs.json data/snapshots data/diff data/ui
+          if git diff --cached --quiet; then
+            echo "No core data changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: update core song-list data"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Failed to push core data changes after retries."
+          exit 1
+
+      - name: Finish run summary
+        if: always()
+        run: |
+          {
+            echo "- completed_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- core_outcome: ${{ steps.core.outcome }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail when core update failed
+        if: steps.core.outcome == 'failure'
+        run: exit 1

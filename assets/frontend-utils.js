@@ -616,8 +616,90 @@
       : `${minutes}:${String(seconds).padStart(2, "0")}`;
   }
 
-  function runtimeRangePath(rangeId, meta) {
+  function runtimeRangePath(rangeId, meta, options = {}) {
+    if (!meta && options.requireMeta) throw new Error(`runtime meta missing before loading ${rangeId}`);
     return meta?.ranges?.[rangeId]?.path || `data/ui/${rangeId}.json`;
+  }
+
+  function runtimeRangeMeta(rangeId, meta) {
+    return meta?.ranges?.[rangeId] || null;
+  }
+
+  function validateRuntimeRangePayload(payload, expected = {}) {
+    const rangeId = expected.rangeId || payload?.id || "";
+    const rangeMeta = expected.rangeMeta || runtimeRangeMeta(rangeId, expected.meta);
+    const itemCount = Number.isInteger(rangeMeta?.itemCount) ? rangeMeta.itemCount : null;
+    const expectedDataVersion = expected.dataVersion || rangeMeta?.dataVersion || expected.meta?.dataVersion || "";
+    const allowLegacyDataVersion = Boolean(expected.allowLegacyDataVersion);
+    const errors = [];
+
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      throw runtimeRangeValidationError("runtime range payload must be object", { rangeId, path: expected.path });
+    }
+    if (payload.schemaVersion !== 1) errors.push("schemaVersion must be 1");
+    if (payload.id !== rangeId) errors.push(`id must be ${rangeId}`);
+    if (typeof payload.generatedAt !== "string") errors.push("generatedAt must be string");
+    if (typeof payload.capturedAt !== "string") errors.push("capturedAt must be string");
+    if (!allowLegacyDataVersion && expectedDataVersion && payload.dataVersion !== expectedDataVersion) {
+      errors.push("dataVersion mismatch");
+    }
+    if (!Number.isInteger(payload.filterVersion)) errors.push("filterVersion must be integer");
+    if (typeof payload.nicheAnnotated !== "boolean") errors.push("nicheAnnotated must be boolean");
+    if (!Array.isArray(payload.items)) {
+      errors.push("items must be array");
+    } else {
+      if (itemCount !== null && payload.items.length !== itemCount) errors.push("items length does not match meta");
+      if (itemCount > 0 && payload.items.length === 0) errors.push("items unexpectedly empty");
+      validateRuntimeItems(payload.items, errors);
+    }
+    if (errors.length) {
+      throw runtimeRangeValidationError(errors.join("; "), { rangeId, path: expected.path, dataVersion: payload.dataVersion || "" });
+    }
+    return payload;
+  }
+
+  function validateRuntimeItems(items, errors) {
+    for (const [videoIndex, item] of (items || []).entries()) {
+      if (!/^[A-Za-z0-9_-]{11}$/u.test(item?.videoId || "")) errors.push(`items[${videoIndex}].videoId invalid`);
+      if (!Array.isArray(item?.songs) || item.songs.length <= 0) {
+        errors.push(`items[${videoIndex}].songs empty`);
+        continue;
+      }
+      for (const [songIndex, song] of item.songs.entries()) {
+        if (!Number.isInteger(song?.seconds) || song.seconds < 0) {
+          errors.push(`items[${videoIndex}].songs[${songIndex}].seconds invalid`);
+        }
+        if (!String(song?.title || "").trim()) errors.push(`items[${videoIndex}].songs[${songIndex}].title missing`);
+        if (typeof song?.isNiche !== "boolean") {
+          errors.push(`items[${videoIndex}].songs[${songIndex}].isNiche must be boolean`);
+        }
+      }
+    }
+  }
+
+  function runtimeRangePayloadFromGroup(group, options = {}) {
+    const rangeId = options.rangeId || group?.id || "";
+    const items = Array.isArray(group?.items) ? group.items : [];
+    const payload = {
+      schemaVersion: 1,
+      id: rangeId,
+      title: group?.title || rangeId,
+      generatedAt: group?.generatedAt || options.generatedAt || "",
+      capturedAt: options.capturedAt || group?.capturedAt || group?.generatedAt || options.generatedAt || "",
+      dataVersion: options.dataVersion || "",
+      filterVersion: Number.isInteger(options.filterVersion) ? options.filterVersion : 0,
+      nicheAnnotated: items.some((item) => (item.songs || []).some((song) => typeof song.isNiche === "boolean")),
+      items,
+      fallbackFrom: options.fallbackFrom || "",
+    };
+    return payload;
+  }
+
+  function runtimeRangeValidationError(message, details = {}) {
+    const error = new Error(message);
+    error.name = "RuntimeRangeValidationError";
+    error.details = details;
+    return error;
   }
 
   function createTrendLookup(diff) {
@@ -669,10 +751,13 @@
     paginateItems,
     parseUrlState,
     rankToggleModel,
+    runtimeRangeMeta,
+    runtimeRangePayloadFromGroup,
     runtimeRangePath,
     serializeUrlState,
     shouldPrefetchRuntimeRange,
     shouldSkipSourceFilter,
+    validateRuntimeRangePayload,
     visiblePageTokens,
     youtubeChannelLink,
     youtubeTimeUrl,

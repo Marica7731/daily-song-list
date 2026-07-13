@@ -1,0 +1,58 @@
+name: Build review reports
+
+on:
+  schedule:
+    - cron: "37 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-song-list-review
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build review data
+        id: review
+        continue-on-error: true
+        run: npm run review:build
+
+      - name: Commit review data
+        if: steps.review.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/review data/quality-report.json
+          if git diff --cached --quiet; then
+            echo "No review data changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: update review reports"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Failed to push review data changes after retries."
+          exit 1
+
+      - name: Report review failure without blocking core
+        if: steps.review.outcome == 'failure'
+        run: echo "::warning::Review report build failed; core data workflow is independent."
