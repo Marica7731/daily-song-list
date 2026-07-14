@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T14:26:23.455Z",
+  "generatedAt": "2026-07-14T19:52:56.434Z",
   "reviewId": "review:G1fbvfswdbg:8d08b00009056d976cc1",
   "video": {
     "videoId": "G1fbvfswdbg",
@@ -11,10 +11,10 @@
   "source": {
     "sourceId": "UgxzBgW0Eay0ARlNvEV4AaABAg",
     "sourceHash": "8d08b00009056d976cc14fba809f93ad8ab8736567eab7aa48680bfe245c46ec",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "素敵なメンバーでの最高のコラボ歌枠お疲れさまでした！\nみんなの素敵な歌声に聴き入っていたら、あっという間に終わっちゃいました…最高の時間をありがとうございました！\n4人での『天ノ弱』最高でした！\nあの頃の曲もいっぱいで懐かしかった…！\nあの頃ジャンプ縛り歌枠、いつか聴けたら嬉しいです！\n\nインフェルノ　16:22　√-1　 21:13　ビビデバ　 1:02:21 さよならミッドナイト　1:06:32  ray　 1:16:12 God knows…　 1:16:12 　天ノ弱　 1:52:41",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
@@ -43,8 +43,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -65,8 +64,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -87,8 +85,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -109,8 +106,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -131,8 +127,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -153,25 +148,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "empty_after_timestamp",
-      "seconds": 6761,
-      "time": "1:52:41",
-      "title": "",
-      "artist": "",
-      "raw": "1:52:41",
-      "rawHash": "a1ce6c60b836f5c45554166c80146a2b3c22d8031f7ae27579df27529eb928ea",
-      "sourceId": "UgxzBgW0Eay0ARlNvEV4AaABAg",
-      "sourceHash": "8d08b00009056d976cc14fba809f93ad8ab8736567eab7aa48680bfe245c46ec",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "empty_after_timestamp"
+        "known_song"
       ]
     }
   ]
