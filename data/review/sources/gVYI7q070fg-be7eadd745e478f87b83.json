@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "reviewId": "review:gVYI7q070fg:be7eadd745e478f87b83",
+  "video": {
+    "videoId": "gVYI7q070fg",
+    "title": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
+    "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
+    "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg"
+  },
+  "source": {
+    "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+    "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+    "sourceType": "comment",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "～～～今回のハイライト～～～\r\n00:00:41  こんつく！　音声は大丈夫かな？　今日は音ズレ問題検証枠です！　いろんな曲のリクエストお待ちしております！\r\n00:03:01  今日のポエムコーナー\r\n01:53:04  ありがとう～盛り上がって良い汗かいたね！　2時間に1曲位の音ズレなら許容範囲かな？\r\n01:54:42  雑談　杣菜さんとご飯！  \r\n02:01:00  [いつものやーつ]\r\n02:08:01  ありがとうございました！  音ズレは許容範囲かな？　土曜日の配信でも検証していきたいです！　みなさんで配信を作って行きましょう！\r\n\n文言とか気になったら遠慮なく言って下さいね！",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 57,
+    "riskLevel": "medium",
+    "riskReasons": [
+      "conversation_entry",
+      "source_multiple_unknown_artists"
+    ]
+  },
+  "entries": [
+    {
+      "status": "accepted",
+      "seconds": 41,
+      "time": "0:00:41",
+      "title": "こんつく！　音声は大丈夫かな？　今日は音ズレ問題検証枠です！　いろんな曲のリクエストお待ちしております！",
+      "artist": "未記載",
+      "raw": "00:00:41  こんつく！　音声は大丈夫かな？　今日は音ズレ問題検証枠です！　いろんな曲のリクエストお待ちしております！",
+      "rawHash": "774addb629a8cdc44440a561a1b0453f4987cf0359118e29a5eea59704caf75e",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
+      "replacementSuggestion": null,
+      "riskReasons": [
+        "conversation_entry",
+        "source_multiple_unknown_artists"
+      ],
+      "positiveEvidence": [
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "accepted",
+      "seconds": 181,
+      "time": "0:03:01",
+      "title": "今日のポエムコーナー",
+      "artist": "未記載",
+      "raw": "00:03:01  今日のポエムコーナー",
+      "rawHash": "b35613540535040994724cd55eb7a7f6bf46ea4d72bf96bcd4f36e747feb2d9f",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [
+        "source_multiple_unknown_artists"
+      ],
+      "positiveEvidence": [
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "accepted",
+      "seconds": 7260,
+      "time": "2:01:00",
+      "title": "いつものやーつ",
+      "artist": "未記載",
+      "raw": "02:01:00  [いつものやーつ]",
+      "rawHash": "849ac4d1fd0b782cc651d2f11db4eb97430222206ae2cdda3ff7ab556a069285",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [
+        "source_multiple_unknown_artists"
+      ],
+      "positiveEvidence": [
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 6784,
+      "time": "1:53:04",
+      "title": "ありがとう～盛り上がって良い汗かいたね！　2時間に1曲位の音ズレなら許容範囲かな？",
+      "artist": "未記載",
+      "raw": "01:53:04 ありがとう～盛り上がって良い汗かいたね！ 2時間に1曲位の音ズレなら許容範囲かな？",
+      "rawHash": "70aa1a5ce7fe91f0ad9d68ee297f5dc7e93c1575de387b3c57a33e237abdde0b",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 6882,
+      "time": "1:54:42",
+      "title": "雑談　杣菜さんとご飯！",
+      "artist": "未記載",
+      "raw": "01:54:42 雑談 杣菜さんとご飯！",
+      "rawHash": "3fca2d42fdf1f314a1d026fd467863cf3cb13d36a3b1f53454e94f6a81714ed1",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 7681,
+      "time": "2:08:01",
+      "title": "ありがとうございました！ 音ズレは許容範囲かな？　土曜日の配信でも検証していきたいです！　みなさんで配信を作って行きましょう！",
+      "artist": "未記載",
+      "raw": "02:08:01 ありがとうございました！ 音ズレは許容範囲かな？ 土曜日の配信でも検証していきたいです！ みなさんで配信を作って行きましょう！",
+      "rawHash": "5686c22c1f3b148dddefebf6ad893e0e456bacc1c6302b40df9bf508ea333683",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    }
+  ]
+}

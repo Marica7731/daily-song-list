@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T20:29:59.030Z",
+  "generatedAt": "2026-07-14T22:38:46.610Z",
   "reviewId": "review:VwhXFlOuiac:6e04c239bb3aff245a95",
   "video": {
     "videoId": "VwhXFlOuiac",
@@ -11,17 +11,17 @@
   "source": {
     "sourceId": "UgwQrI2V4RSsyrg7hkJ4AaABAg",
     "sourceHash": "6e04c239bb3aff245a951d5c1fca744559c5dc78d62d8f322dc4122371b8d413",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "《セトリ》\r\n00:00 配信スタート\r\n05:42 ウルトラマンナイス / Project D.M.M. \r\n11:34 星空のバラード / 真夏竜\r\n17:39 ウルトラマンA / ハニー・ナイツ、少年少女合唱団みずうみ\r\n28:19 心の絆 / Project D.M.M.",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 36,
-    "riskLevel": "medium",
+    "riskScore": 14,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_activity_marker_ratio_high"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -35,14 +35,13 @@
       "rawHash": "309efdc8bf09ad067b657c5265a9bfc730eb41dd47cba7686fb5472ad7b98472",
       "sourceId": "UgwQrI2V4RSsyrg7hkJ4AaABAg",
       "sourceHash": "6e04c239bb3aff245a951d5c1fca744559c5dc78d62d8f322dc4122371b8d413",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -55,14 +54,13 @@
       "rawHash": "23e00c3fdda781652bf00ef255d86bd6c2e668efe0a00de013dd75ace3f441a9",
       "sourceId": "UgwQrI2V4RSsyrg7hkJ4AaABAg",
       "sourceHash": "6e04c239bb3aff245a951d5c1fca744559c5dc78d62d8f322dc4122371b8d413",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -75,14 +73,13 @@
       "rawHash": "8f7ded12df56ccda805dd349f5294e757f8b069ce7d352dfccd9ac121f14edcc",
       "sourceId": "UgwQrI2V4RSsyrg7hkJ4AaABAg",
       "sourceHash": "6e04c239bb3aff245a951d5c1fca744559c5dc78d62d8f322dc4122371b8d413",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -95,31 +92,13 @@
       "rawHash": "185bc68e29272e0894e645341038f704f2d2db1db48399628e8f77abb0285753",
       "sourceId": "UgwQrI2V4RSsyrg7hkJ4AaABAg",
       "sourceHash": "6e04c239bb3aff245a951d5c1fca744559c5dc78d62d8f322dc4122371b8d413",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "activity_marker_title",
-      "seconds": 0,
-      "time": "0:00:00",
-      "title": "配信スタート",
-      "artist": "未記載",
-      "raw": "00:00 配信スタート",
-      "rawHash": "910d39e7726cf250b29b9c23eeafa9cca480fd89e3024d7be35c8d9686735d2e",
-      "sourceId": "UgwQrI2V4RSsyrg7hkJ4AaABAg",
-      "sourceHash": "6e04c239bb3aff245a951d5c1fca744559c5dc78d62d8f322dc4122371b8d413",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "activity_marker_title"
+        "known_artist"
       ]
     }
   ]

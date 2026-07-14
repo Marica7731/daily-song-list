@@ -26,9 +26,9 @@ const RESPONSIVE_BREAKPOINTS = {
   tabletMax: 919,
 };
 const SOURCE_GROUP_LIMITS = {
-  mobile: { initial: 3, batch: 3 },
-  tablet: { initial: 6, batch: 6 },
-  desktop: { initial: 9, batch: 9 },
+  mobile: { initial: 3 },
+  tablet: { initial: 6 },
+  desktop: { initial: 9 },
 };
 const LIST_PAGE_SIZE_OPTIONS = [50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
@@ -604,6 +604,13 @@ function bindEvents() {
       return;
     }
 
+    const artistSongSource = event.target.closest("[data-toggle-artist-song-source]");
+    if (artistSongSource) {
+      event.preventDefault();
+      toggleArtistSongSource(artistSongSource);
+      return;
+    }
+
     const sourceGroups = event.target.closest("[data-toggle-source-groups]");
     if (sourceGroups) {
       event.preventDefault();
@@ -616,8 +623,12 @@ function bindEvents() {
   });
 
   window.addEventListener("resize", handleResponsiveResize, { passive: true });
+  window.addEventListener("scroll", updateFilterAnchorPosition, { passive: true });
   window.visualViewport?.addEventListener("resize", handleResponsiveResize, { passive: true });
-  window.visualViewport?.addEventListener("scroll", updateViewportVars, { passive: true });
+  window.visualViewport?.addEventListener("scroll", () => {
+    updateViewportVars();
+    updateFilterAnchorPosition();
+  }, { passive: true });
   updateViewportVars();
   state.responsiveMode = getResponsiveMode();
 }
@@ -714,10 +725,13 @@ function openFilterOverlay(trigger) {
   state.filterDraft = makeFilterDraftFromState();
   syncFilterControlsFromDraft(state.filterDraft);
   updateFilterAvailability();
+  updateFilterAnchorPosition();
   setDialogOpen(els.filterDialog, true);
   setPageInert(true);
+  updateFilterAnchorPosition();
   measureSync("sheet-open", () => {});
   window.requestAnimationFrame(() => {
+    updateFilterAnchorPosition();
     focusWithoutScrolling(els.filterSheet || els.filterDialog);
   });
 }
@@ -1112,13 +1126,29 @@ function restoreViewPosition() {
 
 function updateViewportVars() {
   const viewport = window.visualViewport;
-  if (!viewport) return;
-  document.documentElement.style.setProperty("--visual-viewport-height", `${Math.round(viewport.height)}px`);
-  document.documentElement.style.setProperty("--visual-viewport-offset-top", `${Math.round(viewport.offsetTop)}px`);
+  const viewportHeight = viewport?.height || window.innerHeight || 0;
+  const offsetTop = viewport?.offsetTop || 0;
+  const offsetBottom = Math.max(0, (window.innerHeight || viewportHeight) - viewportHeight - offsetTop);
+  document.documentElement.style.setProperty("--visual-viewport-height", `${Math.round(viewportHeight)}px`);
+  document.documentElement.style.setProperty("--visual-viewport-offset-top", `${Math.round(offsetTop)}px`);
+  document.documentElement.style.setProperty("--visual-viewport-bottom", `${Math.round(offsetBottom)}px`);
+}
+
+function updateFilterAnchorPosition() {
+  if (state.activeOverlay !== "filter" || !els.filterSheet || isMobileViewport()) return;
+  const trigger = state.overlayTrigger && document.contains(state.overlayTrigger) ? state.overlayTrigger : els.desktopFilterButton || els.controls;
+  const triggerRect = trigger?.getBoundingClientRect?.();
+  const controlsRect = els.controls?.getBoundingClientRect?.();
+  const anchorBottom = Math.max(triggerRect?.bottom || 0, controlsRect?.bottom || 0);
+  const top = Math.max(8, Math.round(anchorBottom + 8));
+  const right = Math.max(16, Math.round((window.innerWidth || document.documentElement.clientWidth || 0) - (triggerRect?.right || 0)));
+  document.documentElement.style.setProperty("--filter-anchor-top", `${top}px`);
+  document.documentElement.style.setProperty("--filter-anchor-right", `${right}px`);
 }
 
 function handleResponsiveResize() {
   updateViewportVars();
+  updateFilterAnchorPosition();
   const nextMode = getResponsiveMode();
   if (!state.responsiveMode) {
     state.responsiveMode = nextMode;
@@ -1223,12 +1253,15 @@ function syncControlsFromState() {
 }
 
 function syncUrlState() {
-  return;
+  // URL state is intentionally read-only: external links can seed state, in-page actions do not persist filters across refresh.
+  if (state.sharedUrlApplied) cleanSharedUrlAfterRender();
 }
 
 function cleanSharedUrlAfterRender() {
   if (!state.sharedUrlApplied || !window.history?.replaceState) return;
-  const cleanUrl = `${window.location.pathname}${window.location.hash || ""}`;
+  const url = new URL(window.location.href);
+  url.searchParams.delete("shared");
+  const cleanUrl = `${url.pathname}${url.search}${url.hash}`;
   window.history.replaceState({ dailySongList: true }, "", cleanUrl);
   state.sharedUrlApplied = false;
 }
@@ -1949,10 +1982,18 @@ function renderStatusLabel(status, capturedAt, fallbackAt = "") {
   const time = document.createElement("time");
   time.className = "status-exact";
   if (displayAt) time.dateTime = displayAt;
-  time.textContent = status?.status === "success" ? exact : capturedAt ? `上次成功 ${exact}` : exact;
+  const snapshotEntry = !isLatestSnapshot() ? snapshotEntryForPath(state.currentSnapshotPath) : null;
+  const snapshotExact = snapshotEntry ? formatDate(snapshotEntry.capturedAt || snapshotEntry.generatedAt || snapshotEntry.id) : "";
+  time.textContent = snapshotEntry ? `历史 · ${snapshotExact}` : status?.status === "success" ? exact : capturedAt ? `上次成功 ${exact}` : exact;
   els.status.append(time);
-  if (status?.status === "success" && relative && relative !== exact && relative !== "状态不可用") {
-    els.status.append(document.createTextNode(` · ${relative}`));
+  if (!snapshotEntry && status?.status === "success" && relative && relative !== exact && relative !== "状态不可用") {
+    const separator = document.createElement("span");
+    separator.className = "status-separator";
+    separator.textContent = " · ";
+    const relativeNode = document.createElement("span");
+    relativeNode.className = "status-relative";
+    relativeNode.textContent = relative;
+    els.status.append(separator, relativeNode);
   }
 }
 
@@ -2605,23 +2646,41 @@ function renderSummary(group, metrics, note = "") {
   title.textContent = VIEWS[state.view] || state.view;
   main.append(title);
 
-  const range = document.createElement("span");
-  range.className = "summary-chip summary-range";
-  range.textContent = RANGE_LABELS[state.range] || group.title || state.range;
-  main.append(range);
-
   if (state.nicheOnly) {
     const niche = document.createElement("span");
     niche.className = "summary-chip niche-summary";
     niche.textContent = "小众";
     main.append(niche);
   }
+  if (!isLatestSnapshot()) {
+    const snapshot = document.createElement("span");
+    snapshot.className = "summary-chip summary-status-chip";
+    snapshot.textContent = "历史快照";
+    main.append(snapshot);
+  }
+  if (state.runtimeWarnings.get(state.range)?.fallbackPath) {
+    const fallback = document.createElement("span");
+    fallback.className = "summary-chip summary-status-chip";
+    fallback.textContent = "备用数据";
+    main.append(fallback);
+  }
 
-  const metricText = metrics.filter(Boolean).join(" · ");
-  if (metricText) {
+  const metricParts = metrics.filter(Boolean);
+  if (metricParts.length) {
     const metricNode = document.createElement("span");
     metricNode.className = "summary-metrics";
-    metricNode.textContent = metricText;
+    metricParts.forEach((part, index) => {
+      if (index) {
+        const separator = document.createElement("span");
+        separator.className = "summary-separator";
+        separator.textContent = " · ";
+        metricNode.append(separator);
+      }
+      const item = document.createElement("span");
+      item.className = "summary-metric";
+      item.textContent = part;
+      metricNode.append(item);
+    });
     main.append(metricNode);
   }
   els.summary.append(main);
@@ -2952,10 +3011,6 @@ function sourceInitialLimitForMode(mode = getResponsiveMode()) {
   return SOURCE_GROUP_LIMITS[mode]?.initial || SOURCE_GROUP_LIMITS.desktop.initial;
 }
 
-function sourceBatchSizeForMode(mode = getResponsiveMode()) {
-  return SOURCE_GROUP_LIMITS[mode]?.batch || SOURCE_GROUP_LIMITS.desktop.batch;
-}
-
 function shouldKeepSingleDrawerOpen() {
   return isCompactRankMode();
 }
@@ -3220,7 +3275,8 @@ function renderRankRecord({
   const drawerId = `source-drawer-${rowKey}`;
   const artistSongCount = songCount;
   const sourceVideoCount = mode === "artist" ? videoCount : window.FrontendUtils.groupOccurrencesByVideo(occurrences).length;
-  const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 : sourceVideoCount > 1;
+  const occurrenceCount = occurrences.length;
+  const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 || occurrenceCount > 1 : sourceVideoCount > 1 || occurrenceCount > 1;
   const isExpanded = state.expandedRows.has(rowKey);
 
   row.className = [
@@ -3261,7 +3317,7 @@ function renderIndexRecord(record) {
   const rowKey = makeDomId(`index-${record.key}`);
   const drawerId = `source-drawer-${rowKey}`;
   const sourceVideoCount = window.FrontendUtils.groupOccurrencesByVideo(record.occurrences).length;
-  const expandable = sourceVideoCount > 1;
+  const expandable = sourceVideoCount > 1 || record.occurrences.length > 1;
   const isExpanded = state.expandedRows.has(rowKey);
 
   row.className = ["index-row", expandable ? "is-expandable" : "", isExpanded ? "is-expanded" : "", isNicheRecord(record) ? "is-niche" : ""]
@@ -3410,7 +3466,7 @@ function appendSublineSource(metaContainer, actionContainer, { mode, occurrences
     return;
   }
   const groupedSources = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
-  if (groupedSources.length <= 1) {
+  if (groupedSources.length === 1 && occurrences.length === 1) {
     appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
     return;
   }
@@ -3529,23 +3585,25 @@ function renderSourceDrawer({ mode, occurrences, songGroups = [], drawerId, isEx
   drawer.className = mode === "artist" ? "source-drawer artist-song-drawer" : "source-drawer";
   drawer.id = drawerId;
   drawer.dataset.sourceMode = mode;
+  drawer.dataset.sourceDeferred = "true";
   drawer.hidden = !isExpanded;
   drawer._getArtistSongGroups = getSongGroups;
-  if (!isExpanded) {
-    drawer.dataset.sourceDeferred = "true";
-    return drawer;
-  }
-
-  appendSourceDrawerContent(drawer, { mode, occurrences, songGroups: songGroups.length ? songGroups : getSongGroups?.() || [] });
+  if (isExpanded) initializeSourceDrawer(drawer, { mode, occurrences, songGroups: songGroups.length ? songGroups : getSongGroups?.() || [] });
   return drawer;
 }
 
-function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] }) {
+function initializeSourceDrawer(drawer, { mode, occurrences, songGroups = [] }) {
+  if (!drawer || drawer.dataset.sourceDeferred !== "true") return;
   if (mode === "artist") {
     appendArtistSongGroups(drawer, songGroups);
-    return;
+  } else {
+    appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true });
   }
-  appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true });
+  delete drawer.dataset.sourceDeferred;
+}
+
+function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] }) {
+  initializeSourceDrawer(drawer, { mode, occurrences, songGroups });
 }
 
 function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
@@ -3555,7 +3613,6 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   drawer._sourceGroups = groups;
   if (options.toolbarVariant) drawer.dataset.toolbarVariant = options.toolbarVariant;
   const visibleCount = sourceVisibleGroupCount(drawer, groups.length);
-  const visibleGroups = groups.slice(0, visibleCount);
   const shouldShowToolbar = options.showToolbar !== false;
   if (shouldShowToolbar && !drawer.querySelector(":scope > .source-drawer-toolbar")) {
     drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount: groups.length }));
@@ -3563,21 +3620,51 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
     updateSourceDrawerCount(drawer, visibleCount, groups.length);
   }
 
-  for (const group of visibleGroups) {
-    drawer.append(renderSourceVideoGroup(group, drawer._songSourceOccurrences));
-  }
+  appendSourceGroupRange(drawer, groups, sourceRenderedGroupCount(drawer), visibleCount);
+  syncSourceGroupMoreButton(drawer, visibleCount, groups.length);
+  appendMobileSourceCollapse(drawer);
+}
 
-  if (groups.length > visibleGroups.length) {
-    const remaining = groups.length - visibleGroups.length;
-    const more = document.createElement("button");
+function sourceRenderedGroupCount(drawer) {
+  return drawer.querySelectorAll(":scope > .source-video-group").length;
+}
+
+function appendSourceGroupRange(drawer, groups, start, end) {
+  const fragment = document.createDocumentFragment();
+  const safeStart = Math.max(0, start);
+  const safeEnd = Math.min(groups.length, Math.max(safeStart, end));
+  let firstAppended = null;
+  for (const group of groups.slice(safeStart, safeEnd)) {
+    const node = renderSourceVideoGroup(group);
+    if (!firstAppended) firstAppended = node;
+    fragment.append(node);
+  }
+  const anchor = sourceGroupInsertAnchor(drawer);
+  drawer.insertBefore(fragment, anchor);
+  return firstAppended;
+}
+
+function sourceGroupInsertAnchor(drawer) {
+  return drawer.querySelector(":scope > .source-group-more") || drawer.querySelector(":scope > .source-collapse-bottom") || null;
+}
+
+function syncSourceGroupMoreButton(drawer, visibleCount, totalCount) {
+  let more = drawer.querySelector(":scope > .source-group-more");
+  if (visibleCount >= totalCount) {
+    more?.remove();
+    return null;
+  }
+  const remaining = totalCount - visibleCount;
+  if (!more) {
+    more = document.createElement("button");
     more.className = "source-group-more";
     more.type = "button";
     more.dataset.toggleSourceGroups = "true";
-    more.textContent = `查看更多来源（剩余 ${remaining}）`;
-    drawer.append(more);
+    drawer.insertBefore(more, drawer.querySelector(":scope > .source-collapse-bottom") || null);
   }
-
-  appendMobileSourceCollapse(drawer);
+  more.textContent = `查看更多来源（剩余 ${remaining}）`;
+  more.setAttribute("aria-label", `查看更多来源，剩余 ${remaining} 个`);
+  return more;
 }
 
 function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
@@ -3620,7 +3707,13 @@ function sourceVisibleGroupCount(drawer, total) {
 }
 
 function appendMobileSourceCollapse(drawer) {
-  if (!isCompactRankMode() || !drawer.classList.contains("source-drawer")) return;
+  if (!drawer.classList.contains("source-drawer")) return;
+  const existing = drawer.querySelector(":scope > .source-collapse-bottom");
+  if (!isCompactRankMode()) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
   const mode = drawer.dataset.sourceMode || "song";
   drawer.append(renderSourceCollapseButton(drawer.id, mode));
 }
@@ -3635,7 +3728,7 @@ function renderSourceCollapseButton(drawerId, mode = "song", className = "source
   return button;
 }
 
-function renderSourceVideoGroup(group, songOccurrences = group.occurrences) {
+function renderSourceVideoGroup(group) {
   const section = document.createElement("section");
   section.className = "source-video-group";
 
@@ -3649,8 +3742,8 @@ function renderSourceVideoGroup(group, songOccurrences = group.occurrences) {
   thumbLink.href = youtubeTimeUrl(videoId, firstSeconds);
   thumbLink.target = "_blank";
   thumbLink.rel = "noreferrer";
-  thumbLink.setAttribute("aria-label", `打开来源视频：${group.title || videoId || "来源视频"}`);
-  thumbLink.append(createThumbnailImage({ ...videoItem, videoId, thumbnailUrl: videoItem.thumbnailUrl || group.thumbnailUrl }, "source-video-thumb"));
+  thumbLink.setAttribute("aria-label", `打开来源视频时间戳：${group.title || videoId || "来源视频"}`);
+  thumbLink.append(createThumbnailImage({ ...videoItem, videoId, thumbnailUrl: videoItem.thumbnailUrl || group.thumbnailUrl }, "source-video-thumb", { preferCompact: true }));
   section.append(thumbLink);
 
   const main = document.createElement("div");
@@ -3672,6 +3765,7 @@ function renderSourceVideoGroup(group, songOccurrences = group.occurrences) {
     more.dataset.toggleSourceTimes = "true";
     more.setAttribute("aria-expanded", "false");
     more.setAttribute("aria-controls", extraTimesId);
+    more.setAttribute("aria-label", `显示其余 ${extraTimes.length} 个时间点`);
     more.textContent = `+${extraTimes.length}`;
     identity.append(more);
   }
@@ -3693,14 +3787,14 @@ function renderSourceVideoGroup(group, songOccurrences = group.occurrences) {
   title.target = "_blank";
   title.rel = "noreferrer";
   title.textContent = group.title || videoId || "来源视频";
-  title.setAttribute("aria-label", `打开来源视频：${title.textContent}`);
+  title.setAttribute("aria-label", `打开来源视频时间戳：${title.textContent}`);
   main.append(title);
 
   const extra = document.createElement("div");
   extra.className = "source-extra-times";
   if (extraTimesId) extra.id = extraTimesId;
   extra.hidden = true;
-  for (const occurrence of extraTimes) extra.append(renderSourceTimestampLink(occurrence, "source-link source-time-extra"));
+  for (const occurrence of extraTimes) extra.append(renderSourceTimestampLink(occurrence, "source-time-extra"));
   main.append(extra);
   section.append(main);
 
@@ -3774,64 +3868,137 @@ function renderCopySongLinksButton(occurrences, label = "复制全部链接", cl
   return button;
 }
 
-function appendArtistSongGroups(drawer, songGroups) {
-  const showAll = drawer.dataset.artistSongsExpanded === "true";
-  const visibleGroups = showAll ? songGroups : songGroups.slice(0, ARTIST_SONG_GROUP_INITIAL_LIMIT);
-  for (const group of visibleGroups) {
-    const section = document.createElement("section");
-    section.className = "artist-song-group";
+function renderCopySongLinksIconButton(occurrences) {
+  const button = renderCopySongLinksButton(occurrences, "", "artist-song-copy source-copy-icon");
+  button.title = "复制全部链接";
+  button.append(renderLinkListIcon());
+  return button;
+}
 
-    const header = document.createElement("div");
-    header.className = "artist-song-header";
-
-    const firstOccurrence = group.occurrences[0];
-    const titleWrap = document.createElement("div");
-    titleWrap.className = "artist-song-title-wrap";
-    const title = document.createElement("a");
-    title.className = "artist-song-title";
-    title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
-    title.target = "_blank";
-    title.rel = "noreferrer";
-    title.textContent = group.title;
-    title.setAttribute("aria-label", `打开歌曲首次来源：${group.title}`);
-    titleWrap.append(title);
-
-    if (group.isNiche) {
-      const badge = document.createElement("span");
-      badge.className = "song-badge niche-badge";
-      badge.textContent = "小众";
-      titleWrap.append(badge);
-    }
-    header.append(titleWrap);
-
-    const count = document.createElement("span");
-    count.className = "artist-song-count";
-    count.textContent = `${group.count}次`;
-    header.append(count);
-    section.append(header);
-
-    const sources = document.createElement("div");
-    sources.className = "artist-song-sources";
-    sources.dataset.sourceMode = "artist-song";
-    appendSourceDrawerLinks(sources, group.occurrences, {
-      copyOccurrences: group.occurrences,
-      showToolbar: true,
-      toolbarVariant: "artist",
-    });
-    section.append(sources);
-    drawer.append(section);
+function renderLinkListIcon() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  const paths = ["M10 13a5 5 0 0 0 7.1 0l1.4-1.4a5 5 0 0 0-7.1-7.1L10.6 5.3", "M14 11a5 5 0 0 0-7.1 0L5.5 12.4a5 5 0 0 0 7.1 7.1l.8-.8", "M8 16l8-8"];
+  for (const d of paths) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    svg.append(path);
   }
+  return svg;
+}
 
-  if (songGroups.length > visibleGroups.length) {
-    const more = document.createElement("button");
+function appendArtistSongGroups(drawer, songGroups) {
+  drawer._artistSongGroups = songGroups;
+  const visibleCount = artistVisibleSongCount(drawer, songGroups.length);
+  appendArtistSongGroupRange(drawer, songGroups, artistRenderedSongCount(drawer), visibleCount);
+  syncArtistSongMoreButton(drawer, visibleCount, songGroups.length);
+  appendMobileSourceCollapse(drawer);
+}
+
+function artistRenderedSongCount(drawer) {
+  return drawer.querySelectorAll(":scope > .artist-song-group").length;
+}
+
+function artistVisibleSongCount(drawer, total) {
+  const parsed = Number.parseInt(drawer.dataset.visibleArtistSongs || "", 10);
+  const requested = Number.isFinite(parsed) && parsed > 0 ? parsed : ARTIST_SONG_GROUP_INITIAL_LIMIT;
+  const visibleCount = Math.min(total, Math.max(ARTIST_SONG_GROUP_INITIAL_LIMIT, requested));
+  drawer.dataset.visibleArtistSongs = String(visibleCount);
+  return visibleCount;
+}
+
+function appendArtistSongGroupRange(drawer, songGroups, start, end) {
+  const fragment = document.createDocumentFragment();
+  const safeStart = Math.max(0, start);
+  const safeEnd = Math.min(songGroups.length, Math.max(safeStart, end));
+  let firstAppended = null;
+  for (const group of songGroups.slice(safeStart, safeEnd)) {
+    const node = renderArtistSongGroup(group);
+    if (!firstAppended) firstAppended = node;
+    fragment.append(node);
+  }
+  drawer.insertBefore(fragment, drawer.querySelector(":scope > .artist-song-more") || drawer.querySelector(":scope > .source-collapse-bottom") || null);
+  return firstAppended;
+}
+
+function renderArtistSongGroup(group) {
+  const section = document.createElement("section");
+  section.className = "artist-song-group";
+
+  const header = document.createElement("div");
+  header.className = "artist-song-header";
+
+  const firstOccurrence = group.occurrences[0];
+  const titleWrap = document.createElement("div");
+  titleWrap.className = "artist-song-title-wrap";
+  const title = document.createElement("a");
+  title.className = "artist-song-title";
+  title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
+  title.target = "_blank";
+  title.rel = "noreferrer";
+  title.textContent = group.title;
+  title.setAttribute("aria-label", `打开歌曲首次来源：${group.title}`);
+  titleWrap.append(title);
+
+  if (group.isNiche) {
+    const badge = document.createElement("span");
+    badge.className = "song-badge niche-badge";
+    badge.textContent = "小众";
+    titleWrap.append(badge);
+  }
+  header.append(titleWrap);
+
+  const meta = document.createElement("div");
+  meta.className = "artist-song-summary-actions";
+
+  const count = document.createElement("span");
+  count.className = "artist-song-count";
+  count.textContent = `${group.count}次`;
+  meta.append(count);
+
+  const sources = document.createElement("div");
+  sources.className = "artist-song-sources";
+  sources.id = `artist-song-sources-${makeDomId(`${group.key}-${firstOccurrence.item.videoId}`)}`;
+  sources.dataset.sourceMode = "artist-song";
+  sources.dataset.sourceDeferred = "true";
+  sources.hidden = true;
+  sources._sourceOccurrences = group.occurrences;
+  section._artistSongSources = sources;
+
+  const sourceGroups = window.FrontendUtils.groupOccurrencesByVideo(group.occurrences);
+  const sourceButton = document.createElement("button");
+  sourceButton.className = "artist-song-source-toggle";
+  sourceButton.type = "button";
+  sourceButton.dataset.toggleArtistSongSource = "true";
+  sourceButton.dataset.sourceVideoCount = String(sourceGroups.length);
+  sourceButton.dataset.occurrenceCount = String(group.occurrences.length);
+  sourceButton.setAttribute("aria-expanded", "false");
+  sourceButton.setAttribute("aria-controls", sources.id);
+  updateArtistSongSourceButton(sourceButton, false);
+  meta.append(sourceButton, renderCopySongLinksIconButton(group.occurrences));
+  header.append(meta);
+  section.append(header, sources);
+  return section;
+}
+
+function syncArtistSongMoreButton(drawer, visibleCount, totalCount) {
+  let more = drawer.querySelector(":scope > .artist-song-more");
+  if (visibleCount >= totalCount) {
+    more?.remove();
+    return null;
+  }
+  const remaining = totalCount - visibleCount;
+  if (!more) {
+    more = document.createElement("button");
     more.className = "artist-song-more";
     more.type = "button";
     more.dataset.toggleArtistSongs = "true";
-    more.textContent = `显示其余 ${songGroups.length - visibleGroups.length} 首`;
-    drawer.append(more);
+    drawer.insertBefore(more, drawer.querySelector(":scope > .source-collapse-bottom") || null);
   }
-
-  appendMobileSourceCollapse(drawer);
+  more.textContent = `显示其余 ${remaining} 首`;
+  more.setAttribute("aria-label", `显示其余 ${remaining} 首歌曲`);
+  return more;
 }
 
 function toggleSourceDrawer(row) {
@@ -3859,23 +4026,18 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   const buttons = Array.from(row.querySelectorAll("[data-toggle-source]"));
   if (!drawer || !buttons.length) return;
 
-  if (nextExpanded && (drawer.dataset.sourceDeferred === "true" || isCompactRankMode())) {
+  if (nextExpanded && drawer.dataset.sourceDeferred === "true") {
     const mode = row.dataset.drawerMode || drawer.dataset.sourceMode || "song";
     const songGroups =
       mode === "artist" ? row._artistSongGroups || row._getArtistSongGroups?.() || [] : row._artistSongGroups || [];
     if (mode === "artist") row._artistSongGroups = songGroups;
-    if (isCompactRankMode()) {
-      delete drawer.dataset.visibleSourceGroups;
-      delete drawer.dataset.videoGroupsExpanded;
-    }
-    drawer.replaceChildren();
-    appendSourceDrawerContent(drawer, {
+    initializeSourceDrawer(drawer, {
       mode,
       occurrences: row._sourceOccurrences || [],
       songGroups,
     });
-    delete drawer.dataset.sourceDeferred;
   }
+  if (nextExpanded) appendMobileSourceCollapse(drawer);
   drawer.hidden = !nextExpanded;
   row.classList.toggle("is-expanded", nextExpanded);
   for (const button of buttons) {
@@ -3926,9 +4088,63 @@ function toggleArtistSongLimit(row) {
   if (!drawer) return;
   const songGroups = row._artistSongGroups || row._getArtistSongGroups?.() || [];
   row._artistSongGroups = songGroups;
-  drawer.dataset.artistSongsExpanded = "true";
-  drawer.replaceChildren();
-  appendArtistSongGroups(drawer, songGroups);
+  const current = artistRenderedSongCount(drawer);
+  const nextVisible = songGroups.length;
+  drawer.dataset.visibleArtistSongs = String(nextVisible);
+  const firstNewGroup = appendArtistSongGroupRange(drawer, songGroups, current, nextVisible);
+  syncArtistSongMoreButton(drawer, nextVisible, songGroups.length);
+  appendMobileSourceCollapse(drawer);
+  window.requestAnimationFrame(() => focusWithoutScrolling(firstNewGroup || drawer));
+}
+
+function toggleArtistSongSource(button) {
+  const section = button.closest(".artist-song-group");
+  const sources = document.getElementById(button.getAttribute("aria-controls")) || section?._artistSongSources;
+  if (!section || !sources) return;
+  const nextExpanded = sources.hidden;
+  if (nextExpanded && isCompactRankMode()) closeSiblingArtistSongSources(section);
+  if (nextExpanded && sources.dataset.sourceDeferred === "true") {
+    appendSourceDrawerLinks(sources, sources._sourceOccurrences || [], {
+      copyOccurrences: sources._sourceOccurrences || [],
+      showToolbar: false,
+    });
+    delete sources.dataset.sourceDeferred;
+  }
+  sources.hidden = !nextExpanded;
+  section.classList.toggle("is-expanded", nextExpanded);
+  button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
+  updateArtistSongSourceButton(button, nextExpanded);
+}
+
+function closeSiblingArtistSongSources(section) {
+  const drawer = section.closest(".artist-song-drawer");
+  const siblings = drawer?.querySelectorAll(":scope > .artist-song-group.is-expanded") || [];
+  for (const sibling of siblings) {
+    if (sibling === section) continue;
+    const button = sibling.querySelector("[data-toggle-artist-song-source]");
+    const sources = sibling.querySelector(".artist-song-sources");
+    if (sources) sources.hidden = true;
+    sibling.classList.remove("is-expanded");
+    if (button) {
+      button.setAttribute("aria-expanded", "false");
+      updateArtistSongSourceButton(button, false);
+    }
+  }
+}
+
+function updateArtistSongSourceButton(button, isExpanded) {
+  const videoCount = Math.max(0, Number(button.dataset.sourceVideoCount) || 0);
+  const occurrenceCount = Math.max(0, Number(button.dataset.occurrenceCount) || 0);
+  const label = videoCount > 1 ? `${videoCount}来源` : occurrenceCount > 1 ? `${occurrenceCount}时间点` : "1来源";
+  button.textContent = isExpanded ? "收起" : label;
+  button.setAttribute(
+    "aria-label",
+    isExpanded
+      ? "收起这首歌的来源"
+      : videoCount > 1
+        ? `查看这首歌的 ${videoCount} 个来源`
+        : `查看这首歌的 ${occurrenceCount} 个时间点`,
+  );
 }
 
 function expandSourceGroupTimestamps(button) {
@@ -3937,7 +4153,11 @@ function expandSourceGroupTimestamps(button) {
   const panel = document.getElementById(button.getAttribute("aria-controls")) || group.querySelector(".source-extra-times");
   if (!panel) return;
   const expanded = button.getAttribute("aria-expanded") === "true";
-  button.setAttribute("aria-expanded", String(!expanded));
+  const nextExpanded = !expanded;
+  button.setAttribute("aria-expanded", String(nextExpanded));
+  const count = panel.querySelectorAll("a").length;
+  button.setAttribute("aria-label", `${nextExpanded ? "收起" : "显示"}其余 ${count} 个时间点`);
+  button.textContent = `${nextExpanded ? "−" : "+"}${count}`;
   panel.hidden = expanded;
 }
 
@@ -3946,10 +4166,23 @@ function expandSourceVideoGroups(button) {
   if (!drawer) return;
   const occurrences = drawer._sourceOccurrences || [];
   const groups = drawer._sourceGroups || window.FrontendUtils.groupOccurrencesByVideo(occurrences);
-  const current = sourceVisibleGroupCount(drawer, groups.length);
-  drawer.dataset.visibleSourceGroups = String(Math.min(groups.length, current + sourceBatchSizeForMode()));
-  drawer.replaceChildren();
-  appendSourceDrawerLinks(drawer, occurrences);
+  const current = Math.min(sourceRenderedGroupCount(drawer), groups.length);
+  const nextVisible = groups.length;
+  const scrollBefore = Math.round(window.scrollY || 0);
+  drawer.dataset.visibleSourceGroups = String(nextVisible);
+  const firstNewGroup = appendSourceGroupRange(drawer, groups, current, nextVisible);
+  updateSourceDrawerCount(drawer, nextVisible, groups.length);
+  syncSourceGroupMoreButton(drawer, nextVisible, groups.length);
+  appendMobileSourceCollapse(drawer);
+  drawer.dataset.lastMoreScrollY = String(scrollBefore);
+  drawer.dataset.lastMoreScrollDelta = String(Math.round((window.scrollY || 0) - scrollBefore));
+  window.requestAnimationFrame(() => {
+    if (button.isConnected && !button.hidden) {
+      focusWithoutScrolling(button);
+      return;
+    }
+    focusWithoutScrolling(firstNewGroup || drawer);
+  });
 }
 
 function renderVideo(item) {
@@ -4427,25 +4660,26 @@ function youtubeTimeUrl(videoId, seconds) {
   return `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${safeSeconds}s`;
 }
 
-function videoThumbnailCandidates(item) {
+function videoThumbnailCandidates(item, options = {}) {
   const videoId = item.videoId ? encodeURIComponent(item.videoId) : "";
-  return uniqueStrings([
-    item.thumbnailUrl,
-    videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : "",
-    videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "",
-    placeholderThumbnail(),
-  ]);
+  const mqdefault = videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : "";
+  const hqdefault = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "";
+  const preferred = options.preferCompact ? [mqdefault, item.thumbnailUrl, hqdefault] : [item.thumbnailUrl, mqdefault, hqdefault];
+  return uniqueStrings([...preferred, placeholderThumbnail()]);
 }
 
-function createThumbnailImage(item, className, width = 160, height = 90) {
+function createThumbnailImage(item, className, optionsOrWidth = {}, height = 90) {
+  const options = typeof optionsOrWidth === "object" && optionsOrWidth !== null ? optionsOrWidth : {};
+  const width = typeof optionsOrWidth === "number" ? optionsOrWidth : options.width || 160;
+  const resolvedHeight = typeof optionsOrWidth === "number" ? height : options.height || 90;
   const img = document.createElement("img");
   img.className = className;
   img.alt = "";
   img.loading = "lazy";
   img.decoding = "async";
   img.width = width;
-  img.height = height;
-  const thumbnailCandidates = videoThumbnailCandidates(item || {});
+  img.height = resolvedHeight;
+  const thumbnailCandidates = videoThumbnailCandidates(item || {}, options);
   let thumbnailIndex = 0;
   img.src = thumbnailCandidates[thumbnailIndex] || placeholderThumbnail();
   img.addEventListener("error", () => {

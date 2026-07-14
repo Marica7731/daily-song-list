@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "listVersion": "2026-07-15.1",
-  "updatedAt": "2026-07-15T00:00:00+08:00",
+  "listVersion": "2026-07-15.2",
+  "updatedAt": "2026-07-15T06:11:16+08:00",
   "entries": [
     {
       "id": "legacy-001-uchi-fifi",
@@ -1202,6 +1202,21 @@
       "unsafeBroadAliases": [],
       "verifiedAt": "2026-07-14",
       "evidence": ["https://www.youtube.com/@rhoda1126", "docs/taiwan-vtuber-blocklist.md"]
+    },
+    {
+      "id": "youtube-UC5bhpsL8ZUHQ9q-HOLVc82A",
+      "name": "月島クロス TksmCross Ch.",
+      "regions": ["TW"],
+      "reason": "confirmed_regional_vtuber",
+      "status": "blocked",
+      "channelIds": ["UC5bhpsL8ZUHQ9q-HOLVc82A"],
+      "handles": ["@TksmCross"],
+      "channelUrls": ["https://www.youtube.com/@TksmCross"],
+      "aliases": ["月島クロス TksmCross Ch.", "月島クロス", "TksmCross"],
+      "titleAliases": [],
+      "unsafeBroadAliases": [],
+      "verifiedAt": "2026-07-15",
+      "evidence": ["https://www.youtube.com/@TksmCross", "user-confirmed TW"]
     }
   ]
 }

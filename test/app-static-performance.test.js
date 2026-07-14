@@ -71,10 +71,76 @@ test("record videoCount is used for rank values and row rendering", () => {
   assert.match(appSource, /videoCount:\s*record\.videoCount/u);
 });
 
+test("same-video multiple timestamps are expandable instead of becoming inline-only", () => {
+  const rankRecordBody = functionBody("function renderRankRecord");
+  assert.match(rankRecordBody, /const sourceVideoCount = mode === "artist" \? videoCount : window\.FrontendUtils\.groupOccurrencesByVideo\(occurrences\)\.length/u);
+  assert.match(rankRecordBody, /const occurrenceCount = occurrences\.length/u);
+  assert.match(rankRecordBody, /const expandable = mode === "artist" \? artistSongCount > 1 \|\| sourceVideoCount > 1 \|\| occurrenceCount > 1 : sourceVideoCount > 1 \|\| occurrenceCount > 1/u);
+
+  const indexRecordBody = functionBody("function renderIndexRecord");
+  assert.match(indexRecordBody, /const sourceVideoCount = window\.FrontendUtils\.groupOccurrencesByVideo\(record\.occurrences\)\.length/u);
+  assert.match(indexRecordBody, /const expandable = sourceVideoCount > 1 \|\| record\.occurrences\.length > 1/u);
+
+  const sublineBody = functionBody("function appendSublineSource");
+  assert.match(sublineBody, /if \(groupedSources\.length === 1 && occurrences\.length === 1\)/u);
+  assert.doesNotMatch(sublineBody, /groupedSources\.length === 1\)\s*\{/u);
+});
+
+test("source drawer append-more reveals all remaining sources without rebuilding old cards", () => {
+  const expandBody = functionBody("function expandSourceVideoGroups");
+  assert.match(expandBody, /const nextVisible = groups\.length/u);
+  assert.match(expandBody, /appendSourceGroupRange\(drawer, groups, current, nextVisible\)/u);
+  assert.doesNotMatch(expandBody, /sourceBatchSizeForMode|current \+ /u);
+
+  const appendRangeBody = functionBody("function appendSourceGroupRange");
+  assert.match(appendRangeBody, /document\.createDocumentFragment\(\)/u);
+  assert.match(appendRangeBody, /drawer\.insertBefore\(fragment/u);
+  assert.doesNotMatch(appendRangeBody, /replaceChildren/u);
+
+  const expandedBody = functionBody("function setSourceDrawerExpanded");
+  assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
+  assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
+});
+
+test("artist rank source details use two-level lazy loading and append remaining songs once", () => {
+  const appendArtistBody = functionBody("function appendArtistSongGroups");
+  assert.match(appendArtistBody, /appendArtistSongGroupRange/u);
+  assert.doesNotMatch(appendArtistBody, /appendSourceDrawerLinks|renderSourceVideoGroup/u);
+
+  const renderArtistBody = functionBody("function renderArtistSongGroup");
+  assert.match(renderArtistBody, /sources\.dataset\.sourceDeferred = "true"/u);
+  assert.match(renderArtistBody, /dataset\.toggleArtistSongSource = "true"/u);
+  assert.match(renderArtistBody, /renderCopySongLinksIconButton\(group\.occurrences\)/u);
+
+  const toggleSourceBody = functionBody("function toggleArtistSongSource");
+  assert.match(toggleSourceBody, /sources\.dataset\.sourceDeferred === "true"/u);
+  assert.match(toggleSourceBody, /appendSourceDrawerLinks\(sources, sources\._sourceOccurrences \|\| \[\],[\s\S]*showToolbar: false/u);
+  assert.match(toggleSourceBody, /closeSiblingArtistSongSources\(section\)/u);
+
+  const toggleLimitBody = functionBody("function toggleArtistSongLimit");
+  assert.match(toggleLimitBody, /const nextVisible = songGroups\.length/u);
+  assert.match(toggleLimitBody, /appendArtistSongGroupRange\(drawer, songGroups, current, nextVisible\)/u);
+  assert.doesNotMatch(toggleLimitBody, /replaceChildren|ARTIST_SONG_GROUP_BATCH/u);
+});
+
 function functionBody(signature) {
   const start = appSource.indexOf(signature);
   assert.notEqual(start, -1, `missing ${signature}`);
-  const braceStart = appSource.indexOf("{", start);
+  const parenStart = appSource.indexOf("(", start);
+  assert.notEqual(parenStart, -1, `missing parameter list for ${signature}`);
+  let parenDepth = 0;
+  let parenEnd = -1;
+  for (let index = parenStart; index < appSource.length; index += 1) {
+    const char = appSource[index];
+    if (char === "(") parenDepth += 1;
+    if (char === ")") parenDepth -= 1;
+    if (parenDepth === 0) {
+      parenEnd = index;
+      break;
+    }
+  }
+  assert.notEqual(parenEnd, -1, `unterminated parameter list for ${signature}`);
+  const braceStart = appSource.indexOf("{", parenEnd);
   let depth = 0;
   for (let index = braceStart; index < appSource.length; index += 1) {
     const char = appSource[index];

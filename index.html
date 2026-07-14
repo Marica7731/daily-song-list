@@ -20,25 +20,22 @@
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles.css?v=h210258c8d1bb" />
+    <link rel="stylesheet" href="assets/styles.css?v=hb8343c402d77" />
   </head>
   <body>
     <header class="topbar">
-      <div class="brand">
-        <h1>Daily Song List</h1>
-        <p>歌曲时间戳排行</p>
+      <div class="topbar-inner">
+        <div class="brand">
+          <h1>Daily Song List</h1>
+          <p>歌曲时间戳排行</p>
+        </div>
+        <div class="status" id="status">载入中</div>
       </div>
-      <div class="status" id="status">载入中</div>
     </header>
 
     <main class="layout">
       <section class="controls" id="controls" aria-label="榜单筛选">
-        <label class="field search-field">
-          <span class="sr-only">搜索</span>
-          <input id="filterInput" type="search" placeholder="搜索歌曲、歌手、频道或视频" autocomplete="off" />
-        </label>
-
-        <div class="control-strip">
+        <div class="controls-primary">
           <div class="segmented range-mode" role="group" aria-label="范围">
             <button class="tab active" type="button" data-range="72h" aria-pressed="true">最近72小时</button>
             <button
@@ -68,16 +65,6 @@
             <span class="filter-count" id="filterCountBadge" hidden></span>
           </button>
 
-          <label class="field snapshot-date-field">
-            <span class="sr-only">快照日期</span>
-            <select id="snapshotDateSelect" aria-label="快照日期"></select>
-          </label>
-
-          <label class="field snapshot-time-field">
-            <span class="sr-only">快照时间</span>
-            <select id="snapshotSelect" aria-label="快照时间"></select>
-          </label>
-
           <div class="mobile-toolbar-actions" aria-label="移动端工具">
             <button class="toolbar-icon-button" id="openSearchButton" type="button" aria-haspopup="dialog" aria-controls="searchDialog" aria-label="打开搜索">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -92,6 +79,23 @@
               <span class="filter-count" id="mobileFilterCountBadge" hidden></span>
             </button>
           </div>
+        </div>
+
+        <div class="controls-secondary">
+          <label class="field search-field">
+            <span class="sr-only">搜索</span>
+            <input id="filterInput" type="search" placeholder="搜索歌曲、歌手、频道或视频" autocomplete="off" />
+          </label>
+
+          <label class="field snapshot-date-field">
+            <span class="sr-only">快照日期</span>
+            <select id="snapshotDateSelect" aria-label="快照日期"></select>
+          </label>
+
+          <label class="field snapshot-time-field">
+            <span class="sr-only">快照时间</span>
+            <select id="snapshotSelect" aria-label="快照时间"></select>
+          </label>
         </div>
       </section>
 
@@ -273,10 +277,10 @@
     </button>
     <div class="toast" id="toast" aria-live="polite" hidden></div>
 
-    <script src="assets/blocked-vtuber-channels.js?v=h210258c8d1bb" defer></script>
-    <script src="assets/source-filter.js?v=h210258c8d1bb" defer></script>
-    <script src="assets/frontend-utils.js?v=h210258c8d1bb" defer></script>
-    <script src="assets/ranking-utils.js?v=h210258c8d1bb" defer></script>
-    <script src="assets/app.js?v=h210258c8d1bb" defer></script>
+    <script src="assets/blocked-vtuber-channels.js?v=hb8343c402d77" defer></script>
+    <script src="assets/source-filter.js?v=hb8343c402d77" defer></script>
+    <script src="assets/frontend-utils.js?v=hb8343c402d77" defer></script>
+    <script src="assets/ranking-utils.js?v=hb8343c402d77" defer></script>
+    <script src="assets/app.js?v=hb8343c402d77" defer></script>
   </body>
 </html>

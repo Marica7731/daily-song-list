@@ -16,7 +16,8 @@ test("mobile information architecture exposes one-row toolbar, bottom nav, searc
   assert.match(indexSource, /id="filterDialog"[\s\S]*role="dialog"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
   assert.match(indexSource, /class="filter-toggle-list"/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*grid-template-areas: "range actions"/u);
+  assert.match(indexSource, /class="topbar-inner"[\s\S]*class="controls-primary"[\s\S]*class="mobile-toolbar-actions"[\s\S]*class="controls-secondary"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 620px\)/u);
 });
@@ -30,6 +31,7 @@ test("URL state and filter draft are wired while visible share actions are remov
   assert.match(appSource, /function makeFilterDraftFromState/u);
   assert.match(appSource, /function applyFilterDraft/u);
   assert.match(appSource, /urlParams\.get\("shared"\) === "1"/u);
+  assert.match(appSource, /URL state is intentionally read-only/u);
   assert.doesNotMatch(indexSource, /id="shareButton"|data-copy-link/u);
   assert.doesNotMatch(appSource, /function buildShareUrl|function shareCurrentLink|function copyCurrentLink|navigator\.share|dataset\.copyLink/u);
   assert.doesNotMatch(cssSource, /share-button/u);
@@ -46,15 +48,17 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /function createThumbnailImage/u);
   assert.doesNotMatch(appSource, /maxresdefault/u);
   assert.match(appSource, /const RESPONSIVE_BREAKPOINTS = \{[\s\S]*mobileMax: 720,[\s\S]*tabletMax: 919/u);
-  assert.match(appSource, /const SOURCE_GROUP_LIMITS = \{[\s\S]*mobile: \{ initial: 3, batch: 3 \},[\s\S]*tablet: \{ initial: 6, batch: 6 \},[\s\S]*desktop: \{ initial: 9, batch: 9 \}/u);
+  assert.match(appSource, /const SOURCE_GROUP_LIMITS = \{[\s\S]*mobile: \{ initial: 3 \},[\s\S]*tablet: \{ initial: 6 \},[\s\S]*desktop: \{ initial: 9 \}/u);
   assert.match(appSource, /function getResponsiveMode/u);
   assert.match(appSource, /window\.matchMedia\?\.\(`\(max-width: \$\{RESPONSIVE_BREAKPOINTS\.mobileMax\}px\)`\)\?\.matches/u);
   assert.match(appSource, /window\.matchMedia\?\.\(`\(max-width: \$\{RESPONSIVE_BREAKPOINTS\.tabletMax\}px\)`\)\?\.matches/u);
   assert.match(appSource, /function isCompactRankMode/u);
   assert.match(appSource, /function sourceInitialLimitForMode/u);
-  assert.match(appSource, /function sourceBatchSizeForMode/u);
+  assert.doesNotMatch(appSource, /function sourceBatchSizeForMode/u);
   assert.match(appSource, /shouldKeepSingleDrawerOpen\(\)/u);
-  assert.match(appSource, /current \+ sourceBatchSizeForMode\(\)/u);
+  assert.match(appSource, /const nextVisible = groups\.length/u);
+  assert.match(appSource, /appendSourceGroupRange\(drawer, groups, current, nextVisible\)/u);
+  assert.match(appSource, /document\.createDocumentFragment\(\)/u);
   assert.match(appSource, /查看更多来源（剩余 \$\{remaining\}）/u);
   assert.match(appSource, /dataset\.collapseSource = "true"/u);
   assert.match(appSource, /dataset\.copySongLinks = "true"/u);
@@ -69,7 +73,8 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.doesNotMatch(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*display: none/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-count\.is-strong\s*\{[\s\S]*background: transparent;[\s\S]*color: var\(--muted\);/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\.rank-top-1,[\s\S]*\.rank-row\.rank-top-2,[\s\S]*\.rank-row\.rank-top-3\s*\{[\s\S]*border-left-color: transparent;/u);
+  assert.match(cssSource, /\.rank-row::before\s*\{[\s\S]*grid-area: rank;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row::before\s*\{[\s\S]*display: none;/u);
   assert.match(cssSource, /\.filter-count\[hidden\]\s*\{[\s\S]*display: none;/u);
 });
 
@@ -105,9 +110,12 @@ test("third-round mobile component rules are encoded in css and browser checks",
 });
 
 test("desktop and tablet contracts use explicit responsive layout", () => {
-  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*grid-template-areas:[\s\S]*"range view filter snapshot-date snapshot-time"[\s\S]*"search search search search search"[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) auto minmax\(120px, 150px\) minmax\(168px, 220px\)/u);
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: auto minmax\(max-content, 1fr\) auto;/u);
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-secondary\s*\{[\s\S]*grid-template-columns: minmax\(320px, 1fr\) minmax\(120px, 150px\) minmax\(168px, 220px\);/u);
   assert.doesNotMatch(cssSource, /grid-template-columns: auto minmax\(0, 1fr\) auto auto minmax\(220px, 1\.1fr\) minmax\(108px, 140px\) minmax\(160px, 220px\)/u);
-  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*grid-template-areas: "range view search filter snapshot-date snapshot-time";[\s\S]*grid-template-columns: auto auto minmax\(320px, 680px\) auto minmax\(112px, 150px\) minmax\(170px, 230px\)/u);
+  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls\s*\{[\s\S]*grid-template-columns: auto minmax\(320px, 680px\);/u);
+  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: auto auto auto;/u);
+  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-secondary\s*\{[\s\S]*grid-template-columns: minmax\(320px, 680px\) minmax\(112px, 150px\) minmax\(170px, 230px\);/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 56px/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.pagination-top \.page-jump,[\s\S]*\.pagination-top \.page-size-control\s*\{[\s\S]*display: none;/u);
 });
@@ -129,8 +137,10 @@ test("range cache song records are lazy getters", () => {
 });
 
 test("mobile summary and pagination have compact rules", () => {
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-range,[\s\S]*\.summary-actions[\s\S]*display: none/u);
+  assert.doesNotMatch(appSource, /summary-range/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: none;/u);
   assert.match(cssSource, /\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main actions"[\s\S]*"note note"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main"[\s\S]*"note"/u);
   assert.match(cssSource, /\.summary-actions\s*\{[\s\S]*grid-area: actions;[\s\S]*margin-left: 0;/u);
   assert.match(appSource, /summary-metrics/u);
   assert.match(appSource, /variant === "top"[\s\S]*`\$\{pageInfo\.startIndex \+ 1\}-\$\{pageInfo\.endIndex\} \/ \$\{pageInfo\.total\}/u);

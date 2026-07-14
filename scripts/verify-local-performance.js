@@ -10,8 +10,14 @@ const viewports = [
   [1920, 1080],
   [1440, 900],
   [1366, 768],
+  [1280, 800],
+  [1279, 800],
+  [1100, 800],
   [1024, 768],
+  [920, 768],
+  [919, 900],
   [768, 1024],
+  [721, 900],
   [430, 932],
   [390, 844],
   [360, 800],
@@ -222,6 +228,8 @@ async function assertUiShape(page, viewport, range) {
       };
     };
     const controls = rect("#controls");
+    const topbar = rect(".topbar");
+    const topbarInner = rect(".topbar-inner");
     const searchField = rect(".search-field");
     const bottomNav = rect("#mobileBottomNav");
     const summary = rect("#summary");
@@ -288,8 +296,31 @@ async function assertUiShape(page, viewport, range) {
       })
       .map((node) => node.textContent.trim())
       .filter((text) => text === "分享" || text === "复制链接");
+    const visible = (node) => {
+      if (!node) return false;
+      const style = getComputedStyle(node);
+      const box = node.getBoundingClientRect();
+      return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+    };
+    const segmentedControls = Array.from(document.querySelectorAll("#controls .segmented"))
+      .filter(visible)
+      .map((node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          className: node.className || "",
+          width: box.width,
+          scrollWidth: node.scrollWidth,
+          clientWidth: node.clientWidth,
+          overflowX: getComputedStyle(node).overflowX,
+          buttons: Array.from(node.querySelectorAll("button"))
+            .filter(visible)
+            .map((button) => ({ text: button.textContent || "", width: button.getBoundingClientRect().width })),
+        };
+      });
     return {
       width,
+      topbar,
+      topbarInner,
       controls,
       searchField,
       bottomNav,
@@ -309,6 +340,7 @@ async function assertUiShape(page, viewport, range) {
       rankCount,
       rankCountStyle,
       rankSubline,
+      segmentedControls,
       shareButtonExists: Boolean(document.querySelector("#shareButton")),
       copyLinkExists: Boolean(document.querySelector("[data-copy-link]")),
       visibleShareLabels,
@@ -318,6 +350,11 @@ async function assertUiShape(page, viewport, range) {
   }, { width: viewport[0], range });
 
   if (result.scrollWidth > result.clientWidth + 1) throw new Error(`horizontal overflow ${JSON.stringify(result)}`);
+  if (result.topbarInner && (result.topbarInner.left < -1 || result.topbarInner.right > result.clientWidth + 1)) {
+    throw new Error(`topbar inner is not aligned to viewport ${JSON.stringify(result.topbarInner)}`);
+  }
+  const overflowingSegment = result.segmentedControls.find((control) => control.scrollWidth > control.clientWidth + 1);
+  if (overflowingSegment) throw new Error(`segmented control overflowed inside toolbar ${JSON.stringify(overflowingSegment)}`);
   if (result.shareButtonExists || result.copyLinkExists || result.visibleShareLabels.length) {
     throw new Error(`visible share/copy-current-link entry remains ${JSON.stringify(result)}`);
   }
@@ -605,10 +642,32 @@ async function desktopRankVisualGeometry(browser) {
     }
     if (sourceGeometry.moreButtons) {
       const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
+      const expectedTotal = sourceCountFromText(sourceGeometry.countText);
+      const preservedBefore = await row.locator(".source-video-group").first().evaluate((node) => {
+        node.dataset.codexPreserve = "1";
+        const image = node.querySelector("img");
+        if (image) image.dataset.codexPreserve = "1";
+        return {
+          text: node.textContent || "",
+          imageSrc: image?.currentSrc || image?.src || "",
+        };
+      });
       await row.locator("[data-toggle-source-groups]").first().click();
       const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
       if (afterGroupCount <= beforeGroupCount) throw new Error("desktop source group expander did not add visible groups");
-      if (afterGroupCount > beforeGroupCount + 9) throw new Error(`desktop source group expander added more than one batch: before=${beforeGroupCount} after=${afterGroupCount}`);
+      if (expectedTotal && afterGroupCount !== expectedTotal) {
+        throw new Error(`desktop source group expander should reveal all remaining groups: before=${beforeGroupCount} after=${afterGroupCount} total=${expectedTotal}`);
+      }
+      if ((await row.locator("[data-toggle-source-groups]").count()) !== 0) throw new Error("desktop source group expander remained after revealing all sources");
+      const preservedAfter = await row.locator(".source-video-group").first().evaluate((node) => ({
+        preserved: node.dataset.codexPreserve === "1",
+        imagePreserved: node.querySelector("img")?.dataset.codexPreserve === "1",
+        text: node.textContent || "",
+        imageSrc: node.querySelector("img")?.currentSrc || node.querySelector("img")?.src || "",
+      }));
+      if (!preservedAfter.preserved || !preservedAfter.imagePreserved || preservedAfter.text !== preservedBefore.text || preservedAfter.imageSrc !== preservedBefore.imageSrc) {
+        throw new Error(`desktop source group expander rebuilt existing source cards ${JSON.stringify({ preservedBefore, preservedAfter })}`);
+      }
     }
     const secondRow = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])").nth(1);
     if ((await secondRow.count()) === 1) {
@@ -658,6 +717,8 @@ async function interactionFlow(browser) {
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
   assertBadgesHidden(await readFilterBadgeState(page), "reset");
+  const searchAfterOrdinaryInteractions = await page.evaluate(() => window.location.search);
+  if (searchAfterOrdinaryInteractions) throw new Error(`ordinary interactions should not persist filters to URL: ${searchAfterOrdinaryInteractions}`);
   await page.waitForFunction(
     () => Boolean(window.RankingUtils?.buildSongRecords && document.querySelector("[data-toggle-source]")),
     null,
@@ -1086,8 +1147,8 @@ async function mobileCopyAllLinksFlow(browser) {
 
 async function compactSourceDrawerFlow(browser) {
   for (const scenario of [
-    { label: "mobile", viewport: [390, 844], initial: 3, batch: 3 },
-    { label: "tablet", viewport: [768, 1024], initial: 6, batch: 6 },
+    { label: "mobile", viewport: [390, 844], initial: 3 },
+    { label: "tablet", viewport: [768, 1024], initial: 6 },
   ]) {
     const viewport = scenario.viewport;
     const { context, page, errors } = await newPage(browser, viewport);
@@ -1201,20 +1262,57 @@ async function compactSourceDrawerFlow(browser) {
     }
     if (sourceSemantics.titleHeight > 44) throw new Error(`source video title exceeds compact two-line height ${JSON.stringify(sourceSemantics)}`);
 
+    let expectedReopenGroupCount = null;
+    let preservedFirstGroupText = "";
     const moreGroups = row.locator("[data-toggle-source-groups]");
     if ((await moreGroups.count()) > 0) {
       const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
       const moreText = (await moreGroups.first().textContent()) || "";
       if (!/查看更多来源（剩余 \d+）/u.test(moreText)) throw new Error(`source group expander text invalid: ${moreText}`);
+      const remainingMatch = moreText.match(/剩余\s*(\d+)/u);
+      const expectedTotal = remainingMatch ? beforeGroupCount + Number.parseInt(remainingMatch[1], 10) : sourceCountFromText(moreText);
+      let expandedTimestampBeforeMore = false;
+      const firstTimestampToggle = row.locator('[data-toggle-source-times][aria-expanded="false"]').first();
+      if ((await firstTimestampToggle.count()) > 0) {
+        await firstTimestampToggle.click();
+        const expandedState = await firstTimestampToggle.getAttribute("aria-expanded");
+        if (expandedState !== "true") throw new Error(`source timestamp toggle did not expand before loading all groups: ${expandedState}`);
+        await firstTimestampToggle.evaluate((node) => {
+          node.dataset.codexPreserveTimeToggle = "1";
+        });
+        expandedTimestampBeforeMore = true;
+      }
+      preservedFirstGroupText = await row.locator(".source-video-group").first().evaluate((node) => {
+        node.dataset.codexPreserve = "1";
+        const image = node.querySelector("img");
+        if (image) image.dataset.codexPreserve = "1";
+        return node.textContent || "";
+      });
       await moreGroups.first().click();
       const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
       if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
-      if (afterGroupCount > beforeGroupCount + scenario.batch) {
-        throw new Error(`source group expander added more than one ${scenario.label} batch: before=${beforeGroupCount} after=${afterGroupCount}`);
+      if (expectedTotal && afterGroupCount !== expectedTotal) {
+        throw new Error(`${scenario.label} source group expander should reveal all remaining groups: before=${beforeGroupCount} after=${afterGroupCount} total=${expectedTotal}`);
       }
+      if ((await moreGroups.count()) !== 0) throw new Error(`${scenario.label} source group expander should be removed after revealing all sources`);
+      const preservedAfter = await row.locator(".source-video-group").first().evaluate((node) => ({
+        preserved: node.dataset.codexPreserve === "1",
+        imagePreserved: node.querySelector("img")?.dataset.codexPreserve === "1",
+        text: node.textContent || "",
+        preservedExpandedTimeButtons: Array.from(node.querySelectorAll("[data-toggle-source-times]")).filter(
+          (button) => button.dataset.codexPreserveTimeToggle === "1" && button.getAttribute("aria-expanded") === "true",
+        ).length,
+      }));
+      if (!preservedAfter.preserved || !preservedAfter.imagePreserved || preservedAfter.text !== preservedFirstGroupText) {
+        throw new Error(`${scenario.label} source group expander rebuilt existing cards ${JSON.stringify(preservedAfter)}`);
+      }
+      if (expandedTimestampBeforeMore && preservedAfter.preservedExpandedTimeButtons < 1) {
+        throw new Error(`${scenario.label} source group expander did not preserve expanded timestamp state ${JSON.stringify(preservedAfter)}`);
+      }
+      expectedReopenGroupCount = afterGroupCount;
     }
 
-    const moreTimes = row.locator("[data-toggle-source-times]");
+    const moreTimes = row.locator('[data-toggle-source-times][aria-expanded="false"]');
     if ((await moreTimes.count()) > 0) {
       const beforeVisibleTimes = await countVisibleInRow(row, ".source-time-primary, .source-time-extra");
       await moreTimes.first().click();
@@ -1253,6 +1351,20 @@ async function compactSourceDrawerFlow(browser) {
     const screenshotPath = shotPath(`source-drawer-${viewport.join("x")}.png`);
     await button.click();
     await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden])", { timeout: 15000 });
+    if (expectedReopenGroupCount) {
+      const reopenedGroupCount = await countVisibleInRow(row, ".source-video-group");
+      if (reopenedGroupCount !== expectedReopenGroupCount) {
+        throw new Error(`${scenario.label} source drawer reopen lost expanded source groups: before=${expectedReopenGroupCount} after=${reopenedGroupCount}`);
+      }
+      const preservedAfterReopen = await row.locator(".source-video-group").first().evaluate((node) => ({
+        preserved: node.dataset.codexPreserve === "1",
+        imagePreserved: node.querySelector("img")?.dataset.codexPreserve === "1",
+        text: node.textContent || "",
+      }));
+      if (!preservedAfterReopen.preserved || !preservedAfterReopen.imagePreserved || preservedAfterReopen.text !== preservedFirstGroupText) {
+        throw new Error(`${scenario.label} source drawer reopen rebuilt existing source cards ${JSON.stringify(preservedAfterReopen)}`);
+      }
+    }
     await page.screenshot({ path: screenshotPath, fullPage: false });
     if (count > 1) {
       const otherIndex = selectedIndex === 0 ? 1 : 0;

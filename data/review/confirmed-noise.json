@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T20:33:02.476Z",
+  "generatedAt": "2026-07-14T22:41:05.119Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-14T19:41:20.884Z",
+  "latestGeneratedAt": "2026-07-14T22:13:53.905Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
   "counts": {
     "totalCandidates": 135,
-    "uniqueVideos": 41,
-    "uniqueSources": 57,
+    "uniqueVideos": 39,
+    "uniqueSources": 58,
     "confirmedNoiseCount": 135,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
@@ -352,24 +352,24 @@
       "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
     },
     {
-      "title": "10",
-      "artist": "07/2026",
+      "title": "本配信のお気に入り",
+      "artist": "未記載",
       "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "aCbSR6lDsis",
-      "videoTitle": "【 歌枠/karaoke 】数日間配信できないからこれをたくさんリピートしたらさみしくない枠【 ナナホシナナ 】",
-      "channelName": "Nana CH. /ナナホシ ナナ",
+      "isUnknownArtist": true,
+      "seconds": 941,
+      "time": "0:15:41",
+      "raw": "0:15:41 本配信のお気に入り",
+      "rawHash": "14fe7176a5cbd34d628abfb3652a6d44c59ecc808868a4da2b05e40bafe2c16e",
+      "videoId": "lUbnHmfYqeA",
+      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka Ch. -響架-",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=aCbSR6lDsis",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aCbSR6lDsis&t=240s",
-      "sourceId": "description:aCbSR6lDsis:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:aCbSR6lDsis-b9e788e059bd3238a48e.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=941s",
+      "sourceId": "UgzQYlmXR2ySd1qSVUJ4AaABAg",
+      "sourceHash": "654ef1c259fb7aa2b6a59f37891db49904a47cf476411be3e09fcf1768cac575",
+      "sourceOrigin": "review:lUbnHmfYqeA-654ef1c259fb7aa2b6a5.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -379,12 +379,195 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "source_level_likely_non_song_entry"
+        "title_only_non_song_candidate"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:aCbSR6lDsis:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/aCbSR6lDsis-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/aCbSR6lDsis-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+      "reviewId": "review:lUbnHmfYqeA:654ef1c259fb7aa2b6a5",
+      "sourcePath": "data/review/sources/lUbnHmfYqeA-654ef1c259fb7aa2b6a5.json",
+      "reviewLocator": "data/review/sources/lUbnHmfYqeA-654ef1c259fb7aa2b6a5.json#14fe7176a5cbd34d628abfb3652a6d44c59ecc808868a4da2b05e40bafe2c16e"
+    },
+    {
+      "title": "~🎶ガンダム尽くしでお届けします!! ∞ 響架",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1320,
+      "time": "0:22:00",
+      "raw": "🏮 実写歌枠 ｜毎週金曜22:00~🎶ガンダム尽くしでお届けします!! ∞ 響架",
+      "rawHash": "5f1cb0143bdf6b9a40033d907f08d88a8cc094ed3fdae42251e047dc5d498bc4",
+      "videoId": "lUbnHmfYqeA",
+      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka Ch. -響架-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=1320s",
+      "sourceId": "description:lUbnHmfYqeA:5f1cb0143bdf6b9a",
+      "sourceHash": "5f1cb0143bdf6b9a40033d907f08d88a8cc094ed3fdae42251e047dc5d498bc4",
+      "sourceOrigin": "review:lUbnHmfYqeA-5f1cb0143bdf6b9a4003.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:lUbnHmfYqeA:5f1cb0143bdf6b9a4003",
+      "sourcePath": "data/review/sources/lUbnHmfYqeA-5f1cb0143bdf6b9a4003.json",
+      "reviewLocator": "data/review/sources/lUbnHmfYqeA-5f1cb0143bdf6b9a4003.json#5f1cb0143bdf6b9a40033d907f08d88a8cc094ed3fdae42251e047dc5d498bc4"
+    },
+    {
+      "title": "から）",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1470,
+      "time": "0:24:30",
+      "raw": "24:30から）",
+      "rawHash": "2774c96a68fde6aeb67fcbc4874d14a1f6e8f02d3b154640b8d5c2a270bf6512",
+      "videoId": "lUbnHmfYqeA",
+      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka Ch. -響架-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=1470s",
+      "sourceId": "UgxubWgTxZPzSrM0rfN4AaABAg",
+      "sourceHash": "8e82f64ea437731f0dddd759822677273349f142df5b55ab5e4fcf9d31aa51e1",
+      "sourceOrigin": "review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "parser_corruption"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:lUbnHmfYqeA:8e82f64ea437731f0ddd",
+      "sourcePath": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
+      "reviewLocator": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json#2774c96a68fde6aeb67fcbc4874d14a1f6e8f02d3b154640b8d5c2a270bf6512"
+    },
+    {
+      "title": "7/25(土)バーチャル縁日のお知らせ",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7705,
+      "time": "2:08:25",
+      "raw": "2:08:25 7/25(土)バーチャル縁日のお知らせ",
+      "rawHash": "c0e82d63cce76b1390a3cd328be48332fd283f060c326fbb539b7f068471ca61",
+      "videoId": "lUbnHmfYqeA",
+      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka Ch. -響架-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=7705s",
+      "sourceId": "UgxubWgTxZPzSrM0rfN4AaABAg",
+      "sourceHash": "8e82f64ea437731f0dddd759822677273349f142df5b55ab5e4fcf9d31aa51e1",
+      "sourceOrigin": "review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "parser_corruption"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:lUbnHmfYqeA:8e82f64ea437731f0ddd",
+      "sourcePath": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
+      "reviewLocator": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json#c0e82d63cce76b1390a3cd328be48332fd283f060c326fbb539b7f068471ca61"
+    },
+    {
+      "title": "8/8(土)ぶいかふぇ♪vol.281のお知らせ",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7790,
+      "time": "2:09:50",
+      "raw": "2:09:50 8/8(土)ぶいかふぇ♪vol.281のお知らせ",
+      "rawHash": "34fcad2a98fa9c319a4504d543bdf8b94389de504b000cb05b39ed3d6c107087",
+      "videoId": "lUbnHmfYqeA",
+      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka Ch. -響架-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=7790s",
+      "sourceId": "UgxubWgTxZPzSrM0rfN4AaABAg",
+      "sourceHash": "8e82f64ea437731f0dddd759822677273349f142df5b55ab5e4fcf9d31aa51e1",
+      "sourceOrigin": "review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "parser_corruption"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:lUbnHmfYqeA:8e82f64ea437731f0ddd",
+      "sourcePath": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
+      "reviewLocator": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json#34fcad2a98fa9c319a4504d543bdf8b94389de504b000cb05b39ed3d6c107087"
+    },
+    {
+      "title": "パーソナルインストラクター響架による筋トレ講座の案内（この後",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7895,
+      "time": "2:11:35",
+      "raw": "2:11:35 パーソナルインストラクター響架による筋トレ講座の案内（この後",
+      "rawHash": "387f2bb383fc65b1ff500d98add86aca5ff7f4b7d154682a54105bd8a7ec5d93",
+      "videoId": "lUbnHmfYqeA",
+      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka Ch. -響架-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=7895s",
+      "sourceId": "UgxubWgTxZPzSrM0rfN4AaABAg",
+      "sourceHash": "8e82f64ea437731f0dddd759822677273349f142df5b55ab5e4fcf9d31aa51e1",
+      "sourceOrigin": "review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "parser_corruption"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:lUbnHmfYqeA:8e82f64ea437731f0ddd",
+      "sourcePath": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
+      "reviewLocator": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json#387f2bb383fc65b1ff500d98add86aca5ff7f4b7d154682a54105bd8a7ec5d93"
     },
     {
       "title": "終わりのあいさつ",
@@ -558,41 +741,6 @@
       "reviewId": "review:71OSYnx-Vy0:6bb534ac466b1ca21974",
       "sourcePath": "data/review/sources/history-71OSYnx-Vy0-6bb534ac466b1ca21974.json",
       "reviewLocator": "data/review/sources/history-71OSYnx-Vy0-6bb534ac466b1ca21974.json#8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4"
-    },
-    {
-      "title": "그리고 어디까지 올라가는 거예요 뭐임? ㅋㅋㅋㅋ",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 9983,
-      "time": "2:46:23",
-      "raw": "2:46:23 그리고 어디까지 올라가는 거예요 뭐임? ㅋㅋㅋㅋ",
-      "rawHash": "987b9eb3b6d8ff74a35373d1bc815552f1428aadb59dd7ee1cbe1585799cd342",
-      "videoId": "NP5wx2ewPtY",
-      "videoTitle": "【 #歌 / Singing Stream 】ラジオ代わりの朝歌枠📻🎶 おはようを届けつつ歌う😈✨【 #音門るき / VEE 】",
-      "channelName": "Ruki Otokado 音門るき [VEE]",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=NP5wx2ewPtY",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=NP5wx2ewPtY&t=9983s",
-      "sourceId": "Ugx_hF2fP6Fpvckl8Dl4AaABAg",
-      "sourceHash": "c4d964c7592054f300889e5c709e35c70d8873ae614bffa167118a9eaec308a8",
-      "sourceOrigin": "review:NP5wx2ewPtY-c4d964c7592054f30088.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "bad_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:NP5wx2ewPtY:c4d964c7592054f30088",
-      "sourcePath": "data/review/sources/NP5wx2ewPtY-c4d964c7592054f30088.json",
-      "reviewLocator": "data/review/sources/NP5wx2ewPtY-c4d964c7592054f30088.json#987b9eb3b6d8ff74a35373d1bc815552f1428aadb59dd7ee1cbe1585799cd342"
     },
     {
       "title": "おつウタノン",
@@ -3560,43 +3708,6 @@
       "reviewLocator": "data/review/sources/history-qENxBvbn29Y-d20b81982796f791041d.json#1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
     },
     {
-      "title": "Ｃパート",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 5091,
-      "time": "1:24:51",
-      "raw": "1:24:51Ｃパート",
-      "rawHash": "18e7e431558fa215dc376d7ceeea10612d442f74932d7f60ad86e3b4a6c20e53",
-      "videoId": "kSBM6nifDKQ",
-      "videoTitle": "【歌枠】寝起きの声出し歌枠【 ゆらぎゆら / ミリプロ 】",
-      "channelName": "ゆらぎゆら / YuragiYura🌙🫧",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=kSBM6nifDKQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=kSBM6nifDKQ&t=5091s",
-      "sourceId": "UgySffAJL6ZEITLPc2h4AaABAg",
-      "sourceHash": "28f309aa018ec0aacc9477c8a70235b87a0b1abe48198f6d1918dd804be1bcd6",
-      "sourceOrigin": "review:kSBM6nifDKQ-28f309aa018ec0aacc94.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:kSBM6nifDKQ:28f309aa018ec0aacc94",
-      "sourcePath": "data/review/sources/kSBM6nifDKQ-28f309aa018ec0aacc94.json",
-      "reviewLocator": "data/review/sources/kSBM6nifDKQ-28f309aa018ec0aacc94.json#18e7e431558fa215dc376d7ceeea10612d442f74932d7f60ad86e3b4a6c20e53"
-    },
-    {
       "title": "おつくわタイム",
       "artist": "",
       "isNiche": false,
@@ -4070,44 +4181,6 @@
       "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
       "sourcePath": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
       "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#6da1d84406c0472862af7c6152abdd30ef75d584de9c0b18c6c3eba607b7236d"
-    },
-    {
-      "title": "配信スタート",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 0,
-      "time": "0:00:00",
-      "raw": "00:00 配信スタート",
-      "rawHash": "910d39e7726cf250b29b9c23eeafa9cca480fd89e3024d7be35c8d9686735d2e",
-      "videoId": "VwhXFlOuiac",
-      "videoTitle": "【 #光をつなぐウルトラソング歌枠リレー 】みんなで歌おう！！ウルトラマンの日前夜祭だ～！！【vtuber/牛牧もこ】",
-      "channelName": "牛牧もこ /Ushimaki Moco",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=VwhXFlOuiac",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=VwhXFlOuiac&t=0s",
-      "sourceId": "UgwQrI2V4RSsyrg7hkJ4AaABAg",
-      "sourceHash": "6e04c239bb3aff245a951d5c1fca744559c5dc78d62d8f322dc4122371b8d413",
-      "sourceOrigin": "review:VwhXFlOuiac-6e04c239bb3aff245a95.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_activity_marker_ratio_high"
-      ],
-      "riskReasons": [
-        "activity_marker_title",
-        "source_activity_marker_ratio_high"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:VwhXFlOuiac:6e04c239bb3aff245a95",
-      "sourcePath": "data/review/sources/VwhXFlOuiac-6e04c239bb3aff245a95.json",
-      "reviewLocator": "data/review/sources/VwhXFlOuiac-6e04c239bb3aff245a95.json#910d39e7726cf250b29b9c23eeafa9cca480fd89e3024d7be35c8d9686735d2e"
     },
     {
       "title": "再開",
@@ -6073,24 +6146,24 @@
       "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json#fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
     },
     {
-      "title": "配信スタート",
-      "artist": "未記載",
+      "title": "START",
+      "artist": "",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 314,
-      "time": "0:05:14",
-      "raw": "5:14 配信スタート",
-      "rawHash": "df00134821c634f1d3609b2f9bf9d67f33351a93a282f537fd60a5861f801ccc",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
+      "seconds": 88,
+      "time": "0:01:28",
+      "raw": "00:01:28 START",
+      "rawHash": "b30628447f5f7a611a991703ab7db8c248ce1d3fd144c4d5c4de70ec1416aba7",
+      "videoId": "oHSrPEGbJ-I",
+      "videoTitle": "【#歌枠｜#KARAOKE】❖キレイ系ソング歌う！伸びやかな歌声、ここにあります！✨ ❖【ゆにふぃ！｜#風魔小宵】",
+      "channelName": "風魔小宵 / Fuuma Koyoi",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=314s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I&t=88s",
+      "sourceId": "UgwPetsXrzXgFfFJ7Al4AaABAg",
+      "sourceHash": "76ac3d497fdaabd72563d9479906f734b33688b199b5d9767b25fb01183b680c",
+      "sourceOrigin": "review:oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -6102,71 +6175,33 @@
         "source_many_topic_entries"
       ],
       "riskReasons": [
-        "activity_marker_title",
+        "obvious_non_song_text",
         "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#df00134821c634f1d3609b2f9bf9d67f33351a93a282f537fd60a5861f801ccc"
+      "reviewId": "review:oHSrPEGbJ-I:76ac3d497fdaabd72563",
+      "sourcePath": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
+      "reviewLocator": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json#b30628447f5f7a611a991703ab7db8c248ce1d3fd144c4d5c4de70ec1416aba7"
     },
     {
-      "title": "まいごさん紹介",
+      "title": "新歌みたが7月24日にも公開されるヨ",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 502,
-      "time": "0:08:22",
-      "raw": "8:22 まいごさん紹介",
-      "rawHash": "9d08a8bd92c25014188554596584d9320af5bd50e283df0768f8090bac74d992",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
+      "seconds": 1016,
+      "time": "0:16:56",
+      "raw": "00:16:56 🦊 新歌みたが7月24日にも公開されるヨ",
+      "rawHash": "3a6ac7692af66be2392357f6da4d92dc8b966c919730c05ee0d3f27bfcbce6b8",
+      "videoId": "oHSrPEGbJ-I",
+      "videoTitle": "【#歌枠｜#KARAOKE】❖キレイ系ソング歌う！伸びやかな歌声、ここにあります！✨ ❖【ゆにふぃ！｜#風魔小宵】",
+      "channelName": "風魔小宵 / Fuuma Koyoi",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=502s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#9d08a8bd92c25014188554596584d9320af5bd50e283df0768f8090bac74d992"
-    },
-    {
-      "title": "ミュートとの戦いでした",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 560,
-      "time": "0:09:20",
-      "raw": "9:20 ミュートとの戦いでした",
-      "rawHash": "b3c2659db147bb8972e9b5aac2550a39290e90c103742de9daaf7858884f3c6e",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=560s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I&t=1016s",
+      "sourceId": "UgwPetsXrzXgFfFJ7Al4AaABAg",
+      "sourceHash": "76ac3d497fdaabd72563d9479906f734b33688b199b5d9767b25fb01183b680c",
+      "sourceOrigin": "review:oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -6182,29 +6217,29 @@
         "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#b3c2659db147bb8972e9b5aac2550a39290e90c103742de9daaf7858884f3c6e"
+      "reviewId": "review:oHSrPEGbJ-I:76ac3d497fdaabd72563",
+      "sourcePath": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
+      "reviewLocator": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json#3a6ac7692af66be2392357f6da4d92dc8b966c919730c05ee0d3f27bfcbce6b8"
     },
     {
-      "title": "お薬ターイム",
+      "title": "ゆにふぃ！Youtube登録企画実施中！",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 3336,
-      "time": "0:55:36",
-      "raw": "55:36 お薬ターイム",
-      "rawHash": "10b2d902539c0606cdbf839647a8aa95ff1043e0ac78be9b640c6c8ca9f528b1",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
+      "seconds": 2371,
+      "time": "0:39:31",
+      "raw": "00:39:31 🦊 ゆにふぃ！Youtube登録企画実施中！",
+      "rawHash": "f3c5ed83450942542a684da536cb0d06a78b199f95bf97ce8ab7148a2c756252",
+      "videoId": "oHSrPEGbJ-I",
+      "videoTitle": "【#歌枠｜#KARAOKE】❖キレイ系ソング歌う！伸びやかな歌声、ここにあります！✨ ❖【ゆにふぃ！｜#風魔小宵】",
+      "channelName": "風魔小宵 / Fuuma Koyoi",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=3336s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I&t=2371s",
+      "sourceId": "UgwPetsXrzXgFfFJ7Al4AaABAg",
+      "sourceHash": "76ac3d497fdaabd72563d9479906f734b33688b199b5d9767b25fb01183b680c",
+      "sourceOrigin": "review:oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -6220,67 +6255,29 @@
         "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#10b2d902539c0606cdbf839647a8aa95ff1043e0ac78be9b640c6c8ca9f528b1"
+      "reviewId": "review:oHSrPEGbJ-I:76ac3d497fdaabd72563",
+      "sourcePath": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
+      "reviewLocator": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json#f3c5ed83450942542a684da536cb0d06a78b199f95bf97ce8ab7148a2c756252"
     },
     {
-      "title": "鈴にボーナスは無いんだ(´；ω；`)ｳｩｩ",
+      "title": "ENDING",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 4683,
-      "time": "1:18:03",
-      "raw": "1:18:03 鈴にボーナスは無いんだ(´；ω；`)ｳｩｩ",
-      "rawHash": "34b028c332a887b815afa4acd71316a6bd5d49e549bb54c53bae720d97cc622b",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
+      "seconds": 8833,
+      "time": "2:27:13",
+      "raw": "02:27:13 ENDING",
+      "rawHash": "b1bebe9a67163cab8143160fccd36656b7b0fc10292c568230dafac7bdd14652",
+      "videoId": "oHSrPEGbJ-I",
+      "videoTitle": "【#歌枠｜#KARAOKE】❖キレイ系ソング歌う！伸びやかな歌声、ここにあります！✨ ❖【ゆにふぃ！｜#風魔小宵】",
+      "channelName": "風魔小宵 / Fuuma Koyoi",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=4683s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#34b028c332a887b815afa4acd71316a6bd5d49e549bb54c53bae720d97cc622b"
-    },
-    {
-      "title": "お手洗い休憩",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 5370,
-      "time": "1:29:30",
-      "raw": "1:29:30 お手洗い休憩",
-      "rawHash": "f1e54f29b462992974aa530bd4bfc4bde72366ac870b22b4bae791eb82cfa0a7",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=5370s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I&t=8833s",
+      "sourceId": "UgwPetsXrzXgFfFJ7Al4AaABAg",
+      "sourceHash": "76ac3d497fdaabd72563d9479906f734b33688b199b5d9767b25fb01183b680c",
+      "sourceOrigin": "review:oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -6296,161 +6293,9 @@
         "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#f1e54f29b462992974aa530bd4bfc4bde72366ac870b22b4bae791eb82cfa0a7"
-    },
-    {
-      "title": "お流しスパチャ読み",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 5484,
-      "time": "1:31:24",
-      "raw": "1:31:24 お流しスパチャ読み",
-      "rawHash": "7d233c41a1350d36e2051971915c73cdba9b4f4219e16a5b7cd79b7f9c29d5cb",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=5484s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#7d233c41a1350d36e2051971915c73cdba9b4f4219e16a5b7cd79b7f9c29d5cb"
-    },
-    {
-      "title": "欲しくて買った物が",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6060,
-      "time": "1:41:00",
-      "raw": "1:41:00 欲しくて買った物が...",
-      "rawHash": "308093392c8c16e101d277c404a5af475edb887ffbc6af918ce9bd86c3e41037",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=6060s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#308093392c8c16e101d277c404a5af475edb887ffbc6af918ce9bd86c3e41037"
-    },
-    {
-      "title": "返品、返金が出来るならそうしようかな？＆鈴、クラファン怖いめう…",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6553,
-      "time": "1:49:13",
-      "raw": "1:49:13 返品、返金が出来るならそうしようかな？＆鈴、クラファン怖いめう…",
-      "rawHash": "393e8a9dd224bb5258524b22fc5899687c001f80aff122a3a3b73fe313064ec0",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=6553s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#393e8a9dd224bb5258524b22fc5899687c001f80aff122a3a3b73fe313064ec0"
-    },
-    {
-      "title": "今日もありがとうございました",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7201,
-      "time": "2:00:01",
-      "raw": "2:00:01 今日もありがとうございました",
-      "rawHash": "96f57ea0bed155092ec98280ca7409e648005f7154d2f080a2654848d1aabf44",
-      "videoId": "yVcyK7IELjc",
-      "videoTitle": "【#歌枠 * song】ATSUINE☀！！！【ぱわーぼいすVtuber／彷徨鈴】",
-      "channelName": "彷徨 鈴【Samayoi Suzu】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yVcyK7IELjc&t=7201s",
-      "sourceId": "UgwFL3NMKYFj5Iy4qDZ4AaABAg",
-      "sourceHash": "80dc90035f53bca90d4c979e5e5ca0a3369a9ba2abf77773e0b4546753bc9e05",
-      "sourceOrigin": "review:yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:yVcyK7IELjc:80dc90035f53bca90d4c",
-      "sourcePath": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json",
-      "reviewLocator": "data/review/sources/yVcyK7IELjc-80dc90035f53bca90d4c.json#96f57ea0bed155092ec98280ca7409e648005f7154d2f080a2654848d1aabf44"
+      "reviewId": "review:oHSrPEGbJ-I:76ac3d497fdaabd72563",
+      "sourcePath": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
+      "reviewLocator": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json#b1bebe9a67163cab8143160fccd36656b7b0fc10292c568230dafac7bdd14652"
     },
     {
       "title": "スタート",
@@ -6498,6 +6343,160 @@
       "reviewId": "review:uRKNhEOx0Hs:32dac2d03f3f75aea9ad",
       "sourcePath": "data/review/sources/history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json",
       "reviewLocator": "data/review/sources/history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json#7e6723d1d7e7e90574847735677c486e4259fc7a18344450abe4532c34ad3d74"
+    },
+    {
+      "title": "スタート",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 0,
+      "time": "0:00:00",
+      "raw": "00:00:00 スタート",
+      "rawHash": "a73821baea8e670ddb7eaa7a0687b7749902471453d62164a6fac5ec2ae10aca",
+      "videoId": "gVYI7q070fg",
+      "videoTitle": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
+      "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gVYI7q070fg&t=0s",
+      "sourceId": "UgyTNfWQx-ndKgbnUad4AaABAg",
+      "sourceHash": "8c4c82a48c4e0a3a3cf62e1a8e668f455c7626f176087dc84cfc7d5d7b345c78",
+      "sourceOrigin": "review:gVYI7q070fg-8c4c82a48c4e0a3a3cf6.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_marker_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:gVYI7q070fg:8c4c82a48c4e0a3a3cf6",
+      "sourcePath": "data/review/sources/gVYI7q070fg-8c4c82a48c4e0a3a3cf6.json",
+      "reviewLocator": "data/review/sources/gVYI7q070fg-8c4c82a48c4e0a3a3cf6.json#a73821baea8e670ddb7eaa7a0687b7749902471453d62164a6fac5ec2ae10aca"
+    },
+    {
+      "title": "ありがとう～盛り上がって良い汗かいたね！　2時間に1曲位の音ズレなら許容範囲かな？",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6784,
+      "time": "1:53:04",
+      "raw": "01:53:04 ありがとう～盛り上がって良い汗かいたね！ 2時間に1曲位の音ズレなら許容範囲かな？",
+      "rawHash": "70aa1a5ce7fe91f0ad9d68ee297f5dc7e93c1575de387b3c57a33e237abdde0b",
+      "videoId": "gVYI7q070fg",
+      "videoTitle": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
+      "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gVYI7q070fg&t=6784s",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "sourceOrigin": "review:gVYI7q070fg-be7eadd745e478f87b83.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:gVYI7q070fg:be7eadd745e478f87b83",
+      "sourcePath": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json",
+      "reviewLocator": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json#70aa1a5ce7fe91f0ad9d68ee297f5dc7e93c1575de387b3c57a33e237abdde0b"
+    },
+    {
+      "title": "雑談　杣菜さんとご飯！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6882,
+      "time": "1:54:42",
+      "raw": "01:54:42 雑談 杣菜さんとご飯！",
+      "rawHash": "3fca2d42fdf1f314a1d026fd467863cf3cb13d36a3b1f53454e94f6a81714ed1",
+      "videoId": "gVYI7q070fg",
+      "videoTitle": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
+      "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gVYI7q070fg&t=6882s",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "sourceOrigin": "review:gVYI7q070fg-be7eadd745e478f87b83.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:gVYI7q070fg:be7eadd745e478f87b83",
+      "sourcePath": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json",
+      "reviewLocator": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json#3fca2d42fdf1f314a1d026fd467863cf3cb13d36a3b1f53454e94f6a81714ed1"
+    },
+    {
+      "title": "ありがとうございました！ 音ズレは許容範囲かな？　土曜日の配信でも検証していきたいです！　みなさんで配信を作って行きましょう！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7681,
+      "time": "2:08:01",
+      "raw": "02:08:01 ありがとうございました！ 音ズレは許容範囲かな？ 土曜日の配信でも検証していきたいです！ みなさんで配信を作って行きましょう！",
+      "rawHash": "5686c22c1f3b148dddefebf6ad893e0e456bacc1c6302b40df9bf508ea333683",
+      "videoId": "gVYI7q070fg",
+      "videoTitle": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
+      "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gVYI7q070fg&t=7681s",
+      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
+      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
+      "sourceOrigin": "review:gVYI7q070fg-be7eadd745e478f87b83.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:gVYI7q070fg:be7eadd745e478f87b83",
+      "sourcePath": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json",
+      "reviewLocator": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json#5686c22c1f3b148dddefebf6ad893e0e456bacc1c6302b40df9bf508ea333683"
     },
     {
       "title": "お名前呼び",
