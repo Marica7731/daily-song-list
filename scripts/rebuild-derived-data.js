@@ -1,6 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { annotatePayloadWithSongSearchNiche, songSearchSourceSummary } = require("./song-search-index");
+const { annotatePayloadWithSongSearchNiche, mergeSupplementalKnownSongs, songSearchSourceSummary } = require("./song-search-index");
 const { applyCurationToVideos, hashNormalizedText, isParserCorruptionEntry, loadCurationContext } = require("./curation");
 const { createSongSearchLookup } = require("../assets/frontend-utils");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION, assertNoBlockedVideos, createBlockedSourceAudit, filterBlockedVideos } = require("../assets/source-filter");
@@ -33,7 +33,7 @@ function main() {
 
   const songAliasContext = loadSongAliasContext();
   const curationContext = { ...loadCurationContext(), songAliasContext };
-  const songSearchIndex = readJsonIfExists(SONG_SEARCH_INDEX_PATH);
+  const songSearchIndex = mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
   const songSearchLookup = createSongSearchLookup(songSearchIndex || {});
   const stats = {
     inputSongs: 0,

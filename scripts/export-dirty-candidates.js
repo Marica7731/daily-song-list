@@ -3,6 +3,7 @@ const path = require("node:path");
 const { createSongSearchLookup, isSongSearchKnown } = require("../assets/frontend-utils");
 const { classifyEntry, hashNormalizedText, isUnknownArtist } = require("./curation");
 const { repairParsedEntry } = require("./entry-repair");
+const { mergeSupplementalKnownSongs } = require("./song-search-index");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -33,7 +34,7 @@ function main() {
   const generatedAt = new Date().toISOString();
   const latest = readJson(LATEST_PATH);
   if (!latest?.groups) throw new Error("data/latest.json missing groups");
-  const lookup = createSongSearchLookup(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
+  const lookup = createSongSearchLookup(mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {}));
   const currentEntryLookup = buildCurrentEntryLookup(readJsonIfExists(CURRENT_ENTRY_INDEX_PATH)?.items || []);
 
   const latestRecords = collectRecords(latest, lookup, currentEntryLookup);

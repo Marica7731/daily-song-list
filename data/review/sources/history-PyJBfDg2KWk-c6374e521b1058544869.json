@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:PyJBfDg2KWk:c6374e521b1058544869",
   "video": {
     "videoId": "PyJBfDg2KWk",
@@ -76,10 +76,14 @@
       "sourceId": "selected:PyJBfDg2KWk:c6374e521b105854",
       "sourceHash": "c6374e521b1058544869ca52ed5c19aa203a988e6ad989bf2c6214651c428d59",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ダダダダ天使"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist",
@@ -97,10 +101,14 @@
       "sourceId": "selected:PyJBfDg2KWk:c6374e521b105854",
       "sourceHash": "c6374e521b1058544869ca52ed5c19aa203a988e6ad989bf2c6214651c428d59",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "瞬間、シンフォニー"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist",

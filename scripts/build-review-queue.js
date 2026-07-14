@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { createSongSearchLookup, isSongSearchKnown } = require("../assets/frontend-utils");
 const { repairParsedEntry } = require("./entry-repair");
+const { mergeSupplementalKnownSongs } = require("./song-search-index");
 const {
   classifyEntry,
   hashNormalizedText,
@@ -41,7 +42,7 @@ function main() {
   if (!latest?.groups) throw new Error("data/latest.json missing groups");
   const audit = readJsonIfExists(AUDIT_PATH) || {};
   const curation = loadCurationContext();
-  const lookup = createSongSearchLookup(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
+  const lookup = createSongSearchLookup(mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {}));
 
   fs.mkdirSync(REVIEW_SOURCE_DIR, { recursive: true });
   clearReviewSources();

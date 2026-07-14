@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:41:05.119Z",
+  "generatedAt": "2026-07-14T23:52:01.266Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-14T22:13:53.905Z",
-  "curationVersion": "curation-v1:6193201176e1",
-  "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
+  "latestGeneratedAt": "2026-07-14T23:37:00.372Z",
+  "curationVersion": "curation-v1:12c32dcbcb07",
+  "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 135,
-    "uniqueVideos": 39,
+    "totalCandidates": 131,
+    "uniqueVideos": 41,
     "uniqueSources": 58,
-    "confirmedNoiseCount": 135,
+    "confirmedNoiseCount": 131,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 135,
+      "confirmed_noise": 131,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -350,224 +350,6 @@
       "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
       "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
       "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
-    },
-    {
-      "title": "本配信のお気に入り",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 941,
-      "time": "0:15:41",
-      "raw": "0:15:41 本配信のお気に入り",
-      "rawHash": "14fe7176a5cbd34d628abfb3652a6d44c59ecc808868a4da2b05e40bafe2c16e",
-      "videoId": "lUbnHmfYqeA",
-      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
-      "channelName": "Kyoka Ch. -響架-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=941s",
-      "sourceId": "UgzQYlmXR2ySd1qSVUJ4AaABAg",
-      "sourceHash": "654ef1c259fb7aa2b6a59f37891db49904a47cf476411be3e09fcf1768cac575",
-      "sourceOrigin": "review:lUbnHmfYqeA-654ef1c259fb7aa2b6a5.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:lUbnHmfYqeA:654ef1c259fb7aa2b6a5",
-      "sourcePath": "data/review/sources/lUbnHmfYqeA-654ef1c259fb7aa2b6a5.json",
-      "reviewLocator": "data/review/sources/lUbnHmfYqeA-654ef1c259fb7aa2b6a5.json#14fe7176a5cbd34d628abfb3652a6d44c59ecc808868a4da2b05e40bafe2c16e"
-    },
-    {
-      "title": "~🎶ガンダム尽くしでお届けします!! ∞ 響架",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1320,
-      "time": "0:22:00",
-      "raw": "🏮 実写歌枠 ｜毎週金曜22:00~🎶ガンダム尽くしでお届けします!! ∞ 響架",
-      "rawHash": "5f1cb0143bdf6b9a40033d907f08d88a8cc094ed3fdae42251e047dc5d498bc4",
-      "videoId": "lUbnHmfYqeA",
-      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
-      "channelName": "Kyoka Ch. -響架-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=1320s",
-      "sourceId": "description:lUbnHmfYqeA:5f1cb0143bdf6b9a",
-      "sourceHash": "5f1cb0143bdf6b9a40033d907f08d88a8cc094ed3fdae42251e047dc5d498bc4",
-      "sourceOrigin": "review:lUbnHmfYqeA-5f1cb0143bdf6b9a4003.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:lUbnHmfYqeA:5f1cb0143bdf6b9a4003",
-      "sourcePath": "data/review/sources/lUbnHmfYqeA-5f1cb0143bdf6b9a4003.json",
-      "reviewLocator": "data/review/sources/lUbnHmfYqeA-5f1cb0143bdf6b9a4003.json#5f1cb0143bdf6b9a40033d907f08d88a8cc094ed3fdae42251e047dc5d498bc4"
-    },
-    {
-      "title": "から）",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1470,
-      "time": "0:24:30",
-      "raw": "24:30から）",
-      "rawHash": "2774c96a68fde6aeb67fcbc4874d14a1f6e8f02d3b154640b8d5c2a270bf6512",
-      "videoId": "lUbnHmfYqeA",
-      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
-      "channelName": "Kyoka Ch. -響架-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=1470s",
-      "sourceId": "UgxubWgTxZPzSrM0rfN4AaABAg",
-      "sourceHash": "8e82f64ea437731f0dddd759822677273349f142df5b55ab5e4fcf9d31aa51e1",
-      "sourceOrigin": "review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "parser_corruption"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:lUbnHmfYqeA:8e82f64ea437731f0ddd",
-      "sourcePath": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
-      "reviewLocator": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json#2774c96a68fde6aeb67fcbc4874d14a1f6e8f02d3b154640b8d5c2a270bf6512"
-    },
-    {
-      "title": "7/25(土)バーチャル縁日のお知らせ",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7705,
-      "time": "2:08:25",
-      "raw": "2:08:25 7/25(土)バーチャル縁日のお知らせ",
-      "rawHash": "c0e82d63cce76b1390a3cd328be48332fd283f060c326fbb539b7f068471ca61",
-      "videoId": "lUbnHmfYqeA",
-      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
-      "channelName": "Kyoka Ch. -響架-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=7705s",
-      "sourceId": "UgxubWgTxZPzSrM0rfN4AaABAg",
-      "sourceHash": "8e82f64ea437731f0dddd759822677273349f142df5b55ab5e4fcf9d31aa51e1",
-      "sourceOrigin": "review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "parser_corruption"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:lUbnHmfYqeA:8e82f64ea437731f0ddd",
-      "sourcePath": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
-      "reviewLocator": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json#c0e82d63cce76b1390a3cd328be48332fd283f060c326fbb539b7f068471ca61"
-    },
-    {
-      "title": "8/8(土)ぶいかふぇ♪vol.281のお知らせ",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7790,
-      "time": "2:09:50",
-      "raw": "2:09:50 8/8(土)ぶいかふぇ♪vol.281のお知らせ",
-      "rawHash": "34fcad2a98fa9c319a4504d543bdf8b94389de504b000cb05b39ed3d6c107087",
-      "videoId": "lUbnHmfYqeA",
-      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
-      "channelName": "Kyoka Ch. -響架-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=7790s",
-      "sourceId": "UgxubWgTxZPzSrM0rfN4AaABAg",
-      "sourceHash": "8e82f64ea437731f0dddd759822677273349f142df5b55ab5e4fcf9d31aa51e1",
-      "sourceOrigin": "review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "parser_corruption"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:lUbnHmfYqeA:8e82f64ea437731f0ddd",
-      "sourcePath": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
-      "reviewLocator": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json#34fcad2a98fa9c319a4504d543bdf8b94389de504b000cb05b39ed3d6c107087"
-    },
-    {
-      "title": "パーソナルインストラクター響架による筋トレ講座の案内（この後",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7895,
-      "time": "2:11:35",
-      "raw": "2:11:35 パーソナルインストラクター響架による筋トレ講座の案内（この後",
-      "rawHash": "387f2bb383fc65b1ff500d98add86aca5ff7f4b7d154682a54105bd8a7ec5d93",
-      "videoId": "lUbnHmfYqeA",
-      "videoTitle": "🏮 実写 #歌枠 ｜癒される夜にしたいと思って。 #shorts #Vtuber ∞ 響架",
-      "channelName": "Kyoka Ch. -響架-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=lUbnHmfYqeA&t=7895s",
-      "sourceId": "UgxubWgTxZPzSrM0rfN4AaABAg",
-      "sourceHash": "8e82f64ea437731f0dddd759822677273349f142df5b55ab5e4fcf9d31aa51e1",
-      "sourceOrigin": "review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "parser_corruption"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:lUbnHmfYqeA:8e82f64ea437731f0ddd",
-      "sourcePath": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
-      "reviewLocator": "data/review/sources/lUbnHmfYqeA-8e82f64ea437731f0ddd.json#387f2bb383fc65b1ff500d98add86aca5ff7f4b7d154682a54105bd8a7ec5d93"
     },
     {
       "title": "終わりのあいさつ",
@@ -1118,6 +900,52 @@
       "reviewId": "review:OCULwDtQ8Bs:a5f12251209c4a3d1b6a",
       "sourcePath": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json",
       "reviewLocator": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json#157a1fd8246db0b268cff62bf11c52381f7dbf657bc3a6342fe9372512776e0a"
+    },
+    {
+      "title": "3次会",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 5226,
+      "time": "1:27:06",
+      "raw": "01:27:06 3次会",
+      "rawHash": "49ace4d8ff76b11cacad06ea1ae3f39f9c749d81c8d547fba4a0525048970f51",
+      "videoId": "LIvCuQkMnVE",
+      "videoTitle": "【歌枠/告知アリ】最強音圧！推理アニメ・サスペンス系アニメのアニソン縛りで盛り上がっていこう🎤 #あおぎり高校 #千代浦蝶美",
+      "channelName": "ちよみch. 千代浦蝶美 /あおぎり高校",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=LIvCuQkMnVE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=LIvCuQkMnVE&t=5226s",
+      "sourceId": "selected:LIvCuQkMnVE:c545a9f2939f62a3",
+      "sourceHash": "c545a9f2939f62a3983aab81e347b77c5426da5ad8afb19a4531abdecee6d52a",
+      "sourceOrigin": "review:history-LIvCuQkMnVE-c545a9f2939f62a3983a.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260714T230000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title",
+        "activity_marker_title"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:LIvCuQkMnVE:c545a9f2939f62a3983a",
+      "sourcePath": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json",
+      "reviewLocator": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json#49ace4d8ff76b11cacad06ea1ae3f39f9c749d81c8d547fba4a0525048970f51"
     },
     {
       "title": "曲終わり",
@@ -4159,28 +3987,137 @@
         "structured_setlist"
       ],
       "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
         "source_many_topic_entries",
-        "kept_count_high_low_known_song_density",
-        "niche_unknown_artist",
+        "source_many_activity_entries",
         "source_multiple_unknown_artists",
+        "niche_unknown_artist",
         "source_multiple_niche_short_titles",
         "conversation_entry",
         "activity_marker_title",
+        "activity_or_announcement",
         "short_unknown_title"
       ],
       "riskReasons": [
         "activity_marker_title",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
-        "source_unknown_artist_ratio_high",
         "source_many_topic_entries",
+        "source_many_activity_entries",
         "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
       "sourcePath": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
       "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#6da1d84406c0472862af7c6152abdd30ef75d584de9c0b18c6c3eba607b7236d"
+    },
+    {
+      "title": "達成！",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 15222,
+      "time": "4:13:42",
+      "raw": "達成！    4:13:42",
+      "rawHash": "43434403382d4b7876bedfc9c40b9fb9630095e4a034383ec67a983f10481cb9",
+      "videoId": "bQtUhOfrJC0",
+      "videoTitle": "【歌枠】2周年ありがとう！50曲歌います！歌ったら告知します！【鬼ヶ谷テン/ネオポルテ】",
+      "channelName": "鬼ヶ谷 テン / Onigaya Ten",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bQtUhOfrJC0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bQtUhOfrJC0&t=15222s",
+      "sourceId": "selected:bQtUhOfrJC0:369ea67228f3b93b",
+      "sourceHash": "369ea67228f3b93b75b0909e3a95eb7c99402d6e925d7874375c87c65d7a21b8",
+      "sourceOrigin": "review:history-bQtUhOfrJC0-369ea67228f3b93b75b0.json;review:history-bQtUhOfrJC0-ff47a8cf68fe595ecfb3.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z",
+        "snapshot:20260714T230000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_unknown_artists",
+        "niche_unknown_artist",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_marker_title",
+        "activity_or_announcement",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
+      "sourcePath": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
+      "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#43434403382d4b7876bedfc9c40b9fb9630095e4a034383ec67a983f10481cb9"
+    },
+    {
+      "title": "歌みたの話",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 15972,
+      "time": "4:26:12",
+      "raw": "歌みたの話　4:26:12",
+      "rawHash": "94d0460c44ee3fdcf285036380173e529ff34e0b7d7367cf4f480bc63c992425",
+      "videoId": "bQtUhOfrJC0",
+      "videoTitle": "【歌枠】2周年ありがとう！50曲歌います！歌ったら告知します！【鬼ヶ谷テン/ネオポルテ】",
+      "channelName": "鬼ヶ谷 テン / Onigaya Ten",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=bQtUhOfrJC0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bQtUhOfrJC0&t=15972s",
+      "sourceId": "selected:bQtUhOfrJC0:369ea67228f3b93b",
+      "sourceHash": "369ea67228f3b93b75b0909e3a95eb7c99402d6e925d7874375c87c65d7a21b8",
+      "sourceOrigin": "review:history-bQtUhOfrJC0-369ea67228f3b93b75b0.json;review:history-bQtUhOfrJC0-ff47a8cf68fe595ecfb3.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z",
+        "snapshot:20260714T230000Z"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_unknown_artists",
+        "niche_unknown_artist",
+        "source_multiple_niche_short_titles",
+        "conversation_entry",
+        "activity_marker_title",
+        "activity_or_announcement",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "activity_or_announcement",
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
+      "sourcePath": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
+      "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#94d0460c44ee3fdcf285036380173e529ff34e0b7d7367cf4f480bc63c992425"
     },
     {
       "title": "再開",
@@ -4593,6 +4530,41 @@
       "reviewLocator": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json#c24465d5d26f2e820af43b1c7d7886264b2a8d37e384c26cdf4eb83a126ec8d4"
     },
     {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "T9Xgix5gcnE",
+      "videoTitle": "【#歌枠 】みんな青春してる？青春ソングを聞いて！！ #狐橙明音成長中 #vtuber",
+      "channelName": "狐橙明音",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=T9Xgix5gcnE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=T9Xgix5gcnE&t=240s",
+      "sourceId": "description:T9Xgix5gcnE:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:T9Xgix5gcnE-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:T9Xgix5gcnE:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/T9Xgix5gcnE-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/T9Xgix5gcnE-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+    },
+    {
       "title": "2周年記念お写真公開！",
       "artist": "未記載",
       "isNiche": true,
@@ -4636,6 +4608,120 @@
       "reviewId": "review:wkmPLI98ccU:c42bc673a091cab8fb3a",
       "sourcePath": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json",
       "reviewLocator": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json#f8ffdd2e900c59a53890c676eda6dccf63ef5df5a2b9af9115ec0480a2630780"
+    },
+    {
+      "title": "声入り",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 277,
+      "time": "0:04:37",
+      "raw": "⊹ 0:04:37 声入り",
+      "rawHash": "f008a85ad455b76e7317f21ea443b371092ed3f0a0ca1de20e3e27f1f8250680",
+      "videoId": "TmnMO21wxcQ",
+      "videoTitle": "【#歌枠】ケーブル新調！そわそわする！歌枠/singing stream【LIVE/雑談/配信/生歌/Vtuber】 #shorts",
+      "channelName": "高宮煌 / - Takamiya Aki -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=TmnMO21wxcQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=TmnMO21wxcQ&t=277s",
+      "sourceId": "Ugxgb_GbwIUfoLE_GUV4AaABAg",
+      "sourceHash": "42b0c2ffc2c08e8abc5fcd44ef23bf9e4ee67efcc35ee44acb290d3e7e168db2",
+      "sourceOrigin": "review:TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:TmnMO21wxcQ:42b0c2ffc2c08e8abc5f",
+      "sourcePath": "data/review/sources/TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json",
+      "reviewLocator": "data/review/sources/TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json#f008a85ad455b76e7317f21ea443b371092ed3f0a0ca1de20e3e27f1f8250680"
+    },
+    {
+      "title": "スパチャ読み",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6805,
+      "time": "1:53:25",
+      "raw": "⊹ 1:53:25 スパチャ読み",
+      "rawHash": "e02891e49cdc3a59eb1e1e379a26c76ce8d3a7818a52978d9b7685e5b51593c4",
+      "videoId": "TmnMO21wxcQ",
+      "videoTitle": "【#歌枠】ケーブル新調！そわそわする！歌枠/singing stream【LIVE/雑談/配信/生歌/Vtuber】 #shorts",
+      "channelName": "高宮煌 / - Takamiya Aki -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=TmnMO21wxcQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=TmnMO21wxcQ&t=6805s",
+      "sourceId": "Ugxgb_GbwIUfoLE_GUV4AaABAg",
+      "sourceHash": "42b0c2ffc2c08e8abc5fcd44ef23bf9e4ee67efcc35ee44acb290d3e7e168db2",
+      "sourceOrigin": "review:TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:TmnMO21wxcQ:42b0c2ffc2c08e8abc5f",
+      "sourcePath": "data/review/sources/TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json",
+      "reviewLocator": "data/review/sources/TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json#e02891e49cdc3a59eb1e1e379a26c76ce8d3a7818a52978d9b7685e5b51593c4"
+    },
+    {
+      "title": "Cパート・ED",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8305,
+      "time": "2:18:25",
+      "raw": "⊹ 2:18:25 Cパート・ED",
+      "rawHash": "3491cd1c1ad008ac86f0952501c2b733a714e1733b80de8759f1814e133336ff",
+      "videoId": "TmnMO21wxcQ",
+      "videoTitle": "【#歌枠】ケーブル新調！そわそわする！歌枠/singing stream【LIVE/雑談/配信/生歌/Vtuber】 #shorts",
+      "channelName": "高宮煌 / - Takamiya Aki -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=TmnMO21wxcQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=TmnMO21wxcQ&t=8305s",
+      "sourceId": "Ugxgb_GbwIUfoLE_GUV4AaABAg",
+      "sourceHash": "42b0c2ffc2c08e8abc5fcd44ef23bf9e4ee67efcc35ee44acb290d3e7e168db2",
+      "sourceOrigin": "review:TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:TmnMO21wxcQ:42b0c2ffc2c08e8abc5f",
+      "sourcePath": "data/review/sources/TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json",
+      "reviewLocator": "data/review/sources/TmnMO21wxcQ-42b0c2ffc2c08e8abc5f.json#3491cd1c1ad008ac86f0952501c2b733a714e1733b80de8759f1814e133336ff"
     },
     {
       "title": "こんひなー",
@@ -5003,6 +5089,41 @@
       "reviewId": "review:pI-sk5vxg3E:c36865484826660b7d25",
       "sourcePath": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json",
       "reviewLocator": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json#a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "NhtXyOSseNs",
+      "videoTitle": "【 #歌枠 】マイクテスト兼お歌うたいます",
+      "channelName": "山田もしゅお。-Yamada Moshuo-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=NhtXyOSseNs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=NhtXyOSseNs&t=240s",
+      "sourceId": "description:NhtXyOSseNs:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:NhtXyOSseNs-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:NhtXyOSseNs:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/NhtXyOSseNs-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/NhtXyOSseNs-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "おつにょ",
@@ -5738,6 +5859,81 @@
       "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#4f866c2f357403d49a0b8e4cacb9176291743f7952c9313431811aa70c5c9ae4"
     },
     {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "kctQMmJrfE0",
+      "videoTitle": "【縦型歌枠/#karaoke 】新しい音響でお試し練習！【灯咲リンカ/#新人Vtuber】",
+      "channelName": "灯咲リンカ-Tosaki Rinka-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=kctQMmJrfE0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=kctQMmJrfE0&t=240s",
+      "sourceId": "description:kctQMmJrfE0:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:kctQMmJrfE0-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:kctQMmJrfE0:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/kctQMmJrfE0-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/kctQMmJrfE0-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+    },
+    {
+      "title": "Ged Wild_TM NETWORK",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1831,
+      "time": "0:30:31",
+      "raw": "30:31 Ged Wild_TM NETWORK",
+      "rawHash": "ce4a178ba695bdae32ad12786aa2ac9941b2326e2da8a0ab34b8bffcecb97dfe",
+      "videoId": "kctQMmJrfE0",
+      "videoTitle": "【縦型歌枠/#karaoke 】新しい音響でお試し練習！【灯咲リンカ/#新人Vtuber】",
+      "channelName": "灯咲リンカ-Tosaki Rinka-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=kctQMmJrfE0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=kctQMmJrfE0&t=1831s",
+      "sourceId": "Ugzji4ccS4W8n7gS_xx4AaABAg",
+      "sourceHash": "707c4c0fb492e824fd8aa60df9676bbaa7199b299e881aa8f96036ed5062638e",
+      "sourceOrigin": "review:kctQMmJrfE0-707c4c0fb492e824fd8a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:kctQMmJrfE0:707c4c0fb492e824fd8a",
+      "sourcePath": "data/review/sources/kctQMmJrfE0-707c4c0fb492e824fd8a.json",
+      "reviewLocator": "data/review/sources/kctQMmJrfE0-707c4c0fb492e824fd8a.json#ce4a178ba695bdae32ad12786aa2ac9941b2326e2da8a0ab34b8bffcecb97dfe"
+    },
+    {
       "title": "閉会式",
       "artist": "未記載",
       "isNiche": true,
@@ -6146,158 +6342,6 @@
       "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json#fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
     },
     {
-      "title": "START",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 88,
-      "time": "0:01:28",
-      "raw": "00:01:28 START",
-      "rawHash": "b30628447f5f7a611a991703ab7db8c248ce1d3fd144c4d5c4de70ec1416aba7",
-      "videoId": "oHSrPEGbJ-I",
-      "videoTitle": "【#歌枠｜#KARAOKE】❖キレイ系ソング歌う！伸びやかな歌声、ここにあります！✨ ❖【ゆにふぃ！｜#風魔小宵】",
-      "channelName": "風魔小宵 / Fuuma Koyoi",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I&t=88s",
-      "sourceId": "UgwPetsXrzXgFfFJ7Al4AaABAg",
-      "sourceHash": "76ac3d497fdaabd72563d9479906f734b33688b199b5d9767b25fb01183b680c",
-      "sourceOrigin": "review:oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:oHSrPEGbJ-I:76ac3d497fdaabd72563",
-      "sourcePath": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
-      "reviewLocator": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json#b30628447f5f7a611a991703ab7db8c248ce1d3fd144c4d5c4de70ec1416aba7"
-    },
-    {
-      "title": "新歌みたが7月24日にも公開されるヨ",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1016,
-      "time": "0:16:56",
-      "raw": "00:16:56 🦊 新歌みたが7月24日にも公開されるヨ",
-      "rawHash": "3a6ac7692af66be2392357f6da4d92dc8b966c919730c05ee0d3f27bfcbce6b8",
-      "videoId": "oHSrPEGbJ-I",
-      "videoTitle": "【#歌枠｜#KARAOKE】❖キレイ系ソング歌う！伸びやかな歌声、ここにあります！✨ ❖【ゆにふぃ！｜#風魔小宵】",
-      "channelName": "風魔小宵 / Fuuma Koyoi",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I&t=1016s",
-      "sourceId": "UgwPetsXrzXgFfFJ7Al4AaABAg",
-      "sourceHash": "76ac3d497fdaabd72563d9479906f734b33688b199b5d9767b25fb01183b680c",
-      "sourceOrigin": "review:oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:oHSrPEGbJ-I:76ac3d497fdaabd72563",
-      "sourcePath": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
-      "reviewLocator": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json#3a6ac7692af66be2392357f6da4d92dc8b966c919730c05ee0d3f27bfcbce6b8"
-    },
-    {
-      "title": "ゆにふぃ！Youtube登録企画実施中！",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 2371,
-      "time": "0:39:31",
-      "raw": "00:39:31 🦊 ゆにふぃ！Youtube登録企画実施中！",
-      "rawHash": "f3c5ed83450942542a684da536cb0d06a78b199f95bf97ce8ab7148a2c756252",
-      "videoId": "oHSrPEGbJ-I",
-      "videoTitle": "【#歌枠｜#KARAOKE】❖キレイ系ソング歌う！伸びやかな歌声、ここにあります！✨ ❖【ゆにふぃ！｜#風魔小宵】",
-      "channelName": "風魔小宵 / Fuuma Koyoi",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I&t=2371s",
-      "sourceId": "UgwPetsXrzXgFfFJ7Al4AaABAg",
-      "sourceHash": "76ac3d497fdaabd72563d9479906f734b33688b199b5d9767b25fb01183b680c",
-      "sourceOrigin": "review:oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:oHSrPEGbJ-I:76ac3d497fdaabd72563",
-      "sourcePath": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
-      "reviewLocator": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json#f3c5ed83450942542a684da536cb0d06a78b199f95bf97ce8ab7148a2c756252"
-    },
-    {
-      "title": "ENDING",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 8833,
-      "time": "2:27:13",
-      "raw": "02:27:13 ENDING",
-      "rawHash": "b1bebe9a67163cab8143160fccd36656b7b0fc10292c568230dafac7bdd14652",
-      "videoId": "oHSrPEGbJ-I",
-      "videoTitle": "【#歌枠｜#KARAOKE】❖キレイ系ソング歌う！伸びやかな歌声、ここにあります！✨ ❖【ゆにふぃ！｜#風魔小宵】",
-      "channelName": "風魔小宵 / Fuuma Koyoi",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oHSrPEGbJ-I&t=8833s",
-      "sourceId": "UgwPetsXrzXgFfFJ7Al4AaABAg",
-      "sourceHash": "76ac3d497fdaabd72563d9479906f734b33688b199b5d9767b25fb01183b680c",
-      "sourceOrigin": "review:oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:oHSrPEGbJ-I:76ac3d497fdaabd72563",
-      "sourcePath": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json",
-      "reviewLocator": "data/review/sources/oHSrPEGbJ-I-76ac3d497fdaabd72563.json#b1bebe9a67163cab8143160fccd36656b7b0fc10292c568230dafac7bdd14652"
-    },
-    {
       "title": "スタート",
       "artist": "未記載",
       "isNiche": true,
@@ -6343,160 +6387,6 @@
       "reviewId": "review:uRKNhEOx0Hs:32dac2d03f3f75aea9ad",
       "sourcePath": "data/review/sources/history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json",
       "reviewLocator": "data/review/sources/history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json#7e6723d1d7e7e90574847735677c486e4259fc7a18344450abe4532c34ad3d74"
-    },
-    {
-      "title": "スタート",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 0,
-      "time": "0:00:00",
-      "raw": "00:00:00 スタート",
-      "rawHash": "a73821baea8e670ddb7eaa7a0687b7749902471453d62164a6fac5ec2ae10aca",
-      "videoId": "gVYI7q070fg",
-      "videoTitle": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
-      "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gVYI7q070fg&t=0s",
-      "sourceId": "UgyTNfWQx-ndKgbnUad4AaABAg",
-      "sourceHash": "8c4c82a48c4e0a3a3cf62e1a8e668f455c7626f176087dc84cfc7d5d7b345c78",
-      "sourceOrigin": "review:gVYI7q070fg-8c4c82a48c4e0a3a3cf6.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "activity_marker_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:gVYI7q070fg:8c4c82a48c4e0a3a3cf6",
-      "sourcePath": "data/review/sources/gVYI7q070fg-8c4c82a48c4e0a3a3cf6.json",
-      "reviewLocator": "data/review/sources/gVYI7q070fg-8c4c82a48c4e0a3a3cf6.json#a73821baea8e670ddb7eaa7a0687b7749902471453d62164a6fac5ec2ae10aca"
-    },
-    {
-      "title": "ありがとう～盛り上がって良い汗かいたね！　2時間に1曲位の音ズレなら許容範囲かな？",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6784,
-      "time": "1:53:04",
-      "raw": "01:53:04 ありがとう～盛り上がって良い汗かいたね！ 2時間に1曲位の音ズレなら許容範囲かな？",
-      "rawHash": "70aa1a5ce7fe91f0ad9d68ee297f5dc7e93c1575de387b3c57a33e237abdde0b",
-      "videoId": "gVYI7q070fg",
-      "videoTitle": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
-      "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gVYI7q070fg&t=6784s",
-      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
-      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
-      "sourceOrigin": "review:gVYI7q070fg-be7eadd745e478f87b83.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "conversation_entry",
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:gVYI7q070fg:be7eadd745e478f87b83",
-      "sourcePath": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json",
-      "reviewLocator": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json#70aa1a5ce7fe91f0ad9d68ee297f5dc7e93c1575de387b3c57a33e237abdde0b"
-    },
-    {
-      "title": "雑談　杣菜さんとご飯！",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6882,
-      "time": "1:54:42",
-      "raw": "01:54:42 雑談 杣菜さんとご飯！",
-      "rawHash": "3fca2d42fdf1f314a1d026fd467863cf3cb13d36a3b1f53454e94f6a81714ed1",
-      "videoId": "gVYI7q070fg",
-      "videoTitle": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
-      "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gVYI7q070fg&t=6882s",
-      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
-      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
-      "sourceOrigin": "review:gVYI7q070fg-be7eadd745e478f87b83.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "conversation_entry",
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:gVYI7q070fg:be7eadd745e478f87b83",
-      "sourcePath": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json",
-      "reviewLocator": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json#3fca2d42fdf1f314a1d026fd467863cf3cb13d36a3b1f53454e94f6a81714ed1"
-    },
-    {
-      "title": "ありがとうございました！ 音ズレは許容範囲かな？　土曜日の配信でも検証していきたいです！　みなさんで配信を作って行きましょう！",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7681,
-      "time": "2:08:01",
-      "raw": "02:08:01 ありがとうございました！ 音ズレは許容範囲かな？ 土曜日の配信でも検証していきたいです！ みなさんで配信を作って行きましょう！",
-      "rawHash": "5686c22c1f3b148dddefebf6ad893e0e456bacc1c6302b40df9bf508ea333683",
-      "videoId": "gVYI7q070fg",
-      "videoTitle": "音ズレ検証中の準備中VTuber★【 歌枠 / karaoke 】#歌枠 #shorts",
-      "channelName": "杣菜つくもちゃんねーる 2026年9月再デビュー",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=gVYI7q070fg",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gVYI7q070fg&t=7681s",
-      "sourceId": "UgxJoXEyoc3gW6ROVuN4AaABAg",
-      "sourceHash": "be7eadd745e478f87b83266a2e86eae423eb42e19c7cc51dfef3816e8a8a3a43",
-      "sourceOrigin": "review:gVYI7q070fg-be7eadd745e478f87b83.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "conversation_entry",
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:gVYI7q070fg:be7eadd745e478f87b83",
-      "sourcePath": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json",
-      "reviewLocator": "data/review/sources/gVYI7q070fg-be7eadd745e478f87b83.json#5686c22c1f3b148dddefebf6ad893e0e456bacc1c6302b40df9bf508ea333683"
     },
     {
       "title": "お名前呼び",

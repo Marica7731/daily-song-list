@@ -165,13 +165,14 @@ function cleanSafeTitleCandidate(value) {
   if (!text) return "";
   text = stripCustomEmojiAliases(text);
   text = text
-    .replace(/^[\s\u3000\u200b-\u200f\u202a-\u202e│┃┏┗┣┳┻━─┬┴┌┐┘┤┼├└╟╠╚╔╩╦╬╞╰╭╮╯꒱]+/u, "")
+    .replace(/^[\s\u3000\u200b-\u200f\u202a-\u202e\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F│┃┏┗┣┳┻━─┬┴┌┐┘┤┼├└╟╠╚╔╩╦╬╞╰╭╮╯꒱⁅⁆]+/u, "")
     .replace(/^(?:【\s*(?:セットリスト|セトリ|リクエスト)\s*】|\[\s*(?:set\s*list|request)\s*\])\s*/iu, "")
     .replace(
       /^(?:未記載|未记载|待补歌手|待補歌手|待补|待補)\s+(?=(?:[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]|[mｍ]?\d{1,3}[.．]|[#＃]?\d{1,3}\s*[≫»>]|[#＃]?\d{1,3}\s*[)）、:：]))/iu,
       "",
     )
     .trim();
+  text = stripDecorativeNumberBullet(text);
   text = text
     .replace(
       /^(?:[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*|[mｍ]\d{1,3}[.．]\s*|\d{1,3}\s*[≫»>]+\s*|[#＃]?\d{1,3}[.．](?!\d)\s*|[#＃]?\d{1,3}\s*[)）、:：]\s*)/iu,
@@ -212,6 +213,15 @@ function stripUnpairedTrailingCloseBracket(value) {
 
 function countChar(value, char) {
   return [...String(value || "")].filter((item) => item === char).length;
+}
+
+function stripDecorativeNumberBullet(value) {
+  return String(value || "")
+    .replace(
+      /^[＊*]\s*(?=(?:[#＃]?[\d０-９]{1,3}[.．](?![\d０-９])|[#＃]?[\d０-９]{1,3}[)）、:：]|[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]|[mｍ][\d０-９]{1,3}[.．]))/iu,
+      "",
+    )
+    .trim();
 }
 
 function stripCrossFieldWrapper(titleInput, artistInput) {
@@ -457,6 +467,7 @@ function isActivityOrAnnouncementText(value, song = {}) {
   const title = cleanSafeTitleCandidate(value);
   const artist = String(song?.artist || "").trim();
   const combined = `${title} ${artist} ${song?.raw || ""}`;
+  if (/^(?:\d+次会|達成[!！]?|歌みたの話)$/u.test(title)) return true;
   if (/^(?:閉会式|開会式)$/u.test(title)) return true;
   return /(?:手で表現した|お写真公開|写真公開|ライブ開催決定|出演決定|フェス.*決定|お披露目で.+やりたい|スタンドマイク回したかった|謝罪会見|改めて謝罪|ばいちょろり.*終了|マリパのわさび事件)/iu.test(combined);
 }

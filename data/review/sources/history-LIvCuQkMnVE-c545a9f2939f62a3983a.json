@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:LIvCuQkMnVE:c545a9f2939f62a3983a",
   "video": {
     "videoId": "LIvCuQkMnVE",
@@ -15,16 +15,17 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260714T220000Z"
+    "snapshotId": "20260714T230000Z"
   },
   "risk": {
-    "riskScore": 44,
-    "riskLevel": "medium",
+    "riskScore": 80,
+    "riskLevel": "high",
     "riskReasons": [
       "niche_unknown_artist",
       "source_multiple_unknown_artists",
       "source_multiple_niche_short_titles",
-      "short_unknown_title"
+      "short_unknown_title",
+      "activity_marker_title"
     ]
   },
   "entries": [
@@ -311,13 +312,15 @@
       "sourceId": "selected:LIvCuQkMnVE:c545a9f2939f62a3",
       "sourceHash": "c545a9f2939f62a3983aab81e347b77c5426da5ad8afb19a4531abdecee6d52a",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
       ],
       "positiveEvidence": []
     }

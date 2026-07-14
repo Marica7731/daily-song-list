@@ -124,6 +124,7 @@ function isLikelyNonSongEntry(song) {
   if (isBlockedSongEntry({ title, artist, raw })) return true;
   if (!hasArtist && isChatReactionShoutText(title)) return true;
   if (isReactionActivityEntry(title, artist, raw)) return true;
+  if (!hasArtist && /^(?:\d+次会|達成[!！]?|歌みたの話)$/u.test(title)) return true;
   if (/^(音入り|音入[り]?|声入り|マイクテスト|開始|終了|曲始まり|オープニング|エンディング|登場|退場|ゲスト|スパチャ読み|読み開始|コメント読み|告知|雑談|休憩|ただいま|まで)$/iu.test(title)) {
     return true;
   }
@@ -286,18 +287,28 @@ function stripLeadingTimelineDecorations(text) {
   let value = normalizeTimelineChars(text).trim();
   for (let idx = 0; idx < 4; idx += 1) {
     const original = value;
-    value = value.replace(/^[\]】)）⟧］」』]+\s*/u, "").trim();
+    value = value.replace(/^[\]】)）⟧］」』⁆]+\s*/u, "").trim();
     value = value
       .replace(/^(?:[\[【(（]\s*)?\d{1,2}:\d{2}(?::\d{2})?\s*(?:[\]】)）])?(?:[\s\u3000]*[;；,，、~～\-—–−:：]+\s*)?/u, "")
       .trim();
     value = value.replace(/^(?:Re\s*[:：]\s*|【\s*\d{1,3}\s*】\s*|\[\s*\d{1,3}\s*\]\s*|\(\s*\d{1,3}\s*\)\s*)/iu, "").trim();
     value = value.replace(/^\d{1,3}\s*(?:曲\s*[\/／]|[,，\-—–−:：]\s*|[.)．。、]\s+)/u, "").trim();
+    value = stripLeadingDecorativeNumberBullet(value);
     value = value
-      .replace(/^[\u200b-\u200f\u202a-\u202e\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼→⇒꒱\s]+/u, "")
+      .replace(/^[\u200b-\u200f\u202a-\u202e\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼→⇒꒱⁅⁆\s]+/u, "")
       .trim();
     if (value === original) break;
   }
   return value.replace(/^[\s\t\-–—:：.、]+|[\s\t\-–—:：.、]+$/g, "");
+}
+
+function stripLeadingDecorativeNumberBullet(value) {
+  return String(value || "")
+    .replace(
+      /^[＊*]\s*(?=(?:[#＃]?[\d０-９]{1,3}[.．](?![\d０-９])|[#＃]?[\d０-９]{1,3}[)）、:：]|[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]|[mｍ][\d０-９]{1,3}[.．]))/iu,
+      "",
+    )
+    .trim();
 }
 
 function extractSongArtistCore(text) {
@@ -381,6 +392,7 @@ function cleanSongOrArtistPart(text) {
   if (!shouldPreserveDecimalSongTitle(value)) value = cleanSongTitleNoise(value).trim();
   value = value.replace(/^_[A-Za-z0-9]+:\s*/u, "").trim();
   const preserveTrailingDoubleSlash = /[A-Za-z0-9)\]）]\/\/\s*$/.test(value);
+  value = stripLeadingDecorativeNumberBullet(value);
   value = value.replace(/^\s*(?:[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*|\d{1,3}\s*[≫»>]+\s*|\d{1,3}\s*[\-—–−]|[#＃]\s*\d{1,3}\s*[.)．。、:：\-—–−]?|encore|アンコール)\s*/iu, "").trim();
   if (!shouldPreserveDecimalSongTitle(value)) value = cleanSongTitleNoise(value).trim();
   value = value.replace(/^[\[［]+|[\]］]+$/g, "").trim();
@@ -456,6 +468,7 @@ function isSongArtistOnlyLine(text) {
 function isObviouslyNonSongText(text) {
   const value = stripWeirdLeadingChars(text);
   if (!value) return true;
+  if (/^(?:\d+次会|達成[!！]?|歌みたの話)$/u.test(value)) return true;
   if (/^(開始|结束|終了|end|start|talk|talk[_-]?\d+|mc|雑談|聊天|感想|告知|返场|休息|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|読み開始|ただいま)$/iu.test(value)) {
     return true;
   }
@@ -468,6 +481,7 @@ function isObviouslyNonSongText(text) {
 function isObviouslyNonSongTitleCandidate(text) {
   const value = normalizeSectionMarker(text);
   if (!value) return true;
+  if (/^(?:\d+次会|達成|歌みたの話)$/u.test(value)) return true;
   if (/^(配信)?start|starting|op|ed|edtalk|optalk|talk\d*|mc|雑談|告知|お知らせ|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|スタート|アカペラver|はのは[ー〜～]*|読み開始|ただいま$/iu.test(value)) {
     return true;
   }
@@ -590,7 +604,7 @@ function timeToSeconds(value) {
 
 function stripWeirdLeadingChars(text) {
   return String(text || "")
-    .replace(/^[\s\u3000\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼→⇒]+/u, "")
+    .replace(/^[\s\u3000\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼→⇒⁅⁆]+/u, "")
     .trim();
 }
 

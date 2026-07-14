@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:uRQJhSnOb-I:102588f085633f8c1d59",
   "video": {
     "videoId": "uRQJhSnOb-I",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260714T220000Z"
+    "snapshotId": "20260714T230000Z"
   },
   "risk": {
     "riskScore": 44,
@@ -248,10 +248,14 @@
       "sourceId": "selected:uRQJhSnOb-I:102588f085633f8c",
       "sourceHash": "102588f085633f8c1d595fe0b6359c85406ba9f179679704d6b09ec97c009d0b",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "星月夜"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"

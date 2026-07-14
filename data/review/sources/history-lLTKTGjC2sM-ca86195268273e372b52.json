@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:lLTKTGjC2sM:ca86195268273e372b52",
   "video": {
     "videoId": "lLTKTGjC2sM",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260714T220000Z"
+    "snapshotId": "20260714T230000Z"
   },
   "risk": {
     "riskScore": 14,
@@ -174,10 +174,14 @@
       "sourceId": "UgyKKDQpooVftWcu5r94AaABAg",
       "sourceHash": "ca86195268273e372b52757b210fdc817b37eb4b24533d2d4bdd32ffba2c2ffc",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "31:33　【Tiger - KINISHY ver from Audition “No No Girls”】"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_artist"
       ]

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:bQtUhOfrJC0:ff47a8cf68fe595ecfb3",
   "video": {
     "videoId": "bQtUhOfrJC0",
@@ -15,17 +15,16 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260714T220000Z"
+    "snapshotId": "20260714T230000Z"
   },
   "risk": {
-    "riskScore": 100,
+    "riskScore": 88,
     "riskLevel": "high",
     "riskReasons": [
-      "source_unknown_artist_ratio_high",
-      "kept_count_high_low_known_song_density",
-      "niche_unknown_artist",
       "source_multiple_unknown_artists",
+      "niche_unknown_artist",
       "source_multiple_niche_short_titles",
+      "activity_marker_title",
       "short_unknown_title"
     ]
   },
@@ -41,14 +40,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "狂乱 Hey Kids!!"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -61,12 +63,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "Fiction"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -81,12 +86,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "MATSURI BAYASHI"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -101,14 +109,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "KICK BACK"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -121,12 +132,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ノロ"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -141,12 +155,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "絶対零度"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -161,14 +178,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ダーリン"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -181,14 +201,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ミックスナッツ"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -201,14 +224,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "栞"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -221,14 +247,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "セレナーデ"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -241,14 +270,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "About me"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -261,14 +293,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "不可抗力"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -281,14 +316,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "SHAMROCK"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -301,14 +339,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "阿修羅ちゃん"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -321,12 +362,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "IN_MY_HEAD"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -341,14 +385,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "GURU"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -361,14 +408,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ふっかつのじゅもん"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -381,12 +431,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "MONSTER DANCE"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -401,14 +454,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "テレキャスタービーボーイ"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -441,14 +497,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "unravel"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -461,14 +520,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ゴーストルール"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -481,14 +543,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "偽物人間40号"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -501,14 +566,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "爆笑"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -521,14 +589,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ハレンチ"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -541,14 +612,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "おやすみ泣き声、さよなら歌姫"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -561,14 +635,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "フライデーナイト"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -581,12 +658,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "目に緋色"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -601,12 +681,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "化け猫"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -621,12 +704,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ルシファー"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -641,14 +727,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "脱法ロック"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -661,12 +750,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "インザバックルーム"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -681,14 +773,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "エゴロック"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -701,14 +796,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "高嶺の花子さん"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -721,14 +819,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "絶え間なく藍色"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -741,11 +842,16 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "プロポーズ"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ]
     },
@@ -760,14 +866,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ray"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -780,14 +889,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ずうっといっしょ！"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -800,14 +912,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "虚ろを扇ぐ"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -820,12 +935,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "アディショナルメモリー"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -840,14 +958,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ヒバナ"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -860,14 +981,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "IRIS OUT"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -880,12 +1004,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ヒューマン"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -900,14 +1027,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "ジャンキーナイトタウンオーケストラ"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -920,12 +1050,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "アイロニーナ"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -940,14 +1073,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "怪獣の花唄"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -960,14 +1096,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "地獄でなぜ悪い"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -980,14 +1119,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "人生は夢だらけ"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -1000,14 +1142,17 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "napori"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -1020,12 +1165,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "有夜無夜"
+      },
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "parser_corruption"
       ],
       "positiveEvidence": []
     },
@@ -1040,13 +1188,15 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "activity_marker_title",
         "niche_unknown_artist",
         "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
       ],
       "positiveEvidence": []
     },
@@ -1061,12 +1211,14 @@
       "sourceId": "selected:bQtUhOfrJC0:ff47a8cf68fe595e",
       "sourceHash": "ff47a8cf68fe595ecfb3795b415f70c4fbe3fe0816572e3f2ba259c2d979283e",
       "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
       "replacementSuggestion": null,
       "riskReasons": [
+        "activity_marker_title",
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "source_multiple_unknown_artists",
+        "activity_or_announcement"
       ],
       "positiveEvidence": []
     }

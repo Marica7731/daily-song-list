@@ -278,6 +278,31 @@ test("cleans decorated indexes and rejects announcement action dirty samples", (
   );
 });
 
+test("cleans decorated list prefixes from current dirty timeline samples", () => {
+  const songs = parseTimestampSongs([
+    [
+      "⁅00:15:50⁆🦊03.星間飛行 /中島愛",
+      "19:26  ＊ 04. KICK BACK",
+      "1:15:31 ＊〜アスタリスク〜 / ORANGE RANGE",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["星間飛行", "KICK BACK", "＊〜アスタリスク〜"],
+  );
+  assert.deepEqual(
+    songs.map((song) => song.artist),
+    ["中島愛", "未記載", "ORANGE RANGE"],
+  );
+});
+
+test("rejects afterparty and non-song tail markers from current dirty samples", () => {
+  const songs = parseTimestampSongs([["01:27:06 3次会", "4:13:42 達成！", "4:26:12 歌みたの話"].join("\n")]);
+
+  assert.deepEqual(songs, []);
+});
+
 test("keeps song rows with guest annotations in work metadata", () => {
   const songs = parseTimestampSongs(["60曲目 3:58:12 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(特別ゲスト ケンリュウ)"]);
 

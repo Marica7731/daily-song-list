@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
   "video": {
     "videoId": "MrGxz0q6Py0",
@@ -242,13 +242,19 @@
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
       "isNiche": false,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "パラソルサイダー",
+        "artist": "ナナホシ管弦楽団"
+      },
       "riskReasons": [
-        "source_multiple_unknown_artists",
-        "no_positive_song_evidence"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song",
+        "known_artist"
+      ]
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:MQBlydpkgJU:003898f0119a5eb249cb",
   "video": {
     "videoId": "MQBlydpkgJU",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260714T220000Z"
+    "snapshotId": "20260714T230000Z"
   },
   "risk": {
     "riskScore": 14,
@@ -75,10 +75,14 @@
       "sourceId": "selected:MQBlydpkgJU:003898f0119a5eb2",
       "sourceHash": "003898f0119a5eb249cb947d35065ea3b1b78e04c7e732c9aaf7378796bf33fc",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "君をのせて"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"
@@ -152,10 +156,14 @@
       "sourceId": "selected:MQBlydpkgJU:003898f0119a5eb2",
       "sourceHash": "003898f0119a5eb249cb947d35065ea3b1b78e04c7e732c9aaf7378796bf33fc",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "永遠のあくる日"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"
@@ -210,10 +218,14 @@
       "sourceId": "selected:MQBlydpkgJU:003898f0119a5eb2",
       "sourceHash": "003898f0119a5eb249cb947d35065ea3b1b78e04c7e732c9aaf7378796bf33fc",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "CH4NGE"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"
@@ -288,10 +300,14 @@
       "sourceId": "selected:MQBlydpkgJU:003898f0119a5eb2",
       "sourceHash": "003898f0119a5eb249cb947d35065ea3b1b78e04c7e732c9aaf7378796bf33fc",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "女々しくて"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"

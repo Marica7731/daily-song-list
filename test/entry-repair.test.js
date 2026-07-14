@@ -127,6 +127,9 @@ test("cleans safe title decorations without overwriting raw text", () => {
   assert.equal(cleanSafeTitleCandidate("01≫アンノウン・マザーグース"), "アンノウン・マザーグース");
   assert.equal(cleanSafeTitleCandidate("待补歌手 01≫アンノウン・マザーグース"), "アンノウン・マザーグース");
   assert.equal(cleanSafeTitleCandidate("꒱‬ 01. 初恋サイダー"), "初恋サイダー");
+  assert.equal(cleanSafeTitleCandidate("⁆🦊03.星間飛行"), "星間飛行");
+  assert.equal(cleanSafeTitleCandidate("＊ 04. KICK BACK"), "KICK BACK");
+  assert.equal(cleanSafeTitleCandidate("＊〜アスタリスク〜"), "＊〜アスタリスク〜");
   assert.equal(cleanSafeTitleCandidate("②どんな色が好き"), "どんな色が好き");
   assert.equal(cleanSafeTitleCandidate("M1.わたがし:_レオペンライト:"), "わたがし");
 
@@ -211,6 +214,9 @@ test("exposes curation signals for announcement action and numeric pseudo titles
     { title: "2周年記念お写真公開！", artist: "未記載", reason: "activity_or_announcement" },
     { title: "3Dお披露目でスタンドマイク回したかった", artist: "永ちゃんやりたい", reason: "activity_or_announcement" },
     { title: "〜3Dライブ開催決定!!!!", artist: "未記載", reason: "activity_or_announcement" },
+    { title: "3次会", artist: "未記載", reason: "activity_or_announcement" },
+    { title: "達成！", artist: "未記載", reason: "activity_or_announcement" },
+    { title: "歌みたの話", artist: "未記載", reason: "activity_or_announcement" },
     { title: "02.441", artist: "miwa", reason: "numeric_pseudo_title" },
   ];
 

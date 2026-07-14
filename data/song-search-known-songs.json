@@ -8,7 +8,8 @@
     "rawIndexUrl": "https://raw.githubusercontent.com/Marica7731/song-search/main/data/index.json",
     "pagesBaseUrl": "https://marica7731.github.io/song-search",
     "rawBaseUrl": "https://raw.githubusercontent.com/Marica7731/song-search/main",
-    "workflowUrl": "https://github.com/Marica7731/song-search/actions/workflows/update.yml"
+    "workflowUrl": "https://github.com/Marica7731/song-search/actions/workflows/update.yml",
+    "supplementalKnownSongsPath": "config/song-search-known-overrides.json"
   },
   "manifestFileCount": 54,
   "fileCount": 52,
@@ -13849,6 +13850,15 @@
         "suu_usuwa.js",
         "yuri.js"
       ]
+    }
+  ],
+  "supplementalKnownSongCount": 1,
+  "supplementalKnownSongs": [
+    {
+      "title": "高鳴る",
+      "artist": "藤田麻衣子",
+      "reason": "manual_known_song_confirmation",
+      "reviewedAt": "2026-07-15"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:6Yr7EJ9tZhY:ed9e22068fa16c9b0cf7",
   "video": {
     "videoId": "6Yr7EJ9tZhY",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260714T220000Z"
+    "snapshotId": "20260714T230000Z"
   },
   "risk": {
     "riskScore": 14,
@@ -94,10 +94,14 @@
       "sourceId": "selected:6Yr7EJ9tZhY:ed9e22068fa16c9b",
       "sourceHash": "ed9e22068fa16c9b0cf74c88753d7c15684ca565b40220b84629aec454e2dfb3",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "灼熱にて純情(wii-wii-woo)"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"

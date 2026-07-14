@@ -5,6 +5,7 @@ const {
   annotatePayloadWithSongSearchNiche,
   buildSongSearchIndex,
   fetchSongSearchIndex,
+  mergeSupplementalKnownSongs,
   parseSongSearchDataFile,
 } = require("../scripts/song-search-index");
 const { createSongAliasContext } = require("../scripts/song-aliases");
@@ -84,6 +85,39 @@ test("annotates payload songs as niche when they are absent from song-search", (
   assert.deepEqual(
     annotated.groups["72h"].items[0].songs.map((song) => song.isNiche),
     [false, true],
+  );
+});
+
+test("merges supplemental known song overrides into niche annotation", () => {
+  const index = mergeSupplementalKnownSongs(
+    buildSongSearchIndex([{ title: "Known Song", artist: "Known Artist" }], {
+      generatedAt: "2026-07-11T00:00:00.000Z",
+      files: ["known.js"],
+    }),
+    [{ title: "高鳴る", artist: "藤田麻衣子", reason: "manual_known_song_confirmation" }],
+  );
+  const payload = {
+    groups: {
+      "1m": {
+        items: [
+          {
+            videoId: "DDDDDDDDDDD",
+            songs: [
+              { title: "高鳴る", artist: "藤田麻衣子", seconds: 1, time: "0:00:01" },
+              { title: "高鳴る", artist: "未記載", seconds: 2, time: "0:00:02" },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const annotated = annotatePayloadWithSongSearchNiche(payload, index);
+
+  assert.equal(index.supplementalKnownSongCount, 1);
+  assert.deepEqual(
+    annotated.groups["1m"].items[0].songs.map((song) => song.isNiche),
+    [false, false],
   );
 });
 

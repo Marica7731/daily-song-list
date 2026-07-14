@@ -93,16 +93,20 @@ test("normalizes song title punctuation and list markers before grouping", () =>
     occurrence("『 少女レイ 』", "", "B"),
     occurrence("⑪少女レイ", "", "C"),
     occurrence("14| 少女レイ", "", "D"),
+    occurrence("⁆🦊03.少女レイ", "", "E"),
+    occurrence("＊ 04. 少女レイ", "", "F"),
   ]);
 
   assert.equal(records.length, 1);
   assert.equal(records[0].title, "少女レイ");
-  assert.equal(records[0].count, 4);
+  assert.equal(records[0].count, 6);
 });
 
 test("numeric dot title keys stay distinct from stripped list indexes", () => {
   assert.equal(normalizeSongTitleKey("01. Song"), "song");
   assert.equal(normalizeSongTitleKey("01) Song"), "song");
+  assert.equal(normalizeSongTitleKey("⁆🦊03.星間飛行"), normalizeSongTitleKey("星間飛行"));
+  assert.equal(normalizeSongTitleKey("＊ 04. KICK BACK"), normalizeSongTitleKey("KICK BACK"));
   assert.notEqual(normalizeSongTitleKey("8.32"), normalizeSongTitleKey("32"));
   assert.notEqual(normalizeSongTitleKey("2.500♪"), normalizeSongTitleKey("500♪"));
 

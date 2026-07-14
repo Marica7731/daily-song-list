@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
-  "curationVersion": "curation-v1:6193201176e1",
-  "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-  "totalSongs": 17012,
-  "unknownArtistCount": 2945,
-  "nicheUnknownArtistCount": 1532,
-  "highRiskEntryCount": 538,
-  "highRiskSourceCount": 19,
+  "generatedAt": "2026-07-14T23:49:35.907Z",
+  "curationVersion": "curation-v1:12c32dcbcb07",
+  "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
+  "totalSongs": 17157,
+  "unknownArtistCount": 2962,
+  "nicheUnknownArtistCount": 1475,
+  "highRiskEntryCount": 487,
+  "highRiskSourceCount": 18,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 11,
+  "ruleDroppedEntryCount": 6,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 14,
-  "parserCorruptionCount": 27,
-  "likelyNoiseCount": 1,
-  "needsReviewCount": 1529,
-  "likelySongCount": 9768,
+  "confirmedNoiseCount": 7,
+  "parserCorruptionCount": 25,
+  "likelyNoiseCount": 0,
+  "needsReviewCount": 1467,
+  "likelySongCount": 9553,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -43,12 +43,12 @@
     },
     {
       "value": "IRIS OUT",
-      "count": 14,
+      "count": 15,
       "classifications": {
-        "likely_song": 14
+        "likely_song": 15
       },
       "riskReasons": {
-        "known_song_unknown_artist": 14
+        "known_song_unknown_artist": 15
       }
     },
     {
@@ -74,17 +74,17 @@
       }
     },
     {
-      "value": "HOT LIMIT",
-      "count": 8,
+      "value": "ray",
+      "count": 9,
       "classifications": {
-        "likely_song": 8
+        "likely_song": 9
       },
       "riskReasons": {
-        "known_song_unknown_artist": 8
+        "known_song_unknown_artist": 9
       }
     },
     {
-      "value": "ray",
+      "value": "HOT LIMIT",
       "count": 8,
       "classifications": {
         "likely_song": 8
@@ -156,6 +156,16 @@
       }
     },
     {
+      "value": "怪獣の花唄",
+      "count": 7,
+      "classifications": {
+        "likely_song": 7
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 7
+      }
+    },
+    {
       "value": "アイネクライネ",
       "count": 6,
       "classifications": {
@@ -196,16 +206,6 @@
       }
     },
     {
-      "value": "怪獣の花唄",
-      "count": 6,
-      "classifications": {
-        "likely_song": 6
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 6
-      }
-    },
-    {
       "value": "君の知らない物語",
       "count": 6,
       "classifications": {
@@ -233,18 +233,10 @@
     },
     {
       "value": "汐音ベリーちゃん Berry Ch",
-      "count": 7
-    },
-    {
-      "value": "Kyoka Ch. -響架-",
       "count": 6
     },
     {
       "value": "MUZU‐むずちゃんねる‐【Vtuber】",
-      "count": 4
-    },
-    {
-      "value": "ひーくん / hi-kun",
       "count": 4
     },
     {
@@ -253,10 +245,6 @@
     },
     {
       "value": "音魂ヒビクHibiku Otodama",
-      "count": 4
-    },
-    {
-      "value": "菜鳥ひなた / Hinata Natori",
       "count": 4
     },
     {
@@ -269,6 +257,10 @@
     },
     {
       "value": "Hibiki ch🔴💦叶 響",
+      "count": 3
+    },
+    {
+      "value": "Kyoka Ch. -響架-",
       "count": 3
     },
     {
@@ -288,11 +280,15 @@
       "count": 3
     },
     {
-      "value": "ただのかえる【TADANO KAERU】",
+      "value": "うさ丸 usamaru",
       "count": 3
     },
     {
       "value": "ノア・ポラリス -Noa Polaris-",
+      "count": 3
+    },
+    {
+      "value": "ひーくん / hi-kun",
       "count": 3
     },
     {
@@ -305,6 +301,10 @@
     },
     {
       "value": "音羽奏來 - Otoha Sora -",
+      "count": 3
+    },
+    {
+      "value": "音鍵めろ / Otokagi Mero",
       "count": 3
     }
   ],
@@ -352,21 +352,6 @@
       ]
     },
     {
-      "videoId": "bQtUhOfrJC0",
-      "title": "【歌枠】2周年ありがとう！50曲歌います！歌ったら告知します！【鬼ヶ谷テン/ネオポルテ】",
-      "channelName": "鬼ヶ谷 テン / Onigaya Ten",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "kept_count_high_low_known_song_density",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
-    },
-    {
       "videoId": "YUPSzDJm2jU",
       "title": "【軌跡歌枠】空の軌跡 the 1stが無料プレイ期間中なので軌跡シリーズの歌を歌う！【紫ノ愛ヨミ/Vtuber】",
       "channelName": "紫ノ愛ヨミ",
@@ -389,8 +374,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "source_multiple_niche_short_titles",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
       ]
     },
     {
@@ -584,10 +569,47 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
+    },
+    {
+      "videoId": "8ddC8VUr0xw",
+      "title": "【夜の弾き語り】ハナレグミ『発光帯』から始まる、生演奏と雑談202607",
+      "channelName": "Akinori IZAWA 『GAIB!!!』",
+      "riskScore": 68,
+      "riskLevel": "medium",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-14T23:49:35.907Z",
+      "totalSongs": 17157,
+      "unknownArtistCount": 2962,
+      "nicheUnknownArtistCount": 1475,
+      "highRiskEntryCount": 487,
+      "highRiskSourceCount": 18
+    },
+    {
+      "generatedAt": "2026-07-14T23:40:06.691Z",
+      "totalSongs": 17009,
+      "unknownArtistCount": 2956,
+      "nicheUnknownArtistCount": 1502,
+      "highRiskEntryCount": 487,
+      "highRiskSourceCount": 18
+    },
+    {
+      "generatedAt": "2026-07-14T23:37:54.362Z",
+      "totalSongs": 17009,
+      "unknownArtistCount": 2956,
+      "nicheUnknownArtistCount": 1502,
+      "highRiskEntryCount": 487,
+      "highRiskSourceCount": 18
+    },
     {
       "generatedAt": "2026-07-14T22:38:46.610Z",
       "totalSongs": 17012,
@@ -723,30 +745,6 @@
       "nicheUnknownArtistCount": 1425,
       "highRiskEntryCount": 410,
       "highRiskSourceCount": 17
-    },
-    {
-      "generatedAt": "2026-07-13T12:59:25.966Z",
-      "totalSongs": 13863,
-      "unknownArtistCount": 2784,
-      "nicheUnknownArtistCount": 1425,
-      "highRiskEntryCount": 410,
-      "highRiskSourceCount": 17
-    },
-    {
-      "generatedAt": "2026-07-13T12:22:50.673Z",
-      "totalSongs": 13866,
-      "unknownArtistCount": 2786,
-      "nicheUnknownArtistCount": 1424,
-      "highRiskEntryCount": 409,
-      "highRiskSourceCount": 17
-    },
-    {
-      "generatedAt": "2026-07-13T04:45:12.479Z",
-      "totalSongs": 13447,
-      "unknownArtistCount": 2782,
-      "nicheUnknownArtistCount": 1421,
-      "highRiskEntryCount": 402,
-      "highRiskSourceCount": 16
     }
   ]
 }

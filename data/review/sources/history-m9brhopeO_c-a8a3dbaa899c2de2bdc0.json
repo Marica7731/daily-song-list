@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:m9brhopeO_c:a8a3dbaa899c2de2bdc0",
   "video": {
     "videoId": "m9brhopeO_c",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260714T220000Z"
+    "snapshotId": "20260714T230000Z"
   },
   "risk": {
     "riskScore": 14,
@@ -116,10 +116,14 @@
       "sourceId": "selected:m9brhopeO_c:a8a3dbaa899c2de2",
       "sourceHash": "a8a3dbaa899c2de2bdc093f89d473a290f59e5f8f707bdb75dca0ad9244c2fa0",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "怪獣"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"

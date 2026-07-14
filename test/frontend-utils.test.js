@@ -714,16 +714,19 @@ test("song-search lookup annotates and filters niche songs", () => {
 
 test("song-search lookup tolerates list markers and artist text leaked into titles", () => {
   const lookup = createSongSearchLookup({
-    titleKeys: [normalizeSongSearchText("少女レイ"), normalizeSongSearchText("鬼ノ宴")],
+    titleKeys: [normalizeSongSearchText("少女レイ"), normalizeSongSearchText("鬼ノ宴"), normalizeSongSearchText("星間飛行"), normalizeSongSearchText("KICK BACK")],
     titleArtistKeys: [
       normalizeSongSearchText("少女レイ") + "::" + normalizeSongSearchText("みきとP"),
       normalizeSongSearchText("鬼ノ宴") + "::" + normalizeSongSearchText("友成空"),
+      normalizeSongSearchText("星間飛行") + "::" + normalizeSongSearchText("中島愛"),
     ],
   });
 
   assert.equal(isSongSearchKnown(song("少女レイ\tみきとP", "未記載"), lookup), true);
   assert.equal(isSongSearchKnown(song("⑪少女レイ", "みきとP"), lookup), true);
   assert.equal(isSongSearchKnown(song("「鬼ノ宴」友成空", "未記載"), lookup), true);
+  assert.equal(isSongSearchKnown(song("⁆🦊03.星間飛行", "中島愛"), lookup), true);
+  assert.equal(isSongSearchKnown(song("＊ 04. KICK BACK", "未記載"), lookup), true);
   assert.equal(isSongSearchKnown(song("unknown song\tみきとP", "未記載"), lookup), false);
 
   const payload = {

@@ -4,6 +4,7 @@ const crypto = require("node:crypto");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION, matchBlockedSource } = require("../assets/source-filter");
 const { NON_SONG_RULES_PATH, OVERRIDES_PATH, validateCurationOverrides } = require("./curation");
 const { SONG_ALIASES_PATH, canonicalizeSongIdentity, loadSongAliasContext, validateSongAliasConfig } = require("./song-aliases");
+const { SUPPLEMENTAL_KNOWN_SONGS_PATH, loadSupplementalKnownSongs } = require("./song-search-index");
 const { MONTH_CATALOG_DAYS, VIDEO_CATALOG_PATH, isWithinCatalogWindow } = require("./video-catalog");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -310,6 +311,22 @@ function validateCurationConfig() {
       } catch (error) {
         errors.push(`non-song-rules.activityTitlePatterns[${index}] invalid regex: ${error.message}`);
       }
+    }
+  }
+
+  if (!fs.existsSync(SUPPLEMENTAL_KNOWN_SONGS_PATH)) {
+    errors.push("missing song-search known overrides: config/song-search-known-overrides.json");
+  } else {
+    try {
+      const records = loadSupplementalKnownSongs();
+      for (const [index, record] of records.entries()) {
+        if (!record.title) errors.push(`song-search-known-overrides.records[${index}].title missing`);
+        if (record.reviewedAt && Number.isNaN(Date.parse(record.reviewedAt))) {
+          errors.push(`song-search-known-overrides.records[${index}].reviewedAt invalid`);
+        }
+      }
+    } catch (error) {
+      errors.push(`song-search-known-overrides: ${error.message}`);
     }
   }
 }

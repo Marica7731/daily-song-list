@@ -3,8 +3,11 @@ const {
   isSongSearchKnown,
   normalizeSongSearchText,
 } = require("../assets/frontend-utils");
+const fs = require("node:fs");
+const path = require("node:path");
 const { canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
 
+const ROOT = path.resolve(__dirname, "..");
 const SOURCE_REPOSITORY = "Marica7731/song-search";
 const SOURCE_BRANCH = "main";
 const PAGES_BASE_URL = "https://marica7731.github.io/song-search";
@@ -12,26 +15,27 @@ const RAW_BASE_URL = `https://raw.githubusercontent.com/${SOURCE_REPOSITORY}/${S
 const SOURCE_INDEX_URL = `${PAGES_BASE_URL}/data/index.json`;
 const RAW_SOURCE_INDEX_URL = `${RAW_BASE_URL}/data/index.json`;
 const SOURCE_WORKFLOW_URL = `https://github.com/${SOURCE_REPOSITORY}/actions/workflows/update.yml`;
+const SUPPLEMENTAL_KNOWN_SONGS_PATH = path.join(ROOT, "config", "song-search-known-overrides.json");
 const DEFAULT_CONCURRENCY = 4;
 
 async function refreshSongSearchIndex(options = {}) {
   const previousIndex = options.previousIndex || null;
   const now = options.now || new Date();
   try {
-    return await fetchSongSearchIndex(options);
+    return mergeSupplementalKnownSongs(await fetchSongSearchIndex(options), options.supplementalKnownSongs);
   } catch (error) {
     if (isSongSearchIndexAvailable(previousIndex)) {
-      return {
+      return mergeSupplementalKnownSongs({
         ...previousIndex,
         stale: true,
         refreshError: error.message,
         refreshedAt: now.toISOString(),
-      };
+      }, options.supplementalKnownSongs);
     }
-    return emptySongSearchIndex({
+    return mergeSupplementalKnownSongs(emptySongSearchIndex({
       generatedAt: now.toISOString(),
       refreshError: error.message,
-    });
+    }), options.supplementalKnownSongs);
   }
 }
 
@@ -187,6 +191,60 @@ function buildSongSearchIndex(entries, options = {}) {
   };
 }
 
+function loadSupplementalKnownSongs(filePath = SUPPLEMENTAL_KNOWN_SONGS_PATH) {
+  if (!fs.existsSync(filePath)) return [];
+  const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  if (Number(payload.schemaVersion) !== 1) throw new Error(`${path.relative(ROOT, filePath)} schemaVersion must be 1`);
+  if (!Array.isArray(payload.records)) throw new Error(`${path.relative(ROOT, filePath)} records must be an array`);
+  return normalizeSupplementalKnownSongs(payload.records);
+}
+
+function mergeSupplementalKnownSongs(index, recordsInput = undefined) {
+  const records = recordsInput === undefined ? loadSupplementalKnownSongs() : normalizeSupplementalKnownSongs(recordsInput);
+  if (!records.length) return index;
+
+  const titleKeys = new Set(index?.titleKeys || []);
+  const titleArtistKeys = new Set(index?.titleArtistKeys || []);
+  let addedRecordCount = 0;
+  for (const record of records) {
+    const titleKey = normalizeSongSearchText(record.title);
+    const artistKey = normalizeSongSearchText(record.artist);
+    if (!titleKey) continue;
+    const hadTitle = titleKeys.has(titleKey);
+    const titleArtistKey = artistKey && !isUnknownArtistKey(artistKey) ? `${titleKey}::${artistKey}` : "";
+    const hadTitleArtist = titleArtistKey ? titleArtistKeys.has(titleArtistKey) : true;
+    titleKeys.add(titleKey);
+    if (titleArtistKey) titleArtistKeys.add(titleArtistKey);
+    if (!hadTitle || !hadTitleArtist) addedRecordCount += 1;
+  }
+
+  return {
+    ...index,
+    source: {
+      ...(index?.source || {}),
+      supplementalKnownSongsPath: "config/song-search-known-overrides.json",
+    },
+    recordCount: (Number(index?.recordCount) || 0) + addedRecordCount,
+    titleKeyCount: titleKeys.size,
+    titleArtistKeyCount: titleArtistKeys.size,
+    titleKeys: [...titleKeys].sort(),
+    titleArtistKeys: [...titleArtistKeys].sort(),
+    supplementalKnownSongCount: records.length,
+    supplementalKnownSongs: records,
+  };
+}
+
+function normalizeSupplementalKnownSongs(records) {
+  return (Array.isArray(records) ? records : [])
+    .map((record) => ({
+      title: cleanText(record?.title),
+      artist: cleanText(record?.artist),
+      reason: cleanText(record?.reason),
+      reviewedAt: cleanText(record?.reviewedAt),
+    }))
+    .filter((record) => record.title);
+}
+
 function annotatePayloadWithSongSearchNiche(payload, index, aliasContext = loadSongAliasContext()) {
   const lookup = createSongSearchLookup(index);
   if (!payload || !lookup.available) return payload;
@@ -238,6 +296,7 @@ function songSearchSourceSummary(index) {
     recordCount: index?.recordCount || 0,
     titleKeyCount: index?.titleKeyCount || 0,
     titleArtistKeyCount: index?.titleArtistKeyCount || 0,
+    supplementalKnownSongCount: index?.supplementalKnownSongCount || 0,
   };
 }
 
@@ -344,11 +403,14 @@ function headers() {
 module.exports = {
   SOURCE_INDEX_URL,
   SOURCE_REPOSITORY,
+  SUPPLEMENTAL_KNOWN_SONGS_PATH,
   SOURCE_WORKFLOW_URL,
   annotatePayloadWithSongSearchNiche,
   buildSongSearchIndex,
   fetchSongSearchIndex,
   isSongSearchIndexAvailable,
+  loadSupplementalKnownSongs,
+  mergeSupplementalKnownSongs,
   parseSongSearchDataFile,
   refreshSongSearchIndex,
   songSearchSourceSummary,

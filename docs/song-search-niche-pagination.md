@@ -21,6 +21,13 @@ The generated local index is `data/song-search-known-songs.json`. It contains
 normalized title keys and title+artist keys. Manifest files that return 404 are
 skipped and recorded in `skippedFiles`.
 
+Confirmed library misses can be maintained in
+`config/song-search-known-overrides.json`. `npm run refresh:song-search`,
+`node scripts/apply-song-search-niche.js`, `npm run update`, and
+`npm run rebuild:derived` merge those reviewed records into the local
+song-search lookup before writing public payloads, so one confirmed known song
+can be fixed without replacing the whole upstream index.
+
 ## Niche Marking
 
 The generated payload still uses the existing internal compatibility field:

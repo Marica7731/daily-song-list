@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T22:38:46.610Z",
+  "generatedAt": "2026-07-14T23:49:35.907Z",
   "reviewId": "review:mAUngaap9vE:50da738698e0fb0c1b5e",
   "video": {
     "videoId": "mAUngaap9vE",
@@ -101,6 +101,7 @@
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ]
     },
@@ -333,10 +334,14 @@
       "sourceId": "Ugw_sJwNiR8ok3I-zWB4AaABAg",
       "sourceHash": "50da738698e0fb0c1b5eac717be3f575b15ead62621c7fb06810171f1f4c5111",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "桃色片想い♡"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"

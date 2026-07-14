@@ -15,6 +15,7 @@ const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require(
 const { compactRankDiff, writeRuntimeJson } = require("./build-runtime-data");
 const { repairParsedEntry } = require("./entry-repair");
 const { canonicalizePayloadSongAliases, canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
+const { mergeSupplementalKnownSongs } = require("./song-search-index");
 const {
   VIDEO_CATALOG_PATH,
   catalogSummary,
@@ -1898,7 +1899,7 @@ function sourceScore(source) {
 }
 
 function loadSongSearchLookup() {
-  return createSongSearchLookup(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
+  return createSongSearchLookup(mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {}));
 }
 
 function parsePublishedTimestamp(text, nowMs) {

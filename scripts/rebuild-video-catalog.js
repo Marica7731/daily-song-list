@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { createSongSearchLookup } = require("../assets/frontend-utils");
 const { applyCurationToVideos, loadCurationContext } = require("./curation");
-const { annotatePayloadWithSongSearchNiche, songSearchSourceSummary } = require("./song-search-index");
+const { annotatePayloadWithSongSearchNiche, mergeSupplementalKnownSongs, songSearchSourceSummary } = require("./song-search-index");
 const { canonicalizePayloadSongAliases, loadSongAliasContext } = require("./song-aliases");
 const { applyGroupQualityFilters, buildGroups, filterBlockedVideos, writeRankDiffFiles } = require("./update-songlist");
 const { buildRuntimeMeta, buildRuntimeRangePayload, writeRuntimeJson } = require("./build-runtime-data");
@@ -70,7 +70,7 @@ function main() {
   payload.source.videoCatalog.monthVideoCount = payload.groups["1m"]?.items?.length || 0;
   payload = canonicalizePayloadSongAliases(payload, songAliasContext);
 
-  const songSearchIndex = readJsonIfExists(SONG_SEARCH_INDEX_PATH);
+  const songSearchIndex = mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
   if (songSearchIndex?.titleKeys?.length || songSearchIndex?.titleArtistKeys?.length) {
     payload = annotatePayloadWithSongSearchNiche(payload, songSearchIndex, songAliasContext);
     payload.source = {
@@ -248,8 +248,7 @@ function uniqueValues(values) {
 }
 
 function loadSongSearchLookup() {
-  const index = readJsonIfExists(SONG_SEARCH_INDEX_PATH);
-  return createSongSearchLookup(index || {});
+  return createSongSearchLookup(mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {}));
 }
 
 function writeRuntimeFiles(payload) {
