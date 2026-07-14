@@ -144,6 +144,21 @@ async function waitForPerformanceEntryIdle(page, name, idleMs = 300, timeoutMs =
   return page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
 }
 
+async function clearSettledPerformanceEntries(page, name, idleMs = 300, timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await waitForPerformanceEntryIdle(page, name, idleMs, Math.max(idleMs + 500, deadline - Date.now()));
+    await page.evaluate((entryName) => {
+      if (typeof performance.clearMeasures === "function") performance.clearMeasures(entryName);
+    }, name);
+    await page.waitForTimeout(idleMs);
+    const count = await page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
+    if (count === 0) return;
+  }
+  const count = await page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
+  throw new Error(`performance entries did not settle after reset: ${name} count=${count}`);
+}
+
 async function assertUiShape(page, viewport, range) {
   const result = await page.evaluate(({ width }) => {
     const rect = (selector) => {
@@ -357,15 +372,17 @@ async function interactionFlow(browser) {
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
   assertBadgesHidden(await readFilterBadgeState(page), "reset");
-  const buildSongRecordCountBeforeSource = await waitForPerformanceEntryIdle(page, "song-list:build-song-records", 1000, 10000);
+  const buildSongRecordsEntry = "song-list:build-song-records";
+  await clearSettledPerformanceEntries(page, buildSongRecordsEntry, 1000, 10000);
   await page.locator("[data-toggle-source]").first().click();
   await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
     timeout: 15000,
   });
-  const sourcePerf = await page.evaluate(() => ({
-    buildSongRecordCount: performance.getEntriesByName("song-list:build-song-records").length,
-  }));
-  if (sourcePerf.buildSongRecordCount !== buildSongRecordCountBeforeSource) {
+  await page.waitForTimeout(baseUrl.startsWith("https://") ? 500 : 200);
+  const sourcePerf = await page.evaluate((entryName) => ({
+    buildSongRecordCount: performance.getEntriesByName(entryName).length,
+  }), buildSongRecordsEntry);
+  if (sourcePerf.buildSongRecordCount > 0) {
     throw new Error(`opening source drawer rebuilt song records: ${JSON.stringify(sourcePerf)}`);
   }
   const oversizedTimestampGroup = await page.locator(".rank-row.is-expanded .source-video-group").evaluateAll((groups) =>
