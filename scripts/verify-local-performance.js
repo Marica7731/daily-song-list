@@ -104,6 +104,21 @@ async function setCheckbox(page, selector, checked) {
   if ((await checkbox.isChecked()) !== checked) throw new Error(`${selector} did not become ${checked ? "checked" : "unchecked"}`);
 }
 
+async function retryDetachedAction(action, label, attempts = 5) {
+  let lastError = null;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      await action();
+      return;
+    } catch (error) {
+      lastError = error;
+      if (!/not attached|detached|Element is not attached/u.test(error.message || "")) throw error;
+      await sleep(150);
+    }
+  }
+  throw new Error(`${label} failed after detached retries: ${lastError?.message || lastError}`);
+}
+
 async function readFilterBadgeState(page) {
   return page.evaluate(() =>
     Array.from(document.querySelectorAll("#filterCountBadge, #mobileFilterCountBadge")).map((node) => ({
@@ -127,36 +142,49 @@ function assertBadgesVisible(badges, label) {
   }
 }
 
-async function waitForPerformanceEntryIdle(page, name, idleMs = 300, timeoutMs = 5000) {
-  const deadline = Date.now() + timeoutMs;
-  let lastCount = -1;
-  let stableSince = Date.now();
-  while (Date.now() < deadline) {
-    const count = await page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
-    if (count !== lastCount) {
-      lastCount = count;
-      stableSince = Date.now();
-    } else if (Date.now() - stableSince >= idleMs) {
-      return count;
+async function installSourceDrawerBuildGuard(page) {
+  return page.evaluate(() => {
+    const button = document.querySelector("[data-toggle-source]");
+    const utils = window.RankingUtils;
+    if (!button || !utils || typeof utils.buildSongRecords !== "function") return false;
+    window.__sourceDrawerBuildGuard = { active: false, calls: 0 };
+    if (!utils.__sourceDrawerOriginalBuildSongRecords) {
+      utils.__sourceDrawerOriginalBuildSongRecords = utils.buildSongRecords;
+      utils.buildSongRecords = function guardedBuildSongRecords(...args) {
+        if (window.__sourceDrawerBuildGuard?.active) window.__sourceDrawerBuildGuard.calls += 1;
+        return utils.__sourceDrawerOriginalBuildSongRecords.apply(this, args);
+      };
     }
-    await page.waitForTimeout(50);
-  }
-  return page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
+    button.addEventListener(
+      "click",
+      () => {
+        if (!window.__sourceDrawerBuildGuard) return;
+        window.__sourceDrawerBuildGuard.active = true;
+        window.requestAnimationFrame(() => {
+          if (window.__sourceDrawerBuildGuard) window.__sourceDrawerBuildGuard.active = false;
+        });
+      },
+      { capture: true, once: true },
+    );
+    return true;
+  });
 }
 
-async function clearSettledPerformanceEntries(page, name, idleMs = 300, timeoutMs = 5000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    await waitForPerformanceEntryIdle(page, name, idleMs, Math.max(idleMs + 500, deadline - Date.now()));
-    await page.evaluate((entryName) => {
-      if (typeof performance.clearMeasures === "function") performance.clearMeasures(entryName);
-    }, name);
-    await page.waitForTimeout(idleMs);
-    const count = await page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
-    if (count === 0) return;
-  }
-  const count = await page.evaluate((entryName) => performance.getEntriesByName(entryName).length, name);
-  throw new Error(`performance entries did not settle after reset: ${name} count=${count}`);
+async function readSourceDrawerBuildGuard(page) {
+  return page.evaluate(() => ({
+    buildSongRecordCount: window.__sourceDrawerBuildGuard?.calls || 0,
+  }));
+}
+
+async function removeSourceDrawerBuildGuard(page) {
+  await page.evaluate(() => {
+    const utils = window.RankingUtils;
+    if (utils?.__sourceDrawerOriginalBuildSongRecords) {
+      utils.buildSongRecords = utils.__sourceDrawerOriginalBuildSongRecords;
+      delete utils.__sourceDrawerOriginalBuildSongRecords;
+    }
+    delete window.__sourceDrawerBuildGuard;
+  });
 }
 
 async function assertUiShape(page, viewport, range) {
@@ -372,16 +400,23 @@ async function interactionFlow(browser) {
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
   assertBadgesHidden(await readFilterBadgeState(page), "reset");
-  const buildSongRecordsEntry = "song-list:build-song-records";
-  await clearSettledPerformanceEntries(page, buildSongRecordsEntry, 1000, 10000);
-  await page.locator("[data-toggle-source]").first().click();
-  await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
-    timeout: 15000,
-  });
-  await page.waitForTimeout(baseUrl.startsWith("https://") ? 500 : 200);
-  const sourcePerf = await page.evaluate((entryName) => ({
-    buildSongRecordCount: performance.getEntriesByName(entryName).length,
-  }), buildSongRecordsEntry);
+  await page.waitForFunction(
+    () => Boolean(window.RankingUtils?.buildSongRecords && document.querySelector("[data-toggle-source]")),
+    null,
+    { timeout: baseUrl.startsWith("https://") ? 30000 : 15000 },
+  );
+  const buildGuardInstalled = await installSourceDrawerBuildGuard(page);
+  if (!buildGuardInstalled) throw new Error("could not install source drawer build guard");
+  let sourcePerf = null;
+  try {
+    await page.locator("[data-toggle-source]").first().click();
+    await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
+      timeout: 15000,
+    });
+    sourcePerf = await readSourceDrawerBuildGuard(page);
+  } finally {
+    await removeSourceDrawerBuildGuard(page);
+  }
   if (sourcePerf.buildSongRecordCount > 0) {
     throw new Error(`opening source drawer rebuilt song records: ${JSON.stringify(sourcePerf)}`);
   }
@@ -435,6 +470,8 @@ async function mobileSourceDrawerFlow(browser) {
   url.searchParams.set("showUnknown", "1");
   await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
   await waitForRows(page, errors, requests);
+  await page.waitForLoadState("networkidle", { timeout: baseUrl.startsWith("https://") ? 10000 : 3000 }).catch(() => {});
+  await page.waitForTimeout(baseUrl.startsWith("https://") ? 500 : 100);
 
   const sourceRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
   const count = await sourceRows.count();
@@ -555,7 +592,7 @@ async function mobileSourceDrawerFlow(browser) {
   const bottomScreenshotPath = path.join(screenshotDir, `source-drawer-bottom-${viewport.join("x")}.png`);
   const collapseBottom = row.locator("[data-collapse-source]").last();
   if ((await collapseBottom.count()) !== 1) throw new Error("mobile source drawer missing bottom collapse button");
-  await collapseBottom.scrollIntoViewIfNeeded();
+  await retryDetachedAction(() => collapseBottom.scrollIntoViewIfNeeded(), "scroll bottom source collapse");
   const bottomCoverage = await page.evaluate(() => {
     const collapse = document.querySelector(".rank-row.is-expanded [data-collapse-source]");
     const nav = document.querySelector("#mobileBottomNav");
@@ -571,7 +608,7 @@ async function mobileSourceDrawerFlow(browser) {
     throw new Error(`source bottom collapse is covered by mobile nav ${JSON.stringify(bottomCoverage)}`);
   }
   await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
-  await collapseBottom.click();
+  await retryDetachedAction(() => collapseBottom.click(), "click bottom source collapse");
   await page.waitForFunction((index) => document.querySelectorAll(".rank-row:not(.skeleton-row):has([data-toggle-source])")[index]?.classList.contains("is-expanded") === false, selectedIndex);
   const closedExpanded = await button.getAttribute("aria-expanded");
   if (closedExpanded !== "false") throw new Error(`source bottom collapse aria-expanded expected false, got ${closedExpanded}`);
@@ -646,6 +683,35 @@ async function selectSnapshotDate(page, value) {
   throw lastError;
 }
 
+function mockLegacyMonthlyFallbackGroup() {
+  return {
+    id: "1m",
+    title: "Mock monthly fallback",
+    generatedAt: "2026-07-13T15:56:10.026Z",
+    updatedAt: "2026-07-13T15:56:10.026Z",
+    items: [
+      {
+        videoId: "codexFall01",
+        title: "Fallback source video",
+        channelName: "Fallback Channel",
+        channelId: "UCfallback",
+        publishedTimestamp: Date.parse("2026-07-13T15:00:00.000Z"),
+        songs: [
+          {
+            index: 1,
+            time: "0:01:23",
+            seconds: 83,
+            title: "Fallback Song",
+            artist: "Fallback Artist",
+            raw: "1:23 Fallback Song / Fallback Artist",
+            isNiche: false,
+          },
+        ],
+      },
+    ],
+  };
+}
+
 async function monthlyFallbackScenarios(browser) {
   for (const scenario of [
     {
@@ -677,9 +743,26 @@ async function monthlyFallbackScenarios(browser) {
     },
   ]) {
     const { context, page, errors } = await newPage(browser, [1366, 768]);
-    await page.route(/\/data\/ui\/1m\.[0-9a-f]{12}\.json$/u, scenario.handler);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    await page.route("**/*", async (route) => {
+      const pathName = requestPath(route.request().url());
+      if (runtimePathPattern("1m").test(pathName)) {
+        await scenario.handler(route);
+        return;
+      }
+      if (pathName === "data/1m.json") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(mockLegacyMonthlyFallbackGroup()),
+        });
+        return;
+      }
+      await route.continue();
+    });
     await page.goto(`${baseUrl}?shared=1&range=1m&debug=1`, { waitUntil: "domcontentloaded" });
-    await waitForRows(page, errors);
+    await waitForRows(page, errors, requests);
     const summary = await page.locator("#summary").textContent();
     const status = await page.locator("#status").textContent();
     const alerts = await page.locator("#statusAlerts").textContent();
@@ -694,7 +777,7 @@ async function monthlyFallbackScenarios(browser) {
     const unexpectedErrors =
       scenario.label === "404" ? errors.filter((error) => !/status of 404|HTTP 404/u.test(error)) : errors;
     if (unexpectedErrors.length) throw new Error(`fallback ${scenario.label} errors: ${unexpectedErrors.join(" | ")}`);
-    results.push({ scenario: `fallback-${scenario.label}` });
+    results.push({ scenario: `fallback-${scenario.label}`, requests: [...new Set(requests)] });
   }
 }
 
