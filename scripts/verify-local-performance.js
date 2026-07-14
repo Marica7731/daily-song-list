@@ -357,7 +357,7 @@ async function interactionFlow(browser) {
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
   assertBadgesHidden(await readFilterBadgeState(page), "reset");
-  const buildSongRecordCountBeforeSource = await waitForPerformanceEntryIdle(page, "song-list:build-song-records");
+  const buildSongRecordCountBeforeSource = await waitForPerformanceEntryIdle(page, "song-list:build-song-records", 1000, 10000);
   await page.locator("[data-toggle-source]").first().click();
   await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
     timeout: 15000,
