@@ -1,26 +1,26 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T20:03:45.530Z",
+  "generatedAt": "2026-07-14T03:47:41.503Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-13T18:53:20.659Z",
+  "latestGeneratedAt": "2026-07-14T03:20:42.708Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
   "counts": {
-    "totalCandidates": 1905,
-    "uniqueVideos": 286,
-    "uniqueSources": 367,
+    "totalCandidates": 1923,
+    "uniqueVideos": 297,
+    "uniqueSources": 378,
     "confirmedNoiseCount": 101,
     "parserCorruptionCount": 187,
     "likelyNoiseCount": 295,
-    "needsReviewCount": 1322,
-    "likelySongCount": 0,
+    "needsReviewCount": 1339,
+    "likelySongCount": 1,
     "byClassification": {
       "confirmed_noise": 101,
       "parser_corruption": 187,
       "likely_noise": 295,
-      "needs_review": 1322,
-      "likely_song": 0
+      "needs_review": 1339,
+      "likely_song": 1
     }
   },
   "items": [
@@ -14275,6 +14275,50 @@
       "repairReasons": []
     },
     {
+      "title": "Heart of Sword ～夜明け前～",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 262,
+      "time": "0:04:22",
+      "raw": "4:22  Heart of Sword ～夜明け前～ - T.M.Revolution 《神劍闖江湖/浪客劍心》ED",
+      "rawHash": "1aa61f784a80f4444afd431190e3de5186c12a41afab30f227f9cba7456b2317",
+      "videoId": "FFf6vhBvezY",
+      "videoTitle": "【歌回 #歌枠】初見&訂閱大歡迎！不說歌名的動漫歌回，你猜得出來嗎？｜妮卡沃爾 ❤️‍🔥",
+      "channelName": "Nica Ch. 妮卡沃爾",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FFf6vhBvezY",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FFf6vhBvezY&t=262s",
+      "sourceId": "selected:FFf6vhBvezY:92987d3b3d231f4b",
+      "sourceHash": "92987d3b3d231f4bf21d00a88f5b78d72ab0c420ff29d40142db2a59d43fb8c4",
+      "sourceOrigin": "review:history-FFf6vhBvezY-92987d3b3d231f4bf21d.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T150000Z"
+      ],
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "positiveEvidence": [
+        "known_song",
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "niche_unknown_artist"
+      ],
+      "riskReasons": [
+        "known_song_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:FFf6vhBvezY:92987d3b3d231f4bf21d",
+      "sourcePath": "data/review/sources/history-FFf6vhBvezY-92987d3b3d231f4bf21d.json",
+      "reviewLocator": "data/review/sources/history-FFf6vhBvezY-92987d3b3d231f4bf21d.json#1aa61f784a80f4444afd431190e3de5186c12a41afab30f227f9cba7456b2317"
+    },
+    {
       "title": "メシア",
       "artist": "未記載",
       "isNiche": true,
@@ -17210,6 +17254,214 @@
       "repairReasons": []
     },
     {
+      "title": "sabaの夢",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1238,
+      "time": "0:20:38",
+      "raw": "20:38 sabaの夢",
+      "rawHash": "053eea2cac15d5979902c90b59ac786a9c8e2e3a5f9e7eb47b964314f5c18d9e",
+      "videoId": "XPO7hsUR3Rs",
+      "videoTitle": "【歌枠】深夜のまったりチル歌雑なのだ。【海月雲ろあ/ #ろあるーむ】",
+      "channelName": "Roa Ch. 海月雲ろあ",
+      "channelId": "UCLIpj4TmXviSTNE_U5WG_Ug",
+      "channelHandle": "/@KurageuRoa",
+      "youtubeUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs&t=1238s",
+      "sourceId": "Ugxx1cE0ZrXQDDLBgrl4AaABAg",
+      "sourceHash": "40ba7337f7fa86ea997ad0628ace7d95095f2eb3954566b7b4c698bd43bb67c4",
+      "sourceOrigin": "latest;review:XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:XPO7hsUR3Rs:40ba7337f7fa86ea997a",
+      "sourcePath": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "reviewLocator": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json#053eea2cac15d5979902c90b59ac786a9c8e2e3a5f9e7eb47b964314f5c18d9e",
+      "repairedTitle": "sabaの夢",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "歌締め",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 8219,
+      "time": "2:16:59",
+      "raw": "2:16:59 歌締め",
+      "rawHash": "3f57ab928ff90d15e72f61a1b882d2912bba4cf386852f170d773ab838d63625",
+      "videoId": "XPO7hsUR3Rs",
+      "videoTitle": "【歌枠】深夜のまったりチル歌雑なのだ。【海月雲ろあ/ #ろあるーむ】",
+      "channelName": "Roa Ch. 海月雲ろあ",
+      "channelId": "UCLIpj4TmXviSTNE_U5WG_Ug",
+      "channelHandle": "/@KurageuRoa",
+      "youtubeUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs&t=8219s",
+      "sourceId": "Ugxx1cE0ZrXQDDLBgrl4AaABAg",
+      "sourceHash": "40ba7337f7fa86ea997ad0628ace7d95095f2eb3954566b7b4c698bd43bb67c4",
+      "sourceOrigin": "latest;review:XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:XPO7hsUR3Rs:40ba7337f7fa86ea997a",
+      "sourcePath": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "reviewLocator": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json#3f57ab928ff90d15e72f61a1b882d2912bba4cf386852f170d773ab838d63625",
+      "repairedTitle": "歌締め",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "屋台",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 10993,
+      "time": "3:03:13",
+      "raw": "3:03:13 屋台",
+      "rawHash": "ba3351a3ba6ec195c041637292ad81a2453ce017da8daa859505ec1ff44f11f6",
+      "videoId": "XPO7hsUR3Rs",
+      "videoTitle": "【歌枠】深夜のまったりチル歌雑なのだ。【海月雲ろあ/ #ろあるーむ】",
+      "channelName": "Roa Ch. 海月雲ろあ",
+      "channelId": "UCLIpj4TmXviSTNE_U5WG_Ug",
+      "channelHandle": "/@KurageuRoa",
+      "youtubeUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs&t=10993s",
+      "sourceId": "Ugxx1cE0ZrXQDDLBgrl4AaABAg",
+      "sourceHash": "40ba7337f7fa86ea997ad0628ace7d95095f2eb3954566b7b4c698bd43bb67c4",
+      "sourceOrigin": "latest;review:XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:XPO7hsUR3Rs:40ba7337f7fa86ea997a",
+      "sourcePath": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "reviewLocator": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json#ba3351a3ba6ec195c041637292ad81a2453ce017da8daa859505ec1ff44f11f6",
+      "repairedTitle": "屋台",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "やっ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 11409,
+      "time": "3:10:09",
+      "raw": "3:10:09 やっ",
+      "rawHash": "e1527fd36cd62fe69d19974dc8ed64b6521a3beafd3cf03c15927e56902d5063",
+      "videoId": "XPO7hsUR3Rs",
+      "videoTitle": "【歌枠】深夜のまったりチル歌雑なのだ。【海月雲ろあ/ #ろあるーむ】",
+      "channelName": "Roa Ch. 海月雲ろあ",
+      "channelId": "UCLIpj4TmXviSTNE_U5WG_Ug",
+      "channelHandle": "/@KurageuRoa",
+      "youtubeUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs&t=11409s",
+      "sourceId": "Ugxx1cE0ZrXQDDLBgrl4AaABAg",
+      "sourceHash": "40ba7337f7fa86ea997ad0628ace7d95095f2eb3954566b7b4c698bd43bb67c4",
+      "sourceOrigin": "latest;review:XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:XPO7hsUR3Rs:40ba7337f7fa86ea997a",
+      "sourcePath": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "reviewLocator": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json#e1527fd36cd62fe69d19974dc8ed64b6521a3beafd3cf03c15927e56902d5063",
+      "repairedTitle": "やっ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "～になって",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 11744,
+      "time": "3:15:44",
+      "raw": "3:15:44 ～になって",
+      "rawHash": "ddab39bb01722af86f39878ae8f7c8dc3ee136e17658deaebe971497520855a0",
+      "videoId": "XPO7hsUR3Rs",
+      "videoTitle": "【歌枠】深夜のまったりチル歌雑なのだ。【海月雲ろあ/ #ろあるーむ】",
+      "channelName": "Roa Ch. 海月雲ろあ",
+      "channelId": "UCLIpj4TmXviSTNE_U5WG_Ug",
+      "channelHandle": "/@KurageuRoa",
+      "youtubeUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=XPO7hsUR3Rs&t=11744s",
+      "sourceId": "Ugxx1cE0ZrXQDDLBgrl4AaABAg",
+      "sourceHash": "40ba7337f7fa86ea997ad0628ace7d95095f2eb3954566b7b4c698bd43bb67c4",
+      "sourceOrigin": "latest;review:XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:XPO7hsUR3Rs:40ba7337f7fa86ea997a",
+      "sourcePath": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json",
+      "reviewLocator": "data/review/sources/XPO7hsUR3Rs-40ba7337f7fa86ea997a.json#ddab39bb01722af86f39878ae8f7c8dc3ee136e17658deaebe971497520855a0",
+      "repairedTitle": "～になって",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "鎖に縛られたろぼちゃん",
       "artist": "未記載",
       "isNiche": true,
@@ -18749,7 +19001,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -18790,7 +19041,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -18831,7 +19081,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -18872,7 +19121,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -18913,7 +19161,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -18954,7 +19201,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -18995,7 +19241,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -19036,7 +19281,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -24558,11 +24802,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=105s",
       "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
       "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "1m"
+        "1m",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
@@ -24616,6 +24861,47 @@
       "sourcePath": "data/review/sources/M9-YywmcTJw-6931becf04cedf033b64.json",
       "reviewLocator": "data/review/sources/M9-YywmcTJw-6931becf04cedf033b64.json#2d715135b063f7c3408505f3c07a219a1b43f7db08a9704a3b3684236017a556",
       "repairedTitle": "Help me, ERINNNNNN!!(COOL&CREATE)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "アルクアラウンド",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 706,
+      "time": "0:11:46",
+      "raw": "11:46 アルクアラウンド",
+      "rawHash": "424345dec678b06198bde4a8fc30955b8fb67ffc2c884132f8d9282cd49be1b1",
+      "videoId": "fnm5-5hlij4",
+      "videoTitle": "【#言霊綴り歌枠リレー】２番手は南方ユキト【スプヴォルヴァの棲み人】",
+      "channelName": "Yukito ch.南方ユキト",
+      "channelId": "UCiWpMyOCeGdjvj8xvcgfdkg",
+      "channelHandle": "/@MinakataYukito",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fnm5-5hlij4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fnm5-5hlij4&t=706s",
+      "sourceId": "UgwOm-gcm2xiwgiq3A54AaABAg",
+      "sourceHash": "bbe40e90d865474e71e158da9d85c46e35cb4316447fd55b551b0589ad5b62a9",
+      "sourceOrigin": "latest;review:fnm5-5hlij4-bbe40e90d865474e71e1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fnm5-5hlij4:bbe40e90d865474e71e1",
+      "sourcePath": "data/review/sources/fnm5-5hlij4-bbe40e90d865474e71e1.json",
+      "reviewLocator": "data/review/sources/fnm5-5hlij4-bbe40e90d865474e71e1.json#424345dec678b06198bde4a8fc30955b8fb67ffc2c884132f8d9282cd49be1b1",
+      "repairedTitle": "アルクアラウンド",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -25621,7 +25907,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
@@ -31574,6 +31860,47 @@
       "sourcePath": "data/review/sources/sFaqXb86QsY-3c784d00637c9badbc2f.json",
       "reviewLocator": "data/review/sources/sFaqXb86QsY-3c784d00637c9badbc2f.json#ea4f8969b2e5ca9d1d900d562a5386b69e12498924057cf9376b66721387f80b",
       "repairedTitle": "？？？(有名なCM曲)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "あいさつ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 238,
+      "time": "0:03:58",
+      "raw": "3:58 あいさつ",
+      "rawHash": "b29102c7bd876b0fbff4481bc651f40f48e711ebc9e5c8110272335739890e2f",
+      "videoId": "20XxI2pdDQU",
+      "videoTitle": "【歌枠/Singing】週初めの深夜に心地いい歌枠！リズム難しめの曲挑戦しよ～♪ #vtuber",
+      "channelName": "ぼのぼん",
+      "channelId": "UCQXpzDLjP1vad1Sxb37o1hA",
+      "channelHandle": "/@bonobon_game",
+      "youtubeUrl": "https://www.youtube.com/watch?v=20XxI2pdDQU",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=20XxI2pdDQU&t=238s",
+      "sourceId": "UgxZqksWc6nN06ZhN8p4AaABAg",
+      "sourceHash": "cb30d87d94fc21a6917575eb599e31e4f9411bb89afd0c43c97ca63691947c7f",
+      "sourceOrigin": "latest;review:20XxI2pdDQU-cb30d87d94fc21a69175.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:20XxI2pdDQU:cb30d87d94fc21a69175",
+      "sourcePath": "data/review/sources/20XxI2pdDQU-cb30d87d94fc21a69175.json",
+      "reviewLocator": "data/review/sources/20XxI2pdDQU-cb30d87d94fc21a69175.json#b29102c7bd876b0fbff4481bc651f40f48e711ebc9e5c8110272335739890e2f",
+      "repairedTitle": "あいさつ",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -38791,6 +39118,46 @@
       "reviewLocator": "data/review/sources/history-qENxBvbn29Y-d20b81982796f791041d.json#1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
     },
     {
+      "title": "最高同接250人",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 7962,
+      "time": "2:12:42",
+      "raw": "◆ 2:12:42 最高同接250人",
+      "rawHash": "f4623ed7e52f55fd9346852ee190d25151d67567b38a52d174b90fcef898ba33",
+      "videoId": "tPcPuer8xk4",
+      "videoTitle": "【#歌枠 】珍しい声の低音ボイス🔥同接300人3分キープ＆ch登録2.15万人目標歌枠✨【#メラメライブ 】",
+      "channelName": "メラ・アカル MelaakaruVtuber",
+      "channelId": "UC1GQB6OqVMoFlHhQ9AagtqA",
+      "channelHandle": "/@mela_akaru",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tPcPuer8xk4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tPcPuer8xk4&t=7962s",
+      "sourceId": "Ugze4yyHPTJJ47ud36Z4AaABAg",
+      "sourceHash": "aa7d24ae5948f25450ab9795434d39e35dde3de672979d5315524b80dc47afa7",
+      "sourceOrigin": "latest;review:tPcPuer8xk4-aa7d24ae5948f25450ab.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tPcPuer8xk4:aa7d24ae5948f25450ab",
+      "sourcePath": "data/review/sources/tPcPuer8xk4-aa7d24ae5948f25450ab.json",
+      "reviewLocator": "data/review/sources/tPcPuer8xk4-aa7d24ae5948f25450ab.json#f4623ed7e52f55fd9346852ee190d25151d67567b38a52d174b90fcef898ba33",
+      "repairedTitle": "最高同接250人",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "ミリオンダラードリーマー",
       "artist": "未記載",
       "isNiche": true,
@@ -40561,18 +40928,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=K1f_qDigzHE&t=2188s",
       "sourceId": "Ugz5VD82e0zXfnJW-Hx4AaABAg",
       "sourceHash": "588c77d61b85e7006b235503fd6e76bab4fe34c7e74874f9d63d64e19755b240",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:K1f_qDigzHE-588c77d61b85e7006b23.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "1m"
+        "1m",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:K1f_qDigzHE:588c77d61b85e7006b23",
@@ -53108,6 +53477,87 @@
       "reviewLocator": "data/review/sources/history-vu9vo2UeJmY-4c4f9cc27d1d95d51f62.json#5722226ec773dd90c8874bf3398c3915a151c6b68041b4ec5be1fc23d638e88f"
     },
     {
+      "title": "開演",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 157,
+      "time": "0:02:37",
+      "raw": "00:02:37　開演",
+      "rawHash": "86e2e7561e6a2bedadb9a5fb0d1fcb6a44ebcb7c5a3c236204415f1dbc203969",
+      "videoId": "hnrDhfogv0c",
+      "videoTitle": "【ラジオ歌枠】月曜日～～～！ゲリラジオ歌枠【錦煙梨/新人Vtuber】#shorts #朝活",
+      "channelName": "錦 煙梨【KonEnri】",
+      "channelId": "UCOeI04bgSM41ULo2-esrYDw",
+      "channelHandle": "/@Konenri",
+      "youtubeUrl": "https://www.youtube.com/watch?v=hnrDhfogv0c",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hnrDhfogv0c&t=157s",
+      "sourceId": "UgyxpNLmVpNjdbpz-Hx4AaABAg",
+      "sourceHash": "f9d5b899743d5fc6994e58f45054e2138f950f72086ab255ec79ec44dbddf0c9",
+      "sourceOrigin": "latest;review:hnrDhfogv0c-f9d5b899743d5fc6994e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:hnrDhfogv0c:f9d5b899743d5fc6994e",
+      "sourcePath": "data/review/sources/hnrDhfogv0c-f9d5b899743d5fc6994e.json",
+      "reviewLocator": "data/review/sources/hnrDhfogv0c-f9d5b899743d5fc6994e.json#86e2e7561e6a2bedadb9a5fb0d1fcb6a44ebcb7c5a3c236204415f1dbc203969",
+      "repairedTitle": "開演",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "お母さんの複雑な胸中",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "∟00:22:30　お母さんの複雑な胸中",
+      "rawHash": "e085d9db84ab84d74713fb18b0f12236bce1dc14d3b8086f8c0fe158dac53662",
+      "videoId": "hnrDhfogv0c",
+      "videoTitle": "【ラジオ歌枠】月曜日～～～！ゲリラジオ歌枠【錦煙梨/新人Vtuber】#shorts #朝活",
+      "channelName": "錦 煙梨【KonEnri】",
+      "channelId": "UCOeI04bgSM41ULo2-esrYDw",
+      "channelHandle": "/@Konenri",
+      "youtubeUrl": "https://www.youtube.com/watch?v=hnrDhfogv0c",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hnrDhfogv0c&t=1350s",
+      "sourceId": "UgyxpNLmVpNjdbpz-Hx4AaABAg",
+      "sourceHash": "f9d5b899743d5fc6994e58f45054e2138f950f72086ab255ec79ec44dbddf0c9",
+      "sourceOrigin": "latest;review:hnrDhfogv0c-f9d5b899743d5fc6994e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:hnrDhfogv0c:f9d5b899743d5fc6994e",
+      "sourcePath": "data/review/sources/hnrDhfogv0c-f9d5b899743d5fc6994e.json",
+      "reviewLocator": "data/review/sources/hnrDhfogv0c-f9d5b899743d5fc6994e.json#e085d9db84ab84d74713fb18b0f12236bce1dc14d3b8086f8c0fe158dac53662",
+      "repairedTitle": "お母さんの複雑な胸中",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "Rolling star【Yuiの曲 ‧ 2007年】",
       "artist": "未記載",
       "isNiche": true,
@@ -62741,6 +63191,88 @@
       "repairReasons": []
     },
     {
+      "title": "エンゼルフィッシュ (feat. 鏡音リン)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 204,
+      "time": "0:03:24",
+      "raw": "✧ 3:24 ➤ 『エンゼルフィッシュ (feat. 鏡音リン)』",
+      "rawHash": "e9871e05a62d84fde905805e320601087283c1022e92478412d7fcbd1b162cf4",
+      "videoId": "2gBKapbDUZQ",
+      "videoTitle": "【歌枠｜KARAOKE】初見さん歓迎！まったりのんびり月曜日【Singing Stream｜朱波奈あわ】",
+      "channelName": "朱波奈あわ -Akebana Awa-",
+      "channelId": "UCD0lSaU5rBkNXawl_s5FaLQ",
+      "channelHandle": "/@%E6%9C%B1%E6%B3%A2%E5%A5%88%E3%81%82%E3%82%8F-akebanaawa",
+      "youtubeUrl": "https://www.youtube.com/watch?v=2gBKapbDUZQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=2gBKapbDUZQ&t=204s",
+      "sourceId": "Ugz9Y-xD5KGSo6SaTnh4AaABAg",
+      "sourceHash": "28049355f2c4b86c87d6ed43e6ac480fe7b09b1a4561f1b3b070a3e9b2f78ea2",
+      "sourceOrigin": "latest;review:2gBKapbDUZQ-28049355f2c4b86c87d6.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:2gBKapbDUZQ:28049355f2c4b86c87d6",
+      "sourcePath": "data/review/sources/2gBKapbDUZQ-28049355f2c4b86c87d6.json",
+      "reviewLocator": "data/review/sources/2gBKapbDUZQ-28049355f2c4b86c87d6.json#e9871e05a62d84fde905805e320601087283c1022e92478412d7fcbd1b162cf4",
+      "repairedTitle": "エンゼルフィッシュ (feat. 鏡音リン)",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "【初音ミク】 GALLOWS BELL",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2466,
+      "time": "0:41:06",
+      "raw": "✧ 41:06 ➤ 『【初音ミク】 GALLOWS BELL』",
+      "rawHash": "479f3e53030356086a225d980596b9c49b6c1c73f2098892563c3e75372bb035",
+      "videoId": "2gBKapbDUZQ",
+      "videoTitle": "【歌枠｜KARAOKE】初見さん歓迎！まったりのんびり月曜日【Singing Stream｜朱波奈あわ】",
+      "channelName": "朱波奈あわ -Akebana Awa-",
+      "channelId": "UCD0lSaU5rBkNXawl_s5FaLQ",
+      "channelHandle": "/@%E6%9C%B1%E6%B3%A2%E5%A5%88%E3%81%82%E3%82%8F-akebanaawa",
+      "youtubeUrl": "https://www.youtube.com/watch?v=2gBKapbDUZQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=2gBKapbDUZQ&t=2466s",
+      "sourceId": "Ugz9Y-xD5KGSo6SaTnh4AaABAg",
+      "sourceHash": "28049355f2c4b86c87d6ed43e6ac480fe7b09b1a4561f1b3b070a3e9b2f78ea2",
+      "sourceOrigin": "latest;review:2gBKapbDUZQ-28049355f2c4b86c87d6.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:2gBKapbDUZQ:28049355f2c4b86c87d6",
+      "sourcePath": "data/review/sources/2gBKapbDUZQ-28049355f2c4b86c87d6.json",
+      "reviewLocator": "data/review/sources/2gBKapbDUZQ-28049355f2c4b86c87d6.json#479f3e53030356086a225d980596b9c49b6c1c73f2098892563c3e75372bb035",
+      "repairedTitle": "【初音ミク】 GALLOWS BELL",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "むせから復帰",
       "artist": "未記載",
       "isNiche": true,
@@ -64467,6 +64999,88 @@
       "sourcePath": "data/review/sources/3iXyCTpZb7I-e677918eefc741bae6de.json",
       "reviewLocator": "data/review/sources/3iXyCTpZb7I-e677918eefc741bae6de.json#1e35eda87ce212e75d163de7fb36748e16102a6758eef6589dc36bada9590d92",
       "repairedTitle": "笹舟",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ナイショの話 ClariS",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2498,
+      "time": "0:41:38",
+      "raw": "41:38 ナイショの話 ClariS",
+      "rawHash": "486b31b27a7d518add1f49a1ae839dba1299872a1b27849176b1be95b6d24da6",
+      "videoId": "MrGxz0q6Py0",
+      "videoTitle": "【#歌枠】夕方チル歌枠【＃karaoke┊︎#個人VTuber┊︎#新人VTuber┊︎#仁斗】【カラオケJOYSOUND for STREAMER】",
+      "channelName": "仁斗_nito",
+      "channelId": "UCzQGJ0vkewz8WJXWkuhIJWw",
+      "channelHandle": "/@nito_t_t",
+      "youtubeUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0&t=2498s",
+      "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
+      "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
+      "sourceOrigin": "latest;review:MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
+      "sourcePath": "data/review/sources/MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "reviewLocator": "data/review/sources/MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json#486b31b27a7d518add1f49a1ae839dba1299872a1b27849176b1be95b6d24da6",
+      "repairedTitle": "ナイショの話 ClariS",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ユメセカイ 戸松遥",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3540,
+      "time": "0:59:00",
+      "raw": "59:00 ユメセカイ 戸松遥",
+      "rawHash": "9fb08bdbe4adf54c082ff0608fef23be0c67d01e72c1dbda12e91fac2dfe869c",
+      "videoId": "MrGxz0q6Py0",
+      "videoTitle": "【#歌枠】夕方チル歌枠【＃karaoke┊︎#個人VTuber┊︎#新人VTuber┊︎#仁斗】【カラオケJOYSOUND for STREAMER】",
+      "channelName": "仁斗_nito",
+      "channelId": "UCzQGJ0vkewz8WJXWkuhIJWw",
+      "channelHandle": "/@nito_t_t",
+      "youtubeUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0&t=3540s",
+      "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
+      "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
+      "sourceOrigin": "latest;review:MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
+      "sourcePath": "data/review/sources/MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "reviewLocator": "data/review/sources/MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json#9fb08bdbe4adf54c082ff0608fef23be0c67d01e72c1dbda12e91fac2dfe869c",
+      "repairedTitle": "ユメセカイ 戸松遥",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -70115,6 +70729,46 @@
       "repairReasons": []
     },
     {
+      "title": "大人のひみつ（GO!GO!7188）[一瞬",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 10262,
+      "time": "2:51:02",
+      "raw": "2:51:02 大人のひみつ（GO!GO!7188）[一瞬]",
+      "rawHash": "8d1b2a9572722c7655d1313b19becdc86884bf96b2c67d661a715fd3d2c58976",
+      "videoId": "Fh-YPYTYmGE",
+      "videoTitle": "【定期歌枠/karaoke】挨拶50人待ってます🙌暑いですね...今週も人魚の歌聴いて乗り越えてえええ！ 初見さん歓迎✨",
+      "channelName": "天音 彩🫧Amane Iro",
+      "channelId": "UCK1WG3mmyfwQTjInGguaV2w",
+      "channelHandle": "/@amane_iro",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Fh-YPYTYmGE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Fh-YPYTYmGE&t=10262s",
+      "sourceId": "UgwZB6Z_2JToT9Btv5V4AaABAg",
+      "sourceHash": "9dccf1fcb5e2ef73142cfc341492b51ce90bc1b008172d7fbceeb9dfb23aecf0",
+      "sourceOrigin": "latest;review:Fh-YPYTYmGE-9dccf1fcb5e2ef73142c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Fh-YPYTYmGE:9dccf1fcb5e2ef73142c",
+      "sourcePath": "data/review/sources/Fh-YPYTYmGE-9dccf1fcb5e2ef73142c.json",
+      "reviewLocator": "data/review/sources/Fh-YPYTYmGE-9dccf1fcb5e2ef73142c.json#8d1b2a9572722c7655d1313b19becdc86884bf96b2c67d661a715fd3d2c58976",
+      "repairedTitle": "大人のひみつ（GO!GO!7188）[一瞬",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "忠犬ヒト公",
       "artist": "未記載",
       "isNiche": true,
@@ -70192,6 +70846,46 @@
       "sourcePath": "data/review/sources/LIK1agbQNus-725f0a9a86361c74a1d1.json",
       "reviewLocator": "data/review/sources/LIK1agbQNus-725f0a9a86361c74a1d1.json#b0fc488fc52370b4bab5eb0519b2c55640d5eca77b94b06ca1b9e56793699ec3",
       "repairedTitle": "swim",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "サイゼリヤの話オモロかったw",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 8018,
+      "time": "2:13:38",
+      "raw": "2:13:38 サイゼリヤの話オモロかったw",
+      "rawHash": "9e298ab5bb42b5389c205ec100098a5c822a4526a0c90a1c59b8de66ecc1873d",
+      "videoId": "fGBYO0b4oNI",
+      "videoTitle": "【朝活/雑談歌枠】初見歓迎✨️100人におはよう目標☀あなたのお姉さんアイドルVtuber🪼💜【天辻ゆらぐ/パレデミア学園】 #新人Vtuber #ゆらぐっどたいむ",
+      "channelName": "天辻 ゆらぐ",
+      "channelId": "UCeOFQCn_QZJMTszlRYRg3rQ",
+      "channelHandle": "/@YuraguAmatsuji",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fGBYO0b4oNI",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fGBYO0b4oNI&t=8018s",
+      "sourceId": "UgzVmxkqyWT5H99yjHJ4AaABAg",
+      "sourceHash": "016e10a4d788a2121bf17ef9ce966e5619f39b907249a7f1f1ad9d991b7fcc5d",
+      "sourceOrigin": "latest;review:fGBYO0b4oNI-016e10a4d788a2121bf1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fGBYO0b4oNI:016e10a4d788a2121bf1",
+      "sourcePath": "data/review/sources/fGBYO0b4oNI-016e10a4d788a2121bf1.json",
+      "reviewLocator": "data/review/sources/fGBYO0b4oNI-016e10a4d788a2121bf1.json#9e298ab5bb42b5389c205ec100098a5c822a4526a0c90a1c59b8de66ecc1873d",
+      "repairedTitle": "サイゼリヤの話オモロかったw",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -70950,7 +71644,6 @@
       "sourceOrigin": "latest;review:8PJXYV1Y2lw-37bce559cff893db62cc.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -70992,7 +71685,6 @@
       "sourceOrigin": "latest;review:8PJXYV1Y2lw-37bce559cff893db62cc.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -71034,7 +71726,6 @@
       "sourceOrigin": "latest;review:8PJXYV1Y2lw-37bce559cff893db62cc.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -71156,7 +71847,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -71244,7 +71934,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -71285,7 +71974,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -71374,7 +72062,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -71415,7 +72102,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -71456,7 +72142,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -74684,6 +75369,46 @@
       "repairReasons": []
     },
     {
+      "title": "おやしろね～",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 10611,
+      "time": "2:56:51",
+      "raw": "2:56:51 おやしろね～",
+      "rawHash": "ee558a9f35fdadadd372ae60800d768ab922d6c211fe8b81caec99812d84a5b2",
+      "videoId": "AVV4RCAq_W8",
+      "videoTitle": "【#歌枠】月曜日おつかれさまでしたの気持ちを込めて歌います￤KARAOKE Singing Stream【明堂しろね/ハコネクト】",
+      "channelName": "明堂しろね Shirone Ch.",
+      "channelId": "UCI-aDQ7k0Ghd9JlFv_qzB7w",
+      "channelHandle": "/@shironech",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AVV4RCAq_W8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AVV4RCAq_W8&t=10611s",
+      "sourceId": "Ugzhd0jW9Qz23QkJj154AaABAg",
+      "sourceHash": "2f623d1f7834b587c2c6fef5f45d432833e5757451e6f94cc75fb880453d4aae",
+      "sourceOrigin": "latest;review:AVV4RCAq_W8-2f623d1f7834b587c2c6.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AVV4RCAq_W8:2f623d1f7834b587c2c6",
+      "sourcePath": "data/review/sources/AVV4RCAq_W8-2f623d1f7834b587c2c6.json",
+      "reviewLocator": "data/review/sources/AVV4RCAq_W8-2f623d1f7834b587c2c6.json#ee558a9f35fdadadd372ae60800d768ab922d6c211fe8b81caec99812d84a5b2",
+      "repairedTitle": "おやしろね～",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "ハッピーバースデー🎉",
       "artist": "未記載",
       "isNiche": true,
@@ -75929,6 +76654,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -75939,14 +76665,13 @@
         "niche_unknown_artist"
       ],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
         "parser_corruption",
-        "source_many_topic_entries"
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": {
         "title": "残灯花火",
-        "artist": "Orangestar feat.初音ミク/2015"
+        "artist": "Orangestar feat.初音ミク"
       },
       "reviewId": "review:gUaAI5HtUHo:84d14e24645a09becf4d",
       "sourcePath": "data/review/sources/history-gUaAI5HtUHo-84d14e24645a09becf4d.json",

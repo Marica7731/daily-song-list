@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T20:02:20.467Z",
+  "generatedAt": "2026-07-14T03:46:08.237Z",
   "reviewId": "review:Igp81Rj-QHc:0c2028584e0597709870",
   "video": {
     "videoId": "Igp81Rj-QHc",
@@ -11,17 +11,17 @@
   "source": {
     "sourceId": "selected:Igp81Rj-QHc:0c2028584e059770",
     "sourceHash": "0c2028584e0597709870af65710330ebc87fe430325052101e2b98cb20217d83",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260713T120000Z"
+    "snapshotId": "20260713T230000Z"
   },
   "risk": {
     "riskScore": 14,
     "riskLevel": "low",
     "riskReasons": [
-      "source_many_topic_entries"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -42,8 +42,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -63,8 +62,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -83,8 +81,7 @@
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -104,8 +101,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -118,15 +114,14 @@
       "rawHash": "32ae8da2fe895a309c33f8d1895224bb3b0a2b93896f0a5956928adcc678c027",
       "sourceId": "selected:Igp81Rj-QHc:0c2028584e059770",
       "sourceHash": "0c2028584e0597709870af65710330ebc87fe430325052101e2b98cb20217d83",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -146,8 +141,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -166,8 +160,7 @@
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -187,8 +180,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     }
   ]

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T20:02:20.467Z",
+  "generatedAt": "2026-07-14T03:46:08.237Z",
   "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
   "video": {
     "videoId": "OWSABUDlx2E",
@@ -11,17 +11,17 @@
   "source": {
     "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
     "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "【タイムスタンプ】\r\n🤍START🐾\r\n　1:45 \n\n\n【セットリスト】\n🎤1曲目：『晩餐歌/tuki.』\n　7:06～10:55 \n\n🎤2曲目：「私は、わたしの事が好き。/Honey Woeks」\r\n　20:56～25:05 \n\n🎤3曲目：「だいしきゅーだいしゅき/Femme fatale」\r\n　31:36～35:09 \r\n\n🎤4曲目：「怪獣の花唄\tVaundy」\r\n　36:28～40:13\r\n\n🎤5曲目：「トリノコシティ\t40mP」\r\n　48:13～51:36 \n\n🎤6曲目：「ダーリン/須田景凪」\r\n　1:04:25～1:06:46 \r\n\n🎤7曲目：寄り酔い/和ぬか」\r\n　1:11:01～1:14:40 \r\n\r\n【雑談パート】\n💭いつ耐久する話\r\n　11:45 \r\n\n💭水着の話\r\n　14:29 \r\n\n💭新しく買ったイヤホンの話\r\n　16:59 \r\n\r\n💭映画の話\r\n　26:38 \r\n\r\n💭Setlogの話\r\n　56:20 \r\n\r\n🤍おつがお～🐾\r\n　1:16:52",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 39,
-    "riskLevel": "medium",
+    "riskScore": 6,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_many_topic_entries"
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -35,14 +35,14 @@
       "rawHash": "c87a31232250982feab238025953dc74b381a4453f8e54a77d885ec6d4340d6c",
       "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
       "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -61,8 +61,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -82,8 +81,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -103,8 +101,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -124,8 +121,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -133,279 +129,19 @@
       "seconds": 4006,
       "time": "1:06:46",
       "title": "寄り酔い",
-      "artist": "和ぬか」",
+      "artist": "和ぬか",
       "raw": "1:06:46 🎤7曲目:寄り酔い/和ぬか」",
       "rawHash": "6ae950ad07cbb8e9955f475e417e265a5d5f2107fb5a67a807c44c9730a9495c",
       "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
       "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "和ぬか"
-      },
-      "riskReasons": [
-        "parser_corruption"
-      ],
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 426,
-      "time": "0:07:06",
-      "title": "～",
-      "artist": "未記載",
-      "raw": "7:06～",
-      "rawHash": "30d686132c3b7815c0005ec3f77f1adfc96a232fa7100224080fb2363e94d023",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 655,
-      "time": "0:10:55",
-      "title": "「私は、わたしの事が好き。/Honey Woeks」",
-      "artist": "未記載",
-      "raw": "10:55 🎤2曲目:「私は、わたしの事が好き。/Honey Woeks」",
-      "rawHash": "154780e2a0141e8b7b78760868564d658b06ece8f1f7877697157dff1ed763ae",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 1256,
-      "time": "0:20:56",
-      "title": "～",
-      "artist": "未記載",
-      "raw": "20:56～",
-      "rawHash": "59c6b85fe49f4a4676a3802527913721d274c9d1080493b5edb34c6d58c15065",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 1896,
-      "time": "0:31:36",
-      "title": "～",
-      "artist": "未記載",
-      "raw": "31:36～",
-      "rawHash": "cf04e9db939e5c1feef2685f5eabb263ff3fdad40a70875d92a1105937ba7e00",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 2188,
-      "time": "0:36:28",
-      "title": "～",
-      "artist": "未記載",
-      "raw": "36:28～",
-      "rawHash": "2421894f7abb4e6950c807fcf1ab77bf71dee05e77a9345db3ddce5e45e723c8",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 2893,
-      "time": "0:48:13",
-      "title": "～",
-      "artist": "未記載",
-      "raw": "48:13～",
-      "rawHash": "d722668bfce9957621e9db06c5ebd9e24decac1d5d19416d54d5e549338edfb6",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 3865,
-      "time": "1:04:25",
-      "title": "～",
-      "artist": "未記載",
-      "raw": "1:04:25～",
-      "rawHash": "1602f8e51272502e8e9f94a0aea462a15e6809448c848d91469a2538e804de72",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 4261,
-      "time": "1:11:01",
-      "title": "～",
-      "artist": "未記載",
-      "raw": "1:11:01～",
-      "rawHash": "c397c30fdf47b05f45c8ee7c2531815ff807960e4e0de58f76f1565e8c692981",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 4480,
-      "time": "1:14:40",
-      "title": "【雑談パート】",
-      "artist": "未記載",
-      "raw": "1:14:40 【雑談パート】",
-      "rawHash": "dfa300ebe611489a61b0fae29b46def526c90cf0261da1a20bae21765c120c11",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 705,
-      "time": "0:11:45",
-      "title": "水着の話",
-      "artist": "未記載",
-      "raw": "11:45 💭水着の話",
-      "rawHash": "2bedaadd77dd46fd419f02f2b63b87b4118463c0e64692332df890970583d199",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 869,
-      "time": "0:14:29",
-      "title": "新しく買ったイヤホンの話",
-      "artist": "未記載",
-      "raw": "14:29 💭新しく買ったイヤホンの話",
-      "rawHash": "36d814786863d10f9ffa0047e601f6351a9d137dcfcd5c7598198fbe3b1763a5",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 1019,
-      "time": "0:16:59",
-      "title": "映画の話",
-      "artist": "未記載",
-      "raw": "16:59 💭映画の話",
-      "rawHash": "30599001b8a13cf68976c7bf55ad31d0be71a8a852486c5d7e5c6a61fbfc4703",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 1598,
-      "time": "0:26:38",
-      "title": "Setlogの話",
-      "artist": "未記載",
-      "raw": "26:38 💭Setlogの話",
-      "rawHash": "fbeea3c605a904e4efadc66a27e8eb05fa7ec38e3cc63ed1b8cb0ebd8c06bc6e",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 3380,
-      "time": "0:56:20",
-      "title": "おつがお～🐾",
-      "artist": "未記載",
-      "raw": "56:20 🤍おつがお～🐾",
-      "rawHash": "292e0d1ad7532bc1cca8489fffbfd8adc91fbf9f7dd99496b16821d59c0fc310",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "empty_after_timestamp",
-      "seconds": 4612,
-      "time": "1:16:52",
-      "title": "",
-      "artist": "",
-      "raw": "1:16:52",
-      "rawHash": "36929a679bb6cad5ebe31267dfcbd1a55ffbaf577d69085e64dbcb70e0e284be",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "empty_after_timestamp"
+        "known_artist"
       ]
     }
   ]

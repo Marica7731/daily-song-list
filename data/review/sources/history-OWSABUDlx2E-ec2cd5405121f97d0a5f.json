@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T20:02:20.467Z",
+  "generatedAt": "2026-07-14T03:46:08.237Z",
   "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
   "video": {
     "videoId": "OWSABUDlx2E",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260713T180000Z"
+    "snapshotId": "20260714T030000Z"
   },
   "risk": {
     "riskScore": 6,
@@ -129,20 +129,16 @@
       "seconds": 4006,
       "time": "1:06:46",
       "title": "寄り酔い",
-      "artist": "和ぬか」",
+      "artist": "和ぬか",
       "raw": "1:06:46 🎤7曲目:寄り酔い/和ぬか」",
       "rawHash": "6ae950ad07cbb8e9955f475e417e265a5d5f2107fb5a67a807c44c9730a9495c",
       "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
       "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "artist": "和ぬか"
-      },
-      "riskReasons": [
-        "parser_corruption"
-      ],
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
       "positiveEvidence": [
         "known_song",
         "known_artist"

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T03:46:08.237Z",
+  "reviewId": "review:FRYLDXX7FS8:bd436dc1e541fd0255a9",
+  "video": {
+    "videoId": "FRYLDXX7FS8",
+    "title": "弾き語り配信｜初見さんも大歓迎です！（2026/7/12アーカイブ）",
+    "channelName": "まにこ (manico)",
+    "youtubeUrl": "https://www.youtube.com/watch?v=FRYLDXX7FS8"
+  },
+  "source": {
+    "sourceId": "description:FRYLDXX7FS8:bd436dc1e541fd02",
+    "sourceHash": "bd436dc1e541fd0255a94ad9b9bc9c3c10a2952dad69fba87a3a90897dbc37d9",
+    "sourceType": "description",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "来週の配信予定（7/16木曜日20:00~）",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 6,
+    "riskLevel": "low",
+    "riskReasons": []
+  },
+  "entries": [
+    {
+      "status": "rejected",
+      "reason": "bad_title",
+      "seconds": 1200,
+      "time": "0:20:00",
+      "title": "~）",
+      "artist": "未記載",
+      "raw": "来週の配信予定（7/16木曜日20:00~）",
+      "rawHash": "bd436dc1e541fd0255a94ad9b9bc9c3c10a2952dad69fba87a3a90897dbc37d9",
+      "sourceId": "description:FRYLDXX7FS8:bd436dc1e541fd02",
+      "sourceHash": "bd436dc1e541fd0255a94ad9b9bc9c3c10a2952dad69fba87a3a90897dbc37d9",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "bad_title"
+      ]
+    }
+  ]
+}

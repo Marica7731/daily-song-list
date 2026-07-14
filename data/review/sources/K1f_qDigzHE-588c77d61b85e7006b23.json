@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T20:02:20.467Z",
+  "generatedAt": "2026-07-14T03:46:08.237Z",
   "reviewId": "review:K1f_qDigzHE:588c77d61b85e7006b23",
   "video": {
     "videoId": "K1f_qDigzHE",
@@ -11,17 +11,19 @@
   "source": {
     "sourceId": "Ugz5VD82e0zXfnJW-Hx4AaABAg",
     "sourceHash": "588c77d61b85e7006b235503fd6e76bab4fe34c7e74874f9d63d64e19755b240",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "10:27 Magic - Mrs. GREEN APPLE\r\n25:30 青と夏\r\n36:28 夏祭り-3\r\n42:33 アゲハ蝶\r\n51:58 ただ君に晴れ\r\n59:57 ツバサ\r\n1:08:42 天体観測\r\n1:14:45 シルエット\r\n1:21:36 HOT LIMIT/T.M.Revolution\r\n1:28:17 UTAGE /T.M.Revolution\r\n1:35:11 FLAGS/T.M.Revolution\n1:41:15 アサガオの散る頃に\n1:46:27 殘響散歌\n1:54:19 ウィーアー！\n2:00:40 少女レイ\n2:08:00  Magic - Mrs. GREEN APPLE\n\r2:15:20 ケセラセラ\n2:23:01 真夏の夜の夢\n2:35:50 風のゆくえ\n2:45:24 水平線\n3:08:13 噓\n3:12:14 逃避行\n3:20:03 夜もすがら君想ふ \n3:26:44 Fire Flower\n\nおつもり～su goi na tsu:_うるうる:\n今日の歌枠の歌　切り抜きいいですが？",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 14,
+    "riskScore": 34,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_unknown_artists"
+      "source_multiple_niche_short_titles",
+      "source_multiple_unknown_artists",
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -35,14 +37,13 @@
       "rawHash": "7774cc8a0b6aed48e30ac47ae0a3ea14d008f944d611becbb3bb9a4ae57b92be",
       "sourceId": "Ugz5VD82e0zXfnJW-Hx4AaABAg",
       "sourceHash": "588c77d61b85e7006b235503fd6e76bab4fe34c7e74874f9d63d64e19755b240",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -63,8 +64,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -77,16 +77,15 @@
       "rawHash": "22ba9f66f4cc62e397692fb3ab2f939337540c0efcfcc1da44fcf2907c2b52e7",
       "sourceId": "Ugz5VD82e0zXfnJW-Hx4AaABAg",
       "sourceHash": "588c77d61b85e7006b235503fd6e76bab4fe34c7e74874f9d63d64e19755b240",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -106,8 +105,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -128,8 +126,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -150,8 +147,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -172,8 +168,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -194,8 +189,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -215,8 +209,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -229,14 +222,13 @@
       "rawHash": "5513116412551218d90be1af061ff2e616ca308850e227d62db3e9fbce6c0e39",
       "sourceId": "Ugz5VD82e0zXfnJW-Hx4AaABAg",
       "sourceHash": "588c77d61b85e7006b235503fd6e76bab4fe34c7e74874f9d63d64e19755b240",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -256,8 +248,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -278,8 +269,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -300,8 +290,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -322,8 +311,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -344,8 +332,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -358,14 +345,13 @@
       "rawHash": "aa3b55bfd97dc49e571e0d0c76a94b4f6d0c2dc8579604abf6a4e2d65ceec003",
       "sourceId": "Ugz5VD82e0zXfnJW-Hx4AaABAg",
       "sourceHash": "588c77d61b85e7006b235503fd6e76bab4fe34c7e74874f9d63d64e19755b240",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -386,8 +372,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -408,8 +393,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -430,8 +414,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -452,8 +435,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -474,8 +456,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -496,8 +477,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -518,8 +498,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -540,8 +519,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     }
   ]

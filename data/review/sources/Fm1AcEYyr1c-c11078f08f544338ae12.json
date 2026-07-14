@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T03:46:08.237Z",
+  "reviewId": "review:Fm1AcEYyr1c:c11078f08f544338ae12",
+  "video": {
+    "videoId": "Fm1AcEYyr1c",
+    "title": "【 歌枠/ 横型】のんびりお昼休みし魔せんか？【 レヴィ・アタン 】 #vtuber #雑談 #魔族さんといっしょ",
+    "channelName": "レヴィ・アタン",
+    "youtubeUrl": "https://www.youtube.com/watch?v=Fm1AcEYyr1c"
+  },
+  "source": {
+    "sourceId": "UgyZpHuoRpvcipoZvgJ4AaABAg",
+    "sourceHash": "c11078f08f544338ae124b8efd1f5e4a957ac54a4f689c228b4dd30472885618",
+    "sourceType": "comment",
+    "selected": true,
+    "sourceTextAvailable": true,
+    "sourceText": "【横型雑談/歌枠】\n0:00:01 待機\n0:00:24 魔族登場・挨拶\n～前半 雑談～\n0:38:23 トウキョウ・シャンディ・ランデヴ/花譜\n0:43:48 フィナーレ。(アカペラ)/eill\n～再び雑談～\n1:11:42 エンディング\n\n月火はなかなかリアタイ出来ないがアーカイブあるのが助かるぞ。\n朝のシチュボもガン見させてもらった。\nいいぞ。\n\nフンッ。",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 50,
+    "riskLevel": "medium",
+    "riskReasons": [
+      "source_activity_marker_ratio_high",
+      "source_many_topic_entries"
+    ]
+  },
+  "entries": [
+    {
+      "status": "accepted",
+      "seconds": 2303,
+      "time": "0:38:23",
+      "title": "トウキョウ・シャンディ・ランデヴ",
+      "artist": "花譜",
+      "raw": "0:38:23 トウキョウ・シャンディ・ランデヴ/花譜",
+      "rawHash": "4bb5424e2665667a5ff5121cf916a59fd032f1c508c08b60342aa0614e1a6bf3",
+      "sourceId": "UgyZpHuoRpvcipoZvgJ4AaABAg",
+      "sourceHash": "c11078f08f544338ae124b8efd1f5e4a957ac54a4f689c228b4dd30472885618",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
+      "positiveEvidence": [
+        "known_song",
+        "known_artist",
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "accepted",
+      "seconds": 2628,
+      "time": "0:43:48",
+      "title": "フィナーレ。(アカペラ)",
+      "artist": "eill",
+      "raw": "0:43:48 フィナーレ。(アカペラ)/eill",
+      "rawHash": "4bec251e40914dfff86b0a70ab57acd5e3006592374e15746013def966ef901a",
+      "sourceId": "UgyZpHuoRpvcipoZvgJ4AaABAg",
+      "sourceHash": "c11078f08f544338ae124b8efd1f5e4a957ac54a4f689c228b4dd30472885618",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
+      "positiveEvidence": [
+        "known_artist",
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "likely_non_song_entry",
+      "seconds": 1,
+      "time": "0:00:01",
+      "title": "待機",
+      "artist": "未記載",
+      "raw": "0:00:01 待機",
+      "rawHash": "4a7506036fab5c640ff16481886dd214794b217650898de5c2bcdf32e12f7e21",
+      "sourceId": "UgyZpHuoRpvcipoZvgJ4AaABAg",
+      "sourceHash": "c11078f08f544338ae124b8efd1f5e4a957ac54a4f689c228b4dd30472885618",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "likely_non_song_entry"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 24,
+      "time": "0:00:24",
+      "title": "魔族登場・挨拶",
+      "artist": "未記載",
+      "raw": "0:00:24 魔族登場・挨拶",
+      "rawHash": "6a4bf068e493c065ee2172774720ac75fda9242b42bd171b4cecfafd6552660f",
+      "sourceId": "UgyZpHuoRpvcipoZvgJ4AaABAg",
+      "sourceHash": "c11078f08f544338ae124b8efd1f5e4a957ac54a4f689c228b4dd30472885618",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "likely_non_song_entry",
+      "seconds": 4302,
+      "time": "1:11:42",
+      "title": "エンディング",
+      "artist": "未記載",
+      "raw": "1:11:42 エンディング",
+      "rawHash": "5a40dcc82456eba988a09d3fb86601e574575d74fbcb7d8f90a37c864de2bc58",
+      "sourceId": "UgyZpHuoRpvcipoZvgJ4AaABAg",
+      "sourceHash": "c11078f08f544338ae124b8efd1f5e4a957ac54a4f689c228b4dd30472885618",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "likely_non_song_entry"
+      ]
+    }
+  ]
+}

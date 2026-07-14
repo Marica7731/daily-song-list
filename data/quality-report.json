@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T20:02:20.467Z",
+  "generatedAt": "2026-07-14T03:46:08.237Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-  "totalSongs": 14421,
-  "unknownArtistCount": 2703,
-  "nicheUnknownArtistCount": 1323,
+  "totalSongs": 15002,
+  "unknownArtistCount": 2749,
+  "nicheUnknownArtistCount": 1340,
   "highRiskEntryCount": 408,
   "highRiskSourceCount": 18,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 14,
+  "ruleDroppedEntryCount": 26,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 24,
-  "parserCorruptionCount": 20,
+  "confirmedNoiseCount": 33,
+  "parserCorruptionCount": 21,
   "likelyNoiseCount": 0,
-  "needsReviewCount": 1320,
-  "likelySongCount": 8085,
+  "needsReviewCount": 1339,
+  "likelySongCount": 8480,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -33,12 +33,12 @@
     },
     {
       "value": "少女レイ",
-      "count": 18,
+      "count": 19,
       "classifications": {
-        "likely_song": 18
+        "likely_song": 19
       },
       "riskReasons": {
-        "known_song_unknown_artist": 18
+        "known_song_unknown_artist": 19
       }
     },
     {
@@ -74,7 +74,7 @@
       }
     },
     {
-      "value": "夜明けと蛍",
+      "value": "ロミオとシンデレラ",
       "count": 8,
       "classifications": {
         "likely_song": 8
@@ -84,13 +84,13 @@
       }
     },
     {
-      "value": "～",
-      "count": 7,
+      "value": "夜明けと蛍",
+      "count": 8,
       "classifications": {
-        "confirmed_noise": 7
+        "likely_song": 8
       },
       "riskReasons": {
-        "bad_title": 7
+        "known_song_unknown_artist": 8
       }
     },
     {
@@ -146,16 +146,6 @@
       }
     },
     {
-      "value": "ロミオとシンデレラ",
-      "count": 7,
-      "classifications": {
-        "likely_song": 7
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 7
-      }
-    },
-    {
       "value": "花に亡霊",
       "count": 7,
       "classifications": {
@@ -167,6 +157,16 @@
     },
     {
       "value": "アイネクライネ",
+      "count": 6,
+      "classifications": {
+        "likely_song": 6
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 6
+      }
+    },
+    {
+      "value": "からくりピエロ",
       "count": 6,
       "classifications": {
         "likely_song": 6
@@ -206,7 +206,7 @@
       }
     },
     {
-      "value": "からくりピエロ",
+      "value": "シュガーソングとビターステップ",
       "count": 5,
       "classifications": {
         "likely_song": 5
@@ -216,7 +216,7 @@
       }
     },
     {
-      "value": "シュガーソングとビターステップ",
+      "value": "ダーリンダンス",
       "count": 5,
       "classifications": {
         "likely_song": 5
@@ -229,11 +229,15 @@
   "topRiskChannels": [
     {
       "value": "UTANO ch. 白玖ウタノ",
-      "count": 8
+      "count": 9
     },
     {
       "value": "汐音ベリーちゃん Berry Ch",
-      "count": 8
+      "count": 5
+    },
+    {
+      "value": "MUZU‐むずちゃんねる‐【Vtuber】",
+      "count": 4
     },
     {
       "value": "音ノ乃のの / NononoNono",
@@ -248,11 +252,15 @@
       "count": 3
     },
     {
+      "value": "Hibiki ch🔴💦叶 響",
+      "count": 3
+    },
+    {
       "value": "Kyoka Ch. -響架-",
       "count": 3
     },
     {
-      "value": "MUZU‐むずちゃんねる‐【Vtuber】",
+      "value": "Norn Ch. 氷々樹ノルン",
       "count": 3
     },
     {
@@ -265,10 +273,6 @@
     },
     {
       "value": "xea",
-      "count": 3
-    },
-    {
-      "value": "ただのかえる【TADANO KAERU】",
       "count": 3
     },
     {
@@ -300,12 +304,8 @@
       "count": 3
     },
     {
-      "value": "-sumica-澄花",
-      "count": 2
-    },
-    {
-      "value": "Akane Ch. 七福あかね",
-      "count": 2
+      "value": "苺咲べりぃ / Maisaki Berry",
+      "count": 3
     }
   ],
   "topRiskVideos": [
@@ -588,6 +588,14 @@
   "newUnseenPatterns": [],
   "history": [
     {
+      "generatedAt": "2026-07-14T03:46:08.237Z",
+      "totalSongs": 15002,
+      "unknownArtistCount": 2749,
+      "nicheUnknownArtistCount": 1340,
+      "highRiskEntryCount": 408,
+      "highRiskSourceCount": 18
+    },
+    {
       "generatedAt": "2026-07-13T20:02:20.467Z",
       "totalSongs": 14421,
       "unknownArtistCount": 2703,
@@ -738,14 +746,6 @@
       "nicheUnknownArtistCount": 1552,
       "highRiskEntryCount": 428,
       "highRiskSourceCount": 16
-    },
-    {
-      "generatedAt": "2026-07-12T21:19:13.602Z",
-      "totalSongs": 12853,
-      "unknownArtistCount": 3107,
-      "nicheUnknownArtistCount": 1585,
-      "highRiskEntryCount": 440,
-      "highRiskSourceCount": 17
     }
   ]
 }

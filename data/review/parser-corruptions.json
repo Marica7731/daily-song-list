@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-13T20:03:45.530Z",
+  "generatedAt": "2026-07-14T03:47:41.503Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-13T18:53:20.659Z",
+  "latestGeneratedAt": "2026-07-14T03:20:42.708Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
   "counts": {
-    "totalCandidates": 1668,
-    "uniqueVideos": 237,
-    "uniqueSources": 287,
+    "totalCandidates": 1667,
+    "uniqueVideos": 236,
+    "uniqueSources": 286,
     "confirmedNoiseCount": 0,
-    "parserCorruptionCount": 1668,
+    "parserCorruptionCount": 1667,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 0,
-      "parser_corruption": 1668,
+      "parser_corruption": 1667,
       "likely_noise": 0,
       "needs_review": 0,
       "likely_song": 0
@@ -3240,7 +3240,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -9533,7 +9533,7 @@
       "ranges": [
         "72h",
         "1m",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -10861,7 +10861,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -19895,94 +19895,6 @@
       "reviewLocator": "data/review/sources/history-yP9Qz6hBpcs-41a45a41a1023729b203.json#a2bd3242a1c695aa4a19f8dff3d05910783a315ff6300124c73006127cd5f157"
     },
     {
-      "title": "寄り酔い",
-      "artist": "和ぬか",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 4006,
-      "time": "1:06:46",
-      "raw": "1:06:46 🎤7曲目:寄り酔い/和ぬか」",
-      "rawHash": "6ae950ad07cbb8e9955f475e417e265a5d5f2107fb5a67a807c44c9730a9495c",
-      "videoId": "OWSABUDlx2E",
-      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
-      "channelName": "Yona Ch. 獅ノ月ヨナ",
-      "channelId": "UC5xL2VODxgdf0_wL_k_JilQ",
-      "channelHandle": "/@ShinotsukiYona",
-      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=4006s",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
-      "sourcePath": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
-      "reviewLocator": "data/review/sources/OWSABUDlx2E-ec2cd5405121f97d0a5f.json#6ae950ad07cbb8e9955f475e417e265a5d5f2107fb5a67a807c44c9730a9495c",
-      "repairedTitle": "寄り酔い",
-      "repairedArtist": "和ぬか",
-      "repairReasons": [
-        "delimiter_split"
-      ]
-    },
-    {
-      "title": "寄り酔い",
-      "artist": "和ぬか」",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 4006,
-      "time": "1:06:46",
-      "raw": "1:06:46 🎤7曲目:寄り酔い/和ぬか」",
-      "rawHash": "6ae950ad07cbb8e9955f475e417e265a5d5f2107fb5a67a807c44c9730a9495c",
-      "videoId": "OWSABUDlx2E",
-      "videoTitle": "【歌枠】眠る前に歌いたい【#獅ノ月ヨナ / KARAOKE】",
-      "channelName": "Yona Ch. 獅ノ月ヨナ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OWSABUDlx2E&t=4006s",
-      "sourceId": "UgzpZpVY_H-lWuyYYFx4AaABAg",
-      "sourceHash": "ec2cd5405121f97d0a5f667d1a9695fe0c2d9498380159be4c410ae4b17aee43",
-      "sourceOrigin": "review:history-OWSABUDlx2E-ec2cd5405121f97d0a5f.json;review:OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
-      "sourceScope": "history",
-      "ranges": [
-        "snapshot:20260713T180000Z",
-        "review"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_song",
-        "known_artist"
-      ],
-      "sourceRiskReasons": [
-        "niche_unknown_artist"
-      ],
-      "riskReasons": [
-        "parser_corruption"
-      ],
-      "replacementSuggestion": {
-        "artist": "和ぬか"
-      },
-      "reviewId": "review:OWSABUDlx2E:ec2cd5405121f97d0a5f",
-      "sourcePath": "data/review/sources/history-OWSABUDlx2E-ec2cd5405121f97d0a5f.json",
-      "reviewLocator": "data/review/sources/history-OWSABUDlx2E-ec2cd5405121f97d0a5f.json#6ae950ad07cbb8e9955f475e417e265a5d5f2107fb5a67a807c44c9730a9495c"
-    },
-    {
       "title": "あーあーあ”ーあ”ぁ”ー:_teteなんかふえてた",
       "artist": "",
       "isNiche": false,
@@ -20563,7 +20475,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z",
         "review"
@@ -32999,13 +32911,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U&t=1305s",
       "sourceId": "legacy:ZTi1cpRaW8U",
       "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
-      "sourceOrigin": "latest;review:history-ZTi1cpRaW8U-938d64179a2e87620ead.json;review:ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json;review:history-ZTi1cpRaW8U-938d64179a2e87620ead.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
         "1m",
-        "snapshot:20260713T180000Z",
-        "review"
+        "review",
+        "snapshot:20260714T030000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33239,7 +33151,7 @@
       "ranges": [
         "72h",
         "1m",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -33524,7 +33436,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -33574,7 +33486,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T190000Z"
       ],
@@ -33625,7 +33537,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -33885,15 +33797,15 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM&t=6954s",
       "sourceId": "legacy:_lKgLhWSCCM",
       "sourceHash": "ba5c9cc71aa9b31e467ab2ab07bd66ffea6cc13a7c538f216b78e77b3abc38cc",
-      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:history-_lKgLhWSCCM-ce6d964f00e006a457bc.json;review:_lKgLhWSCCM-373b0c82505415e34abb.json",
+      "sourceOrigin": "latest;review:_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:history-_lKgLhWSCCM-ce6d964f00e006a457bc.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
+        "review",
         "snapshot:20260711T150000Z",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "snapshot:20260712T190000Z",
-        "snapshot:20260713T120000Z",
-        "review"
+        "snapshot:20260713T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33936,14 +33848,14 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM&t=10329s",
       "sourceId": "legacy:_lKgLhWSCCM",
       "sourceHash": "ba5c9cc71aa9b31e467ab2ab07bd66ffea6cc13a7c538f216b78e77b3abc38cc",
-      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:_lKgLhWSCCM-373b0c82505415e34abb.json",
+      "sourceOrigin": "latest;review:_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
+        "review",
         "snapshot:20260711T150000Z",
-        "snapshot:20260713T180000Z",
-        "snapshot:20260712T190000Z",
-        "review"
+        "snapshot:20260714T030000Z",
+        "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -49010,13 +48922,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=JJc_HICmBrU&t=4438s",
       "sourceId": "legacy:JJc_HICmBrU",
       "sourceHash": "52ac8eb415fdeb60c844810baef33ac473cbd33d8e7801c1ff8f40a03cf97cca",
-      "sourceOrigin": "latest;review:history-JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-96f5649a92eae0d1a47f.json;review:JJc_HICmBrU-52ac8eb415fdeb60c844.json",
+      "sourceOrigin": "latest;review:JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-96f5649a92eae0d1a47f.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260713T180000Z",
-        "snapshot:20260711T150000Z",
-        "review"
+        "review",
+        "snapshot:20260714T030000Z",
+        "snapshot:20260711T150000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -49107,7 +49019,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T180000Z"
+        "snapshot:20260714T030000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -49150,12 +49062,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=K4ODEKmZw2M&t=4446s",
       "sourceId": "legacy:K4ODEKmZw2M",
       "sourceHash": "8513628ce54958e285669af5504b7f13eb7fe596e9ab85930262ad149030c07d",
-      "sourceOrigin": "latest;review:history-K4ODEKmZw2M-8513628ce54958e28566.json;review:K4ODEKmZw2M-8513628ce54958e28566.json",
+      "sourceOrigin": "latest;review:K4ODEKmZw2M-8513628ce54958e28566.json;review:history-K4ODEKmZw2M-8513628ce54958e28566.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260713T180000Z",
-        "review"
+        "review",
+        "snapshot:20260714T030000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -49198,12 +49110,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=RNi5KJKQm04&t=456s",
       "sourceId": "legacy:RNi5KJKQm04",
       "sourceHash": "df87c41c0267ba4c06d8d82b5e8bea6ce32d98e63a9b2dc284e160e08b58c713",
-      "sourceOrigin": "latest;review:history-RNi5KJKQm04-df87c41c0267ba4c06d8.json;review:RNi5KJKQm04-df87c41c0267ba4c06d8.json",
+      "sourceOrigin": "latest;review:RNi5KJKQm04-df87c41c0267ba4c06d8.json;review:history-RNi5KJKQm04-df87c41c0267ba4c06d8.json",
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260713T180000Z",
-        "review"
+        "review",
+        "snapshot:20260714T030000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -54478,6 +54390,108 @@
       "reviewLocator": "data/review/sources/history-oWUhxHkwZ9g-2b7a253052fe8e3f71da.json#b4d3b38bea6b12dde931659028aa8f544c7ea34fcece3ed2f1316e34ca52953a"
     },
     {
+      "title": "八月の夜 SILENT SIREN",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1292,
+      "time": "0:21:32",
+      "raw": "21:32 八月の夜 SILENT SIREN",
+      "rawHash": "afb7beec123d81ff6cadc99dd38784169e01199a3649aebff5f0bc7ab3bf91b3",
+      "videoId": "MrGxz0q6Py0",
+      "videoTitle": "【#歌枠】夕方チル歌枠【＃karaoke┊︎#個人VTuber┊︎#新人VTuber┊︎#仁斗】【カラオケJOYSOUND for STREAMER】",
+      "channelName": "仁斗_nito",
+      "channelId": "UCzQGJ0vkewz8WJXWkuhIJWw",
+      "channelHandle": "/@nito_t_t",
+      "youtubeUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0&t=1292s",
+      "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
+      "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
+      "sourceOrigin": "latest;review:MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json;review:history-MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review",
+        "snapshot:20260714T030000Z"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title_artist",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "combined_title_artist_lookup",
+        "known_song_unknown_artist"
+      ],
+      "replacementSuggestion": {
+        "title": "八月の夜",
+        "artist": "SILENT SIREN"
+      },
+      "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
+      "sourcePath": "data/review/sources/MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "reviewLocator": "data/review/sources/MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json#afb7beec123d81ff6cadc99dd38784169e01199a3649aebff5f0bc7ab3bf91b3",
+      "repairedTitle": "八月の夜",
+      "repairedArtist": "SILENT SIREN",
+      "repairReasons": [
+        "combined_title_artist_lookup"
+      ]
+    },
+    {
+      "title": "パラソルサイダー ナナホシ管弦楽団",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5588,
+      "time": "1:33:08",
+      "raw": "1:33:08 パラソルサイダー ナナホシ管弦楽団",
+      "rawHash": "bed992b53d7355ebad055dcc9a8381d6ab82daf126a11cc02b340cfe28f0e199",
+      "videoId": "MrGxz0q6Py0",
+      "videoTitle": "【#歌枠】夕方チル歌枠【＃karaoke┊︎#個人VTuber┊︎#新人VTuber┊︎#仁斗】【カラオケJOYSOUND for STREAMER】",
+      "channelName": "仁斗_nito",
+      "channelId": "UCzQGJ0vkewz8WJXWkuhIJWw",
+      "channelHandle": "/@nito_t_t",
+      "youtubeUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0&t=5588s",
+      "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
+      "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
+      "sourceOrigin": "latest;review:MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json;review:history-MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review",
+        "snapshot:20260714T030000Z"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title_artist",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "combined_title_artist_lookup",
+        "known_song_unknown_artist"
+      ],
+      "replacementSuggestion": {
+        "title": "パラソルサイダー",
+        "artist": "ナナホシ管弦楽団"
+      },
+      "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
+      "sourcePath": "data/review/sources/MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "reviewLocator": "data/review/sources/MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json#bed992b53d7355ebad055dcc9a8381d6ab82daf126a11cc02b340cfe28f0e199",
+      "repairedTitle": "パラソルサイダー",
+      "repairedArtist": "ナナホシ管弦楽団",
+      "repairReasons": [
+        "combined_title_artist_lookup"
+      ]
+    },
+    {
       "title": "『 モエチャッカファイア 』",
       "artist": "弌誠",
       "isNiche": false,
@@ -56010,7 +56024,7 @@
       "ranges": [
         "1m",
         "snapshot:20260712T220000Z",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -57850,54 +57864,6 @@
       "reviewId": "review:eF-XelhsSEU:ad19406bff26a2a720d9",
       "sourcePath": "data/review/sources/history-eF-XelhsSEU-ad19406bff26a2a720d9.json",
       "reviewLocator": "data/review/sources/history-eF-XelhsSEU-ad19406bff26a2a720d9.json#452c9722d51051e07dcdf4b208a5134f5ec58f1f7ea5f86bba992d5795d64735"
-    },
-    {
-      "title": "君は僕に似ている",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 11640,
-      "time": "3:14:00",
-      "raw": "3:14:00 君は僕に似ている/See-Saw（アカペラ）",
-      "rawHash": "aa62d6ac0c95a7104131b5667bc6311e6c8dca44f041ecdc40955cbf01e57185",
-      "videoId": "7VNWlyfFQzM",
-      "videoTitle": "【歌枠 / 耐久】初見さん来ないと24時間歌枠！？初見さん・常連さん・ROM専さん大歓迎【 星瑠璃メロウ 】",
-      "channelName": "星瑠璃メロウ / Hoshiruri Mellow",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=7VNWlyfFQzM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=7VNWlyfFQzM&t=11640s",
-      "sourceId": "legacy:7VNWlyfFQzM",
-      "sourceHash": "3ea49c4ac65dd57fc8cdfb066431a58e25d082848b631c3c13021143f76cc585",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "known_song_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "artist": "See-Saw（アカペラ）"
-      },
-      "reviewId": "",
-      "sourcePath": "",
-      "reviewLocator": "aa62d6ac0c95a7104131b5667bc6311e6c8dca44f041ecdc40955cbf01e57185",
-      "repairedTitle": "君は僕に似ている",
-      "repairedArtist": "See-Saw（アカペラ）",
-      "repairReasons": [
-        "delimiter_split"
-      ]
     },
     {
       "title": "_おつつ::_みああ",
@@ -69612,7 +69578,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T180000Z"
+        "snapshot:20260714T030000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -75658,6 +75624,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -75668,14 +75635,13 @@
         "niche_unknown_artist"
       ],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
         "parser_corruption",
-        "source_many_topic_entries"
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": {
         "title": "残灯花火",
-        "artist": "Orangestar feat.初音ミク/2015"
+        "artist": "Orangestar feat.初音ミク"
       },
       "reviewId": "review:gUaAI5HtUHo:84d14e24645a09becf4d",
       "sourcePath": "data/review/sources/history-gUaAI5HtUHo-84d14e24645a09becf4d.json",
@@ -76378,7 +76344,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -76470,7 +76436,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260713T180000Z",
+        "snapshot:20260714T030000Z",
         "review"
       ],
       "classification": "parser_corruption",
