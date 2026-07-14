@@ -237,22 +237,33 @@ test("builds whole-video setlist text from original songs", () => {
   );
 });
 
-test("builds same-song source link text from every timestamp", () => {
+test("builds same-song source link text from unique source videos", () => {
   const links = buildSongSourceLinksText([
-    occurrence("VideoA", "Channel A", { seconds: 75, title: "song" }),
+    occurrence("VideoA", "羽海乃ゆき", { seconds: 75, title: "song" }),
     occurrence("VideoA", "Channel A", { seconds: 180, title: "song" }),
-    occurrence("VideoB", "Channel B", { seconds: 12, title: "song" }),
+    occurrence("VideoB", "こは太郎", { seconds: 12, title: "song" }),
     occurrence("VideoA", "Channel A", { seconds: 75, title: "song" }),
+    occurrence("VideoC", "", { seconds: 9, title: "song" }),
+    occurrence("VideoD", "中文频道", { seconds: 120, title: "song" }),
+    occurrence("VideoE", "Orihime Haruka", { seconds: 121, title: "song" }),
+    occurrence("", "Broken Channel", { seconds: 1, title: "song" }),
   ]);
 
   assert.equal(
     links,
     [
-      "Channel B https://www.youtube.com/watch?v=VideoB&t=12s",
-      "Channel A https://www.youtube.com/watch?v=VideoA&t=75s",
-      "Channel A https://www.youtube.com/watch?v=VideoA&t=180s",
+      "未知频道 https://www.youtube.com/watch?v=VideoC",
+      "こは太郎 https://www.youtube.com/watch?v=VideoB",
+      "羽海乃ゆき https://www.youtube.com/watch?v=VideoA",
+      "中文频道 https://www.youtube.com/watch?v=VideoD",
+      "Orihime Haruka https://www.youtube.com/watch?v=VideoE",
     ].join("\n"),
   );
+  assert.doesNotMatch(links, /&t=|t=\d+s/u);
+  assert.doesNotMatch(links, /^\d+\.|^- |\[[^\]]+\]\(/um);
+  assert.equal(links.split("\n").length, 5);
+  assert.equal(new Set(links.split("\n").map((line) => line.match(/watch\?v=([^&\s]+)/u)?.[1])).size, 5);
+  assert.equal(links.endsWith("\n"), false);
 });
 
 test("inline source timestamp link points to YouTube watch time", () => {
@@ -375,7 +386,7 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
   assert.deepEqual(parseUrlState(serialized, options), parsed);
 });
 
-test("url state parses trend and minCount and serializes explicit share links", () => {
+test("url state parses trend, minCount, and legacy shared marker", () => {
   const options = urlStateOptions();
   const parsed = parseUrlState("?trend=up&minCount=5&detail=song%3Atitle%253A%253Aartist", options);
 

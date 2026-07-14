@@ -46,7 +46,7 @@
   --rank-leading-width: 44px;
   --shadow-soft: 0 10px 28px rgba(17, 24, 39, 0.08);
   --page-x: clamp(12px, 2vw, 28px);
-  --page-max: 1240px;
+  --page-max: 1400px;
   --controls-height: 62px;
   --visual-viewport-height: 100dvh;
   --visual-viewport-offset-top: 0px;
@@ -159,8 +159,8 @@ h1 {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-areas: "range view search filter snapshot-date snapshot-time share";
-  grid-template-columns: auto auto minmax(260px, 1fr) auto minmax(112px, 150px) minmax(170px, 230px) auto;
+  grid-template-areas: "range view search filter snapshot-date snapshot-time";
+  grid-template-columns: auto auto minmax(300px, 1fr) auto minmax(112px, 150px) minmax(170px, 230px);
   gap: 10px;
   align-items: center;
   margin: 0 calc(var(--page-x) * -1) 10px;
@@ -201,10 +201,6 @@ h1 {
   grid-area: filter;
 }
 
-.share-button {
-  grid-area: share;
-}
-
 .mobile-toolbar-actions {
   display: none;
 }
@@ -216,7 +212,7 @@ h1 {
   gap: 4px;
   min-width: 0;
   max-width: 100%;
-  padding: 3px;
+  padding: 4px;
   overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
@@ -315,6 +311,11 @@ svg {
   border-radius: var(--radius-control);
   font-weight: 700;
   letter-spacing: 0;
+}
+
+.toolbar-button,
+.toolbar-icon-button {
+  min-height: var(--control-default);
 }
 
 .toolbar-button,
@@ -1140,6 +1141,7 @@ mark {
   justify-content: center;
   justify-items: end;
   justify-self: end;
+  width: 100%;
   min-width: 52px;
   border-radius: var(--radius-pill);
   padding: 3px 8px;
@@ -1158,7 +1160,9 @@ mark {
 
 .rank-trend {
   grid-area: trend;
-  justify-self: end;
+  display: flex;
+  justify-content: flex-end;
+  justify-self: stretch;
   min-width: 0;
 }
 
@@ -1339,13 +1343,13 @@ mark {
   grid-column: 2 / -1;
   grid-row: 2;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-  gap: 10px 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  margin-top: 8px;
-  padding: 9px 0 0;
+  margin-top: var(--space-2);
+  padding: var(--space-3) 0 0;
   border-top: 1px dashed var(--line);
 }
 
@@ -1416,8 +1420,36 @@ mark {
 
 .artist-song-sources {
   display: grid;
-  gap: 3px;
+  gap: var(--space-2);
   min-width: 0;
+}
+
+.source-drawer-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-bottom: var(--space-1);
+}
+
+.source-drawer-count {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-drawer-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
 }
 
 .artist-song-more,
@@ -1438,7 +1470,7 @@ mark {
   min-width: 0;
   border: 0;
   border-radius: var(--radius-control);
-  padding: var(--space-2);
+  padding: var(--space-3);
   background: #f8fafc;
 }
 
@@ -1460,9 +1492,9 @@ mark {
   display: -webkit-box;
   min-width: 0;
   overflow: hidden;
-  color: var(--accent-strong);
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
   line-height: 1.3;
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -1473,13 +1505,21 @@ mark {
 }
 
 .source-video-channel {
+  display: block;
   min-width: 0;
   overflow: hidden;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 500;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-decoration: none;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.source-video-channel:hover,
+.source-video-title:hover {
+  color: var(--accent-strong);
 }
 
 .source-video-actions {
@@ -1508,6 +1548,11 @@ mark {
   line-height: 1;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.source-group-more,
+.source-collapse-bottom {
+  grid-column: 1 / -1;
 }
 
 .source-action:hover,
@@ -1568,6 +1613,15 @@ mark {
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
+}
+
+.trend-badge.rank-trend-inline {
+  display: none;
+  flex: 0 0 auto;
+  justify-self: start;
+  align-self: center;
+  width: max-content;
+  max-width: 120px;
 }
 
 .trend-up,
@@ -2001,9 +2055,9 @@ mark {
 @media (min-width: 721px) and (max-width: 919px) {
   .controls {
     grid-template-areas:
-      "range view filter snapshot-date snapshot-time share"
-      "search search search search search search";
-    grid-template-columns: auto minmax(0, 1fr) auto minmax(108px, 136px) minmax(150px, 200px) auto;
+      "range view filter snapshot-date snapshot-time"
+      "search search search search search";
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(108px, 136px) minmax(150px, 200px);
   }
 
   .rank-header {
@@ -2028,7 +2082,7 @@ mark {
     display: none;
   }
 
-  .rank-trend-inline {
+  .trend-badge.rank-trend-inline {
     display: inline-flex;
     flex: 0 0 auto;
     justify-self: start;
@@ -2063,6 +2117,10 @@ mark {
     padding: var(--space-2) 0 0;
   }
 
+  .source-drawer-toolbar {
+    padding: 0 0 var(--space-2) calc(42px + 12px);
+  }
+
   .source-video-group {
     border-radius: 0;
     padding: var(--space-3) 0 var(--space-3) calc(42px + 12px);
@@ -2092,17 +2150,17 @@ mark {
 
 @media (min-width: 1024px) {
   .layout {
-    width: min(1240px, calc(100% - (var(--page-x) * 2)));
-  }
-
-  .layout:has(.video-grid) {
     width: min(var(--page-max), calc(100% - (var(--page-x) * 2)));
   }
 
-  .rank-header {
-    position: sticky;
-    top: var(--controls-height);
-    z-index: 9;
+  .layout:has(.video-grid) {
+    width: min(1480px, calc(100% - (var(--page-x) * 2)));
+  }
+}
+
+@media (min-width: 1280px) {
+  .source-drawer {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -2171,8 +2229,7 @@ mark {
   .view-mode,
   .desktop-filter-button,
   .snapshot-date-field,
-  .snapshot-time-field,
-  .share-button {
+  .snapshot-time-field {
     display: none;
   }
 
@@ -2414,7 +2471,7 @@ mark {
     display: none;
   }
 
-  .rank-trend-inline {
+  .trend-badge.rank-trend-inline {
     display: inline-flex;
     flex: 0 0 auto;
     justify-self: start;
@@ -2566,6 +2623,15 @@ mark {
     border-top: 1px solid var(--line);
   }
 
+  .source-drawer-toolbar {
+    align-items: center;
+    padding: 0 0 var(--space-2) var(--rank-leading-width);
+  }
+
+  .source-drawer-actions {
+    justify-content: flex-start;
+  }
+
   .source-video-group {
     gap: var(--space-2);
     border-radius: 0;
@@ -2586,6 +2652,10 @@ mark {
   .source-video-title {
     font-size: 12.5px;
     line-height: 1.32;
+  }
+
+  .source-video-channel {
+    font-size: 14px;
   }
 
   .source-video-actions {

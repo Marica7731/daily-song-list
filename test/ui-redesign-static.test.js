@@ -21,7 +21,7 @@ test("mobile information architecture exposes one-row toolbar, bottom nav, searc
   assert.doesNotMatch(cssSource, /@media \(max-width: 620px\)/u);
 });
 
-test("new URL state, filter draft, and share state are wired through app state", () => {
+test("URL state and filter draft are wired while visible share actions are removed", () => {
   assert.match(appSource, /trend:\s*"all"/u);
   assert.match(appSource, /minCount:\s*1/u);
   assert.match(appSource, /sharedUrlApplied:\s*false/u);
@@ -29,8 +29,10 @@ test("new URL state, filter draft, and share state are wired through app state",
   assert.match(appSource, /validMinCounts: MIN_COUNT_OPTIONS/u);
   assert.match(appSource, /function makeFilterDraftFromState/u);
   assert.match(appSource, /function applyFilterDraft/u);
-  assert.match(appSource, /function buildShareUrl/u);
-  assert.match(appSource, /includeShared:\s*true/u);
+  assert.match(appSource, /urlParams\.get\("shared"\) === "1"/u);
+  assert.doesNotMatch(indexSource, /id="shareButton"|data-copy-link/u);
+  assert.doesNotMatch(appSource, /function buildShareUrl|function shareCurrentLink|function copyCurrentLink|navigator\.share|dataset\.copyLink/u);
+  assert.doesNotMatch(cssSource, /share-button/u);
 });
 
 test("source drawer is inline, grouped, and visible on mobile", () => {
@@ -44,6 +46,8 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /dataset\.collapseSource = "true"/u);
   assert.match(appSource, /dataset\.copySongLinks = "true"/u);
   assert.match(appSource, /buildSongSourceLinksText\(occurrences\)/u);
+  assert.match(appSource, /className = "source-drawer-toolbar"/u);
+  assert.match(appSource, /复制全部链接/u);
   assert.match(appSource, /closeOtherMobileSourceDrawers\(row\)/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content count"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
@@ -65,12 +69,16 @@ test("third-round mobile component rules are encoded in css and browser checks",
   assert.match(cssSource, /\.sheet-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--control-large\);[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.match(cssSource, /\.sheet-actions\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: 1fr 1fr/u);
   assert.match(cssSource, /\.rank-actions-line\s*\{[\s\S]*gap: var\(--space-2\);/u);
-  assert.match(cssSource, /\.rank-trend-inline\s*\{[\s\S]*width: max-content;[\s\S]*max-width: 120px;/u);
+  assert.match(cssSource, /\.trend-badge\.rank-trend-inline\s*\{[\s\S]*display: none;[\s\S]*width: max-content;[\s\S]*max-width: 120px;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*gap: 0;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-video-group\s*\{[\s\S]*padding: var\(--space-3\) 0 var\(--space-3\) var\(--rank-leading-width\);/u);
+  assert.match(cssSource, /\.source-video-channel\s*\{[\s\S]*font-size: 14\.5px;[\s\S]*font-weight: 700;/u);
+  assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*font-size: 12\.5px;[\s\S]*font-weight: 500;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-video-header/u);
   assert.match(verifySource, /async function mobileFilterSheetFlow/u);
   assert.match(verifySource, /async function mobileRankVisualGeometry/u);
+  assert.match(verifySource, /async function mobileCopyAllLinksFlow/u);
+  assert.match(verifySource, /async function desktopRankVisualGeometry/u);
   assert.match(verifySource, /filter-sheet-bottom-\$\{viewport\.join\("x"\)\}\.png/u);
   assert.match(verifySource, /rank-expanded-trend-\$\{viewport\.join\("x"\)\}\.png/u);
 });

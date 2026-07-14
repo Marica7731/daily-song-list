@@ -259,7 +259,6 @@ const els = {
   filterInput: document.querySelector("#filterInput"),
   nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
   hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
-  shareButton: document.querySelector("#shareButton"),
   openSearchButton: document.querySelector("#openSearchButton"),
   searchDialog: document.querySelector("#searchDialog"),
   searchPanel: document.querySelector("#searchDialog .search-panel"),
@@ -459,20 +458,10 @@ function bindEvents() {
     await loadSnapshotPath(path, state.currentSnapshotPath, { urlMode: "push" });
   });
 
-  els.shareButton?.addEventListener("click", () => {
-    shareCurrentLink();
-  });
-
   bindSearchOverlayEvents();
   bindFilterOverlayEvents();
 
   els.summary?.addEventListener("click", async (event) => {
-    const copy = event.target.closest("[data-copy-link]");
-    if (copy) {
-      await copyCurrentLink();
-      return;
-    }
-
     const rankMetric = event.target.closest("[data-rank-metric]");
     if (rankMetric) {
       state.rankMetric = rankMetric.dataset.rankMetric || "occurrences";
@@ -1121,25 +1110,6 @@ function updateViewportVars() {
   document.documentElement.style.setProperty("--visual-viewport-offset-top", `${Math.round(viewport.offsetTop)}px`);
 }
 
-async function shareCurrentLink(options = {}) {
-  const href = buildShareUrl();
-  const title = options.label || "当前榜单链接";
-  if (navigator.share) {
-    try {
-      await navigator.share({ title, url: href });
-      return;
-    } catch (error) {
-      if (error?.name === "AbortError") return;
-    }
-  }
-  try {
-    await writeClipboardText(href);
-    showToast(`已复制${title}`);
-  } catch {
-    showToast(href);
-  }
-}
-
 function setActiveTab(tabs, activeTab) {
   for (const item of tabs) {
     item.classList.toggle("active", item === activeTab);
@@ -1212,33 +1182,6 @@ function syncControlsFromState() {
 
 function syncUrlState() {
   return;
-}
-
-function buildShareUrl(sourceState = state) {
-  const query = window.FrontendUtils.serializeUrlState(
-    {
-      range: sourceState.range,
-      view: sourceState.view,
-      page: sourceState.page,
-      pageSize: sourceState.pageSize,
-      bucket: sourceState.indexBucket,
-      rankMetric: sourceState.rankMetric,
-      trend: sourceState.trend,
-      minCount: sourceState.minCount,
-      videoLayout: sourceState.videoLayout,
-      outside: sourceState.nicheOnly,
-      showUnknown: !sourceState.hideUnknownArtist,
-      q: sourceState.filter,
-      snapshotPath: sourceState.currentSnapshotPath,
-    },
-    {
-      defaults: defaultUrlState(),
-      latestSnapshotPath: SNAPSHOT_LATEST_PATH,
-      snapshots: state.snapshots,
-      includeShared: true,
-    },
-  );
-  return `${window.location.origin}${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || ""}`;
 }
 
 function cleanSharedUrlAfterRender() {
@@ -2692,12 +2635,6 @@ function renderSummaryActions() {
     actions.append(layoutGroup);
   }
 
-  const copy = document.createElement("button");
-  copy.className = "summary-action copy-link";
-  copy.type = "button";
-  copy.dataset.copyLink = "true";
-  copy.textContent = "复制链接";
-  actions.append(copy);
   return actions;
 }
 
@@ -3518,7 +3455,7 @@ function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] 
     appendArtistSongGroups(drawer, songGroups);
     return;
   }
-  appendSourceDrawerLinks(drawer, occurrences);
+  appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true });
 }
 
 function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
@@ -3528,6 +3465,10 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   drawer._sourceGroups = groups;
   const visibleCount = drawer.classList.contains("source-drawer") ? sourceVisibleGroupCount(drawer, groups.length) : groups.length;
   const visibleGroups = groups.slice(0, visibleCount);
+  const shouldShowToolbar = options.showToolbar !== false;
+  if (shouldShowToolbar && !drawer.querySelector(":scope > .source-drawer-toolbar")) {
+    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences));
+  }
 
   for (const group of visibleGroups) {
     drawer.append(renderSourceVideoGroup(group, drawer._songSourceOccurrences));
@@ -3546,6 +3487,26 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   appendMobileSourceCollapse(drawer);
 }
 
+function renderSourceDrawerToolbar(drawer, occurrences) {
+  const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  const toolbar = document.createElement("div");
+  toolbar.className = "source-drawer-toolbar";
+
+  const count = document.createElement("span");
+  count.className = "source-drawer-count";
+  count.textContent = `${groups.length} 个来源`;
+  toolbar.append(count);
+
+  const actions = document.createElement("div");
+  actions.className = "source-drawer-actions";
+  actions.append(renderCopySongLinksButton(occurrences));
+  if (drawer.classList.contains("source-drawer")) {
+    actions.append(renderSourceCollapseButton(drawer.id, drawer.dataset.sourceMode || "song", "source-action source-collapse-top"));
+  }
+  toolbar.append(actions);
+  return toolbar;
+}
+
 function sourceVisibleGroupCount(drawer, total) {
   if (!isMobileViewport()) return total;
   const parsed = Number.parseInt(drawer.dataset.visibleSourceGroups || "", 10);
@@ -3561,9 +3522,9 @@ function appendMobileSourceCollapse(drawer) {
   drawer.append(renderSourceCollapseButton(drawer.id, mode));
 }
 
-function renderSourceCollapseButton(drawerId, mode = "song") {
+function renderSourceCollapseButton(drawerId, mode = "song", className = "source-collapse-bottom") {
   const button = document.createElement("button");
-  button.className = "source-collapse-bottom";
+  button.className = className;
   button.type = "button";
   button.dataset.collapseSource = "true";
   button.setAttribute("aria-controls", drawerId);
@@ -3587,18 +3548,20 @@ function renderSourceVideoGroup(group, songOccurrences = group.occurrences) {
   title.rel = "noreferrer";
   title.textContent = group.title || group.videoId || "来源视频";
   title.setAttribute("aria-label", `打开来源视频：${title.textContent}`);
-  titleWrap.append(title);
-
-  const channel = document.createElement("span");
+  const channelLink = window.FrontendUtils.youtubeChannelLink({ ...(group.item || {}), channelName: group.channelName });
+  const channel = document.createElement("a");
   channel.className = "source-video-channel";
+  channel.href = channelLink.href;
+  channel.target = "_blank";
+  channel.rel = "noreferrer";
   channel.textContent = group.channelName || "未知频道";
   titleWrap.append(channel);
+  titleWrap.append(title);
   header.append(titleWrap);
 
   const actions = document.createElement("div");
   actions.className = "source-video-actions";
   actions.append(renderCopySetlistButton(group.item, "复制歌单", "source-action source-copy"));
-  actions.append(renderCopySongLinksButton(songOccurrences, "复制链接", "source-action source-copy source-copy-song-links"));
   header.append(actions);
   section.append(header);
 
@@ -3655,14 +3618,14 @@ function renderCopySetlistButton(item, label = "复制歌单", className = "copy
   return button;
 }
 
-function renderCopySongLinksButton(occurrences, label = "复制链接", className = "copy-song-links-button") {
+function renderCopySongLinksButton(occurrences, label = "复制全部链接", className = "source-action source-copy-all") {
   const button = document.createElement("button");
   button.className = className;
   button.type = "button";
   button.dataset.copySongLinks = "true";
   button._sourceOccurrences = occurrences || [];
   button.textContent = label;
-  button.setAttribute("aria-label", "复制同一首歌所有来源链接");
+  button.setAttribute("aria-label", "复制同一首歌全部来源链接");
   return button;
 }
 
@@ -3705,7 +3668,7 @@ function appendArtistSongGroups(drawer, songGroups) {
     const sources = document.createElement("div");
     sources.className = "artist-song-sources";
     const visibleOccurrences = group.occurrences.slice(0, ARTIST_SOURCE_INITIAL_LIMIT);
-    appendSourceDrawerLinks(sources, visibleOccurrences, { copyOccurrences: group.occurrences });
+    appendSourceDrawerLinks(sources, visibleOccurrences, { copyOccurrences: group.occurrences, showToolbar: true });
     if (group.occurrences.length > visibleOccurrences.length) {
       const sourceMore = document.createElement("button");
       sourceMore.className = "artist-source-more";
@@ -4173,16 +4136,6 @@ function formatSignedDelta(value) {
   return delta > 0 ? `+${delta}` : String(delta);
 }
 
-async function copyCurrentLink() {
-  const href = buildShareUrl();
-  try {
-    await writeClipboardText(href);
-    showToast("已复制当前视图链接");
-  } catch {
-    showToast(href);
-  }
-}
-
 async function copyVideoSetlist(item) {
   const text = window.FrontendUtils.buildSetlistText(item, {
     isUnknownArtistName: window.RankingUtils.isUnknownArtistName,
@@ -4199,12 +4152,12 @@ async function copyVideoSetlist(item) {
 async function copySongSourceLinks(occurrences) {
   const text = window.FrontendUtils.buildSongSourceLinksText(occurrences);
   if (!text) {
-    showToast("这首歌没有可复制的来源链接");
+    showToast("当前歌曲没有可复制的来源链接");
     return;
   }
   await writeClipboardText(text);
   const count = text.split("\n").filter(Boolean).length;
-  showToast(`已复制同一首歌来源链接 · ${count}条`);
+  showToast(`已复制 ${count} 个来源链接`);
 }
 
 async function writeClipboardText(text) {

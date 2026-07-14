@@ -25,6 +25,10 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function verifyTimeout(localMs, remoteMs) {
+  return baseUrl.startsWith("https://") ? remoteMs : localMs;
+}
+
 function requestPath(url) {
   try {
     return new URL(url).pathname.replace(/^\//, "");
@@ -64,10 +68,10 @@ async function newPage(browser, viewport, options = {}) {
 async function waitForRows(page, errors = [], requests = []) {
   try {
     await page.waitForSelector(".rank-row:not(.skeleton-row) .rank-title, .video-card .video-title, .index-row .rank-title, .empty", {
-      timeout: baseUrl.startsWith("https://") ? 30000 : 15000,
+      timeout: verifyTimeout(15000, 120000),
     });
     await page.waitForFunction(() => document.querySelector("#videoList")?.getAttribute("aria-busy") !== "true", null, {
-      timeout: baseUrl.startsWith("https://") ? 30000 : 15000,
+      timeout: verifyTimeout(15000, 120000),
     });
   } catch (error) {
     const diagnostics = await page
@@ -248,6 +252,14 @@ async function assertUiShape(page, viewport, range) {
         }
       : null;
     const rankSubline = rect(".rank-subline");
+    const visibleShareLabels = Array.from(document.querySelectorAll("button, a"))
+      .filter((node) => {
+        const style = getComputedStyle(node);
+        const box = node.getBoundingClientRect();
+        return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      })
+      .map((node) => node.textContent.trim())
+      .filter((text) => text === "分享" || text === "复制链接");
     return {
       width,
       controls,
@@ -266,12 +278,18 @@ async function assertUiShape(page, viewport, range) {
       rankCount,
       rankCountStyle,
       rankSubline,
+      shareButtonExists: Boolean(document.querySelector("#shareButton")),
+      copyLinkExists: Boolean(document.querySelector("[data-copy-link]")),
+      visibleShareLabels,
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
     };
   }, { width: viewport[0], range });
 
   if (result.scrollWidth > result.clientWidth + 1) throw new Error(`horizontal overflow ${JSON.stringify(result)}`);
+  if (result.shareButtonExists || result.copyLinkExists || result.visibleShareLabels.length) {
+    throw new Error(`visible share/copy-current-link entry remains ${JSON.stringify(result)}`);
+  }
   if (viewport[0] <= 720) {
     if (!result.controls || result.controls.height > 60) throw new Error(`mobile controls not one row ${JSON.stringify(result.controls)}`);
     if (result.searchField && result.searchField.display !== "none") throw new Error("mobile search field is still resident in toolbar");
@@ -374,6 +392,179 @@ async function firstLoad(browser, range, viewport) {
     );
   }
   results.push({ scenario: `first-${range}-${viewport.join("x")}`, requests: beforeFirstContentRequests, measures: perf.measures, longTasks: longTasks.length, screenshotPath });
+}
+
+async function desktopRankVisualGeometry(browser) {
+  for (const viewport of [
+    [1440, 900],
+    [1920, 1080],
+  ]) {
+    const { context, page, errors } = await newPage(browser, viewport);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    const url = new URL(baseUrl);
+    url.searchParams.set("pageSize", "100");
+    url.searchParams.set("showUnknown", "1");
+    await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    await page.waitForSelector(".rank-trend .trend-badge", { timeout: verifyTimeout(15000, 30000) });
+
+    const geometry = await page.evaluate(() => {
+      const rectFor = (node) => {
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+          position: style.position,
+          display: style.display,
+          backgroundColor: style.backgroundColor,
+        };
+      };
+      const visible = (node) => {
+        if (!node) return false;
+        const style = getComputedStyle(node);
+        const box = node.getBoundingClientRect();
+        return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      };
+      const header = document.querySelector(".rank-header");
+      const headerCells = Array.from(document.querySelectorAll(".rank-header > span")).map(rectFor);
+      const firstRow = document.querySelector(".rank-row:not(.skeleton-row)");
+      const rowCells = [
+        firstRow?.querySelector(".rank-number"),
+        firstRow?.querySelector(".rank-content"),
+        firstRow?.querySelector(".rank-trend"),
+        firstRow?.querySelector(".rank-count"),
+      ].map((node) => (node ? rectFor(node) : null));
+      const title = firstRow?.querySelector(".rank-title");
+      const trendCounts = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)")).slice(0, 40).map((row) => ({
+        visibleBadges: Array.from(row.querySelectorAll(".trend-badge")).filter(visible).length,
+        visibleInline: Array.from(row.querySelectorAll(".rank-trend-inline")).filter(visible).length,
+        visibleDesktop: Array.from(row.querySelectorAll(".rank-trend .trend-badge")).filter(visible).length,
+      }));
+      const controls = Array.from(document.querySelectorAll("#controls .segmented, #controls .toolbar-button, #controls select, #controls input:not([type='checkbox']):not([type='radio'])"))
+        .filter(visible)
+        .map((node) => ({ className: node.className || node.tagName, ...rectFor(node) }));
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        header: header ? rectFor(header) : null,
+        headerCells,
+        firstRow: firstRow ? rectFor(firstRow) : null,
+        rowCells,
+        title: title ? rectFor(title) : null,
+        titleText: title?.textContent?.trim() || "",
+        trendCounts,
+        controls,
+        shareButtonExists: Boolean(document.querySelector("#shareButton")),
+        copyLinkExists: Boolean(document.querySelector("[data-copy-link]")),
+      };
+    });
+    if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`desktop rank overflow ${JSON.stringify(geometry)}`);
+    if (geometry.shareButtonExists || geometry.copyLinkExists) throw new Error(`desktop share entry remains ${JSON.stringify(geometry)}`);
+    if (!geometry.header || !geometry.firstRow || !geometry.title) throw new Error(`desktop rank geometry missing ${JSON.stringify(geometry)}`);
+    if (geometry.header.position === "sticky") throw new Error(`desktop rank header should not be sticky ${JSON.stringify(geometry.header)}`);
+    if (geometry.title.top < geometry.header.bottom - 1) throw new Error(`first rank title is covered by header ${JSON.stringify(geometry)}`);
+    if (geometry.title.height < 16) throw new Error(`first rank title height too small ${JSON.stringify(geometry)}`);
+    if (geometry.trendCounts.some((row) => row.visibleBadges > 1 || row.visibleInline > 0)) {
+      throw new Error(`desktop trend visibility invalid ${JSON.stringify(geometry.trendCounts.slice(0, 10))}`);
+    }
+    if (!geometry.trendCounts.some((row) => row.visibleDesktop > 0)) throw new Error("desktop trend column did not render any trend badge");
+    for (let index = 0; index < 4; index += 1) {
+      const headerCell = geometry.headerCells[index];
+      const rowCell = geometry.rowCells[index];
+      if (!headerCell || !rowCell) throw new Error(`desktop rank columns missing ${JSON.stringify(geometry)}`);
+      assertClose(headerCell.left, rowCell.left, 4, `desktop column ${index} left`, geometry);
+      assertClose(headerCell.right, rowCell.right, 8, `desktop column ${index} right`, geometry);
+    }
+    if (geometry.controls.some((control) => Math.abs(control.height - 44) > 3)) {
+      throw new Error(`desktop toolbar control height mismatch ${JSON.stringify(geometry.controls)}`);
+    }
+
+    const row = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])").first();
+    await row.locator("[data-toggle-source]").first().click();
+    await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group", { timeout: 15000 });
+    const sourceGeometry = await row.evaluate((node) => {
+      const rectFor = (target) => {
+        const box = target.getBoundingClientRect();
+        const style = getComputedStyle(target);
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+          fontSize: Number.parseFloat(style.fontSize) || 0,
+          fontWeight: Number.parseInt(style.fontWeight, 10) || 0,
+        };
+      };
+      const drawer = node.querySelector(".source-drawer");
+      const toolbar = node.querySelector(".source-drawer-toolbar");
+      const firstGroup = node.querySelector(".source-video-group");
+      const channel = node.querySelector(".source-video-channel");
+      const sourceTitle = node.querySelector(".source-video-title");
+      const groups = Array.from(node.querySelectorAll(".source-video-group")).map(rectFor);
+      const top = groups[0]?.top || 0;
+      const firstRowGroups = groups.filter((group) => Math.abs(group.top - top) < 3);
+      const firstRowBottom = firstRowGroups.reduce((bottom, group) => Math.max(bottom, group.bottom), 0);
+      const copyButtons = Array.from(node.querySelectorAll(".source-video-group .source-copy"))
+        .map(rectFor)
+        .filter((button) => button.top >= top - 2 && button.top <= firstRowBottom);
+      return {
+        drawer: drawer ? rectFor(drawer) : null,
+        toolbar: toolbar ? rectFor(toolbar) : null,
+        firstGroup: firstGroup ? rectFor(firstGroup) : null,
+        channel: channel ? rectFor(channel) : null,
+        sourceTitle: sourceTitle ? rectFor(sourceTitle) : null,
+        channelHref: channel?.href || "",
+        sourceTitleHref: sourceTitle?.href || "",
+        copyAllButtons: node.querySelectorAll("[data-copy-song-links]").length,
+        copyAllInToolbar: node.querySelectorAll(".source-drawer-toolbar [data-copy-song-links]").length,
+        copyAllInsideCards: node.querySelectorAll(".source-video-group [data-copy-song-links]").length,
+        groups,
+        firstRowGroups,
+        copyButtons,
+      };
+    });
+    if (!sourceGeometry.drawer || !sourceGeometry.toolbar || !sourceGeometry.firstGroup || !sourceGeometry.channel || !sourceGeometry.sourceTitle) {
+      throw new Error(`desktop source geometry missing ${JSON.stringify(sourceGeometry)}`);
+    }
+    if (sourceGeometry.copyAllButtons !== 1 || sourceGeometry.copyAllInToolbar !== 1 || sourceGeometry.copyAllInsideCards !== 0) {
+      throw new Error(`desktop copy-all placement invalid ${JSON.stringify(sourceGeometry)}`);
+    }
+    if (sourceGeometry.toolbar.bottom > sourceGeometry.firstGroup.top + 8) {
+      throw new Error(`desktop source toolbar not before cards ${JSON.stringify(sourceGeometry)}`);
+    }
+    if (sourceGeometry.channel.fontSize <= sourceGeometry.sourceTitle.fontSize || sourceGeometry.channel.fontWeight < sourceGeometry.sourceTitle.fontWeight) {
+      throw new Error(`desktop source hierarchy invalid ${JSON.stringify(sourceGeometry)}`);
+    }
+    if (!sourceGeometry.channelHref || !sourceGeometry.sourceTitleHref) throw new Error(`desktop source links missing ${JSON.stringify(sourceGeometry)}`);
+    if (sourceGeometry.firstRowGroups.length > 1) {
+      const width = sourceGeometry.firstRowGroups[0].width;
+      for (const group of sourceGeometry.firstRowGroups) {
+        assertClose(group.width, width, 2, "desktop source group width", sourceGeometry);
+        assertClose(group.top, sourceGeometry.firstRowGroups[0].top, 2, "desktop source group top", sourceGeometry);
+      }
+    }
+    if (sourceGeometry.copyButtons.length > 1) {
+      const top = sourceGeometry.copyButtons[0].top;
+      for (const button of sourceGeometry.copyButtons) assertClose(button.top, top, 3, "desktop source copy button top", sourceGeometry);
+    }
+    let expandedScreenshotPath = null;
+    if (viewport[0] === 1440) {
+      expandedScreenshotPath = path.join(screenshotDir, `desktop-source-expanded-${viewport.join("x")}.png`);
+      await page.screenshot({ path: expandedScreenshotPath, fullPage: false });
+    }
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    if (errors.length || unhandled) throw new Error(`desktop rank visual geometry errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `desktop-rank-geometry-${viewport.join("x")}`, requests: [...new Set(requests)], expandedScreenshotPath });
+  }
 }
 
 async function interactionFlow(browser) {
@@ -688,12 +879,12 @@ async function mobileRankVisualGeometry(browser) {
       const drawer = node.querySelector(".source-drawer");
       const firstGroup = node.querySelector(".source-video-group");
       const title = node.querySelector(".rank-title");
-      const sourceTitle = node.querySelector(".source-video-title");
+      const sourceChannel = node.querySelector(".source-video-channel");
       const copyButtons = Array.from(node.querySelectorAll(".source-copy")).map(rectFor);
       const timeLinks = Array.from(node.querySelectorAll(".source-time-link:not([hidden])")).map(rectFor);
       return {
         title: title ? rectFor(title) : null,
-        sourceTitle: sourceTitle ? rectFor(sourceTitle) : null,
+        sourceChannel: sourceChannel ? rectFor(sourceChannel) : null,
         drawer: drawer ? rectFor(drawer) : null,
         firstGroup: firstGroup ? rectFor(firstGroup) : null,
         copyButtons,
@@ -701,17 +892,17 @@ async function mobileRankVisualGeometry(browser) {
         sourceLinkButtonCount: node.querySelectorAll("[data-copy-song-links]").length,
       };
     });
-    if (!expandedGeometry.title || !expandedGeometry.sourceTitle || !expandedGeometry.drawer || !expandedGeometry.firstGroup) {
+    if (!expandedGeometry.title || !expandedGeometry.sourceChannel || !expandedGeometry.drawer || !expandedGeometry.firstGroup) {
       throw new Error(`expanded source geometry missing ${JSON.stringify(expandedGeometry)}`);
     }
-    assertClose(expandedGeometry.title.left, expandedGeometry.sourceTitle.left, 3, "source title aligns with rank title", expandedGeometry);
+    assertClose(expandedGeometry.title.left, expandedGeometry.sourceChannel.left, 3, "source channel aligns with rank title", expandedGeometry);
     if (expandedGeometry.drawer.rowGap !== "0px") throw new Error(`mobile source drawer should have no grid row gap ${JSON.stringify(expandedGeometry)}`);
     assertClose(expandedGeometry.firstGroup.paddingTop, 12, 1, "source group top padding", expandedGeometry);
     assertClose(expandedGeometry.firstGroup.paddingBottom, 12, 1, "source group bottom padding", expandedGeometry);
     if (!expandedGeometry.copyButtons.length || expandedGeometry.copyButtons.some((button) => button.height < 36)) {
       throw new Error(`source copy button height invalid ${JSON.stringify(expandedGeometry)}`);
     }
-    if (!expandedGeometry.sourceLinkButtonCount) throw new Error(`missing copy same-song links button ${JSON.stringify(expandedGeometry)}`);
+    if (expandedGeometry.sourceLinkButtonCount !== 1) throw new Error(`copy same-song links button should render once ${JSON.stringify(expandedGeometry)}`);
     if (!expandedGeometry.timeLinks.length || expandedGeometry.timeLinks.some((link) => link.height < 36)) {
       throw new Error(`source timestamp touch height invalid ${JSON.stringify(expandedGeometry)}`);
     }
@@ -726,6 +917,96 @@ async function mobileRankVisualGeometry(browser) {
     await context.close();
     if (errors.length || unhandled) throw new Error(`mobile rank visual geometry errors: ${errors.join(" | ")} ${unhandled}`);
     results.push({ scenario: `mobile-rank-geometry-${viewport.join("x")}`, requests: [...new Set(requests)], expandedScreenshotPath });
+  }
+}
+
+async function mobileCopyAllLinksFlow(browser) {
+  for (const viewport of [
+    [390, 844],
+    [1440, 900],
+  ]) {
+    const { context, page, errors } = await newPage(browser, viewport);
+    await page.addInitScript(() => {
+      window.__clipboardWrites = [];
+      const clipboard = {
+        writeText: async (text) => {
+          window.__clipboardWrites.push(String(text));
+        },
+      };
+      try {
+        Object.defineProperty(navigator, "clipboard", { configurable: true, value: clipboard });
+      } catch {
+        navigator.clipboard = clipboard;
+      }
+    });
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    const url = new URL(baseUrl);
+    url.searchParams.set("pageSize", "100");
+    url.searchParams.set("showUnknown", "1");
+    await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+
+    const row = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])").first();
+    if ((await row.count()) !== 1) throw new Error("no expandable row for copy all links flow");
+    await row.locator("[data-toggle-source]").first().click();
+    await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) [data-copy-song-links]", { timeout: 15000 });
+    const copyAllButtons = await row.locator("[data-copy-song-links]").count();
+    if (copyAllButtons !== 1) throw new Error(`copy all links button should appear once, got ${copyAllButtons}`);
+
+    const totalSources = await row.locator(".source-drawer-count").first().textContent();
+    const expectedCount = Number.parseInt(totalSources || "0", 10);
+    await row.locator("[data-copy-song-links]").first().click();
+    await page.waitForFunction(() => (window.__clipboardWrites || []).length > 0, null, { timeout: 5000 });
+
+    const copyResult = await page.evaluate(() => {
+      const text = window.__clipboardWrites[0] || "";
+      const lines = text ? text.split("\n") : [];
+      const videoIds = lines.map((line) => {
+        const match = line.match(/https:\/\/www\.youtube\.com\/watch\?v=([^&\s]+)/u);
+        return match?.[1] || "";
+      });
+      const invalidLines = lines.filter((line) => {
+        const urlIndex = line.lastIndexOf(" https://www.youtube.com/watch?v=");
+        const channel = urlIndex >= 0 ? line.slice(0, urlIndex) : "";
+        const url = urlIndex >= 0 ? line.slice(urlIndex + 1) : "";
+        return !channel || !/^https:\/\/www\.youtube\.com\/watch\?v=[^&\s]+$/u.test(url);
+      });
+      return {
+        text,
+        lines,
+        videoIds,
+        invalidLines,
+        duplicateVideoIds: videoIds.filter((id, index) => id && videoIds.indexOf(id) !== index),
+        hasTimestamp: /[?&]t=|&t=/u.test(text),
+        hasMarkdown: /\[[^\]]+\]\(|^[-*]\s|^\d+\./um.test(text),
+        toast: document.querySelector("#toast")?.textContent || "",
+      };
+    });
+    if (!expectedCount || copyResult.lines.length !== expectedCount) {
+      throw new Error(`copy all links line count mismatch expected=${expectedCount} ${JSON.stringify(copyResult)}`);
+    }
+    if (copyResult.invalidLines.length || copyResult.duplicateVideoIds.length || copyResult.hasTimestamp || copyResult.hasMarkdown) {
+      throw new Error(`copy all links format invalid ${JSON.stringify(copyResult)}`);
+    }
+    if (copyResult.toast !== `已复制 ${expectedCount} 个来源链接`) {
+      throw new Error(`copy all links toast invalid ${JSON.stringify(copyResult)}`);
+    }
+
+    await row.locator("[data-copy-setlist]").first().click();
+    await page.waitForFunction(() => (window.__clipboardWrites || []).length > 1, null, { timeout: 5000 });
+    const setlistCopied = await page.evaluate(() => (window.__clipboardWrites[1] || "").split("\n").filter(Boolean).length);
+    if (!setlistCopied) throw new Error("copy setlist did not write clipboard text");
+
+    let screenshotPath = null;
+    if (viewport[0] === 390) {
+      screenshotPath = path.join(screenshotDir, `source-drawer-toolbar-${viewport.join("x")}.png`);
+      await page.screenshot({ path: screenshotPath, fullPage: false });
+    }
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    if (errors.length || unhandled) throw new Error(`copy all links flow errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `copy-all-links-${viewport.join("x")}`, requests: [...new Set(requests)], screenshotPath });
   }
 }
 
@@ -834,7 +1115,7 @@ async function mobileSourceDrawerFlow(browser) {
     throw new Error(`source video title should link to video start ${JSON.stringify(sourceSemantics)}`);
   }
   if (!sourceSemantics.copiedButtons) throw new Error(`source drawer missing compact copy setlist button ${JSON.stringify(sourceSemantics)}`);
-  if (!sourceSemantics.copySongLinkButtons) throw new Error(`source drawer missing same-song source link copy button ${JSON.stringify(sourceSemantics)}`);
+  if (sourceSemantics.copySongLinkButtons !== 1) throw new Error(`source drawer should render one same-song source link copy button ${JSON.stringify(sourceSemantics)}`);
   if (sourceSemantics.openVideoActions) throw new Error(`mobile source drawer still renders large open video action ${JSON.stringify(sourceSemantics)}`);
   if (sourceSemantics.badTimeText.length || sourceSemantics.missingTimeAria || sourceSemantics.oldTimestampSpans) {
     throw new Error(`source timestamp labels should only show time while aria keeps context ${JSON.stringify(sourceSemantics)}`);
@@ -931,7 +1212,7 @@ async function selectSnapshotDate(page, value) {
   let lastError = null;
   for (let attempt = 0; attempt < 6; attempt += 1) {
     try {
-      await page.waitForFunction(() => document.querySelector("#snapshotDateSelect")?.disabled === false, null, { timeout: 30000 });
+      await page.waitForFunction(() => document.querySelector("#snapshotDateSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
     } catch (error) {
       const diagnostics = await page.evaluate(() => ({
         status: document.querySelector("#status")?.textContent || "",
@@ -1095,9 +1376,11 @@ function runtimePathPattern(range) {
       await firstLoad(browser, "72h", viewport);
     }
     await firstLoad(browser, "1m", [1366, 768]);
+    await desktopRankVisualGeometry(browser);
     await interactionFlow(browser);
     await mobileFilterSheetFlow(browser);
     await mobileRankVisualGeometry(browser);
+    await mobileCopyAllLinksFlow(browser);
     await mobileSourceDrawerFlow(browser);
     await monthlyFallbackScenarios(browser);
     await prefetchGuards(browser);
