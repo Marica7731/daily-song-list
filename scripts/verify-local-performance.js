@@ -415,17 +415,17 @@ async function mobileSourceDrawerFlow(browser) {
 
   const moreGroups = row.locator("[data-toggle-source-groups]");
   if ((await moreGroups.count()) > 0) {
-    const beforeGroupCount = await row.locator(".source-video-group").count();
+    const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
     await moreGroups.first().click();
-    const afterGroupCount = await row.locator(".source-video-group").count();
+    const afterGroupCount = await countVisibleInRow(row, ".source-video-group");
     if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
   }
 
   const moreTimes = row.locator("[data-toggle-source-times]");
   if ((await moreTimes.count()) > 0) {
-    const beforeVisibleTimes = await row.locator(".source-time-link:not([hidden])").count();
+    const beforeVisibleTimes = await countVisibleInRow(row, ".source-time-link");
     await moreTimes.first().click();
-    const afterVisibleTimes = await row.locator(".source-time-link:not([hidden])").count();
+    const afterVisibleTimes = await countVisibleInRow(row, ".source-time-link");
     if (afterVisibleTimes <= beforeVisibleTimes) throw new Error("source timestamp expander did not add visible timestamps");
   }
 
@@ -441,6 +441,16 @@ async function mobileSourceDrawerFlow(browser) {
   await context.close();
   if (errors.length || unhandled) throw new Error(`mobile source drawer errors: ${errors.join(" | ")} ${unhandled}`);
   results.push({ scenario: "mobile-source-drawer-390x844", requests: [...new Set(requests)], screenshotPath });
+}
+
+async function countVisibleInRow(row, selector) {
+  return row.locator(selector).evaluateAll((nodes) =>
+    nodes.filter((node) => {
+      const style = getComputedStyle(node);
+      const rect = node.getBoundingClientRect();
+      return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+    }).length,
+  );
 }
 
 async function selectSnapshotDate(page, value) {
