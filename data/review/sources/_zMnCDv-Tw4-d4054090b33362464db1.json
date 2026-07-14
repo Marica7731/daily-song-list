@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T03:46:08.237Z",
+  "generatedAt": "2026-07-14T08:39:21.763Z",
   "reviewId": "review:_zMnCDv-Tw4:d4054090b33362464db1",
   "video": {
     "videoId": "_zMnCDv-Tw4",
@@ -240,16 +240,15 @@
       "rawHash": "5073543e6b2d6bf1a29343785ec7ca790e763f0fb370581c167c671dd8b04a74",
       "sourceId": "selected:_zMnCDv-Tw4:d4054090b3336246",
       "sourceHash": "d4054090b33362464db1206c48c91dbe8e6f76d2e366accc1e2a621123f2111c",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -777,16 +776,15 @@
       "rawHash": "4ef2f3723e799555dfa2c39450d3ee2182ba34a564995895f51379445a828068",
       "sourceId": "selected:_zMnCDv-Tw4:d4054090b3336246",
       "sourceHash": "d4054090b33362464db1206c48c91dbe8e6f76d2e366accc1e2a621123f2111c",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     }
   ]
 }
