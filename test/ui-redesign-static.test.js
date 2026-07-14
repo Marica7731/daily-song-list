@@ -6,6 +6,7 @@ const test = require("node:test");
 const appSource = fs.readFileSync(path.join(__dirname, "..", "assets", "app.js"), "utf8");
 const cssSource = fs.readFileSync(path.join(__dirname, "..", "assets", "styles.css"), "utf8");
 const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-local-performance.js"), "utf8");
 
 test("mobile information architecture exposes one-row toolbar, bottom nav, search, and filter dialogs", () => {
   assert.match(indexSource, /id="openSearchButton"/u);
@@ -41,6 +42,8 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /const SOURCE_MOBILE_GROUP_BATCH_SIZE = 3/u);
   assert.match(appSource, /查看更多来源（剩余 \$\{remaining\}）/u);
   assert.match(appSource, /dataset\.collapseSource = "true"/u);
+  assert.match(appSource, /dataset\.copySongLinks = "true"/u);
+  assert.match(appSource, /buildSongSourceLinksText\(occurrences\)/u);
   assert.match(appSource, /closeOtherMobileSourceDrawers\(row\)/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content count"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
@@ -50,6 +53,26 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-count\.is-strong\s*\{[\s\S]*background: transparent;[\s\S]*color: var\(--muted\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\.rank-top-1,[\s\S]*\.rank-row\.rank-top-2,[\s\S]*\.rank-row\.rank-top-3\s*\{[\s\S]*border-left-color: transparent;/u);
   assert.match(cssSource, /\.filter-count\[hidden\]\s*\{[\s\S]*display: none;/u);
+});
+
+test("third-round mobile component rules are encoded in css and browser checks", () => {
+  assert.match(cssSource, /--radius-control:\s*8px/u);
+  assert.match(cssSource, /--control-compact:\s*36px/u);
+  assert.match(cssSource, /--control-default:\s*44px/u);
+  assert.match(cssSource, /--control-large:\s*48px/u);
+  assert.match(cssSource, /--rank-leading-width:\s*44px/u);
+  assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
+  assert.match(cssSource, /\.sheet-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--control-large\);[\s\S]*border-radius: var\(--radius-control\);/u);
+  assert.match(cssSource, /\.sheet-actions\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: 1fr 1fr/u);
+  assert.match(cssSource, /\.rank-actions-line\s*\{[\s\S]*gap: var\(--space-2\);/u);
+  assert.match(cssSource, /\.rank-trend-inline\s*\{[\s\S]*width: max-content;[\s\S]*max-width: 120px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*gap: 0;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-video-group\s*\{[\s\S]*padding: var\(--space-3\) 0 var\(--space-3\) var\(--rank-leading-width\);/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-video-header/u);
+  assert.match(verifySource, /async function mobileFilterSheetFlow/u);
+  assert.match(verifySource, /async function mobileRankVisualGeometry/u);
+  assert.match(verifySource, /filter-sheet-bottom-\$\{viewport\.join\("x"\)\}\.png/u);
+  assert.match(verifySource, /rank-expanded-trend-\$\{viewport\.join\("x"\)\}\.png/u);
 });
 
 test("search suggestions highlight safely without assigning untrusted innerHTML", () => {

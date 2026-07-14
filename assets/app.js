@@ -499,6 +499,14 @@ function bindEvents() {
       return;
     }
 
+    const copySongLinks = event.target.closest("[data-copy-song-links]");
+    if (copySongLinks) {
+      event.preventDefault();
+      event.stopPropagation();
+      copySongSourceLinks(copySongLinks._sourceOccurrences).catch((error) => showToast(`复制失败：${error.message}`));
+      return;
+    }
+
     const clear = event.target.closest("[data-clear-search]");
     if (clear) {
       els.filterInput.value = "";
@@ -3296,34 +3304,40 @@ function renderRecordContent(title, meta, options) {
 
   const subline = document.createElement("div");
   subline.className = "rank-subline";
+  const metaLine = document.createElement("div");
+  metaLine.className = "rank-meta-line";
+  const actionsLine = document.createElement("div");
+  actionsLine.className = "rank-actions-line";
   if (mode === "artist") {
-    appendArtistSubline(subline, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount });
+    appendArtistSubline(metaLine, actionsLine, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount });
   } else {
-    appendSublinePart(subline, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
-    appendSublinePart(subline, `${videoCount} 个视频`, "subline-video-count");
-    appendSublineSource(subline, { mode, occurrences, drawerId, isExpanded });
+    appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
+    appendSublinePart(metaLine, `${videoCount} 个视频`, "subline-video-count");
+    appendSublineSource(metaLine, actionsLine, { mode, occurrences, drawerId, isExpanded });
   }
   const inlineTrend = renderTrendBadge(trend);
   if (inlineTrend) {
     inlineTrend.classList.add("rank-trend-inline");
-    appendSublineNode(subline, inlineTrend);
+    appendActionNode(actionsLine, inlineTrend);
   }
+  if (metaLine.childNodes.length) subline.append(metaLine);
+  if (actionsLine.childNodes.length) subline.append(actionsLine);
   content.append(subline);
 
   return content;
 }
 
-function appendArtistSubline(container, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount }) {
-  appendSublinePart(container, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
-  appendSublinePart(container, `${songCount} 首歌曲`, "subline-song-count");
-  appendSublinePart(container, `${videoCount} 个视频`, "subline-video-count");
+function appendArtistSubline(metaContainer, actionContainer, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount }) {
+  appendSublinePart(metaContainer, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
+  appendSublinePart(metaContainer, `${songCount} 首歌曲`, "subline-song-count");
+  appendSublinePart(metaContainer, `${videoCount} 个视频`, "subline-video-count");
   if (songCount === 1 && occurrences.length === 1) {
-    appendSublineNode(container, renderInlineSource(occurrences[0]));
+    appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
   }
 
   if (songCount > 1 || occurrences.length > 1) {
     const button = renderSourceToggleButton({ mode: "artist", drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount });
-    appendSublineNode(container, button);
+    appendActionNode(actionContainer, button);
   }
 }
 
@@ -3363,14 +3377,14 @@ function renderTrend(trend) {
   return node;
 }
 
-function appendSublineSource(container, { mode, occurrences, drawerId, isExpanded }) {
+function appendSublineSource(metaContainer, actionContainer, { mode, occurrences, drawerId, isExpanded }) {
   if (!occurrences.length) {
-    appendSublinePart(container, "无来源");
+    appendSublinePart(metaContainer, "无来源");
     return;
   }
   const groupedSources = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   if (groupedSources.length <= 1) {
-    appendSublineNode(container, renderInlineSource(occurrences[0]));
+    appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
     return;
   }
 
@@ -3388,8 +3402,9 @@ function appendSublineSource(container, { mode, occurrences, drawerId, isExpande
   });
   const sourceLine = document.createElement("span");
   sourceLine.className = "source-line";
-  sourceLine.append(renderSourcePreviewLinks(sourcePreview.preview), button);
-  appendSublineNode(container, sourceLine);
+  sourceLine.append(renderSourcePreviewLinks(sourcePreview.preview));
+  appendSublineNode(metaContainer, sourceLine);
+  appendActionNode(actionContainer, button);
 }
 
 function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0, total = 0, songCount = 0, videoCount = 0, occurrenceCount = 0 }) {
@@ -3478,6 +3493,10 @@ function appendSublineNode(container, node) {
   container.append(node);
 }
 
+function appendActionNode(container, node) {
+  if (node) container.append(node);
+}
+
 function renderSourceDrawer({ mode, occurrences, songGroups = [], drawerId, isExpanded, getSongGroups = null }) {
   const drawer = document.createElement("div");
   drawer.className = mode === "artist" ? "source-drawer artist-song-drawer" : "source-drawer";
@@ -3502,15 +3521,16 @@ function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] 
   appendSourceDrawerLinks(drawer, occurrences);
 }
 
-function appendSourceDrawerLinks(drawer, occurrences) {
+function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   drawer._sourceOccurrences = occurrences;
+  drawer._songSourceOccurrences = options.copyOccurrences || drawer._songSourceOccurrences || occurrences;
   const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   drawer._sourceGroups = groups;
   const visibleCount = drawer.classList.contains("source-drawer") ? sourceVisibleGroupCount(drawer, groups.length) : groups.length;
   const visibleGroups = groups.slice(0, visibleCount);
 
   for (const group of visibleGroups) {
-    drawer.append(renderSourceVideoGroup(group));
+    drawer.append(renderSourceVideoGroup(group, drawer._songSourceOccurrences));
   }
 
   if (groups.length > visibleGroups.length) {
@@ -3551,7 +3571,7 @@ function renderSourceCollapseButton(drawerId, mode = "song") {
   return button;
 }
 
-function renderSourceVideoGroup(group) {
+function renderSourceVideoGroup(group, songOccurrences = group.occurrences) {
   const section = document.createElement("section");
   section.className = "source-video-group";
 
@@ -3578,6 +3598,7 @@ function renderSourceVideoGroup(group) {
   const actions = document.createElement("div");
   actions.className = "source-video-actions";
   actions.append(renderCopySetlistButton(group.item, "复制歌单", "source-action source-copy"));
+  actions.append(renderCopySongLinksButton(songOccurrences, "复制链接", "source-action source-copy source-copy-song-links"));
   header.append(actions);
   section.append(header);
 
@@ -3634,6 +3655,17 @@ function renderCopySetlistButton(item, label = "复制歌单", className = "copy
   return button;
 }
 
+function renderCopySongLinksButton(occurrences, label = "复制链接", className = "copy-song-links-button") {
+  const button = document.createElement("button");
+  button.className = className;
+  button.type = "button";
+  button.dataset.copySongLinks = "true";
+  button._sourceOccurrences = occurrences || [];
+  button.textContent = label;
+  button.setAttribute("aria-label", "复制同一首歌所有来源链接");
+  return button;
+}
+
 function appendArtistSongGroups(drawer, songGroups) {
   const showAll = drawer.dataset.artistSongsExpanded === "true";
   const visibleGroups = showAll ? songGroups : songGroups.slice(0, ARTIST_SONG_GROUP_INITIAL_LIMIT);
@@ -3673,13 +3705,14 @@ function appendArtistSongGroups(drawer, songGroups) {
     const sources = document.createElement("div");
     sources.className = "artist-song-sources";
     const visibleOccurrences = group.occurrences.slice(0, ARTIST_SOURCE_INITIAL_LIMIT);
-    appendSourceDrawerLinks(sources, visibleOccurrences);
+    appendSourceDrawerLinks(sources, visibleOccurrences, { copyOccurrences: group.occurrences });
     if (group.occurrences.length > visibleOccurrences.length) {
       const sourceMore = document.createElement("button");
       sourceMore.className = "artist-source-more";
       sourceMore.type = "button";
       sourceMore.dataset.toggleArtistSources = "true";
       sourceMore._remainingOccurrences = group.occurrences.slice(visibleOccurrences.length);
+      sourceMore._allSongOccurrences = group.occurrences;
       sourceMore.textContent = `显示其余 ${group.occurrences.length - visibleOccurrences.length} 个来源`;
       sources.append(sourceMore);
     }
@@ -3800,8 +3833,9 @@ function expandArtistSongSources(button) {
   const sources = button.closest(".artist-song-sources");
   const occurrences = button._remainingOccurrences || [];
   if (!sources || !occurrences.length) return;
+  const copyOccurrences = button._allSongOccurrences || sources._songSourceOccurrences || occurrences;
   button.remove();
-  appendSourceDrawerLinks(sources, occurrences);
+  appendSourceDrawerLinks(sources, occurrences, { copyOccurrences });
 }
 
 function expandSourceGroupTimestamps(button) {
@@ -4160,6 +4194,17 @@ async function copyVideoSetlist(item) {
   await writeClipboardText(text);
   const count = text.split("\n").filter(Boolean).length;
   showToast(`已复制整场歌单 · ${count}首`);
+}
+
+async function copySongSourceLinks(occurrences) {
+  const text = window.FrontendUtils.buildSongSourceLinksText(occurrences);
+  if (!text) {
+    showToast("这首歌没有可复制的来源链接");
+    return;
+  }
+  await writeClipboardText(text);
+  const count = text.split("\n").filter(Boolean).length;
+  showToast(`已复制同一首歌来源链接 · ${count}条`);
 }
 
 async function writeClipboardText(text) {

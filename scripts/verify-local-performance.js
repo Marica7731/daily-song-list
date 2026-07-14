@@ -88,6 +88,12 @@ async function openFilterSheet(page) {
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
 }
 
+async function openMobileFilterSheet(page) {
+  await page.locator("#openFilterButton").click();
+  await page.waitForSelector("#filterDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
+}
+
 async function setCheckbox(page, selector, checked) {
   const checkbox = page.locator(selector);
   await checkbox.waitFor({ state: "visible", timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
@@ -460,6 +466,269 @@ async function interactionFlow(browser) {
   results.push({ scenario: latestOnly ? "interaction-flow-latest" : "interaction-flow", requests: [...new Set(requests)], measures: perf.measures });
 }
 
+function assertClose(actual, expected, tolerance, label, details = {}) {
+  if (Math.abs(actual - expected) > tolerance) {
+    throw new Error(`${label}: actual=${actual} expected=${expected} tolerance=${tolerance} details=${JSON.stringify(details)}`);
+  }
+}
+
+async function mobileFilterSheetFlow(browser) {
+  for (const viewport of [
+    [390, 844],
+    [320, 700],
+  ]) {
+    const { context, page, errors } = await newPage(browser, viewport);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    await openMobileFilterSheet(page);
+
+    const topScreenshotPath = path.join(screenshotDir, `filter-sheet-top-${viewport.join("x")}.png`);
+    await page.screenshot({ path: topScreenshotPath, fullPage: false });
+
+    const topGeometry = await page.evaluate(() => {
+      const rectFor = (node) => {
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+          centerY: box.top + box.height / 2,
+          borderRadius: Number.parseFloat(style.borderTopLeftRadius) || 0,
+          paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
+        };
+      };
+      const dialog = document.querySelector("#filterDialog");
+      const sheet = document.querySelector("#filterDialog .filter-sheet");
+      const toggles = ["#nicheOnlyToggle", "#hideUnknownToggle"].map((selector) => {
+        const input = document.querySelector(selector);
+        const label = input?.closest(".sheet-toggle");
+        const text = label?.querySelector("span:not(.sr-only)");
+        return {
+          label: label ? rectFor(label) : null,
+          input: input ? rectFor(input) : null,
+          text: text ? rectFor(text) : null,
+        };
+      });
+      const segmented = Array.from(document.querySelectorAll("#metricFilterGroup .sheet-segmented label")).map(rectFor);
+      const selects = Array.from(document.querySelectorAll("#filterDialog select")).map(rectFor);
+      const footerButtons = Array.from(document.querySelectorAll("#filterDialog .sheet-actions button")).map(rectFor);
+      const sheetBox = sheet ? rectFor(sheet) : null;
+      return {
+        toggles,
+        segmented,
+        selects,
+        footerButtons,
+        sheet: sheetBox,
+        dialogOverflow: dialog ? dialog.scrollWidth - dialog.clientWidth : 0,
+        sheetOverflow: sheet ? sheet.scrollWidth - sheet.clientWidth : 0,
+        documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    if (topGeometry.documentOverflow > 1 || topGeometry.dialogOverflow > 1 || topGeometry.sheetOverflow > 1) {
+      throw new Error(`mobile filter sheet overflow ${JSON.stringify(topGeometry)}`);
+    }
+    const [nicheToggle, unknownToggle] = topGeometry.toggles;
+    if (!nicheToggle?.label || !unknownToggle?.label || !nicheToggle.input || !unknownToggle.input || !nicheToggle.text || !unknownToggle.text) {
+      throw new Error(`mobile filter toggles missing ${JSON.stringify(topGeometry)}`);
+    }
+    assertClose(nicheToggle.label.left, unknownToggle.label.left, 1, "sheet toggle left", topGeometry);
+    assertClose(nicheToggle.label.right, unknownToggle.label.right, 1, "sheet toggle right", topGeometry);
+    assertClose(nicheToggle.label.width, unknownToggle.label.width, 1, "sheet toggle width", topGeometry);
+    assertClose(nicheToggle.label.height, unknownToggle.label.height, 1, "sheet toggle height", topGeometry);
+    if (!nicheToggle.label.borderRadius || !unknownToggle.label.borderRadius) throw new Error(`sheet toggle border radius missing ${JSON.stringify(topGeometry)}`);
+    assertClose(nicheToggle.label.borderRadius, unknownToggle.label.borderRadius, 1, "sheet toggle radius", topGeometry);
+    assertClose(nicheToggle.input.centerY - nicheToggle.label.centerY, unknownToggle.input.centerY - unknownToggle.label.centerY, 1, "sheet checkbox center offset", topGeometry);
+    assertClose(nicheToggle.text.centerY - nicheToggle.label.centerY, unknownToggle.text.centerY - unknownToggle.label.centerY, 1, "sheet toggle text center offset", topGeometry);
+    assertClose(nicheToggle.input.centerY, nicheToggle.label.centerY, 1, "niche checkbox row center", topGeometry);
+    assertClose(unknownToggle.input.centerY, unknownToggle.label.centerY, 1, "unknown checkbox row center", topGeometry);
+    assertClose(nicheToggle.label.paddingLeft, unknownToggle.label.paddingLeft, 1, "sheet toggle left padding", topGeometry);
+    if (topGeometry.segmented.length !== 2) throw new Error(`metric segmented controls missing ${JSON.stringify(topGeometry)}`);
+    assertClose(topGeometry.segmented[0].height, topGeometry.segmented[1].height, 1, "metric segmented height", topGeometry);
+    if (!topGeometry.selects.length) throw new Error(`mobile filter select controls missing ${JSON.stringify(topGeometry)}`);
+    for (const select of topGeometry.selects) {
+      assertClose(select.height, 44, 1, "filter select height", topGeometry);
+    }
+    const selectHeights = topGeometry.selects.map((item) => item.height);
+    if (Math.max(...selectHeights) - Math.min(...selectHeights) > 1) throw new Error(`filter select heights differ ${JSON.stringify(topGeometry)}`);
+    if (topGeometry.footerButtons.length !== 2) throw new Error(`filter footer buttons missing ${JSON.stringify(topGeometry)}`);
+    const [resetButton, applyButton] = topGeometry.footerButtons;
+    assertClose(resetButton.height, applyButton.height, 1, "filter footer button height", topGeometry);
+    assertClose(resetButton.width, applyButton.width, 2, "filter footer button width", topGeometry);
+    assertClose(resetButton.top, applyButton.top, 1, "filter footer button top", topGeometry);
+    assertClose(resetButton.bottom, applyButton.bottom, 1, "filter footer button bottom", topGeometry);
+
+    await page.locator("#filterDialog .filter-sheet").evaluate((sheet) => {
+      sheet.scrollTop = sheet.scrollHeight;
+    });
+    await page.waitForTimeout(50);
+    const bottomGeometry = await page.evaluate(() => {
+      const rectFor = (node) => {
+        const box = node.getBoundingClientRect();
+        return { top: box.top, bottom: box.bottom, height: box.height };
+      };
+      const selects = Array.from(document.querySelectorAll("#filterDialog select"));
+      const footer = document.querySelector("#filterDialog .sheet-actions");
+      return {
+        lastSelect: selects.length ? rectFor(selects[selects.length - 1]) : null,
+        footer: footer ? rectFor(footer) : null,
+      };
+    });
+    if (!bottomGeometry.lastSelect || !bottomGeometry.footer) throw new Error(`filter bottom geometry missing ${JSON.stringify(bottomGeometry)}`);
+    if (bottomGeometry.lastSelect.bottom > bottomGeometry.footer.top - 12) {
+      throw new Error(`filter footer overlaps last select ${JSON.stringify(bottomGeometry)}`);
+    }
+    const bottomScreenshotPath = path.join(screenshotDir, `filter-sheet-bottom-${viewport.join("x")}.png`);
+    await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
+
+    await page.locator("#cancelFilterButton").click();
+    await page.locator("#filterDialog").waitFor({ state: "hidden", timeout: 5000 });
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    if (errors.length || unhandled) throw new Error(`mobile filter sheet errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `mobile-filter-sheet-${viewport.join("x")}`, requests: [...new Set(requests)], topScreenshotPath, bottomScreenshotPath });
+  }
+}
+
+async function mobileRankVisualGeometry(browser) {
+  for (const viewport of [
+    [320, 700],
+    [360, 800],
+    [390, 844],
+    [430, 932],
+    [768, 1024],
+  ]) {
+    const { context, page, errors } = await newPage(browser, viewport);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    const url = new URL(baseUrl);
+    url.searchParams.set("pageSize", "100");
+    url.searchParams.set("showUnknown", "1");
+    await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    await page.waitForFunction(
+      () => document.querySelector(".rank-row:not(.skeleton-row)") && document.querySelector(".rank-trend-inline"),
+      null,
+      { timeout: baseUrl.startsWith("https://") ? 30000 : 15000 },
+    );
+
+    const closedGeometry = await page.evaluate(() => {
+      const rectFor = (node) => {
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+          centerY: box.top + box.height / 2,
+          display: style.display,
+          backgroundColor: style.backgroundColor,
+        };
+      };
+      const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)"));
+      const trendRow = rows.find((row) => row.querySelector(".rank-trend-inline") && row.querySelector(".rank-expand")) || rows.find((row) => row.querySelector(".rank-trend-inline"));
+      const trend = trendRow?.querySelector(".rank-trend-inline");
+      const content = trendRow?.querySelector(".rank-content");
+      const button = trendRow?.querySelector(".rank-expand");
+      const rank = trendRow?.querySelector(".rank-number");
+      const title = trendRow?.querySelector(".rank-title");
+      const count = trendRow?.querySelector(".rank-count");
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        rowText: trendRow?.textContent?.slice(0, 200) || "",
+        trend: trend ? rectFor(trend) : null,
+        content: content ? rectFor(content) : null,
+        button: button ? rectFor(button) : null,
+        rank: rank ? rectFor(rank) : null,
+        title: title ? rectFor(title) : null,
+        count: count ? rectFor(count) : null,
+      };
+    });
+    if (closedGeometry.scrollWidth > closedGeometry.viewportWidth + 1) throw new Error(`mobile rank overflow ${JSON.stringify(closedGeometry)}`);
+    if (!closedGeometry.trend || !closedGeometry.content) throw new Error(`mobile trend geometry missing ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.trend.width > 120) throw new Error(`trend badge too wide ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.trend.width > closedGeometry.content.width * 0.5) throw new Error(`trend badge exceeds half content width ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.trend.width > closedGeometry.content.width - 8) throw new Error(`trend badge spans rank content ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.trend.height > 28) throw new Error(`trend badge too tall ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.button) assertClose(closedGeometry.trend.centerY, closedGeometry.button.centerY, 2, "trend and source button center", closedGeometry);
+    if (closedGeometry.rank && closedGeometry.title) assertClose(closedGeometry.rank.top, closedGeometry.title.top, 3, "rank and title top", closedGeometry);
+    if (closedGeometry.title && closedGeometry.count) assertClose(closedGeometry.title.top, closedGeometry.count.top, 3, "title and count top", closedGeometry);
+
+    const expandableRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
+    if ((await expandableRows.count()) < 1) throw new Error("no expandable row for mobile rank visual geometry");
+    const expandedRow = expandableRows.first();
+    await expandedRow.locator("[data-toggle-source]").first().click();
+    await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group", { timeout: 15000 });
+
+    const expandedGeometry = await expandedRow.evaluate((node) => {
+      const rectFor = (target) => {
+        const box = target.getBoundingClientRect();
+        const style = getComputedStyle(target);
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+          rowGap: style.rowGap,
+          paddingTop: Number.parseFloat(style.paddingTop) || 0,
+          paddingBottom: Number.parseFloat(style.paddingBottom) || 0,
+        };
+      };
+      const drawer = node.querySelector(".source-drawer");
+      const firstGroup = node.querySelector(".source-video-group");
+      const title = node.querySelector(".rank-title");
+      const sourceTitle = node.querySelector(".source-video-title");
+      const copyButtons = Array.from(node.querySelectorAll(".source-copy")).map(rectFor);
+      const timeLinks = Array.from(node.querySelectorAll(".source-time-link:not([hidden])")).map(rectFor);
+      return {
+        title: title ? rectFor(title) : null,
+        sourceTitle: sourceTitle ? rectFor(sourceTitle) : null,
+        drawer: drawer ? rectFor(drawer) : null,
+        firstGroup: firstGroup ? rectFor(firstGroup) : null,
+        copyButtons,
+        timeLinks,
+        sourceLinkButtonCount: node.querySelectorAll("[data-copy-song-links]").length,
+      };
+    });
+    if (!expandedGeometry.title || !expandedGeometry.sourceTitle || !expandedGeometry.drawer || !expandedGeometry.firstGroup) {
+      throw new Error(`expanded source geometry missing ${JSON.stringify(expandedGeometry)}`);
+    }
+    assertClose(expandedGeometry.title.left, expandedGeometry.sourceTitle.left, 3, "source title aligns with rank title", expandedGeometry);
+    if (expandedGeometry.drawer.rowGap !== "0px") throw new Error(`mobile source drawer should have no grid row gap ${JSON.stringify(expandedGeometry)}`);
+    assertClose(expandedGeometry.firstGroup.paddingTop, 12, 1, "source group top padding", expandedGeometry);
+    assertClose(expandedGeometry.firstGroup.paddingBottom, 12, 1, "source group bottom padding", expandedGeometry);
+    if (!expandedGeometry.copyButtons.length || expandedGeometry.copyButtons.some((button) => button.height < 36)) {
+      throw new Error(`source copy button height invalid ${JSON.stringify(expandedGeometry)}`);
+    }
+    if (!expandedGeometry.sourceLinkButtonCount) throw new Error(`missing copy same-song links button ${JSON.stringify(expandedGeometry)}`);
+    if (!expandedGeometry.timeLinks.length || expandedGeometry.timeLinks.some((link) => link.height < 36)) {
+      throw new Error(`source timestamp touch height invalid ${JSON.stringify(expandedGeometry)}`);
+    }
+
+    let expandedScreenshotPath = null;
+    if (viewport[0] === 390) {
+      expandedScreenshotPath = path.join(screenshotDir, `rank-expanded-trend-${viewport.join("x")}.png`);
+      await page.screenshot({ path: expandedScreenshotPath, fullPage: false });
+    }
+
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    if (errors.length || unhandled) throw new Error(`mobile rank visual geometry errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `mobile-rank-geometry-${viewport.join("x")}`, requests: [...new Set(requests)], expandedScreenshotPath });
+  }
+}
+
 async function mobileSourceDrawerFlow(browser) {
   const viewport = [390, 844];
   const { context, page, errors } = await newPage(browser, viewport);
@@ -554,6 +823,7 @@ async function mobileSourceDrawerFlow(browser) {
       titleText: title?.textContent?.trim() || "",
       titleHeight: title?.getBoundingClientRect().height || 0,
       copiedButtons: node.querySelectorAll(".source-copy").length,
+      copySongLinkButtons: node.querySelectorAll("[data-copy-song-links]").length,
       openVideoActions: Array.from(node.querySelectorAll(".source-action")).filter((action) => action.textContent.trim() === "打开视频").length,
       badTimeText: timeLinks.map((link) => link.textContent.trim()).filter((text) => !/^\d{1,2}:\d{2}(?::\d{2})?$/u.test(text)),
       missingTimeAria: timeLinks.filter((link) => !/打开时间戳：.+\d{1,2}:\d{2}/u.test(link.getAttribute("aria-label") || "")).length,
@@ -564,6 +834,7 @@ async function mobileSourceDrawerFlow(browser) {
     throw new Error(`source video title should link to video start ${JSON.stringify(sourceSemantics)}`);
   }
   if (!sourceSemantics.copiedButtons) throw new Error(`source drawer missing compact copy setlist button ${JSON.stringify(sourceSemantics)}`);
+  if (!sourceSemantics.copySongLinkButtons) throw new Error(`source drawer missing same-song source link copy button ${JSON.stringify(sourceSemantics)}`);
   if (sourceSemantics.openVideoActions) throw new Error(`mobile source drawer still renders large open video action ${JSON.stringify(sourceSemantics)}`);
   if (sourceSemantics.badTimeText.length || sourceSemantics.missingTimeAria || sourceSemantics.oldTimestampSpans) {
     throw new Error(`source timestamp labels should only show time while aria keeps context ${JSON.stringify(sourceSemantics)}`);
@@ -825,6 +1096,8 @@ function runtimePathPattern(range) {
     }
     await firstLoad(browser, "1m", [1366, 768]);
     await interactionFlow(browser);
+    await mobileFilterSheetFlow(browser);
+    await mobileRankVisualGeometry(browser);
     await mobileSourceDrawerFlow(browser);
     await monthlyFallbackScenarios(browser);
     await prefetchGuards(browser);

@@ -4,6 +4,7 @@ const test = require("node:test");
 const {
   annotatePayloadWithNiche,
   buildSetlistText,
+  buildSongSourceLinksText,
   buildIndexBucketModel,
   buildInlineSourceModel,
   buildSourcePreview,
@@ -233,6 +234,24 @@ test("builds whole-video setlist text from original songs", () => {
   assert.equal(
     buildSetlistText(item, { isUnknownArtistName: (value) => value === "待补歌手" }),
     ["00:12 01. Opening", "05:52 02. KING - Kanaria", "05:53 03. KING - Kanaria", "1:10:00 04. Long Song"].join("\n"),
+  );
+});
+
+test("builds same-song source link text from every timestamp", () => {
+  const links = buildSongSourceLinksText([
+    occurrence("VideoA", "Channel A", { seconds: 75, title: "song" }),
+    occurrence("VideoA", "Channel A", { seconds: 180, title: "song" }),
+    occurrence("VideoB", "Channel B", { seconds: 12, title: "song" }),
+    occurrence("VideoA", "Channel A", { seconds: 75, title: "song" }),
+  ]);
+
+  assert.equal(
+    links,
+    [
+      "Channel B https://www.youtube.com/watch?v=VideoB&t=12s",
+      "Channel A https://www.youtube.com/watch?v=VideoA&t=75s",
+      "Channel A https://www.youtube.com/watch?v=VideoA&t=180s",
+    ].join("\n"),
   );
 });
 

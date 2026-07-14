@@ -608,6 +608,25 @@
       .join("\n");
   }
 
+  function buildSongSourceLinksText(occurrences) {
+    const rows = [];
+    const seen = new Set();
+    for (const group of groupOccurrencesByVideo(occurrences)) {
+      for (const occurrence of group.occurrences) {
+        const item = occurrence?.item || group.item || {};
+        const videoId = cleanText(item.videoId || group.videoId);
+        if (!videoId) continue;
+        const seconds = validSeconds(occurrence?.song?.seconds) ?? group.firstSeconds ?? 0;
+        const key = `${videoId}::${seconds}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const channelName = cleanText(item.channelName || group.channelName || item.title || videoId || "未知频道") || "未知频道";
+        rows.push(`${channelName} ${youtubeTimeUrl(videoId, seconds)}`);
+      }
+    }
+    return rows.join("\n");
+  }
+
   function buildInlineSourceModel(occurrence) {
     const item = occurrence?.item || {};
     const song = occurrence?.song || {};
@@ -850,6 +869,7 @@
   return {
     annotatePayloadWithNiche,
     buildSetlistText,
+    buildSongSourceLinksText,
     buildIndexBucketModel,
     buildInlineSourceModel,
     buildSourcePreview,
