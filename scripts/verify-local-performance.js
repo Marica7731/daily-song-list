@@ -417,7 +417,7 @@ async function mobileSourceDrawerFlow(browser) {
   if ((await moreGroups.count()) > 0) {
     const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
     await moreGroups.first().click();
-    const afterGroupCount = await countVisibleInRow(row, ".source-video-group");
+    const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
     if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
   }
 
@@ -425,7 +425,7 @@ async function mobileSourceDrawerFlow(browser) {
   if ((await moreTimes.count()) > 0) {
     const beforeVisibleTimes = await countVisibleInRow(row, ".source-time-link");
     await moreTimes.first().click();
-    const afterVisibleTimes = await countVisibleInRow(row, ".source-time-link");
+    const afterVisibleTimes = await waitForVisibleCountAbove(row, ".source-time-link", beforeVisibleTimes);
     if (afterVisibleTimes <= beforeVisibleTimes) throw new Error("source timestamp expander did not add visible timestamps");
   }
 
@@ -451,6 +451,18 @@ async function countVisibleInRow(row, selector) {
       return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
     }).length,
   );
+}
+
+async function waitForVisibleCountAbove(row, selector, minimum) {
+  const deadline = Date.now() + 3000;
+  let latest = await countVisibleInRow(row, selector);
+  while (latest <= minimum && Date.now() < deadline) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    latest = await countVisibleInRow(row, selector);
+  }
+  return latest;
 }
 
 async function selectSnapshotDate(page, value) {
