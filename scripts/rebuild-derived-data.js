@@ -3,6 +3,7 @@ const path = require("node:path");
 const { annotatePayloadWithSongSearchNiche, songSearchSourceSummary } = require("./song-search-index");
 const { applyCurationToVideos, hashNormalizedText, isParserCorruptionEntry, loadCurationContext } = require("./curation");
 const { createSongSearchLookup } = require("../assets/frontend-utils");
+const { BLOCKLIST_HASH, BLOCKLIST_VERSION, assertNoBlockedVideos, createBlockedSourceAudit, filterBlockedVideos } = require("../assets/source-filter");
 const { repairParsedEntry } = require("./entry-repair");
 const { normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
 const { canonicalizePayloadSongAliases, canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
@@ -50,14 +51,17 @@ function main() {
     qualityDroppedEntryCount: 0,
     droppedVideoCount: 0,
     forceRefreshVideoIds: [],
+    blockedSourceDroppedVideoCount: 0,
   };
+  const blockedSourceAudit = createBlockedSourceAudit();
 
   const rebuiltGroups = {};
   for (const [groupId, group] of Object.entries(latest.groups || {})) {
     const rebuiltItems = (group.items || [])
       .map((item) => rebuildVideoItem(item, stats, songSearchLookup, songAliasContext))
       .filter((item) => item.songs.length);
-    const curatedItems = applyCurationToVideos(rebuiltItems, curationContext);
+    const sourceFilteredItems = filterBlockedVideos(rebuiltItems, { audit: blockedSourceAudit });
+    const curatedItems = applyCurationToVideos(sourceFilteredItems, curationContext);
     const curationStats = curatedItems.curationStats || {};
     stats.manualDroppedEntryCount += curationStats.droppedEntries || 0;
     stats.manualReplacedEntryCount += curationStats.replacedEntries || 0;
@@ -89,8 +93,13 @@ function main() {
     source: {
       ...(latest.source || {}),
       rebuiltDerivedAt: new Date().toISOString(),
+      blocklistVersion: BLOCKLIST_VERSION,
+      blocklistHash: BLOCKLIST_HASH,
+      blockedSourceAudit: blockedSourceAudit.summary(),
       curationSummary: buildCurationSummary(latest.source?.curationSummary, stats),
     },
+    blocklistVersion: BLOCKLIST_VERSION,
+    blocklistHash: BLOCKLIST_HASH,
   };
 
   payload = canonicalizePayloadSongAliases(payload, songAliasContext);
@@ -100,17 +109,21 @@ function main() {
   }
 
   const capturedAt = new Date(payload.capturedAt || payload.generatedAt || Date.now());
-  const catalogRefresh = rebuildVideoCatalogFromVideos(collectUniqueGroupVideos(payload.groups), capturedAt, {
+  const catalogInputVideos = filterBlockedVideos(collectUniqueGroupVideos(payload.groups), { audit: blockedSourceAudit });
+  const catalogRefresh = rebuildVideoCatalogFromVideos(catalogInputVideos, capturedAt, {
     previousCatalog: loadVideoCatalog(),
     curationVersion: curationContext.version,
     curationHash: curationContext.hash,
   });
+  const catalogGroupVideos = catalogToVideos(catalogRefresh.catalog);
+  assertNoBlockedVideos(catalogGroupVideos, "rebuild-derived catalog");
   writeJson(VIDEO_CATALOG_PATH, catalogRefresh.catalog);
   payload = {
     ...payload,
-    groups: applyGroupQualityFilters(buildGroups(catalogToVideos(catalogRefresh.catalog), capturedAt)),
+    groups: applyGroupQualityFilters(buildGroups(catalogGroupVideos, capturedAt)),
     source: {
       ...(payload.source || {}),
+      blockedSourceAudit: blockedSourceAudit.summary(),
       videoCatalog: {
         ...catalogSummary(catalogRefresh.catalog, capturedAt),
         addedVideoCount: catalogRefresh.stats.addedVideoCount,
@@ -137,6 +150,7 @@ function main() {
       `repaired=${stats.repairedEntryCount}`,
       `manualDropped=${stats.manualDroppedEntryCount}`,
       `ruleDropped=${payload.source.curationSummary.ruleDroppedEntryCount}`,
+      `blockedSources=${blockedSourceAudit.summary().removed}`,
       `forceRefresh=${payload.source.curationSummary.forceRefreshVideoCount}`,
     ].join(" "),
   );

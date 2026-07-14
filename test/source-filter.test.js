@@ -7,12 +7,16 @@ const {
   isBlockedSongEntry,
   filterPayloadBlockedSources,
   isBlockedSource,
+  BLOCKLIST_HASH,
   normalizeSongEntry,
 } = require("../assets/source-filter");
 
 test("source filter removes blocked HK/TW VTuber channels without matching ordinary song titles", () => {
-  assert.equal(isBlockedSource({ channelName: "CheukCat Ch. 綽貓喵", title: "歌雜 / HKVtuber" }), true);
+  assert.equal(isBlockedSource({ channelId: "UCW8G8aeRjbIOlL-Fgms8hEQ", channelName: "Japanese Channel", title: "歌雜 / HKVtuber" }), true);
+  assert.equal(isBlockedSource({ channelHandle: "@yukichanch", channelName: "Japanese Channel", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelUrl: "https://www.youtube.com/@rhoda1126", channelName: "Japanese Channel", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "奔跑日記！ / 米亞 MYA" }), false);
+  assert.equal(isBlockedSource({ channelName: "Narrator Music", title: "HKVtuber 台湾旅行" }), false);
   assert.equal(isBlockedSongEntry({ title: "DEN Q~~~", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "DEN Q~~~", artist: "Known Artist" }), false);
 
@@ -21,7 +25,7 @@ test("source filter removes blocked HK/TW VTuber channels without matching ordin
     groups: {
       "72h": {
         items: [
-          video("blocked", "CheukCat Ch. 綽貓喵", "奔跑日記！"),
+          { ...video("blocked", "Japanese Channel", "奔跑日記！"), channelId: "UCW8G8aeRjbIOlL-Fgms8hEQ" },
           {
             ...video("kept", "AZKi Channel", "奔跑日記！ / 米亞 MYA"),
             songs: [
@@ -50,6 +54,7 @@ test("source filter removes blocked HK/TW VTuber channels without matching ordin
   );
   assert.equal(filtered.source.clientFilteredBlockedSourceCount, 1);
   assert.equal(filtered.source.clientFilteredBlockedSongCount, 2);
+  assert.equal(filtered.blocklistHash, BLOCKLIST_HASH);
   assert.equal(payload.groups["72h"].items.length, 2);
 });
 

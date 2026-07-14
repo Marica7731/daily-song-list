@@ -941,12 +941,18 @@ async function mobileRankVisualGeometry(browser) {
       const drawer = node.querySelector(".source-drawer");
       const firstGroup = node.querySelector(".source-video-group");
       const title = node.querySelector(".rank-title");
+      const sourceTime = node.querySelector(".source-time-primary");
       const sourceChannel = node.querySelector(".source-video-channel");
+      const sourceVideoTitle = node.querySelector(".source-video-title");
+      const sourceMoreTimes = node.querySelector(".source-time-extra-toggle");
       const copyButtons = Array.from(node.querySelectorAll(".source-copy")).map(rectFor);
-      const timeLinks = Array.from(node.querySelectorAll(".source-time-link:not([hidden])")).map(rectFor);
+      const timeLinks = Array.from(node.querySelectorAll(".source-time-primary, .source-time-extra")).map(rectFor);
       return {
         title: title ? rectFor(title) : null,
+        sourceTime: sourceTime ? rectFor(sourceTime) : null,
         sourceChannel: sourceChannel ? rectFor(sourceChannel) : null,
+        sourceVideoTitle: sourceVideoTitle ? rectFor(sourceVideoTitle) : null,
+        sourceMoreTimes: sourceMoreTimes ? rectFor(sourceMoreTimes) : null,
         drawer: drawer ? rectFor(drawer) : null,
         firstGroup: firstGroup ? rectFor(firstGroup) : null,
         copyButtons,
@@ -954,19 +960,25 @@ async function mobileRankVisualGeometry(browser) {
         sourceLinkButtonCount: node.querySelectorAll("[data-copy-song-links]").length,
       };
     });
-    if (!expandedGeometry.title || !expandedGeometry.sourceChannel || !expandedGeometry.drawer || !expandedGeometry.firstGroup) {
+    if (!expandedGeometry.title || !expandedGeometry.sourceTime || !expandedGeometry.sourceChannel || !expandedGeometry.sourceVideoTitle || !expandedGeometry.drawer || !expandedGeometry.firstGroup) {
       throw new Error(`expanded source geometry missing ${JSON.stringify(expandedGeometry)}`);
     }
-    assertClose(expandedGeometry.title.left, expandedGeometry.sourceChannel.left, 3, "source channel aligns with rank title", expandedGeometry);
+    assertClose(expandedGeometry.sourceVideoTitle.left, expandedGeometry.sourceTime.left, 3, "source time aligns with source title", expandedGeometry);
+    if (expandedGeometry.sourceChannel.left <= expandedGeometry.sourceTime.right) {
+      throw new Error(`source channel should sit after primary timestamp ${JSON.stringify(expandedGeometry)}`);
+    }
     if (expandedGeometry.drawer.rowGap !== "0px") throw new Error(`mobile source drawer should have no grid row gap ${JSON.stringify(expandedGeometry)}`);
-    assertClose(expandedGeometry.firstGroup.paddingTop, 12, 1, "source group top padding", expandedGeometry);
-    assertClose(expandedGeometry.firstGroup.paddingBottom, 12, 1, "source group bottom padding", expandedGeometry);
+    assertClose(expandedGeometry.firstGroup.paddingTop, 8, 1, "source group top padding", expandedGeometry);
+    assertClose(expandedGeometry.firstGroup.paddingBottom, 8, 1, "source group bottom padding", expandedGeometry);
     if (!expandedGeometry.copyButtons.length || expandedGeometry.copyButtons.some((button) => button.height < 36)) {
       throw new Error(`source copy button height invalid ${JSON.stringify(expandedGeometry)}`);
     }
     if (expandedGeometry.sourceLinkButtonCount !== 1) throw new Error(`copy same-song links button should render once ${JSON.stringify(expandedGeometry)}`);
-    if (!expandedGeometry.timeLinks.length || expandedGeometry.timeLinks.some((link) => link.height < 36)) {
-      throw new Error(`source timestamp touch height invalid ${JSON.stringify(expandedGeometry)}`);
+    if (!expandedGeometry.timeLinks.length || expandedGeometry.timeLinks.some((link) => link.height > 28)) {
+      throw new Error(`source timestamp compact height invalid ${JSON.stringify(expandedGeometry)}`);
+    }
+    if (expandedGeometry.sourceMoreTimes && expandedGeometry.sourceMoreTimes.height > 28) {
+      throw new Error(`source extra timestamp toggle too tall ${JSON.stringify(expandedGeometry)}`);
     }
 
     let expandedScreenshotPath = null;
@@ -1165,7 +1177,7 @@ async function compactSourceDrawerFlow(browser) {
 
     const sourceSemantics = await row.evaluate((node) => {
       const title = node.querySelector(".source-video-title");
-      const timeLinks = Array.from(node.querySelectorAll(".source-time-link:not([hidden])"));
+      const timeLinks = Array.from(node.querySelectorAll(".source-time-primary, .source-time-extra"));
       return {
         titleHref: title?.href || "",
         titleText: title?.textContent?.trim() || "",
@@ -1178,8 +1190,8 @@ async function compactSourceDrawerFlow(browser) {
         oldTimestampSpans: node.querySelectorAll(".source-time-link .source-song, .source-time-link .source-artist").length,
       };
     });
-    if (!sourceSemantics.titleHref || !/[?&]t=0s/u.test(sourceSemantics.titleHref)) {
-      throw new Error(`source video title should link to video start ${JSON.stringify(sourceSemantics)}`);
+    if (!sourceSemantics.titleHref || !/youtube\.com\/watch\?v=.+[?&]t=\d+s/u.test(sourceSemantics.titleHref)) {
+      throw new Error(`source video title should link to the selected timestamp ${JSON.stringify(sourceSemantics)}`);
     }
     if (!sourceSemantics.copiedButtons) throw new Error(`source drawer missing compact copy setlist button ${JSON.stringify(sourceSemantics)}`);
     if (sourceSemantics.copySongLinkButtons !== 1) throw new Error(`source drawer should render one same-song source link copy button ${JSON.stringify(sourceSemantics)}`);
@@ -1204,9 +1216,9 @@ async function compactSourceDrawerFlow(browser) {
 
     const moreTimes = row.locator("[data-toggle-source-times]");
     if ((await moreTimes.count()) > 0) {
-      const beforeVisibleTimes = await countVisibleInRow(row, ".source-time-link");
+      const beforeVisibleTimes = await countVisibleInRow(row, ".source-time-primary, .source-time-extra");
       await moreTimes.first().click();
-      const afterVisibleTimes = await waitForVisibleCountAbove(row, ".source-time-link", beforeVisibleTimes);
+      const afterVisibleTimes = await waitForVisibleCountAbove(row, ".source-time-primary, .source-time-extra", beforeVisibleTimes);
       if (afterVisibleTimes <= beforeVisibleTimes) throw new Error("source timestamp expander did not add visible timestamps");
     }
 

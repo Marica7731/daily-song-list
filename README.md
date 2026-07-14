@@ -21,7 +21,7 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - When one timestamp source already contains many explicit `song / artist` rows, remaining title-only rows from that same source are treated as timeline notes rather than songs and are dropped during generation and carry-forward.
    - Existing snapshots also pass through a front-end in-memory safety filter for high-confidence unknown-artist section markers such as waiting/ending/resume notes, stream sign-off catchphrases, and obvious ordinal title prefixes like `01|`, `10曲目`, or `3 01.`.
    - Long title-only lists are kept only when they look like a real setlist, such as a clear `縛り`/setlist theme.
-   - A channel-first Taiwan/HK VTuber source blacklist runs before inspection, during carry-forward, before final merge, and in the front-end as an in-memory safety filter for existing snapshots. Maintain it in `TAIWAN_VTUBER_BLACKLIST` in `assets/source-filter.js`; add channel names and stable aliases first, and only add title aliases for exact hashtags or strong source markers.
+   - A channel-first regional VTuber source blocklist runs before inspection, during carry-forward, before final merge, during derived-data rebuilds, and in the front-end as an in-memory safety filter for existing snapshots. Daily Song List mirrors the canonical list from `Marica7731/mygit` into `config/blocked-vtuber-channels.json`, then regenerates `assets/blocked-vtuber-channels.js`; runtime payloads carry `blocklistVersion` and `blocklistHash` so stale data is re-filtered instead of trusted.
 3. It writes:
    - `data/latest.json`
    - `data/72h.json`
@@ -83,6 +83,9 @@ npm run update
 npm run update:core
 npm run review:build
 npm run build:runtime
+npm run blocklist:generate
+npm run blocklist:validate
+npm run blocklist:check-sync
 node scripts/build-review-queue.js
 node scripts/export-dirty-candidates.js
 npm run rebuild:derived
@@ -108,6 +111,8 @@ npm run verify:local -- http://127.0.0.1:8080/
 Screenshots are written to `artifacts/h5-redesign/` and should not be committed.
 
 `npm run rebuild:derived` never fetches YouTube. It rereads local `data/latest.json` song `raw` fields with the current parser, reapplies durable curation rules and manual overrides, reuses local `data/song-search-known-songs.json`, rewrites `data/latest.json`, `data/72h.json`, `data/1m.json`, rank diffs, review reports, and compact `data/ui/*` runtime files. Use it for parser/rule/report fixes that should update the current published dataset without changing the remote scrape input.
+
+`scripts/sync-blocked-vtuber-channels.js --source <mygit>/config/blocked-vtuber-channels.json` updates the local mirror of the canonical regional VTuber blocklist. After syncing, run `npm run blocklist:generate`, `npm run blocklist:validate`, and `npm run rebuild:derived` so generated browser assets and runtime payload hashes all refer to the same list.
 
 Useful environment variables:
 

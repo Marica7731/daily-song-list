@@ -1,6 +1,6 @@
 # 全量小众无歌手人工审核清单
 
-生成时间：2026-07-14T19:54:33.333Z
+生成时间：2026-07-14T20:33:02.476Z
 
 候选总数：2083
 唯一视频数：316
@@ -4260,8 +4260,8 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:41:38](https://www.youtube.com/watch?v=MrGxz0q6Py0&t=2498s) | ナイショの話 ClariS | 未記載 | 72h, 1m, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MrGxz0q6Py0\-d3cd39d2e298aabbdfb6\.json\#486b31b27a7d518add1f49a1ae839dba1299872a1b27849176b1be95b6d24da6 |
-| [0:59:00](https://www.youtube.com/watch?v=MrGxz0q6Py0&t=3540s) | ユメセカイ 戸松遥 | 未記載 | 72h, 1m, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MrGxz0q6Py0\-d3cd39d2e298aabbdfb6\.json\#9fb08bdbe4adf54c082ff0608fef23be0c67d01e72c1dbda12e91fac2dfe869c |
+| [0:41:38](https://www.youtube.com/watch?v=MrGxz0q6Py0&t=2498s) | ナイショの話 ClariS | 未記載 | 72h, 1m, review | niche_unknown_artist |  | manual_review | data/review/sources/MrGxz0q6Py0\-d3cd39d2e298aabbdfb6\.json\#486b31b27a7d518add1f49a1ae839dba1299872a1b27849176b1be95b6d24da6 |
+| [0:59:00](https://www.youtube.com/watch?v=MrGxz0q6Py0&t=3540s) | ユメセカイ 戸松遥 | 未記載 | 72h, 1m, review | niche_unknown_artist |  | manual_review | data/review/sources/MrGxz0q6Py0\-d3cd39d2e298aabbdfb6\.json\#9fb08bdbe4adf54c082ff0608fef23be0c67d01e72c1dbda12e91fac2dfe869c |
 
 ### 【歌枠/KARAOKE】キミたちに7月を告げるアコギ弾き語り🐺【水瀬 凪/RK Musicライブユニオン】
 - 视频：[o5R8p6msWXw](https://www.youtube.com/watch?v=o5R8p6msWXw)

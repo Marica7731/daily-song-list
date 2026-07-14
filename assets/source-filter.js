@@ -1,81 +1,34 @@
 (function initSourceFilter(root, factory) {
   if (typeof module === "object" && module.exports) {
-    module.exports = factory();
+    module.exports = factory(root);
     return;
   }
-  root.SourceFilter = factory();
-})(typeof globalThis !== "undefined" ? globalThis : window, function createSourceFilter() {
-  const TAIWAN_VTUBER_BLACKLIST = [
-    { name: "羽芝扉扉", aliases: ["羽芝扉扉", "Uchi Fifi", "uchififi", "@uchififi"], titleAliases: ["#羽芝扉扉", "#扉出來啦"] },
-    { name: "厄倫蒂兒", aliases: ["厄倫蒂兒", "厄伦蒂儿", "Earendel", "EarendelXDFP", "@EarendelXDFP"], titleAliases: ["#厄倫蒂兒", "#厄伦蒂儿", "#DearLive"] },
-    { name: "露恰露恰", aliases: ["露恰露恰", "LutraLutra", "Lutralutra"] },
-    { name: "歐妲", aliases: ["歐妲", "欧妲", "Olda"] },
-    { name: "祈菈・貝希毛絲", aliases: ["祈菈", "祈菈‧貝希毛絲", "祈菈・貝希毛絲", "貝希毛絲", "STORIA", "Narrator"] },
-    { name: "埃穆亞", aliases: ["埃穆亞", "埃穆亚", "Oumua"] },
-    { name: "涅默", aliases: ["涅默", "Nemesis ch. 涅默"] },
-    { name: "熙歌", aliases: ["熙歌", "Cygnus ch. 熙歌"] },
-    { name: "雲隙光", aliases: ["雲隙光", "云隙光", "Kumosuki"] },
-    { name: "冰霧", aliases: ["冰霧", "冰雾", "Eisnebel"] },
-    { name: "白白虹", aliases: ["白白虹", "Xxhacucoxx"] },
-    { name: "幻月", aliases: ["幻月", "Moondogs"] },
-    { name: "光逸幸", aliases: ["光逸幸", "Kouitu Sin"] },
-    { name: "希翁", aliases: ["希翁", "Chion"] },
-    { name: "黑銀夜烏", aliases: ["黑銀夜烏", "黑银夜乌", "Karasu"] },
-    { name: "繆・索緹絲", aliases: ["繆・索緹絲", "繆索緹絲", "缪索缇丝", "Sotis"] },
-    { name: "庫路路", aliases: ["庫路路", "库路路", "Kururun"] },
-    { name: "史黛菈・埃蕾諾亞", aliases: ["史黛菈", "史黛菈 埃蕾諾亞", "Stella Eleanor"] },
-    { name: "克蕾", aliases: ["克蕾", "Cray Ch."] },
-    { name: "火野貝", aliases: ["火野貝", "火野贝", "Hinokai"] },
-    { name: "凝川眠", aliases: ["凝川眠", "Nemuri"] },
-    { name: "汐海黑兔", aliases: ["汐海黑兔", "Usagi"] },
-    { name: "香草奈若", aliases: ["香草奈若", "Vanilla Nyoro"] },
-    { name: "蘇米", aliases: ["蘇米", "苏米", "Sumi Ch."] },
-    { name: "菜姬", aliases: ["菜姬"] },
-    { name: "希靈", aliases: ["希靈", "希灵", "ASMR Healing 希靈"] },
-    { name: "高維爾", aliases: ["高維爾", "高维尔", "Cowell"] },
-    { name: "朵璃安", aliases: ["朵璃安", "Dorian Vtuber"] },
-    { name: "烟花蹦蹦蹦", aliases: ["烟花蹦蹦蹦"] },
-    { name: "杏仁ミル", aliases: ["杏仁ミル", "杏仁咪嚕", "杏仁咪噜"] },
-    { name: "汐 seki", aliases: ["汐 seki", "汐 Seki"] },
-    { name: "璐洛洛", aliases: ["璐洛洛"] },
-    { name: "稻乙緹", aliases: ["稻乙緹", "稻乙缇"] },
-    { name: "李聽", aliases: ["李聽", "李听"] },
-    { name: "Rumi 懶貓子", aliases: ["Rumi 懶貓子", "Rumi懶貓子", "懶貓子", "懒猫子"] },
-    { name: "浠 Mizuki", aliases: ["浠 Mizuki", "浠Mizuki"] },
-    { name: "森森鈴蘭", aliases: ["森森鈴蘭", "森森铃兰"] },
-    { name: "瑪格麗特・諾爾絲", aliases: ["瑪格麗特", "玛格丽特", "Margaret Norns"] },
-    { name: "綽貓喵", aliases: ["綽貓喵", "绰猫喵", "CheukCat", "CheukCat Ch.", "HKVtuber"] },
-  ];
+  root.SourceFilter = factory(root);
+})(typeof globalThis !== "undefined" ? globalThis : window, function createSourceFilter(root) {
+  const blocklistPackage = loadRegionalBlocklist(root);
+  const BLOCKED_REGIONAL_VTUBER_CHANNELS = blocklistPackage.data;
+  const BLOCKLIST_VERSION = blocklistPackage.version;
+  const BLOCKLIST_HASH = blocklistPackage.hash;
+  const matchBlockedRegionalSource = createBlockedSourceMatcher(BLOCKED_REGIONAL_VTUBER_CHANNELS);
 
   function matchBlockedSource(item) {
     if (!item) return null;
-    const channelText = normalizeMatcherText(
-      [item.channelName, item.ownerText, item.longBylineText, item.shortBylineText, item.channelId, item.channelHandle].filter(Boolean).join(" "),
-    );
-    const titleText = normalizeMatcherText(item.title);
-    for (const entry of TAIWAN_VTUBER_BLACKLIST) {
-      for (const alias of entry.aliases || []) {
-        const normalizedAlias = normalizeMatcherText(alias);
-        if (normalizedAlias && channelText.includes(normalizedAlias)) {
-          return { name: entry.name, alias, field: "channelName" };
-        }
-      }
-      for (const alias of entry.titleAliases || []) {
-        const normalizedAlias = normalizeMatcherText(alias);
-        if (normalizedAlias && titleText.includes(normalizedAlias)) {
-          return { name: entry.name, alias, field: "title" };
-        }
-      }
-    }
-    return null;
+    return matchBlockedRegionalSource(item);
   }
 
   function isBlockedSource(item) {
     return Boolean(matchBlockedSource(item));
   }
 
-  function filterBlockedVideos(items) {
-    return (items || []).filter((item) => !isBlockedSource(item));
+  function filterBlockedVideos(items, options = {}) {
+    return (items || []).filter((item) => {
+      const match = matchBlockedSource(item);
+      if (match) {
+        recordBlockedSourceAudit(options.audit, match);
+        return false;
+      }
+      return true;
+    });
   }
 
   function filterPayloadBlockedSources(payload) {
@@ -83,12 +36,15 @@
     let removedSources = 0;
     let removedSongs = 0;
     let normalizedSongs = 0;
+    const blockedSourceAudit = createBlockedSourceAudit();
     const groups = Object.fromEntries(
       Object.entries(payload.groups).map(([groupId, group]) => {
         const items = [];
         for (const item of group.items || []) {
-          if (isBlockedSource(item)) {
+          const blockedSourceMatch = matchBlockedSource(item);
+          if (blockedSourceMatch) {
             removedSources += 1;
+            recordBlockedSourceAudit(blockedSourceAudit, blockedSourceMatch);
             continue;
           }
           const normalizedItemSongs = (item.songs || []).map(normalizeSongEntry);
@@ -116,12 +72,17 @@
     if (!removedSources && !removedSongs && !normalizedSongs) return payload;
     return {
       ...payload,
+      blocklistVersion: BLOCKLIST_VERSION,
+      blocklistHash: BLOCKLIST_HASH,
       groups,
       source: {
         ...(payload.source || {}),
+        blocklistVersion: BLOCKLIST_VERSION,
+        blocklistHash: BLOCKLIST_HASH,
         clientFilteredBlockedSourceCount: removedSources,
         clientFilteredBlockedSongCount: removedSongs,
         clientNormalizedSongCount: normalizedSongs,
+        clientBlockedSourceAudit: blockedSourceAudit.summary(),
       },
     };
   }
@@ -354,6 +315,172 @@
     return value.trim();
   }
 
+  function loadRegionalBlocklist(rootObject) {
+    if (typeof module === "object" && module.exports && typeof require === "function") {
+      const data = require("../config/blocked-vtuber-channels.json");
+      const { blocklistHash } = require("../scripts/blocked-vtuber-utils");
+      return {
+        data,
+        version: data.listVersion || "",
+        hash: blocklistHash(data),
+      };
+    }
+    const runtime = rootObject?.BlockedVtuberChannels || { entries: [], listVersion: "", blocklistHash: "" };
+    return {
+      data: runtime,
+      version: runtime.listVersion || "",
+      hash: runtime.blocklistHash || "",
+    };
+  }
+
+  function createBlockedSourceMatcher(blocklist) {
+    const entries = (blocklist.entries || []).filter((entry) => entry.status === "blocked");
+    const channelIdIndex = new Map();
+    const handleIndex = new Map();
+    const channelUrlIndex = new Map();
+    const aliasIndex = new Map();
+    const titleAliasIndex = new Map();
+
+    for (const entry of entries) {
+      const meta = entryMeta(entry);
+      for (const value of entry.channelIds || []) channelIdIndex.set(value, { ...meta, matchedField: "channelId", matchedValue: value, matchType: "exact" });
+      for (const value of entry.handles || []) {
+        const normalized = normalizeHandle(value);
+        if (normalized) handleIndex.set(normalized, { ...meta, matchedField: "handle", matchedValue: value, matchType: "exact" });
+      }
+      for (const value of entry.channelUrls || []) {
+        const normalized = normalizeChannelUrl(value);
+        if (normalized) channelUrlIndex.set(normalized, { ...meta, matchedField: "channelUrl", matchedValue: value, matchType: "exact" });
+      }
+      for (const value of [entry.name, ...(entry.aliases || [])]) {
+        const normalized = normalizeMatcherText(value);
+        if (normalized) aliasIndex.set(normalized, { ...meta, matchedField: "channelName", matchedValue: value, matchType: "exact" });
+      }
+      for (const value of entry.titleAliases || []) {
+        const normalized = normalizeMatcherText(value);
+        if (normalized) titleAliasIndex.set(normalized, { ...meta, matchedField: "title", matchedValue: value, matchType: "contains" });
+      }
+    }
+
+    return function blockedSourceMatcher(item = {}) {
+      for (const value of uniqueStrings([item.channelId, item.authorChannelId, item.ownerChannelId])) {
+        const match = channelIdIndex.get(value);
+        if (match) return match;
+      }
+      for (const value of uniqueStrings([item.channelHandle, item.handle, item.ownerHandle, ...channelUrlValues(item).map(normalizeChannelUrl)])) {
+        const normalized = normalizeHandle(value);
+        const match = normalized ? handleIndex.get(normalized) : null;
+        if (match) return match;
+      }
+      for (const value of channelUrlValues(item)) {
+        const normalized = normalizeChannelUrl(value);
+        const match = normalized ? channelUrlIndex.get(normalized) : null;
+        if (match) return match;
+      }
+      for (const value of uniqueStrings([item.channelName, item.ownerText, item.longBylineText, item.shortBylineText])) {
+        const normalized = normalizeMatcherText(value);
+        const match = normalized ? aliasIndex.get(normalized) : null;
+        if (match) return match;
+      }
+      const title = normalizeMatcherText(item.title || "");
+      if (title) {
+        for (const [alias, match] of titleAliasIndex.entries()) {
+          if (title.includes(alias)) return match;
+        }
+      }
+      return null;
+    };
+  }
+
+  function entryMeta(entry) {
+    return {
+      entryId: entry.id,
+      name: entry.name,
+      region: (entry.regions || []).join(","),
+    };
+  }
+
+  function channelUrlValues(item = {}) {
+    return uniqueStrings([item.channelUrl, item.authorUrl, item.ownerUrl]);
+  }
+
+  function normalizeHandle(value) {
+    const cleaned = String(value || "")
+      .trim()
+      .replace(/^https?:\/\/(?:www\.)?youtube\.com\//iu, "")
+      .replace(/^\/+/u, "")
+      .split(/[/?#]/u)[0]
+      .replace(/^@/u, "")
+      .trim();
+    return /^[A-Za-z0-9._-]+$/u.test(cleaned) ? cleaned.toLocaleLowerCase() : "";
+  }
+
+  function normalizeChannelUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    try {
+      const url = new URL(raw, "https://www.youtube.com");
+      const host = url.hostname.replace(/^www\./iu, "").toLocaleLowerCase();
+      if (!["youtube.com", "m.youtube.com"].includes(host)) return "";
+      const segments = url.pathname.split("/").filter(Boolean);
+      if (!segments.length) return "";
+      if (segments[0].startsWith("@")) return `@${normalizeHandle(segments[0])}`;
+      if (segments[0] === "channel" && segments[1]) return segments[1];
+      return `/${segments.slice(0, 2).join("/")}`.toLocaleLowerCase();
+    } catch {
+      return "";
+    }
+  }
+
+  function createBlockedSourceAudit() {
+    return {
+      removed: 0,
+      byRegion: {},
+      byMatchedField: {},
+      record(match) {
+        recordBlockedSourceAudit(this, match);
+      },
+      summary() {
+        return {
+          removed: this.removed,
+          byRegion: { ...this.byRegion },
+          byMatchedField: { ...this.byMatchedField },
+        };
+      },
+    };
+  }
+
+  function recordBlockedSourceAudit(audit, match) {
+    if (!audit || !match) return;
+    audit.removed = (audit.removed || 0) + 1;
+    for (const region of String(match.region || "UNKNOWN").split(",").filter(Boolean)) {
+      audit.byRegion = audit.byRegion || {};
+      audit.byRegion[region] = (audit.byRegion[region] || 0) + 1;
+    }
+    const field = match.matchedField || "unknown";
+    audit.byMatchedField = audit.byMatchedField || {};
+    audit.byMatchedField[field] = (audit.byMatchedField[field] || 0) + 1;
+  }
+
+  function assertNoBlockedVideos(items, label = "videos") {
+    const match = (items || []).map((item) => ({ item, match: matchBlockedSource(item) })).find((entry) => entry.match);
+    if (match) {
+      throw new Error(`${label} contains blocked source: ${match.item?.videoId || match.item?.title || "unknown"} (${match.match.name})`);
+    }
+  }
+
+  function uniqueStrings(values) {
+    const seen = new Set();
+    const result = [];
+    for (const raw of values || []) {
+      const value = String(raw || "").trim();
+      if (!value || seen.has(value)) continue;
+      seen.add(value);
+      result.push(value);
+    }
+    return result;
+  }
+
   function normalizeMatcherText(value) {
     return normalizeWhitespace(String(value || "").normalize("NFKC")).toLocaleLowerCase();
   }
@@ -368,6 +495,11 @@
 
   return {
     cleanSongTitleNoise,
+    assertNoBlockedVideos,
+    BLOCKED_REGIONAL_VTUBER_CHANNELS,
+    BLOCKLIST_HASH,
+    BLOCKLIST_VERSION,
+    createBlockedSourceAudit,
     filterBlockedVideos,
     filterPayloadBlockedSources,
     isArtistRichMixedSongList,
@@ -377,6 +509,5 @@
     matchBlockedSource,
     normalizeSongEntry,
     normalizeMatcherText,
-    TAIWAN_VTUBER_BLACKLIST,
   };
 });

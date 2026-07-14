@@ -9,6 +9,7 @@ const {
   compactRankDiffEntries,
   CURRENT_FILTER_VERSION,
 } = require("../scripts/build-runtime-data");
+const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
 
 test("buildClientGroup keeps only runtime video and song fields", () => {
   const group = buildClientGroup({
@@ -90,6 +91,8 @@ test("runtime meta uses the expected range and diff paths", () => {
 
   assert.match(meta.dataVersion, /^[0-9a-f]{64}$/u);
   assert.equal(meta.filterVersion, CURRENT_FILTER_VERSION);
+  assert.equal(meta.blocklistVersion, BLOCKLIST_VERSION);
+  assert.equal(meta.blocklistHash, BLOCKLIST_HASH);
   assert.equal(meta.rebuiltDerivedAt, "2026-07-12T16:30:00Z");
   assert.equal(meta.status.rebuiltDerivedAt, "2026-07-12T16:30:00Z");
   assert.equal(meta.status.capturedAt, "2026-07-12T15:00:00Z");
@@ -137,6 +140,8 @@ test("runtime range payload carries filterVersion and niche annotation state", (
 
   assert.equal(range.id, "72h");
   assert.equal(range.filterVersion, CURRENT_FILTER_VERSION);
+  assert.equal(range.blocklistVersion, BLOCKLIST_VERSION);
+  assert.equal(range.blocklistHash, BLOCKLIST_HASH);
   assert.equal(range.nicheAnnotated, true);
   assert.equal(range.items[0].songs[0].isNiche, true);
 });

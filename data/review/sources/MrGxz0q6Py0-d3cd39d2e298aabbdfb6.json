@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T19:52:56.434Z",
+  "generatedAt": "2026-07-14T20:29:59.030Z",
   "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
   "video": {
     "videoId": "MrGxz0q6Py0",
@@ -18,10 +18,9 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 20,
+    "riskScore": 6,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_unknown_artists",
       "niche_unknown_artist"
     ]
   },
@@ -70,22 +69,17 @@
       "status": "accepted",
       "seconds": 1292,
       "time": "0:21:32",
-      "title": "八月の夜 SILENT SIREN",
-      "artist": "未記載",
+      "title": "八月の夜",
+      "artist": "SILENT SIREN",
       "raw": "21:32 八月の夜 SILENT SIREN",
       "rawHash": "afb7beec123d81ff6cadc99dd38784169e01199a3649aebff5f0bc7ab3bf91b3",
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "title": "八月の夜",
-        "artist": "SILENT SIREN"
-      },
-      "riskReasons": [
-        "parser_corruption"
-      ],
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
       "positiveEvidence": [
         "known_song",
         "known_artist"
@@ -126,8 +120,7 @@
       "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "positiveEvidence": []
     },
@@ -166,8 +159,7 @@
       "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "positiveEvidence": []
     },
@@ -235,22 +227,17 @@
       "status": "accepted",
       "seconds": 5588,
       "time": "1:33:08",
-      "title": "パラソルサイダー ナナホシ管弦楽団",
-      "artist": "未記載",
+      "title": "パラソルサイダー",
+      "artist": "ナナホシ管弦楽団",
       "raw": "1:33:08 パラソルサイダー ナナホシ管弦楽団",
       "rawHash": "bed992b53d7355ebad055dcc9a8381d6ab82daf126a11cc02b340cfe28f0e199",
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "title": "パラソルサイダー",
-        "artist": "ナナホシ管弦楽団"
-      },
-      "riskReasons": [
-        "parser_corruption"
-      ],
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
       "positiveEvidence": [
         "known_song",
         "known_artist"

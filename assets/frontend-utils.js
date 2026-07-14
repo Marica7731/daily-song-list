@@ -777,6 +777,7 @@
       errors.push("dataVersion mismatch");
     }
     if (!Number.isInteger(payload.filterVersion)) errors.push("filterVersion must be integer");
+    if (expected.blocklistHash && payload.blocklistHash !== expected.blocklistHash) errors.push("blocklistHash mismatch");
     if (typeof payload.nicheAnnotated !== "boolean") errors.push("nicheAnnotated must be boolean");
     if (!Array.isArray(payload.items)) {
       errors.push("items must be array");
@@ -821,6 +822,8 @@
       capturedAt: options.capturedAt || group?.capturedAt || group?.generatedAt || options.generatedAt || "",
       dataVersion: options.dataVersion || "",
       filterVersion: Number.isInteger(options.filterVersion) ? options.filterVersion : 0,
+      blocklistVersion: options.blocklistVersion || "",
+      blocklistHash: options.blocklistHash || "",
       nicheAnnotated: items.some((item) => (item.songs || []).some((song) => typeof song.isNiche === "boolean")),
       items,
       fallbackFrom: options.fallbackFrom || "",
@@ -853,8 +856,13 @@
     return !["2g", "slow-2g"].includes(connection.effectiveType || "");
   }
 
-  function shouldSkipSourceFilter(payload, currentFilterVersion) {
-    return Number(payload?.filterVersion) >= Number(currentFilterVersion);
+  function shouldSkipSourceFilter(payload, currentFilterVersion, currentBlocklistHash = "") {
+    return (
+      Number(payload?.filterVersion) >= Number(currentFilterVersion) &&
+      Boolean(payload?.blocklistHash) &&
+      Boolean(currentBlocklistHash) &&
+      payload.blocklistHash === currentBlocklistHash
+    );
   }
 
   function cleanText(value) {

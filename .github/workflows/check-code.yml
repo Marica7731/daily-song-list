@@ -8,6 +8,7 @@ on:
       - ".github/workflows/**"
       - "scripts/**"
       - "assets/**"
+      - "config/**"
       - "test/**"
       - "index.html"
       - "package.json"
@@ -33,6 +34,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Checkout canonical blocklist
+        uses: actions/checkout@v4
+        with:
+          repository: Marica7731/mygit
+          path: .tmp/mygit
+
+      - name: Check blocklist mirror sync
+        run: node scripts/check-blocked-vtuber-sync.js --source .tmp/mygit/config/blocked-vtuber-channels.json --mirror config/blocked-vtuber-channels.json
 
       - name: Run checks
         run: npm run check

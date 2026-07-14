@@ -633,11 +633,13 @@ test("trend lookup converts arrays into Map lookups", () => {
   assert.equal(lookup.songRank.get("missing"), undefined);
 });
 
-test("current filterVersion skips latest SourceFilter while old snapshots do not", () => {
-  assert.equal(shouldSkipSourceFilter({ filterVersion: 3 }, 3), true);
-  assert.equal(shouldSkipSourceFilter({ filterVersion: 4 }, 3), true);
-  assert.equal(shouldSkipSourceFilter({ filterVersion: 2 }, 3), false);
-  assert.equal(shouldSkipSourceFilter({}, 3), false);
+test("current source filter skip requires both filterVersion and blocklistHash", () => {
+  assert.equal(shouldSkipSourceFilter({ filterVersion: 3, blocklistHash: "hash-a" }, 3, "hash-a"), true);
+  assert.equal(shouldSkipSourceFilter({ filterVersion: 4, blocklistHash: "hash-a" }, 3, "hash-a"), true);
+  assert.equal(shouldSkipSourceFilter({ filterVersion: 2, blocklistHash: "hash-a" }, 3, "hash-a"), false);
+  assert.equal(shouldSkipSourceFilter({ filterVersion: 3 }, 3, "hash-a"), false);
+  assert.equal(shouldSkipSourceFilter({ filterVersion: 3, blocklistHash: "stale" }, 3, "hash-a"), false);
+  assert.equal(shouldSkipSourceFilter({}, 3, "hash-a"), false);
 });
 
 test("formatSeconds derives display time from seconds", () => {

@@ -31,6 +31,8 @@ test("runtime range load validates meta-bound payloads and has fallback paths", 
   assert.match(appSource, /async function tryRuntimeRangeLoad[\s\S]*validateRuntimeRangePayload/u);
   assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*data\/\$\{rangeId\}\.json/u);
   assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*SNAPSHOT_LATEST_PATH/u);
+  assert.doesNotMatch(functionBody("async function loadRuntimeRangeFallback"), /state\.runtimeMeta\?\.filterVersion/u);
+  assert.match(functionBody("async function loadRuntimeRangeFallback"), /filterVersion: Number\.isInteger\(raw\.filterVersion\) \? raw\.filterVersion : 0/u);
 });
 
 test("status display separates capture time from derived rebuild time", () => {

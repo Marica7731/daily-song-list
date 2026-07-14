@@ -19,7 +19,7 @@ const {
   parseRetryAfterMs,
   retryDelayMs,
   selectCandidatesForInspection,
-  TAIWAN_VTUBER_BLACKLIST,
+  BLOCKED_REGIONAL_VTUBER_CHANNELS,
 } = require("../scripts/update-songlist");
 const { createSongAliasContext } = require("../scripts/song-aliases");
 
@@ -400,13 +400,14 @@ test("rank diffs preserve competition ranking for tied counts", () => {
   assert.equal(rankDiffByLabel(diff.songRank, "Delta").currentRank, 4);
 });
 
-test("Taiwan VTuber blacklist matches named channels without relying on song title text", () => {
-  assert.equal(TAIWAN_VTUBER_BLACKLIST.some((entry) => entry.name === "羽芝扉扉"), true);
-  assert.equal(TAIWAN_VTUBER_BLACKLIST.some((entry) => entry.name === "厄倫蒂兒"), true);
-  assert.equal(TAIWAN_VTUBER_BLACKLIST.some((entry) => entry.name === "綽貓喵"), true);
-  assert.equal(isBlockedSource({ channelName: "羽芝扉扉Uchi Fifi", title: "歌枠" }), true);
-  assert.equal(isBlockedSource({ channelName: "Earendel ch. 厄倫蒂兒", title: "Karaoke" }), true);
-  assert.equal(isBlockedSource({ channelName: "CheukCat Ch. 綽貓喵", title: "歌雜 / HKVtuber" }), true);
+test("regional VTuber blocklist matches exact channel fields without relying on broad title text", () => {
+  assert.equal(BLOCKED_REGIONAL_VTUBER_CHANNELS.entries.some((entry) => entry.name === "羽芝扉扉"), true);
+  assert.equal(BLOCKED_REGIONAL_VTUBER_CHANNELS.entries.some((entry) => entry.name === "厄倫蒂兒"), true);
+  assert.equal(BLOCKED_REGIONAL_VTUBER_CHANNELS.entries.some((entry) => entry.name === "綽貓喵"), true);
+  assert.equal(isBlockedSource({ channelName: "羽芝扉扉", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelHandle: "@EarendelXDFP", channelName: "Japanese Channel", title: "Karaoke" }), true);
+  assert.equal(isBlockedSource({ channelId: "UCW8G8aeRjbIOlL-Fgms8hEQ", channelName: "Japanese Channel", title: "歌雜 / HKVtuber" }), true);
+  assert.equal(isBlockedSource({ channelName: "VTuber Music", title: "HKVtuber 台湾旅行" }), false);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "厄倫蒂兒 cover setlist" }), false);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "奔跑日記！ / 米亞 MYA" }), false);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "#厄倫蒂兒 clip" }), true);
@@ -418,13 +419,13 @@ test("carry-forward drops blacklisted previous videos", () => {
     groups: {
       "72h": {
         items: [
-          video("AAAAAAAAAAA", 3, ["today"], { channelName: "Earendel ch. 厄倫蒂兒" }),
+          video("AAAAAAAAAAA", 3, ["today"], { channelHandle: "@EarendelXDFP" }),
           video("BBBBBBBBBBB", 3, ["today"], { channelName: "channel" }),
         ],
       },
       "1m": {
         items: [
-          video("CCCCCCCCCCC", 24 * 10, ["month"], { channelName: "羽芝扉扉Uchi Fifi" }),
+          video("CCCCCCCCCCC", 24 * 10, ["month"], { channelName: "羽芝扉扉" }),
           video("DDDDDDDDDDD", 24 * 10, ["month"], { channelName: "channel" }),
         ],
       },
@@ -442,9 +443,9 @@ test("carry-forward drops blacklisted previous videos", () => {
 
 test("candidate selection and final merge filter blacklisted videos", () => {
   const candidates = [
-    candidate("AAAAAAAAAAA", 2, ["today"], { channelName: "羽芝扉扉Uchi Fifi" }),
+    candidate("AAAAAAAAAAA", 2, ["today"], { channelName: "羽芝扉扉" }),
     candidate("BBBBBBBBBBB", 3, ["today"], { channelName: "channel" }),
-    candidate("CCCCCCCCCCC", 24 * 8, ["month"], { channelName: "Earendel ch. 厄倫蒂兒" }),
+    candidate("CCCCCCCCCCC", 24 * 8, ["month"], { channelHandle: "@EarendelXDFP" }),
   ];
   const selection = selectCandidatesForInspection(candidates, NOW);
 
@@ -455,7 +456,7 @@ test("candidate selection and final merge filter blacklisted videos", () => {
   );
 
   const merged = mergeFetchedAndCarriedVideos(
-    [video("AAAAAAAAAAA", 2, ["today"], { channelName: "羽芝扉扉Uchi Fifi" })],
+    [video("AAAAAAAAAAA", 2, ["today"], { channelName: "羽芝扉扉" })],
     [video("BBBBBBBBBBB", 3, ["month"], { channelName: "channel" })],
   );
 

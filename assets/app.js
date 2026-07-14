@@ -18,7 +18,7 @@ const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
 const INLINE_SOURCE_PREVIEW_LIMIT = 1;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
-const SOURCE_TIMESTAMP_INITIAL_LIMIT = 10;
+const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
 // Keep these breakpoints synchronized with assets/styles.css:
 // mobile <= 720px, tablet 721-919px, desktop >= 920px.
 const RESPONSIVE_BREAKPOINTS = {
@@ -57,7 +57,9 @@ const PAGE_SIZES = {
   videos: VIDEO_PAGE_SIZE,
 };
 const INDEX_ALL_BUCKET = "全部";
-const STATUS_STALE_MS = 90 * 60 * 1000;
+const DISPLAY_TIME_ZONE = "Asia/Shanghai";
+const STATUS_STALE_MINUTES = 120;
+const STATUS_STALE_MS = STATUS_STALE_MINUTES * 60 * 1000;
 const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
 
 const KANA_BUCKETS = [
@@ -1431,6 +1433,7 @@ async function tryRuntimeRangeLoad(rangeId, path, options = {}) {
         rangeId,
         meta: state.runtimeMeta,
         path,
+        blocklistHash: window.SourceFilter?.BLOCKLIST_HASH || "",
       }),
     };
   } catch (error) {
@@ -1448,7 +1451,9 @@ async function loadRuntimeRangeFallback(rangeId, errors) {
         rangeId,
         generatedAt: raw.generatedAt || group?.generatedAt || state.runtimeMeta?.generatedAt || "",
         capturedAt: raw.capturedAt || state.runtimeMeta?.capturedAt || "",
-        filterVersion: Number.isInteger(state.runtimeMeta?.filterVersion) ? state.runtimeMeta.filterVersion : CURRENT_FILTER_VERSION,
+        filterVersion: Number.isInteger(raw.filterVersion) ? raw.filterVersion : 0,
+        blocklistVersion: raw.blocklistVersion || "",
+        blocklistHash: raw.blocklistHash || "",
         fallbackFrom: fallbackPath,
       });
       window.FrontendUtils.validateRuntimeRangePayload(payload, {
@@ -1518,6 +1523,8 @@ function latestPayloadFromRuntimeRange(rangePayload, meta) {
     capturedAt: meta?.capturedAt || rangePayload?.capturedAt || rangePayload?.generatedAt || "",
     status: mergeRuntimeStatus(meta?.status || null, state.status, meta),
     filterVersion: rangePayload?.filterVersion ?? meta?.filterVersion ?? 0,
+    blocklistVersion: rangePayload?.blocklistVersion || meta?.blocklistVersion || "",
+    blocklistHash: rangePayload?.blocklistHash || meta?.blocklistHash || "",
     nicheAnnotated: rangePayload?.nicheAnnotated === true || meta?.nicheAnnotated === true,
     groups: {
       [rangeId]: group,
@@ -1560,7 +1567,7 @@ async function preparePayload(payload) {
 }
 
 function shouldSkipSourceFilter(payload) {
-  return window.FrontendUtils.shouldSkipSourceFilter(payload, CURRENT_FILTER_VERSION);
+  return window.FrontendUtils.shouldSkipSourceFilter(payload, CURRENT_FILTER_VERSION, window.SourceFilter?.BLOCKLIST_HASH || "");
 }
 
 async function ensureSongSearchLookup() {
@@ -1840,12 +1847,9 @@ function snapshotEntriesForDate(dateValue) {
 }
 
 function snapshotDateValue(entry) {
-  const date = new Date(entry?.capturedAt || entry?.generatedAt || entry?.id || "");
-  if (Number.isNaN(date.getTime())) return "";
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const parts = dateParts(entry?.capturedAt || entry?.generatedAt || entry?.id || "");
+  if (!parts) return "";
+  return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
 function snapshotDateOptionLabel(dateValue) {
@@ -1868,7 +1872,8 @@ function renderStatus(status) {
     renderDebugPanel();
     return;
   }
-  const capturedAt = currentStatus.completedAt || currentStatus.capturedAt || currentStatus.dataCapturedAt || state.runtimeMeta?.capturedAt || "";
+  const capturedAt = currentStatus.capturedAt || currentStatus.dataCapturedAt || state.runtimeMeta?.capturedAt || "";
+  const completedAt = currentStatus.completedAt || "";
   const attemptedAt = currentStatus.attemptedAt || "";
   const rebuiltDerivedAt = currentStatus.rebuiltDerivedAt || state.runtimeMeta?.rebuiltDerivedAt || "";
   const parts = [];
@@ -1877,25 +1882,26 @@ function renderStatus(status) {
   } else {
     const failureAt = attemptedAt ? `最近尝试 ${formatDate(attemptedAt)}` : "最近尝试时间不可用";
     parts.push(`正在使用上次成功数据 · ${failureAt}`);
-    if (capturedAt) parts.push(`上次抓取 ${formatDate(capturedAt)}`);
+    if (capturedAt) parts.push(`上次成功 ${formatDate(capturedAt)}`);
   }
   if (rebuiltDerivedAt && rebuiltDerivedAt !== capturedAt) parts.push(`页面数据重建于 ${formatDate(rebuiltDerivedAt)}`);
   const staleAge = capturedAt ? Date.now() - Date.parse(capturedAt) : 0;
   const alerts = [];
   if (Number.isFinite(staleAge) && staleAge > STATUS_STALE_MS) {
-    parts.push("超过90分钟未更新");
-    alerts.push("数据已超过2小时未更新");
+    parts.push(`超过${STATUS_STALE_MINUTES}分钟未更新`);
+    alerts.push(`数据已超过${staleThresholdLabel()}未更新`);
   }
   const warning = state.runtimeWarnings.get(state.range);
   if (warning?.fallbackPath) {
     parts.push("当前使用备用数据");
     alerts.push("精简数据读取失败，当前使用备用数据");
   }
-  els.status.textContent = relativeUpdateLabel(capturedAt || rebuiltDerivedAt || attemptedAt);
+  renderStatusLabel(currentStatus, capturedAt, rebuiltDerivedAt || attemptedAt);
   els.status.title = [
     parts.filter(Boolean).join(" · "),
     `status=${currentStatus.status || "unknown"}`,
     `capturedAt=${capturedAt || ""}`,
+    `completedAt=${completedAt || ""}`,
     `attemptedAt=${attemptedAt || ""}`,
     `rebuiltDerivedAt=${rebuiltDerivedAt || ""}`,
     `dataVersion=${state.runtimeMeta?.dataVersion || ""}`,
@@ -1916,6 +1922,26 @@ function renderStatusAlerts(messages) {
     item.textContent = message;
     els.statusAlerts.append(item);
   }
+}
+
+function renderStatusLabel(status, capturedAt, fallbackAt = "") {
+  const displayAt = capturedAt || fallbackAt;
+  const exact = formatDate(displayAt);
+  const relative = relativeUpdateLabel(displayAt);
+  els.status.replaceChildren();
+  const time = document.createElement("time");
+  time.className = "status-exact";
+  if (displayAt) time.dateTime = displayAt;
+  time.textContent = status?.status === "success" ? exact : capturedAt ? `上次成功 ${exact}` : exact;
+  els.status.append(time);
+  if (status?.status === "success" && relative && relative !== exact && relative !== "状态不可用") {
+    els.status.append(document.createTextNode(` · ${relative}`));
+  }
+}
+
+function staleThresholdLabel() {
+  if (STATUS_STALE_MINUTES % 60 === 0) return `${STATUS_STALE_MINUTES / 60}小时`;
+  return `${STATUS_STALE_MINUTES}分钟`;
 }
 
 function relativeUpdateLabel(value) {
@@ -3596,62 +3622,78 @@ function renderSourceVideoGroup(group, songOccurrences = group.occurrences) {
   const section = document.createElement("section");
   section.className = "source-video-group";
 
-  const header = document.createElement("div");
-  header.className = "source-video-header";
+  const firstOccurrence = group.occurrences[0];
+  const videoItem = group.item || firstOccurrence?.item || {};
+  const videoId = videoItem.videoId || group.videoId || "";
+  const firstSeconds = firstOccurrence?.song?.seconds || 0;
 
-  const titleWrap = document.createElement("div");
-  titleWrap.className = "source-video-title-wrap";
-  const title = document.createElement("a");
-  title.className = "source-video-title";
-  title.href = youtubeTimeUrl(group.item?.videoId || group.videoId, 0);
-  title.target = "_blank";
-  title.rel = "noreferrer";
-  title.textContent = group.title || group.videoId || "来源视频";
-  title.setAttribute("aria-label", `打开来源视频：${title.textContent}`);
-  const channelLink = window.FrontendUtils.youtubeChannelLink({ ...(group.item || {}), channelName: group.channelName });
+  const thumbLink = document.createElement("a");
+  thumbLink.className = "source-video-thumb-link";
+  thumbLink.href = youtubeTimeUrl(videoId, firstSeconds);
+  thumbLink.target = "_blank";
+  thumbLink.rel = "noreferrer";
+  thumbLink.setAttribute("aria-label", `打开来源视频：${group.title || videoId || "来源视频"}`);
+  thumbLink.append(createThumbnailImage({ ...videoItem, videoId, thumbnailUrl: videoItem.thumbnailUrl || group.thumbnailUrl }, "source-video-thumb"));
+  section.append(thumbLink);
+
+  const main = document.createElement("div");
+  main.className = "source-video-main";
+
+  const topline = document.createElement("div");
+  topline.className = "source-video-topline";
+
+  const identity = document.createElement("div");
+  identity.className = "source-video-identity";
+  if (firstOccurrence) identity.append(renderSourceTimestampLink(firstOccurrence, "source-time-primary"));
+  const extraTimes = group.occurrences.slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
+  let extraTimesId = "";
+  if (extraTimes.length) {
+    extraTimesId = `source-extra-times-${makeDomId(`${videoId}-${firstSeconds}-${group.channelName || ""}`)}`;
+    const more = document.createElement("button");
+    more.className = "source-time-extra-toggle";
+    more.type = "button";
+    more.dataset.toggleSourceTimes = "true";
+    more.setAttribute("aria-expanded", "false");
+    more.setAttribute("aria-controls", extraTimesId);
+    more.textContent = `+${extraTimes.length}`;
+    identity.append(more);
+  }
+
+  const channelLink = window.FrontendUtils.youtubeChannelLink({ ...videoItem, channelName: group.channelName });
   const channel = document.createElement("a");
   channel.className = "source-video-channel";
   channel.href = channelLink.href;
   channel.target = "_blank";
   channel.rel = "noreferrer";
   channel.textContent = group.channelName || "未知频道";
-  titleWrap.append(channel);
-  titleWrap.append(title);
-  header.append(titleWrap);
+  identity.append(channel);
+  topline.append(identity);
+  main.append(topline);
 
-  const actions = document.createElement("div");
-  actions.className = "source-video-actions";
-  actions.append(renderCopySetlistButton(group.item, "复制歌单", "source-action source-copy"));
-  header.append(actions);
-  section.append(header);
+  const title = document.createElement("a");
+  title.className = "source-video-title";
+  title.href = youtubeTimeUrl(videoId, firstSeconds);
+  title.target = "_blank";
+  title.rel = "noreferrer";
+  title.textContent = group.title || videoId || "来源视频";
+  title.setAttribute("aria-label", `打开来源视频：${title.textContent}`);
+  main.append(title);
 
-  const timestamps = document.createElement("div");
-  timestamps.className = "source-timestamps";
-  group.occurrences.forEach((occurrence, index) => {
-    const link = renderSourceTimestampLink(occurrence);
-    if (index >= SOURCE_TIMESTAMP_INITIAL_LIMIT) {
-      link.hidden = true;
-      link.dataset.sourceTimeOverflow = "true";
-    }
-    timestamps.append(link);
-  });
+  const extra = document.createElement("div");
+  extra.className = "source-extra-times";
+  if (extraTimesId) extra.id = extraTimesId;
+  extra.hidden = true;
+  for (const occurrence of extraTimes) extra.append(renderSourceTimestampLink(occurrence, "source-link source-time-extra"));
+  main.append(extra);
+  section.append(main);
 
-  if (group.occurrences.length > SOURCE_TIMESTAMP_INITIAL_LIMIT) {
-    const more = document.createElement("button");
-    more.className = "source-time-more";
-    more.type = "button";
-    more.dataset.toggleSourceTimes = "true";
-    more.textContent = `显示其余 ${group.occurrences.length - SOURCE_TIMESTAMP_INITIAL_LIMIT} 个时间戳`;
-    timestamps.append(more);
-  }
-
-  section.append(timestamps);
+  section.append(renderCopySetlistIconButton(videoItem));
   return section;
 }
 
-function renderSourceTimestampLink(occurrence) {
+function renderSourceTimestampLink(occurrence, className = "source-link source-time-link") {
   const link = document.createElement("a");
-  link.className = "source-link source-time-link";
+  link.className = className;
   link.href = youtubeTimeUrl(occurrence.item.videoId, occurrence.song.seconds);
   link.target = "_blank";
   link.rel = "noreferrer";
@@ -3676,6 +3718,32 @@ function renderCopySetlistButton(item, label = "复制歌单", className = "copy
   button.textContent = label;
   button.setAttribute("aria-label", `复制整场歌单：${item?.title || item?.videoId || "来源视频"}`);
   return button;
+}
+
+function renderCopySetlistIconButton(item) {
+  const button = renderCopySetlistButton(item, "", "source-copy-icon source-copy");
+  button.title = "复制歌单";
+  button.append(renderMusicListIcon());
+  return button;
+}
+
+function renderMusicListIcon() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  const paths = [
+    "M9 18V6l10-2v12",
+    "M9 10l10-2",
+    "M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z",
+    "M19 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z",
+    "M4 5h3M4 9h3M4 13h3",
+  ];
+  for (const d of paths) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    svg.append(path);
+  }
+  return svg;
 }
 
 function renderCopySongLinksButton(occurrences, label = "复制全部链接", className = "source-action source-copy-all") {
@@ -3849,11 +3917,11 @@ function toggleArtistSongLimit(row) {
 function expandSourceGroupTimestamps(button) {
   const group = button.closest(".source-video-group");
   if (!group) return;
-  for (const link of group.querySelectorAll("[data-source-time-overflow]")) {
-    link.hidden = false;
-    delete link.dataset.sourceTimeOverflow;
-  }
-  button.remove();
+  const panel = document.getElementById(button.getAttribute("aria-controls")) || group.querySelector(".source-extra-times");
+  if (!panel) return;
+  const expanded = button.getAttribute("aria-expanded") === "true";
+  button.setAttribute("aria-expanded", String(!expanded));
+  panel.hidden = expanded;
 }
 
 function expandSourceVideoGroups(button) {
@@ -3879,18 +3947,7 @@ function renderVideo(item) {
   thumbLink.rel = "noreferrer";
   thumbLink.setAttribute("aria-label", `打开视频：${item.title || item.videoId}`);
 
-  const thumb = document.createElement("img");
-  thumb.className = "thumb";
-  thumb.alt = "";
-  thumb.loading = "lazy";
-  const thumbnailCandidates = videoThumbnailCandidates(item);
-  let thumbnailIndex = 0;
-  thumb.src = thumbnailCandidates[thumbnailIndex];
-  thumb.addEventListener("error", () => {
-    thumbnailIndex += 1;
-    if (thumbnailIndex < thumbnailCandidates.length) thumb.src = thumbnailCandidates[thumbnailIndex];
-  });
-  thumbLink.append(thumb);
+  thumbLink.append(createThumbnailImage(item, "thumb"));
   card.append(thumbLink);
 
   const body = document.createElement("div");
@@ -4357,10 +4414,28 @@ function videoThumbnailCandidates(item) {
   const videoId = item.videoId ? encodeURIComponent(item.videoId) : "";
   return uniqueStrings([
     item.thumbnailUrl,
+    videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : "",
     videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "",
-    videoId ? `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg` : "",
     placeholderThumbnail(),
   ]);
+}
+
+function createThumbnailImage(item, className, width = 160, height = 90) {
+  const img = document.createElement("img");
+  img.className = className;
+  img.alt = "";
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.width = width;
+  img.height = height;
+  const thumbnailCandidates = videoThumbnailCandidates(item || {});
+  let thumbnailIndex = 0;
+  img.src = thumbnailCandidates[thumbnailIndex] || placeholderThumbnail();
+  img.addEventListener("error", () => {
+    thumbnailIndex += 1;
+    if (thumbnailIndex < thumbnailCandidates.length) img.src = thumbnailCandidates[thumbnailIndex];
+  });
+  return img;
 }
 
 function uniqueStrings(values) {
@@ -4395,7 +4470,8 @@ function dateParts(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   const parts = new Intl.DateTimeFormat("zh-CN", {
-    timeZone: "Asia/Taipei",
+    timeZone: DISPLAY_TIME_ZONE,
+    year: "numeric",
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -4408,6 +4484,7 @@ function dateParts(value) {
       return acc;
     }, {});
   return {
+    year: parts.year,
     month: parts.month,
     day: parts.day,
     hour: parts.hour,

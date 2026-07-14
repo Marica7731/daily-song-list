@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -72,6 +73,8 @@ function buildRuntimeMeta(payload, rangePayloads, options = {}) {
     derivedBuiltAt: payload.generatedAt || rebuiltDerivedAt || capturedAt,
     curationVersion: payload.curationVersion || "",
     curationHash: payload.curationHash || "",
+    blocklistVersion: payload.blocklistVersion || payload.source?.blocklistVersion || BLOCKLIST_VERSION,
+    blocklistHash: payload.blocklistHash || payload.source?.blocklistHash || BLOCKLIST_HASH,
     catalog: payload.source?.videoCatalog || null,
     status: runtimeStatus(payload, { capturedAt, rebuiltDerivedAt, dataVersion, itemCounts }),
     latestCapture: {
@@ -134,6 +137,8 @@ function buildRuntimeRangePayload(payload, rangeId) {
     generatedAt: clientGroup.generatedAt || payload.generatedAt || "",
     capturedAt: payload.capturedAt || payload.generatedAt || "",
     curationVersion: payload.curationVersion || "",
+    blocklistVersion: payload.blocklistVersion || payload.source?.blocklistVersion || BLOCKLIST_VERSION,
+    blocklistHash: payload.blocklistHash || payload.source?.blocklistHash || BLOCKLIST_HASH,
     filterVersion: CURRENT_FILTER_VERSION,
     nicheAnnotated: groupHasNicheAnnotations(clientGroup),
     items: clientGroup.items,
@@ -257,6 +262,8 @@ function computeRuntimeDataVersion(payload, rangePayloads) {
       rebuiltDerivedAt: payload.source?.rebuiltDerivedAt || "",
       curationVersion: payload.curationVersion || "",
       curationHash: payload.curationHash || "",
+      blocklistVersion: payload.blocklistVersion || payload.source?.blocklistVersion || BLOCKLIST_VERSION,
+      blocklistHash: payload.blocklistHash || payload.source?.blocklistHash || BLOCKLIST_HASH,
       filterVersion: CURRENT_FILTER_VERSION,
       ranges: Object.fromEntries(RANGES.map((rangeId) => [rangeId, rangePayloads[rangeId] || null])),
     }),

@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { BLOCKLIST_HASH, BLOCKLIST_VERSION, matchBlockedSource } = require("../assets/source-filter");
 const { NON_SONG_RULES_PATH, OVERRIDES_PATH, validateCurationOverrides } = require("./curation");
 const { SONG_ALIASES_PATH, canonicalizeSongIdentity, loadSongAliasContext, validateSongAliasConfig } = require("./song-aliases");
 const { MONTH_CATALOG_DAYS, VIDEO_CATALOG_PATH, isWithinCatalogWindow } = require("./video-catalog");
@@ -49,6 +50,8 @@ const capturedMs = Date.parse(payload.capturedAt || payload.generatedAt || "");
 validateCurationConfig();
 
 if (payload.schemaVersion !== 1) errors.push("latest.schemaVersion must be 1");
+if (payload.blocklistVersion !== BLOCKLIST_VERSION) errors.push("latest.blocklistVersion must match current blocklist");
+if (payload.blocklistHash !== BLOCKLIST_HASH) errors.push("latest.blocklistHash must match current blocklist");
 if (!payload.groups || typeof payload.groups !== "object") errors.push("latest.groups missing");
 for (const groupId of ["72h", "1m"]) {
   const group = payload.groups?.[groupId];
@@ -58,6 +61,7 @@ for (const groupId of ["72h", "1m"]) {
   }
   if (!Array.isArray(group.items)) errors.push(`groups.${groupId}.items must be array`);
   for (const [videoIndex, item] of (group.items || []).entries()) {
+    validateNotBlockedSource(`groups.${groupId}[${videoIndex}]`, item);
     if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`${groupId}[${videoIndex}].videoId invalid`);
     if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`${groupId}[${videoIndex}].songs empty`);
     if (groupId === "72h" && Number.isFinite(capturedMs) && !isWithinWindow(item.publishedTimestamp, capturedMs, H72_MS)) {
@@ -205,6 +209,8 @@ function validateRuntimeUiFiles() {
   if (typeof meta.nicheAnnotated !== "boolean") errors.push("ui.meta.nicheAnnotated must be boolean");
   if ("curationVersion" in meta && typeof meta.curationVersion !== "string") errors.push("ui.meta.curationVersion must be string");
   if ("curationHash" in meta && typeof meta.curationHash !== "string") errors.push("ui.meta.curationHash must be string");
+  if (meta.blocklistVersion !== BLOCKLIST_VERSION) errors.push("ui.meta.blocklistVersion must match current blocklist");
+  if (meta.blocklistHash !== BLOCKLIST_HASH) errors.push("ui.meta.blocklistHash must match current blocklist");
 
   for (const groupId of RANGES) {
     const rangeMeta = meta.ranges?.[groupId];
@@ -256,6 +262,7 @@ function validateVideoCatalog() {
   const catalogIds = new Set();
   for (const [index, item] of catalog.videos.entries()) {
     const label = `video-catalog.videos[${index}]`;
+    validateNotBlockedSource(label, item);
     if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`${label}.videoId invalid`);
     if (seen.has(item.videoId)) errors.push(`${label}.videoId duplicated: ${item.videoId}`);
     seen.add(item.videoId);
@@ -404,6 +411,8 @@ function validateRuntimeRangeFile(groupId, rangeMeta, meta, options = {}) {
   if (typeof range.capturedAt !== "string") errors.push(`${label}.capturedAt must be string`);
   if (range.dataVersion !== meta.dataVersion) errors.push(`${label}.dataVersion must match ui.meta.dataVersion`);
   if (!Number.isInteger(range.filterVersion)) errors.push(`${label}.filterVersion must be integer`);
+  if (range.blocklistVersion !== BLOCKLIST_VERSION) errors.push(`${label}.blocklistVersion must match current blocklist`);
+  if (range.blocklistHash !== BLOCKLIST_HASH) errors.push(`${label}.blocklistHash must match current blocklist`);
   if (typeof range.nicheAnnotated !== "boolean") errors.push(`${label}.nicheAnnotated must be boolean`);
   if (!Array.isArray(range.items)) {
     errors.push(`${label}.items must be array`);
@@ -414,6 +423,7 @@ function validateRuntimeRangeFile(groupId, rangeMeta, meta, options = {}) {
   }
   for (const [videoIndex, item] of range.items.entries()) {
     validateAllowedFields(`${label}.items[${videoIndex}]`, item, RUNTIME_VIDEO_FIELDS);
+    validateNotBlockedSource(`${label}.items[${videoIndex}]`, item);
     if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`${label}[${videoIndex}].videoId invalid`);
     if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`${label}[${videoIndex}].songs empty`);
     for (const [songIndex, song] of (item.songs || []).entries()) {
@@ -438,6 +448,14 @@ function validateAllowedFields(label, value, allowedFields) {
   for (const field of Object.keys(value)) {
     if (!allowedFields.has(field)) errors.push(`${label}.${field} is not allowed in runtime UI data`);
   }
+}
+
+function validateNotBlockedSource(label, item) {
+  const match = matchBlockedSource(item);
+  if (!match) return;
+  errors.push(
+    `${label} blocked source ${match.name} via ${match.matchedField}=${match.matchedValue || ""} (${match.entryId || "unknown"})`,
+  );
 }
 
 function isPositiveInteger(value) {

@@ -6,6 +6,7 @@ const ROOT = path.resolve(__dirname, "..");
 const INDEX_PATH = path.join(ROOT, "index.html");
 const VERSIONED_ASSETS = [
   "assets/styles.css",
+  "assets/blocked-vtuber-channels.js",
   "assets/source-filter.js",
   "assets/frontend-utils.js",
   "assets/ranking-utils.js",

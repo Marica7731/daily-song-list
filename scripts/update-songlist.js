@@ -1,10 +1,14 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const {
+  BLOCKED_REGIONAL_VTUBER_CHANNELS,
+  BLOCKLIST_HASH,
+  BLOCKLIST_VERSION,
+  assertNoBlockedVideos,
+  createBlockedSourceAudit,
   filterBlockedVideos,
   isBlockedSource,
   matchBlockedSource,
-  TAIWAN_VTUBER_BLACKLIST,
 } = require("../assets/source-filter");
 const { createSongSearchLookup } = require("../assets/frontend-utils");
 const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
@@ -46,6 +50,7 @@ const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const STATUS_PATH = path.join(DATA_DIR, "status.json");
 const AUDIT_PATH = path.join(DATA_DIR, "audit.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
+const DISPLAY_TIME_ZONE = "Asia/Shanghai";
 
 const KEYWORDS = [
   {
@@ -125,6 +130,7 @@ async function main() {
   const startedAt = new Date();
   const songAliasContext = loadSongAliasContext();
   const curationContext = { ...loadCurationContext(), songSearchLookup: loadSongSearchLookup(), songAliasContext };
+  const blockedSourceAudit = createBlockedSourceAudit();
   const forceRefreshVideoIds = collectForceRefreshVideoIds(curationContext);
   const previousPayload = readJsonIfExists(LATEST_PATH);
   const previousAudit = readJsonIfExists(AUDIT_PATH);
@@ -142,14 +148,14 @@ async function main() {
 
   const { inspected, videos: fetchedVideos, audits } = await inspectCandidates(inspectionCandidates, curationContext);
   const curatedMergedVideos = applyCurationToVideos(mergeFetchedAndCarriedVideos(fetchedVideos, carryForward.videos), curationContext);
-  const videos = filterBlockedVideos(curatedMergedVideos);
+  const videos = filterBlockedVideos(curatedMergedVideos, { audit: blockedSourceAudit });
 
   const capturedAt = new Date();
   const catalogUpdate = mergeVideosIntoCatalog(loadVideoCatalog(), videos, capturedAt, {
     curationVersion: curationContext.version,
     curationHash: curationContext.hash,
   });
-  const catalogVideos = filterBlockedVideos(applyCurationToVideos(catalogToVideos(catalogUpdate.catalog), curationContext));
+  const catalogVideos = filterBlockedVideos(applyCurationToVideos(catalogToVideos(catalogUpdate.catalog), curationContext), { audit: blockedSourceAudit });
   const catalogRefresh = rebuildVideoCatalogFromVideos(catalogVideos, capturedAt, {
     previousCatalog: catalogUpdate.catalog,
     curationVersion: curationContext.version,
@@ -158,6 +164,7 @@ async function main() {
   writeJson(VIDEO_CATALOG_PATH, catalogRefresh.catalog);
 
   const groupVideos = catalogToVideos(catalogRefresh.catalog);
+  assertNoBlockedVideos(groupVideos, "catalogRefresh");
   const groups = applyGroupQualityFilters(buildGroups(groupVideos, capturedAt));
   const totalItems = Object.values(groups).reduce((sum, group) => sum + group.items.length, 0);
   if (totalItems <= 0) {
@@ -171,6 +178,8 @@ async function main() {
     capturedAt: capturedAt.toISOString(),
     curationVersion: curationContext.version,
     curationHash: curationContext.hash,
+    blocklistVersion: BLOCKLIST_VERSION,
+    blocklistHash: BLOCKLIST_HASH,
     source: {
       name: "YouTube search + watch comments/descriptions",
       keywords: KEYWORDS.map((keyword) => ({ keyword: keyword.keyword, key: keyword.key })),
@@ -181,8 +190,11 @@ async function main() {
       carriedVideoCount: carryForward.videos.length,
       carried72hVideoCount: carryForward.counts.h72,
       carriedMonthVideoCount: carryForward.counts.month,
-      blacklistedSourceCount: TAIWAN_VTUBER_BLACKLIST.length,
-      blacklistedSources: TAIWAN_VTUBER_BLACKLIST.map((entry) => entry.name),
+      blocklistVersion: BLOCKLIST_VERSION,
+      blocklistHash: BLOCKLIST_HASH,
+      blacklistedSourceCount: BLOCKED_REGIONAL_VTUBER_CHANNELS.entries.length,
+      blacklistedSources: BLOCKED_REGIONAL_VTUBER_CHANNELS.entries.map((entry) => entry.name),
+      blockedSourceAudit: blockedSourceAudit.summary(),
       skippedBlacklistedSearchCount: sumBy(searchSummaries, (summary) => summary.skippedBlacklistedSource || 0),
       skippedBlacklistedCandidateCount: selection.skippedBlacklistedCandidateCount,
       carryForwardEnabled: carryForward.enabled,
@@ -2103,7 +2115,7 @@ function hourSnapshotId(date) {
 
 function formatSnapshotLabel(date) {
   return new Intl.DateTimeFormat("zh-Hant", {
-    timeZone: "Asia/Taipei",
+    timeZone: DISPLAY_TIME_ZONE,
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
@@ -2140,5 +2152,7 @@ module.exports = {
   selectBestSongs,
   sourceScore,
   writeRankDiffFiles,
-  TAIWAN_VTUBER_BLACKLIST,
+  BLOCKED_REGIONAL_VTUBER_CHANNELS,
+  BLOCKLIST_HASH,
+  BLOCKLIST_VERSION,
 };
