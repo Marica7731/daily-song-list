@@ -50,6 +50,14 @@ test("home controls remove legacy info buttons and expose hide-unknown toggle", 
   assert.match(appSource, /hideUnknownToggle/u);
 });
 
+test("initial URL state accepts ordinary query params without shared marker", () => {
+  const body = functionBody("function applyInitialUrlState");
+  assert.match(body, /stateParamKeys/u);
+  assert.match(body, /urlParams\.has\(key\)/u);
+  assert.match(body, /!shouldApplySharedState && !hasStateParams/u);
+  assert.match(body, /state\.sharedUrlApplied = shouldApplySharedState/u);
+});
+
 test("monthly range copy describes 35 day catalog semantics", () => {
   assert.doesNotMatch(indexSource, /来自 YouTube 月度搜索筛选/u);
   assert.match(indexSource, /最近35天累计；YouTube 月度搜索用于补充发现视频。/u);

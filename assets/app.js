@@ -1146,7 +1146,24 @@ function applyInitialUrlState() {
   const defaults = defaultUrlState();
   const urlParams = new URLSearchParams(window.location.search);
   const shouldApplySharedState = urlParams.get("shared") === "1";
-  if (!shouldApplySharedState) {
+  const stateParamKeys = [
+    "range",
+    "view",
+    "page",
+    "pageSize",
+    "bucket",
+    "metric",
+    "layout",
+    "outside",
+    "libraryOutside",
+    "showUnknown",
+    "q",
+    "snapshot",
+    "trend",
+    "minCount",
+  ];
+  const hasStateParams = stateParamKeys.some((key) => urlParams.has(key));
+  if (!shouldApplySharedState && !hasStateParams) {
     Object.assign(state, {
       range: defaults.range,
       view: defaults.view,
@@ -1191,7 +1208,7 @@ function applyInitialUrlState() {
   state.hideUnknownArtist = !parsed.showUnknown;
   state.filter = parsed.q;
   state.currentSnapshotPath = parsed.snapshotPath;
-  state.sharedUrlApplied = true;
+  state.sharedUrlApplied = shouldApplySharedState;
 }
 
 function syncControlsFromState() {
