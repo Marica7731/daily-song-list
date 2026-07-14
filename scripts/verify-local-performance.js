@@ -8,6 +8,7 @@ const baseUrl = args.find((arg) => !arg.startsWith("--")) || "http://127.0.0.1:8
 const viewports = [
   [2560, 1440],
   [1920, 1080],
+  [1440, 900],
   [1366, 768],
   [1024, 768],
   [768, 1024],
@@ -143,6 +144,8 @@ async function assertUiShape(page, viewport, range) {
     const summaryRange = rect("#summary .summary-range");
     const topPagination = rect(".pagination-top");
     const topJump = rect(".pagination-top .page-jump");
+    const topPageSize = rect(".pagination-top .page-size-control");
+    const topControls = Array.from(document.querySelectorAll(".pagination-top .pagination-button, .pagination-top .pagination-status")).map((node) => node.textContent || "");
     const bottomJump = rect(".pagination-bottom .page-jump");
     const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row), .index-row, .video-card"));
     const fullyVisibleRows = rows.filter((node) => {
@@ -165,6 +168,8 @@ async function assertUiShape(page, viewport, range) {
       summaryRange,
       topPagination,
       topJump,
+      topPageSize,
+      topControls,
       bottomJump,
       fullyVisibleRows,
       rankCount,
@@ -184,6 +189,10 @@ async function assertUiShape(page, viewport, range) {
     }
     if (result.summaryRange && result.summaryRange.display !== "none") {
       throw new Error(`mobile summary repeats range: ${result.summary.text}`);
+    }
+    if (result.topJump || result.topPageSize) throw new Error(`mobile top pagination includes jump/page size ${JSON.stringify(result)}`);
+    if (result.topControls.length && result.topControls.length !== 3) {
+      throw new Error(`mobile top pagination should expose prev/status/next only ${JSON.stringify(result.topControls)}`);
     }
     if (result.topPagination && result.topPagination.height > 52) throw new Error(`mobile top pagination too tall ${result.topPagination.height}`);
     if (viewport[0] >= 390 && result.fullyVisibleRows < 5) throw new Error(`mobile visible rows below target: ${result.fullyVisibleRows}`);
@@ -337,6 +346,103 @@ async function interactionFlow(browser) {
   results.push({ scenario: latestOnly ? "interaction-flow-latest" : "interaction-flow", requests: [...new Set(requests)], measures: perf.measures });
 }
 
+async function mobileSourceDrawerFlow(browser) {
+  const viewport = [390, 844];
+  const { context, page, errors } = await newPage(browser, viewport);
+  const requests = [];
+  page.on("request", (request) => requests.push(requestPath(request.url())));
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+  await waitForRows(page, errors, requests);
+
+  const sourceRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
+  const count = await sourceRows.count();
+  if (count < 1) throw new Error("no expandable rank rows found for mobile source drawer");
+  const row = sourceRows.nth(Math.min(1, count - 1));
+  const button = row.locator("[data-toggle-source]").first();
+  const beforeExpanded = await button.getAttribute("aria-expanded");
+  if (beforeExpanded !== "false") throw new Error(`source toggle initial aria-expanded expected false, got ${beforeExpanded}`);
+  await button.click();
+  await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
+    timeout: 15000,
+  });
+  const afterExpanded = await button.getAttribute("aria-expanded");
+  if (afterExpanded !== "true") throw new Error(`source toggle opened aria-expanded expected true, got ${afterExpanded}`);
+
+  const geometry = await row.evaluate((node) => {
+    const rectFor = (target) => {
+      const box = target.getBoundingClientRect();
+      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height };
+    };
+    const drawer = node.querySelector(".source-drawer");
+    const content = node.querySelector(".rank-content");
+    const rank = node.querySelector(".rank-number");
+    const countNode = node.querySelector(".rank-count");
+    const style = getComputedStyle(node);
+    const sourceGroups = Array.from(node.querySelectorAll(".source-video-group")).map((group) => rectFor(group));
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      scrollWidth: document.documentElement.scrollWidth,
+      row: rectFor(node),
+      rowBox: {
+        paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
+        paddingRight: Number.parseFloat(style.paddingRight) || 0,
+        borderLeft: Number.parseFloat(style.borderLeftWidth) || 0,
+        borderRight: Number.parseFloat(style.borderRightWidth) || 0,
+      },
+      drawer: drawer ? rectFor(drawer) : null,
+      content: content ? rectFor(content) : null,
+      rank: rank ? rectFor(rank) : null,
+      count: countNode ? rectFor(countNode) : null,
+      sourceGroups,
+    };
+  });
+  if (!geometry.drawer) throw new Error(`mobile source drawer missing ${JSON.stringify(geometry)}`);
+  if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`mobile source drawer caused horizontal overflow ${JSON.stringify(geometry)}`);
+  const expectedLeft = geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft;
+  const expectedWidth = geometry.row.width - geometry.rowBox.borderLeft - geometry.rowBox.borderRight - geometry.rowBox.paddingLeft - geometry.rowBox.paddingRight;
+  if (Math.abs(geometry.drawer.left - expectedLeft) > 3) {
+    throw new Error(`mobile source drawer left offset invalid ${JSON.stringify(geometry)}`);
+  }
+  if (Math.abs(geometry.drawer.width - expectedWidth) > 4) {
+    throw new Error(`mobile source drawer width invalid ${JSON.stringify(geometry)}`);
+  }
+  if (geometry.content && geometry.drawer.top - geometry.content.bottom > 18) {
+    throw new Error(`mobile source drawer has excessive blank gap ${JSON.stringify(geometry)}`);
+  }
+  if (geometry.sourceGroups.some((group) => group.width > geometry.drawer.width + 1 || group.left < geometry.drawer.left - 1 || group.right > geometry.drawer.right + 1)) {
+    throw new Error(`mobile source group shifted out of drawer ${JSON.stringify(geometry)}`);
+  }
+
+  const moreGroups = row.locator("[data-toggle-source-groups]");
+  if ((await moreGroups.count()) > 0) {
+    const beforeGroupCount = await row.locator(".source-video-group").count();
+    await moreGroups.first().click();
+    const afterGroupCount = await row.locator(".source-video-group").count();
+    if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
+  }
+
+  const moreTimes = row.locator("[data-toggle-source-times]");
+  if ((await moreTimes.count()) > 0) {
+    const beforeVisibleTimes = await row.locator(".source-time-link:not([hidden])").count();
+    await moreTimes.first().click();
+    const afterVisibleTimes = await row.locator(".source-time-link:not([hidden])").count();
+    if (afterVisibleTimes <= beforeVisibleTimes) throw new Error("source timestamp expander did not add visible timestamps");
+  }
+
+  await button.click();
+  const closedExpanded = await button.getAttribute("aria-expanded");
+  if (closedExpanded !== "false") throw new Error(`source toggle closed aria-expanded expected false, got ${closedExpanded}`);
+
+  const screenshotPath = path.join(screenshotDir, `source-drawer-${viewport.join("x")}.png`);
+  await button.click();
+  await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden])", { timeout: 15000 });
+  await page.screenshot({ path: screenshotPath, fullPage: false });
+  const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+  await context.close();
+  if (errors.length || unhandled) throw new Error(`mobile source drawer errors: ${errors.join(" | ")} ${unhandled}`);
+  results.push({ scenario: "mobile-source-drawer-390x844", requests: [...new Set(requests)], screenshotPath });
+}
+
 async function selectSnapshotDate(page, value) {
   let lastError = null;
   for (let attempt = 0; attempt < 6; attempt += 1) {
@@ -460,6 +566,7 @@ function runtimePathPattern(range) {
     }
     await firstLoad(browser, "1m", [1366, 768]);
     await interactionFlow(browser);
+    await mobileSourceDrawerFlow(browser);
     await monthlyFallbackScenarios(browser);
     await prefetchGuards(browser);
     await review404Scenario(browser);

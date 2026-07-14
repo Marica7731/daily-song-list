@@ -17,6 +17,7 @@ test("mobile information architecture exposes one-row toolbar, bottom nav, searc
   assert.match(indexSource, /class="filter-toggle-list"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*grid-template-areas: "range actions"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
+  assert.doesNotMatch(cssSource, /@media \(max-width: 620px\)/u);
 });
 
 test("new URL state, filter draft, and share state are wired through app state", () => {
@@ -37,6 +38,10 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /FrontendUtils\.groupOccurrencesByVideo\(occurrences\)/u);
   assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 10/u);
   assert.match(appSource, /const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 5/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content count"[\s\S]*"drawer drawer drawer"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-row: 2;[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
+  assert.doesNotMatch(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*display: none/u);
 });
 
@@ -58,7 +63,10 @@ test("range cache song records are lazy getters", () => {
 
 test("mobile summary and pagination have compact rules", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-range,[\s\S]*\.summary-actions[\s\S]*display: none/u);
+  assert.match(appSource, /summary-metrics/u);
   assert.match(appSource, /variant === "top"[\s\S]*`\$\{pageInfo\.startIndex \+ 1\}-\$\{pageInfo\.endIndex\} \/ \$\{pageInfo\.total\}/u);
+  assert.match(appSource, /const compactTop = isMobileViewport\(\)/u);
+  assert.match(appSource, /if \(!compactTop\) controls\.append\(renderPageJumpControl\(pageInfo\)\)/u);
   assert.match(appSource, /function renderPageJumpControl/u);
 });
 

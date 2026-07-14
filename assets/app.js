@@ -2592,11 +2592,12 @@ function renderSummary(group, metrics, note = "") {
     main.append(niche);
   }
 
-  for (const item of metrics.filter(Boolean)) {
-    const chip = document.createElement("span");
-    chip.className = "summary-chip";
-    chip.textContent = item;
-    main.append(chip);
+  const metricText = metrics.filter(Boolean).join(" · ");
+  if (metricText) {
+    const metricNode = document.createElement("span");
+    metricNode.className = "summary-metrics";
+    metricNode.textContent = metricText;
+    main.append(metricNode);
   }
   els.summary.append(main);
 
@@ -2739,12 +2740,13 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
 
   if (variant === "top") {
     if (!showPageControls) return footer;
+    const compactTop = isMobileViewport();
     controls.append(
       renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1),
       renderPageStatus(pageInfo, { compact: true }),
-      renderPageJumpControl(pageInfo),
-      renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount),
     );
+    if (!compactTop) controls.append(renderPageJumpControl(pageInfo));
+    controls.append(renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount));
     footer.append(controls);
     return footer;
   }
