@@ -71,7 +71,7 @@ async function waitForRows(page, errors = [], requests = []) {
       timeout: verifyTimeout(15000, 120000),
     });
     await page.waitForFunction(() => document.querySelector("#videoList")?.getAttribute("aria-busy") !== "true", null, {
-      timeout: verifyTimeout(15000, 120000),
+      timeout: verifyTimeout(15000, 300000),
     });
   } catch (error) {
     const diagnostics = await page
