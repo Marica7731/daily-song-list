@@ -18,10 +18,18 @@ const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
 const INLINE_SOURCE_PREVIEW_LIMIT = 1;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
-const ARTIST_SOURCE_INITIAL_LIMIT = 3;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 10;
-const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 3;
-const SOURCE_MOBILE_GROUP_BATCH_SIZE = 3;
+// Keep these breakpoints synchronized with assets/styles.css:
+// mobile <= 720px, tablet 721-919px, desktop >= 920px.
+const RESPONSIVE_BREAKPOINTS = {
+  mobileMax: 720,
+  tabletMax: 919,
+};
+const SOURCE_GROUP_LIMITS = {
+  mobile: { initial: 3, batch: 3 },
+  tablet: { initial: 6, batch: 6 },
+  desktop: { initial: 9, batch: 9 },
+};
 const LIST_PAGE_SIZE_OPTIONS = [50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
 const VIDEO_PAGE_SIZE = 24;
@@ -246,6 +254,8 @@ const state = {
   overlayTrigger: null,
   filterDraft: null,
   sharedUrlApplied: false,
+  responsiveMode: "",
+  resizeRenderFrame: 0,
 };
 
 const els = {
@@ -544,13 +554,6 @@ function bindEvents() {
       return;
     }
 
-    const artistSources = event.target.closest("[data-toggle-artist-sources]");
-    if (artistSources) {
-      event.preventDefault();
-      expandArtistSongSources(artistSources);
-      return;
-    }
-
     const videoToggle = event.target.closest("[data-toggle-video-songs]");
     if (videoToggle) {
       event.preventDefault();
@@ -610,9 +613,11 @@ function bindEvents() {
     restoreStateFromUrl();
   });
 
-  window.visualViewport?.addEventListener("resize", updateViewportVars, { passive: true });
+  window.addEventListener("resize", handleResponsiveResize, { passive: true });
+  window.visualViewport?.addEventListener("resize", handleResponsiveResize, { passive: true });
   window.visualViewport?.addEventListener("scroll", updateViewportVars, { passive: true });
   updateViewportVars();
+  state.responsiveMode = getResponsiveMode();
 }
 
 function switchView(nextView, options = {}) {
@@ -1108,6 +1113,24 @@ function updateViewportVars() {
   if (!viewport) return;
   document.documentElement.style.setProperty("--visual-viewport-height", `${Math.round(viewport.height)}px`);
   document.documentElement.style.setProperty("--visual-viewport-offset-top", `${Math.round(viewport.offsetTop)}px`);
+}
+
+function handleResponsiveResize() {
+  updateViewportVars();
+  const nextMode = getResponsiveMode();
+  if (!state.responsiveMode) {
+    state.responsiveMode = nextMode;
+    return;
+  }
+  if (nextMode === state.responsiveMode || state.resizeRenderFrame) return;
+  state.resizeRenderFrame = window.requestAnimationFrame(() => {
+    state.resizeRenderFrame = 0;
+    const currentMode = getResponsiveMode();
+    if (currentMode === state.responsiveMode) return;
+    state.responsiveMode = currentMode;
+    state.expandedRows.clear();
+    renderOrSyncUrl({ syncUrl: false });
+  });
 }
 
 function setActiveTab(tabs, activeTab) {
@@ -2693,12 +2716,11 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
 
   if (variant === "top") {
     if (!showPageControls) return footer;
-    const compactTop = isMobileViewport();
+    const compactTop = isCompactRankMode();
     controls.append(
       renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, compactTop ? { icon: "prev" } : {}),
       renderPageStatus(pageInfo, { compact: compactTop }),
     );
-    if (!compactTop) controls.append(renderPageJumpControl(pageInfo));
     controls.append(renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, compactTop ? { icon: "next" } : {}));
     footer.append(controls);
     return footer;
@@ -2870,8 +2892,33 @@ function prefersReducedMotion() {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches === true;
 }
 
+function getResponsiveMode() {
+  if (window.matchMedia?.(`(max-width: ${RESPONSIVE_BREAKPOINTS.mobileMax}px)`)?.matches) return "mobile";
+  if (window.matchMedia?.(`(max-width: ${RESPONSIVE_BREAKPOINTS.tabletMax}px)`)?.matches) return "tablet";
+  const width = document.documentElement.clientWidth || window.innerWidth || 0;
+  if (width && width <= RESPONSIVE_BREAKPOINTS.mobileMax) return "mobile";
+  if (width && width <= RESPONSIVE_BREAKPOINTS.tabletMax) return "tablet";
+  return "desktop";
+}
+
+function isCompactRankMode() {
+  return getResponsiveMode() !== "desktop";
+}
+
+function sourceInitialLimitForMode(mode = getResponsiveMode()) {
+  return SOURCE_GROUP_LIMITS[mode]?.initial || SOURCE_GROUP_LIMITS.desktop.initial;
+}
+
+function sourceBatchSizeForMode(mode = getResponsiveMode()) {
+  return SOURCE_GROUP_LIMITS[mode]?.batch || SOURCE_GROUP_LIMITS.desktop.batch;
+}
+
+function shouldKeepSingleDrawerOpen() {
+  return isCompactRankMode();
+}
+
 function isMobileViewport() {
-  return window.matchMedia?.("(max-width: 720px)")?.matches === true;
+  return getResponsiveMode() === "mobile";
 }
 
 function emptyMessage(defaultMessage, searchMessage, nicheMessage) {
@@ -3353,7 +3400,7 @@ function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0,
     songCount,
     videoCount,
     occurrenceCount,
-    compact: isMobileViewport(),
+    compact: isCompactRankMode(),
   });
   const button = document.createElement("button");
   button.className = "rank-expand";
@@ -3463,11 +3510,14 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   drawer._songSourceOccurrences = options.copyOccurrences || drawer._songSourceOccurrences || occurrences;
   const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   drawer._sourceGroups = groups;
-  const visibleCount = drawer.classList.contains("source-drawer") ? sourceVisibleGroupCount(drawer, groups.length) : groups.length;
+  if (options.toolbarVariant) drawer.dataset.toolbarVariant = options.toolbarVariant;
+  const visibleCount = sourceVisibleGroupCount(drawer, groups.length);
   const visibleGroups = groups.slice(0, visibleCount);
   const shouldShowToolbar = options.showToolbar !== false;
   if (shouldShowToolbar && !drawer.querySelector(":scope > .source-drawer-toolbar")) {
-    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences));
+    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount: groups.length }));
+  } else {
+    updateSourceDrawerCount(drawer, visibleCount, groups.length);
   }
 
   for (const group of visibleGroups) {
@@ -3487,37 +3537,47 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   appendMobileSourceCollapse(drawer);
 }
 
-function renderSourceDrawerToolbar(drawer, occurrences) {
-  const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
+  const totalCount = Number.isFinite(options.totalCount)
+    ? options.totalCount
+    : window.FrontendUtils.groupOccurrencesByVideo(occurrences).length;
+  const visibleCount = Number.isFinite(options.visibleCount) ? options.visibleCount : totalCount;
   const toolbar = document.createElement("div");
   toolbar.className = "source-drawer-toolbar";
+  if (drawer.dataset.toolbarVariant === "artist") toolbar.classList.add("artist-source-toolbar");
 
   const count = document.createElement("span");
   count.className = "source-drawer-count";
-  count.textContent = `${groups.length} 个来源`;
+  count.textContent = sourceDrawerCountText(visibleCount, totalCount);
   toolbar.append(count);
 
   const actions = document.createElement("div");
   actions.className = "source-drawer-actions";
   actions.append(renderCopySongLinksButton(occurrences));
-  if (drawer.classList.contains("source-drawer")) {
-    actions.append(renderSourceCollapseButton(drawer.id, drawer.dataset.sourceMode || "song", "source-action source-collapse-top"));
-  }
   toolbar.append(actions);
   return toolbar;
 }
 
+function updateSourceDrawerCount(drawer, visibleCount, totalCount) {
+  const count = drawer.querySelector(":scope > .source-drawer-toolbar .source-drawer-count");
+  if (count) count.textContent = sourceDrawerCountText(visibleCount, totalCount);
+}
+
+function sourceDrawerCountText(visibleCount, totalCount) {
+  return visibleCount < totalCount ? `已显示${visibleCount}/${totalCount}个来源` : `${totalCount} 个来源`;
+}
+
 function sourceVisibleGroupCount(drawer, total) {
-  if (!isMobileViewport()) return total;
   const parsed = Number.parseInt(drawer.dataset.visibleSourceGroups || "", 10);
-  const requested = Number.isFinite(parsed) && parsed > 0 ? parsed : SOURCE_MOBILE_GROUP_INITIAL_LIMIT;
-  const visibleCount = Math.min(total, Math.max(SOURCE_MOBILE_GROUP_INITIAL_LIMIT, requested));
+  const initial = sourceInitialLimitForMode();
+  const requested = Number.isFinite(parsed) && parsed > 0 ? parsed : initial;
+  const visibleCount = Math.min(total, Math.max(initial, requested));
   drawer.dataset.visibleSourceGroups = String(visibleCount);
   return visibleCount;
 }
 
 function appendMobileSourceCollapse(drawer) {
-  if (!isMobileViewport() || !drawer.classList.contains("source-drawer")) return;
+  if (!isCompactRankMode() || !drawer.classList.contains("source-drawer")) return;
   const mode = drawer.dataset.sourceMode || "song";
   drawer.append(renderSourceCollapseButton(drawer.id, mode));
 }
@@ -3667,18 +3727,12 @@ function appendArtistSongGroups(drawer, songGroups) {
 
     const sources = document.createElement("div");
     sources.className = "artist-song-sources";
-    const visibleOccurrences = group.occurrences.slice(0, ARTIST_SOURCE_INITIAL_LIMIT);
-    appendSourceDrawerLinks(sources, visibleOccurrences, { copyOccurrences: group.occurrences, showToolbar: true });
-    if (group.occurrences.length > visibleOccurrences.length) {
-      const sourceMore = document.createElement("button");
-      sourceMore.className = "artist-source-more";
-      sourceMore.type = "button";
-      sourceMore.dataset.toggleArtistSources = "true";
-      sourceMore._remainingOccurrences = group.occurrences.slice(visibleOccurrences.length);
-      sourceMore._allSongOccurrences = group.occurrences;
-      sourceMore.textContent = `显示其余 ${group.occurrences.length - visibleOccurrences.length} 个来源`;
-      sources.append(sourceMore);
-    }
+    sources.dataset.sourceMode = "artist-song";
+    appendSourceDrawerLinks(sources, group.occurrences, {
+      copyOccurrences: group.occurrences,
+      showToolbar: true,
+      toolbarVariant: "artist",
+    });
     section.append(sources);
     drawer.append(section);
   }
@@ -3699,7 +3753,7 @@ function toggleSourceDrawer(row) {
   if (!row) return;
   const drawer = row.querySelector(".source-drawer");
   const nextExpanded = Boolean(drawer?.hidden);
-  if (nextExpanded && isMobileViewport()) closeOtherMobileSourceDrawers(row);
+  if (nextExpanded && shouldKeepSingleDrawerOpen()) closeOtherMobileSourceDrawers(row);
   setSourceDrawerExpanded(row, nextExpanded);
 }
 
@@ -3720,12 +3774,12 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   const buttons = Array.from(row.querySelectorAll("[data-toggle-source]"));
   if (!drawer || !buttons.length) return;
 
-  if (nextExpanded && (drawer.dataset.sourceDeferred === "true" || isMobileViewport())) {
+  if (nextExpanded && (drawer.dataset.sourceDeferred === "true" || isCompactRankMode())) {
     const mode = row.dataset.drawerMode || drawer.dataset.sourceMode || "song";
     const songGroups =
       mode === "artist" ? row._artistSongGroups || row._getArtistSongGroups?.() || [] : row._artistSongGroups || [];
     if (mode === "artist") row._artistSongGroups = songGroups;
-    if (isMobileViewport()) {
+    if (isCompactRankMode()) {
       delete drawer.dataset.visibleSourceGroups;
       delete drawer.dataset.videoGroupsExpanded;
     }
@@ -3756,7 +3810,7 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
       songCount,
       videoCount,
       occurrenceCount,
-      compact: isMobileViewport(),
+      compact: isCompactRankMode(),
     });
     button.setAttribute("aria-label", model.ariaLabel);
     button.textContent = model.text;
@@ -3777,7 +3831,7 @@ function keepSourceRowVisible(row) {
   if (!row || !document.contains(row)) return;
   const rect = row.getBoundingClientRect();
   const topLimit = controlsHeightPx() + 8;
-  const bottomLimit = window.innerHeight - (isMobileViewport() ? 76 : 16);
+  const bottomLimit = window.innerHeight - (isCompactRankMode() ? 76 : 16);
   if (rect.top < topLimit || rect.bottom > bottomLimit) scrollToElement(row);
 }
 
@@ -3790,15 +3844,6 @@ function toggleArtistSongLimit(row) {
   drawer.dataset.artistSongsExpanded = "true";
   drawer.replaceChildren();
   appendArtistSongGroups(drawer, songGroups);
-}
-
-function expandArtistSongSources(button) {
-  const sources = button.closest(".artist-song-sources");
-  const occurrences = button._remainingOccurrences || [];
-  if (!sources || !occurrences.length) return;
-  const copyOccurrences = button._allSongOccurrences || sources._songSourceOccurrences || occurrences;
-  button.remove();
-  appendSourceDrawerLinks(sources, occurrences, { copyOccurrences });
 }
 
 function expandSourceGroupTimestamps(button) {
@@ -3817,7 +3862,7 @@ function expandSourceVideoGroups(button) {
   const occurrences = drawer._sourceOccurrences || [];
   const groups = drawer._sourceGroups || window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   const current = sourceVisibleGroupCount(drawer, groups.length);
-  drawer.dataset.visibleSourceGroups = String(Math.min(groups.length, current + SOURCE_MOBILE_GROUP_BATCH_SIZE));
+  drawer.dataset.visibleSourceGroups = String(Math.min(groups.length, current + sourceBatchSizeForMode()));
   drawer.replaceChildren();
   appendSourceDrawerLinks(drawer, occurrences);
 }

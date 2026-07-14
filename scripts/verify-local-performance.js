@@ -19,7 +19,12 @@ const viewports = [
 ];
 const results = [];
 const screenshotDir = path.join(process.cwd(), "artifacts", "h5-redesign");
+const screenshotTag = (process.env.CODEX_SCREENSHOT_TAG || "local").replace(/[^a-zA-Z0-9._-]/g, "-");
 fs.mkdirSync(screenshotDir, { recursive: true });
+
+function shotPath(name) {
+  return path.join(screenshotDir, `${screenshotTag}-${name}`);
+}
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -208,6 +213,9 @@ async function assertUiShape(page, viewport, range) {
         width: box.width,
         height: box.height,
         top: box.top,
+        bottom: box.bottom,
+        left: box.left,
+        right: box.right,
         display: style.display,
         overflowX: style.overflowX,
         text: node.textContent || "",
@@ -234,10 +242,30 @@ async function assertUiShape(page, viewport, range) {
       text: node.textContent || "",
     }));
     const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row), .index-row, .video-card"));
-    const fullyVisibleRows = rows.filter((node) => {
+    const firstRow = rows[0] || null;
+    const secondRow = rows[1] || null;
+    const firstTitle = firstRow?.querySelector(".rank-title, .index-heading, .video-title") || null;
+    const firstButton =
+      Array.from(firstRow?.querySelectorAll("button") || []).find((node) => {
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      }) || null;
+    const rowRect = (node) => {
+      if (!node) return null;
       const box = node.getBoundingClientRect();
-      return box.top >= 0 && box.bottom <= window.innerHeight;
-    }).length;
+      const style = getComputedStyle(node);
+      return {
+        top: box.top,
+        bottom: box.bottom,
+        left: box.left,
+        right: box.right,
+        width: box.width,
+        height: box.height,
+        fontSize: Number.parseFloat(style.fontSize) || 0,
+        display: style.display,
+      };
+    };
     const bottomItems = Array.from(document.querySelectorAll("#mobileBottomNav [data-view]")).map((node) => {
       const box = node.getBoundingClientRect();
       return { text: node.textContent || "", width: box.width, display: getComputedStyle(node).display };
@@ -274,7 +302,10 @@ async function assertUiShape(page, viewport, range) {
       topControls,
       bottomJump,
       filterBadges,
-      fullyVisibleRows,
+      firstRow: rowRect(firstRow),
+      firstTitle: rowRect(firstTitle),
+      firstButton: rowRect(firstButton),
+      secondRow: rowRect(secondRow),
       rankCount,
       rankCountStyle,
       rankSubline,
@@ -321,13 +352,22 @@ async function assertUiShape(page, viewport, range) {
       throw new Error(`mobile rank count should not use a filled pill ${JSON.stringify(result.rankCountStyle)}`);
     }
     if (result.topPagination && result.topPagination.height > 52) throw new Error(`mobile top pagination too tall ${result.topPagination.height}`);
-    if (viewport[0] >= 390 && result.fullyVisibleRows < 5) throw new Error(`mobile visible rows below target: ${result.fullyVisibleRows}`);
-    if (viewport[0] <= 360 && result.fullyVisibleRows < 4) throw new Error(`narrow mobile visible rows below target: ${result.fullyVisibleRows}`);
+    if (!result.firstRow || result.firstRow.bottom > viewport[1]) throw new Error(`first mobile row is not visible ${JSON.stringify(result)}`);
+    if (!result.firstTitle || result.firstTitle.top < (result.topPagination?.bottom || 0) - 1) {
+      throw new Error(`first mobile title is covered ${JSON.stringify(result)}`);
+    }
+    if (result.firstTitle.fontSize < 14) throw new Error(`first mobile title font too small ${JSON.stringify(result.firstTitle)}`);
+    if (result.firstButton && result.firstButton.height < 36) throw new Error(`mobile first action touch target too small ${JSON.stringify(result.firstButton)}`);
+    if (!result.secondRow || result.secondRow.top >= viewport[1]) throw new Error(`next mobile row entry is not visible ${JSON.stringify(result.secondRow)}`);
+  } else if (viewport[0] <= 919) {
+    if (result.topJump || result.topPageSize) throw new Error(`tablet top pagination includes jump/page size ${JSON.stringify(result)}`);
+    if (!result.firstRow || result.firstRow.bottom > viewport[1]) throw new Error(`first tablet row is not visible ${JSON.stringify(result)}`);
+    if (!result.firstTitle || result.firstTitle.fontSize < 14) throw new Error(`first tablet title invalid ${JSON.stringify(result.firstTitle)}`);
   } else if (viewport[0] >= 1024) {
-    if (!result.topJump || !result.bottomJump) throw new Error(`desktop pagination jump missing ${JSON.stringify(result)}`);
-    if (result.fullyVisibleRows >= (viewport[0] >= 1600 ? 10 : 7)) return;
-    if (viewport[0] < 1600 && result.fullyVisibleRows >= 6) return;
-    throw new Error(`desktop visible rows below target: ${result.fullyVisibleRows} viewport=${viewport.join("x")}`);
+    if (result.topJump || !result.bottomJump) throw new Error(`desktop pagination scope invalid ${JSON.stringify(result)}`);
+    if (!result.firstRow || !result.firstTitle) throw new Error(`desktop first row missing ${JSON.stringify(result)}`);
+    if (result.firstTitle.top < (result.topPagination?.bottom || 0) - 1) throw new Error(`desktop first title is covered ${JSON.stringify(result)}`);
+    if (result.firstTitle.fontSize < 14) throw new Error(`desktop first title font too small ${JSON.stringify(result.firstTitle)}`);
   }
 }
 
@@ -359,7 +399,7 @@ async function firstLoad(browser, range, viewport) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
   const longTasks = await page.evaluate(() => window.__longTasks || []);
   const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
-  const screenshotPath = path.join(screenshotDir, `${range}-${viewport.join("x")}.png`);
+  const screenshotPath = shotPath(`${range}-${viewport.join("x")}.png`);
   await page.screenshot({ path: screenshotPath, fullPage: false });
   await context.close();
 
@@ -526,6 +566,9 @@ async function desktopRankVisualGeometry(browser) {
         copyAllButtons: node.querySelectorAll("[data-copy-song-links]").length,
         copyAllInToolbar: node.querySelectorAll(".source-drawer-toolbar [data-copy-song-links]").length,
         copyAllInsideCards: node.querySelectorAll(".source-video-group [data-copy-song-links]").length,
+        moreButtons: node.querySelectorAll("[data-toggle-source-groups]").length,
+        collapseButtons: node.querySelectorAll("[data-collapse-source]").length,
+        countText: node.querySelector(".source-drawer-count")?.textContent?.trim() || "",
         groups,
         firstRowGroups,
         copyButtons,
@@ -537,6 +580,11 @@ async function desktopRankVisualGeometry(browser) {
     if (sourceGeometry.copyAllButtons !== 1 || sourceGeometry.copyAllInToolbar !== 1 || sourceGeometry.copyAllInsideCards !== 0) {
       throw new Error(`desktop copy-all placement invalid ${JSON.stringify(sourceGeometry)}`);
     }
+    if (sourceGeometry.groups.length > 9) throw new Error(`desktop source drawer rendered more than initial batch ${JSON.stringify(sourceGeometry)}`);
+    if (sourceGeometry.moreButtons && !/^已显示9\/\d+个来源$/u.test(sourceGeometry.countText)) {
+      throw new Error(`desktop source count should expose visible progress ${JSON.stringify(sourceGeometry)}`);
+    }
+    if (sourceGeometry.collapseButtons !== 0) throw new Error(`desktop source drawer should not render duplicate collapse actions ${JSON.stringify(sourceGeometry)}`);
     if (sourceGeometry.toolbar.bottom > sourceGeometry.firstGroup.top + 8) {
       throw new Error(`desktop source toolbar not before cards ${JSON.stringify(sourceGeometry)}`);
     }
@@ -555,9 +603,22 @@ async function desktopRankVisualGeometry(browser) {
       const top = sourceGeometry.copyButtons[0].top;
       for (const button of sourceGeometry.copyButtons) assertClose(button.top, top, 3, "desktop source copy button top", sourceGeometry);
     }
+    if (sourceGeometry.moreButtons) {
+      const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
+      await row.locator("[data-toggle-source-groups]").first().click();
+      const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
+      if (afterGroupCount <= beforeGroupCount) throw new Error("desktop source group expander did not add visible groups");
+      if (afterGroupCount > beforeGroupCount + 9) throw new Error(`desktop source group expander added more than one batch: before=${beforeGroupCount} after=${afterGroupCount}`);
+    }
+    const secondRow = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])").nth(1);
+    if ((await secondRow.count()) === 1) {
+      await secondRow.locator("[data-toggle-source]").first().click();
+      const expandedCount = await page.locator(".rank-row.is-expanded").count();
+      if (expandedCount < 2) throw new Error(`desktop should allow multiple expanded rows, got ${expandedCount}`);
+    }
     let expandedScreenshotPath = null;
     if (viewport[0] === 1440) {
-      expandedScreenshotPath = path.join(screenshotDir, `desktop-source-expanded-${viewport.join("x")}.png`);
+      expandedScreenshotPath = shotPath(`desktop-source-expanded-${viewport.join("x")}.png`);
       await page.screenshot({ path: expandedScreenshotPath, fullPage: false });
     }
     const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
@@ -676,7 +737,7 @@ async function mobileFilterSheetFlow(browser) {
     await waitForRows(page, errors, requests);
     await openMobileFilterSheet(page);
 
-    const topScreenshotPath = path.join(screenshotDir, `filter-sheet-top-${viewport.join("x")}.png`);
+    const topScreenshotPath = shotPath(`filter-sheet-top-${viewport.join("x")}.png`);
     await page.screenshot({ path: topScreenshotPath, fullPage: false });
 
     const topGeometry = await page.evaluate(() => {
@@ -775,7 +836,7 @@ async function mobileFilterSheetFlow(browser) {
     if (bottomGeometry.lastSelect.bottom > bottomGeometry.footer.top - 12) {
       throw new Error(`filter footer overlaps last select ${JSON.stringify(bottomGeometry)}`);
     }
-    const bottomScreenshotPath = path.join(screenshotDir, `filter-sheet-bottom-${viewport.join("x")}.png`);
+    const bottomScreenshotPath = shotPath(`filter-sheet-bottom-${viewport.join("x")}.png`);
     await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
 
     await page.locator("#cancelFilterButton").click();
@@ -910,7 +971,7 @@ async function mobileRankVisualGeometry(browser) {
 
     let expandedScreenshotPath = null;
     if (viewport[0] === 390) {
-      expandedScreenshotPath = path.join(screenshotDir, `rank-expanded-trend-${viewport.join("x")}.png`);
+      expandedScreenshotPath = shotPath(`rank-expanded-trend-${viewport.join("x")}.png`);
       await page.screenshot({ path: expandedScreenshotPath, fullPage: false });
     }
 
@@ -956,7 +1017,7 @@ async function mobileCopyAllLinksFlow(browser) {
     if (copyAllButtons !== 1) throw new Error(`copy all links button should appear once, got ${copyAllButtons}`);
 
     const totalSources = await row.locator(".source-drawer-count").first().textContent();
-    const expectedCount = Number.parseInt(totalSources || "0", 10);
+    const expectedCount = sourceCountFromText(totalSources || "");
     await row.locator("[data-copy-song-links]").first().click();
     await page.waitForFunction(() => (window.__clipboardWrites || []).length > 0, null, { timeout: 5000 });
 
@@ -1001,7 +1062,7 @@ async function mobileCopyAllLinksFlow(browser) {
 
     let screenshotPath = null;
     if (viewport[0] === 390) {
-      screenshotPath = path.join(screenshotDir, `source-drawer-toolbar-${viewport.join("x")}.png`);
+      screenshotPath = shotPath(`source-drawer-toolbar-${viewport.join("x")}.png`);
       await page.screenshot({ path: screenshotPath, fullPage: false });
     }
     const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
@@ -1011,180 +1072,191 @@ async function mobileCopyAllLinksFlow(browser) {
   }
 }
 
-async function mobileSourceDrawerFlow(browser) {
-  const viewport = [390, 844];
-  const { context, page, errors } = await newPage(browser, viewport);
-  const requests = [];
-  page.on("request", (request) => requests.push(requestPath(request.url())));
-  const url = new URL(baseUrl);
-  url.searchParams.set("pageSize", "100");
-  url.searchParams.set("showUnknown", "1");
-  await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
-  await waitForRows(page, errors, requests);
-  await page.waitForLoadState("networkidle", { timeout: baseUrl.startsWith("https://") ? 10000 : 3000 }).catch(() => {});
-  await page.waitForTimeout(baseUrl.startsWith("https://") ? 500 : 100);
+async function compactSourceDrawerFlow(browser) {
+  for (const scenario of [
+    { label: "mobile", viewport: [390, 844], initial: 3, batch: 3 },
+    { label: "tablet", viewport: [768, 1024], initial: 6, batch: 6 },
+  ]) {
+    const viewport = scenario.viewport;
+    const { context, page, errors } = await newPage(browser, viewport);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    const url = new URL(baseUrl);
+    url.searchParams.set("pageSize", "100");
+    url.searchParams.set("showUnknown", "1");
+    await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    await page.waitForLoadState("networkidle", { timeout: baseUrl.startsWith("https://") ? 10000 : 3000 }).catch(() => {});
+    await page.waitForTimeout(baseUrl.startsWith("https://") ? 500 : 100);
 
-  const sourceRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
-  const count = await sourceRows.count();
-  if (count < 1) throw new Error("no expandable rank rows found for mobile source drawer");
+    const sourceRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
+    const count = await sourceRows.count();
+    if (count < 1) throw new Error("no expandable rank rows found for compact source drawer");
 
-  const selectedIndex = 0;
-  const row = sourceRows.first();
-  const button = row.locator("[data-toggle-source]").first();
-  const beforeExpanded = await button.getAttribute("aria-expanded");
-  if (beforeExpanded !== "false") throw new Error(`first source toggle initial aria-expanded expected false, got ${beforeExpanded}`);
-  await button.click();
+    const selectedIndex = 0;
+    const row = sourceRows.first();
+    const button = row.locator("[data-toggle-source]").first();
+    const beforeExpanded = await button.getAttribute("aria-expanded");
+    if (beforeExpanded !== "false") throw new Error(`first source toggle initial aria-expanded expected false, got ${beforeExpanded}`);
+    await button.click();
 
-  await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
-    timeout: 15000,
-  });
-  const afterExpanded = await button.getAttribute("aria-expanded");
-  if (afterExpanded !== "true") throw new Error(`source toggle opened aria-expanded expected true, got ${afterExpanded}`);
-  if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 1) {
-    throw new Error("mobile source drawer should keep exactly one row expanded");
-  }
-  if ((await row.locator("[data-toggle-source-groups]").count()) < 1) throw new Error("first rank row should expose batched source groups");
-  if ((await countVisibleInRow(row, ".source-video-group")) !== 3) {
-    throw new Error("mobile source drawer should start with exactly 3 visible source video groups when more are available");
-  }
+    await page.waitForSelector(
+      ".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link",
+      { timeout: 15000 },
+    );
+    const afterExpanded = await button.getAttribute("aria-expanded");
+    if (afterExpanded !== "true") throw new Error(`source toggle opened aria-expanded expected true, got ${afterExpanded}`);
+    if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 1) {
+      throw new Error(`${scenario.label} source drawer should keep exactly one row expanded`);
+    }
+    if ((await row.locator("[data-toggle-source-groups]").count()) < 1) throw new Error("first rank row should expose batched source groups");
+    if ((await countVisibleInRow(row, ".source-video-group")) !== scenario.initial) {
+      throw new Error(`${scenario.label} source drawer should start with exactly ${scenario.initial} visible source video groups when more are available`);
+    }
 
-  const geometry = await row.evaluate((node) => {
-    const rectFor = (target) => {
-      const box = target.getBoundingClientRect();
-      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height };
-    };
-    const drawer = node.querySelector(".source-drawer");
-    const content = node.querySelector(".rank-content");
-    const rank = node.querySelector(".rank-number");
-    const countNode = node.querySelector(".rank-count");
-    const style = getComputedStyle(node);
-    const sourceGroups = Array.from(node.querySelectorAll(".source-video-group")).map((group) => rectFor(group));
-    return {
-      viewportWidth: document.documentElement.clientWidth,
-      scrollWidth: document.documentElement.scrollWidth,
-      row: rectFor(node),
-      rowBox: {
-        paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
-        paddingRight: Number.parseFloat(style.paddingRight) || 0,
-        borderLeft: Number.parseFloat(style.borderLeftWidth) || 0,
-        borderLeftColor: style.borderLeftColor,
-        borderRight: Number.parseFloat(style.borderRightWidth) || 0,
-      },
-      drawer: drawer ? rectFor(drawer) : null,
-      content: content ? rectFor(content) : null,
-      rank: rank ? rectFor(rank) : null,
-      count: countNode ? rectFor(countNode) : null,
-      sourceGroups,
-    };
-  });
-  if (!geometry.drawer) throw new Error(`mobile source drawer missing ${JSON.stringify(geometry)}`);
-  if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`mobile source drawer caused horizontal overflow ${JSON.stringify(geometry)}`);
-  if (geometry.rowBox.borderLeft > 0 && !/rgba\(0,\s*0,\s*0,\s*0\)|transparent/u.test(geometry.rowBox.borderLeftColor)) {
-    throw new Error(`top rank accent line should not continue through drawer on mobile ${JSON.stringify(geometry)}`);
-  }
-  const expectedLeft = geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft;
-  const expectedWidth = geometry.row.width - geometry.rowBox.borderLeft - geometry.rowBox.borderRight - geometry.rowBox.paddingLeft - geometry.rowBox.paddingRight;
-  if (Math.abs(geometry.drawer.left - expectedLeft) > 3) {
-    throw new Error(`mobile source drawer left offset invalid ${JSON.stringify(geometry)}`);
-  }
-  if (Math.abs(geometry.drawer.width - expectedWidth) > 4) {
-    throw new Error(`mobile source drawer width invalid ${JSON.stringify(geometry)}`);
-  }
-  if (geometry.content && geometry.drawer.top - geometry.content.bottom > 18) {
-    throw new Error(`mobile source drawer has excessive blank gap ${JSON.stringify(geometry)}`);
-  }
-  if (geometry.sourceGroups.some((group) => group.width > geometry.drawer.width + 1 || group.left < geometry.drawer.left - 1 || group.right > geometry.drawer.right + 1)) {
-    throw new Error(`mobile source group shifted out of drawer ${JSON.stringify(geometry)}`);
-  }
+    const geometry = await row.evaluate((node) => {
+      const rectFor = (target) => {
+        const box = target.getBoundingClientRect();
+        return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height };
+      };
+      const drawer = node.querySelector(".source-drawer");
+      const content = node.querySelector(".rank-content");
+      const rank = node.querySelector(".rank-number");
+      const countNode = node.querySelector(".rank-count");
+      const style = getComputedStyle(node);
+      const sourceGroups = Array.from(node.querySelectorAll(".source-video-group")).map((group) => rectFor(group));
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        row: rectFor(node),
+        rowBox: {
+          paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
+          paddingRight: Number.parseFloat(style.paddingRight) || 0,
+          borderLeft: Number.parseFloat(style.borderLeftWidth) || 0,
+          borderLeftColor: style.borderLeftColor,
+          borderRight: Number.parseFloat(style.borderRightWidth) || 0,
+        },
+        drawer: drawer ? rectFor(drawer) : null,
+        content: content ? rectFor(content) : null,
+        rank: rank ? rectFor(rank) : null,
+        count: countNode ? rectFor(countNode) : null,
+        sourceGroups,
+      };
+    });
+    if (!geometry.drawer) throw new Error(`${scenario.label} source drawer missing ${JSON.stringify(geometry)}`);
+    if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`${scenario.label} source drawer caused horizontal overflow ${JSON.stringify(geometry)}`);
+    if (geometry.rowBox.borderLeft > 0 && !/rgba\(0,\s*0,\s*0,\s*0\)|transparent/u.test(geometry.rowBox.borderLeftColor)) {
+      throw new Error(`top rank accent line should not continue through compact drawer ${JSON.stringify(geometry)}`);
+    }
+    const expectedLeft = geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft;
+    const expectedWidth = geometry.row.width - geometry.rowBox.borderLeft - geometry.rowBox.borderRight - geometry.rowBox.paddingLeft - geometry.rowBox.paddingRight;
+    if (Math.abs(geometry.drawer.left - expectedLeft) > 3) {
+      throw new Error(`${scenario.label} source drawer left offset invalid ${JSON.stringify(geometry)}`);
+    }
+    if (Math.abs(geometry.drawer.width - expectedWidth) > 4) {
+      throw new Error(`${scenario.label} source drawer width invalid ${JSON.stringify(geometry)}`);
+    }
+    if (geometry.content && geometry.drawer.top - geometry.content.bottom > 18) {
+      throw new Error(`${scenario.label} source drawer has excessive blank gap ${JSON.stringify(geometry)}`);
+    }
+    if (geometry.sourceGroups.some((group) => group.width > geometry.drawer.width + 1 || group.left < geometry.drawer.left - 1 || group.right > geometry.drawer.right + 1)) {
+      throw new Error(`${scenario.label} source group shifted out of drawer ${JSON.stringify(geometry)}`);
+    }
 
-  const sourceSemantics = await row.evaluate((node) => {
-    const title = node.querySelector(".source-video-title");
-    const timeLinks = Array.from(node.querySelectorAll(".source-time-link:not([hidden])"));
-    return {
-      titleHref: title?.href || "",
-      titleText: title?.textContent?.trim() || "",
-      titleHeight: title?.getBoundingClientRect().height || 0,
-      copiedButtons: node.querySelectorAll(".source-copy").length,
-      copySongLinkButtons: node.querySelectorAll("[data-copy-song-links]").length,
-      openVideoActions: Array.from(node.querySelectorAll(".source-action")).filter((action) => action.textContent.trim() === "打开视频").length,
-      badTimeText: timeLinks.map((link) => link.textContent.trim()).filter((text) => !/^\d{1,2}:\d{2}(?::\d{2})?$/u.test(text)),
-      missingTimeAria: timeLinks.filter((link) => !/打开时间戳：.+\d{1,2}:\d{2}/u.test(link.getAttribute("aria-label") || "")).length,
-      oldTimestampSpans: node.querySelectorAll(".source-time-link .source-song, .source-time-link .source-artist").length,
-    };
-  });
-  if (!sourceSemantics.titleHref || !/[?&]t=0s/u.test(sourceSemantics.titleHref)) {
-    throw new Error(`source video title should link to video start ${JSON.stringify(sourceSemantics)}`);
-  }
-  if (!sourceSemantics.copiedButtons) throw new Error(`source drawer missing compact copy setlist button ${JSON.stringify(sourceSemantics)}`);
-  if (sourceSemantics.copySongLinkButtons !== 1) throw new Error(`source drawer should render one same-song source link copy button ${JSON.stringify(sourceSemantics)}`);
-  if (sourceSemantics.openVideoActions) throw new Error(`mobile source drawer still renders large open video action ${JSON.stringify(sourceSemantics)}`);
-  if (sourceSemantics.badTimeText.length || sourceSemantics.missingTimeAria || sourceSemantics.oldTimestampSpans) {
-    throw new Error(`source timestamp labels should only show time while aria keeps context ${JSON.stringify(sourceSemantics)}`);
-  }
-  if (sourceSemantics.titleHeight > 44) throw new Error(`source video title exceeds compact two-line height ${JSON.stringify(sourceSemantics)}`);
+    const sourceSemantics = await row.evaluate((node) => {
+      const title = node.querySelector(".source-video-title");
+      const timeLinks = Array.from(node.querySelectorAll(".source-time-link:not([hidden])"));
+      return {
+        titleHref: title?.href || "",
+        titleText: title?.textContent?.trim() || "",
+        titleHeight: title?.getBoundingClientRect().height || 0,
+        copiedButtons: node.querySelectorAll(".source-copy").length,
+        copySongLinkButtons: node.querySelectorAll("[data-copy-song-links]").length,
+        openVideoActions: Array.from(node.querySelectorAll(".source-action")).filter((action) => action.textContent.trim() === "打开视频").length,
+        badTimeText: timeLinks.map((link) => link.textContent.trim()).filter((text) => !/^\d{1,2}:\d{2}(?::\d{2})?$/u.test(text)),
+        missingTimeAria: timeLinks.filter((link) => !/打开时间戳：.+\d{1,2}:\d{2}/u.test(link.getAttribute("aria-label") || "")).length,
+        oldTimestampSpans: node.querySelectorAll(".source-time-link .source-song, .source-time-link .source-artist").length,
+      };
+    });
+    if (!sourceSemantics.titleHref || !/[?&]t=0s/u.test(sourceSemantics.titleHref)) {
+      throw new Error(`source video title should link to video start ${JSON.stringify(sourceSemantics)}`);
+    }
+    if (!sourceSemantics.copiedButtons) throw new Error(`source drawer missing compact copy setlist button ${JSON.stringify(sourceSemantics)}`);
+    if (sourceSemantics.copySongLinkButtons !== 1) throw new Error(`source drawer should render one same-song source link copy button ${JSON.stringify(sourceSemantics)}`);
+    if (sourceSemantics.openVideoActions) throw new Error(`compact source drawer still renders large open video action ${JSON.stringify(sourceSemantics)}`);
+    if (sourceSemantics.badTimeText.length || sourceSemantics.missingTimeAria || sourceSemantics.oldTimestampSpans) {
+      throw new Error(`source timestamp labels should only show time while aria keeps context ${JSON.stringify(sourceSemantics)}`);
+    }
+    if (sourceSemantics.titleHeight > 44) throw new Error(`source video title exceeds compact two-line height ${JSON.stringify(sourceSemantics)}`);
 
-  const moreGroups = row.locator("[data-toggle-source-groups]");
-  if ((await moreGroups.count()) > 0) {
-    const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
-    const moreText = (await moreGroups.first().textContent()) || "";
-    if (!/查看更多来源（剩余 \d+）/u.test(moreText)) throw new Error(`source group expander text invalid: ${moreText}`);
-    await moreGroups.first().click();
-    const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
-    if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
-    if (afterGroupCount > beforeGroupCount + 3) throw new Error(`source group expander added more than one batch: before=${beforeGroupCount} after=${afterGroupCount}`);
-  }
+    const moreGroups = row.locator("[data-toggle-source-groups]");
+    if ((await moreGroups.count()) > 0) {
+      const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
+      const moreText = (await moreGroups.first().textContent()) || "";
+      if (!/查看更多来源（剩余 \d+）/u.test(moreText)) throw new Error(`source group expander text invalid: ${moreText}`);
+      await moreGroups.first().click();
+      const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
+      if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
+      if (afterGroupCount > beforeGroupCount + scenario.batch) {
+        throw new Error(`source group expander added more than one ${scenario.label} batch: before=${beforeGroupCount} after=${afterGroupCount}`);
+      }
+    }
 
-  const moreTimes = row.locator("[data-toggle-source-times]");
-  if ((await moreTimes.count()) > 0) {
-    const beforeVisibleTimes = await countVisibleInRow(row, ".source-time-link");
-    await moreTimes.first().click();
-    const afterVisibleTimes = await waitForVisibleCountAbove(row, ".source-time-link", beforeVisibleTimes);
-    if (afterVisibleTimes <= beforeVisibleTimes) throw new Error("source timestamp expander did not add visible timestamps");
-  }
+    const moreTimes = row.locator("[data-toggle-source-times]");
+    if ((await moreTimes.count()) > 0) {
+      const beforeVisibleTimes = await countVisibleInRow(row, ".source-time-link");
+      await moreTimes.first().click();
+      const afterVisibleTimes = await waitForVisibleCountAbove(row, ".source-time-link", beforeVisibleTimes);
+      if (afterVisibleTimes <= beforeVisibleTimes) throw new Error("source timestamp expander did not add visible timestamps");
+    }
 
-  const bottomScreenshotPath = path.join(screenshotDir, `source-drawer-bottom-${viewport.join("x")}.png`);
-  const collapseBottom = row.locator("[data-collapse-source]").last();
-  if ((await collapseBottom.count()) !== 1) throw new Error("mobile source drawer missing bottom collapse button");
-  await retryDetachedAction(() => collapseBottom.scrollIntoViewIfNeeded(), "scroll bottom source collapse");
-  const bottomCoverage = await page.evaluate(() => {
-    const collapse = document.querySelector(".rank-row.is-expanded [data-collapse-source]");
-    const nav = document.querySelector("#mobileBottomNav");
-    const collapseBox = collapse?.getBoundingClientRect();
-    const navBox = nav?.getBoundingClientRect();
-    return {
-      collapseBottom: collapseBox?.bottom || 0,
-      navTop: navBox?.top || window.innerHeight,
-      collapseHeight: collapseBox?.height || 0,
-    };
-  });
-  if (bottomCoverage.collapseHeight > 0 && bottomCoverage.collapseBottom > bottomCoverage.navTop - 4) {
-    throw new Error(`source bottom collapse is covered by mobile nav ${JSON.stringify(bottomCoverage)}`);
-  }
-  await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
-  await retryDetachedAction(() => collapseBottom.click(), "click bottom source collapse");
-  await page.waitForFunction((index) => document.querySelectorAll(".rank-row:not(.skeleton-row):has([data-toggle-source])")[index]?.classList.contains("is-expanded") === false, selectedIndex);
-  const closedExpanded = await button.getAttribute("aria-expanded");
-  if (closedExpanded !== "false") throw new Error(`source bottom collapse aria-expanded expected false, got ${closedExpanded}`);
-  if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 0) throw new Error("source bottom collapse left an expanded row");
+    const bottomScreenshotPath = shotPath(`source-drawer-bottom-${viewport.join("x")}.png`);
+    const collapseBottom = row.locator("[data-collapse-source]");
+    if ((await collapseBottom.count()) !== 1) throw new Error(`${scenario.label} source drawer should have exactly one bottom collapse button`);
+    await retryDetachedAction(() => collapseBottom.scrollIntoViewIfNeeded(), "scroll bottom source collapse");
+    const bottomCoverage = await page.evaluate(() => {
+      const collapse = document.querySelector(".rank-row.is-expanded [data-collapse-source]");
+      const nav = document.querySelector("#mobileBottomNav");
+      const collapseBox = collapse?.getBoundingClientRect();
+      const navBox = nav?.getBoundingClientRect();
+      return {
+        collapseBottom: collapseBox?.bottom || 0,
+        navTop: navBox?.top || window.innerHeight,
+        collapseHeight: collapseBox?.height || 0,
+      };
+    });
+    if (bottomCoverage.collapseHeight > 0 && bottomCoverage.collapseBottom > bottomCoverage.navTop - 4) {
+      throw new Error(`source bottom collapse is covered by mobile nav ${JSON.stringify(bottomCoverage)}`);
+    }
+    await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
+    await retryDetachedAction(() => collapseBottom.click(), "click bottom source collapse");
+    await page.waitForFunction(
+      (index) => document.querySelectorAll(".rank-row:not(.skeleton-row):has([data-toggle-source])")[index]?.classList.contains("is-expanded") === false,
+      selectedIndex,
+    );
+    const closedExpanded = await button.getAttribute("aria-expanded");
+    if (closedExpanded !== "false") throw new Error(`source bottom collapse aria-expanded expected false, got ${closedExpanded}`);
+    if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 0) throw new Error("source bottom collapse left an expanded row");
 
-  const screenshotPath = path.join(screenshotDir, `source-drawer-${viewport.join("x")}.png`);
-  await button.click();
-  await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden])", { timeout: 15000 });
-  await page.screenshot({ path: screenshotPath, fullPage: false });
-  if (count > 1) {
-    const otherIndex = selectedIndex === 0 ? 1 : 0;
-    const otherRow = sourceRows.nth(otherIndex);
-    await otherRow.locator("[data-toggle-source]").first().click();
+    const screenshotPath = shotPath(`source-drawer-${viewport.join("x")}.png`);
+    await button.click();
     await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden])", { timeout: 15000 });
-    const expandedCount = await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count();
-    if (expandedCount !== 1) throw new Error(`mobile opening another row should leave one expanded row, got ${expandedCount}`);
-    const firstStillExpanded = await row.evaluate((node) => node.classList.contains("is-expanded"));
-    if (firstStillExpanded) throw new Error("mobile opening another row did not collapse the previous source drawer");
+    await page.screenshot({ path: screenshotPath, fullPage: false });
+    if (count > 1) {
+      const otherIndex = selectedIndex === 0 ? 1 : 0;
+      const otherRow = sourceRows.nth(otherIndex);
+      await otherRow.locator("[data-toggle-source]").first().click();
+      await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden])", { timeout: 15000 });
+      const expandedCount = await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count();
+      if (expandedCount !== 1) throw new Error(`${scenario.label} opening another row should leave one expanded row, got ${expandedCount}`);
+      const firstStillExpanded = await row.evaluate((node) => node.classList.contains("is-expanded"));
+      if (firstStillExpanded) throw new Error(`${scenario.label} opening another row did not collapse the previous source drawer`);
+    }
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    if (errors.length || unhandled) throw new Error(`${scenario.label} source drawer errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `${scenario.label}-source-drawer-${viewport.join("x")}`, requests: [...new Set(requests)], screenshotPath, bottomScreenshotPath });
   }
-  const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
-  await context.close();
-  if (errors.length || unhandled) throw new Error(`mobile source drawer errors: ${errors.join(" | ")} ${unhandled}`);
-  results.push({ scenario: "mobile-source-drawer-390x844", requests: [...new Set(requests)], screenshotPath, bottomScreenshotPath });
 }
 
 async function countVisibleInRow(row, selector) {
@@ -1207,6 +1279,14 @@ async function waitForVisibleCountAbove(row, selector, minimum) {
     latest = await countVisibleInRow(row, selector);
   }
   return latest;
+}
+
+function sourceCountFromText(text) {
+  const value = String(text || "");
+  const progress = value.match(/\/(\d+)\s*个来源/u);
+  if (progress) return Number.parseInt(progress[1], 10);
+  const total = value.match(/(\d+)\s*个来源/u);
+  return total ? Number.parseInt(total[1], 10) : 0;
 }
 
 async function selectSnapshotDate(page, value) {
@@ -1357,7 +1437,7 @@ async function review404Scenario(browser) {
   const { context, page, errors } = await newPage(browser, viewport);
   const response = await page.goto(new URL("review.html", baseUrl).toString(), { waitUntil: "domcontentloaded" });
   const status = response?.status() || 0;
-  const screenshotPath = path.join(screenshotDir, `review-404-${viewport.join("x")}.png`);
+  const screenshotPath = shotPath(`review-404-${viewport.join("x")}.png`);
   await page.screenshot({ path: screenshotPath, fullPage: false });
   await context.close();
   if (status !== 404) throw new Error(`review.html expected 404, got ${status}`);
@@ -1382,7 +1462,7 @@ function runtimePathPattern(range) {
     await mobileFilterSheetFlow(browser);
     await mobileRankVisualGeometry(browser);
     await mobileCopyAllLinksFlow(browser);
-    await mobileSourceDrawerFlow(browser);
+    await compactSourceDrawerFlow(browser);
     await monthlyFallbackScenarios(browser);
     await prefetchGuards(browser);
     await review404Scenario(browser);

@@ -40,15 +40,24 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /toggleSourceDrawer\(sourceToggle\.closest\("\.rank-row, \.index-row"\)\)/u);
   assert.match(appSource, /FrontendUtils\.groupOccurrencesByVideo\(occurrences\)/u);
   assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 10/u);
-  assert.match(appSource, /const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 3/u);
-  assert.match(appSource, /const SOURCE_MOBILE_GROUP_BATCH_SIZE = 3/u);
+  assert.match(appSource, /const RESPONSIVE_BREAKPOINTS = \{[\s\S]*mobileMax: 720,[\s\S]*tabletMax: 919/u);
+  assert.match(appSource, /const SOURCE_GROUP_LIMITS = \{[\s\S]*mobile: \{ initial: 3, batch: 3 \},[\s\S]*tablet: \{ initial: 6, batch: 6 \},[\s\S]*desktop: \{ initial: 9, batch: 9 \}/u);
+  assert.match(appSource, /function getResponsiveMode/u);
+  assert.match(appSource, /window\.matchMedia\?\.\(`\(max-width: \$\{RESPONSIVE_BREAKPOINTS\.mobileMax\}px\)`\)\?\.matches/u);
+  assert.match(appSource, /window\.matchMedia\?\.\(`\(max-width: \$\{RESPONSIVE_BREAKPOINTS\.tabletMax\}px\)`\)\?\.matches/u);
+  assert.match(appSource, /function isCompactRankMode/u);
+  assert.match(appSource, /function sourceInitialLimitForMode/u);
+  assert.match(appSource, /function sourceBatchSizeForMode/u);
+  assert.match(appSource, /shouldKeepSingleDrawerOpen\(\)/u);
+  assert.match(appSource, /current \+ sourceBatchSizeForMode\(\)/u);
   assert.match(appSource, /查看更多来源（剩余 \$\{remaining\}）/u);
   assert.match(appSource, /dataset\.collapseSource = "true"/u);
   assert.match(appSource, /dataset\.copySongLinks = "true"/u);
   assert.match(appSource, /buildSongSourceLinksText\(occurrences\)/u);
   assert.match(appSource, /className = "source-drawer-toolbar"/u);
   assert.match(appSource, /复制全部链接/u);
-  assert.match(appSource, /closeOtherMobileSourceDrawers\(row\)/u);
+  assert.match(appSource, /if \(nextExpanded && shouldKeepSingleDrawerOpen\(\)\) closeOtherMobileSourceDrawers\(row\)/u);
+  assert.doesNotMatch(appSource, /source-collapse-top|data-toggle-artist-sources|ARTIST_SOURCE_INITIAL_LIMIT/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content count"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-row: 2;[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
@@ -65,6 +74,7 @@ test("third-round mobile component rules are encoded in css and browser checks",
   assert.match(cssSource, /--control-default:\s*44px/u);
   assert.match(cssSource, /--control-large:\s*48px/u);
   assert.match(cssSource, /--rank-leading-width:\s*44px/u);
+  assert.match(cssSource, /--rank-columns:\s*48px minmax\(0, 1fr\) 92px 64px/u);
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
   assert.match(cssSource, /\.sheet-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--control-large\);[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.match(cssSource, /\.sheet-actions\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: 1fr 1fr/u);
@@ -74,13 +84,25 @@ test("third-round mobile component rules are encoded in css and browser checks",
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-video-group\s*\{[\s\S]*padding: var\(--space-3\) 0 var\(--space-3\) var\(--rank-leading-width\);/u);
   assert.match(cssSource, /\.source-video-channel\s*\{[\s\S]*font-size: 14\.5px;[\s\S]*font-weight: 700;/u);
   assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*font-size: 12\.5px;[\s\S]*font-weight: 500;/u);
+  assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*text-decoration: none;/u);
+  assert.match(cssSource, /\.source-video-channel:hover,[\s\S]*\.source-video-title:hover\s*\{[\s\S]*text-decoration: underline;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-video-header/u);
   assert.match(verifySource, /async function mobileFilterSheetFlow/u);
   assert.match(verifySource, /async function mobileRankVisualGeometry/u);
   assert.match(verifySource, /async function mobileCopyAllLinksFlow/u);
   assert.match(verifySource, /async function desktopRankVisualGeometry/u);
+  assert.match(verifySource, /async function compactSourceDrawerFlow/u);
+  assert.match(verifySource, /sourceCountFromText/u);
   assert.match(verifySource, /filter-sheet-bottom-\$\{viewport\.join\("x"\)\}\.png/u);
   assert.match(verifySource, /rank-expanded-trend-\$\{viewport\.join\("x"\)\}\.png/u);
+});
+
+test("desktop and tablet contracts use explicit responsive layout", () => {
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*grid-template-areas:[\s\S]*"range view filter snapshot-date snapshot-time"[\s\S]*"search search search search search"[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) auto minmax\(120px, 150px\) minmax\(168px, 220px\)/u);
+  assert.doesNotMatch(cssSource, /grid-template-columns: auto minmax\(0, 1fr\) auto auto minmax\(220px, 1\.1fr\) minmax\(108px, 140px\) minmax\(160px, 220px\)/u);
+  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*grid-template-areas: "range view search filter snapshot-date snapshot-time";[\s\S]*grid-template-columns: auto auto minmax\(320px, 680px\) auto minmax\(112px, 150px\) minmax\(170px, 230px\)/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 56px/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.pagination-top \.page-jump,[\s\S]*\.pagination-top \.page-size-control\s*\{[\s\S]*display: none;/u);
 });
 
 test("search suggestions highlight safely without assigning untrusted innerHTML", () => {
@@ -101,12 +123,14 @@ test("range cache song records are lazy getters", () => {
 
 test("mobile summary and pagination have compact rules", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-range,[\s\S]*\.summary-actions[\s\S]*display: none/u);
+  assert.match(cssSource, /\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main actions"[\s\S]*"note note"/u);
+  assert.match(cssSource, /\.summary-actions\s*\{[\s\S]*grid-area: actions;[\s\S]*margin-left: 0;/u);
   assert.match(appSource, /summary-metrics/u);
   assert.match(appSource, /variant === "top"[\s\S]*`\$\{pageInfo\.startIndex \+ 1\}-\$\{pageInfo\.endIndex\} \/ \$\{pageInfo\.total\}/u);
-  assert.match(appSource, /const compactTop = isMobileViewport\(\)/u);
+  assert.match(appSource, /const compactTop = isCompactRankMode\(\)/u);
   assert.match(appSource, /renderPageButton\("上一页"[\s\S]*\{ icon: "prev" \}/u);
   assert.match(appSource, /renderPageButton\("下一页"[\s\S]*\{ icon: "next" \}/u);
-  assert.match(appSource, /if \(!compactTop\) controls\.append\(renderPageJumpControl\(pageInfo\)\)/u);
+  assert.doesNotMatch(appSource, /if \(!compactTop\) controls\.append\(renderPageJumpControl\(pageInfo\)\)/u);
   assert.match(appSource, /function renderPageJumpControl/u);
 });
 

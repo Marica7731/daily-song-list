@@ -53,7 +53,8 @@ The site keeps one successful snapshot per hour. If a scheduled scrape fails, ex
    - Default view is song appearance ranking.
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
    - Ranking rows preview one primary source channel inline; source buttons open an inline drawer grouped by video, with sorted timestamp links, whole-video setlist copy, and one song-level `复制全部链接` action that copies unique source videos in `频道名 https://www.youtube.com/watch?v=VIDEO_ID` line format.
-   - On mobile, source drawers render in-place below the current row, show source videos in batches of 3, keep only one row expanded at a time, and use timestamp links whose visible text is only the time while the accessible label keeps song, artist, and channel context.
+   - Responsive ranking layout uses one maintained breakpoint system: mobile is `<=720px`, tablet is `721px-919px`, and desktop is `>=920px`. Mobile and tablet drawers render in-place below the current row, keep only one row expanded at a time, and use timestamp links whose visible text is only the time while the accessible label keeps song, artist, and channel context.
+   - Source drawers are grouped by video and loaded in batches by mode: 3 videos on mobile, 6 on tablet, and 9 on desktop. Desktop can keep multiple rows expanded, while compact modes replace the previously opened drawer to avoid stacked off-screen content.
    - Initial load reads `data/ui/meta.json` first, then loads only the active hash range file from `meta.ranges`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact monthly range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
    - `debug=1` adds a read-only runtime panel with `dataVersion`, active range path, status fields, fallback state, and recent resource timings.
    - Initial load skips `song-search-known-songs.json` when payload songs already contain `isNiche`; older snapshots load that index only when niche annotation is missing. Current data with a supported `filterVersion` skips the full front-end safety filter, while older snapshots still run it for compatibility.
@@ -96,6 +97,15 @@ npm run version:assets
 npm run check
 python -m http.server 8080
 ```
+
+For visual acceptance screenshots, start the static server and pass a traceable tag:
+
+```powershell
+$env:CODEX_SCREENSHOT_TAG = (git rev-parse --short HEAD)
+npm run verify:local -- http://127.0.0.1:8080/
+```
+
+Screenshots are written to `artifacts/h5-redesign/` and should not be committed.
 
 `npm run rebuild:derived` never fetches YouTube. It rereads local `data/latest.json` song `raw` fields with the current parser, reapplies durable curation rules and manual overrides, reuses local `data/song-search-known-songs.json`, rewrites `data/latest.json`, `data/72h.json`, `data/1m.json`, rank diffs, review reports, and compact `data/ui/*` runtime files. Use it for parser/rule/report fixes that should update the current published dataset without changing the remote scrape input.
 

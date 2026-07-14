@@ -44,6 +44,7 @@
   --control-default: 44px;
   --control-large: 48px;
   --rank-leading-width: 44px;
+  --rank-columns: 48px minmax(0, 1fr) 92px 64px;
   --shadow-soft: 0 10px 28px rgba(17, 24, 39, 0.08);
   --page-x: clamp(12px, 2vw, 28px);
   --page-max: 1400px;
@@ -447,10 +448,13 @@ svg {
 
 /* 07. Summary metrics */
 .summary {
-  display: flex;
+  display: grid;
+  grid-template-areas:
+    "main actions"
+    "note note";
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 10px;
+  gap: 4px 12px;
   min-height: 32px;
   margin-bottom: 8px;
   color: var(--muted);
@@ -459,8 +463,8 @@ svg {
 }
 
 .summary-main {
+  grid-area: main;
   display: flex;
-  flex: 1 1 auto;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
@@ -505,7 +509,7 @@ svg {
 }
 
 .summary-note {
-  flex: 1 1 100%;
+  grid-area: note;
   min-width: 0;
   margin: -2px 0 0;
   overflow: hidden;
@@ -517,11 +521,11 @@ svg {
 }
 
 .summary-actions {
+  grid-area: actions;
   display: inline-flex;
-  flex: 0 0 auto;
   align-items: center;
   gap: 6px;
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .summary-segmented {
@@ -888,7 +892,7 @@ mark {
 .rank-header,
 .rank-row {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 92px 64px;
+  grid-template-columns: var(--rank-columns);
   column-gap: 12px;
   align-items: center;
 }
@@ -1154,8 +1158,8 @@ mark {
 }
 
 .rank-count.is-strong {
-  background: var(--accent-soft);
-  color: var(--accent-strong);
+  background: #f2f4f7;
+  color: var(--muted);
 }
 
 .rank-trend {
@@ -1186,7 +1190,7 @@ mark {
   border-radius: var(--radius-control);
   padding: 2px 7px;
   background: #ffffff;
-  color: var(--accent);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
@@ -1195,7 +1199,8 @@ mark {
 
 .rank-expand:hover,
 .is-expanded .rank-expand {
-  background: var(--accent-soft);
+  border-color: var(--line-strong);
+  background: #f8fafc;
   color: var(--accent-strong);
 }
 
@@ -1452,8 +1457,7 @@ mark {
   gap: var(--space-2);
 }
 
-.artist-song-more,
-.artist-source-more {
+.artist-song-more {
   justify-self: start;
   border: 0;
   border-radius: 6px;
@@ -1496,9 +1500,7 @@ mark {
   font-size: 12.5px;
   font-weight: 500;
   line-height: 1.3;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
+  text-decoration: none;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -1520,6 +1522,9 @@ mark {
 .source-video-channel:hover,
 .source-video-title:hover {
   color: var(--accent-strong);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
 }
 
 .source-video-actions {
@@ -1542,7 +1547,7 @@ mark {
   border-radius: var(--radius-control);
   padding: 0 var(--space-3);
   background: #ffffff;
-  color: var(--accent);
+  color: var(--muted);
   font-size: 12px;
   font-weight: 600;
   line-height: 1;
@@ -2042,9 +2047,16 @@ mark {
 }
 
 /* 15. Responsive breakpoints */
-@media (max-width: 1280px) {
+@media (min-width: 920px) and (max-width: 1279px) {
   .controls {
-    grid-template-columns: auto minmax(0, 1fr) auto auto minmax(220px, 1.1fr) minmax(108px, 140px) minmax(160px, 220px);
+    grid-template-areas:
+      "range view filter snapshot-date snapshot-time"
+      "search search search search search";
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(120px, 150px) minmax(168px, 220px);
+  }
+
+  .search-field {
+    max-width: min(760px, 100%);
   }
 
   .video-grid {
@@ -2053,11 +2065,25 @@ mark {
 }
 
 @media (min-width: 721px) and (max-width: 919px) {
+  :root {
+    --rank-columns: 42px minmax(0, 1fr) 56px;
+  }
+
   .controls {
     grid-template-areas:
       "range view filter snapshot-date snapshot-time"
       "search search search search search";
     grid-template-columns: auto minmax(0, 1fr) auto minmax(108px, 136px) minmax(150px, 200px);
+  }
+
+  .pagination-top .page-jump,
+  .pagination-top .page-size-control {
+    display: none;
+  }
+
+  .pagination-top .pagination-controls {
+    flex: 1 1 auto;
+    justify-content: flex-end;
   }
 
   .rank-header {
@@ -2068,7 +2094,12 @@ mark {
     grid-template-areas:
       "rank content count"
       "drawer drawer drawer";
-    grid-template-columns: 42px minmax(0, 1fr) 56px;
+  }
+
+  .rank-row.rank-top-1,
+  .rank-row.rank-top-2,
+  .rank-row.rank-top-3 {
+    border-left-color: transparent;
   }
 
   .rank-number {
@@ -2115,6 +2146,7 @@ mark {
     gap: 0;
     min-width: 0;
     padding: var(--space-2) 0 0;
+    border-top: 1px solid var(--line);
   }
 
   .source-drawer-toolbar {
@@ -2138,14 +2170,14 @@ mark {
 }
 
 @media (min-width: 920px) {
-  .rank-header {
-    display: grid;
-    grid-template-columns: 48px minmax(0, 1fr) 92px 64px;
+  :root {
+    --rank-columns: 48px minmax(0, 1fr) 92px 64px;
   }
 
-  .rank-row {
-    grid-template-columns: 48px minmax(0, 1fr) 92px 64px;
+  .rank-header {
+    display: grid;
   }
+
 }
 
 @media (min-width: 1024px) {
@@ -2159,6 +2191,11 @@ mark {
 }
 
 @media (min-width: 1280px) {
+  .controls {
+    grid-template-areas: "range view search filter snapshot-date snapshot-time";
+    grid-template-columns: auto auto minmax(320px, 680px) auto minmax(112px, 150px) minmax(170px, 230px);
+  }
+
   .source-drawer {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -2168,6 +2205,7 @@ mark {
   :root {
     --page-x: 8px;
     --controls-height: 52px;
+    --rank-columns: 36px minmax(0, 1fr) 56px;
   }
 
   html,
@@ -2311,6 +2349,10 @@ mark {
 
   .summary {
     display: grid;
+    grid-template-areas:
+      "main"
+      "note";
+    grid-template-columns: minmax(0, 1fr);
     gap: 2px;
     min-height: 0;
     margin-bottom: 6px;
@@ -2443,7 +2485,6 @@ mark {
     grid-template-areas:
       "rank content count"
       "drawer drawer drawer";
-    grid-template-columns: 36px minmax(0, 1fr) 56px;
     min-height: 72px;
     column-gap: 8px;
     padding: 8px;

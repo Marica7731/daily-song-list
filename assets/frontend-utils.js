@@ -658,7 +658,7 @@
     const videoCount = Math.max(0, Number(options.videoCount) || 0);
     const occurrenceCount = Math.max(0, Number(options.occurrenceCount ?? options.total) || 0);
     const sourceCount = videoCount || occurrenceCount;
-    const text = isExpanded ? "收起来源" : compact ? `${sourceCount}个来源` : videoCount > 1 ? `查看${videoCount}个视频` : `查看${occurrenceCount}个时间戳`;
+    const text = isExpanded ? "收起来源" : compact ? `${sourceCount}来源` : videoCount > 1 ? `查看${videoCount}个视频` : `查看${occurrenceCount}个时间戳`;
     const ariaLabel = isExpanded
       ? "收起该歌曲来源"
       : videoCount > 1

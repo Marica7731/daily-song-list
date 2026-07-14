@@ -181,7 +181,7 @@ test("song rank toggle uses video and timestamp counts", () => {
   assert.equal(sameVideo.ariaLabel, "查看该歌曲的 4 个时间戳");
 
   const compact = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 3, occurrenceCount: 8, compact: true });
-  assert.equal(compact.text, "3个来源");
+  assert.equal(compact.text, "3来源");
   assert.equal(compact.ariaLabel, "查看该歌曲的 3 个来源视频");
 
   const expanded = rankToggleModel({ mode: "song", isExpanded: true, hiddenCount: 3 });
