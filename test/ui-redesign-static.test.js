@@ -37,12 +37,19 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /toggleSourceDrawer\(sourceToggle\.closest\("\.rank-row, \.index-row"\)\)/u);
   assert.match(appSource, /FrontendUtils\.groupOccurrencesByVideo\(occurrences\)/u);
   assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 10/u);
-  assert.match(appSource, /const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 5/u);
+  assert.match(appSource, /const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 3/u);
+  assert.match(appSource, /const SOURCE_MOBILE_GROUP_BATCH_SIZE = 3/u);
+  assert.match(appSource, /查看更多来源（剩余 \$\{remaining\}）/u);
+  assert.match(appSource, /dataset\.collapseSource = "true"/u);
+  assert.match(appSource, /closeOtherMobileSourceDrawers\(row\)/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content count"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-row: 2;[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
   assert.doesNotMatch(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*display: none/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-count\.is-strong\s*\{[\s\S]*background: transparent;[\s\S]*color: var\(--muted\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\.rank-top-1,[\s\S]*\.rank-row\.rank-top-2,[\s\S]*\.rank-row\.rank-top-3\s*\{[\s\S]*border-left-color: transparent;/u);
+  assert.match(cssSource, /\.filter-count\[hidden\]\s*\{[\s\S]*display: none;/u);
 });
 
 test("search suggestions highlight safely without assigning untrusted innerHTML", () => {
@@ -66,6 +73,8 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /summary-metrics/u);
   assert.match(appSource, /variant === "top"[\s\S]*`\$\{pageInfo\.startIndex \+ 1\}-\$\{pageInfo\.endIndex\} \/ \$\{pageInfo\.total\}/u);
   assert.match(appSource, /const compactTop = isMobileViewport\(\)/u);
+  assert.match(appSource, /renderPageButton\("上一页"[\s\S]*\{ icon: "prev" \}/u);
+  assert.match(appSource, /renderPageButton\("下一页"[\s\S]*\{ icon: "next" \}/u);
   assert.match(appSource, /if \(!compactTop\) controls\.append\(renderPageJumpControl\(pageInfo\)\)/u);
   assert.match(appSource, /function renderPageJumpControl/u);
 });

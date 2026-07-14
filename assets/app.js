@@ -20,7 +20,8 @@ const INLINE_SOURCE_PREVIEW_LIMIT = 1;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SOURCE_INITIAL_LIMIT = 3;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 10;
-const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 5;
+const SOURCE_MOBILE_GROUP_INITIAL_LIMIT = 3;
+const SOURCE_MOBILE_GROUP_BATCH_SIZE = 3;
 const LIST_PAGE_SIZE_OPTIONS = [50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
 const VIDEO_PAGE_SIZE = 24;
@@ -587,6 +588,13 @@ function bindEvents() {
       return;
     }
 
+    const sourceCollapse = event.target.closest("[data-collapse-source]");
+    if (sourceCollapse) {
+      event.preventDefault();
+      collapseSourceDrawer(sourceCollapse.closest(".rank-row, .index-row"), { keepVisible: true });
+      return;
+    }
+
     const sourceTimes = event.target.closest("[data-toggle-source-times]");
     if (sourceTimes) {
       event.preventDefault();
@@ -1067,7 +1075,7 @@ function syncFilterButtonCount() {
   for (const badge of [els.filterCountBadge, els.mobileFilterCountBadge]) {
     if (!badge) continue;
     badge.hidden = count <= 0;
-    badge.textContent = String(count);
+    badge.textContent = count > 0 ? String(count) : "";
   }
 }
 
@@ -2742,11 +2750,11 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
     if (!showPageControls) return footer;
     const compactTop = isMobileViewport();
     controls.append(
-      renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1),
-      renderPageStatus(pageInfo, { compact: true }),
+      renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, compactTop ? { icon: "prev" } : {}),
+      renderPageStatus(pageInfo, { compact: compactTop }),
     );
     if (!compactTop) controls.append(renderPageJumpControl(pageInfo));
-    controls.append(renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount));
+    controls.append(renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, compactTop ? { icon: "next" } : {}));
     footer.append(controls);
     return footer;
   }
@@ -2807,15 +2815,31 @@ function renderPageSizeControl() {
   return group;
 }
 
-function renderPageButton(label, page, disabled, isCurrent = false) {
+function renderPageButton(label, page, disabled, isCurrent = false, options = {}) {
   const button = document.createElement("button");
   button.className = isCurrent ? "pagination-button is-current" : "pagination-button";
   button.type = "button";
   button.dataset.page = String(page);
   button.disabled = disabled;
   if (isCurrent) button.setAttribute("aria-current", "page");
-  button.textContent = label;
+  if (options.icon) {
+    button.classList.add("pagination-icon-button");
+    button.setAttribute("aria-label", label);
+    button.append(renderPaginationIcon(options.icon));
+  } else {
+    button.textContent = label;
+  }
   return button;
+}
+
+function renderPaginationIcon(direction) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", direction === "prev" ? "m15 18-6-6 6-6" : "m9 6 6 6-6 6");
+  svg.append(path);
+  return svg;
 }
 
 function renderPageStatus(pageInfo, options = {}) {
@@ -3160,7 +3184,8 @@ function renderRankRecord({
   const rowKey = makeDomId(key);
   const drawerId = `source-drawer-${rowKey}`;
   const artistSongCount = songCount;
-  const expandable = mode === "artist" ? artistSongCount > 1 || occurrences.length > 1 : occurrences.length > 1;
+  const sourceVideoCount = mode === "artist" ? videoCount : window.FrontendUtils.groupOccurrencesByVideo(occurrences).length;
+  const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 : sourceVideoCount > 1;
   const isExpanded = state.expandedRows.has(rowKey);
 
   row.className = [
@@ -3200,7 +3225,8 @@ function renderIndexRecord(record) {
   const row = document.createElement("article");
   const rowKey = makeDomId(`index-${record.key}`);
   const drawerId = `source-drawer-${rowKey}`;
-  const expandable = record.occurrences.length > 1;
+  const sourceVideoCount = window.FrontendUtils.groupOccurrencesByVideo(record.occurrences).length;
+  const expandable = sourceVideoCount > 1;
   const isExpanded = state.expandedRows.has(rowKey);
 
   row.className = ["index-row", expandable ? "is-expandable" : "", isExpanded ? "is-expanded" : "", isNicheRecord(record) ? "is-niche" : ""]
@@ -3342,7 +3368,8 @@ function appendSublineSource(container, { mode, occurrences, drawerId, isExpande
     appendSublinePart(container, "无来源");
     return;
   }
-  if (occurrences.length === 1) {
+  const groupedSources = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  if (groupedSources.length <= 1) {
     appendSublineNode(container, renderInlineSource(occurrences[0]));
     return;
   }
@@ -3350,7 +3377,6 @@ function appendSublineSource(container, { mode, occurrences, drawerId, isExpande
   const sourcePreview = window.FrontendUtils.buildSourcePreview(occurrences, {
     limit: INLINE_SOURCE_PREVIEW_LIMIT,
   });
-  const groupedSources = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   const button = renderSourceToggleButton({
     mode,
     drawerId,
@@ -3479,21 +3505,50 @@ function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] 
 function appendSourceDrawerLinks(drawer, occurrences) {
   drawer._sourceOccurrences = occurrences;
   const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
-  const showAllGroups = drawer.dataset.videoGroupsExpanded === "true" || !isMobileViewport();
-  const visibleGroups = showAllGroups ? groups : groups.slice(0, SOURCE_MOBILE_GROUP_INITIAL_LIMIT);
+  drawer._sourceGroups = groups;
+  const visibleCount = drawer.classList.contains("source-drawer") ? sourceVisibleGroupCount(drawer, groups.length) : groups.length;
+  const visibleGroups = groups.slice(0, visibleCount);
 
   for (const group of visibleGroups) {
     drawer.append(renderSourceVideoGroup(group));
   }
 
   if (groups.length > visibleGroups.length) {
+    const remaining = groups.length - visibleGroups.length;
     const more = document.createElement("button");
     more.className = "source-group-more";
     more.type = "button";
     more.dataset.toggleSourceGroups = "true";
-    more.textContent = `显示其余 ${groups.length - visibleGroups.length} 个视频`;
+    more.textContent = `查看更多来源（剩余 ${remaining}）`;
     drawer.append(more);
   }
+
+  appendMobileSourceCollapse(drawer);
+}
+
+function sourceVisibleGroupCount(drawer, total) {
+  if (!isMobileViewport()) return total;
+  const parsed = Number.parseInt(drawer.dataset.visibleSourceGroups || "", 10);
+  const requested = Number.isFinite(parsed) && parsed > 0 ? parsed : SOURCE_MOBILE_GROUP_INITIAL_LIMIT;
+  const visibleCount = Math.min(total, Math.max(SOURCE_MOBILE_GROUP_INITIAL_LIMIT, requested));
+  drawer.dataset.visibleSourceGroups = String(visibleCount);
+  return visibleCount;
+}
+
+function appendMobileSourceCollapse(drawer) {
+  if (!isMobileViewport() || !drawer.classList.contains("source-drawer")) return;
+  const mode = drawer.dataset.sourceMode || "song";
+  drawer.append(renderSourceCollapseButton(drawer.id, mode));
+}
+
+function renderSourceCollapseButton(drawerId, mode = "song") {
+  const button = document.createElement("button");
+  button.className = "source-collapse-bottom";
+  button.type = "button";
+  button.dataset.collapseSource = "true";
+  button.setAttribute("aria-controls", drawerId);
+  button.textContent = mode === "artist" ? "收起曲目" : "收起来源";
+  return button;
 }
 
 function renderSourceVideoGroup(group) {
@@ -3507,7 +3562,7 @@ function renderSourceVideoGroup(group) {
   titleWrap.className = "source-video-title-wrap";
   const title = document.createElement("a");
   title.className = "source-video-title";
-  title.href = youtubeTimeUrl(group.item?.videoId || group.videoId, group.firstSeconds || 0);
+  title.href = youtubeTimeUrl(group.item?.videoId || group.videoId, 0);
   title.target = "_blank";
   title.rel = "noreferrer";
   title.textContent = group.title || group.videoId || "来源视频";
@@ -3522,13 +3577,6 @@ function renderSourceVideoGroup(group) {
 
   const actions = document.createElement("div");
   actions.className = "source-video-actions";
-  const open = document.createElement("a");
-  open.className = "source-action";
-  open.href = group.item?.videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(group.item.videoId)}` : title.href;
-  open.target = "_blank";
-  open.rel = "noreferrer";
-  open.textContent = "打开视频";
-  actions.append(open);
   actions.append(renderCopySetlistButton(group.item, "复制歌单", "source-action source-copy"));
   header.append(actions);
   section.append(header);
@@ -3564,20 +3612,14 @@ function renderSourceTimestampLink(occurrence) {
   link.target = "_blank";
   link.rel = "noreferrer";
 
-  const time = document.createElement("span");
-  time.className = "time";
-  time.textContent = occurrence.song.time || formatSeconds(occurrence.song.seconds);
-
-  const song = document.createElement("span");
-  song.className = "source-song";
-  song.textContent = cleanText(occurrence.song.title) || "未命名歌曲";
-
-  const artist = document.createElement("span");
-  artist.className = "source-artist";
-  artist.textContent = cleanText(occurrence.song.artist);
-
-  link.append(time, song);
-  if (artist.textContent) link.append(artist);
+  const timeText = occurrence.song.time || formatSeconds(occurrence.song.seconds);
+  const songTitle = cleanText(occurrence.song.title) || "未命名歌曲";
+  const artist = cleanText(occurrence.song.artist);
+  const channel = cleanText(occurrence.item.channelName);
+  link.textContent = timeText;
+  const context = [songTitle, artist, channel, timeText].filter(Boolean).join(" · ");
+  link.title = context;
+  link.setAttribute("aria-label", `打开时间戳：${context}`);
   return link;
 }
 
@@ -3653,20 +3695,44 @@ function appendArtistSongGroups(drawer, songGroups) {
     more.textContent = `显示其余 ${songGroups.length - visibleGroups.length} 首`;
     drawer.append(more);
   }
+
+  appendMobileSourceCollapse(drawer);
 }
 
 function toggleSourceDrawer(row) {
   if (!row) return;
   const drawer = row.querySelector(".source-drawer");
+  const nextExpanded = Boolean(drawer?.hidden);
+  if (nextExpanded && isMobileViewport()) closeOtherMobileSourceDrawers(row);
+  setSourceDrawerExpanded(row, nextExpanded);
+}
+
+function collapseSourceDrawer(row, options = {}) {
+  setSourceDrawerExpanded(row, false, options);
+}
+
+function closeOtherMobileSourceDrawers(currentRow) {
+  const rows = els.content?.querySelectorAll(".rank-row.is-expanded, .index-row.is-expanded") || [];
+  for (const row of rows) {
+    if (row !== currentRow) setSourceDrawerExpanded(row, false);
+  }
+}
+
+function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
+  if (!row) return;
+  const drawer = row.querySelector(".source-drawer");
   const buttons = Array.from(row.querySelectorAll("[data-toggle-source]"));
   if (!drawer || !buttons.length) return;
 
-  const nextExpanded = drawer.hidden;
-  if (nextExpanded && drawer.dataset.sourceDeferred === "true") {
+  if (nextExpanded && (drawer.dataset.sourceDeferred === "true" || isMobileViewport())) {
     const mode = row.dataset.drawerMode || drawer.dataset.sourceMode || "song";
     const songGroups =
       mode === "artist" ? row._artistSongGroups || row._getArtistSongGroups?.() || [] : row._artistSongGroups || [];
     if (mode === "artist") row._artistSongGroups = songGroups;
+    if (isMobileViewport()) {
+      delete drawer.dataset.visibleSourceGroups;
+      delete drawer.dataset.videoGroupsExpanded;
+    }
     drawer.replaceChildren();
     appendSourceDrawerContent(drawer, {
       mode,
@@ -3705,6 +3771,18 @@ function toggleSourceDrawer(row) {
   } else {
     state.expandedRows.delete(row.dataset.rowKey);
   }
+
+  if (!nextExpanded && options.keepVisible) {
+    window.requestAnimationFrame(() => keepSourceRowVisible(row));
+  }
+}
+
+function keepSourceRowVisible(row) {
+  if (!row || !document.contains(row)) return;
+  const rect = row.getBoundingClientRect();
+  const topLimit = controlsHeightPx() + 8;
+  const bottomLimit = window.innerHeight - (isMobileViewport() ? 76 : 16);
+  if (rect.top < topLimit || rect.bottom > bottomLimit) scrollToElement(row);
 }
 
 function toggleArtistSongLimit(row) {
@@ -3737,10 +3815,12 @@ function expandSourceGroupTimestamps(button) {
 }
 
 function expandSourceVideoGroups(button) {
-  const drawer = button.closest(".source-drawer");
+  const drawer = button.closest(".artist-song-sources, .source-drawer");
   if (!drawer) return;
   const occurrences = drawer._sourceOccurrences || [];
-  drawer.dataset.videoGroupsExpanded = "true";
+  const groups = drawer._sourceGroups || window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  const current = sourceVisibleGroupCount(drawer, groups.length);
+  drawer.dataset.visibleSourceGroups = String(Math.min(groups.length, current + SOURCE_MOBILE_GROUP_BATCH_SIZE));
   drawer.replaceChildren();
   appendSourceDrawerLinks(drawer, occurrences);
 }

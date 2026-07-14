@@ -636,14 +636,15 @@
     if (mode === "artist") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
       return {
-        text: compact ? (isExpanded ? "收起" : "展开") : isExpanded ? "收起曲目" : `查看${songCount}首`,
+        text: isExpanded ? "收起曲目" : compact ? `${songCount}首曲目` : `查看${songCount}首`,
         ariaLabel: isExpanded ? "收起该歌手曲目" : `查看该歌手的 ${songCount} 首歌曲`,
       };
     }
 
     const videoCount = Math.max(0, Number(options.videoCount) || 0);
     const occurrenceCount = Math.max(0, Number(options.occurrenceCount ?? options.total) || 0);
-    const text = compact ? (isExpanded ? "收起" : "展开") : isExpanded ? "收起" : videoCount > 1 ? `查看${videoCount}个视频` : `查看${occurrenceCount}个时间戳`;
+    const sourceCount = videoCount || occurrenceCount;
+    const text = isExpanded ? "收起来源" : compact ? `${sourceCount}个来源` : videoCount > 1 ? `查看${videoCount}个视频` : `查看${occurrenceCount}个时间戳`;
     const ariaLabel = isExpanded
       ? "收起该歌曲来源"
       : videoCount > 1

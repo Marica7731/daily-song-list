@@ -161,6 +161,10 @@ test("artist rank toggle uses unique song count", () => {
   assert.equal(collapsed.text, "查看5首");
   assert.equal(collapsed.ariaLabel, "查看该歌手的 5 首歌曲");
 
+  const compact = rankToggleModel({ mode: "artist", isExpanded: false, songCount: 5, compact: true });
+  assert.equal(compact.text, "5首曲目");
+  assert.equal(compact.ariaLabel, "查看该歌手的 5 首歌曲");
+
   const expanded = rankToggleModel({ mode: "artist", isExpanded: true, songCount: 5 });
   assert.equal(expanded.text, "收起曲目");
   assert.equal(expanded.ariaLabel, "收起该歌手曲目");
@@ -176,11 +180,11 @@ test("song rank toggle uses video and timestamp counts", () => {
   assert.equal(sameVideo.ariaLabel, "查看该歌曲的 4 个时间戳");
 
   const compact = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 3, occurrenceCount: 8, compact: true });
-  assert.equal(compact.text, "展开");
+  assert.equal(compact.text, "3个来源");
   assert.equal(compact.ariaLabel, "查看该歌曲的 3 个来源视频");
 
   const expanded = rankToggleModel({ mode: "song", isExpanded: true, hiddenCount: 3 });
-  assert.equal(expanded.text, "收起");
+  assert.equal(expanded.text, "收起来源");
   assert.equal(expanded.ariaLabel, "收起该歌曲来源");
 });
 

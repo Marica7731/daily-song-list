@@ -374,6 +374,10 @@ svg {
   line-height: 1;
 }
 
+.filter-count[hidden] {
+  display: none;
+}
+
 .niche-toggle {
   display: inline-flex;
   align-items: center;
@@ -1222,6 +1226,16 @@ mark {
   line-height: 1;
 }
 
+.pagination-button svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.2;
+}
+
 .page-size-button {
   min-width: 72px;
   border-color: transparent;
@@ -1397,6 +1411,7 @@ mark {
 }
 
 .source-video-title {
+  display: -webkit-box;
   min-width: 0;
   overflow: hidden;
   color: var(--ink);
@@ -1405,6 +1420,8 @@ mark {
   line-height: 1.3;
   text-decoration: none;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .source-video-channel {
@@ -1427,6 +1444,7 @@ mark {
 .source-action,
 .source-time-more,
 .source-group-more,
+.source-collapse-bottom,
 .video-copy-setlist {
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -1443,6 +1461,7 @@ mark {
 .source-action:hover,
 .source-time-more:hover,
 .source-group-more:hover,
+.source-collapse-bottom:hover,
 .video-copy-setlist:hover {
   background: var(--accent-soft);
   color: var(--accent-strong);
@@ -1457,6 +1476,13 @@ mark {
 
 .source-group-more {
   justify-self: start;
+}
+
+.source-collapse-bottom {
+  justify-self: stretch;
+  min-height: 36px;
+  margin-top: 2px;
+  color: var(--muted);
 }
 
 .manual-copy-textarea {
@@ -1502,9 +1528,7 @@ mark {
 }
 
 .source-link {
-  display: inline-grid;
-  grid-template-columns: auto minmax(0, auto) minmax(0, auto);
-  gap: 5px;
+  display: inline-flex;
   align-items: center;
   min-width: 0;
   max-width: 100%;
@@ -1512,10 +1536,12 @@ mark {
   border-radius: 999px;
   padding: 3px 7px;
   background: #f8fafc;
-  color: var(--muted);
+  color: var(--accent);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .source-link:hover {
@@ -2026,7 +2052,7 @@ mark {
   .layout {
     width: calc(100% - 16px);
     margin-bottom: 0;
-    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
   }
 
   .controls {
@@ -2198,10 +2224,22 @@ mark {
 
   .pagination-top .pagination-button,
   .pagination-top .pagination-status {
-    min-width: 36px;
-    min-height: 34px;
+    min-width: 40px;
+    min-height: 40px;
     padding: 0 8px;
     font-size: 12px;
+  }
+
+  .pagination-top .pagination-icon-button {
+    flex: 0 0 40px;
+    width: 40px;
+    padding: 0;
+  }
+
+  .pagination-top .pagination-status {
+    flex: 1 1 auto;
+    color: var(--muted);
+    font-size: 13px;
   }
 
   .pagination-bottom {
@@ -2251,6 +2289,12 @@ mark {
     column-gap: 8px;
     padding: 8px;
     contain-intrinsic-size: auto 72px;
+  }
+
+  .rank-row.rank-top-1,
+  .rank-row.rank-top-2,
+  .rank-row.rank-top-3 {
+    border-left-color: transparent;
   }
 
   .rank-number {
@@ -2321,6 +2365,16 @@ mark {
     justify-self: start;
   }
 
+  .rank-row.is-expanded .source-line .source-preview-list,
+  .index-row.is-expanded .source-line .source-preview-list {
+    display: none;
+  }
+
+  .rank-row.is-expanded .source-line,
+  .index-row.is-expanded .source-line {
+    max-width: 100%;
+  }
+
   .source-line .source-preview-list {
     flex: 0 1 auto;
     max-width: calc(100% - 54px);
@@ -2348,8 +2402,14 @@ mark {
     max-width: 56px;
     padding: 6px 0 0;
     background: transparent;
+    color: var(--muted);
     font-size: 12px;
     font-weight: 700;
+  }
+
+  .rank-count.is-strong {
+    background: transparent;
+    color: var(--muted);
   }
 
   .rank-count-value {
@@ -2378,6 +2438,55 @@ mark {
     margin-top: 8px;
     padding: 8px 0 0;
     border-top: 1px solid var(--line);
+  }
+
+  .source-video-group {
+    gap: 6px;
+    border-radius: 0;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+  }
+
+  .source-video-group:last-of-type {
+    border-bottom: 0;
+  }
+
+  .source-video-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .source-video-title {
+    font-size: 12.5px;
+    line-height: 1.32;
+  }
+
+  .source-video-actions {
+    align-self: start;
+  }
+
+  .source-copy {
+    min-height: 30px;
+    padding: 3px 7px;
+  }
+
+  .source-timestamps {
+    gap: 4px;
+  }
+
+  .source-link {
+    padding: 3px 6px;
+    background: #f8fafc;
+    font-size: 11.5px;
+  }
+
+  .source-group-more,
+  .source-time-more,
+  .source-collapse-bottom {
+    min-height: 36px;
+    border-color: transparent;
+    background: #f8fafc;
   }
 
   .video-grid {

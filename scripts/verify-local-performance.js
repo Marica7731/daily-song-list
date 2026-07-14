@@ -104,6 +104,29 @@ async function setCheckbox(page, selector, checked) {
   if ((await checkbox.isChecked()) !== checked) throw new Error(`${selector} did not become ${checked ? "checked" : "unchecked"}`);
 }
 
+async function readFilterBadgeState(page) {
+  return page.evaluate(() =>
+    Array.from(document.querySelectorAll("#filterCountBadge, #mobileFilterCountBadge")).map((node) => ({
+      id: node.id,
+      hidden: node.hidden,
+      display: getComputedStyle(node).display,
+      text: node.textContent || "",
+    })),
+  );
+}
+
+function assertBadgesHidden(badges, label) {
+  if (badges.some((badge) => !badge.hidden || badge.display !== "none" || badge.text === "0")) {
+    throw new Error(`${label} filter badges should be hidden when count is zero: ${JSON.stringify(badges)}`);
+  }
+}
+
+function assertBadgesVisible(badges, label) {
+  if (badges.some((badge) => badge.hidden || badge.display === "none" || !/^[1-9]\d*$/u.test(badge.text))) {
+    throw new Error(`${label} filter badges should show active count: ${JSON.stringify(badges)}`);
+  }
+}
+
 async function waitForPerformanceEntryIdle(page, name, idleMs = 300, timeoutMs = 5000) {
   const deadline = Date.now() + timeoutMs;
   let lastCount = -1;
@@ -145,8 +168,18 @@ async function assertUiShape(page, viewport, range) {
     const topPagination = rect(".pagination-top");
     const topJump = rect(".pagination-top .page-jump");
     const topPageSize = rect(".pagination-top .page-size-control");
-    const topControls = Array.from(document.querySelectorAll(".pagination-top .pagination-button, .pagination-top .pagination-status")).map((node) => node.textContent || "");
+    const topControls = Array.from(document.querySelectorAll(".pagination-top .pagination-button, .pagination-top .pagination-status")).map((node) => ({
+      text: node.textContent || "",
+      ariaLabel: node.getAttribute("aria-label") || "",
+      className: node.className || "",
+    }));
     const bottomJump = rect(".pagination-bottom .page-jump");
+    const filterBadges = Array.from(document.querySelectorAll("#filterCountBadge, #mobileFilterCountBadge")).map((node) => ({
+      id: node.id,
+      hidden: node.hidden,
+      display: getComputedStyle(node).display,
+      text: node.textContent || "",
+    }));
     const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row), .index-row, .video-card"));
     const fullyVisibleRows = rows.filter((node) => {
       const box = node.getBoundingClientRect();
@@ -157,6 +190,14 @@ async function assertUiShape(page, viewport, range) {
       return { text: node.textContent || "", width: box.width, display: getComputedStyle(node).display };
     });
     const rankCount = rect(".rank-count");
+    const strongCount = document.querySelector(".rank-count.is-strong") || document.querySelector(".rank-count");
+    const rankCountStyle = strongCount
+      ? {
+          backgroundColor: getComputedStyle(strongCount).backgroundColor,
+          color: getComputedStyle(strongCount).color,
+          borderRadius: getComputedStyle(strongCount).borderRadius,
+        }
+      : null;
     const rankSubline = rect(".rank-subline");
     return {
       width,
@@ -171,8 +212,10 @@ async function assertUiShape(page, viewport, range) {
       topPageSize,
       topControls,
       bottomJump,
+      filterBadges,
       fullyVisibleRows,
       rankCount,
+      rankCountStyle,
       rankSubline,
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
@@ -193,6 +236,22 @@ async function assertUiShape(page, viewport, range) {
     if (result.topJump || result.topPageSize) throw new Error(`mobile top pagination includes jump/page size ${JSON.stringify(result)}`);
     if (result.topControls.length && result.topControls.length !== 3) {
       throw new Error(`mobile top pagination should expose prev/status/next only ${JSON.stringify(result.topControls)}`);
+    }
+    if (
+      result.topControls.length === 3 &&
+      (result.topControls[0].text.trim() ||
+        result.topControls[2].text.trim() ||
+        result.topControls[0].ariaLabel !== "上一页" ||
+        result.topControls[2].ariaLabel !== "下一页" ||
+        !/^\d+\/\d+$/u.test(result.topControls[1].text.trim()))
+    ) {
+      throw new Error(`mobile top pagination should use icon buttons plus compact status ${JSON.stringify(result.topControls)}`);
+    }
+    if (result.filterBadges.some((badge) => !badge.hidden || badge.display !== "none" || badge.text === "0")) {
+      throw new Error(`inactive filter badge is visible ${JSON.stringify(result.filterBadges)}`);
+    }
+    if (result.rankCountStyle && !/rgba\(0,\s*0,\s*0,\s*0\)|transparent/u.test(result.rankCountStyle.backgroundColor)) {
+      throw new Error(`mobile rank count should not use a filled pill ${JSON.stringify(result.rankCountStyle)}`);
     }
     if (result.topPagination && result.topPagination.height > 52) throw new Error(`mobile top pagination too tall ${result.topPagination.height}`);
     if (viewport[0] >= 390 && result.fullyVisibleRows < 5) throw new Error(`mobile visible rows below target: ${result.fullyVisibleRows}`);
@@ -274,6 +333,7 @@ async function interactionFlow(browser) {
   page.on("request", (request) => requests.push(requestPath(request.url())));
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await waitForRows(page, errors, requests);
+  assertBadgesHidden(await readFilterBadgeState(page), "initial");
   await page.locator('[data-range="1m"]').click();
   await waitForRows(page, errors, requests);
   if (!requests.some((item) => runtimePathPattern("1m").test(item))) throw new Error("range switch did not load monthly runtime");
@@ -285,6 +345,7 @@ async function interactionFlow(browser) {
   await setCheckbox(page, "#nicheOnlyToggle", true);
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
+  assertBadgesVisible(await readFilterBadgeState(page), "filtered");
   await openFilterSheet(page);
   await page.locator("#metricFilterGroup label").filter({ hasText: "按视频" }).click();
   await page.locator("#applyFiltersButton").click();
@@ -295,6 +356,7 @@ async function interactionFlow(browser) {
   await page.locator("#metricFilterGroup label").filter({ hasText: "按收录" }).click();
   await page.locator("#applyFiltersButton").click();
   await waitForRows(page, errors, requests);
+  assertBadgesHidden(await readFilterBadgeState(page), "reset");
   const buildSongRecordCountBeforeSource = await waitForPerformanceEntryIdle(page, "song-list:build-song-records");
   await page.locator("[data-toggle-source]").first().click();
   await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
@@ -351,22 +413,35 @@ async function mobileSourceDrawerFlow(browser) {
   const { context, page, errors } = await newPage(browser, viewport);
   const requests = [];
   page.on("request", (request) => requests.push(requestPath(request.url())));
-  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+  const url = new URL(baseUrl);
+  url.searchParams.set("pageSize", "100");
+  url.searchParams.set("showUnknown", "1");
+  await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
   await waitForRows(page, errors, requests);
 
   const sourceRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
   const count = await sourceRows.count();
   if (count < 1) throw new Error("no expandable rank rows found for mobile source drawer");
-  const row = sourceRows.nth(Math.min(1, count - 1));
+
+  const selectedIndex = 0;
+  const row = sourceRows.first();
   const button = row.locator("[data-toggle-source]").first();
   const beforeExpanded = await button.getAttribute("aria-expanded");
-  if (beforeExpanded !== "false") throw new Error(`source toggle initial aria-expanded expected false, got ${beforeExpanded}`);
+  if (beforeExpanded !== "false") throw new Error(`first source toggle initial aria-expanded expected false, got ${beforeExpanded}`);
   await button.click();
+
   await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link", {
     timeout: 15000,
   });
   const afterExpanded = await button.getAttribute("aria-expanded");
   if (afterExpanded !== "true") throw new Error(`source toggle opened aria-expanded expected true, got ${afterExpanded}`);
+  if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 1) {
+    throw new Error("mobile source drawer should keep exactly one row expanded");
+  }
+  if ((await row.locator("[data-toggle-source-groups]").count()) < 1) throw new Error("first rank row should expose batched source groups");
+  if ((await countVisibleInRow(row, ".source-video-group")) !== 3) {
+    throw new Error("mobile source drawer should start with exactly 3 visible source video groups when more are available");
+  }
 
   const geometry = await row.evaluate((node) => {
     const rectFor = (target) => {
@@ -387,6 +462,7 @@ async function mobileSourceDrawerFlow(browser) {
         paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
         paddingRight: Number.parseFloat(style.paddingRight) || 0,
         borderLeft: Number.parseFloat(style.borderLeftWidth) || 0,
+        borderLeftColor: style.borderLeftColor,
         borderRight: Number.parseFloat(style.borderRightWidth) || 0,
       },
       drawer: drawer ? rectFor(drawer) : null,
@@ -398,6 +474,9 @@ async function mobileSourceDrawerFlow(browser) {
   });
   if (!geometry.drawer) throw new Error(`mobile source drawer missing ${JSON.stringify(geometry)}`);
   if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`mobile source drawer caused horizontal overflow ${JSON.stringify(geometry)}`);
+  if (geometry.rowBox.borderLeft > 0 && !/rgba\(0,\s*0,\s*0,\s*0\)|transparent/u.test(geometry.rowBox.borderLeftColor)) {
+    throw new Error(`top rank accent line should not continue through drawer on mobile ${JSON.stringify(geometry)}`);
+  }
   const expectedLeft = geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft;
   const expectedWidth = geometry.row.width - geometry.rowBox.borderLeft - geometry.rowBox.borderRight - geometry.rowBox.paddingLeft - geometry.rowBox.paddingRight;
   if (Math.abs(geometry.drawer.left - expectedLeft) > 3) {
@@ -413,12 +492,39 @@ async function mobileSourceDrawerFlow(browser) {
     throw new Error(`mobile source group shifted out of drawer ${JSON.stringify(geometry)}`);
   }
 
+  const sourceSemantics = await row.evaluate((node) => {
+    const title = node.querySelector(".source-video-title");
+    const timeLinks = Array.from(node.querySelectorAll(".source-time-link:not([hidden])"));
+    return {
+      titleHref: title?.href || "",
+      titleText: title?.textContent?.trim() || "",
+      titleHeight: title?.getBoundingClientRect().height || 0,
+      copiedButtons: node.querySelectorAll(".source-copy").length,
+      openVideoActions: Array.from(node.querySelectorAll(".source-action")).filter((action) => action.textContent.trim() === "打开视频").length,
+      badTimeText: timeLinks.map((link) => link.textContent.trim()).filter((text) => !/^\d{1,2}:\d{2}(?::\d{2})?$/u.test(text)),
+      missingTimeAria: timeLinks.filter((link) => !/打开时间戳：.+\d{1,2}:\d{2}/u.test(link.getAttribute("aria-label") || "")).length,
+      oldTimestampSpans: node.querySelectorAll(".source-time-link .source-song, .source-time-link .source-artist").length,
+    };
+  });
+  if (!sourceSemantics.titleHref || !/[?&]t=0s/u.test(sourceSemantics.titleHref)) {
+    throw new Error(`source video title should link to video start ${JSON.stringify(sourceSemantics)}`);
+  }
+  if (!sourceSemantics.copiedButtons) throw new Error(`source drawer missing compact copy setlist button ${JSON.stringify(sourceSemantics)}`);
+  if (sourceSemantics.openVideoActions) throw new Error(`mobile source drawer still renders large open video action ${JSON.stringify(sourceSemantics)}`);
+  if (sourceSemantics.badTimeText.length || sourceSemantics.missingTimeAria || sourceSemantics.oldTimestampSpans) {
+    throw new Error(`source timestamp labels should only show time while aria keeps context ${JSON.stringify(sourceSemantics)}`);
+  }
+  if (sourceSemantics.titleHeight > 44) throw new Error(`source video title exceeds compact two-line height ${JSON.stringify(sourceSemantics)}`);
+
   const moreGroups = row.locator("[data-toggle-source-groups]");
   if ((await moreGroups.count()) > 0) {
     const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
+    const moreText = (await moreGroups.first().textContent()) || "";
+    if (!/查看更多来源（剩余 \d+）/u.test(moreText)) throw new Error(`source group expander text invalid: ${moreText}`);
     await moreGroups.first().click();
     const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
     if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
+    if (afterGroupCount > beforeGroupCount + 3) throw new Error(`source group expander added more than one batch: before=${beforeGroupCount} after=${afterGroupCount}`);
   }
 
   const moreTimes = row.locator("[data-toggle-source-times]");
@@ -429,18 +535,49 @@ async function mobileSourceDrawerFlow(browser) {
     if (afterVisibleTimes <= beforeVisibleTimes) throw new Error("source timestamp expander did not add visible timestamps");
   }
 
-  await button.click();
+  const bottomScreenshotPath = path.join(screenshotDir, `source-drawer-bottom-${viewport.join("x")}.png`);
+  const collapseBottom = row.locator("[data-collapse-source]").last();
+  if ((await collapseBottom.count()) !== 1) throw new Error("mobile source drawer missing bottom collapse button");
+  await collapseBottom.scrollIntoViewIfNeeded();
+  const bottomCoverage = await page.evaluate(() => {
+    const collapse = document.querySelector(".rank-row.is-expanded [data-collapse-source]");
+    const nav = document.querySelector("#mobileBottomNav");
+    const collapseBox = collapse?.getBoundingClientRect();
+    const navBox = nav?.getBoundingClientRect();
+    return {
+      collapseBottom: collapseBox?.bottom || 0,
+      navTop: navBox?.top || window.innerHeight,
+      collapseHeight: collapseBox?.height || 0,
+    };
+  });
+  if (bottomCoverage.collapseHeight > 0 && bottomCoverage.collapseBottom > bottomCoverage.navTop - 4) {
+    throw new Error(`source bottom collapse is covered by mobile nav ${JSON.stringify(bottomCoverage)}`);
+  }
+  await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
+  await collapseBottom.click();
+  await page.waitForFunction((index) => document.querySelectorAll(".rank-row:not(.skeleton-row):has([data-toggle-source])")[index]?.classList.contains("is-expanded") === false, selectedIndex);
   const closedExpanded = await button.getAttribute("aria-expanded");
-  if (closedExpanded !== "false") throw new Error(`source toggle closed aria-expanded expected false, got ${closedExpanded}`);
+  if (closedExpanded !== "false") throw new Error(`source bottom collapse aria-expanded expected false, got ${closedExpanded}`);
+  if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 0) throw new Error("source bottom collapse left an expanded row");
 
   const screenshotPath = path.join(screenshotDir, `source-drawer-${viewport.join("x")}.png`);
   await button.click();
   await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden])", { timeout: 15000 });
   await page.screenshot({ path: screenshotPath, fullPage: false });
+  if (count > 1) {
+    const otherIndex = selectedIndex === 0 ? 1 : 0;
+    const otherRow = sourceRows.nth(otherIndex);
+    await otherRow.locator("[data-toggle-source]").first().click();
+    await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden])", { timeout: 15000 });
+    const expandedCount = await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count();
+    if (expandedCount !== 1) throw new Error(`mobile opening another row should leave one expanded row, got ${expandedCount}`);
+    const firstStillExpanded = await row.evaluate((node) => node.classList.contains("is-expanded"));
+    if (firstStillExpanded) throw new Error("mobile opening another row did not collapse the previous source drawer");
+  }
   const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
   await context.close();
   if (errors.length || unhandled) throw new Error(`mobile source drawer errors: ${errors.join(" | ")} ${unhandled}`);
-  results.push({ scenario: "mobile-source-drawer-390x844", requests: [...new Set(requests)], screenshotPath });
+  results.push({ scenario: "mobile-source-drawer-390x844", requests: [...new Set(requests)], screenshotPath, bottomScreenshotPath });
 }
 
 async function countVisibleInRow(row, selector) {
