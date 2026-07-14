@@ -636,13 +636,14 @@ async function interactionFlow(browser) {
     let options = [];
     for (const dateOption of dateOptions) {
       await selectSnapshotDate(page, dateOption);
-      await sleep(150);
+      await waitForRows(page, errors, requests);
       options = await page
         .locator("#snapshotSelect option")
         .evaluateAll((items) => items.map((item) => item.value).filter((value) => value !== "data/latest.json"));
       if (options.length) break;
     }
     if (!options.length) throw new Error("no historical snapshot options");
+    await page.waitForFunction(() => document.querySelector("#snapshotSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
     await page.selectOption("#snapshotSelect", options[0]);
     await waitForRows(page, errors, requests);
     const search = await page.evaluate(() => window.location.search);
