@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T08:39:21.763Z",
+  "generatedAt": "2026-07-14T14:26:23.455Z",
   "reviewId": "review:8ttj1Hk8yrY:002d5fdb6bd9304a9ea4",
   "video": {
     "videoId": "8ttj1Hk8yrY",
@@ -11,17 +11,18 @@
   "source": {
     "sourceId": "UgwRknRSGTEMqw_gCOt4AaABAg",
     "sourceHash": "002d5fdb6bd9304a9ea4e0cf1f40d7ae5bc6cbe908edb7e9aab3cd62bcf3fbfb",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "3:34　ほんまやで☆なんでやねん☆しらんけど\n9:29 マリアージュ\n17:17 モーニングムーン",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 17,
+    "riskScore": 23,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_unknown_artists"
+      "source_multiple_unknown_artists",
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -43,8 +44,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -57,16 +57,15 @@
       "rawHash": "966bca2b9ba5091d6c67d8bed90f9a9160ae93bebb21d5f604cb5a18236931d7",
       "sourceId": "UgwRknRSGTEMqw_gCOt4AaABAg",
       "sourceHash": "002d5fdb6bd9304a9ea4e0cf1f40d7ae5bc6cbe908edb7e9aab3cd62bcf3fbfb",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -78,16 +77,15 @@
       "rawHash": "ad53b0e27c87f8cd4a72ac948dd1376e73df9b01363410538edcfc7797190b53",
       "sourceId": "UgwRknRSGTEMqw_gCOt4AaABAg",
       "sourceHash": "002d5fdb6bd9304a9ea4e0cf1f40d7ae5bc6cbe908edb7e9aab3cd62bcf3fbfb",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T08:39:21.763Z",
+  "generatedAt": "2026-07-14T14:26:23.455Z",
   "reviewId": "review:VmLgly38CwY:13471331dc10d8e60dc6",
   "video": {
     "videoId": "VmLgly38CwY",
@@ -15,16 +15,14 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260714T060000Z"
+    "snapshotId": "20260714T140000Z"
   },
   "risk": {
-    "riskScore": 44,
-    "riskLevel": "medium",
+    "riskScore": 20,
+    "riskLevel": "low",
     "riskReasons": [
-      "niche_unknown_artist",
       "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles",
-      "short_unknown_title"
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -38,15 +36,16 @@
       "rawHash": "4b3ef27907049132dec03b202b906dae5cee865552db432001c7c5f374a7c59c",
       "sourceId": "selected:VmLgly38CwY:13471331dc10d8e6",
       "sourceHash": "13471331dc10d8e60dc6b22125eb1796cae49e721630a066561d3b96f25c93ac",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "known_song_unknown_artist"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",
@@ -436,16 +435,16 @@
       "rawHash": "a0a21597e845d7b9fac3ba6242262ce347da2914097e7b6fc8541550b728cb0a",
       "sourceId": "selected:VmLgly38CwY:13471331dc10d8e6",
       "sourceHash": "13471331dc10d8e60dc6b22125eb1796cae49e721630a066561d3b96f25c93ac",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
+        "known_song_unknown_artist"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song"
+      ]
     },
     {
       "status": "accepted",

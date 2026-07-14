@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T08:39:21.763Z",
+  "generatedAt": "2026-07-14T14:26:23.455Z",
   "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
   "video": {
     "videoId": "MrGxz0q6Py0",
@@ -18,12 +18,11 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 34,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
-      "niche_unknown_artist",
       "source_multiple_unknown_artists",
-      "source_multiple_niche_short_titles"
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -77,15 +76,20 @@
       "rawHash": "afb7beec123d81ff6cadc99dd38784169e01199a3649aebff5f0bc7ab3bf91b3",
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "isNiche": false,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "八月の夜",
+        "artist": "SILENT SIREN"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song",
+        "known_artist"
+      ]
     },
     {
       "status": "accepted",
@@ -237,15 +241,20 @@
       "rawHash": "bed992b53d7355ebad055dcc9a8381d6ab82daf126a11cc02b340cfe28f0e199",
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "isNiche": false,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "パラソルサイダー",
+        "artist": "ナナホシ管弦楽団"
+      },
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song",
+        "known_artist"
+      ]
     }
   ]
 }

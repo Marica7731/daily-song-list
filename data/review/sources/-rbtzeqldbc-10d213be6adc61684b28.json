@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T08:39:21.763Z",
+  "generatedAt": "2026-07-14T14:26:23.455Z",
   "reviewId": "review:-rbtzeqldbc:10d213be6adc61684b28",
   "video": {
     "videoId": "-rbtzeqldbc",
@@ -11,17 +11,17 @@
   "source": {
     "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
     "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "🖤本日のセットリスト໒꒱\r\n00:05:24 START\r\n00:11:03 [01] ビビデバ / 星街すいせい (2024) \r\n00:15:49 [02] ダーリン / 須田景凪 (2023) \r\n00:20:50 [03] 世界の約束 / 倍賞千恵子 (2004) アニメ映画「ハウルの動く城」主題歌\r\n00:28:06 [04] 悪魔の子 / ヒグチアイ (2022) アニメ「進撃の巨人 The Final Season Part 2」ED\r\n00:34:33 [05] 残酷な天使のテーゼ / 高橋洋子 (1995) アニメ「新世紀エヴァンゲリオン」OP\r\n00:42:14 [06] 涙そうそう / 森山良子,BEGIN (1998) \r\n00:52:25 [07] 六等星 / ざらめ (2023) \r\n00:59:10 [08] JANE DOE / 米津玄師×宇多田ヒカル (2025) アニメ映画「チェンソーマン レゼ篇」ED\r\n01:09:19 [09] 君の知らない物語 / supercell (2009) アニメ「化物語」ED\r\n01:18:51 [10] 夜に駆ける / YOASOBI (2019)\r\n01:30:31 [11] Season / 瀧川ありさ (2015) アニメ「七つの大罪」ED\r\n01:44:25 [12] シルシ / LiSA (2014) アニメ「ソードアート・オンラインⅡ」ED\r\n01:51:51 [13] ANIMA / ReoNa (2020) アニメ「ソードアート・オンライン アリシゼーション War of Underworld」OP\r\n02:01:45 [14] smile for you / ユナ(神田沙也加) (2017) アニメ映画「劇場版 ソードアート・オンライン -オーディナル・スケール-」挿入歌\r\n02:08:51 [15] 泥中に咲く / HarryP（針原翼) (2018) \r\n02:18:21 [EN1] ヒカリへ / miwa (2012) ドラマ「リッチマン、プアウーマン」主題歌\r\n02:25:58 [EN2] 贖罪 / 傘村トータ (2018) \r\n02:38:17 [EN3] 25時の情熱 / カンザキイオリ (2023) \r\n02:44:07 雑談&ENDING",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
     "riskScore": 14,
     "riskLevel": "low",
     "riskReasons": [
-      "source_many_topic_entries"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -42,8 +42,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -63,71 +62,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 1250,
-      "time": "0:20:50",
-      "title": "世界の約束",
-      "artist": "倍賞千恵子 (2004) アニメ映画「ハウルの動く城」主題歌",
-      "raw": "00:20:50 [03] 世界の約束 / 倍賞千恵子 (2004) アニメ映画「ハウルの動く城」主題歌",
-      "rawHash": "44a5a05baac55bc508c33cae3c013346313e9da2def11bdf761ca252be92b8bf",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 1686,
-      "time": "0:28:06",
-      "title": "悪魔の子",
-      "artist": "ヒグチアイ (2022) アニメ「進撃の巨人 The Final Season Part 2」ED",
-      "raw": "00:28:06 [04] 悪魔の子 / ヒグチアイ (2022) アニメ「進撃の巨人 The Final Season Part 2」ED",
-      "rawHash": "c7c8c9d5da9ae9801b813767470db4f4f399cf5ec61ea32ca7d9dfdc94365d7a",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 2073,
-      "time": "0:34:33",
-      "title": "残酷な天使のテーゼ",
-      "artist": "高橋洋子 (1995) アニメ「新世紀エヴァンゲリオン」OP",
-      "raw": "00:34:33 [05] 残酷な天使のテーゼ / 高橋洋子 (1995) アニメ「新世紀エヴァンゲリオン」OP",
-      "rawHash": "ff9e4f02e78932680dc46f1606d357b82685b1bd6eca51e4484ce957da3237a9",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -147,8 +82,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -168,29 +102,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 3550,
-      "time": "0:59:10",
-      "title": "JANE DOE",
-      "artist": "米津玄師×宇多田ヒカル (2025) アニメ映画「チェンソーマン レゼ篇」ED",
-      "raw": "00:59:10 [08] JANE DOE / 米津玄師×宇多田ヒカル (2025) アニメ映画「チェンソーマン レゼ篇」ED",
-      "rawHash": "8271165593c75a36a6cc5258b2218fd433c00cf82c8b8a2672ac69697534bd4f",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -210,8 +122,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -231,28 +142,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 5431,
-      "time": "1:30:31",
-      "title": "Season",
-      "artist": "瀧川ありさ (2015) アニメ「七つの大罪」ED",
-      "raw": "01:30:31 [11] Season / 瀧川ありさ (2015) アニメ「七つの大罪」ED",
-      "rawHash": "97417cdd029ba57a5a6153afbc4525271b0e62a8c473ae683ef1bcf08579d648",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -272,8 +162,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -293,29 +182,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 7305,
-      "time": "2:01:45",
-      "title": "smile for you",
-      "artist": "ユナ(神田沙也加) (2017) アニメ映画「劇場版 ソードアート・オンライン -オーディナル・スケール-」挿入歌",
-      "raw": "02:01:45 [14] smile for you / ユナ(神田沙也加) (2017) アニメ映画「劇場版 ソードアート・オンライン -オーディナル・スケール-」挿入歌",
-      "rawHash": "fcb8e3fbed351cd7931d2ee309af77d664b62b1efdd0bff0ddf7ddeb90b8392e",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -335,8 +202,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -349,14 +215,13 @@
       "rawHash": "0c8e834ce92fc82cd5428bb15d1d15382eae15375121ce1fdc0adcbf0d6c4f0d",
       "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
       "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -369,14 +234,13 @@
       "rawHash": "bbf15ea45836fbf4ecec248a4edc7dd402e1fc48cde7ec986eb73b5ea8afdd46",
       "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
       "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -389,48 +253,13 @@
       "rawHash": "c18b80acf4867440f8d296aa3203d91dbf3802a1e4b35ec7b7d69a6d4e4ac965",
       "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
       "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "obvious_non_song_text",
-      "seconds": 324,
-      "time": "0:05:24",
-      "title": "START",
-      "artist": "",
-      "raw": "00:05:24 START",
-      "rawHash": "847c64c82e364d83ddf56da0b9233d3b0526a1bae9cc481c08bf18359b77b916",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "obvious_non_song_text"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 9847,
-      "time": "2:44:07",
-      "title": "雑談&ENDING",
-      "artist": "未記載",
-      "raw": "02:44:07 雑談&ENDING",
-      "rawHash": "68655bac6d14bbd64894927b799a76122fab8dbc0e0a991cc6055118abc2c1b7",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
+        "known_artist"
       ]
     }
   ]

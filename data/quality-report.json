@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T08:39:21.763Z",
+  "generatedAt": "2026-07-14T14:26:23.455Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-  "totalSongs": 15312,
-  "unknownArtistCount": 2893,
-  "nicheUnknownArtistCount": 1526,
-  "highRiskEntryCount": 544,
-  "highRiskSourceCount": 20,
+  "totalSongs": 15944,
+  "unknownArtistCount": 2911,
+  "nicheUnknownArtistCount": 1487,
+  "highRiskEntryCount": 660,
+  "highRiskSourceCount": 23,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 7,
+  "ruleDroppedEntryCount": 2,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 22,
-  "parserCorruptionCount": 19,
-  "likelyNoiseCount": 0,
-  "needsReviewCount": 1387,
-  "likelySongCount": 9040,
+  "confirmedNoiseCount": 51,
+  "parserCorruptionCount": 21,
+  "likelyNoiseCount": 24,
+  "needsReviewCount": 1486,
+  "likelySongCount": 8947,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -74,6 +74,26 @@
       }
     },
     {
+      "value": "HOT LIMIT",
+      "count": 8,
+      "classifications": {
+        "likely_song": 8
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 8
+      }
+    },
+    {
+      "value": "ray",
+      "count": 8,
+      "classifications": {
+        "likely_song": 8
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 8
+      }
+    },
+    {
       "value": "ロミオとシンデレラ",
       "count": 8,
       "classifications": {
@@ -91,26 +111,6 @@
       },
       "riskReasons": {
         "known_song_unknown_artist": 8
-      }
-    },
-    {
-      "value": "HOT LIMIT",
-      "count": 7,
-      "classifications": {
-        "likely_song": 7
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 7
-      }
-    },
-    {
-      "value": "ray",
-      "count": 7,
-      "classifications": {
-        "likely_song": 7
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 7
       }
     },
     {
@@ -186,6 +186,16 @@
       }
     },
     {
+      "value": "ビビデバ",
+      "count": 6,
+      "classifications": {
+        "likely_song": 6
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 6
+      }
+    },
+    {
       "value": "怪獣の花唄",
       "count": 6,
       "classifications": {
@@ -206,17 +216,7 @@
       }
     },
     {
-      "value": "シュガーソングとビターステップ",
-      "count": 5,
-      "classifications": {
-        "likely_song": 5
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 5
-      }
-    },
-    {
-      "value": "ダーリンダンス",
+      "value": "Butter-Fly",
       "count": 5,
       "classifications": {
         "likely_song": 5
@@ -234,6 +234,14 @@
     {
       "value": "汐音ベリーちゃん Berry Ch",
       "count": 9
+    },
+    {
+      "value": "戌亥とこ -Inui Toko-",
+      "count": 9
+    },
+    {
+      "value": "長尾 景 / Nagao Kei【にじさんじ】",
+      "count": 7
     },
     {
       "value": "MUZU‐むずちゃんねる‐【Vtuber】",
@@ -276,10 +284,6 @@
       "count": 3
     },
     {
-      "value": "ただのかえる【TADANO KAERU】",
-      "count": 3
-    },
-    {
       "value": "ノア・ポラリス -Noa Polaris-",
       "count": 3
     },
@@ -300,11 +304,7 @@
       "count": 3
     },
     {
-      "value": "菜鳥ひなた / Hinata Natori",
-      "count": 3
-    },
-    {
-      "value": "獅子神レオナ/レオナちゃんねる",
+      "value": "鬼ヶ谷 テン / Onigaya Ten",
       "count": 3
     }
   ],
@@ -382,6 +382,60 @@
       ]
     },
     {
+      "videoId": "GkmXWhgz1QA",
+      "title": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ]
+    },
+    {
+      "videoId": "ajT_9l8g0pw",
+      "title": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "conversation_entry"
+      ]
+    },
+    {
+      "videoId": "ajT_9l8g0pw",
+      "title": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "riskScore": 98,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "G1fbvfswdbg",
+      "title": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "riskScore": 93,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ]
+    },
+    {
       "videoId": "DuDkasY22Mc",
       "title": "【 歌枠 / #karaoke 】RADWIMPSさんの曲だけをたんまり歌う会🦉 【羽緒 / RK Music】#羽緒集魂中 #vtuber #vsinger #歌枠",
       "channelName": "羽緒",
@@ -389,8 +443,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "source_multiple_niche_short_titles",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
       ]
     },
     {
@@ -505,20 +559,6 @@
       ]
     },
     {
-      "videoId": "hWv55PnjmEo",
-      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "riskScore": 78,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
       "videoId": "ZTi1cpRaW8U",
       "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
       "channelName": "闇咲とうか",
@@ -544,51 +584,18 @@
         "source_multiple_niche_short_titles",
         "short_unknown_title"
       ]
-    },
-    {
-      "videoId": "zAqcZDpOM1Q",
-      "title": "【雑＆歌枠】どでかいお知らせあります！！！！！！ハニカムステーション！-204【HACHI 】",
-      "channelName": "HACHI",
-      "riskScore": 76,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "short_unknown_title",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "n6EQoAdmQMA",
-      "title": "【朝活/雑談歌枠】初見歓迎✨️150人におはよう目標☀あなたのお姉さんアイドルVtuber🪼💜【天辻ゆらぐ/パレデミア学園】 #新人Vtuber #ゆらぐっどたいむ",
-      "channelName": "天辻 ゆらぐ",
-      "riskScore": 76,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "VE-1uMHoZh0",
-      "title": "12時間歌枠耐久！チャンネル登録者様450人！いいね50！目指すぞ！#新人vtuber #労働村の村人1",
-      "channelName": "労働村の村人1",
-      "riskScore": 74,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-14T14:26:23.455Z",
+      "totalSongs": 15944,
+      "unknownArtistCount": 2911,
+      "nicheUnknownArtistCount": 1487,
+      "highRiskEntryCount": 660,
+      "highRiskSourceCount": 23
+    },
     {
       "generatedAt": "2026-07-14T08:39:21.763Z",
       "totalSongs": 15312,
@@ -738,14 +745,6 @@
       "totalSongs": 13130,
       "unknownArtistCount": 2918,
       "nicheUnknownArtistCount": 1520,
-      "highRiskEntryCount": 427,
-      "highRiskSourceCount": 16
-    },
-    {
-      "generatedAt": "2026-07-12T21:32:53.123Z",
-      "totalSongs": 12846,
-      "unknownArtistCount": 2932,
-      "nicheUnknownArtistCount": 1525,
       "highRiskEntryCount": 427,
       "highRiskSourceCount": 16
     }

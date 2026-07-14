@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T14:26:23.455Z",
+  "reviewId": "review:G1fbvfswdbg:77998cc92a909d571091",
+  "video": {
+    "videoId": "G1fbvfswdbg",
+    "title": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+    "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+    "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg"
+  },
+  "source": {
+    "sourceId": "UgxnryG89exN0F48oGV4AaABAg",
+    "sourceHash": "77998cc92a909d5710919f3e550d2c5dfd4bdb4395dced76e92bcdd7890a6d99",
+    "sourceType": "comment",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "5:54  8:12 🎀  ⇔  1:22:34  1:23:17 ✨\n緑のギャップに鳥肌\n\n追記 8:12 「ね!!｣で傾くのやめてくださいもう私に笑いかけてね??と言われてる想像がもうできてダメです🙅‍♀️🙅‍♀️",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 6,
+    "riskLevel": "low",
+    "riskReasons": []
+  },
+  "entries": [
+    {
+      "status": "rejected",
+      "reason": "bad_title",
+      "seconds": 354,
+      "time": "0:05:54",
+      "title": "⇔",
+      "artist": "未記載",
+      "raw": "5:54 8:12 🎀 ⇔",
+      "rawHash": "c0197e02f2fb14f7de2a87060f5289bf66ffa591171f7a91ce0083638bfc4529",
+      "sourceId": "UgxnryG89exN0F48oGV4AaABAg",
+      "sourceHash": "77998cc92a909d5710919f3e550d2c5dfd4bdb4395dced76e92bcdd7890a6d99",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "bad_title"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 4954,
+      "time": "1:22:34",
+      "title": "",
+      "artist": "",
+      "raw": "1:22:34 1:23:17 ✨",
+      "rawHash": "f827ce7dbd1dea19792343ed575868abfcc1c17f155fa738bfb11b670c40505b",
+      "sourceId": "UgxnryG89exN0F48oGV4AaABAg",
+      "sourceHash": "77998cc92a909d5710919f3e550d2c5dfd4bdb4395dced76e92bcdd7890a6d99",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 492,
+      "time": "0:08:12",
+      "title": "「ね!!｣で傾くのやめてくださいもう私に笑いかけてね??と言われてる想像がもうできてダメです🙅♀🙅♀",
+      "artist": "未記載",
+      "raw": "追記 8:12 「ね!!｣で傾くのやめてくださいもう私に笑いかけてね??と言われてる想像がもうできてダメです🙅‍♀️🙅‍♀️",
+      "rawHash": "ef45fca07f5ba80a5eeee4342900c0432b82ab67f0bb5653c427af7398ed3e43",
+      "sourceId": "UgxnryG89exN0F48oGV4AaABAg",
+      "sourceHash": "77998cc92a909d5710919f3e550d2c5dfd4bdb4395dced76e92bcdd7890a6d99",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    }
+  ]
+}

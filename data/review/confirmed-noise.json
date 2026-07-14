@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T08:40:59.279Z",
+  "generatedAt": "2026-07-14T14:27:48.836Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-14T06:24:38.093Z",
+  "latestGeneratedAt": "2026-07-14T14:07:31.945Z",
   "curationVersion": "curation-v1:6193201176e1",
   "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
   "counts": {
-    "totalCandidates": 143,
-    "uniqueVideos": 41,
-    "uniqueSources": 59,
-    "confirmedNoiseCount": 143,
+    "totalCandidates": 172,
+    "uniqueVideos": 43,
+    "uniqueSources": 71,
+    "confirmedNoiseCount": 172,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 143,
+      "confirmed_noise": 172,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -352,46 +352,6 @@
       "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
     },
     {
-      "title": "Bewitched, Bothered, and Bewildered(Boz Scaggs)",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1560,
-      "time": "0:26:00",
-      "raw": "26:00 Bewitched, Bothered, and Bewildered(Boz Scaggs)",
-      "rawHash": "d6f0ecd041c6831695e8d94cf230721383fbdc1ee3e10544ebd1a4dd57238ee7",
-      "videoId": "YqcXUR52t0c",
-      "videoTitle": "【月〜木 深夜0時】寝落ち歌枠_20260714",
-      "channelName": "KAITOちゃんの音楽道",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=YqcXUR52t0c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YqcXUR52t0c&t=1560s",
-      "sourceId": "Ugz33lRQFp1dXKeD1Ph4AaABAg",
-      "sourceHash": "bbeb3af909da30cedfcc4b6263ad236a9992e503b6826de9a3966d2377d43eef",
-      "sourceOrigin": "review:YqcXUR52t0c-bbeb3af909da30cedfcc.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:YqcXUR52t0c:bbeb3af909da30cedfcc",
-      "sourcePath": "data/review/sources/YqcXUR52t0c-bbeb3af909da30cedfcc.json",
-      "reviewLocator": "data/review/sources/YqcXUR52t0c-bbeb3af909da30cedfcc.json#d6f0ecd041c6831695e8d94cf230721383fbdc1ee3e10544ebd1a4dd57238ee7"
-    },
-    {
       "title": "終わりのあいさつ",
       "artist": "未記載",
       "isNiche": true,
@@ -473,6 +433,41 @@
       "reviewId": "review:zREfHIYyb1M:94bf1eecf968bf5bd964",
       "sourcePath": "data/review/sources/history-zREfHIYyb1M-94bf1eecf968bf5bd964.json",
       "reviewLocator": "data/review/sources/history-zREfHIYyb1M-94bf1eecf968bf5bd964.json#48fea5b826b2e681e68b721a26940a22bdadf0a86ad15cefd603b5b1badf983a"
+    },
+    {
+      "title": "～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
+      "videoId": "VpYQ1YhbK58",
+      "videoTitle": "〖 歌枠￤弾き語り 〗ゆるく歌ってみたりする！🎸┊︎泡ノ音ポカ ⋰ #弾き語り #縦型配信 #karaoke",
+      "channelName": "Poka ch. 泡ノ音ポカ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=VpYQ1YhbK58",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=VpYQ1YhbK58&t=1350s",
+      "sourceId": "description:VpYQ1YhbK58:5d44a7135bb15e6a",
+      "sourceHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
+      "sourceOrigin": "review:VpYQ1YhbK58-5d44a7135bb15e6a43df.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:VpYQ1YhbK58:5d44a7135bb15e6a43df",
+      "sourcePath": "data/review/sources/VpYQ1YhbK58-5d44a7135bb15e6a43df.json",
+      "reviewLocator": "data/review/sources/VpYQ1YhbK58-5d44a7135bb15e6a43df.json#5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb"
     },
     {
       "title": "〜3Dライブ開催決定!!!!",
@@ -940,6 +935,76 @@
       "reviewId": "review:OCULwDtQ8Bs:a5f12251209c4a3d1b6a",
       "sourcePath": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json",
       "reviewLocator": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json#157a1fd8246db0b268cff62bf11c52381f7dbf657bc3a6342fe9372512776e0a"
+    },
+    {
+      "title": "～まったり🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～まったり🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515",
+      "videoId": "XivmPdczrtU",
+      "videoTitle": "【3D歌枠】アニサマ曲縛りで歌うよ！初見さんもおいで？💖 #アニサマ #karaoke",
+      "channelName": "こまいぬ🐶⛩🐶",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=XivmPdczrtU",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=XivmPdczrtU&t=1350s",
+      "sourceId": "description:XivmPdczrtU:132becd39bd29e7b",
+      "sourceHash": "132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515",
+      "sourceOrigin": "review:XivmPdczrtU-132becd39bd29e7b52fa.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:XivmPdczrtU:132becd39bd29e7b52fa",
+      "sourcePath": "data/review/sources/XivmPdczrtU-132becd39bd29e7b52fa.json",
+      "reviewLocator": "data/review/sources/XivmPdczrtU-132becd39bd29e7b52fa.json#132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515"
+    },
+    {
+      "title": "今すぐ会いた過ぎるこまちゃん好き笑",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 9230,
+      "time": "2:33:50",
+      "raw": "2:33:50 今すぐ会いた過ぎるこまちゃん好き笑",
+      "rawHash": "b8b74021f0495257f71e878c58edd34390dd3f964330b07aa9e5e5e288d7ec9e",
+      "videoId": "XivmPdczrtU",
+      "videoTitle": "【3D歌枠】アニサマ曲縛りで歌うよ！初見さんもおいで？💖 #アニサマ #karaoke",
+      "channelName": "こまいぬ🐶⛩🐶",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=XivmPdczrtU",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=XivmPdczrtU&t=9230s",
+      "sourceId": "Ugy0PCW8VdcOjfWQmzJ4AaABAg",
+      "sourceHash": "72a1caf32df86fdcc3ceafdaa959bce7d49f624e526e24449fd14c8ae47c3c62",
+      "sourceOrigin": "review:XivmPdczrtU-72a1caf32df86fdcc3ce.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:XivmPdczrtU:72a1caf32df86fdcc3ce",
+      "sourcePath": "data/review/sources/XivmPdczrtU-72a1caf32df86fdcc3ce.json",
+      "reviewLocator": "data/review/sources/XivmPdczrtU-72a1caf32df86fdcc3ce.json#b8b74021f0495257f71e878c58edd34390dd3f964330b07aa9e5e5e288d7ec9e"
     },
     {
       "title": "曲終わり",
@@ -3813,591 +3878,6 @@
       "reviewLocator": "data/review/sources/history-9hgQ0Qbv0iM-bde69793cef445c039d7.json#9d4f9fca8470dad9bb6c857e2fc1a04bd38153a2e1d4bbbc4f24a9a6d9607646"
     },
     {
-      "title": "Obstructed Calm",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 90,
-      "time": "0:01:30",
-      "raw": "00:01:30 Obstructed Calm",
-      "rawHash": "00031989ebf112f561b04f09b3710f38058e19e05171b7185d95a4b1357e25e5",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=90s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#00031989ebf112f561b04f09b3710f38058e19e05171b7185d95a4b1357e25e5"
-    },
-    {
-      "title": "Living Copy",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 840,
-      "time": "0:14:00",
-      "raw": "00:14:00 Living Copy",
-      "rawHash": "38306ae8ee87d2a9d9db054975ea14ad30dacbc9039a6d1ad5bd0d569fb3b399",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=840s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#38306ae8ee87d2a9d9db054975ea14ad30dacbc9039a6d1ad5bd0d569fb3b399"
-    },
-    {
-      "title": "Kindled Ridge",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 2950,
-      "time": "0:49:10",
-      "raw": "00:49:10 Kindled Ridge",
-      "rawHash": "6676b6902956dff5dc27b0ea32f41c3941a8a69ba1058e5c0fb7317408fccb26",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=2950s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#6676b6902956dff5dc27b0ea32f41c3941a8a69ba1058e5c0fb7317408fccb26"
-    },
-    {
-      "title": "Sacred Drain",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 5680,
-      "time": "1:34:40",
-      "raw": "01:34:40 Sacred Drain",
-      "rawHash": "40f0cd24d8c4523bd667ef18e552f55a5aa49b79df4ae825aac00bdb383e6270",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=5680s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#40f0cd24d8c4523bd667ef18e552f55a5aa49b79df4ae825aac00bdb383e6270"
-    },
-    {
-      "title": "Rough Edges of Liberty",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 12464,
-      "time": "3:27:44",
-      "raw": "03:27:44 Rough Edges of Liberty",
-      "rawHash": "6d35dd9aa90d8b12b18052859c14f493fda8f219f3c19706a8ad46ef6253f497",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=12464s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#6d35dd9aa90d8b12b18052859c14f493fda8f219f3c19706a8ad46ef6253f497"
-    },
-    {
-      "title": "Clay Credentials",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 15654,
-      "time": "4:20:54",
-      "raw": "04:20:54 Clay Credentials",
-      "rawHash": "55b4b63e985f10d2f0ef1cd0c6b2067d81aa9a47db59af543bb2e1956a59e53e",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=15654s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#55b4b63e985f10d2f0ef1cd0c6b2067d81aa9a47db59af543bb2e1956a59e53e"
-    },
-    {
-      "title": "Road of Forked Tongues",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 16311,
-      "time": "4:31:51",
-      "raw": "04:31:51 Road of Forked Tongues",
-      "rawHash": "fdc80c241beb447241dbfae9aea2dcd72c993c12174c6058fa463e02c601c581",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=16311s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#fdc80c241beb447241dbfae9aea2dcd72c993c12174c6058fa463e02c601c581"
-    },
-    {
-      "title": "Fo'c'sle Diary",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 23536,
-      "time": "6:32:16",
-      "raw": "06:32:16 Fo'c'sle Diary",
-      "rawHash": "5f802ed0038dcd65c625ea161eb6dc70a7d1f4dcd9b30712d145049ca8ed563c",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=23536s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#5f802ed0038dcd65c625ea161eb6dc70a7d1f4dcd9b30712d145049ca8ed563c"
-    },
-    {
-      "title": "Up From the Dust",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 26295,
-      "time": "7:18:15",
-      "raw": "07:18:15 Up From the Dust",
-      "rawHash": "6db1e60606de0572a633e86cefb73d19859aec65d2e4e83351ec260a11f8e2c3",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=26295s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#6db1e60606de0572a633e86cefb73d19859aec65d2e4e83351ec260a11f8e2c3"
-    },
-    {
-      "title": "Stibium Cage",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 31145,
-      "time": "8:39:05",
-      "raw": "08:39:05 Stibium Cage",
-      "rawHash": "6df1d0118134498dde83d66fadb421d67a194a25c0bee899042fe0aaeaf152ce",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=31145s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#6df1d0118134498dde83d66fadb421d67a194a25c0bee899042fe0aaeaf152ce"
-    },
-    {
-      "title": "Unpopular Remedy",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 31594,
-      "time": "8:46:34",
-      "raw": "08:46:34 Unpopular Remedy",
-      "rawHash": "1f10def3984b047db06b42ec38b92bb75d993155610132291efb3e69604a9605",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=31594s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#1f10def3984b047db06b42ec38b92bb75d993155610132291efb3e69604a9605"
-    },
-    {
-      "title": "Cytoplasmic Reader",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 33292,
-      "time": "9:14:52",
-      "raw": "09:14:52 Cytoplasmic Reader",
-      "rawHash": "7f88d9a07fc210c1343d7369090621d962660c7d8fffbaecd3c31083ea782312",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=33292s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#7f88d9a07fc210c1343d7369090621d962660c7d8fffbaecd3c31083ea782312"
-    },
-    {
-      "title": "Underworker's Sweet Bleed",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 33532,
-      "time": "9:18:52",
-      "raw": "09:18:52 Underworker's Sweet Bleed",
-      "rawHash": "52d7033acfff462796fcbb108ede9c6d4cf48ac9f9d876ef2ab26f415b36c8d2",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=33532s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#52d7033acfff462796fcbb108ede9c6d4cf48ac9f9d876ef2ab26f415b36c8d2"
-    },
-    {
-      "title": "Feeding Bottle Gleam",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 38848,
-      "time": "10:47:28",
-      "raw": "10:47:28 Feeding Bottle Gleam",
-      "rawHash": "d7aba3efcc181f1a6082c6ada91357160a63e4b1cb00ce5246962916e67cfdf7",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=38848s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#d7aba3efcc181f1a6082c6ada91357160a63e4b1cb00ce5246962916e67cfdf7"
-    },
-    {
-      "title": "Scrambled Kreplach",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 41106,
-      "time": "11:25:06",
-      "raw": "11:25:06 Scrambled Kreplach",
-      "rawHash": "af9743de21e69005e8b979a16751786451c4742b38f4f57e25179283d58bce69",
-      "videoId": "EVH6nEzjzDQ",
-      "videoTitle": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
-      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EVH6nEzjzDQ&t=41106s",
-      "sourceId": "UgydeJi3mRbpLj_ctq14AaABAg",
-      "sourceHash": "a0e7a89bf608085fe8666c878b7beb9704b1b9ee04cbc23b476d32625939086a",
-      "sourceOrigin": "review:EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists",
-        "short_unknown_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:EVH6nEzjzDQ:a0e7a89bf608085fe866",
-      "sourcePath": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json",
-      "reviewLocator": "data/review/sources/EVH6nEzjzDQ-a0e7a89bf608085fe866.json#af9743de21e69005e8b979a16751786451c4742b38f4f57e25179283d58bce69"
-    },
-    {
       "title": "1を手で表現した",
       "artist": "未記載",
       "isNiche": true,
@@ -5045,82 +4525,6 @@
       "reviewLocator": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json#f8ffdd2e900c59a53890c676eda6dccf63ef5df5a2b9af9115ec0480a2630780"
     },
     {
-      "title": "START",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 324,
-      "time": "0:05:24",
-      "raw": "00:05:24 START",
-      "rawHash": "847c64c82e364d83ddf56da0b9233d3b0526a1bae9cc481c08bf18359b77b916",
-      "videoId": "-rbtzeqldbc",
-      "videoTitle": "【#歌枠 】おやすみ前に聴いていきませんか✦【#新人vtuber /#黒羽あやめ】",
-      "channelName": "黒羽あやめ / KurobaAyame ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=-rbtzeqldbc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-rbtzeqldbc&t=324s",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "sourceOrigin": "review:-rbtzeqldbc-10d213be6adc61684b28.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:-rbtzeqldbc:10d213be6adc61684b28",
-      "sourcePath": "data/review/sources/-rbtzeqldbc-10d213be6adc61684b28.json",
-      "reviewLocator": "data/review/sources/-rbtzeqldbc-10d213be6adc61684b28.json#847c64c82e364d83ddf56da0b9233d3b0526a1bae9cc481c08bf18359b77b916"
-    },
-    {
-      "title": "雑談&ENDING",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 9847,
-      "time": "2:44:07",
-      "raw": "02:44:07 雑談&ENDING",
-      "rawHash": "68655bac6d14bbd64894927b799a76122fab8dbc0e0a991cc6055118abc2c1b7",
-      "videoId": "-rbtzeqldbc",
-      "videoTitle": "【#歌枠 】おやすみ前に聴いていきませんか✦【#新人vtuber /#黒羽あやめ】",
-      "channelName": "黒羽あやめ / KurobaAyame ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=-rbtzeqldbc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-rbtzeqldbc&t=9847s",
-      "sourceId": "UgwrSjg_pj-mTYezaqR4AaABAg",
-      "sourceHash": "10d213be6adc61684b288db871843798ffd0dd713f6b98cd4e5192da63e5914e",
-      "sourceOrigin": "review:-rbtzeqldbc-10d213be6adc61684b28.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:-rbtzeqldbc:10d213be6adc61684b28",
-      "sourcePath": "data/review/sources/-rbtzeqldbc-10d213be6adc61684b28.json",
-      "reviewLocator": "data/review/sources/-rbtzeqldbc-10d213be6adc61684b28.json#68655bac6d14bbd64894927b799a76122fab8dbc0e0a991cc6055118abc2c1b7"
-    },
-    {
       "title": "こんひなー",
       "artist": "未記載",
       "isNiche": true,
@@ -5488,6 +4892,86 @@
       "reviewLocator": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json#a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
     },
     {
+      "title": "メン限配信　超美麗3Dスイカ割りと花火",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 578,
+      "time": "0:09:38",
+      "raw": "0:09:38メン限配信 超美麗3Dスイカ割りと花火",
+      "rawHash": "5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=578s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320"
+    },
+    {
+      "title": "～まったり🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～まったり🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:132becd39bd29e7b",
+      "sourceHash": "132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515",
+      "sourceOrigin": "review:GkmXWhgz1QA-132becd39bd29e7b52fa.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:132becd39bd29e7b52fa",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-132becd39bd29e7b52fa.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-132becd39bd29e7b52fa.json#132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515"
+    },
+    {
       "title": "～今夜もまったりアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
       "artist": "未記載",
       "isNiche": false,
@@ -5558,6 +5042,186 @@
       "reviewLocator": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json#5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb"
     },
     {
+      "title": "「歌声に　夢の種から　花ひらく」　朝起きてアーカイブ視聴中　ピクミンの～種のうた～　いい♪（",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6520,
+      "time": "1:48:40",
+      "raw": "「歌声に 夢の種から 花ひらく」 朝起きてアーカイブ視聴中 ピクミンの～種のうた～ いい♪（1:48:40）",
+      "rawHash": "87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=6520s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd"
+    },
+    {
+      "title": "同接400人越えてたありがとう",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14300,
+      "time": "3:58:20",
+      "raw": "3:58:20同接400人越えてたありがとう",
+      "rawHash": "8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14300s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19"
+    },
+    {
+      "title": "かわいくFANBOX宣伝",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14354,
+      "time": "3:59:14",
+      "raw": "3:59:14かわいくFANBOX宣伝",
+      "rawHash": "00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14354s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f"
+    },
+    {
+      "title": "オープニング目に焼き付けといて",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14661,
+      "time": "4:04:21",
+      "raw": "4:04:21オープニング目に焼き付けといて",
+      "rawHash": "062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14661s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff"
+    },
+    {
       "title": "おつにょ",
       "artist": "未記載",
       "isNiche": true,
@@ -5609,59 +5273,24 @@
       "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
     },
     {
-      "title": "start",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 120,
-      "time": "0:02:00",
-      "raw": "2:00 start",
-      "rawHash": "5d29b04e3cafee0f96a448f5c86268393aff0038b8bb6d4cc2fff378b5db32b1",
-      "videoId": "Von5CRDJLHw",
-      "videoTitle": "歌枠￤歌いたい！！！！となったのでゲリラお歌枠【 星ノ音コロン / ハコネクト 】",
-      "channelName": "星ノ音コロン Koron Ch.",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Von5CRDJLHw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Von5CRDJLHw&t=120s",
-      "sourceId": "UgxfAKFjxLUIApvAzLZ4AaABAg",
-      "sourceHash": "5d29b04e3cafee0f96a448f5c86268393aff0038b8bb6d4cc2fff378b5db32b1",
-      "sourceOrigin": "review:Von5CRDJLHw-5d29b04e3cafee0f96a4.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "obvious_non_song_text"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Von5CRDJLHw:5d29b04e3cafee0f96a4",
-      "sourcePath": "data/review/sources/Von5CRDJLHw-5d29b04e3cafee0f96a4.json",
-      "reviewLocator": "data/review/sources/Von5CRDJLHw-5d29b04e3cafee0f96a4.json#5d29b04e3cafee0f96a448f5c86268393aff0038b8bb6d4cc2fff378b5db32b1"
-    },
-    {
-      "title": "「こきゅ」がかわいい",
+      "title": "今週のスケジュール",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 4453,
-      "time": "1:14:13",
-      "raw": "1:14:13 「こきゅ」がかわいい",
-      "rawHash": "f8229b1daf7881cd7fe99b0065aaec012a666076948e38e8c3787b8380f05119",
-      "videoId": "Von5CRDJLHw",
-      "videoTitle": "歌枠￤歌いたい！！！！となったのでゲリラお歌枠【 星ノ音コロン / ハコネクト 】",
-      "channelName": "星ノ音コロン Koron Ch.",
+      "seconds": 7007,
+      "time": "1:56:47",
+      "raw": "1:56:47 今週のスケジュール",
+      "rawHash": "e800396c37f1ce01b2a2bf7b86e5f4dee4ddafb9104da15b6333b769af69ffea",
+      "videoId": "twwiFMTzq0U",
+      "videoTitle": "【 #歌枠 / KARAOKE】一気に夏になったので、爽やか曲縛りで歌います🫧【 #しのの仕立て屋 / vsinger 】",
+      "channelName": "翠雨 しの",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Von5CRDJLHw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Von5CRDJLHw&t=4453s",
-      "sourceId": "UgxD24N7Ohah3GDHiY14AaABAg",
-      "sourceHash": "ce72f56890d75ab13b9fc4ac81eb34ecd0687dc6d39f9336d8098b830028af45",
-      "sourceOrigin": "review:Von5CRDJLHw-ce72f56890d75ab13b9f.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=twwiFMTzq0U",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=twwiFMTzq0U&t=7007s",
+      "sourceId": "UgxBDDy2tVN1GU8Y7JZ4AaABAg",
+      "sourceHash": "3d620064e388e3dba49991cc0370e2fdb3b28b6ebdaf2546b61ef01504a828f6",
+      "sourceOrigin": "review:twwiFMTzq0U-3d620064e388e3dba499.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -5669,14 +5298,16 @@
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
-      "sourceRiskReasons": [],
+      "sourceRiskReasons": [
+        "activity_marker_title"
+      ],
       "riskReasons": [
-        "title_only_non_song_candidate"
+        "likely_non_song_entry"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:Von5CRDJLHw:ce72f56890d75ab13b9f",
-      "sourcePath": "data/review/sources/Von5CRDJLHw-ce72f56890d75ab13b9f.json",
-      "reviewLocator": "data/review/sources/Von5CRDJLHw-ce72f56890d75ab13b9f.json#f8229b1daf7881cd7fe99b0065aaec012a666076948e38e8c3787b8380f05119"
+      "reviewId": "review:twwiFMTzq0U:3d620064e388e3dba499",
+      "sourcePath": "data/review/sources/twwiFMTzq0U-3d620064e388e3dba499.json",
+      "reviewLocator": "data/review/sources/twwiFMTzq0U-3d620064e388e3dba499.json#e800396c37f1ce01b2a2bf7b86e5f4dee4ddafb9104da15b6333b769af69ffea"
     },
     {
       "title": "閉会式",
@@ -5771,6 +5402,899 @@
       "reviewId": "review:vdqlFJD0e7c:d6aae283833834bbc00a",
       "sourcePath": "data/review/sources/history-vdqlFJD0e7c-d6aae283833834bbc00a.json",
       "reviewLocator": "data/review/sources/history-vdqlFJD0e7c-d6aae283833834bbc00a.json#594f12b91757e74ac04e1e6fbeb079cf29c358956f2b442f4b20d9e77ccab216"
+    },
+    {
+      "title": "声入り",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 119,
+      "time": "0:01:59",
+      "raw": "1:59 声入り",
+      "rawHash": "35fbaa68865159a0383d463cfd13d2c44126d872f453cbcc83511ddfe5e3ba5f",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=119s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#35fbaa68865159a0383d463cfd13d2c44126d872f453cbcc83511ddfe5e3ba5f"
+    },
+    {
+      "title": "⇔",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 354,
+      "time": "0:05:54",
+      "raw": "5:54 8:12 🎀 ⇔",
+      "rawHash": "c0197e02f2fb14f7de2a87060f5289bf66ffa591171f7a91ce0083638bfc4529",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=354s",
+      "sourceId": "UgxnryG89exN0F48oGV4AaABAg",
+      "sourceHash": "77998cc92a909d5710919f3e550d2c5dfd4bdb4395dced76e92bcdd7890a6d99",
+      "sourceOrigin": "review:G1fbvfswdbg-77998cc92a909d571091.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "bad_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:77998cc92a909d571091",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-77998cc92a909d571091.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-77998cc92a909d571091.json#c0197e02f2fb14f7de2a87060f5289bf66ffa591171f7a91ce0083638bfc4529"
+    },
+    {
+      "title": "「ね!!｣で傾くのやめてくださいもう私に笑いかけてね??と言われてる想像がもうできてダメです🙅♀🙅♀",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 492,
+      "time": "0:08:12",
+      "raw": "追記 8:12 「ね!!｣で傾くのやめてくださいもう私に笑いかけてね??と言われてる想像がもうできてダメです🙅‍♀️🙅‍♀️",
+      "rawHash": "ef45fca07f5ba80a5eeee4342900c0432b82ab67f0bb5653c427af7398ed3e43",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=492s",
+      "sourceId": "UgxnryG89exN0F48oGV4AaABAg",
+      "sourceHash": "77998cc92a909d5710919f3e550d2c5dfd4bdb4395dced76e92bcdd7890a6d99",
+      "sourceOrigin": "review:G1fbvfswdbg-77998cc92a909d571091.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:77998cc92a909d571091",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-77998cc92a909d571091.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-77998cc92a909d571091.json#ef45fca07f5ba80a5eeee4342900c0432b82ab67f0bb5653c427af7398ed3e43"
+    },
+    {
+      "title": "全部デュエット歌枠があったっていい",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 893,
+      "time": "0:14:53",
+      "raw": "14:53 全部デュエット歌枠があったっていい",
+      "rawHash": "c7e89cd1856141f06c14e6e336c599c1458964c122ffe53771b5911e05d9180b",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=893s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#c7e89cd1856141f06c14e6e336c599c1458964c122ffe53771b5911e05d9180b"
+    },
+    {
+      "title": "LM.C 📿🍔",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1611,
+      "time": "0:26:51",
+      "raw": "26:51 88 / LM.C ‪📿🍔‬",
+      "rawHash": "f356573061da3c2b7eb5ccc275f6811e71199b171a994e90ee426a675f97db43",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=1611s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#f356573061da3c2b7eb5ccc275f6811e71199b171a994e90ee426a675f97db43"
+    },
+    {
+      "title": "LM.C 📿🍔",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1611,
+      "time": "0:26:51",
+      "raw": "26:51 ♪ 88 / LM.C ‪📿🍔‬",
+      "rawHash": "21a78db5214ac7ca9171f3422dd166f487981a70e8275d406b7575ea7b35ea8f",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=1611s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#21a78db5214ac7ca9171f3422dd166f487981a70e8275d406b7575ea7b35ea8f"
+    },
+    {
+      "title": "リボーンの話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1841,
+      "time": "0:30:41",
+      "raw": "30:41 リボーンの話",
+      "rawHash": "34ec6cdb905281adad333f278077b0c76e894a875478dd517de436b94ae05065",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=1841s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#34ec6cdb905281adad333f278077b0c76e894a875478dd517de436b94ae05065"
+    },
+    {
+      "title": "キャラソン歌枠したくね？",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1879,
+      "time": "0:31:19",
+      "raw": "31:19 ⚗キャラソン歌枠したくね？",
+      "rawHash": "63db2a5a19ec70211c98fbe8b7a5a39680c7f360a91dfd0d85be640cca697499",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=1879s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#63db2a5a19ec70211c98fbe8b7a5a39680c7f360a91dfd0d85be640cca697499"
+    },
+    {
+      "title": "これ歌ってくれる人にじさんじにいるんだよ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2387,
+      "time": "0:39:47",
+      "raw": "39:47 🐼これ歌ってくれる人にじさんじにいるんだよ",
+      "rawHash": "8d97bc173b67546e4ae0a2a6b2b54a580d94e7289344ed65d83341cfb1cd2fb8",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=2387s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#8d97bc173b67546e4ae0a2a6b2b54a580d94e7289344ed65d83341cfb1cd2fb8"
+    },
+    {
+      "title": "魔法の絨毯 沁みた……🥲その後の「なにもないじゃん」切れ味良すぎて草だった 食器洗うよ~♪",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3075,
+      "time": "0:51:15",
+      "raw": "51:15 魔法の絨毯 沁みた……🥲その後の「なにもないじゃん」切れ味良すぎて草だった 食器洗うよ~♪",
+      "rawHash": "ef290883142b8cdb347c15102e59d6a947d7ae086bd5befc4fb3aeba2fd05c51",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=3075s",
+      "sourceId": "Ugy2MCHsSYD9nolErUh4AaABAg",
+      "sourceHash": "5508bf3355513ce20046b0ccff4ca7e46912ffcb5ebf08306117ac24eaa6608d",
+      "sourceOrigin": "review:G1fbvfswdbg-5508bf3355513ce20046.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:5508bf3355513ce20046",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-5508bf3355513ce20046.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-5508bf3355513ce20046.json#ef290883142b8cdb347c15102e59d6a947d7ae086bd5befc4fb3aeba2fd05c51"
+    },
+    {
+      "title": "あの頃のジャンプ縛り歌枠やりたい",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3637,
+      "time": "1:00:37",
+      "raw": "1:00:37 あの頃のジャンプ縛り歌枠やりたい",
+      "rawHash": "a0710924090660589d15d42dc572f1880748dc12fced016056b0a5a7bca9f580",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=3637s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#a0710924090660589d15d42dc572f1880748dc12fced016056b0a5a7bca9f580"
+    },
+    {
+      "title": "ビビデバ好きな緑仙",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3912,
+      "time": "1:05:12",
+      "raw": "1:05:12 ビビデバ好きな緑仙",
+      "rawHash": "9e3e3405c9abf754072d4045adcef319f76ff9dd6e066d6b1106a1d9346a1845",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=3912s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#9e3e3405c9abf754072d4045adcef319f76ff9dd6e066d6b1106a1d9346a1845"
+    },
+    {
+      "title": "緑仙の歌枠から持ってきたはかちぇ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3978,
+      "time": "1:06:18",
+      "raw": "1:06:18 緑仙の歌枠から持ってきたはかちぇ",
+      "rawHash": "792df9ad71c17019e581004e6437132a683d1ac6f236b7258313e72fb4a75e0b",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=3978s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#792df9ad71c17019e581004e6437132a683d1ac6f236b7258313e72fb4a75e0b"
+    },
+    {
+      "title": "2012年/🐼ﾔﾒﾃﾔﾒﾃ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4332,
+      "time": "1:12:12",
+      "raw": "1:12:12 2012年/🐼ﾔﾒﾃﾔﾒﾃ",
+      "rawHash": "cdc96000f0f4c9aa5a57ef4184687d3342bbe601a647185b4d923878f93c70f3",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=4332s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#cdc96000f0f4c9aa5a57ef4184687d3342bbe601a647185b4d923878f93c70f3"
+    },
+    {
+      "title": "非公式サイトが便利な話😂",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4356,
+      "time": "1:12:36",
+      "raw": "1:12:36 非公式サイトが便利な話😂",
+      "rawHash": "4bbf0da114947ef3dbbdc736e5019c80f534ff913393f7a46745411bf89b4ab0",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=4356s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#4bbf0da114947ef3dbbdc736e5019c80f534ff913393f7a46745411bf89b4ab0"
+    },
+    {
+      "title": "歌える曲をリストにしてる緑仙😳",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4445,
+      "time": "1:14:05",
+      "raw": "1:14:05 歌える曲をリストにしてる緑仙😳",
+      "rawHash": "da0fd15403aeb2cbd2d052f39354bf0191433395001b63852a5362797c988465",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=4445s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#da0fd15403aeb2cbd2d052f39354bf0191433395001b63852a5362797c988465"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4954,
+      "time": "1:22:34",
+      "raw": "1:22:34 1:23:17 ✨",
+      "rawHash": "f827ce7dbd1dea19792343ed575868abfcc1c17f155fa738bfb11b670c40505b",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=4954s",
+      "sourceId": "UgxnryG89exN0F48oGV4AaABAg",
+      "sourceHash": "77998cc92a909d5710919f3e550d2c5dfd4bdb4395dced76e92bcdd7890a6d99",
+      "sourceOrigin": "review:G1fbvfswdbg-77998cc92a909d571091.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:77998cc92a909d571091",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-77998cc92a909d571091.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-77998cc92a909d571091.json#f827ce7dbd1dea19792343ed575868abfcc1c17f155fa738bfb11b670c40505b"
+    },
+    {
+      "title": "え、好き",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5164,
+      "time": "1:26:04",
+      "raw": "1:26:04 え、好き",
+      "rawHash": "8dfc6f2a347c68235af53d95ee5dba617a4a6fa6ac99a864f411c5423a8acabc",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=5164s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#8dfc6f2a347c68235af53d95ee5dba617a4a6fa6ac99a864f411c5423a8acabc"
+    },
+    {
+      "title": "長尾さん歌枠中ですよ？",
+      "artist": "優しさの連れション",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 5185,
+      "time": "1:26:25",
+      "raw": "1:26:25 ‪📿🍔‬長尾さん歌枠中ですよ？/優しさの連れション",
+      "rawHash": "1e02bb047ad34e1c1d83c5c3a1c326fea26031a390c033af7c36b7f660ec3c23",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=5185s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#1e02bb047ad34e1c1d83c5c3a1c326fea26031a390c033af7c36b7f660ec3c23"
+    },
+    {
+      "title": "ドリンクバーの正解🤔💭",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5289,
+      "time": "1:28:09",
+      "raw": "1:28:09 ドリンクバーの正解🤔💭",
+      "rawHash": "cabf8c906ce38bd2e60d8708cdd0b1efd779c5cb56efdf59ceb72f751880e38b",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=5289s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#cabf8c906ce38bd2e60d8708cdd0b1efd779c5cb56efdf59ceb72f751880e38b"
+    },
+    {
+      "title": "戻り",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5331,
+      "time": "1:28:51",
+      "raw": "1:28:51 ‪📿🍔‬☯️戻り",
+      "rawHash": "6ca68627ff020a3ba972df7de206a3d9fb639b6c8c8efd6b8d421016b31cd6dd",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=5331s",
+      "sourceId": "UgydPKSMjyWpDqMq43F4AaABAg",
+      "sourceHash": "6b8a0273f3ed2a08cfd4771363c603e515f31d936353c0067352b1a4d0dd3c05",
+      "sourceOrigin": "review:G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:6b8a0273f3ed2a08cfd4",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-6b8a0273f3ed2a08cfd4.json#6ca68627ff020a3ba972df7de206a3d9fb639b6c8c8efd6b8d421016b31cd6dd"
+    },
+    {
+      "title": "はかちぇのモニタリング、最高とさせていただきます",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6110,
+      "time": "1:41:50",
+      "raw": "1:41:50 はかちぇのモニタリング、最高とさせていただきます",
+      "rawHash": "80a3b15a85a6ebc16659898d0c1f7965ebbd3cf96b0dd67fb2d89f71a8579984",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=6110s",
+      "sourceId": "Ugz5vSmQ_z6JOMXhX1F4AaABAg",
+      "sourceHash": "80a3b15a85a6ebc16659898d0c1f7965ebbd3cf96b0dd67fb2d89f71a8579984",
+      "sourceOrigin": "review:G1fbvfswdbg-80a3b15a85a6ebc16659.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:80a3b15a85a6ebc16659",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-80a3b15a85a6ebc16659.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-80a3b15a85a6ebc16659.json#80a3b15a85a6ebc16659898d0c1f7965ebbd3cf96b0dd67fb2d89f71a8579984"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6761,
+      "time": "1:52:41",
+      "raw": "1:52:41",
+      "rawHash": "a1ce6c60b836f5c45554166c80146a2b3c22d8031f7ae27579df27529eb928ea",
+      "videoId": "G1fbvfswdbg",
+      "videoTitle": "【歌枠】自枠は久々？コラボ歌枠【長尾景/にじさんじ】",
+      "channelName": "長尾 景 / Nagao Kei【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=G1fbvfswdbg&t=6761s",
+      "sourceId": "UgxzBgW0Eay0ARlNvEV4AaABAg",
+      "sourceHash": "8d08b00009056d976cc14fba809f93ad8ab8736567eab7aa48680bfe245c46ec",
+      "sourceOrigin": "review:G1fbvfswdbg-8d08b00009056d976cc1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:G1fbvfswdbg:8d08b00009056d976cc1",
+      "sourcePath": "data/review/sources/G1fbvfswdbg-8d08b00009056d976cc1.json",
+      "reviewLocator": "data/review/sources/G1fbvfswdbg-8d08b00009056d976cc1.json#a1ce6c60b836f5c45554166c80146a2b3c22d8031f7ae27579df27529eb928ea"
     },
     {
       "title": "離席",
@@ -6769,6 +7293,146 @@
       "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json#fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
     },
     {
+      "title": "あまりにも本職のうたのおねえさんと子役すぎたシーン",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2966,
+      "time": "0:49:26",
+      "raw": "49:26 あまりにも本職のうたのおねえさんと子役すぎたシーン",
+      "rawHash": "ff3370bc21e188c3a453c46b06090d82718033ed77e2a5aabebd97b40ca4853a",
+      "videoId": "IYYiJwcO2B0",
+      "videoTitle": "【コラボ歌枠】ジブリ楽曲オンリー歌枠！【戌亥とこ/珠乃井ナナ/にじさんじ】",
+      "channelName": "戌亥とこ -Inui Toko-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=IYYiJwcO2B0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=IYYiJwcO2B0&t=2966s",
+      "sourceId": "UgwyJ3qrf5RHpW3UR8N4AaABAg",
+      "sourceHash": "ff3370bc21e188c3a453c46b06090d82718033ed77e2a5aabebd97b40ca4853a",
+      "sourceOrigin": "review:IYYiJwcO2B0-ff3370bc21e188c3a453.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:IYYiJwcO2B0:ff3370bc21e188c3a453",
+      "sourcePath": "data/review/sources/IYYiJwcO2B0-ff3370bc21e188c3a453.json",
+      "reviewLocator": "data/review/sources/IYYiJwcO2B0-ff3370bc21e188c3a453.json#ff3370bc21e188c3a453c46b06090d82718033ed77e2a5aabebd97b40ca4853a"
+    },
+    {
+      "title": "素敵な歌声の「とこおねえさん」とお歌の上手な「ナナちゃん（7）」による崖の上のポニョ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2967,
+      "time": "0:49:27",
+      "raw": "49:27 素敵な歌声の「とこおねえさん」とお歌の上手な「ナナちゃん（7）」による崖の上のポニョ",
+      "rawHash": "2b7d934dbeea6d0606bed68e285b953381c92488b7fcfd323a71eabafdd62b5c",
+      "videoId": "IYYiJwcO2B0",
+      "videoTitle": "【コラボ歌枠】ジブリ楽曲オンリー歌枠！【戌亥とこ/珠乃井ナナ/にじさんじ】",
+      "channelName": "戌亥とこ -Inui Toko-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=IYYiJwcO2B0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=IYYiJwcO2B0&t=2967s",
+      "sourceId": "UgwAIxNnxOvv601M-tN4AaABAg",
+      "sourceHash": "c5d23a8f6dfa3477e417b130b7b37e693b043386eef5c76b37a254cbf524a359",
+      "sourceOrigin": "review:IYYiJwcO2B0-c5d23a8f6dfa3477e417.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:IYYiJwcO2B0:c5d23a8f6dfa3477e417",
+      "sourcePath": "data/review/sources/IYYiJwcO2B0-c5d23a8f6dfa3477e417.json",
+      "reviewLocator": "data/review/sources/IYYiJwcO2B0-c5d23a8f6dfa3477e417.json#2b7d934dbeea6d0606bed68e285b953381c92488b7fcfd323a71eabafdd62b5c"
+    },
+    {
+      "title": "歌枠の機会作ってくださって感謝！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4253,
+      "time": "1:10:53",
+      "raw": "1:10:53 歌枠の機会作ってくださって感謝！",
+      "rawHash": "6a29fc6c602b1a2f60cd77a146351fa274fadb8f94d55f8475504ed3b29c41f6",
+      "videoId": "IYYiJwcO2B0",
+      "videoTitle": "【コラボ歌枠】ジブリ楽曲オンリー歌枠！【戌亥とこ/珠乃井ナナ/にじさんじ】",
+      "channelName": "戌亥とこ -Inui Toko-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=IYYiJwcO2B0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=IYYiJwcO2B0&t=4253s",
+      "sourceId": "Ugye52uEQfHfjR2w1RZ4AaABAg",
+      "sourceHash": "1f7ba914b8aa9cd9992f98dccc21156b2be36ea858530286ca3e39ec445f16c3",
+      "sourceOrigin": "review:IYYiJwcO2B0-1f7ba914b8aa9cd9992f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:IYYiJwcO2B0:1f7ba914b8aa9cd9992f",
+      "sourcePath": "data/review/sources/IYYiJwcO2B0-1f7ba914b8aa9cd9992f.json",
+      "reviewLocator": "data/review/sources/IYYiJwcO2B0-1f7ba914b8aa9cd9992f.json#6a29fc6c602b1a2f60cd77a146351fa274fadb8f94d55f8475504ed3b29c41f6"
+    },
+    {
+      "title": "初めて聴いてとても好きな曲になった、時の歌",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4849,
+      "time": "1:20:49",
+      "raw": "初めて聴いてとても好きな曲になった、時の歌 01:20:49",
+      "rawHash": "0faaba064d0f91bfa8e5d43c9178b3530483d7b81ce55a44039c1c6fe5e1c119",
+      "videoId": "IYYiJwcO2B0",
+      "videoTitle": "【コラボ歌枠】ジブリ楽曲オンリー歌枠！【戌亥とこ/珠乃井ナナ/にじさんじ】",
+      "channelName": "戌亥とこ -Inui Toko-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=IYYiJwcO2B0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=IYYiJwcO2B0&t=4849s",
+      "sourceId": "UgwcouAqdDi91s-ZLAl4AaABAg",
+      "sourceHash": "0faaba064d0f91bfa8e5d43c9178b3530483d7b81ce55a44039c1c6fe5e1c119",
+      "sourceOrigin": "review:IYYiJwcO2B0-0faaba064d0f91bfa8e5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:IYYiJwcO2B0:0faaba064d0f91bfa8e5",
+      "sourcePath": "data/review/sources/IYYiJwcO2B0-0faaba064d0f91bfa8e5.json",
+      "reviewLocator": "data/review/sources/IYYiJwcO2B0-0faaba064d0f91bfa8e5.json#0faaba064d0f91bfa8e5d43c9178b3530483d7b81ce55a44039c1c6fe5e1c119"
+    },
+    {
       "title": "スタート",
       "artist": "未記載",
       "isNiche": true,
@@ -6814,6 +7478,478 @@
       "reviewId": "review:uRKNhEOx0Hs:32dac2d03f3f75aea9ad",
       "sourcePath": "data/review/sources/history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json",
       "reviewLocator": "data/review/sources/history-uRKNhEOx0Hs-32dac2d03f3f75aea9ad.json#7e6723d1d7e7e90574847735677c486e4259fc7a18344450abe4532c34ad3d74"
+    },
+    {
+      "title": "鼻声と配信と体調と寿司と今日のセトリのお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 483,
+      "time": "0:08:03",
+      "raw": "8:03 鼻声と配信と体調と寿司と今日のセトリのお話",
+      "rawHash": "19013fbd49ddcfa1d9917cdc6d06e59ab1d14b1c620060408e54744115b30f79",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=483s",
+      "sourceId": "UgxPrVuTx9S_jUC7jM94AaABAg",
+      "sourceHash": "f6a5f7efd3ed1d8df928e034c4df85ed1a52b7e0863e4c9376c8820d0dbb4f4c",
+      "sourceOrigin": "review:ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:f6a5f7efd3ed1d8df928",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json#19013fbd49ddcfa1d9917cdc6d06e59ab1d14b1c620060408e54744115b30f79"
+    },
+    {
+      "title": "鼻声と鼻声に合う曲のお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 978,
+      "time": "0:16:18",
+      "raw": "16:18 鼻声と鼻声に合う曲のお話",
+      "rawHash": "0e557d5c516767ebec1f451dee81a2b849de3edc8ffca33bbb53d68d77e7b3cf",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=978s",
+      "sourceId": "UgxPrVuTx9S_jUC7jM94AaABAg",
+      "sourceHash": "f6a5f7efd3ed1d8df928e034c4df85ed1a52b7e0863e4c9376c8820d0dbb4f4c",
+      "sourceOrigin": "review:ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:f6a5f7efd3ed1d8df928",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json#0e557d5c516767ebec1f451dee81a2b849de3edc8ffca33bbb53d68d77e7b3cf"
+    },
+    {
+      "title": "「とっとこうた」とレパートリーとジェネーレーションギャップとおでんくんのお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1202,
+      "time": "0:20:02",
+      "raw": "20:02 「とっとこうた」とレパートリーとジェネーレーションギャップとおでんくんのお話",
+      "rawHash": "d382a1c9eeb16f4f80969d4e84bf1278cb1e5c85c4f2fb07b48f310e8fd91f88",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=1202s",
+      "sourceId": "UgxPrVuTx9S_jUC7jM94AaABAg",
+      "sourceHash": "f6a5f7efd3ed1d8df928e034c4df85ed1a52b7e0863e4c9376c8820d0dbb4f4c",
+      "sourceOrigin": "review:ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:f6a5f7efd3ed1d8df928",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json#d382a1c9eeb16f4f80969d4e84bf1278cb1e5c85c4f2fb07b48f310e8fd91f88"
+    },
+    {
+      "title": "気温とジャンプと天然と模写と過去のライブのお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1781,
+      "time": "0:29:41",
+      "raw": "29:41 気温とジャンプと天然と模写と過去のライブのお話",
+      "rawHash": "326fc29d8edd69cb7622cb23aa7c44188d915d9196fe847a9b812a4d9de19a09",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=1781s",
+      "sourceId": "UgxPrVuTx9S_jUC7jM94AaABAg",
+      "sourceHash": "f6a5f7efd3ed1d8df928e034c4df85ed1a52b7e0863e4c9376c8820d0dbb4f4c",
+      "sourceOrigin": "review:ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:f6a5f7efd3ed1d8df928",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json#326fc29d8edd69cb7622cb23aa7c44188d915d9196fe847a9b812a4d9de19a09"
+    },
+    {
+      "title": "鼻声とコメント欄の不具合と終了時間のお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2780,
+      "time": "0:46:20",
+      "raw": "46:20 鼻声とコメント欄の不具合と終了時間のお話",
+      "rawHash": "5e07e0e4dbce8047c011512813f5a4dc19958341745d14616f28e2b3103bd007",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=2780s",
+      "sourceId": "UgxPrVuTx9S_jUC7jM94AaABAg",
+      "sourceHash": "f6a5f7efd3ed1d8df928e034c4df85ed1a52b7e0863e4c9376c8820d0dbb4f4c",
+      "sourceOrigin": "review:ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:f6a5f7efd3ed1d8df928",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json#5e07e0e4dbce8047c011512813f5a4dc19958341745d14616f28e2b3103bd007"
+    },
+    {
+      "title": "ビスコと声の高さと声とチョッパーのお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3176,
+      "time": "0:52:56",
+      "raw": "52:56 ビスコと声の高さと声とチョッパーのお話",
+      "rawHash": "f5cfb39365d4293a9cd79546e0cf019ee11c949d6faa75a5f09e74ec58af4cf7",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=3176s",
+      "sourceId": "UgxPrVuTx9S_jUC7jM94AaABAg",
+      "sourceHash": "f6a5f7efd3ed1d8df928e034c4df85ed1a52b7e0863e4c9376c8820d0dbb4f4c",
+      "sourceOrigin": "review:ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:f6a5f7efd3ed1d8df928",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json#f5cfb39365d4293a9cd79546e0cf019ee11c949d6faa75a5f09e74ec58af4cf7"
+    },
+    {
+      "title": "暑さと誕生日と8月の楽しみと歌の練習と筋トレのお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3702,
+      "time": "1:01:42",
+      "raw": "1:01:42 暑さと誕生日と8月の楽しみと歌の練習と筋トレのお話",
+      "rawHash": "485daeb3197be2ed21ea396330faeb6f03aa92d53c7e9f4d38fa12dda9ccd185",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=3702s",
+      "sourceId": "UgxPrVuTx9S_jUC7jM94AaABAg",
+      "sourceHash": "f6a5f7efd3ed1d8df928e034c4df85ed1a52b7e0863e4c9376c8820d0dbb4f4c",
+      "sourceOrigin": "review:ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:f6a5f7efd3ed1d8df928",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json#485daeb3197be2ed21ea396330faeb6f03aa92d53c7e9f4d38fa12dda9ccd185"
+    },
+    {
+      "title": "言って！お誕生日おめでとうって！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3810,
+      "time": "1:03:30",
+      "raw": "1:03:30 言って！お誕生日おめでとうって！",
+      "rawHash": "141a2396c0aed319b8a13b39c43e173243332e7a3620db24126abcd966441937",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=3810s",
+      "sourceId": "UgwZv9qljiH8J31FD5R4AaABAg",
+      "sourceHash": "1acdf801dd4bc0b13fc25008534c076fb5f986325719a1cd1f2197a76966a824",
+      "sourceOrigin": "review:ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:1acdf801dd4bc0b13fc2",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json#141a2396c0aed319b8a13b39c43e173243332e7a3620db24126abcd966441937"
+    },
+    {
+      "title": "あら！またコメント欄止まってる〜",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4057,
+      "time": "1:07:37",
+      "raw": "1:07:37 あら！またコメント欄止まってる〜",
+      "rawHash": "709a48ddbdf8a7700e437825179a1d3ee0423dd3146f2e2ed96f302652fbdb7c",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=4057s",
+      "sourceId": "UgwZv9qljiH8J31FD5R4AaABAg",
+      "sourceHash": "1acdf801dd4bc0b13fc25008534c076fb5f986325719a1cd1f2197a76966a824",
+      "sourceOrigin": "review:ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:1acdf801dd4bc0b13fc2",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json#709a48ddbdf8a7700e437825179a1d3ee0423dd3146f2e2ed96f302652fbdb7c"
+    },
+    {
+      "title": "告知タイムと鼻声のお話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4395,
+      "time": "1:13:15",
+      "raw": "1:13:15 告知タイムと鼻声のお話",
+      "rawHash": "5085f8618b55d3ba3c5fdac3f921d1837e3848245773d08ce748b4d3d3dfbdb3",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=4395s",
+      "sourceId": "UgxPrVuTx9S_jUC7jM94AaABAg",
+      "sourceHash": "f6a5f7efd3ed1d8df928e034c4df85ed1a52b7e0863e4c9376c8820d0dbb4f4c",
+      "sourceOrigin": "review:ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:f6a5f7efd3ed1d8df928",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-f6a5f7efd3ed1d8df928.json#5085f8618b55d3ba3c5fdac3f921d1837e3848245773d08ce748b4d3d3dfbdb3"
+    },
+    {
+      "title": "ありがと〜！ありがと〜！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5147,
+      "time": "1:25:47",
+      "raw": "1:25:47 ありがと〜！ありがと〜！",
+      "rawHash": "c71c1592ab7f2eae768496e62c84bff9da8a67af8caad82ac7e64a1fde85a235",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=5147s",
+      "sourceId": "UgwZv9qljiH8J31FD5R4AaABAg",
+      "sourceHash": "1acdf801dd4bc0b13fc25008534c076fb5f986325719a1cd1f2197a76966a824",
+      "sourceOrigin": "review:ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:1acdf801dd4bc0b13fc2",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json#c71c1592ab7f2eae768496e62c84bff9da8a67af8caad82ac7e64a1fde85a235"
+    },
+    {
+      "title": "ンフフチャット！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5165,
+      "time": "1:26:05",
+      "raw": "1:26:05 ンフフチャット！",
+      "rawHash": "ded32069e0438328b25fd07ecd2e2e8cfe4a4be5d5e6bb4d00a2181b8493bfd1",
+      "videoId": "ajT_9l8g0pw",
+      "videoTitle": "【歌枠】かわいい曲を歌う！！ 初見さんも大歓迎！#超銀河レコード ＃礒貝真琴",
+      "channelName": "礒貝真琴 / MAKOTO ISOGAI",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ajT_9l8g0pw&t=5165s",
+      "sourceId": "UgwZv9qljiH8J31FD5R4AaABAg",
+      "sourceHash": "1acdf801dd4bc0b13fc25008534c076fb5f986325719a1cd1f2197a76966a824",
+      "sourceOrigin": "review:ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ajT_9l8g0pw:1acdf801dd4bc0b13fc2",
+      "sourcePath": "data/review/sources/ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json",
+      "reviewLocator": "data/review/sources/ajT_9l8g0pw-1acdf801dd4bc0b13fc2.json#ded32069e0438328b25fd07ecd2e2e8cfe4a4be5d5e6bb4d00a2181b8493bfd1"
     },
     {
       "title": "お名前呼び",
