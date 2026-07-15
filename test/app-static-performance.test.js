@@ -84,19 +84,27 @@ test("same-video multiple timestamps are expandable instead of becoming inline-o
 
   const sublineBody = functionBody("function appendSublineSource");
   assert.match(sublineBody, /if \(sourceVideoCount <= 1 && occurrences\.length === 1\)/u);
+  assert.match(sublineBody, /renderSingleSourceCopyIconButton\(occurrence\)/u);
   assert.doesNotMatch(sublineBody, /groupOccurrencesByVideo/u);
 });
 
 test("source drawer append-more reveals all remaining sources without rebuilding old cards", () => {
   const expandBody = functionBody("function expandSourceVideoGroups");
   assert.match(expandBody, /const nextVisible = groups\.length/u);
-  assert.match(expandBody, /appendSourceGroupRange\(drawer, groups, current, nextVisible\)/u);
-  assert.doesNotMatch(expandBody, /sourceBatchSizeForMode|current \+ /u);
+  assert.match(expandBody, /SOURCE_EXPAND_CHUNK_SIZE/u);
+  assert.match(expandBody, /await yieldToBrowser\(\)/u);
+  assert.match(expandBody, /convertSourceGroupMoreToCollapse\(button, drawer\)/u);
+  assert.doesNotMatch(expandBody, /sourceBatchSizeForMode/u);
 
   const appendRangeBody = functionBody("function appendSourceGroupRange");
   assert.match(appendRangeBody, /document\.createDocumentFragment\(\)/u);
   assert.match(appendRangeBody, /drawer\.insertBefore\(fragment/u);
   assert.doesNotMatch(appendRangeBody, /replaceChildren/u);
+
+  const footerBody = functionBody("function convertSourceGroupMoreToCollapse");
+  assert.match(footerBody, /delete button\.dataset\.toggleSourceGroups/u);
+  assert.match(footerBody, /button\.dataset\.collapseSource = "true"/u);
+  assert.doesNotMatch(footerBody, /createElement\("button"\)|remove\(\)/u);
 
   const expandedBody = functionBody("function setSourceDrawerExpanded");
   assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
@@ -144,6 +152,16 @@ test("selection builds only the records needed by the current view", () => {
   const prewarmBody = functionBody("async function prewarmDefaultSorts");
   assert.match(prewarmBody, /if \(state\.view === "videos"\) return/u);
   assert.ok(prewarmBody.indexOf('state.view === "artistRank"') < prewarmBody.indexOf("selectedSongRecords"));
+});
+
+test("range prefetch stays fast and does not use an 8 second delay", () => {
+  const scheduleBody = functionBody("function scheduleOtherRangePrefetch");
+  assert.match(scheduleBody, /window\.setTimeout\(\(\) => \{[\s\S]*requestIdleCallback\(run, \{ timeout: 1200 \}\)/u);
+  assert.match(scheduleBody, /\}, 300\)/u);
+  assert.doesNotMatch(scheduleBody, /8000|8\s*\*\s*1000/u);
+
+  const intentBody = functionBody("function bindRangeIntentPrefetch");
+  assert.match(intentBody, /\["pointerdown", "touchstart", "mousedown", "focus"\]/u);
 });
 
 function functionBody(signature) {

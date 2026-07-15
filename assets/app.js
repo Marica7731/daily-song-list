@@ -20,6 +20,7 @@ const INLINE_SOURCE_PREVIEW_LIMIT = 1;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
+const SOURCE_EXPAND_CHUNK_SIZE = 12;
 const MAX_COMPACT_INITIALIZED_DRAWERS = 3;
 // Keep these breakpoints synchronized with assets/styles.css:
 // mobile <= 720px, tablet 721-919px, desktop >= 920px.
@@ -620,7 +621,7 @@ function bindEvents() {
     const sourceGroups = event.target.closest("[data-toggle-source-groups]");
     if (sourceGroups) {
       event.preventDefault();
-      expandSourceVideoGroups(sourceGroups);
+      expandSourceVideoGroups(sourceGroups).catch((error) => showToast(`展开来源失败：${error.message}`));
     }
   });
 
@@ -3468,7 +3469,21 @@ function renderRankRecord({
   rankNumber.setAttribute("aria-label", `第 ${rank} 名`);
   row.append(rankNumber);
 
-  row.append(renderRecordContent(title, meta, { mode, occurrences, songGroups, songCount, songPreview, drawerId, isExpanded, videoCount, trend }));
+  row.append(
+    renderRecordContent(title, meta, {
+      mode,
+      occurrences,
+      songGroups,
+      songCount,
+      songPreview,
+      drawerId,
+      isExpanded,
+      videoCount,
+      trend,
+      rankCount: count,
+      rankMetric: state.rankMetric,
+    }),
+  );
   row.append(renderTrend(trend));
   row.append(renderCount(count, countUnit));
   if (expandable) row.append(renderSourceDrawer({ mode, occurrences, songGroups, drawerId, isExpanded, getSongGroups }));
@@ -3499,6 +3514,8 @@ function renderIndexRecord(record) {
       drawerId,
       isExpanded,
       videoCount: record.videoCount,
+      rankCount: record.count,
+      rankMetric: "occurrences",
       headingLevel: 3,
     }),
   );
@@ -3533,6 +3550,8 @@ function renderRecordContent(title, meta, options) {
     drawerId,
     isExpanded,
     videoCount,
+    rankCount = 0,
+    rankMetric = state.rankMetric,
     trend,
     headingLevel = 2,
   } = options;
@@ -3561,7 +3580,7 @@ function renderRecordContent(title, meta, options) {
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(metaLine, `${videoCount} 个视频`, "subline-video-count");
-    appendSublineSource(metaLine, actionsLine, { mode, occurrences, drawerId, isExpanded, videoCount });
+    appendSublineSource(metaLine, actionsLine, { mode, occurrences, drawerId, isExpanded, videoCount, rankCount, rankMetric });
   }
   appendActionNode(actionsLine, renderInlineTrend(trend));
   if (metaLine.childNodes.length) subline.append(metaLine);
@@ -3622,7 +3641,7 @@ function renderTrend(trend) {
 }
 
 function renderInlineTrend(trend) {
-  const badge = renderTrendBadge(trend) || document.createElement("span");
+  const badge = renderTrendBadge(trend, { compact: true }) || document.createElement("span");
   badge.classList.add("rank-trend-inline");
   if (!trend) {
     badge.hidden = true;
@@ -3631,14 +3650,16 @@ function renderInlineTrend(trend) {
   return badge;
 }
 
-function appendSublineSource(metaContainer, actionContainer, { mode, occurrences, drawerId, isExpanded, videoCount }) {
+function appendSublineSource(metaContainer, actionContainer, { mode, occurrences, drawerId, isExpanded, videoCount, rankCount = 0, rankMetric = "occurrences" }) {
   if (!occurrences.length) {
     appendSublinePart(metaContainer, "无来源");
     return;
   }
   const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
   if (sourceVideoCount <= 1 && occurrences.length === 1) {
-    appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
+    const occurrence = occurrences[0];
+    appendSublineNode(metaContainer, renderInlineSource(occurrence));
+    appendActionNode(actionContainer, renderSingleSourceCopyIconButton(occurrence));
     return;
   }
 
@@ -3653,6 +3674,8 @@ function appendSublineSource(metaContainer, actionContainer, { mode, occurrences
     total: sourcePreview.total,
     videoCount: sourceVideoCount,
     occurrenceCount: occurrences.length,
+    rankCount,
+    rankMetric,
   });
   const sourceLine = document.createElement("span");
   sourceLine.className = "source-line";
@@ -3661,7 +3684,18 @@ function appendSublineSource(metaContainer, actionContainer, { mode, occurrences
   appendActionNode(actionContainer, button);
 }
 
-function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0, total = 0, songCount = 0, videoCount = 0, occurrenceCount = 0 }) {
+function renderSourceToggleButton({
+  mode,
+  drawerId,
+  isExpanded,
+  hiddenCount = 0,
+  total = 0,
+  songCount = 0,
+  videoCount = 0,
+  occurrenceCount = 0,
+  rankCount = 0,
+  rankMetric = "occurrences",
+}) {
   const model = window.FrontendUtils.rankToggleModel({
     mode,
     isExpanded,
@@ -3670,6 +3704,8 @@ function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0,
     songCount,
     videoCount,
     occurrenceCount,
+    rankCount,
+    rankMetric,
     compact: isCompactRankMode(),
   });
   const button = document.createElement("button");
@@ -3682,6 +3718,8 @@ function renderSourceToggleButton({ mode, drawerId, isExpanded, hiddenCount = 0,
   button.dataset.songCount = String(songCount);
   button.dataset.videoCount = String(videoCount);
   button.dataset.occurrenceCount = String(occurrenceCount || total);
+  button.dataset.rankCount = String(rankCount);
+  button.dataset.rankMetric = rankMetric;
   button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
   button.setAttribute("aria-controls", drawerId);
   button.setAttribute("aria-label", model.ariaLabel);
@@ -3838,6 +3876,20 @@ function syncSourceGroupMoreButton(drawer, visibleCount, totalCount) {
   return more;
 }
 
+function convertSourceGroupMoreToCollapse(button, drawer) {
+  if (!button || !drawer) return null;
+  delete button.dataset.toggleSourceGroups;
+  button.dataset.collapseSource = "true";
+  button.classList.remove("source-group-more");
+  button.classList.add("source-collapse-bottom");
+  button.disabled = false;
+  button.removeAttribute("aria-busy");
+  button.removeAttribute("aria-label");
+  button.setAttribute("aria-controls", drawer.id);
+  button.textContent = drawer.dataset.sourceMode === "artist" ? "收起曲目" : "收起来源";
+  return button;
+}
+
 function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
   const totalCount = Number.isFinite(options.totalCount)
     ? options.totalCount
@@ -3880,6 +3932,10 @@ function sourceVisibleGroupCount(drawer, total) {
 function appendMobileSourceCollapse(drawer) {
   if (!drawer.classList.contains("source-drawer")) return;
   const existing = drawer.querySelector(":scope > .source-collapse-bottom");
+  if (drawer.querySelector(":scope > [data-toggle-source-groups]")) {
+    existing?.remove();
+    return;
+  }
   if (!isCompactRankMode()) {
     existing?.remove();
     return;
@@ -4042,6 +4098,15 @@ function renderCopySongLinksButton(occurrences, label = "复制全部链接", cl
 function renderCopySongLinksIconButton(occurrences) {
   const button = renderCopySongLinksButton(occurrences, "", "artist-song-copy source-copy-icon");
   button.title = "复制全部链接";
+  button.append(renderLinkListIcon());
+  return button;
+}
+
+function renderSingleSourceCopyIconButton(occurrence) {
+  const channelName = cleanText(occurrence?.item?.channelName) || "未知频道";
+  const button = renderCopySongLinksButton([occurrence], "", "inline-source-copy source-copy-icon");
+  button.title = "复制来源链接";
+  button.setAttribute("aria-label", `复制来源链接：${channelName}`);
   button.append(renderLinkListIcon());
   return button;
 }
@@ -4220,6 +4285,8 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     const songCount = Number(button.dataset.songCount || row._artistSongCount || row._artistSongGroups?.length || 0);
     const videoCount = Number(button.dataset.videoCount || window.FrontendUtils.groupOccurrencesByVideo(row._sourceOccurrences || []).length);
     const occurrenceCount = Number(button.dataset.occurrenceCount || count);
+    const rankCount = Number(button.dataset.rankCount || 0);
+    const rankMetric = button.dataset.rankMetric || "occurrences";
     const mode = button.dataset.sourceMode || row.dataset.drawerMode || "song";
     const model = window.FrontendUtils.rankToggleModel({
       mode,
@@ -4229,6 +4296,8 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
       songCount,
       videoCount,
       occurrenceCount,
+      rankCount,
+      rankMetric,
       compact: isCompactRankMode(),
     });
     button.setAttribute("aria-label", model.ariaLabel);
@@ -4380,7 +4449,7 @@ function expandSourceGroupTimestamps(button) {
   panel.hidden = expanded;
 }
 
-function expandSourceVideoGroups(button) {
+async function expandSourceVideoGroups(button) {
   const drawer = button.closest(".artist-song-sources, .source-drawer");
   if (!drawer) return;
   const occurrences = drawer._sourceOccurrences || [];
@@ -4388,19 +4457,37 @@ function expandSourceVideoGroups(button) {
   const current = Math.min(sourceRenderedGroupCount(drawer), groups.length);
   const nextVisible = groups.length;
   const scrollBefore = Math.round(window.scrollY || 0);
+  const remaining = Math.max(0, nextVisible - current);
+  const originalText = button.textContent;
+  const originalLabel = button.getAttribute("aria-label");
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  button.textContent = `正在展开${remaining}个来源…`;
+  drawer.setAttribute("aria-busy", "true");
+  let firstNewGroup = null;
+  try {
+    for (let start = current; start < nextVisible; start += SOURCE_EXPAND_CHUNK_SIZE) {
+      const end = Math.min(nextVisible, start + SOURCE_EXPAND_CHUNK_SIZE);
+      const appended = appendSourceGroupRange(drawer, groups, start, end);
+      if (!firstNewGroup) firstNewGroup = appended;
+      if (end < nextVisible) await yieldToBrowser();
+    }
+  } catch (error) {
+    button.textContent = originalText;
+    if (originalLabel) button.setAttribute("aria-label", originalLabel);
+    throw error;
+  } finally {
+    drawer.removeAttribute("aria-busy");
+    button.removeAttribute("aria-busy");
+    button.disabled = false;
+  }
   drawer.dataset.visibleSourceGroups = String(nextVisible);
-  const firstNewGroup = appendSourceGroupRange(drawer, groups, current, nextVisible);
   updateSourceDrawerCount(drawer, nextVisible, groups.length);
-  syncSourceGroupMoreButton(drawer, nextVisible, groups.length);
-  appendMobileSourceCollapse(drawer);
+  convertSourceGroupMoreToCollapse(button, drawer);
   drawer.dataset.lastMoreScrollY = String(scrollBefore);
   drawer.dataset.lastMoreScrollDelta = String(Math.round((window.scrollY || 0) - scrollBefore));
   window.requestAnimationFrame(() => {
-    if (button.isConnected && !button.hidden) {
-      focusWithoutScrolling(button);
-      return;
-    }
-    focusWithoutScrolling(firstNewGroup || drawer);
+    focusWithoutScrolling(button.isConnected ? button : firstNewGroup || drawer);
   });
 }
 
@@ -4675,14 +4762,16 @@ function trendForKey(mode, key) {
   return diff.get(key) || null;
 }
 
-function renderTrendBadge(trend) {
+function renderTrendBadge(trend, options = {}) {
   if (!trend) return null;
+  const compact = Boolean(options.compact);
   const badge = document.createElement("span");
   badge.className = "trend-badge";
   if (trend.isNew) {
     badge.classList.add("trend-new");
-    badge.textContent = "新上榜";
+    badge.textContent = compact ? "新" : "新上榜";
     badge.title = "本期新进入榜单";
+    badge.setAttribute("aria-label", "本期新进入榜单");
     return badge;
   }
 
@@ -4690,25 +4779,31 @@ function renderTrendBadge(trend) {
   const countDelta = Number(trend.countDelta) || 0;
   if (rankDelta > 0) {
     badge.classList.add("trend-up");
-    badge.textContent = `升 ${rankDelta}`;
+    badge.textContent = compact ? `↑${rankDelta}` : `升 ${rankDelta}`;
     badge.title = countDelta ? `排名上升 ${rankDelta}，收录 ${formatSignedDelta(countDelta)}` : `排名上升 ${rankDelta}`;
   } else if (rankDelta < 0) {
     badge.classList.add("trend-down");
-    badge.textContent = `降 ${Math.abs(rankDelta)}`;
+    badge.textContent = compact ? `↓${Math.abs(rankDelta)}` : `降 ${Math.abs(rankDelta)}`;
     badge.title = countDelta ? `排名下降 ${Math.abs(rankDelta)}，收录 ${formatSignedDelta(countDelta)}` : `排名下降 ${Math.abs(rankDelta)}`;
   } else if (countDelta) {
     badge.classList.add(countDelta > 0 ? "trend-up" : "trend-down");
-    badge.textContent = `收录 ${formatSignedDelta(countDelta)}`;
-    badge.title = `收录变化 ${formatSignedDelta(countDelta)}`;
+    badge.textContent = compact ? formatCompactSignedDelta(countDelta) : `收录 ${formatSignedDelta(countDelta)}`;
+    badge.title = countDelta > 0 ? `收录增加 ${countDelta}` : `收录减少 ${Math.abs(countDelta)}`;
   } else {
     return null;
   }
+  badge.setAttribute("aria-label", badge.title);
   return badge;
 }
 
 function formatSignedDelta(value) {
   const delta = Number(value) || 0;
   return delta > 0 ? `+${delta}` : String(delta);
+}
+
+function formatCompactSignedDelta(value) {
+  const delta = Number(value) || 0;
+  return delta > 0 ? `+${delta}` : `−${Math.abs(delta)}`;
 }
 
 async function copyVideoSetlist(item) {

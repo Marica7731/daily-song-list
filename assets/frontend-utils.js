@@ -661,9 +661,14 @@
 
     const videoCount = Math.max(0, Number(options.videoCount) || 0);
     const occurrenceCount = Math.max(0, Number(options.occurrenceCount ?? options.total) || 0);
-    const sourceCount = videoCount || occurrenceCount;
-    const compactText = videoCount > 1 ? `${sourceCount}来源` : `${occurrenceCount}时间点`;
-    const text = isExpanded ? "收起来源" : compact ? compactText : videoCount > 1 ? `查看${videoCount}个视频` : `查看${occurrenceCount}个时间戳`;
+    const compactText = compactSourceToggleModel({
+      isExpanded,
+      rankMetric: options.rankMetric,
+      rankCount: options.rankCount,
+      videoCount,
+      occurrenceCount,
+    }).text;
+    const text = isExpanded ? (compact ? compactText : "收起来源") : compact ? compactText : videoCount > 1 ? `查看${videoCount}个视频` : `查看${occurrenceCount}个时间戳`;
     const ariaLabel = isExpanded
       ? "收起该歌曲来源"
       : videoCount > 1
@@ -673,6 +678,19 @@
       text,
       ariaLabel,
     };
+  }
+
+  function compactSourceToggleModel(options = {}) {
+    const isExpanded = Boolean(options.isExpanded);
+    if (isExpanded) return { text: "收起" };
+    const videoCount = Math.max(0, Number(options.videoCount) || 0);
+    const occurrenceCount = Math.max(0, Number(options.occurrenceCount) || 0);
+    const rankCount = Math.max(0, Number(options.rankCount) || 0);
+    const rankMetric = options.rankMetric || "occurrences";
+
+    if (videoCount <= 1) return { text: `${occurrenceCount}点` };
+    if (rankMetric === "videos" || videoCount === rankCount) return { text: "来源" };
+    return { text: `${videoCount}源` };
   }
 
   function indexBucketButtonModel(label, bucket, isCurrent) {
@@ -901,6 +919,7 @@
     normalizeSongSearchText,
     paginateItems,
     parseUrlState,
+    compactSourceToggleModel,
     rankToggleModel,
     runtimeRangeMeta,
     runtimeRangePayloadFromGroup,

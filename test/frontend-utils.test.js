@@ -8,6 +8,7 @@ const {
   buildIndexBucketModel,
   buildInlineSourceModel,
   buildSourcePreview,
+  compactSourceToggleModel,
   createSnapshotLoader,
   createSongSearchLookup,
   createTrendLookup,
@@ -180,17 +181,61 @@ test("song rank toggle uses video and timestamp counts", () => {
   assert.equal(sameVideo.text, "查看4个时间戳");
   assert.equal(sameVideo.ariaLabel, "查看该歌曲的 4 个时间戳");
 
-  const compact = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 3, occurrenceCount: 8, compact: true });
-  assert.equal(compact.text, "3来源");
+  const compact = rankToggleModel({ mode: "song", isExpanded: false, rankMetric: "occurrences", rankCount: 9, videoCount: 3, occurrenceCount: 8, compact: true });
+  assert.equal(compact.text, "3源");
   assert.equal(compact.ariaLabel, "查看该歌曲的 3 个来源视频");
 
   const sameVideoCompact = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 1, occurrenceCount: 4, compact: true });
-  assert.equal(sameVideoCompact.text, "4时间点");
+  assert.equal(sameVideoCompact.text, "4点");
   assert.equal(sameVideoCompact.ariaLabel, "查看该歌曲的 4 个时间戳");
 
   const expanded = rankToggleModel({ mode: "song", isExpanded: true, hiddenCount: 3 });
   assert.equal(expanded.text, "收起来源");
   assert.equal(expanded.ariaLabel, "收起该歌曲来源");
+});
+
+test("compact source toggle model removes repeated rank counts", () => {
+  assert.equal(
+    compactSourceToggleModel({
+      isExpanded: false,
+      rankMetric: "occurrences",
+      rankCount: 36,
+      videoCount: 36,
+      occurrenceCount: 36,
+    }).text,
+    "来源",
+  );
+  assert.equal(
+    compactSourceToggleModel({
+      isExpanded: false,
+      rankMetric: "occurrences",
+      rankCount: 27,
+      videoCount: 25,
+      occurrenceCount: 27,
+    }).text,
+    "25源",
+  );
+  assert.equal(
+    compactSourceToggleModel({
+      isExpanded: false,
+      rankMetric: "videos",
+      rankCount: 25,
+      videoCount: 25,
+      occurrenceCount: 27,
+    }).text,
+    "来源",
+  );
+  assert.equal(
+    compactSourceToggleModel({
+      isExpanded: false,
+      rankMetric: "occurrences",
+      rankCount: 3,
+      videoCount: 1,
+      occurrenceCount: 3,
+    }).text,
+    "3点",
+  );
+  assert.equal(compactSourceToggleModel({ isExpanded: true, videoCount: 25, occurrenceCount: 27 }).text, "收起");
 });
 
 test("groups source occurrences by video with sorted timestamps", () => {

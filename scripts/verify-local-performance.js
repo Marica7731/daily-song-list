@@ -61,7 +61,11 @@ async function newPage(browser, viewport, options = {}) {
     if (msg.type() === "error") errors.push(msg.text());
   });
   page.on("pageerror", (error) => errors.push(error.message));
-  page.on("requestfailed", (request) => errors.push(`request failed ${request.url()} ${request.failure()?.errorText || ""}`));
+  page.on("requestfailed", (request) => {
+    const failure = request.failure()?.errorText || "";
+    if (failure === "net::ERR_ABORTED" && ["image", "media", "font"].includes(request.resourceType())) return;
+    errors.push(`request failed ${request.url()} ${failure}`);
+  });
   await page.addInitScript(() => {
     window.__longTasks = [];
     window.addEventListener("unhandledrejection", (event) => {
@@ -649,13 +653,30 @@ async function desktopRankVisualGeometry(browser) {
           imageSrc: image?.currentSrc || image?.src || "",
         };
       });
+      const footerHandle = await row.locator("[data-toggle-source-groups]").first().elementHandle();
+      await row.locator("[data-toggle-source-groups]").first().evaluate((node) => {
+        node.dataset.codexFooterPreserve = "1";
+      });
       await row.locator("[data-toggle-source-groups]").first().click();
-      const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
+      const afterGroupCount = expectedTotal
+        ? await waitForVisibleCountAtLeast(row, ".source-video-group", expectedTotal)
+        : await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
       if (afterGroupCount <= beforeGroupCount) throw new Error("desktop source group expander did not add visible groups");
       if (expectedTotal && afterGroupCount !== expectedTotal) {
         throw new Error(`desktop source group expander should reveal all remaining groups: before=${beforeGroupCount} after=${afterGroupCount} total=${expectedTotal}`);
       }
       if ((await row.locator("[data-toggle-source-groups]").count()) !== 0) throw new Error("desktop source group expander remained after revealing all sources");
+      const footerAfter = footerHandle
+        ? await footerHandle.evaluate((node) => ({
+            preserved: node.dataset.codexFooterPreserve === "1",
+            collapse: node.dataset.collapseSource === "true",
+            text: node.textContent.trim(),
+            connected: node.isConnected,
+          }))
+        : null;
+      if (!footerAfter?.preserved || !footerAfter.collapse || footerAfter.text !== "收起来源" || !footerAfter.connected) {
+        throw new Error(`desktop source group footer did not become collapse in place ${JSON.stringify(footerAfter)}`);
+      }
       const preservedAfter = await row.locator(".source-video-group").first().evaluate((node) => ({
         preserved: node.dataset.codexPreserve === "1",
         imagePreserved: node.querySelector("img")?.dataset.codexPreserve === "1",
@@ -962,20 +983,47 @@ async function mobileRankVisualGeometry(browser) {
       const rank = trendRow?.querySelector(".rank-number");
       const title = trendRow?.querySelector(".rank-title");
       const count = trendRow?.querySelector(".rank-count");
+      const rowBox = trendRow ? rectFor(trendRow) : null;
+      const subline = trendRow?.querySelector(".rank-subline");
+      const metaLine = trendRow?.querySelector(".rank-meta-line");
+      const actionsLine = trendRow?.querySelector(".rank-actions-line");
+      const actionsStyle = actionsLine ? getComputedStyle(actionsLine) : null;
+      const sublineStyle = subline ? getComputedStyle(subline) : null;
       return {
         viewportWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
         rowText: trendRow?.textContent?.slice(0, 200) || "",
+        row: rowBox,
+        subline: subline ? { ...rectFor(subline), display: sublineStyle.display, gridTemplateColumns: sublineStyle.gridTemplateColumns } : null,
+        metaLine: metaLine ? rectFor(metaLine) : null,
+        actionsLine: actionsLine
+          ? { ...rectFor(actionsLine), flexWrap: actionsStyle.flexWrap, minHeight: actionsStyle.minHeight }
+          : null,
+        actionTexts: Array.from(actionsLine?.querySelectorAll("button, .trend-badge") || [])
+          .filter(isVisible)
+          .map((node) => node.textContent.trim()),
         trend: isVisible(trend) ? rectFor(trend) : null,
+        trendText: isVisible(trend) ? trend.textContent.trim() : "",
         content: content ? rectFor(content) : null,
         button: button ? rectFor(button) : null,
+        buttonText: isVisible(button) ? button.textContent.trim() : "",
         rank: rank ? rectFor(rank) : null,
         title: title ? rectFor(title) : null,
         count: count ? rectFor(count) : null,
+        countText: count?.textContent?.trim() || "",
       };
     });
     if (closedGeometry.scrollWidth > closedGeometry.viewportWidth + 1) throw new Error(`mobile rank overflow ${JSON.stringify(closedGeometry)}`);
     if (!closedGeometry.content) throw new Error(`mobile rank content geometry missing ${JSON.stringify(closedGeometry)}`);
+    if (!closedGeometry.subline || closedGeometry.subline.display !== "grid") throw new Error(`mobile rank subline should be grid ${JSON.stringify(closedGeometry)}`);
+    if (!closedGeometry.metaLine || !closedGeometry.actionsLine) throw new Error(`mobile rank subline pieces missing ${JSON.stringify(closedGeometry)}`);
+    assertClose(closedGeometry.metaLine.centerY, closedGeometry.actionsLine.centerY, 2, "meta and actions center", closedGeometry);
+    if (closedGeometry.actionsLine.flexWrap !== "nowrap") throw new Error(`mobile rank actions should not wrap ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > 90) {
+      throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
+    }
+    if (/收录/u.test(closedGeometry.trendText)) throw new Error(`compact trend should not include 收录 ${JSON.stringify(closedGeometry)}`);
+    if (/^\d+来源$/u.test(closedGeometry.buttonText)) throw new Error(`compact source button should use 源 or 来源 text ${JSON.stringify(closedGeometry)}`);
     if (closedGeometry.trend) {
       if (closedGeometry.trend.width > 120) throw new Error(`trend badge too wide ${JSON.stringify(closedGeometry)}`);
       if (closedGeometry.trend.width > closedGeometry.content.width * 0.5) throw new Error(`trend badge exceeds half content width ${JSON.stringify(closedGeometry)}`);
@@ -1142,6 +1190,48 @@ async function mobileCopyAllLinksFlow(browser) {
     const setlistCopied = await page.evaluate(() => (window.__clipboardWrites[1] || "").split("\n").filter(Boolean).length);
     if (!setlistCopied) throw new Error("copy setlist did not write clipboard text");
 
+    const singleSourcePage = await gotoFirstSingleSourcePage(page, errors, requests);
+    const singleSourceRow = page.locator(".rank-row:not(.skeleton-row):has(.inline-source-copy):not(:has([data-toggle-source]))").first();
+    if ((await singleSourceRow.count()) !== 1) throw new Error(`single-source row with inline copy button not found after paging ${JSON.stringify(singleSourcePage)}`);
+    const singleSourceShape = await singleSourceRow.evaluate((node) => ({
+      copyButtons: node.querySelectorAll("[data-copy-song-links]").length,
+      drawerButtons: node.querySelectorAll("[data-toggle-source]").length,
+      drawers: node.querySelectorAll(".source-drawer").length,
+      title: node.querySelector(".inline-source-copy")?.getAttribute("title") || "",
+      aria: node.querySelector(".inline-source-copy")?.getAttribute("aria-label") || "",
+      actionHeight: node.querySelector(".inline-source-copy")?.getBoundingClientRect().height || 0,
+    }));
+    if (singleSourceShape.copyButtons !== 1 || singleSourceShape.drawerButtons !== 0 || singleSourceShape.drawers !== 0) {
+      throw new Error(`single-source inline copy structure invalid ${JSON.stringify(singleSourceShape)}`);
+    }
+    if (singleSourceShape.title !== "复制来源链接" || !/^复制来源链接：/u.test(singleSourceShape.aria)) {
+      throw new Error(`single-source copy accessibility invalid ${JSON.stringify(singleSourceShape)}`);
+    }
+    const maxSingleSourceHeight = viewport[0] <= 720 ? 34 : 40;
+    if (singleSourceShape.actionHeight < 28 || singleSourceShape.actionHeight > maxSingleSourceHeight) {
+      throw new Error(`single-source copy button size invalid ${JSON.stringify(singleSourceShape)}`);
+    }
+    let singleSourceScreenshotPath = null;
+    if (viewport[0] === 390) {
+      singleSourceScreenshotPath = shotPath(`single-source-copy-${viewport.join("x")}.png`);
+      await page.screenshot({ path: singleSourceScreenshotPath, fullPage: false });
+    }
+    await singleSourceRow.locator(".inline-source-copy[data-copy-song-links]").first().click();
+    await page.waitForFunction(() => (window.__clipboardWrites || []).length > 0, null, { timeout: 5000 });
+    const singleCopyResult = await page.evaluate(() => {
+      const writes = window.__clipboardWrites || [];
+      const text = writes[writes.length - 1] || "";
+      return {
+        text,
+        lines: text ? text.split("\n") : [],
+        valid: /^[^\n]+ https:\/\/www\.youtube\.com\/watch\?v=[^&\s]+&t=\d+s$/u.test(text),
+        hasMarkdown: /\[[^\]]+\]\(|^[-*]\s|^\d+\./um.test(text),
+      };
+    });
+    if (singleCopyResult.lines.length !== 1 || !singleCopyResult.valid || singleCopyResult.hasMarkdown) {
+      throw new Error(`single-source copy text invalid ${JSON.stringify(singleCopyResult)}`);
+    }
+
     let screenshotPath = null;
     if (viewport[0] === 390) {
       screenshotPath = shotPath(`source-drawer-toolbar-${viewport.join("x")}.png`);
@@ -1150,8 +1240,22 @@ async function mobileCopyAllLinksFlow(browser) {
     const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
     await context.close();
     if (errors.length || unhandled) throw new Error(`copy all links flow errors: ${errors.join(" | ")} ${unhandled}`);
-    results.push({ scenario: `copy-all-links-${viewport.join("x")}`, requests: [...new Set(requests)], screenshotPath });
+    results.push({ scenario: `copy-all-links-${viewport.join("x")}`, requests: [...new Set(requests)], screenshotPath, singleSourceScreenshotPath });
   }
+}
+
+async function gotoFirstSingleSourcePage(page, errors, requests) {
+  for (let pageNumber = 1; pageNumber <= 20; pageNumber += 1) {
+    const targetUrl = new URL(baseUrl);
+    targetUrl.searchParams.set("pageSize", "100");
+    targetUrl.searchParams.set("showUnknown", "1");
+    targetUrl.searchParams.set("page", String(pageNumber));
+    await page.goto(targetUrl.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    const matchCount = await page.locator(".rank-row:not(.skeleton-row):has(.inline-source-copy):not(:has([data-toggle-source]))").count();
+    if (matchCount > 0) return { page: pageNumber, matchCount };
+  }
+  return { page: null, matchCount: 0 };
 }
 
 async function compactSourceDrawerFlow(browser) {
@@ -1297,13 +1401,30 @@ async function compactSourceDrawerFlow(browser) {
         if (image) image.dataset.codexPreserve = "1";
         return node.textContent || "";
       });
+      const footerHandle = await moreGroups.first().elementHandle();
+      await moreGroups.first().evaluate((node) => {
+        node.dataset.codexFooterPreserve = "1";
+      });
       await moreGroups.first().click();
-      const afterGroupCount = await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
+      const afterGroupCount = expectedTotal
+        ? await waitForVisibleCountAtLeast(row, ".source-video-group", expectedTotal)
+        : await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
       if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
       if (expectedTotal && afterGroupCount !== expectedTotal) {
         throw new Error(`${scenario.label} source group expander should reveal all remaining groups: before=${beforeGroupCount} after=${afterGroupCount} total=${expectedTotal}`);
       }
       if ((await moreGroups.count()) !== 0) throw new Error(`${scenario.label} source group expander should be removed after revealing all sources`);
+      const footerAfter = footerHandle
+        ? await footerHandle.evaluate((node) => ({
+            preserved: node.dataset.codexFooterPreserve === "1",
+            collapse: node.dataset.collapseSource === "true",
+            text: node.textContent.trim(),
+            connected: node.isConnected,
+          }))
+        : null;
+      if (!footerAfter?.preserved || !footerAfter.collapse || footerAfter.text !== "收起来源" || !footerAfter.connected) {
+        throw new Error(`${scenario.label} source group footer did not become collapse in place ${JSON.stringify(footerAfter)}`);
+      }
       const preservedAfter = await row.locator(".source-video-group").first().evaluate((node) => ({
         preserved: node.dataset.codexPreserve === "1",
         imagePreserved: node.querySelector("img")?.dataset.codexPreserve === "1",
@@ -1406,6 +1527,18 @@ async function waitForVisibleCountAbove(row, selector, minimum) {
   const deadline = Date.now() + 3000;
   let latest = await countVisibleInRow(row, selector);
   while (latest <= minimum && Date.now() < deadline) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+    latest = await countVisibleInRow(row, selector);
+  }
+  return latest;
+}
+
+async function waitForVisibleCountAtLeast(row, selector, minimum) {
+  const deadline = Date.now() + 5000;
+  let latest = await countVisibleInRow(row, selector);
+  while (latest < minimum && Date.now() < deadline) {
     await new Promise((resolve) => {
       setTimeout(resolve, 50);
     });

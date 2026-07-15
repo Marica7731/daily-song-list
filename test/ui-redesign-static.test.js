@@ -57,7 +57,10 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.doesNotMatch(appSource, /function sourceBatchSizeForMode/u);
   assert.match(appSource, /shouldKeepSingleDrawerOpen\(\)/u);
   assert.match(appSource, /const nextVisible = groups\.length/u);
-  assert.match(appSource, /appendSourceGroupRange\(drawer, groups, current, nextVisible\)/u);
+  assert.match(appSource, /SOURCE_EXPAND_CHUNK_SIZE/u);
+  assert.match(appSource, /appendSourceGroupRange\(drawer, groups, start, end\)/u);
+  assert.match(appSource, /await yieldToBrowser\(\)/u);
+  assert.match(appSource, /convertSourceGroupMoreToCollapse\(button, drawer\)/u);
   assert.match(appSource, /document\.createDocumentFragment\(\)/u);
   assert.match(appSource, /查看更多来源（剩余 \$\{remaining\}）/u);
   assert.match(appSource, /dataset\.collapseSource = "true"/u);
@@ -89,6 +92,12 @@ test("third-round mobile component rules are encoded in css and browser checks",
   assert.match(cssSource, /\.sheet-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--control-large\);[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.match(cssSource, /\.sheet-actions\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: 1fr 1fr/u);
   assert.match(cssSource, /\.rank-actions-line\s*\{[\s\S]*gap: var\(--space-2\);/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-subline\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-subline\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-actions-line\s*\{[\s\S]*min-height: 0;[\s\S]*flex-wrap: nowrap;/u);
+  assert.match(cssSource, /\.rank-expand::after\s*\{[\s\S]*border-right: 1\.5px solid currentcolor;[\s\S]*transform: translateY\(-1px\) rotate\(45deg\);/u);
+  assert.match(cssSource, /\.rank-expand\[aria-expanded="true"\]::after\s*\{[\s\S]*rotate\(225deg\)/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.inline-source-copy\.source-copy-icon\s*\{[\s\S]*width: 30px;[\s\S]*height: 30px;/u);
   assert.match(cssSource, /\.trend-badge\.rank-trend-inline\s*\{[\s\S]*display: none;[\s\S]*width: max-content;[\s\S]*max-width: 120px;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*gap: 0;/u);
   assert.match(cssSource, /\.source-video-group\s*\{[\s\S]*grid-template-areas: "thumb main copy"/u);
