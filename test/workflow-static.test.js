@@ -3,7 +3,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 
-const workflowsDir = path.join(__dirname, "..", ".github", "workflows");
+const repoRoot = path.join(__dirname, "..");
+const workflowsDir = path.join(repoRoot, ".github", "workflows");
 
 test("core, review, and code checks use separate workflow files and concurrency groups", () => {
   const core = readWorkflow("update-core.yml");
@@ -39,6 +40,19 @@ test("core, review, and code checks use separate workflow files and concurrency 
 
 test("legacy combined update workflow is removed", () => {
   assert.equal(fs.existsSync(path.join(workflowsDir, "update-songlist.yml")), false);
+});
+
+test("README screenshot gallery is refreshable and references committed images", () => {
+  const readme = fs.readFileSync(path.join(repoRoot, "README.md"), "utf8");
+  assert.match(readme, /npm run screenshots:readme -- https:\/\/ytb-song-rank\.culua\.com\//u);
+  assert.match(readme, /docs\/assets\/screenshots\/desktop-song-rank\.png/u);
+  assert.match(readme, /docs\/assets\/screenshots\/mobile-query-suggestions\.png/u);
+
+  const screenshotRefs = [...readme.matchAll(/src="(docs\/assets\/screenshots\/[^"]+\.png)"/gu)].map((match) => match[1]);
+  assert.ok(screenshotRefs.length >= 12, `expected broad screenshot coverage, found ${screenshotRefs.length}`);
+  for (const ref of screenshotRefs) {
+    assert.equal(fs.existsSync(path.join(repoRoot, ref)), true, `missing README screenshot: ${ref}`);
+  }
 });
 
 function readWorkflow(name) {

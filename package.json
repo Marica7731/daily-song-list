@@ -22,6 +22,7 @@
     "validate:review": "node scripts/validate-data.js --review",
     "check:published": "node scripts/check-published-runtime.js",
     "verify:local": "node scripts/verify-local-performance.js",
+    "screenshots:readme": "node scripts/capture-readme-screenshots.js",
     "check:budget": "node scripts/check-runtime-budgets.js",
     "check": "node scripts/check-js-syntax.js && npm run blocklist:validate && npm test && npm run validate && npm run check:budget",
     "serve": "python -m http.server 8080",

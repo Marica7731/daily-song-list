@@ -1,13 +1,47 @@
 # Daily Song List
 
-![Daily Song List high-density mobile UI](docs/assets/daily-song-list-ultimate-density.png)
-
 Small GitHub Pages site that collects YouTube videos with usable timestamp song lists, then exposes jump links for two ranges:
 
 - `72h`: videos published within the last 72 hours.
 - `1m`: videos in the monthly carry-forward window that were returned by YouTube's monthly search filter.
 
 The site keeps one successful snapshot per hour. If a scheduled scrape fails, existing `data/latest.json` and snapshot files remain untouched, so the page continues to show the last successful result.
+
+## UI Screenshots
+
+These committed screenshots are the repository homepage proof set for the current UI. Refresh them whenever a UI-facing change is shipped or when the deployed page needs to show the latest layout:
+
+```powershell
+npm run screenshots:readme -- https://ytb-song-rank.culua.com/
+```
+
+### Desktop Web
+
+| Song ranking | Monthly ranking | Video tab |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/desktop-song-rank.png" alt="Desktop song ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-monthly-song-rank.png" alt="Desktop monthly ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
+
+| Search and filters | Expanded sources |
+| --- | --- |
+| <img src="docs/assets/screenshots/desktop-query-panel.png" alt="Desktop unified search and filter panel" width="420" /> | <img src="docs/assets/screenshots/desktop-source-expanded.png" alt="Desktop expanded song sources" width="420" /> |
+
+### Mobile H5
+
+| Song ranking | Artist ranking | Song index |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-song-rank.png" alt="Mobile song ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-artist-rank.png" alt="Mobile artist ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-song-index.png" alt="Mobile song index" width="180" /> |
+
+| Video tab | Video expanded | Sources expanded |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-video-view.png" alt="Mobile video tab" width="180" /> | <img src="docs/assets/screenshots/mobile-video-expanded.png" alt="Mobile expanded video card" width="180" /> | <img src="docs/assets/screenshots/mobile-source-expanded.png" alt="Mobile expanded song sources" width="180" /> |
+
+| Active query strip | Recent searches | Suggestions |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-active-query-strip.png" alt="Mobile active query strip with search and filters" width="180" /> | <img src="docs/assets/screenshots/mobile-query-recent.png" alt="Mobile search and filter panel with recent searches" width="180" /> | <img src="docs/assets/screenshots/mobile-query-suggestions.png" alt="Mobile search suggestions in query panel" width="180" /> |
+
+| Snapshot controls |
+| --- |
+| <img src="docs/assets/screenshots/mobile-query-history.png" alt="Mobile query panel history snapshot controls" width="180" /> |
 
 ## How it Works
 
@@ -100,6 +134,7 @@ npm run validate:review
 npm run check:budget
 npm run check:published
 npm run verify:local
+npm run screenshots:readme
 npm run version:assets
 npm run check
 python -m http.server 8080
@@ -113,6 +148,8 @@ npm run verify:local -- http://127.0.0.1:8080/
 ```
 
 Screenshots are written to `artifacts/h5-redesign/` and should not be committed.
+
+For repository-homepage screenshots, run `npm run screenshots:readme -- <base-url>` and commit the refreshed files in `docs/assets/screenshots/`. This set should be updated with every shipped UI change so the README reflects the current deployed interface, while `artifacts/h5-redesign/` remains the disposable full acceptance output.
 
 `npm run rebuild:derived` never fetches YouTube. It rereads local `data/latest.json` song `raw` fields with the current parser, reapplies durable curation rules and manual overrides, reuses local `data/song-search-known-songs.json`, rewrites `data/latest.json`, `data/72h.json`, `data/1m.json`, rank diffs, review reports, and compact `data/ui/*` runtime files. Use it for parser/rule/report fixes that should update the current published dataset without changing the remote scrape input.
 
