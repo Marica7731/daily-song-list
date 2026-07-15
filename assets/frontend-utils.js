@@ -95,27 +95,44 @@
     };
   }
 
-  function visiblePageTokens(currentPage, totalPages) {
+  function visiblePageTokens(currentPage, totalPages, options = {}) {
     const total = positiveInteger(totalPages, 1);
     const current = clamp(positiveInteger(currentPage, 1), 1, total);
-    if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1);
+    const maxTokens = Math.max(5, positiveInteger(options.maxTokens, 7));
+    const jumpStep = positiveInteger(options.jumpStep, maxTokens <= 5 ? 5 : 10);
+    const pageToken = (page) => ({ type: "page", page, current: page === current });
+    const jumpToken = (direction) => ({
+      type: "jump",
+      direction,
+      step: jumpStep,
+      target: direction === "previous" ? Math.max(1, current - jumpStep) : Math.min(total, current + jumpStep),
+    });
 
-    const pages = new Set([1, total, current - 1, current, current + 1]);
-    if (current <= 4) {
-      for (let page = 2; page <= 5; page += 1) pages.add(page);
-    }
-    if (current >= total - 3) {
-      for (let page = total - 4; page < total; page += 1) pages.add(page);
+    if (total <= maxTokens) return Array.from({ length: total }, (_, index) => pageToken(index + 1));
+
+    let pages;
+    if (current <= 3) {
+      const end = Math.min(total - 1, maxTokens - 2);
+      pages = Array.from({ length: end }, (_, index) => index + 1);
+      return [...pages.map(pageToken), jumpToken("next"), pageToken(total)];
     }
 
-    const ordered = [...pages].filter((page) => page >= 1 && page <= total).sort((a, b) => a - b);
-    const tokens = [];
-    for (const page of ordered) {
-      const previous = tokens[tokens.length - 1];
-      if (typeof previous === "number" && page - previous > 1) tokens.push("ellipsis");
-      tokens.push(page);
+    if (current >= total - 2) {
+      const start = Math.max(2, total - (maxTokens - 3));
+      pages = Array.from({ length: total - start + 1 }, (_, index) => start + index);
+      return [pageToken(1), jumpToken("previous"), ...pages.map(pageToken)];
     }
-    return tokens;
+
+    const middleSlots = Math.max(1, maxTokens - 4);
+    const leftSlots = Math.floor((middleSlots - 1) / 2);
+    const rightSlots = middleSlots - 1 - leftSlots;
+    let start = Math.max(2, current - leftSlots);
+    let end = Math.min(total - 1, current + rightSlots);
+    const missing = middleSlots - (end - start + 1);
+    if (missing > 0 && start === 2) end = Math.min(total - 1, end + missing);
+    if (missing > 0 && end === total - 1) start = Math.max(2, start - missing);
+    pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
+    return [pageToken(1), jumpToken("previous"), ...pages.map(pageToken), jumpToken("next"), pageToken(total)];
   }
 
   function buildIndexBucketModel(records, options = {}) {
@@ -650,47 +667,48 @@
   function rankToggleModel(options = {}) {
     const mode = options.mode || "song";
     const isExpanded = Boolean(options.isExpanded);
-    const compact = Boolean(options.compact);
     if (mode === "artist") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
       return {
-        text: isExpanded ? "收起曲目" : compact ? `${songCount}首曲目` : `查看${songCount}首`,
+        text: isExpanded ? "收起" : `${songCount}首曲目`,
         ariaLabel: isExpanded ? "收起该歌手曲目" : `查看该歌手的 ${songCount} 首歌曲`,
       };
     }
 
     const videoCount = Math.max(0, Number(options.videoCount) || 0);
     const occurrenceCount = Math.max(0, Number(options.occurrenceCount ?? options.total) || 0);
-    const compactText = compactSourceToggleModel({
+    const model = compactSourceToggleModel({
       isExpanded,
       rankMetric: options.rankMetric,
       rankCount: options.rankCount,
       videoCount,
       occurrenceCount,
-    }).text;
-    const text = isExpanded ? (compact ? compactText : "收起来源") : compact ? compactText : videoCount > 1 ? `查看${videoCount}个视频` : `查看${occurrenceCount}个时间戳`;
+    });
     const ariaLabel = isExpanded
       ? "收起该歌曲来源"
-      : videoCount > 1
+      : model.kind === "source"
         ? `查看该歌曲的 ${videoCount} 个来源视频`
-        : `查看该歌曲的 ${occurrenceCount} 个时间戳`;
+        : model.kind === "time"
+          ? `查看该歌曲的 ${occurrenceCount} 个时间点`
+          : "该歌曲没有来源";
     return {
-      text,
+      text: model.text,
       ariaLabel,
     };
   }
 
   function compactSourceToggleModel(options = {}) {
     const isExpanded = Boolean(options.isExpanded);
-    if (isExpanded) return { text: "收起" };
+    if (isExpanded) return { text: "收起", kind: "expanded" };
     const videoCount = Math.max(0, Number(options.videoCount) || 0);
     const occurrenceCount = Math.max(0, Number(options.occurrenceCount) || 0);
     const rankCount = Math.max(0, Number(options.rankCount) || 0);
     const rankMetric = options.rankMetric || "occurrences";
 
-    if (videoCount <= 1) return { text: `${occurrenceCount}点` };
-    if (rankMetric === "videos" || videoCount === rankCount) return { text: "来源" };
-    return { text: `${videoCount}源` };
+    if (!videoCount && !occurrenceCount) return { text: "无来源", kind: "none" };
+    if (videoCount <= 1 && occurrenceCount > 1) return { text: `${occurrenceCount}个时间点`, kind: "time" };
+    if (videoCount > 1 && rankMetric !== "videos" && videoCount !== rankCount) return { text: `${videoCount}个来源`, kind: "source" };
+    return { text: "来源", kind: "source" };
   }
 
   function indexBucketButtonModel(label, bucket, isCurrent) {

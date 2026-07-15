@@ -16,7 +16,6 @@ const STATUS_PATH = "data/status.json";
 const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
-const INLINE_SOURCE_PREVIEW_LIMIT = 1;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
@@ -577,26 +576,15 @@ function bindEvents() {
     }
   });
 
-  els.content.addEventListener("keydown", (event) => {
-    const input = event.target.closest("[data-jump-page]");
-    if (!input || event.key !== "Enter") return;
-    event.preventDefault();
-    const page = Number.parseInt(input.value || "1", 10);
+  els.content.addEventListener("change", (event) => {
+    const select = event.target.closest("[data-page-select]");
+    if (!select) return;
+    const page = Number.parseInt(select.value || "1", 10);
     setPage(page);
-    render({ focusAfterPageChange: true });
+    render({ focusAfterPageChange: true, urlMode: "push" });
   });
 
   els.content.addEventListener("click", (event) => {
-    const jump = event.target.closest("[data-jump-page-button]");
-    if (jump) {
-      event.preventDefault();
-      const input = jump.closest(".page-jump")?.querySelector("[data-jump-page]");
-      const page = Number.parseInt(input?.value || "1", 10);
-      setPage(page);
-      render({ focusAfterPageChange: true });
-      return;
-    }
-
     const sourceCollapse = event.target.closest("[data-collapse-source]");
     if (sourceCollapse) {
       event.preventDefault();
@@ -2978,39 +2966,16 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
   const controls = document.createElement("div");
   controls.className = "pagination-controls";
 
-  if (variant === "top") {
-    if (!showPageControls) return footer;
-    const compactTop = isCompactRankMode();
-    controls.append(
-      renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, compactTop ? { icon: "prev" } : {}),
-      renderPageStatus(pageInfo, { compact: compactTop }),
-    );
-    controls.append(renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, compactTop ? { icon: "next" } : {}));
-    footer.append(controls);
-    return footer;
-  }
-
-  controls.append(
-    ...(showPageControls ? [renderPageButton("首页", 1, pageInfo.page === 1), renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1)] : []),
-  );
-
   if (showPageControls) {
-    for (const token of window.FrontendUtils.visiblePageTokens(pageInfo.page, pageInfo.pageCount)) {
-      if (token === "ellipsis") {
-        controls.append(renderPageEllipsis());
-      } else {
-        controls.append(renderPageButton(String(token), token, token === pageInfo.page, token === pageInfo.page));
-      }
-    }
-
     controls.append(
-      renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount),
-      renderPageButton("末页", pageInfo.pageCount, pageInfo.page === pageInfo.pageCount),
+      renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, { icon: "prev" }),
+      ...renderPageTokenButtons(pageInfo),
+      renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, { icon: "next" }),
     );
-    controls.append(renderPageJumpControl(pageInfo));
     footer.append(controls);
   }
 
+  if (variant === "bottom" && showPageControls) footer.append(renderPageSelectControl(pageInfo));
   return footer;
 }
 
@@ -3056,9 +3021,11 @@ function renderPageButton(label, page, disabled, isCurrent = false, options = {}
   if (options.icon) {
     button.classList.add("pagination-icon-button");
     button.setAttribute("aria-label", label);
+    button.title = label;
     button.append(renderPaginationIcon(options.icon));
   } else {
     button.textContent = label;
+    button.title = label;
   }
   return button;
 }
@@ -3073,43 +3040,48 @@ function renderPaginationIcon(direction) {
   return svg;
 }
 
-function renderPageStatus(pageInfo, options = {}) {
-  const status = document.createElement("span");
-  status.className = "pagination-status";
-  status.textContent = options.compact ? `${pageInfo.page}/${pageInfo.pageCount}` : `第 ${pageInfo.page} / ${pageInfo.pageCount} 页`;
-  return status;
+function renderPageTokenButtons(pageInfo) {
+  const options = paginationTokenOptions();
+  return window.FrontendUtils.visiblePageTokens(pageInfo.page, pageInfo.pageCount, options).map((token) => {
+    if (token.type === "jump") return renderPageJumpToken(token);
+    return renderPageButton(String(token.page), token.page, false, token.current);
+  });
 }
 
-function renderPageJumpControl(pageInfo) {
+function paginationTokenOptions() {
+  const mode = getResponsiveMode();
+  if (mode === "mobile") return { maxTokens: 5, jumpStep: 5 };
+  if (mode === "tablet") return { maxTokens: 7, jumpStep: 10 };
+  return { maxTokens: 9, jumpStep: 10 };
+}
+
+function renderPageJumpToken(token) {
+  const label = token.direction === "previous" ? `向前跳 ${token.step} 页` : `向后跳 ${token.step} 页`;
+  const button = renderPageButton("…", token.target, false, false);
+  button.classList.add("pagination-jump-token");
+  button.dataset.pageJumpDirection = token.direction;
+  button.setAttribute("aria-label", label);
+  button.title = label;
+  return button;
+}
+
+function renderPageSelectControl(pageInfo) {
   const label = document.createElement("label");
-  label.className = "page-jump";
+  label.className = "page-select";
   const text = document.createElement("span");
-  text.textContent = "跳转到第";
-  const input = document.createElement("input");
-  input.type = "number";
-  input.min = "1";
-  input.max = String(pageInfo.pageCount);
-  input.inputMode = "numeric";
-  input.dataset.jumpPage = "true";
-  input.value = String(pageInfo.page);
-  input.setAttribute("aria-label", `跳转到第几页，范围 1 到 ${pageInfo.pageCount}`);
-  const suffix = document.createElement("span");
-  suffix.textContent = "页";
-  const button = document.createElement("button");
-  button.className = "pagination-button page-jump-button";
-  button.type = "button";
-  button.dataset.jumpPageButton = "true";
-  button.textContent = "跳转";
-  label.append(text, input, suffix, button);
+  text.textContent = "跳至";
+  const select = document.createElement("select");
+  select.dataset.pageSelect = "true";
+  select.setAttribute("aria-label", `选择页码，范围 1 到 ${pageInfo.pageCount}`);
+  for (let page = 1; page <= pageInfo.pageCount; page += 1) {
+    const option = document.createElement("option");
+    option.value = String(page);
+    option.textContent = `${page}`;
+    select.append(option);
+  }
+  select.value = String(pageInfo.page);
+  label.append(text, select);
   return label;
-}
-
-function renderPageEllipsis() {
-  const ellipsis = document.createElement("span");
-  ellipsis.className = "pagination-ellipsis";
-  ellipsis.setAttribute("aria-hidden", "true");
-  ellipsis.textContent = "…";
-  return ellipsis;
 }
 
 function schedulePageChangeFocus() {
@@ -3438,7 +3410,7 @@ function renderRankRecord({
   const artistSongCount = songCount;
   const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
   const occurrenceCount = occurrences.length;
-  const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 || occurrenceCount > 1 : sourceVideoCount > 1 || occurrenceCount > 1;
+  const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 || occurrenceCount > 1 : occurrenceCount > 0;
   const isExpanded = state.expandedRows.has(rowKey);
 
   row.className = [
@@ -3485,7 +3457,21 @@ function renderRankRecord({
     }),
   );
   row.append(renderTrend(trend));
-  row.append(renderCount(count, countUnit));
+  row.append(
+    renderRankSide({
+      mode,
+      drawerId,
+      isExpanded,
+      expandable,
+      occurrences,
+      songCount: artistSongCount,
+      videoCount: sourceVideoCount,
+      count,
+      countUnit,
+      rankCount: count,
+      rankMetric: state.rankMetric,
+    }),
+  );
   if (expandable) row.append(renderSourceDrawer({ mode, occurrences, songGroups, drawerId, isExpanded, getSongGroups }));
 
   return row;
@@ -3496,7 +3482,7 @@ function renderIndexRecord(record) {
   const rowKey = makeDomId(`index-${record.key}`);
   const drawerId = `source-drawer-${rowKey}`;
   const sourceVideoCount = Math.max(0, Number(record.videoCount) || 0);
-  const expandable = sourceVideoCount > 1 || record.occurrences.length > 1;
+  const expandable = record.occurrences.length > 0;
   const isExpanded = state.expandedRows.has(rowKey);
 
   row.className = ["index-row", expandable ? "is-expandable" : "", isExpanded ? "is-expanded" : "", isNicheRecord(record) ? "is-niche" : ""]
@@ -3519,7 +3505,19 @@ function renderIndexRecord(record) {
       headingLevel: 3,
     }),
   );
-  row.append(renderCount(record.count));
+  row.append(
+    renderRankSide({
+      mode: "index",
+      drawerId,
+      isExpanded,
+      expandable,
+      occurrences: record.occurrences,
+      videoCount: sourceVideoCount,
+      count: record.count,
+      rankCount: record.count,
+      rankMetric: "occurrences",
+    }),
+  );
   if (expandable) row.append(renderSourceDrawer({ mode: "index", occurrences: record.occurrences, drawerId, isExpanded }));
 
   return row;
@@ -3576,11 +3574,10 @@ function renderRecordContent(title, meta, options) {
   const actionsLine = document.createElement("div");
   actionsLine.className = "rank-actions-line";
   if (mode === "artist") {
-    appendArtistSubline(metaLine, actionsLine, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount });
+    appendArtistSubline(metaLine, { occurrences, songCount, songPreview, videoCount });
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(metaLine, `${videoCount} 个视频`, "subline-video-count");
-    appendSublineSource(metaLine, actionsLine, { mode, occurrences, drawerId, isExpanded, videoCount, rankCount, rankMetric });
   }
   appendActionNode(actionsLine, renderInlineTrend(trend));
   if (metaLine.childNodes.length) subline.append(metaLine);
@@ -3590,17 +3587,12 @@ function renderRecordContent(title, meta, options) {
   return content;
 }
 
-function appendArtistSubline(metaContainer, actionContainer, { occurrences, songCount, songPreview, drawerId, isExpanded, videoCount }) {
+function appendArtistSubline(metaContainer, { occurrences, songCount, songPreview, videoCount }) {
   appendSublinePart(metaContainer, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
   appendSublinePart(metaContainer, `${songCount} 首歌曲`, "subline-song-count");
   appendSublinePart(metaContainer, `${videoCount} 个视频`, "subline-video-count");
   if (songCount === 1 && occurrences.length === 1) {
     appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
-  }
-
-  if (songCount > 1 || occurrences.length > 1) {
-    const button = renderSourceToggleButton({ mode: "artist", drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount });
-    appendActionNode(actionContainer, button);
   }
 }
 
@@ -3650,40 +3642,6 @@ function renderInlineTrend(trend) {
   return badge;
 }
 
-function appendSublineSource(metaContainer, actionContainer, { mode, occurrences, drawerId, isExpanded, videoCount, rankCount = 0, rankMetric = "occurrences" }) {
-  if (!occurrences.length) {
-    appendSublinePart(metaContainer, "无来源");
-    return;
-  }
-  const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
-  if (sourceVideoCount <= 1 && occurrences.length === 1) {
-    const occurrence = occurrences[0];
-    appendSublineNode(metaContainer, renderInlineSource(occurrence));
-    appendActionNode(actionContainer, renderSingleSourceCopyIconButton(occurrence));
-    return;
-  }
-
-  const sourcePreview = window.FrontendUtils.buildSourcePreview(occurrences, {
-    limit: INLINE_SOURCE_PREVIEW_LIMIT,
-  });
-  const button = renderSourceToggleButton({
-    mode,
-    drawerId,
-    isExpanded,
-    hiddenCount: sourcePreview.hiddenCount,
-    total: sourcePreview.total,
-    videoCount: sourceVideoCount,
-    occurrenceCount: occurrences.length,
-    rankCount,
-    rankMetric,
-  });
-  const sourceLine = document.createElement("span");
-  sourceLine.className = "source-line";
-  sourceLine.append(renderSourcePreviewLinks(sourcePreview.preview));
-  appendSublineNode(metaContainer, sourceLine);
-  appendActionNode(actionContainer, button);
-}
-
 function renderSourceToggleButton({
   mode,
   drawerId,
@@ -3709,7 +3667,7 @@ function renderSourceToggleButton({
     compact: isCompactRankMode(),
   });
   const button = document.createElement("button");
-  button.className = "rank-expand";
+  button.className = "rank-expand ui-chip";
   button.type = "button";
   button.dataset.toggleSource = "true";
   button.dataset.sourceMode = mode;
@@ -3727,21 +3685,56 @@ function renderSourceToggleButton({
   return button;
 }
 
-function renderSourcePreviewLinks(occurrences) {
-  const preview = document.createElement("span");
-  preview.className = "source-preview-list";
-  preview.setAttribute("aria-label", "来源预览");
-  occurrences.forEach((occurrence, index) => {
-    if (index > 0) {
-      const separator = document.createElement("span");
-      separator.className = "source-preview-separator";
-      separator.setAttribute("aria-hidden", "true");
-      separator.textContent = "/";
-      preview.append(separator);
+function renderRankSide({
+  mode = "song",
+  drawerId,
+  isExpanded,
+  expandable,
+  occurrences = [],
+  songCount = 0,
+  videoCount = 0,
+  count = 0,
+  countUnit = "次",
+  rankCount = 0,
+  rankMetric = "occurrences",
+}) {
+  const side = document.createElement("div");
+  side.className = "rank-side";
+  side.append(renderCount(count, countUnit));
+  if (mode === "artist") {
+    if (expandable) {
+      side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount }));
+    } else {
+      side.append(renderStaticSideChip(`${songCount}首曲目`));
     }
-    preview.append(renderInlineSource(occurrence));
-  });
-  return preview;
+    return side;
+  }
+
+  if (occurrences.length) {
+    const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
+    side.append(
+      renderSourceToggleButton({
+        mode,
+        drawerId,
+        isExpanded,
+        total: occurrences.length,
+        videoCount: sourceVideoCount,
+        occurrenceCount: occurrences.length,
+        rankCount,
+        rankMetric,
+      }),
+    );
+  } else {
+    side.append(renderStaticSideChip("无来源"));
+  }
+  return side;
+}
+
+function renderStaticSideChip(text) {
+  const chip = document.createElement("span");
+  chip.className = "rank-expand rank-expand-static ui-chip ui-chip-muted";
+  chip.textContent = text;
+  return chip;
 }
 
 function renderInlineSource(occurrence) {
@@ -3866,13 +3859,13 @@ function syncSourceGroupMoreButton(drawer, visibleCount, totalCount) {
   const remaining = totalCount - visibleCount;
   if (!more) {
     more = document.createElement("button");
-    more.className = "source-group-more";
+    more.className = "source-group-more ui-chip";
     more.type = "button";
     more.dataset.toggleSourceGroups = "true";
     drawer.insertBefore(more, drawer.querySelector(":scope > .source-collapse-bottom") || null);
   }
-  more.textContent = `查看更多来源（剩余 ${remaining}）`;
-  more.setAttribute("aria-label", `查看更多来源，剩余 ${remaining} 个`);
+  more.textContent = `查看更多 ${remaining}个来源`;
+  more.setAttribute("aria-label", `查看更多 ${remaining} 个来源`);
   return more;
 }
 
@@ -3885,8 +3878,9 @@ function convertSourceGroupMoreToCollapse(button, drawer) {
   button.disabled = false;
   button.removeAttribute("aria-busy");
   button.removeAttribute("aria-label");
+  button.setAttribute("aria-label", "收起来源抽屉");
   button.setAttribute("aria-controls", drawer.id);
-  button.textContent = drawer.dataset.sourceMode === "artist" ? "收起曲目" : "收起来源";
+  button.textContent = "收起";
   return button;
 }
 
@@ -3907,6 +3901,7 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
   const actions = document.createElement("div");
   actions.className = "source-drawer-actions";
   actions.append(renderCopySongLinksButton(occurrences));
+  actions.append(renderSourceCollapseButton(drawer.id, drawer.dataset.sourceMode || "song", "source-action source-collapse-top ui-chip"));
   toolbar.append(actions);
   return toolbar;
 }
@@ -3917,7 +3912,7 @@ function updateSourceDrawerCount(drawer, visibleCount, totalCount) {
 }
 
 function sourceDrawerCountText(visibleCount, totalCount) {
-  return visibleCount < totalCount ? `已显示${visibleCount}/${totalCount}个来源` : `${totalCount} 个来源`;
+  return visibleCount < totalCount ? `已显示 ${visibleCount}/${totalCount} 个来源` : `${totalCount} 个来源`;
 }
 
 function sourceVisibleGroupCount(drawer, total) {
@@ -3945,13 +3940,14 @@ function appendMobileSourceCollapse(drawer) {
   drawer.append(renderSourceCollapseButton(drawer.id, mode));
 }
 
-function renderSourceCollapseButton(drawerId, mode = "song", className = "source-collapse-bottom") {
+function renderSourceCollapseButton(drawerId, mode = "song", className = "source-collapse-bottom ui-chip") {
   const button = document.createElement("button");
   button.className = className;
   button.type = "button";
   button.dataset.collapseSource = "true";
   button.setAttribute("aria-controls", drawerId);
-  button.textContent = mode === "artist" ? "收起曲目" : "收起来源";
+  button.setAttribute("aria-label", mode === "artist" ? "收起该歌手曲目" : "收起来源抽屉");
+  button.textContent = "收起";
   return button;
 }
 
@@ -4059,9 +4055,11 @@ function renderCopySetlistButton(item, label = "复制歌单", className = "copy
 }
 
 function renderCopySetlistIconButton(item) {
-  const button = renderCopySetlistButton(item, "", "source-copy-icon source-copy");
+  const button = renderCopySetlistButton(item, "", "source-copy-icon source-copy ui-chip ui-chip-icon-label");
   button.title = "复制歌单";
-  button.append(renderMusicListIcon());
+  const label = document.createElement("span");
+  label.textContent = "复制歌单";
+  button.append(renderMusicListIcon(), label);
   return button;
 }
 
@@ -4084,7 +4082,7 @@ function renderMusicListIcon() {
   return svg;
 }
 
-function renderCopySongLinksButton(occurrences, label = "复制全部链接", className = "source-action source-copy-all") {
+function renderCopySongLinksButton(occurrences, label = "复制全部链接", className = "source-action source-copy-all ui-chip") {
   const button = document.createElement("button");
   button.className = className;
   button.type = "button";
@@ -4096,17 +4094,8 @@ function renderCopySongLinksButton(occurrences, label = "复制全部链接", cl
 }
 
 function renderCopySongLinksIconButton(occurrences) {
-  const button = renderCopySongLinksButton(occurrences, "", "artist-song-copy source-copy-icon");
+  const button = renderCopySongLinksButton(occurrences, "", "artist-song-copy source-copy-icon ui-chip");
   button.title = "复制全部链接";
-  button.append(renderLinkListIcon());
-  return button;
-}
-
-function renderSingleSourceCopyIconButton(occurrence) {
-  const channelName = cleanText(occurrence?.item?.channelName) || "未知频道";
-  const button = renderCopySongLinksButton([occurrence], "", "inline-source-copy source-copy-icon");
-  button.title = "复制来源链接";
-  button.setAttribute("aria-label", `复制来源链接：${channelName}`);
   button.append(renderLinkListIcon());
   return button;
 }
@@ -4204,7 +4193,7 @@ function renderArtistSongGroup(group) {
 
   const sourceGroups = window.FrontendUtils.groupOccurrencesByVideo(group.occurrences);
   const sourceButton = document.createElement("button");
-  sourceButton.className = "artist-song-source-toggle";
+  sourceButton.className = "artist-song-source-toggle ui-chip";
   sourceButton.type = "button";
   sourceButton.dataset.toggleArtistSongSource = "true";
   sourceButton.dataset.sourceVideoCount = String(sourceGroups.length);
@@ -4281,7 +4270,7 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
     const count = row._sourceOccurrences?.length || 0;
     const total = Number(button.dataset.sourceTotal || count);
-    const hiddenCount = Number(button.dataset.sourceHiddenCount || Math.max(0, count - INLINE_SOURCE_PREVIEW_LIMIT));
+    const hiddenCount = Number(button.dataset.sourceHiddenCount || 0);
     const songCount = Number(button.dataset.songCount || row._artistSongCount || row._artistSongGroups?.length || 0);
     const videoCount = Number(button.dataset.videoCount || window.FrontendUtils.groupOccurrencesByVideo(row._sourceOccurrences || []).length);
     const occurrenceCount = Number(button.dataset.occurrenceCount || count);
@@ -4423,14 +4412,19 @@ function closeSiblingArtistSongSources(section) {
 function updateArtistSongSourceButton(button, isExpanded) {
   const videoCount = Math.max(0, Number(button.dataset.sourceVideoCount) || 0);
   const occurrenceCount = Math.max(0, Number(button.dataset.occurrenceCount) || 0);
-  const label = videoCount > 1 ? `${videoCount}来源` : occurrenceCount > 1 ? `${occurrenceCount}时间点` : "1来源";
-  button.textContent = isExpanded ? "收起" : label;
+  const model = window.FrontendUtils.compactSourceToggleModel({
+    isExpanded,
+    rankMetric: "occurrences",
+    videoCount,
+    occurrenceCount,
+  });
+  button.textContent = model.text;
   button.setAttribute(
     "aria-label",
     isExpanded
       ? "收起这首歌的来源"
-      : videoCount > 1
-        ? `查看这首歌的 ${videoCount} 个来源`
+      : model.kind === "source"
+        ? `查看这首歌的 ${videoCount} 个来源视频`
         : `查看这首歌的 ${occurrenceCount} 个时间点`,
   );
 }
@@ -4534,7 +4528,7 @@ function renderVideo(item) {
   count.textContent = matchCount && !item._videoSearchMatched ? `匹配 ${matchCount} 首` : `${item.songs?.length || 0} 首`;
   const headingActions = document.createElement("div");
   headingActions.className = "video-heading-actions";
-  headingActions.append(count, renderCopySetlistButton(item, "复制歌单", "video-copy-setlist"));
+  headingActions.append(count, renderCopySetlistButton(item, "复制歌单", "video-copy-setlist ui-chip"));
   heading.append(headingActions);
   body.append(heading);
 

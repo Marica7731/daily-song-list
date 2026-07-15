@@ -239,14 +239,14 @@ async function assertUiShape(page, viewport, range) {
     const summary = rect("#summary");
     const summaryRange = rect("#summary .summary-range");
     const topPagination = rect(".pagination-top");
-    const topJump = rect(".pagination-top .page-jump");
+    const topSelect = rect(".pagination-top .page-select");
     const topPageSize = rect(".pagination-top .page-size-control");
-    const topControls = Array.from(document.querySelectorAll(".pagination-top .pagination-button, .pagination-top .pagination-status")).map((node) => ({
+    const topControls = Array.from(document.querySelectorAll(".pagination-top .pagination-button")).map((node) => ({
       text: node.textContent || "",
       ariaLabel: node.getAttribute("aria-label") || "",
       className: node.className || "",
     }));
-    const bottomJump = rect(".pagination-bottom .page-jump");
+    const bottomSelect = rect(".pagination-bottom .page-select");
     const filterBadges = Array.from(document.querySelectorAll("#filterCountBadge, #mobileFilterCountBadge")).map((node) => ({
       id: node.id,
       hidden: node.hidden,
@@ -332,10 +332,10 @@ async function assertUiShape(page, viewport, range) {
       summary,
       summaryRange,
       topPagination,
-      topJump,
+      topSelect,
       topPageSize,
       topControls,
-      bottomJump,
+      bottomSelect,
       filterBadges,
       firstRow: rowRect(firstRow),
       firstTitle: rowRect(firstTitle),
@@ -372,19 +372,18 @@ async function assertUiShape(page, viewport, range) {
     if (result.summaryRange && result.summaryRange.display !== "none") {
       throw new Error(`mobile summary repeats range: ${result.summary.text}`);
     }
-    if (result.topJump || result.topPageSize) throw new Error(`mobile top pagination includes jump/page size ${JSON.stringify(result)}`);
-    if (result.topControls.length && result.topControls.length !== 3) {
-      throw new Error(`mobile top pagination should expose prev/status/next only ${JSON.stringify(result.topControls)}`);
+    if (result.topSelect || result.topPageSize) throw new Error(`mobile top pagination includes page select/page size ${JSON.stringify(result)}`);
+    if (result.topControls.length && result.topControls.length < 5) {
+      throw new Error(`mobile top pagination should expose clickable page tokens ${JSON.stringify(result.topControls)}`);
     }
     if (
-      result.topControls.length === 3 &&
-      (result.topControls[0].text.trim() ||
-        result.topControls[2].text.trim() ||
-        result.topControls[0].ariaLabel !== "上一页" ||
-        result.topControls[2].ariaLabel !== "下一页" ||
-        !/^\d+\/\d+$/u.test(result.topControls[1].text.trim()))
+      result.topControls.length &&
+      (result.topControls[0].ariaLabel !== "上一页" ||
+        result.topControls[result.topControls.length - 1].ariaLabel !== "下一页" ||
+        !result.topControls.some((control) => control.className.includes("is-current") && /^\d+$/u.test(control.text.trim())) ||
+        !result.topControls.some((control) => control.text.trim() === "…" && /向[前后]跳/u.test(control.ariaLabel)))
     ) {
-      throw new Error(`mobile top pagination should use icon buttons plus compact status ${JSON.stringify(result.topControls)}`);
+      throw new Error(`mobile top pagination should use icon buttons, page numbers, and jump tokens ${JSON.stringify(result.topControls)}`);
     }
     if (result.filterBadges.some((badge) => !badge.hidden || badge.display !== "none" || badge.text === "0")) {
       throw new Error(`inactive filter badge is visible ${JSON.stringify(result.filterBadges)}`);
@@ -398,14 +397,14 @@ async function assertUiShape(page, viewport, range) {
       throw new Error(`first mobile title is covered ${JSON.stringify(result)}`);
     }
     if (result.firstTitle.fontSize < 14) throw new Error(`first mobile title font too small ${JSON.stringify(result.firstTitle)}`);
-    if (result.firstButton && result.firstButton.height < 36) throw new Error(`mobile first action touch target too small ${JSON.stringify(result.firstButton)}`);
+    if (result.firstButton && result.firstButton.height < 30) throw new Error(`mobile first action chip too small ${JSON.stringify(result.firstButton)}`);
     if (!result.secondRow || result.secondRow.top >= viewport[1]) throw new Error(`next mobile row entry is not visible ${JSON.stringify(result.secondRow)}`);
   } else if (viewport[0] <= 919) {
-    if (result.topJump || result.topPageSize) throw new Error(`tablet top pagination includes jump/page size ${JSON.stringify(result)}`);
+    if (result.topSelect || result.topPageSize) throw new Error(`tablet top pagination includes page select/page size ${JSON.stringify(result)}`);
     if (!result.firstRow || result.firstRow.bottom > viewport[1]) throw new Error(`first tablet row is not visible ${JSON.stringify(result)}`);
     if (!result.firstTitle || result.firstTitle.fontSize < 14) throw new Error(`first tablet title invalid ${JSON.stringify(result.firstTitle)}`);
   } else if (viewport[0] >= 1024) {
-    if (result.topJump || !result.bottomJump) throw new Error(`desktop pagination scope invalid ${JSON.stringify(result)}`);
+    if (result.topSelect || !result.bottomSelect) throw new Error(`desktop pagination scope invalid ${JSON.stringify(result)}`);
     if (!result.firstRow || !result.firstTitle) throw new Error(`desktop first row missing ${JSON.stringify(result)}`);
     if (result.firstTitle.top < (result.topPagination?.bottom || 0) - 1) throw new Error(`desktop first title is covered ${JSON.stringify(result)}`);
     if (result.firstTitle.fontSize < 14) throw new Error(`desktop first title font too small ${JSON.stringify(result.firstTitle)}`);
@@ -516,7 +515,7 @@ async function desktopRankVisualGeometry(browser) {
         firstRow?.querySelector(".rank-number"),
         firstRow?.querySelector(".rank-content"),
         firstRow?.querySelector(".rank-trend"),
-        firstRow?.querySelector(".rank-count"),
+        firstRow?.querySelector(".rank-side"),
       ].map((node) => (node ? rectFor(node) : null));
       const title = firstRow?.querySelector(".rank-title");
       const trendCounts = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)")).slice(0, 40).map((row) => ({
@@ -619,10 +618,10 @@ async function desktopRankVisualGeometry(browser) {
       throw new Error(`desktop copy-all placement invalid ${JSON.stringify(sourceGeometry)}`);
     }
     if (sourceGeometry.groups.length > 9) throw new Error(`desktop source drawer rendered more than initial batch ${JSON.stringify(sourceGeometry)}`);
-    if (sourceGeometry.moreButtons && !/^已显示9\/\d+个来源$/u.test(sourceGeometry.countText)) {
+    if (sourceGeometry.moreButtons && !/^已显示\s+9\/\d+\s+个来源$/u.test(sourceGeometry.countText)) {
       throw new Error(`desktop source count should expose visible progress ${JSON.stringify(sourceGeometry)}`);
     }
-    if (sourceGeometry.collapseButtons !== 0) throw new Error(`desktop source drawer should not render duplicate collapse actions ${JSON.stringify(sourceGeometry)}`);
+    if (sourceGeometry.collapseButtons !== 1) throw new Error(`desktop source drawer should render one toolbar collapse action ${JSON.stringify(sourceGeometry)}`);
     if (sourceGeometry.toolbar.bottom > sourceGeometry.firstGroup.top + 8) {
       throw new Error(`desktop source toolbar not before cards ${JSON.stringify(sourceGeometry)}`);
     }
@@ -674,7 +673,7 @@ async function desktopRankVisualGeometry(browser) {
             connected: node.isConnected,
           }))
         : null;
-      if (!footerAfter?.preserved || !footerAfter.collapse || footerAfter.text !== "收起来源" || !footerAfter.connected) {
+      if (!footerAfter?.preserved || !footerAfter.collapse || footerAfter.text !== "收起" || !footerAfter.connected) {
         throw new Error(`desktop source group footer did not become collapse in place ${JSON.stringify(footerAfter)}`);
       }
       const preservedAfter = await row.locator(".source-video-group").first().evaluate((node) => ({
@@ -884,7 +883,7 @@ async function mobileFilterSheetFlow(browser) {
     assertClose(topGeometry.segmented[0].height, topGeometry.segmented[1].height, 1, "metric segmented height", topGeometry);
     if (!topGeometry.selects.length) throw new Error(`mobile filter select controls missing ${JSON.stringify(topGeometry)}`);
     for (const select of topGeometry.selects) {
-      assertClose(select.height, 44, 1, "filter select height", topGeometry);
+      assertClose(select.height, 40, 1, "filter select height", topGeometry);
     }
     const selectHeights = topGeometry.selects.map((item) => item.height);
     if (Math.max(...selectHeights) - Math.min(...selectHeights) > 1) throw new Error(`filter select heights differ ${JSON.stringify(topGeometry)}`);
@@ -1023,16 +1022,22 @@ async function mobileRankVisualGeometry(browser) {
       throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
     }
     if (/收录/u.test(closedGeometry.trendText)) throw new Error(`compact trend should not include 收录 ${JSON.stringify(closedGeometry)}`);
-    if (/^\d+来源$/u.test(closedGeometry.buttonText)) throw new Error(`compact source button should use 源 or 来源 text ${JSON.stringify(closedGeometry)}`);
+    if (/^\d+(?:源|点|来源)$/u.test(closedGeometry.buttonText)) throw new Error(`compact source button should use complete Chinese units ${JSON.stringify(closedGeometry)}`);
     if (closedGeometry.trend) {
       if (closedGeometry.trend.width > 120) throw new Error(`trend badge too wide ${JSON.stringify(closedGeometry)}`);
       if (closedGeometry.trend.width > closedGeometry.content.width * 0.5) throw new Error(`trend badge exceeds half content width ${JSON.stringify(closedGeometry)}`);
       if (closedGeometry.trend.width > closedGeometry.content.width - 8) throw new Error(`trend badge spans rank content ${JSON.stringify(closedGeometry)}`);
       if (closedGeometry.trend.height > 28) throw new Error(`trend badge too tall ${JSON.stringify(closedGeometry)}`);
-      if (closedGeometry.button) assertClose(closedGeometry.trend.centerY, closedGeometry.button.centerY, 2, "trend and source button center", closedGeometry);
     }
-    if (closedGeometry.rank && closedGeometry.title) assertClose(closedGeometry.rank.top, closedGeometry.title.top, 3, "rank and title top", closedGeometry);
-    if (closedGeometry.title && closedGeometry.count) assertClose(closedGeometry.title.top, closedGeometry.count.top, 3, "title and count top", closedGeometry);
+    if (closedGeometry.rank && closedGeometry.title && closedGeometry.rank.top > closedGeometry.title.top + 3) {
+      throw new Error(`mobile rank marker should stay near the row top ${JSON.stringify(closedGeometry)}`);
+    }
+    if (closedGeometry.title && closedGeometry.count && closedGeometry.count.top > closedGeometry.title.top + 8) {
+      throw new Error(`mobile count should stay in the right-side upper area ${JSON.stringify(closedGeometry)}`);
+    }
+    if (closedGeometry.count && closedGeometry.button && closedGeometry.button.top < closedGeometry.count.bottom - 1) {
+      throw new Error(`mobile source chip should sit below the count ${JSON.stringify(closedGeometry)}`);
+    }
 
     const expandableRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
     if ((await expandableRows.count()) < 1) throw new Error("no expandable row for mobile rank visual geometry");
@@ -1088,7 +1093,7 @@ async function mobileRankVisualGeometry(browser) {
     if (expandedGeometry.drawer.rowGap !== "0px") throw new Error(`mobile source drawer should have no grid row gap ${JSON.stringify(expandedGeometry)}`);
     assertClose(expandedGeometry.firstGroup.paddingTop, 8, 1, "source group top padding", expandedGeometry);
     assertClose(expandedGeometry.firstGroup.paddingBottom, 8, 1, "source group bottom padding", expandedGeometry);
-    if (!expandedGeometry.copyButtons.length || expandedGeometry.copyButtons.some((button) => button.height < 36)) {
+    if (!expandedGeometry.copyButtons.length || expandedGeometry.copyButtons.some((button) => button.height < 30)) {
       throw new Error(`source copy button height invalid ${JSON.stringify(expandedGeometry)}`);
     }
     if (expandedGeometry.sourceLinkButtonCount !== 1) throw new Error(`copy same-song links button should render once ${JSON.stringify(expandedGeometry)}`);
@@ -1191,33 +1196,35 @@ async function mobileCopyAllLinksFlow(browser) {
     if (!setlistCopied) throw new Error("copy setlist did not write clipboard text");
 
     const singleSourcePage = await gotoFirstSingleSourcePage(page, errors, requests);
-    const singleSourceRow = page.locator(".rank-row:not(.skeleton-row):has(.inline-source-copy):not(:has([data-toggle-source]))").first();
-    if ((await singleSourceRow.count()) !== 1) throw new Error(`single-source row with inline copy button not found after paging ${JSON.stringify(singleSourcePage)}`);
+    const singleSourceRow = page.locator('.rank-row:not(.skeleton-row):has([data-toggle-source][data-occurrence-count="1"])').first();
+    if ((await singleSourceRow.count()) !== 1) throw new Error(`single-source row with drawer source button not found after paging ${JSON.stringify(singleSourcePage)}`);
     const singleSourceShape = await singleSourceRow.evaluate((node) => ({
       copyButtons: node.querySelectorAll("[data-copy-song-links]").length,
       drawerButtons: node.querySelectorAll("[data-toggle-source]").length,
       drawers: node.querySelectorAll(".source-drawer").length,
-      title: node.querySelector(".inline-source-copy")?.getAttribute("title") || "",
-      aria: node.querySelector(".inline-source-copy")?.getAttribute("aria-label") || "",
-      actionHeight: node.querySelector(".inline-source-copy")?.getBoundingClientRect().height || 0,
+      toggleText: node.querySelector("[data-toggle-source]")?.textContent?.trim() || "",
+      aria: node.querySelector("[data-toggle-source]")?.getAttribute("aria-label") || "",
+      actionHeight: node.querySelector("[data-toggle-source]")?.getBoundingClientRect().height || 0,
     }));
-    if (singleSourceShape.copyButtons !== 1 || singleSourceShape.drawerButtons !== 0 || singleSourceShape.drawers !== 0) {
-      throw new Error(`single-source inline copy structure invalid ${JSON.stringify(singleSourceShape)}`);
+    if (singleSourceShape.copyButtons !== 0 || singleSourceShape.drawerButtons !== 1 || singleSourceShape.drawers !== 1) {
+      throw new Error(`single-source drawer trigger structure invalid ${JSON.stringify(singleSourceShape)}`);
     }
-    if (singleSourceShape.title !== "复制来源链接" || !/^复制来源链接：/u.test(singleSourceShape.aria)) {
-      throw new Error(`single-source copy accessibility invalid ${JSON.stringify(singleSourceShape)}`);
+    if (singleSourceShape.toggleText !== "来源" || !/^查看该歌曲的 1 个来源视频/u.test(singleSourceShape.aria)) {
+      throw new Error(`single-source toggle accessibility invalid ${JSON.stringify(singleSourceShape)}`);
     }
-    const maxSingleSourceHeight = viewport[0] <= 720 ? 34 : 40;
-    if (singleSourceShape.actionHeight < 28 || singleSourceShape.actionHeight > maxSingleSourceHeight) {
-      throw new Error(`single-source copy button size invalid ${JSON.stringify(singleSourceShape)}`);
+    if (singleSourceShape.actionHeight < 28 || singleSourceShape.actionHeight > 34) {
+      throw new Error(`single-source source chip size invalid ${JSON.stringify(singleSourceShape)}`);
     }
+    await singleSourceRow.locator("[data-toggle-source]").first().click();
+    await singleSourceRow.locator(".source-drawer:not([hidden]) [data-copy-song-links]").first().waitFor({ state: "visible", timeout: 5000 });
     let singleSourceScreenshotPath = null;
     if (viewport[0] === 390) {
-      singleSourceScreenshotPath = shotPath(`single-source-copy-${viewport.join("x")}.png`);
+      singleSourceScreenshotPath = shotPath(`single-source-drawer-${viewport.join("x")}.png`);
       await page.screenshot({ path: singleSourceScreenshotPath, fullPage: false });
     }
-    await singleSourceRow.locator(".inline-source-copy[data-copy-song-links]").first().click();
-    await page.waitForFunction(() => (window.__clipboardWrites || []).length > 0, null, { timeout: 5000 });
+    const writesBeforeSingleCopy = await page.evaluate(() => (window.__clipboardWrites || []).length);
+    await singleSourceRow.locator(".source-drawer:not([hidden]) [data-copy-song-links]").first().click();
+    await page.waitForFunction((count) => (window.__clipboardWrites || []).length > count, writesBeforeSingleCopy, { timeout: 5000 });
     const singleCopyResult = await page.evaluate(() => {
       const writes = window.__clipboardWrites || [];
       const text = writes[writes.length - 1] || "";
@@ -1252,7 +1259,7 @@ async function gotoFirstSingleSourcePage(page, errors, requests) {
     targetUrl.searchParams.set("page", String(pageNumber));
     await page.goto(targetUrl.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
-    const matchCount = await page.locator(".rank-row:not(.skeleton-row):has(.inline-source-copy):not(:has([data-toggle-source]))").count();
+    const matchCount = await page.locator('.rank-row:not(.skeleton-row):has([data-toggle-source][data-occurrence-count="1"])').count();
     if (matchCount > 0) return { page: pageNumber, matchCount };
   }
   return { page: null, matchCount: 0 };
@@ -1381,8 +1388,8 @@ async function compactSourceDrawerFlow(browser) {
     if ((await moreGroups.count()) > 0) {
       const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
       const moreText = (await moreGroups.first().textContent()) || "";
-      if (!/查看更多来源（剩余 \d+）/u.test(moreText)) throw new Error(`source group expander text invalid: ${moreText}`);
-      const remainingMatch = moreText.match(/剩余\s*(\d+)/u);
+      if (!/查看更多 \d+个来源/u.test(moreText)) throw new Error(`source group expander text invalid: ${moreText}`);
+      const remainingMatch = moreText.match(/查看更多\s*(\d+)个来源/u);
       const expectedTotal = remainingMatch ? beforeGroupCount + Number.parseInt(remainingMatch[1], 10) : sourceCountFromText(moreText);
       let expandedTimestampBeforeMore = false;
       const firstTimestampToggle = row.locator('[data-toggle-source-times][aria-expanded="false"]').first();
@@ -1422,7 +1429,7 @@ async function compactSourceDrawerFlow(browser) {
             connected: node.isConnected,
           }))
         : null;
-      if (!footerAfter?.preserved || !footerAfter.collapse || footerAfter.text !== "收起来源" || !footerAfter.connected) {
+      if (!footerAfter?.preserved || !footerAfter.collapse || footerAfter.text !== "收起" || !footerAfter.connected) {
         throw new Error(`${scenario.label} source group footer did not become collapse in place ${JSON.stringify(footerAfter)}`);
       }
       const preservedAfter = await row.locator(".source-video-group").first().evaluate((node) => ({
@@ -1451,11 +1458,13 @@ async function compactSourceDrawerFlow(browser) {
     }
 
     const bottomScreenshotPath = shotPath(`source-drawer-bottom-${viewport.join("x")}.png`);
-    const collapseBottom = row.locator("[data-collapse-source]");
+    const collapseTop = row.locator(".source-collapse-top[data-collapse-source]");
+    const collapseBottom = row.locator(".source-collapse-bottom[data-collapse-source]");
+    if ((await collapseTop.count()) < 1) throw new Error(`${scenario.label} source drawer should have a toolbar collapse button`);
     if ((await collapseBottom.count()) !== 1) throw new Error(`${scenario.label} source drawer should have exactly one bottom collapse button`);
     await retryDetachedAction(() => collapseBottom.scrollIntoViewIfNeeded(), "scroll bottom source collapse");
     const bottomCoverage = await page.evaluate(() => {
-      const collapse = document.querySelector(".rank-row.is-expanded [data-collapse-source]");
+      const collapse = document.querySelector(".rank-row.is-expanded .source-collapse-bottom[data-collapse-source]");
       const nav = document.querySelector("#mobileBottomNav");
       const collapseBox = collapse?.getBoundingClientRect();
       const navBox = nav?.getBoundingClientRect();

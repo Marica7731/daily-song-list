@@ -18,8 +18,8 @@ test("fixture: one video with multiple timestamps uses timestamp disclosure copy
 
   assert.equal(groups.length, 1);
   assert.equal(groups[0].occurrences.length, 3);
-  assert.equal(rankToggleModel({ mode: "song", isExpanded: false, videoCount: groups.length, occurrenceCount: occurrences.length }).text, "查看3个时间戳");
-  assert.equal(rankToggleModel({ mode: "song", isExpanded: false, videoCount: groups.length, occurrenceCount: occurrences.length, compact: true }).text, "3点");
+  assert.equal(rankToggleModel({ mode: "song", isExpanded: false, videoCount: groups.length, occurrenceCount: occurrences.length }).text, "3个时间点");
+  assert.equal(rankToggleModel({ mode: "song", isExpanded: false, videoCount: groups.length, occurrenceCount: occurrences.length, compact: true }).text, "3个时间点");
 });
 
 test("fixture: forty source videos keep all source links copyable", () => {

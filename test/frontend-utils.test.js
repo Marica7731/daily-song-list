@@ -160,7 +160,7 @@ test("source preview defaults to one inline source and counts hidden sources", (
 
 test("artist rank toggle uses unique song count", () => {
   const collapsed = rankToggleModel({ mode: "artist", isExpanded: false, songCount: 5, hiddenCount: 12 });
-  assert.equal(collapsed.text, "查看5首");
+  assert.equal(collapsed.text, "5首曲目");
   assert.equal(collapsed.ariaLabel, "查看该歌手的 5 首歌曲");
 
   const compact = rankToggleModel({ mode: "artist", isExpanded: false, songCount: 5, compact: true });
@@ -168,74 +168,74 @@ test("artist rank toggle uses unique song count", () => {
   assert.equal(compact.ariaLabel, "查看该歌手的 5 首歌曲");
 
   const expanded = rankToggleModel({ mode: "artist", isExpanded: true, songCount: 5 });
-  assert.equal(expanded.text, "收起曲目");
+  assert.equal(expanded.text, "收起");
   assert.equal(expanded.ariaLabel, "收起该歌手曲目");
 });
 
 test("song rank toggle uses video and timestamp counts", () => {
   const multiVideo = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 3, occurrenceCount: 8 });
-  assert.equal(multiVideo.text, "查看3个视频");
+  assert.equal(multiVideo.text, "3个来源");
   assert.equal(multiVideo.ariaLabel, "查看该歌曲的 3 个来源视频");
 
   const sameVideo = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 1, occurrenceCount: 4 });
-  assert.equal(sameVideo.text, "查看4个时间戳");
-  assert.equal(sameVideo.ariaLabel, "查看该歌曲的 4 个时间戳");
+  assert.equal(sameVideo.text, "4个时间点");
+  assert.equal(sameVideo.ariaLabel, "查看该歌曲的 4 个时间点");
 
   const compact = rankToggleModel({ mode: "song", isExpanded: false, rankMetric: "occurrences", rankCount: 9, videoCount: 3, occurrenceCount: 8, compact: true });
-  assert.equal(compact.text, "3源");
+  assert.equal(compact.text, "3个来源");
   assert.equal(compact.ariaLabel, "查看该歌曲的 3 个来源视频");
 
   const sameVideoCompact = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 1, occurrenceCount: 4, compact: true });
-  assert.equal(sameVideoCompact.text, "4点");
-  assert.equal(sameVideoCompact.ariaLabel, "查看该歌曲的 4 个时间戳");
+  assert.equal(sameVideoCompact.text, "4个时间点");
+  assert.equal(sameVideoCompact.ariaLabel, "查看该歌曲的 4 个时间点");
 
   const expanded = rankToggleModel({ mode: "song", isExpanded: true, hiddenCount: 3 });
-  assert.equal(expanded.text, "收起来源");
+  assert.equal(expanded.text, "收起");
   assert.equal(expanded.ariaLabel, "收起该歌曲来源");
 });
 
 test("compact source toggle model removes repeated rank counts", () => {
-  assert.equal(
+  assert.deepEqual(
     compactSourceToggleModel({
       isExpanded: false,
       rankMetric: "occurrences",
       rankCount: 36,
       videoCount: 36,
       occurrenceCount: 36,
-    }).text,
-    "来源",
+    }),
+    { text: "来源", kind: "source" },
   );
-  assert.equal(
+  assert.deepEqual(
     compactSourceToggleModel({
       isExpanded: false,
       rankMetric: "occurrences",
       rankCount: 27,
       videoCount: 25,
       occurrenceCount: 27,
-    }).text,
-    "25源",
+    }),
+    { text: "25个来源", kind: "source" },
   );
-  assert.equal(
+  assert.deepEqual(
     compactSourceToggleModel({
       isExpanded: false,
       rankMetric: "videos",
       rankCount: 25,
       videoCount: 25,
       occurrenceCount: 27,
-    }).text,
-    "来源",
+    }),
+    { text: "来源", kind: "source" },
   );
-  assert.equal(
+  assert.deepEqual(
     compactSourceToggleModel({
       isExpanded: false,
       rankMetric: "occurrences",
       rankCount: 3,
       videoCount: 1,
       occurrenceCount: 3,
-    }).text,
-    "3点",
+    }),
+    { text: "3个时间点", kind: "time" },
   );
-  assert.equal(compactSourceToggleModel({ isExpanded: true, videoCount: 25, occurrenceCount: 27 }).text, "收起");
+  assert.deepEqual(compactSourceToggleModel({ isExpanded: true, videoCount: 25, occurrenceCount: 27 }), { text: "收起", kind: "expanded" });
 });
 
 test("groups source occurrences by video with sorted timestamps", () => {
@@ -384,18 +384,71 @@ test("pagination uses pageSize 50 and clamps pages to available bounds", () => {
   assert.equal(underrun.page, 1);
 });
 
-test("visible page tokens include ellipses for every numeric gap", () => {
+test("visible page tokens include clickable directional jumps", () => {
   const cases = [
-    { current: 1, total: 10, expected: [1, 2, 3, 4, 5, "ellipsis", 10] },
-    { current: 6, total: 12, expected: [1, "ellipsis", 5, 6, 7, "ellipsis", 12] },
-    { current: 12, total: 12, expected: [1, "ellipsis", 8, 9, 10, 11, 12] },
-    { current: 5, total: 7, expected: [1, 2, 3, 4, 5, 6, 7] },
+    {
+      current: 1,
+      total: 68,
+      options: { maxTokens: 5, jumpStep: 5 },
+      expected: [
+        { type: "page", page: 1, current: true },
+        { type: "page", page: 2, current: false },
+        { type: "page", page: 3, current: false },
+        { type: "jump", direction: "next", step: 5, target: 6 },
+        { type: "page", page: 68, current: false },
+      ],
+    },
+    {
+      current: 8,
+      total: 68,
+      options: { maxTokens: 5, jumpStep: 5 },
+      expected: [
+        { type: "page", page: 1, current: false },
+        { type: "jump", direction: "previous", step: 5, target: 3 },
+        { type: "page", page: 8, current: true },
+        { type: "jump", direction: "next", step: 5, target: 13 },
+        { type: "page", page: 68, current: false },
+      ],
+    },
+    {
+      current: 8,
+      total: 68,
+      options: { maxTokens: 7, jumpStep: 10 },
+      expected: [
+        { type: "page", page: 1, current: false },
+        { type: "jump", direction: "previous", step: 10, target: 1 },
+        { type: "page", page: 7, current: false },
+        { type: "page", page: 8, current: true },
+        { type: "page", page: 9, current: false },
+        { type: "jump", direction: "next", step: 10, target: 18 },
+        { type: "page", page: 68, current: false },
+      ],
+    },
+    {
+      current: 67,
+      total: 68,
+      options: { maxTokens: 5, jumpStep: 5 },
+      expected: [
+        { type: "page", page: 1, current: false },
+        { type: "jump", direction: "previous", step: 5, target: 62 },
+        { type: "page", page: 66, current: false },
+        { type: "page", page: 67, current: true },
+        { type: "page", page: 68, current: false },
+      ],
+    },
+    {
+      current: 5,
+      total: 7,
+      options: { maxTokens: 7, jumpStep: 10 },
+      expected: Array.from({ length: 7 }, (_, index) => ({ type: "page", page: index + 1, current: index + 1 === 5 })),
+    },
   ];
 
-  for (const { current, total, expected } of cases) {
-    const tokens = visiblePageTokens(current, total);
+  for (const { current, total, options, expected } of cases) {
+    const tokens = visiblePageTokens(current, total, options);
     assert.deepEqual(tokens, expected);
-    assertNoNumericJumpWithoutEllipsis(tokens);
+    assertPageTokensOrdered(tokens);
+    assert.equal(tokens.filter((token) => token.type === "page" && token.current).length, 1);
   }
 });
 
@@ -806,18 +859,21 @@ function createDeferred() {
   return { promise, resolve, reject };
 }
 
-function assertNoNumericJumpWithoutEllipsis(tokens) {
-  let previousNumber = null;
-  let previousToken = null;
+function assertPageTokensOrdered(tokens) {
+  let previousPage = 0;
+  const pages = [];
   for (const token of tokens) {
-    if (typeof token === "number") {
-      if (previousNumber !== null && token - previousNumber > 1) {
-        assert.equal(previousToken, "ellipsis", `missing ellipsis between ${previousNumber} and ${token}`);
-      }
-      previousNumber = token;
+    if (token.type === "page") {
+      assert.ok(token.page > previousPage, `page token out of order: ${JSON.stringify(tokens)}`);
+      previousPage = token.page;
+      pages.push(token.page);
+    } else {
+      assert.match(token.direction, /^(previous|next)$/u);
+      assert.ok(token.target >= 1, `jump target below first page: ${JSON.stringify(token)}`);
+      assert.ok(token.step > 0, `jump step invalid: ${JSON.stringify(token)}`);
     }
-    previousToken = token;
   }
+  assert.equal(new Set(pages).size, pages.length, `duplicate page token: ${JSON.stringify(tokens)}`);
 }
 
 function urlStateOptions() {

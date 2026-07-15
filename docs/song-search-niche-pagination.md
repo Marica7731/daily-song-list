@@ -71,9 +71,9 @@ update step.
 - Long rank, index, and video lists use page controls. URL state keeps the
   active range, view, page, page size, index bucket, search text, snapshot, and
   library-outside filter so a filtered page can be reopened or shared.
-- Ranking rows preview one primary source inline. When more sources exist, the
-  `+N 来源` control stays fully visible and opens the source drawer containing
-  every matching timestamp link.
+- Ranking rows keep the source control in the right-side count column. `来源`,
+  `N个来源`, and `N个时间点` all open the same source drawer containing every
+  matching timestamp link, including one-source rows.
 
 ## Verification
 

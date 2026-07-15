@@ -62,19 +62,19 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /await yieldToBrowser\(\)/u);
   assert.match(appSource, /convertSourceGroupMoreToCollapse\(button, drawer\)/u);
   assert.match(appSource, /document\.createDocumentFragment\(\)/u);
-  assert.match(appSource, /查看更多来源（剩余 \$\{remaining\}）/u);
+  assert.match(appSource, /查看更多 \$\{remaining\}个来源/u);
   assert.match(appSource, /dataset\.collapseSource = "true"/u);
   assert.match(appSource, /dataset\.copySongLinks = "true"/u);
   assert.match(appSource, /buildSongSourceLinksText\(occurrences\)/u);
   assert.match(appSource, /className = "source-drawer-toolbar"/u);
   assert.match(appSource, /复制全部链接/u);
   assert.match(appSource, /if \(nextExpanded && shouldKeepSingleDrawerOpen\(\)\) closeOtherMobileSourceDrawers\(row\)/u);
-  assert.doesNotMatch(appSource, /source-collapse-top|data-toggle-artist-sources|ARTIST_SOURCE_INITIAL_LIMIT/u);
+  assert.doesNotMatch(appSource, /data-toggle-artist-sources|ARTIST_SOURCE_INITIAL_LIMIT/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content count"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-row: 2;[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
   assert.doesNotMatch(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer/u);
-  assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*display: none/u);
+  assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[^}]*display: none/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-count\.is-strong\s*\{[\s\S]*background: transparent;[\s\S]*color: var\(--muted\);/u);
   assert.match(cssSource, /\.rank-row::before\s*\{[\s\S]*grid-area: rank;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row::before\s*\{[\s\S]*display: none;/u);
@@ -87,9 +87,9 @@ test("third-round mobile component rules are encoded in css and browser checks",
   assert.match(cssSource, /--control-default:\s*44px/u);
   assert.match(cssSource, /--control-large:\s*48px/u);
   assert.match(cssSource, /--rank-leading-width:\s*44px/u);
-  assert.match(cssSource, /--rank-columns:\s*48px minmax\(0, 1fr\) 92px 64px/u);
+  assert.match(cssSource, /--rank-columns:\s*48px minmax\(0, 1fr\) 88px 88px/u);
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
-  assert.match(cssSource, /\.sheet-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--control-large\);[\s\S]*border-radius: var\(--radius-control\);/u);
+  assert.match(cssSource, /\.sheet-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--filter-control-height\);[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.match(cssSource, /\.sheet-actions\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: 1fr 1fr/u);
   assert.match(cssSource, /\.rank-actions-line\s*\{[\s\S]*gap: var\(--space-2\);/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-subline\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;[\s\S]*white-space: nowrap;/u);
@@ -97,7 +97,7 @@ test("third-round mobile component rules are encoded in css and browser checks",
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-actions-line\s*\{[\s\S]*min-height: 0;[\s\S]*flex-wrap: nowrap;/u);
   assert.match(cssSource, /\.rank-expand::after\s*\{[\s\S]*border-right: 1\.5px solid currentcolor;[\s\S]*transform: translateY\(-1px\) rotate\(45deg\);/u);
   assert.match(cssSource, /\.rank-expand\[aria-expanded="true"\]::after\s*\{[\s\S]*rotate\(225deg\)/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.inline-source-copy\.source-copy-icon\s*\{[\s\S]*width: 30px;[\s\S]*height: 30px;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-copy-icon span\s*\{[\s\S]*display: none;/u);
   assert.match(cssSource, /\.trend-badge\.rank-trend-inline\s*\{[\s\S]*display: none;[\s\S]*width: max-content;[\s\S]*max-width: 120px;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*gap: 0;/u);
   assert.match(cssSource, /\.source-video-group\s*\{[\s\S]*grid-template-areas: "thumb main copy"/u);
@@ -125,8 +125,8 @@ test("desktop and tablet contracts use explicit responsive layout", () => {
   assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls\s*\{[\s\S]*grid-template-columns: auto minmax\(320px, 680px\);/u);
   assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: auto auto auto;/u);
   assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-secondary\s*\{[\s\S]*grid-template-columns: minmax\(320px, 680px\) minmax\(112px, 150px\) minmax\(170px, 230px\);/u);
-  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 56px/u);
-  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.pagination-top \.page-jump,[\s\S]*\.pagination-top \.page-size-control\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 84px/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.pagination-top \.page-select,[\s\S]*\.pagination-top \.page-size-control\s*\{[\s\S]*display: none;/u);
 });
 
 test("search suggestions highlight safely without assigning untrusted innerHTML", () => {
@@ -153,11 +153,12 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(cssSource, /\.summary-actions\s*\{[\s\S]*grid-area: actions;[\s\S]*margin-left: 0;/u);
   assert.match(appSource, /summary-metrics/u);
   assert.match(appSource, /variant === "top"[\s\S]*`\$\{pageInfo\.startIndex \+ 1\}-\$\{pageInfo\.endIndex\} \/ \$\{pageInfo\.total\}/u);
-  assert.match(appSource, /const compactTop = isCompactRankMode\(\)/u);
+  assert.match(appSource, /function paginationTokenOptions/u);
   assert.match(appSource, /renderPageButton\("上一页"[\s\S]*\{ icon: "prev" \}/u);
   assert.match(appSource, /renderPageButton\("下一页"[\s\S]*\{ icon: "next" \}/u);
   assert.doesNotMatch(appSource, /if \(!compactTop\) controls\.append\(renderPageJumpControl\(pageInfo\)\)/u);
-  assert.match(appSource, /function renderPageJumpControl/u);
+  assert.match(appSource, /function renderPageSelectControl/u);
+  assert.match(appSource, /function renderPageJumpToken/u);
 });
 
 function functionBody(signature) {

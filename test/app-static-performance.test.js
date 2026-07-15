@@ -76,16 +76,18 @@ test("same-video multiple timestamps are expandable instead of becoming inline-o
   const rankRecordBody = functionBody("function renderRankRecord");
   assert.match(rankRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(videoCount\) \|\| 0\)/u);
   assert.match(rankRecordBody, /const occurrenceCount = occurrences\.length/u);
-  assert.match(rankRecordBody, /const expandable = mode === "artist" \? artistSongCount > 1 \|\| sourceVideoCount > 1 \|\| occurrenceCount > 1 : sourceVideoCount > 1 \|\| occurrenceCount > 1/u);
+  assert.match(rankRecordBody, /const expandable = mode === "artist" \? artistSongCount > 1 \|\| sourceVideoCount > 1 \|\| occurrenceCount > 1 : occurrenceCount > 0/u);
+  assert.match(rankRecordBody, /renderRankSide/u);
 
   const indexRecordBody = functionBody("function renderIndexRecord");
   assert.match(indexRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(record\.videoCount\) \|\| 0\)/u);
-  assert.match(indexRecordBody, /const expandable = sourceVideoCount > 1 \|\| record\.occurrences\.length > 1/u);
+  assert.match(indexRecordBody, /const expandable = record\.occurrences\.length > 0/u);
+  assert.match(indexRecordBody, /renderRankSide/u);
 
-  const sublineBody = functionBody("function appendSublineSource");
-  assert.match(sublineBody, /if \(sourceVideoCount <= 1 && occurrences\.length === 1\)/u);
-  assert.match(sublineBody, /renderSingleSourceCopyIconButton\(occurrence\)/u);
-  assert.doesNotMatch(sublineBody, /groupOccurrencesByVideo/u);
+  const sideBody = functionBody("function renderRankSide");
+  assert.match(sideBody, /renderSourceToggleButton/u);
+  assert.match(sideBody, /renderStaticSideChip\("无来源"\)/u);
+  assert.doesNotMatch(sideBody, /renderSingleSourceCopyIconButton/u);
 });
 
 test("source drawer append-more reveals all remaining sources without rebuilding old cards", () => {
