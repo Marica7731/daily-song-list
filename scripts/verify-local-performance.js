@@ -1035,11 +1035,11 @@ async function mobileRankVisualGeometry(browser) {
       throw new Error(`source copy button height invalid ${JSON.stringify(expandedGeometry)}`);
     }
     if (expandedGeometry.sourceLinkButtonCount !== 1) throw new Error(`copy same-song links button should render once ${JSON.stringify(expandedGeometry)}`);
-    if (!expandedGeometry.timeLinks.length || expandedGeometry.timeLinks.some((link) => link.height > 28)) {
-      throw new Error(`source timestamp compact height invalid ${JSON.stringify(expandedGeometry)}`);
+    if (!expandedGeometry.timeLinks.length || expandedGeometry.timeLinks.some((link) => link.height < 32)) {
+      throw new Error(`source timestamp hit area invalid ${JSON.stringify(expandedGeometry)}`);
     }
-    if (expandedGeometry.sourceMoreTimes && expandedGeometry.sourceMoreTimes.height > 28) {
-      throw new Error(`source extra timestamp toggle too tall ${JSON.stringify(expandedGeometry)}`);
+    if (expandedGeometry.sourceMoreTimes && expandedGeometry.sourceMoreTimes.height < 32) {
+      throw new Error(`source extra timestamp toggle hit area invalid ${JSON.stringify(expandedGeometry)}`);
     }
 
     let expandedScreenshotPath = null;
@@ -1098,14 +1098,14 @@ async function mobileCopyAllLinksFlow(browser) {
       const text = window.__clipboardWrites[0] || "";
       const lines = text ? text.split("\n") : [];
       const videoIds = lines.map((line) => {
-        const match = line.match(/https:\/\/www\.youtube\.com\/watch\?v=([^&\s]+)/u);
+        const match = line.match(/https:\/\/www\.youtube\.com\/watch\?v=([^&\s]+)&t=(\d+)s/u);
         return match?.[1] || "";
       });
       const invalidLines = lines.filter((line) => {
         const urlIndex = line.lastIndexOf(" https://www.youtube.com/watch?v=");
         const channel = urlIndex >= 0 ? line.slice(0, urlIndex) : "";
         const url = urlIndex >= 0 ? line.slice(urlIndex + 1) : "";
-        return !channel || !/^https:\/\/www\.youtube\.com\/watch\?v=[^&\s]+$/u.test(url);
+        return !channel || !/^https:\/\/www\.youtube\.com\/watch\?v=[^&\s]+&t=\d+s$/u.test(url);
       });
       return {
         text,
@@ -1113,7 +1113,7 @@ async function mobileCopyAllLinksFlow(browser) {
         videoIds,
         invalidLines,
         duplicateVideoIds: videoIds.filter((id, index) => id && videoIds.indexOf(id) !== index),
-        hasTimestamp: /[?&]t=|&t=/u.test(text),
+        missingTimestamp: lines.some((line) => !/[?&]t=\d+s$/u.test(line)),
         hasMarkdown: /\[[^\]]+\]\(|^[-*]\s|^\d+\./um.test(text),
         toast: document.querySelector("#toast")?.textContent || "",
       };
@@ -1121,7 +1121,7 @@ async function mobileCopyAllLinksFlow(browser) {
     if (!expectedCount || copyResult.lines.length !== expectedCount) {
       throw new Error(`copy all links line count mismatch expected=${expectedCount} ${JSON.stringify(copyResult)}`);
     }
-    if (copyResult.invalidLines.length || copyResult.duplicateVideoIds.length || copyResult.hasTimestamp || copyResult.hasMarkdown) {
+    if (copyResult.invalidLines.length || copyResult.duplicateVideoIds.length || copyResult.missingTimestamp || copyResult.hasMarkdown) {
       throw new Error(`copy all links format invalid ${JSON.stringify(copyResult)}`);
     }
     if (copyResult.toast !== `已复制 ${expectedCount} 个来源链接`) {

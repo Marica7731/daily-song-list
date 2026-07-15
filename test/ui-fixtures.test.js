@@ -22,19 +22,19 @@ test("fixture: one video with multiple timestamps uses timestamp disclosure copy
   assert.equal(rankToggleModel({ mode: "song", isExpanded: false, videoCount: groups.length, occurrenceCount: occurrences.length, compact: true }).text, "3时间点");
 });
 
-test("fixture: thirty source videos keep all source links copyable", () => {
-  const occurrences = Array.from({ length: 30 }, (_, index) =>
+test("fixture: forty source videos keep all source links copyable", () => {
+  const occurrences = Array.from({ length: 40 }, (_, index) =>
     occurrence(`source-${String(index + 1).padStart(2, "0")}`, `Channel ${index + 1}`, 60 + index),
   );
   const groups = groupOccurrencesByVideo(occurrences);
   const preview = buildSourcePreview(occurrences, { limit: 2 });
   const linkText = buildSongSourceLinksText(occurrences);
 
-  assert.equal(groups.length, 30);
-  assert.equal(preview.total, 30);
-  assert.equal(preview.hiddenCount, 28);
-  assert.equal(linkText.split("\n").length, 30);
-  assert.match(linkText, /^Channel 1 https:\/\/www\.youtube\.com\/watch\?v=source-01/u);
+  assert.equal(groups.length, 40);
+  assert.equal(preview.total, 40);
+  assert.equal(preview.hiddenCount, 38);
+  assert.equal(linkText.split("\n").length, 40);
+  assert.match(linkText, /^Channel 1 https:\/\/www\.youtube\.com\/watch\?v=source-01&t=60s/u);
 });
 
 test("fixture: artist rank can contain multiple songs with multiple source groups", () => {

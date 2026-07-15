@@ -534,8 +534,8 @@
       const group = groups.get(key);
       group.occurrences.push(occurrence);
       group.occurrenceCount += 1;
-      const seconds = Number(occurrence?.song?.seconds);
-      if (Number.isFinite(seconds) && seconds >= 0) group.firstSeconds = Math.min(group.firstSeconds, seconds);
+      const seconds = validSeconds(occurrence?.song?.seconds);
+      if (seconds !== null) group.firstSeconds = Math.min(group.firstSeconds, seconds);
     }
 
     return Array.from(groups.values())
@@ -561,6 +561,7 @@
   }
 
   function validSeconds(value) {
+    if (value === null || value === undefined || value === "") return null;
     const seconds = Number(value);
     return Number.isFinite(seconds) && seconds >= 0 ? seconds : null;
   }
@@ -616,10 +617,11 @@
     for (const group of groupOccurrencesByVideo(occurrences)) {
       const item = group.item || group.occurrences?.[0]?.item || {};
       const videoId = cleanText(item.videoId || group.videoId);
-      if (!videoId || seen.has(videoId)) continue;
+      const seconds = validSeconds(group.firstSeconds);
+      if (!videoId || seconds === null || seen.has(videoId)) continue;
       seen.add(videoId);
       const channelName = cleanText(item.channelName || group.channelName) || "未知频道";
-      rows.push(`${channelName} https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}`);
+      rows.push(`${channelName} https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${Math.floor(seconds)}s`);
     }
     return rows.join("\n");
   }
@@ -686,7 +688,7 @@
   }
 
   function youtubeTimeUrl(videoId, seconds) {
-    const safeSeconds = Math.max(0, Number(seconds) || 0);
+    const safeSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
     return `https://www.youtube.com/watch?v=${encodeURIComponent(videoId || "")}&t=${safeSeconds}s`;
   }
 

@@ -325,7 +325,8 @@
         hash: blocklistHash(data),
       };
     }
-    const runtime = rootObject?.BlockedVtuberChannels || { entries: [], listVersion: "", blocklistHash: "" };
+    const runtime = rootObject?.BlockedVtuberChannels;
+    if (!runtime?.blocklistHash) throw new Error("BlockedVtuberChannels must be loaded before source-filter");
     return {
       data: runtime,
       version: runtime.listVersion || "",

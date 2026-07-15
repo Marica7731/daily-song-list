@@ -49,6 +49,7 @@
   --source-thumb-width: var(--source-thumb-width-desktop);
   --shadow-soft: 0 10px 28px rgba(17, 24, 39, 0.08);
   --page-x: clamp(12px, 2vw, 28px);
+  --content-gutter: max(var(--page-x), calc((100vw - var(--page-max)) / 2 + var(--page-x)));
   --page-max: 1400px;
   --controls-height: 62px;
   --visual-viewport-height: 100dvh;
@@ -175,8 +176,9 @@ h1 {
   z-index: 20;
   display: grid;
   gap: var(--space-2);
-  margin: 0 calc((100vw - min(var(--page-max), calc(100vw - (var(--page-x) * 2)))) / -2) var(--space-3);
-  padding: var(--space-2) max(var(--page-x), calc((100vw - var(--page-max)) / 2 + var(--page-x)));
+  width: 100vw;
+  margin: 0 0 var(--space-3) calc(50% - 50vw);
+  padding: var(--space-2) var(--content-gutter);
   border-bottom: 1px solid rgba(228, 231, 236, 0.9);
   background: rgba(245, 247, 250, 0.92);
   backdrop-filter: blur(14px);
@@ -2356,6 +2358,13 @@ mark {
     padding: 0 0 var(--space-2);
   }
 
+  .source-time-primary,
+  .source-time-extra-toggle,
+  .source-time-extra {
+    min-height: 32px;
+    padding-inline: var(--space-2);
+  }
+
   .source-video-group {
     border-radius: 0;
     padding: var(--space-2);
@@ -2922,6 +2931,13 @@ mark {
     padding: 0 var(--space-2);
     background: #f8fafc;
     font-size: 11.5px;
+  }
+
+  .source-time-primary,
+  .source-time-extra-toggle,
+  .source-time-extra {
+    min-height: 32px;
+    padding-inline: var(--space-2);
   }
 
   .source-group-more,

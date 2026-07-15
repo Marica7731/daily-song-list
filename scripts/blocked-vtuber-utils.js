@@ -5,6 +5,7 @@ const path = require("node:path");
 const ROOT_DIR = path.resolve(__dirname, "..");
 const DEFAULT_BLOCKLIST_PATH = path.join(ROOT_DIR, "config", "blocked-vtuber-channels.json");
 const DEFAULT_GENERATED_ASSET_PATH = path.join(ROOT_DIR, "assets", "blocked-vtuber-channels.js");
+const DEFAULT_GENERATED_META_ASSET_PATH = path.join(ROOT_DIR, "assets", "blocked-vtuber-meta.js");
 const VALID_REGIONS = new Set(["TW", "HK", "LEGACY_REVIEW"]);
 const VALID_STATUS = new Set(["blocked"]);
 const DANGEROUS_BROAD_TERMS = new Set(
@@ -313,6 +314,7 @@ function uniqueSorted(values) {
 module.exports = {
   DEFAULT_BLOCKLIST_PATH,
   DEFAULT_GENERATED_ASSET_PATH,
+  DEFAULT_GENERATED_META_ASSET_PATH,
   VALID_REGIONS,
   blocklistHash,
   canonicalizeBlocklist,

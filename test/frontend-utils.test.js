@@ -251,22 +251,24 @@ test("builds same-song source link text from unique source videos", () => {
     occurrence("VideoD", "中文频道", { seconds: 120, title: "song" }),
     occurrence("VideoE", "Orihime Haruka", { seconds: 121, title: "song" }),
     occurrence("", "Broken Channel", { seconds: 1, title: "song" }),
+    occurrence("VideoF", "No Time Channel", { seconds: null, title: "song" }),
   ]);
 
   assert.equal(
     links,
     [
-      "未知频道 https://www.youtube.com/watch?v=VideoC",
-      "こは太郎 https://www.youtube.com/watch?v=VideoB",
-      "羽海乃ゆき https://www.youtube.com/watch?v=VideoA",
-      "中文频道 https://www.youtube.com/watch?v=VideoD",
-      "Orihime Haruka https://www.youtube.com/watch?v=VideoE",
+      "未知频道 https://www.youtube.com/watch?v=VideoC&t=9s",
+      "こは太郎 https://www.youtube.com/watch?v=VideoB&t=12s",
+      "羽海乃ゆき https://www.youtube.com/watch?v=VideoA&t=75s",
+      "中文频道 https://www.youtube.com/watch?v=VideoD&t=120s",
+      "Orihime Haruka https://www.youtube.com/watch?v=VideoE&t=121s",
     ].join("\n"),
   );
-  assert.doesNotMatch(links, /&t=|t=\d+s/u);
+  assert.match(links, /&t=\d+s/u);
+  assert.doesNotMatch(links, /No Time Channel|VideoF/u);
   assert.doesNotMatch(links, /^\d+\.|^- |\[[^\]]+\]\(/um);
   assert.equal(links.split("\n").length, 5);
-  assert.equal(new Set(links.split("\n").map((line) => line.match(/watch\?v=([^&\s]+)/u)?.[1])).size, 5);
+  assert.equal(new Set(links.split("\n").map((line) => line.match(/watch\?v=([^&\s]+)&t=(\d+)s/u)?.[1])).size, 5);
   assert.equal(links.endsWith("\n"), false);
 });
 

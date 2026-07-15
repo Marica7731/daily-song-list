@@ -18,7 +18,9 @@ const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
 const INLINE_SOURCE_PREVIEW_LIMIT = 1;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
+const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
+const MAX_COMPACT_INITIALIZED_DRAWERS = 3;
 // Keep these breakpoints synchronized with assets/styles.css:
 // mobile <= 720px, tablet 721-919px, desktop >= 920px.
 const RESPONSIVE_BREAKPOINTS = {
@@ -242,14 +244,17 @@ const state = {
   runtimeRangePayloads: new Map(),
   runtimeRangeLoads: new Map(),
   runtimeWarnings: new Map(),
+  rangePrefetchTimer: 0,
   rangeCache: new Map(),
   latestRangeLoadError: null,
   statusRefreshTimer: null,
   songSearchIndexPromise: null,
   songSearchLookup: window.FrontendUtils.createSongSearchLookup(null),
+  sourceFilterPromise: null,
   rankDiffs: {},
   rankDiffLoads: new Map(),
   loadedResources: [],
+  compactDrawerLru: [],
   firstContentMeasured: false,
   eventsBound: false,
   activeOverlay: "",
@@ -424,6 +429,7 @@ function bindEvents() {
   if (state.eventsBound) return;
   state.eventsBound = true;
   for (const tab of els.rangeTabs) {
+    bindRangeIntentPrefetch(tab);
     tab.addEventListener("click", async () => {
       if (state.range === tab.dataset.range) return;
       await switchRange(tab.dataset.range, { urlMode: "push" });
@@ -631,6 +637,13 @@ function bindEvents() {
   }, { passive: true });
   updateViewportVars();
   state.responsiveMode = getResponsiveMode();
+}
+
+function bindRangeIntentPrefetch(tab) {
+  const prefetch = () => prefetchRuntimeRangeOnIntent(tab.dataset.range);
+  for (const eventName of ["pointerdown", "touchstart", "mousedown", "focus"]) {
+    tab.addEventListener(eventName, prefetch, { passive: true });
+  }
 }
 
 function switchView(nextView, options = {}) {
@@ -1483,7 +1496,6 @@ async function tryRuntimeRangeLoad(rangeId, path, options = {}) {
         rangeId,
         meta: state.runtimeMeta,
         path,
-        blocklistHash: window.SourceFilter?.BLOCKLIST_HASH || "",
       }),
     };
   } catch (error) {
@@ -1606,18 +1618,96 @@ function applyPreparedSnapshotPayload(payload, path, options = {}) {
 }
 
 async function preparePayload(payload) {
-  const sourceFiltered =
-    shouldSkipSourceFilter(payload) || !window.SourceFilter?.filterPayloadBlockedSources
-      ? payload
-      : measureSync("source-filter", () => window.SourceFilter.filterPayloadBlockedSources(payload));
+  const sourceFiltered = await applySourceFilterIfNeeded(payload);
   if (window.FrontendUtils.hasNicheAnnotations(sourceFiltered)) return sourceFiltered;
   await ensureSongSearchLookup();
   if (!state.songSearchLookup.available) return sourceFiltered;
   return window.FrontendUtils.annotatePayloadWithNiche(sourceFiltered, state.songSearchLookup);
 }
 
+async function applySourceFilterIfNeeded(payload) {
+  if (shouldSkipSourceFilter(payload) && isLatestSnapshot()) return payload;
+  const sourceFilter = await ensureSourceFilterLoaded();
+  if (!sourceFilter?.filterPayloadBlockedSources) {
+    throw new Error("source-filter 加载失败，已停止展示未过滤数据");
+  }
+  return measureSync("source-filter", () => sourceFilter.filterPayloadBlockedSources(payload));
+}
+
 function shouldSkipSourceFilter(payload) {
-  return window.FrontendUtils.shouldSkipSourceFilter(payload, CURRENT_FILTER_VERSION, window.SourceFilter?.BLOCKLIST_HASH || "");
+  return window.FrontendUtils.shouldSkipSourceFilter(payload, CURRENT_FILTER_VERSION, currentBlocklistHash());
+}
+
+function currentBlocklistHash() {
+  return window.SourceFilter?.BLOCKLIST_HASH || window.BlockedVtuberMeta?.blocklistHash || "";
+}
+
+async function ensureSourceFilterLoaded() {
+  if (window.SourceFilter?.filterPayloadBlockedSources) return window.SourceFilter;
+  if (!state.sourceFilterPromise) {
+    state.sourceFilterPromise = loadScript(versionedAssetPath("assets/blocked-vtuber-channels.js"))
+      .then(() => {
+        if (!window.BlockedVtuberChannels?.blocklistHash) throw new Error("blocked-vtuber-channels 加载失败");
+        if (window.BlockedVtuberMeta?.blocklistHash && window.BlockedVtuberChannels.blocklistHash !== window.BlockedVtuberMeta.blocklistHash) {
+          throw new Error("blocked-vtuber-channels hash 与 meta 不一致");
+        }
+        return loadScript(versionedAssetPath("assets/source-filter.js"));
+      })
+      .then(() => {
+        if (!window.SourceFilter?.filterPayloadBlockedSources) throw new Error("source-filter 未导出过滤器");
+        if (window.BlockedVtuberMeta?.blocklistHash && window.SourceFilter.BLOCKLIST_HASH !== window.BlockedVtuberMeta.blocklistHash) {
+          throw new Error("source-filter hash 与 meta 不一致");
+        }
+        return window.SourceFilter;
+      })
+      .catch((error) => {
+        state.sourceFilterPromise = null;
+        throw error;
+      });
+  }
+  return state.sourceFilterPromise;
+}
+
+function versionedAssetPath(path) {
+  const version = currentAssetVersion();
+  return version ? `${path}?v=${encodeURIComponent(version)}` : path;
+}
+
+function currentAssetVersion() {
+  const script = document.querySelector('script[src^="assets/app.js"]');
+  const src = script?.getAttribute("src") || "";
+  const match = src.match(/[?&]v=([^&]+)/u);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const existing = Array.from(document.scripts || []).find((script) => script.getAttribute("src") === src);
+    if (existing?.dataset.loaded === "true") {
+      resolve();
+      return;
+    }
+    if (existing) {
+      existing.addEventListener("load", resolve, { once: true });
+      existing.addEventListener("error", () => reject(new Error(`${src}: script load failed`)), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = false;
+    script.dataset.dynamicAsset = "true";
+    script.addEventListener(
+      "load",
+      () => {
+        script.dataset.loaded = "true";
+        state.loadedResources.push({ path: src, bytes: 0, cache: "script", durationMs: 0 });
+        resolve();
+      },
+      { once: true },
+    );
+    script.addEventListener("error", () => reject(new Error(`${src}: script load failed`)), { once: true });
+    document.head.append(script);
+  });
 }
 
 async function ensureSongSearchLookup() {
@@ -1702,7 +1792,13 @@ function scheduleCurrentRankDiffLoad() {
   if (!isLatestSnapshot() || state.view === "videos") return;
   loadRankDiffForRange(state.range)
     .then((loaded) => {
-      if (loaded && isLatestSnapshot()) render({ syncUrl: false, lowPriority: true });
+      if (!loaded || !isLatestSnapshot()) return;
+      if (state.trend === "all") {
+        updateVisibleTrendBadges();
+        updateFilterAvailability();
+      } else {
+        render({ syncUrl: false });
+      }
     })
     .catch((error) => {
       showToast(`趋势读取失败，榜单已正常显示：${error.message}`);
@@ -1739,21 +1835,53 @@ function buildRankDiffLookup(diff) {
   return window.FrontendUtils.createTrendLookup(diff);
 }
 
+function updateVisibleTrendBadges() {
+  if (!isLatestSnapshot() || state.rankMetric !== "occurrences") return;
+  const rows = els.content?.querySelectorAll(".rank-row[data-trend-mode][data-trend-key]") || [];
+  for (const row of rows) {
+    const trend = trendForKey(row.dataset.trendMode, row.dataset.trendKey);
+    const trendCell = row.querySelector(":scope > .rank-trend");
+    if (trendCell) {
+      const badge = renderTrendBadge(trend);
+      trendCell.replaceChildren();
+      if (badge) {
+        trendCell.append(badge);
+        trendCell.removeAttribute("aria-hidden");
+      } else {
+        trendCell.setAttribute("aria-hidden", "true");
+      }
+    }
+    const inlineTrend = row.querySelector(".rank-trend-inline");
+    if (inlineTrend) {
+      const replacement = renderInlineTrend(trend);
+      inlineTrend.replaceWith(replacement);
+    }
+  }
+}
+
 function scheduleOtherRangePrefetch() {
   if (!isLatestSnapshot() || !canPrefetchOtherRange()) return;
   const otherRange = Object.keys(RANGE_LABELS).find((rangeId) => rangeId !== state.range);
   if (!otherRange || state.runtimeRangePayloads.has(otherRange)) return;
+  if (state.rangePrefetchTimer) window.clearTimeout(state.rangePrefetchTimer);
   const run = () => {
-    if (document.visibilityState === "hidden" || state.runtimeRangePayloads.has(otherRange)) return;
+    state.rangePrefetchTimer = 0;
+    if (!canPrefetchOtherRange() || state.runtimeRangePayloads.has(otherRange)) return;
     loadRuntimeRange(otherRange).catch(() => {});
   };
-  setTimeout(() => {
+  state.rangePrefetchTimer = window.setTimeout(() => {
     if (typeof requestIdleCallback === "function") {
-      requestIdleCallback(run, { timeout: 6000 });
+      requestIdleCallback(run, { timeout: 1200 });
     } else {
       run();
     }
-  }, 1800);
+  }, 300);
+}
+
+function prefetchRuntimeRangeOnIntent(rangeId) {
+  if (!rangeId || rangeId === state.range || state.runtimeRangePayloads.has(rangeId)) return;
+  if (!isLatestSnapshot() || !canPrefetchOtherRange()) return;
+  loadRuntimeRange(rangeId).catch(() => {});
 }
 
 function canPrefetchOtherRange() {
@@ -1910,9 +2038,16 @@ function snapshotDateOptionLabel(dateValue) {
 function renderStatus(status) {
   renderStatusAlerts([]);
   if (!isLatestSnapshot()) {
-    els.status.textContent = "历史快照";
-    els.status.title = `历史快照 · ${capturedDate()}`;
-    renderStatusAlerts([`历史快照 · ${capturedDate()}`]);
+    const snapshotEntry = snapshotEntryForPath(state.currentSnapshotPath);
+    const capturedAt = snapshotEntry?.capturedAt || snapshotEntry?.generatedAt || state.payload?.capturedAt || state.payload?.generatedAt || "";
+    renderStatusLabel({ status: "success" }, capturedAt);
+    els.status.title = [
+      `历史快照 · ${formatDate(capturedAt)}`,
+      `path=${state.currentSnapshotPath}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    renderStatusAlerts([`历史快照 · ${formatDate(capturedAt)}`]);
     renderDebugPanel();
     return;
   }
@@ -1983,8 +2118,8 @@ function renderStatusLabel(status, capturedAt, fallbackAt = "") {
   time.className = "status-exact";
   if (displayAt) time.dateTime = displayAt;
   const snapshotEntry = !isLatestSnapshot() ? snapshotEntryForPath(state.currentSnapshotPath) : null;
-  const snapshotExact = snapshotEntry ? formatDate(snapshotEntry.capturedAt || snapshotEntry.generatedAt || snapshotEntry.id) : "";
-  time.textContent = snapshotEntry ? `历史 · ${snapshotExact}` : status?.status === "success" ? exact : capturedAt ? `上次成功 ${exact}` : exact;
+  const snapshotExact = snapshotEntry ? formatDate(snapshotEntry.capturedAt || snapshotEntry.generatedAt || snapshotEntry.id) : formatDate(displayAt);
+  time.textContent = !isLatestSnapshot() ? `历史 · ${snapshotExact}` : status?.status === "success" ? exact : capturedAt ? `上次成功 ${exact}` : exact;
   els.status.append(time);
   if (!snapshotEntry && status?.status === "success" && relative && relative !== exact && relative !== "状态不可用") {
     const separator = document.createElement("span");
@@ -2072,6 +2207,7 @@ function render(options = {}) {
   if (state.view === "songAz") ensureIndexBucketExists(selection.songRecords);
 
   resetContentClasses();
+  state.compactDrawerLru = [];
   els.content.replaceChildren();
 
   if (state.view === "videos") {
@@ -2145,15 +2281,17 @@ async function prewarmRangeCache(group, snapshotPath, rangeId) {
 async function prewarmDefaultSorts(cache) {
   const filterKey = normalizeSearch(state.filter);
   if (filterKey) return;
+  if (state.view === "videos") return;
   const hideUnknownForView = shouldHideUnknownForCurrentView();
   const scope = `${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}`;
-  const songRecords = selectedSongRecords(cache, { hideUnknownForView });
   if (state.view === "artistRank") {
     const artistRecords = state.nicheOnly ? cache.nicheArtistRecords : cache.allArtistRecords;
     cacheRankModel(cache, `artist-rank::${scope}::${filterKey}::${state.rankMetric}`, [...artistRecords].sort(compareRankRecords));
   } else if (state.view === "songAz") {
+    const songRecords = selectedSongRecords(cache, { hideUnknownForView });
     cache.sortedRecords.set(`song-az::${scope}::${filterKey}::${state.rankMetric}`, [...songRecords].sort(compareSongAz));
   } else {
+    const songRecords = selectedSongRecords(cache, { hideUnknownForView });
     cacheRankModel(cache, `song-rank::${scope}::${filterKey}::${state.rankMetric}`, [...songRecords].sort(compareSongRank));
   }
 }
@@ -2252,48 +2390,71 @@ function defineLazyValue(target, key, factory) {
 function currentSelection(rangeCache) {
   const filterKey = normalizeSearch(state.filter);
   const hideUnknownForView = shouldHideUnknownForCurrentView();
-  const key = `${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}::${filterKey}`;
+  const key = `${state.view}::${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}::${filterKey}`;
   if (rangeCache.selectionCache.has(key)) return rangeCache.selectionCache.get(key);
 
   const baseOccurrences = selectedOccurrences(rangeCache, { hideUnknownForView });
-  const baseSongRecords = selectedSongRecords(rangeCache, { hideUnknownForView });
-  const needsArtistRecords = state.view === "artistRank";
-  const baseArtistRecords = needsArtistRecords ? (state.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords) : [];
-  const baseMissingArtistCount = needsArtistRecords ? (state.nicheOnly ? rangeCache.nicheMissingArtistCount : rangeCache.allMissingArtistCount) : 0;
   const hiddenUnknownCount = hideUnknownForView ? hiddenUnknownOccurrenceCount(rangeCache) : 0;
+  const baseVideoCount = state.nicheOnly
+    ? hideUnknownForView
+      ? rangeCache.visibleNicheVideoCount
+      : rangeCache.nicheVideoCount
+    : hideUnknownForView
+      ? rangeCache.visibleVideoCount
+      : rangeCache.allVideoCount;
 
-  let selection;
+  const selection = {
+    occurrences: baseOccurrences,
+    videoCount: baseVideoCount,
+    hiddenUnknownCount,
+    videoItems: null,
+  };
   if (!filterKey) {
-    selection = {
-      occurrences: baseOccurrences,
-      songRecords: baseSongRecords,
-      artistRecords: baseArtistRecords,
-      missingArtistCount: baseMissingArtistCount,
-      videoCount: state.nicheOnly
-        ? hideUnknownForView
-          ? rangeCache.visibleNicheVideoCount
-          : rangeCache.nicheVideoCount
-        : hideUnknownForView
-          ? rangeCache.visibleVideoCount
-          : rangeCache.allVideoCount,
-      hiddenUnknownCount,
-      videoItems: null,
-    };
+    attachSelectionRecordGetters(selection, rangeCache, baseOccurrences, { hideUnknownForView, filtered: false });
   } else {
     const occurrences = baseOccurrences.filter((occurrence) => occurrence.searchText.includes(filterKey));
-    const artistResult = buildArtistRecords(occurrences);
-    selection = {
-      occurrences,
-      songRecords: buildSongRecords(occurrences),
-      artistRecords: artistResult.records,
-      missingArtistCount: artistResult.missingArtistCount,
-      videoCount: uniqueVideoCount(occurrences),
-      hiddenUnknownCount,
-      videoItems: null,
-    };
+    selection.occurrences = occurrences;
+    selection.videoCount = uniqueVideoCount(occurrences);
+    attachSelectionRecordGetters(selection, rangeCache, occurrences, { hideUnknownForView, filtered: true });
   }
   rangeCache.selectionCache.set(key, selection);
   return selection;
+}
+
+function attachSelectionRecordGetters(selection, rangeCache, occurrences, options = {}) {
+  const filtered = Boolean(options.filtered);
+  const hideUnknownForView = Boolean(options.hideUnknownForView);
+  if (state.view === "artistRank") {
+    defineLazyValue(selection, "artistResult", () =>
+      filtered
+        ? measureSync("build-artist-records", () => buildArtistRecords(occurrences))
+        : {
+            records: state.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords,
+            missingArtistCount: state.nicheOnly ? rangeCache.nicheMissingArtistCount : rangeCache.allMissingArtistCount,
+          },
+    );
+    Object.defineProperty(selection, "artistRecords", {
+      configurable: true,
+      enumerable: true,
+      get() {
+        return selection.artistResult.records;
+      },
+    });
+    Object.defineProperty(selection, "missingArtistCount", {
+      configurable: true,
+      enumerable: true,
+      get() {
+        return selection.artistResult.missingArtistCount;
+      },
+    });
+    return;
+  }
+
+  if (state.view === "songRank" || state.view === "songAz") {
+    defineLazyValue(selection, "songRecords", () =>
+      filtered ? measureSync("build-song-records", () => buildSongRecords(occurrences)) : selectedSongRecords(rangeCache, { hideUnknownForView }),
+    );
+  }
 }
 
 function selectedOccurrences(rangeCache, options = {}) {
@@ -3274,7 +3435,7 @@ function renderRankRecord({
   const rowKey = makeDomId(key);
   const drawerId = `source-drawer-${rowKey}`;
   const artistSongCount = songCount;
-  const sourceVideoCount = mode === "artist" ? videoCount : window.FrontendUtils.groupOccurrencesByVideo(occurrences).length;
+  const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
   const occurrenceCount = occurrences.length;
   const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 || occurrenceCount > 1 : sourceVideoCount > 1 || occurrenceCount > 1;
   const isExpanded = state.expandedRows.has(rowKey);
@@ -3292,7 +3453,10 @@ function renderRankRecord({
     .join(" ");
   row.dataset.rowKey = rowKey;
   row.dataset.drawerMode = mode;
+  row.dataset.trendMode = mode === "artist" ? "artistRank" : "songRank";
+  row.dataset.trendKey = record?.key || key;
   row._sourceOccurrences = occurrences;
+  row._sourceVideoCount = sourceVideoCount;
   row._artistSongGroups = songGroups.length ? songGroups : null;
   row._getArtistSongGroups = getSongGroups;
   row._artistSongCount = artistSongCount;
@@ -3316,7 +3480,7 @@ function renderIndexRecord(record) {
   const row = document.createElement("article");
   const rowKey = makeDomId(`index-${record.key}`);
   const drawerId = `source-drawer-${rowKey}`;
-  const sourceVideoCount = window.FrontendUtils.groupOccurrencesByVideo(record.occurrences).length;
+  const sourceVideoCount = Math.max(0, Number(record.videoCount) || 0);
   const expandable = sourceVideoCount > 1 || record.occurrences.length > 1;
   const isExpanded = state.expandedRows.has(rowKey);
 
@@ -3326,6 +3490,7 @@ function renderIndexRecord(record) {
   row.dataset.rowKey = rowKey;
   row.dataset.drawerMode = "index";
   row._sourceOccurrences = record.occurrences;
+  row._sourceVideoCount = sourceVideoCount;
 
   row.append(
     renderRecordContent(record.title, songMeta(record), {
@@ -3396,13 +3561,9 @@ function renderRecordContent(title, meta, options) {
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(metaLine, `${videoCount} 个视频`, "subline-video-count");
-    appendSublineSource(metaLine, actionsLine, { mode, occurrences, drawerId, isExpanded });
+    appendSublineSource(metaLine, actionsLine, { mode, occurrences, drawerId, isExpanded, videoCount });
   }
-  const inlineTrend = renderTrendBadge(trend);
-  if (inlineTrend) {
-    inlineTrend.classList.add("rank-trend-inline");
-    appendActionNode(actionsLine, inlineTrend);
-  }
+  appendActionNode(actionsLine, renderInlineTrend(trend));
   if (metaLine.childNodes.length) subline.append(metaLine);
   if (actionsLine.childNodes.length) subline.append(actionsLine);
   content.append(subline);
@@ -3460,13 +3621,23 @@ function renderTrend(trend) {
   return node;
 }
 
-function appendSublineSource(metaContainer, actionContainer, { mode, occurrences, drawerId, isExpanded }) {
+function renderInlineTrend(trend) {
+  const badge = renderTrendBadge(trend) || document.createElement("span");
+  badge.classList.add("rank-trend-inline");
+  if (!trend) {
+    badge.hidden = true;
+    badge.setAttribute("aria-hidden", "true");
+  }
+  return badge;
+}
+
+function appendSublineSource(metaContainer, actionContainer, { mode, occurrences, drawerId, isExpanded, videoCount }) {
   if (!occurrences.length) {
     appendSublinePart(metaContainer, "无来源");
     return;
   }
-  const groupedSources = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
-  if (groupedSources.length === 1 && occurrences.length === 1) {
+  const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
+  if (sourceVideoCount <= 1 && occurrences.length === 1) {
     appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
     return;
   }
@@ -3480,7 +3651,7 @@ function appendSublineSource(metaContainer, actionContainer, { mode, occurrences
     isExpanded,
     hiddenCount: sourcePreview.hiddenCount,
     total: sourcePreview.total,
-    videoCount: groupedSources.length,
+    videoCount: sourceVideoCount,
     occurrenceCount: occurrences.length,
   });
   const sourceLine = document.createElement("span");
@@ -3804,7 +3975,7 @@ function renderSourceVideoGroup(group) {
 
 function renderSourceTimestampLink(occurrence, className = "source-link source-time-link") {
   const link = document.createElement("a");
-  link.className = className;
+  link.className = className.includes("source-link") ? className : `source-link ${className}`;
   link.href = youtubeTimeUrl(occurrence.item.videoId, occurrence.song.seconds);
   link.target = "_blank";
   link.rel = "noreferrer";
@@ -3864,7 +4035,7 @@ function renderCopySongLinksButton(occurrences, label = "复制全部链接", cl
   button.dataset.copySongLinks = "true";
   button._sourceOccurrences = occurrences || [];
   button.textContent = label;
-  button.setAttribute("aria-label", "复制同一首歌全部来源链接");
+  button.setAttribute("aria-label", "复制同一首歌全部来源时间点链接");
   return button;
 }
 
@@ -3989,6 +4160,7 @@ function syncArtistSongMoreButton(drawer, visibleCount, totalCount) {
     return null;
   }
   const remaining = totalCount - visibleCount;
+  const batch = Math.min(ARTIST_SONG_GROUP_BATCH_SIZE, remaining);
   if (!more) {
     more = document.createElement("button");
     more.className = "artist-song-more";
@@ -3996,8 +4168,8 @@ function syncArtistSongMoreButton(drawer, visibleCount, totalCount) {
     more.dataset.toggleArtistSongs = "true";
     drawer.insertBefore(more, drawer.querySelector(":scope > .source-collapse-bottom") || null);
   }
-  more.textContent = `显示其余 ${remaining} 首`;
-  more.setAttribute("aria-label", `显示其余 ${remaining} 首歌曲`);
+  more.textContent = `再显示 ${batch} 首（剩余 ${remaining} 首）`;
+  more.setAttribute("aria-label", `再显示 ${batch} 首歌曲，剩余 ${remaining} 首`);
   return more;
 }
 
@@ -4068,10 +4240,57 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   } else {
     state.expandedRows.delete(row.dataset.rowKey);
   }
+  trackCompactInitializedDrawer(row, nextExpanded);
 
   if (!nextExpanded && options.keepVisible) {
     window.requestAnimationFrame(() => keepSourceRowVisible(row));
   }
+}
+
+function trackCompactInitializedDrawer(row, isExpanded) {
+  if (!row || !isCompactRankMode()) return;
+  const key = row.dataset.rowKey;
+  if (!key) return;
+  state.compactDrawerLru = [key, ...state.compactDrawerLru.filter((value) => value !== key)].slice(0, 20);
+  if (isExpanded) {
+    pruneCompactInitializedDrawers(row);
+    return;
+  }
+  pruneCompactInitializedDrawers();
+}
+
+function pruneCompactInitializedDrawers(currentRow = null) {
+  if (!isCompactRankMode()) return;
+  const rows = Array.from(els.content?.querySelectorAll(".rank-row, .index-row") || []);
+  const keep = new Set();
+  if (currentRow?.dataset?.rowKey) keep.add(currentRow.dataset.rowKey);
+  for (const row of rows) {
+    if (row.classList.contains("is-expanded") && row.dataset.rowKey) keep.add(row.dataset.rowKey);
+  }
+  for (const key of state.compactDrawerLru) {
+    if (keep.size >= MAX_COMPACT_INITIALIZED_DRAWERS) break;
+    keep.add(key);
+  }
+  for (const row of rows) {
+    const key = row.dataset.rowKey;
+    if (!key || keep.has(key) || row.classList.contains("is-expanded")) continue;
+    resetSourceDrawerToDeferred(row);
+  }
+  state.compactDrawerLru = state.compactDrawerLru.filter((key) => keep.has(key));
+}
+
+function resetSourceDrawerToDeferred(row) {
+  const drawer = row?.querySelector(".source-drawer");
+  if (!drawer || drawer.dataset.sourceDeferred === "true" || !drawer.hidden) return;
+  drawer.replaceChildren();
+  drawer.dataset.sourceDeferred = "true";
+  delete drawer.dataset.visibleSourceGroups;
+  delete drawer.dataset.visibleArtistSongs;
+  delete drawer.dataset.lastMoreScrollY;
+  delete drawer.dataset.lastMoreScrollDelta;
+  delete drawer._sourceGroups;
+  delete drawer._songSourceOccurrences;
+  delete drawer._sourceOccurrences;
 }
 
 function keepSourceRowVisible(row) {
@@ -4089,7 +4308,7 @@ function toggleArtistSongLimit(row) {
   const songGroups = row._artistSongGroups || row._getArtistSongGroups?.() || [];
   row._artistSongGroups = songGroups;
   const current = artistRenderedSongCount(drawer);
-  const nextVisible = songGroups.length;
+  const nextVisible = Math.min(songGroups.length, current + ARTIST_SONG_GROUP_BATCH_SIZE);
   drawer.dataset.visibleArtistSongs = String(nextVisible);
   const firstNewGroup = appendArtistSongGroupRange(drawer, songGroups, current, nextVisible);
   syncArtistSongMoreButton(drawer, nextVisible, songGroups.length);
@@ -4446,10 +4665,14 @@ function getArtistSongGroups(record) {
 }
 
 function trendForRecord(mode, record) {
+  return trendForKey(mode, record?.key);
+}
+
+function trendForKey(mode, key) {
   if (!isLatestSnapshot() || state.rankMetric !== "occurrences") return null;
   const diff = state.rankDiffs?.[state.range]?.[mode];
   if (!(diff instanceof Map)) return null;
-  return diff.get(record.key) || null;
+  return diff.get(key) || null;
 }
 
 function renderTrendBadge(trend) {
@@ -4656,7 +4879,7 @@ function lastVowel(value) {
 }
 
 function youtubeTimeUrl(videoId, seconds) {
-  const safeSeconds = Math.max(0, Number(seconds) || 0);
+  const safeSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
   return `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${safeSeconds}s`;
 }
 

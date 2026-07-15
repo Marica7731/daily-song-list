@@ -5,6 +5,7 @@ const path = require("node:path");
 const {
   DEFAULT_BLOCKLIST_PATH,
   DEFAULT_GENERATED_ASSET_PATH,
+  DEFAULT_GENERATED_META_ASSET_PATH,
   blocklistHash,
   createBlockedSourceMatcher,
   loadBlocklist,
@@ -36,13 +37,17 @@ function main() {
 
 function assertHtml(errors, hash) {
   const html = fs.readFileSync(INDEX_PATH, "utf8");
-  if (!html.includes("assets/blocked-vtuber-channels.js")) errors.push("index.html missing blocked-vtuber-channels.js");
-  if (html.indexOf("assets/blocked-vtuber-channels.js") > html.indexOf("assets/source-filter.js")) {
-    errors.push("index.html must load blocked-vtuber-channels.js before source-filter.js");
-  }
-  if (!html.includes(`assets/blocked-vtuber-channels.js?v=`)) errors.push("blocked-vtuber asset must be versioned");
+  if (!html.includes("assets/blocked-vtuber-meta.js")) errors.push("index.html missing blocked-vtuber-meta.js");
+  if (html.includes("assets/blocked-vtuber-channels.js")) errors.push("index.html must not load full blocked-vtuber-channels.js on first screen");
+  if (html.includes("assets/source-filter.js")) errors.push("index.html must not load source-filter.js on first screen");
+  if (!html.includes(`assets/blocked-vtuber-meta.js?v=`)) errors.push("blocked-vtuber meta asset must be versioned");
   const generated = fs.readFileSync(DEFAULT_GENERATED_ASSET_PATH, "utf8");
   if (!generated.includes(`blocklistHash: "${hash}"`)) errors.push("generated asset hash mismatch");
+  const meta = fs.readFileSync(DEFAULT_GENERATED_META_ASSET_PATH, "utf8");
+  if (!meta.includes(`blocklistHash: "${hash}"`)) errors.push("generated meta asset hash mismatch");
+  const app = fs.readFileSync(path.join(ROOT_DIR, "assets", "app.js"), "utf8");
+  if (!app.includes('versionedAssetPath("assets/blocked-vtuber-channels.js")')) errors.push("app.js missing dynamic blocklist load");
+  if (!app.includes('versionedAssetPath("assets/source-filter.js")')) errors.push("app.js missing dynamic source-filter load");
 }
 
 function assertMatcherSamples(errors, nodeMatcher, sourceFilterMatcher) {

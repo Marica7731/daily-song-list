@@ -21,7 +21,8 @@ test("range cache and trend Map are wired into rendering", () => {
   assert.match(appSource, /rangeCache:\s*new Map\(\)/u);
   assert.match(appSource, /currentSelection\(rangeCache\)/u);
   assert.match(functionBody("function currentSelection"), /hideUnknownForView/u);
-  assert.match(functionBody("function trendForRecord"), /\.get\(record\.key\)/u);
+  assert.match(functionBody("function trendForRecord"), /trendForKey\(mode, record\?\.key\)/u);
+  assert.match(functionBody("function trendForKey"), /\.get\(key\)/u);
   assert.match(appSource, /function createRangeCacheObject[\s\S]*defineLazyArtistCache/u);
   assert.match(appSource, /function createRangeCacheObject[\s\S]*normalizedVideoSearchData/u);
 });
@@ -73,17 +74,17 @@ test("record videoCount is used for rank values and row rendering", () => {
 
 test("same-video multiple timestamps are expandable instead of becoming inline-only", () => {
   const rankRecordBody = functionBody("function renderRankRecord");
-  assert.match(rankRecordBody, /const sourceVideoCount = mode === "artist" \? videoCount : window\.FrontendUtils\.groupOccurrencesByVideo\(occurrences\)\.length/u);
+  assert.match(rankRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(videoCount\) \|\| 0\)/u);
   assert.match(rankRecordBody, /const occurrenceCount = occurrences\.length/u);
   assert.match(rankRecordBody, /const expandable = mode === "artist" \? artistSongCount > 1 \|\| sourceVideoCount > 1 \|\| occurrenceCount > 1 : sourceVideoCount > 1 \|\| occurrenceCount > 1/u);
 
   const indexRecordBody = functionBody("function renderIndexRecord");
-  assert.match(indexRecordBody, /const sourceVideoCount = window\.FrontendUtils\.groupOccurrencesByVideo\(record\.occurrences\)\.length/u);
+  assert.match(indexRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(record\.videoCount\) \|\| 0\)/u);
   assert.match(indexRecordBody, /const expandable = sourceVideoCount > 1 \|\| record\.occurrences\.length > 1/u);
 
   const sublineBody = functionBody("function appendSublineSource");
-  assert.match(sublineBody, /if \(groupedSources\.length === 1 && occurrences\.length === 1\)/u);
-  assert.doesNotMatch(sublineBody, /groupedSources\.length === 1\)\s*\{/u);
+  assert.match(sublineBody, /if \(sourceVideoCount <= 1 && occurrences\.length === 1\)/u);
+  assert.doesNotMatch(sublineBody, /groupOccurrencesByVideo/u);
 });
 
 test("source drawer append-more reveals all remaining sources without rebuilding old cards", () => {
@@ -102,7 +103,7 @@ test("source drawer append-more reveals all remaining sources without rebuilding
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
 });
 
-test("artist rank source details use two-level lazy loading and append remaining songs once", () => {
+test("artist rank source details use two-level lazy loading and append remaining songs in batches", () => {
   const appendArtistBody = functionBody("function appendArtistSongGroups");
   assert.match(appendArtistBody, /appendArtistSongGroupRange/u);
   assert.doesNotMatch(appendArtistBody, /appendSourceDrawerLinks|renderSourceVideoGroup/u);
@@ -118,9 +119,31 @@ test("artist rank source details use two-level lazy loading and append remaining
   assert.match(toggleSourceBody, /closeSiblingArtistSongSources\(section\)/u);
 
   const toggleLimitBody = functionBody("function toggleArtistSongLimit");
-  assert.match(toggleLimitBody, /const nextVisible = songGroups\.length/u);
+  assert.match(toggleLimitBody, /const nextVisible = Math\.min\(songGroups\.length, current \+ ARTIST_SONG_GROUP_BATCH_SIZE\)/u);
   assert.match(toggleLimitBody, /appendArtistSongGroupRange\(drawer, songGroups, current, nextVisible\)/u);
-  assert.doesNotMatch(toggleLimitBody, /replaceChildren|ARTIST_SONG_GROUP_BATCH/u);
+  assert.doesNotMatch(toggleLimitBody, /replaceChildren/u);
+});
+
+test("delayed trend diffs update visible badges without rerendering the list for all trend", () => {
+  const scheduleBody = functionBody("function scheduleCurrentRankDiffLoad");
+  assert.match(scheduleBody, /state\.trend === "all"[\s\S]*updateVisibleTrendBadges\(\)/u);
+  assert.match(scheduleBody, /else \{[\s\S]*render\(\{ syncUrl: false \}\)/u);
+
+  const updateBody = functionBody("function updateVisibleTrendBadges");
+  assert.match(updateBody, /querySelectorAll\("\.rank-row\[data-trend-mode\]\[data-trend-key\]"\)/u);
+  assert.match(updateBody, /trendCell\.replaceChildren\(\)/u);
+  assert.doesNotMatch(updateBody, /els\.content\.replaceChildren|render\(/u);
+});
+
+test("selection builds only the records needed by the current view", () => {
+  const selectionBody = functionBody("function currentSelection");
+  assert.match(selectionBody, /const key = `\$\{state\.view\}::/u);
+  assert.doesNotMatch(selectionBody, /const baseSongRecords/u);
+  assert.doesNotMatch(selectionBody, /buildArtistRecords\(occurrences\)[\s\S]*buildSongRecords\(occurrences\)/u);
+
+  const prewarmBody = functionBody("async function prewarmDefaultSorts");
+  assert.match(prewarmBody, /if \(state\.view === "videos"\) return/u);
+  assert.ok(prewarmBody.indexOf('state.view === "artistRank"') < prewarmBody.indexOf("selectedSongRecords"));
 });
 
 function functionBody(signature) {
