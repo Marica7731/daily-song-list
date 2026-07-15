@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T14:26:36.493Z",
+  "generatedAt": "2026-07-15T19:50:01.721Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-15T14:04:26.181Z",
+  "latestGeneratedAt": "2026-07-15T18:30:22.026Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 2161,
-    "uniqueVideos": 338,
-    "uniqueSources": 420,
+    "totalCandidates": 2130,
+    "uniqueVideos": 339,
+    "uniqueSources": 421,
     "confirmedNoiseCount": 104,
-    "parserCorruptionCount": 234,
+    "parserCorruptionCount": 232,
     "likelyNoiseCount": 294,
-    "needsReviewCount": 1528,
+    "needsReviewCount": 1499,
     "likelySongCount": 1,
     "byClassification": {
       "confirmed_noise": 104,
-      "parser_corruption": 234,
+      "parser_corruption": 232,
       "likely_noise": 294,
-      "needs_review": 1528,
+      "needs_review": 1499,
       "likely_song": 1
     }
   },
@@ -228,6 +228,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -1239,46 +1240,6 @@
       "repairReasons": []
     },
     {
-      "title": "my sweet heart",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4012,
-      "time": "1:06:52",
-      "raw": "1:06:52　　my sweet heart",
-      "rawHash": "4e7d2fc70f43fd1c7fe17105457e01acec94499517c12c4068172b4d6072990f",
-      "videoId": "GO8HLO9vl6I",
-      "videoTitle": "【歌枠】たくさん歌ってわくわくしたい！【Vtuber/星降あめる】",
-      "channelName": "Ameru Ch.星降 あめる",
-      "channelId": "UCg07Ij3Uov3k9rYgBwDQLVQ",
-      "channelHandle": "/@ameru_hoshifuru",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GO8HLO9vl6I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GO8HLO9vl6I&t=4012s",
-      "sourceId": "legacy:GO8HLO9vl6I",
-      "sourceHash": "c5928bf96f0ee0fbe89b6042764f9e0c2be98ab4e580aaab6f7e53194fb68869",
-      "sourceOrigin": "latest;review:GO8HLO9vl6I-4fce31559bf7e4759df2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GO8HLO9vl6I:4fce31559bf7e4759df2",
-      "sourcePath": "data/review/sources/GO8HLO9vl6I-4fce31559bf7e4759df2.json",
-      "reviewLocator": "data/review/sources/GO8HLO9vl6I-4fce31559bf7e4759df2.json#4e7d2fc70f43fd1c7fe17105457e01acec94499517c12c4068172b4d6072990f",
-      "repairedTitle": "my sweet heart",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "Puppy love",
       "artist": "未記載",
       "isNiche": true,
@@ -1544,7 +1505,6 @@
       "sourceOrigin": "latest;review:ktbhqRT-6go-d58b92f2349499f483b3.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -14286,46 +14246,6 @@
       "repairReasons": []
     },
     {
-      "title": "シャカビーチ〜Laka Laka La〜",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4780,
-      "time": "1:19:40",
-      "raw": "01:19:40 シャカビーチ〜Laka Laka La〜",
-      "rawHash": "361ec63c44792fbdb14bbc238ee08b87b68d1222eeb2edf49b68035166f9bc2e",
-      "videoId": "ZUYcc-MtfBc",
-      "videoTitle": "【#歌枠｜高評価100目標】今宵もお歌の時間だよ～🌟【おとなしめんま｜vtuber 】#shorts #縦型配信",
-      "channelName": "Menma Ch. おとなしめんま",
-      "channelId": "UCcOiCDt3Ub_MMwGobfzRNIw",
-      "channelHandle": "/@menmacha",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZUYcc-MtfBc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZUYcc-MtfBc&t=4780s",
-      "sourceId": "legacy:ZUYcc-MtfBc",
-      "sourceHash": "9d84ffb9f2966f696135a3add0d6253024314e6853d9ef2cbd7083990820f958",
-      "sourceOrigin": "latest;review:ZUYcc-MtfBc-9d84ffb9f2966f696135.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZUYcc-MtfBc:9d84ffb9f2966f696135",
-      "sourcePath": "data/review/sources/ZUYcc-MtfBc-9d84ffb9f2966f696135.json",
-      "reviewLocator": "data/review/sources/ZUYcc-MtfBc-9d84ffb9f2966f696135.json#361ec63c44792fbdb14bbc238ee08b87b68d1222eeb2edf49b68035166f9bc2e",
-      "repairedTitle": "シャカビーチ〜Laka Laka La〜",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "星寂夜",
       "artist": "未記載",
       "isNiche": true,
@@ -14670,7 +14590,6 @@
       "sourceOrigin": "latest;review:xtkm7esReyk-7d0500f46db35257998d.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -14711,7 +14630,6 @@
       "sourceOrigin": "latest;review:xtkm7esReyk-7d0500f46db35257998d.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -14752,7 +14670,6 @@
       "sourceOrigin": "latest;review:xtkm7esReyk-7d0500f46db35257998d.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -14793,7 +14710,6 @@
       "sourceOrigin": "latest;review:xtkm7esReyk-7d0500f46db35257998d.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -14834,7 +14750,6 @@
       "sourceOrigin": "latest;review:xtkm7esReyk-7d0500f46db35257998d.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -15016,46 +14931,6 @@
       "sourcePath": "data/review/sources/sAvPguxfkbI-bac86e4c83769ec92f95.json",
       "reviewLocator": "data/review/sources/sAvPguxfkbI-bac86e4c83769ec92f95.json#2c44a408eb1b033be7db6d324b242ccf6748715089068321bf091cdf394b7a37",
       "repairedTitle": "嗚呼、麗しき人生",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "乙女のポリシー",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3069,
-      "time": "0:51:09",
-      "raw": "51:09 乙女のポリシー",
-      "rawHash": "cb51428a0fa373444903d700056418316f935186b4405fc1d5c17688c659ba83",
-      "videoId": "sAvPguxfkbI",
-      "videoTitle": "6/29【歌枠】ゆったり深夜の歌枠【KARAOKE STREAM】",
-      "channelName": "NORISTRY Official",
-      "channelId": "UChvkwy7w0ouKv2rJhD_kPvw",
-      "channelHandle": "/channel/UChvkwy7w0ouKv2rJhD_kPvw",
-      "youtubeUrl": "https://www.youtube.com/watch?v=sAvPguxfkbI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=sAvPguxfkbI&t=3069s",
-      "sourceId": "legacy:sAvPguxfkbI",
-      "sourceHash": "8020d65e73bb07dbdb645411e7109beac5d2fb90f3355b1154e561d88cee4f6d",
-      "sourceOrigin": "latest;review:sAvPguxfkbI-bac86e4c83769ec92f95.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:sAvPguxfkbI:bac86e4c83769ec92f95",
-      "sourcePath": "data/review/sources/sAvPguxfkbI-bac86e4c83769ec92f95.json",
-      "reviewLocator": "data/review/sources/sAvPguxfkbI-bac86e4c83769ec92f95.json#cb51428a0fa373444903d700056418316f935186b4405fc1d5c17688c659ba83",
-      "repairedTitle": "乙女のポリシー",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -17264,7 +17139,6 @@
       "sourceOrigin": "latest;review:t7sfhp6JFbM-b66e99883c0db5b250a9.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -20309,46 +20183,6 @@
       "repairReasons": []
     },
     {
-      "title": "雨とペトラ piano ver",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 2361,
-      "time": "0:39:21",
-      "raw": "♪39:21 雨とペトラ piano ver",
-      "rawHash": "5073543e6b2d6bf1a29343785ec7ca790e763f0fb370581c167c671dd8b04a74",
-      "videoId": "_zMnCDv-Tw4",
-      "videoTitle": "【 歌枠 】 リクエスト◎ るんるんるん 【 雨海ルカ / WeatherPlanet 】",
-      "channelName": "Ruka Ch. 雨海ルカ",
-      "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
-      "channelHandle": "/@RukaCh.%E9%9B%A8%E6%B5%B7%E3%83%AB%E3%82%AB",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_zMnCDv-Tw4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=2361s",
-      "sourceId": "legacy:_zMnCDv-Tw4",
-      "sourceHash": "2ffb94b05fbbf5517b606ac5492d918378157a06d557c073dd222e7756095179",
-      "sourceOrigin": "latest;review:_zMnCDv-Tw4-d4054090b33362464db1.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:_zMnCDv-Tw4:d4054090b33362464db1",
-      "sourcePath": "data/review/sources/_zMnCDv-Tw4-d4054090b33362464db1.json",
-      "reviewLocator": "data/review/sources/_zMnCDv-Tw4-d4054090b33362464db1.json#5073543e6b2d6bf1a29343785ec7ca790e763f0fb370581c167c671dd8b04a74",
-      "repairedTitle": "雨とペトラ piano ver",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "にゃー",
       "artist": "未記載",
       "isNiche": true,
@@ -20884,46 +20718,6 @@
       "repairReasons": []
     },
     {
-      "title": "HEART STATION",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 10032,
-      "time": "2:47:12",
-      "raw": "♪2:47:12 HEART STATION",
-      "rawHash": "4ef2f3723e799555dfa2c39450d3ee2182ba34a564995895f51379445a828068",
-      "videoId": "_zMnCDv-Tw4",
-      "videoTitle": "【 歌枠 】 リクエスト◎ るんるんるん 【 雨海ルカ / WeatherPlanet 】",
-      "channelName": "Ruka Ch. 雨海ルカ",
-      "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
-      "channelHandle": "/@RukaCh.%E9%9B%A8%E6%B5%B7%E3%83%AB%E3%82%AB",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_zMnCDv-Tw4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=10032s",
-      "sourceId": "legacy:_zMnCDv-Tw4",
-      "sourceHash": "2ffb94b05fbbf5517b606ac5492d918378157a06d557c073dd222e7756095179",
-      "sourceOrigin": "latest;review:_zMnCDv-Tw4-d4054090b33362464db1.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:_zMnCDv-Tw4:d4054090b33362464db1",
-      "sourcePath": "data/review/sources/_zMnCDv-Tw4-d4054090b33362464db1.json",
-      "reviewLocator": "data/review/sources/_zMnCDv-Tw4-d4054090b33362464db1.json#4ef2f3723e799555dfa2c39450d3ee2182ba34a564995895f51379445a828068",
-      "repairedTitle": "HEART STATION",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "台風平気？",
       "artist": "未記載",
       "isNiche": true,
@@ -21106,46 +20900,6 @@
       "sourcePath": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json",
       "reviewLocator": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json#18dcd646028db2ffa1b59ea253fc48fe411f28d1b3871a79d453ac0b63dd5369",
       "repairedTitle": "自分の歌う曲の傾向",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "ワンルームシュガーライフ",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3048,
-      "time": "0:50:48",
-      "raw": "♪50:48 ワンルームシュガーライフ",
-      "rawHash": "35af648ca785dd21f722f7386bc009ba2f0640a6723754ef466749b17d72332e",
-      "videoId": "I82L8E7O8Sw",
-      "videoTitle": "【 歌枠 】 リクエスト◎ 台風だし雨海の出番っしょ！ 【 雨海ルカ / WeatherPlanet 】",
-      "channelName": "Ruka Ch. 雨海ルカ",
-      "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
-      "channelHandle": "/@RukaCh.%E9%9B%A8%E6%B5%B7%E3%83%AB%E3%82%AB",
-      "youtubeUrl": "https://www.youtube.com/watch?v=I82L8E7O8Sw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=I82L8E7O8Sw&t=3048s",
-      "sourceId": "legacy:I82L8E7O8Sw",
-      "sourceHash": "068209d1eca57c1d55d5674bf09dc0648851190df17f0cee71977f7a13fa67d1",
-      "sourceOrigin": "latest;review:I82L8E7O8Sw-7f78a6def8df2d574904.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:I82L8E7O8Sw:7f78a6def8df2d574904",
-      "sourcePath": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json",
-      "reviewLocator": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json#35af648ca785dd21f722f7386bc009ba2f0640a6723754ef466749b17d72332e",
-      "repairedTitle": "ワンルームシュガーライフ",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -21415,46 +21169,6 @@
       "reviewLocator": "data/review/sources/history-I82L8E7O8Sw-068209d1eca57c1d55d5.json#1781f1eacd5ca07377ed6f646a796fc5da5a2c3008aef9816525514da83f0af4"
     },
     {
-      "title": "drivers license",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 7320,
-      "time": "2:02:00",
-      "raw": "♪2:02:00 drivers license",
-      "rawHash": "8098ae34b31997beac63e503298016fcca12f762958a5f708b15bafa416b5789",
-      "videoId": "I82L8E7O8Sw",
-      "videoTitle": "【 歌枠 】 リクエスト◎ 台風だし雨海の出番っしょ！ 【 雨海ルカ / WeatherPlanet 】",
-      "channelName": "Ruka Ch. 雨海ルカ",
-      "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
-      "channelHandle": "/@RukaCh.%E9%9B%A8%E6%B5%B7%E3%83%AB%E3%82%AB",
-      "youtubeUrl": "https://www.youtube.com/watch?v=I82L8E7O8Sw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=I82L8E7O8Sw&t=7320s",
-      "sourceId": "legacy:I82L8E7O8Sw",
-      "sourceHash": "068209d1eca57c1d55d5674bf09dc0648851190df17f0cee71977f7a13fa67d1",
-      "sourceOrigin": "latest;review:I82L8E7O8Sw-7f78a6def8df2d574904.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:I82L8E7O8Sw:7f78a6def8df2d574904",
-      "sourcePath": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json",
-      "reviewLocator": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json#8098ae34b31997beac63e503298016fcca12f762958a5f708b15bafa416b5789",
-      "repairedTitle": "drivers license",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "今からクリスマスを一緒に過ごしてもらいます",
       "artist": "未記載",
       "isNiche": true,
@@ -21539,46 +21253,6 @@
       "sourcePath": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json",
       "reviewLocator": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json#6fac60f8e2aad6a48950a794248186079905b4d163691b3340a615d86028334b",
       "repairedTitle": "ECHO(ワンコーラス)",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "Angel",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 9291,
-      "time": "2:34:51",
-      "raw": "♪2:34:51 Angel",
-      "rawHash": "39128fc28db059851adb66615ae712a9220a8bb2dd2eb6070e7a4efa90983f12",
-      "videoId": "I82L8E7O8Sw",
-      "videoTitle": "【 歌枠 】 リクエスト◎ 台風だし雨海の出番っしょ！ 【 雨海ルカ / WeatherPlanet 】",
-      "channelName": "Ruka Ch. 雨海ルカ",
-      "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
-      "channelHandle": "/@RukaCh.%E9%9B%A8%E6%B5%B7%E3%83%AB%E3%82%AB",
-      "youtubeUrl": "https://www.youtube.com/watch?v=I82L8E7O8Sw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=I82L8E7O8Sw&t=9291s",
-      "sourceId": "legacy:I82L8E7O8Sw",
-      "sourceHash": "068209d1eca57c1d55d5674bf09dc0648851190df17f0cee71977f7a13fa67d1",
-      "sourceOrigin": "latest;review:I82L8E7O8Sw-7f78a6def8df2d574904.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:I82L8E7O8Sw:7f78a6def8df2d574904",
-      "sourcePath": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json",
-      "reviewLocator": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json#39128fc28db059851adb66615ae712a9220a8bb2dd2eb6070e7a4efa90983f12",
-      "repairedTitle": "Angel",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -21670,47 +21344,6 @@
       "reviewId": "review:I82L8E7O8Sw:068209d1eca57c1d55d5",
       "sourcePath": "data/review/sources/history-I82L8E7O8Sw-068209d1eca57c1d55d5.json",
       "reviewLocator": "data/review/sources/history-I82L8E7O8Sw-068209d1eca57c1d55d5.json#a518909f3637e57fdc985619b0193da2ea549c6076d8c0869b933617562c03c2"
-    },
-    {
-      "title": "DADA",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 10658,
-      "time": "2:57:38",
-      "raw": "♪2:57:38 DADA",
-      "rawHash": "9381e5289d8194bc055e2fc87bd7ce6325e3f2c4bc4cd89ba6e4ee0e7d0fcdfe",
-      "videoId": "I82L8E7O8Sw",
-      "videoTitle": "【 歌枠 】 リクエスト◎ 台風だし雨海の出番っしょ！ 【 雨海ルカ / WeatherPlanet 】",
-      "channelName": "Ruka Ch. 雨海ルカ",
-      "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
-      "channelHandle": "/@RukaCh.%E9%9B%A8%E6%B5%B7%E3%83%AB%E3%82%AB",
-      "youtubeUrl": "https://www.youtube.com/watch?v=I82L8E7O8Sw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=I82L8E7O8Sw&t=10658s",
-      "sourceId": "legacy:I82L8E7O8Sw",
-      "sourceHash": "068209d1eca57c1d55d5674bf09dc0648851190df17f0cee71977f7a13fa67d1",
-      "sourceOrigin": "latest;review:I82L8E7O8Sw-7f78a6def8df2d574904.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:I82L8E7O8Sw:7f78a6def8df2d574904",
-      "sourcePath": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json",
-      "reviewLocator": "data/review/sources/I82L8E7O8Sw-7f78a6def8df2d574904.json#9381e5289d8194bc055e2fc87bd7ce6325e3f2c4bc4cd89ba6e4ee0e7d0fcdfe",
-      "repairedTitle": "DADA",
-      "repairedArtist": "未記載",
-      "repairReasons": []
     },
     {
       "title": "にゃにゃ",
@@ -22034,6 +21667,45 @@
       "sourcePath": "data/review/sources/rjkpOwMiGek-62beb6f6cbda1e7dba9e.json",
       "reviewLocator": "data/review/sources/rjkpOwMiGek-62beb6f6cbda1e7dba9e.json#24274f81fa97ce13aa49e86d6d3179cf447cfb295cb28380c75ffa33339a1d39",
       "repairedTitle": "an!",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "スカ―",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1250,
+      "time": "0:20:50",
+      "raw": "20:50　スカ―",
+      "rawHash": "a9e13319b71492abac777037275a042b6f6623db7fdd4491faba46a71d0bfe7f",
+      "videoId": "-3iD7lEd7ik",
+      "videoTitle": "【 #歌枠 】5周年ライブまで毎日歌練習#7【練習配信】 #vtuber #浅葱サキ #バーチャルyoutuber 声優 #shorts",
+      "channelName": "Saki Ch. 浅葱サキ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-3iD7lEd7ik",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-3iD7lEd7ik&t=1250s",
+      "sourceId": "Ugy6ippR_oqJuVL0twd4AaABAg",
+      "sourceHash": "052f0f63ea49fd0a6231ad2ea06bf96cc015aa8423bd87b9f96d39d5045ba52b",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:-3iD7lEd7ik:052f0f63ea49fd0a6231",
+      "sourcePath": "data/review/sources/-3iD7lEd7ik-052f0f63ea49fd0a6231.json",
+      "reviewLocator": "data/review/sources/-3iD7lEd7ik-052f0f63ea49fd0a6231.json#a9e13319b71492abac777037275a042b6f6623db7fdd4491faba46a71d0bfe7f",
+      "repairedTitle": "スカ―",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -25453,46 +25125,6 @@
       "repairReasons": []
     },
     {
-      "title": "夢のまた夢",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1178,
-      "time": "0:19:38",
-      "raw": "19:38夢のまた夢",
-      "rawHash": "d3ddb87e718f895715270d78522a8f9b599b8e359dad26577d2c9359b827ea0f",
-      "videoId": "ulT7yX74FPE",
-      "videoTitle": "【睡眠導入】眠れない夜の弾き語り #4",
-      "channelName": "xea",
-      "channelId": "UC1fasxkXiMymlMT72ykOTpw",
-      "channelHandle": "/channel/UC1fasxkXiMymlMT72ykOTpw",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ulT7yX74FPE",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ulT7yX74FPE&t=1178s",
-      "sourceId": "legacy:ulT7yX74FPE",
-      "sourceHash": "098a7af9e5693e1bfdfcb136c5a1e01c50ef0e666756447388056df6b3a58683",
-      "sourceOrigin": "latest;review:ulT7yX74FPE-098a7af9e5693e1bfdfc.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ulT7yX74FPE:098a7af9e5693e1bfdfc",
-      "sourcePath": "data/review/sources/ulT7yX74FPE-098a7af9e5693e1bfdfc.json",
-      "reviewLocator": "data/review/sources/ulT7yX74FPE-098a7af9e5693e1bfdfc.json#d3ddb87e718f895715270d78522a8f9b599b8e359dad26577d2c9359b827ea0f",
-      "repairedTitle": "夢のまた夢",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "あの秋とスクールデイズ",
       "artist": "未記載",
       "isNiche": true,
@@ -25693,6 +25325,86 @@
       "repairReasons": []
     },
     {
+      "title": "168000",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3477,
+      "time": "0:57:57",
+      "raw": "00:57:57  168000",
+      "rawHash": "ce5ff7a4937a176e578c836b579d242d840384162ab39188088e91c8fddc84b5",
+      "videoId": "iMgIA50iznE",
+      "videoTitle": "【#歌枠 】初見さん歓迎中！暑すぎてめつ！ #shorts #vtuber #vsinger",
+      "channelName": "YOSHIKA⁂Ch.",
+      "channelId": "UC3xQCiEPSkco54WhuiDcngw",
+      "channelHandle": "/@YOSHIKA-Ch",
+      "youtubeUrl": "https://www.youtube.com/watch?v=iMgIA50iznE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iMgIA50iznE&t=3477s",
+      "sourceId": "UgyI3ZBp0m4bn2BaOJN4AaABAg",
+      "sourceHash": "854951e10c6f54b97daa959d1b44fdebee6451908cbf885ff36188e8f7c0a705",
+      "sourceOrigin": "latest;review:iMgIA50iznE-854951e10c6f54b97daa.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:iMgIA50iznE:854951e10c6f54b97daa",
+      "sourcePath": "data/review/sources/iMgIA50iznE-854951e10c6f54b97daa.json",
+      "reviewLocator": "data/review/sources/iMgIA50iznE-854951e10c6f54b97daa.json#ce5ff7a4937a176e578c836b579d242d840384162ab39188088e91c8fddc84b5",
+      "repairedTitle": "168000",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "168100",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 8255,
+      "time": "2:17:35",
+      "raw": "02:17:35  168100",
+      "rawHash": "aa2d153b130a3e8260b6d973cf3840c5a23e67ae0424720712a9a5c94d91d459",
+      "videoId": "iMgIA50iznE",
+      "videoTitle": "【#歌枠 】初見さん歓迎中！暑すぎてめつ！ #shorts #vtuber #vsinger",
+      "channelName": "YOSHIKA⁂Ch.",
+      "channelId": "UC3xQCiEPSkco54WhuiDcngw",
+      "channelHandle": "/@YOSHIKA-Ch",
+      "youtubeUrl": "https://www.youtube.com/watch?v=iMgIA50iznE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iMgIA50iznE&t=8255s",
+      "sourceId": "UgyI3ZBp0m4bn2BaOJN4AaABAg",
+      "sourceHash": "854951e10c6f54b97daa959d1b44fdebee6451908cbf885ff36188e8f7c0a705",
+      "sourceOrigin": "latest;review:iMgIA50iznE-854951e10c6f54b97daa.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:iMgIA50iznE:854951e10c6f54b97daa",
+      "sourcePath": "data/review/sources/iMgIA50iznE-854951e10c6f54b97daa.json",
+      "reviewLocator": "data/review/sources/iMgIA50iznE-854951e10c6f54b97daa.json#aa2d153b130a3e8260b6d973cf3840c5a23e67ae0424720712a9a5c94d91d459",
+      "repairedTitle": "168100",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "Help me, ERINNNNNN!!(COOL&CREATE)",
       "artist": "未記載",
       "isNiche": true,
@@ -25773,48 +25485,6 @@
       "repairReasons": []
     },
     {
-      "title": "モス",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1296,
-      "time": "0:21:36",
-      "raw": "21:36 モス",
-      "rawHash": "c21d2a091d675f0e3b6ad26c40838e0f1a980112fd5c6f8cb032c209b9a5f686",
-      "videoId": "fnm5-5hlij4",
-      "videoTitle": "【#言霊綴り歌枠リレー】２番手は南方ユキト【スプヴォルヴァの棲み人】",
-      "channelName": "Yukito ch.南方ユキト",
-      "channelId": "UCiWpMyOCeGdjvj8xvcgfdkg",
-      "channelHandle": "/@MinakataYukito",
-      "youtubeUrl": "https://www.youtube.com/watch?v=fnm5-5hlij4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fnm5-5hlij4&t=1296s",
-      "sourceId": "UgwOm-gcm2xiwgiq3A54AaABAg",
-      "sourceHash": "bbe40e90d865474e71e158da9d85c46e35cb4316447fd55b551b0589ad5b62a9",
-      "sourceOrigin": "latest;review:fnm5-5hlij4-bbe40e90d865474e71e1.json",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:fnm5-5hlij4:bbe40e90d865474e71e1",
-      "sourcePath": "data/review/sources/fnm5-5hlij4-bbe40e90d865474e71e1.json",
-      "reviewLocator": "data/review/sources/fnm5-5hlij4-bbe40e90d865474e71e1.json#c21d2a091d675f0e3b6ad26c40838e0f1a980112fd5c6f8cb032c209b9a5f686",
-      "repairedTitle": "モス",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "こいのぼり",
       "artist": "未記載",
       "isNiche": true,
@@ -25835,7 +25505,6 @@
       "sourceOrigin": "latest;review:0LRtgvFNsoU-54d387bc5821e57e0a95.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -26816,7 +26485,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
@@ -27430,7 +27099,6 @@
       "sourceOrigin": "latest;review:sl0vwRC8M9Q-77ad285479b8c4621f6e.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -27567,7 +27235,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -27830,18 +27498,21 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=cNXIRo0xtV0&t=0s",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "1m"
+        "1m",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:cNXIRo0xtV0:33fdb0b9d76f4a86c94a",
@@ -27850,54 +27521,6 @@
       "repairedTitle": "開場",
       "repairedArtist": "未記載",
       "repairReasons": []
-    },
-    {
-      "title": "キミの色",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 2804,
-      "time": "0:46:44",
-      "raw": "46:44 キミの色/オリジナル",
-      "rawHash": "6bd1fe6a52f7e48069cca4dc6c254215d3e91d6acc1982ea51c34b8adbc198e5",
-      "videoId": "cNXIRo0xtV0",
-      "videoTitle": "【#弾き語り #132】7月最初の雑談＆弾き語り！【Vtuber/エクト】",
-      "channelName": "エクト / 弾き語り系白猫Vtuber🐾",
-      "channelId": "UC7Vn20aSEXlIU-sbqIsLMsw",
-      "channelHandle": "/@Ekuto_Vtuber",
-      "youtubeUrl": "https://www.youtube.com/watch?v=cNXIRo0xtV0",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=cNXIRo0xtV0&t=2804s",
-      "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
-      "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "sourceOrigin": "latest;review:history-cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m",
-        "snapshot:20260715T140000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "artist": "オリジナル"
-      },
-      "reviewId": "review:cNXIRo0xtV0:33fdb0b9d76f4a86c94a",
-      "sourcePath": "data/review/sources/cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json",
-      "reviewLocator": "data/review/sources/cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json#6bd1fe6a52f7e48069cca4dc6c254215d3e91d6acc1982ea51c34b8adbc198e5",
-      "repairedTitle": "キミの色",
-      "repairedArtist": "オリジナル",
-      "repairReasons": [
-        "delimiter_split"
-      ]
     },
     {
       "title": "FA紹介コーナー！",
@@ -27917,18 +27540,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=cNXIRo0xtV0&t=3414s",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "1m"
+        "1m",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:cNXIRo0xtV0:33fdb0b9d76f4a86c94a",
@@ -27956,18 +27581,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=cNXIRo0xtV0&t=4895s",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "1m"
+        "1m",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:cNXIRo0xtV0:33fdb0b9d76f4a86c94a",
@@ -28022,6 +27649,46 @@
       "reviewId": "review:LRsjXGiMZUs:a9acd9d6b3d12d271b2c",
       "sourcePath": "data/review/sources/history-LRsjXGiMZUs-a9acd9d6b3d12d271b2c.json",
       "reviewLocator": "data/review/sources/history-LRsjXGiMZUs-a9acd9d6b3d12d271b2c.json#40fe8aa59d12ae310a6beb59a1af47644883d0223687453dcab944702a1c01e1"
+    },
+    {
+      "title": "↑ 歌詞考察",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1177,
+      "time": "0:19:37",
+      "raw": "0:19:37 ↑ 歌詞考察",
+      "rawHash": "23d61cac1d5b43e5ca9082993031ee928f36b48e48719384fe974ddd50320133",
+      "videoId": "gYXv_h6oYTU",
+      "videoTitle": "【#耐久 #歌枠 】登録者1500人耐久歌枠【#shorts #まあいっか放送 #vtuber 】",
+      "channelName": "おもや いっか -Omoya Icca-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gYXv_h6oYTU",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gYXv_h6oYTU&t=1177s",
+      "sourceId": "Ugynqgo7hESSVlgrYP94AaABAg",
+      "sourceHash": "b94e3e52d6a4feb674f7a46fed8767a6e77e5f41d42011485e4b710a8db4bed9",
+      "sourceOrigin": "latest;review:gYXv_h6oYTU-b94e3e52d6a4feb674f7.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:gYXv_h6oYTU:b94e3e52d6a4feb674f7",
+      "sourcePath": "data/review/sources/gYXv_h6oYTU-b94e3e52d6a4feb674f7.json",
+      "reviewLocator": "data/review/sources/gYXv_h6oYTU-b94e3e52d6a4feb674f7.json#23d61cac1d5b43e5ca9082993031ee928f36b48e48719384fe974ddd50320133",
+      "repairedTitle": "↑ 歌詞考察",
+      "repairedArtist": "未記載",
+      "repairReasons": []
     },
     {
       "title": "(邪気放出)",
@@ -29017,56 +28684,6 @@
       "repairedTitle": "Starry Heayens",
       "repairedArtist": "未記載",
       "repairReasons": []
-    },
-    {
-      "title": "灰色と青(＋菅田将暉)/米津玄師",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3793,
-      "time": "1:03:13",
-      "raw": "1:03:13    灰色と青(＋菅田将暉)/米津玄師/2017",
-      "rawHash": "88822fbc314512f00ae7461f34759908e991455b12eb05240930a5147a5bfb9e",
-      "videoId": "B2NNCFyBwbw",
-      "videoTitle": "【歌枠】落ち着きたい時に聴きたいチル曲縛り。【ここ・じぇす汰 / ななしいんく】",
-      "channelName": "ここ・じぇす汰 / Coco･Jester【ななしいんく】",
-      "channelId": "UCuDfldiO-ujdFC-36eYMl2g",
-      "channelHandle": "/@Coco_Jester",
-      "youtubeUrl": "https://www.youtube.com/watch?v=B2NNCFyBwbw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=B2NNCFyBwbw&t=3793s",
-      "sourceId": "UgyQAIqSQrTAWAOq__F4AaABAg",
-      "sourceHash": "be04d3d2e230ef2b8bfcef3feee0228f485d48afa52bf70c0d60771670b9d01e",
-      "sourceOrigin": "latest;review:B2NNCFyBwbw-be04d3d2e230ef2b8bfc.json;review:history-B2NNCFyBwbw-be04d3d2e230ef2b8bfc.json",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260715T140000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "title": "灰色と青(＋菅田将暉)",
-        "artist": "米津玄師/2017"
-      },
-      "reviewId": "review:B2NNCFyBwbw:be04d3d2e230ef2b8bfc",
-      "sourcePath": "data/review/sources/B2NNCFyBwbw-be04d3d2e230ef2b8bfc.json",
-      "reviewLocator": "data/review/sources/B2NNCFyBwbw-be04d3d2e230ef2b8bfc.json#88822fbc314512f00ae7461f34759908e991455b12eb05240930a5147a5bfb9e",
-      "repairedTitle": "灰色と青(＋菅田将暉)",
-      "repairedArtist": "米津玄師/2017",
-      "repairReasons": [
-        "delimiter_split"
-      ]
     },
     {
       "title": "My Blue Heaven",
@@ -30649,87 +30266,6 @@
       "repairReasons": []
     },
     {
-      "title": "MOTTAI",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 732,
-      "time": "0:12:12",
-      "raw": "1. MOTTAI　12:12",
-      "rawHash": "4b3ef27907049132dec03b202b906dae5cee865552db432001c7c5f374a7c59c",
-      "videoId": "VmLgly38CwY",
-      "videoTitle": "【歌枠】おいっすオラ多声類！！【チョま】#多声類 #両声類 #Vtuber #Vsinger #shorts",
-      "channelName": "チョま",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=VmLgly38CwY",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=VmLgly38CwY&t=732s",
-      "sourceId": "legacy:VmLgly38CwY",
-      "sourceHash": "13471331dc10d8e60dc6b22125eb1796cae49e721630a066561d3b96f25c93ac",
-      "sourceOrigin": "latest;review:VmLgly38CwY-13471331dc10d8e60dc6.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:VmLgly38CwY:13471331dc10d8e60dc6",
-      "sourcePath": "data/review/sources/VmLgly38CwY-13471331dc10d8e60dc6.json",
-      "reviewLocator": "data/review/sources/VmLgly38CwY-13471331dc10d8e60dc6.json#4b3ef27907049132dec03b202b906dae5cee865552db432001c7c5f374a7c59c",
-      "repairedTitle": "MOTTAI",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "ヤラララ",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 6519,
-      "time": "1:48:39",
-      "raw": "20. ヤラララ　1:48:39",
-      "rawHash": "a0a21597e845d7b9fac3ba6242262ce347da2914097e7b6fc8541550b728cb0a",
-      "videoId": "VmLgly38CwY",
-      "videoTitle": "【歌枠】おいっすオラ多声類！！【チョま】#多声類 #両声類 #Vtuber #Vsinger #shorts",
-      "channelName": "チョま",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=VmLgly38CwY",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=VmLgly38CwY&t=6519s",
-      "sourceId": "legacy:VmLgly38CwY",
-      "sourceHash": "13471331dc10d8e60dc6b22125eb1796cae49e721630a066561d3b96f25c93ac",
-      "sourceOrigin": "latest;review:VmLgly38CwY-13471331dc10d8e60dc6.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:VmLgly38CwY:13471331dc10d8e60dc6",
-      "sourcePath": "data/review/sources/VmLgly38CwY-13471331dc10d8e60dc6.json",
-      "reviewLocator": "data/review/sources/VmLgly38CwY-13471331dc10d8e60dc6.json#a0a21597e845d7b9fac3ba6242262ce347da2914097e7b6fc8541550b728cb0a",
-      "repairedTitle": "ヤラララ",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "お願いダーリン",
       "artist": "未記載",
       "isNiche": true,
@@ -30937,46 +30473,6 @@
       "repairReasons": []
     },
     {
-      "title": "Round ZERO ～ BLADE BRAVE",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3260,
-      "time": "0:54:20",
-      "raw": "00:54:20    012 Round ZERO ～ BLADE BRAVE",
-      "rawHash": "c6299bb683c082eade03589eccf3a4f58965a37e7c224894c06ffa3c813de9cf",
-      "videoId": "_Oe-nuMiM2I",
-      "videoTitle": "【耐久歌枠】最強音圧！ワンマンライブ一般抽選最終日！sold out祈願で抽選〆切まで歌い続ける…！！Part.1 #あおぎり高校 #千代浦蝶美 #vsinger",
-      "channelName": "ちよみch. 千代浦蝶美 /あおぎり高校",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_Oe-nuMiM2I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=3260s",
-      "sourceId": "legacy:_Oe-nuMiM2I",
-      "sourceHash": "e760d0923d90ff3c456e59fc080f8ae93d184f9dd37b25c471307c1918f67553",
-      "sourceOrigin": "latest;review:_Oe-nuMiM2I-ce9a7a8a358dfc233a65.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:_Oe-nuMiM2I:ce9a7a8a358dfc233a65",
-      "sourcePath": "data/review/sources/_Oe-nuMiM2I-ce9a7a8a358dfc233a65.json",
-      "reviewLocator": "data/review/sources/_Oe-nuMiM2I-ce9a7a8a358dfc233a65.json#c6299bb683c082eade03589eccf3a4f58965a37e7c224894c06ffa3c813de9cf",
-      "repairedTitle": "Round ZERO ～ BLADE BRAVE",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "七夕に願いを「つべ様、グルグルは勘弁して下さい」",
       "artist": "未記載",
       "isNiche": true,
@@ -31146,46 +30642,6 @@
       "sourcePath": "data/review/sources/_Oe-nuMiM2I-ce9a7a8a358dfc233a65.json",
       "reviewLocator": "data/review/sources/_Oe-nuMiM2I-ce9a7a8a358dfc233a65.json#7dcebd40e5782c957f8d09b44f5ec3289511903e938fd8d1228b2c470a7b99a1",
       "repairedTitle": "夢は終わらない ～こぼれ落ちる時の雫～",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "永遠の明日",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4612,
-      "time": "1:16:52",
-      "raw": "01:16:52    016 永遠の明日",
-      "rawHash": "41b0f5c8e9b29f651e3345e14937e79df01be32d68a07754c4aab74d62b63371",
-      "videoId": "_Oe-nuMiM2I",
-      "videoTitle": "【耐久歌枠】最強音圧！ワンマンライブ一般抽選最終日！sold out祈願で抽選〆切まで歌い続ける…！！Part.1 #あおぎり高校 #千代浦蝶美 #vsinger",
-      "channelName": "ちよみch. 千代浦蝶美 /あおぎり高校",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_Oe-nuMiM2I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=4612s",
-      "sourceId": "legacy:_Oe-nuMiM2I",
-      "sourceHash": "e760d0923d90ff3c456e59fc080f8ae93d184f9dd37b25c471307c1918f67553",
-      "sourceOrigin": "latest;review:_Oe-nuMiM2I-ce9a7a8a358dfc233a65.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:_Oe-nuMiM2I:ce9a7a8a358dfc233a65",
-      "sourcePath": "data/review/sources/_Oe-nuMiM2I-ce9a7a8a358dfc233a65.json",
-      "reviewLocator": "data/review/sources/_Oe-nuMiM2I-ce9a7a8a358dfc233a65.json#41b0f5c8e9b29f651e3345e14937e79df01be32d68a07754c4aab74d62b63371",
-      "repairedTitle": "永遠の明日",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -31642,46 +31098,6 @@
       "sourcePath": "data/review/sources/bLAvuEdVT6Q-bc40d5d2ed2dd06f24c5.json",
       "reviewLocator": "data/review/sources/bLAvuEdVT6Q-bc40d5d2ed2dd06f24c5.json#de61836a133f4fea0b8c76abb3293d57f968c283fc3511255c0541fc2728782f",
       "repairedTitle": "初音ミクメドレー",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "花束のかわりにメロディーを",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 6901,
-      "time": "1:55:01",
-      "raw": "1:55:01 花束のかわりにメロディーを",
-      "rawHash": "34588048d57e552afe9171fcf21ba04a47f7fdf2209ad37513abaccff28a27ca",
-      "videoId": "a4ZJuD9qSGw",
-      "videoTitle": "【モテたい】人生初の神曲カラオケ配信をやる【歌枠】",
-      "channelName": "ニキ【すごいイケメン】",
-      "channelId": "UC5rzmPd-Jy1uYy9xEpYerQA",
-      "channelHandle": "/@Niki_Ikemen",
-      "youtubeUrl": "https://www.youtube.com/watch?v=a4ZJuD9qSGw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=a4ZJuD9qSGw&t=6901s",
-      "sourceId": "legacy:a4ZJuD9qSGw",
-      "sourceHash": "50c4c5c7b8fa21183c835dda23d1ab4852397154b881c5821d3000c23f972e4d",
-      "sourceOrigin": "latest;review:a4ZJuD9qSGw-0fd9a7f3beb7a112c2a0.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:a4ZJuD9qSGw:0fd9a7f3beb7a112c2a0",
-      "sourcePath": "data/review/sources/a4ZJuD9qSGw-0fd9a7f3beb7a112c2a0.json",
-      "reviewLocator": "data/review/sources/a4ZJuD9qSGw-0fd9a7f3beb7a112c2a0.json#34588048d57e552afe9171fcf21ba04a47f7fdf2209ad37513abaccff28a27ca",
-      "repairedTitle": "花束のかわりにメロディーを",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -33840,46 +33256,6 @@
       "repairReasons": []
     },
     {
-      "title": "花束のかわりにメロディーを",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 8928,
-      "time": "2:28:48",
-      "raw": "2:28:48 花束のかわりにメロディーを",
-      "rawHash": "9f7fb26b421423060c8c73b160b0518264620606a074f4dfae8e9c870c1d3f5f",
-      "videoId": "37WV6tXih-8",
-      "videoTitle": "歌枠でみんなを癒すのだ♪#shorts #縦型配信 #vtuber #みいなのおふとん #歌枠",
-      "channelName": "みいなのおふとん_channel",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=37WV6tXih-8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=37WV6tXih-8&t=8928s",
-      "sourceId": "legacy:37WV6tXih-8",
-      "sourceHash": "a94d9ff308ff1d5dbc279a5b01961acee786aa93ecc03ae9ade8d48b446006b4",
-      "sourceOrigin": "latest;review:37WV6tXih-8-a94d9ff308ff1d5dbc27.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:37WV6tXih-8:a94d9ff308ff1d5dbc27",
-      "sourcePath": "data/review/sources/37WV6tXih-8-a94d9ff308ff1d5dbc27.json",
-      "reviewLocator": "data/review/sources/37WV6tXih-8-a94d9ff308ff1d5dbc27.json#9f7fb26b421423060c8c73b160b0518264620606a074f4dfae8e9c870c1d3f5f",
-      "repairedTitle": "花束のかわりにメロディーを",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "メンバーシップスタンプ更新",
       "artist": "未記載",
       "isNiche": true,
@@ -34019,168 +33395,6 @@
       "reviewId": "review:1PP__LNIRBU:a59c2931e335296219a2",
       "sourcePath": "data/review/sources/history-1PP__LNIRBU-a59c2931e335296219a2.json",
       "reviewLocator": "data/review/sources/history-1PP__LNIRBU-a59c2931e335296219a2.json#2109f4dc8401defa65deea339daf1f9f1971cc5e1f4ed991cdf2662431ca40cf"
-    },
-    {
-      "title": "心の残響",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 963,
-      "time": "0:16:03",
-      "raw": "16:03   01.  心の残響",
-      "rawHash": "dd8d06a9314f02c3563fb5056042ea166fd458291f33a71ac7c40393f4504c4b",
-      "videoId": "hWv55PnjmEo",
-      "videoTitle": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "channelId": "UCHefdkPE5A4EqGHgDhrVfzw",
-      "channelHandle": "/@IZUMIMINAMI",
-      "youtubeUrl": "https://www.youtube.com/watch?v=hWv55PnjmEo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hWv55PnjmEo&t=963s",
-      "sourceId": "legacy:hWv55PnjmEo",
-      "sourceHash": "69f253384a8d0b7bde69819ecf68679037dd3e79591390eb543c7e8b66a3a509",
-      "sourceOrigin": "latest;review:hWv55PnjmEo-69f253384a8d0b7bde69.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:hWv55PnjmEo:69f253384a8d0b7bde69",
-      "sourcePath": "data/review/sources/hWv55PnjmEo-69f253384a8d0b7bde69.json",
-      "reviewLocator": "data/review/sources/hWv55PnjmEo-69f253384a8d0b7bde69.json#dd8d06a9314f02c3563fb5056042ea166fd458291f33a71ac7c40393f4504c4b",
-      "repairedTitle": "心の残響",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "結晶",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1373,
-      "time": "0:22:53",
-      "raw": "22:53   02.  結晶",
-      "rawHash": "a3488fb71ec2d99d4c807fa6e3787e5d306dbffaf54f40d47c3298772f824155",
-      "videoId": "hWv55PnjmEo",
-      "videoTitle": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "channelId": "UCHefdkPE5A4EqGHgDhrVfzw",
-      "channelHandle": "/@IZUMIMINAMI",
-      "youtubeUrl": "https://www.youtube.com/watch?v=hWv55PnjmEo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hWv55PnjmEo&t=1373s",
-      "sourceId": "legacy:hWv55PnjmEo",
-      "sourceHash": "69f253384a8d0b7bde69819ecf68679037dd3e79591390eb543c7e8b66a3a509",
-      "sourceOrigin": "latest;review:hWv55PnjmEo-69f253384a8d0b7bde69.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:hWv55PnjmEo:69f253384a8d0b7bde69",
-      "sourcePath": "data/review/sources/hWv55PnjmEo-69f253384a8d0b7bde69.json",
-      "reviewLocator": "data/review/sources/hWv55PnjmEo-69f253384a8d0b7bde69.json#a3488fb71ec2d99d4c807fa6e3787e5d306dbffaf54f40d47c3298772f824155",
-      "repairedTitle": "結晶",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "Break through",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1785,
-      "time": "0:29:45",
-      "raw": "29:45   03.  Break through",
-      "rawHash": "6fd52291437e068e8dc9d57e83fcb7e183b2d8a56c348093621af05a8db056e6",
-      "videoId": "hWv55PnjmEo",
-      "videoTitle": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "channelId": "UCHefdkPE5A4EqGHgDhrVfzw",
-      "channelHandle": "/@IZUMIMINAMI",
-      "youtubeUrl": "https://www.youtube.com/watch?v=hWv55PnjmEo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hWv55PnjmEo&t=1785s",
-      "sourceId": "legacy:hWv55PnjmEo",
-      "sourceHash": "69f253384a8d0b7bde69819ecf68679037dd3e79591390eb543c7e8b66a3a509",
-      "sourceOrigin": "latest;review:hWv55PnjmEo-69f253384a8d0b7bde69.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:hWv55PnjmEo:69f253384a8d0b7bde69",
-      "sourcePath": "data/review/sources/hWv55PnjmEo-69f253384a8d0b7bde69.json",
-      "reviewLocator": "data/review/sources/hWv55PnjmEo-69f253384a8d0b7bde69.json#6fd52291437e068e8dc9d57e83fcb7e183b2d8a56c348093621af05a8db056e6",
-      "repairedTitle": "Break through",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "諦めることを諦めたい",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 2268,
-      "time": "0:37:48",
-      "raw": "37:48   04.  諦めることを諦めたい",
-      "rawHash": "eb067c1581eed9274a6c7506cd51b5fecce5192633f7f238b8077691db23f92e",
-      "videoId": "hWv55PnjmEo",
-      "videoTitle": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "channelId": "UCHefdkPE5A4EqGHgDhrVfzw",
-      "channelHandle": "/@IZUMIMINAMI",
-      "youtubeUrl": "https://www.youtube.com/watch?v=hWv55PnjmEo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hWv55PnjmEo&t=2268s",
-      "sourceId": "legacy:hWv55PnjmEo",
-      "sourceHash": "69f253384a8d0b7bde69819ecf68679037dd3e79591390eb543c7e8b66a3a509",
-      "sourceOrigin": "latest;review:hWv55PnjmEo-69f253384a8d0b7bde69.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:hWv55PnjmEo:69f253384a8d0b7bde69",
-      "sourcePath": "data/review/sources/hWv55PnjmEo-69f253384a8d0b7bde69.json",
-      "reviewLocator": "data/review/sources/hWv55PnjmEo-69f253384a8d0b7bde69.json#eb067c1581eed9274a6c7506cd51b5fecce5192633f7f238b8077691db23f92e",
-      "repairedTitle": "諦めることを諦めたい",
-      "repairedArtist": "未記載",
-      "repairReasons": []
     },
     {
       "title": "海を進む",
@@ -41055,7 +40269,6 @@
       "sourceOrigin": "latest;review:ZSNptWSG6i4-20467cb7df1d1d284931.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -41096,7 +40309,6 @@
       "sourceOrigin": "latest;review:ZSNptWSG6i4-20467cb7df1d1d284931.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -41231,7 +40443,6 @@
       "sourceOrigin": "latest;review:ZSNptWSG6i4-20467cb7df1d1d284931.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -41273,7 +40484,6 @@
       "sourceOrigin": "latest;review:ZSNptWSG6i4-20467cb7df1d1d284931.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -41354,7 +40564,6 @@
       "sourceOrigin": "latest;review:ZSNptWSG6i4-20467cb7df1d1d284931.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -41513,18 +40722,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=cQ-rfhrwJhs&t=3508s",
       "sourceId": "Ugyd-KR3hGnnH1eomoN4AaABAg",
       "sourceHash": "ced60703bac801b18e233da480d0abbde98a95fcf6bd969d76e20540dace806c",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:cQ-rfhrwJhs-ced60703bac801b18e23.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "1m"
+        "1m",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:cQ-rfhrwJhs:ced60703bac801b18e23",
@@ -41959,7 +41170,6 @@
       "sourceOrigin": "latest;review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -42000,7 +41210,6 @@
       "sourceOrigin": "latest;review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -42041,7 +41250,6 @@
       "sourceOrigin": "latest;review:bKXiQO9kkeA-8c4da34922c46dc95f57.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -42207,6 +41415,46 @@
       "reviewId": "review:0gbXCxLtDoE:d05e3b686c5f25109e61",
       "sourcePath": "data/review/sources/history-0gbXCxLtDoE-d05e3b686c5f25109e61.json",
       "reviewLocator": "data/review/sources/history-0gbXCxLtDoE-d05e3b686c5f25109e61.json#84a9c3b396d111ecc887dacf81bc1df9ab8bec24942be0ed2f5ec9fe3737cf4d"
+    },
+    {
+      "title": "サドデレボイス販売中！",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 6600,
+      "time": "1:50:00",
+      "raw": "1:50:00 サドデレボイス販売中！",
+      "rawHash": "5db32679ad5eaa4b8d848d7780e36a5f6a15775926957cd6928c788b0aa08bee",
+      "videoId": "epYYerm9bbk",
+      "videoTitle": "【 歌枠 】深夜にアニソンで盛り上がらないかい？～sing stream～【茜音カンナ / ななしいんく】",
+      "channelName": "茜音カンナ / Canna Channel【ななしいんく】",
+      "channelId": "UCkpqb53xiOvOgNYEbNpFSyw",
+      "channelHandle": "/channel/UCkpqb53xiOvOgNYEbNpFSyw",
+      "youtubeUrl": "https://www.youtube.com/watch?v=epYYerm9bbk",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=epYYerm9bbk&t=6600s",
+      "sourceId": "UgzzJHxQIonpQkaW4lp4AaABAg",
+      "sourceHash": "06bd48e78ee945d7277ad6a7129142a29217e446b396311f90e7647d0cef12c9",
+      "sourceOrigin": "latest;review:epYYerm9bbk-06bd48e78ee945d7277a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:epYYerm9bbk:06bd48e78ee945d7277a",
+      "sourcePath": "data/review/sources/epYYerm9bbk-06bd48e78ee945d7277a.json",
+      "reviewLocator": "data/review/sources/epYYerm9bbk-06bd48e78ee945d7277a.json#5db32679ad5eaa4b8d848d7780e36a5f6a15775926957cd6928c788b0aa08bee",
+      "repairedTitle": "サドデレボイス販売中！",
+      "repairedArtist": "未記載",
+      "repairReasons": []
     },
     {
       "title": "LIKE YOU o(>< = ><)o LOVE YOU?",
@@ -42497,46 +41745,6 @@
       "sourcePath": "data/review/sources/v6NTygAAdfg-b1e766fce565a8bc0eea.json",
       "reviewLocator": "data/review/sources/v6NTygAAdfg-b1e766fce565a8bc0eea.json#d5d508377c5213de2c7fef8d823729ae0d01a5969de419baf0af4e209bbd5f85",
       "repairedTitle": "星屑のインターリュード",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "セカイはまだ始まってすらいない",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4318,
-      "time": "1:11:58",
-      "raw": "1:11:58  セカイはまだ始まってすらいない",
-      "rawHash": "4305d980eaf00cbd878a9fdb531d641e1fa895811ad5446c899d2f80c713ae85",
-      "videoId": "v6NTygAAdfg",
-      "videoTitle": "【 #歌枠 ┆sing 】朝活歌枠☀歌って元気に送り出す!! 初見さん大歓迎🌼【 杏夜くもり / Re:AcT 】",
-      "channelName": "杏夜 くもり - Anya Kumori -",
-      "channelId": "UCHnbtVLZYGuKkGh6iFxxTpw",
-      "channelHandle": "/@anyakumori",
-      "youtubeUrl": "https://www.youtube.com/watch?v=v6NTygAAdfg",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=v6NTygAAdfg&t=4318s",
-      "sourceId": "legacy:v6NTygAAdfg",
-      "sourceHash": "b1e766fce565a8bc0eeafeec929a9b914f34bcc99bc7cc1be5ff07b611ea605d",
-      "sourceOrigin": "latest;review:v6NTygAAdfg-b1e766fce565a8bc0eea.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:v6NTygAAdfg:b1e766fce565a8bc0eea",
-      "sourcePath": "data/review/sources/v6NTygAAdfg-b1e766fce565a8bc0eea.json",
-      "reviewLocator": "data/review/sources/v6NTygAAdfg-b1e766fce565a8bc0eea.json#4305d980eaf00cbd878a9fdb531d641e1fa895811ad5446c899d2f80c713ae85",
-      "repairedTitle": "セカイはまだ始まってすらいない",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -42888,6 +42096,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -42955,26 +42164,27 @@
       "reviewLocator": "data/review/sources/history-Kg4cWnWbWkc-47abf6bd780feac945bd.json#5918e0a180e156dc1f3ed1808549948e009e59ba86cb4b302783386370314185"
     },
     {
-      "title": "For You",
+      "title": "～ 開始",
       "artist": "未記載",
       "isNiche": true,
       "isUnknownArtist": true,
-      "seconds": 6435,
-      "time": "1:47:15",
-      "raw": "🐰🎶 1:47:15 For You",
-      "rawHash": "ddfc990380aa2c5529755ab9a5fb80a1155bcee399c6918b166029fe7e18f3e4",
-      "videoId": "8fAJlFEVmBU",
-      "videoTitle": "【 歌枠 】まったり歌でも聴いてってよん【 卯埜らび￤ゆにれいど！ 】",
-      "channelName": "卯埜らび / Rabi Uno",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8fAJlFEVmBU",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8fAJlFEVmBU&t=6435s",
-      "sourceId": "legacy:8fAJlFEVmBU",
-      "sourceHash": "b86f5048e7bd73d6e361b1ed271bdabc5381c2ea577a09046553b0f7b72bc0ec",
-      "sourceOrigin": "latest;review:8fAJlFEVmBU-b86f5048e7bd73d6e361.json",
+      "seconds": 288,
+      "time": "0:04:48",
+      "raw": "00:04:48 ～ 開始",
+      "rawHash": "d0093048a5ec4cddc8fa142177a185cf437f5b071a813723f0de6c989227de05",
+      "videoId": "EpMPqgcQZ04",
+      "videoTitle": "【#歌枠 / #弾き語り 】 女性アイドルソング、弾かせてくださいっ‼ 【#Vtuber / #唄街観光中 】",
+      "channelName": "唄街しの",
+      "channelId": "UC6a14JXNCBk7cNa1vDIzgmg",
+      "channelHandle": "/@Utamachi_Shino",
+      "youtubeUrl": "https://www.youtube.com/watch?v=EpMPqgcQZ04",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=EpMPqgcQZ04&t=288s",
+      "sourceId": "UgwKNOvwLnV2r0baDMV4AaABAg",
+      "sourceHash": "6e2c357a9b963ecd1f98cfa7bf666fcfb5ff321053704be764fd52678c47c2e7",
+      "sourceOrigin": "latest;review:EpMPqgcQZ04-6e2c357a9b963ecd1f98.json",
       "sourceScope": "current",
       "ranges": [
+        "72h",
         "1m",
         "review"
       ],
@@ -42984,13 +42194,13 @@
       "sourceRiskReasons": [],
       "riskReasons": [
         "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "short_unknown_title"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:8fAJlFEVmBU:b86f5048e7bd73d6e361",
-      "sourcePath": "data/review/sources/8fAJlFEVmBU-b86f5048e7bd73d6e361.json",
-      "reviewLocator": "data/review/sources/8fAJlFEVmBU-b86f5048e7bd73d6e361.json#ddfc990380aa2c5529755ab9a5fb80a1155bcee399c6918b166029fe7e18f3e4",
-      "repairedTitle": "For You",
+      "reviewId": "review:EpMPqgcQZ04:6e2c357a9b963ecd1f98",
+      "sourcePath": "data/review/sources/EpMPqgcQZ04-6e2c357a9b963ecd1f98.json",
+      "reviewLocator": "data/review/sources/EpMPqgcQZ04-6e2c357a9b963ecd1f98.json#d0093048a5ec4cddc8fa142177a185cf437f5b071a813723f0de6c989227de05",
+      "repairedTitle": "～ 開始",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -43562,166 +42772,6 @@
       "reviewId": "review:9hgQ0Qbv0iM:100d1340384bfffe6e25",
       "sourcePath": "data/review/sources/history-9hgQ0Qbv0iM-100d1340384bfffe6e25.json",
       "reviewLocator": "data/review/sources/history-9hgQ0Qbv0iM-100d1340384bfffe6e25.json#a0888608f90cccd805228f0ff9e83271e97a8ef9716e8c596c354221a9f71948"
-    },
-    {
-      "title": "リンちゃんなう！",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 2725,
-      "time": "0:45:25",
-      "raw": "0:45:25 リンちゃんなう！",
-      "rawHash": "b0294715584f7af2f8f29149d7eba45fb87e57c11304774d88ebfc2d62e6182e",
-      "videoId": "9HkSnH457VY",
-      "videoTitle": "歌枠 / Karaoke │ ボカロ歌枠❤️‍🔥クリアボイスが名曲を歌いまくる🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗",
-      "channelName": "音羽ララ (Otohane Lara) / シアーミュージックV",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=9HkSnH457VY",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=9HkSnH457VY&t=2725s",
-      "sourceId": "legacy:9HkSnH457VY",
-      "sourceHash": "7322fe65c3ed6aca6ef89049476667392c534eb34a5c56bd2afee1db521ca0e9",
-      "sourceOrigin": "latest;review:9HkSnH457VY-7322fe65c3ed6aca6ef8.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:9HkSnH457VY:7322fe65c3ed6aca6ef8",
-      "sourcePath": "data/review/sources/9HkSnH457VY-7322fe65c3ed6aca6ef8.json",
-      "reviewLocator": "data/review/sources/9HkSnH457VY-7322fe65c3ed6aca6ef8.json#b0294715584f7af2f8f29149d7eba45fb87e57c11304774d88ebfc2d62e6182e",
-      "repairedTitle": "リンちゃんなう！",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "IMITATION BLACK",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4713,
-      "time": "1:18:33",
-      "raw": "1:18:33 IMITATION BLACK",
-      "rawHash": "a27b6928dcacf3cdc6f60d5e66dc8e98e83f1041a7db1121f52c564d16fd8ac3",
-      "videoId": "9HkSnH457VY",
-      "videoTitle": "歌枠 / Karaoke │ ボカロ歌枠❤️‍🔥クリアボイスが名曲を歌いまくる🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗",
-      "channelName": "音羽ララ (Otohane Lara) / シアーミュージックV",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=9HkSnH457VY",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=9HkSnH457VY&t=4713s",
-      "sourceId": "legacy:9HkSnH457VY",
-      "sourceHash": "7322fe65c3ed6aca6ef89049476667392c534eb34a5c56bd2afee1db521ca0e9",
-      "sourceOrigin": "latest;review:9HkSnH457VY-7322fe65c3ed6aca6ef8.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:9HkSnH457VY:7322fe65c3ed6aca6ef8",
-      "sourcePath": "data/review/sources/9HkSnH457VY-7322fe65c3ed6aca6ef8.json",
-      "reviewLocator": "data/review/sources/9HkSnH457VY-7322fe65c3ed6aca6ef8.json#a27b6928dcacf3cdc6f60d5e66dc8e98e83f1041a7db1121f52c564d16fd8ac3",
-      "repairedTitle": "IMITATION BLACK",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "夢、時々…",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 5258,
-      "time": "1:27:38",
-      "raw": "1:27:38 夢、時々…",
-      "rawHash": "ad749a34e2c3d64909033a38910981950568b497f6be024f8e0a47a0aced1b41",
-      "videoId": "9HkSnH457VY",
-      "videoTitle": "歌枠 / Karaoke │ ボカロ歌枠❤️‍🔥クリアボイスが名曲を歌いまくる🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗",
-      "channelName": "音羽ララ (Otohane Lara) / シアーミュージックV",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=9HkSnH457VY",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=9HkSnH457VY&t=5258s",
-      "sourceId": "legacy:9HkSnH457VY",
-      "sourceHash": "7322fe65c3ed6aca6ef89049476667392c534eb34a5c56bd2afee1db521ca0e9",
-      "sourceOrigin": "latest;review:9HkSnH457VY-7322fe65c3ed6aca6ef8.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:9HkSnH457VY:7322fe65c3ed6aca6ef8",
-      "sourcePath": "data/review/sources/9HkSnH457VY-7322fe65c3ed6aca6ef8.json",
-      "reviewLocator": "data/review/sources/9HkSnH457VY-7322fe65c3ed6aca6ef8.json#ad749a34e2c3d64909033a38910981950568b497f6be024f8e0a47a0aced1b41",
-      "repairedTitle": "夢、時々…",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "高音厨音域テスト",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 5690,
-      "time": "1:34:50",
-      "raw": "1:34:50 高音厨音域テスト",
-      "rawHash": "62cab4ab22ced1da3f5a6068158bd237b0201a9fcf9cd6a30a6b3726942bf28c",
-      "videoId": "9HkSnH457VY",
-      "videoTitle": "歌枠 / Karaoke │ ボカロ歌枠❤️‍🔥クリアボイスが名曲を歌いまくる🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗",
-      "channelName": "音羽ララ (Otohane Lara) / シアーミュージックV",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=9HkSnH457VY",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=9HkSnH457VY&t=5690s",
-      "sourceId": "legacy:9HkSnH457VY",
-      "sourceHash": "7322fe65c3ed6aca6ef89049476667392c534eb34a5c56bd2afee1db521ca0e9",
-      "sourceOrigin": "latest;review:9HkSnH457VY-7322fe65c3ed6aca6ef8.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:9HkSnH457VY:7322fe65c3ed6aca6ef8",
-      "sourcePath": "data/review/sources/9HkSnH457VY-7322fe65c3ed6aca6ef8.json",
-      "reviewLocator": "data/review/sources/9HkSnH457VY-7322fe65c3ed6aca6ef8.json#62cab4ab22ced1da3f5a6068158bd237b0201a9fcf9cd6a30a6b3726942bf28c",
-      "repairedTitle": "高音厨音域テスト",
-      "repairedArtist": "未記載",
-      "repairReasons": []
     },
     {
       "title": "Synthetic Sympathy",
@@ -53461,47 +52511,6 @@
       "repairReasons": []
     },
     {
-      "title": "home",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1826,
-      "time": "0:30:26",
-      "raw": "0:30:26 home",
-      "rawHash": "232d1592ad2947dbf35c2ed431c8910b52a7bcdb8320ecc3f973df2b15f0c2b8",
-      "videoId": "PJSKfA2EmWI",
-      "videoTitle": "【 #歌枠】初見さん・作業ROMも大歓迎!!ゆったりまったり歌う枠！🌙🎤🌺【 #karaoke￤Singing 】",
-      "channelName": "夏野華火Vsinger (hanabi natsuno)",
-      "channelId": "UC3T4jJ11twV3RWAsYRR-XKw",
-      "channelHandle": "/@hanabinatsuno8723",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PJSKfA2EmWI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJSKfA2EmWI&t=1826s",
-      "sourceId": "legacy:PJSKfA2EmWI",
-      "sourceHash": "c326fc168b7b6b70a60d492cc399409ed147af19eab9fdef9e11836d038afc1c",
-      "sourceOrigin": "latest;review:PJSKfA2EmWI-c326fc168b7b6b70a60d.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:PJSKfA2EmWI:c326fc168b7b6b70a60d",
-      "sourcePath": "data/review/sources/PJSKfA2EmWI-c326fc168b7b6b70a60d.json",
-      "reviewLocator": "data/review/sources/PJSKfA2EmWI-c326fc168b7b6b70a60d.json#232d1592ad2947dbf35c2ed431c8910b52a7bcdb8320ecc3f973df2b15f0c2b8",
-      "repairedTitle": "home",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "今、話したい誰かがいる",
       "artist": "未記載",
       "isNiche": true,
@@ -54259,46 +53268,6 @@
       "sourcePath": "data/review/sources/887B0hAROzA-2bf2dce44a525e2e3013.json",
       "reviewLocator": "data/review/sources/887B0hAROzA-2bf2dce44a525e2e3013.json#645aef1d063f668822095d3873e846ab9b5f969908e680eeabd21fe8d94a56af",
       "repairedTitle": "どきどきキュン！大暴走♡",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "Watch Me",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3938,
-      "time": "1:05:38",
-      "raw": "1:05:38  Watch Me",
-      "rawHash": "33ac1457421a97eb3741fc70b49e4fc753eea398d12ea618ebfc1caa869e6460",
-      "videoId": "887B0hAROzA",
-      "videoTitle": "【歌枠】いろいろうたう歌枠さん",
-      "channelName": "花咲めぽる",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=887B0hAROzA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=887B0hAROzA&t=3938s",
-      "sourceId": "legacy:887B0hAROzA",
-      "sourceHash": "46b48504794c3365d6285f436f50ffc6e7b144e1240e6dac066e207a237fa192",
-      "sourceOrigin": "latest;review:887B0hAROzA-2bf2dce44a525e2e3013.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:887B0hAROzA:2bf2dce44a525e2e3013",
-      "sourcePath": "data/review/sources/887B0hAROzA-2bf2dce44a525e2e3013.json",
-      "reviewLocator": "data/review/sources/887B0hAROzA-2bf2dce44a525e2e3013.json#33ac1457421a97eb3741fc70b49e4fc753eea398d12ea618ebfc1caa869e6460",
-      "repairedTitle": "Watch Me",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -55166,7 +54135,6 @@
       "sourceOrigin": "latest;review:iNg0epYblLc-f3eef86ad2822291be0d.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -55207,7 +54175,6 @@
       "sourceOrigin": "latest;review:iNg0epYblLc-f3eef86ad2822291be0d.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -55248,7 +54215,6 @@
       "sourceOrigin": "latest;review:iNg0epYblLc-f3eef86ad2822291be0d.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -55549,46 +54515,6 @@
       "sourcePath": "data/review/sources/NqE3_Z_gnW8-177e0d9232414ceb1299.json",
       "reviewLocator": "data/review/sources/NqE3_Z_gnW8-177e0d9232414ceb1299.json#e959c1ec8d5199dabd0593b743fa2628a8f7fb60a6eae036f0613497f91b69c1",
       "repairedTitle": "おはシェル",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "なまえのないうた",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 351,
-      "time": "0:05:51",
-      "raw": "5:51 なまえのないうた",
-      "rawHash": "632a9e535c80089c92b50eb6d9d30b5120f036543c8b492e54c7b0bea38da3dc",
-      "videoId": "iiqNfehlubQ",
-      "videoTitle": "【#新人vtuber】30分睡眠導入歌枠🎶【#歌枠】",
-      "channelName": "海猫ほたて💭のんびり活動中",
-      "channelId": "UCYIrqtKEoZxMhD71wgeUP6Q",
-      "channelHandle": "/@hotatube-nya",
-      "youtubeUrl": "https://www.youtube.com/watch?v=iiqNfehlubQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iiqNfehlubQ&t=351s",
-      "sourceId": "legacy:iiqNfehlubQ",
-      "sourceHash": "26fc19b0ed82771e53a7f13556781c123e31a9e13bfe51414e4470933019197c",
-      "sourceOrigin": "latest;review:iiqNfehlubQ-26fc19b0ed82771e53a7.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:iiqNfehlubQ:26fc19b0ed82771e53a7",
-      "sourcePath": "data/review/sources/iiqNfehlubQ-26fc19b0ed82771e53a7.json",
-      "reviewLocator": "data/review/sources/iiqNfehlubQ-26fc19b0ed82771e53a7.json#632a9e535c80089c92b50eb6d9d30b5120f036543c8b492e54c7b0bea38da3dc",
-      "repairedTitle": "なまえのないうた",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -58853,6 +57779,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "structured_setlist"
       ],
       "sourceRiskReasons": [
@@ -58867,11 +57794,10 @@
         "short_unknown_title"
       ],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
         "parser_corruption",
         "source_many_topic_entries",
         "source_many_activity_entries",
+        "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
@@ -58880,47 +57806,6 @@
       "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
       "sourcePath": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
       "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#8108c824f5223f30490cdb301194d27ccdae519d7f1a1ab1c307b0aa5e65e1b4"
-    },
-    {
-      "title": "不可抗力",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3351,
-      "time": "0:55:51",
-      "raw": "55:51   ＊ 12. 不可抗力",
-      "rawHash": "8108c824f5223f30490cdb301194d27ccdae519d7f1a1ab1c307b0aa5e65e1b4",
-      "videoId": "bQtUhOfrJC0",
-      "videoTitle": "【歌枠】2周年ありがとう！50曲歌います！歌ったら告知します！【鬼ヶ谷テン/ネオポルテ】",
-      "channelName": "鬼ヶ谷 テン / Onigaya Ten",
-      "channelId": "UCv3EicDtxObcZZmnFcHvNnw",
-      "channelHandle": "/@onigayaten0512",
-      "youtubeUrl": "https://www.youtube.com/watch?v=bQtUhOfrJC0",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3351s",
-      "sourceId": "legacy:bQtUhOfrJC0",
-      "sourceHash": "369ea67228f3b93b75b0909e3a95eb7c99402d6e925d7874375c87c65d7a21b8",
-      "sourceOrigin": "latest;review:bQtUhOfrJC0-b6942c64602b82d58d6a.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:bQtUhOfrJC0:b6942c64602b82d58d6a",
-      "sourcePath": "data/review/sources/bQtUhOfrJC0-b6942c64602b82d58d6a.json",
-      "reviewLocator": "data/review/sources/bQtUhOfrJC0-b6942c64602b82d58d6a.json#8108c824f5223f30490cdb301194d27ccdae519d7f1a1ab1c307b0aa5e65e1b4",
-      "repairedTitle": "不可抗力",
-      "repairedArtist": "未記載",
-      "repairReasons": []
     },
     {
       "title": "＊ 13. にわかには信じがたいものです",
@@ -59004,6 +57889,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "structured_setlist"
       ],
       "sourceRiskReasons": [
@@ -59018,11 +57904,10 @@
         "short_unknown_title"
       ],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
         "parser_corruption",
         "source_many_topic_entries",
         "source_many_activity_entries",
+        "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
@@ -59031,46 +57916,6 @@
       "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
       "sourcePath": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
       "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#2c8aaa1dc6e718b3a7176c7ce33b75180718982cb96b926e44992fec395aa33f"
-    },
-    {
-      "title": "SHAMROCK",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3799,
-      "time": "1:03:19",
-      "raw": "1:03:19  ＊ 14. SHAMROCK",
-      "rawHash": "2c8aaa1dc6e718b3a7176c7ce33b75180718982cb96b926e44992fec395aa33f",
-      "videoId": "bQtUhOfrJC0",
-      "videoTitle": "【歌枠】2周年ありがとう！50曲歌います！歌ったら告知します！【鬼ヶ谷テン/ネオポルテ】",
-      "channelName": "鬼ヶ谷 テン / Onigaya Ten",
-      "channelId": "UCv3EicDtxObcZZmnFcHvNnw",
-      "channelHandle": "/@onigayaten0512",
-      "youtubeUrl": "https://www.youtube.com/watch?v=bQtUhOfrJC0",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3799s",
-      "sourceId": "legacy:bQtUhOfrJC0",
-      "sourceHash": "369ea67228f3b93b75b0909e3a95eb7c99402d6e925d7874375c87c65d7a21b8",
-      "sourceOrigin": "latest;review:bQtUhOfrJC0-b6942c64602b82d58d6a.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:bQtUhOfrJC0:b6942c64602b82d58d6a",
-      "sourcePath": "data/review/sources/bQtUhOfrJC0-b6942c64602b82d58d6a.json",
-      "reviewLocator": "data/review/sources/bQtUhOfrJC0-b6942c64602b82d58d6a.json#2c8aaa1dc6e718b3a7176c7ce33b75180718982cb96b926e44992fec395aa33f",
-      "repairedTitle": "SHAMROCK",
-      "repairedArtist": "未記載",
-      "repairReasons": []
     },
     {
       "title": "＊ 15. 阿修羅ちゃん",
@@ -61844,46 +60689,6 @@
       "repairReasons": []
     },
     {
-      "title": "永遠甚だしい",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4470,
-      "time": "1:14:30",
-      "raw": "1:14:30 永遠甚だしい",
-      "rawHash": "b1593a46ea75511038563f2355accf92a2a81275de63e7fab343e5272b4c639f",
-      "videoId": "siiXMi3dKCQ",
-      "videoTitle": "【歌枠】新衣装で歌うわよ～【鬼ヶ谷テン/ネオポルテ】",
-      "channelName": "鬼ヶ谷 テン / Onigaya Ten",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=siiXMi3dKCQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=siiXMi3dKCQ&t=4470s",
-      "sourceId": "legacy:siiXMi3dKCQ",
-      "sourceHash": "b38d79629aea1117054f1ba848eb29570739ec6f967b12b027737514d0d41f2f",
-      "sourceOrigin": "latest;review:siiXMi3dKCQ-b38d79629aea1117054f.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:siiXMi3dKCQ:b38d79629aea1117054f",
-      "sourcePath": "data/review/sources/siiXMi3dKCQ-b38d79629aea1117054f.json",
-      "reviewLocator": "data/review/sources/siiXMi3dKCQ-b38d79629aea1117054f.json#b1593a46ea75511038563f2355accf92a2a81275de63e7fab343e5272b4c639f",
-      "repairedTitle": "永遠甚だしい",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "隠したボルケーノ",
       "artist": "未記載",
       "isNiche": true,
@@ -64484,18 +63289,21 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ivT-o3KHDSM&t=70s",
       "sourceId": "Ugw9gsyMMt8FLRKPpit4AaABAg",
       "sourceHash": "2335b05059d06d3dcfd667f763ee9ccf5ba59150b60dd00b22d16d60ccdbced3",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:ivT-o3KHDSM-2335b05059d06d3dcfd6.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "1m"
+        "1m",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:ivT-o3KHDSM:2335b05059d06d3dcfd6",
@@ -64766,47 +63574,6 @@
       "reviewId": "review:nZmV-QZQ4lQ:a9141f51f95bb891dfec",
       "sourcePath": "data/review/sources/history-nZmV-QZQ4lQ-a9141f51f95bb891dfec.json",
       "reviewLocator": "data/review/sources/history-nZmV-QZQ4lQ-a9141f51f95bb891dfec.json#99c6c73d28bdb0f8f947b56dda52e3f00015cf80375d75b45c992743a421189b"
-    },
-    {
-      "title": "ヤラララ",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3174,
-      "time": "0:52:54",
-      "raw": "52:54 ヤラララ",
-      "rawHash": "1cb63ba19ea71290934241cd377b4d0b9bd0b3097b8b8925db3610288f2e01a4",
-      "videoId": "q5yBBDwp57g",
-      "videoTitle": "歌枠 リクエスト歓迎",
-      "channelName": "高生紳士の実家",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=q5yBBDwp57g",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=q5yBBDwp57g&t=3174s",
-      "sourceId": "legacy:q5yBBDwp57g",
-      "sourceHash": "f07ea94128c3393a001600d853c1fb36d68190923138672fb6c369d776392280",
-      "sourceOrigin": "latest;review:q5yBBDwp57g-9689429c4a6f48e7903b.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:q5yBBDwp57g:9689429c4a6f48e7903b",
-      "sourcePath": "data/review/sources/q5yBBDwp57g-9689429c4a6f48e7903b.json",
-      "reviewLocator": "data/review/sources/q5yBBDwp57g-9689429c4a6f48e7903b.json#1cb63ba19ea71290934241cd377b4d0b9bd0b3097b8b8925db3610288f2e01a4",
-      "repairedTitle": "ヤラララ",
-      "repairedArtist": "未記載",
-      "repairReasons": []
     },
     {
       "title": "今週どうだった？",
@@ -65974,126 +64741,6 @@
       "sourcePath": "data/review/sources/541KxVpNieg-2cfaed1f27bd297cf26b.json",
       "reviewLocator": "data/review/sources/541KxVpNieg-2cfaed1f27bd297cf26b.json#1037723a28ac3bf76b6ee4f96c7df2874b056d8cdaf9687f4c0bdef364d7cb49",
       "repairedTitle": "LOSER ～希望と未来に無縁のカタルシス～",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "水色の旋律",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4327,
-      "time": "1:12:07",
-      "raw": "1:12:07  水色の旋律",
-      "rawHash": "de9072926dc661b6bf27a450c2dcb0529147426af8ba415d666f7a5429c26299",
-      "videoId": "tfzoaUeTBQA",
-      "videoTitle": "【歌枠/Singing】タイトル。【 獅子神レオナ/Re:AcT】",
-      "channelName": "獅子神レオナ/レオナちゃんねる",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=tfzoaUeTBQA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tfzoaUeTBQA&t=4327s",
-      "sourceId": "legacy:tfzoaUeTBQA",
-      "sourceHash": "a2e6fe654fb3ff6c259940bc929ddda8811011fe6ef2b6f4c5066ffada70acfd",
-      "sourceOrigin": "latest;review:tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:tfzoaUeTBQA:a2e6fe654fb3ff6c2599",
-      "sourcePath": "data/review/sources/tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json",
-      "reviewLocator": "data/review/sources/tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json#de9072926dc661b6bf27a450c2dcb0529147426af8ba415d666f7a5429c26299",
-      "repairedTitle": "水色の旋律",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "恐竜マッスル",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4803,
-      "time": "1:20:03",
-      "raw": "1:20:03  恐竜マッスル",
-      "rawHash": "2a1152460a353faa73f77e40f1ea71228983e4f90c3698c32f5aa73cee889666",
-      "videoId": "tfzoaUeTBQA",
-      "videoTitle": "【歌枠/Singing】タイトル。【 獅子神レオナ/Re:AcT】",
-      "channelName": "獅子神レオナ/レオナちゃんねる",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=tfzoaUeTBQA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tfzoaUeTBQA&t=4803s",
-      "sourceId": "legacy:tfzoaUeTBQA",
-      "sourceHash": "a2e6fe654fb3ff6c259940bc929ddda8811011fe6ef2b6f4c5066ffada70acfd",
-      "sourceOrigin": "latest;review:tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:tfzoaUeTBQA:a2e6fe654fb3ff6c2599",
-      "sourcePath": "data/review/sources/tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json",
-      "reviewLocator": "data/review/sources/tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json#2a1152460a353faa73f77e40f1ea71228983e4f90c3698c32f5aa73cee889666",
-      "repairedTitle": "恐竜マッスル",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "パオパオダンス",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 5079,
-      "time": "1:24:39",
-      "raw": "1:24:39  パオパオダンス",
-      "rawHash": "58fa2559dc55e9f7b1fd2e4a97165d6c9a5e46dbd87833ef1b60274d367f9246",
-      "videoId": "tfzoaUeTBQA",
-      "videoTitle": "【歌枠/Singing】タイトル。【 獅子神レオナ/Re:AcT】",
-      "channelName": "獅子神レオナ/レオナちゃんねる",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=tfzoaUeTBQA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tfzoaUeTBQA&t=5079s",
-      "sourceId": "legacy:tfzoaUeTBQA",
-      "sourceHash": "a2e6fe654fb3ff6c259940bc929ddda8811011fe6ef2b6f4c5066ffada70acfd",
-      "sourceOrigin": "latest;review:tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:tfzoaUeTBQA:a2e6fe654fb3ff6c2599",
-      "sourcePath": "data/review/sources/tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json",
-      "reviewLocator": "data/review/sources/tfzoaUeTBQA-a2e6fe654fb3ff6c2599.json#58fa2559dc55e9f7b1fd2e4a97165d6c9a5e46dbd87833ef1b60274d367f9246",
-      "repairedTitle": "パオパオダンス",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -68154,7 +66801,6 @@
       "sourceOrigin": "latest;review:kOe-Cd9MYUc-5aa2851dcc7486ce6550.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -72606,6 +71252,47 @@
       "repairReasons": []
     },
     {
+      "title": "画面入り",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 73,
+      "time": "0:01:13",
+      "raw": "0:01:13 画面入り",
+      "rawHash": "0db6adfa4d2eed8b01bbb5271c54f0140562dd161a24fe57385e65365ebfb958",
+      "videoId": "iiiRTvKNq_A",
+      "videoTitle": "【歌枠 / #karaoke 】おすすめで見つけてくれたキミへ🍃 弾き語りで癒されませんか？ singing stream #vsinger #弾き語り #shorts 【渚沢シチ / #ミクスト 】",
+      "channelName": "渚沢シチ / Shichi Channel【ミクスト】",
+      "channelId": "UCAoKkBp0Qj0xW0NEOp7G4hw",
+      "channelHandle": "/@Shichi_Mixstgirls",
+      "youtubeUrl": "https://www.youtube.com/watch?v=iiiRTvKNq_A",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iiiRTvKNq_A&t=73s",
+      "sourceId": "UgxfMkmMhKuc2VPGv454AaABAg",
+      "sourceHash": "d42aa9959234dadd2f291120f881492a03b5ddb1792964fd31289d9311a82590",
+      "sourceOrigin": "latest;review:iiiRTvKNq_A-d42aa9959234dadd2f29.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:iiiRTvKNq_A:d42aa9959234dadd2f29",
+      "sourcePath": "data/review/sources/iiiRTvKNq_A-d42aa9959234dadd2f29.json",
+      "reviewLocator": "data/review/sources/iiiRTvKNq_A-d42aa9959234dadd2f29.json#0db6adfa4d2eed8b01bbb5271c54f0140562dd161a24fe57385e65365ebfb958",
+      "repairedTitle": "画面入り",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "むせから復帰",
       "artist": "未記載",
       "isNiche": true,
@@ -73770,7 +72457,6 @@
       "sourceOrigin": "latest;review:dDwgKDvfMeQ-580fcc89e80fe5342d91.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],
@@ -78104,6 +76790,46 @@
       "repairReasons": []
     },
     {
+      "title": "ミュート解除",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 280,
+      "time": "0:04:40",
+      "raw": "0:04:40 ミュート解除",
+      "rawHash": "e8686df2f53f70eb35df5942ce1f487506c3e7553ca0120ebcc38b78c6981046",
+      "videoId": "w4egjjJHOuc",
+      "videoTitle": "【🟡歌枠】たのしいうたいっぱい歌う！！【 仲町あられ / 夢限大みゅーたいぷ 】",
+      "channelName": "仲町あられ -Nakamachi Arale- / 夢限大みゅーたいぷ",
+      "channelId": "UCWfF0DB6m_t2CE3KcOOOX7g",
+      "channelHandle": "/@arale_yumemita",
+      "youtubeUrl": "https://www.youtube.com/watch?v=w4egjjJHOuc",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=w4egjjJHOuc&t=280s",
+      "sourceId": "UgyBH1RgaOFsoP1kyIB4AaABAg",
+      "sourceHash": "7ea908b8e5e32f84c4913ed8d2593f6d497873497d86344ffe25864b550ed080",
+      "sourceOrigin": "latest;review:w4egjjJHOuc-7ea908b8e5e32f84c491.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:w4egjjJHOuc:7ea908b8e5e32f84c491",
+      "sourcePath": "data/review/sources/w4egjjJHOuc-7ea908b8e5e32f84c491.json",
+      "reviewLocator": "data/review/sources/w4egjjJHOuc-7ea908b8e5e32f84c491.json#e8686df2f53f70eb35df5942ce1f487506c3e7553ca0120ebcc38b78c6981046",
+      "repairedTitle": "ミュート解除",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "閉会式",
       "artist": "未記載",
       "isNiche": true,
@@ -80069,18 +78795,21 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=STOIWEAYF5c&t=1543s",
       "sourceId": "Ugx3Lz6hUo5gD775AOB4AaABAg",
       "sourceHash": "f85e3fe03087de99fed59fd7efd14cc98fc655f67e27e9fa6c78a49b7c17342b",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:STOIWEAYF5c-f85e3fe03087de99fed5.json",
       "sourceScope": "current",
       "ranges": [
         "72h",
-        "1m"
+        "1m",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:STOIWEAYF5c:f85e3fe03087de99fed5",
@@ -81000,7 +79729,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -81105,46 +79834,6 @@
       "sourcePath": "data/review/sources/8PJXYV1Y2lw-37bce559cff893db62cc.json",
       "reviewLocator": "data/review/sources/8PJXYV1Y2lw-37bce559cff893db62cc.json#136c281ffc801861b68a8065fc08ff5aa1e431c37188a2af325d5dfd467f5806",
       "repairedTitle": "M八七",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "I'm a mess",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 5956,
-      "time": "1:39:16",
-      "raw": "1:39:16 I'm a mess",
-      "rawHash": "c06010fe539a8f11fb2a1344220979de109ef5f504a08bcf1640b392f89f48bc",
-      "videoId": "8PJXYV1Y2lw",
-      "videoTitle": "【朝活/歌枠】リクエストOK❣初見さん歓迎❤【兎彩ゆあ / Vtuber 】",
-      "channelName": "兎彩ゆあ💎toiroyua",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8PJXYV1Y2lw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=5956s",
-      "sourceId": "legacy:8PJXYV1Y2lw",
-      "sourceHash": "049f40336c724d17484a527c85096850137a6e4f49b499deaa3aa080ca2802ee",
-      "sourceOrigin": "latest;review:8PJXYV1Y2lw-37bce559cff893db62cc.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8PJXYV1Y2lw:37bce559cff893db62cc",
-      "sourcePath": "data/review/sources/8PJXYV1Y2lw-37bce559cff893db62cc.json",
-      "reviewLocator": "data/review/sources/8PJXYV1Y2lw-37bce559cff893db62cc.json#c06010fe539a8f11fb2a1344220979de109ef5f504a08bcf1640b392f89f48bc",
-      "repairedTitle": "I'm a mess",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -81771,47 +80460,6 @@
       "reviewId": "review:gxftjQhHf2I:47295e4f168d566e2c4b",
       "sourcePath": "data/review/sources/history-gxftjQhHf2I-47295e4f168d566e2c4b.json",
       "reviewLocator": "data/review/sources/history-gxftjQhHf2I-47295e4f168d566e2c4b.json#f66c1fbf05611f76ae8c8fb6e63d2c690ebfe67fe67e174abd5776d8586e802e"
-    },
-    {
-      "title": "うつけ論争",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 650,
-      "time": "0:10:50",
-      "raw": "1.【10:50】うつけ論争",
-      "rawHash": "a15c46b726d9e5c86d2a3da8b624f4c07427b8c104df6af8ac2cd6fb7f5a4eb4",
-      "videoId": "JpVR3eYTTJw",
-      "videoTitle": "【歌枠】急に暑くなりましたね。暑中見舞い申し上げます【如月ゆう】【すたぽら】",
-      "channelName": "如月ゆう",
-      "channelId": "UCA6XK10V6LK4V-KOP2ubmlg",
-      "channelHandle": "/@kisaragi4444you",
-      "youtubeUrl": "https://www.youtube.com/watch?v=JpVR3eYTTJw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=JpVR3eYTTJw&t=650s",
-      "sourceId": "Ugw2s8Yzvz1W6nT9pCx4AaABAg",
-      "sourceHash": "0dfd066573f2cadec6885b74584402b3e346fa2246d107a98ce40432e0332608",
-      "sourceOrigin": "latest;review:JpVR3eYTTJw-0dfd066573f2cadec688.json",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:JpVR3eYTTJw:0dfd066573f2cadec688",
-      "sourcePath": "data/review/sources/JpVR3eYTTJw-0dfd066573f2cadec688.json",
-      "reviewLocator": "data/review/sources/JpVR3eYTTJw-0dfd066573f2cadec688.json#a15c46b726d9e5c86d2a3da8b624f4c07427b8c104df6af8ac2cd6fb7f5a4eb4",
-      "repairedTitle": "うつけ論争",
-      "repairedArtist": "未記載",
-      "repairReasons": []
     },
     {
       "title": "『ジャックポットサッドガール / 25時、ナイトコードで。』",
@@ -83617,6 +82265,211 @@
       "repairReasons": []
     },
     {
+      "title": "ミッドナイト・ドリーマー",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 128,
+      "time": "0:02:08",
+      "raw": "0:02:08🍅💕🎶 001 ミッドナイト・ドリーマー",
+      "rawHash": "26c6dbed4c21ada85bd405b096d34c9f24930c9162ff277fbd48c67bb3da7da0",
+      "videoId": "oaqbexLlNk8",
+      "videoTitle": "【 #招き猫歌枠リレー 】悪魔も福を届けたい❣見習いサキュバスです❣【#Vtuber / #夢深りりん 】",
+      "channelName": "夢深りりん / Yumemi Ririn",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8&t=128s",
+      "sourceId": "UgxzeHG9QA4FGAPfxBp4AaABAg",
+      "sourceHash": "040b26bd9e4e9298e817abef5819c39be14a538b75b24108eabdef9f6a0995ed",
+      "sourceOrigin": "latest;review:oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:oaqbexLlNk8:040b26bd9e4e9298e817",
+      "sourcePath": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "reviewLocator": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json#26c6dbed4c21ada85bd405b096d34c9f24930c9162ff277fbd48c67bb3da7da0",
+      "repairedTitle": "ミッドナイト・ドリーマー",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "天神爛漫夢宴",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 367,
+      "time": "0:06:07",
+      "raw": "🍅💕🎶0:06:07 002 天神爛漫夢宴",
+      "rawHash": "7c48bf6f221f1bca22ab62e5793c4226226ab96ed0226b8017382333352e9375",
+      "videoId": "oaqbexLlNk8",
+      "videoTitle": "【 #招き猫歌枠リレー 】悪魔も福を届けたい❣見習いサキュバスです❣【#Vtuber / #夢深りりん 】",
+      "channelName": "夢深りりん / Yumemi Ririn",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8&t=367s",
+      "sourceId": "UgxzeHG9QA4FGAPfxBp4AaABAg",
+      "sourceHash": "040b26bd9e4e9298e817abef5819c39be14a538b75b24108eabdef9f6a0995ed",
+      "sourceOrigin": "latest;review:oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:oaqbexLlNk8:040b26bd9e4e9298e817",
+      "sourcePath": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "reviewLocator": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json#7c48bf6f221f1bca22ab62e5793c4226226ab96ed0226b8017382333352e9375",
+      "repairedTitle": "天神爛漫夢宴",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ハッピークレセント",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 674,
+      "time": "0:11:14",
+      "raw": "0:11:14🍅💕🎶 003 ハッピークレセント",
+      "rawHash": "ad385cdbea95964d1bee4b4f88d910d90c3aca70fc329e3db65d981ec0e6b2f4",
+      "videoId": "oaqbexLlNk8",
+      "videoTitle": "【 #招き猫歌枠リレー 】悪魔も福を届けたい❣見習いサキュバスです❣【#Vtuber / #夢深りりん 】",
+      "channelName": "夢深りりん / Yumemi Ririn",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8&t=674s",
+      "sourceId": "UgxzeHG9QA4FGAPfxBp4AaABAg",
+      "sourceHash": "040b26bd9e4e9298e817abef5819c39be14a538b75b24108eabdef9f6a0995ed",
+      "sourceOrigin": "latest;review:oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:oaqbexLlNk8:040b26bd9e4e9298e817",
+      "sourcePath": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "reviewLocator": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json#ad385cdbea95964d1bee4b4f88d910d90c3aca70fc329e3db65d981ec0e6b2f4",
+      "repairedTitle": "ハッピークレセント",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "君のいないハッピーエンドなんて",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 963,
+      "time": "0:16:03",
+      "raw": "🍅💕🎶0:16:03 004 君のいないハッピーエンドなんて",
+      "rawHash": "16f24bd78876154350f6bbdb26b88e67bdc6e2adaa8c4d457795b1c33097dc72",
+      "videoId": "oaqbexLlNk8",
+      "videoTitle": "【 #招き猫歌枠リレー 】悪魔も福を届けたい❣見習いサキュバスです❣【#Vtuber / #夢深りりん 】",
+      "channelName": "夢深りりん / Yumemi Ririn",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8&t=963s",
+      "sourceId": "UgxzeHG9QA4FGAPfxBp4AaABAg",
+      "sourceHash": "040b26bd9e4e9298e817abef5819c39be14a538b75b24108eabdef9f6a0995ed",
+      "sourceOrigin": "latest;review:oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:oaqbexLlNk8:040b26bd9e4e9298e817",
+      "sourcePath": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "reviewLocator": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json#16f24bd78876154350f6bbdb26b88e67bdc6e2adaa8c4d457795b1c33097dc72",
+      "repairedTitle": "君のいないハッピーエンドなんて",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "you&U&me",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1724,
+      "time": "0:28:44",
+      "raw": "🍅💕🎶0:28:44 006 you&U&me",
+      "rawHash": "0ae8aaca9625ddfeb5a6c809e709c614931881be026a5ff9a126be047d1f9543",
+      "videoId": "oaqbexLlNk8",
+      "videoTitle": "【 #招き猫歌枠リレー 】悪魔も福を届けたい❣見習いサキュバスです❣【#Vtuber / #夢深りりん 】",
+      "channelName": "夢深りりん / Yumemi Ririn",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=oaqbexLlNk8&t=1724s",
+      "sourceId": "UgxzeHG9QA4FGAPfxBp4AaABAg",
+      "sourceHash": "040b26bd9e4e9298e817abef5819c39be14a538b75b24108eabdef9f6a0995ed",
+      "sourceOrigin": "latest;review:oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:oaqbexLlNk8:040b26bd9e4e9298e817",
+      "sourcePath": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json",
+      "reviewLocator": "data/review/sources/oaqbexLlNk8-040b26bd9e4e9298e817.json#0ae8aaca9625ddfeb5a6c809e709c614931881be026a5ff9a126be047d1f9543",
+      "repairedTitle": "you&U&me",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "お昼ご飯は食べた？",
       "artist": "未記載",
       "isNiche": true,
@@ -85325,46 +84178,6 @@
       "repairReasons": []
     },
     {
-      "title": "ホムンクルス",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 1537,
-      "time": "0:25:37",
-      "raw": "0:25:37 ホムンクルス",
-      "rawHash": "c36d56291cfd21649bdf957b77bda633973be6c462cdaa228ce8d1a0309bcfe2",
-      "videoId": "SgB1kTS_tLs",
-      "videoTitle": "【#歌枠 】同接60名目標！Vaundyさん縛り歌枠🎤🌟 #まふゆのお部屋",
-      "channelName": "夜堕まふゆ -Yoda Mafuyu-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=SgB1kTS_tLs",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=SgB1kTS_tLs&t=1537s",
-      "sourceId": "legacy:SgB1kTS_tLs",
-      "sourceHash": "8946f7db3b85d964fcbd7a8e5c3b8cef2eaa3464b192d69ff6b68f0e63610d19",
-      "sourceOrigin": "latest;review:SgB1kTS_tLs-8946f7db3b85d964fcbd.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:SgB1kTS_tLs:8946f7db3b85d964fcbd",
-      "sourcePath": "data/review/sources/SgB1kTS_tLs-8946f7db3b85d964fcbd.json",
-      "reviewLocator": "data/review/sources/SgB1kTS_tLs-8946f7db3b85d964fcbd.json#c36d56291cfd21649bdf957b77bda633973be6c462cdaa228ce8d1a0309bcfe2",
-      "repairedTitle": "ホムンクルス",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "瞳惚れ",
       "artist": "未記載",
       "isNiche": true,
@@ -86274,6 +85087,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -86423,6 +85237,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -87046,6 +85861,47 @@
       "sourcePath": "data/review/sources/GhIEeGjpSOw-051a0c4426b788de9b59.json",
       "reviewLocator": "data/review/sources/GhIEeGjpSOw-051a0c4426b788de9b59.json#cd3962ea9794dbac33784f07a35297d0931a19f13167f5d57c2e6513be9fe5a1",
       "repairedTitle": "次枠紹介 儚音ルイ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "(睡蓮花)",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1508,
+      "time": "0:25:08",
+      "raw": "25:08 31:08 🎵5曲目(睡蓮花)",
+      "rawHash": "36c769b4571bdce0d1bf5abe28866691848ceed7bfef6f704046f3432853e888",
+      "videoId": "y0q8msitDGs",
+      "videoTitle": "【#ぽけサマー2026歌枠リレー】ラストはこのうち！！一緒に盛り上がるぞ！💙 【麗水カノン / ぽけぶい】",
+      "channelName": "麗水カノン / UrumiKanon",
+      "channelId": "UCEVNwBFKdjSmrGf9a1Pzt1w",
+      "channelHandle": "/@UrumiKanon",
+      "youtubeUrl": "https://www.youtube.com/watch?v=y0q8msitDGs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=y0q8msitDGs&t=1508s",
+      "sourceId": "Ugz0zKIydtf8QiHiEf94AaABAg",
+      "sourceHash": "9d31bed2be1cb6705daf71c7d7f7212d4bdd44d1bd82d9eaeac1edb81e887c97",
+      "sourceOrigin": "latest;review:y0q8msitDGs-9d31bed2be1cb6705daf.json",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:y0q8msitDGs:9d31bed2be1cb6705daf",
+      "sourcePath": "data/review/sources/y0q8msitDGs-9d31bed2be1cb6705daf.json",
+      "reviewLocator": "data/review/sources/y0q8msitDGs-9d31bed2be1cb6705daf.json#36c769b4571bdce0d1bf5abe28866691848ceed7bfef6f704046f3432853e888",
+      "repairedTitle": "(睡蓮花)",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -90706,86 +89562,6 @@
       "repairReasons": []
     },
     {
-      "title": "キャットフード",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3056,
-      "time": "0:50:56",
-      "raw": "50:56 キャットフード",
-      "rawHash": "41407af6d8fd30db6de628a7af1a6a38929b95ccf4ccd95fbf49388e4db60ad4",
-      "videoId": "4wVh_RdwvDQ",
-      "videoTitle": "【 歌枠 】懐かしのボカロ縛り歌枠♩きみの好きな曲は何曲あるかな？【 惑世いと┆#vtuber 】",
-      "channelName": "惑世いと - wakuse ito-",
-      "channelId": "UCyDFAl2Wdquesag2yQFSLuQ",
-      "channelHandle": "/@wakuse_ito",
-      "youtubeUrl": "https://www.youtube.com/watch?v=4wVh_RdwvDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4wVh_RdwvDQ&t=3056s",
-      "sourceId": "legacy:4wVh_RdwvDQ",
-      "sourceHash": "c0caa29bf5e0e63c727770eca1b36ea60846ff4b8728a5719db43f04ab7c266b",
-      "sourceOrigin": "latest;review:4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:4wVh_RdwvDQ:c0caa29bf5e0e63c7277",
-      "sourcePath": "data/review/sources/4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json",
-      "reviewLocator": "data/review/sources/4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json#41407af6d8fd30db6de628a7af1a6a38929b95ccf4ccd95fbf49388e4db60ad4",
-      "repairedTitle": "キャットフード",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "ジュブナイル",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3804,
-      "time": "1:03:24",
-      "raw": "1:03:24 ジュブナイル",
-      "rawHash": "4dfb8e4fafdfbe44253ebf7bad198873c88abf99c405942a0fb1ff7d14a83f18",
-      "videoId": "4wVh_RdwvDQ",
-      "videoTitle": "【 歌枠 】懐かしのボカロ縛り歌枠♩きみの好きな曲は何曲あるかな？【 惑世いと┆#vtuber 】",
-      "channelName": "惑世いと - wakuse ito-",
-      "channelId": "UCyDFAl2Wdquesag2yQFSLuQ",
-      "channelHandle": "/@wakuse_ito",
-      "youtubeUrl": "https://www.youtube.com/watch?v=4wVh_RdwvDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4wVh_RdwvDQ&t=3804s",
-      "sourceId": "legacy:4wVh_RdwvDQ",
-      "sourceHash": "c0caa29bf5e0e63c727770eca1b36ea60846ff4b8728a5719db43f04ab7c266b",
-      "sourceOrigin": "latest;review:4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:4wVh_RdwvDQ:c0caa29bf5e0e63c7277",
-      "sourcePath": "data/review/sources/4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json",
-      "reviewLocator": "data/review/sources/4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json#4dfb8e4fafdfbe44253ebf7bad198873c88abf99c405942a0fb1ff7d14a83f18",
-      "repairedTitle": "ジュブナイル",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
       "title": "怪盗ピーター&ジェニイ",
       "artist": "未記載",
       "isNiche": true,
@@ -90822,46 +89598,6 @@
       "sourcePath": "data/review/sources/4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json",
       "reviewLocator": "data/review/sources/4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json#fe07c6fd25c97eb0de5818b39ccb5e59e91f2dc60c7b1b06c4a3b8458d4fccf8",
       "repairedTitle": "怪盗ピーター&ジェニイ",
-      "repairedArtist": "未記載",
-      "repairReasons": []
-    },
-    {
-      "title": "夢喰い白黒バク",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 4722,
-      "time": "1:18:42",
-      "raw": "1:18:42 夢喰い白黒バク",
-      "rawHash": "5dd801cf70b2333a24e8de6c245559d2f3765e576867586b326b8582b45e4f20",
-      "videoId": "4wVh_RdwvDQ",
-      "videoTitle": "【 歌枠 】懐かしのボカロ縛り歌枠♩きみの好きな曲は何曲あるかな？【 惑世いと┆#vtuber 】",
-      "channelName": "惑世いと - wakuse ito-",
-      "channelId": "UCyDFAl2Wdquesag2yQFSLuQ",
-      "channelHandle": "/@wakuse_ito",
-      "youtubeUrl": "https://www.youtube.com/watch?v=4wVh_RdwvDQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4wVh_RdwvDQ&t=4722s",
-      "sourceId": "legacy:4wVh_RdwvDQ",
-      "sourceHash": "c0caa29bf5e0e63c727770eca1b36ea60846ff4b8728a5719db43f04ab7c266b",
-      "sourceOrigin": "latest;review:4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json",
-      "sourceScope": "current",
-      "ranges": [
-        "1m",
-        "review"
-      ],
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:4wVh_RdwvDQ:c0caa29bf5e0e63c7277",
-      "sourcePath": "data/review/sources/4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json",
-      "reviewLocator": "data/review/sources/4wVh_RdwvDQ-c0caa29bf5e0e63c7277.json#5dd801cf70b2333a24e8de6c245559d2f3765e576867586b326b8582b45e4f20",
-      "repairedTitle": "夢喰い白黒バク",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -90926,7 +89662,6 @@
       "sourceOrigin": "latest;review:IpTo_AW_y1A-ab461ec0d54440ec350b.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review"
       ],

@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T14:23:46.494Z",
+  "generatedAt": "2026-07-15T19:47:36.700Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 18136,
-  "unknownArtistCount": 2994,
-  "nicheUnknownArtistCount": 1533,
-  "highRiskEntryCount": 500,
-  "highRiskSourceCount": 20,
+  "totalSongs": 18775,
+  "unknownArtistCount": 3019,
+  "nicheUnknownArtistCount": 1502,
+  "highRiskEntryCount": 497,
+  "highRiskSourceCount": 19,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 8,
+  "ruleDroppedEntryCount": 5,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 19,
-  "parserCorruptionCount": 36,
-  "likelyNoiseCount": 1,
-  "needsReviewCount": 1522,
-  "likelySongCount": 10541,
+  "confirmedNoiseCount": 21,
+  "parserCorruptionCount": 35,
+  "likelyNoiseCount": 7,
+  "needsReviewCount": 1498,
+  "likelySongCount": 10392,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -166,6 +166,26 @@
       }
     },
     {
+      "value": "10",
+      "count": 6,
+      "classifications": {
+        "confirmed_noise": 6
+      },
+      "riskReasons": {
+        "source_level_likely_non_song_entry": 6
+      }
+    },
+    {
+      "value": "Bling-Bang-Bang-Born",
+      "count": 6,
+      "classifications": {
+        "likely_song": 6
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 6
+      }
+    },
+    {
       "value": "アイネクライネ",
       "count": 6,
       "classifications": {
@@ -204,56 +224,28 @@
       "riskReasons": {
         "known_song_unknown_artist": 6
       }
-    },
-    {
-      "value": "君の知らない物語",
-      "count": 6,
-      "classifications": {
-        "likely_song": 6
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 6
-      }
-    },
-    {
-      "value": "Butter-Fly",
-      "count": 5,
-      "classifications": {
-        "likely_song": 5
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 5
-      }
     }
   ],
   "topRiskChannels": [
     {
-      "value": "UTANO ch. 白玖ウタノ",
-      "count": 9
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 11
     },
     {
-      "value": "汐音ベリーちゃん Berry Ch",
-      "count": 7
+      "value": "UTANO ch. 白玖ウタノ",
+      "count": 9
     },
     {
       "value": "MUZU‐むずちゃんねる‐【Vtuber】",
       "count": 5
     },
     {
+      "value": "じゅだ@ボカロP",
+      "count": 5
+    },
+    {
       "value": "音魂ヒビクHibiku Otodama",
       "count": 5
-    },
-    {
-      "value": "菜鳥ひなた / Hinata Natori",
-      "count": 5
-    },
-    {
-      "value": "ただのかえる【TADANO KAERU】",
-      "count": 4
-    },
-    {
-      "value": "ひーくん / hi-kun",
-      "count": 4
     },
     {
       "value": "音ノ乃のの / NononoNono",
@@ -264,7 +256,7 @@
       "count": 4
     },
     {
-      "value": "茶々プラムム / Pulamumu",
+      "value": "菜鳥ひなた / Hinata Natori",
       "count": 4
     },
     {
@@ -284,6 +276,10 @@
       "count": 3
     },
     {
+      "value": "NEPHLA",
+      "count": 3
+    },
+    {
       "value": "Norn Ch. 氷々樹ノルン",
       "count": 3
     },
@@ -296,6 +292,10 @@
       "count": 3
     },
     {
+      "value": "Saki Ch. 浅葱サキ",
+      "count": 3
+    },
+    {
       "value": "xea",
       "count": 3
     },
@@ -304,7 +304,7 @@
       "count": 3
     },
     {
-      "value": "エクト / 弾き語り系白猫Vtuber🐾",
+      "value": "おもや いっか -Omoya Icca-",
       "count": 3
     }
   ],
@@ -367,6 +367,20 @@
       ]
     },
     {
+      "videoId": "GkmXWhgz1QA",
+      "title": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ]
+    },
+    {
       "videoId": "DuDkasY22Mc",
       "title": "【 歌枠 / #karaoke 】RADWIMPSさんの曲だけをたんまり歌う会🦉 【羽緒 / RK Music】#羽緒集魂中 #vtuber #vsinger #歌枠",
       "channelName": "羽緒",
@@ -374,8 +388,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "source_multiple_niche_short_titles",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
       ]
     },
     {
@@ -448,18 +462,6 @@
       ]
     },
     {
-      "videoId": "67kizm2OGkI",
-      "title": "【歌枠】復活！黄昏のMy Favorite Song...♬ 【Vsinger Vtuber┊御神楽すずめ】",
-      "channelName": "御神楽すずめ / Mikagura Suzume",
-      "riskScore": 83,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ]
-    },
-    {
       "videoId": "8rx98ujzukk",
       "title": "【#ピアノ弾き語り 】ジャズっぽい弾き語り練習【 #Vsinger 】Singing while playing the piano to help you sleep.",
       "channelName": "朱の唄 Akane's Lullaby",
@@ -491,20 +493,6 @@
       "videoId": "rjkpOwMiGek",
       "title": "〖#歌枠 〗真夜中だけど歌います✨ #vsinger #凰牙人類攻略",
       "channelName": "RUKI Ch. 凰牙るき",
-      "riskScore": 78,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "hWv55PnjmEo",
-      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
       "riskScore": 78,
       "riskLevel": "high",
       "riskReasons": [
@@ -582,10 +570,31 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
+    },
+    {
+      "videoId": "pv0BsotH36E",
+      "title": "【 #歌枠/#karaoke 】初見さん求む！高評価10増えるごとに歌える歌枠✨【 #shorts #vtuber #宵十めむ 】",
+      "channelName": "宵十めむ",
+      "riskScore": 69,
+      "riskLevel": "medium",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-15T19:47:36.700Z",
+      "totalSongs": 18775,
+      "unknownArtistCount": 3019,
+      "nicheUnknownArtistCount": 1502,
+      "highRiskEntryCount": 497,
+      "highRiskSourceCount": 19
+    },
     {
       "generatedAt": "2026-07-15T14:23:46.494Z",
       "totalSongs": 18136,
@@ -733,14 +742,6 @@
     {
       "generatedAt": "2026-07-13T13:48:58.220Z",
       "totalSongs": 13853,
-      "unknownArtistCount": 2782,
-      "nicheUnknownArtistCount": 1423,
-      "highRiskEntryCount": 411,
-      "highRiskSourceCount": 18
-    },
-    {
-      "generatedAt": "2026-07-13T13:36:49.136Z",
-      "totalSongs": 13861,
       "unknownArtistCount": 2782,
       "nicheUnknownArtistCount": 1423,
       "highRiskEntryCount": 411,

@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T14:26:36.493Z",
+  "generatedAt": "2026-07-15T19:50:01.721Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-15T14:04:26.181Z",
+  "latestGeneratedAt": "2026-07-15T18:30:22.026Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 1707,
-    "uniqueVideos": 249,
-    "uniqueSources": 307,
+    "totalCandidates": 1712,
+    "uniqueVideos": 251,
+    "uniqueSources": 309,
     "confirmedNoiseCount": 0,
-    "parserCorruptionCount": 1707,
+    "parserCorruptionCount": 1712,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 0,
-      "parser_corruption": 1707,
+      "parser_corruption": 1712,
       "likely_noise": 0,
       "needs_review": 0,
       "likely_song": 0
@@ -464,6 +464,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -3239,7 +3240,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -3488,6 +3489,53 @@
       "reviewId": "review:zQtVAz5sk-w:caffb060827427d41f06",
       "sourcePath": "data/review/sources/history-zQtVAz5sk-w-caffb060827427d41f06.json",
       "reviewLocator": "data/review/sources/history-zQtVAz5sk-w-caffb060827427d41f06.json#604f10d537b254c32544d7544c763c11b505fb141ce45100e80aa762e89261c3"
+    },
+    {
+      "title": "粛聖‼ロリ神レクイエム",
+      "artist": "しぐれうい",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 11341,
+      "time": "3:09:01",
+      "raw": "3:09:01 粛聖‼︎ロリ神レクイエム/ しぐれうい",
+      "rawHash": "05958ccea2bf7102687465b096bc66a5ff219b37c27b3432ec82c89a2e5b453a",
+      "videoId": "3WJrz6_waTs",
+      "videoTitle": "【#歌枠 】高評価100耐久歌枠 #shorts #雑談 #新人Vtuber #JOYSOUNDforSteam #karaoke #配信中",
+      "channelName": "dosanco",
+      "channelId": "UCbpskeTQhwr1EoT5M3gm33w",
+      "channelHandle": "/@dosancoCH",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3WJrz6_waTs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3WJrz6_waTs&t=11341s",
+      "sourceId": "Ugy0L5ZMCaAfJIcJA0d4AaABAg",
+      "sourceHash": "e91701fdeb4b521ca4bb08e85e383761a217b7e60632aa08d14374771e9c9b32",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title_artist",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "delimiter_split"
+      ],
+      "replacementSuggestion": {
+        "title": "粛聖‼︎ロリ神レクイエム"
+      },
+      "reviewId": "",
+      "sourcePath": "",
+      "reviewLocator": "05958ccea2bf7102687465b096bc66a5ff219b37c27b3432ec82c89a2e5b453a",
+      "repairedTitle": "粛聖‼︎ロリ神レクイエム",
+      "repairedArtist": "しぐれうい",
+      "repairReasons": [
+        "delimiter_split"
+      ]
     },
     {
       "title": "恋するしっぽ。",
@@ -9489,6 +9537,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -9530,7 +9579,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -10151,7 +10200,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -10953,7 +11002,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -11003,7 +11052,7 @@
       "ranges": [
         "1m",
         "snapshot:20260714T210000Z",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -12217,6 +12266,51 @@
       "reviewLocator": "data/review/sources/history-hrYT1a0GmDw-73a265ac7b0bc7f12a6d.json#51577464a397a5346d61b7bcad9517ebf9ee6f8f84e654c26eba7475a93ec55a"
     },
     {
+      "title": "魔法戦隊マジレンジャー",
+      "artist": "岩崎貴文",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 4598,
+      "time": "1:16:38",
+      "raw": "1:16:38  ・魔法戦隊マジレンジャー / 岩崎貴文",
+      "rawHash": "56681fa131acb3cc65022ae8f55633b8f4ea61da4b6d45e294b49cf769a31b2f",
+      "videoId": "hrYT1a0GmDw",
+      "videoTitle": "【#歌枠】特撮縛り歌枠┊︎7月10日はウルトラマンの日！歌で光を届けます✨【#MUS1CA / #Vsinger】",
+      "channelName": "MUS1CA",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=hrYT1a0GmDw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=hrYT1a0GmDw&t=4598s",
+      "sourceId": "selected:hrYT1a0GmDw:73a265ac7b0bc7f1",
+      "sourceHash": "73a265ac7b0bc7f12a6d7ab0db33ff3ced53c13219cc5ddacd42afda333da5e1",
+      "sourceOrigin": "review:history-hrYT1a0GmDw-73a265ac7b0bc7f12a6d.json;review:history-hrYT1a0GmDw-d0aa5a0f670d242616dd.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z",
+        "snapshot:20260714T230000Z"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_song",
+        "known_artist",
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_niche_short_titles"
+      ],
+      "riskReasons": [
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
+      ],
+      "replacementSuggestion": {
+        "title": "・魔法戦隊マジレンジャー"
+      },
+      "reviewId": "review:hrYT1a0GmDw:73a265ac7b0bc7f12a6d",
+      "sourcePath": "data/review/sources/history-hrYT1a0GmDw-73a265ac7b0bc7f12a6d.json",
+      "reviewLocator": "data/review/sources/history-hrYT1a0GmDw-73a265ac7b0bc7f12a6d.json#56681fa131acb3cc65022ae8f55633b8f4ea61da4b6d45e294b49cf769a31b2f"
+    },
+    {
       "title": "Anything Goes!",
       "artist": "大黒摩季",
       "isNiche": false,
@@ -13306,6 +13400,53 @@
       "reviewId": "review:cK2fwGBPBSM:46d9c20bd338126917d8",
       "sourcePath": "data/review/sources/history-cK2fwGBPBSM-46d9c20bd338126917d8.json",
       "reviewLocator": "data/review/sources/history-cK2fwGBPBSM-46d9c20bd338126917d8.json#2624928a70b092db338c072f9ce9708cbf8a60316be735f66caf421232190eb0"
+    },
+    {
+      "title": "サムライハート",
+      "artist": "SPYAIR",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 4322,
+      "time": "1:12:02",
+      "raw": "1:12:02 サムライハート(Some Like It Hot!!) / SPYAIR",
+      "rawHash": "626967002205eb826d8890a3c11b4017b38a6dba2439468c1617c5b15c14d6ff",
+      "videoId": "gNgtf5P0l70",
+      "videoTitle": "【#縦型歌枠】調子どうよ【NERA/新人ロックvsinger】 #vsinger #shorts #singingstream",
+      "channelName": "NERA",
+      "channelId": "UC8jrQMrCrE3p0Zm73AvWMsw",
+      "channelHandle": "/@NERA_scarlet",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gNgtf5P0l70",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gNgtf5P0l70&t=4322s",
+      "sourceId": "UgyPmPryim9MrmuVgN14AaABAg",
+      "sourceHash": "9988ada9aea4bd266e173f684cb5c2c226a1d25ebc26d0ea8549ae6978f2671a",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title_artist",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "delimiter_split"
+      ],
+      "replacementSuggestion": {
+        "title": "サムライハート(Some Like It Hot!!)"
+      },
+      "reviewId": "",
+      "sourcePath": "",
+      "reviewLocator": "626967002205eb826d8890a3c11b4017b38a6dba2439468c1617c5b15c14d6ff",
+      "repairedTitle": "サムライハート(Some Like It Hot!!)",
+      "repairedArtist": "SPYAIR",
+      "repairReasons": [
+        "delimiter_split"
+      ]
     },
     {
       "title": "雨とペトラ Prod.",
@@ -20575,7 +20716,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z",
         "review"
@@ -20807,6 +20948,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -20935,6 +21077,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -21109,7 +21252,7 @@
       "ranges": [
         "72h",
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -21234,54 +21377,6 @@
       "reviewId": "review:Pqfy9RqzA9Q:a59341105f85bde975f0",
       "sourcePath": "data/review/sources/history-Pqfy9RqzA9Q-a59341105f85bde975f0.json",
       "reviewLocator": "data/review/sources/history-Pqfy9RqzA9Q-a59341105f85bde975f0.json#990b508a85b8ce6eb90ba1f74efe134be3519081d1f68c892cbe8410df5e31f5"
-    },
-    {
-      "title": "キミの色",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 2804,
-      "time": "0:46:44",
-      "raw": "46:44 キミの色/オリジナル",
-      "rawHash": "6bd1fe6a52f7e48069cca4dc6c254215d3e91d6acc1982ea51c34b8adbc198e5",
-      "videoId": "cNXIRo0xtV0",
-      "videoTitle": "【#弾き語り #132】7月最初の雑談＆弾き語り！【Vtuber/エクト】",
-      "channelName": "エクト / 弾き語り系白猫Vtuber🐾",
-      "channelId": "UC7Vn20aSEXlIU-sbqIsLMsw",
-      "channelHandle": "/@Ekuto_Vtuber",
-      "youtubeUrl": "https://www.youtube.com/watch?v=cNXIRo0xtV0",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=cNXIRo0xtV0&t=2804s",
-      "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
-      "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "sourceOrigin": "latest;review:history-cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m",
-        "snapshot:20260715T140000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "artist": "オリジナル"
-      },
-      "reviewId": "review:cNXIRo0xtV0:33fdb0b9d76f4a86c94a",
-      "sourcePath": "data/review/sources/cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json",
-      "reviewLocator": "data/review/sources/cNXIRo0xtV0-33fdb0b9d76f4a86c94a.json#6bd1fe6a52f7e48069cca4dc6c254215d3e91d6acc1982ea51c34b8adbc198e5",
-      "repairedTitle": "キミの色",
-      "repairedArtist": "オリジナル",
-      "repairReasons": [
-        "delimiter_split"
-      ]
     },
     {
       "title": "福寿草／ぐにょ",
@@ -22820,56 +22915,6 @@
       "reviewLocator": "data/review/sources/history-2k2rzt954Qc-e435a6ab80cee130b54e.json#7ecc95143d72888c9620fa72fdca7f84839893c6ffc06966e78c4becb8e65fa1"
     },
     {
-      "title": "灰色と青(＋菅田将暉)/米津玄師",
-      "artist": "未記載",
-      "isNiche": true,
-      "isUnknownArtist": true,
-      "seconds": 3793,
-      "time": "1:03:13",
-      "raw": "1:03:13    灰色と青(＋菅田将暉)/米津玄師/2017",
-      "rawHash": "88822fbc314512f00ae7461f34759908e991455b12eb05240930a5147a5bfb9e",
-      "videoId": "B2NNCFyBwbw",
-      "videoTitle": "【歌枠】落ち着きたい時に聴きたいチル曲縛り。【ここ・じぇす汰 / ななしいんく】",
-      "channelName": "ここ・じぇす汰 / Coco･Jester【ななしいんく】",
-      "channelId": "UCuDfldiO-ujdFC-36eYMl2g",
-      "channelHandle": "/@Coco_Jester",
-      "youtubeUrl": "https://www.youtube.com/watch?v=B2NNCFyBwbw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=B2NNCFyBwbw&t=3793s",
-      "sourceId": "UgyQAIqSQrTAWAOq__F4AaABAg",
-      "sourceHash": "be04d3d2e230ef2b8bfcef3feee0228f485d48afa52bf70c0d60771670b9d01e",
-      "sourceOrigin": "latest;review:B2NNCFyBwbw-be04d3d2e230ef2b8bfc.json;review:history-B2NNCFyBwbw-be04d3d2e230ef2b8bfc.json",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260715T140000Z"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split",
-        "niche_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "title": "灰色と青(＋菅田将暉)",
-        "artist": "米津玄師/2017"
-      },
-      "reviewId": "review:B2NNCFyBwbw:be04d3d2e230ef2b8bfc",
-      "sourcePath": "data/review/sources/B2NNCFyBwbw-be04d3d2e230ef2b8bfc.json",
-      "reviewLocator": "data/review/sources/B2NNCFyBwbw-be04d3d2e230ef2b8bfc.json#88822fbc314512f00ae7461f34759908e991455b12eb05240930a5147a5bfb9e",
-      "repairedTitle": "灰色と青(＋菅田将暉)",
-      "repairedArtist": "米津玄師/2017",
-      "repairReasons": [
-        "delimiter_split"
-      ]
-    },
-    {
       "title": "🎤少女レイ",
       "artist": "みきとP",
       "isNiche": false,
@@ -23409,7 +23454,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -23459,7 +23504,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -23509,7 +23554,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29507,6 +29552,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -30292,6 +30338,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -31491,6 +31538,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -33295,7 +33343,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33529,7 +33577,7 @@
       "ranges": [
         "72h",
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -33581,6 +33629,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -33812,7 +33861,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -33861,7 +33910,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T190000Z"
       ],
@@ -33911,7 +33960,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -34177,7 +34226,7 @@
         "1m",
         "review",
         "snapshot:20260711T150000Z",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260712T190000Z",
         "snapshot:20260713T120000Z"
       ],
@@ -34228,7 +34277,7 @@
         "1m",
         "review",
         "snapshot:20260711T150000Z",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -35994,6 +36043,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -36942,6 +36992,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -40072,6 +40123,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -40812,6 +40864,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "structured_setlist"
       ],
       "sourceRiskReasons": [
@@ -40826,11 +40879,10 @@
         "short_unknown_title"
       ],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
         "parser_corruption",
         "source_many_topic_entries",
         "source_many_activity_entries",
+        "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
@@ -40922,6 +40974,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "structured_setlist"
       ],
       "sourceRiskReasons": [
@@ -40936,11 +40989,10 @@
         "short_unknown_title"
       ],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
         "parser_corruption",
         "source_many_topic_entries",
         "source_many_activity_entries",
+        "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
@@ -44189,6 +44241,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -44198,9 +44251,8 @@
         "niche_unknown_artist"
       ],
       "riskReasons": [
-        "conversation_entry",
-        "source_multiple_unknown_artists",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": {
         "title": "Song for",
@@ -44236,6 +44288,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -44245,9 +44298,8 @@
         "niche_unknown_artist"
       ],
       "riskReasons": [
-        "conversation_entry",
-        "source_multiple_unknown_artists",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": {
         "title": "Song for",
@@ -46570,6 +46622,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -47012,6 +47065,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -47145,7 +47199,7 @@
       "ranges": [
         "72h",
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -51497,7 +51551,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260711T150000Z"
       ],
       "classification": "parser_corruption",
@@ -51589,7 +51643,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -51637,7 +51691,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -51685,7 +51739,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -53491,7 +53545,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -53539,7 +53593,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -53633,7 +53687,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -53727,7 +53781,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -56705,6 +56759,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -56840,6 +56895,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -56858,6 +56914,96 @@
       "reviewId": "review:oWUhxHkwZ9g:2b7a253052fe8e3f71da",
       "sourcePath": "data/review/sources/history-oWUhxHkwZ9g-2b7a253052fe8e3f71da.json",
       "reviewLocator": "data/review/sources/history-oWUhxHkwZ9g-2b7a253052fe8e3f71da.json#b4d3b38bea6b12dde931659028aa8f544c7ea34fcece3ed2f1316e34ca52953a"
+    },
+    {
+      "title": "八月の夜 SILENT SIREN",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1292,
+      "time": "0:21:32",
+      "raw": "21:32 八月の夜 SILENT SIREN",
+      "rawHash": "afb7beec123d81ff6cadc99dd38784169e01199a3649aebff5f0bc7ab3bf91b3",
+      "videoId": "MrGxz0q6Py0",
+      "videoTitle": "【#歌枠】夕方チル歌枠【＃karaoke┊︎#個人VTuber┊︎#新人VTuber┊︎#仁斗】【カラオケJOYSOUND for STREAMER】",
+      "channelName": "仁斗_nito",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0&t=1292s",
+      "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
+      "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
+      "sourceOrigin": "review:history-MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260714T190000Z"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_song",
+        "known_artist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "niche_unknown_artist"
+      ],
+      "riskReasons": [
+        "parser_corruption",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": {
+        "title": "八月の夜",
+        "artist": "SILENT SIREN"
+      },
+      "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
+      "sourcePath": "data/review/sources/history-MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "reviewLocator": "data/review/sources/history-MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json#afb7beec123d81ff6cadc99dd38784169e01199a3649aebff5f0bc7ab3bf91b3"
+    },
+    {
+      "title": "パラソルサイダー ナナホシ管弦楽団",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5588,
+      "time": "1:33:08",
+      "raw": "1:33:08 パラソルサイダー ナナホシ管弦楽団",
+      "rawHash": "bed992b53d7355ebad055dcc9a8381d6ab82daf126a11cc02b340cfe28f0e199",
+      "videoId": "MrGxz0q6Py0",
+      "videoTitle": "【#歌枠】夕方チル歌枠【＃karaoke┊︎#個人VTuber┊︎#新人VTuber┊︎#仁斗】【カラオケJOYSOUND for STREAMER】",
+      "channelName": "仁斗_nito",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=MrGxz0q6Py0&t=5588s",
+      "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
+      "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
+      "sourceOrigin": "review:history-MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260714T190000Z"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_song",
+        "known_artist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "niche_unknown_artist"
+      ],
+      "riskReasons": [
+        "parser_corruption",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": {
+        "title": "パラソルサイダー",
+        "artist": "ナナホシ管弦楽団"
+      },
+      "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
+      "sourcePath": "data/review/sources/history-MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json",
+      "reviewLocator": "data/review/sources/history-MrGxz0q6Py0-d3cd39d2e298aabbdfb6.json#bed992b53d7355ebad055dcc9a8381d6ab82daf126a11cc02b340cfe28f0e199"
     },
     {
       "title": "『 モエチャッカファイア 』",
@@ -58731,6 +58877,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -58773,6 +58920,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -60127,6 +60275,52 @@
       "reviewLocator": "data/review/sources/history-ZScmvA51-Bs-dc730f5e769784e168e0.json#489e36dc532e45832c497609b912d660fe8b60702e8bd186bb02dfc0a2fe593e"
     },
     {
+      "title": "あの子コンプレックス =LOVE",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 825,
+      "time": "0:13:45",
+      "raw": "1\tあの子コンプレックス\t　=LOVE\t0:13:45",
+      "rawHash": "f29d6748b193a905894af4fbc9975314b8044e2ac7384e56cbeecd0424521aa5",
+      "videoId": "5-qelaIZQAI",
+      "videoTitle": "【歌枠】週末を彩るSinging Stream🤍❄️【#vtuber /#vsinger /#蒼星すい】",
+      "channelName": "蒼星すい",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=5-qelaIZQAI",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=5-qelaIZQAI&t=825s",
+      "sourceId": "selected:5-qelaIZQAI:6ab94e05faa26d26",
+      "sourceHash": "6ab94e05faa26d2628fc815b210b4ac95aa65900568bebfc53d1cf6b7e235e08",
+      "sourceOrigin": "review:history-5-qelaIZQAI-6ab94e05faa26d2628fc.json",
+      "sourceScope": "history",
+      "ranges": [
+        "snapshot:20260712T190000Z"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_song",
+        "known_artist",
+        "structured_setlist"
+      ],
+      "sourceRiskReasons": [
+        "source_multiple_unknown_artists",
+        "niche_unknown_artist"
+      ],
+      "riskReasons": [
+        "parser_corruption",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": {
+        "title": "あの子コンプレックス",
+        "artist": "=LOVE"
+      },
+      "reviewId": "review:5-qelaIZQAI:6ab94e05faa26d2628fc",
+      "sourcePath": "data/review/sources/history-5-qelaIZQAI-6ab94e05faa26d2628fc.json",
+      "reviewLocator": "data/review/sources/history-5-qelaIZQAI-6ab94e05faa26d2628fc.json#f29d6748b193a905894af4fbc9975314b8044e2ac7384e56cbeecd0424521aa5"
+    },
+    {
       "title": "夏祭り\tWhiteberry",
       "artist": "未記載",
       "isNiche": false,
@@ -60631,6 +60825,55 @@
       "reviewId": "review:5-qelaIZQAI:6ab94e05faa26d2628fc",
       "sourcePath": "data/review/sources/history-5-qelaIZQAI-6ab94e05faa26d2628fc.json",
       "reviewLocator": "data/review/sources/history-5-qelaIZQAI-6ab94e05faa26d2628fc.json#cf6d925ed65837c3cd4e5dd548799c451a9d27c6287ddaa7cf9a123af62842dc"
+    },
+    {
+      "title": "果てなく続くストーリー\tMISIA",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7800,
+      "time": "2:10:00",
+      "raw": "12\t果てなく続くストーリー\tMISIA\t2:10:00",
+      "rawHash": "55bc8566a9d7befa15c08bed8898a5f7ffc0fe1ece15e856bea1fa47ff860009",
+      "videoId": "iIs_WEI1OtI",
+      "videoTitle": "【歌枠】新機材で歌います🤍❄️Singing Stream【#vtuber /#vsinger /#蒼星すい】",
+      "channelName": "蒼星すい",
+      "channelId": "UCcZPZ680duJJXnm9J0AAuBg",
+      "channelHandle": "/@aoisui_",
+      "youtubeUrl": "https://www.youtube.com/watch?v=iIs_WEI1OtI",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iIs_WEI1OtI&t=7800s",
+      "sourceId": "Ugy_Ar84xUPR3_bmWQJ4AaABAg",
+      "sourceHash": "4103f2c3202ed4b7c983f420723d10f27511b6620e89430d21744f86fcd6581b",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "72h",
+        "1m"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title_artist",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "combined_title_artist_lookup",
+        "known_song_unknown_artist"
+      ],
+      "replacementSuggestion": {
+        "title": "果てなく続くストーリー",
+        "artist": "MISIA"
+      },
+      "reviewId": "",
+      "sourcePath": "",
+      "reviewLocator": "55bc8566a9d7befa15c08bed8898a5f7ffc0fe1ece15e856bea1fa47ff860009",
+      "repairedTitle": "果てなく続くストーリー",
+      "repairedArtist": "MISIA",
+      "repairReasons": [
+        "combined_title_artist_lookup"
+      ]
     },
     {
       "title": "Secret base ～君がくれたもの～ ／ZONE",
@@ -61752,6 +61995,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -65936,7 +66180,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -65986,7 +66230,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -66036,7 +66280,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -68175,7 +68419,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -69124,7 +69368,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -70911,10 +71155,9 @@
       "sourceOrigin": "latest;review:5_B31kedAE4-5cf114dc51ce3e4ead89.json;review:history-5_B31kedAE4-5cf114dc51ce3e4ead89.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -71919,6 +72162,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist"
       ],
       "sourceRiskReasons": [
@@ -76860,6 +77104,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -77156,6 +77401,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -77166,13 +77412,13 @@
         "niche_unknown_artist"
       ],
       "riskReasons": [
-        "source_multiple_unknown_artists",
         "parser_corruption",
-        "source_unknown_artist_ratio_high"
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": {
         "title": "チェリボム",
-        "artist": "SILENT SIREN/2016"
+        "artist": "SILENT SIREN"
       },
       "reviewId": "review:IVNayNo7j0E:6cda1d806a687bf11611",
       "sourcePath": "data/review/sources/history-IVNayNo7j0E-6cda1d806a687bf11611.json",
@@ -77204,6 +77450,7 @@
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ],
@@ -77675,7 +77922,7 @@
       "ranges": [
         "1m",
         "review",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -77769,7 +78016,7 @@
         "72h",
         "1m",
         "review",
-        "snapshot:20260715T140000Z"
+        "snapshot:20260715T180000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -77816,7 +78063,7 @@
       "sourceScope": "current",
       "ranges": [
         "1m",
-        "snapshot:20260715T140000Z",
+        "snapshot:20260715T180000Z",
         "review"
       ],
       "classification": "parser_corruption",

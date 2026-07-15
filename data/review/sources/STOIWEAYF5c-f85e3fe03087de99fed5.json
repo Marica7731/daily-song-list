@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T14:23:46.494Z",
+  "generatedAt": "2026-07-15T19:47:36.700Z",
   "reviewId": "review:STOIWEAYF5c:f85e3fe03087de99fed5",
   "video": {
     "videoId": "STOIWEAYF5c",
@@ -11,42 +11,22 @@
   "source": {
     "sourceId": "Ugx3Lz6hUo5gD775AOB4AaABAg",
     "sourceHash": "f85e3fe03087de99fed59fd7efd14cc98fc655f67e27e9fa6c78a49b7c17342b",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "2:44   開幕🎵「やらないか」(※罰ゲーム)\r\n7:20   ぽけぶい歌枠リレーはじま:_りーふ:\r\n11:26 罰ゲーム中の裏話\r\n\r\n13:41 歌枠リレー(アロマちゃんソロ)スタート\r\n14:29 🎵１曲目(変わらないもの)\r\n20:29 🎵２曲目(初恋サイダー)(21:10)\r\n25:21 🎵３曲目(スパークル)(25:43)\r\n33:08 ぐっす:_りーふ:",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 56,
-    "riskLevel": "medium",
+    "riskScore": 30,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_unknown_artist_ratio_high",
       "source_multiple_unknown_artists",
+      "niche_unknown_artist",
       "short_unknown_title"
     ]
   },
   "entries": [
-    {
-      "status": "accepted",
-      "seconds": 164,
-      "time": "0:02:44",
-      "title": "開幕🎵「やらないか」",
-      "artist": "※罰ゲーム",
-      "raw": "2:44   開幕🎵「やらないか」(※罰ゲーム)",
-      "rawHash": "1adb81bc05795dbe1f2a7baa801aca57f4eeaf5a6dbef8e26d569d752b9e7761",
-      "sourceId": "Ugx3Lz6hUo5gD775AOB4AaABAg",
-      "sourceHash": "f85e3fe03087de99fed59fd7efd14cc98fc655f67e27e9fa6c78a49b7c17342b",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
-      "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
     {
       "status": "accepted",
       "seconds": 869,
@@ -65,8 +45,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -87,8 +66,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -109,8 +87,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -123,68 +100,16 @@
       "rawHash": "043f9941008954acdd79fe1dca46b34c4df0eabb2c52b8bb019f7e4e746e079a",
       "sourceId": "Ugx3Lz6hUo5gD775AOB4AaABAg",
       "sourceHash": "f85e3fe03087de99fed59fd7efd14cc98fc655f67e27e9fa6c78a49b7c17342b",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "activity_title",
-      "seconds": 440,
-      "time": "0:07:20",
-      "title": "ぽけぶい歌枠リレーはじま",
-      "artist": "未記載",
-      "raw": "7:20 ぽけぶい歌枠リレーはじま:_りーふ:",
-      "rawHash": "e082e6f99b6e0b8bab2bbeaf87daa284921b454bd8ce1409cf456cf631c337fc",
-      "sourceId": "Ugx3Lz6hUo5gD775AOB4AaABAg",
-      "sourceHash": "f85e3fe03087de99fed59fd7efd14cc98fc655f67e27e9fa6c78a49b7c17342b",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "activity_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 686,
-      "time": "0:11:26",
-      "title": "罰ゲーム中の裏話",
-      "artist": "未記載",
-      "raw": "11:26 罰ゲーム中の裏話",
-      "rawHash": "d974d75d411cf4dea020d6ef9e0c759b26242162ebc290aa678f1e8f0c9e3999",
-      "sourceId": "Ugx3Lz6hUo5gD775AOB4AaABAg",
-      "sourceHash": "f85e3fe03087de99fed59fd7efd14cc98fc655f67e27e9fa6c78a49b7c17342b",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "activity_title",
-      "seconds": 821,
-      "time": "0:13:41",
-      "title": "歌枠リレー(アロマちゃんソロ)スタート",
-      "artist": "未記載",
-      "raw": "13:41 歌枠リレー(アロマちゃんソロ)スタート",
-      "rawHash": "51f5646f2e8f129fddb6b6c7127a74d4d236b47338f34518a346eea3bd8668a3",
-      "sourceId": "Ugx3Lz6hUo5gD775AOB4AaABAg",
-      "sourceHash": "f85e3fe03087de99fed59fd7efd14cc98fc655f67e27e9fa6c78a49b7c17342b",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "activity_title"
-      ]
+      "positiveEvidence": []
     }
   ]
 }

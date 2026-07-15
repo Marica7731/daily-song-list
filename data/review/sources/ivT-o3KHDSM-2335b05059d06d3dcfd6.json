@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T14:23:46.494Z",
+  "generatedAt": "2026-07-15T19:47:36.700Z",
   "reviewId": "review:ivT-o3KHDSM:2335b05059d06d3dcfd6",
   "video": {
     "videoId": "ivT-o3KHDSM",
@@ -11,16 +11,17 @@
   "source": {
     "sourceId": "Ugw9gsyMMt8FLRKPpit4AaABAg",
     "sourceHash": "2335b05059d06d3dcfd667f763ee9ccf5ba59150b60dd00b22d16d60ccdbced3",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "1:10   ふか:_めると:～！\r\n2:26   🎵１曲目(ブルーバード)\r\n6:46   🎵２曲目(Rollingstar)\n10:16 🎵３曲目(ガーネット) \r\n16:02 🎵４曲目(サマータイムレコード)\r\n21:05 🎵５曲目(ライラック)",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 24,
+    "riskScore": 30,
     "riskLevel": "low",
     "riskReasons": [
+      "niche_unknown_artist",
       "short_unknown_title",
       "source_multiple_unknown_artists"
     ]
@@ -36,17 +37,16 @@
       "rawHash": "b685d6d2707978da1df898230fd0cf6e9cdd9921f0ee23f40ff16be5589a4e35",
       "sourceId": "Ugw9gsyMMt8FLRKPpit4AaABAg",
       "sourceHash": "2335b05059d06d3dcfd667f763ee9ccf5ba59150b60dd00b22d16d60ccdbced3",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -66,8 +66,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -88,8 +87,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -110,8 +108,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -132,25 +129,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "bad_title",
-      "seconds": 406,
-      "time": "0:06:46",
-      "title": "2曲目(Rollingstar)",
-      "artist": "未記載",
-      "raw": "6:46 🎵2曲目(Rollingstar)",
-      "rawHash": "73896f1563a241b9deb197f50a4eba5a6f10aa26e643e711afe9e32bc9462bd6",
-      "sourceId": "Ugw9gsyMMt8FLRKPpit4AaABAg",
-      "sourceHash": "2335b05059d06d3dcfd667f763ee9ccf5ba59150b60dd00b22d16d60ccdbced3",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "bad_title"
+        "known_song"
       ]
     }
   ]

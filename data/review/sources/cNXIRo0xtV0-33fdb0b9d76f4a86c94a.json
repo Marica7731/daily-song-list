@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T14:23:46.494Z",
+  "generatedAt": "2026-07-15T19:47:36.700Z",
   "reviewId": "review:cNXIRo0xtV0:33fdb0b9d76f4a86c94a",
   "video": {
     "videoId": "cNXIRo0xtV0",
@@ -11,18 +11,20 @@
   "source": {
     "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
     "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "セットリスト\r\n0:00 開場\r\n18:50 言って。/ヨルシカ\r\n46:44 キミの色/オリジナル\r\n52:03 アイスクリームシンドローム　(映画『劇場版ポケットモンスター ダイヤモンド&パール 幻影の覇者 ゾロアーク』主題歌)/スキマスイッチ\r\n56:54 FA紹介コーナー！\r\n1:17:20 花に亡霊/ヨルシカ\r\n1:21:35 夏の決心　(テレビ『ポンキッキーズ』使用曲)/\r\n1:24:35 アカシア　(『ポケットモンスター』スペシャルMV『GOTCHA!』テーマソング)/BUMP OF CHICKEN\r\n1:29:58 1・2・3　(アニメ「ポケットモンスター(2019)」OP)/After the Rain",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 24,
-    "riskLevel": "low",
+    "riskScore": 47,
+    "riskLevel": "medium",
     "riskReasons": [
+      "niche_unknown_artist",
       "short_unknown_title",
-      "source_multiple_unknown_artists"
+      "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -36,17 +38,16 @@
       "rawHash": "3c980a7502638b38173be1535db4d9e7a0b7e7cb6f4958f935fd8c3b36df348e",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -65,8 +66,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -79,14 +79,13 @@
       "rawHash": "6bd1fe6a52f7e48069cca4dc6c254215d3e91d6acc1982ea51c34b8adbc198e5",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -99,14 +98,13 @@
       "rawHash": "e1f2b67dcd829604ad525acea8b180a06ae18bd16c21e93ce638fa22a625be60",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -119,16 +117,15 @@
       "rawHash": "6d4f91d1add31a269c1a64ab9cb857d6d41dc41a7171f0fd6beab7f60c0bf6a9",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -147,8 +144,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -161,16 +157,15 @@
       "rawHash": "e59c68ef0f4163d6a91830ef8d036ae19d0fb84e87fd6e142f3d9dbd502400ad",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -182,14 +177,13 @@
       "rawHash": "62ad9824ce77bee44ddea58a89fa8423c0f2009a141aebfdc1455934525a1f23",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -202,14 +196,13 @@
       "rawHash": "90131c053f705d9a54ddf15f853c8827faa19dd6509a13f157db7f1ea923b031",
       "sourceId": "Ugw2GFNaFyXXmR1DqoZ4AaABAg",
       "sourceHash": "33fdb0b9d76f4a86c94a10b13a18643ad9a2057063c269d35f1cefdf1de5a74a",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     }
   ]
