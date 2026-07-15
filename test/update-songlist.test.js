@@ -13,13 +13,18 @@ const {
   buildRankDiffs,
   collectCarryForwardVideos,
   createRequestLimiter,
+  extractMygitTodaySnapshotItems,
   filterArtistRichMixedSourceSongs,
+  fetchMygitTodaySnapshotSource,
+  hasMonthlyDiscoverySource,
   isBlockedSource,
   mergeFetchedAndCarriedVideos,
   parseRetryAfterMs,
   retryDelayMs,
+  selectMygitTodaySnapshotEntries,
   selectCandidatesForInspection,
   BLOCKED_REGIONAL_VTUBER_CHANNELS,
+  MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
 } = require("../scripts/update-songlist");
 const { createSongAliasContext } = require("../scripts/song-aliases");
 
@@ -162,7 +167,7 @@ test("artist-rich mixed sources drop title-only rows without rejecting pure titl
   assert.deepEqual(titleOnly.rejectedEntries, []);
 });
 
-test("incremental selection skips known videos, scans 48h, and caps monthly refresh", () => {
+test("incremental selection skips known videos, scans 72h, and reserves monthly refresh", () => {
   const candidates = [
     candidate("AAAAAAAAAAA", 2, ["today"]),
     candidate("BBBBBBBBBBB", 10, ["today"]),
@@ -176,12 +181,13 @@ test("incremental selection skips known videos, scans 48h, and caps monthly refr
     excludeVideoIds: new Set(["AAAAAAAAAAA"]),
   });
 
-  assert.equal(selection.mode, "incremental_48h_with_carry_forward");
-  assert.equal(selection.recentScanHorizonHours, 48);
+  assert.equal(selection.mode, "incremental_72h_with_carry_forward");
+  assert.equal(selection.recentScanHorizonHours, 72);
+  assert.equal(selection.monthRefreshReserveLimit, 1);
   assert.equal(selection.skippedKnownCandidateCount, 1);
   assert.deepEqual(
     selection.items.map((item) => item.videoId),
-    ["BBBBBBBBBBB", "CCCCCCCCCCC", "FFFFFFFFFFF"],
+    ["BBBBBBBBBBB", "CCCCCCCCCCC", "DDDDDDDDDDD", "FFFFFFFFFFF"],
   );
 });
 
@@ -224,6 +230,184 @@ test("low monthly carry-forward prioritizes monthly backfill within the inspecti
       "KKKKKKKKKKK",
       "LLLLLLLLLLL",
     ],
+  );
+});
+
+test("mygit today snapshot index selects the latest retained snapshot per day", () => {
+  const entries = selectMygitTodaySnapshotEntries(
+    {
+      snapshots: [
+        {
+          id: "20260715T140648Z",
+          path: "data/today-snapshots/20260715T140648Z.json",
+          capturedAt: "2026-07-15T14:06:48.000Z",
+        },
+        {
+          id: "20260715T030000Z",
+          path: "data/today-snapshots/20260715T030000Z.json",
+          capturedAt: "2026-07-15T03:00:00.000Z",
+        },
+        {
+          id: "20260714T230000Z",
+          path: "data/today-snapshots/20260714T230000Z.json",
+          capturedAt: "2026-07-14T23:00:00.000Z",
+        },
+        {
+          id: "20260713T220000Z",
+          path: "data/today-snapshots/20260713T220000Z.json",
+          capturedAt: "2026-07-13T22:00:00.000Z",
+        },
+        {
+          id: "20260710T220000Z",
+          path: "data/today-snapshots/20260710T220000Z.json",
+          capturedAt: "2026-07-10T22:00:00.000Z",
+        },
+      ],
+    },
+    new Date("2026-07-15T15:00:00Z"),
+    { lookbackDays: 3, maxSnapshots: 3 },
+  );
+
+  assert.deepEqual(
+    entries.map((entry) => entry.id),
+    ["20260715T140648Z", "20260714T230000Z", "20260713T220000Z"],
+  );
+});
+
+test("mygit today snapshot items dedupe videos, preserve timestamps, and count as monthly discovery", () => {
+  const items = extractMygitTodaySnapshotItems(
+    {
+      groups: {
+        today: {
+          keywords: {
+            歌枠: [
+              {
+                videoId: "MG000000001",
+                title: "歌枠 archive",
+                channelName: "snapshot channel",
+                channelUrl: "https://www.youtube.com/@snapshot_channel",
+                watchUrl: "https://www.youtube.com/watch?v=MG000000001",
+                thumbnailUrl: "https://i.ytimg.com/vi/MG000000001/hqdefault.jpg",
+                publishedText: "1 day ago",
+                publishedTimestamp: Date.parse("2026-07-14T11:00:00Z"),
+                durationText: "1:23:45",
+                sourceUrl: TODAY_SEARCH_URL,
+              },
+              {
+                videoId: "MG000000002",
+                title: "live waiting room",
+                channelName: "snapshot channel",
+                publishedText: "ライブ配信中",
+                statusText: "ライブ配信中",
+              },
+            ],
+            弾き語り: [
+              {
+                videoId: "MG000000001",
+                title: "歌枠 archive",
+                channelName: "snapshot channel",
+                publishedTimestamp: Date.parse("2026-07-14T11:00:00Z"),
+                durationText: "1:23:45",
+              },
+            ],
+          },
+        },
+      },
+    },
+    {
+      snapshotId: "20260715T140648Z",
+      snapshotUrl: "https://raw.githubusercontent.com/Marica7731/mygit/main/data/today-snapshots/20260715T140648Z.json",
+      capturedAt: "2026-07-15T14:06:48.000Z",
+    },
+  );
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0].videoId, "MG000000001");
+  assert.equal(items[0].publishedTimestamp, Date.parse("2026-07-14T11:00:00Z"));
+  assert.equal(items[0].channelHandle, "@snapshot_channel");
+  assert.equal(items[0].sourceGroup, MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP);
+  assert.equal(items[0].sourceUrls.includes("https://raw.githubusercontent.com/Marica7731/mygit/main/data/today-snapshots/20260715T140648Z.json"), true);
+  assert.deepEqual(items[0].keywords.sort(), ["mygit今日快照", "弾き語り", "歌枠"].sort());
+  assert.equal(hasMonthlyDiscoverySource(items[0]), true);
+});
+
+test("mygit today snapshot source fetches selected snapshots and summarizes failures without throwing", async () => {
+  const indexUrl = "https://raw.example/mygit/data/today-snapshots/index.json";
+  const rawBaseUrl = "https://raw.example/mygit";
+  const snapshotUrl = "https://raw.example/mygit/data/today-snapshots/20260715T140648Z.json";
+  const fetchImpl = async (url) => {
+    if (url === indexUrl) {
+      return jsonResponse({
+        snapshots: [
+          {
+            id: "20260715T140648Z",
+            path: "data/today-snapshots/20260715T140648Z.json",
+            capturedAt: "2026-07-15T14:06:48.000Z",
+          },
+          {
+            id: "20260714T230000Z",
+            path: "data/today-snapshots/20260714T230000Z.json",
+            capturedAt: "2026-07-14T23:00:00.000Z",
+          },
+        ],
+      });
+    }
+    if (url === snapshotUrl) {
+      return jsonResponse({
+        groups: {
+          today: {
+            keywords: {
+              歌枠: [
+                {
+                  videoId: "MG000000003",
+                  title: "snapshot discovered song list",
+                  channelName: "snapshot channel",
+                  publishedTimestamp: Date.parse("2026-07-15T10:00:00Z"),
+                  durationText: "2:00:00",
+                },
+              ],
+            },
+          },
+        },
+      });
+    }
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+
+  const result = await fetchMygitTodaySnapshotSource(new Date("2026-07-15T15:00:00Z"), {
+    fetchImpl,
+    indexUrl,
+    rawBaseUrl,
+    lookbackDays: 2,
+    maxSnapshots: 2,
+  });
+
+  assert.equal(result.summary.status, "partial");
+  assert.equal(result.summary.snapshotCount, 2);
+  assert.equal(result.summary.fetchedSnapshotCount, 1);
+  assert.equal(result.summary.itemCount, 1);
+  assert.equal(result.items[0].videoId, "MG000000003");
+  assert.equal(result.items[0].sourceGroups.includes(MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP), true);
+});
+
+test("mygit-discovered videos are eligible for monthly backfill selection", () => {
+  const candidates = [
+    candidate("AAAAAAAAAAA", 2, ["today"]),
+    candidate("MG000000004", 24 * 12, [MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP], {
+      sourceUrls: ["https://raw.githubusercontent.com/Marica7731/mygit/main/data/today-snapshots/20260701T140000Z.json"],
+    }),
+  ];
+
+  const selection = selectCandidatesForInspection(candidates, NOW, {
+    carryForwardEnabled: true,
+    carriedMonthVideoCount: 1,
+  });
+
+  assert.equal(selection.monthBackfillEnabled, true);
+  assert.equal(hasMonthlyDiscoverySource(candidates[1]), true);
+  assert.deepEqual(
+    selection.items.map((item) => item.videoId),
+    ["AAAAAAAAAAA", "MG000000004"],
   );
 });
 
@@ -583,5 +767,13 @@ function response(status, retryAfter) {
         return name.toLowerCase() === "retry-after" ? retryAfter : "";
       },
     },
+  };
+}
+
+function jsonResponse(payload) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => payload,
   };
 }

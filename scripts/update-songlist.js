@@ -72,6 +72,14 @@ const KEYWORDS = [
   },
 ];
 const MONTH_SEARCH_URLS = new Set(KEYWORDS.map((keyword) => keyword.urls.month));
+const MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP = "mygit_today_snapshot";
+const MYGIT_TODAY_SNAPSHOT_SOURCE_LABEL = "Marica7731/mygit today snapshots";
+const MYGIT_TODAY_SNAPSHOT_KEYWORD = "mygit今日快照";
+const MYGIT_TODAY_SNAPSHOT_KEYWORD_KEY = "mygit_today_snapshot";
+const MYGIT_RAW_BASE_URL = String(
+  process.env.DAILY_SONG_MYGIT_RAW_BASE_URL || "https://raw.githubusercontent.com/Marica7731/mygit/main",
+).replace(/\/+$/u, "");
+const MYGIT_TODAY_SNAPSHOT_INDEX_URL = joinUrl(MYGIT_RAW_BASE_URL, "data/today-snapshots/index.json");
 
 const SEARCH_GROUPS = {
   today: {
@@ -104,8 +112,10 @@ const MONTH_BACKFILL_RECENT_BUCKET_LIMIT = positiveInteger(
   process.env.DAILY_SONG_MONTH_BACKFILL_RECENT_BUCKET_LIMIT,
   Math.max(1, Math.floor(VIDEO_LIMIT / 8)),
 );
+const MYGIT_TODAY_SNAPSHOTS_ENABLED = !isDisabledEnv(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOTS);
+const MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS = positiveInteger(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS, 35);
+const MYGIT_TODAY_SNAPSHOT_LIMIT = positiveInteger(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_LIMIT, 35);
 const H72_MS = 72 * 60 * 60 * 1000;
-const H48_MS = 48 * 60 * 60 * 1000;
 const MONTH_CARRY_MS = 35 * 24 * 60 * 60 * 1000;
 const DIFF_RANGES = [
   { id: "72h", file: "latest-72h.json" },
@@ -225,6 +235,7 @@ async function main() {
       monthRefreshLimit: MONTH_REFRESH_LIMIT,
       monthBackfillTarget: MONTH_BACKFILL_TARGET,
       monthBackfillRecentBucketLimit: selection.monthBackfillRecentBucketLimit,
+      monthRefreshReserveLimit: selection.monthRefreshReserveLimit,
       monthBackfillEnabled: selection.monthBackfillEnabled,
       recentScanHorizonHours: selection.recentScanHorizonHours,
       auditPath: "data/audit.json",
@@ -270,6 +281,7 @@ async function main() {
       knownVideoSkipCount: carryForward.skipVideoIds.size,
       skippedKnownCandidateCount: selection.skippedKnownCandidateCount,
       monthBackfillEnabled: selection.monthBackfillEnabled,
+      monthRefreshReserveLimit: selection.monthRefreshReserveLimit,
       forceRefreshVideoCount: forceRefreshVideoIds.size,
     },
     usableVideoCount: videos.length,
@@ -298,6 +310,22 @@ async function collectCandidates(now) {
     for (const item of result.items) {
       mergeCandidate(byVideoId, item, search, nowMs);
     }
+  }
+  const mygitResult = await fetchMygitTodaySnapshotSource(now);
+  if (mygitResult.summary) searchSummaries.push(mygitResult.summary);
+  for (const item of mygitResult.items) {
+    mergeCandidate(
+      byVideoId,
+      item,
+      {
+        sourceGroup: MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
+        sourceLabel: MYGIT_TODAY_SNAPSHOT_SOURCE_LABEL,
+        keyword: MYGIT_TODAY_SNAPSHOT_KEYWORD,
+        keywordKey: MYGIT_TODAY_SNAPSHOT_KEYWORD_KEY,
+        url: MYGIT_TODAY_SNAPSHOT_INDEX_URL,
+      },
+      nowMs,
+    );
   }
 
   return {
@@ -370,32 +398,226 @@ async function fetchSearchSource(search) {
   return { summary, items: finalItems };
 }
 
+async function fetchMygitTodaySnapshotSource(now, options = {}) {
+  const enabled = options.enabled ?? MYGIT_TODAY_SNAPSHOTS_ENABLED;
+  const collectedAt = new Date().toISOString();
+  const indexUrl = options.indexUrl || MYGIT_TODAY_SNAPSHOT_INDEX_URL;
+  const rawBaseUrl = String(options.rawBaseUrl || MYGIT_RAW_BASE_URL).replace(/\/+$/u, "");
+  const fetchImpl = options.fetchImpl || fetch;
+  const lookbackDays = positiveInteger(options.lookbackDays, MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS);
+  const maxSnapshots = positiveInteger(options.maxSnapshots, MYGIT_TODAY_SNAPSHOT_LIMIT);
+  const baseSummary = {
+    sourceGroup: MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
+    sourceLabel: MYGIT_TODAY_SNAPSHOT_SOURCE_LABEL,
+    keyword: MYGIT_TODAY_SNAPSHOT_KEYWORD,
+    keywordKey: MYGIT_TODAY_SNAPSHOT_KEYWORD_KEY,
+    url: indexUrl,
+    limit: maxSnapshots,
+    lookbackDays,
+    collectedAt,
+  };
+  if (!enabled) {
+    return {
+      summary: {
+        ...baseSummary,
+        status: "disabled",
+        itemCount: 0,
+        snapshotCount: 0,
+        fetchedSnapshotCount: 0,
+      },
+      items: [],
+    };
+  }
+
+  try {
+    const index = await fetchJsonUrl(fetchImpl, indexUrl);
+    const selectedEntries = selectMygitTodaySnapshotEntries(index, now, { lookbackDays, maxSnapshots });
+    const byVideoId = new Map();
+    const fetchedSnapshotIds = [];
+    const snapshotErrors = [];
+    let rawItemCount = 0;
+    for (const entry of selectedEntries) {
+      const snapshotUrl = mygitSnapshotEntryUrl(rawBaseUrl, entry);
+      if (!snapshotUrl) continue;
+      try {
+        const snapshot = await fetchJsonUrl(fetchImpl, snapshotUrl);
+        const items = extractMygitTodaySnapshotItems(snapshot, {
+          snapshotId: entry.id || snapshot.snapshotId || "",
+          snapshotUrl,
+          capturedAt: entry.capturedAt || snapshot.collectedAt || snapshot.generatedAt || "",
+        });
+        rawItemCount += items.length;
+        fetchedSnapshotIds.push(entry.id || snapshot.snapshotId || snapshotUrl);
+        for (const item of items) upsertMygitSnapshotCandidate(byVideoId, item);
+      } catch (error) {
+        snapshotErrors.push({
+          snapshotId: entry.id || "",
+          path: entry.path || entry.file || "",
+          message: error.message,
+        });
+      }
+    }
+    const items = [...byVideoId.values()].sort(candidateSort);
+    const status = snapshotErrors.length
+      ? fetchedSnapshotIds.length
+        ? "partial"
+        : "error"
+      : "success";
+    console.log(
+      `[mygit:${status}] snapshots=${fetchedSnapshotIds.length}/${selectedEntries.length} rawItems=${rawItemCount} items=${items.length} errors=${snapshotErrors.length}`,
+    );
+    return {
+      summary: {
+        ...baseSummary,
+        status,
+        itemCount: items.length,
+        rawItemCount,
+        availableSnapshotCount: listValues(index?.snapshots).length,
+        snapshotCount: selectedEntries.length,
+        fetchedSnapshotCount: fetchedSnapshotIds.length,
+        selectedSnapshotIds: selectedEntries.map((entry) => entry.id || entry.file || entry.path).filter(Boolean),
+        fetchedSnapshotIds,
+        snapshotErrors: snapshotErrors.slice(0, 5),
+      },
+      items,
+    };
+  } catch (error) {
+    console.warn(`[mygit:error] ${error.message}`);
+    return {
+      summary: {
+        ...baseSummary,
+        status: "error",
+        itemCount: 0,
+        snapshotCount: 0,
+        fetchedSnapshotCount: 0,
+        error: error.message,
+      },
+      items: [],
+    };
+  }
+}
+
+function selectMygitTodaySnapshotEntries(index, now, options = {}) {
+  const lookbackDays = positiveInteger(options.lookbackDays, MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS);
+  const maxSnapshots = positiveInteger(options.maxSnapshots, MYGIT_TODAY_SNAPSHOT_LIMIT);
+  const nowMs = new Date(now).getTime();
+  if (!Number.isFinite(nowMs)) return [];
+  const earliestMs = nowMs - lookbackDays * 24 * 60 * 60 * 1000;
+  const latestAllowedMs = nowMs + 6 * 60 * 60 * 1000;
+  const sorted = listValues(index?.snapshots)
+    .map((entry) => ({ entry, timestamp: mygitSnapshotEntryTimestamp(entry) }))
+    .filter(({ entry, timestamp }) => entry && Number.isFinite(timestamp))
+    .filter(({ timestamp }) => timestamp >= earliestMs && timestamp <= latestAllowedMs)
+    .sort((a, b) => b.timestamp - a.timestamp);
+  const byDay = new Map();
+  for (const item of sorted) {
+    const day = mygitSnapshotEntryDay(item.entry, item.timestamp);
+    if (!day || byDay.has(day)) continue;
+    byDay.set(day, item.entry);
+    if (byDay.size >= maxSnapshots) break;
+  }
+  return [...byDay.values()];
+}
+
+function extractMygitTodaySnapshotItems(snapshot, context = {}) {
+  const groups = snapshot?.groups?.today?.keywords || snapshot?.keywords || {};
+  const groupEntries = Object.entries(groups).filter(([, items]) => Array.isArray(items));
+  if (Array.isArray(snapshot?.items)) groupEntries.push(["", snapshot.items]);
+  const byVideoId = new Map();
+  for (const [keyword, items] of groupEntries) {
+    for (const item of items) {
+      const normalized = normalizeMygitTodaySnapshotItem(item, { ...context, keyword });
+      if (!normalized || isBlockedSource(normalized) || isActiveLiveOrUpcomingCandidate(normalized)) continue;
+      upsertMygitSnapshotCandidate(byVideoId, normalized);
+    }
+  }
+  return [...byVideoId.values()];
+}
+
+function normalizeMygitTodaySnapshotItem(item, context = {}) {
+  const videoId = String(item?.videoId || extractVideoIdFromWatchUrl(item?.watchUrl) || "").trim();
+  const title = normalizeWhitespace(item?.title || "");
+  if (!isValidVideoId(videoId) || !title) return null;
+  const keyword = normalizeWhitespace(item.keyword || context.keyword || "");
+  const keywordKey = normalizeWhitespace(item.keywordKey || keyword || MYGIT_TODAY_SNAPSHOT_KEYWORD_KEY);
+  const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
+  const channelName = normalizeWhitespace(item.channelName || "");
+  const sourceUrls = uniqueValues([context.snapshotUrl, item.sourceUrl, item.watchUrl]);
+  return {
+    videoId,
+    title,
+    channelName,
+    channelId: normalizeWhitespace(item.channelId || ""),
+    channelHandle: normalizeChannelHandle(item.channelHandle || item.channelUrl || ""),
+    keyword: keyword || MYGIT_TODAY_SNAPSHOT_KEYWORD,
+    keywords: uniqueValues([keyword, MYGIT_TODAY_SNAPSHOT_KEYWORD]),
+    keywordKeys: uniqueValues([keywordKey, MYGIT_TODAY_SNAPSHOT_KEYWORD_KEY]),
+    sourceGroup: MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
+    sourceGroups: [MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP],
+    sourceUrls,
+    sourceUrl: context.snapshotUrl || item.sourceUrl || item.watchUrl || "",
+    publishedText: item.publishedText || "",
+    publishedTimestamp,
+    durationText: item.durationText || "",
+    thumbnailUrl: item.thumbnailUrl || "",
+    viewText: item.viewText || "",
+    statusText: item.statusText || "",
+    snapshotId: context.snapshotId || "",
+    snapshotCapturedAt: context.capturedAt || "",
+  };
+}
+
+function upsertMygitSnapshotCandidate(byVideoId, item) {
+  const existing = byVideoId.get(item.videoId);
+  if (!existing) {
+    byVideoId.set(item.videoId, { ...item });
+    return;
+  }
+  existing.keywords = uniqueValues([...listValues(existing.keywords), existing.keyword, ...listValues(item.keywords), item.keyword]);
+  existing.keywordKeys = uniqueValues([...listValues(existing.keywordKeys), ...listValues(item.keywordKeys)]);
+  existing.sourceGroups = uniqueValues([...listValues(existing.sourceGroups), ...listValues(item.sourceGroups), item.sourceGroup]);
+  existing.sourceUrls = uniqueValues([...listValues(existing.sourceUrls), ...listValues(item.sourceUrls), item.sourceUrl]);
+  if (!existing.publishedTimestamp && item.publishedTimestamp) existing.publishedTimestamp = item.publishedTimestamp;
+  if (!existing.publishedText && item.publishedText) existing.publishedText = item.publishedText;
+  if (!existing.durationText && item.durationText) existing.durationText = item.durationText;
+  if (!existing.thumbnailUrl && item.thumbnailUrl) existing.thumbnailUrl = item.thumbnailUrl;
+  if (!existing.viewText && item.viewText) existing.viewText = item.viewText;
+  if (!existing.channelName && item.channelName) existing.channelName = item.channelName;
+  if (!existing.channelId && item.channelId) existing.channelId = item.channelId;
+  if (!existing.channelHandle && item.channelHandle) existing.channelHandle = item.channelHandle;
+  if (!existing.snapshotId && item.snapshotId) existing.snapshotId = item.snapshotId;
+}
+
 function addSearchItems(target, items) {
   target.push(...items.filter((item) => item.videoId && item.title && !isBlockedSource(item)));
 }
 
 function mergeCandidate(byVideoId, item, search, nowMs) {
   if (isBlockedSource(item)) return;
-  const publishedTimestamp = parsePublishedTimestamp(item.publishedText, nowMs);
+  const publishedTimestamp = finiteTimestamp(item.publishedTimestamp) || parsePublishedTimestamp(item.publishedText, nowMs);
+  const keywords = uniqueValues([...listValues(item.keywords), item.keyword, search.keyword]);
+  const keywordKeys = uniqueValues([...listValues(item.keywordKeys), item.keywordKey, search.keywordKey]);
+  const sourceGroups = uniqueValues([...listValues(item.sourceGroups), item.sourceGroup, search.sourceGroup]);
+  const sourceUrls = uniqueValues([...listValues(item.sourceUrls), item.sourceUrl, search.url]);
   const existing = byVideoId.get(item.videoId);
   if (!existing) {
     byVideoId.set(item.videoId, {
       ...item,
-      keyword: search.keyword,
-      keywords: [search.keyword],
-      keywordKeys: [search.keywordKey],
-      sourceGroup: search.sourceGroup,
-      sourceGroups: [search.sourceGroup],
-      sourceUrls: [search.url],
+      keyword: item.keyword || search.keyword,
+      keywords,
+      keywordKeys,
+      sourceGroup: item.sourceGroup || search.sourceGroup,
+      sourceGroups,
+      sourceUrls,
       publishedTimestamp,
     });
     return;
   }
 
-  addUnique(existing.keywords, search.keyword);
-  addUnique(existing.keywordKeys, search.keywordKey);
-  addUnique(existing.sourceGroups, search.sourceGroup);
-  addUnique(existing.sourceUrls, search.url);
+  for (const keyword of keywords) addUnique(existing.keywords, keyword);
+  for (const keywordKey of keywordKeys) addUnique(existing.keywordKeys, keywordKey);
+  for (const sourceGroup of sourceGroups) addUnique(existing.sourceGroups, sourceGroup);
+  for (const sourceUrl of sourceUrls) addUnique(existing.sourceUrls, sourceUrl);
   if (!existing.publishedTimestamp && publishedTimestamp) existing.publishedTimestamp = publishedTimestamp;
   if (!existing.publishedText && item.publishedText) existing.publishedText = item.publishedText;
   if (!existing.durationText && item.durationText) existing.durationText = item.durationText;
@@ -554,13 +776,21 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
   const nowMs = now.getTime();
   const carryForwardEnabled = Boolean(options.carryForwardEnabled);
   const excludeVideoIds = options.excludeVideoIds || new Set();
-  const recentScanHorizonMs = carryForwardEnabled ? H48_MS : H72_MS;
+  const recentScanHorizonMs = H72_MS;
   const carriedMonthVideoCount = Number(options.carriedMonthVideoCount);
   const monthBackfillEnabled =
     carryForwardEnabled && Number.isFinite(carriedMonthVideoCount) && carriedMonthVideoCount < MONTH_BACKFILL_TARGET;
+  const bucketDefinitions = recentBuckets(nowMs, recentScanHorizonMs);
+  const monthRefreshReserveLimit = carryForwardEnabled && !monthBackfillEnabled ? Math.min(MONTH_REFRESH_LIMIT, VIDEO_LIMIT) : 0;
+  const reservedRecentBucketLimit = Math.max(
+    1,
+    Math.floor((VIDEO_LIMIT - monthRefreshReserveLimit) / Math.max(1, bucketDefinitions.length)),
+  );
   const recentBucketLimit = monthBackfillEnabled
     ? Math.min(RECENT_BUCKET_LIMIT, MONTH_BACKFILL_RECENT_BUCKET_LIMIT)
-    : RECENT_BUCKET_LIMIT;
+    : carryForwardEnabled
+      ? Math.min(RECENT_BUCKET_LIMIT, reservedRecentBucketLimit)
+      : RECENT_BUCKET_LIMIT;
   let skippedBlacklistedCandidateCount = 0;
   let skippedKnownCandidateCount = 0;
   const sourceAllowedCandidates = candidates.filter((item) => {
@@ -593,7 +823,7 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
     }
   };
 
-  for (const bucket of recentBuckets(nowMs, recentScanHorizonMs)) {
+  for (const bucket of bucketDefinitions) {
     const bucketItems = availableCandidates
       .filter((item) => item.publishedTimestamp && item.publishedTimestamp >= bucket.from && item.publishedTimestamp < bucket.to)
       .map((item) => ({ ...item, __bucket: bucket.id }))
@@ -605,13 +835,14 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
     .filter((item) => item.publishedTimestamp && nowMs - item.publishedTimestamp >= 0 && nowMs - item.publishedTimestamp <= recentScanHorizonMs)
     .sort(candidateSort);
 
-  const monthCandidates = availableCandidates.filter((item) => hasMonthlySearchSource(item)).sort(candidateSort);
+  const monthCandidates = availableCandidates.filter((item) => hasMonthlyDiscoverySource(item)).sort(candidateSort);
   if (monthBackfillEnabled) {
     add(monthCandidates, null);
     add(recentCandidates, null);
   } else {
+    if (carryForwardEnabled) add(monthCandidates, MONTH_REFRESH_LIMIT);
     add(recentCandidates, null);
-    add(monthCandidates, carryForwardEnabled ? MONTH_REFRESH_LIMIT : null);
+    if (!carryForwardEnabled) add(monthCandidates, null);
     if (!carryForwardEnabled) add(availableCandidates, null);
   }
 
@@ -620,12 +851,13 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
     mode: monthBackfillEnabled
       ? "incremental_month_backfill_with_carry_forward"
       : carryForwardEnabled
-        ? "incremental_48h_with_carry_forward"
+        ? "incremental_72h_with_carry_forward"
         : "full_72h_recovery",
     recentScanHorizonHours: Math.round(recentScanHorizonMs / (60 * 60 * 1000)),
     monthBackfillEnabled,
     monthBackfillTarget: MONTH_BACKFILL_TARGET,
     monthBackfillRecentBucketLimit: recentBucketLimit,
+    monthRefreshReserveLimit,
     skippedBlacklistedCandidateCount,
     skippedKnownCandidateCount,
   };
@@ -1181,6 +1413,14 @@ function buildGroups(videos, capturedAt) {
 
 function hasMonthlySearchSource(item) {
   return listValues(item?.sourceUrls).some((url) => MONTH_SEARCH_URLS.has(url));
+}
+
+function hasMonthlyDiscoverySource(item) {
+  return (
+    hasMonthlySearchSource(item) ||
+    item?.sourceGroup === MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP ||
+    listValues(item?.sourceGroups).includes(MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP)
+  );
 }
 
 function applyGroupQualityFilters(groups) {
@@ -1874,6 +2114,63 @@ function listValues(value) {
   return value ? [value] : [];
 }
 
+function isDisabledEnv(value) {
+  return /^(?:0|false|off|no)$/iu.test(String(value || "").trim());
+}
+
+function joinUrl(base, relative) {
+  return `${String(base || "").replace(/\/+$/u, "")}/${String(relative || "").replace(/^\/+/u, "")}`;
+}
+
+function mygitSnapshotEntryUrl(rawBaseUrl, entry) {
+  const entryPath = entry?.path || (entry?.file ? `data/today-snapshots/${entry.file}` : "");
+  return entryPath ? joinUrl(rawBaseUrl, entryPath) : "";
+}
+
+function mygitSnapshotEntryTimestamp(entry) {
+  const direct = Date.parse(entry?.capturedAt || entry?.generatedAt || "");
+  if (Number.isFinite(direct)) return direct;
+  const idValue = String(entry?.id || entry?.file || "").match(/(\d{8})T(\d{6})Z/u);
+  if (!idValue) return NaN;
+  const [, datePart, timePart] = idValue;
+  return Date.parse(
+    `${datePart.slice(0, 4)}-${datePart.slice(4, 6)}-${datePart.slice(6, 8)}T${timePart.slice(0, 2)}:${timePart.slice(
+      2,
+      4,
+    )}:${timePart.slice(4, 6)}Z`,
+  );
+}
+
+function mygitSnapshotEntryDay(entry, timestamp) {
+  const direct = String(entry?.capturedAt || entry?.generatedAt || "").slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/u.test(direct)) return direct;
+  const idValue = String(entry?.id || entry?.file || "").match(/(\d{4})(\d{2})(\d{2})T/u);
+  if (idValue) return `${idValue[1]}-${idValue[2]}-${idValue[3]}`;
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString().slice(0, 10) : "";
+}
+
+function extractVideoIdFromWatchUrl(url) {
+  const value = String(url || "").trim();
+  if (!value) return "";
+  try {
+    const parsed = new URL(value);
+    const byQuery = parsed.searchParams.get("v");
+    if (isValidVideoId(byQuery)) return byQuery;
+    const shortsMatch = parsed.pathname.match(/\/(?:shorts|live|embed)\/([A-Za-z0-9_-]{11})(?:\/|$)/u);
+    return shortsMatch?.[1] || "";
+  } catch {
+    const match = value.match(/[?&]v=([A-Za-z0-9_-]{11})/u) || value.match(/youtu\.be\/([A-Za-z0-9_-]{11})/u);
+    return match?.[1] || "";
+  }
+}
+
+function normalizeChannelHandle(value) {
+  const text = normalizeWhitespace(value || "");
+  const match = text.match(/(?:^|\/)(@[A-Za-z0-9._-]+)(?:[/?#]|$)/u);
+  if (match) return match[1];
+  return text.startsWith("@") ? text : "";
+}
+
 function roundNumber(value, digits = 2) {
   if (!Number.isFinite(value)) return null;
   const scale = 10 ** digits;
@@ -1935,6 +2232,12 @@ async function fetchText(url) {
   const response = await fetchWithRetry(url, { headers: headers() });
   if (!response.ok) throw new Error(`${url} HTTP ${response.status}`);
   return response.text();
+}
+
+async function fetchJsonUrl(fetchImpl, url) {
+  const response = await fetchImpl(url, { headers: headers() });
+  if (!response.ok) throw new Error(`${url} HTTP ${response.status}`);
+  return response.json();
 }
 
 async function fetchWithRetry(url, options) {
@@ -2141,14 +2444,19 @@ module.exports = {
   buildRankDiffs,
   collectCarryForwardVideos,
   createRequestLimiter,
+  extractMygitTodaySnapshotItems,
   extractCommentTexts,
   filterBlockedVideos,
   filterArtistRichMixedSourceSongs,
+  fetchMygitTodaySnapshotSource,
+  hasMonthlyDiscoverySource,
   isBlockedSource,
   matchBlockedSource,
   mergeFetchedAndCarriedVideos,
+  normalizeMygitTodaySnapshotItem,
   parseRetryAfterMs,
   retryDelayMs,
+  selectMygitTodaySnapshotEntries,
   selectCandidatesForInspection,
   selectBestSongs,
   sourceScore,
@@ -2156,4 +2464,5 @@ module.exports = {
   BLOCKED_REGIONAL_VTUBER_CHANNELS,
   BLOCKLIST_HASH,
   BLOCKLIST_VERSION,
+  MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
 };
