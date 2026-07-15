@@ -12,14 +12,17 @@ const {
   buildGroups,
   buildRankDiffs,
   collectCarryForwardVideos,
+  collectInspectionCacheSkipIds,
   createRequestLimiter,
   extractMygitTodaySnapshotItems,
   filterArtistRichMixedSourceSongs,
   fetchMygitTodaySnapshotSource,
   hasMonthlyDiscoverySource,
   isBlockedSource,
+  mergeInspectionCache,
   mergeFetchedAndCarriedVideos,
   parseRetryAfterMs,
+  randomJitterMs,
   retryDelayMs,
   selectMygitTodaySnapshotEntries,
   selectCandidatesForInspection,
@@ -58,8 +61,9 @@ test("carries fresh previous song lists and skips previously inspected stable vi
   };
   const previousAudit = {
     videos: [
-      { videoId: "EEEEEEEEEEE", result: "no_usable_song_source" },
+      { videoId: "EEEEEEEEEEE", result: "selected" },
       { videoId: "FFFFFFFFFFF", result: "fetch_error" },
+      { videoId: "IIIIIIIIIII", result: "no_usable_song_source" },
     ],
   };
 
@@ -78,6 +82,7 @@ test("carries fresh previous song lists and skips previously inspected stable vi
   assert.equal(carry.skipVideoIds.has("HHHHHHHHHHH"), true);
   assert.equal(carry.skipVideoIds.has("EEEEEEEEEEE"), true);
   assert.equal(carry.skipVideoIds.has("FFFFFFFFFFF"), false);
+  assert.equal(carry.skipVideoIds.has("IIIIIIIIIII"), false);
 });
 
 test("dirty carried videos are normalized but left eligible for refresh", () => {
@@ -118,6 +123,107 @@ test("dirty carried videos are normalized but left eligible for refresh", () => 
   assert.equal(carry.videos[0].songs.length, 1);
   assert.equal(carry.videos[0].songs[0].artist, "未記載");
   assert.equal(carry.skipVideoIds.has("AAAAAAAAAAA"), false);
+});
+
+test("inspection cache skips only aged no-usable videos using real mygit published timestamps", () => {
+  const realNowMs = Date.parse("2026-07-15T14:47:13Z");
+  const cache = {
+    videos: [
+      {
+        videoId: "rimdGN6BGQ8",
+        title: "ウクレレ弾き語り。YouTubeライブ配信 #ウクレレ #ウクレレ弾き語り #弾き語り",
+        channelName: "よしうた。",
+        result: "no_usable_song_source",
+        lastInspectedAt: "2026-07-15T14:45:00.000Z",
+        publishedText: "56 分前 に配信済み",
+        publishedTimestamp: 1784124040470,
+      },
+      {
+        videoId: "QSaxZIHI774",
+        title: "HINAZUKIのお歌",
+        channelName: "HINAZUKI",
+        result: "no_usable_song_source",
+        lastInspectedAt: "2026-07-15T14:45:00.000Z",
+        publishedText: "16 分前 に配信済み",
+        publishedTimestamp: 1783952078609,
+      },
+      {
+        videoId: "kw83Fv8eEGQ",
+        title: "【歌枠✧karaoke】夕方の歌枠♪高評価１００✨よかったら聞いてって♡",
+        channelName: "子鞠まゆ-KomariMayu",
+        result: "fetch_error",
+        lastInspectedAt: "2026-07-15T12:47:13.000Z",
+        publishedTimestamp: 1784120183392,
+      },
+      {
+        videoId: "Jpw04YF4V8o",
+        title: "猫のゆるジャズ喫茶【Vtuber 歌枠】",
+        channelName: "さばしろ JazzVocal",
+        result: "fetch_error",
+        lastInspectedAt: "2026-07-15T07:47:13.000Z",
+        publishedTimestamp: 1784113333000,
+      },
+    ],
+  };
+
+  const skipped = collectInspectionCacheSkipIds(cache, realNowMs);
+
+  assert.equal(skipped.has("rimdGN6BGQ8"), false, "just-ended no-usable streams stay eligible for reinspection");
+  assert.equal(skipped.has("QSaxZIHI774"), true, "two-day-old no-usable streams are skipped");
+  assert.equal(skipped.has("kw83Fv8eEGQ"), true, "recent fetch errors get a short cooldown skip");
+  assert.equal(skipped.has("Jpw04YF4V8o"), false, "fetch errors leave cooldown after the TTL");
+
+  const carry = collectCarryForwardVideos({ generatedAt: "2026-07-15T14:40:00Z", groups: {} }, { videos: [] }, new Date(realNowMs), {
+    inspectionCache: cache,
+  });
+  assert.equal(carry.skipVideoIds.has("rimdGN6BGQ8"), false);
+  assert.equal(carry.skipVideoIds.has("QSaxZIHI774"), true);
+  assert.equal(carry.inspectionCacheSkipCount, 2);
+});
+
+test("inspection cache merge records published timestamps and removes later selected videos", () => {
+  const merged = mergeInspectionCache(
+    {
+      videos: [
+        {
+          videoId: "QSaxZIHI774",
+          title: "HINAZUKIのお歌",
+          channelName: "HINAZUKI",
+          result: "no_usable_song_source",
+          firstInspectedAt: "2026-07-15T13:00:00.000Z",
+          lastInspectedAt: "2026-07-15T13:00:00.000Z",
+          publishedTimestamp: 1783952078609,
+        },
+      ],
+    },
+    [
+      {
+        videoId: "QSaxZIHI774",
+        title: "HINAZUKIのお歌",
+        channelName: "HINAZUKI",
+        result: "selected",
+        publishedTimestamp: 1783952078609,
+      },
+      {
+        videoId: "rimdGN6BGQ8",
+        title: "ウクレレ弾き語り。YouTubeライブ配信 #ウクレレ #ウクレレ弾き語り #弾き語り",
+        channelName: "よしうた。",
+        result: "no_usable_song_source",
+        publishedText: "56 分前 に配信済み",
+        publishedTimestamp: 1784124040470,
+        durationText: "59:24 再生中",
+        rejectedEntryCount: 3,
+      },
+    ],
+    new Date("2026-07-15T14:47:13Z"),
+  );
+
+  assert.equal(merged.cache.videos.some((item) => item.videoId === "QSaxZIHI774"), false);
+  const fresh = merged.cache.videos.find((item) => item.videoId === "rimdGN6BGQ8");
+  assert.equal(fresh.publishedTimestamp, 1784124040470);
+  assert.equal(fresh.publishedText, "56 分前 に配信済み");
+  assert.equal(fresh.durationText, "59:24 再生中");
+  assert.equal(merged.cache.noUsableMinAgeHours, 48);
 });
 
 test("artist-rich mixed sources drop title-only rows without rejecting pure title-only lists", () => {
@@ -664,6 +770,14 @@ test("429 retry delay honors cooldown and Retry-After headers", () => {
   assert.equal(retryDelayMs(response(429, "2"), 1, nowMs), 9000);
   assert.equal(retryDelayMs(response(503, "Sun, 12 Jul 2026 00:00:05 GMT"), 1, nowMs), 5000);
   assert.equal(retryDelayMs(response(500, ""), 2, nowMs), 3000);
+  assert.equal(retryDelayMs(response(500, ""), 2, nowMs, () => 0.5, 500), 3250);
+});
+
+test("random jitter is deterministic when the random source is injected", () => {
+  assert.equal(randomJitterMs(0, () => 0.99), 0);
+  assert.equal(randomJitterMs(500, () => 0), 0);
+  assert.equal(randomJitterMs(500, () => 0.5), 250);
+  assert.equal(randomJitterMs(500, () => 0.999), 500);
 });
 
 test("request limiter tracks request spacing, cooldowns, and 429 budget", async () => {
@@ -680,6 +794,15 @@ test("request limiter tracks request spacing, cooldowns, and 429 budget", async 
   assert.equal(limiter.shouldStop(), false);
   limiter.note429();
   assert.equal(limiter.shouldStop(), true);
+});
+
+test("request limiter adds deterministic jitter to request spacing", async () => {
+  const limiter = createRequestLimiter({ requestDelayMs: 1000, requestJitterMs: 500, max429Errors: 2, random: () => 0.5 });
+  let nowMs = 1000;
+
+  await limiter.beforeRequest(() => nowMs);
+
+  assert.equal(limiter.nextRequestAt, 2250);
 });
 
 function candidate(videoId, hoursAgo, sourceGroups, overrides = {}) {

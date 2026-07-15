@@ -50,6 +50,7 @@ const DIFF_DIR = path.join(DATA_DIR, "diff");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const STATUS_PATH = path.join(DATA_DIR, "status.json");
 const AUDIT_PATH = path.join(DATA_DIR, "audit.json");
+const INSPECTION_CACHE_PATH = path.join(DATA_DIR, "inspection-cache.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 const DISPLAY_TIME_ZONE = "Asia/Shanghai";
 
@@ -102,9 +103,14 @@ const REPLY_LIMIT = positiveInteger(process.env.DAILY_SONG_COMMENT_REPLY_LIMIT, 
 const SEARCH_CONTINUATION_ROUNDS = positiveInteger(process.env.DAILY_SONG_SEARCH_CONTINUATION_ROUNDS, 40);
 const FETCH_RETRIES = positiveInteger(process.env.DAILY_SONG_FETCH_RETRIES, 3);
 const REQUEST_DELAY_MS = nonNegativeInteger(process.env.DAILY_SONG_REQUEST_DELAY_MS, 0);
+const REQUEST_JITTER_MS = nonNegativeInteger(process.env.DAILY_SONG_REQUEST_JITTER_MS, 0);
 const RATE_LIMIT_COOLDOWN_MS = nonNegativeInteger(process.env.DAILY_SONG_429_COOLDOWN_MS, 15_000);
+const RETRY_JITTER_MS = nonNegativeInteger(process.env.DAILY_SONG_RETRY_JITTER_MS, 0);
 const MAX_429_ERRORS = nonNegativeInteger(process.env.DAILY_SONG_MAX_429_ERRORS, 8);
 const SNAPSHOT_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_SNAPSHOT_RETENTION_DAYS, 35);
+const INSPECTION_CACHE_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_INSPECTION_CACHE_RETENTION_DAYS, SNAPSHOT_RETENTION_DAYS);
+const INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS = positiveInteger(process.env.DAILY_SONG_INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS, 6);
+const INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS = positiveInteger(process.env.DAILY_SONG_INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS, 48);
 const CARRY_FORWARD_MAX_AGE_HOURS = positiveInteger(process.env.DAILY_SONG_CARRY_FORWARD_MAX_AGE_HOURS, 36);
 const MONTH_REFRESH_LIMIT = positiveInteger(process.env.DAILY_SONG_MONTH_REFRESH_LIMIT, Math.max(20, Math.floor(VIDEO_LIMIT / 8)));
 const MONTH_BACKFILL_TARGET = positiveInteger(process.env.DAILY_SONG_MONTH_BACKFILL_TARGET, VIDEO_LIMIT * 2);
@@ -126,7 +132,7 @@ const rankCollator = new Intl.Collator("en", {
   sensitivity: "base",
   ignorePunctuation: true,
 });
-const requestLimiter = createRequestLimiter({ requestDelayMs: REQUEST_DELAY_MS, max429Errors: MAX_429_ERRORS });
+const requestLimiter = createRequestLimiter({ requestDelayMs: REQUEST_DELAY_MS, requestJitterMs: REQUEST_JITTER_MS, max429Errors: MAX_429_ERRORS });
 
 if (require.main === module) {
   main().catch((error) => {
@@ -145,7 +151,11 @@ async function main() {
   const forceRefreshVideoIds = collectForceRefreshVideoIds(curationContext);
   const previousPayload = readJsonIfExists(LATEST_PATH);
   const previousAudit = readJsonIfExists(AUDIT_PATH);
-  const carryForward = collectCarryForwardVideos(previousPayload, previousAudit, startedAt, { forceRefreshVideoIds });
+  const previousInspectionCache = readJsonIfExists(INSPECTION_CACHE_PATH);
+  const carryForward = collectCarryForwardVideos(previousPayload, previousAudit, startedAt, {
+    forceRefreshVideoIds,
+    inspectionCache: previousInspectionCache,
+  });
   const { candidates, searchSummaries } = await collectCandidates(startedAt);
   const selection = selectCandidatesForInspection(candidates, startedAt, {
     carryForwardEnabled: carryForward.enabled,
@@ -158,10 +168,11 @@ async function main() {
   );
 
   const { inspected, videos: fetchedVideos, audits } = await inspectCandidates(inspectionCandidates, curationContext);
+  const capturedAt = new Date();
+  const inspectionCache = mergeInspectionCache(previousInspectionCache, audits, capturedAt);
   const curatedMergedVideos = applyCurationToVideos(mergeFetchedAndCarriedVideos(fetchedVideos, carryForward.videos), curationContext);
   const videos = filterBlockedVideos(curatedMergedVideos, { audit: blockedSourceAudit });
 
-  const capturedAt = new Date();
   const catalogUpdate = mergeVideosIntoCatalog(loadVideoCatalog(), videos, capturedAt, {
     curationVersion: curationContext.version,
     curationHash: curationContext.hash,
@@ -213,6 +224,7 @@ async function main() {
       carryForwardAgeHours: carryForward.ageHours,
       carryForwardReason: carryForward.reason,
       knownVideoSkipCount: carryForward.skipVideoIds.size,
+      inspectionCacheSkipCount: carryForward.inspectionCacheSkipCount,
       skippedKnownCandidateCount: selection.skippedKnownCandidateCount,
       usableVideoCount: videos.length,
       catalogVideoCount: catalogRefresh.stats.catalogVideoCount,
@@ -220,7 +232,9 @@ async function main() {
       inspectionLimit: VIDEO_LIMIT,
       videoConcurrency: VIDEO_CONCURRENCY,
       requestDelayMs: REQUEST_DELAY_MS,
+      requestJitterMs: REQUEST_JITTER_MS,
       rateLimitCooldownMs: RATE_LIMIT_COOLDOWN_MS,
+      retryJitterMs: RETRY_JITTER_MS,
       max429Errors: MAX_429_ERRORS,
       rateLimitErrorCount: requestLimiter.error429Count,
       curationVersion: curationContext.version,
@@ -248,6 +262,16 @@ async function main() {
         fromCurrentRunVideoCount: videos.length,
         h72VideoCount: groups["72h"]?.items?.length || 0,
         monthVideoCount: groups["1m"]?.items?.length || 0,
+      },
+      inspectionCache: {
+        path: "data/inspection-cache.json",
+        videoCount: inspectionCache.stats.videoCount,
+        retainedVideoCount: inspectionCache.stats.retainedVideoCount,
+        updatedVideoCount: inspectionCache.stats.updatedVideoCount,
+        skippedKnownVideoCount: carryForward.inspectionCacheSkipCount,
+        retentionDays: INSPECTION_CACHE_RETENTION_DAYS,
+        fetchErrorTtlHours: INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS,
+        noUsableMinAgeHours: INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS,
       },
     },
     status: {
@@ -279,6 +303,7 @@ async function main() {
       reason: carryForward.reason,
       counts: carryForward.counts,
       knownVideoSkipCount: carryForward.skipVideoIds.size,
+      inspectionCacheSkipCount: carryForward.inspectionCacheSkipCount,
       skippedKnownCandidateCount: selection.skippedKnownCandidateCount,
       monthBackfillEnabled: selection.monthBackfillEnabled,
       monthRefreshReserveLimit: selection.monthRefreshReserveLimit,
@@ -292,6 +317,7 @@ async function main() {
     skippedBlacklistedCandidateCount: payload.source.skippedBlacklistedCandidateCount,
     videos: audits,
   });
+  writeJson(INSPECTION_CACHE_PATH, inspectionCache.cache);
   writeJson(path.join(DATA_DIR, "72h.json"), groups["72h"]);
   writeJson(path.join(DATA_DIR, "1m.json"), groups["1m"]);
   writeRankDiffFiles(payload, previousSnapshot, curationContext);
@@ -644,6 +670,8 @@ function candidateSort(a, b) {
 function collectCarryForwardVideos(previousPayload, previousAudit, now, options = {}) {
   const nowMs = now.getTime();
   const counts = { h72: 0, month: 0 };
+  const inspectionCacheSkipIds = collectInspectionCacheSkipIds(options.inspectionCache, nowMs);
+  for (const videoId of options.forceRefreshVideoIds || []) inspectionCacheSkipIds.delete(videoId);
   const empty = (reason, from = "", ageHours = null) => ({
     enabled: false,
     reason,
@@ -651,7 +679,8 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now, options 
     ageHours,
     videos: [],
     counts,
-    skipVideoIds: new Set(),
+    skipVideoIds: new Set(inspectionCacheSkipIds),
+    inspectionCacheSkipCount: inspectionCacheSkipIds.size,
   });
 
   if (!previousPayload?.groups) return empty("no_previous_latest");
@@ -677,6 +706,7 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now, options 
   if (!videos.size) return empty("no_carryable_previous_videos", from, ageHours);
   const skipVideoIds = new Set([...videos.values()].filter((video) => !video.needsRefreshFromDirtyCarryForward).map((video) => video.videoId));
   addKnownAuditSkipIds(skipVideoIds, previousAudit);
+  for (const videoId of inspectionCacheSkipIds) skipVideoIds.add(videoId);
   for (const videoId of options.forceRefreshVideoIds || []) skipVideoIds.delete(videoId);
   return {
     enabled: true,
@@ -686,6 +716,7 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now, options 
     videos: [...videos.values()],
     counts,
     skipVideoIds,
+    inspectionCacheSkipCount: inspectionCacheSkipIds.size,
   };
 }
 
@@ -738,9 +769,97 @@ function hasDirtyCarriedSongs(originalSongs, normalizedSongs) {
 
 function addKnownAuditSkipIds(skipVideoIds, previousAudit) {
   for (const audit of previousAudit?.videos || []) {
-    if (!isValidVideoId(audit.videoId) || audit.result === "fetch_error") continue;
+    if (!isValidVideoId(audit.videoId) || audit.result !== "selected") continue;
     skipVideoIds.add(audit.videoId);
   }
+}
+
+function collectInspectionCacheSkipIds(cache, nowMs) {
+  const skipVideoIds = new Set();
+  const retentionMs = INSPECTION_CACHE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  const fetchErrorTtlMs = INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS * 60 * 60 * 1000;
+  const noUsableMinAgeMs = INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS * 60 * 60 * 1000;
+  for (const item of listValues(cache?.videos)) {
+    if (!isValidVideoId(item?.videoId)) continue;
+    const inspectedMs = Date.parse(item.lastInspectedAt || item.updatedAt || item.firstInspectedAt || "");
+    if (!Number.isFinite(inspectedMs)) continue;
+    const ageMs = nowMs - inspectedMs;
+    if (ageMs < 0) continue;
+    const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
+    const videoAgeMs = Number.isFinite(publishedTimestamp) ? nowMs - publishedTimestamp : null;
+    if (item.result === "no_usable_song_source" && ageMs <= retentionMs && videoAgeMs !== null && videoAgeMs >= noUsableMinAgeMs) {
+      skipVideoIds.add(item.videoId);
+    } else if (item.result === "fetch_error" && ageMs <= fetchErrorTtlMs) {
+      skipVideoIds.add(item.videoId);
+    }
+  }
+  return skipVideoIds;
+}
+
+function mergeInspectionCache(previousCache, audits, capturedAt) {
+  const capturedAtIso = capturedAt.toISOString();
+  const cutoffMs = capturedAt.getTime() - INSPECTION_CACHE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  const fetchErrorCutoffMs = capturedAt.getTime() - INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS * 60 * 60 * 1000;
+  const byVideoId = new Map();
+  for (const item of listValues(previousCache?.videos)) {
+    if (!isRetainedInspectionCacheItem(item, cutoffMs, fetchErrorCutoffMs)) continue;
+    byVideoId.set(item.videoId, { ...item });
+  }
+  let updatedVideoCount = 0;
+  for (const audit of audits || []) {
+    if (!isValidVideoId(audit?.videoId)) continue;
+    updatedVideoCount += 1;
+    const existing = byVideoId.get(audit.videoId);
+    if (audit.result === "selected") {
+      byVideoId.delete(audit.videoId);
+      continue;
+    }
+    byVideoId.set(audit.videoId, {
+      videoId: audit.videoId,
+      title: audit.title || existing?.title || "",
+      channelName: audit.channelName || existing?.channelName || "",
+      publishedText: audit.publishedText || existing?.publishedText || "",
+      publishedTimestamp: finiteTimestamp(audit.publishedTimestamp) || finiteTimestamp(existing?.publishedTimestamp) || null,
+      durationText: audit.durationText || existing?.durationText || "",
+      result: audit.result || existing?.result || "unknown",
+      firstInspectedAt: existing?.firstInspectedAt || capturedAtIso,
+      lastInspectedAt: capturedAtIso,
+      attemptCount: (existing?.attemptCount || 0) + 1,
+      rejectedEntryCount: audit.rejectedEntryCount || 0,
+      rejectedSourceCount: audit.rejectedSourceCount || 0,
+      acceptedSourceCount: audit.acceptedSourceCount || 0,
+      selectedSongCount: audit.selectedSongCount || 0,
+    });
+  }
+  const videos = [...byVideoId.values()].filter((item) => isRetainedInspectionCacheItem(item, cutoffMs, fetchErrorCutoffMs)).sort((a, b) => {
+    const timeDiff = Date.parse(b.lastInspectedAt || "") - Date.parse(a.lastInspectedAt || "");
+    if (Number.isFinite(timeDiff) && timeDiff) return timeDiff;
+    return String(a.videoId).localeCompare(String(b.videoId));
+  });
+  return {
+    cache: {
+      schemaVersion: 1,
+      generatedAt: capturedAtIso,
+      retentionDays: INSPECTION_CACHE_RETENTION_DAYS,
+      fetchErrorTtlHours: INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS,
+      noUsableMinAgeHours: INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS,
+      videos,
+    },
+    stats: {
+      videoCount: videos.length,
+      retainedVideoCount: byVideoId.size,
+      updatedVideoCount,
+    },
+  };
+}
+
+function isRetainedInspectionCacheItem(item, cutoffMs, fetchErrorCutoffMs) {
+  if (!isValidVideoId(item?.videoId)) return false;
+  const lastInspectedMs = Date.parse(item.lastInspectedAt || item.updatedAt || item.firstInspectedAt || "");
+  if (!Number.isFinite(lastInspectedMs)) return false;
+  if (item.result === "selected") return false;
+  if (item.result === "fetch_error") return lastInspectedMs >= fetchErrorCutoffMs;
+  return lastInspectedMs >= cutoffMs;
 }
 
 function mergeFetchedAndCarriedVideos(fetchedVideos, carriedVideos) {
@@ -902,6 +1021,9 @@ async function inspectCandidates(candidates, curationContext = loadCurationConte
             keyword: candidate.keyword,
             keywords: candidate.keywords || [],
             sourceGroups: candidate.sourceGroups || [],
+            publishedText: candidate.publishedText || "",
+            publishedTimestamp: candidate.publishedTimestamp || null,
+            durationText: candidate.durationText || "",
             result: "fetch_error",
             error: error.message,
             sources: [],
@@ -944,6 +1066,7 @@ async function fetchVideoSongList(candidate, curationContext = loadCurationConte
     keywords: candidate.keywords,
     sourceGroups: candidate.sourceGroups,
     publishedText: candidate.publishedText,
+    publishedTimestamp: candidate.publishedTimestamp || null,
     durationText: candidate.durationText,
     commentCandidateCount: comments.length,
     result: "no_timestamp_candidates",
@@ -2269,11 +2392,11 @@ function isRetryableHttpStatus(status) {
   return status === 429 || status === 500 || status === 502 || status === 503 || status === 504;
 }
 
-function retryDelayMs(response, attempt, nowMs = Date.now()) {
+function retryDelayMs(response, attempt, nowMs = Date.now(), random = Math.random, retryJitterMs = RETRY_JITTER_MS) {
   const retryAfterMs = parseRetryAfterMs(response?.headers?.get?.("retry-after"), nowMs);
   const baseDelayMs = 750 * attempt * attempt;
   const cooldownMs = response?.status === 429 ? RATE_LIMIT_COOLDOWN_MS : 0;
-  return Math.max(baseDelayMs, retryAfterMs, cooldownMs);
+  return Math.max(baseDelayMs, retryAfterMs, cooldownMs) + randomJitterMs(retryJitterMs, random);
 }
 
 function parseRetryAfterMs(value, nowMs = Date.now()) {
@@ -2284,7 +2407,12 @@ function parseRetryAfterMs(value, nowMs = Date.now()) {
   return Number.isFinite(dateMs) ? Math.max(0, dateMs - nowMs) : 0;
 }
 
-function createRequestLimiter({ requestDelayMs, max429Errors }) {
+function randomJitterMs(maxJitterMs, random = Math.random) {
+  const max = nonNegativeInteger(maxJitterMs, 0);
+  return max > 0 ? Math.floor(random() * (max + 1)) : 0;
+}
+
+function createRequestLimiter({ requestDelayMs, requestJitterMs = 0, max429Errors, random = Math.random }) {
   return {
     pending: Promise.resolve(),
     nextRequestAt: 0,
@@ -2296,7 +2424,7 @@ function createRequestLimiter({ requestDelayMs, max429Errors }) {
         const waitUntil = Math.max(this.nextRequestAt, this.cooldownUntil);
         const waitMs = waitUntil - now();
         if (waitMs > 0) await delay(waitMs);
-        this.nextRequestAt = now() + requestDelayMs;
+        this.nextRequestAt = now() + requestDelayMs + randomJitterMs(requestJitterMs, random);
       });
       this.pending = queued.catch(() => {});
       await queued;
@@ -2443,6 +2571,7 @@ module.exports = {
   buildRankDiffForRange,
   buildRankDiffs,
   collectCarryForwardVideos,
+  collectInspectionCacheSkipIds,
   createRequestLimiter,
   extractMygitTodaySnapshotItems,
   extractCommentTexts,
@@ -2452,9 +2581,11 @@ module.exports = {
   hasMonthlyDiscoverySource,
   isBlockedSource,
   matchBlockedSource,
+  mergeInspectionCache,
   mergeFetchedAndCarriedVideos,
   normalizeMygitTodaySnapshotItem,
   parseRetryAfterMs,
+  randomJitterMs,
   retryDelayMs,
   selectMygitTodaySnapshotEntries,
   selectCandidatesForInspection,

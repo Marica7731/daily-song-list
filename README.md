@@ -134,11 +134,16 @@ Useful environment variables:
 - `DAILY_SONG_CARRY_FORWARD_MAX_AGE_HOURS`: maximum age of the previous successful snapshot that can be used for carry-forward, default `36`.
 - `DAILY_SONG_SEARCH_CONTINUATION_ROUNDS`: maximum YouTube search continuation requests per source, default `40`; GitHub Actions uses `120`.
 - `DAILY_SONG_FETCH_RETRIES`: retry count for YouTube 429/5xx responses, default `3`.
-- `DAILY_SONG_REQUEST_DELAY_MS`: minimum global delay between YouTube requests, default `0`; GitHub Actions uses `750`.
-- `DAILY_SONG_429_COOLDOWN_MS`: cooldown after retryable YouTube 429 responses, default `15000`.
+- `DAILY_SONG_REQUEST_DELAY_MS`: minimum global delay between YouTube requests, default `0`; GitHub Actions uses `2500`.
+- `DAILY_SONG_REQUEST_JITTER_MS`: extra random delay added to each YouTube request spacing, default `0`; GitHub Actions uses `1500`.
+- `DAILY_SONG_429_COOLDOWN_MS`: cooldown after retryable YouTube 429 responses, default `15000`; GitHub Actions uses `60000`.
+- `DAILY_SONG_RETRY_JITTER_MS`: extra random delay added after retryable YouTube responses, default `0`; GitHub Actions uses `5000`.
 - `DAILY_SONG_MAX_429_ERRORS`: stop inspecting new videos after this many YouTube 429 responses, default `8`.
 - `DAILY_SONG_COMMENT_REPLY_LIMIT`: max reply continuations, default `12`.
 - `DAILY_SONG_SNAPSHOT_RETENTION_DAYS`: hourly snapshot retention, default `35`.
+- `DAILY_SONG_INSPECTION_CACHE_RETENTION_DAYS`: retention for videos that were inspected but did not produce usable songs, default matches snapshot retention.
+- `DAILY_SONG_INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS`: short skip window for videos that recently failed inspection, default `6`.
+- `DAILY_SONG_INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS`: only skip `no_usable_song_source` videos after the video itself is at least this old, default `48`. This keeps just-ended streams eligible for later reinspection while avoiding repeated work on two-day-old videos that still have no usable setlist.
 
 The mygit today snapshot integration is a discovery layer only. It reads remote snapshot JSON files, dedupes candidate video IDs, and then lets daily-song-list fetch and parse the watch page, description, comments, curation rules, catalog merge, and ranking exactly as before. No mygit snapshot copies are stored in this repository, so daily-song-list does not need a separate cleanup job for those upstream snapshots.
 
