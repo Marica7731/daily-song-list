@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-14T23:49:35.907Z",
+  "generatedAt": "2026-07-15T03:46:40.626Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 17157,
-  "unknownArtistCount": 2962,
-  "nicheUnknownArtistCount": 1475,
-  "highRiskEntryCount": 487,
-  "highRiskSourceCount": 18,
+  "totalSongs": 17268,
+  "unknownArtistCount": 2970,
+  "nicheUnknownArtistCount": 1522,
+  "highRiskEntryCount": 493,
+  "highRiskSourceCount": 19,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 6,
+  "ruleDroppedEntryCount": 7,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 7,
-  "parserCorruptionCount": 25,
+  "confirmedNoiseCount": 38,
+  "parserCorruptionCount": 32,
   "likelyNoiseCount": 0,
-  "needsReviewCount": 1467,
-  "likelySongCount": 9553,
+  "needsReviewCount": 1515,
+  "likelySongCount": 10002,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -233,10 +233,18 @@
     },
     {
       "value": "汐音ベリーちゃん Berry Ch",
-      "count": 6
+      "count": 7
     },
     {
       "value": "MUZU‐むずちゃんねる‐【Vtuber】",
+      "count": 4
+    },
+    {
+      "value": "ただのかえる【TADANO KAERU】",
+      "count": 4
+    },
+    {
+      "value": "ひーくん / hi-kun",
       "count": 4
     },
     {
@@ -245,6 +253,14 @@
     },
     {
       "value": "音魂ヒビクHibiku Otodama",
+      "count": 4
+    },
+    {
+      "value": "菜鳥ひなた / Hinata Natori",
+      "count": 4
+    },
+    {
+      "value": "茶々プラムム / Pulamumu",
       "count": 4
     },
     {
@@ -288,23 +304,7 @@
       "count": 3
     },
     {
-      "value": "ひーくん / hi-kun",
-      "count": 3
-    },
-    {
-      "value": "羽月うずな / Hazuki Uzuna",
-      "count": 3
-    },
-    {
-      "value": "羽緒",
-      "count": 3
-    },
-    {
-      "value": "音羽奏來 - Otoha Sora -",
-      "count": 3
-    },
-    {
-      "value": "音鍵めろ / Otokagi Mero",
+      "value": "メラ・アカル MelaakaruVtuber",
       "count": 3
     }
   ],
@@ -374,8 +374,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
+        "source_multiple_niche_short_titles",
+        "parser_corruption"
       ]
     },
     {
@@ -490,6 +490,20 @@
       ]
     },
     {
+      "videoId": "hWv55PnjmEo",
+      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
+      "channelName": "ミナミイズミ / IZUMI MINAMI",
+      "riskScore": 78,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
       "videoId": "ZTi1cpRaW8U",
       "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
       "channelName": "闇咲とうか",
@@ -569,23 +583,18 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
-    },
-    {
-      "videoId": "8ddC8VUr0xw",
-      "title": "【夜の弾き語り】ハナレグミ『発光帯』から始まる、生演奏と雑談202607",
-      "channelName": "Akinori IZAWA 『GAIB!!!』",
-      "riskScore": 68,
-      "riskLevel": "medium",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-15T03:46:40.626Z",
+      "totalSongs": 17268,
+      "unknownArtistCount": 2970,
+      "nicheUnknownArtistCount": 1522,
+      "highRiskEntryCount": 493,
+      "highRiskSourceCount": 19
+    },
     {
       "generatedAt": "2026-07-14T23:49:35.907Z",
       "totalSongs": 17157,
@@ -737,14 +746,6 @@
       "nicheUnknownArtistCount": 1423,
       "highRiskEntryCount": 410,
       "highRiskSourceCount": 18
-    },
-    {
-      "generatedAt": "2026-07-13T13:01:53.796Z",
-      "totalSongs": 13863,
-      "unknownArtistCount": 2784,
-      "nicheUnknownArtistCount": 1425,
-      "highRiskEntryCount": 410,
-      "highRiskSourceCount": 17
     }
   ]
 }
