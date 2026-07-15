@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T08:57:01.281Z",
+  "generatedAt": "2026-07-15T14:23:46.494Z",
   "reviewId": "review:_qjGpnjmNMo:cc67ac8ddd0110882265",
   "video": {
     "videoId": "_qjGpnjmNMo",
@@ -11,16 +11,17 @@
   "source": {
     "sourceId": "UgwfBFvn8sATPm4SHP94AaABAg",
     "sourceHash": "cc67ac8ddd01108822657d654b41ad4e106b942cff71ed79f7a9551f81228dc1",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "12:00 PEACH/大塚愛\n19:27 Butterfly/木村カエラ\r\n26:34 キューティーハニー/倖田來未\r\n34:09 花に亡霊/ヨルシカ\r\n43:54 Silly/家入レオ\r\n50:36 告知\n1:13:50 閲覧注意\r\n1:20:22 おしりフリフリ/おかあさんといっしょ\r\n1:26:22 にんげんっていいな/まんが日本昔話\n\n改めて2.5周年＆コラおめでとうございました～\n「灰」って字、遠目に見ると「尻」に見えますよね、ということに気付きました\nありがとう、魔尻えん。",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 24,
+    "riskScore": 16,
     "riskLevel": "low",
     "riskReasons": [
+      "niche_unknown_artist",
       "short_unknown_title"
     ]
   },
@@ -42,8 +43,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -63,8 +63,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -84,8 +83,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -105,8 +103,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -126,8 +123,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -140,16 +136,15 @@
       "rawHash": "ce1bed4caef6577096ce519299af16a10e32440e27026e1aabfcedfed8810a8f",
       "sourceId": "UgwfBFvn8sATPm4SHP94AaABAg",
       "sourceHash": "cc67ac8ddd01108822657d654b41ad4e106b942cff71ed79f7a9551f81228dc1",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -161,14 +156,13 @@
       "rawHash": "fd694640c5ba3f4f3528d110d031b3ab657d15f6d512b78b7b025445107d0e32",
       "sourceId": "UgwfBFvn8sATPm4SHP94AaABAg",
       "sourceHash": "cc67ac8ddd01108822657d654b41ad4e106b942cff71ed79f7a9551f81228dc1",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -188,25 +182,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "obvious_non_song_text",
-      "seconds": 3036,
-      "time": "0:50:36",
-      "title": "告知",
-      "artist": "",
-      "raw": "50:36 告知",
-      "rawHash": "6a7fa602952ab0cfe4bf36d670d987394960888d409bb55a20167a0ccd6e9297",
-      "sourceId": "UgwfBFvn8sATPm4SHP94AaABAg",
-      "sourceHash": "cc67ac8ddd01108822657d654b41ad4e106b942cff71ed79f7a9551f81228dc1",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "obvious_non_song_text"
+        "known_artist"
       ]
     }
   ]

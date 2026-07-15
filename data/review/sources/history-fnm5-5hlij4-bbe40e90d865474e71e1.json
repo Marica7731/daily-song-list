@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T08:57:01.281Z",
+  "generatedAt": "2026-07-15T14:23:46.494Z",
   "reviewId": "review:fnm5-5hlij4:bbe40e90d865474e71e1",
   "video": {
     "videoId": "fnm5-5hlij4",
@@ -15,14 +15,15 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260715T060000Z"
+    "snapshotId": "20260715T140000Z"
   },
   "risk": {
-    "riskScore": 20,
+    "riskScore": 30,
     "riskLevel": "low",
     "riskReasons": [
       "source_multiple_unknown_artists",
-      "niche_unknown_artist"
+      "niche_unknown_artist",
+      "short_unknown_title"
     ]
   },
   "entries": [
@@ -119,16 +120,16 @@
       "rawHash": "c21d2a091d675f0e3b6ad26c40838e0f1a980112fd5c6f8cb032c209b9a5f686",
       "sourceId": "UgwOm-gcm2xiwgiq3A54AaABAg",
       "sourceHash": "bbe40e90d865474e71e158da9d85c46e35cb4316447fd55b551b0589ad5b62a9",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
