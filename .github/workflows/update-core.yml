@@ -105,6 +105,13 @@ jobs:
         if: steps.core.outcome == 'success'
         run: |
           sleep 75
+          for attempt in 1 2 3 4 5; do
+            if npm run check:published -- https://ytb-song-rank.culua.com/; then
+              exit 0
+            fi
+            echo "Published runtime health check attempt ${attempt} failed; waiting for CDN propagation."
+            sleep 45
+          done
           npm run check:published -- https://ytb-song-rank.culua.com/
 
       - name: Finish run summary
