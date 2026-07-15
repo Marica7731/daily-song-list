@@ -232,11 +232,10 @@ async function assertUiShape(page, viewport, range) {
       };
     };
     const controls = rect("#controls");
-    const topbar = rect(".topbar");
-    const topbarInner = rect(".topbar-inner");
     const searchField = rect(".search-field");
     const bottomNav = rect("#mobileBottomNav");
     const summary = rect("#summary");
+    const summaryStatus = rect("#summary .summary-status");
     const summaryRange = rect("#summary .summary-range");
     const topPagination = rect(".pagination-top");
     const topSelect = rect(".pagination-top .page-select");
@@ -323,13 +322,14 @@ async function assertUiShape(page, viewport, range) {
       });
     return {
       width,
-      topbar,
-      topbarInner,
+      bodyText: document.body.innerText || "",
+      topbarExists: Boolean(document.querySelector(".topbar, .topbar-inner, .brand")),
       controls,
       searchField,
       bottomNav,
       bottomItems,
       summary,
+      summaryStatus,
       summaryRange,
       topPagination,
       topSelect,
@@ -354,16 +354,17 @@ async function assertUiShape(page, viewport, range) {
   }, { width: viewport[0], range });
 
   if (result.scrollWidth > result.clientWidth + 1) throw new Error(`horizontal overflow ${JSON.stringify(result)}`);
-  if (result.topbarInner && (result.topbarInner.left < -1 || result.topbarInner.right > result.clientWidth + 1)) {
-    throw new Error(`topbar inner is not aligned to viewport ${JSON.stringify(result.topbarInner)}`);
+  if (result.topbarExists || /\bDaily Song List\b/u.test(result.bodyText)) {
+    throw new Error(`legacy title row remains visible ${JSON.stringify({ topbarExists: result.topbarExists, bodyText: result.bodyText.slice(0, 160) })}`);
   }
+  if (!result.summaryStatus || result.summaryStatus.display === "none") throw new Error(`summary status missing ${JSON.stringify(result.summary)}`);
   const overflowingSegment = result.segmentedControls.find((control) => control.scrollWidth > control.clientWidth + 1);
   if (overflowingSegment) throw new Error(`segmented control overflowed inside toolbar ${JSON.stringify(overflowingSegment)}`);
   if (result.shareButtonExists || result.copyLinkExists || result.visibleShareLabels.length) {
     throw new Error(`visible share/copy-current-link entry remains ${JSON.stringify(result)}`);
   }
   if (viewport[0] <= 720) {
-    if (!result.controls || result.controls.height > 60) throw new Error(`mobile controls not one row ${JSON.stringify(result.controls)}`);
+    if (!result.controls || result.controls.height > 50) throw new Error(`mobile controls not one row ${JSON.stringify(result.controls)}`);
     if (result.searchField && result.searchField.display !== "none") throw new Error("mobile search field is still resident in toolbar");
     if (!result.bottomNav || result.bottomNav.display === "none") throw new Error("mobile bottom nav missing");
     if (result.bottomItems.length !== 4 || result.bottomItems.some((item) => item.width < 60 || item.display === "none")) {
@@ -397,7 +398,7 @@ async function assertUiShape(page, viewport, range) {
       throw new Error(`first mobile title is covered ${JSON.stringify(result)}`);
     }
     if (result.firstTitle.fontSize < 14) throw new Error(`first mobile title font too small ${JSON.stringify(result.firstTitle)}`);
-    if (result.firstButton && result.firstButton.height < 30) throw new Error(`mobile first action chip too small ${JSON.stringify(result.firstButton)}`);
+    if (result.firstButton && result.firstButton.height < 28) throw new Error(`mobile first action chip too small ${JSON.stringify(result.firstButton)}`);
     if (!result.secondRow || result.secondRow.top >= viewport[1]) throw new Error(`next mobile row entry is not visible ${JSON.stringify(result.secondRow)}`);
   } else if (viewport[0] <= 919) {
     if (result.topSelect || result.topPageSize) throw new Error(`tablet top pagination includes page select/page size ${JSON.stringify(result)}`);
@@ -484,7 +485,7 @@ async function desktopRankVisualGeometry(browser) {
     url.searchParams.set("showUnknown", "1");
     await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
-    await page.waitForSelector(".rank-trend .trend-badge", { timeout: verifyTimeout(15000, 30000) });
+    await page.waitForSelector(".rank-side .trend-badge", { timeout: verifyTimeout(15000, 30000) });
 
     const geometry = await page.evaluate(() => {
       const rectFor = (node) => {
@@ -514,15 +515,21 @@ async function desktopRankVisualGeometry(browser) {
       const rowCells = [
         firstRow?.querySelector(".rank-number"),
         firstRow?.querySelector(".rank-content"),
-        firstRow?.querySelector(".rank-trend"),
         firstRow?.querySelector(".rank-side"),
       ].map((node) => (node ? rectFor(node) : null));
       const title = firstRow?.querySelector(".rank-title");
       const trendCounts = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)")).slice(0, 40).map((row) => ({
         visibleBadges: Array.from(row.querySelectorAll(".trend-badge")).filter(visible).length,
         visibleInline: Array.from(row.querySelectorAll(".rank-trend-inline")).filter(visible).length,
-        visibleDesktop: Array.from(row.querySelectorAll(".rank-trend .trend-badge")).filter(visible).length,
+        visibleDesktop: Array.from(row.querySelectorAll(".rank-side .trend-badge")).filter(visible).length,
       }));
+      const trendTexts = Array.from(document.querySelectorAll(".rank-side .trend-badge"))
+        .filter(visible)
+        .map((node) => ({
+          text: node.textContent.trim(),
+          scrollWidth: node.scrollWidth,
+          clientWidth: node.clientWidth,
+        }));
       const controls = Array.from(document.querySelectorAll("#controls .segmented, #controls .toolbar-button, #controls select, #controls input:not([type='checkbox']):not([type='radio'])"))
         .filter(visible)
         .map((node) => ({ className: node.className || node.tagName, ...rectFor(node) }));
@@ -536,6 +543,7 @@ async function desktopRankVisualGeometry(browser) {
         title: title ? rectFor(title) : null,
         titleText: title?.textContent?.trim() || "",
         trendCounts,
+        trendTexts,
         controls,
         shareButtonExists: Boolean(document.querySelector("#shareButton")),
         copyLinkExists: Boolean(document.querySelector("[data-copy-link]")),
@@ -550,15 +558,18 @@ async function desktopRankVisualGeometry(browser) {
     if (geometry.trendCounts.some((row) => row.visibleBadges > 1 || row.visibleInline > 0)) {
       throw new Error(`desktop trend visibility invalid ${JSON.stringify(geometry.trendCounts.slice(0, 10))}`);
     }
-    if (!geometry.trendCounts.some((row) => row.visibleDesktop > 0)) throw new Error("desktop trend column did not render any trend badge");
-    for (let index = 0; index < 4; index += 1) {
+    if (!geometry.trendCounts.some((row) => row.visibleDesktop > 0)) throw new Error("desktop side area did not render any trend badge");
+    if (geometry.trendTexts.some((item) => !/^(新|升\d+|降\d+|增\d+|减\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
+      throw new Error(`desktop trend label invalid ${JSON.stringify(geometry.trendTexts.slice(0, 10))}`);
+    }
+    for (let index = 0; index < 3; index += 1) {
       const headerCell = geometry.headerCells[index];
       const rowCell = geometry.rowCells[index];
       if (!headerCell || !rowCell) throw new Error(`desktop rank columns missing ${JSON.stringify(geometry)}`);
       assertClose(headerCell.left, rowCell.left, 4, `desktop column ${index} left`, geometry);
       assertClose(headerCell.right, rowCell.right, 8, `desktop column ${index} right`, geometry);
     }
-    if (geometry.controls.some((control) => Math.abs(control.height - 44) > 3)) {
+    if (geometry.controls.some((control) => control.height < 30 || control.height > 40)) {
       throw new Error(`desktop toolbar control height mismatch ${JSON.stringify(geometry.controls)}`);
     }
 
@@ -883,7 +894,7 @@ async function mobileFilterSheetFlow(browser) {
     assertClose(topGeometry.segmented[0].height, topGeometry.segmented[1].height, 1, "metric segmented height", topGeometry);
     if (!topGeometry.selects.length) throw new Error(`mobile filter select controls missing ${JSON.stringify(topGeometry)}`);
     for (const select of topGeometry.selects) {
-      assertClose(select.height, 40, 1, "filter select height", topGeometry);
+      if (select.height < 36 || select.height > 38) throw new Error(`filter select height invalid ${JSON.stringify(topGeometry)}`);
     }
     const selectHeights = topGeometry.selects.map((item) => item.height);
     if (Math.max(...selectHeights) - Math.min(...selectHeights) > 1) throw new Error(`filter select heights differ ${JSON.stringify(topGeometry)}`);
@@ -943,7 +954,7 @@ async function mobileRankVisualGeometry(browser) {
     await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
     await page.waitForFunction(
-      () => document.querySelector(".rank-row:not(.skeleton-row)") && document.querySelector(".rank-trend-inline"),
+      () => document.querySelector(".rank-row:not(.skeleton-row)") && document.querySelector(".rank-side"),
       null,
       { timeout: baseUrl.startsWith("https://") ? 30000 : 15000 },
     );
@@ -972,37 +983,40 @@ async function mobileRankVisualGeometry(browser) {
       };
       const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)"));
       const trendRow =
-        rows.find((row) => isVisible(row.querySelector(".rank-trend-inline")) && row.querySelector(".rank-expand")) ||
-        rows.find((row) => isVisible(row.querySelector(".rank-trend-inline"))) ||
+        rows.find((row) => isVisible(row.querySelector(".rank-side .trend-badge")) && row.querySelector(".rank-expand")) ||
+        rows.find((row) => isVisible(row.querySelector(".rank-side .trend-badge"))) ||
         rows.find((row) => row.querySelector(".rank-expand")) ||
         rows[0];
-      const trend = trendRow?.querySelector(".rank-trend-inline");
+      const trend = trendRow?.querySelector(".rank-side .trend-badge");
       const content = trendRow?.querySelector(".rank-content");
       const button = trendRow?.querySelector(".rank-expand");
       const rank = trendRow?.querySelector(".rank-number");
       const title = trendRow?.querySelector(".rank-title");
       const count = trendRow?.querySelector(".rank-count");
+      const side = trendRow?.querySelector(".rank-side");
+      const sideTop = trendRow?.querySelector(".rank-side-top");
       const rowBox = trendRow ? rectFor(trendRow) : null;
       const subline = trendRow?.querySelector(".rank-subline");
       const metaLine = trendRow?.querySelector(".rank-meta-line");
-      const actionsLine = trendRow?.querySelector(".rank-actions-line");
-      const actionsStyle = actionsLine ? getComputedStyle(actionsLine) : null;
       const sublineStyle = subline ? getComputedStyle(subline) : null;
+      const allTrendTexts = Array.from(document.querySelectorAll(".trend-badge"))
+        .filter(isVisible)
+        .map((node) => ({ text: node.textContent.trim(), scrollWidth: node.scrollWidth, clientWidth: node.clientWidth }));
       return {
         viewportWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
         rowText: trendRow?.textContent?.slice(0, 200) || "",
         row: rowBox,
-        subline: subline ? { ...rectFor(subline), display: sublineStyle.display, gridTemplateColumns: sublineStyle.gridTemplateColumns } : null,
+        subline: subline ? { ...rectFor(subline), display: sublineStyle.display, overflowX: sublineStyle.overflowX } : null,
         metaLine: metaLine ? rectFor(metaLine) : null,
-        actionsLine: actionsLine
-          ? { ...rectFor(actionsLine), flexWrap: actionsStyle.flexWrap, minHeight: actionsStyle.minHeight }
-          : null,
-        actionTexts: Array.from(actionsLine?.querySelectorAll("button, .trend-badge") || [])
-          .filter(isVisible)
-          .map((node) => node.textContent.trim()),
+        side: side ? rectFor(side) : null,
+        sideTop: sideTop ? rectFor(sideTop) : null,
+        allTrendTexts,
+        legacyTrendNodes: document.querySelectorAll(".rank-trend, .rank-trend-inline, .rank-actions-line").length,
         trend: isVisible(trend) ? rectFor(trend) : null,
         trendText: isVisible(trend) ? trend.textContent.trim() : "",
+        trendScrollWidth: trend?.scrollWidth || 0,
+        trendClientWidth: trend?.clientWidth || 0,
         content: content ? rectFor(content) : null,
         button: button ? rectFor(button) : null,
         buttonText: isVisible(button) ? button.textContent.trim() : "",
@@ -1014,20 +1028,24 @@ async function mobileRankVisualGeometry(browser) {
     });
     if (closedGeometry.scrollWidth > closedGeometry.viewportWidth + 1) throw new Error(`mobile rank overflow ${JSON.stringify(closedGeometry)}`);
     if (!closedGeometry.content) throw new Error(`mobile rank content geometry missing ${JSON.stringify(closedGeometry)}`);
-    if (!closedGeometry.subline || closedGeometry.subline.display !== "grid") throw new Error(`mobile rank subline should be grid ${JSON.stringify(closedGeometry)}`);
-    if (!closedGeometry.metaLine || !closedGeometry.actionsLine) throw new Error(`mobile rank subline pieces missing ${JSON.stringify(closedGeometry)}`);
-    assertClose(closedGeometry.metaLine.centerY, closedGeometry.actionsLine.centerY, 2, "meta and actions center", closedGeometry);
-    if (closedGeometry.actionsLine.flexWrap !== "nowrap") throw new Error(`mobile rank actions should not wrap ${JSON.stringify(closedGeometry)}`);
+    if (!closedGeometry.subline || closedGeometry.subline.display !== "flex") throw new Error(`mobile rank subline should be a single flex line ${JSON.stringify(closedGeometry)}`);
+    if (!closedGeometry.metaLine || !closedGeometry.side || !closedGeometry.sideTop) throw new Error(`mobile rank pieces missing ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.legacyTrendNodes) throw new Error(`legacy mobile trend nodes remain ${JSON.stringify(closedGeometry)}`);
     if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > 90) {
       throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
     }
-    if (/收录/u.test(closedGeometry.trendText)) throw new Error(`compact trend should not include 收录 ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.allTrendTexts.some((item) => !/^(新|升\d+|降\d+|增\d+|减\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
+      throw new Error(`mobile trend label invalid ${JSON.stringify(closedGeometry.allTrendTexts.slice(0, 10))}`);
+    }
+    if (/^[+−+\-↑↓]$/u.test(closedGeometry.trendText) || /收录/u.test(closedGeometry.trendText)) {
+      throw new Error(`compact trend should use semantic short labels ${JSON.stringify(closedGeometry)}`);
+    }
     if (/^\d+(?:源|点|来源)$/u.test(closedGeometry.buttonText)) throw new Error(`compact source button should use complete Chinese units ${JSON.stringify(closedGeometry)}`);
     if (closedGeometry.trend) {
-      if (closedGeometry.trend.width > 120) throw new Error(`trend badge too wide ${JSON.stringify(closedGeometry)}`);
-      if (closedGeometry.trend.width > closedGeometry.content.width * 0.5) throw new Error(`trend badge exceeds half content width ${JSON.stringify(closedGeometry)}`);
-      if (closedGeometry.trend.width > closedGeometry.content.width - 8) throw new Error(`trend badge spans rank content ${JSON.stringify(closedGeometry)}`);
-      if (closedGeometry.trend.height > 28) throw new Error(`trend badge too tall ${JSON.stringify(closedGeometry)}`);
+      if (!/^(新|升\d+|降\d+|增\d+|减\d+)$/u.test(closedGeometry.trendText)) throw new Error(`trend text invalid ${JSON.stringify(closedGeometry)}`);
+      if (closedGeometry.trendScrollWidth > closedGeometry.trendClientWidth + 1) throw new Error(`trend badge clipped ${JSON.stringify(closedGeometry)}`);
+      if (closedGeometry.trend.height > 22) throw new Error(`trend badge too tall ${JSON.stringify(closedGeometry)}`);
+      assertClose(closedGeometry.trend.centerY, closedGeometry.count.centerY, 2, "count and trend center", closedGeometry);
     }
     if (closedGeometry.rank && closedGeometry.title && closedGeometry.rank.top > closedGeometry.title.top + 3) {
       throw new Error(`mobile rank marker should stay near the row top ${JSON.stringify(closedGeometry)}`);
@@ -1091,16 +1109,16 @@ async function mobileRankVisualGeometry(browser) {
       throw new Error(`source channel should sit after primary timestamp ${JSON.stringify(expandedGeometry)}`);
     }
     if (expandedGeometry.drawer.rowGap !== "0px") throw new Error(`mobile source drawer should have no grid row gap ${JSON.stringify(expandedGeometry)}`);
-    assertClose(expandedGeometry.firstGroup.paddingTop, 8, 1, "source group top padding", expandedGeometry);
-    assertClose(expandedGeometry.firstGroup.paddingBottom, 8, 1, "source group bottom padding", expandedGeometry);
-    if (!expandedGeometry.copyButtons.length || expandedGeometry.copyButtons.some((button) => button.height < 30)) {
+    assertClose(expandedGeometry.firstGroup.paddingTop, 7, 1, "source group top padding", expandedGeometry);
+    assertClose(expandedGeometry.firstGroup.paddingBottom, 7, 1, "source group bottom padding", expandedGeometry);
+    if (!expandedGeometry.copyButtons.length || expandedGeometry.copyButtons.some((button) => button.height < 28 || button.width < 28 || button.width !== button.height)) {
       throw new Error(`source copy button height invalid ${JSON.stringify(expandedGeometry)}`);
     }
     if (expandedGeometry.sourceLinkButtonCount !== 1) throw new Error(`copy same-song links button should render once ${JSON.stringify(expandedGeometry)}`);
-    if (!expandedGeometry.timeLinks.length || expandedGeometry.timeLinks.some((link) => link.height < 32)) {
+    if (!expandedGeometry.timeLinks.length || expandedGeometry.timeLinks.some((link) => link.height < 24 || link.height > 28)) {
       throw new Error(`source timestamp hit area invalid ${JSON.stringify(expandedGeometry)}`);
     }
-    if (expandedGeometry.sourceMoreTimes && expandedGeometry.sourceMoreTimes.height < 32) {
+    if (expandedGeometry.sourceMoreTimes && (expandedGeometry.sourceMoreTimes.height < 24 || expandedGeometry.sourceMoreTimes.height > 28)) {
       throw new Error(`source extra timestamp toggle hit area invalid ${JSON.stringify(expandedGeometry)}`);
     }
 
@@ -1190,6 +1208,36 @@ async function mobileCopyAllLinksFlow(browser) {
       throw new Error(`copy all links toast invalid ${JSON.stringify(copyResult)}`);
     }
 
+    const setlistButtonsShape = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("[data-copy-setlist]")).map((button) => {
+        const box = button.getBoundingClientRect();
+        const style = getComputedStyle(button);
+        return {
+          text: button.textContent.trim(),
+          ariaLabel: button.getAttribute("aria-label") || "",
+          title: button.getAttribute("title") || "",
+          svgCount: button.querySelectorAll("svg").length,
+          visible: !button.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0,
+          width: box.width,
+          height: box.height,
+        };
+      }),
+    );
+    const invalidSetlistButton = setlistButtonsShape.find(
+      (button) =>
+        button.visible &&
+        (button.text ||
+          button.svgCount !== 1 ||
+          !button.ariaLabel.startsWith("复制该视频歌单：") ||
+          button.title !== "复制歌单" ||
+          Math.abs(button.width - button.height) > 1 ||
+          button.width < 28 ||
+          button.width > (viewport[0] <= 720 ? 30 : 32)),
+    );
+    if (invalidSetlistButton) {
+      throw new Error(`copy setlist icon button invalid ${JSON.stringify({ invalidSetlistButton, setlistButtonsShape: setlistButtonsShape.slice(0, 12) })}`);
+    }
+
     await row.locator("[data-copy-setlist]").first().click();
     await page.waitForFunction(() => (window.__clipboardWrites || []).length > 1, null, { timeout: 5000 });
     const setlistCopied = await page.evaluate(() => (window.__clipboardWrites[1] || "").split("\n").filter(Boolean).length);
@@ -1248,6 +1296,127 @@ async function mobileCopyAllLinksFlow(browser) {
     await context.close();
     if (errors.length || unhandled) throw new Error(`copy all links flow errors: ${errors.join(" | ")} ${unhandled}`);
     results.push({ scenario: `copy-all-links-${viewport.join("x")}`, requests: [...new Set(requests)], screenshotPath, singleSourceScreenshotPath });
+  }
+}
+
+async function mobileVideoCardGeometry(browser) {
+  for (const viewport of [
+    [390, 844],
+    [430, 932],
+    [1366, 768],
+  ]) {
+    const { context, page, errors } = await newPage(browser, viewport);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    const url = new URL(baseUrl);
+    url.searchParams.set("view", "videos");
+    url.searchParams.set("layout", "cards");
+    url.searchParams.set("pageSize", "100");
+    url.searchParams.set("showUnknown", "1");
+    await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    await page.waitForSelector(".video-card .video-title", { timeout: verifyTimeout(15000, 30000) });
+
+    const geometry = await page.evaluate(() => {
+      const rectFor = (node) => {
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+          display: style.display,
+          gridColumn: style.gridColumn,
+          fontSize: Number.parseFloat(style.fontSize) || 0,
+        };
+      };
+      const visible = (node) => {
+        if (!node) return false;
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      };
+      const card = document.querySelector(".video-card");
+      const thumb = card?.querySelector(".thumb-link");
+      const heading = card?.querySelector(".video-heading");
+      const title = card?.querySelector(".video-title");
+      const meta = card?.querySelector(".video-meta");
+      const songList = card?.querySelector(".song-list");
+      const copy = card?.querySelector("[data-copy-setlist]");
+      const more = card?.querySelector(".video-more");
+      const visibleCopyButtons = Array.from(document.querySelectorAll("[data-copy-setlist]"))
+        .filter(visible)
+        .map((button) => ({
+          ...rectFor(button),
+          text: button.textContent.trim(),
+          ariaLabel: button.getAttribute("aria-label") || "",
+          title: button.getAttribute("title") || "",
+          svgCount: button.querySelectorAll("svg").length,
+        }));
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        gridColumns: getComputedStyle(document.querySelector(".video-grid")).gridTemplateColumns,
+        card: card ? rectFor(card) : null,
+        thumb: thumb ? rectFor(thumb) : null,
+        heading: heading ? rectFor(heading) : null,
+        title: title ? rectFor(title) : null,
+        meta: meta ? rectFor(meta) : null,
+        songList: songList ? rectFor(songList) : null,
+        copy: copy ? rectFor(copy) : null,
+        visibleCopyButtons,
+        more: more ? rectFor(more) : null,
+      };
+    });
+    if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`video view overflow ${JSON.stringify(geometry)}`);
+    if (!geometry.card || !geometry.thumb || !geometry.heading || !geometry.title || !geometry.songList || !geometry.copy) {
+      throw new Error(`video card geometry missing ${JSON.stringify(geometry)}`);
+    }
+    const badCopy = geometry.visibleCopyButtons.find(
+      (button) =>
+        button.text ||
+        button.svgCount !== 1 ||
+        !button.ariaLabel.startsWith("复制该视频歌单：") ||
+        button.title !== "复制歌单" ||
+        Math.abs(button.width - button.height) > 1,
+    );
+    if (badCopy) throw new Error(`video copy setlist button invalid ${JSON.stringify({ badCopy, geometry })}`);
+    if (viewport[0] <= 720) {
+      if (geometry.thumb.width >= geometry.card.width * 0.45) throw new Error(`mobile video thumbnail too wide ${JSON.stringify(geometry)}`);
+      if (geometry.thumb.width < 100 || geometry.thumb.width > 114) throw new Error(`mobile video thumbnail size invalid ${JSON.stringify(geometry)}`);
+      if (geometry.songList.left > geometry.card.left + 12 || geometry.songList.right < geometry.card.right - 12) {
+        throw new Error(`mobile video song list is not full width ${JSON.stringify(geometry)}`);
+      }
+      if (geometry.copy.width < 28 || geometry.copy.width > 30 || Math.abs(geometry.copy.width - geometry.copy.height) > 1) {
+        throw new Error(`mobile video copy button size invalid ${JSON.stringify(geometry)}`);
+      }
+    } else if (!geometry.gridColumns.includes(" ")) {
+      throw new Error(`desktop video grid did not keep multiple columns ${JSON.stringify(geometry)}`);
+    }
+
+    let expandedScreenshotPath = null;
+    const moreButton = page.locator(".video-card .video-more").first();
+    if ((await moreButton.count()) === 1) {
+      await moreButton.click();
+      await page.waitForFunction(() => document.querySelector(".video-card .video-more")?.getAttribute("aria-expanded") === "true", null, { timeout: 5000 });
+      if (viewport[0] === 390) {
+        expandedScreenshotPath = shotPath(`video-card-expanded-${viewport.join("x")}.png`);
+        await page.screenshot({ path: expandedScreenshotPath, fullPage: false });
+      }
+    }
+
+    let screenshotPath = null;
+    if (viewport[0] === 390 || viewport[0] === 1366) {
+      screenshotPath = shotPath(`video-card-${viewport.join("x")}.png`);
+      await page.screenshot({ path: screenshotPath, fullPage: false });
+    }
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    if (errors.length || unhandled) throw new Error(`video card geometry errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `video-card-geometry-${viewport.join("x")}`, requests: [...new Set(requests)], screenshotPath, expandedScreenshotPath });
   }
 }
 
@@ -1737,6 +1906,7 @@ function runtimePathPattern(range) {
     await mobileFilterSheetFlow(browser);
     await mobileRankVisualGeometry(browser);
     await mobileCopyAllLinksFlow(browser);
+    await mobileVideoCardGeometry(browser);
     await compactSourceDrawerFlow(browser);
     await monthlyFallbackScenarios(browser);
     await prefetchGuards(browser);

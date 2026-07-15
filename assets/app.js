@@ -248,6 +248,7 @@ const state = {
   rangeCache: new Map(),
   latestRangeLoadError: null,
   statusRefreshTimer: null,
+  statusSummary: null,
   songSearchIndexPromise: null,
   songSearchLookup: window.FrontendUtils.createSongSearchLookup(null),
   sourceFilterPromise: null,
@@ -758,7 +759,7 @@ function setDialogOpen(dialog, isOpen) {
 }
 
 function setPageInert(isInert) {
-  for (const element of [document.querySelector(".topbar"), document.querySelector(".layout"), els.mobileBottomNav, els.backToTop]) {
+  for (const element of [document.querySelector(".layout"), els.mobileBottomNav, els.backToTop]) {
     if (!element) continue;
     if ("inert" in element) element.inert = isInert;
     element.setAttribute("aria-hidden", isInert ? "true" : "false");
@@ -1829,21 +1830,15 @@ function updateVisibleTrendBadges() {
   const rows = els.content?.querySelectorAll(".rank-row[data-trend-mode][data-trend-key]") || [];
   for (const row of rows) {
     const trend = trendForKey(row.dataset.trendMode, row.dataset.trendKey);
-    const trendCell = row.querySelector(":scope > .rank-trend");
-    if (trendCell) {
-      const badge = renderTrendBadge(trend);
-      trendCell.replaceChildren();
-      if (badge) {
-        trendCell.append(badge);
-        trendCell.removeAttribute("aria-hidden");
-      } else {
-        trendCell.setAttribute("aria-hidden", "true");
-      }
-    }
-    const inlineTrend = row.querySelector(".rank-trend-inline");
-    if (inlineTrend) {
-      const replacement = renderInlineTrend(trend);
-      inlineTrend.replaceWith(replacement);
+    const trendSlot = row.querySelector(".rank-side-trend");
+    if (!trendSlot) continue;
+    const badge = renderTrendBadge(trend);
+    trendSlot.replaceChildren();
+    if (badge) {
+      trendSlot.append(badge);
+      trendSlot.removeAttribute("aria-hidden");
+    } else {
+      trendSlot.setAttribute("aria-hidden", "true");
     }
   }
 }
@@ -2029,20 +2024,22 @@ function renderStatus(status) {
   if (!isLatestSnapshot()) {
     const snapshotEntry = snapshotEntryForPath(state.currentSnapshotPath);
     const capturedAt = snapshotEntry?.capturedAt || snapshotEntry?.generatedAt || state.payload?.capturedAt || state.payload?.generatedAt || "";
-    renderStatusLabel({ status: "success" }, capturedAt);
-    els.status.title = [
-      `历史快照 · ${formatDate(capturedAt)}`,
-      `path=${state.currentSnapshotPath}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-    renderStatusAlerts([`历史快照 · ${formatDate(capturedAt)}`]);
+    setStatusSummary({
+      text: `历史 ${formatDate(capturedAt)}`,
+      kind: "snapshot",
+      dateTime: capturedAt,
+      title: [`历史快照 · ${formatDate(capturedAt)}`, `path=${state.currentSnapshotPath}`].filter(Boolean).join("\n"),
+    });
     renderDebugPanel();
     return;
   }
   const currentStatus = mergeRuntimeStatus(state.runtimeMeta?.status || null, status || state.status, state.runtimeMeta);
   if (!currentStatus) {
-    els.status.textContent = "状态不可用";
+    setStatusSummary({
+      text: "状态不可用",
+      kind: "unavailable",
+      title: "状态不可用",
+    });
     renderDebugPanel();
     return;
   }
@@ -2070,21 +2067,62 @@ function renderStatus(status) {
     parts.push("当前使用备用数据");
     alerts.push("精简数据读取失败，当前使用备用数据");
   }
-  renderStatusLabel(currentStatus, capturedAt, rebuiltDerivedAt || attemptedAt);
-  els.status.title = [
-    parts.filter(Boolean).join(" · "),
-    `status=${currentStatus.status || "unknown"}`,
-    `capturedAt=${capturedAt || ""}`,
-    `completedAt=${completedAt || ""}`,
-    `attemptedAt=${attemptedAt || ""}`,
-    `rebuiltDerivedAt=${rebuiltDerivedAt || ""}`,
-    `dataVersion=${state.runtimeMeta?.dataVersion || ""}`,
-    warning?.primaryError ? `warning=${warning.primaryError}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+  const displayAt = capturedAt || rebuiltDerivedAt || attemptedAt;
+  const statusText = currentStatus.status === "success" ? `更新 ${formatDate(displayAt)}` : capturedAt ? `上次成功 ${formatDate(capturedAt)}` : "状态异常";
+  setStatusSummary({
+    text: statusText,
+    kind: currentStatus.status === "success" ? "success" : "fallback",
+    dateTime: displayAt,
+    title: [
+      parts.filter(Boolean).join(" · "),
+      `status=${currentStatus.status || "unknown"}`,
+      `capturedAt=${capturedAt || ""}`,
+      `completedAt=${completedAt || ""}`,
+      `attemptedAt=${attemptedAt || ""}`,
+      `rebuiltDerivedAt=${rebuiltDerivedAt || ""}`,
+      `dataVersion=${state.runtimeMeta?.dataVersion || ""}`,
+      warning?.primaryError ? `warning=${warning.primaryError}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  });
   renderStatusAlerts(alerts);
   renderDebugPanel();
+}
+
+function setStatusSummary(model) {
+  state.statusSummary = model || null;
+  if (els.status) {
+    els.status.textContent = model?.text || "";
+    if (model?.title) {
+      els.status.title = model.title;
+    } else {
+      els.status.removeAttribute("title");
+    }
+  }
+  refreshSummaryStatusNode();
+}
+
+function refreshSummaryStatusNode() {
+  const oldNode = els.summary?.querySelector(".summary-status");
+  if (!oldNode) return;
+  const nextNode = renderSummaryStatusNode();
+  if (nextNode) {
+    oldNode.replaceWith(nextNode);
+  } else {
+    oldNode.remove();
+  }
+}
+
+function renderSummaryStatusNode() {
+  if (!state.statusSummary?.text) return null;
+  const node = document.createElement(state.statusSummary.dateTime ? "time" : "span");
+  node.className = `summary-status summary-status-${state.statusSummary.kind || "info"}`;
+  node.textContent = state.statusSummary.text;
+  node.dataset.statusKind = state.statusSummary.kind || "info";
+  if (state.statusSummary.dateTime) node.dateTime = state.statusSummary.dateTime;
+  if (state.statusSummary.title) node.title = state.statusSummary.title;
+  return node;
 }
 
 function renderStatusAlerts(messages) {
@@ -2098,43 +2136,9 @@ function renderStatusAlerts(messages) {
   }
 }
 
-function renderStatusLabel(status, capturedAt, fallbackAt = "") {
-  const displayAt = capturedAt || fallbackAt;
-  const exact = formatDate(displayAt);
-  const relative = relativeUpdateLabel(displayAt);
-  els.status.replaceChildren();
-  const time = document.createElement("time");
-  time.className = "status-exact";
-  if (displayAt) time.dateTime = displayAt;
-  const snapshotEntry = !isLatestSnapshot() ? snapshotEntryForPath(state.currentSnapshotPath) : null;
-  const snapshotExact = snapshotEntry ? formatDate(snapshotEntry.capturedAt || snapshotEntry.generatedAt || snapshotEntry.id) : formatDate(displayAt);
-  time.textContent = !isLatestSnapshot() ? `历史 · ${snapshotExact}` : status?.status === "success" ? exact : capturedAt ? `上次成功 ${exact}` : exact;
-  els.status.append(time);
-  if (!snapshotEntry && status?.status === "success" && relative && relative !== exact && relative !== "状态不可用") {
-    const separator = document.createElement("span");
-    separator.className = "status-separator";
-    separator.textContent = " · ";
-    const relativeNode = document.createElement("span");
-    relativeNode.className = "status-relative";
-    relativeNode.textContent = relative;
-    els.status.append(separator, relativeNode);
-  }
-}
-
 function staleThresholdLabel() {
   if (STATUS_STALE_MINUTES % 60 === 0) return `${STATUS_STALE_MINUTES / 60}小时`;
   return `${STATUS_STALE_MINUTES}分钟`;
-}
-
-function relativeUpdateLabel(value) {
-  const timestamp = Date.parse(value || "");
-  if (!Number.isFinite(timestamp)) return "状态不可用";
-  const minutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
-  if (minutes < 1) return "刚刚更新";
-  if (minutes < 60) return `${minutes}分钟前`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}小时前`;
-  return formatDate(value);
 }
 
 function mergeRuntimeStatus(metaStatus, statusFile, meta) {
@@ -2831,7 +2835,17 @@ function renderSummary(group, metrics, note = "") {
       item.textContent = part;
       metricNode.append(item);
     });
+    const statusNode = renderSummaryStatusNode();
+    if (statusNode) {
+      const separator = document.createElement("span");
+      separator.className = "summary-separator";
+      separator.textContent = " · ";
+      metricNode.append(separator, statusNode);
+    }
     main.append(metricNode);
+  } else {
+    const statusNode = renderSummaryStatusNode();
+    if (statusNode) main.append(statusNode);
   }
   els.summary.append(main);
 
@@ -3456,7 +3470,6 @@ function renderRankRecord({
       rankMetric: state.rankMetric,
     }),
   );
-  row.append(renderTrend(trend));
   row.append(
     renderRankSide({
       mode,
@@ -3470,6 +3483,7 @@ function renderRankRecord({
       countUnit,
       rankCount: count,
       rankMetric: state.rankMetric,
+      trend,
     }),
   );
   if (expandable) row.append(renderSourceDrawer({ mode, occurrences, songGroups, drawerId, isExpanded, getSongGroups }));
@@ -3527,9 +3541,9 @@ function renderRankHeader(mode = "song") {
   const header = document.createElement("div");
   header.className = "rank-header";
 
-  const contentLabel = mode === "artist" ? "歌手与曲目" : "歌曲与来源";
-  const countLabel = state.rankMetric === "videos" ? "视频" : "收录";
-  for (const label of ["排名", contentLabel, "趋势", countLabel]) {
+  const contentLabel = mode === "artist" ? "歌手与曲目" : "歌曲与歌手";
+  const countLabel = state.rankMetric === "videos" ? "视频与来源" : "次数与来源";
+  for (const label of ["排名", contentLabel, countLabel]) {
     const item = document.createElement("span");
     item.textContent = label;
     header.append(item);
@@ -3550,7 +3564,6 @@ function renderRecordContent(title, meta, options) {
     videoCount,
     rankCount = 0,
     rankMetric = state.rankMetric,
-    trend,
     headingLevel = 2,
   } = options;
   const content = document.createElement("div");
@@ -3571,17 +3584,13 @@ function renderRecordContent(title, meta, options) {
   subline.className = "rank-subline";
   const metaLine = document.createElement("div");
   metaLine.className = "rank-meta-line";
-  const actionsLine = document.createElement("div");
-  actionsLine.className = "rank-actions-line";
   if (mode === "artist") {
     appendArtistSubline(metaLine, { occurrences, songCount, songPreview, videoCount });
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(metaLine, `${videoCount} 个视频`, "subline-video-count");
   }
-  appendActionNode(actionsLine, renderInlineTrend(trend));
   if (metaLine.childNodes.length) subline.append(metaLine);
-  if (actionsLine.childNodes.length) subline.append(actionsLine);
   content.append(subline);
 
   return content;
@@ -3618,28 +3627,6 @@ function renderCount(count, unit = "次") {
   value.textContent = `${count}${unit}`;
   node.append(value);
   return node;
-}
-
-function renderTrend(trend) {
-  const node = document.createElement("div");
-  node.className = "rank-trend";
-  const badge = renderTrendBadge(trend);
-  if (badge) {
-    node.append(badge);
-  } else {
-    node.setAttribute("aria-hidden", "true");
-  }
-  return node;
-}
-
-function renderInlineTrend(trend) {
-  const badge = renderTrendBadge(trend, { compact: true }) || document.createElement("span");
-  badge.classList.add("rank-trend-inline");
-  if (!trend) {
-    badge.hidden = true;
-    badge.setAttribute("aria-hidden", "true");
-  }
-  return badge;
 }
 
 function renderSourceToggleButton({
@@ -3697,10 +3684,25 @@ function renderRankSide({
   countUnit = "次",
   rankCount = 0,
   rankMetric = "occurrences",
+  trend = null,
 }) {
   const side = document.createElement("div");
   side.className = "rank-side";
-  side.append(renderCount(count, countUnit));
+
+  const top = document.createElement("div");
+  top.className = "rank-side-top";
+  top.append(renderCount(count, countUnit));
+  const trendSlot = document.createElement("span");
+  trendSlot.className = "rank-side-trend";
+  const trendBadge = renderTrendBadge(trend);
+  if (trendBadge) {
+    trendSlot.append(trendBadge);
+  } else {
+    trendSlot.setAttribute("aria-hidden", "true");
+  }
+  top.append(trendSlot);
+  side.append(top);
+
   if (mode === "artist") {
     if (expandable) {
       side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount }));
@@ -3776,10 +3778,6 @@ function appendSublineNode(container, node) {
     container.append(separator);
   }
   container.append(node);
-}
-
-function appendActionNode(container, node) {
-  if (node) container.append(node);
 }
 
 function renderSourceDrawer({ mode, occurrences, songGroups = [], drawerId, isExpanded, getSongGroups = null }) {
@@ -4049,31 +4047,21 @@ function renderCopySetlistButton(item, label = "复制歌单", className = "copy
   button.type = "button";
   button.dataset.copySetlist = "true";
   button._videoItem = item || {};
-  button.textContent = label;
-  button.setAttribute("aria-label", `复制整场歌单：${item?.title || item?.videoId || "来源视频"}`);
+  button.title = label || "复制歌单";
+  button.setAttribute("aria-label", `复制该视频歌单：${item?.title || item?.videoId || "来源视频"}`);
+  button.append(renderMusicNoteIcon());
   return button;
 }
 
 function renderCopySetlistIconButton(item) {
-  const button = renderCopySetlistButton(item, "", "source-copy-icon source-copy ui-chip ui-chip-icon-label");
-  button.title = "复制歌单";
-  const label = document.createElement("span");
-  label.textContent = "复制歌单";
-  button.append(renderMusicListIcon(), label);
-  return button;
+  return renderCopySetlistButton(item, "复制歌单", "source-copy-icon source-copy ui-chip ui-chip-icon");
 }
 
-function renderMusicListIcon() {
+function renderMusicNoteIcon() {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 24 24");
   svg.setAttribute("aria-hidden", "true");
-  const paths = [
-    "M9 18V6l10-2v12",
-    "M9 10l10-2",
-    "M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z",
-    "M19 16a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z",
-    "M4 5h3M4 9h3M4 13h3",
-  ];
+  const paths = ["M9 18V5l10-2v13", "M9 9l10-2", "M9 18a3 3 0 1 1-3-3 3 3 0 0 1 3 3Zm10-2a3 3 0 1 1-3-3 3 3 0 0 1 3 3Z"];
   for (const d of paths) {
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("d", d);
@@ -4528,7 +4516,7 @@ function renderVideo(item) {
   count.textContent = matchCount && !item._videoSearchMatched ? `匹配 ${matchCount} 首` : `${item.songs?.length || 0} 首`;
   const headingActions = document.createElement("div");
   headingActions.className = "video-heading-actions";
-  headingActions.append(count, renderCopySetlistButton(item, "复制歌单", "video-copy-setlist ui-chip"));
+  headingActions.append(count, renderCopySetlistButton(item, "复制歌单", "video-copy-setlist ui-chip ui-chip-icon"));
   heading.append(headingActions);
   body.append(heading);
 
@@ -4756,48 +4744,15 @@ function trendForKey(mode, key) {
   return diff.get(key) || null;
 }
 
-function renderTrendBadge(trend, options = {}) {
-  if (!trend) return null;
-  const compact = Boolean(options.compact);
+function renderTrendBadge(trend) {
+  const model = window.FrontendUtils.trendDisplayModel(trend);
+  if (!model) return null;
   const badge = document.createElement("span");
-  badge.className = "trend-badge";
-  if (trend.isNew) {
-    badge.classList.add("trend-new");
-    badge.textContent = compact ? "新" : "新上榜";
-    badge.title = "本期新进入榜单";
-    badge.setAttribute("aria-label", "本期新进入榜单");
-    return badge;
-  }
-
-  const rankDelta = Number(trend.rankDelta) || 0;
-  const countDelta = Number(trend.countDelta) || 0;
-  if (rankDelta > 0) {
-    badge.classList.add("trend-up");
-    badge.textContent = compact ? `↑${rankDelta}` : `升 ${rankDelta}`;
-    badge.title = countDelta ? `排名上升 ${rankDelta}，收录 ${formatSignedDelta(countDelta)}` : `排名上升 ${rankDelta}`;
-  } else if (rankDelta < 0) {
-    badge.classList.add("trend-down");
-    badge.textContent = compact ? `↓${Math.abs(rankDelta)}` : `降 ${Math.abs(rankDelta)}`;
-    badge.title = countDelta ? `排名下降 ${Math.abs(rankDelta)}，收录 ${formatSignedDelta(countDelta)}` : `排名下降 ${Math.abs(rankDelta)}`;
-  } else if (countDelta) {
-    badge.classList.add(countDelta > 0 ? "trend-up" : "trend-down");
-    badge.textContent = compact ? formatCompactSignedDelta(countDelta) : `收录 ${formatSignedDelta(countDelta)}`;
-    badge.title = countDelta > 0 ? `收录增加 ${countDelta}` : `收录减少 ${Math.abs(countDelta)}`;
-  } else {
-    return null;
-  }
-  badge.setAttribute("aria-label", badge.title);
+  badge.className = `trend-badge trend-${model.kind}`;
+  badge.textContent = model.text;
+  badge.title = model.title;
+  badge.setAttribute("aria-label", model.ariaLabel);
   return badge;
-}
-
-function formatSignedDelta(value) {
-  const delta = Number(value) || 0;
-  return delta > 0 ? `+${delta}` : String(delta);
-}
-
-function formatCompactSignedDelta(value) {
-  const delta = Number(value) || 0;
-  return delta > 0 ? `+${delta}` : `−${Math.abs(delta)}`;
 }
 
 async function copyVideoSetlist(item) {

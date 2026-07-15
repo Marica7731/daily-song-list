@@ -16,7 +16,10 @@ test("mobile information architecture exposes one-row toolbar, bottom nav, searc
   assert.match(indexSource, /id="filterDialog"[\s\S]*role="dialog"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
   assert.match(indexSource, /class="filter-toggle-list"/u);
-  assert.match(indexSource, /class="topbar-inner"[\s\S]*class="controls-primary"[\s\S]*class="mobile-toolbar-actions"[\s\S]*class="controls-secondary"/u);
+  assert.match(indexSource, /<title>YouTube 歌枠歌曲排行<\/title>/u);
+  assert.match(indexSource, /id="status" hidden aria-hidden="true"/u);
+  assert.doesNotMatch(indexSource, /class="topbar"|class="topbar-inner"|<h1>Daily Song List<\/h1>|歌曲时间戳排行/u);
+  assert.match(indexSource, /class="controls-primary"[\s\S]*class="mobile-toolbar-actions"[\s\S]*class="controls-secondary"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 620px\)/u);
@@ -70,7 +73,7 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /复制全部链接/u);
   assert.match(appSource, /if \(nextExpanded && shouldKeepSingleDrawerOpen\(\)\) closeOtherMobileSourceDrawers\(row\)/u);
   assert.doesNotMatch(appSource, /data-toggle-artist-sources|ARTIST_SOURCE_INITIAL_LIMIT/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content count"[\s\S]*"drawer drawer drawer"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-row: 2;[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
   assert.doesNotMatch(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer/u);
@@ -81,36 +84,47 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /\.filter-count\[hidden\]\s*\{[\s\S]*display: none;/u);
 });
 
-test("third-round mobile component rules are encoded in css and browser checks", () => {
+test("high-density rank and source rules are encoded in css and browser checks", () => {
   assert.match(cssSource, /--radius-control:\s*8px/u);
   assert.match(cssSource, /--control-compact:\s*36px/u);
-  assert.match(cssSource, /--control-default:\s*44px/u);
-  assert.match(cssSource, /--control-large:\s*48px/u);
+  assert.match(cssSource, /--control-default:\s*38px/u);
+  assert.match(cssSource, /--control-large:\s*40px/u);
   assert.match(cssSource, /--rank-leading-width:\s*44px/u);
-  assert.match(cssSource, /--rank-columns:\s*48px minmax\(0, 1fr\) 88px 88px/u);
+  assert.match(cssSource, /--rank-columns:\s*48px minmax\(0, 1fr\) 104px/u);
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
   assert.match(cssSource, /\.sheet-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--filter-control-height\);[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.match(cssSource, /\.sheet-actions\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: 1fr 1fr/u);
-  assert.match(cssSource, /\.rank-actions-line\s*\{[\s\S]*gap: var\(--space-2\);/u);
-  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-subline\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;[\s\S]*white-space: nowrap;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-subline\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;[\s\S]*white-space: nowrap;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-actions-line\s*\{[\s\S]*min-height: 0;[\s\S]*flex-wrap: nowrap;/u);
+  assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. drawer drawer"/u);
+  assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
+  assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
+  assert.doesNotMatch(cssSource, /\.rank-actions-line|\.rank-trend-inline|\.rank-trend\s*\{/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-subline\s*\{[\s\S]*display: flex;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-subline\s*\{[\s\S]*display: flex;[\s\S]*white-space: nowrap;/u);
   assert.match(cssSource, /\.rank-expand::after\s*\{[\s\S]*border-right: 1\.5px solid currentcolor;[\s\S]*transform: translateY\(-1px\) rotate\(45deg\);/u);
   assert.match(cssSource, /\.rank-expand\[aria-expanded="true"\]::after\s*\{[\s\S]*rotate\(225deg\)/u);
-  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-copy-icon span\s*\{[\s\S]*display: none;/u);
-  assert.match(cssSource, /\.trend-badge\.rank-trend-inline\s*\{[\s\S]*display: none;[\s\S]*width: max-content;[\s\S]*max-width: 120px;/u);
+  assert.match(cssSource, /\.source-copy-icon\s*\{[\s\S]*width: var\(--chip-icon-size\);[\s\S]*padding: 0;/u);
+  assert.doesNotMatch(cssSource, /\.source-copy-icon span|ui-chip-icon-label/u);
+  assert.match(cssSource, /\.trend-badge\s*\{[\s\S]*min-height: 20px;[\s\S]*font-size: 10\.5px;[\s\S]*white-space: nowrap;/u);
+  assert.match(cssSource, /\.trend-up,[\s\S]*\.trend-increase,[\s\S]*\.trend-new/u);
+  assert.match(appSource, /FrontendUtils\.trendDisplayModel\(trend\)/u);
+  assert.doesNotMatch(appSource, /formatCompactSignedDelta|formatSignedDelta/u);
+  assert.doesNotMatch(functionBody("function renderCopySetlistButton"), /textContent = label/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*gap: 0;/u);
   assert.match(cssSource, /\.source-video-group\s*\{[\s\S]*grid-template-areas: "thumb main copy"/u);
   assert.match(cssSource, /\.source-video-thumb-link\s*\{[\s\S]*aspect-ratio: 16 \/ 9/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-video-group\s*\{[\s\S]*padding: var\(--space-2\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-video-group\s*\{[\s\S]*padding: 7px 0;/u);
   assert.match(cssSource, /\.source-video-channel\s*\{[\s\S]*font-size: 13px;[\s\S]*font-weight: 600;/u);
   assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*font-size: 12\.5px;[\s\S]*font-weight: 500;/u);
   assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*text-decoration: none;/u);
   assert.match(cssSource, /\.source-video-channel:hover,[\s\S]*\.source-video-title:hover\s*\{[\s\S]*text-decoration: underline;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-card,[\s\S]*\.video-compact \.video-card\s*\{[\s\S]*grid-template-columns: 108px minmax\(0, 1fr\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-body,[\s\S]*\.video-compact \.video-body\s*\{[\s\S]*display: contents;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.song-list,[\s\S]*\.video-compact \.song-list\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*--source-thumb-width: var\(--source-thumb-width-narrow\)/u);
   assert.match(verifySource, /async function mobileFilterSheetFlow/u);
   assert.match(verifySource, /async function mobileRankVisualGeometry/u);
   assert.match(verifySource, /async function mobileCopyAllLinksFlow/u);
+  assert.match(verifySource, /async function mobileVideoCardGeometry/u);
   assert.match(verifySource, /async function desktopRankVisualGeometry/u);
   assert.match(verifySource, /async function compactSourceDrawerFlow/u);
   assert.match(verifySource, /sourceCountFromText/u);
@@ -125,7 +139,7 @@ test("desktop and tablet contracts use explicit responsive layout", () => {
   assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls\s*\{[\s\S]*grid-template-columns: auto minmax\(320px, 680px\);/u);
   assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: auto auto auto;/u);
   assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-secondary\s*\{[\s\S]*grid-template-columns: minmax\(320px, 680px\) minmax\(112px, 150px\) minmax\(170px, 230px\);/u);
-  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 84px/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 100px/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.pagination-top \.page-select,[\s\S]*\.pagination-top \.page-size-control\s*\{[\s\S]*display: none;/u);
 });
 

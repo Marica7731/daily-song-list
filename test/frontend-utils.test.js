@@ -32,6 +32,7 @@ const {
   serializeUrlState,
   shouldPrefetchRuntimeRange,
   shouldSkipSourceFilter,
+  trendDisplayModel,
   validateRuntimeRangePayload,
   visiblePageTokens,
   youtubeChannelLink,
@@ -236,6 +237,41 @@ test("compact source toggle model removes repeated rank counts", () => {
     { text: "3个时间点", kind: "time" },
   );
   assert.deepEqual(compactSourceToggleModel({ isExpanded: true, videoCount: 25, occurrenceCount: 27 }), { text: "收起", kind: "expanded" });
+});
+
+test("trend display model uses compact semantic Chinese labels", () => {
+  assert.equal(trendDisplayModel(null), null);
+  assert.deepEqual(trendDisplayModel({ isNew: true, rankDelta: 12, countDelta: 3 }), {
+    text: "新",
+    kind: "new",
+    title: "本期新进入榜单",
+    ariaLabel: "本期新进入榜单",
+  });
+  assert.deepEqual(trendDisplayModel({ rankDelta: 3, countDelta: 2 }), {
+    text: "升3",
+    kind: "up",
+    title: "排名上升 3 名，收录增加 2 次",
+    ariaLabel: "排名上升 3 名，收录增加 2 次",
+  });
+  assert.deepEqual(trendDisplayModel({ rankDelta: -4, countDelta: -1 }), {
+    text: "降4",
+    kind: "down",
+    title: "排名下降 4 名，收录减少 1 次",
+    ariaLabel: "排名下降 4 名，收录减少 1 次",
+  });
+  assert.deepEqual(trendDisplayModel({ rankDelta: 0, countDelta: 5 }), {
+    text: "增5",
+    kind: "increase",
+    title: "收录增加 5 次",
+    ariaLabel: "收录增加 5 次",
+  });
+  assert.deepEqual(trendDisplayModel({ rankDelta: 0, countDelta: -2 }), {
+    text: "减2",
+    kind: "decrease",
+    title: "收录减少 2 次",
+    ariaLabel: "收录减少 2 次",
+  });
+  assert.equal(trendDisplayModel({ rankDelta: 0, countDelta: 0 }), null);
 });
 
 test("groups source occurrences by video with sorted timestamps", () => {

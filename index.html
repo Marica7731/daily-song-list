@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>YouTube 歌枠歌曲排行 | Daily Song List</title>
+    <title>YouTube 歌枠歌曲排行</title>
     <meta
       name="description"
       content="YouTube 最近72小时和最近35天累计时间戳歌单快照，支持直接跳转到歌曲时间点。"
@@ -11,7 +11,7 @@
     <link rel="canonical" href="https://ytb-song-rank.culua.com/" />
     <meta name="theme-color" content="#0f766e" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="YouTube 歌枠歌曲排行 | Daily Song List" />
+    <meta property="og:title" content="YouTube 歌枠歌曲排行" />
     <meta
       property="og:description"
       content="YouTube 最近72小时和最近35天累计时间戳歌单快照，支持直接跳转到歌曲时间点。"
@@ -20,19 +20,9 @@
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles.css?v=hac7e7f791f11" />
+    <link rel="stylesheet" href="assets/styles.css?v=ha7d231214858" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="brand">
-          <h1>Daily Song List</h1>
-          <p>歌曲时间戳排行</p>
-        </div>
-        <div class="status" id="status">载入中</div>
-      </div>
-    </header>
-
     <main class="layout">
       <section class="controls" id="controls" aria-label="榜单筛选">
         <div class="controls-primary">
@@ -99,6 +89,7 @@
         </div>
       </section>
 
+      <div class="status" id="status" hidden aria-hidden="true">载入中</div>
       <section class="status-alerts" id="statusAlerts" aria-live="polite"></section>
       <section class="summary" id="summary" aria-live="polite"></section>
       <section class="content-shell rank-panel skeleton-panel" id="videoList" aria-busy="true">
@@ -277,9 +268,9 @@
     </button>
     <div class="toast" id="toast" aria-live="polite" hidden></div>
 
-    <script src="assets/blocked-vtuber-meta.js?v=hac7e7f791f11" defer></script>
-    <script src="assets/frontend-utils.js?v=hac7e7f791f11" defer></script>
-    <script src="assets/ranking-utils.js?v=hac7e7f791f11" defer></script>
-    <script src="assets/app.js?v=hac7e7f791f11" defer></script>
+    <script src="assets/blocked-vtuber-meta.js?v=ha7d231214858" defer></script>
+    <script src="assets/frontend-utils.js?v=ha7d231214858" defer></script>
+    <script src="assets/ranking-utils.js?v=ha7d231214858" defer></script>
+    <script src="assets/app.js?v=ha7d231214858" defer></script>
   </body>
 </html>

@@ -711,6 +711,57 @@
     return { text: "来源", kind: "source" };
   }
 
+  function trendDisplayModel(trend) {
+    if (!trend) return null;
+    const rankDelta = Number(trend.rankDelta) || 0;
+    const countDelta = Number(trend.countDelta) || 0;
+    if (trend.isNew) {
+      return {
+        text: "新",
+        kind: "new",
+        title: "本期新进入榜单",
+        ariaLabel: "本期新进入榜单",
+      };
+    }
+    if (rankDelta > 0) {
+      const countText = countDelta > 0 ? `，收录增加 ${countDelta} 次` : countDelta < 0 ? `，收录减少 ${Math.abs(countDelta)} 次` : "";
+      return {
+        text: `升${rankDelta}`,
+        kind: "up",
+        title: `排名上升 ${rankDelta} 名${countText}`,
+        ariaLabel: `排名上升 ${rankDelta} 名${countText}`,
+      };
+    }
+    if (rankDelta < 0) {
+      const value = Math.abs(rankDelta);
+      const countText = countDelta > 0 ? `，收录增加 ${countDelta} 次` : countDelta < 0 ? `，收录减少 ${Math.abs(countDelta)} 次` : "";
+      return {
+        text: `降${value}`,
+        kind: "down",
+        title: `排名下降 ${value} 名${countText}`,
+        ariaLabel: `排名下降 ${value} 名${countText}`,
+      };
+    }
+    if (countDelta > 0) {
+      return {
+        text: `增${countDelta}`,
+        kind: "increase",
+        title: `收录增加 ${countDelta} 次`,
+        ariaLabel: `收录增加 ${countDelta} 次`,
+      };
+    }
+    if (countDelta < 0) {
+      const value = Math.abs(countDelta);
+      return {
+        text: `减${value}`,
+        kind: "decrease",
+        title: `收录减少 ${value} 次`,
+        ariaLabel: `收录减少 ${value} 次`,
+      };
+    }
+    return null;
+  }
+
   function indexBucketButtonModel(label, bucket, isCurrent) {
     const current = Boolean(isCurrent);
     return {
@@ -946,6 +997,7 @@
     shouldPrefetchRuntimeRange,
     shouldSkipSourceFilter,
     validateRuntimeRangePayload,
+    trendDisplayModel,
     visiblePageTokens,
     youtubeChannelLink,
     youtubeTimeUrl,

@@ -1,5 +1,7 @@
 # Daily Song List
 
+![Daily Song List high-density mobile UI](docs/assets/daily-song-list-ultimate-density.png)
+
 Small GitHub Pages site that collects YouTube videos with usable timestamp song lists, then exposes jump links for two ranges:
 
 - `72h`: videos published within the last 72 hours.

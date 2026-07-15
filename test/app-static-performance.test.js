@@ -141,7 +141,8 @@ test("delayed trend diffs update visible badges without rerendering the list for
 
   const updateBody = functionBody("function updateVisibleTrendBadges");
   assert.match(updateBody, /querySelectorAll\("\.rank-row\[data-trend-mode\]\[data-trend-key\]"\)/u);
-  assert.match(updateBody, /trendCell\.replaceChildren\(\)/u);
+  assert.match(updateBody, /querySelector\("\.rank-side-trend"\)/u);
+  assert.match(updateBody, /trendSlot\.replaceChildren\(\)/u);
   assert.doesNotMatch(updateBody, /els\.content\.replaceChildren|render\(/u);
 });
 
