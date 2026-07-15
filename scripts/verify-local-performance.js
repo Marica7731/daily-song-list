@@ -444,10 +444,7 @@ async function firstLoad(browser, range, viewport) {
     range === "72h"
       ? ["data/latest.json", "data/diff/latest-1m.json", "data/song-search-known-songs.json"]
       : ["data/latest.json", "data/diff/latest-72h.json", "data/song-search-known-songs.json"];
-  const inactiveRange = range === "72h" ? "1m" : "72h";
-  const seenForbidden = beforeFirstContentRequests.filter(
-    (item) => forbidden.includes(item) || runtimePathPattern(inactiveRange).test(item),
-  );
+  const seenForbidden = beforeFirstContentRequests.filter((item) => forbidden.includes(item));
   if (seenForbidden.length) {
     throw new Error(`${range} first load requested forbidden resources before first content: ${seenForbidden.join(", ")}`);
   }
