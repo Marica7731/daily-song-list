@@ -8,33 +8,38 @@ const cssSource = fs.readFileSync(path.join(__dirname, "..", "assets", "styles.c
 const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-local-performance.js"), "utf8");
 
-test("mobile information architecture exposes one-row toolbar, bottom nav, search, and filter dialogs", () => {
-  assert.match(indexSource, /id="openSearchButton"/u);
-  assert.match(indexSource, /id="openFilterButton"/u);
+test("mobile information architecture exposes one query center and a one-row toolbar", () => {
+  assert.match(indexSource, /id="queryTrigger"[\s\S]*aria-controls="queryDialog"/u);
+  assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
   assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
-  assert.match(indexSource, /id="searchDialog"[\s\S]*role="dialog"[\s\S]*id="searchSuggestions"/u);
-  assert.match(indexSource, /id="filterDialog"[\s\S]*role="dialog"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
+  assert.match(indexSource, /id="queryDialog"[\s\S]*role="dialog"[\s\S]*aria-labelledby="queryDialogTitle"[\s\S]*搜索与筛选/u);
+  assert.match(indexSource, /id="queryInput"[\s\S]*id="searchSuggestions"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
+  assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
-  assert.match(indexSource, /class="filter-toggle-list"/u);
+  assert.match(indexSource, /id="activeQueryStrip"/u);
   assert.match(indexSource, /<title>YouTube 歌枠歌曲排行<\/title>/u);
   assert.match(indexSource, /id="status" hidden aria-hidden="true"/u);
   assert.doesNotMatch(indexSource, /class="topbar"|class="topbar-inner"|<h1>Daily Song List<\/h1>|歌曲时间戳排行/u);
-  assert.match(indexSource, /class="controls-primary"[\s\S]*class="mobile-toolbar-actions"[\s\S]*class="controls-secondary"/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
+  assert.doesNotMatch(indexSource, /class="controls-primary"|class="mobile-toolbar-actions"|class="controls-secondary"/u);
+  assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*class="query-trigger"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 620px\)/u);
 });
 
-test("URL state and filter draft are wired while visible share actions are removed", () => {
+test("URL state and query draft are wired while visible share actions are removed", () => {
   assert.match(appSource, /trend:\s*"all"/u);
   assert.match(appSource, /minCount:\s*1/u);
   assert.match(appSource, /sharedUrlApplied:\s*false/u);
   assert.match(appSource, /validTrendFilters: Object\.keys\(TREND_FILTERS\)/u);
   assert.match(appSource, /validMinCounts: MIN_COUNT_OPTIONS/u);
-  assert.match(appSource, /function makeFilterDraftFromState/u);
-  assert.match(appSource, /function applyFilterDraft/u);
+  assert.match(appSource, /function makeQueryDraftFromState/u);
+  assert.match(appSource, /function applyQueryDraft/u);
+  assert.match(appSource, /function readQueryDraftFromControls[\s\S]*q: els\.queryInput\?\.value/u);
+  assert.match(appSource, /FrontendUtils\.activeQueryConditionCount/u);
   assert.match(appSource, /urlParams\.get\("shared"\) === "1"/u);
-  assert.match(appSource, /URL state is intentionally read-only/u);
+  assert.doesNotMatch(appSource, /URL state is intentionally read-only/u);
+  assert.match(appSource, /FrontendUtils\.serializeUrlState/u);
   assert.doesNotMatch(indexSource, /id="shareButton"|data-copy-link/u);
   assert.doesNotMatch(appSource, /function buildShareUrl|function shareCurrentLink|function copyCurrentLink|navigator\.share|dataset\.copyLink/u);
   assert.doesNotMatch(cssSource, /share-button/u);
@@ -81,7 +86,7 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-count\.is-strong\s*\{[\s\S]*background: transparent;[\s\S]*color: var\(--muted\);/u);
   assert.match(cssSource, /\.rank-row::before\s*\{[\s\S]*grid-area: rank;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row::before\s*\{[\s\S]*display: none;/u);
-  assert.match(cssSource, /\.filter-count\[hidden\]\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /\.query-count\[hidden\]\s*\{[\s\S]*display: none;/u);
 });
 
 test("high-density rank and source rules are encoded in css and browser checks", () => {
@@ -92,8 +97,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /--rank-leading-width:\s*44px/u);
   assert.match(cssSource, /--rank-columns:\s*48px minmax\(0, 1fr\) 104px/u);
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
-  assert.match(cssSource, /\.sheet-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--filter-control-height\);[\s\S]*border-radius: var\(--radius-control\);/u);
-  assert.match(cssSource, /\.sheet-actions\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: 1fr 1fr/u);
+  assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--filter-control-height\);[\s\S]*border-radius: var\(--radius-control\);/u);
+  assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) auto;/u);
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. drawer drawer"/u);
   assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
   assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
@@ -128,18 +133,16 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(verifySource, /async function desktopRankVisualGeometry/u);
   assert.match(verifySource, /async function compactSourceDrawerFlow/u);
   assert.match(verifySource, /sourceCountFromText/u);
-  assert.match(verifySource, /filter-sheet-bottom-\$\{viewport\.join\("x"\)\}\.png/u);
+  assert.match(verifySource, /query-panel-bottom-\$\{viewport\.join\("x"\)\}\.png/u);
   assert.match(verifySource, /rank-expanded-trend-\$\{viewport\.join\("x"\)\}\.png/u);
 });
 
 test("desktop and tablet contracts use explicit responsive layout", () => {
-  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: auto minmax\(max-content, 1fr\) auto;/u);
-  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-secondary\s*\{[\s\S]*grid-template-columns: minmax\(320px, 1fr\) minmax\(120px, 150px\) minmax\(168px, 220px\);/u);
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(280px, 1fr\) minmax\(260px, 380px\);/u);
   assert.doesNotMatch(cssSource, /grid-template-columns: auto minmax\(0, 1fr\) auto auto minmax\(220px, 1\.1fr\) minmax\(108px, 140px\) minmax\(160px, 220px\)/u);
-  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls\s*\{[\s\S]*grid-template-columns: auto minmax\(320px, 680px\);/u);
-  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-primary\s*\{[\s\S]*grid-template-columns: auto auto auto;/u);
-  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-secondary\s*\{[\s\S]*grid-template-columns: minmax\(320px, 680px\) minmax\(112px, 150px\) minmax\(170px, 230px\);/u);
+  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto auto minmax\(340px, 480px\);/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 100px/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) minmax\(220px, 320px\);/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.pagination-top \.page-select,[\s\S]*\.pagination-top \.page-size-control\s*\{[\s\S]*display: none;/u);
 });
 

@@ -3,6 +3,7 @@ const test = require("node:test");
 
 const {
   annotatePayloadWithNiche,
+  activeQueryConditionCount,
   buildSetlistText,
   buildSongSourceLinksText,
   buildIndexBucketModel,
@@ -12,6 +13,7 @@ const {
   createSnapshotLoader,
   createSongSearchLookup,
   createTrendLookup,
+  defaultQueryDraft,
   filterItemsBySearch,
   filterItemsByNiche,
   filterOccurrencesBySearch,
@@ -21,6 +23,7 @@ const {
   groupOccurrencesByVideo,
   isSongSearchKnown,
   indexBucketButtonModel,
+  makeQueryDraftFromState,
   normalizeSearch,
   normalizeSetlistSongs,
   normalizeSongSearchText,
@@ -30,6 +33,7 @@ const {
   runtimeRangePayloadFromGroup,
   runtimeRangePath,
   serializeUrlState,
+  sanitizeQueryDraft,
   shouldPrefetchRuntimeRange,
   shouldSkipSourceFilter,
   trendDisplayModel,
@@ -579,6 +583,66 @@ test("url state uses showUnknown=1 only when unknown artists are visible", () =>
   assert.equal(new URLSearchParams(serializeUrlState(defaults, options)).has("showUnknown"), false);
 });
 
+test("query draft derives search and every filter field from applied state", () => {
+  const draft = makeQueryDraftFromState(
+    {
+      filter: "少女レイ",
+      nicheOnly: true,
+      hideUnknownArtist: false,
+      rankMetric: "videos",
+      trend: "up",
+      minCount: 5,
+      pageSize: 100,
+      currentSnapshotPath: "data/latest.json",
+    },
+    queryDraftOptions(),
+  );
+
+  assert.deepEqual(draft, {
+    q: "少女レイ",
+    nicheOnly: true,
+    hideUnknownArtist: false,
+    rankMetric: "videos",
+    trend: "up",
+    minCount: 5,
+    pageSize: 100,
+    snapshotPath: "data/latest.json",
+  });
+  assert.deepEqual(defaultQueryDraft({ pageSize: 100, snapshotPath: "data/snapshots/2026-07-10.json" }), {
+    q: "",
+    nicheOnly: false,
+    hideUnknownArtist: true,
+    rankMetric: "occurrences",
+    trend: "all",
+    minCount: 1,
+    pageSize: 100,
+    snapshotPath: "data/snapshots/2026-07-10.json",
+  });
+});
+
+test("query draft sanitizes snapshot trend and counts only active conditions", () => {
+  const options = queryDraftOptions();
+  const snapshotDraft = sanitizeQueryDraft(
+    {
+      q: "少女レイ",
+      nicheOnly: true,
+      hideUnknownArtist: false,
+      rankMetric: "videos",
+      trend: "up",
+      minCount: 5,
+      pageSize: 100,
+      snapshotPath: "data/snapshots/2026-07-10.json",
+    },
+    options,
+  );
+
+  assert.equal(snapshotDraft.trend, "all");
+  assert.equal(activeQueryConditionCount(snapshotDraft, { ...options, view: "songRank" }), 6);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 6);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, rankMetric: "videos", minCount: 10 }, { ...options, view: "videos" }), 4);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 5);
+});
+
 test("runtime range path follows URL range and meta paths", () => {
   const parsed = parseUrlState("?range=1m", urlStateOptions());
   assert.equal(parsed.range, "1m");
@@ -931,6 +995,28 @@ function urlStateOptions() {
       outside: false,
       showUnknown: false,
       q: "",
+    },
+  };
+}
+
+function queryDraftOptions() {
+  return {
+    validRankMetrics: ["occurrences", "videos"],
+    validTrendFilters: ["all", "new", "up", "down"],
+    validMinCounts: [1, 2, 5, 10],
+    validPageSizes: [50, 100],
+    latestSnapshotPath: "data/latest.json",
+    snapshots: [
+      { id: "archive-20260710", path: "data/snapshots/2026-07-10.json" },
+      { id: "archive-20260711", path: "data/snapshots/2026-07-11.json" },
+    ],
+    defaults: {
+      pageSize: 50,
+      snapshotPath: "data/latest.json",
+      hideUnknownArtist: true,
+      rankMetric: "occurrences",
+      trend: "all",
+      minCount: 1,
     },
   };
 }

@@ -260,7 +260,8 @@ const state = {
   eventsBound: false,
   activeOverlay: "",
   overlayTrigger: null,
-  filterDraft: null,
+  queryDraft: null,
+  queryPreviewTimer: 0,
   sharedUrlApplied: false,
   responsiveMode: "",
   resizeRenderFrame: 0,
@@ -270,40 +271,35 @@ const els = {
   controls: document.querySelector("#controls"),
   status: document.querySelector("#status"),
   statusAlerts: document.querySelector("#statusAlerts"),
+  activeQueryStrip: document.querySelector("#activeQueryStrip"),
   summary: document.querySelector("#summary"),
   content: document.querySelector("#videoList"),
-  snapshotSelect: document.querySelector("#snapshotSelect"),
-  snapshotDateSelect: document.querySelector("#snapshotDateSelect"),
-  filterInput: document.querySelector("#filterInput"),
+  queryTrigger: document.querySelector("#queryTrigger"),
+  queryTriggerText: document.querySelector("#queryTriggerText"),
+  queryCountBadge: document.querySelector("#queryCountBadge"),
+  queryDialog: document.querySelector("#queryDialog"),
+  queryPanel: document.querySelector("#queryDialog .query-panel"),
+  queryInput: document.querySelector("#queryInput"),
   nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
   hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
-  openSearchButton: document.querySelector("#openSearchButton"),
-  searchDialog: document.querySelector("#searchDialog"),
-  searchPanel: document.querySelector("#searchDialog .search-panel"),
-  searchPanelInput: document.querySelector("#searchPanelInput"),
-  cancelSearchButton: document.querySelector("#cancelSearchButton"),
-  clearSearchButton: document.querySelector("#clearSearchButton"),
+  cancelQueryButton: document.querySelector("#cancelQueryButton"),
+  clearQueryButton: document.querySelector("#clearQueryButton"),
   clearRecentSearchesButton: document.querySelector("#clearRecentSearchesButton"),
   recentSearches: document.querySelector("#recentSearches"),
   recentSearchSection: document.querySelector("#recentSearchSection"),
   searchSuggestions: document.querySelector("#searchSuggestions"),
-  openFilterButton: document.querySelector("#openFilterButton"),
-  desktopFilterButton: document.querySelector("#desktopFilterButton"),
-  filterDialog: document.querySelector("#filterDialog"),
-  filterSheet: document.querySelector("#filterDialog .filter-sheet"),
-  filterCountBadge: document.querySelector("#filterCountBadge"),
-  mobileFilterCountBadge: document.querySelector("#mobileFilterCountBadge"),
-  cancelFilterButton: document.querySelector("#cancelFilterButton"),
-  applyFiltersButton: document.querySelector("#applyFiltersButton"),
-  resetFiltersButton: document.querySelector("#resetFiltersButton"),
+  applyQueryButton: document.querySelector("#applyQueryButton"),
+  resetQueryButton: document.querySelector("#resetQueryButton"),
+  queryResultPreview: document.querySelector("#queryResultPreview"),
   metricFilterGroup: document.querySelector("#metricFilterGroup"),
+  displayFilterGroup: document.querySelector("#displayFilterGroup"),
   trendFilterGroup: document.querySelector("#trendFilterGroup"),
   trendFilterSelect: document.querySelector("#trendFilterSelect"),
   trendFilterHint: document.querySelector("#trendFilterHint"),
   minCountSelect: document.querySelector("#minCountSelect"),
-  filterPageSizeSelect: document.querySelector("#filterPageSizeSelect"),
-  filterSnapshotDateSelect: document.querySelector("#filterSnapshotDateSelect"),
-  filterSnapshotSelect: document.querySelector("#filterSnapshotSelect"),
+  queryPageSizeSelect: document.querySelector("#queryPageSizeSelect"),
+  querySnapshotDateSelect: document.querySelector("#querySnapshotDateSelect"),
+  querySnapshotSelect: document.querySelector("#querySnapshotSelect"),
   mobileBottomNav: document.querySelector("#mobileBottomNav"),
   backToTop: document.querySelector("#backToTop"),
   toast: document.querySelector("#toast"),
@@ -449,36 +445,7 @@ function bindEvents() {
     });
   }
 
-  els.filterInput.addEventListener("input", () => {
-    const rawValue = els.filterInput.value;
-    state.filter = rawValue.trim();
-    state.expandedRows.clear();
-    resetPagination();
-    const renderRevision = advanceRenderRevision();
-    window.clearTimeout(state.filterTimer);
-    if (!state.filter) {
-      renderOrSyncUrl({ urlMode: "replace" });
-      return;
-    }
-    state.filterTimer = window.setTimeout(() => {
-      if (renderRevision === state.renderRevision) renderOrSyncUrl({ urlMode: "replace" });
-    }, SEARCH_DEBOUNCE_MS);
-  });
-
-  els.snapshotDateSelect?.addEventListener("change", async () => {
-    const path = firstSnapshotPathForDate(els.snapshotDateSelect.value);
-    resetPagination();
-    await loadSnapshotPath(path, state.currentSnapshotPath, { urlMode: "push" });
-  });
-
-  els.snapshotSelect.addEventListener("change", async () => {
-    const path = els.snapshotSelect.value;
-    resetPagination();
-    await loadSnapshotPath(path, state.currentSnapshotPath, { urlMode: "push" });
-  });
-
-  bindSearchOverlayEvents();
-  bindFilterOverlayEvents();
+  bindQueryOverlayEvents();
 
   els.summary?.addEventListener("click", async (event) => {
     const rankMetric = event.target.closest("[data-rank-metric]");
@@ -496,6 +463,12 @@ function bindEvents() {
       state.expandedRows.clear();
       render({ urlMode: "push" });
     }
+  });
+
+  els.activeQueryStrip?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-query-clear]");
+    if (!button) return;
+    clearQueryCondition(button.dataset.queryClear || "");
   });
 
   els.content.addEventListener("click", (event) => {
@@ -517,13 +490,7 @@ function bindEvents() {
 
     const clear = event.target.closest("[data-clear-search]");
     if (clear) {
-      els.filterInput.value = "";
-      state.filter = "";
-      state.expandedRows.clear();
-      resetPagination();
-      advanceRenderRevision();
-      render({ urlMode: "push" });
-      els.filterInput.focus();
+      applyQueryPatch({ q: "" }, { focusTrigger: true });
       return;
     }
 
@@ -619,11 +586,11 @@ function bindEvents() {
   });
 
   window.addEventListener("resize", handleResponsiveResize, { passive: true });
-  window.addEventListener("scroll", updateFilterAnchorPosition, { passive: true });
+  window.addEventListener("scroll", updateQueryAnchorPosition, { passive: true });
   window.visualViewport?.addEventListener("resize", handleResponsiveResize, { passive: true });
   window.visualViewport?.addEventListener("scroll", () => {
     updateViewportVars();
-    updateFilterAnchorPosition();
+    updateQueryAnchorPosition();
   }, { passive: true });
   updateViewportVars();
   state.responsiveMode = getResponsiveMode();
@@ -647,56 +614,75 @@ function switchView(nextView, options = {}) {
   restoreViewPosition();
 }
 
-function bindSearchOverlayEvents() {
-  els.openSearchButton?.addEventListener("click", () => openSearchOverlay(els.openSearchButton));
-  els.cancelSearchButton?.addEventListener("click", () => closeOverlay("search"));
-  els.clearSearchButton?.addEventListener("click", () => {
-    if (!els.searchPanelInput) return;
-    els.searchPanelInput.value = "";
-    renderSearchSuggestions("");
-    els.searchPanelInput.focus();
+function bindQueryOverlayEvents() {
+  els.queryTrigger?.addEventListener("click", () => openQueryOverlay(els.queryTrigger));
+  els.cancelQueryButton?.addEventListener("click", () => closeOverlay("query"));
+  els.queryDialog?.querySelector("[data-close-overlay='query']")?.addEventListener("click", () => closeOverlay("query"));
+  els.clearQueryButton?.addEventListener("click", () => {
+    updateQueryDraft({ q: "" });
+    if (els.queryInput) els.queryInput.focus();
   });
   els.clearRecentSearchesButton?.addEventListener("click", () => {
     writeRecentSearches([]);
     renderRecentSearches();
   });
-  els.searchDialog?.querySelector("[data-close-overlay='search']")?.addEventListener("click", () => closeOverlay("search"));
-  els.searchPanelInput?.addEventListener("input", () => renderSearchSuggestions(els.searchPanelInput.value));
-  els.searchPanelInput?.addEventListener("keydown", (event) => {
+  els.queryInput?.addEventListener("input", () => {
+    updateQueryDraft({ q: els.queryInput.value });
+  });
+  els.queryInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      applySearchFromOverlay(els.searchPanelInput.value);
+      applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
     } else if (event.key === "Escape") {
       event.preventDefault();
-      closeOverlay("search");
+      closeOverlay("query");
     }
   });
   els.searchSuggestions?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-search-value]");
     if (!button) return;
-    applySearchFromOverlay(button.dataset.searchValue || button.textContent || "");
+    updateQueryDraft({ q: button.dataset.searchValue || button.textContent || "" });
+    els.queryInput?.focus();
   });
   els.recentSearches?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-search-value]");
     if (!button) return;
-    applySearchFromOverlay(button.dataset.searchValue || button.textContent || "");
+    updateQueryDraft({ q: button.dataset.searchValue || button.textContent || "" });
+    els.queryInput?.focus();
   });
-}
-
-function bindFilterOverlayEvents() {
-  els.openFilterButton?.addEventListener("click", () => openFilterOverlay(els.openFilterButton));
-  els.desktopFilterButton?.addEventListener("click", () => openFilterOverlay(els.desktopFilterButton));
-  els.cancelFilterButton?.addEventListener("click", () => closeOverlay("filter"));
-  els.filterDialog?.querySelector("[data-close-overlay='filter']")?.addEventListener("click", () => closeOverlay("filter"));
-  els.applyFiltersButton?.addEventListener("click", () => {
-    applyFilterDraft().catch((error) => showToast(`筛选应用失败：${error.message}`));
+  for (const element of [
+    els.nicheOnlyToggle,
+    els.hideUnknownToggle,
+    els.trendFilterSelect,
+    els.minCountSelect,
+    els.queryPageSizeSelect,
+    els.querySnapshotSelect,
+  ]) {
+    element?.addEventListener("change", () => {
+      state.queryDraft = readQueryDraftFromControls();
+      syncQueryControlsFromDraft(state.queryDraft);
+      scheduleQueryDraftPreview();
+    });
+  }
+  document.querySelectorAll("input[name='queryMetric']").forEach((input) => {
+    input.addEventListener("change", () => {
+      state.queryDraft = readQueryDraftFromControls();
+      syncQueryControlsFromDraft(state.queryDraft);
+      scheduleQueryDraftPreview();
+    });
   });
-  els.resetFiltersButton?.addEventListener("click", () => {
-    state.filterDraft = defaultFilterDraft();
-    syncFilterControlsFromDraft(state.filterDraft);
+  els.querySnapshotDateSelect?.addEventListener("change", () => {
+    const path = firstSnapshotPathForDate(els.querySnapshotDateSelect.value);
+    updateQueryDraft({ snapshotPath: path });
   });
-  els.filterSnapshotDateSelect?.addEventListener("change", () => {
-    syncDraftSnapshotTimes(els.filterSnapshotDateSelect.value);
+  els.resetQueryButton?.addEventListener("click", () => {
+    state.queryDraft = defaultQueryDraft();
+    syncQueryControlsFromDraft(state.queryDraft);
+    renderSearchSuggestions(state.queryDraft.q, state.queryDraft);
+    scheduleQueryDraftPreview();
+  });
+  els.applyQueryButton?.addEventListener("click", () => {
+    applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
   });
 }
 
@@ -709,33 +695,22 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Tab") trapModalFocus(event);
 });
 
-function openSearchOverlay(trigger) {
+function openQueryOverlay(trigger) {
   state.overlayTrigger = trigger || document.activeElement;
-  state.activeOverlay = "search";
-  if (els.searchPanelInput) els.searchPanelInput.value = state.filter;
+  state.activeOverlay = "query";
+  state.queryDraft = makeQueryDraftFromState();
+  syncQueryControlsFromDraft(state.queryDraft);
   renderRecentSearches();
-  renderSearchSuggestions(state.filter);
-  setDialogOpen(els.searchDialog, true);
+  renderSearchSuggestions(state.queryDraft.q, state.queryDraft);
+  scheduleQueryDraftPreview({ immediate: true });
+  updateQueryAnchorPosition();
+  setDialogOpen(els.queryDialog, true);
   setPageInert(true);
+  updateQueryAnchorPosition();
+  measureSync("query-open", () => {});
   window.requestAnimationFrame(() => {
-    focusWithoutScrolling(els.searchPanelInput || els.searchPanel);
-  });
-}
-
-function openFilterOverlay(trigger) {
-  state.overlayTrigger = trigger || document.activeElement;
-  state.activeOverlay = "filter";
-  state.filterDraft = makeFilterDraftFromState();
-  syncFilterControlsFromDraft(state.filterDraft);
-  updateFilterAvailability();
-  updateFilterAnchorPosition();
-  setDialogOpen(els.filterDialog, true);
-  setPageInert(true);
-  updateFilterAnchorPosition();
-  measureSync("sheet-open", () => {});
-  window.requestAnimationFrame(() => {
-    updateFilterAnchorPosition();
-    focusWithoutScrolling(els.filterSheet || els.filterDialog);
+    updateQueryAnchorPosition();
+    focusWithoutScrolling(els.queryInput || els.queryPanel || els.queryDialog);
   });
 }
 
@@ -743,9 +718,11 @@ function closeOverlay(kind) {
   if (kind && state.activeOverlay !== kind) return;
   const overlay = state.activeOverlay;
   if (!overlay) return;
-  setDialogOpen(overlay === "search" ? els.searchDialog : els.filterDialog, false);
+  setDialogOpen(els.queryDialog, false);
   state.activeOverlay = "";
-  state.filterDraft = null;
+  state.queryDraft = null;
+  window.clearTimeout(state.queryPreviewTimer);
+  state.queryPreviewTimer = 0;
   setPageInert(false);
   const trigger = state.overlayTrigger;
   state.overlayTrigger = null;
@@ -767,8 +744,7 @@ function setPageInert(isInert) {
 }
 
 function activeModalElement() {
-  if (state.activeOverlay === "search") return els.searchDialog;
-  if (state.activeOverlay === "filter") return els.filterDialog;
+  if (state.activeOverlay === "query") return els.queryDialog;
   return null;
 }
 
@@ -790,22 +766,10 @@ function trapModalFocus(event) {
   }
 }
 
-function applySearchFromOverlay(value) {
-  const next = String(value || "").trim().slice(0, 200);
-  state.filter = next;
-  if (els.filterInput) els.filterInput.value = next;
-  if (next) writeRecentSearches([next, ...readRecentSearches().filter((item) => item !== next)].slice(0, 10));
-  state.expandedRows.clear();
-  resetPagination();
-  advanceRenderRevision();
-  closeOverlay("search");
-  render({ urlMode: "push" });
-}
-
 function renderRecentSearches() {
   if (!els.recentSearches || !els.recentSearchSection) return;
   const recent = readRecentSearches();
-  els.recentSearchSection.hidden = !recent.length;
+  els.recentSearchSection.hidden = Boolean(state.queryDraft?.q?.trim()) || !recent.length;
   els.recentSearches.replaceChildren();
   for (const item of recent) {
     const button = document.createElement("button");
@@ -834,17 +798,15 @@ function writeRecentSearches(items) {
   }
 }
 
-function renderSearchSuggestions(query) {
+function renderSearchSuggestions(query, draft = state.queryDraft || makeQueryDraftFromState()) {
   if (!els.searchSuggestions) return;
-  const suggestions = measureSync("search-suggest", () => buildSearchSuggestions(query));
+  const hasQuery = Boolean(String(query || "").trim());
+  const suggestionsSection = els.searchSuggestions.closest(".suggestions-section");
+  if (suggestionsSection) suggestionsSection.hidden = !hasQuery;
+  if (els.recentSearchSection) els.recentSearchSection.hidden = hasQuery || !readRecentSearches().length;
+  const suggestions = measureSync("search-suggest", () => buildSearchSuggestions(query, draft));
   els.searchSuggestions.replaceChildren();
-  if (!String(query || "").trim()) {
-    const empty = document.createElement("p");
-    empty.className = "suggestion-empty";
-    empty.textContent = "输入关键词后显示建议";
-    els.searchSuggestions.append(empty);
-    return;
-  }
+  if (!hasQuery) return;
   for (const group of suggestions) {
     if (!group.items.length) continue;
     const section = document.createElement("section");
@@ -895,13 +857,19 @@ function appendHighlightedText(container, text, query) {
   container.append(mark, document.createTextNode(source.slice(index + needle.length)));
 }
 
-function buildSearchSuggestions(query) {
+function buildSearchSuggestions(query, draft = state.queryDraft || makeQueryDraftFromState()) {
   const filterKey = normalizeSearch(query);
   if (!filterKey || !state.payload) return [];
   const rangeCache = getRangeCache(currentGroup());
-  const hideUnknownForView = shouldHideUnknownForCurrentView();
-  const baseOccurrences = selectedOccurrences(rangeCache, { hideUnknownForView });
-  const songRecords = selectedSongRecords(rangeCache, { hideUnknownForView });
+  const hideUnknownForView = draft.hideUnknownArtist && state.view !== "artistRank";
+  const baseOccurrences = draft.nicheOnly
+    ? hideUnknownForView
+      ? rangeCache.visibleNicheOccurrences
+      : rangeCache.nicheOccurrences
+    : hideUnknownForView
+      ? rangeCache.visibleOccurrences
+      : rangeCache.occurrences;
+  const songRecords = buildSongRecords(baseOccurrences);
   const songSuggestions = songRecords
     .filter((record) => normalizeSearch([record.title, songMeta(record).primary].join(" ")).includes(filterKey))
     .slice(0, 5)
@@ -911,7 +879,8 @@ function buildSearchSuggestions(query) {
       meta: songMeta(record).primary,
     }));
 
-  const artistRecords = (state.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords)
+  const artistRecords = (draft.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords)
+    .filter((record) => !draft.hideUnknownArtist || !window.RankingUtils.isUnknownArtistName(record.name))
     .filter((record) => normalizeSearch(record.name).includes(filterKey))
     .slice(0, 3)
     .map((record) => ({
@@ -942,86 +911,94 @@ function buildSearchSuggestions(query) {
   ];
 }
 
-function makeFilterDraftFromState() {
+function queryDraftOptions(extra = {}) {
   return {
-    q: state.filter,
-    nicheOnly: state.nicheOnly,
-    hideUnknownArtist: state.hideUnknownArtist,
-    rankMetric: state.rankMetric,
-    trend: state.trend,
-    minCount: state.minCount,
-    pageSize: state.pageSize,
-    snapshotPath: state.currentSnapshotPath,
+    defaults: {
+      pageSize: DEFAULT_LIST_PAGE_SIZE,
+      snapshotPath: SNAPSHOT_LATEST_PATH,
+    },
+    validRankMetrics: Object.keys(RANK_METRICS),
+    validTrendFilters: Object.keys(TREND_FILTERS),
+    validMinCounts: MIN_COUNT_OPTIONS,
+    validPageSizes: LIST_PAGE_SIZE_OPTIONS,
+    latestSnapshotPath: SNAPSHOT_LATEST_PATH,
+    snapshots: state.snapshots,
+    ...extra,
   };
 }
 
-function defaultFilterDraft() {
-  return {
-    q: "",
-    nicheOnly: false,
-    hideUnknownArtist: true,
-    rankMetric: "occurrences",
-    trend: "all",
-    minCount: 1,
-    pageSize: state.pageSize,
+function makeQueryDraftFromState() {
+  return window.FrontendUtils.makeQueryDraftFromState(state, queryDraftOptions());
+}
+
+function defaultQueryDraft() {
+  return window.FrontendUtils.defaultQueryDraft({
+    pageSize: DEFAULT_LIST_PAGE_SIZE,
     snapshotPath: SNAPSHOT_LATEST_PATH,
-  };
+  });
 }
 
-function syncFilterControlsFromDraft(draft) {
+function sanitizeQueryDraft(draft) {
+  return window.FrontendUtils.sanitizeQueryDraft(draft, queryDraftOptions());
+}
+
+function syncQueryControlsFromDraft(draft) {
   if (!draft) return;
-  if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = Boolean(draft.nicheOnly);
-  if (els.hideUnknownToggle) els.hideUnknownToggle.checked = Boolean(draft.hideUnknownArtist);
-  for (const input of document.querySelectorAll("input[name='filterMetric']")) {
-    input.checked = input.value === draft.rankMetric;
+  const next = sanitizeQueryDraft(draft);
+  state.queryDraft = next;
+  if (els.queryInput && els.queryInput.value !== next.q) els.queryInput.value = next.q;
+  if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = Boolean(next.nicheOnly);
+  if (els.hideUnknownToggle) els.hideUnknownToggle.checked = Boolean(next.hideUnknownArtist);
+  for (const input of document.querySelectorAll("input[name='queryMetric']")) {
+    input.checked = input.value === next.rankMetric;
   }
-  if (els.trendFilterSelect) els.trendFilterSelect.value = draft.trend;
-  if (els.minCountSelect) els.minCountSelect.value = String(draft.minCount);
-  if (els.filterPageSizeSelect) els.filterPageSizeSelect.value = String(draft.pageSize);
-  const dateValue = snapshotDateValueForPath(draft.snapshotPath);
-  if (els.filterSnapshotDateSelect) els.filterSnapshotDateSelect.value = dateValue;
-  syncDraftSnapshotTimes(dateValue, draft.snapshotPath);
-  updateFilterAvailability();
+  if (els.trendFilterSelect) els.trendFilterSelect.value = next.trend;
+  if (els.minCountSelect) els.minCountSelect.value = String(next.minCount);
+  if (els.queryPageSizeSelect) els.queryPageSizeSelect.value = String(next.pageSize);
+  const dateValue = snapshotDateValueForPath(next.snapshotPath);
+  if (els.querySnapshotDateSelect) els.querySnapshotDateSelect.value = dateValue;
+  syncDraftSnapshotTimes(dateValue, next.snapshotPath);
+  updateQueryAvailability(next);
 }
 
 function syncDraftSnapshotTimes(dateValue, selectedPath = "") {
-  if (!els.filterSnapshotSelect) return;
-  els.filterSnapshotSelect.replaceChildren();
+  if (!els.querySnapshotSelect) return;
+  els.querySnapshotSelect.replaceChildren();
   if (dateValue === "latest") {
     const option = document.createElement("option");
     option.value = SNAPSHOT_LATEST_PATH;
     option.textContent = "最新快照";
-    els.filterSnapshotSelect.append(option);
-    els.filterSnapshotSelect.value = SNAPSHOT_LATEST_PATH;
+    els.querySnapshotSelect.append(option);
+    els.querySnapshotSelect.value = SNAPSHOT_LATEST_PATH;
     return;
   }
   for (const entry of snapshotEntriesForDate(dateValue)) {
     const option = document.createElement("option");
     option.value = entry.path;
     option.textContent = snapshotOptionLabel(entry);
-    els.filterSnapshotSelect.append(option);
+    els.querySnapshotSelect.append(option);
   }
-  els.filterSnapshotSelect.value = selectedPath || firstSnapshotPathForDate(dateValue);
+  els.querySnapshotSelect.value = selectedPath || firstSnapshotPathForDate(dateValue);
 }
 
-function readFilterDraftFromControls() {
-  const selectedMetric = document.querySelector("input[name='filterMetric']:checked")?.value || "occurrences";
-  return {
-    q: state.filter,
+function readQueryDraftFromControls() {
+  const selectedMetric = document.querySelector("input[name='queryMetric']:checked")?.value || "occurrences";
+  return sanitizeQueryDraft({
+    q: els.queryInput?.value || "",
     nicheOnly: Boolean(els.nicheOnlyToggle?.checked),
     hideUnknownArtist: Boolean(els.hideUnknownToggle?.checked),
     rankMetric: Object.hasOwn(RANK_METRICS, selectedMetric) ? selectedMetric : "occurrences",
     trend: Object.hasOwn(TREND_FILTERS, els.trendFilterSelect?.value) ? els.trendFilterSelect.value : "all",
     minCount: MIN_COUNT_OPTIONS.includes(Number(els.minCountSelect?.value)) ? Number(els.minCountSelect.value) : 1,
-    pageSize: LIST_PAGE_SIZE_OPTIONS.includes(Number(els.filterPageSizeSelect?.value)) ? Number(els.filterPageSizeSelect.value) : DEFAULT_LIST_PAGE_SIZE,
-    snapshotPath: els.filterSnapshotSelect?.value || SNAPSHOT_LATEST_PATH,
-  };
+    pageSize: LIST_PAGE_SIZE_OPTIONS.includes(Number(els.queryPageSizeSelect?.value)) ? Number(els.queryPageSizeSelect.value) : DEFAULT_LIST_PAGE_SIZE,
+    snapshotPath: els.querySnapshotSelect?.value || SNAPSHOT_LATEST_PATH,
+  });
 }
 
-async function applyFilterDraft() {
-  const draft = readFilterDraftFromControls();
+async function applyQueryDraft() {
+  const draft = readQueryDraftFromControls();
   const previousPath = state.currentSnapshotPath;
-  closeOverlay("filter");
+  closeOverlay("query");
   state.filter = draft.q;
   state.nicheOnly = draft.nicheOnly;
   state.hideUnknownArtist = draft.hideUnknownArtist;
@@ -1032,11 +1009,49 @@ async function applyFilterDraft() {
   state.expandedRows.clear();
   resetPagination();
   syncControlsFromState();
+  if (draft.q) writeRecentSearches([draft.q, ...readRecentSearches().filter((item) => item !== draft.q)].slice(0, 10));
   if (previousPath !== draft.snapshotPath) {
     await applySnapshotPath(draft.snapshotPath, previousPath, { urlMode: "push" });
     return;
   }
-  measureSync("filter-apply", () => render({ urlMode: "push" }));
+  measureSync("query-apply", () => render({ urlMode: "push" }));
+}
+
+function updateQueryDraft(patch) {
+  state.queryDraft = sanitizeQueryDraft({
+    ...(state.queryDraft || makeQueryDraftFromState()),
+    ...patch,
+  });
+  syncQueryControlsFromDraft(state.queryDraft);
+  renderSearchSuggestions(state.queryDraft.q, state.queryDraft);
+  scheduleQueryDraftPreview();
+}
+
+function applyQueryPatch(patch, options = {}) {
+  const draft = sanitizeQueryDraft({
+    ...makeQueryDraftFromState(),
+    ...patch,
+  });
+  const previousPath = state.currentSnapshotPath;
+  state.filter = draft.q;
+  state.nicheOnly = draft.nicheOnly;
+  state.hideUnknownArtist = draft.hideUnknownArtist;
+  state.rankMetric = draft.rankMetric;
+  state.trend = draft.trend;
+  state.minCount = draft.minCount;
+  state.pageSize = draft.pageSize;
+  state.expandedRows.clear();
+  resetPagination();
+  syncControlsFromState();
+  const afterRender = () => {
+    if (options.focusTrigger) focusWithoutScrolling(els.queryTrigger || els.controls || document.body);
+  };
+  if (previousPath !== draft.snapshotPath) {
+    applySnapshotPath(draft.snapshotPath, previousPath, { urlMode: "push" }).then(afterRender).catch((error) => showToast(`查询应用失败：${error.message}`));
+    return;
+  }
+  render({ urlMode: "push" });
+  afterRender();
 }
 
 async function applySnapshotPath(path, previousPath, options = {}) {
@@ -1052,15 +1067,18 @@ async function applySnapshotPath(path, previousPath, options = {}) {
   await loadSnapshotPath(nextPath, previousPath, options);
 }
 
-function updateFilterAvailability() {
+function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromState()) {
   const rankView = state.view === "songRank" || state.view === "artistRank";
-  if (els.metricFilterGroup) els.metricFilterGroup.hidden = !rankView || state.view === "videos";
+  if (els.metricFilterGroup) els.metricFilterGroup.hidden = state.view === "videos";
+  if (els.displayFilterGroup) els.displayFilterGroup.hidden = state.view === "videos";
   if (els.trendFilterGroup) els.trendFilterGroup.hidden = state.view === "songAz" || state.view === "videos";
+  if (els.minCountSelect?.closest(".query-field")) els.minCountSelect.closest(".query-field").hidden = state.view === "videos";
   if (els.trendFilterSelect) {
-    const disabled = !rankView || !isLatestSnapshot() || state.rankDiffLoads.has(state.range) || state.rankDiffs[state.range] === null;
+    const isLatestDraft = draft.snapshotPath === SNAPSHOT_LATEST_PATH;
+    const disabled = !rankView || !isLatestDraft || state.rankDiffLoads.has(state.range) || state.rankDiffs[state.range] === null;
     els.trendFilterSelect.disabled = disabled;
     if (els.trendFilterHint) {
-      els.trendFilterHint.textContent = !isLatestSnapshot()
+      els.trendFilterHint.textContent = !isLatestDraft
         ? "历史快照不支持趋势筛选"
         : state.rankDiffLoads.has(state.range)
           ? "趋势载入中"
@@ -1081,23 +1099,171 @@ function syncBottomNavFromState() {
 }
 
 function activeFilterCount() {
-  let count = 0;
-  if (state.nicheOnly) count += 1;
-  if (!state.hideUnknownArtist) count += 1;
-  if ((state.view === "songRank" || state.view === "artistRank") && state.rankMetric !== "occurrences") count += 1;
-  if ((state.view === "songRank" || state.view === "artistRank") && state.trend !== "all") count += 1;
-  if (state.view !== "videos" && state.minCount > 1) count += 1;
-  if (!isLatestSnapshot()) count += 1;
-  return count;
+  return window.FrontendUtils.activeQueryConditionCount(makeQueryDraftFromState(), {
+    ...queryDraftOptions(),
+    view: state.view,
+  });
 }
 
-function syncFilterButtonCount() {
+function syncQueryTriggerState() {
   const count = activeFilterCount();
-  for (const badge of [els.filterCountBadge, els.mobileFilterCountBadge]) {
-    if (!badge) continue;
-    badge.hidden = count <= 0;
-    badge.textContent = count > 0 ? String(count) : "";
+  if (els.queryCountBadge) {
+    els.queryCountBadge.hidden = count <= 0;
+    els.queryCountBadge.textContent = count > 0 ? String(count) : "";
+    els.queryCountBadge.setAttribute("aria-label", `当前有 ${count} 个搜索与筛选条件`);
   }
+  if (els.queryTriggerText) {
+    els.queryTriggerText.textContent = state.filter || "搜索歌曲、歌手、频道或视频";
+    els.queryTriggerText.title = state.filter || "";
+  }
+  els.queryTrigger?.setAttribute("aria-label", count > 0 ? `打开搜索与筛选，当前有 ${count} 个条件` : "打开搜索与筛选");
+}
+
+function renderActiveQueryStrip() {
+  if (!els.activeQueryStrip) return;
+  const items = activeQueryItems(makeQueryDraftFromState());
+  els.activeQueryStrip.replaceChildren();
+  if (!items.length) {
+    els.activeQueryStrip.hidden = true;
+    return;
+  }
+  els.activeQueryStrip.hidden = false;
+  for (const item of items) {
+    const button = document.createElement("button");
+    button.className = "active-query-chip";
+    button.type = "button";
+    button.dataset.queryClear = item.key;
+    button.title = item.fullLabel || item.label;
+    button.setAttribute("aria-label", `清除条件：${item.fullLabel || item.label}`);
+    const text = document.createElement("span");
+    text.textContent = item.label;
+    const close = document.createElement("span");
+    close.className = "active-query-chip-close";
+    close.setAttribute("aria-hidden", "true");
+    close.textContent = "×";
+    button.append(text, close);
+    els.activeQueryStrip.append(button);
+  }
+  const clearAll = document.createElement("button");
+  clearAll.className = "active-query-clear";
+  clearAll.type = "button";
+  clearAll.dataset.queryClear = "all";
+  clearAll.textContent = "清除全部";
+  els.activeQueryStrip.append(clearAll);
+}
+
+function activeQueryItems(draft) {
+  const items = [];
+  if (draft.q) items.push({ key: "q", label: draft.q, fullLabel: draft.q });
+  if (draft.nicheOnly) items.push({ key: "nicheOnly", label: "只看小众" });
+  if (!draft.hideUnknownArtist) items.push({ key: "hideUnknownArtist", label: "显示无歌手" });
+  if ((state.view === "songRank" || state.view === "artistRank") && draft.rankMetric !== "occurrences") items.push({ key: "rankMetric", label: "按视频" });
+  if ((state.view === "songRank" || state.view === "artistRank") && draft.trend !== "all") items.push({ key: "trend", label: TREND_FILTERS[draft.trend] || "趋势" });
+  if (state.view !== "videos" && draft.minCount > 1) items.push({ key: "minCount", label: `${draft.minCount}次以上` });
+  if (draft.snapshotPath !== SNAPSHOT_LATEST_PATH) items.push({ key: "snapshotPath", label: `历史 ${snapshotDateOptionLabel(snapshotDateValueForPath(draft.snapshotPath))}` });
+  return items;
+}
+
+function clearQueryCondition(key) {
+  if (key === "all") {
+    applyQueryPatch(defaultQueryDraft(), { focusTrigger: true });
+    return;
+  }
+  const patch = {};
+  if (key === "q") patch.q = "";
+  else if (key === "nicheOnly") patch.nicheOnly = false;
+  else if (key === "hideUnknownArtist") patch.hideUnknownArtist = true;
+  else if (key === "rankMetric") patch.rankMetric = "occurrences";
+  else if (key === "trend") patch.trend = "all";
+  else if (key === "minCount") patch.minCount = 1;
+  else if (key === "snapshotPath") patch.snapshotPath = SNAPSHOT_LATEST_PATH;
+  applyQueryPatch(patch, { focusTrigger: true });
+}
+
+function scheduleQueryDraftPreview(options = {}) {
+  window.clearTimeout(state.queryPreviewTimer);
+  if (options.immediate) {
+    renderQueryDraftPreview();
+    return;
+  }
+  if (els.queryResultPreview) els.queryResultPreview.textContent = "计算中";
+  state.queryPreviewTimer = window.setTimeout(renderQueryDraftPreview, SEARCH_DEBOUNCE_MS);
+}
+
+function renderQueryDraftPreview() {
+  const draft = sanitizeQueryDraft(state.queryDraft || readQueryDraftFromControls());
+  if (!els.queryResultPreview || !els.applyQueryButton) return;
+  if (draft.snapshotPath !== state.currentSnapshotPath) {
+    els.queryResultPreview.textContent = "将载入快照";
+    els.applyQueryButton.textContent = "应用并载入快照";
+    return;
+  }
+  const count = queryDraftResultCount(draft);
+  const unit = queryResultUnit();
+  els.queryResultPreview.textContent = `${count} ${unit}`;
+  els.applyQueryButton.textContent = `查看 ${count} ${unit}`;
+}
+
+function queryResultUnit() {
+  if (state.view === "artistRank") return "位歌手";
+  if (state.view === "videos") return "个视频";
+  return "首歌曲";
+}
+
+function queryDraftResultCount(draft) {
+  if (!state.payload) return 0;
+  const rangeCache = getRangeCache(currentGroup());
+  if (state.view === "videos") {
+    return buildVideoViewItems(rangeCache.items, {
+      filter: draft.q,
+      nicheOnly: draft.nicheOnly,
+      hideUnknownArtists: draft.hideUnknownArtist,
+    }).length;
+  }
+  const occurrences = queryDraftOccurrences(rangeCache, draft);
+  if (state.view === "artistRank") {
+    return queryDraftRankRecords(buildArtistRecords(occurrences).records, draft, "artistRank").length;
+  }
+  const songRecords = buildSongRecords(occurrences);
+  if (state.view === "songAz") {
+    return queryDraftMinCountRecords(songRecords, draft).length;
+  }
+  return queryDraftRankRecords(songRecords, draft, "songRank").length;
+}
+
+function queryDraftOccurrences(rangeCache, draft) {
+  const hideUnknownForView = draft.hideUnknownArtist && state.view !== "artistRank";
+  const base = draft.nicheOnly
+    ? hideUnknownForView
+      ? rangeCache.visibleNicheOccurrences
+      : rangeCache.nicheOccurrences
+    : hideUnknownForView
+      ? rangeCache.visibleOccurrences
+      : rangeCache.occurrences;
+  const filterKey = normalizeSearch(draft.q);
+  if (!filterKey) return base;
+  return base.filter((occurrence) => occurrence.searchText.includes(filterKey));
+}
+
+function queryDraftMinCountRecords(records, draft) {
+  if (state.view === "videos" || draft.minCount <= 1) return records;
+  return records.filter((record) => rankValue(record) >= draft.minCount);
+}
+
+function queryDraftRankRecords(records, draft, mode) {
+  const minFiltered = queryDraftMinCountRecords(records, draft);
+  if (draft.trend === "all" || draft.snapshotPath !== SNAPSHOT_LATEST_PATH || (mode !== "songRank" && mode !== "artistRank")) return minFiltered;
+  const diff = state.rankDiffs?.[state.range]?.[mode];
+  if (!(diff instanceof Map)) return minFiltered;
+  return minFiltered.filter((record) => {
+    const trend = diff.get(record.key);
+    if (!trend) return false;
+    if (draft.trend === "new") return trend.isNew === true;
+    const rankDelta = Number(trend.rankDelta) || 0;
+    if (draft.trend === "up") return rankDelta > 0;
+    if (draft.trend === "down") return rankDelta < 0;
+    return true;
+  });
 }
 
 function snapshotDateValueForPath(path) {
@@ -1137,21 +1303,21 @@ function updateViewportVars() {
   document.documentElement.style.setProperty("--visual-viewport-bottom", `${Math.round(offsetBottom)}px`);
 }
 
-function updateFilterAnchorPosition() {
-  if (state.activeOverlay !== "filter" || !els.filterSheet || isMobileViewport()) return;
-  const trigger = state.overlayTrigger && document.contains(state.overlayTrigger) ? state.overlayTrigger : els.desktopFilterButton || els.controls;
+function updateQueryAnchorPosition() {
+  if (state.activeOverlay !== "query" || !els.queryPanel || isMobileViewport()) return;
+  const trigger = state.overlayTrigger && document.contains(state.overlayTrigger) ? state.overlayTrigger : els.queryTrigger || els.controls;
   const triggerRect = trigger?.getBoundingClientRect?.();
   const controlsRect = els.controls?.getBoundingClientRect?.();
   const anchorBottom = Math.max(triggerRect?.bottom || 0, controlsRect?.bottom || 0);
   const top = Math.max(8, Math.round(anchorBottom + 8));
   const right = Math.max(16, Math.round((window.innerWidth || document.documentElement.clientWidth || 0) - (triggerRect?.right || 0)));
-  document.documentElement.style.setProperty("--filter-anchor-top", `${top}px`);
-  document.documentElement.style.setProperty("--filter-anchor-right", `${right}px`);
+  document.documentElement.style.setProperty("--query-anchor-top", `${top}px`);
+  document.documentElement.style.setProperty("--query-anchor-right", `${right}px`);
 }
 
 function handleResponsiveResize() {
   updateViewportVars();
-  updateFilterAnchorPosition();
+  updateQueryAnchorPosition();
   const nextMode = getResponsiveMode();
   if (!state.responsiveMode) {
     state.responsiveMode = nextMode;
@@ -1248,16 +1414,45 @@ function syncControlsFromState() {
   setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === state.range) || els.rangeTabs[0]);
   setActiveTab(els.viewTabs, els.viewTabs.find((tab) => tab.dataset.view === state.view) || els.viewTabs[0]);
   syncBottomNavFromState();
-  if (els.filterInput) els.filterInput.value = state.filter;
   if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = state.nicheOnly;
   if (els.hideUnknownToggle) els.hideUnknownToggle.checked = state.hideUnknownArtist;
   syncSnapshotControlsFromState();
-  syncFilterButtonCount();
+  syncQueryTriggerState();
+  renderActiveQueryStrip();
 }
 
-function syncUrlState() {
-  // URL state is intentionally read-only: external links can seed state, in-page actions do not persist filters across refresh.
-  if (state.sharedUrlApplied) cleanSharedUrlAfterRender();
+function syncUrlState(urlMode = "replace") {
+  if (!window.history?.pushState || !window.history?.replaceState) return;
+  const serialized = window.FrontendUtils.serializeUrlState(
+    {
+      range: state.range,
+      view: state.view,
+      page: state.page,
+      pageSize: state.pageSize,
+      bucket: state.indexBucket,
+      rankMetric: state.rankMetric,
+      videoLayout: state.videoLayout,
+      outside: state.nicheOnly,
+      showUnknown: !state.hideUnknownArtist,
+      q: state.filter,
+      snapshotPath: state.currentSnapshotPath,
+      trend: state.trend,
+      minCount: state.minCount,
+    },
+    {
+      defaults: defaultUrlState(),
+      latestSnapshotPath: SNAPSHOT_LATEST_PATH,
+      snapshots: state.snapshots,
+    },
+  );
+  const nextUrl = `${window.location.pathname}${serialized ? `?${serialized}` : ""}${window.location.hash}`;
+  if (nextUrl === `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+    state.sharedUrlApplied = false;
+    return;
+  }
+  const mode = urlMode === "push" ? "pushState" : "replaceState";
+  window.history[mode]({ dailySongList: true }, "", nextUrl);
+  state.sharedUrlApplied = false;
 }
 
 function cleanSharedUrlAfterRender() {
@@ -1785,7 +1980,7 @@ function scheduleCurrentRankDiffLoad() {
       if (!loaded || !isLatestSnapshot()) return;
       if (state.trend === "all") {
         updateVisibleTrendBadges();
-        updateFilterAvailability();
+        updateQueryAvailability();
       } else {
         render({ syncUrl: false });
       }
@@ -1878,10 +2073,8 @@ function canPrefetchOtherRange() {
 
 function setSnapshotBusy(isBusy, message = "") {
   els.content.setAttribute("aria-busy", isBusy ? "true" : "false");
-  if (els.snapshotSelect) els.snapshotSelect.disabled = isBusy;
-  if (els.snapshotDateSelect) els.snapshotDateSelect.disabled = isBusy;
-  if (els.filterSnapshotSelect) els.filterSnapshotSelect.disabled = isBusy;
-  if (els.filterSnapshotDateSelect) els.filterSnapshotDateSelect.disabled = isBusy;
+  if (els.querySnapshotSelect) els.querySnapshotSelect.disabled = isBusy;
+  if (els.querySnapshotDateSelect) els.querySnapshotDateSelect.disabled = isBusy;
   if (isBusy && message) els.status.textContent = message;
 }
 
@@ -1922,37 +2115,36 @@ function advanceRenderRevision() {
 }
 
 function renderSnapshotOptions() {
-  if (!els.snapshotSelect) return;
   renderSnapshotDateOptions();
   renderSnapshotTimeOptions(selectedSnapshotDateValue());
   syncSnapshotControlsFromState();
-  syncFilterSnapshotControlsFromState();
 }
 
 function renderSnapshotDateOptions() {
-  if (!els.snapshotDateSelect) return;
-  els.snapshotDateSelect.replaceChildren();
+  if (!els.querySnapshotDateSelect) return;
+  els.querySnapshotDateSelect.replaceChildren();
   const latestOption = document.createElement("option");
   latestOption.value = "latest";
   latestOption.textContent = "最新";
-  els.snapshotDateSelect.append(latestOption);
+  els.querySnapshotDateSelect.append(latestOption);
 
   for (const dateValue of snapshotDateValues()) {
     const option = document.createElement("option");
     option.value = dateValue;
     option.textContent = snapshotDateOptionLabel(dateValue);
-    els.snapshotDateSelect.append(option);
+    els.querySnapshotDateSelect.append(option);
   }
 }
 
 function renderSnapshotTimeOptions(dateValue) {
-  els.snapshotSelect.replaceChildren();
+  if (!els.querySnapshotSelect) return;
+  els.querySnapshotSelect.replaceChildren();
   if (dateValue === "latest") {
     const latestOption = document.createElement("option");
     latestOption.value = SNAPSHOT_LATEST_PATH;
     latestOption.textContent = "最新快照";
-    els.snapshotSelect.append(latestOption);
-    els.snapshotSelect.disabled = false;
+    els.querySnapshotSelect.append(latestOption);
+    els.querySnapshotSelect.disabled = false;
     return;
   }
 
@@ -1960,29 +2152,18 @@ function renderSnapshotTimeOptions(dateValue) {
     const option = document.createElement("option");
     option.value = entry.path;
     option.textContent = snapshotOptionLabel(entry);
-    els.snapshotSelect.append(option);
+    els.querySnapshotSelect.append(option);
   }
-  els.snapshotSelect.disabled = !els.snapshotSelect.options.length;
+  els.querySnapshotSelect.disabled = !els.querySnapshotSelect.options.length;
 }
 
 function syncSnapshotControlsFromState() {
   const dateValue = selectedSnapshotDateValue();
-  if (els.snapshotDateSelect && els.snapshotDateSelect.value !== dateValue) {
-    els.snapshotDateSelect.value = dateValue;
+  if (els.querySnapshotDateSelect && els.querySnapshotDateSelect.value !== dateValue) {
+    els.querySnapshotDateSelect.value = dateValue;
   }
   renderSnapshotTimeOptions(dateValue);
-  if (els.snapshotSelect) els.snapshotSelect.value = state.currentSnapshotPath;
-  syncFilterSnapshotControlsFromState();
-}
-
-function syncFilterSnapshotControlsFromState() {
-  if (!els.filterSnapshotDateSelect || !els.filterSnapshotSelect || !els.snapshotDateSelect || !els.snapshotSelect) return;
-  els.filterSnapshotDateSelect.replaceChildren(...Array.from(els.snapshotDateSelect.options).map((option) => option.cloneNode(true)));
-  els.filterSnapshotSelect.replaceChildren(...Array.from(els.snapshotSelect.options).map((option) => option.cloneNode(true)));
-  els.filterSnapshotDateSelect.value = els.snapshotDateSelect.value;
-  els.filterSnapshotSelect.value = els.snapshotSelect.value;
-  els.filterSnapshotDateSelect.disabled = els.snapshotDateSelect.disabled;
-  els.filterSnapshotSelect.disabled = els.snapshotSelect.disabled;
+  if (els.querySnapshotSelect) els.querySnapshotSelect.value = state.currentSnapshotPath;
 }
 
 function selectedSnapshotDateValue() {
@@ -2220,8 +2401,9 @@ function render(options = {}) {
 
   if (options.syncUrl !== false) syncUrlState(options.urlMode || "replace");
   if (options.focusAfterPageChange) schedulePageChangeFocus();
-  syncFilterButtonCount();
-  updateFilterAvailability();
+  syncQueryTriggerState();
+  renderActiveQueryStrip();
+  updateQueryAvailability();
   cleanSharedUrlAfterRender();
   updateBackToTopVisibility();
   if (!state.firstContentMeasured) {
@@ -3235,8 +3417,8 @@ function buildVideoViewItems(items, options = {}) {
       continue;
     }
 
-    const videoMatched = matchesSearch([item.title, item.channelName, item.keyword]);
-    const matchedSongs = sourceSongs.filter((song) => matchesSearch([song.title, song.artist]));
+    const videoMatched = matchesSearch([item.title, item.channelName, item.keyword], filter);
+    const matchedSongs = sourceSongs.filter((song) => matchesSearch([song.title, song.artist], filter));
     if (!videoMatched && !matchedSongs.length) continue;
 
     const matchedSongSet = new Set(matchedSongs);
@@ -3279,8 +3461,8 @@ function filterUnknownArtistOccurrences(occurrences) {
   return (occurrences || []).filter(({ song }) => !window.RankingUtils.isUnknownArtistName(song?.artist));
 }
 
-function matchesSearch(parts) {
-  return window.FrontendUtils.matchesSearch(parts, state.filter);
+function matchesSearch(parts, filter = state.filter) {
+  return window.FrontendUtils.matchesSearch(parts, filter);
 }
 
 function buildSongRecords(occurrences) {

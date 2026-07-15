@@ -102,14 +102,14 @@ async function waitForRows(page, errors = [], requests = []) {
 }
 
 async function openFilterSheet(page) {
-  await page.locator("#desktopFilterButton").click();
-  await page.waitForSelector("#filterDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.locator("#queryTrigger").click();
+  await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
 }
 
 async function openMobileFilterSheet(page) {
-  await page.locator("#openFilterButton").click();
-  await page.waitForSelector("#filterDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.locator("#queryTrigger").click();
+  await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
 }
 
@@ -146,7 +146,7 @@ async function retryDetachedAction(action, label, attempts = 5) {
 
 async function readFilterBadgeState(page) {
   return page.evaluate(() =>
-    Array.from(document.querySelectorAll("#filterCountBadge, #mobileFilterCountBadge")).map((node) => ({
+    Array.from(document.querySelectorAll("#queryCountBadge")).map((node) => ({
       id: node.id,
       hidden: node.hidden,
       display: getComputedStyle(node).display,
@@ -246,7 +246,7 @@ async function assertUiShape(page, viewport, range) {
       className: node.className || "",
     }));
     const bottomSelect = rect(".pagination-bottom .page-select");
-    const filterBadges = Array.from(document.querySelectorAll("#filterCountBadge, #mobileFilterCountBadge")).map((node) => ({
+    const filterBadges = Array.from(document.querySelectorAll("#queryCountBadge")).map((node) => ({
       id: node.id,
       hidden: node.hidden,
       display: getComputedStyle(node).display,
@@ -727,26 +727,36 @@ async function interactionFlow(browser) {
   if (!requests.some((item) => runtimePathPattern("1m").test(item))) throw new Error("range switch did not load monthly runtime");
   await page.locator('[data-page-size="100"]').first().click();
   await waitForRows(page, errors, requests);
-  await page.locator("#filterInput").fill("夜");
-  await waitForRows(page, errors, requests);
   await openFilterSheet(page);
+  await page.locator("#queryInput").fill("夜");
+  const searchBeforeApply = await page.evaluate(() => window.location.search);
+  if (new URLSearchParams(searchBeforeApply).has("q")) throw new Error(`query draft wrote q before apply: ${searchBeforeApply}`);
   await setCheckbox(page, "#nicheOnlyToggle", true);
-  await page.locator("#applyFiltersButton").click();
+  await page.locator("#applyQueryButton").click();
   await waitForRows(page, errors, requests);
   assertBadgesVisible(await readFilterBadgeState(page), "filtered");
+  const activeConditions = await page.locator("#activeQueryStrip .active-query-chip").evaluateAll((items) => items.map((item) => item.textContent || ""));
+  if (!activeConditions.some((text) => text.includes("夜")) || !activeConditions.some((text) => text.includes("只看小众"))) {
+    throw new Error(`query strip did not expose search and niche filter: ${JSON.stringify(activeConditions)}`);
+  }
   await openFilterSheet(page);
-  await page.locator("#metricFilterGroup label").filter({ hasText: "按视频" }).click();
-  await page.locator("#applyFiltersButton").click();
+  const draftSearch = await page.locator("#queryInput").inputValue();
+  if (draftSearch !== "夜") throw new Error(`query panel forgot applied search: ${draftSearch}`);
+  await page.locator("#metricFilterGroup .query-segmented label").filter({ hasText: "按视频" }).click();
+  await page.locator("#applyQueryButton").click();
   await waitForRows(page, errors, requests);
-  await page.locator("#filterInput").fill("");
   await openFilterSheet(page);
+  await page.locator("#queryInput").fill("");
   await setCheckbox(page, "#nicheOnlyToggle", false);
-  await page.locator("#metricFilterGroup label").filter({ hasText: "按收录" }).click();
-  await page.locator("#applyFiltersButton").click();
+  await page.locator("#metricFilterGroup .query-segmented label").filter({ hasText: "按收录" }).click();
+  await page.locator("#applyQueryButton").click();
   await waitForRows(page, errors, requests);
   assertBadgesHidden(await readFilterBadgeState(page), "reset");
   const searchAfterOrdinaryInteractions = await page.evaluate(() => window.location.search);
-  if (searchAfterOrdinaryInteractions) throw new Error(`ordinary interactions should not persist filters to URL: ${searchAfterOrdinaryInteractions}`);
+  const resetParams = new URLSearchParams(searchAfterOrdinaryInteractions);
+  if (resetParams.has("q") || resetParams.has("outside") || resetParams.has("rankMetric")) {
+    throw new Error(`reset query left active query params: ${searchAfterOrdinaryInteractions}`);
+  }
   await page.waitForFunction(
     () => Boolean(window.RankingUtils?.buildSongRecords && document.querySelector("[data-toggle-source]")),
     null,
@@ -779,25 +789,26 @@ async function interactionFlow(browser) {
   await page.locator('.view-mode [data-view="songRank"]').click();
   await waitForRows(page, errors, requests);
   if (!latestOnly) {
+    await openFilterSheet(page);
     const dateOptions = await page
-      .locator("#snapshotDateSelect option")
+      .locator("#querySnapshotDateSelect option")
       .evaluateAll((items) => items.map((item) => item.value).filter((value) => value !== "latest"));
     if (!dateOptions.length) throw new Error("no historical snapshot dates");
     let options = [];
     for (const dateOption of dateOptions) {
       await selectSnapshotDate(page, dateOption);
-      await waitForRows(page, errors, requests);
       options = await page
-        .locator("#snapshotSelect option")
+        .locator("#querySnapshotSelect option")
         .evaluateAll((items) => items.map((item) => item.value).filter((value) => value !== "data/latest.json"));
       if (options.length) break;
     }
     if (!options.length) throw new Error("no historical snapshot options");
-    await page.waitForFunction(() => document.querySelector("#snapshotSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
-    await page.selectOption("#snapshotSelect", options[0]);
+    await page.waitForFunction(() => document.querySelector("#querySnapshotSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
+    await page.selectOption("#querySnapshotSelect", options[0]);
+    await page.locator("#applyQueryButton").click();
     await waitForRows(page, errors, requests);
     const search = await page.evaluate(() => window.location.search);
-    if (search) throw new Error(`ordinary snapshot interaction wrote URL state: ${search}`);
+    if (!new URLSearchParams(search).has("snapshot")) throw new Error(`snapshot apply did not write URL state: ${search}`);
   }
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
   const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
@@ -826,7 +837,7 @@ async function mobileFilterSheetFlow(browser) {
     await waitForRows(page, errors, requests);
     await openMobileFilterSheet(page);
 
-    const topScreenshotPath = shotPath(`filter-sheet-top-${viewport.join("x")}.png`);
+    const topScreenshotPath = shotPath(`query-panel-top-${viewport.join("x")}.png`);
     await page.screenshot({ path: topScreenshotPath, fullPage: false });
 
     const topGeometry = await page.evaluate(() => {
@@ -845,11 +856,11 @@ async function mobileFilterSheetFlow(browser) {
           paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
         };
       };
-      const dialog = document.querySelector("#filterDialog");
-      const sheet = document.querySelector("#filterDialog .filter-sheet");
+      const dialog = document.querySelector("#queryDialog");
+      const sheet = document.querySelector("#queryDialog .query-panel");
       const toggles = ["#nicheOnlyToggle", "#hideUnknownToggle"].map((selector) => {
         const input = document.querySelector(selector);
-        const label = input?.closest(".sheet-toggle");
+        const label = input?.closest(".query-toggle");
         const text = label?.querySelector("span:not(.sr-only)");
         return {
           label: label ? rectFor(label) : null,
@@ -857,9 +868,9 @@ async function mobileFilterSheetFlow(browser) {
           text: text ? rectFor(text) : null,
         };
       });
-      const segmented = Array.from(document.querySelectorAll("#metricFilterGroup .sheet-segmented label")).map(rectFor);
-      const selects = Array.from(document.querySelectorAll("#filterDialog select")).map(rectFor);
-      const footerButtons = Array.from(document.querySelectorAll("#filterDialog .sheet-actions button")).map(rectFor);
+      const segmented = Array.from(document.querySelectorAll("#metricFilterGroup .query-segmented label")).map(rectFor);
+      const selects = Array.from(document.querySelectorAll("#queryDialog select")).map(rectFor);
+      const footerButtons = Array.from(document.querySelectorAll("#queryDialog .query-panel-footer button")).map(rectFor);
       const sheetBox = sheet ? rectFor(sheet) : null;
       return {
         toggles,
@@ -873,7 +884,7 @@ async function mobileFilterSheetFlow(browser) {
       };
     });
     if (topGeometry.documentOverflow > 1 || topGeometry.dialogOverflow > 1 || topGeometry.sheetOverflow > 1) {
-      throw new Error(`mobile filter sheet overflow ${JSON.stringify(topGeometry)}`);
+      throw new Error(`mobile query panel overflow ${JSON.stringify(topGeometry)}`);
     }
     const [nicheToggle, unknownToggle] = topGeometry.toggles;
     if (!nicheToggle?.label || !unknownToggle?.label || !nicheToggle.input || !unknownToggle.input || !nicheToggle.text || !unknownToggle.text) {
@@ -901,12 +912,14 @@ async function mobileFilterSheetFlow(browser) {
     if (topGeometry.footerButtons.length !== 2) throw new Error(`filter footer buttons missing ${JSON.stringify(topGeometry)}`);
     const [resetButton, applyButton] = topGeometry.footerButtons;
     assertClose(resetButton.height, applyButton.height, 1, "filter footer button height", topGeometry);
-    assertClose(resetButton.width, applyButton.width, 2, "filter footer button width", topGeometry);
     assertClose(resetButton.top, applyButton.top, 1, "filter footer button top", topGeometry);
     assertClose(resetButton.bottom, applyButton.bottom, 1, "filter footer button bottom", topGeometry);
+    if (resetButton.width < 44 || applyButton.width < 44 || resetButton.right > applyButton.left) {
+      throw new Error(`filter footer buttons overlap or undersize ${JSON.stringify(topGeometry)}`);
+    }
 
-    await page.locator("#filterDialog .filter-sheet").evaluate((sheet) => {
-      sheet.scrollTop = sheet.scrollHeight;
+    await page.locator("#queryDialog .query-panel-body").evaluate((body) => {
+      body.scrollTop = body.scrollHeight;
     });
     await page.waitForTimeout(50);
     const bottomGeometry = await page.evaluate(() => {
@@ -914,8 +927,8 @@ async function mobileFilterSheetFlow(browser) {
         const box = node.getBoundingClientRect();
         return { top: box.top, bottom: box.bottom, height: box.height };
       };
-      const selects = Array.from(document.querySelectorAll("#filterDialog select"));
-      const footer = document.querySelector("#filterDialog .sheet-actions");
+      const selects = Array.from(document.querySelectorAll("#queryDialog select"));
+      const footer = document.querySelector("#queryDialog .query-panel-footer");
       return {
         lastSelect: selects.length ? rectFor(selects[selects.length - 1]) : null,
         footer: footer ? rectFor(footer) : null,
@@ -925,15 +938,15 @@ async function mobileFilterSheetFlow(browser) {
     if (bottomGeometry.lastSelect.bottom > bottomGeometry.footer.top - 12) {
       throw new Error(`filter footer overlaps last select ${JSON.stringify(bottomGeometry)}`);
     }
-    const bottomScreenshotPath = shotPath(`filter-sheet-bottom-${viewport.join("x")}.png`);
+    const bottomScreenshotPath = shotPath(`query-panel-bottom-${viewport.join("x")}.png`);
     await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
 
-    await page.locator("#cancelFilterButton").click();
-    await page.locator("#filterDialog").waitFor({ state: "hidden", timeout: 5000 });
+    await page.locator("#cancelQueryButton").click();
+    await page.locator("#queryDialog").waitFor({ state: "hidden", timeout: 5000 });
     const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
     await context.close();
-    if (errors.length || unhandled) throw new Error(`mobile filter sheet errors: ${errors.join(" | ")} ${unhandled}`);
-    results.push({ scenario: `mobile-filter-sheet-${viewport.join("x")}`, requests: [...new Set(requests)], topScreenshotPath, bottomScreenshotPath });
+    if (errors.length || unhandled) throw new Error(`mobile query panel errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `mobile-query-panel-${viewport.join("x")}`, requests: [...new Set(requests)], topScreenshotPath, bottomScreenshotPath });
   }
 }
 
@@ -1737,20 +1750,20 @@ async function selectSnapshotDate(page, value) {
   let lastError = null;
   for (let attempt = 0; attempt < 6; attempt += 1) {
     try {
-      await page.waitForFunction(() => document.querySelector("#snapshotDateSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
+      await page.waitForFunction(() => document.querySelector("#querySnapshotDateSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
     } catch (error) {
       const diagnostics = await page.evaluate(() => ({
         status: document.querySelector("#status")?.textContent || "",
         busy: document.querySelector("#videoList")?.getAttribute("aria-busy") || "",
-        dateDisabled: document.querySelector("#snapshotDateSelect")?.disabled ?? null,
-        timeDisabled: document.querySelector("#snapshotSelect")?.disabled ?? null,
+        dateDisabled: document.querySelector("#querySnapshotDateSelect")?.disabled ?? null,
+        timeDisabled: document.querySelector("#querySnapshotSelect")?.disabled ?? null,
         activeView: document.querySelector("[data-view].is-active")?.textContent || "",
         resources: window.printSongListPerformance?.().resources || [],
       }));
       throw new Error(`${error.message}\nsnapshot diagnostics=${JSON.stringify(diagnostics)}`);
     }
     try {
-      await page.selectOption("#snapshotDateSelect", value, { timeout: 5000 });
+      await page.selectOption("#querySnapshotDateSelect", value, { timeout: 5000 });
       return;
     } catch (error) {
       lastError = error;

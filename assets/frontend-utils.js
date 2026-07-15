@@ -260,6 +260,77 @@
     return params.toString();
   }
 
+  function defaultQueryDraft(defaults = {}) {
+    return {
+      q: "",
+      nicheOnly: false,
+      hideUnknownArtist: true,
+      rankMetric: "occurrences",
+      trend: "all",
+      minCount: 1,
+      pageSize: positiveInteger(defaults.pageSize, 50),
+      snapshotPath: defaults.snapshotPath || "data/latest.json",
+      ...defaults,
+    };
+  }
+
+  function makeQueryDraftFromState(source = {}, defaults = {}) {
+    return sanitizeQueryDraft(
+      {
+        ...defaultQueryDraft(defaults),
+        q: source.filter ?? source.q ?? "",
+        nicheOnly: Boolean(source.nicheOnly ?? source.outside),
+        hideUnknownArtist: typeof source.hideUnknownArtist === "boolean" ? source.hideUnknownArtist : !Boolean(source.showUnknown),
+        rankMetric: source.rankMetric,
+        trend: source.trend,
+        minCount: source.minCount,
+        pageSize: source.pageSize,
+        snapshotPath: source.currentSnapshotPath || source.snapshotPath,
+      },
+      defaults,
+    );
+  }
+
+  function sanitizeQueryDraft(draft = {}, options = {}) {
+    const defaults = defaultQueryDraft(options.defaults || {});
+    const validRankMetrics = new Set(options.validRankMetrics || ["occurrences", "videos"]);
+    const validTrendFilters = new Set(options.validTrendFilters || ["all", "new", "up", "down"]);
+    const validMinCounts = new Set((options.validMinCounts || [1, 2, 5, 10]).map(Number));
+    const validPageSizes = new Set((options.validPageSizes || [50, 100]).map(Number));
+    const latestSnapshotPath = options.latestSnapshotPath || defaults.snapshotPath || "data/latest.json";
+    const snapshots = snapshotOptions({ latestSnapshotPath, snapshots: options.snapshots });
+    const snapshotPath = snapshots.find((entry) => entry.path === draft.snapshotPath)?.path || latestSnapshotPath;
+    const minCount = Number(draft.minCount);
+    const pageSize = Number(draft.pageSize);
+    const next = {
+      q: String(draft.q ?? "").trim().slice(0, 200),
+      nicheOnly: Boolean(draft.nicheOnly),
+      hideUnknownArtist: typeof draft.hideUnknownArtist === "boolean" ? draft.hideUnknownArtist : defaults.hideUnknownArtist,
+      rankMetric: validRankMetrics.has(draft.rankMetric) ? draft.rankMetric : defaults.rankMetric,
+      trend: validTrendFilters.has(draft.trend) ? draft.trend : defaults.trend,
+      minCount: validMinCounts.has(minCount) ? minCount : defaults.minCount,
+      pageSize: validPageSizes.has(pageSize) ? pageSize : defaults.pageSize,
+      snapshotPath,
+    };
+    if (snapshotPath !== latestSnapshotPath && options.disableTrendForSnapshots !== false) next.trend = "all";
+    return next;
+  }
+
+  function activeQueryConditionCount(draft = {}, options = {}) {
+    const normalized = sanitizeQueryDraft(draft, options);
+    const view = options.view || "songRank";
+    const latestSnapshotPath = options.latestSnapshotPath || "data/latest.json";
+    let count = 0;
+    if (normalized.q) count += 1;
+    if (normalized.nicheOnly) count += 1;
+    if (!normalized.hideUnknownArtist) count += 1;
+    if ((view === "songRank" || view === "artistRank") && normalized.rankMetric !== "occurrences") count += 1;
+    if ((view === "songRank" || view === "artistRank") && normalized.trend !== "all") count += 1;
+    if (view !== "videos" && normalized.minCount > 1) count += 1;
+    if (normalized.snapshotPath && normalized.snapshotPath !== latestSnapshotPath) count += 1;
+    return count;
+  }
+
   function parseBooleanParam(value, fallback) {
     if (value === null || typeof value === "undefined") return fallback;
     return ["1", "true", "yes", "on"].includes(String(value).toLocaleLowerCase());
@@ -971,6 +1042,7 @@
     createSnapshotLoader,
     createSongSearchLookup,
     createTrendLookup,
+    activeQueryConditionCount,
     filterItemsBySearch,
     filterItemsByNiche,
     filterOccurrencesBySearch,
@@ -988,12 +1060,15 @@
     normalizeSongSearchText,
     paginateItems,
     parseUrlState,
+    defaultQueryDraft,
+    makeQueryDraftFromState,
     compactSourceToggleModel,
     rankToggleModel,
     runtimeRangeMeta,
     runtimeRangePayloadFromGroup,
     runtimeRangePath,
     serializeUrlState,
+    sanitizeQueryDraft,
     shouldPrefetchRuntimeRange,
     shouldSkipSourceFilter,
     validateRuntimeRangePayload,
