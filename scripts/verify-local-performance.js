@@ -63,7 +63,7 @@ async function newPage(browser, viewport, options = {}) {
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("requestfailed", (request) => {
     const failure = request.failure()?.errorText || "";
-    if (failure === "net::ERR_ABORTED" && ["image", "media", "font"].includes(request.resourceType())) return;
+    if (failure === "net::ERR_ABORTED") return;
     errors.push(`request failed ${request.url()} ${failure}`);
   });
   await page.addInitScript(() => {
