@@ -15,6 +15,7 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(core, /cancel-in-progress:\s*false/u);
   assert.match(core, /cron:\s*"37 \* \* \* \*"/u);
   assert.match(core, /timeout-minutes:\s*35/u);
+  assert.match(core, /DAILY_SONG_MONTH_BACKFILL_TARGET:\s*"3000"/u);
   assert.match(core, /node scripts\/run-core-update\.js/u);
   assert.doesNotMatch(core, /review:build|build-review-queue|export-dirty-candidates/u);
   assert.match(core, /npm run mark:failure/u);

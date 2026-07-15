@@ -125,7 +125,7 @@ Useful environment variables:
 - `DAILY_SONG_VIDEO_CONCURRENCY`: concurrent watch-page inspections, default `2`; GitHub Actions uses `1` to reduce YouTube 429 pressure.
 - `DAILY_SONG_RECENT_BUCKET_LIMIT`: maximum candidates reserved for each recent bucket, default is based on `DAILY_SONG_VIDEO_LIMIT`; GitHub Actions uses `70`.
 - `DAILY_SONG_MONTH_REFRESH_LIMIT`: maximum monthly-filter candidates to refresh when carry-forward is active, default is based on `DAILY_SONG_VIDEO_LIMIT`; GitHub Actions uses `20`.
-- `DAILY_SONG_MONTH_BACKFILL_TARGET`: if carried monthly videos are below this target, prioritize monthly-filter candidates within the same inspection budget; GitHub Actions uses `320`.
+- `DAILY_SONG_MONTH_BACKFILL_TARGET`: if carried monthly videos are below this target, prioritize monthly-filter candidates within the same inspection budget; default is `DAILY_SONG_VIDEO_LIMIT * 18`, and GitHub Actions uses `3000` so the 35-day catalog keeps filling instead of stopping after the first thousand usable videos.
 - `DAILY_SONG_MONTH_BACKFILL_RECENT_BUCKET_LIMIT`: per-recent-bucket cap while monthly backfill is active, leaving more of `DAILY_SONG_VIDEO_LIMIT` for month-filter candidates; GitHub Actions uses `20`.
 - `DAILY_SONG_MYGIT_TODAY_SNAPSHOTS`: set to `0`, `false`, `off`, or `no` to disable reading `Marica7731/mygit` today snapshots as an extra video discovery source; default enabled.
 - `DAILY_SONG_MYGIT_RAW_BASE_URL`: raw GitHub base URL for the mygit repository, default `https://raw.githubusercontent.com/Marica7731/mygit/main`.
