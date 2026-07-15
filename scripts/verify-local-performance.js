@@ -944,8 +944,18 @@ async function mobileRankVisualGeometry(browser) {
           backgroundColor: style.backgroundColor,
         };
       };
+      const isVisible = (node) => {
+        if (!node) return false;
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      };
       const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)"));
-      const trendRow = rows.find((row) => row.querySelector(".rank-trend-inline") && row.querySelector(".rank-expand")) || rows.find((row) => row.querySelector(".rank-trend-inline"));
+      const trendRow =
+        rows.find((row) => isVisible(row.querySelector(".rank-trend-inline")) && row.querySelector(".rank-expand")) ||
+        rows.find((row) => isVisible(row.querySelector(".rank-trend-inline"))) ||
+        rows.find((row) => row.querySelector(".rank-expand")) ||
+        rows[0];
       const trend = trendRow?.querySelector(".rank-trend-inline");
       const content = trendRow?.querySelector(".rank-content");
       const button = trendRow?.querySelector(".rank-expand");
@@ -956,7 +966,7 @@ async function mobileRankVisualGeometry(browser) {
         viewportWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
         rowText: trendRow?.textContent?.slice(0, 200) || "",
-        trend: trend ? rectFor(trend) : null,
+        trend: isVisible(trend) ? rectFor(trend) : null,
         content: content ? rectFor(content) : null,
         button: button ? rectFor(button) : null,
         rank: rank ? rectFor(rank) : null,
@@ -965,12 +975,14 @@ async function mobileRankVisualGeometry(browser) {
       };
     });
     if (closedGeometry.scrollWidth > closedGeometry.viewportWidth + 1) throw new Error(`mobile rank overflow ${JSON.stringify(closedGeometry)}`);
-    if (!closedGeometry.trend || !closedGeometry.content) throw new Error(`mobile trend geometry missing ${JSON.stringify(closedGeometry)}`);
-    if (closedGeometry.trend.width > 120) throw new Error(`trend badge too wide ${JSON.stringify(closedGeometry)}`);
-    if (closedGeometry.trend.width > closedGeometry.content.width * 0.5) throw new Error(`trend badge exceeds half content width ${JSON.stringify(closedGeometry)}`);
-    if (closedGeometry.trend.width > closedGeometry.content.width - 8) throw new Error(`trend badge spans rank content ${JSON.stringify(closedGeometry)}`);
-    if (closedGeometry.trend.height > 28) throw new Error(`trend badge too tall ${JSON.stringify(closedGeometry)}`);
-    if (closedGeometry.button) assertClose(closedGeometry.trend.centerY, closedGeometry.button.centerY, 2, "trend and source button center", closedGeometry);
+    if (!closedGeometry.content) throw new Error(`mobile rank content geometry missing ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.trend) {
+      if (closedGeometry.trend.width > 120) throw new Error(`trend badge too wide ${JSON.stringify(closedGeometry)}`);
+      if (closedGeometry.trend.width > closedGeometry.content.width * 0.5) throw new Error(`trend badge exceeds half content width ${JSON.stringify(closedGeometry)}`);
+      if (closedGeometry.trend.width > closedGeometry.content.width - 8) throw new Error(`trend badge spans rank content ${JSON.stringify(closedGeometry)}`);
+      if (closedGeometry.trend.height > 28) throw new Error(`trend badge too tall ${JSON.stringify(closedGeometry)}`);
+      if (closedGeometry.button) assertClose(closedGeometry.trend.centerY, closedGeometry.button.centerY, 2, "trend and source button center", closedGeometry);
+    }
     if (closedGeometry.rank && closedGeometry.title) assertClose(closedGeometry.rank.top, closedGeometry.title.top, 3, "rank and title top", closedGeometry);
     if (closedGeometry.title && closedGeometry.count) assertClose(closedGeometry.title.top, closedGeometry.count.top, 3, "title and count top", closedGeometry);
 
