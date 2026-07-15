@@ -143,7 +143,7 @@ Useful environment variables:
 - `DAILY_SONG_SNAPSHOT_RETENTION_DAYS`: hourly snapshot retention, default `35`.
 - `DAILY_SONG_INSPECTION_CACHE_RETENTION_DAYS`: retention for videos that were inspected but did not produce usable songs, default matches snapshot retention.
 - `DAILY_SONG_INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS`: short skip window for videos that recently failed inspection, default `6`.
-- `DAILY_SONG_INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS`: only skip `no_usable_song_source` videos after the video itself is at least this old, default `48`. This keeps just-ended streams eligible for later reinspection while avoiding repeated work on two-day-old videos that still have no usable setlist.
+- `DAILY_SONG_INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS`: only skip videos with no usable setlist or no timestamp candidates after the video itself is at least this old, default `48`. This keeps just-ended streams eligible for later reinspection while avoiding repeated work on two-day-old videos that still have no usable setlist/progress comments.
 
 The mygit today snapshot integration is a discovery layer only. It reads remote snapshot JSON files, dedupes candidate video IDs, and then lets daily-song-list fetch and parse the watch page, description, comments, curation rules, catalog merge, and ranking exactly as before. No mygit snapshot copies are stored in this repository, so daily-song-list does not need a separate cleanup job for those upstream snapshots.
 

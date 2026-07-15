@@ -787,13 +787,17 @@ function collectInspectionCacheSkipIds(cache, nowMs) {
     if (ageMs < 0) continue;
     const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
     const videoAgeMs = Number.isFinite(publishedTimestamp) ? nowMs - publishedTimestamp : null;
-    if (item.result === "no_usable_song_source" && ageMs <= retentionMs && videoAgeMs !== null && videoAgeMs >= noUsableMinAgeMs) {
+    if (isAgedNegativeInspectionResult(item.result) && ageMs <= retentionMs && videoAgeMs !== null && videoAgeMs >= noUsableMinAgeMs) {
       skipVideoIds.add(item.videoId);
     } else if (item.result === "fetch_error" && ageMs <= fetchErrorTtlMs) {
       skipVideoIds.add(item.videoId);
     }
   }
   return skipVideoIds;
+}
+
+function isAgedNegativeInspectionResult(result) {
+  return result === "no_usable_song_source" || result === "no_timestamp_candidates";
 }
 
 function mergeInspectionCache(previousCache, audits, capturedAt) {

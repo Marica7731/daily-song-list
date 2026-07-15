@@ -125,7 +125,7 @@ test("dirty carried videos are normalized but left eligible for refresh", () => 
   assert.equal(carry.skipVideoIds.has("AAAAAAAAAAA"), false);
 });
 
-test("inspection cache skips only aged no-usable videos using real mygit published timestamps", () => {
+test("inspection cache skips only aged no-progress videos using real mygit published timestamps", () => {
   const realNowMs = Date.parse("2026-07-15T14:47:13Z");
   const cache = {
     videos: [
@@ -146,6 +146,15 @@ test("inspection cache skips only aged no-usable videos using real mygit publish
         lastInspectedAt: "2026-07-15T14:45:00.000Z",
         publishedText: "16 分前 に配信済み",
         publishedTimestamp: 1783952078609,
+      },
+      {
+        videoId: "oVMq3zFoWbQ",
+        title: "そろそろサムネ変えたいギター弾き語り配信",
+        channelName: "ういちチャンネル",
+        result: "no_timestamp_candidates",
+        lastInspectedAt: "2026-07-15T14:45:00.000Z",
+        publishedText: "1 時間前 に配信済み",
+        publishedTimestamp: 1783897178354,
       },
       {
         videoId: "kw83Fv8eEGQ",
@@ -170,6 +179,7 @@ test("inspection cache skips only aged no-usable videos using real mygit publish
 
   assert.equal(skipped.has("rimdGN6BGQ8"), false, "just-ended no-usable streams stay eligible for reinspection");
   assert.equal(skipped.has("QSaxZIHI774"), true, "two-day-old no-usable streams are skipped");
+  assert.equal(skipped.has("oVMq3zFoWbQ"), true, "two-day-old streams without timestamp candidates are skipped");
   assert.equal(skipped.has("kw83Fv8eEGQ"), true, "recent fetch errors get a short cooldown skip");
   assert.equal(skipped.has("Jpw04YF4V8o"), false, "fetch errors leave cooldown after the TTL");
 
@@ -178,7 +188,8 @@ test("inspection cache skips only aged no-usable videos using real mygit publish
   });
   assert.equal(carry.skipVideoIds.has("rimdGN6BGQ8"), false);
   assert.equal(carry.skipVideoIds.has("QSaxZIHI774"), true);
-  assert.equal(carry.inspectionCacheSkipCount, 2);
+  assert.equal(carry.skipVideoIds.has("oVMq3zFoWbQ"), true);
+  assert.equal(carry.inspectionCacheSkipCount, 3);
 });
 
 test("inspection cache merge records published timestamps and removes later selected videos", () => {
