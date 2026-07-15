@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-15T08:57:01.281Z",
+  "reviewId": "review:wpFOTcya9Nw:f8cfbb73abd0dcd8a890",
+  "video": {
+    "videoId": "wpFOTcya9Nw",
+    "title": "【 #ガンダム #歌枠 】初見さんもお気軽に聴いてってね！ガンダム歌枠🐥🪽【詩磨翼 / #初見歓迎 】",
+    "channelName": "詩磨 翼/Shima Tsubasa",
+    "youtubeUrl": "https://www.youtube.com/watch?v=wpFOTcya9Nw"
+  },
+  "source": {
+    "sourceId": "UgzND5scf-IfhPLLSGd4AaABAg",
+    "sourceHash": "f8cfbb73abd0dcd8a89021ae5452f109f1f1c0ef06058de61284e96f95b3d4e1",
+    "sourceType": "comment",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "配信お疲れ様でした！:_おつかれさま::_しまー:\n久しぶりのガンダム縛り歌枠楽しかった！！:_エレナガライト:\n\nGACKTさんver.歌ってる時の声格好良すぎ:_ちゅー:\n\n【個人用】\n1:03:04 可愛いありがと！\n1:03:30 可愛い離席の仕方",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 1,
+    "riskLevel": "low",
+    "riskReasons": []
+  },
+  "entries": [
+    {
+      "status": "accepted",
+      "seconds": 3810,
+      "time": "1:03:30",
+      "title": "可愛い離席の仕方",
+      "artist": "未記載",
+      "raw": "1:03:30 可愛い離席の仕方",
+      "rawHash": "bdbd74c91c3662b6e6504575a553f783cffd3639d3baa0fd9bd33fde02d11fc5",
+      "sourceId": "UgzND5scf-IfhPLLSGd4AaABAg",
+      "sourceHash": "f8cfbb73abd0dcd8a89021ae5452f109f1f1c0ef06058de61284e96f95b3d4e1",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
+      "positiveEvidence": [
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 3784,
+      "time": "1:03:04",
+      "title": "可愛いありがと！",
+      "artist": "未記載",
+      "raw": "1:03:04 可愛いありがと！",
+      "rawHash": "aa04bfc5892a6610e0345c29d0ef377574c0e993c4f127fa7c71d96749a17ac6",
+      "sourceId": "UgzND5scf-IfhPLLSGd4AaABAg",
+      "sourceHash": "f8cfbb73abd0dcd8a89021ae5452f109f1f1c0ef06058de61284e96f95b3d4e1",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T03:46:40.626Z",
+  "generatedAt": "2026-07-15T08:57:01.281Z",
   "reviewId": "review:kQVdDhuS2js:dbff8ac38f56e8488ef2",
   "video": {
     "videoId": "kQVdDhuS2js",
@@ -11,17 +11,19 @@
   "source": {
     "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
     "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "【セットリスト&タイムスタンプ】今日も楽しく歌わせていただきました( ๑´ސު｀๑)✨初見の方ともご縁が出来た嬉しい一枠でした✨お勧めの曲なども頂いたので、いろいろ聴いて歌えそうであればチャレンジしてみたいです！\n\n4:55 コットンキャンディーえいえいおー！/ラブライブ!\r\n13:15 もってけ!セーラーふく/らき☆すた\tLucky Star\r\n21:00 インパーフェクト/SSSS.DYNAZENON　ダイナゼノン\r\n29:00 夢冒険/アニメ三銃士\r\n35:50 アクティブ・ハート/トップをねらえ！\r\n44:15 走れ正直者/ちびまる子ちゃん\tChibi Maruko-chan\t\r\n51:25 素敵な君（アカペラ）\r\n57:12 ホームワークが終わらない/幽☆遊☆白書\tYuYu Hakusho",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 10,
+    "riskScore": 30,
     "riskLevel": "low",
     "riskReasons": [
-      "short_unknown_title"
+      "niche_unknown_artist",
+      "short_unknown_title",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -35,14 +37,13 @@
       "rawHash": "857b0c5e832be30e3a666aa912cc045d0781ab48a3ae050c59d3c40a8d9bbcad",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -62,8 +63,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -83,8 +83,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -92,19 +91,24 @@
       "seconds": 1740,
       "time": "0:29:00",
       "title": "夢冒険",
-      "artist": "アニメ三銃士",
+      "artist": "未記載",
       "raw": "29:00 夢冒険/アニメ三銃士",
       "rawHash": "83a0da7d69f60875dbdd9a57f92f0fd8532e750398faec3e0e97c2ef514912a7",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "isNiche": true,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "アニメ三銃士"
+      },
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "parser_corruption"
+      ],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -117,14 +121,13 @@
       "rawHash": "fdf11af66583a5c70007e304150315dc761d6252144d7e6824f802bcb1d5407a",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -144,8 +147,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -158,16 +160,15 @@
       "rawHash": "3c22c55a9d0369540fdc69b6be1082bae3746909ff8ffab89f8b3398a0c1b021",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -179,14 +180,13 @@
       "rawHash": "ea86ea98a6f1319d44b3dff20f8de093e6934ca2b61ec76ea2b4f8ce86046b5c",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     }
   ]

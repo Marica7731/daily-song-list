@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T03:46:40.626Z",
+  "generatedAt": "2026-07-15T08:57:01.281Z",
   "reviewId": "review:YWzh2Zvda44:cb2098731742491224d8",
   "video": {
     "videoId": "YWzh2Zvda44",
@@ -11,17 +11,19 @@
   "source": {
     "sourceId": "description:YWzh2Zvda44:cb20987317424912",
     "sourceHash": "cb2098731742491224d887a876d1a5663bed293bdfa2d09242aa502957184d8b",
-    "sourceType": "description",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "【新楓之谷】感冒可能有點鼻音，明天颱風假！｜兔子島島主🐰 閃炫代洗1:42  一次買100顆以上1:40，1000以上1:38 可分次洗#maplestory #tms",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 17,
-    "riskLevel": "low",
+    "riskScore": 37,
+    "riskLevel": "medium",
     "riskReasons": [
-      "source_multiple_unknown_artists"
+      "niche_unknown_artist",
+      "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -35,16 +37,15 @@
       "rawHash": "210dcd621240a9d827c9b352410efca5169afefa4be8be4c59ab5c005e77d99b",
       "sourceId": "description:YWzh2Zvda44:cb20987317424912",
       "sourceHash": "cb2098731742491224d887a876d1a5663bed293bdfa2d09242aa502957184d8b",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -56,16 +57,15 @@
       "rawHash": "104f32c5201733ad1eb79700a7360c563517a00bc75143376fdec943779c60fd",
       "sourceId": "description:YWzh2Zvda44:cb20987317424912",
       "sourceHash": "cb2098731742491224d887a876d1a5663bed293bdfa2d09242aa502957184d8b",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -77,16 +77,15 @@
       "rawHash": "5df0a9b70e3e6e055545db574a52c2f7d602e2225db05e420296ff9c449d025f",
       "sourceId": "description:YWzh2Zvda44:cb20987317424912",
       "sourceHash": "cb2098731742491224d887a876d1a5663bed293bdfa2d09242aa502957184d8b",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     }
   ]
 }

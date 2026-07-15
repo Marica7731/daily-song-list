@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T03:46:40.626Z",
+  "generatedAt": "2026-07-15T08:57:01.281Z",
   "reviewId": "review:UshWHilFl1s:0a906b0e607f3a8e6412",
   "video": {
     "videoId": "UshWHilFl1s",
@@ -11,17 +11,18 @@
   "source": {
     "sourceId": "Ugxay3M_2qKKxkIDHPZ4AaABAg",
     "sourceHash": "0a906b0e607f3a8e6412b8db41a27e9018095a921bf419e09ebbe9cd632591e9",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "気まぐれロマンティック (32:21)\nルーマー (50:26)\nカメレオン (58:36)\n可愛くてごめん (1:11:25)\nシルヴ・プレジデント (1:23:00)\nトウキョウ・シャンディ・ランデブー (1:57:33)\n\n自分用",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 14,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_unknown_artists"
+      "source_multiple_unknown_artists",
+      "niche_unknown_artist"
     ]
   },
   "entries": [
@@ -140,12 +141,13 @@
       "rawHash": "b3ee4229474f78c63ed9321be316b16335937e5fa279aea781fd3070855b8087",
       "sourceId": "Ugxay3M_2qKKxkIDHPZ4AaABAg",
       "sourceHash": "0a906b0e607f3a8e6412b8db41a27e9018095a921bf419e09ebbe9cd632591e9",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "needs_review",
       "suggestedAction": "manual_review",
+      "replacementSuggestion": null,
       "riskReasons": [
-        "source_multiple_unknown_artists",
-        "no_positive_song_evidence"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": []
     }
