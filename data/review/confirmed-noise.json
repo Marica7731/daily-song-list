@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T03:53:32.911Z",
+  "generatedAt": "2026-07-16T09:01:16.162Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-16T00:29:11.982Z",
+  "latestGeneratedAt": "2026-07-16T06:49:26.180Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 142,
-    "uniqueVideos": 41,
-    "uniqueSources": 58,
-    "confirmedNoiseCount": 142,
+    "totalCandidates": 127,
+    "uniqueVideos": 39,
+    "uniqueSources": 55,
+    "confirmedNoiseCount": 127,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 142,
+      "confirmed_noise": 127,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -350,120 +350,6 @@
       "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
       "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
       "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
-    },
-    {
-      "title": "オープニングトーク",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 286,
-      "time": "0:04:46",
-      "raw": "[0:04:46] ✨オープニングトーク",
-      "rawHash": "658e10d1fb4acf7f60b6c762c59c6c2e35f57d6345c8ee7a37a3ebf0ba66419d",
-      "videoId": "pxj2hf7ljuI",
-      "videoTitle": "【#歌枠】陽だまりボイスな天使のボカロ楽曲歌枠👼📯 #julyの方舟大航海 #vsinger",
-      "channelName": "July -ジュライ- 🌼 Vsinger",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI&t=286s",
-      "sourceId": "UgwXZa1czCyG2mI2LsR4AaABAg",
-      "sourceHash": "35ce0836a9f3476d611a02e7e96281831c50b724e50ade06ab9defdec2627241",
-      "sourceOrigin": "review:pxj2hf7ljuI-35ce0836a9f3476d611a.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:pxj2hf7ljuI:35ce0836a9f3476d611a",
-      "sourcePath": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json",
-      "reviewLocator": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json#658e10d1fb4acf7f60b6c762c59c6c2e35f57d6345c8ee7a37a3ebf0ba66419d"
-    },
-    {
-      "title": "エンディングトーク",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4907,
-      "time": "1:21:47",
-      "raw": "[1:21:47] 📯エンディングトーク",
-      "rawHash": "fcbb66807fdb4985a9f794025cb2b6a04553030aef7442a7029359fd2b862d5c",
-      "videoId": "pxj2hf7ljuI",
-      "videoTitle": "【#歌枠】陽だまりボイスな天使のボカロ楽曲歌枠👼📯 #julyの方舟大航海 #vsinger",
-      "channelName": "July -ジュライ- 🌼 Vsinger",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI&t=4907s",
-      "sourceId": "UgwXZa1czCyG2mI2LsR4AaABAg",
-      "sourceHash": "35ce0836a9f3476d611a02e7e96281831c50b724e50ade06ab9defdec2627241",
-      "sourceOrigin": "review:pxj2hf7ljuI-35ce0836a9f3476d611a.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:pxj2hf7ljuI:35ce0836a9f3476d611a",
-      "sourcePath": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json",
-      "reviewLocator": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json#fcbb66807fdb4985a9f794025cb2b6a04553030aef7442a7029359fd2b862d5c"
-    },
-    {
-      "title": "エンディング曲「うたたね」(オリジナル曲)",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6516,
-      "time": "1:48:36",
-      "raw": "[1:48:36] 🎵エンディング曲「うたたね」(オリジナル曲)",
-      "rawHash": "cab4873b88b3c80d2d548fd9183effb10b41f4334690a3c5459780677a68de7b",
-      "videoId": "pxj2hf7ljuI",
-      "videoTitle": "【#歌枠】陽だまりボイスな天使のボカロ楽曲歌枠👼📯 #julyの方舟大航海 #vsinger",
-      "channelName": "July -ジュライ- 🌼 Vsinger",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI&t=6516s",
-      "sourceId": "UgwXZa1czCyG2mI2LsR4AaABAg",
-      "sourceHash": "35ce0836a9f3476d611a02e7e96281831c50b724e50ade06ab9defdec2627241",
-      "sourceOrigin": "review:pxj2hf7ljuI-35ce0836a9f3476d611a.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:pxj2hf7ljuI:35ce0836a9f3476d611a",
-      "sourcePath": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json",
-      "reviewLocator": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json#cab4873b88b3c80d2d548fd9183effb10b41f4334690a3c5459780677a68de7b"
     },
     {
       "title": "終わりのあいさつ",
@@ -969,24 +855,24 @@
       "reviewLocator": "data/review/sources/history-8KDs7OP6_KM-92d430c2418abbe57f06.json#aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7"
     },
     {
-      "title": "10",
-      "artist": "07/2026",
+      "title": "をうかさんの『風待ちジェット』が聴きたい！！ってここ最近ずっと思っていたので、歌って貰えて本当に嬉しい",
+      "artist": "未記載",
       "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "Z32GSHaRkZ0",
-      "videoTitle": "チルい弾き語り歌枠【うるわし えも】#新人Vtuber",
-      "channelName": "うるわし えも【Uruwashi Emo】🪶🐙",
+      "isUnknownArtist": true,
+      "seconds": 6855,
+      "time": "1:54:15",
+      "raw": "1:54:15 をうかさんの『風待ちジェット』が聴きたい！！ってここ最近ずっと思っていたので、歌って貰えて本当に嬉しい:_bikurimark::_shuku:",
+      "rawHash": "9d87551c8fda4ec9c5a27f0112a87c55c3023fe64719a6b2124d7958baed7a58",
+      "videoId": "20OiQfiWXp8",
+      "videoTitle": "【歌枠】今日はリクエスト曲を歌いたい気分🥂初見さんも大歓迎♫｜karaoke【wouca : RK Music】#utawouca 51",
+      "channelName": "wouca",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Z32GSHaRkZ0",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Z32GSHaRkZ0&t=240s",
-      "sourceId": "description:Z32GSHaRkZ0:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:Z32GSHaRkZ0-b9e788e059bd3238a48e.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=20OiQfiWXp8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=20OiQfiWXp8&t=6855s",
+      "sourceId": "UgwMQnc92knyuZL4otl4AaABAg",
+      "sourceHash": "aaf3427f3f132775d1421a5a4492978843206e47348ce1b5103067e6abf9aea0",
+      "sourceOrigin": "review:20OiQfiWXp8-aaf3427f3f132775d142.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -996,82 +882,12 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "source_level_likely_non_song_entry"
+        "title_only_non_song_candidate"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:Z32GSHaRkZ0:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/Z32GSHaRkZ0-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/Z32GSHaRkZ0-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
-    },
-    {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "DE_8a-bZq1I",
-      "videoTitle": "〖#歌枠 〗初見さん大歓迎!! 物語シリーズ縛り歌枠〖#新人vtuber /#おばけなの 〗",
-      "channelName": "おばけなの / Obake Nano ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=DE_8a-bZq1I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DE_8a-bZq1I&t=240s",
-      "sourceId": "description:DE_8a-bZq1I:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:DE_8a-bZq1I-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:DE_8a-bZq1I:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/DE_8a-bZq1I-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/DE_8a-bZq1I-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
-    },
-    {
-      "title": "12",
-      "artist": "06/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 12/06/2026 | Live Ao vivo",
-      "rawHash": "99b29933ad4cac79f704775cfe1b15a41ddd25e5c7f0f9b3bae32195f85b46f0",
-      "videoId": "DE_8a-bZq1I",
-      "videoTitle": "〖#歌枠 〗初見さん大歓迎!! 物語シリーズ縛り歌枠〖#新人vtuber /#おばけなの 〗",
-      "channelName": "おばけなの / Obake Nano ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=DE_8a-bZq1I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DE_8a-bZq1I&t=240s",
-      "sourceId": "description:DE_8a-bZq1I:99b29933ad4cac79",
-      "sourceHash": "99b29933ad4cac79f704775cfe1b15a41ddd25e5c7f0f9b3bae32195f85b46f0",
-      "sourceOrigin": "review:DE_8a-bZq1I-99b29933ad4cac79f704.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:DE_8a-bZq1I:99b29933ad4cac79f704",
-      "sourcePath": "data/review/sources/DE_8a-bZq1I-99b29933ad4cac79f704.json",
-      "reviewLocator": "data/review/sources/DE_8a-bZq1I-99b29933ad4cac79f704.json#99b29933ad4cac79f704775cfe1b15a41ddd25e5c7f0f9b3bae32195f85b46f0"
+      "reviewId": "review:20OiQfiWXp8:aaf3427f3f132775d142",
+      "sourcePath": "data/review/sources/20OiQfiWXp8-aaf3427f3f132775d142.json",
+      "reviewLocator": "data/review/sources/20OiQfiWXp8-aaf3427f3f132775d142.json#9d87551c8fda4ec9c5a27f0112a87c55c3023fe64719a6b2124d7958baed7a58"
     },
     {
       "title": "企画説明",
@@ -1165,462 +981,6 @@
       "reviewId": "review:LIvCuQkMnVE:c545a9f2939f62a3983a",
       "sourcePath": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json",
       "reviewLocator": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json#49ace4d8ff76b11cacad06ea1ae3f39f9c749d81c8d547fba4a0525048970f51"
-    },
-    {
-      "title": "Opening",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 0,
-      "time": "0:00:00",
-      "raw": "00:00:00 Opening",
-      "rawHash": "0b0757b6fb0e9798787dce32ae390be5ccc9b6f6423d5ea40f031418b6f41330",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=0s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#0b0757b6fb0e9798787dce32ae390be5ccc9b6f6423d5ea40f031418b6f41330"
-    },
-    {
-      "title": "KANGOL REWARDコラボ第3弾決定しました！",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 3933,
-      "time": "1:05:33",
-      "raw": "01:05:33 KANGOL REWARDコラボ第3弾決定しました！",
-      "rawHash": "d91cbf3e6a6c1b0717b5d45536b835c19a514620a56932eb4466bd63c50a9c31",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=3933s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#d91cbf3e6a6c1b0717b5d45536b835c19a514620a56932eb4466bd63c50a9c31"
-    },
-    {
-      "title": "昨日撮影してきたばかり",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4043,
-      "time": "1:07:23",
-      "raw": "01:07:23 昨日撮影してきたばかり",
-      "rawHash": "22f71d21e1f180931cc83bec9f2faf76f1e32d05cd6af735505f5e86ef2c30b6",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=4043s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#22f71d21e1f180931cc83bec9f2faf76f1e32d05cd6af735505f5e86ef2c30b6"
-    },
-    {
-      "title": "今回は4種類でます！",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4120,
-      "time": "1:08:40",
-      "raw": "01:08:40 今回は4種類でます！",
-      "rawHash": "a594af1ce8ea6e8369a8247785275f921f8f0f32a1521cb3f9b2d65eae32ce01",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=4120s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#a594af1ce8ea6e8369a8247785275f921f8f0f32a1521cb3f9b2d65eae32ce01"
-    },
-    {
-      "title": "撮影時間5時間",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4352,
-      "time": "1:12:32",
-      "raw": "01:12:32 撮影時間5時間",
-      "rawHash": "adb712c92a9871fa52614a1f9e9372d957d511db859615813410ecaa9ccb723c",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=4352s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#adb712c92a9871fa52614a1f9e9372d957d511db859615813410ecaa9ccb723c"
-    },
-    {
-      "title": "ゲップ出そうになった",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4730,
-      "time": "1:18:50",
-      "raw": "01:18:50 ゲップ出そうになった",
-      "rawHash": "6d3efe42e71800fd80a10acf6222e9b0d7d69874d401cca39a7e8f4195f2bdc7",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=4730s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#6d3efe42e71800fd80a10acf6222e9b0d7d69874d401cca39a7e8f4195f2bdc7"
-    },
-    {
-      "title": "次回配信予定",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 11593,
-      "time": "3:13:13",
-      "raw": "03:13:13 次回配信予定",
-      "rawHash": "c34566d477131130f1ed6090bc70fb225a056d14939ee482956b829f75192b17",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=11593s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#c34566d477131130f1ed6090bc70fb225a056d14939ee482956b829f75192b17"
-    },
-    {
-      "title": "陸上のお話し",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 12099,
-      "time": "3:21:39",
-      "raw": "03:21:39 陸上のお話し",
-      "rawHash": "4baf6117963c7caa45a01d945f3a984a18da770b64934833bbc05483d484efde",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12099s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#4baf6117963c7caa45a01d945f3a984a18da770b64934833bbc05483d484efde"
-    },
-    {
-      "title": "裸足は走りやすいよね→走ったことないけど",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 12358,
-      "time": "3:25:58",
-      "raw": "03:25:58 裸足は走りやすいよね→走ったことないけど",
-      "rawHash": "ed2795d896f79583cfed6ba2241f8e4920b876c6b83eae5f99bc1d46885436ea",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12358s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "activity_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#ed2795d896f79583cfed6ba2241f8e4920b876c6b83eae5f99bc1d46885436ea"
-    },
-    {
-      "title": "リコーダー発表で笑ったお話し",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 12610,
-      "time": "3:30:10",
-      "raw": "03:30:10 リコーダー発表で笑ったお話し",
-      "rawHash": "9a73dab3e92069e2be3cf27b6bc9685e79fbd4b2b04da53f103ba3f28ba80c74",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12610s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#9a73dab3e92069e2be3cf27b6bc9685e79fbd4b2b04da53f103ba3f28ba80c74"
-    },
-    {
-      "title": "合唱で笑ったお話し",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 12819,
-      "time": "3:33:39",
-      "raw": "03:33:39 合唱で笑ったお話し",
-      "rawHash": "ae708772889213a82b40197e16d26d3a3d7c48b284c7f06a6d26d1f80f2a38e0",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12819s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#ae708772889213a82b40197e16d26d3a3d7c48b284c7f06a6d26d1f80f2a38e0"
-    },
-    {
-      "title": "Endingトーク＆ED曲S☆MILE",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 12908,
-      "time": "3:35:08",
-      "raw": "03:35:08 Endingトーク＆ED曲S☆MILE",
-      "rawHash": "84dc85d1b5479161c819b6f8eea8203b2184df63cbe6f8af4e84913f7d32f42d",
-      "videoId": "8BXdn5BJE9I",
-      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
-      "channelName": "みかんとボーカルノート",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12908s",
-      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
-      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
-      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
-      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
-      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#84dc85d1b5479161c819b6f8eea8203b2184df63cbe6f8af4e84913f7d32f42d"
     },
     {
       "title": "曲終わり",
@@ -4209,6 +3569,88 @@
       "reviewId": "review:qENxBvbn29Y:d20b81982796f791041d",
       "sourcePath": "data/review/sources/history-qENxBvbn29Y-d20b81982796f791041d.json",
       "reviewLocator": "data/review/sources/history-qENxBvbn29Y-d20b81982796f791041d.json#1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
+    },
+    {
+      "title": "オープニングトーク",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 106,
+      "time": "0:01:46",
+      "raw": "0:01:46 オープニングトーク",
+      "rawHash": "105792dad071d5f4b0a38a168cd441329b6fec106c8a09fab30cd33fc11d519a",
+      "videoId": "3HsBNG-zTjo",
+      "videoTitle": "【#アニソン歌枠 #らんちぅ寿希】おたよりは来るのか！？君の眠気を極熱ヴォイスで吹っ飛ばす【#Vtuber #KARAOKE】",
+      "channelName": "らんちぅ寿希Live",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3HsBNG-zTjo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3HsBNG-zTjo&t=106s",
+      "sourceId": "UgxIWHWl_8cSgmL6xUp4AaABAg",
+      "sourceHash": "f85d973ff748059e66e2c6f68c6b90f0289697fae8f47c0e0e651f4f49808440",
+      "sourceOrigin": "review:3HsBNG-zTjo-f85d973ff748059e66e2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "activity_marker_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries",
+        "source_many_activity_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3HsBNG-zTjo:f85d973ff748059e66e2",
+      "sourcePath": "data/review/sources/3HsBNG-zTjo-f85d973ff748059e66e2.json",
+      "reviewLocator": "data/review/sources/3HsBNG-zTjo-f85d973ff748059e66e2.json#105792dad071d5f4b0a38a168cd441329b6fec106c8a09fab30cd33fc11d519a"
+    },
+    {
+      "title": "エンディングトーク",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 10691,
+      "time": "2:58:11",
+      "raw": "2:58:11 エンディングトーク",
+      "rawHash": "48658757ae9fcdb1a598d2a18f372ae06b7e99ed6d49728e88d2efd6a8d3eb54",
+      "videoId": "3HsBNG-zTjo",
+      "videoTitle": "【#アニソン歌枠 #らんちぅ寿希】おたよりは来るのか！？君の眠気を極熱ヴォイスで吹っ飛ばす【#Vtuber #KARAOKE】",
+      "channelName": "らんちぅ寿希Live",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3HsBNG-zTjo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3HsBNG-zTjo&t=10691s",
+      "sourceId": "UgxIWHWl_8cSgmL6xUp4AaABAg",
+      "sourceHash": "f85d973ff748059e66e2c6f68c6b90f0289697fae8f47c0e0e651f4f49808440",
+      "sourceOrigin": "review:3HsBNG-zTjo-f85d973ff748059e66e2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries",
+        "source_many_activity_entries",
+        "activity_marker_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries",
+        "source_many_activity_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3HsBNG-zTjo:f85d973ff748059e66e2",
+      "sourcePath": "data/review/sources/3HsBNG-zTjo-f85d973ff748059e66e2.json",
+      "reviewLocator": "data/review/sources/3HsBNG-zTjo-f85d973ff748059e66e2.json#48658757ae9fcdb1a598d2a18f372ae06b7e99ed6d49728e88d2efd6a8d3eb54"
     },
     {
       "title": "おつくわタイム",

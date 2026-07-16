@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T03:49:38.843Z",
+  "generatedAt": "2026-07-16T08:57:09.053Z",
   "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
   "video": {
     "videoId": "MrGxz0q6Py0",
@@ -77,19 +77,13 @@
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "title": "八月の夜",
-        "artist": "SILENT SIREN"
-      },
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
-        "parser_corruption"
+        "source_multiple_unknown_artists",
+        "no_positive_song_evidence"
       ],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -242,19 +236,13 @@
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
       "isNiche": false,
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "replacementSuggestion": {
-        "title": "パラソルサイダー",
-        "artist": "ナナホシ管弦楽団"
-      },
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "riskReasons": [
-        "parser_corruption"
+        "source_multiple_unknown_artists",
+        "no_positive_song_evidence"
       ],
-      "positiveEvidence": [
-        "known_song",
-        "known_artist"
-      ]
+      "positiveEvidence": []
     }
   ]
 }
