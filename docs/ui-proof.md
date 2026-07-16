@@ -69,9 +69,9 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Mobile no source row](assets/screenshots/mobile-source-inline-0.png) | ![Mobile one source thumbnail](assets/screenshots/mobile-source-inline-1.png) | ![Mobile two source thumbnails](assets/screenshots/mobile-source-inline-2.png) |
 
-| 3 sources | 4+ collapsed | 4+ expanded |
+| 3 sources compact | 4+ collapsed | 4+ expanded |
 | --- | --- | --- |
-| ![Mobile three source thumbnail tail](assets/screenshots/mobile-source-inline-3.png) | ![Mobile more source collapsed](assets/screenshots/mobile-source-more-than-3.png) | ![Mobile more source expanded](assets/screenshots/mobile-source-more-than-3-expanded.png) |
+| ![Mobile three-source row with two inline thumbnails and one compact remaining-source action](assets/screenshots/mobile-source-inline-3.png) | ![Mobile more source collapsed](assets/screenshots/mobile-source-more-than-3.png) | ![Mobile more source expanded](assets/screenshots/mobile-source-more-than-3-expanded.png) |
 
 | Sources new-to-old | Thumbnail fallback | Long channel name |
 | --- | --- | --- |

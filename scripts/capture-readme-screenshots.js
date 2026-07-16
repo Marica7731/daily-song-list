@@ -170,6 +170,23 @@ async function warmImagesInElement(page, locator, selector = "img") {
   await locator.scrollIntoViewIfNeeded().catch(() => {});
 }
 
+async function scrollElementNearTop(page, locator) {
+  await locator.evaluate((node) => {
+    const controls = document.querySelector(".controls");
+    const controlsBox = controls?.getBoundingClientRect();
+    const controlsStyle = controls ? getComputedStyle(controls) : null;
+    const stickyOffset =
+      controlsBox && controlsStyle?.display !== "none" && controlsStyle?.visibility !== "hidden"
+        ? Math.max(12, controlsBox.bottom + 8)
+        : window.matchMedia?.("(max-width: 720px)")?.matches
+          ? 52
+          : 12;
+    const top = window.scrollY + node.getBoundingClientRect().top - stickyOffset;
+    window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+  });
+  await sleep(150);
+}
+
 async function save(page, name, options = {}) {
   await assertNoPageOverflow(page, name);
   await assertNoVisibleClipping(page, name);
@@ -278,6 +295,7 @@ async function captureExpandedSource(browser, viewport, params, name) {
   const expandedRow = page.locator(".rank-row.is-expanded, .index-row.is-expanded").first();
   await warmImagesInElement(page, expandedRow, ".source-drawer .source-video-thumb");
   await assertExpandedSourceVisible(page, expandedRow, name);
+  await scrollElementNearTop(page, expandedRow);
   await sleep(500);
   await save(page, name, { viewport, params, selector: ".rank-row.is-expanded, .index-row.is-expanded" });
   await page.close();
@@ -335,12 +353,7 @@ async function captureSourceCase(browser, viewport, kind, name, options = {}) {
     await assertInlineSourceCase(page, row, kind, name);
   }
   if (options.viewportOnly) {
-    await row.evaluate((node) => {
-      const stickyOffset = window.matchMedia?.("(max-width: 720px)")?.matches ? 52 : 12;
-      const top = window.scrollY + node.getBoundingClientRect().top - stickyOffset;
-      window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
-    });
-    await sleep(150);
+    await scrollElementNearTop(page, row);
     await save(page, name, { viewport, params: found.params, selector: `.rank-row source-${kind}` });
   } else {
     await saveElement(page, row, name, { minBytes: kind === "single" ? 4_000 : 6_000, viewport, params: found.params, selector: `.rank-row source-${kind}` });
@@ -1174,6 +1187,10 @@ function publishScreenshots() {
     proofInputs,
     screenshots,
   };
+  const missingFiles = expectedScreenshots.filter((name) => !fs.existsSync(path.join(workDir, name)));
+  if (missingFiles.length) {
+    throw new Error(`missing generated screenshot files before publish: ${missingFiles.join(", ")}`);
+  }
   for (const name of expectedScreenshots) {
     fs.copyFileSync(path.join(workDir, name), path.join(outputDir, name));
   }

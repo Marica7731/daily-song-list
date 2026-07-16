@@ -132,7 +132,11 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--filter-control-height\);[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.match(indexSource, /class="query-tabs"[\s\S]*data-query-panel-tab="search"[\s\S]*data-query-panel-tab="filter"/u);
   assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: auto auto;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\s*\{[\s\S]*height: auto;[\s\S]*max-height: min\(calc\(var\(--visual-viewport-height\) - 10px\), 84dvh\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel-body\s*\{[\s\S]*padding-bottom: 16px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\.is-filter-tab \.query-panel-body\s*\{[\s\S]*padding-bottom: calc\(144px \+ env\(safe-area-inset-bottom\)\);/u);
   assert.match(appSource, /function setQueryPanelTab/u);
+  assert.match(appSource, /els\.queryPanel\?\.classList\.toggle\("is-filter-tab", targetName === "filter"\)/u);
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"\. drawer drawer"/u);
   assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
   assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
@@ -173,6 +177,16 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(verifySource, /sourceCountFromText/u);
   assert.match(verifySource, /query-panel-bottom-\$\{viewport\.join\("x"\)\}\.png/u);
   assert.match(verifySource, /rank-expanded-trend-\$\{viewport\.join\("x"\)\}\.png/u);
+});
+
+test("mobile source preview contract matches compact documentation", () => {
+  const readmeSource = fs.readFileSync(path.join(__dirname, "..", "README.md"), "utf8");
+  const specSource = fs.readFileSync(path.join(__dirname, "..", "docs", "ui-spec.md"), "utf8");
+  assert.match(appSource, /SOURCE_INLINE_LIMITS\s*=\s*\{[\s\S]*mobile: 2,[\s\S]*tablet: 3,[\s\S]*desktop: 3,/u);
+  assert.match(readmeSource, /Mobile three-source row with two inline thumbnails and one compact remaining-source action/u);
+  assert.match(specSource, /3 个唯一来源视频：移动端默认内联前 2 个真实来源/u);
+  assert.doesNotMatch(readmeSource, /Mobile three source inline row with thumbnail tail action/u);
+  assert.doesNotMatch(specSource, /3 个唯一来源视频：手机两列布局/u);
 });
 
 test("desktop and tablet contracts use explicit responsive layout", () => {

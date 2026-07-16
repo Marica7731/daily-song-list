@@ -955,6 +955,8 @@ function renderSearchSuggestions(query, draft = state.queryDraft || makeQueryDra
 
 function setQueryPanelTab(tabName = "search", options = {}) {
   const targetName = tabName === "filter" ? "filter" : "search";
+  els.queryPanel?.classList.toggle("is-filter-tab", targetName === "filter");
+  els.queryPanel?.classList.toggle("is-search-tab", targetName !== "filter");
   for (const tab of els.queryTabButtons) {
     const active = (tab.dataset.queryPanelTab || "search") === targetName;
     tab.classList.toggle("is-active", active);

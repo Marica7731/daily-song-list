@@ -3774,7 +3774,7 @@ mark {
     bottom: var(--visual-viewport-bottom);
     left: 0;
     width: 100%;
-    height: min(calc(var(--visual-viewport-height) - 10px), 84dvh);
+    height: auto;
     max-height: min(calc(var(--visual-viewport-height) - 10px), 84dvh);
     border-radius: var(--radius-panel) var(--radius-panel) 0 0;
   }
@@ -3791,7 +3791,11 @@ mark {
   }
 
   .query-panel-body {
-    padding-bottom: calc(148px + env(safe-area-inset-bottom));
+    padding-bottom: 16px;
+  }
+
+  .query-panel.is-filter-tab .query-panel-body {
+    padding-bottom: calc(144px + env(safe-area-inset-bottom));
   }
 
   .query-panel-footer {
