@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T19:47:36.700Z",
+  "generatedAt": "2026-07-16T03:49:38.843Z",
   "reviewId": "review:-3iD7lEd7ik:052f0f63ea49fd0a6231",
   "video": {
     "videoId": "-3iD7lEd7ik",
@@ -11,17 +11,18 @@
   "source": {
     "sourceId": "Ugy6ippR_oqJuVL0twd4AaABAg",
     "sourceHash": "052f0f63ea49fd0a6231ad2ea06bf96cc015aa8423bd87b9f96d39d5045ba52b",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "6:40　   Bling-Bang-Bang-Born\n10:27　Bling-Bang-Bang-Born\n13:33　Bling-Bang-Bang-Born\n16:47　Bling-Bang-Bang-Born\n20:50　スカ―\n26:20　Bling-Bang-Bang-Born",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 24,
+    "riskScore": 30,
     "riskLevel": "low",
     "riskReasons": [
       "source_multiple_unknown_artists",
+      "niche_unknown_artist",
       "short_unknown_title"
     ]
   },
@@ -44,8 +45,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -66,8 +66,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -88,8 +87,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -110,8 +108,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -124,17 +121,16 @@
       "rawHash": "a9e13319b71492abac777037275a042b6f6623db7fdd4491faba46a71d0bfe7f",
       "sourceId": "Ugy6ippR_oqJuVL0twd4AaABAg",
       "sourceHash": "052f0f63ea49fd0a6231ad2ea06bf96cc015aa8423bd87b9f96d39d5045ba52b",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -154,8 +150,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     }
   ]

@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-15T19:50:01.721Z",
+  "generatedAt": "2026-07-16T03:53:32.911Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-15T18:30:22.026Z",
+  "latestGeneratedAt": "2026-07-16T00:29:11.982Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 145,
-    "uniqueVideos": 44,
-    "uniqueSources": 65,
-    "confirmedNoiseCount": 145,
+    "totalCandidates": 142,
+    "uniqueVideos": 41,
+    "uniqueSources": 58,
+    "confirmedNoiseCount": 142,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 145,
+      "confirmed_noise": 142,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -352,6 +352,120 @@
       "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
     },
     {
+      "title": "オープニングトーク",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 286,
+      "time": "0:04:46",
+      "raw": "[0:04:46] ✨オープニングトーク",
+      "rawHash": "658e10d1fb4acf7f60b6c762c59c6c2e35f57d6345c8ee7a37a3ebf0ba66419d",
+      "videoId": "pxj2hf7ljuI",
+      "videoTitle": "【#歌枠】陽だまりボイスな天使のボカロ楽曲歌枠👼📯 #julyの方舟大航海 #vsinger",
+      "channelName": "July -ジュライ- 🌼 Vsinger",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI&t=286s",
+      "sourceId": "UgwXZa1czCyG2mI2LsR4AaABAg",
+      "sourceHash": "35ce0836a9f3476d611a02e7e96281831c50b724e50ade06ab9defdec2627241",
+      "sourceOrigin": "review:pxj2hf7ljuI-35ce0836a9f3476d611a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:pxj2hf7ljuI:35ce0836a9f3476d611a",
+      "sourcePath": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json",
+      "reviewLocator": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json#658e10d1fb4acf7f60b6c762c59c6c2e35f57d6345c8ee7a37a3ebf0ba66419d"
+    },
+    {
+      "title": "エンディングトーク",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4907,
+      "time": "1:21:47",
+      "raw": "[1:21:47] 📯エンディングトーク",
+      "rawHash": "fcbb66807fdb4985a9f794025cb2b6a04553030aef7442a7029359fd2b862d5c",
+      "videoId": "pxj2hf7ljuI",
+      "videoTitle": "【#歌枠】陽だまりボイスな天使のボカロ楽曲歌枠👼📯 #julyの方舟大航海 #vsinger",
+      "channelName": "July -ジュライ- 🌼 Vsinger",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI&t=4907s",
+      "sourceId": "UgwXZa1czCyG2mI2LsR4AaABAg",
+      "sourceHash": "35ce0836a9f3476d611a02e7e96281831c50b724e50ade06ab9defdec2627241",
+      "sourceOrigin": "review:pxj2hf7ljuI-35ce0836a9f3476d611a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:pxj2hf7ljuI:35ce0836a9f3476d611a",
+      "sourcePath": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json",
+      "reviewLocator": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json#fcbb66807fdb4985a9f794025cb2b6a04553030aef7442a7029359fd2b862d5c"
+    },
+    {
+      "title": "エンディング曲「うたたね」(オリジナル曲)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6516,
+      "time": "1:48:36",
+      "raw": "[1:48:36] 🎵エンディング曲「うたたね」(オリジナル曲)",
+      "rawHash": "cab4873b88b3c80d2d548fd9183effb10b41f4334690a3c5459780677a68de7b",
+      "videoId": "pxj2hf7ljuI",
+      "videoTitle": "【#歌枠】陽だまりボイスな天使のボカロ楽曲歌枠👼📯 #julyの方舟大航海 #vsinger",
+      "channelName": "July -ジュライ- 🌼 Vsinger",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=pxj2hf7ljuI&t=6516s",
+      "sourceId": "UgwXZa1czCyG2mI2LsR4AaABAg",
+      "sourceHash": "35ce0836a9f3476d611a02e7e96281831c50b724e50ade06ab9defdec2627241",
+      "sourceOrigin": "review:pxj2hf7ljuI-35ce0836a9f3476d611a.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:pxj2hf7ljuI:35ce0836a9f3476d611a",
+      "sourcePath": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json",
+      "reviewLocator": "data/review/sources/pxj2hf7ljuI-35ce0836a9f3476d611a.json#cab4873b88b3c80d2d548fd9183effb10b41f4334690a3c5459780677a68de7b"
+    },
+    {
       "title": "終わりのあいさつ",
       "artist": "未記載",
       "isNiche": true,
@@ -523,41 +637,6 @@
       "reviewId": "review:71OSYnx-Vy0:6bb534ac466b1ca21974",
       "sourcePath": "data/review/sources/history-71OSYnx-Vy0-6bb534ac466b1ca21974.json",
       "reviewLocator": "data/review/sources/history-71OSYnx-Vy0-6bb534ac466b1ca21974.json#8e29b1e12cea7240ad8e350418da67674f6d75c7aaf47b5610f686f58914c0b4"
-    },
-    {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "-3iD7lEd7ik",
-      "videoTitle": "【 #歌枠 】5周年ライブまで毎日歌練習#7【練習配信】 #vtuber #浅葱サキ #バーチャルyoutuber 声優 #shorts",
-      "channelName": "Saki Ch. 浅葱サキ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=-3iD7lEd7ik",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-3iD7lEd7ik&t=240s",
-      "sourceId": "description:-3iD7lEd7ik:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:-3iD7lEd7ik-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:-3iD7lEd7ik:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/-3iD7lEd7ik-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/-3iD7lEd7ik-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "おつウタノン",
@@ -890,6 +969,111 @@
       "reviewLocator": "data/review/sources/history-8KDs7OP6_KM-92d430c2418abbe57f06.json#aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7"
     },
     {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "Z32GSHaRkZ0",
+      "videoTitle": "チルい弾き語り歌枠【うるわし えも】#新人Vtuber",
+      "channelName": "うるわし えも【Uruwashi Emo】🪶🐙",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Z32GSHaRkZ0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Z32GSHaRkZ0&t=240s",
+      "sourceId": "description:Z32GSHaRkZ0:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:Z32GSHaRkZ0-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Z32GSHaRkZ0:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/Z32GSHaRkZ0-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/Z32GSHaRkZ0-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "DE_8a-bZq1I",
+      "videoTitle": "〖#歌枠 〗初見さん大歓迎!! 物語シリーズ縛り歌枠〖#新人vtuber /#おばけなの 〗",
+      "channelName": "おばけなの / Obake Nano ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=DE_8a-bZq1I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DE_8a-bZq1I&t=240s",
+      "sourceId": "description:DE_8a-bZq1I:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:DE_8a-bZq1I-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:DE_8a-bZq1I:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/DE_8a-bZq1I-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/DE_8a-bZq1I-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+    },
+    {
+      "title": "12",
+      "artist": "06/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 12/06/2026 | Live Ao vivo",
+      "rawHash": "99b29933ad4cac79f704775cfe1b15a41ddd25e5c7f0f9b3bae32195f85b46f0",
+      "videoId": "DE_8a-bZq1I",
+      "videoTitle": "〖#歌枠 〗初見さん大歓迎!! 物語シリーズ縛り歌枠〖#新人vtuber /#おばけなの 〗",
+      "channelName": "おばけなの / Obake Nano ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=DE_8a-bZq1I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=DE_8a-bZq1I&t=240s",
+      "sourceId": "description:DE_8a-bZq1I:99b29933ad4cac79",
+      "sourceHash": "99b29933ad4cac79f704775cfe1b15a41ddd25e5c7f0f9b3bae32195f85b46f0",
+      "sourceOrigin": "review:DE_8a-bZq1I-99b29933ad4cac79f704.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:DE_8a-bZq1I:99b29933ad4cac79f704",
+      "sourcePath": "data/review/sources/DE_8a-bZq1I-99b29933ad4cac79f704.json",
+      "reviewLocator": "data/review/sources/DE_8a-bZq1I-99b29933ad4cac79f704.json#99b29933ad4cac79f704775cfe1b15a41ddd25e5c7f0f9b3bae32195f85b46f0"
+    },
+    {
       "title": "企画説明",
       "artist": "未記載",
       "isNiche": true,
@@ -937,41 +1121,6 @@
       "reviewLocator": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json#157a1fd8246db0b268cff62bf11c52381f7dbf657bc3a6342fe9372512776e0a"
     },
     {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "WgrElVkzo80",
-      "videoTitle": "【#歌枠】暑い中お疲れ様！みんなを癒すように歌います！！家路につくお供に聴いていってください！",
-      "channelName": "じゅだ@ボカロP",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=WgrElVkzo80",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WgrElVkzo80&t=240s",
-      "sourceId": "description:WgrElVkzo80:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:WgrElVkzo80-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:WgrElVkzo80:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/WgrElVkzo80-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/WgrElVkzo80-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
-    },
-    {
       "title": "3次会",
       "artist": "未記載",
       "isNiche": true,
@@ -1016,6 +1165,462 @@
       "reviewId": "review:LIvCuQkMnVE:c545a9f2939f62a3983a",
       "sourcePath": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json",
       "reviewLocator": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json#49ace4d8ff76b11cacad06ea1ae3f39f9c749d81c8d547fba4a0525048970f51"
+    },
+    {
+      "title": "Opening",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 0,
+      "time": "0:00:00",
+      "raw": "00:00:00 Opening",
+      "rawHash": "0b0757b6fb0e9798787dce32ae390be5ccc9b6f6423d5ea40f031418b6f41330",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=0s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#0b0757b6fb0e9798787dce32ae390be5ccc9b6f6423d5ea40f031418b6f41330"
+    },
+    {
+      "title": "KANGOL REWARDコラボ第3弾決定しました！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3933,
+      "time": "1:05:33",
+      "raw": "01:05:33 KANGOL REWARDコラボ第3弾決定しました！",
+      "rawHash": "d91cbf3e6a6c1b0717b5d45536b835c19a514620a56932eb4466bd63c50a9c31",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=3933s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#d91cbf3e6a6c1b0717b5d45536b835c19a514620a56932eb4466bd63c50a9c31"
+    },
+    {
+      "title": "昨日撮影してきたばかり",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4043,
+      "time": "1:07:23",
+      "raw": "01:07:23 昨日撮影してきたばかり",
+      "rawHash": "22f71d21e1f180931cc83bec9f2faf76f1e32d05cd6af735505f5e86ef2c30b6",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=4043s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#22f71d21e1f180931cc83bec9f2faf76f1e32d05cd6af735505f5e86ef2c30b6"
+    },
+    {
+      "title": "今回は4種類でます！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4120,
+      "time": "1:08:40",
+      "raw": "01:08:40 今回は4種類でます！",
+      "rawHash": "a594af1ce8ea6e8369a8247785275f921f8f0f32a1521cb3f9b2d65eae32ce01",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=4120s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#a594af1ce8ea6e8369a8247785275f921f8f0f32a1521cb3f9b2d65eae32ce01"
+    },
+    {
+      "title": "撮影時間5時間",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4352,
+      "time": "1:12:32",
+      "raw": "01:12:32 撮影時間5時間",
+      "rawHash": "adb712c92a9871fa52614a1f9e9372d957d511db859615813410ecaa9ccb723c",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=4352s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#adb712c92a9871fa52614a1f9e9372d957d511db859615813410ecaa9ccb723c"
+    },
+    {
+      "title": "ゲップ出そうになった",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4730,
+      "time": "1:18:50",
+      "raw": "01:18:50 ゲップ出そうになった",
+      "rawHash": "6d3efe42e71800fd80a10acf6222e9b0d7d69874d401cca39a7e8f4195f2bdc7",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=4730s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#6d3efe42e71800fd80a10acf6222e9b0d7d69874d401cca39a7e8f4195f2bdc7"
+    },
+    {
+      "title": "次回配信予定",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 11593,
+      "time": "3:13:13",
+      "raw": "03:13:13 次回配信予定",
+      "rawHash": "c34566d477131130f1ed6090bc70fb225a056d14939ee482956b829f75192b17",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=11593s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#c34566d477131130f1ed6090bc70fb225a056d14939ee482956b829f75192b17"
+    },
+    {
+      "title": "陸上のお話し",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 12099,
+      "time": "3:21:39",
+      "raw": "03:21:39 陸上のお話し",
+      "rawHash": "4baf6117963c7caa45a01d945f3a984a18da770b64934833bbc05483d484efde",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12099s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#4baf6117963c7caa45a01d945f3a984a18da770b64934833bbc05483d484efde"
+    },
+    {
+      "title": "裸足は走りやすいよね→走ったことないけど",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 12358,
+      "time": "3:25:58",
+      "raw": "03:25:58 裸足は走りやすいよね→走ったことないけど",
+      "rawHash": "ed2795d896f79583cfed6ba2241f8e4920b876c6b83eae5f99bc1d46885436ea",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12358s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#ed2795d896f79583cfed6ba2241f8e4920b876c6b83eae5f99bc1d46885436ea"
+    },
+    {
+      "title": "リコーダー発表で笑ったお話し",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 12610,
+      "time": "3:30:10",
+      "raw": "03:30:10 リコーダー発表で笑ったお話し",
+      "rawHash": "9a73dab3e92069e2be3cf27b6bc9685e79fbd4b2b04da53f103ba3f28ba80c74",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12610s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#9a73dab3e92069e2be3cf27b6bc9685e79fbd4b2b04da53f103ba3f28ba80c74"
+    },
+    {
+      "title": "合唱で笑ったお話し",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 12819,
+      "time": "3:33:39",
+      "raw": "03:33:39 合唱で笑ったお話し",
+      "rawHash": "ae708772889213a82b40197e16d26d3a3d7c48b284c7f06a6d26d1f80f2a38e0",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12819s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#ae708772889213a82b40197e16d26d3a3d7c48b284c7f06a6d26d1f80f2a38e0"
+    },
+    {
+      "title": "Endingトーク＆ED曲S☆MILE",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 12908,
+      "time": "3:35:08",
+      "raw": "03:35:08 Endingトーク＆ED曲S☆MILE",
+      "rawHash": "84dc85d1b5479161c819b6f8eea8203b2184df63cbe6f8af4e84913f7d32f42d",
+      "videoId": "8BXdn5BJE9I",
+      "videoTitle": "【#歌枠】心をほどく癒しの歌時間。今日は嬉しい発表も♪🍊【ボイトレVTuber / みかん先生】",
+      "channelName": "みかんとボーカルノート",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=8BXdn5BJE9I&t=12908s",
+      "sourceId": "UgzuMtaxb79UExjUG1Z4AaABAg",
+      "sourceHash": "f5acbb15d0c391762e81a4957281f5aacfcbc547a0f0a8c21294cd4c89851f35",
+      "sourceOrigin": "review:8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:8BXdn5BJE9I:f5acbb15d0c391762e81",
+      "sourcePath": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json",
+      "reviewLocator": "data/review/sources/8BXdn5BJE9I-f5acbb15d0c391762e81.json#84dc85d1b5479161c819b6f8eea8203b2184df63cbe6f8af4e84913f7d32f42d"
     },
     {
       "title": "曲終わり",
@@ -3938,269 +4543,6 @@
       "reviewLocator": "data/review/sources/history-ELqKe7RYai0-c2f39a5fb479d4d148f0.json#b5e8f6f1e36c31b08d7c517412adb850b283b80cf8b34f5d5f6d9233627a4ab2"
     },
     {
-      "title": "あまこ～ん🤤",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 58,
-      "time": "0:00:58",
-      "raw": "┣ 0:00:58 あまこ～ん🤤",
-      "rawHash": "7606d2659b9c316cc274a83f87171aa150c8cb019523a6abd0d3abd871eddeb4",
-      "videoId": "wwxqshoV5f4",
-      "videoTitle": "【歌枠 / KARAOKE】 テンション上がる夏歌メドレー！ 作業用BGM【甘狐ユウナ/新人VTuber】",
-      "channelName": "甘狐ユウナ / Amagitsune Yuna",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4&t=58s",
-      "sourceId": "UgwJMXLuTipnfmIWjkl4AaABAg",
-      "sourceHash": "275e1edddac4ca7a8de209570358a7d07908dc9565e23c853088fa1b865b9897",
-      "sourceOrigin": "review:wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:wwxqshoV5f4:275e1edddac4ca7a8de2",
-      "sourcePath": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "reviewLocator": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json#7606d2659b9c316cc274a83f87171aa150c8cb019523a6abd0d3abd871eddeb4"
-    },
-    {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "wwxqshoV5f4",
-      "videoTitle": "【歌枠 / KARAOKE】 テンション上がる夏歌メドレー！ 作業用BGM【甘狐ユウナ/新人VTuber】",
-      "channelName": "甘狐ユウナ / Amagitsune Yuna",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4&t=240s",
-      "sourceId": "description:wwxqshoV5f4:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:wwxqshoV5f4-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:wwxqshoV5f4:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/wwxqshoV5f4-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/wwxqshoV5f4-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
-    },
-    {
-      "title": "KP🍻",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 894,
-      "time": "0:14:54",
-      "raw": "┣ 0:14:54 KP🍻",
-      "rawHash": "22522c9124715a8dfb5fe8780f733e2a929dbe044d5770919d55c1a61c178117",
-      "videoId": "wwxqshoV5f4",
-      "videoTitle": "【歌枠 / KARAOKE】 テンション上がる夏歌メドレー！ 作業用BGM【甘狐ユウナ/新人VTuber】",
-      "channelName": "甘狐ユウナ / Amagitsune Yuna",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4&t=894s",
-      "sourceId": "UgwJMXLuTipnfmIWjkl4AaABAg",
-      "sourceHash": "275e1edddac4ca7a8de209570358a7d07908dc9565e23c853088fa1b865b9897",
-      "sourceOrigin": "review:wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:wwxqshoV5f4:275e1edddac4ca7a8de2",
-      "sourcePath": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "reviewLocator": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json#22522c9124715a8dfb5fe8780f733e2a929dbe044d5770919d55c1a61c178117"
-    },
-    {
-      "title": "酔っ払いの顔😳",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 951,
-      "time": "0:15:51",
-      "raw": "┣ 0:15:51 酔っ払いの顔😳",
-      "rawHash": "d925f97fd0eb1504e06bb80cf57b503711837680eaff1115c65b6b8417b5f732",
-      "videoId": "wwxqshoV5f4",
-      "videoTitle": "【歌枠 / KARAOKE】 テンション上がる夏歌メドレー！ 作業用BGM【甘狐ユウナ/新人VTuber】",
-      "channelName": "甘狐ユウナ / Amagitsune Yuna",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4&t=951s",
-      "sourceId": "UgwJMXLuTipnfmIWjkl4AaABAg",
-      "sourceHash": "275e1edddac4ca7a8de209570358a7d07908dc9565e23c853088fa1b865b9897",
-      "sourceOrigin": "review:wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:wwxqshoV5f4:275e1edddac4ca7a8de2",
-      "sourcePath": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "reviewLocator": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json#d925f97fd0eb1504e06bb80cf57b503711837680eaff1115c65b6b8417b5f732"
-    },
-    {
-      "title": "脱いじゃうぞ",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1653,
-      "time": "0:27:33",
-      "raw": "┣ 0:27:33 脱いじゃうぞ",
-      "rawHash": "df19279a6405392e4647d4ec0ec8b9f143f6d5b1b7f2dec8002dfe81a1ede33a",
-      "videoId": "wwxqshoV5f4",
-      "videoTitle": "【歌枠 / KARAOKE】 テンション上がる夏歌メドレー！ 作業用BGM【甘狐ユウナ/新人VTuber】",
-      "channelName": "甘狐ユウナ / Amagitsune Yuna",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4&t=1653s",
-      "sourceId": "UgwJMXLuTipnfmIWjkl4AaABAg",
-      "sourceHash": "275e1edddac4ca7a8de209570358a7d07908dc9565e23c853088fa1b865b9897",
-      "sourceOrigin": "review:wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:wwxqshoV5f4:275e1edddac4ca7a8de2",
-      "sourcePath": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "reviewLocator": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json#df19279a6405392e4647d4ec0ec8b9f143f6d5b1b7f2dec8002dfe81a1ede33a"
-    },
-    {
-      "title": "おつこ～ん",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 3780,
-      "time": "1:03:00",
-      "raw": "┣ 1:03:00 おつこ～ん",
-      "rawHash": "6a499f4ea344bb96a450e677c86dae19ed5733111e0e0092b8a0dfd5163c2624",
-      "videoId": "wwxqshoV5f4",
-      "videoTitle": "【歌枠 / KARAOKE】 テンション上がる夏歌メドレー！ 作業用BGM【甘狐ユウナ/新人VTuber】",
-      "channelName": "甘狐ユウナ / Amagitsune Yuna",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4&t=3780s",
-      "sourceId": "UgwJMXLuTipnfmIWjkl4AaABAg",
-      "sourceHash": "275e1edddac4ca7a8de209570358a7d07908dc9565e23c853088fa1b865b9897",
-      "sourceOrigin": "review:wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:wwxqshoV5f4:275e1edddac4ca7a8de2",
-      "sourcePath": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "reviewLocator": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json#6a499f4ea344bb96a450e677c86dae19ed5733111e0e0092b8a0dfd5163c2624"
-    },
-    {
-      "title": "エンディング",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 3796,
-      "time": "1:03:16",
-      "raw": "┗ 1:03:16 エンディング",
-      "rawHash": "47ac5f40c4fc356162bda84bc02a68ad688e52a7acfa314d6cf7a3b6d134ffae",
-      "videoId": "wwxqshoV5f4",
-      "videoTitle": "【歌枠 / KARAOKE】 テンション上がる夏歌メドレー！ 作業用BGM【甘狐ユウナ/新人VTuber】",
-      "channelName": "甘狐ユウナ / Amagitsune Yuna",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=wwxqshoV5f4&t=3796s",
-      "sourceId": "UgwJMXLuTipnfmIWjkl4AaABAg",
-      "sourceHash": "275e1edddac4ca7a8de209570358a7d07908dc9565e23c853088fa1b865b9897",
-      "sourceOrigin": "review:wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:wwxqshoV5f4:275e1edddac4ca7a8de2",
-      "sourcePath": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json",
-      "reviewLocator": "data/review/sources/wwxqshoV5f4-275e1edddac4ca7a8de2.json#47ac5f40c4fc356162bda84bc02a68ad688e52a7acfa314d6cf7a3b6d134ffae"
-    },
-    {
       "title": "チューニング",
       "artist": "未記載",
       "isNiche": true,
@@ -5275,371 +5617,6 @@
       "reviewLocator": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json#a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
     },
     {
-      "title": "メン限配信　超美麗3Dスイカ割りと花火",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 578,
-      "time": "0:09:38",
-      "raw": "0:09:38メン限配信 超美麗3Dスイカ割りと花火",
-      "rawHash": "5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=578s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320"
-    },
-    {
-      "title": "～まったり🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1350,
-      "time": "0:22:30",
-      "raw": "22:30～まったり🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "rawHash": "132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
-      "sourceId": "description:GkmXWhgz1QA:132becd39bd29e7b",
-      "sourceHash": "132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515",
-      "sourceOrigin": "review:GkmXWhgz1QA-132becd39bd29e7b52fa.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:132becd39bd29e7b52fa",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-132becd39bd29e7b52fa.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-132becd39bd29e7b52fa.json#132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515"
-    },
-    {
-      "title": "～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1350,
-      "time": "0:22:30",
-      "raw": "22:30～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "rawHash": "c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
-      "sourceId": "description:GkmXWhgz1QA:c34ca03a358bd9ce",
-      "sourceHash": "c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8",
-      "sourceOrigin": "review:GkmXWhgz1QA-c34ca03a358bd9ce0a30.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:c34ca03a358bd9ce0a30",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-c34ca03a358bd9ce0a30.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-c34ca03a358bd9ce0a30.json#c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8"
-    },
-    {
-      "title": "～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1350,
-      "time": "0:22:30",
-      "raw": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "rawHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
-      "sourceId": "description:GkmXWhgz1QA:5d44a7135bb15e6a",
-      "sourceHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
-      "sourceOrigin": "review:GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:5d44a7135bb15e6a43df",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json#5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb"
-    },
-    {
-      "title": "～眠れない夜の優しいアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1350,
-      "time": "0:22:30",
-      "raw": "22:30～眠れない夜の優しいアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "rawHash": "921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
-      "sourceId": "description:GkmXWhgz1QA:921f12791a4b50ad",
-      "sourceHash": "921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca",
-      "sourceOrigin": "review:GkmXWhgz1QA-921f12791a4b50ad0e26.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:921f12791a4b50ad0e26",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-921f12791a4b50ad0e26.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-921f12791a4b50ad0e26.json#921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca"
-    },
-    {
-      "title": "「歌声に　夢の種から　花ひらく」　朝起きてアーカイブ視聴中　ピクミンの～種のうた～　いい♪（",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6520,
-      "time": "1:48:40",
-      "raw": "「歌声に 夢の種から 花ひらく」 朝起きてアーカイブ視聴中 ピクミンの～種のうた～ いい♪（1:48:40）",
-      "rawHash": "87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=6520s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd"
-    },
-    {
-      "title": "同接400人越えてたありがとう",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 14300,
-      "time": "3:58:20",
-      "raw": "3:58:20同接400人越えてたありがとう",
-      "rawHash": "8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14300s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19"
-    },
-    {
-      "title": "かわいくFANBOX宣伝",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 14354,
-      "time": "3:59:14",
-      "raw": "3:59:14かわいくFANBOX宣伝",
-      "rawHash": "00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14354s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f"
-    },
-    {
-      "title": "オープニング目に焼き付けといて",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 14661,
-      "time": "4:04:21",
-      "raw": "4:04:21オープニング目に焼き付けといて",
-      "rawHash": "062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14661s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff"
-    },
-    {
       "title": "おつにょ",
       "artist": "未記載",
       "isNiche": true,
@@ -5689,41 +5666,6 @@
       "reviewId": "review:FlhwC9s1Nk8:4aa61da2d1b34d7d38e8",
       "sourcePath": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json",
       "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
-    },
-    {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "P2y3c51O7qc",
-      "videoTitle": "〖歌枠〗あつまれ～！好きなアニソン・アイドルさんの曲歌う🪄〖#初見さん大歓迎 〗",
-      "channelName": "星奈杏咲 / Azusa Hoshina",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=P2y3c51O7qc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=P2y3c51O7qc&t=240s",
-      "sourceId": "description:P2y3c51O7qc:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:P2y3c51O7qc-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:P2y3c51O7qc:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/P2y3c51O7qc-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/P2y3c51O7qc-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "閉会式",
@@ -6408,41 +6350,6 @@
       "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#4f866c2f357403d49a0b8e4cacb9176291743f7952c9313431811aa70c5c9ae4"
     },
     {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "Xhzje-vKyrA",
-      "videoTitle": "【歌枠】夏がきたー！夏曲歌おう☀【Vtuber/天瀬リルム】",
-      "channelName": "天瀬リルム ／Rirumu channel",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Xhzje-vKyrA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Xhzje-vKyrA&t=240s",
-      "sourceId": "description:Xhzje-vKyrA:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:Xhzje-vKyrA-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Xhzje-vKyrA:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/Xhzje-vKyrA-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/Xhzje-vKyrA-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
-    },
-    {
       "title": "閉会式",
       "artist": "未記載",
       "isNiche": true,
@@ -6849,41 +6756,6 @@
       "reviewId": "review:C0ABKi9DGTs:ee77fcec7c9effc55c25",
       "sourcePath": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json",
       "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json#fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
-    },
-    {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "2EMOSXEkg0A",
-      "videoTitle": "【＃歌枠 / #karaoke 】ストレス発散１時間カラオケ🎤【＃もんたりうむ /初見さんも大歓迎♪】",
-      "channelName": "木乃芽もん太🦭Konome Monta💭",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=2EMOSXEkg0A",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=2EMOSXEkg0A&t=240s",
-      "sourceId": "description:2EMOSXEkg0A:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:2EMOSXEkg0A-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:2EMOSXEkg0A:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/2EMOSXEkg0A-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/2EMOSXEkg0A-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "スタート",
