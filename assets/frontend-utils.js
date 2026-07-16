@@ -331,6 +331,20 @@
     return count;
   }
 
+  function summaryVideoCountModel(options = {}) {
+    const visibleCount = nonNegativeInteger(options.visibleCount ?? options.visibleVideoCount, 0);
+    const sourceCount = nonNegativeInteger(options.sourceCount ?? options.sourceVideoCount, visibleCount);
+    const hasSearchFilter = cleanText(options.filter ?? options.q).length > 0;
+    const usesSourceCount = Boolean(options.hideUnknownArtist) && !hasSearchFilter && sourceCount > visibleCount;
+    return {
+      count: usesSourceCount ? sourceCount : visibleCount,
+      note: usesSourceCount ? `当前可见 ${visibleCount} 个视频` : "",
+      sourceCount,
+      visibleCount,
+      usesSourceCount,
+    };
+  }
+
   function parseBooleanParam(value, fallback) {
     if (value === null || typeof value === "undefined") return fallback;
     return ["1", "true", "yes", "on"].includes(String(value).toLocaleLowerCase());
@@ -365,6 +379,11 @@
   function positiveInteger(value, fallback) {
     const parsed = Number.parseInt(value, 10);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  }
+
+  function nonNegativeInteger(value, fallback) {
+    const parsed = Number.parseInt(value, 10);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
   }
 
   function clamp(value, min, max) {
@@ -1071,6 +1090,7 @@
     sanitizeQueryDraft,
     shouldPrefetchRuntimeRange,
     shouldSkipSourceFilter,
+    summaryVideoCountModel,
     validateRuntimeRangePayload,
     trendDisplayModel,
     visiblePageTokens,

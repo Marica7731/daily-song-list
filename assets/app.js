@@ -2791,8 +2791,8 @@ function renderSongRank(group, rangeCache, selection) {
   renderSummary(group, [
     recordVisibilityMetric(records.length, baseModel.records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
     occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
-    metric(selection.videoCount, "个视频"),
-  ], summaryNote(selection, filterStatusNote("songRank", filteredModel)));
+    summaryVideoMetric(rangeCache, selection),
+  ], summaryNote(selection, filterStatusNote("songRank", filteredModel), rangeCache));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌曲", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
@@ -2893,8 +2893,8 @@ function renderSongIndexView(group, rangeCache, selection) {
   renderSummary(group, [
     recordVisibilityMetric(records.length, baseRecords.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
     occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
-    metric(selection.videoCount, "个视频"),
-  ], summaryNote(selection));
+    summaryVideoMetric(rangeCache, selection),
+  ], summaryNote(selection, "", rangeCache));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有歌曲索引", "没有找到符合条件的歌曲", "没有找到小众歌曲"), {
@@ -3047,8 +3047,31 @@ function hiddenUnknownNote(selection) {
   return state.hideUnknownArtist && count > 0 ? `已隐藏 ${count} 条无歌手收录` : "";
 }
 
-function summaryNote(selection, extra = "") {
-  return [extra, hiddenUnknownNote(selection), monthlyCoverageNote()].filter(Boolean).join(" · ");
+function summaryNote(selection, extra = "", rangeCache = null) {
+  return [extra, summaryVideoVisibilityNote(rangeCache, selection), hiddenUnknownNote(selection), monthlyCoverageNote()].filter(Boolean).join(" · ");
+}
+
+function summaryVideoMetric(rangeCache, selection) {
+  return metric(summaryVideoCountModel(rangeCache, selection).count, "个视频");
+}
+
+function summaryVideoVisibilityNote(rangeCache, selection) {
+  return summaryVideoCountModel(rangeCache, selection).note;
+}
+
+function summaryVideoCountModel(rangeCache, selection) {
+  if (!rangeCache) return { count: Number(selection?.videoCount) || 0, note: "" };
+  return window.FrontendUtils.summaryVideoCountModel({
+    visibleCount: selection?.videoCount,
+    sourceCount: sourceVideoCountForSummary(rangeCache),
+    hideUnknownArtist: shouldHideUnknownForCurrentView(),
+    filter: state.filter,
+  });
+}
+
+function sourceVideoCountForSummary(rangeCache) {
+  if (state.nicheOnly) return rangeCache.nicheVideoCount;
+  return Array.isArray(rangeCache.items) ? rangeCache.items.length : rangeCache.allVideoCount;
 }
 
 function monthlyCoverageNote() {

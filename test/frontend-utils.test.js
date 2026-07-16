@@ -36,6 +36,7 @@ const {
   sanitizeQueryDraft,
   shouldPrefetchRuntimeRange,
   shouldSkipSourceFilter,
+  summaryVideoCountModel,
   trendDisplayModel,
   validateRuntimeRangePayload,
   visiblePageTokens,
@@ -641,6 +642,46 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
   assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 6);
   assert.equal(activeQueryConditionCount({ ...snapshotDraft, rankMetric: "videos", minCount: 10 }, { ...options, view: "videos" }), 4);
   assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 5);
+});
+
+test("summary video count keeps source totals separate from hidden-unknown visibility", () => {
+  assert.deepEqual(summaryVideoCountModel({
+    visibleCount: 1099,
+    sourceCount: 1224,
+    hideUnknownArtist: true,
+    filter: "",
+  }), {
+    count: 1224,
+    note: "当前可见 1099 个视频",
+    sourceCount: 1224,
+    visibleCount: 1099,
+    usesSourceCount: true,
+  });
+
+  assert.deepEqual(summaryVideoCountModel({
+    visibleCount: 37,
+    sourceCount: 1224,
+    hideUnknownArtist: true,
+    filter: "テオ",
+  }), {
+    count: 37,
+    note: "",
+    sourceCount: 1224,
+    visibleCount: 37,
+    usesSourceCount: false,
+  });
+
+  assert.deepEqual(summaryVideoCountModel({
+    visibleCount: 1224,
+    sourceCount: 1224,
+    hideUnknownArtist: false,
+  }), {
+    count: 1224,
+    note: "",
+    sourceCount: 1224,
+    visibleCount: 1224,
+    usesSourceCount: false,
+  });
 });
 
 test("runtime range path follows URL range and meta paths", () => {

@@ -178,6 +178,18 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /function renderPageJumpToken/u);
 });
 
+test("summary video metric uses source payload count instead of hidden-unknown visible count", () => {
+  const songRankBody = functionBody("function renderSongRank");
+  const songIndexBody = functionBody("function renderSongIndexView");
+  assert.match(songRankBody, /summaryVideoMetric\(rangeCache, selection\)/u);
+  assert.match(songIndexBody, /summaryVideoMetric\(rangeCache, selection\)/u);
+  assert.doesNotMatch(songRankBody, /metric\(selection\.videoCount, "个视频"\)/u);
+  assert.doesNotMatch(songIndexBody, /metric\(selection\.videoCount, "个视频"\)/u);
+  assert.match(appSource, /function summaryVideoCountModel\(rangeCache, selection\)[\s\S]*visibleCount: selection\?\.videoCount,[\s\S]*sourceCount: sourceVideoCountForSummary\(rangeCache\)/u);
+  assert.match(appSource, /function sourceVideoCountForSummary\(rangeCache\)[\s\S]*rangeCache\.items\.length/u);
+  assert.match(appSource, /function summaryNote\(selection, extra = "", rangeCache = null\)[\s\S]*summaryVideoVisibilityNote\(rangeCache, selection\)/u);
+});
+
 function functionBody(signature) {
   const start = appSource.indexOf(signature);
   assert.notEqual(start, -1, `missing ${signature}`);
