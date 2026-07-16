@@ -32,6 +32,7 @@ const {
   normalizeSongSearchText,
   paginateItems,
   parseUrlState,
+  queryTriggerModel,
   rankToggleModel,
   runtimeRangePayloadFromGroup,
   runtimeRangePath,
@@ -602,6 +603,7 @@ test("source presentation model inlines up to three videos and expands only the 
     occurrence("D", "channel D"),
   ]);
   assert.equal(fourVideos.mode, "collapsed");
+  assert.equal(fourVideos.inlineVisibleCount, 3);
   assert.deepEqual(
     fourVideos.inlineGroups.map((group) => group.videoId),
     ["A", "B", "C"],
@@ -611,6 +613,9 @@ test("source presentation model inlines up to three videos and expands only the 
     ["D"],
   );
   assert.equal(fourVideos.remainingCount, 1);
+  assert.equal(fourVideos.collapsedLabel, "+1来源");
+  assert.equal(fourVideos.collapsedAriaLabel, "查看其余 1 个来源");
+  assert.equal(fourVideos.expandedLabel, "收起");
   assert.equal(fourVideos.hasMore, true);
   assert.equal(fourVideos.canExpand, true);
 
@@ -624,11 +629,31 @@ test("source presentation model inlines up to three videos and expands only the 
     { expanded: true },
   );
   assert.equal(expanded.mode, "expanded");
+  assert.equal(expanded.inlineVisibleCount, 3);
   assert.deepEqual(
     expanded.detailGroups.map((group) => group.videoId),
     ["D"],
   );
   assert.equal(expanded.hasMore, false);
+});
+
+test("source presentation distinguishes videos from many timestamps", () => {
+  const manyVideos = Array.from({ length: 114 }, (_, index) => occurrence(`V${index + 1}`, `channel ${index + 1}`, { seconds: index }));
+  const model = sourcePresentationModel(manyVideos);
+  assert.equal(model.videoCount, 114);
+  assert.equal(model.inlineVisibleCount, 3);
+  assert.equal(model.remainingCount, 111);
+  assert.equal(model.collapsedLabel, "+111来源");
+  assert.equal(model.collapsedAriaLabel, "查看其余 111 个来源");
+
+  const oneVideoManyTimes = sourcePresentationModel(
+    Array.from({ length: 89 }, (_, index) => occurrence("A", "channel A", { seconds: index + 1 })),
+  );
+  assert.equal(oneVideoManyTimes.videoCount, 1);
+  assert.equal(oneVideoManyTimes.occurrenceCount, 89);
+  assert.equal(oneVideoManyTimes.inlineVisibleCount, 1);
+  assert.equal(oneVideoManyTimes.remainingCount, 0);
+  assert.equal(oneVideoManyTimes.canExpand, false);
 });
 
 test("url state parses and serializes range, view, page, pageSize, bucket, outside, q, and snapshot", () => {
@@ -780,6 +805,38 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
   assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 6);
   assert.equal(activeQueryConditionCount({ ...snapshotDraft, rankMetric: "videos", minCount: 10 }, { ...options, view: "videos" }), 4);
   assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 5);
+  assert.equal(activeQueryConditionCount(defaultQueryDraft(), { ...options, view: "songRank" }), 0);
+  assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), hideUnknownArtist: false }, { ...options, view: "songRank" }), 1);
+  assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ" }, { ...options, view: "songRank" }), 1);
+  assert.equal(
+    activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ", nicheOnly: true, minCount: 2 }, { ...options, view: "songRank" }),
+    3,
+  );
+
+  assert.deepEqual(queryTriggerModel(defaultQueryDraft(), { ...options, view: "songRank", mode: "mobile" }), {
+    count: 0,
+    labels: [],
+    hasActive: false,
+    visibleCountText: "",
+    ariaLabel: "打开搜索与筛选",
+  });
+  assert.deepEqual(
+    queryTriggerModel(
+      { ...defaultQueryDraft(), q: "少女レイ", nicheOnly: true, minCount: 2 },
+      { ...options, view: "songRank", mode: "mobile" },
+    ),
+    {
+      count: 3,
+      labels: ["少女レイ", "只看小众", "2次以上"],
+      hasActive: true,
+      visibleCountText: "",
+      ariaLabel: "打开搜索与筛选，当前有 3 个条件：少女レイ、只看小众、2次以上",
+    },
+  );
+  assert.equal(
+    queryTriggerModel({ ...defaultQueryDraft(), hideUnknownArtist: false }, { ...options, view: "songRank" }).visibleCountText,
+    "1",
+  );
 });
 
 test("summary video count keeps source totals separate from hidden-unknown visibility", () => {
@@ -789,8 +846,8 @@ test("summary video count keeps source totals separate from hidden-unknown visib
     hideUnknownArtist: true,
     filter: "",
   }), {
-    count: 1224,
-    note: "当前可见 1099 个视频",
+    count: 1099,
+    note: "当前范围目录 1224 视频",
     sourceCount: 1224,
     visibleCount: 1099,
     usesSourceCount: true,

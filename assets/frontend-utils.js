@@ -340,18 +340,43 @@
   }
 
   function activeQueryConditionCount(draft = {}, options = {}) {
+    return activeQueryConditionItems(draft, options).length;
+  }
+
+  function activeQueryConditionItems(draft = {}, options = {}) {
     const normalized = sanitizeQueryDraft(draft, options);
     const view = options.view || "songRank";
     const latestSnapshotPath = options.latestSnapshotPath || "data/latest.json";
-    let count = 0;
-    if (normalized.q) count += 1;
-    if (normalized.nicheOnly) count += 1;
-    if (!normalized.hideUnknownArtist) count += 1;
-    if ((view === "songRank" || view === "artistRank") && normalized.rankMetric !== "occurrences") count += 1;
-    if ((view === "songRank" || view === "artistRank") && normalized.trend !== "all") count += 1;
-    if (view !== "videos" && normalized.minCount > 1) count += 1;
-    if (normalized.snapshotPath && normalized.snapshotPath !== latestSnapshotPath) count += 1;
-    return count;
+    const items = [];
+    if (normalized.q) items.push({ key: "q", label: normalized.q, fullLabel: normalized.q });
+    if (normalized.nicheOnly) items.push({ key: "nicheOnly", label: "只看小众" });
+    if (!normalized.hideUnknownArtist) items.push({ key: "hideUnknownArtist", label: "显示无歌手" });
+    if ((view === "songRank" || view === "artistRank") && normalized.rankMetric !== "occurrences") {
+      items.push({ key: "rankMetric", label: "按视频" });
+    }
+    if ((view === "songRank" || view === "artistRank") && normalized.trend !== "all") {
+      const trendLabels = options.trendLabels || {};
+      items.push({ key: "trend", label: trendLabels[normalized.trend] || "趋势" });
+    }
+    if (view !== "videos" && normalized.minCount > 1) items.push({ key: "minCount", label: `${normalized.minCount}次以上` });
+    if (normalized.snapshotPath && normalized.snapshotPath !== latestSnapshotPath) {
+      items.push({ key: "snapshotPath", label: options.snapshotLabel || "历史快照" });
+    }
+    return items;
+  }
+
+  function queryTriggerModel(draft = {}, options = {}) {
+    const items = activeQueryConditionItems(draft, options);
+    const labels = items.map((item) => item.fullLabel || item.label).filter(Boolean);
+    const count = labels.length;
+    const compact = options.mode === "mobile" || options.compact === true;
+    return {
+      count,
+      labels,
+      hasActive: count > 0,
+      visibleCountText: !compact && count > 0 ? String(count) : "",
+      ariaLabel: count > 0 ? `打开搜索与筛选，当前有 ${count} 个条件：${labels.join("、")}` : "打开搜索与筛选",
+    };
   }
 
   function summaryVideoCountModel(options = {}) {
@@ -360,8 +385,8 @@
     const hasSearchFilter = cleanText(options.filter ?? options.q).length > 0;
     const usesSourceCount = Boolean(options.hideUnknownArtist) && !hasSearchFilter && sourceCount > visibleCount;
     return {
-      count: usesSourceCount ? sourceCount : visibleCount,
-      note: usesSourceCount ? `当前可见 ${visibleCount} 个视频` : "",
+      count: visibleCount,
+      note: usesSourceCount ? `当前范围目录 ${sourceCount} 视频` : "",
       sourceCount,
       visibleCount,
       usesSourceCount,
@@ -648,6 +673,7 @@
     const hiddenGroups = videoCount > inlineLimit ? groups.slice(inlineLimit) : [];
     const canExpand = hiddenGroups.length > 0;
     const mode = videoCount === 0 ? "none" : canExpand ? (expanded ? "expanded" : "collapsed") : "inline";
+    const remainingCount = hiddenGroups.length;
 
     return {
       mode,
@@ -655,11 +681,16 @@
       occurrenceCount,
       inlineLimit,
       inlineGroups,
+      inlineVisibleCount: inlineGroups.length,
       hiddenGroups,
       detailGroups: expanded ? hiddenGroups : [],
-      remainingCount: hiddenGroups.length,
+      remainingCount,
       hasMore: canExpand && !expanded,
       canExpand,
+      collapsedLabel: canExpand ? `+${remainingCount}来源` : "",
+      collapsedAriaLabel: canExpand ? `查看其余 ${remainingCount} 个来源` : "",
+      expandedLabel: "收起",
+      expandedAriaLabel: "收起其余来源",
       showCopyAll: videoCount > 1,
     };
   }
@@ -1111,6 +1142,7 @@
     createSongSearchLookup,
     createTrendLookup,
     activeQueryConditionCount,
+    activeQueryConditionItems,
     filterItemsBySearch,
     filterItemsByNiche,
     filterOccurrencesBySearch,
@@ -1130,6 +1162,7 @@
     desktopPageTokens,
     mobilePageModel,
     mobilePageStepperModel,
+    queryTriggerModel,
     parseUrlState,
     defaultQueryDraft,
     makeQueryDraftFromState,

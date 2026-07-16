@@ -124,7 +124,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*font-size: 12\.5px;[\s\S]*font-weight: 500;/u);
   assert.match(cssSource, /\.source-video-title\s*\{[\s\S]*text-decoration: none;/u);
   assert.match(cssSource, /\.source-video-channel:hover,[\s\S]*\.source-video-title:hover\s*\{[\s\S]*text-decoration: underline;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-card,[\s\S]*\.video-compact \.video-card\s*\{[\s\S]*grid-template-columns: 108px minmax\(0, 1fr\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-card,[\s\S]*\.video-compact \.video-card\s*\{[\s\S]*grid-template-columns: clamp\(120px, 34vw, 144px\) minmax\(0, 1fr\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-body,[\s\S]*\.video-compact \.video-body\s*\{[\s\S]*display: contents;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.song-list,[\s\S]*\.video-compact \.song-list\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
   assert.match(cssSource, /\.video-grid\s*\{[\s\S]*grid-template-columns: repeat\(auto-fit, minmax\(280px, 1fr\)\);/u);

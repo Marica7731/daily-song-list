@@ -1407,7 +1407,9 @@ function activeFilterCount() {
 }
 
 function syncQueryTriggerState() {
-  const count = activeFilterCount();
+  const draft = makeQueryDraftFromState();
+  const items = activeQueryItems(draft);
+  const count = items.length;
   if (els.queryCountBadge) {
     els.queryCountBadge.hidden = count <= 0;
     els.queryCountBadge.textContent = count > 0 ? String(count) : "";
@@ -1417,7 +1419,12 @@ function syncQueryTriggerState() {
     els.queryTriggerText.textContent = state.filter || "搜索歌曲、歌手、频道或视频";
     els.queryTriggerText.title = state.filter || "";
   }
-  els.queryTrigger?.setAttribute("aria-label", count > 0 ? `打开搜索与筛选，当前有 ${count} 个条件` : "打开搜索与筛选");
+  if (els.queryTrigger) {
+    els.queryTrigger.classList.toggle("has-active-query", count > 0);
+    els.queryTrigger.dataset.activeQueryCount = String(count);
+    const labels = items.map((item) => item.fullLabel || item.label).filter(Boolean);
+    els.queryTrigger.setAttribute("aria-label", count > 0 ? `打开搜索与筛选，当前有 ${count} 个条件：${labels.join("、")}` : "打开搜索与筛选");
+  }
 }
 
 function renderActiveQueryStrip() {
@@ -3484,7 +3491,8 @@ function summaryNote(selection, extra = "", rangeCache = null) {
 }
 
 function summaryVideoMetric(rangeCache, selection) {
-  return metric(summaryVideoCountModel(rangeCache, selection).count, "个视频");
+  const model = summaryVideoCountModel(rangeCache, selection);
+  return model.usesSourceCount ? `可见${model.visibleCount}视频` : metric(model.visibleCount, "个视频");
 }
 
 function summaryVideoVisibilityNote(rangeCache, selection) {
@@ -3512,7 +3520,7 @@ function monthlyCoverageNote() {
   const catalogVideoCount = Number(catalog?.catalogVideoCount);
   const retentionDays = Number(catalog?.retentionDays) || 35;
   if (!Number.isFinite(catalogVideoCount) || catalogVideoCount <= 0) return "最近35天累计";
-  return `最近${retentionDays}天累计 · 视频目录 ${catalogVideoCount} 个`;
+  return `最近${retentionDays}天累计 · 总目录${catalogVideoCount}视频`;
 }
 
 function rangeFallbackNote() {
@@ -3750,11 +3758,11 @@ function renderMobileBottomPagination(pageInfo) {
   const controls = document.createElement("div");
   controls.className = "pagination-controls pagination-bottom-stepper";
   controls.append(
-    renderPageButton("首页", 1, pageInfo.page === 1),
+    renderPageButton("首页", 1, pageInfo.page === 1, false, { icon: "first" }),
     renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, { icon: "prev" }),
     renderPageSelectControl(pageInfo, { compact: true }),
     renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, { icon: "next" }),
-    renderPageButton("末页", pageInfo.pageCount, pageInfo.page === pageInfo.pageCount),
+    renderPageButton("末页", pageInfo.pageCount, pageInfo.page === pageInfo.pageCount, false, { icon: "last" }),
   );
   return controls;
 }
@@ -3763,9 +3771,17 @@ function renderPaginationIcon(direction) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 24 24");
   svg.setAttribute("aria-hidden", "true");
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", direction === "prev" ? "m15 18-6-6 6-6" : "m9 6 6 6-6 6");
-  svg.append(path);
+  const paths = {
+    first: ["m11 18-6-6 6-6", "m19 18-6-6 6-6"],
+    prev: ["m15 18-6-6 6-6"],
+    next: ["m9 6 6 6-6 6"],
+    last: ["m5 6 6 6-6 6", "m13 6 6 6-6 6"],
+  }[direction] || ["m9 6 6 6-6 6"];
+  for (const d of paths) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    svg.append(path);
+  }
   return svg;
 }
 
@@ -4492,6 +4508,7 @@ function renderSourceInlineStrip(model, options = {}) {
   const strip = document.createElement("div");
   strip.className = `source-inline-strip source-inline-${model.mode}`;
   strip.dataset.sourceVideoCount = String(model.videoCount || 0);
+  strip.dataset.inlineVisibleCount = String(model.inlineVisibleCount || model.inlineGroups?.length || 0);
   if (model.canExpand) strip.classList.add("has-more");
 
   if (!model.videoCount) {
@@ -4502,12 +4519,23 @@ function renderSourceInlineStrip(model, options = {}) {
     return strip;
   }
 
+  const rail = document.createElement("div");
+  rail.className = "source-inline-preview-rail";
+  rail.setAttribute("aria-label", "来源预览");
+  const list = document.createElement("div");
+  list.className = "source-inline-preview-list";
+
   for (const group of model.inlineGroups) {
-    strip.append(renderSourceInlineGroup(group));
+    list.append(renderSourceInlineGroup(group));
   }
+  rail.append(list);
+  strip.append(rail);
+
+  const actions = document.createElement("div");
+  actions.className = "source-inline-actions";
 
   if (model.canExpand) {
-    strip.append(
+    actions.append(
       renderSourceInlineMoreButton({
         drawerId: options.drawerId,
         isExpanded: options.isExpanded,
@@ -4522,8 +4550,9 @@ function renderSourceInlineStrip(model, options = {}) {
   }
 
   if (model.showCopyAll && !model.canExpand && options.showCopyAll !== false) {
-    strip.append(renderInlineCopySongLinksButton(options.occurrences || []));
+    actions.append(renderInlineCopySongLinksButton(options.occurrences || []));
   }
+  if (actions.childElementCount) strip.append(actions);
 
   return strip;
 }
@@ -4535,6 +4564,7 @@ function renderSourceInlineGroup(group) {
   const firstSeconds = firstOccurrence?.song?.seconds ?? group.firstSeconds ?? 0;
   const wrapper = document.createElement("span");
   wrapper.className = "source-inline-item";
+  wrapper.dataset.videoId = videoId;
 
   if (firstOccurrence) {
     wrapper.append(renderSourceTimestampLink(firstOccurrence, "source-inline-time"));
@@ -4557,8 +4587,13 @@ function renderSourceInlineGroup(group) {
     more.dataset.toggleSourceTimes = "true";
     more.setAttribute("aria-expanded", "false");
     more.setAttribute("aria-controls", extraTimesId);
-    more.setAttribute("aria-label", `显示其余 ${extraTimes.length} 个时间点`);
-    more.textContent = `+${extraTimes.length}`;
+    more.setAttribute("aria-label", `显示另外 ${extraTimes.length} 个时间点`);
+    more.title = `另外 ${extraTimes.length} 个时间点`;
+    more.append(document.createTextNode(`+${extraTimes.length}`));
+    const unit = document.createElement("span");
+    unit.className = "source-inline-time-more-unit";
+    unit.textContent = "时间点";
+    more.append(unit);
     wrapper.append(more);
 
     const extra = document.createElement("span");
@@ -4576,10 +4611,13 @@ function renderSourceInlineGroup(group) {
   channel.target = "_blank";
   channel.rel = "noreferrer";
   channel.textContent = group.channelName || "未知频道";
+  channel.setAttribute("aria-label", channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`);
   channel.title = channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`;
   wrapper.append(channel);
 
   wrapper.append(renderCopySetlistButton(item, "复制歌单", "source-inline-copy source-copy-icon ui-chip ui-chip-icon"));
+  wrapper.title = [firstOccurrence ? formatSeconds(firstSeconds) : "", group.channelName || "未知频道", group.title || item.title || videoId].filter(Boolean).join(" · ");
+  wrapper.setAttribute("aria-label", wrapper.title);
   return wrapper;
 }
 
@@ -4612,8 +4650,11 @@ function renderSourceInlineMoreButton({
 
 function updateSourceInlineMoreButton(button, isExpanded) {
   const remaining = Math.max(0, Number(button.dataset.remainingCount) || 0);
-  button.textContent = isExpanded ? "收起其余来源" : `查看其余 ${remaining} 个来源`;
-  button.setAttribute("aria-label", isExpanded ? "收起其余来源" : `查看其余 ${remaining} 个来源`);
+  const label = isExpanded ? "收起" : `+${remaining}来源`;
+  const fullLabel = isExpanded ? "收起其余来源" : `查看其余 ${remaining} 个来源`;
+  button.textContent = label;
+  button.title = fullLabel;
+  button.setAttribute("aria-label", fullLabel);
 }
 
 function renderInlineCopySongLinksButton(occurrences) {
@@ -4706,11 +4747,14 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   drawer._sourceGroups = groups;
   if (options.toolbarVariant) drawer.dataset.toolbarVariant = options.toolbarVariant;
   const showAllOnOpen = drawer.dataset.sourceMode === "song" || drawer.dataset.sourceMode === "index" || drawer.dataset.sourceMode === "artist-song";
+  const allGroups = window.FrontendUtils.groupOccurrencesByVideo(drawer._songSourceOccurrences || occurrences);
+  const isRemainderDrawer = showAllOnOpen && allGroups.length > groups.length;
+  drawer.dataset.sourceRemainder = isRemainderDrawer ? "true" : "false";
   const visibleCount = showAllOnOpen ? groups.length : sourceVisibleGroupCount(drawer, groups.length);
   if (showAllOnOpen) drawer.dataset.visibleSourceGroups = String(visibleCount);
   const shouldShowToolbar = options.showToolbar !== false;
   if (shouldShowToolbar && !drawer.querySelector(":scope > .source-drawer-toolbar")) {
-    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount: groups.length }));
+    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount: groups.length, remainder: isRemainderDrawer }));
   } else {
     updateSourceDrawerCount(drawer, visibleCount, groups.length);
   }
@@ -4782,13 +4826,14 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
     ? options.totalCount
     : window.FrontendUtils.groupOccurrencesByVideo(occurrences).length;
   const visibleCount = Number.isFinite(options.visibleCount) ? options.visibleCount : totalCount;
+  const isRemainder = Boolean(options.remainder) || drawer.dataset.sourceRemainder === "true";
   const toolbar = document.createElement("div");
   toolbar.className = "source-drawer-toolbar";
   if (drawer.dataset.toolbarVariant === "artist") toolbar.classList.add("artist-source-toolbar");
 
   const count = document.createElement("span");
   count.className = "source-drawer-count";
-  count.textContent = sourceDrawerCountText(visibleCount, totalCount);
+  count.textContent = sourceDrawerCountText(visibleCount, totalCount, { remainder: isRemainder });
   toolbar.append(count);
 
   const actions = document.createElement("div");
@@ -4801,11 +4846,13 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
 
 function updateSourceDrawerCount(drawer, visibleCount, totalCount) {
   const count = drawer.querySelector(":scope > .source-drawer-toolbar .source-drawer-count");
-  if (count) count.textContent = sourceDrawerCountText(visibleCount, totalCount);
+  if (count) count.textContent = sourceDrawerCountText(visibleCount, totalCount, { remainder: drawer.dataset.sourceRemainder === "true" });
 }
 
-function sourceDrawerCountText(visibleCount, totalCount) {
-  return visibleCount < totalCount ? `已显示 ${visibleCount}/${totalCount} 个来源` : `${totalCount} 个来源`;
+function sourceDrawerCountText(visibleCount, totalCount, options = {}) {
+  const suffix = options.remainder ? "个其余来源" : "个来源";
+  if (visibleCount < totalCount) return `已显示 ${visibleCount}/${totalCount} ${suffix}`;
+  return options.remainder ? `其余 ${totalCount} 个来源` : `${totalCount} 个来源`;
 }
 
 function sourceVisibleGroupCount(drawer, total) {

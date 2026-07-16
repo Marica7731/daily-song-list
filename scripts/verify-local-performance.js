@@ -279,14 +279,62 @@ async function assertUiShape(page, viewport, range) {
       text: node.textContent || "",
       ariaLabel: node.getAttribute("aria-label") || "",
       className: node.className || "",
+      width: node.getBoundingClientRect().width,
+      height: node.getBoundingClientRect().height,
     }));
     const bottomSelect = rect(".pagination-bottom .page-select");
+    const bottomControls = Array.from(document.querySelectorAll(".pagination-bottom .pagination-button")).map((node) => ({
+      text: node.textContent || "",
+      ariaLabel: node.getAttribute("aria-label") || "",
+      svgCount: node.querySelectorAll("svg").length,
+      width: node.getBoundingClientRect().width,
+      height: node.getBoundingClientRect().height,
+    }));
     const filterBadges = Array.from(document.querySelectorAll("#queryCountBadge")).map((node) => ({
       id: node.id,
       hidden: node.hidden,
       display: getComputedStyle(node).display,
       text: node.textContent || "",
     }));
+    const queryTrigger = document.querySelector("#queryTrigger");
+    const queryTriggerBox = queryTrigger ? queryTrigger.getBoundingClientRect() : null;
+    const visibleTriggerChildren = queryTrigger
+      ? Array.from(queryTrigger.children)
+          .filter((node) => {
+            const style = getComputedStyle(node);
+            const box = node.getBoundingClientRect();
+            return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+          })
+          .map((node) => {
+            const box = node.getBoundingClientRect();
+            return {
+              tagName: node.tagName,
+              className: node.getAttribute("class") || "",
+              text: node.textContent || "",
+              left: box.left,
+              right: box.right,
+              top: box.top,
+              bottom: box.bottom,
+              width: box.width,
+              height: box.height,
+            };
+          })
+      : [];
+    const queryTriggerShape = queryTrigger
+      ? {
+          width: queryTriggerBox.width,
+          height: queryTriggerBox.height,
+          left: queryTriggerBox.left,
+          right: queryTriggerBox.right,
+          top: queryTriggerBox.top,
+          bottom: queryTriggerBox.bottom,
+          ariaLabel: queryTrigger.getAttribute("aria-label") || "",
+          visibleSvgCount: visibleTriggerChildren.filter((child) => child.tagName.toLowerCase() === "svg").length,
+          visibleNumericBadgeCount: visibleTriggerChildren.filter((child) => /^\d+$/u.test(child.text.trim())).length,
+          visibleChildren: visibleTriggerChildren,
+          hasActiveClass: queryTrigger.classList.contains("has-active-query"),
+        }
+      : null;
     const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row), .index-row, .video-card"));
     const firstRow = rows[0] || null;
     const secondRow = rows[1] || null;
@@ -371,7 +419,9 @@ async function assertUiShape(page, viewport, range) {
       topPageSize,
       topControls,
       bottomSelect,
+      bottomControls,
       filterBadges,
+      queryTrigger: queryTriggerShape,
       firstRow: rowRect(firstRow),
       firstTitle: rowRect(firstTitle),
       firstButton: rowRect(firstButton),
@@ -400,6 +450,27 @@ async function assertUiShape(page, viewport, range) {
   }
   if (viewport[0] <= 720) {
     if (!result.controls || result.controls.height > 50) throw new Error(`mobile controls not one row ${JSON.stringify(result.controls)}`);
+    if (!result.queryTrigger) throw new Error("mobile query trigger missing");
+    if (result.queryTrigger.width < 34 || result.queryTrigger.width > 36 || result.queryTrigger.height < 34 || result.queryTrigger.height > 36) {
+      throw new Error(`mobile query trigger geometry invalid ${JSON.stringify(result.queryTrigger)}`);
+    }
+    if (Math.abs(result.queryTrigger.width - result.queryTrigger.height) > 1) {
+      throw new Error(`mobile query trigger should be square ${JSON.stringify(result.queryTrigger)}`);
+    }
+    if (result.queryTrigger.visibleSvgCount !== 1 || result.queryTrigger.visibleNumericBadgeCount !== 0) {
+      throw new Error(`mobile query trigger should expose one icon and no visible number ${JSON.stringify(result.queryTrigger)}`);
+    }
+    if (
+      result.queryTrigger.visibleChildren.some(
+        (child) =>
+          child.left < result.queryTrigger.left - 1 ||
+          child.right > result.queryTrigger.right + 1 ||
+          child.top < result.queryTrigger.top - 1 ||
+          child.bottom > result.queryTrigger.bottom + 1,
+      )
+    ) {
+      throw new Error(`mobile query trigger child escaped bounds ${JSON.stringify(result.queryTrigger)}`);
+    }
     if (result.searchField && result.searchField.display !== "none") throw new Error("mobile search field is still resident in toolbar");
     if (!result.bottomNav || result.bottomNav.display === "none") throw new Error("mobile bottom nav missing");
     if (result.bottomItems.length !== 4 || result.bottomItems.some((item) => item.width < 60 || item.display === "none")) {
@@ -409,6 +480,10 @@ async function assertUiShape(page, viewport, range) {
       throw new Error(`mobile summary repeats range: ${result.summary.text}`);
     }
     if (!result.topSelect || result.topPageSize) throw new Error(`mobile top pagination should expose page select without page size ${JSON.stringify(result)}`);
+    if (result.topSelect.width > 92) throw new Error(`mobile top page select too wide ${JSON.stringify(result.topSelect)}`);
+    if (result.topControls.some((control) => control.width > 31 || control.height > 31)) {
+      throw new Error(`mobile top pagination buttons too large ${JSON.stringify(result.topControls)}`);
+    }
     if (
       result.topControls.length &&
       (result.topControls[0].ariaLabel !== "上一页" ||
@@ -424,6 +499,13 @@ async function assertUiShape(page, viewport, range) {
       throw new Error(`mobile rank count should not use a filled pill ${JSON.stringify(result.rankCountStyle)}`);
     }
     if (result.topPagination && result.topPagination.height > 52) throw new Error(`mobile top pagination too tall ${result.topPagination.height}`);
+    if (result.bottomControls.length >= 2) {
+      const first = result.bottomControls[0];
+      const last = result.bottomControls[result.bottomControls.length - 1];
+      if (first.ariaLabel !== "首页" || last.ariaLabel !== "末页" || first.text.trim() || last.text.trim() || first.svgCount < 1 || last.svgCount < 1) {
+        throw new Error(`mobile bottom pagination first/last should be icon buttons ${JSON.stringify(result.bottomControls)}`);
+      }
+    }
     if (!result.firstRow || result.firstRow.bottom > viewport[1]) throw new Error(`first mobile row is not visible ${JSON.stringify(result)}`);
     if (!result.firstTitle || result.firstTitle.top < (result.topPagination?.bottom || 0) - 1) {
       throw new Error(`first mobile title is covered ${JSON.stringify(result)}`);
@@ -1132,6 +1214,36 @@ async function mobileRankVisualGeometry(browser) {
       const side = trendRow?.querySelector(".rank-side");
       const sideTop = trendRow?.querySelector(".rank-side-top");
       const sourceStrip = trendRow?.querySelector(".source-inline-strip");
+      const sourceInlineItems = Array.from(trendRow?.querySelectorAll(".source-inline-item") || []).map((node) => {
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        const channel = node.querySelector(".source-inline-channel");
+        const channelBox = channel?.getBoundingClientRect();
+        const channelStyle = channel ? getComputedStyle(channel) : null;
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+          display: style.display,
+          visibility: style.visibility,
+          text: node.textContent.trim(),
+          channelText: channel?.textContent?.trim() || "",
+          channelDisplay: channelStyle?.display || "",
+          channelVisibility: channelStyle?.visibility || "",
+          channelWidth: channelBox?.width || 0,
+          channelHeight: channelBox?.height || 0,
+        };
+      });
+      const sourceMoreButton = button
+        ? {
+            ...rectFor(button),
+            flexGrow: getComputedStyle(button).flexGrow,
+            maxWidth: getComputedStyle(button).maxWidth,
+          }
+        : null;
       const rowBox = trendRow ? rectFor(trendRow) : null;
       const subline = trendRow?.querySelector(".rank-subline");
       const metaLine = trendRow?.querySelector(".rank-meta-line");
@@ -1158,7 +1270,10 @@ async function mobileRankVisualGeometry(browser) {
         sourceStrip: sourceStrip ? rectFor(sourceStrip) : null,
         sourceStripScrollWidth: sourceStrip?.scrollWidth || 0,
         sourceStripClientWidth: sourceStrip?.clientWidth || 0,
+        sourceVideoCount: Number(sourceStrip?.dataset.sourceVideoCount || 0),
+        sourceInlineItems,
         button: button ? rectFor(button) : null,
+        sourceMoreButton,
         buttonText: isVisible(button) ? button.textContent.trim() : "",
         rank: rank ? rectFor(rank) : null,
         title: title ? rectFor(title) : null,
@@ -1173,8 +1288,37 @@ async function mobileRankVisualGeometry(browser) {
     if (!closedGeometry.sourceStrip || closedGeometry.sourceStrip.right > closedGeometry.side.left + 1) {
       throw new Error(`mobile inline source strip should stay in content column ${JSON.stringify(closedGeometry)}`);
     }
+    if (closedGeometry.sourceVideoCount > 3) {
+      if (closedGeometry.sourceInlineItems.length !== 3) {
+        throw new Error(`4+ source rows should render exactly three inline previews ${JSON.stringify(closedGeometry.sourceInlineItems)}`);
+      }
+      const invisibleSource = closedGeometry.sourceInlineItems.find(
+        (item) =>
+          item.display === "none" ||
+          item.visibility === "hidden" ||
+          item.width <= 0 ||
+          item.height <= 0 ||
+          !item.channelText ||
+          item.channelDisplay === "none" ||
+          item.channelVisibility === "hidden" ||
+          item.channelWidth < 6 ||
+          item.channelHeight <= 0,
+      );
+      if (invisibleSource) {
+        throw new Error(`inline source preview is visually hidden ${JSON.stringify({ invisibleSource, sourceInlineItems: closedGeometry.sourceInlineItems })}`);
+      }
+      if (
+        !closedGeometry.sourceMoreButton ||
+        closedGeometry.sourceMoreButton.width > 112 ||
+        closedGeometry.sourceMoreButton.height > 28 ||
+        closedGeometry.sourceMoreButton.flexGrow !== "0"
+      ) {
+        throw new Error(`source more button should stay compact ${JSON.stringify(closedGeometry.sourceMoreButton)}`);
+      }
+    }
     if (closedGeometry.legacyTrendNodes) throw new Error(`legacy mobile trend nodes remain ${JSON.stringify(closedGeometry)}`);
-    if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > 90) {
+    const compactRowHeightLimit = closedGeometry.sourceVideoCount > 3 ? 126 : 90;
+    if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > compactRowHeightLimit) {
       throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
     }
     if (closedGeometry.allTrendTexts.some((item) => !/^(新|升\d+|降\d+|增\d+|减\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
@@ -1205,6 +1349,12 @@ async function mobileRankVisualGeometry(browser) {
     const expandedRow = expandableRows.first();
     await expandedRow.locator("[data-toggle-source]").first().click();
     await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group", { timeout: 15000 });
+    await page
+      .waitForFunction(() => {
+        const img = document.querySelector(".rank-row.is-expanded .source-video-thumb");
+        return Boolean(img?.currentSrc || img?.src) && (img?.naturalWidth || 0) > 0;
+      }, null, { timeout: 8000 })
+      .catch(() => {});
 
     const expandedGeometry = await expandedRow.evaluate((node) => {
       const rectFor = (target) => {
@@ -1228,6 +1378,8 @@ async function mobileRankVisualGeometry(browser) {
       const sourceTime = node.querySelector(".source-time-primary");
       const sourceChannel = node.querySelector(".source-video-channel");
       const sourceVideoTitle = node.querySelector(".source-video-title");
+      const sourceThumb = node.querySelector(".source-video-thumb-link");
+      const sourceThumbImage = node.querySelector(".source-video-thumb");
       const sourceMoreTimes = node.querySelector(".source-time-extra-toggle");
       const copyButtons = Array.from(node.querySelectorAll(".source-copy")).map(rectFor);
       const timeLinks = Array.from(node.querySelectorAll(".source-time-primary, .source-time-extra")).map(rectFor);
@@ -1236,6 +1388,14 @@ async function mobileRankVisualGeometry(browser) {
         sourceTime: sourceTime ? rectFor(sourceTime) : null,
         sourceChannel: sourceChannel ? rectFor(sourceChannel) : null,
         sourceVideoTitle: sourceVideoTitle ? rectFor(sourceVideoTitle) : null,
+        sourceThumb: sourceThumb ? rectFor(sourceThumb) : null,
+        sourceThumbImage: sourceThumbImage
+          ? {
+              ...rectFor(sourceThumbImage),
+              currentSrc: sourceThumbImage.currentSrc || sourceThumbImage.src || "",
+              naturalWidth: sourceThumbImage.naturalWidth || 0,
+            }
+          : null,
         sourceMoreTimes: sourceMoreTimes ? rectFor(sourceMoreTimes) : null,
         drawer: drawer ? rectFor(drawer) : null,
         firstGroup: firstGroup ? rectFor(firstGroup) : null,
@@ -1246,6 +1406,12 @@ async function mobileRankVisualGeometry(browser) {
     });
     if (!expandedGeometry.title || !expandedGeometry.sourceTime || !expandedGeometry.sourceChannel || !expandedGeometry.sourceVideoTitle || !expandedGeometry.drawer || !expandedGeometry.firstGroup) {
       throw new Error(`expanded source geometry missing ${JSON.stringify(expandedGeometry)}`);
+    }
+    if (!expandedGeometry.sourceThumb || expandedGeometry.sourceThumb.width < 50 || expandedGeometry.sourceThumb.height < 28) {
+      throw new Error(`source thumbnail should be visible as a compact cover ${JSON.stringify(expandedGeometry)}`);
+    }
+    if (!expandedGeometry.sourceThumbImage?.currentSrc) {
+      throw new Error(`source thumbnail image did not load ${JSON.stringify(expandedGeometry.sourceThumbImage)}`);
     }
     assertClose(expandedGeometry.sourceVideoTitle.left, expandedGeometry.sourceTime.left, 3, "source time aligns with source title", expandedGeometry);
     if (expandedGeometry.sourceChannel.left <= expandedGeometry.sourceTime.right) {
@@ -1385,6 +1551,12 @@ async function mobileCopyAllLinksFlow(browser) {
     const setlistCopied = await page.evaluate(() => (window.__clipboardWrites[1] || "").split("\n").filter(Boolean).length);
     if (!setlistCopied) throw new Error("copy setlist did not write clipboard text");
 
+    let screenshotPath = null;
+    if (viewport[0] === 390) {
+      screenshotPath = shotPath(`source-drawer-toolbar-${viewport.join("x")}.png`);
+      await page.screenshot({ path: screenshotPath, fullPage: false });
+    }
+
     const singleSourcePage = await gotoFirstSingleSourcePage(page, errors, requests);
     const singleSourceRow = page.locator('.rank-row:not(.skeleton-row):has(.source-inline-strip[data-source-video-count="1"])').first();
     if ((await singleSourceRow.count()) !== 1) throw new Error(`single-source inline row not found after paging ${JSON.stringify(singleSourcePage)}`);
@@ -1412,17 +1584,58 @@ async function mobileCopyAllLinksFlow(browser) {
     if (singleSourceShape.actionHeight < 28 || singleSourceShape.actionHeight > 34) {
       throw new Error(`single-source inline copy size invalid ${JSON.stringify(singleSourceShape)}`);
     }
+    const singleVisibleShape = await inlineSourceShape(singleSourceRow);
+    if (
+      singleVisibleShape.items.length !== 1 ||
+      !singleVisibleShape.items[0]?.visible ||
+      !singleVisibleShape.items[0]?.channel?.visible ||
+      !singleVisibleShape.items[0]?.channel?.text ||
+      !singleVisibleShape.items[0]?.timeVisible ||
+      !singleVisibleShape.items[0]?.copyVisible
+    ) {
+      throw new Error(`single-source inline visibility invalid ${JSON.stringify(singleVisibleShape)}`);
+    }
+
     let singleSourceScreenshotPath = null;
     if (viewport[0] === 390) {
       singleSourceScreenshotPath = shotPath(`single-source-inline-${viewport.join("x")}.png`);
       await page.screenshot({ path: singleSourceScreenshotPath, fullPage: false });
     }
 
-    let screenshotPath = null;
-    if (viewport[0] === 390) {
-      screenshotPath = shotPath(`source-drawer-toolbar-${viewport.join("x")}.png`);
-      await page.screenshot({ path: screenshotPath, fullPage: false });
+    if (viewport[0] <= 720) {
+      const tripleSourcePage = await gotoFirstSourceCasePage(page, errors, requests, "triple");
+      if (!tripleSourcePage.page) throw new Error("triple-source inline row not found");
+      const tripleRow = page.locator(".rank-row:not(.skeleton-row)").nth(tripleSourcePage.rowIndex);
+      const tripleShape = await inlineSourceShape(tripleRow);
+      if (
+        tripleShape.sourceVideoCount !== 3 ||
+        tripleShape.items.length !== 3 ||
+        tripleShape.toggleCount !== 0 ||
+        tripleShape.drawerCount !== 0 ||
+        tripleShape.items.some((item) => !item.visible || !item.channel?.visible || !item.channel.text)
+      ) {
+        throw new Error(`triple-source inline shape invalid ${JSON.stringify(tripleShape)}`);
+      }
+
+      const moreSourcePage = await gotoFirstSourceCasePage(page, errors, requests, "more");
+      if (!moreSourcePage.page) throw new Error("4+ source inline row not found");
+      const moreRow = page.locator(".rank-row:not(.skeleton-row)").nth(moreSourcePage.rowIndex);
+      const moreShape = await inlineSourceShape(moreRow);
+      if (
+        moreShape.sourceVideoCount <= 3 ||
+        moreShape.inlineVisibleCount !== 3 ||
+        moreShape.items.length !== 3 ||
+        moreShape.toggleCount !== 1 ||
+        !moreShape.more?.visible ||
+        moreShape.more.width > 112 ||
+        moreShape.more.height > 28 ||
+        moreShape.more.flexGrow !== "0" ||
+        moreShape.items.some((item) => !item.visible || !item.channel?.visible || !item.channel.text)
+      ) {
+        throw new Error(`4+ source inline shape invalid ${JSON.stringify(moreShape)}`);
+      }
     }
+
     const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
     await context.close();
     if (errors.length || unhandled) throw new Error(`copy all links flow errors: ${errors.join(" | ")} ${unhandled}`);
@@ -1473,6 +1686,7 @@ async function mobileVideoCardGeometry(browser) {
       };
       const card = document.querySelector(".video-card");
       const thumb = card?.querySelector(".thumb-link");
+      const thumbImage = card?.querySelector(".thumb");
       const heading = card?.querySelector(".video-heading");
       const title = card?.querySelector(".video-title");
       const meta = card?.querySelector(".video-meta");
@@ -1494,6 +1708,13 @@ async function mobileVideoCardGeometry(browser) {
         gridColumns: getComputedStyle(document.querySelector(".video-grid")).gridTemplateColumns,
         card: card ? rectFor(card) : null,
         thumb: thumb ? rectFor(thumb) : null,
+        thumbImage: thumbImage
+          ? {
+              ...rectFor(thumbImage),
+              currentSrc: thumbImage.currentSrc || thumbImage.src || "",
+              naturalWidth: thumbImage.naturalWidth || 0,
+            }
+          : null,
         heading: heading ? rectFor(heading) : null,
         title: title ? rectFor(title) : null,
         meta: meta ? rectFor(meta) : null,
@@ -1507,6 +1728,9 @@ async function mobileVideoCardGeometry(browser) {
     if (!geometry.card || !geometry.thumb || !geometry.heading || !geometry.title || !geometry.songList || !geometry.copy) {
       throw new Error(`video card geometry missing ${JSON.stringify(geometry)}`);
     }
+    if (!geometry.thumbImage?.currentSrc) {
+      throw new Error(`video thumbnail image did not load ${JSON.stringify(geometry)}`);
+    }
     const badCopy = geometry.visibleCopyButtons.find(
       (button) =>
         button.text ||
@@ -1518,7 +1742,7 @@ async function mobileVideoCardGeometry(browser) {
     if (badCopy) throw new Error(`video copy setlist button invalid ${JSON.stringify({ badCopy, geometry })}`);
     if (viewport[0] <= 720) {
       if (geometry.thumb.width >= geometry.card.width * 0.45) throw new Error(`mobile video thumbnail too wide ${JSON.stringify(geometry)}`);
-      if (geometry.thumb.width < 100 || geometry.thumb.width > 114) throw new Error(`mobile video thumbnail size invalid ${JSON.stringify(geometry)}`);
+      if (geometry.thumb.width < 118 || geometry.thumb.width > 146) throw new Error(`mobile video thumbnail size invalid ${JSON.stringify(geometry)}`);
       if (geometry.songList.left > geometry.card.left + 12 || geometry.songList.right < geometry.card.right - 12) {
         throw new Error(`mobile video song list is not full width ${JSON.stringify(geometry)}`);
       }
@@ -1557,6 +1781,10 @@ async function mobileVideoCardGeometry(browser) {
 }
 
 async function gotoFirstSingleSourcePage(page, errors, requests) {
+  return gotoFirstSourceCasePage(page, errors, requests, "single");
+}
+
+async function gotoFirstSourceCasePage(page, errors, requests, kind) {
   for (let pageNumber = 1; pageNumber <= 20; pageNumber += 1) {
     const targetUrl = new URL(baseUrl);
     targetUrl.searchParams.set("pageSize", "100");
@@ -1564,10 +1792,79 @@ async function gotoFirstSingleSourcePage(page, errors, requests) {
     targetUrl.searchParams.set("page", String(pageNumber));
     await page.goto(targetUrl.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
-    const matchCount = await page.locator('.rank-row:not(.skeleton-row):has(.source-inline-strip[data-source-video-count="1"])').count();
-    if (matchCount > 0) return { page: pageNumber, matchCount };
+    const match = await page.evaluate((targetKind) => {
+      const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)"));
+      const matches = (count) =>
+        targetKind === "single" ? count === 1 : targetKind === "triple" ? count === 3 : targetKind === "more" ? count > 3 : false;
+      for (const [index, row] of rows.entries()) {
+        const strip = row.querySelector(".source-inline-strip");
+        const count = Number(strip?.dataset.sourceVideoCount || 0);
+        if (matches(count)) return { rowIndex: index, count };
+      }
+      return null;
+    }, kind);
+    if (match) return { page: pageNumber, matchCount: 1, ...match };
   }
   return { page: null, matchCount: 0 };
+}
+
+async function inlineSourceShape(row) {
+  return row.evaluate((node) => {
+    const visible = (target) => {
+      if (!target) return false;
+      const box = target.getBoundingClientRect();
+      const style = getComputedStyle(target);
+      return !target.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+    };
+    const rectFor = (target) => {
+      const box = target.getBoundingClientRect();
+      const style = getComputedStyle(target);
+      return {
+        left: box.left,
+        right: box.right,
+        top: box.top,
+        bottom: box.bottom,
+        width: box.width,
+        height: box.height,
+        display: style.display,
+        visibility: style.visibility,
+        text: target.textContent.trim(),
+      };
+    };
+    const strip = node.querySelector(".source-inline-strip");
+    const items = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => {
+      const channel = item.querySelector(".source-inline-channel");
+      return {
+        ...rectFor(item),
+        visible: visible(item),
+        channel: channel
+          ? {
+              ...rectFor(channel),
+              visible: visible(channel),
+              text: channel.textContent.trim(),
+            }
+          : null,
+        copyVisible: visible(item.querySelector("[data-copy-setlist]")),
+        timeVisible: visible(item.querySelector(".source-inline-time")),
+      };
+    });
+    const more = node.querySelector(".source-inline-more");
+    return {
+      sourceVideoCount: Number(strip?.dataset.sourceVideoCount || 0),
+      inlineVisibleCount: Number(strip?.dataset.inlineVisibleCount || 0),
+      toggleCount: node.querySelectorAll("[data-toggle-source]").length,
+      drawerCount: node.querySelectorAll(".source-drawer").length,
+      copyAllCount: node.querySelectorAll("[data-copy-song-links]").length,
+      items,
+      more: more
+        ? {
+            ...rectFor(more),
+            visible: visible(more),
+            flexGrow: getComputedStyle(more).flexGrow,
+          }
+        : null,
+    };
+  });
 }
 
 async function compactSourceDrawerFlow(browser) {
@@ -2063,16 +2360,41 @@ async function mobileActiveQueryStripGeometry(browser) {
       const strip = document.querySelector("#activeQueryStrip");
       const clear = document.querySelector("#activeQueryStrip .active-query-clear");
       const chips = Array.from(document.querySelectorAll("#activeQueryStrip .active-query-chip")).map(rectFor);
+      const queryTrigger = document.querySelector("#queryTrigger");
+      const queryBox = queryTrigger?.getBoundingClientRect();
+      const visibleTriggerChildren = queryTrigger
+        ? Array.from(queryTrigger.children).filter((node) => {
+            const box = node.getBoundingClientRect();
+            const style = getComputedStyle(node);
+            return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+          })
+        : [];
       return {
         viewportWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
         strip: strip ? rectFor(strip) : null,
         clear: clear ? rectFor(clear) : null,
         chips,
+        queryTrigger: queryTrigger
+          ? {
+              width: queryBox.width,
+              height: queryBox.height,
+              ariaLabel: queryTrigger.getAttribute("aria-label") || "",
+              visibleSvgCount: visibleTriggerChildren.filter((node) => node.tagName.toLowerCase() === "svg").length,
+              visibleNumericBadgeCount: visibleTriggerChildren.filter((node) => /^\d+$/u.test((node.textContent || "").trim())).length,
+              hasActiveClass: queryTrigger.classList.contains("has-active-query"),
+            }
+          : null,
       };
     });
     if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`active query strip page overflow ${JSON.stringify(geometry)}`);
     if (!geometry.strip || !geometry.clear || geometry.chips.length < 3) throw new Error(`active query strip missing pieces ${JSON.stringify(geometry)}`);
+    if (!geometry.queryTrigger?.hasActiveClass || geometry.queryTrigger.visibleSvgCount !== 1 || geometry.queryTrigger.visibleNumericBadgeCount !== 0) {
+      throw new Error(`active query trigger state invalid ${JSON.stringify(geometry)}`);
+    }
+    if (!/当前有 4 个条件：少女レイ、只看小众、按视频、2次以上/u.test(geometry.queryTrigger.ariaLabel)) {
+      throw new Error(`active query trigger aria label missing condition detail ${JSON.stringify(geometry.queryTrigger)}`);
+    }
     if (!/清除全部/u.test(geometry.clear.text) || geometry.clear.width < 58 || geometry.clear.scrollWidth > geometry.clear.clientWidth + 1) {
       throw new Error(`active query clear button clipped ${JSON.stringify(geometry)}`);
     }
