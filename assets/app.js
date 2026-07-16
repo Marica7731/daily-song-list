@@ -17,7 +17,7 @@ const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
 const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
-const QUERY_SUGGESTION_SCAN_LIMIT = 1200;
+const QUERY_SUGGESTION_SCAN_LIMIT = 640;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
@@ -810,7 +810,6 @@ function setDialogOpen(dialog, isOpen) {
 function setPageInert(isInert) {
   for (const element of [document.querySelector(".layout"), els.mobileBottomNav, els.backToTop]) {
     if (!element) continue;
-    if ("inert" in element) element.inert = isInert;
     element.setAttribute("aria-hidden", isInert ? "true" : "false");
   }
 }

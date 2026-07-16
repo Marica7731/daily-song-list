@@ -206,6 +206,7 @@ test("query overlay opens before suggestions and result preview work", () => {
 
   const suggestionBody = functionBody("function renderSearchSuggestions");
   assert.ok(suggestionBody.indexOf("if (!hasQuery) return") < suggestionBody.indexOf("buildSearchSuggestions"));
+  assert.match(appSource, /const QUERY_SUGGESTION_SCAN_LIMIT = 640;/u);
   const countBody = functionBody("function queryDraftResultCount");
   assert.doesNotMatch(countBody, /buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
   assert.match(countBody, /queryResultCountCache/u);
