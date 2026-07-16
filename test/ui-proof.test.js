@@ -23,8 +23,13 @@ test("UI proof expected list covers source thumbnail states", () => {
     "mobile-source-new-to-old.png",
     "mobile-source-more-than-3.png",
     "mobile-source-more-than-3-expanded.png",
+    "mobile-source-more-than-3-expanded-bottom.png",
     "mobile-source-thumb-fallback.png",
     "mobile-source-long-channel.png",
+    "mobile-query-filter.png",
+    "mobile-video-expanded-bottom.png",
+    "desktop-artist-rank.png",
+    "desktop-song-index.png",
     "desktop-source-inline-3.png",
     "tablet-source-inline-3.png",
     "desktop-range-7d.png",
@@ -39,12 +44,18 @@ test("UI proof expected list covers source thumbnail states", () => {
 test("UI proof contracts pin new fixture scenes and proof docs", () => {
   assert.deepEqual(screenshotContracts["desktop-range-7d.png"].params, { fixture: "range", range: "7d" });
   assert.deepEqual(screenshotContracts["desktop-range-all.png"].params, { fixture: "range", range: "all" });
+  assert.deepEqual(screenshotContracts["desktop-monthly-song-rank.png"].params, { range: "1m", pageSize: 100 });
+  assert.equal(screenshotContracts["desktop-monthly-song-rank.png"].scene, "desktop-all-range-song-rank");
+  assert.deepEqual(screenshotContracts["desktop-artist-rank.png"].params, { view: "artistRank" });
+  assert.deepEqual(screenshotContracts["desktop-song-index.png"].params, { view: "songAz" });
   assert.equal(screenshotContracts["mobile-source-inline-2.png"].scene, "fixture-double");
   assert.equal(screenshotContracts["mobile-source-inline-3.png"].scene, "fixture-triple");
   assert.equal(screenshotContracts["tablet-source-inline-3.png"].viewport.width, 820);
   assert.equal(screenshotContracts["mobile-source-new-to-old.png"].scene, "fixture-newToOld");
   assert.equal(screenshotContracts["desktop-partition-pagination.png"].scene, "fixture-partition-pagination");
   assert.equal(screenshotContracts["desktop-search-snapshot-index.png"].scene, "fixture-search-snapshot-index");
+  assert.equal(screenshotContracts["mobile-query-filter.png"].viewport.width, 390);
+  assert.equal(screenshotContracts["mobile-video-expanded-bottom.png"].scene, "mobile-video-expanded-bottom");
 
   const inputPaths = proofInputEntries().map((entry) => entry.path);
   for (const inputPath of [

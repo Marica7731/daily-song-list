@@ -13,9 +13,13 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 
 ## Desktop
 
-| Song ranking | Monthly ranking | Video tab |
+| Song ranking | All range via legacy `1m` URL | Artist ranking |
 | --- | --- | --- |
-| ![Desktop song ranking](assets/screenshots/desktop-song-rank.png) | ![Desktop monthly ranking](assets/screenshots/desktop-monthly-song-rank.png) | ![Desktop video tab](assets/screenshots/desktop-video-view.png) |
+| ![Desktop song ranking](assets/screenshots/desktop-song-rank.png) | ![Desktop all range ranking through legacy 1m URL](assets/screenshots/desktop-monthly-song-rank.png) | ![Desktop artist ranking](assets/screenshots/desktop-artist-rank.png) |
+
+| Song index | Video tab |
+| --- | --- |
+| ![Desktop song index](assets/screenshots/desktop-song-index.png) | ![Desktop video tab](assets/screenshots/desktop-video-view.png) |
 
 | 7d range fixture | All range fixture | Partition pagination |
 | --- | --- | --- |
@@ -45,9 +49,13 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Mobile song index middle page](assets/screenshots/mobile-song-index-middle-page.png) | ![Mobile song index last page](assets/screenshots/mobile-song-index-last-page.png) | ![Mobile 320px pagination](assets/screenshots/mobile-pagination-320.png) |
 
-| Video tab | Expanded video | Expanded sources |
+| Video tab | Expanded video top | Expanded video bottom |
 | --- | --- | --- |
-| ![Mobile video tab](assets/screenshots/mobile-video-view.png) | ![Mobile expanded video](assets/screenshots/mobile-video-expanded.png) | ![Mobile expanded sources](assets/screenshots/mobile-source-expanded.png) |
+| ![Mobile video tab](assets/screenshots/mobile-video-view.png) | ![Mobile expanded video top](assets/screenshots/mobile-video-expanded.png) | ![Mobile expanded video bottom](assets/screenshots/mobile-video-expanded-bottom.png) |
+
+| Expanded sources |
+| --- |
+| ![Mobile expanded sources](assets/screenshots/mobile-source-expanded.png) |
 
 ## Mobile Query
 
@@ -55,13 +63,13 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Mobile active query strip](assets/screenshots/mobile-active-query-strip.png) | ![Mobile recent searches](assets/screenshots/mobile-query-recent.png) | ![Mobile query suggestions](assets/screenshots/mobile-query-suggestions.png) |
 
-| Snapshot history | Filtered summary | Active controls |
+| Filter controls | Snapshot history | Filtered summary |
 | --- | --- | --- |
-| ![Mobile query history](assets/screenshots/mobile-query-history.png) | ![Mobile filtered summary](assets/screenshots/mobile-summary-filtered.png) | ![Mobile active controls](assets/screenshots/mobile-controls-active.png) |
+| ![Mobile query filter](assets/screenshots/mobile-query-filter.png) | ![Mobile query history](assets/screenshots/mobile-query-history.png) | ![Mobile filtered summary](assets/screenshots/mobile-summary-filtered.png) |
 
-| Bottom navigation |
-| --- |
-| ![Mobile active bottom navigation](assets/screenshots/mobile-bottom-nav-active.png) |
+| Active controls | Bottom navigation |
+| --- | --- |
+| ![Mobile active controls](assets/screenshots/mobile-controls-active.png) | ![Mobile active bottom navigation](assets/screenshots/mobile-bottom-nav-active.png) |
 
 ## Source States
 
@@ -69,9 +77,13 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Mobile no source row](assets/screenshots/mobile-source-inline-0.png) | ![Mobile one source thumbnail](assets/screenshots/mobile-source-inline-1.png) | ![Mobile two source thumbnails](assets/screenshots/mobile-source-inline-2.png) |
 
-| 3 sources compact | 4+ collapsed | 4+ expanded |
+| 3 sources compact | 4+ collapsed | 4+ expanded top |
 | --- | --- | --- |
-| ![Mobile three-source row with two inline thumbnails and one compact remaining-source action](assets/screenshots/mobile-source-inline-3.png) | ![Mobile more source collapsed](assets/screenshots/mobile-source-more-than-3.png) | ![Mobile more source expanded](assets/screenshots/mobile-source-more-than-3-expanded.png) |
+| ![Mobile three-source row with two inline thumbnails and one compact remaining-source action](assets/screenshots/mobile-source-inline-3.png) | ![Mobile more source collapsed](assets/screenshots/mobile-source-more-than-3.png) | ![Mobile more source expanded top](assets/screenshots/mobile-source-more-than-3-expanded.png) |
+
+| 4+ expanded bottom |
+| --- |
+| ![Mobile more source expanded bottom](assets/screenshots/mobile-source-more-than-3-expanded-bottom.png) |
 
 | Sources new-to-old | Thumbnail fallback | Long channel name |
 | --- | --- | --- |

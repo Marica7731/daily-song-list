@@ -114,6 +114,55 @@ async function assertNoVisibleClipping(page, label) {
   if (clipped.length) throw new Error(`${label} visible clipping: ${JSON.stringify(clipped.slice(0, 8))}`);
 }
 
+async function assertQueryHistoryPanelSpacing(page, label) {
+  const metrics = await page.evaluate(() => {
+    const section = document.querySelector(".query-history-section[open]");
+    const footer = document.querySelector(".query-panel-footer");
+    if (!section || !footer) return null;
+    const sectionBox = section.getBoundingClientRect();
+    const footerBox = footer.getBoundingClientRect();
+    return {
+      gap: Math.round((footerBox.top - sectionBox.bottom) * 10) / 10,
+      sectionBottom: Math.round(sectionBox.bottom * 10) / 10,
+      footerTop: Math.round(footerBox.top * 10) / 10,
+    };
+  });
+  if (!metrics) throw new Error(`${label} missing open query history section`);
+  if (metrics.gap > 48) {
+    throw new Error(`${label} query history bottom gap too large: ${JSON.stringify(metrics)}`);
+  }
+}
+
+async function assertExpandedSourceBottomVisible(page, row, label) {
+  const metrics = await row.evaluate((node) => {
+    const drawer = node.querySelector(".source-drawer:not([hidden])");
+    const collapse = drawer?.querySelector(".source-collapse-bottom[data-collapse-source]");
+    const bottomNav = document.querySelector("#mobileBottomNav");
+    const navBox = bottomNav?.getBoundingClientRect();
+    const navTop =
+      navBox && getComputedStyle(bottomNav).display !== "none" && getComputedStyle(bottomNav).visibility !== "hidden"
+        ? navBox.top
+        : window.innerHeight;
+    const buttonBox = collapse?.getBoundingClientRect();
+    return {
+      hasDrawer: Boolean(drawer),
+      groupCount: drawer?.querySelectorAll(".source-video-group").length || 0,
+      hasCollapse: Boolean(collapse),
+      collapseText: collapse?.textContent?.trim() || "",
+      buttonTop: Math.round((buttonBox?.top || 0) * 10) / 10,
+      buttonBottom: Math.round((buttonBox?.bottom || 0) * 10) / 10,
+      navTop: Math.round(navTop * 10) / 10,
+      viewportHeight: window.innerHeight,
+    };
+  });
+  if (!metrics.hasDrawer || metrics.groupCount < 8 || !metrics.hasCollapse || metrics.collapseText !== "收起") {
+    throw new Error(`${label} source drawer bottom controls missing: ${JSON.stringify(metrics)}`);
+  }
+  if (metrics.buttonTop < 0 || metrics.buttonBottom > metrics.navTop - 6) {
+    throw new Error(`${label} source drawer bottom collapse not visible: ${JSON.stringify(metrics)}`);
+  }
+}
+
 async function assertSongIndexToolbarSpacing(page, label) {
   const shape = await page.evaluate(() => {
     const rectFor = (selector) => {
@@ -183,6 +232,21 @@ async function scrollElementNearTop(page, locator) {
           : 12;
     const top = window.scrollY + node.getBoundingClientRect().top - stickyOffset;
     window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+  });
+  await sleep(150);
+}
+
+async function scrollElementBottomIntoView(page, locator) {
+  await locator.evaluate((node) => {
+    const bottomNav = document.querySelector("#mobileBottomNav");
+    const bottomNavBox = bottomNav?.getBoundingClientRect();
+    const bottomInset =
+      bottomNavBox && getComputedStyle(bottomNav).display !== "none" && getComputedStyle(bottomNav).visibility !== "hidden"
+        ? bottomNavBox.height
+        : 0;
+    const targetBottom = window.scrollY + node.getBoundingClientRect().bottom;
+    const nextTop = targetBottom - window.innerHeight + bottomInset + 14;
+    window.scrollTo({ top: Math.max(0, nextTop), behavior: "instant" });
   });
   await sleep(150);
 }
@@ -275,6 +339,7 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
     });
     await sleep(250);
   }
+  if (options.openHistory) await assertQueryHistoryPanelSpacing(page, name);
   await save(page, name, { viewport, params: options.params || {}, selector: "#queryDialog" });
   await page.close();
 }
@@ -348,15 +413,30 @@ async function captureSourceCase(browser, viewport, kind, name, options = {}) {
   if (options.expand) {
     await warmImagesInElement(page, row, ".source-drawer .source-video-thumb");
     await assertExpandedSourceVisible(page, row, name);
+    if (options.scrollBottom) {
+      await scrollElementBottomIntoView(page, row.locator(".source-drawer:not([hidden])").first());
+      await assertExpandedSourceBottomVisible(page, row, name);
+    }
   } else {
     await warmImagesInElement(page, row, ".source-inline-thumb-image");
     await assertInlineSourceCase(page, row, kind, name);
   }
   if (options.viewportOnly) {
-    await scrollElementNearTop(page, row);
-    await save(page, name, { viewport, params: found.params, selector: `.rank-row source-${kind}` });
+    if (!options.scrollBottom) await scrollElementNearTop(page, row);
+    await save(page, name, {
+      viewport,
+      params: found.params,
+      selector: `.rank-row source-${kind}${options.scrollBottom ? "-bottom" : ""}`,
+      scene: options.scene,
+    });
   } else {
-    await saveElement(page, row, name, { minBytes: kind === "single" ? 4_000 : 6_000, viewport, params: found.params, selector: `.rank-row source-${kind}` });
+    await saveElement(page, row, name, {
+      minBytes: kind === "single" ? 4_000 : 6_000,
+      viewport,
+      params: found.params,
+      selector: `.rank-row source-${kind}`,
+      scene: options.scene,
+    });
   }
   await page.close();
 }
@@ -378,7 +458,7 @@ async function captureSongIndexPage(browser, viewport, target, name) {
   await page.close();
 }
 
-async function captureExpandedVideo(browser, viewport, name) {
+async function captureExpandedVideo(browser, viewport, name, options = {}) {
   const page = await newPage(browser, viewport);
   await page.goto(appUrl({ view: "videos" }), { waitUntil: "networkidle" });
   await waitForApp(page);
@@ -397,8 +477,49 @@ async function captureExpandedVideo(browser, viewport, name) {
   } else {
     throw new Error(`${name} did not find an expandable video card`);
   }
-  await save(page, name, { viewport, params: { view: "videos" }, selector: ".video-card.expanded" });
+  if (options.scrollBottom) {
+    const expandedCard = page.locator(".video-card").filter({ has: page.locator(".video-more[aria-expanded='true']") }).first();
+    await scrollElementBottomIntoView(page, expandedCard);
+    await assertExpandedVideoBottomVisible(page, name);
+  }
+  await save(page, name, {
+    viewport,
+    params: { view: "videos" },
+    selector: `.video-card:has(.video-more[aria-expanded='true'])${options.scrollBottom ? " bottom" : ""}`,
+    scene: options.scene,
+  });
   await page.close();
+}
+
+async function assertExpandedVideoBottomVisible(page, label) {
+  const metrics = await page.evaluate(() => {
+    const expandedButton = document.querySelector(".video-card .video-more[aria-expanded='true']");
+    const card = expandedButton?.closest(".video-card");
+    const bottomButton = Array.from(card?.querySelectorAll(".video-more[aria-expanded='true']") || []).find(
+      (button) => !button.classList.contains("video-more-top"),
+    );
+    const bottomNav = document.querySelector("#mobileBottomNav");
+    const navBox = bottomNav?.getBoundingClientRect();
+    const navTop =
+      navBox && getComputedStyle(bottomNav).display !== "none" && getComputedStyle(bottomNav).visibility !== "hidden"
+        ? navBox.top
+        : window.innerHeight;
+    const buttonBox = bottomButton?.getBoundingClientRect();
+    return {
+      hasCard: Boolean(card),
+      hasBottomButton: Boolean(bottomButton),
+      buttonText: bottomButton?.textContent?.trim() || "",
+      buttonTop: Math.round((buttonBox?.top || 0) * 10) / 10,
+      buttonBottom: Math.round((buttonBox?.bottom || 0) * 10) / 10,
+      navTop: Math.round(navTop * 10) / 10,
+    };
+  });
+  if (!metrics.hasCard || !metrics.hasBottomButton || metrics.buttonText !== "收起歌曲") {
+    throw new Error(`${label} expanded video bottom controls missing: ${JSON.stringify(metrics)}`);
+  }
+  if (metrics.buttonTop < 0 || metrics.buttonBottom > metrics.navTop - 6) {
+    throw new Error(`${label} expanded video bottom controls not visible: ${JSON.stringify(metrics)}`);
+  }
 }
 
 async function captureElementFromPage(browser, viewport, params, selector, name, options = {}) {
@@ -1212,7 +1333,11 @@ async function main() {
 
   try {
     await openPage(browser, desktop, {}, "desktop-song-rank.png");
-    await openPage(browser, desktopWide, { range: "1m", pageSize: 100 }, "desktop-monthly-song-rank.png");
+    await openPage(browser, desktopWide, { range: "1m", pageSize: 100 }, "desktop-monthly-song-rank.png", {
+      scene: "desktop-all-range-song-rank",
+    });
+    await openPage(browser, desktop, { view: "artistRank" }, "desktop-artist-rank.png");
+    await openPage(browser, desktop, { view: "songAz" }, "desktop-song-index.png");
     await captureRangeFixtureCase(browser, desktop, "7d", "desktop-range-7d.png");
     await captureRangeFixtureCase(browser, desktop, "all", "desktop-range-all.png");
     await openPage(browser, desktopWide, { view: "videos" }, "desktop-video-view.png");
@@ -1231,6 +1356,10 @@ async function main() {
     await captureSongIndexPage(browser, mobile, "last", "mobile-song-index-last-page.png");
     await openPage(browser, mobile, { view: "videos" }, "mobile-video-view.png");
     await captureExpandedVideo(browser, mobile, "mobile-video-expanded.png");
+    await captureExpandedVideo(browser, mobile, "mobile-video-expanded-bottom.png", {
+      scrollBottom: true,
+      scene: "mobile-video-expanded-bottom",
+    });
     await openPage(browser, { width: 320, height: 700 }, { page: 7, pageSize: 100, showUnknown: 1 }, "mobile-pagination-320.png");
     await captureElementFromPage(browser, mobile, { view: "videos" }, "#mobileBottomNav", "mobile-bottom-nav-active.png", {
       assert: assertBottomNavIconSelection,
@@ -1256,6 +1385,7 @@ async function main() {
     });
     await captureQueryPanel(browser, mobile, "mobile-query-recent.png");
     await captureQueryPanel(browser, mobile, "mobile-query-suggestions.png", { searchText: "少女レイ" });
+    await captureQueryPanel(browser, mobile, "mobile-query-filter.png", { filterTab: true });
     await captureQueryPanel(browser, mobile, "mobile-query-history.png", { openHistory: true, scrollBottom: true });
     await captureExpandedSource(browser, mobile, {}, "mobile-source-expanded.png");
     await captureFixtureSourceCase(browser, mobile, "none", "mobile-source-inline-0.png");
@@ -1265,6 +1395,12 @@ async function main() {
     await captureFixtureSourceCase(browser, mobile, "newToOld", "mobile-source-new-to-old.png");
     await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3.png");
     await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3-expanded.png", { expand: true, viewportOnly: true });
+    await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3-expanded-bottom.png", {
+      expand: true,
+      viewportOnly: true,
+      scrollBottom: true,
+      scene: "mobile-source-more-than-3-expanded-bottom",
+    });
     await captureFixtureSourceCase(browser, mobile, "fallback", "mobile-source-thumb-fallback.png");
     await captureFixtureSourceCase(browser, mobile, "longChannel", "mobile-source-long-channel.png");
     await captureFixtureSourceCase(browser, mobile, "longTime", "mobile-source-long-time.png");

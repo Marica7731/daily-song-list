@@ -19,9 +19,13 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 
 ### Desktop Web
 
-| Song ranking | Monthly ranking | Video tab |
+| Song ranking | All range via legacy `1m` URL | Artist ranking |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/desktop-song-rank.png" alt="Desktop song ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-monthly-song-rank.png" alt="Desktop monthly ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
+| <img src="docs/assets/screenshots/desktop-song-rank.png" alt="Desktop song ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-monthly-song-rank.png" alt="Desktop all range ranking through legacy 1m URL" width="320" /> | <img src="docs/assets/screenshots/desktop-artist-rank.png" alt="Desktop artist ranking" width="320" /> |
+
+| Song index | Video tab |
+| --- | --- |
+| <img src="docs/assets/screenshots/desktop-song-index.png" alt="Desktop song index" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
 
 | 7d range fixture | All range fixture | Data partitions |
 | --- | --- | --- |
@@ -49,17 +53,25 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-song-index-middle-page.png" alt="Mobile song index middle page" width="180" /> | <img src="docs/assets/screenshots/mobile-song-index-last-page.png" alt="Mobile song index last page" width="180" /> | <img src="docs/assets/screenshots/mobile-pagination-320.png" alt="Mobile 320px pagination" width="180" /> |
 
-| Video tab | Video expanded | Sources expanded |
+| Video tab | Video expanded top | Video expanded bottom |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-video-view.png" alt="Mobile video tab" width="180" /> | <img src="docs/assets/screenshots/mobile-video-expanded.png" alt="Mobile expanded video card" width="180" /> | <img src="docs/assets/screenshots/mobile-source-expanded.png" alt="Mobile expanded song sources" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-video-view.png" alt="Mobile video tab" width="180" /> | <img src="docs/assets/screenshots/mobile-video-expanded.png" alt="Mobile expanded video card top" width="180" /> | <img src="docs/assets/screenshots/mobile-video-expanded-bottom.png" alt="Mobile expanded video card bottom collapse action" width="180" /> |
+
+| Sources expanded |
+| --- |
+| <img src="docs/assets/screenshots/mobile-source-expanded.png" alt="Mobile expanded song sources" width="180" /> |
 
 | 0 source | 1 source inline | 2 sources inline |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-source-inline-0.png" alt="Mobile source row with no source" width="180" /> | <img src="docs/assets/screenshots/mobile-source-inline-1.png" alt="Mobile one source inline row with thumbnail" width="180" /> | <img src="docs/assets/screenshots/mobile-source-inline-2.png" alt="Mobile two source inline row with thumbnails" width="180" /> |
 
-| 3 sources compact | More sources | More expanded |
+| 3 sources compact | More sources | More expanded top |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-source-inline-3.png" alt="Mobile three-source row with two inline thumbnails and one compact remaining-source action" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3.png" alt="Mobile row with more than three sources" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3-expanded.png" alt="Mobile row with all remaining sources expanded" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-source-inline-3.png" alt="Mobile three-source row with two inline thumbnails and one compact remaining-source action" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3.png" alt="Mobile row with more than three sources" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3-expanded.png" alt="Mobile row with all remaining sources expanded top" width="180" /> |
+
+| More expanded bottom |
+| --- |
+| <img src="docs/assets/screenshots/mobile-source-more-than-3-expanded-bottom.png" alt="Mobile row with all remaining sources expanded bottom collapse action" width="180" /> |
 
 | New-to-old sources | Thumbnail fallback | Long channel |
 | --- | --- | --- |
@@ -77,9 +89,9 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-active-query-strip.png" alt="Mobile active query strip with search and filters" width="180" /> | <img src="docs/assets/screenshots/mobile-query-recent.png" alt="Mobile search and filter panel with recent searches" width="180" /> | <img src="docs/assets/screenshots/mobile-query-suggestions.png" alt="Mobile search suggestions in query panel" width="180" /> |
 
-| Snapshot controls | Bottom navigation |
-| --- | --- |
-| <img src="docs/assets/screenshots/mobile-query-history.png" alt="Mobile query panel history snapshot controls" width="180" /> | <img src="docs/assets/screenshots/mobile-bottom-nav-active.png" alt="Mobile bottom navigation active icon state" width="180" /> |
+| Filter controls | Snapshot controls | Bottom navigation |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-query-filter.png" alt="Mobile query panel filter controls" width="180" /> | <img src="docs/assets/screenshots/mobile-query-history.png" alt="Mobile query panel history snapshot controls" width="180" /> | <img src="docs/assets/screenshots/mobile-bottom-nav-active.png" alt="Mobile bottom navigation active icon state" width="180" /> |
 
 ## How it Works
 

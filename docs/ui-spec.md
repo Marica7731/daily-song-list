@@ -104,16 +104,16 @@
 
 README 截图矩阵至少包括：
 
-- 桌面歌曲榜、月度榜、视频页、查询面板、展开来源、中页分页。
+- 桌面歌曲榜、全量榜入口（legacy `1m` URL）、歌手榜、歌曲索引、视频页、查询面板、展开来源、中页分页。
 - 桌面 `7d`、`all` range fixture；这些是当前核心 runtime 的 proof。
 - 桌面分片分页 fixture、搜索索引 fixture 和快照索引 fixture。
 - 平板 3 来源内联 fixture。
-- 手机歌曲榜、歌手榜、歌曲索引、索引中页、索引末页、视频页、展开视频、active query strip、query recent、query suggestions、query history、展开来源。
+- 手机歌曲榜、歌手榜、歌曲索引、索引中页、索引末页、视频页、展开视频顶部和底部收起入口、active query strip、query recent、query suggestions、query filter、query history、展开来源。
 - 手机 320px 分页。
-- 手机 0 来源、1 来源、2 来源、3 来源、4+ 来源收起、4+ 来源展开、长频道名、长时间戳、额外时间点和封面 fallback。
+- 手机 0 来源、1 来源、2 来源、3 来源、4+ 来源收起、4+ 来源展开顶部和底部收起入口、长频道名、长时间戳、额外时间点和封面 fallback。
 - 手机来源新到旧 fixture，至少用 `publishedAt` 降序校验来源显示顺序。
 - 移动筛选后摘要、活动查询控制区和底部导航选中态。
-- 截图脚本必须验证视觉可见性，不得只检查 DOM 或 `data-source-video-count`：内联来源缩略图必须无遮挡，页面中不得存在 `.source-inline-time-overlay`，来源主时间戳必须可见且不溢出，来源频道不能 `display:none`，来源预览必须横跨内容和右侧列，展开 drawer 不得重复前三个内联来源，移动查询按钮不能显示孤立数字徽标/圆点，视频页和展开来源的首个缩略图必须实际可见。
+- 截图脚本必须验证视觉可见性，不得只检查 DOM 或 `data-source-video-count`：内联来源缩略图必须无遮挡，页面中不得存在 `.source-inline-time-overlay`，来源主时间戳必须可见且不溢出，来源频道不能 `display:none`，来源预览必须横跨内容和右侧列，展开 drawer 不得重复前三个内联来源，移动查询按钮不能显示孤立数字徽标/圆点，视频页和展开来源的首个缩略图必须实际可见，移动 query history 取景中历史快照区到 footer 的可见空白不得超过正常组件间距。
 - `docs/assets/screenshots/manifest.json` 记录全部截图 SHA256、尺寸、生成时间、视口、URL 参数、选择器和 UI 源码指纹。`scripts/validate-ui-proof.js` 还要校验 `scripts/ui-proof-config.js` 中 fixture screenshot 的 scene、viewport 和 URL params。只要 `index.html`、`assets/app.js`、`assets/styles.css`、`assets/frontend-utils.js`、`docs/ui-spec.md`、`docs/data-architecture.md`、`docs/range-migration.md`、`docs/storage-layout.md`、`docs/backfill.md`、截图脚本或 UI proof fixture 变化但截图未刷新，`npm run check` 必须失败并提示运行 `npm run screenshots:readme`。
 
 ## 数据与 Range 文档
@@ -128,4 +128,5 @@ README 截图矩阵至少包括：
 - `active-query-strip`：存在时 26px-28px。
 - `summary`：约 34px-48px，主摘要最多两行；更新时间与主指标处于同一 flex 信息流，移动端使用 gap 而不是文本中点分隔。
 - `pagination-top`：32px-36px。
+- 移动 query panel 的 footer 是独立网格行；筛选 tab 在手机端使用明确面板高度，让 `.query-panel-body` 成为实际滚动行，不得再用大额底部 padding 伪造 footer 避让。历史快照展开到底部时不应出现半屏空白。
 - 实心品牌色只用于当前范围、当前页和查询面板主要提交按钮。单个内容区域最多一个高强调实心控件；剩余来源按钮不得成为大面积绿色 CTA。

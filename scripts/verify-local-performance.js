@@ -119,7 +119,7 @@ async function openFilterSheet(page) {
   await page.locator("#queryTrigger").click();
   await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
   await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
-  await page.waitForSelector("#queryFilterPanel:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await waitForQueryFilterTab(page);
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
 }
 
@@ -127,8 +127,25 @@ async function openMobileFilterSheet(page) {
   await page.locator("#queryTrigger").click();
   await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
   await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
-  await page.waitForSelector("#queryFilterPanel:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await waitForQueryFilterTab(page);
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
+}
+
+async function waitForQueryFilterTab(page) {
+  await page.waitForFunction(
+    () => {
+      const panel = document.querySelector("#queryDialog .query-panel");
+      const filterPanel = document.querySelector("#queryFilterPanel");
+      const filterTab = document.querySelector('[data-query-panel-tab="filter"]');
+      return (
+        Boolean(panel?.classList.contains("is-filter-tab")) &&
+        filterPanel?.hidden === false &&
+        filterTab?.getAttribute("aria-selected") === "true"
+      );
+    },
+    null,
+    { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 },
+  );
 }
 
 async function openSnapshotFilters(page) {
@@ -136,7 +153,7 @@ async function openSnapshotFilters(page) {
     await openFilterSheet(page);
   } else if ((await page.locator("#queryFilterPanel:not([hidden])").count()) === 0) {
     await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
-    await page.waitForSelector("#queryFilterPanel:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+    await waitForQueryFilterTab(page);
   }
   await page.locator(".query-history-section").evaluate((section) => {
     section.open = true;
@@ -1141,7 +1158,13 @@ async function mobileFilterSheetFlow(browser) {
         const box = node.getBoundingClientRect();
         return { top: box.top, bottom: box.bottom, height: box.height };
       };
-      const selects = Array.from(document.querySelectorAll("#queryDialog select"));
+      const isVisibleControl = (node) => {
+        if (node.closest("details:not([open])")) return false;
+        const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      };
+      const selects = Array.from(document.querySelectorAll("#queryDialog select")).filter(isVisibleControl);
       const footer = document.querySelector("#queryDialog .query-panel-footer");
       return {
         lastSelect: selects.length ? rectFor(selects[selects.length - 1]) : null,

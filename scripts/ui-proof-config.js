@@ -3,6 +3,8 @@
 const expectedScreenshots = [
   "desktop-song-rank.png",
   "desktop-monthly-song-rank.png",
+  "desktop-artist-rank.png",
+  "desktop-song-index.png",
   "desktop-range-7d.png",
   "desktop-range-all.png",
   "desktop-video-view.png",
@@ -21,11 +23,13 @@ const expectedScreenshots = [
   "mobile-song-index-last-page.png",
   "mobile-video-view.png",
   "mobile-video-expanded.png",
+  "mobile-video-expanded-bottom.png",
   "mobile-pagination-320.png",
   "mobile-bottom-nav-active.png",
   "mobile-active-query-strip.png",
   "mobile-query-recent.png",
   "mobile-query-suggestions.png",
+  "mobile-query-filter.png",
   "mobile-query-history.png",
   "mobile-summary-filtered.png",
   "mobile-controls-active.png",
@@ -37,6 +41,7 @@ const expectedScreenshots = [
   "mobile-source-new-to-old.png",
   "mobile-source-more-than-3.png",
   "mobile-source-more-than-3-expanded.png",
+  "mobile-source-more-than-3-expanded-bottom.png",
   "mobile-source-thumb-fallback.png",
   "mobile-source-long-channel.png",
   "mobile-source-long-time.png",
@@ -63,6 +68,19 @@ const proofInputPaths = [
 ];
 
 const screenshotContracts = {
+  "desktop-monthly-song-rank.png": {
+    scene: "desktop-all-range-song-rank",
+    params: { range: "1m", pageSize: 100 },
+    viewport: { width: 1366, height: 768 },
+  },
+  "desktop-artist-rank.png": {
+    params: { view: "artistRank" },
+    viewport: { width: 1440, height: 900 },
+  },
+  "desktop-song-index.png": {
+    params: { view: "songAz" },
+    viewport: { width: 1440, height: 900 },
+  },
   "desktop-range-7d.png": {
     scene: "fixture-range-7d",
     params: { fixture: "range", range: "7d" },
@@ -107,6 +125,17 @@ const screenshotContracts = {
     scene: "fixture-search-snapshot-index",
     params: { fixture: "search-snapshot-index" },
     viewport: { width: 1440, height: 900 },
+  },
+  "mobile-query-filter.png": {
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-query-history.png": {
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-video-expanded-bottom.png": {
+    scene: "mobile-video-expanded-bottom",
+    params: { view: "videos" },
+    viewport: { width: 390, height: 844 },
   },
 };
 

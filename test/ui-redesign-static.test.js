@@ -6,6 +6,7 @@ const test = require("node:test");
 const appSource = fs.readFileSync(path.join(__dirname, "..", "assets", "app.js"), "utf8");
 const cssSource = fs.readFileSync(path.join(__dirname, "..", "assets", "styles.css"), "utf8");
 const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const captureSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "capture-readme-screenshots.js"), "utf8");
 const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-local-performance.js"), "utf8");
 
 test("mobile information architecture exposes one query center and a one-row toolbar", () => {
@@ -133,8 +134,11 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(indexSource, /class="query-tabs"[\s\S]*data-query-panel-tab="search"[\s\S]*data-query-panel-tab="filter"/u);
   assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: auto auto;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\s*\{[\s\S]*height: auto;[\s\S]*max-height: min\(calc\(var\(--visual-viewport-height\) - 10px\), 84dvh\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\.is-filter-tab\s*\{[\s\S]*height: min\(calc\(var\(--visual-viewport-height\) - 10px\), 84dvh\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel-body\s*\{[\s\S]*padding-bottom: 16px;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\.is-filter-tab \.query-panel-body\s*\{[\s\S]*padding-bottom: calc\(144px \+ env\(safe-area-inset-bottom\)\);/u);
+  assert.doesNotMatch(cssSource, /\.query-panel\.is-filter-tab \.query-panel-body\s*\{[\s\S]*144px/u);
+  assert.match(captureSource, /async function assertQueryHistoryPanelSpacing/u);
+  assert.match(captureSource, /query history bottom gap too large/u);
   assert.match(appSource, /function setQueryPanelTab/u);
   assert.match(appSource, /els\.queryPanel\?\.classList\.toggle\("is-filter-tab", targetName === "filter"\)/u);
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"\. drawer drawer"/u);
@@ -169,6 +173,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(appSource, /className = "video-more video-more-top"/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*--source-thumb-width: var\(--source-thumb-width-narrow\)/u);
   assert.match(verifySource, /async function mobileFilterSheetFlow/u);
+  assert.match(verifySource, /async function waitForQueryFilterTab/u);
+  assert.match(verifySource, /details:not\(\[open\]\)/u);
   assert.match(verifySource, /async function mobileRankVisualGeometry/u);
   assert.match(verifySource, /async function mobileCopyAllLinksFlow/u);
   assert.match(verifySource, /async function mobileVideoCardGeometry/u);
