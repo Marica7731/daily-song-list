@@ -95,7 +95,7 @@
     };
   }
 
-  function visiblePageTokens(currentPage, totalPages, options = {}) {
+  function desktopPageTokens(currentPage, totalPages, options = {}) {
     const total = positiveInteger(totalPages, 1);
     const current = clamp(positiveInteger(currentPage, 1), 1, total);
     const maxTokens = Math.max(5, positiveInteger(options.maxTokens, 7));
@@ -126,20 +126,35 @@
     return [pageToken(1), ellipsisToken("left"), ...pages.map(pageToken), ellipsisToken("right"), pageToken(total)];
   }
 
-  function mobilePageStepperModel(currentPage, totalPages) {
+  function visiblePageTokens(currentPage, totalPages, options = {}) {
+    return desktopPageTokens(currentPage, totalPages, options);
+  }
+
+  function mobilePageModel(currentPage, totalPages) {
     const pageCount = positiveInteger(totalPages, 1);
     const current = clamp(positiveInteger(currentPage, 1), 1, pageCount);
     const previousPage = current > 1 ? current - 1 : null;
     const nextPage = current < pageCount ? current + 1 : null;
     return {
       currentPage: current,
+      totalPages: pageCount,
       pageCount,
       hasPrevious: previousPage !== null,
       hasNext: nextPage !== null,
       previousPage,
-      previousNeighbor: previousPage,
-      nextNeighbor: nextPage,
+      previousNeighbors: previousPage ? [previousPage] : [],
+      currentLabel: `${current}/${pageCount}`,
+      nextNeighbors: nextPage ? [nextPage] : [],
       nextPage,
+    };
+  }
+
+  function mobilePageStepperModel(currentPage, totalPages) {
+    const model = mobilePageModel(currentPage, totalPages);
+    return {
+      ...model,
+      previousNeighbor: model.previousNeighbors[0] || null,
+      nextNeighbor: model.nextNeighbors[0] || null,
     };
   }
 
@@ -1112,6 +1127,8 @@
     normalizeSetlistSongs,
     normalizeSongSearchText,
     paginateItems,
+    desktopPageTokens,
+    mobilePageModel,
     mobilePageStepperModel,
     parseUrlState,
     defaultQueryDraft,

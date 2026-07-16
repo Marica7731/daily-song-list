@@ -13,6 +13,7 @@ const {
   createSnapshotLoader,
   createSongSearchLookup,
   createTrendLookup,
+  desktopPageTokens,
   defaultQueryDraft,
   filterItemsBySearch,
   filterItemsByNiche,
@@ -24,6 +25,7 @@ const {
   isSongSearchKnown,
   indexBucketButtonModel,
   makeQueryDraftFromState,
+  mobilePageModel,
   mobilePageStepperModel,
   normalizeSearch,
   normalizeSetlistSongs,
@@ -490,45 +492,72 @@ test("visible page tokens use non-clickable ellipsis markers", () => {
   for (const { current, total, options, expected } of cases) {
     const tokens = visiblePageTokens(current, total, options);
     assert.deepEqual(tokens, expected);
+    assert.deepEqual(desktopPageTokens(current, total, options), expected);
     assertPageTokensOrdered(tokens);
     assert.equal(tokens.filter((token) => token.type === "page" && token.current).length, 1);
   }
 });
 
 test("mobile page stepper exposes stable neighbor and arrow targets", () => {
-  assert.deepEqual(mobilePageStepperModel(7, 59), {
+  assert.deepEqual(mobilePageModel(7, 59), {
     currentPage: 7,
+    totalPages: 59,
     pageCount: 59,
     hasPrevious: true,
     hasNext: true,
     previousPage: 6,
-    previousNeighbor: 6,
-    nextNeighbor: 8,
+    previousNeighbors: [6],
+    currentLabel: "7/59",
+    nextNeighbors: [8],
     nextPage: 8,
   });
-  assert.deepEqual(mobilePageStepperModel(1, 59), {
+  assert.deepEqual(mobilePageModel(1, 59), {
     currentPage: 1,
+    totalPages: 59,
     pageCount: 59,
     hasPrevious: false,
     hasNext: true,
     previousPage: null,
-    previousNeighbor: null,
-    nextNeighbor: 2,
+    previousNeighbors: [],
+    currentLabel: "1/59",
+    nextNeighbors: [2],
     nextPage: 2,
   });
-  assert.deepEqual(mobilePageStepperModel(99, 3), {
+  assert.deepEqual(mobilePageModel(99, 3), {
     currentPage: 3,
+    totalPages: 3,
     pageCount: 3,
     hasPrevious: true,
     hasNext: false,
     previousPage: 2,
-    previousNeighbor: 2,
-    nextNeighbor: null,
+    previousNeighbors: [2],
+    currentLabel: "3/3",
+    nextNeighbors: [],
+    nextPage: null,
+  });
+  assert.equal(mobilePageStepperModel(7, 59).previousNeighbor, 6);
+  assert.equal(mobilePageStepperModel(7, 59).nextNeighbor, 8);
+  assert.deepEqual(mobilePageModel(1, 1), {
+    currentPage: 1,
+    totalPages: 1,
+    pageCount: 1,
+    hasPrevious: false,
+    hasNext: false,
+    previousPage: null,
+    previousNeighbors: [],
+    currentLabel: "1/1",
+    nextNeighbors: [],
     nextPage: null,
   });
 });
 
 test("source presentation model inlines up to three videos and expands only the rest", () => {
+  const empty = sourcePresentationModel([]);
+  assert.equal(empty.mode, "none");
+  assert.equal(empty.videoCount, 0);
+  assert.equal(empty.inlineGroups.length, 0);
+  assert.equal(empty.canExpand, false);
+
   const oneVideo = sourcePresentationModel([
     occurrence("A", "channel A", { seconds: 10 }),
     occurrence("A", "channel A", { seconds: 20 }),
@@ -540,6 +569,19 @@ test("source presentation model inlines up to three videos and expands only the 
   assert.equal(oneVideo.remainingCount, 0);
   assert.equal(oneVideo.canExpand, false);
   assert.equal(oneVideo.showCopyAll, false);
+
+  const twoVideosWithDuplicateTimestamps = sourcePresentationModel([
+    occurrence("A", "channel A", { seconds: 10 }),
+    occurrence("A", "channel A", { seconds: 20 }),
+    occurrence("B", "channel B", { seconds: 30 }),
+  ]);
+  assert.equal(twoVideosWithDuplicateTimestamps.videoCount, 2);
+  assert.equal(twoVideosWithDuplicateTimestamps.occurrenceCount, 3);
+  assert.deepEqual(
+    twoVideosWithDuplicateTimestamps.inlineGroups.map((group) => `${group.videoId}:${group.occurrences.length}`),
+    ["A:2", "B:1"],
+  );
+  assert.equal(twoVideosWithDuplicateTimestamps.canExpand, false);
 
   const threeVideos = sourcePresentationModel([
     occurrence("A", "channel A"),

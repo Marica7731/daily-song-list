@@ -87,8 +87,11 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
   const page = await newPage(browser, viewport);
   await page.goto(appUrl(options.params || {}), { waitUntil: "networkidle" });
   await waitForApp(page);
+  const openedAt = await page.evaluate(() => performance.now());
   await page.click("#queryTrigger");
-  await page.waitForSelector("#queryDialog:not([hidden]) .query-panel", { timeout: 15_000 });
+  await page.waitForSelector("#queryDialog:not([hidden]) .query-panel", { timeout: 3_000 });
+  const visibleMs = await page.evaluate((start) => Math.round((performance.now() - start) * 10) / 10, openedAt);
+  console.log(`README_QUERY_OPEN ${name} ${visibleMs}ms`);
   if (options.searchText) {
     await page.fill("#queryInput", options.searchText);
     await page.waitForSelector(".suggestion-item", { timeout: 15_000 });

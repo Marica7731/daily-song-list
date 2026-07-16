@@ -16,6 +16,8 @@ const STATUS_PATH = "data/status.json";
 const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
+const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
+const QUERY_SUGGESTION_SCAN_LIMIT = 1200;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
@@ -263,6 +265,10 @@ const state = {
   overlayTrigger: null,
   queryDraft: null,
   queryPreviewTimer: 0,
+  querySuggestionTimer: 0,
+  queryWorkRevision: 0,
+  queryComposing: false,
+  currentResultSummary: null,
   sharedUrlApplied: false,
   responsiveMode: "",
   resizeRenderFrame: 0,
@@ -543,6 +549,10 @@ function bindEvents() {
     const sourceToggle = event.target.closest("[data-toggle-source]");
     if (sourceToggle) {
       event.preventDefault();
+      if (sourceToggle.closest(".artist-song-group")) {
+        toggleArtistSongSource(sourceToggle);
+        return;
+      }
       toggleSourceDrawer(sourceToggle.closest(".rank-row, .index-row"));
     }
   });
@@ -631,7 +641,7 @@ function bindQueryOverlayEvents() {
   els.cancelQueryButton?.addEventListener("click", () => closeOverlay("query"));
   els.queryDialog?.querySelector("[data-close-overlay='query']")?.addEventListener("click", () => closeOverlay("query"));
   els.clearQueryButton?.addEventListener("click", () => {
-    updateQueryDraft({ q: "" });
+    updateQueryDraft({ q: "" }, { sync: "input" });
     if (els.queryInput) els.queryInput.focus();
   });
   els.clearRecentSearchesButton?.addEventListener("click", () => {
@@ -657,12 +667,24 @@ function bindQueryOverlayEvents() {
       if (next) setQueryPanelTab(next.dataset.queryPanelTab || "search", { focusTab: true });
     });
   }
-  els.queryInput?.addEventListener("input", () => {
+  els.queryInput?.addEventListener("compositionstart", () => {
+    state.queryComposing = true;
+  });
+  els.queryInput?.addEventListener("compositionend", () => {
+    state.queryComposing = false;
     setQueryPanelTab("search");
-    updateQueryDraft({ q: els.queryInput.value });
+    updateQueryDraft({ q: els.queryInput.value }, { sync: "input" });
+  });
+  els.queryInput?.addEventListener("input", (event) => {
+    setQueryPanelTab("search");
+    updateQueryDraft({ q: els.queryInput.value }, {
+      sync: "input",
+      schedule: !(event.isComposing || state.queryComposing),
+    });
   });
   els.queryInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
+      if (event.isComposing || state.queryComposing) return;
       event.preventDefault();
       applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
     } else if (event.key === "Escape") {
@@ -673,13 +695,13 @@ function bindQueryOverlayEvents() {
   els.searchSuggestions?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-search-value]");
     if (!button) return;
-    updateQueryDraft({ q: button.dataset.searchValue || button.textContent || "" });
+    updateQueryDraft({ q: button.dataset.searchValue || button.textContent || "" }, { sync: "input" });
     els.queryInput?.focus();
   });
   els.recentSearches?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-search-value]");
     if (!button) return;
-    updateQueryDraft({ q: button.dataset.searchValue || button.textContent || "" });
+    updateQueryDraft({ q: button.dataset.searchValue || button.textContent || "" }, { sync: "input" });
     els.queryInput?.focus();
   });
   for (const element of [
@@ -692,28 +714,22 @@ function bindQueryOverlayEvents() {
   ]) {
     element?.addEventListener("change", () => {
       setQueryPanelTab("filter");
-      state.queryDraft = readQueryDraftFromControls();
-      syncQueryControlsFromDraft(state.queryDraft);
-      scheduleQueryDraftPreview();
+      setQueryDraft(readQueryDraftFromControls(), { sync: "controls" });
     });
   }
   document.querySelectorAll("input[name='queryMetric']").forEach((input) => {
     input.addEventListener("change", () => {
       setQueryPanelTab("filter");
-      state.queryDraft = readQueryDraftFromControls();
-      syncQueryControlsFromDraft(state.queryDraft);
-      scheduleQueryDraftPreview();
+      setQueryDraft(readQueryDraftFromControls(), { sync: "controls" });
     });
   });
   els.querySnapshotDateSelect?.addEventListener("change", () => {
     const path = firstSnapshotPathForDate(els.querySnapshotDateSelect.value);
-    updateQueryDraft({ snapshotPath: path });
+    updateQueryDraft({ snapshotPath: path }, { sync: "snapshot" });
   });
   els.resetQueryButton?.addEventListener("click", () => {
-    state.queryDraft = defaultQueryDraft();
-    syncQueryControlsFromDraft(state.queryDraft);
-    renderSearchSuggestions(state.queryDraft.q, state.queryDraft);
-    scheduleQueryDraftPreview();
+    setQueryPanelTab("search");
+    setQueryDraft(defaultQueryDraft(), { sync: "full" });
   });
   els.applyQueryButton?.addEventListener("click", () => {
     applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
@@ -730,22 +746,23 @@ document.addEventListener("keydown", (event) => {
 });
 
 function openQueryOverlay(trigger) {
+  const openMark = perfMark("query-open:start");
   state.overlayTrigger = trigger || document.activeElement;
-  state.activeOverlay = "query";
   state.queryDraft = makeQueryDraftFromState();
-  syncQueryControlsFromDraft(state.queryDraft);
-  renderRecentSearches();
-  renderSearchSuggestions(state.queryDraft.q, state.queryDraft);
-  setQueryPanelTab("search");
-  scheduleQueryDraftPreview({ immediate: true });
-  updateQueryAnchorPosition();
+  const revision = advanceQueryWorkRevision();
+  state.activeOverlay = "query";
   setDialogOpen(els.queryDialog, true);
   setPageInert(true);
-  updateQueryAnchorPosition();
-  measureSync("query-open", () => {});
+  setQueryPanelTab("search");
+  syncQueryControlsFromDraft(state.queryDraft, { light: true, forceSnapshot: false });
+  prepareQuerySearchShell(state.queryDraft);
+  prepareQueryPreviewShell(state.queryDraft);
+  perfMeasure("query-open-visible", openMark);
   window.requestAnimationFrame(() => {
+    if (!isCurrentQueryWork(revision)) return;
     updateQueryAnchorPosition();
     focusWithoutScrolling(els.queryInput || els.queryPanel || els.queryDialog);
+    window.setTimeout(() => hydrateQueryOverlayAfterFirstFrame(revision), 0);
   });
 }
 
@@ -758,10 +775,30 @@ function closeOverlay(kind) {
   state.queryDraft = null;
   window.clearTimeout(state.queryPreviewTimer);
   state.queryPreviewTimer = 0;
+  window.clearTimeout(state.querySuggestionTimer);
+  state.querySuggestionTimer = 0;
+  state.queryComposing = false;
+  advanceQueryWorkRevision();
   setPageInert(false);
   const trigger = state.overlayTrigger;
   state.overlayTrigger = null;
   if (trigger && document.contains(trigger)) focusWithoutScrolling(trigger);
+}
+
+function advanceQueryWorkRevision() {
+  state.queryWorkRevision += 1;
+  return state.queryWorkRevision;
+}
+
+function isCurrentQueryWork(revision) {
+  return state.activeOverlay === "query" && revision === state.queryWorkRevision;
+}
+
+function hydrateQueryOverlayAfterFirstFrame(revision) {
+  if (!isCurrentQueryWork(revision)) return;
+  renderRecentSearches();
+  scheduleSearchSuggestions({ revision });
+  scheduleQueryDraftPreview({ revision });
 }
 
 function setDialogOpen(dialog, isOpen) {
@@ -833,15 +870,46 @@ function writeRecentSearches(items) {
   }
 }
 
+function prepareQuerySearchShell(draft) {
+  const hasQuery = Boolean(String(draft?.q || "").trim());
+  const suggestionsSection = els.searchSuggestions?.closest(".suggestions-section");
+  if (suggestionsSection) suggestionsSection.hidden = !hasQuery;
+  if (els.recentSearchSection) els.recentSearchSection.hidden = hasQuery;
+  if (!els.searchSuggestions) return;
+  els.searchSuggestions.replaceChildren();
+  if (hasQuery) {
+    const pending = document.createElement("p");
+    pending.className = "suggestion-empty";
+    pending.textContent = "正在匹配建议";
+    els.searchSuggestions.append(pending);
+  }
+}
+
+function scheduleSearchSuggestions(options = {}) {
+  window.clearTimeout(state.querySuggestionTimer);
+  const draft = sanitizeQueryDraft(state.queryDraft || makeQueryDraftFromState());
+  const revision = options.revision || advanceQueryWorkRevision();
+  const hasQuery = Boolean(String(draft.q || "").trim());
+  if (!hasQuery) {
+    renderSearchSuggestions("", draft);
+    return;
+  }
+  if (els.searchSuggestions && !els.searchSuggestions.childElementCount) prepareQuerySearchShell(draft);
+  state.querySuggestionTimer = window.setTimeout(() => {
+    if (!isCurrentQueryWork(revision)) return;
+    renderSearchSuggestions(draft.q, draft);
+  }, options.immediate ? 0 : SEARCH_DEBOUNCE_MS);
+}
+
 function renderSearchSuggestions(query, draft = state.queryDraft || makeQueryDraftFromState()) {
   if (!els.searchSuggestions) return;
   const hasQuery = Boolean(String(query || "").trim());
   const suggestionsSection = els.searchSuggestions.closest(".suggestions-section");
   if (suggestionsSection) suggestionsSection.hidden = !hasQuery;
   if (els.recentSearchSection) els.recentSearchSection.hidden = hasQuery || !readRecentSearches().length;
-  const suggestions = measureSync("search-suggest", () => buildSearchSuggestions(query, draft));
   els.searchSuggestions.replaceChildren();
   if (!hasQuery) return;
+  const suggestions = measureSync("search-suggest", () => buildSearchSuggestions(query, draft));
   for (const group of suggestions) {
     if (!group.items.length) continue;
     const section = document.createElement("section");
@@ -911,54 +979,171 @@ function buildSearchSuggestions(query, draft = state.queryDraft || makeQueryDraf
   const filterKey = normalizeSearch(query);
   if (!filterKey || !state.payload) return [];
   const rangeCache = getRangeCache(currentGroup());
-  const hideUnknownForView = draft.hideUnknownArtist && state.view !== "artistRank";
-  const baseOccurrences = draft.nicheOnly
-    ? hideUnknownForView
-      ? rangeCache.visibleNicheOccurrences
-      : rangeCache.nicheOccurrences
-    : hideUnknownForView
-      ? rangeCache.visibleOccurrences
-      : rangeCache.occurrences;
-  const songRecords = buildSongRecords(baseOccurrences);
-  const songSuggestions = songRecords
-    .filter((record) => normalizeSearch([record.title, songMeta(record).primary].join(" ")).includes(filterKey))
+  const key = queryIndexKey(draft);
+  const index = rangeCache.queryIndexes.get(key) || buildFastSearchSuggestionIndex(filterKey, rangeCache, draft);
+  const songSuggestions = index.songs
+    .filter((entry) => entry.normalizedText.includes(filterKey))
     .slice(0, 5)
-    .map((record) => ({
-      label: record.title,
-      value: record.title,
-      meta: songMeta(record).primary,
+    .map((entry) => ({
+      label: entry.label,
+      value: entry.value,
+      meta: entry.meta,
     }));
 
-  const artistRecords = (draft.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords)
-    .filter((record) => !draft.hideUnknownArtist || !window.RankingUtils.isUnknownArtistName(record.name))
-    .filter((record) => normalizeSearch(record.name).includes(filterKey))
+  const artistSuggestions = index.artists
+    .filter((entry) => entry.normalizedText.includes(filterKey))
     .slice(0, 3)
-    .map((record) => ({
-      label: record.name,
-      value: record.name,
-      meta: `${record.count}次`,
+    .map((entry) => ({
+      label: entry.label,
+      value: entry.value,
+      meta: entry.meta,
     }));
 
-  const channelMap = new Map();
-  for (const occurrence of baseOccurrences) {
-    const channel = cleanText(occurrence?.item?.channelName || "");
-    if (!channel || !normalizeSearch(channel).includes(filterKey)) continue;
-    channelMap.set(channel, (channelMap.get(channel) || 0) + 1);
-  }
-  const channelSuggestions = Array.from(channelMap.entries())
-    .sort((a, b) => b[1] - a[1] || compareValues(a[0], b[0]))
+  const channelSuggestions = index.channels
+    .filter((entry) => entry.normalizedText.includes(filterKey))
     .slice(0, 3)
-    .map(([channel, count]) => ({
-      label: channel,
-      value: channel,
-      meta: `${count}次`,
+    .map((entry) => ({
+      label: entry.label,
+      value: entry.value,
+      meta: entry.meta,
     }));
 
   return [
     { label: "歌曲", items: songSuggestions },
-    { label: "歌手", items: artistRecords },
+    { label: "歌手", items: artistSuggestions },
     { label: "频道", items: channelSuggestions },
   ];
+}
+
+function buildFastSearchSuggestionIndex(filterKey, rangeCache, draft) {
+  const occurrences = queryDraftBaseOccurrences(rangeCache, draft);
+  const songs = [];
+  const artists = [];
+  const channels = [];
+  const seenSongs = new Set();
+  const seenArtists = new Set();
+  const seenChannels = new Set();
+  const maxScan = Math.min(occurrences.length, QUERY_SUGGESTION_SCAN_LIMIT);
+  for (let index = 0; index < maxScan; index += 1) {
+    const occurrence = occurrences[index];
+    const song = occurrence?.song || {};
+    const item = occurrence?.item || {};
+    const title = cleanText(song.title || "");
+    const artist = cleanText(song.artist || "");
+    const channel = cleanText(item.channelName || "");
+    if (title && songs.length < 5) {
+      const normalizedText = normalizeSearch([title, artist].join(" "));
+      const key = normalizeEntityKey([title, artist].join("\n"));
+      if (normalizedText.includes(filterKey) && !seenSongs.has(key)) {
+        seenSongs.add(key);
+        songs.push({
+          label: title,
+          value: title,
+          meta: window.RankingUtils.isUnknownArtistName(artist) ? "" : artist,
+          normalizedText,
+        });
+      }
+    }
+    if (artist && artists.length < 3 && !window.RankingUtils.isUnknownArtistName(artist)) {
+      const normalizedText = normalizeSearch(artist);
+      const key = normalizeEntityKey(artist);
+      if (normalizedText.includes(filterKey) && !seenArtists.has(key)) {
+        seenArtists.add(key);
+        artists.push({
+          label: artist,
+          value: artist,
+          meta: "歌手",
+          normalizedText,
+        });
+      }
+    }
+    if (channel && channels.length < 3) {
+      const normalizedText = normalizeSearch(channel);
+      const key = normalizeEntityKey(channel);
+      if (normalizedText.includes(filterKey) && !seenChannels.has(key)) {
+        seenChannels.add(key);
+        channels.push({
+          label: channel,
+          value: channel,
+          meta: "频道",
+          normalizedText,
+        });
+      }
+    }
+    if (songs.length >= 5 && artists.length >= 3 && channels.length >= 3) break;
+    if (songs.length >= 5 && index >= 480 && (artists.length || channels.length)) break;
+  }
+  return { songs, artists, channels };
+}
+
+function prewarmQueryIndexForDraft(draft, options = {}) {
+  if (!state.payload || !draft) return;
+  const rangeCache = getRangeCache(currentGroup());
+  const key = queryIndexKey(draft);
+  if (rangeCache.queryIndexes.has(key) || rangeCache.queryIndexLoads.has(key)) return;
+  const run = () => {
+    if (options.revision && !isCurrentQueryWork(options.revision)) return;
+    try {
+      getQueryIndex(rangeCache, draft);
+    } finally {
+      rangeCache.queryIndexLoads.delete(key);
+    }
+  };
+  const load = Promise.resolve().then(() => {
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(run, { timeout: 600 });
+    } else {
+      window.setTimeout(run, 0);
+    }
+  });
+  rangeCache.queryIndexLoads.set(key, load);
+}
+
+function getQueryIndex(rangeCache, draft) {
+  const key = queryIndexKey(draft);
+  if (rangeCache.queryIndexes.has(key)) return rangeCache.queryIndexes.get(key);
+  const occurrences = queryDraftBaseOccurrences(rangeCache, draft);
+  const songRecords = queryDraftSongRecords(rangeCache, { ...draft, q: "" }, occurrences);
+  const artistRecords = queryDraftArtistRecords(rangeCache, { ...draft, q: "" }, occurrences);
+  const channelMap = new Map();
+  for (const occurrence of occurrences) {
+    const channel = cleanText(occurrence?.item?.channelName || "");
+    if (!channel) continue;
+    channelMap.set(channel, (channelMap.get(channel) || 0) + 1);
+  }
+  const index = {
+    songs: songRecords.map((record) => {
+      const meta = songMeta(record).primary;
+      return {
+        label: record.title,
+        value: record.title,
+        meta,
+        normalizedText: normalizeSearch([record.title, meta].join(" ")),
+      };
+    }),
+    artists: artistRecords
+      .filter((record) => !draft.hideUnknownArtist || !window.RankingUtils.isUnknownArtistName(record.name))
+      .map((record) => ({
+        label: record.name,
+        value: record.name,
+        meta: `${record.count}次`,
+        normalizedText: normalizeSearch(record.name),
+      })),
+    channels: Array.from(channelMap.entries())
+      .sort((a, b) => b[1] - a[1] || compareValues(a[0], b[0]))
+      .map(([channel, count]) => ({
+        label: channel,
+        value: channel,
+        meta: `${count}次`,
+        normalizedText: normalizeSearch(channel),
+      })),
+  };
+  rangeCache.queryIndexes.set(key, index);
+  return index;
+}
+
+function queryIndexKey(draft) {
+  return `query-index::${draft.nicheOnly ? "niche" : "all"}::${queryDraftHideUnknownForView(draft) ? "hide-unknown" : "show-unknown"}::${state.view}`;
 }
 
 function queryDraftOptions(extra = {}) {
@@ -992,23 +1177,69 @@ function sanitizeQueryDraft(draft) {
   return window.FrontendUtils.sanitizeQueryDraft(draft, queryDraftOptions());
 }
 
-function syncQueryControlsFromDraft(draft) {
-  if (!draft) return;
+function syncQueryControlsFromDraft(draft, options = {}) {
+  return syncQueryPanelFromDraft(draft, {
+    ...options,
+    syncMode: options.light ? "light" : options.syncMode || "full",
+  });
+}
+
+function syncQueryPanelFromDraft(draft, options = {}) {
+  if (!draft) return null;
   const next = sanitizeQueryDraft(draft);
+  const previous = options.previousDraft || state.queryDraft;
   state.queryDraft = next;
-  if (els.queryInput && els.queryInput.value !== next.q) els.queryInput.value = next.q;
-  if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = Boolean(next.nicheOnly);
-  if (els.hideUnknownToggle) els.hideUnknownToggle.checked = Boolean(next.hideUnknownArtist);
-  for (const input of document.querySelectorAll("input[name='queryMetric']")) {
-    input.checked = input.value === next.rankMetric;
-  }
-  if (els.trendFilterSelect) els.trendFilterSelect.value = next.trend;
-  if (els.minCountSelect) els.minCountSelect.value = String(next.minCount);
-  if (els.queryPageSizeSelect) els.queryPageSizeSelect.value = String(next.pageSize);
-  const dateValue = snapshotDateValueForPath(next.snapshotPath);
-  if (els.querySnapshotDateSelect) els.querySnapshotDateSelect.value = dateValue;
-  syncDraftSnapshotTimes(dateValue, next.snapshotPath);
+  syncQueryInputValue(next);
+  syncQueryClearButton(next);
+  if (options.syncMode === "input") return next;
+  syncQueryToggleValues(next);
+  syncQuerySelectValues(next);
+  syncQuerySnapshotControls(next, previous, options);
   updateQueryAvailability(next);
+  return next;
+}
+
+function syncQueryInputValue(draft) {
+  if (els.queryInput && els.queryInput.value !== draft.q) els.queryInput.value = draft.q;
+}
+
+function syncQueryToggleValues(draft) {
+  if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = Boolean(draft.nicheOnly);
+  if (els.hideUnknownToggle) els.hideUnknownToggle.checked = Boolean(draft.hideUnknownArtist);
+  for (const input of document.querySelectorAll("input[name='queryMetric']")) {
+    input.checked = input.value === draft.rankMetric;
+  }
+}
+
+function syncQuerySelectValues(draft) {
+  if (els.trendFilterSelect) els.trendFilterSelect.value = draft.trend;
+  if (els.minCountSelect) els.minCountSelect.value = String(draft.minCount);
+  if (els.queryPageSizeSelect) els.queryPageSizeSelect.value = String(draft.pageSize);
+}
+
+function syncQuerySnapshotControls(draft, previousDraft = null, options = {}) {
+  const dateValue = snapshotDateValueForPath(draft.snapshotPath);
+  if (els.querySnapshotDateSelect && els.querySnapshotDateSelect.value !== dateValue) {
+    els.querySnapshotDateSelect.value = dateValue;
+  }
+  const previousDateValue = previousDraft ? snapshotDateValueForPath(previousDraft.snapshotPath) : "";
+  const mustRebuild =
+    options.forceSnapshot === true ||
+    !els.querySnapshotSelect?.options?.length ||
+    previousDateValue !== dateValue ||
+    (els.querySnapshotSelect && !Array.from(els.querySnapshotSelect.options).some((option) => option.value === draft.snapshotPath));
+  if (mustRebuild) {
+    syncDraftSnapshotTimes(dateValue, draft.snapshotPath);
+  } else if (els.querySnapshotSelect && els.querySnapshotSelect.value !== draft.snapshotPath) {
+    els.querySnapshotSelect.value = draft.snapshotPath;
+  }
+}
+
+function syncQueryClearButton(draft) {
+  if (!els.clearQueryButton) return;
+  const hasQuery = Boolean(String(draft?.q || "").trim());
+  els.clearQueryButton.hidden = !hasQuery;
+  els.clearQueryButton.tabIndex = hasQuery ? 0 : -1;
 }
 
 function syncDraftSnapshotTimes(dateValue, selectedPath = "") {
@@ -1067,14 +1298,34 @@ async function applyQueryDraft() {
   measureSync("query-apply", () => render({ urlMode: "push" }));
 }
 
-function updateQueryDraft(patch) {
-  state.queryDraft = sanitizeQueryDraft({
-    ...(state.queryDraft || makeQueryDraftFromState()),
-    ...patch,
+function updateQueryDraft(patch, options = {}) {
+  return setQueryDraft(
+    {
+      ...(state.queryDraft || makeQueryDraftFromState()),
+      ...patch,
+    },
+    options,
+  );
+}
+
+function setQueryDraft(draft, options = {}) {
+  const previousDraft = state.queryDraft || makeQueryDraftFromState();
+  const nextDraft = sanitizeQueryDraft(draft);
+  const revision = advanceQueryWorkRevision();
+  const syncMode = options.sync || "full";
+  syncQueryPanelFromDraft(nextDraft, {
+    previousDraft,
+    syncMode,
+    forceSnapshot: syncMode === "snapshot" || syncMode === "full",
   });
-  syncQueryControlsFromDraft(state.queryDraft);
-  renderSearchSuggestions(state.queryDraft.q, state.queryDraft);
-  scheduleQueryDraftPreview();
+  if (options.schedule === false || state.queryComposing) return nextDraft;
+  scheduleSearchSuggestions({ revision });
+  scheduleQueryDraftPreview({
+    revision,
+    delay: syncMode === "input" ? QUERY_PREVIEW_INPUT_DEBOUNCE_MS : SEARCH_DEBOUNCE_MS,
+  });
+  if (syncMode !== "input") prewarmQueryIndexForDraft(nextDraft, { revision });
+  return nextDraft;
 }
 
 function applyQueryPatch(patch, options = {}) {
@@ -1232,22 +1483,49 @@ function clearQueryCondition(key) {
 
 function scheduleQueryDraftPreview(options = {}) {
   window.clearTimeout(state.queryPreviewTimer);
-  if (options.immediate) {
-    renderQueryDraftPreview();
-    return;
-  }
-  if (els.queryResultPreview) els.queryResultPreview.textContent = "计算中";
-  state.queryPreviewTimer = window.setTimeout(renderQueryDraftPreview, SEARCH_DEBOUNCE_MS);
+  const draft = sanitizeQueryDraft(state.queryDraft || makeQueryDraftFromState());
+  const revision = options.revision || advanceQueryWorkRevision();
+  prepareQueryPreviewShell(draft);
+  const delay = Number.isFinite(options.delay) ? options.delay : options.immediate ? 0 : SEARCH_DEBOUNCE_MS;
+  state.queryPreviewTimer = window.setTimeout(() => {
+    renderQueryDraftPreview(revision).catch((error) => {
+      if (isCurrentQueryWork(revision)) {
+        if (els.queryResultPreview) els.queryResultPreview.textContent = "计算失败";
+        if (els.applyQueryButton) els.applyQueryButton.textContent = "应用查询";
+      }
+      console.warn("query preview failed", error);
+    });
+  }, delay);
 }
 
-function renderQueryDraftPreview() {
-  const draft = sanitizeQueryDraft(state.queryDraft || readQueryDraftFromControls());
+function prepareQueryPreviewShell(draft) {
   if (!els.queryResultPreview || !els.applyQueryButton) return;
   if (draft.snapshotPath !== state.currentSnapshotPath) {
     els.queryResultPreview.textContent = "将载入快照";
     els.applyQueryButton.textContent = "应用并载入快照";
     return;
   }
+  const cached = currentResultCountForDraft(draft);
+  if (cached !== null) {
+    const unit = queryResultUnit();
+    els.queryResultPreview.textContent = `${cached} ${unit}`;
+    els.applyQueryButton.textContent = `查看 ${cached} ${unit}`;
+    return;
+  }
+  els.queryResultPreview.textContent = "计算中";
+  els.applyQueryButton.textContent = "查看结果";
+}
+
+async function renderQueryDraftPreview(revision = state.queryWorkRevision) {
+  const draft = sanitizeQueryDraft(state.queryDraft || readQueryDraftFromControls());
+  if (!els.queryResultPreview || !els.applyQueryButton || !isCurrentQueryWork(revision)) return;
+  if (draft.snapshotPath !== state.currentSnapshotPath) {
+    els.queryResultPreview.textContent = "将载入快照";
+    els.applyQueryButton.textContent = "应用并载入快照";
+    return;
+  }
+  await yieldToBrowser();
+  if (!isCurrentQueryWork(revision)) return;
   const count = queryDraftResultCount(draft);
   const unit = queryResultUnit();
   els.queryResultPreview.textContent = `${count} ${unit}`;
@@ -1263,41 +1541,87 @@ function queryResultUnit() {
 function queryDraftResultCount(draft) {
   if (!state.payload) return 0;
   const rangeCache = getRangeCache(currentGroup());
+  const cachedCurrent = currentResultCountForDraft(draft);
+  if (cachedCurrent !== null) return cachedCurrent;
+  const cacheKey = queryResultCountKey(draft);
+  if (rangeCache.queryResultCountCache.has(cacheKey)) return rangeCache.queryResultCountCache.get(cacheKey);
+  let count = 0;
   if (state.view === "videos") {
-    return buildVideoViewItems(rangeCache.items, {
+    count = videoItemsForRange(rangeCache, {
       filter: draft.q,
       nicheOnly: draft.nicheOnly,
       hideUnknownArtists: draft.hideUnknownArtist,
     }).length;
+    rangeCache.queryResultCountCache.set(cacheKey, count);
+    return count;
   }
   const occurrences = queryDraftOccurrences(rangeCache, draft);
   if (state.view === "artistRank") {
-    return queryDraftRankRecords(buildArtistRecords(occurrences).records, draft, "artistRank").length;
+    count = queryDraftRankRecords(queryDraftArtistRecords(rangeCache, draft, occurrences), draft, "artistRank").length;
+    rangeCache.queryResultCountCache.set(cacheKey, count);
+    return count;
   }
-  const songRecords = buildSongRecords(occurrences);
+  const songRecords = queryDraftSongRecords(rangeCache, draft, occurrences);
   if (state.view === "songAz") {
-    return queryDraftMinCountRecords(songRecords, draft).length;
+    count = queryDraftMinCountRecords(songRecords, draft).length;
+    rangeCache.queryResultCountCache.set(cacheKey, count);
+    return count;
   }
-  return queryDraftRankRecords(songRecords, draft, "songRank").length;
+  count = queryDraftRankRecords(songRecords, draft, "songRank").length;
+  rangeCache.queryResultCountCache.set(cacheKey, count);
+  return count;
 }
 
-function queryDraftOccurrences(rangeCache, draft) {
+function queryDraftBaseOccurrences(rangeCache, draft) {
   const hideUnknownForView = draft.hideUnknownArtist && state.view !== "artistRank";
-  const base = draft.nicheOnly
+  return draft.nicheOnly
     ? hideUnknownForView
       ? rangeCache.visibleNicheOccurrences
       : rangeCache.nicheOccurrences
     : hideUnknownForView
       ? rangeCache.visibleOccurrences
       : rangeCache.occurrences;
+}
+
+function queryDraftHideUnknownForView(draft) {
+  return draft.hideUnknownArtist && state.view !== "artistRank";
+}
+
+function queryDraftOccurrences(rangeCache, draft) {
+  const base = queryDraftBaseOccurrences(rangeCache, draft);
   const filterKey = normalizeSearch(draft.q);
   if (!filterKey) return base;
   return base.filter((occurrence) => occurrence.searchText.includes(filterKey));
 }
 
+function queryDraftSongRecords(rangeCache, draft, occurrences = queryDraftOccurrences(rangeCache, draft)) {
+  const filterKey = normalizeSearch(draft.q);
+  if (!filterKey) return draftScopedSongRecords(rangeCache, draft);
+  const key = `query-records::song::${draft.nicheOnly ? "niche" : "all"}::${queryDraftHideUnknownForView(draft) ? "hide-unknown" : "show-unknown"}::${filterKey}`;
+  if (!rangeCache.queryRecordCache.has(key)) {
+    rangeCache.queryRecordCache.set(key, buildSongRecords(occurrences));
+  }
+  return rangeCache.queryRecordCache.get(key);
+}
+
+function queryDraftArtistRecords(rangeCache, draft, occurrences = queryDraftOccurrences(rangeCache, draft)) {
+  const filterKey = normalizeSearch(draft.q);
+  if (!filterKey) return draft.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords;
+  const key = `query-records::artist::${draft.nicheOnly ? "niche" : "all"}::${filterKey}`;
+  if (!rangeCache.queryRecordCache.has(key)) {
+    rangeCache.queryRecordCache.set(key, buildArtistRecords(occurrences).records);
+  }
+  return rangeCache.queryRecordCache.get(key);
+}
+
+function draftScopedSongRecords(rangeCache, draft) {
+  if (draft.nicheOnly) return queryDraftHideUnknownForView(draft) ? rangeCache.visibleNicheSongRecords : rangeCache.nicheSongRecords;
+  return queryDraftHideUnknownForView(draft) ? rangeCache.visibleSongRecords : rangeCache.allSongRecords;
+}
+
 function queryDraftMinCountRecords(records, draft) {
   if (state.view === "videos" || draft.minCount <= 1) return records;
-  return records.filter((record) => rankValue(record) >= draft.minCount);
+  return records.filter((record) => queryDraftRankValue(record, draft) >= draft.minCount);
 }
 
 function queryDraftRankRecords(records, draft, mode) {
@@ -1314,6 +1638,46 @@ function queryDraftRankRecords(records, draft, mode) {
     if (draft.trend === "down") return rankDelta < 0;
     return true;
   });
+}
+
+function queryDraftRankValue(record, draft) {
+  return draft.rankMetric === "videos" ? record.videoCount || 0 : record.count;
+}
+
+function queryResultCountKey(draft) {
+  const trendState =
+    draft.trend === "all"
+      ? "all"
+      : state.rankDiffs?.[state.range]?.[state.view] instanceof Map
+        ? "ready"
+        : state.rankDiffLoads.has(state.range)
+          ? "loading"
+          : "missing";
+  return [
+    "query-count",
+    state.currentSnapshotPath,
+    state.range,
+    state.view,
+    draft.nicheOnly ? "niche" : "all",
+    queryDraftHideUnknownForView(draft) ? "hide-unknown" : "show-unknown",
+    normalizeSearch(draft.q),
+    draft.rankMetric,
+    draft.trend,
+    trendState,
+    draft.minCount,
+  ].join("::");
+}
+
+function currentResultCountForDraft(draft) {
+  const key = queryResultCountKey(draft);
+  return state.currentResultSummary?.key === key ? state.currentResultSummary.count : null;
+}
+
+function setCurrentResultSummary(draft, count) {
+  state.currentResultSummary = {
+    key: queryResultCountKey(draft),
+    count: Math.max(0, Number(count) || 0),
+  };
 }
 
 function snapshotDateValueForPath(path) {
@@ -2555,6 +2919,10 @@ function createRangeCacheObject({
     visibleNicheVideoCount: uniqueVideoCount(visibleNicheOccurrences),
     sortedRecords: new Map(),
     selectionCache: new Map(),
+    queryIndexes: new Map(),
+    queryIndexLoads: new Map(),
+    queryRecordCache: new Map(),
+    queryResultCountCache: new Map(),
   };
   defineLazySongCache(cache, "allSongRecords", occurrences);
   defineLazySongCache(cache, "nicheSongRecords", nicheOccurrences);
@@ -2805,6 +3173,7 @@ function renderVideoList(group, rangeCache, selection) {
   const denominatorItems = state.filter && state.nicheOnly ? nicheItems : sourceItems;
   const visibleSongs = items.reduce((sum, item) => sum + (item._displaySongs?.length || item.songs?.length || 0), 0);
   const denominatorSongs = denominatorItems.reduce((sum, item) => sum + (item._displaySongs?.length || item.songs?.length || 0), 0);
+  setCurrentResultSummary(makeQueryDraftFromState(), items.length);
   renderSummary(group, [
     visibilityMetric(items.length, sourceItems.length, nicheItems.length, "个视频", "个小众视频"),
     countRatioMetric(visibleSongs, denominatorSongs, "个时间戳"),
@@ -2837,6 +3206,7 @@ function renderSongRank(group, rangeCache, selection) {
   const baseModel = rankingModelForSelection(rangeCache, selection, "song-rank", compareSongRank);
   const filteredModel = filteredRankModel(baseModel.records, "songRank");
   const { records, ranks, countFrequencies } = filteredModel;
+  setCurrentResultSummary(makeQueryDraftFromState(), records.length);
 
   renderSummary(group, [
     recordVisibilityMetric(records.length, baseModel.records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
@@ -2887,6 +3257,7 @@ function renderArtistRank(group, rangeCache, selection) {
   const filteredModel = filteredRankModel(baseModel.records, "artistRank");
   const { records, ranks, countFrequencies } = filteredModel;
   const missingArtistCount = selection.missingArtistCount;
+  setCurrentResultSummary(makeQueryDraftFromState(), records.length);
 
   renderSummary(group, [
     recordVisibilityMetric(records.length, baseModel.records.length, allArtistRecords.length, nicheArtistRecords.length, "位歌手", "位小众歌曲歌手"),
@@ -2939,6 +3310,7 @@ function renderSongIndexView(group, rangeCache, selection) {
   const occurrences = selection.occurrences;
   const baseRecords = sortedSelectionRecords(rangeCache, selection, "song-az", compareSongAz);
   const records = filterRecordsByMinCount(baseRecords);
+  setCurrentResultSummary(makeQueryDraftFromState(), records.length);
 
   renderSummary(group, [
     recordVisibilityMetric(records.length, baseRecords.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
@@ -3359,16 +3731,16 @@ function renderDesktopPaginationControls(pageInfo) {
 }
 
 function renderMobileTopPagination(pageInfo, options = {}) {
-  const model = window.FrontendUtils.mobilePageStepperModel(pageInfo.page, pageInfo.pageCount);
+  const model = window.FrontendUtils.mobilePageModel(pageInfo.page, pageInfo.pageCount);
   const controls = document.createElement("div");
   controls.className = options.index ? "pagination-controls pagination-stepper pagination-stepper-index" : "pagination-controls pagination-stepper";
   controls.append(renderPageButton("上一页", model.previousPage || 1, !model.hasPrevious, false, { icon: "prev" }));
-  if (!options.index && model.previousNeighbor) {
-    controls.append(renderPageButton(String(model.previousNeighbor), model.previousNeighbor, false, false, { className: "pagination-neighbor" }));
+  for (const page of options.index ? [] : model.previousNeighbors) {
+    controls.append(renderPageButton(String(page), page, false, false, { className: "pagination-neighbor" }));
   }
   controls.append(renderPageSelectControl(pageInfo, { compact: true }));
-  if (!options.index && model.nextNeighbor) {
-    controls.append(renderPageButton(String(model.nextNeighbor), model.nextNeighbor, false, false, { className: "pagination-neighbor" }));
+  for (const page of options.index ? [] : model.nextNeighbors) {
+    controls.append(renderPageButton(String(page), page, false, false, { className: "pagination-neighbor" }));
   }
   controls.append(renderPageButton("下一页", model.nextPage || model.pageCount, !model.hasNext, false, { icon: "next" }));
   return controls;
@@ -3399,7 +3771,7 @@ function renderPaginationIcon(direction) {
 
 function renderPageTokenButtons(pageInfo) {
   const options = paginationTokenOptions();
-  return window.FrontendUtils.visiblePageTokens(pageInfo.page, pageInfo.pageCount, options).map((token) => {
+  return window.FrontendUtils.desktopPageTokens(pageInfo.page, pageInfo.pageCount, options).map((token) => {
     if (token.type === "ellipsis") return renderPageEllipsisToken(token);
     return renderPageButton(String(token.page), token.page, false, token.current);
   });
@@ -3425,10 +3797,10 @@ function renderPageSelectControl(pageInfo, options = {}) {
   const label = document.createElement("label");
   label.className = options.compact ? "page-select page-select-compact" : "page-select";
   const text = document.createElement("span");
-  text.textContent = options.compact ? `第 ${pageInfo.page} / ${pageInfo.pageCount} 页` : "跳至";
+  text.textContent = options.compact ? `${pageInfo.page}/${pageInfo.pageCount}` : "跳至";
   const select = document.createElement("select");
   select.dataset.pageSelect = "true";
-  select.setAttribute("aria-label", `选择页码，范围 1 到 ${pageInfo.pageCount}`);
+  select.setAttribute("aria-label", `当前第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页，选择其他页`);
   for (let page = 1; page <= pageInfo.pageCount; page += 1) {
     const option = document.createElement("option");
     option.value = String(page);
@@ -4120,6 +4492,7 @@ function renderSourceInlineStrip(model, options = {}) {
   const strip = document.createElement("div");
   strip.className = `source-inline-strip source-inline-${model.mode}`;
   strip.dataset.sourceVideoCount = String(model.videoCount || 0);
+  if (model.canExpand) strip.classList.add("has-more");
 
   if (!model.videoCount) {
     const empty = document.createElement("span");
@@ -4148,7 +4521,7 @@ function renderSourceInlineStrip(model, options = {}) {
     );
   }
 
-  if (model.showCopyAll && !model.canExpand) {
+  if (model.showCopyAll && !model.canExpand && options.showCopyAll !== false) {
     strip.append(renderInlineCopySongLinksButton(options.occurrences || []));
   }
 
@@ -4239,8 +4612,8 @@ function renderSourceInlineMoreButton({
 
 function updateSourceInlineMoreButton(button, isExpanded) {
   const remaining = Math.max(0, Number(button.dataset.remainingCount) || 0);
-  button.textContent = isExpanded ? "收起" : `其余 ${remaining} 个来源`;
-  button.setAttribute("aria-label", isExpanded ? "收起其余来源" : `显示其余 ${remaining} 个来源`);
+  button.textContent = isExpanded ? "收起其余来源" : `查看其余 ${remaining} 个来源`;
+  button.setAttribute("aria-label", isExpanded ? "收起其余来源" : `查看其余 ${remaining} 个来源`);
 }
 
 function renderInlineCopySongLinksButton(occurrences) {
@@ -4332,7 +4705,7 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   drawer._sourceGroups = groups;
   if (options.toolbarVariant) drawer.dataset.toolbarVariant = options.toolbarVariant;
-  const showAllOnOpen = drawer.dataset.sourceMode === "song" || drawer.dataset.sourceMode === "index";
+  const showAllOnOpen = drawer.dataset.sourceMode === "song" || drawer.dataset.sourceMode === "index" || drawer.dataset.sourceMode === "artist-song";
   const visibleCount = showAllOnOpen ? groups.length : sourceVisibleGroupCount(drawer, groups.length);
   if (showAllOnOpen) drawer.dataset.visibleSourceGroups = String(visibleCount);
   const shouldShowToolbar = options.showToolbar !== false;
@@ -4698,22 +5071,30 @@ function renderArtistSongGroup(group) {
   sources.dataset.sourceMode = "artist-song";
   sources.dataset.sourceDeferred = "true";
   sources.hidden = true;
-  sources._sourceOccurrences = group.occurrences;
   section._artistSongSources = sources;
 
-  const sourceGroups = window.FrontendUtils.groupOccurrencesByVideo(group.occurrences);
-  const sourceButton = document.createElement("button");
-  sourceButton.className = "artist-song-source-toggle ui-chip";
-  sourceButton.type = "button";
-  sourceButton.dataset.toggleArtistSongSource = "true";
-  sourceButton.dataset.sourceVideoCount = String(sourceGroups.length);
-  sourceButton.dataset.occurrenceCount = String(group.occurrences.length);
-  sourceButton.setAttribute("aria-expanded", "false");
-  sourceButton.setAttribute("aria-controls", sources.id);
-  updateArtistSongSourceButton(sourceButton, false);
-  meta.append(sourceButton, renderCopySongLinksIconButton(group.occurrences));
+  const sourcePresentation = window.FrontendUtils.sourcePresentationModel(group.occurrences, {
+    expanded: false,
+    inlineLimit: SOURCE_INLINE_LIMIT,
+  });
+  sources._sourceOccurrences = sourcePresentation.hiddenGroups.flatMap((sourceGroup) => sourceGroup.occurrences);
+  sources._songSourceOccurrences = group.occurrences;
+
+  meta.append(renderCopySongLinksIconButton(group.occurrences));
   header.append(meta);
-  section.append(header, sources);
+  section.append(header);
+  section.append(
+    renderSourceInlineStrip(sourcePresentation, {
+      drawerId: sources.id,
+      isExpanded: false,
+      occurrences: group.occurrences,
+      mode: "artist-song",
+      rankCount: group.count,
+      rankMetric: "occurrences",
+      showCopyAll: false,
+    }),
+  );
+  if (sourcePresentation.canExpand) section.append(sources);
   return section;
 }
 
@@ -4898,7 +5279,7 @@ function toggleArtistSongSource(button) {
   if (nextExpanded && isCompactRankMode()) closeSiblingArtistSongSources(section);
   if (nextExpanded && sources.dataset.sourceDeferred === "true") {
     appendSourceDrawerLinks(sources, sources._sourceOccurrences || [], {
-      copyOccurrences: sources._sourceOccurrences || [],
+      copyOccurrences: sources._songSourceOccurrences || sources._sourceOccurrences || [],
       showToolbar: false,
     });
     delete sources.dataset.sourceDeferred;
@@ -4906,7 +5287,8 @@ function toggleArtistSongSource(button) {
   sources.hidden = !nextExpanded;
   section.classList.toggle("is-expanded", nextExpanded);
   button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
-  updateArtistSongSourceButton(button, nextExpanded);
+  if (button.dataset.sourceSummaryToggle === "true") updateSourceInlineMoreButton(button, nextExpanded);
+  else updateArtistSongSourceButton(button, nextExpanded);
 }
 
 function closeSiblingArtistSongSources(section) {
@@ -4920,7 +5302,8 @@ function closeSiblingArtistSongSources(section) {
     sibling.classList.remove("is-expanded");
     if (button) {
       button.setAttribute("aria-expanded", "false");
-      updateArtistSongSourceButton(button, false);
+      if (button.dataset.sourceSummaryToggle === "true") updateSourceInlineMoreButton(button, false);
+      else updateArtistSongSourceButton(button, false);
     }
   }
 }

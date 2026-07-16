@@ -87,7 +87,7 @@ async function newPage(browser, viewport, options = {}) {
     });
     try {
       new PerformanceObserver((list) => {
-        window.__longTasks.push(...list.getEntries().map((entry) => ({ name: entry.name, duration: entry.duration })));
+        window.__longTasks.push(...list.getEntries().map((entry) => ({ name: entry.name, startTime: entry.startTime, duration: entry.duration })));
       }).observe({ entryTypes: ["longtask"] });
     } catch {}
   });
@@ -853,6 +853,93 @@ async function interactionFlow(browser) {
   if (!overflow) throw new Error("interaction viewport overflow");
   if (errors.length || unhandled) throw new Error(`interaction errors: ${errors.join(" | ")} ${unhandled}`);
   results.push({ scenario: latestOnly ? "interaction-flow-latest" : "interaction-flow", requests: [...new Set(requests)], measures: perf.measures });
+}
+
+async function measureQueryOpenLatency(browser) {
+  const scenarios = [
+    { label: "desktop", viewport: [1366, 768], visibleBudget: 100, focusBudget: 300, throttle: 1 },
+    { label: "mobile", viewport: [390, 844], visibleBudget: 150, focusBudget: 300, throttle: 1 },
+    { label: "mobile-4x", viewport: [390, 844], visibleBudget: 250, focusBudget: 300, throttle: 4 },
+  ];
+  for (const scenario of scenarios) {
+    const { context, page, errors } = await newPage(browser, scenario.viewport);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    let cdpSession = null;
+    if (scenario.throttle > 1) {
+      cdpSession = await context.newCDPSession(page);
+      await cdpSession.send("Emulation.setCPUThrottlingRate", { rate: scenario.throttle });
+    }
+    await page.goto(`${baseUrl}?range=1m&pageSize=100`, { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    await page.evaluate(() => {
+      window.__queryPanelVisibleAt = 0;
+      window.__queryInputFocusedAt = 0;
+      window.__querySuggestionAt = 0;
+      document.querySelector("#queryInput")?.addEventListener(
+        "focus",
+        () => {
+          window.__queryInputFocusedAt = performance.now();
+        },
+        { once: true },
+      );
+    });
+    const startedAt = await page.evaluate(() => performance.now());
+    await page.locator("#queryTrigger").click();
+    await page.waitForFunction(
+      () => {
+        const panel = document.querySelector("#queryDialog:not([hidden]) .query-panel");
+        if (!panel) return false;
+        const rect = panel.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return false;
+        if (!window.__queryPanelVisibleAt) window.__queryPanelVisibleAt = performance.now();
+        return true;
+      },
+      null,
+      { timeout: 5000 },
+    );
+    await page.waitForFunction(() => document.activeElement?.id === "queryInput", null, { timeout: 5000 });
+    await page.locator("#queryInput").fill("夜");
+    await page.waitForFunction(
+      () => {
+        const visible = document.querySelector("#searchSuggestions .suggestion-item");
+        if (!visible) return false;
+        if (!window.__querySuggestionAt) window.__querySuggestionAt = performance.now();
+        return true;
+      },
+      null,
+      { timeout: 5000 },
+    );
+    const metrics = await page.evaluate((start) => {
+      const longTasks = (window.__longTasks || []).filter((entry) => entry.startTime >= start);
+      return {
+        visibleMs: Math.round((window.__queryPanelVisibleAt - start) * 10) / 10,
+        focusMs: Math.round((window.__queryInputFocusedAt - start) * 10) / 10,
+        suggestionMs: Math.round((window.__querySuggestionAt - start) * 10) / 10,
+        longTasks,
+      };
+    }, startedAt);
+    const screenshotPath = shotPath(`query-open-${scenario.label}-${scenario.viewport.join("x")}.png`);
+    await page.screenshot({ path: screenshotPath, fullPage: false });
+    if (cdpSession) await cdpSession.send("Emulation.setCPUThrottlingRate", { rate: 1 }).catch(() => {});
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    const remoteAllowance = baseUrl.startsWith("https://") ? 150 : 0;
+    if (metrics.visibleMs > scenario.visibleBudget + remoteAllowance) {
+      throw new Error(`query panel visible latency exceeded ${scenario.label}: ${JSON.stringify(metrics)}`);
+    }
+    if (metrics.focusMs <= 0 || metrics.focusMs > scenario.focusBudget + remoteAllowance) {
+      throw new Error(`query input focus latency exceeded ${scenario.label}: ${JSON.stringify(metrics)}`);
+    }
+    if (metrics.suggestionMs <= 0 || metrics.suggestionMs > 800 + remoteAllowance) {
+      throw new Error(`query suggestion latency exceeded ${scenario.label}: ${JSON.stringify(metrics)}`);
+    }
+    if (metrics.longTasks.some((entry) => entry.duration > 100)) {
+      throw new Error(`query open produced >100ms long task ${scenario.label}: ${JSON.stringify(metrics)}`);
+    }
+    if (errors.length || unhandled) throw new Error(`query open latency errors ${scenario.label}: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `query-open-${scenario.label}`, requests: [...new Set(requests)], metrics, screenshotPath });
+  }
 }
 
 function assertClose(actual, expected, tolerance, label, details = {}) {
@@ -2012,6 +2099,7 @@ function runtimePathPattern(range) {
     await firstLoad(browser, "1m", [1366, 768]);
     await desktopRankVisualGeometry(browser);
     await interactionFlow(browser);
+    await measureQueryOpenLatency(browser);
     await mobileFilterSheetFlow(browser);
     await mobileActiveQueryStripGeometry(browser);
     await mobileRankVisualGeometry(browser);

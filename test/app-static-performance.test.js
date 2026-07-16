@@ -134,19 +134,24 @@ test("source drawer append-more reveals all remaining sources without rebuilding
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
 });
 
-test("artist rank source details use two-level lazy loading and append remaining songs in batches", () => {
+test("artist rank song details share inline source model and append remaining songs in batches", () => {
   const appendArtistBody = functionBody("function appendArtistSongGroups");
   assert.match(appendArtistBody, /appendArtistSongGroupRange/u);
   assert.doesNotMatch(appendArtistBody, /appendSourceDrawerLinks|renderSourceVideoGroup/u);
 
   const renderArtistBody = functionBody("function renderArtistSongGroup");
+  assert.match(renderArtistBody, /sourcePresentationModel\(group\.occurrences/u);
+  assert.match(renderArtistBody, /renderSourceInlineStrip\(sourcePresentation/u);
   assert.match(renderArtistBody, /sources\.dataset\.sourceDeferred = "true"/u);
-  assert.match(renderArtistBody, /dataset\.toggleArtistSongSource = "true"/u);
+  assert.match(renderArtistBody, /sourcePresentation\.hiddenGroups\.flatMap/u);
+  assert.doesNotMatch(renderArtistBody, /dataset\.toggleArtistSongSource = "true"/u);
   assert.match(renderArtistBody, /renderCopySongLinksIconButton\(group\.occurrences\)/u);
 
   const toggleSourceBody = functionBody("function toggleArtistSongSource");
   assert.match(toggleSourceBody, /sources\.dataset\.sourceDeferred === "true"/u);
-  assert.match(toggleSourceBody, /appendSourceDrawerLinks\(sources, sources\._sourceOccurrences \|\| \[\],[\s\S]*showToolbar: false/u);
+  assert.match(toggleSourceBody, /copyOccurrences: sources\._songSourceOccurrences \|\| sources\._sourceOccurrences/u);
+  assert.match(toggleSourceBody, /showToolbar: false/u);
+  assert.match(functionBody("function appendSourceDrawerLinks"), /drawer\.dataset\.sourceMode === "artist-song"/u);
   assert.match(toggleSourceBody, /closeSiblingArtistSongSources\(section\)/u);
 
   const toggleLimitBody = functionBody("function toggleArtistSongLimit");
@@ -176,6 +181,33 @@ test("selection builds only the records needed by the current view", () => {
   const prewarmBody = functionBody("async function prewarmDefaultSorts");
   assert.match(prewarmBody, /if \(state\.view === "videos"\) return/u);
   assert.ok(prewarmBody.indexOf('state.view === "artistRank"') < prewarmBody.indexOf("selectedSongRecords"));
+});
+
+test("query overlay opens before suggestions and result preview work", () => {
+  const openBody = functionBody("function openQueryOverlay");
+  const setActiveIndex = openBody.indexOf('state.activeOverlay = "query"');
+  const openIndex = openBody.indexOf("setDialogOpen(els.queryDialog, true)");
+  const inertIndex = openBody.indexOf("setPageInert(true)");
+  const syncIndex = openBody.indexOf("syncQueryControlsFromDraft");
+  assert.ok(setActiveIndex >= 0 && openIndex > setActiveIndex, "query overlay should set active overlay before opening");
+  assert.ok(inertIndex > openIndex, "query overlay should mark the page inert immediately after opening");
+  assert.ok(syncIndex > inertIndex, "query controls should sync after the shell is visible");
+  const beforeOpen = openBody.slice(0, openIndex);
+  assert.doesNotMatch(beforeOpen, /renderSearchSuggestions|queryDraftResultCount|buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
+  assert.match(openBody, /requestAnimationFrame\(\(\) => \{[\s\S]*hydrateQueryOverlayAfterFirstFrame\(revision\)/u);
+
+  const bindBody = functionBody("function bindQueryOverlayEvents");
+  assert.match(bindBody, /compositionstart/u);
+  assert.match(bindBody, /compositionend/u);
+  assert.match(bindBody, /event\.isComposing \|\| state\.queryComposing/u);
+  assert.match(bindBody, /updateQueryDraft\(\{ q: els\.queryInput\.value \}, \{[\s\S]*sync: "input"/u);
+
+  const suggestionBody = functionBody("function renderSearchSuggestions");
+  assert.ok(suggestionBody.indexOf("if (!hasQuery) return") < suggestionBody.indexOf("buildSearchSuggestions"));
+  const countBody = functionBody("function queryDraftResultCount");
+  assert.doesNotMatch(countBody, /buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
+  assert.match(countBody, /queryResultCountCache/u);
+  assert.match(functionBody("function createRangeCacheObject"), /queryIndexes:[\s\S]*queryIndexLoads:[\s\S]*queryResultCountCache:/u);
 });
 
 test("range prefetch stays fast and does not use an 8 second delay", () => {
