@@ -1,8 +1,22 @@
 {
-  "status": "success",
-  "attemptedAt": "2026-07-16T09:21:07.424Z",
+  "status": "failed",
+  "attemptedAt": "2026-07-16T11:46:04.231Z",
+  "failedAt": "2026-07-16T11:46:04.231Z",
   "completedAt": "2026-07-16T09:45:05.595Z",
   "capturedAt": "2026-07-16T09:45:05.595Z",
   "dataCapturedAt": "2026-07-16T09:45:05.595Z",
-  "message": "Captured 1619 videos with timestamp song lists."
+  "rebuiltDerivedAt": "",
+  "dataVersion": "",
+  "itemCounts": {},
+  "message": "Core scheduled update failed; previous latest data kept.",
+  "fallback": "kept previous validated data/latest.json",
+  "failureOutcome": "failure",
+  "failureStage": "core",
+  "retainedDataCapturedAt": "2026-07-16T09:45:05.595Z",
+  "retainedCompletedAt": "2026-07-16T09:45:05.595Z",
+  "retainedDataVersion": "",
+  "runId": "29495585261",
+  "runAttempt": "1",
+  "workflow": "Update core song-list data",
+  "headSha": "317f0975da2031e4ead73638af2bff3ed834ad8c"
 }
