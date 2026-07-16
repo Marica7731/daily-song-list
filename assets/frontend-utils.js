@@ -99,40 +99,48 @@
     const total = positiveInteger(totalPages, 1);
     const current = clamp(positiveInteger(currentPage, 1), 1, total);
     const maxTokens = Math.max(5, positiveInteger(options.maxTokens, 7));
-    const jumpStep = positiveInteger(options.jumpStep, maxTokens <= 5 ? 5 : 10);
     const pageToken = (page) => ({ type: "page", page, current: page === current });
-    const jumpToken = (direction) => ({
-      type: "jump",
-      direction,
-      step: jumpStep,
-      target: direction === "previous" ? Math.max(1, current - jumpStep) : Math.min(total, current + jumpStep),
-    });
+    const ellipsisToken = (side) => ({ type: "ellipsis", side });
 
     if (total <= maxTokens) return Array.from({ length: total }, (_, index) => pageToken(index + 1));
 
-    let pages;
-    if (current <= 3) {
+    const siblingCount = maxTokens >= 7 ? 1 : 0;
+    const leftSibling = Math.max(2, current - siblingCount);
+    const rightSibling = Math.min(total - 1, current + siblingCount);
+    const showLeftEllipsis = leftSibling > 2;
+    const showRightEllipsis = rightSibling < total - 1;
+
+    if (!showLeftEllipsis && showRightEllipsis) {
       const end = Math.min(total - 1, maxTokens - 2);
-      pages = Array.from({ length: end }, (_, index) => index + 1);
-      return [...pages.map(pageToken), jumpToken("next"), pageToken(total)];
+      const pages = Array.from({ length: end }, (_, index) => index + 1);
+      return [...pages.map(pageToken), ellipsisToken("right"), pageToken(total)];
     }
 
-    if (current >= total - 2) {
+    if (showLeftEllipsis && !showRightEllipsis) {
       const start = Math.max(2, total - (maxTokens - 3));
-      pages = Array.from({ length: total - start + 1 }, (_, index) => start + index);
-      return [pageToken(1), jumpToken("previous"), ...pages.map(pageToken)];
+      const pages = Array.from({ length: total - start + 1 }, (_, index) => start + index);
+      return [pageToken(1), ellipsisToken("left"), ...pages.map(pageToken)];
     }
 
-    const middleSlots = Math.max(1, maxTokens - 4);
-    const leftSlots = Math.floor((middleSlots - 1) / 2);
-    const rightSlots = middleSlots - 1 - leftSlots;
-    let start = Math.max(2, current - leftSlots);
-    let end = Math.min(total - 1, current + rightSlots);
-    const missing = middleSlots - (end - start + 1);
-    if (missing > 0 && start === 2) end = Math.min(total - 1, end + missing);
-    if (missing > 0 && end === total - 1) start = Math.max(2, start - missing);
-    pages = Array.from({ length: end - start + 1 }, (_, index) => start + index);
-    return [pageToken(1), jumpToken("previous"), ...pages.map(pageToken), jumpToken("next"), pageToken(total)];
+    const pages = Array.from({ length: rightSibling - leftSibling + 1 }, (_, index) => leftSibling + index);
+    return [pageToken(1), ellipsisToken("left"), ...pages.map(pageToken), ellipsisToken("right"), pageToken(total)];
+  }
+
+  function mobilePageStepperModel(currentPage, totalPages) {
+    const pageCount = positiveInteger(totalPages, 1);
+    const current = clamp(positiveInteger(currentPage, 1), 1, pageCount);
+    const previousPage = current > 1 ? current - 1 : null;
+    const nextPage = current < pageCount ? current + 1 : null;
+    return {
+      currentPage: current,
+      pageCount,
+      hasPrevious: previousPage !== null,
+      hasNext: nextPage !== null,
+      previousPage,
+      previousNeighbor: previousPage,
+      nextNeighbor: nextPage,
+      nextPage,
+    };
   }
 
   function buildIndexBucketModel(records, options = {}) {
@@ -615,6 +623,32 @@
     };
   }
 
+  function sourcePresentationModel(occurrences, options = {}) {
+    const groups = Array.isArray(options.groups) ? options.groups : groupOccurrencesByVideo(occurrences);
+    const inlineLimit = positiveInteger(options.inlineLimit, 3);
+    const expanded = Boolean(options.expanded);
+    const videoCount = groups.length;
+    const occurrenceCount = groups.reduce((sum, group) => sum + (group.occurrences?.length || 0), 0);
+    const inlineGroups = groups.slice(0, Math.min(inlineLimit, videoCount));
+    const hiddenGroups = videoCount > inlineLimit ? groups.slice(inlineLimit) : [];
+    const canExpand = hiddenGroups.length > 0;
+    const mode = videoCount === 0 ? "none" : canExpand ? (expanded ? "expanded" : "collapsed") : "inline";
+
+    return {
+      mode,
+      videoCount,
+      occurrenceCount,
+      inlineLimit,
+      inlineGroups,
+      hiddenGroups,
+      detailGroups: expanded ? hiddenGroups : [],
+      remainingCount: hiddenGroups.length,
+      hasMore: canExpand && !expanded,
+      canExpand,
+      showCopyAll: videoCount > 1,
+    };
+  }
+
   function sourcePreviewKey(occurrence) {
     const item = occurrence?.item || {};
     return normalizeSearch(item.channelName || item.title || item.videoId || "");
@@ -1078,6 +1112,7 @@
     normalizeSetlistSongs,
     normalizeSongSearchText,
     paginateItems,
+    mobilePageStepperModel,
     parseUrlState,
     defaultQueryDraft,
     makeQueryDraftFromState,
@@ -1090,6 +1125,7 @@
     sanitizeQueryDraft,
     shouldPrefetchRuntimeRange,
     shouldSkipSourceFilter,
+    sourcePresentationModel,
     summaryVideoCountModel,
     validateRuntimeRangePayload,
     trendDisplayModel,

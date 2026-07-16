@@ -48,6 +48,16 @@ function requestPath(url) {
   }
 }
 
+function isIgnorableHttpResponse(response) {
+  if (response.status() !== 404) return false;
+  try {
+    const url = new URL(response.url());
+    return url.hostname === "i.ytimg.com";
+  } catch {
+    return false;
+  }
+}
+
 async function newPage(browser, viewport, options = {}) {
   const context = await browser.newContext({ viewport: { width: viewport[0], height: viewport[1] } });
   if (options.connection) {
@@ -58,9 +68,13 @@ async function newPage(browser, viewport, options = {}) {
   const page = await context.newPage();
   const errors = [];
   page.on("console", (msg) => {
-    if (msg.type() === "error") errors.push(msg.text());
+    const text = msg.text();
+    if (msg.type() === "error" && !text.startsWith("Failed to load resource:")) errors.push(text);
   });
   page.on("pageerror", (error) => errors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400 && !isIgnorableHttpResponse(response)) errors.push(`HTTP ${response.status()} ${response.url()}`);
+  });
   page.on("requestfailed", (request) => {
     const failure = request.failure()?.errorText || "";
     if (failure === "net::ERR_ABORTED") return;
@@ -104,21 +118,42 @@ async function waitForRows(page, errors = [], requests = []) {
 async function openFilterSheet(page) {
   await page.locator("#queryTrigger").click();
   await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
+  await page.waitForSelector("#queryFilterPanel:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
 }
 
 async function openMobileFilterSheet(page) {
   await page.locator("#queryTrigger").click();
   await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
+  await page.waitForSelector("#queryFilterPanel:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
+}
+
+async function openSnapshotFilters(page) {
+  if ((await page.locator("#queryDialog:not([hidden])").count()) === 0) {
+    await openFilterSheet(page);
+  } else if ((await page.locator("#queryFilterPanel:not([hidden])").count()) === 0) {
+    await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
+    await page.waitForSelector("#queryFilterPanel:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  }
+  await page.locator(".query-history-section").evaluate((section) => {
+    section.open = true;
+  });
+  await page.waitForSelector(".query-history-section[open] #querySnapshotDateSelect", {
+    timeout: baseUrl.startsWith("https://") ? 15000 : 5000,
+  });
 }
 
 async function setCheckbox(page, selector, checked) {
   const checkbox = page.locator(selector);
-  await checkbox.waitFor({ state: "visible", timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await checkbox.waitFor({ state: "attached", timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
   if ((await checkbox.isChecked()) === checked) return;
   try {
-    if (checked) {
+    if (!(await checkbox.isVisible())) {
+      await checkbox.evaluate((input) => input.closest("label")?.click());
+    } else if (checked) {
       await checkbox.check({ timeout: 5000 });
     } else {
       await checkbox.uncheck({ timeout: 5000 });
@@ -373,18 +408,14 @@ async function assertUiShape(page, viewport, range) {
     if (result.summaryRange && result.summaryRange.display !== "none") {
       throw new Error(`mobile summary repeats range: ${result.summary.text}`);
     }
-    if (result.topSelect || result.topPageSize) throw new Error(`mobile top pagination includes page select/page size ${JSON.stringify(result)}`);
-    if (result.topControls.length && result.topControls.length < 5) {
-      throw new Error(`mobile top pagination should expose clickable page tokens ${JSON.stringify(result.topControls)}`);
-    }
+    if (!result.topSelect || result.topPageSize) throw new Error(`mobile top pagination should expose page select without page size ${JSON.stringify(result)}`);
     if (
       result.topControls.length &&
       (result.topControls[0].ariaLabel !== "上一页" ||
         result.topControls[result.topControls.length - 1].ariaLabel !== "下一页" ||
-        !result.topControls.some((control) => control.className.includes("is-current") && /^\d+$/u.test(control.text.trim())) ||
-        !result.topControls.some((control) => control.text.trim() === "…" && /向[前后]跳/u.test(control.ariaLabel)))
+        result.topControls.some((control) => control.text.trim() === "…" || /向[前后]跳/u.test(control.ariaLabel)))
     ) {
-      throw new Error(`mobile top pagination should use icon buttons, page numbers, and jump tokens ${JSON.stringify(result.topControls)}`);
+      throw new Error(`mobile top pagination should use stepper controls without clickable ellipsis ${JSON.stringify(result.topControls)}`);
     }
     if (result.filterBadges.some((badge) => !badge.hidden || badge.display !== "none" || badge.text === "0")) {
       throw new Error(`inactive filter badge is visible ${JSON.stringify(result.filterBadges)}`);
@@ -604,6 +635,7 @@ async function desktopRankVisualGeometry(browser) {
         .map(rectFor)
         .filter((button) => button.top >= top - 2 && button.top <= firstRowBottom);
       return {
+        remainingCount: Number(node.querySelector("[data-toggle-source]")?.dataset.remainingCount || 0),
         drawer: drawer ? rectFor(drawer) : null,
         toolbar: toolbar ? rectFor(toolbar) : null,
         firstGroup: firstGroup ? rectFor(firstGroup) : null,
@@ -628,9 +660,11 @@ async function desktopRankVisualGeometry(browser) {
     if (sourceGeometry.copyAllButtons !== 1 || sourceGeometry.copyAllInToolbar !== 1 || sourceGeometry.copyAllInsideCards !== 0) {
       throw new Error(`desktop copy-all placement invalid ${JSON.stringify(sourceGeometry)}`);
     }
-    if (sourceGeometry.groups.length > 9) throw new Error(`desktop source drawer rendered more than initial batch ${JSON.stringify(sourceGeometry)}`);
-    if (sourceGeometry.moreButtons && !/^已显示\s+9\/\d+\s+个来源$/u.test(sourceGeometry.countText)) {
-      throw new Error(`desktop source count should expose visible progress ${JSON.stringify(sourceGeometry)}`);
+    if (!sourceGeometry.remainingCount || sourceGeometry.groups.length !== sourceGeometry.remainingCount) {
+      throw new Error(`desktop source drawer should render all remaining sources on one click ${JSON.stringify(sourceGeometry)}`);
+    }
+    if (sourceGeometry.moreButtons) {
+      throw new Error(`desktop source drawer should not expose a second source expander ${JSON.stringify(sourceGeometry)}`);
     }
     if (sourceGeometry.collapseButtons !== 1) throw new Error(`desktop source drawer should render one toolbar collapse action ${JSON.stringify(sourceGeometry)}`);
     if (sourceGeometry.toolbar.bottom > sourceGeometry.firstGroup.top + 8) {
@@ -790,6 +824,7 @@ async function interactionFlow(browser) {
   await waitForRows(page, errors, requests);
   if (!latestOnly) {
     await openFilterSheet(page);
+    await openSnapshotFilters(page);
     const dateOptions = await page
       .locator("#querySnapshotDateSelect option")
       .evaluateAll((items) => items.map((item) => item.value).filter((value) => value !== "latest"));
@@ -803,6 +838,7 @@ async function interactionFlow(browser) {
       if (options.length) break;
     }
     if (!options.length) throw new Error("no historical snapshot options");
+    await openSnapshotFilters(page);
     await page.waitForFunction(() => document.querySelector("#querySnapshotSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
     await page.selectOption("#querySnapshotSelect", options[0]);
     await page.locator("#applyQueryButton").click();
@@ -996,18 +1032,19 @@ async function mobileRankVisualGeometry(browser) {
       };
       const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)"));
       const trendRow =
-        rows.find((row) => isVisible(row.querySelector(".rank-side .trend-badge")) && row.querySelector(".rank-expand")) ||
+        rows.find((row) => isVisible(row.querySelector(".rank-side .trend-badge")) && row.querySelector(".source-inline-more")) ||
         rows.find((row) => isVisible(row.querySelector(".rank-side .trend-badge"))) ||
-        rows.find((row) => row.querySelector(".rank-expand")) ||
+        rows.find((row) => row.querySelector(".source-inline-more")) ||
         rows[0];
       const trend = trendRow?.querySelector(".rank-side .trend-badge");
       const content = trendRow?.querySelector(".rank-content");
-      const button = trendRow?.querySelector(".rank-expand");
+      const button = trendRow?.querySelector(".source-inline-more");
       const rank = trendRow?.querySelector(".rank-number");
       const title = trendRow?.querySelector(".rank-title");
       const count = trendRow?.querySelector(".rank-count");
       const side = trendRow?.querySelector(".rank-side");
       const sideTop = trendRow?.querySelector(".rank-side-top");
+      const sourceStrip = trendRow?.querySelector(".source-inline-strip");
       const rowBox = trendRow ? rectFor(trendRow) : null;
       const subline = trendRow?.querySelector(".rank-subline");
       const metaLine = trendRow?.querySelector(".rank-meta-line");
@@ -1031,6 +1068,9 @@ async function mobileRankVisualGeometry(browser) {
         trendScrollWidth: trend?.scrollWidth || 0,
         trendClientWidth: trend?.clientWidth || 0,
         content: content ? rectFor(content) : null,
+        sourceStrip: sourceStrip ? rectFor(sourceStrip) : null,
+        sourceStripScrollWidth: sourceStrip?.scrollWidth || 0,
+        sourceStripClientWidth: sourceStrip?.clientWidth || 0,
         button: button ? rectFor(button) : null,
         buttonText: isVisible(button) ? button.textContent.trim() : "",
         rank: rank ? rectFor(rank) : null,
@@ -1043,6 +1083,9 @@ async function mobileRankVisualGeometry(browser) {
     if (!closedGeometry.content) throw new Error(`mobile rank content geometry missing ${JSON.stringify(closedGeometry)}`);
     if (!closedGeometry.subline || closedGeometry.subline.display !== "flex") throw new Error(`mobile rank subline should be a single flex line ${JSON.stringify(closedGeometry)}`);
     if (!closedGeometry.metaLine || !closedGeometry.side || !closedGeometry.sideTop) throw new Error(`mobile rank pieces missing ${JSON.stringify(closedGeometry)}`);
+    if (!closedGeometry.sourceStrip || closedGeometry.sourceStrip.right > closedGeometry.side.left + 1) {
+      throw new Error(`mobile inline source strip should stay in content column ${JSON.stringify(closedGeometry)}`);
+    }
     if (closedGeometry.legacyTrendNodes) throw new Error(`legacy mobile trend nodes remain ${JSON.stringify(closedGeometry)}`);
     if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > 90) {
       throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
@@ -1066,8 +1109,8 @@ async function mobileRankVisualGeometry(browser) {
     if (closedGeometry.title && closedGeometry.count && closedGeometry.count.top > closedGeometry.title.top + 8) {
       throw new Error(`mobile count should stay in the right-side upper area ${JSON.stringify(closedGeometry)}`);
     }
-    if (closedGeometry.count && closedGeometry.button && closedGeometry.button.top < closedGeometry.count.bottom - 1) {
-      throw new Error(`mobile source chip should sit below the count ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.count && closedGeometry.button && closedGeometry.button.left < closedGeometry.content.left - 1) {
+      throw new Error(`mobile source more button should live in the content column ${JSON.stringify(closedGeometry)}`);
     }
 
     const expandableRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
@@ -1182,8 +1225,7 @@ async function mobileCopyAllLinksFlow(browser) {
     const copyAllButtons = await row.locator("[data-copy-song-links]").count();
     if (copyAllButtons !== 1) throw new Error(`copy all links button should appear once, got ${copyAllButtons}`);
 
-    const totalSources = await row.locator(".source-drawer-count").first().textContent();
-    const expectedCount = sourceCountFromText(totalSources || "");
+    const expectedCount = Number.parseInt((await row.locator("[data-toggle-source]").first().getAttribute("data-video-count")) || "0", 10);
     await row.locator("[data-copy-song-links]").first().click();
     await page.waitForFunction(() => (window.__clipboardWrites || []).length > 0, null, { timeout: 5000 });
 
@@ -1257,47 +1299,36 @@ async function mobileCopyAllLinksFlow(browser) {
     if (!setlistCopied) throw new Error("copy setlist did not write clipboard text");
 
     const singleSourcePage = await gotoFirstSingleSourcePage(page, errors, requests);
-    const singleSourceRow = page.locator('.rank-row:not(.skeleton-row):has([data-toggle-source][data-occurrence-count="1"])').first();
-    if ((await singleSourceRow.count()) !== 1) throw new Error(`single-source row with drawer source button not found after paging ${JSON.stringify(singleSourcePage)}`);
+    const singleSourceRow = page.locator('.rank-row:not(.skeleton-row):has(.source-inline-strip[data-source-video-count="1"])').first();
+    if ((await singleSourceRow.count()) !== 1) throw new Error(`single-source inline row not found after paging ${JSON.stringify(singleSourcePage)}`);
     const singleSourceShape = await singleSourceRow.evaluate((node) => ({
       copyButtons: node.querySelectorAll("[data-copy-song-links]").length,
       drawerButtons: node.querySelectorAll("[data-toggle-source]").length,
       drawers: node.querySelectorAll(".source-drawer").length,
-      toggleText: node.querySelector("[data-toggle-source]")?.textContent?.trim() || "",
-      aria: node.querySelector("[data-toggle-source]")?.getAttribute("aria-label") || "",
-      actionHeight: node.querySelector("[data-toggle-source]")?.getBoundingClientRect().height || 0,
+      inlineItems: node.querySelectorAll(".source-inline-item").length,
+      inlineTimes: node.querySelectorAll(".source-inline-time").length,
+      inlineChannels: node.querySelectorAll(".source-inline-channel").length,
+      setlistButtons: node.querySelectorAll(".source-inline-item [data-copy-setlist]").length,
+      actionHeight: node.querySelector(".source-inline-item [data-copy-setlist]")?.getBoundingClientRect().height || 0,
     }));
-    if (singleSourceShape.copyButtons !== 0 || singleSourceShape.drawerButtons !== 1 || singleSourceShape.drawers !== 1) {
-      throw new Error(`single-source drawer trigger structure invalid ${JSON.stringify(singleSourceShape)}`);
-    }
-    if (singleSourceShape.toggleText !== "来源" || !/^查看该歌曲的 1 个来源视频/u.test(singleSourceShape.aria)) {
-      throw new Error(`single-source toggle accessibility invalid ${JSON.stringify(singleSourceShape)}`);
+    if (
+      singleSourceShape.copyButtons !== 0 ||
+      singleSourceShape.drawerButtons !== 0 ||
+      singleSourceShape.drawers !== 0 ||
+      singleSourceShape.inlineItems !== 1 ||
+      singleSourceShape.inlineTimes !== 1 ||
+      singleSourceShape.inlineChannels !== 1 ||
+      singleSourceShape.setlistButtons !== 1
+    ) {
+      throw new Error(`single-source inline structure invalid ${JSON.stringify(singleSourceShape)}`);
     }
     if (singleSourceShape.actionHeight < 28 || singleSourceShape.actionHeight > 34) {
-      throw new Error(`single-source source chip size invalid ${JSON.stringify(singleSourceShape)}`);
+      throw new Error(`single-source inline copy size invalid ${JSON.stringify(singleSourceShape)}`);
     }
-    await singleSourceRow.locator("[data-toggle-source]").first().click();
-    await singleSourceRow.locator(".source-drawer:not([hidden]) [data-copy-song-links]").first().waitFor({ state: "visible", timeout: 5000 });
     let singleSourceScreenshotPath = null;
     if (viewport[0] === 390) {
-      singleSourceScreenshotPath = shotPath(`single-source-drawer-${viewport.join("x")}.png`);
+      singleSourceScreenshotPath = shotPath(`single-source-inline-${viewport.join("x")}.png`);
       await page.screenshot({ path: singleSourceScreenshotPath, fullPage: false });
-    }
-    const writesBeforeSingleCopy = await page.evaluate(() => (window.__clipboardWrites || []).length);
-    await singleSourceRow.locator(".source-drawer:not([hidden]) [data-copy-song-links]").first().click();
-    await page.waitForFunction((count) => (window.__clipboardWrites || []).length > count, writesBeforeSingleCopy, { timeout: 5000 });
-    const singleCopyResult = await page.evaluate(() => {
-      const writes = window.__clipboardWrites || [];
-      const text = writes[writes.length - 1] || "";
-      return {
-        text,
-        lines: text ? text.split("\n") : [],
-        valid: /^[^\n]+ https:\/\/www\.youtube\.com\/watch\?v=[^&\s]+&t=\d+s$/u.test(text),
-        hasMarkdown: /\[[^\]]+\]\(|^[-*]\s|^\d+\./um.test(text),
-      };
-    });
-    if (singleCopyResult.lines.length !== 1 || !singleCopyResult.valid || singleCopyResult.hasMarkdown) {
-      throw new Error(`single-source copy text invalid ${JSON.stringify(singleCopyResult)}`);
     }
 
     let screenshotPath = null;
@@ -1314,6 +1345,7 @@ async function mobileCopyAllLinksFlow(browser) {
 
 async function mobileVideoCardGeometry(browser) {
   for (const viewport of [
+    [320, 700],
     [390, 844],
     [430, 932],
     [1366, 768],
@@ -1411,10 +1443,14 @@ async function mobileVideoCardGeometry(browser) {
     }
 
     let expandedScreenshotPath = null;
-    const moreButton = page.locator(".video-card .video-more").first();
+    const moreButton = page.locator(".video-card .video-more:not(.video-more-top)").first();
     if ((await moreButton.count()) === 1) {
       await moreButton.click();
-      await page.waitForFunction(() => document.querySelector(".video-card .video-more")?.getAttribute("aria-expanded") === "true", null, { timeout: 5000 });
+      await page.waitForFunction(
+        () => document.querySelector(".video-card .video-more:not(.video-more-top)")?.getAttribute("aria-expanded") === "true",
+        null,
+        { timeout: 5000 },
+      );
       if (viewport[0] === 390) {
         expandedScreenshotPath = shotPath(`video-card-expanded-${viewport.join("x")}.png`);
         await page.screenshot({ path: expandedScreenshotPath, fullPage: false });
@@ -1441,7 +1477,7 @@ async function gotoFirstSingleSourcePage(page, errors, requests) {
     targetUrl.searchParams.set("page", String(pageNumber));
     await page.goto(targetUrl.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
-    const matchCount = await page.locator('.rank-row:not(.skeleton-row):has([data-toggle-source][data-occurrence-count="1"])').count();
+    const matchCount = await page.locator('.rank-row:not(.skeleton-row):has(.source-inline-strip[data-source-video-count="1"])').count();
     if (matchCount > 0) return { page: pageNumber, matchCount };
   }
   return { page: null, matchCount: 0 };
@@ -1449,8 +1485,8 @@ async function gotoFirstSingleSourcePage(page, errors, requests) {
 
 async function compactSourceDrawerFlow(browser) {
   for (const scenario of [
-    { label: "mobile", viewport: [390, 844], initial: 3 },
-    { label: "tablet", viewport: [768, 1024], initial: 6 },
+    { label: "mobile", viewport: [390, 844] },
+    { label: "tablet", viewport: [768, 1024] },
   ]) {
     const viewport = scenario.viewport;
     const { context, page, errors } = await newPage(browser, viewport);
@@ -1484,9 +1520,12 @@ async function compactSourceDrawerFlow(browser) {
     if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 1) {
       throw new Error(`${scenario.label} source drawer should keep exactly one row expanded`);
     }
-    if ((await row.locator("[data-toggle-source-groups]").count()) < 1) throw new Error("first rank row should expose batched source groups");
-    if ((await countVisibleInRow(row, ".source-video-group")) !== scenario.initial) {
-      throw new Error(`${scenario.label} source drawer should start with exactly ${scenario.initial} visible source video groups when more are available`);
+    const expectedRemaining = Number.parseInt((await button.getAttribute("data-remaining-count")) || "0", 10);
+    if (!expectedRemaining) throw new Error(`${scenario.label} source drawer toggle missing remaining count`);
+    if ((await row.locator("[data-toggle-source-groups]").count()) !== 0) throw new Error("song source drawer should not expose a second source group expander");
+    const visibleGroupsOnOpen = await countVisibleInRow(row, ".source-video-group");
+    if (visibleGroupsOnOpen !== expectedRemaining) {
+      throw new Error(`${scenario.label} source drawer should reveal all remaining groups on one click: expected=${expectedRemaining} actual=${visibleGroupsOnOpen}`);
     }
 
     const geometry = await row.evaluate((node) => {
@@ -1749,6 +1788,7 @@ function sourceCountFromText(text) {
 async function selectSnapshotDate(page, value) {
   let lastError = null;
   for (let attempt = 0; attempt < 6; attempt += 1) {
+    await openSnapshotFilters(page);
     try {
       await page.waitForFunction(() => document.querySelector("#querySnapshotDateSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
     } catch (error) {
@@ -1903,6 +1943,62 @@ async function review404Scenario(browser) {
   results.push({ scenario: "review-404", status, screenshotPath });
 }
 
+async function mobileActiveQueryStripGeometry(browser) {
+  for (const viewport of [
+    [320, 700],
+    [390, 844],
+  ]) {
+    const { context, page, errors } = await newPage(browser, viewport);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    const url = new URL(baseUrl);
+    url.searchParams.set("q", "少女レイ");
+    url.searchParams.set("outside", "1");
+    url.searchParams.set("metric", "videos");
+    url.searchParams.set("minCount", "2");
+    await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    const geometry = await page.evaluate(() => {
+      const rectFor = (node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          left: box.left,
+          right: box.right,
+          top: box.top,
+          bottom: box.bottom,
+          width: box.width,
+          height: box.height,
+          scrollWidth: node.scrollWidth,
+          clientWidth: node.clientWidth,
+          text: node.textContent || "",
+        };
+      };
+      const strip = document.querySelector("#activeQueryStrip");
+      const clear = document.querySelector("#activeQueryStrip .active-query-clear");
+      const chips = Array.from(document.querySelectorAll("#activeQueryStrip .active-query-chip")).map(rectFor);
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        strip: strip ? rectFor(strip) : null,
+        clear: clear ? rectFor(clear) : null,
+        chips,
+      };
+    });
+    if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`active query strip page overflow ${JSON.stringify(geometry)}`);
+    if (!geometry.strip || !geometry.clear || geometry.chips.length < 3) throw new Error(`active query strip missing pieces ${JSON.stringify(geometry)}`);
+    if (!/清除全部/u.test(geometry.clear.text) || geometry.clear.width < 58 || geometry.clear.scrollWidth > geometry.clear.clientWidth + 1) {
+      throw new Error(`active query clear button clipped ${JSON.stringify(geometry)}`);
+    }
+    if (geometry.clear.right > geometry.viewportWidth + 1) throw new Error(`active query clear button offscreen ${JSON.stringify(geometry)}`);
+    const screenshotPath = shotPath(`active-query-strip-${viewport.join("x")}.png`);
+    await page.screenshot({ path: screenshotPath, fullPage: false });
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    if (errors.length || unhandled) throw new Error(`active query strip errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `active-query-strip-${viewport.join("x")}`, requests: [...new Set(requests)], screenshotPath });
+  }
+}
+
 function runtimePathPattern(range) {
   return new RegExp(`^data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json$`, "u");
 }
@@ -1917,6 +2013,7 @@ function runtimePathPattern(range) {
     await desktopRankVisualGeometry(browser);
     await interactionFlow(browser);
     await mobileFilterSheetFlow(browser);
+    await mobileActiveQueryStripGeometry(browser);
     await mobileRankVisualGeometry(browser);
     await mobileCopyAllLinksFlow(browser);
     await mobileVideoCardGeometry(browser);

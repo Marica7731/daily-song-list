@@ -98,7 +98,9 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /--rank-columns:\s*48px minmax\(0, 1fr\) 104px/u);
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
   assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: var\(--filter-control-height\);[\s\S]*border-radius: var\(--radius-control\);/u);
-  assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) auto;/u);
+  assert.match(indexSource, /class="query-tabs"[\s\S]*data-query-panel-tab="search"[\s\S]*data-query-panel-tab="filter"/u);
+  assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: auto auto;/u);
+  assert.match(appSource, /function setQueryPanelTab/u);
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. drawer drawer"/u);
   assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
   assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
@@ -125,6 +127,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-card,[\s\S]*\.video-compact \.video-card\s*\{[\s\S]*grid-template-columns: 108px minmax\(0, 1fr\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-body,[\s\S]*\.video-compact \.video-body\s*\{[\s\S]*display: contents;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.song-list,[\s\S]*\.video-compact \.song-list\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
+  assert.match(cssSource, /\.video-grid\s*\{[\s\S]*grid-template-columns: repeat\(auto-fit, minmax\(280px, 1fr\)\);/u);
+  assert.match(appSource, /className = "video-more video-more-top"/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*--source-thumb-width: var\(--source-thumb-width-narrow\)/u);
   assert.match(verifySource, /async function mobileFilterSheetFlow/u);
   assert.match(verifySource, /async function mobileRankVisualGeometry/u);
@@ -141,9 +145,9 @@ test("desktop and tablet contracts use explicit responsive layout", () => {
   assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(280px, 1fr\) minmax\(260px, 380px\);/u);
   assert.doesNotMatch(cssSource, /grid-template-columns: auto minmax\(0, 1fr\) auto auto minmax\(220px, 1\.1fr\) minmax\(108px, 140px\) minmax\(160px, 220px\)/u);
   assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto auto minmax\(340px, 480px\);/u);
-  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 100px/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) 74px/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) minmax\(220px, 320px\);/u);
-  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.pagination-top \.page-select,[\s\S]*\.pagination-top \.page-size-control\s*\{[\s\S]*display: none;/u);
+  assert.match(appSource, /mode === "mobile"[\s\S]*variant === "top"[\s\S]*renderMobileTopPagination\(pageInfo\)/u);
 });
 
 test("search suggestions highlight safely without assigning untrusted innerHTML", () => {
@@ -175,7 +179,10 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /renderPageButton\("下一页"[\s\S]*\{ icon: "next" \}/u);
   assert.doesNotMatch(appSource, /if \(!compactTop\) controls\.append\(renderPageJumpControl\(pageInfo\)\)/u);
   assert.match(appSource, /function renderPageSelectControl/u);
-  assert.match(appSource, /function renderPageJumpToken/u);
+  assert.match(appSource, /function renderMobileTopPagination/u);
+  assert.match(appSource, /function renderMobileBottomPagination/u);
+  assert.match(appSource, /function renderPageEllipsisToken/u);
+  assert.doesNotMatch(appSource, /function renderPageJumpToken|data-page-jump-direction/u);
 });
 
 test("summary video metric uses source payload count instead of hidden-unknown visible count", () => {

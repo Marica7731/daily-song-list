@@ -19,6 +19,7 @@ const SEARCH_DEBOUNCE_MS = 140;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
+const SOURCE_INLINE_LIMIT = 3;
 const SOURCE_EXPAND_CHUNK_SIZE = 12;
 const MAX_COMPACT_INITIALIZED_DRAWERS = 3;
 // Keep these breakpoints synchronized with assets/styles.css:
@@ -291,6 +292,8 @@ const els = {
   applyQueryButton: document.querySelector("#applyQueryButton"),
   resetQueryButton: document.querySelector("#resetQueryButton"),
   queryResultPreview: document.querySelector("#queryResultPreview"),
+  queryTabButtons: Array.from(document.querySelectorAll("[data-query-panel-tab]")),
+  queryTabPanels: Array.from(document.querySelectorAll(".query-tab-panel")),
   metricFilterGroup: document.querySelector("#metricFilterGroup"),
   displayFilterGroup: document.querySelector("#displayFilterGroup"),
   trendFilterGroup: document.querySelector("#trendFilterGroup"),
@@ -545,6 +548,15 @@ function bindEvents() {
   });
 
   els.content.addEventListener("change", (event) => {
+    const bucketSelect = event.target.closest("[data-index-bucket-select]");
+    if (bucketSelect) {
+      state.indexBucket = bucketSelect.value || INDEX_ALL_BUCKET;
+      state.expandedRows.clear();
+      resetPagination();
+      render({ focusAfterPageChange: true, urlMode: "push" });
+      return;
+    }
+
     const select = event.target.closest("[data-page-select]");
     if (!select) return;
     const page = Number.parseInt(select.value || "1", 10);
@@ -626,7 +638,27 @@ function bindQueryOverlayEvents() {
     writeRecentSearches([]);
     renderRecentSearches();
   });
+  for (const tab of els.queryTabButtons) {
+    tab.addEventListener("click", () => setQueryPanelTab(tab.dataset.queryPanelTab || "search", { focusTab: true }));
+    tab.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const tabs = els.queryTabButtons;
+      const index = tabs.indexOf(tab);
+      const nextIndex =
+        event.key === "Home"
+          ? 0
+          : event.key === "End"
+            ? tabs.length - 1
+            : event.key === "ArrowLeft"
+              ? Math.max(0, index - 1)
+              : Math.min(tabs.length - 1, index + 1);
+      const next = tabs[nextIndex];
+      if (next) setQueryPanelTab(next.dataset.queryPanelTab || "search", { focusTab: true });
+    });
+  }
   els.queryInput?.addEventListener("input", () => {
+    setQueryPanelTab("search");
     updateQueryDraft({ q: els.queryInput.value });
   });
   els.queryInput?.addEventListener("keydown", (event) => {
@@ -659,6 +691,7 @@ function bindQueryOverlayEvents() {
     els.querySnapshotSelect,
   ]) {
     element?.addEventListener("change", () => {
+      setQueryPanelTab("filter");
       state.queryDraft = readQueryDraftFromControls();
       syncQueryControlsFromDraft(state.queryDraft);
       scheduleQueryDraftPreview();
@@ -666,6 +699,7 @@ function bindQueryOverlayEvents() {
   }
   document.querySelectorAll("input[name='queryMetric']").forEach((input) => {
     input.addEventListener("change", () => {
+      setQueryPanelTab("filter");
       state.queryDraft = readQueryDraftFromControls();
       syncQueryControlsFromDraft(state.queryDraft);
       scheduleQueryDraftPreview();
@@ -702,6 +736,7 @@ function openQueryOverlay(trigger) {
   syncQueryControlsFromDraft(state.queryDraft);
   renderRecentSearches();
   renderSearchSuggestions(state.queryDraft.q, state.queryDraft);
+  setQueryPanelTab("search");
   scheduleQueryDraftPreview({ immediate: true });
   updateQueryAnchorPosition();
   setDialogOpen(els.queryDialog, true);
@@ -834,6 +869,21 @@ function renderSearchSuggestions(query, draft = state.queryDraft || makeQueryDra
     empty.className = "suggestion-empty";
     empty.textContent = "没有匹配建议";
     els.searchSuggestions.append(empty);
+  }
+}
+
+function setQueryPanelTab(tabName = "search", options = {}) {
+  const targetName = tabName === "filter" ? "filter" : "search";
+  for (const tab of els.queryTabButtons) {
+    const active = (tab.dataset.queryPanelTab || "search") === targetName;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", active ? "true" : "false");
+    tab.tabIndex = active ? 0 : -1;
+    if (active && options.focusTab) focusWithoutScrolling(tab);
+  }
+  for (const panel of els.queryTabPanels) {
+    const active = panel.id === (targetName === "filter" ? "queryFilterPanel" : "querySearchPanel");
+    panel.hidden = !active;
   }
 }
 
@@ -2916,28 +2966,38 @@ function renderSongIndexView(group, rangeCache, selection) {
   const pageInfo = pagedSlice(bucketModel.records);
   const groups = groupSongIndex(pageInfo.visible);
   const fragment = document.createDocumentFragment();
-  fragment.append(renderIndexBucketNav(bucketModel.buckets));
-  appendPagination(fragment, { pageInfo, unit: "首歌曲", variant: "top" });
+  fragment.append(renderIndexToolbar(bucketModel, pageInfo));
 
-  for (const groupEntry of groups) {
-    const section = document.createElement("section");
-    section.className = "index-section";
-    section.id = groupEntry.id;
+  if (bucketModel.currentBucket === INDEX_ALL_BUCKET) {
+    for (const groupEntry of groups) {
+      const section = document.createElement("section");
+      section.className = "index-section";
+      section.id = groupEntry.id;
 
-    const heading = document.createElement("h2");
-    heading.className = "index-heading";
-    heading.textContent = groupEntry.label;
-    section.append(heading);
+      const heading = document.createElement("h2");
+      heading.className = "index-heading";
+      heading.textContent = groupEntry.label;
+      section.append(heading);
 
+      const list = document.createElement("div");
+      list.className = "index-list";
+      const listFragment = document.createDocumentFragment();
+      for (const record of groupEntry.records) {
+        listFragment.append(renderIndexRecord(record));
+      }
+      list.append(listFragment);
+      section.append(list);
+      fragment.append(section);
+    }
+  } else {
     const list = document.createElement("div");
-    list.className = "index-list";
+    list.className = "index-list index-list-flat";
     const listFragment = document.createDocumentFragment();
-    for (const record of groupEntry.records) {
+    for (const record of pageInfo.visible) {
       listFragment.append(renderIndexRecord(record));
     }
     list.append(listFragment);
-    section.append(list);
-    fragment.append(section);
+    fragment.append(list);
   }
   appendPagination(fragment, { pageInfo, unit: "首歌曲", variant: "bottom" });
   els.content.append(fragment);
@@ -3132,6 +3192,43 @@ function renderSummaryActions() {
   return actions;
 }
 
+function renderIndexToolbar(bucketModel, pageInfo) {
+  const toolbar = document.createElement("div");
+  toolbar.className = "index-toolbar";
+  toolbar.append(renderIndexBucketSelect(bucketModel));
+  toolbar.append(renderIndexBucketNav(bucketModel.buckets));
+  const pager = renderPaginationControl({ pageInfo, unit: "首歌曲", variant: "top" });
+  if (pager) {
+    pager.classList.add("index-pagination");
+    const mobileControls = pager.querySelector(".pagination-controls");
+    if (mobileControls && getResponsiveMode() === "mobile") {
+      mobileControls.replaceWith(renderMobileTopPagination(pageInfo, { index: true }));
+    }
+    toolbar.append(pager);
+  }
+  return toolbar;
+}
+
+function renderIndexBucketSelect(bucketModel) {
+  const label = document.createElement("label");
+  label.className = "index-bucket-select";
+  const text = document.createElement("span");
+  text.textContent = "首字母";
+  const select = document.createElement("select");
+  select.dataset.indexBucketSelect = "true";
+  select.setAttribute("aria-label", "选择歌曲索引首字母");
+  const options = [{ label: INDEX_ALL_BUCKET, value: INDEX_ALL_BUCKET }, ...bucketModel.buckets.map((bucket) => ({ label: bucket.label, value: bucket.label }))];
+  for (const item of options) {
+    const option = document.createElement("option");
+    option.value = item.value;
+    option.textContent = item.label;
+    select.append(option);
+  }
+  select.value = bucketModel.currentBucket;
+  label.append(text, select);
+  return label;
+}
+
 function renderIndexBucketNav(buckets) {
   const nav = document.createElement("nav");
   nav.className = "index-nav";
@@ -3166,9 +3263,11 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
   const showPageControls = pageInfo.total > pageInfo.pageSize;
   const showPageSizeControl = shouldShowPageSizeControl(pageInfo, variant);
   if (!showPageControls && !showPageSizeControl) return null;
+  const mode = getResponsiveMode();
 
   const footer = document.createElement("div");
   footer.className = `pagination-row pagination-${variant}`;
+  if (mode === "mobile") footer.classList.add("pagination-mobile");
 
   const note = document.createElement("span");
   note.className = "pagination-note";
@@ -3182,19 +3281,17 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
     footer.append(renderPageSizeControl());
   }
 
-  const controls = document.createElement("div");
-  controls.className = "pagination-controls";
-
   if (showPageControls) {
-    controls.append(
-      renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, { icon: "prev" }),
-      ...renderPageTokenButtons(pageInfo),
-      renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, { icon: "next" }),
-    );
+    const controls =
+      mode === "mobile"
+        ? variant === "top"
+          ? renderMobileTopPagination(pageInfo)
+          : renderMobileBottomPagination(pageInfo)
+        : renderDesktopPaginationControls(pageInfo);
     footer.append(controls);
   }
 
-  if (variant === "bottom" && showPageControls) footer.append(renderPageSelectControl(pageInfo));
+  if (mode !== "mobile" && variant === "bottom" && showPageControls) footer.append(renderPageSelectControl(pageInfo));
   return footer;
 }
 
@@ -3233,6 +3330,7 @@ function renderPageSizeControl() {
 function renderPageButton(label, page, disabled, isCurrent = false, options = {}) {
   const button = document.createElement("button");
   button.className = isCurrent ? "pagination-button is-current" : "pagination-button";
+  if (options.className) button.classList.add(options.className);
   button.type = "button";
   button.dataset.page = String(page);
   button.disabled = disabled;
@@ -3249,6 +3347,46 @@ function renderPageButton(label, page, disabled, isCurrent = false, options = {}
   return button;
 }
 
+function renderDesktopPaginationControls(pageInfo) {
+  const controls = document.createElement("div");
+  controls.className = "pagination-controls";
+  controls.append(
+    renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, { icon: "prev" }),
+    ...renderPageTokenButtons(pageInfo),
+    renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, { icon: "next" }),
+  );
+  return controls;
+}
+
+function renderMobileTopPagination(pageInfo, options = {}) {
+  const model = window.FrontendUtils.mobilePageStepperModel(pageInfo.page, pageInfo.pageCount);
+  const controls = document.createElement("div");
+  controls.className = options.index ? "pagination-controls pagination-stepper pagination-stepper-index" : "pagination-controls pagination-stepper";
+  controls.append(renderPageButton("上一页", model.previousPage || 1, !model.hasPrevious, false, { icon: "prev" }));
+  if (!options.index && model.previousNeighbor) {
+    controls.append(renderPageButton(String(model.previousNeighbor), model.previousNeighbor, false, false, { className: "pagination-neighbor" }));
+  }
+  controls.append(renderPageSelectControl(pageInfo, { compact: true }));
+  if (!options.index && model.nextNeighbor) {
+    controls.append(renderPageButton(String(model.nextNeighbor), model.nextNeighbor, false, false, { className: "pagination-neighbor" }));
+  }
+  controls.append(renderPageButton("下一页", model.nextPage || model.pageCount, !model.hasNext, false, { icon: "next" }));
+  return controls;
+}
+
+function renderMobileBottomPagination(pageInfo) {
+  const controls = document.createElement("div");
+  controls.className = "pagination-controls pagination-bottom-stepper";
+  controls.append(
+    renderPageButton("首页", 1, pageInfo.page === 1),
+    renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, { icon: "prev" }),
+    renderPageSelectControl(pageInfo, { compact: true }),
+    renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, { icon: "next" }),
+    renderPageButton("末页", pageInfo.pageCount, pageInfo.page === pageInfo.pageCount),
+  );
+  return controls;
+}
+
 function renderPaginationIcon(direction) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 24 24");
@@ -3262,33 +3400,32 @@ function renderPaginationIcon(direction) {
 function renderPageTokenButtons(pageInfo) {
   const options = paginationTokenOptions();
   return window.FrontendUtils.visiblePageTokens(pageInfo.page, pageInfo.pageCount, options).map((token) => {
-    if (token.type === "jump") return renderPageJumpToken(token);
+    if (token.type === "ellipsis") return renderPageEllipsisToken(token);
     return renderPageButton(String(token.page), token.page, false, token.current);
   });
 }
 
 function paginationTokenOptions() {
   const mode = getResponsiveMode();
-  if (mode === "mobile") return { maxTokens: 5, jumpStep: 5 };
-  if (mode === "tablet") return { maxTokens: 7, jumpStep: 10 };
-  return { maxTokens: 9, jumpStep: 10 };
+  if (mode === "mobile") return { maxTokens: 5 };
+  if (mode === "tablet") return { maxTokens: 7 };
+  return { maxTokens: 9 };
 }
 
-function renderPageJumpToken(token) {
-  const label = token.direction === "previous" ? `向前跳 ${token.step} 页` : `向后跳 ${token.step} 页`;
-  const button = renderPageButton("…", token.target, false, false);
-  button.classList.add("pagination-jump-token");
-  button.dataset.pageJumpDirection = token.direction;
-  button.setAttribute("aria-label", label);
-  button.title = label;
-  return button;
+function renderPageEllipsisToken(token) {
+  const item = document.createElement("span");
+  item.className = "pagination-ellipsis";
+  item.setAttribute("aria-hidden", "true");
+  item.dataset.ellipsisSide = token.side || "";
+  item.textContent = "…";
+  return item;
 }
 
-function renderPageSelectControl(pageInfo) {
+function renderPageSelectControl(pageInfo, options = {}) {
   const label = document.createElement("label");
-  label.className = "page-select";
+  label.className = options.compact ? "page-select page-select-compact" : "page-select";
   const text = document.createElement("span");
-  text.textContent = "跳至";
+  text.textContent = options.compact ? `第 ${pageInfo.page} / ${pageInfo.pageCount} 页` : "跳至";
   const select = document.createElement("select");
   select.dataset.pageSelect = "true";
   select.setAttribute("aria-label", `选择页码，范围 1 到 ${pageInfo.pageCount}`);
@@ -3628,9 +3765,17 @@ function renderRankRecord({
   const drawerId = `source-drawer-${rowKey}`;
   const artistSongCount = songCount;
   const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
-  const occurrenceCount = occurrences.length;
-  const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 || occurrenceCount > 1 : occurrenceCount > 0;
+  const safeOccurrences = occurrences || [];
+  const occurrenceCount = safeOccurrences.length;
   const isExpanded = state.expandedRows.has(rowKey);
+  const sourcePresentation =
+    mode === "artist"
+      ? null
+      : window.FrontendUtils.sourcePresentationModel(safeOccurrences, {
+          expanded: isExpanded,
+          inlineLimit: SOURCE_INLINE_LIMIT,
+        });
+  const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 || occurrenceCount > 1 : Boolean(sourcePresentation?.canExpand);
 
   row.className = [
     "rank-row",
@@ -3647,7 +3792,8 @@ function renderRankRecord({
   row.dataset.drawerMode = mode;
   row.dataset.trendMode = mode === "artist" ? "artistRank" : "songRank";
   row.dataset.trendKey = record?.key || key;
-  row._sourceOccurrences = occurrences;
+  row._sourceOccurrences = safeOccurrences;
+  row._sourceDetailOccurrences = sourcePresentation?.hiddenGroups?.flatMap((group) => group.occurrences) || [];
   row._sourceVideoCount = sourceVideoCount;
   row._artistSongGroups = songGroups.length ? songGroups : null;
   row._getArtistSongGroups = getSongGroups;
@@ -3663,13 +3809,14 @@ function renderRankRecord({
   row.append(
     renderRecordContent(title, meta, {
       mode,
-      occurrences,
+      occurrences: safeOccurrences,
       songGroups,
       songCount,
       songPreview,
       drawerId,
       isExpanded,
       videoCount,
+      sourcePresentation,
       trend,
       rankCount: count,
       rankMetric: state.rankMetric,
@@ -3681,7 +3828,7 @@ function renderRankRecord({
       drawerId,
       isExpanded,
       expandable,
-      occurrences,
+      occurrences: safeOccurrences,
       songCount: artistSongCount,
       videoCount: sourceVideoCount,
       count,
@@ -3691,7 +3838,19 @@ function renderRankRecord({
       trend,
     }),
   );
-  if (expandable) row.append(renderSourceDrawer({ mode, occurrences, songGroups, drawerId, isExpanded, getSongGroups }));
+  if (expandable) {
+    row.append(
+      renderSourceDrawer({
+        mode,
+        occurrences: mode === "artist" ? safeOccurrences : row._sourceDetailOccurrences,
+        copyOccurrences: safeOccurrences,
+        songGroups,
+        drawerId,
+        isExpanded,
+        getSongGroups,
+      }),
+    );
+  }
 
   return row;
 }
@@ -3701,8 +3860,12 @@ function renderIndexRecord(record) {
   const rowKey = makeDomId(`index-${record.key}`);
   const drawerId = `source-drawer-${rowKey}`;
   const sourceVideoCount = Math.max(0, Number(record.videoCount) || 0);
-  const expandable = record.occurrences.length > 0;
   const isExpanded = state.expandedRows.has(rowKey);
+  const sourcePresentation = window.FrontendUtils.sourcePresentationModel(record.occurrences, {
+    expanded: isExpanded,
+    inlineLimit: SOURCE_INLINE_LIMIT,
+  });
+  const expandable = sourcePresentation.canExpand;
 
   row.className = ["index-row", expandable ? "is-expandable" : "", isExpanded ? "is-expanded" : "", isNicheRecord(record) ? "is-niche" : ""]
     .filter(Boolean)
@@ -3710,6 +3873,7 @@ function renderIndexRecord(record) {
   row.dataset.rowKey = rowKey;
   row.dataset.drawerMode = "index";
   row._sourceOccurrences = record.occurrences;
+  row._sourceDetailOccurrences = sourcePresentation.hiddenGroups.flatMap((group) => group.occurrences);
   row._sourceVideoCount = sourceVideoCount;
 
   row.append(
@@ -3719,6 +3883,7 @@ function renderIndexRecord(record) {
       drawerId,
       isExpanded,
       videoCount: record.videoCount,
+      sourcePresentation,
       rankCount: record.count,
       rankMetric: "occurrences",
       headingLevel: 3,
@@ -3737,7 +3902,17 @@ function renderIndexRecord(record) {
       rankMetric: "occurrences",
     }),
   );
-  if (expandable) row.append(renderSourceDrawer({ mode: "index", occurrences: record.occurrences, drawerId, isExpanded }));
+  if (expandable) {
+    row.append(
+      renderSourceDrawer({
+        mode: "index",
+        occurrences: row._sourceDetailOccurrences,
+        copyOccurrences: record.occurrences,
+        drawerId,
+        isExpanded,
+      }),
+    );
+  }
 
   return row;
 }
@@ -3767,6 +3942,7 @@ function renderRecordContent(title, meta, options) {
     drawerId,
     isExpanded,
     videoCount,
+    sourcePresentation = null,
     rankCount = 0,
     rankMetric = state.rankMetric,
     headingLevel = 2,
@@ -3797,6 +3973,19 @@ function renderRecordContent(title, meta, options) {
   }
   if (metaLine.childNodes.length) subline.append(metaLine);
   content.append(subline);
+
+  if (mode !== "artist") {
+    content.append(
+      renderSourceInlineStrip(sourcePresentation || window.FrontendUtils.sourcePresentationModel(occurrences, { expanded: isExpanded, inlineLimit: SOURCE_INLINE_LIMIT }), {
+        drawerId,
+        isExpanded,
+        occurrences,
+        mode,
+        rankCount,
+        rankMetric,
+      }),
+    );
+  }
 
   return content;
 }
@@ -3917,23 +4106,6 @@ function renderRankSide({
     return side;
   }
 
-  if (occurrences.length) {
-    const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
-    side.append(
-      renderSourceToggleButton({
-        mode,
-        drawerId,
-        isExpanded,
-        total: occurrences.length,
-        videoCount: sourceVideoCount,
-        occurrenceCount: occurrences.length,
-        rankCount,
-        rankMetric,
-      }),
-    );
-  } else {
-    side.append(renderStaticSideChip("无来源"));
-  }
   return side;
 }
 
@@ -3942,6 +4114,140 @@ function renderStaticSideChip(text) {
   chip.className = "rank-expand rank-expand-static ui-chip ui-chip-muted";
   chip.textContent = text;
   return chip;
+}
+
+function renderSourceInlineStrip(model, options = {}) {
+  const strip = document.createElement("div");
+  strip.className = `source-inline-strip source-inline-${model.mode}`;
+  strip.dataset.sourceVideoCount = String(model.videoCount || 0);
+
+  if (!model.videoCount) {
+    const empty = document.createElement("span");
+    empty.className = "source-inline-empty";
+    empty.textContent = "无来源";
+    strip.append(empty);
+    return strip;
+  }
+
+  for (const group of model.inlineGroups) {
+    strip.append(renderSourceInlineGroup(group));
+  }
+
+  if (model.canExpand) {
+    strip.append(
+      renderSourceInlineMoreButton({
+        drawerId: options.drawerId,
+        isExpanded: options.isExpanded,
+        remainingCount: model.remainingCount,
+        videoCount: model.videoCount,
+        occurrenceCount: model.occurrenceCount,
+        rankCount: options.rankCount,
+        rankMetric: options.rankMetric,
+        mode: options.mode || "song",
+      }),
+    );
+  }
+
+  if (model.showCopyAll && !model.canExpand) {
+    strip.append(renderInlineCopySongLinksButton(options.occurrences || []));
+  }
+
+  return strip;
+}
+
+function renderSourceInlineGroup(group) {
+  const item = group.item || group.occurrences?.[0]?.item || {};
+  const firstOccurrence = group.occurrences?.[0];
+  const videoId = item.videoId || group.videoId || "";
+  const firstSeconds = firstOccurrence?.song?.seconds ?? group.firstSeconds ?? 0;
+  const wrapper = document.createElement("span");
+  wrapper.className = "source-inline-item";
+
+  if (firstOccurrence) {
+    wrapper.append(renderSourceTimestampLink(firstOccurrence, "source-inline-time"));
+  } else {
+    const fallback = document.createElement("a");
+    fallback.className = "source-link source-inline-time";
+    fallback.href = youtubeTimeUrl(videoId, firstSeconds);
+    fallback.target = "_blank";
+    fallback.rel = "noreferrer";
+    fallback.textContent = formatSeconds(firstSeconds);
+    wrapper.append(fallback);
+  }
+
+  const extraTimes = (group.occurrences || []).slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
+  if (extraTimes.length) {
+    const extraTimesId = `source-inline-extra-${makeDomId(`${videoId}-${firstSeconds}-${group.channelName || ""}`)}`;
+    const more = document.createElement("button");
+    more.className = "source-inline-time-more";
+    more.type = "button";
+    more.dataset.toggleSourceTimes = "true";
+    more.setAttribute("aria-expanded", "false");
+    more.setAttribute("aria-controls", extraTimesId);
+    more.setAttribute("aria-label", `显示其余 ${extraTimes.length} 个时间点`);
+    more.textContent = `+${extraTimes.length}`;
+    wrapper.append(more);
+
+    const extra = document.createElement("span");
+    extra.className = "source-extra-times source-inline-extra-times";
+    extra.id = extraTimesId;
+    extra.hidden = true;
+    for (const occurrence of extraTimes) extra.append(renderSourceTimestampLink(occurrence, "source-inline-extra-time"));
+    wrapper.append(extra);
+  }
+
+  const channelLink = window.FrontendUtils.youtubeChannelLink({ ...item, channelName: group.channelName });
+  const channel = document.createElement("a");
+  channel.className = "source-inline-channel";
+  channel.href = channelLink.href;
+  channel.target = "_blank";
+  channel.rel = "noreferrer";
+  channel.textContent = group.channelName || "未知频道";
+  channel.title = channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`;
+  wrapper.append(channel);
+
+  wrapper.append(renderCopySetlistButton(item, "复制歌单", "source-inline-copy source-copy-icon ui-chip ui-chip-icon"));
+  return wrapper;
+}
+
+function renderSourceInlineMoreButton({
+  drawerId,
+  isExpanded,
+  remainingCount = 0,
+  videoCount = 0,
+  occurrenceCount = 0,
+  rankCount = 0,
+  rankMetric = "occurrences",
+  mode = "song",
+}) {
+  const button = document.createElement("button");
+  button.className = "source-inline-more ui-chip";
+  button.type = "button";
+  button.dataset.toggleSource = "true";
+  button.dataset.sourceSummaryToggle = "true";
+  button.dataset.sourceMode = mode;
+  button.dataset.remainingCount = String(remainingCount);
+  button.dataset.videoCount = String(videoCount);
+  button.dataset.occurrenceCount = String(occurrenceCount);
+  button.dataset.rankCount = String(rankCount);
+  button.dataset.rankMetric = rankMetric;
+  button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+  button.setAttribute("aria-controls", drawerId);
+  updateSourceInlineMoreButton(button, isExpanded);
+  return button;
+}
+
+function updateSourceInlineMoreButton(button, isExpanded) {
+  const remaining = Math.max(0, Number(button.dataset.remainingCount) || 0);
+  button.textContent = isExpanded ? "收起" : `其余 ${remaining} 个来源`;
+  button.setAttribute("aria-label", isExpanded ? "收起其余来源" : `显示其余 ${remaining} 个来源`);
+}
+
+function renderInlineCopySongLinksButton(occurrences) {
+  const button = renderCopySongLinksButton(occurrences, "", "source-inline-copy-all source-copy-icon ui-chip ui-chip-icon");
+  button.title = "复制全部链接";
+  button.append(renderLinkListIcon());
+  return button;
 }
 
 function renderInlineSource(occurrence) {
@@ -3985,7 +4291,7 @@ function appendSublineNode(container, node) {
   container.append(node);
 }
 
-function renderSourceDrawer({ mode, occurrences, songGroups = [], drawerId, isExpanded, getSongGroups = null }) {
+function renderSourceDrawer({ mode, occurrences, copyOccurrences = occurrences, songGroups = [], drawerId, isExpanded, getSongGroups = null }) {
   const drawer = document.createElement("div");
   drawer.className = mode === "artist" ? "source-drawer artist-song-drawer" : "source-drawer";
   drawer.id = drawerId;
@@ -3993,16 +4299,25 @@ function renderSourceDrawer({ mode, occurrences, songGroups = [], drawerId, isEx
   drawer.dataset.sourceDeferred = "true";
   drawer.hidden = !isExpanded;
   drawer._getArtistSongGroups = getSongGroups;
-  if (isExpanded) initializeSourceDrawer(drawer, { mode, occurrences, songGroups: songGroups.length ? songGroups : getSongGroups?.() || [] });
+  drawer._sourceOccurrences = occurrences || [];
+  drawer._songSourceOccurrences = copyOccurrences || occurrences || [];
+  if (isExpanded) {
+    initializeSourceDrawer(drawer, {
+      mode,
+      occurrences,
+      copyOccurrences,
+      songGroups: songGroups.length ? songGroups : getSongGroups?.() || [],
+    });
+  }
   return drawer;
 }
 
-function initializeSourceDrawer(drawer, { mode, occurrences, songGroups = [] }) {
+function initializeSourceDrawer(drawer, { mode, occurrences, copyOccurrences = occurrences, songGroups = [] }) {
   if (!drawer || drawer.dataset.sourceDeferred !== "true") return;
   if (mode === "artist") {
     appendArtistSongGroups(drawer, songGroups);
   } else {
-    appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true });
+    appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true, copyOccurrences });
   }
   delete drawer.dataset.sourceDeferred;
 }
@@ -4017,7 +4332,9 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   drawer._sourceGroups = groups;
   if (options.toolbarVariant) drawer.dataset.toolbarVariant = options.toolbarVariant;
-  const visibleCount = sourceVisibleGroupCount(drawer, groups.length);
+  const showAllOnOpen = drawer.dataset.sourceMode === "song" || drawer.dataset.sourceMode === "index";
+  const visibleCount = showAllOnOpen ? groups.length : sourceVisibleGroupCount(drawer, groups.length);
+  if (showAllOnOpen) drawer.dataset.visibleSourceGroups = String(visibleCount);
   const shouldShowToolbar = options.showToolbar !== false;
   if (shouldShowToolbar && !drawer.querySelector(":scope > .source-drawer-toolbar")) {
     drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount: groups.length }));
@@ -4450,9 +4767,11 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     const songGroups =
       mode === "artist" ? row._artistSongGroups || row._getArtistSongGroups?.() || [] : row._artistSongGroups || [];
     if (mode === "artist") row._artistSongGroups = songGroups;
+    const drawerOccurrences = mode === "artist" ? row._sourceOccurrences || [] : row._sourceDetailOccurrences || row._sourceOccurrences || [];
     initializeSourceDrawer(drawer, {
       mode,
-      occurrences: row._sourceOccurrences || [],
+      occurrences: drawerOccurrences,
+      copyOccurrences: row._sourceOccurrences || drawerOccurrences,
       songGroups,
     });
   }
@@ -4461,6 +4780,10 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   row.classList.toggle("is-expanded", nextExpanded);
   for (const button of buttons) {
     button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
+    if (button.dataset.sourceSummaryToggle === "true") {
+      updateSourceInlineMoreButton(button, nextExpanded);
+      continue;
+    }
     const count = row._sourceOccurrences?.length || 0;
     const total = Number(button.dataset.sourceTotal || count);
     const hiddenCount = Number(button.dataset.sourceHiddenCount || 0);
@@ -4729,6 +5052,19 @@ function renderVideo(item) {
   list.className = "song-list";
   list.id = `video-songs-${makeDomId(item.videoId || item.title)}`;
   const songs = item._displaySongs || item.songs || [];
+
+  if (songs.length > 3) {
+    const topMore = document.createElement("button");
+    topMore.className = "video-more video-more-top";
+    topMore.type = "button";
+    topMore.dataset.toggleVideoSongs = "true";
+    topMore.setAttribute("aria-expanded", "false");
+    topMore.setAttribute("aria-controls", list.id);
+    topMore.hidden = true;
+    topMore.textContent = "收起歌曲";
+    body.append(topMore);
+  }
+
   appendVideoSongLinks(list, item, songs.slice(0, 3));
   body.append(list);
 
@@ -4752,7 +5088,8 @@ function renderVideo(item) {
 
 function toggleVideoSongs(card) {
   if (!card) return;
-  const button = card.querySelector(".video-more");
+  const button = card.querySelector(".video-more:not(.video-more-top)");
+  const buttons = Array.from(card.querySelectorAll(".video-more"));
   const nextExpanded = button.getAttribute("aria-expanded") !== "true";
   if (nextExpanded && card._remainingSongs?.length) {
     appendVideoSongLinks(card._songList, card._videoItem, card._remainingSongs, "video-song-extra");
@@ -4762,8 +5099,11 @@ function toggleVideoSongs(card) {
   const extras = Array.from(card.querySelectorAll(".video-song-extra"));
 
   for (const item of extras) item.hidden = !nextExpanded;
-  button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
-  button.textContent = nextExpanded ? "收起歌曲" : `展开其余 ${extras.length} 首`;
+  for (const control of buttons) {
+    control.hidden = control.classList.contains("video-more-top") ? !nextExpanded : false;
+    control.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
+    control.textContent = nextExpanded ? "收起歌曲" : `展开其余 ${extras.length} 首`;
+  }
 }
 
 function appendVideoSongLinks(list, item, songs, extraClass = "") {

@@ -72,22 +72,43 @@ test("record videoCount is used for rank values and row rendering", () => {
   assert.match(appSource, /videoCount:\s*record\.videoCount/u);
 });
 
-test("same-video multiple timestamps are expandable instead of becoming inline-only", () => {
+test("song and index rows inline source previews and expand only remaining videos", () => {
   const rankRecordBody = functionBody("function renderRankRecord");
   assert.match(rankRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(videoCount\) \|\| 0\)/u);
-  assert.match(rankRecordBody, /const occurrenceCount = occurrences\.length/u);
-  assert.match(rankRecordBody, /const expandable = mode === "artist" \? artistSongCount > 1 \|\| sourceVideoCount > 1 \|\| occurrenceCount > 1 : occurrenceCount > 0/u);
+  assert.match(rankRecordBody, /const safeOccurrences = occurrences \|\| \[\]/u);
+  assert.match(rankRecordBody, /const occurrenceCount = safeOccurrences\.length/u);
+  assert.match(rankRecordBody, /sourcePresentationModel\(safeOccurrences/u);
+  assert.match(rankRecordBody, /Boolean\(sourcePresentation\?\.canExpand\)/u);
+  assert.match(rankRecordBody, /row\._sourceDetailOccurrences = sourcePresentation\?\.hiddenGroups\?\.flatMap/u);
+  assert.match(rankRecordBody, /occurrences: mode === "artist" \? safeOccurrences : row\._sourceDetailOccurrences/u);
+  assert.match(rankRecordBody, /copyOccurrences: safeOccurrences/u);
   assert.match(rankRecordBody, /renderRankSide/u);
 
   const indexRecordBody = functionBody("function renderIndexRecord");
   assert.match(indexRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(record\.videoCount\) \|\| 0\)/u);
-  assert.match(indexRecordBody, /const expandable = record\.occurrences\.length > 0/u);
+  assert.match(indexRecordBody, /sourcePresentationModel\(record\.occurrences/u);
+  assert.match(indexRecordBody, /const expandable = sourcePresentation\.canExpand/u);
+  assert.match(indexRecordBody, /row\._sourceDetailOccurrences = sourcePresentation\.hiddenGroups\.flatMap/u);
+  assert.match(indexRecordBody, /occurrences: row\._sourceDetailOccurrences/u);
+  assert.match(indexRecordBody, /copyOccurrences: record\.occurrences/u);
   assert.match(indexRecordBody, /renderRankSide/u);
 
+  const contentBody = functionBody("function renderRecordContent");
+  assert.match(contentBody, /renderSourceInlineStrip/u);
+  assert.match(contentBody, /sourcePresentationModel\(occurrences/u);
+
   const sideBody = functionBody("function renderRankSide");
+  assert.match(sideBody, /if \(mode === "artist"\)/u);
   assert.match(sideBody, /renderSourceToggleButton/u);
-  assert.match(sideBody, /renderStaticSideChip\("无来源"\)/u);
+  assert.match(sideBody, /return side/u);
   assert.doesNotMatch(sideBody, /renderSingleSourceCopyIconButton/u);
+
+  const stripBody = functionBody("function renderSourceInlineStrip");
+  assert.match(stripBody, /source-inline-empty/u);
+  assert.match(stripBody, /renderSourceInlineGroup/u);
+  assert.match(stripBody, /renderSourceInlineMoreButton/u);
+  assert.match(stripBody, /model\.showCopyAll && !model\.canExpand/u);
+  assert.match(stripBody, /renderInlineCopySongLinksButton/u);
 });
 
 test("source drawer append-more reveals all remaining sources without rebuilding old cards", () => {

@@ -15,15 +15,17 @@ These committed screenshots are the repository homepage proof set for the curren
 npm run screenshots:readme -- https://ytb-song-rank.culua.com/
 ```
 
+The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md).
+
 ### Desktop Web
 
 | Song ranking | Monthly ranking | Video tab |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-song-rank.png" alt="Desktop song ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-monthly-song-rank.png" alt="Desktop monthly ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
 
-| Search and filters | Expanded sources |
-| --- | --- |
-| <img src="docs/assets/screenshots/desktop-query-panel.png" alt="Desktop unified search and filter panel" width="420" /> | <img src="docs/assets/screenshots/desktop-source-expanded.png" alt="Desktop expanded song sources" width="420" /> |
+| Search and filters | Expanded sources | Middle pagination |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/desktop-query-panel.png" alt="Desktop unified search and filter panel" width="320" /> | <img src="docs/assets/screenshots/desktop-source-expanded.png" alt="Desktop expanded song sources" width="320" /> | <img src="docs/assets/screenshots/desktop-pagination-middle.png" alt="Desktop middle pagination state" width="320" /> |
 
 ### Mobile H5
 
@@ -31,9 +33,21 @@ npm run screenshots:readme -- https://ytb-song-rank.culua.com/
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-song-rank.png" alt="Mobile song ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-artist-rank.png" alt="Mobile artist ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-song-index.png" alt="Mobile song index" width="180" /> |
 
+| Song index middle | Song index last | 320px pagination |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-song-index-middle-page.png" alt="Mobile song index middle page" width="180" /> | <img src="docs/assets/screenshots/mobile-song-index-last-page.png" alt="Mobile song index last page" width="180" /> | <img src="docs/assets/screenshots/mobile-pagination-320.png" alt="Mobile 320px pagination" width="180" /> |
+
 | Video tab | Video expanded | Sources expanded |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-video-view.png" alt="Mobile video tab" width="180" /> | <img src="docs/assets/screenshots/mobile-video-expanded.png" alt="Mobile expanded video card" width="180" /> | <img src="docs/assets/screenshots/mobile-source-expanded.png" alt="Mobile expanded song sources" width="180" /> |
+
+| 1 source inline | 3 sources inline | More sources |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-source-inline-1.png" alt="Mobile one source inline row" width="180" /> | <img src="docs/assets/screenshots/mobile-source-inline-3.png" alt="Mobile three source inline row" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3.png" alt="Mobile row with more than three sources" width="180" /> |
+
+| More sources expanded |
+| --- |
+| <img src="docs/assets/screenshots/mobile-source-more-than-3-expanded.png" alt="Mobile row with all remaining sources expanded" width="180" /> |
 
 | Active query strip | Recent searches | Suggestions |
 | --- | --- | --- |
@@ -88,11 +102,11 @@ npm run screenshots:readme -- https://ytb-song-rank.culua.com/
 4. `index.html` + `assets/app.js` render the latest data and allow switching to an hourly snapshot.
    - Default view is song appearance ranking.
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
-   - Ranking rows place count and source actions in a right-side `rank-side` column. Source buttons open an inline drawer grouped by video, with sorted timestamp links, whole-video setlist copy, and one song-level `复制全部链接` action that copies unique source videos in `频道名 https://www.youtube.com/watch?v=VIDEO_ID&t=SECONDSs` line format.
+   - Ranking rows place count and trend in a fixed right-side `rank-side` column. Song and song-index source actions live inside the content column, grouped by unique source video.
    - Responsive ranking layout uses one maintained breakpoint system: mobile is `<=720px`, tablet is `721px-919px`, and desktop is `>=920px`. Mobile and tablet drawers render in-place below the current row, keep only one row expanded at a time, and use timestamp links whose visible text is only the time while the accessible label keeps song, artist, and channel context.
-   - Compact mobile and tablet song rows keep count above the source chip on the right side. Repeated count text is `来源`, differing video counts use complete labels such as `25个来源`, single-video multi-timestamp rows use `3个时间点`, and one-source rows also open the same source drawer for a consistent interaction model.
-   - Source drawers are grouped by video and initially show 3 videos on mobile, 6 on tablet, and 9 on desktop. `查看更多 N个来源` appends all remaining source videos with one user click and internally yields between 12-video chunks, while artist-song drawers append additional songs in batches of 8. Desktop can keep multiple rows expanded, while compact modes replace the previously opened drawer and evict older closed drawer DOM after a small LRU limit.
-   - Pagination uses one token model across songs, artists, song index, and videos. Top and bottom pagers both show clickable page numbers plus directional `…` jump buttons; the bottom pager uses a `跳至` page selector instead of the older number input plus jump button.
+   - `FrontendUtils.sourcePresentationModel` inlines 0-3 unique source videos. Four or more source videos show the first three inline plus `其余 N 个来源`; one click renders all remaining sources and changes the control to `收起`. One-source rows no longer open drawers.
+   - Each inline source includes the timestamp, channel link, and compact setlist-copy icon. Multi-source inline rows expose one same-song `复制全部链接` icon, and 4+ rows expose the same song-level copy action in the expanded source toolbar.
+   - Pagination uses one token model across songs, artists, song index, and videos. Numeric pagination uses non-clickable ellipsis markers; mobile top pagination uses a compact page stepper, and the song index combines bucket selection with page selection in one toolbar.
    - Initial load reads `data/ui/meta.json` first, then loads only the active hash range file from `meta.ranges`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact monthly range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
    - `debug=1` adds a read-only runtime panel with `dataVersion`, active range path, status fields, fallback state, and recent resource timings.
    - Initial load skips `song-search-known-songs.json` when payload songs already contain `isNiche`; older snapshots load that index only when niche annotation is missing. Current data with a supported `filterVersion` and matching blocklist hash skips the full front-end safety filter after loading only the tiny blocklist meta asset; older or historical payloads dynamically load `blocked-vtuber-channels.js` and `source-filter.js` before rendering.

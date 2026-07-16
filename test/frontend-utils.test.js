@@ -24,6 +24,7 @@ const {
   isSongSearchKnown,
   indexBucketButtonModel,
   makeQueryDraftFromState,
+  mobilePageStepperModel,
   normalizeSearch,
   normalizeSetlistSongs,
   normalizeSongSearchText,
@@ -36,6 +37,7 @@ const {
   sanitizeQueryDraft,
   shouldPrefetchRuntimeRange,
   shouldSkipSourceFilter,
+  sourcePresentationModel,
   summaryVideoCountModel,
   trendDisplayModel,
   validateRuntimeRangePayload,
@@ -425,53 +427,53 @@ test("pagination uses pageSize 50 and clamps pages to available bounds", () => {
   assert.equal(underrun.page, 1);
 });
 
-test("visible page tokens include clickable directional jumps", () => {
+test("visible page tokens use non-clickable ellipsis markers", () => {
   const cases = [
     {
       current: 1,
       total: 68,
-      options: { maxTokens: 5, jumpStep: 5 },
+      options: { maxTokens: 5 },
       expected: [
         { type: "page", page: 1, current: true },
         { type: "page", page: 2, current: false },
         { type: "page", page: 3, current: false },
-        { type: "jump", direction: "next", step: 5, target: 6 },
+        { type: "ellipsis", side: "right" },
         { type: "page", page: 68, current: false },
       ],
     },
     {
       current: 8,
       total: 68,
-      options: { maxTokens: 5, jumpStep: 5 },
+      options: { maxTokens: 5 },
       expected: [
         { type: "page", page: 1, current: false },
-        { type: "jump", direction: "previous", step: 5, target: 3 },
+        { type: "ellipsis", side: "left" },
         { type: "page", page: 8, current: true },
-        { type: "jump", direction: "next", step: 5, target: 13 },
+        { type: "ellipsis", side: "right" },
         { type: "page", page: 68, current: false },
       ],
     },
     {
       current: 8,
       total: 68,
-      options: { maxTokens: 7, jumpStep: 10 },
+      options: { maxTokens: 7 },
       expected: [
         { type: "page", page: 1, current: false },
-        { type: "jump", direction: "previous", step: 10, target: 1 },
+        { type: "ellipsis", side: "left" },
         { type: "page", page: 7, current: false },
         { type: "page", page: 8, current: true },
         { type: "page", page: 9, current: false },
-        { type: "jump", direction: "next", step: 10, target: 18 },
+        { type: "ellipsis", side: "right" },
         { type: "page", page: 68, current: false },
       ],
     },
     {
       current: 67,
       total: 68,
-      options: { maxTokens: 5, jumpStep: 5 },
+      options: { maxTokens: 5 },
       expected: [
         { type: "page", page: 1, current: false },
-        { type: "jump", direction: "previous", step: 5, target: 62 },
+        { type: "ellipsis", side: "left" },
         { type: "page", page: 66, current: false },
         { type: "page", page: 67, current: true },
         { type: "page", page: 68, current: false },
@@ -491,6 +493,100 @@ test("visible page tokens include clickable directional jumps", () => {
     assertPageTokensOrdered(tokens);
     assert.equal(tokens.filter((token) => token.type === "page" && token.current).length, 1);
   }
+});
+
+test("mobile page stepper exposes stable neighbor and arrow targets", () => {
+  assert.deepEqual(mobilePageStepperModel(7, 59), {
+    currentPage: 7,
+    pageCount: 59,
+    hasPrevious: true,
+    hasNext: true,
+    previousPage: 6,
+    previousNeighbor: 6,
+    nextNeighbor: 8,
+    nextPage: 8,
+  });
+  assert.deepEqual(mobilePageStepperModel(1, 59), {
+    currentPage: 1,
+    pageCount: 59,
+    hasPrevious: false,
+    hasNext: true,
+    previousPage: null,
+    previousNeighbor: null,
+    nextNeighbor: 2,
+    nextPage: 2,
+  });
+  assert.deepEqual(mobilePageStepperModel(99, 3), {
+    currentPage: 3,
+    pageCount: 3,
+    hasPrevious: true,
+    hasNext: false,
+    previousPage: 2,
+    previousNeighbor: 2,
+    nextNeighbor: null,
+    nextPage: null,
+  });
+});
+
+test("source presentation model inlines up to three videos and expands only the rest", () => {
+  const oneVideo = sourcePresentationModel([
+    occurrence("A", "channel A", { seconds: 10 }),
+    occurrence("A", "channel A", { seconds: 20 }),
+  ]);
+  assert.equal(oneVideo.mode, "inline");
+  assert.equal(oneVideo.videoCount, 1);
+  assert.equal(oneVideo.occurrenceCount, 2);
+  assert.equal(oneVideo.inlineGroups.length, 1);
+  assert.equal(oneVideo.remainingCount, 0);
+  assert.equal(oneVideo.canExpand, false);
+  assert.equal(oneVideo.showCopyAll, false);
+
+  const threeVideos = sourcePresentationModel([
+    occurrence("A", "channel A"),
+    occurrence("B", "channel B"),
+    occurrence("C", "channel C"),
+  ]);
+  assert.equal(threeVideos.mode, "inline");
+  assert.deepEqual(
+    threeVideos.inlineGroups.map((group) => group.videoId),
+    ["A", "B", "C"],
+  );
+  assert.equal(threeVideos.showCopyAll, true);
+
+  const fourVideos = sourcePresentationModel([
+    occurrence("A", "channel A"),
+    occurrence("B", "channel B"),
+    occurrence("C", "channel C"),
+    occurrence("D", "channel D"),
+  ]);
+  assert.equal(fourVideos.mode, "collapsed");
+  assert.deepEqual(
+    fourVideos.inlineGroups.map((group) => group.videoId),
+    ["A", "B", "C"],
+  );
+  assert.deepEqual(
+    fourVideos.hiddenGroups.map((group) => group.videoId),
+    ["D"],
+  );
+  assert.equal(fourVideos.remainingCount, 1);
+  assert.equal(fourVideos.hasMore, true);
+  assert.equal(fourVideos.canExpand, true);
+
+  const expanded = sourcePresentationModel(
+    [
+      occurrence("A", "channel A"),
+      occurrence("B", "channel B"),
+      occurrence("C", "channel C"),
+      occurrence("D", "channel D"),
+    ],
+    { expanded: true },
+  );
+  assert.equal(expanded.mode, "expanded");
+  assert.deepEqual(
+    expanded.detailGroups.map((group) => group.videoId),
+    ["D"],
+  );
+  assert.equal(expanded.hasMore, false);
 });
 
 test("url state parses and serializes range, view, page, pageSize, bucket, outside, q, and snapshot", () => {
@@ -1009,9 +1105,9 @@ function assertPageTokensOrdered(tokens) {
       previousPage = token.page;
       pages.push(token.page);
     } else {
-      assert.match(token.direction, /^(previous|next)$/u);
-      assert.ok(token.target >= 1, `jump target below first page: ${JSON.stringify(token)}`);
-      assert.ok(token.step > 0, `jump step invalid: ${JSON.stringify(token)}`);
+      assert.equal(token.type, "ellipsis");
+      assert.match(token.side, /^(left|right)$/u);
+      assert.equal(Object.hasOwn(token, "target"), false, `ellipsis must not be clickable: ${JSON.stringify(token)}`);
     }
   }
   assert.equal(new Set(pages).size, pages.length, `duplicate page token: ${JSON.stringify(tokens)}`);
