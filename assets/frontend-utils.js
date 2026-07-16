@@ -209,7 +209,7 @@
     const validPageSizes = new Set((options.validPageSizes || []).map(Number));
     const validRankMetrics = new Set(options.validRankMetrics || ["occurrences", "videos"]);
     const validVideoLayouts = new Set(options.validVideoLayouts || ["cards", "compact"]);
-    const fallbackRange = defaults.range || firstSetValue(validRanges) || "";
+    const fallbackRange = normalizeRangeId(defaults.range || firstSetValue(validRanges) || "", options);
     const fallbackView = defaults.view || firstSetValue(validViews) || "";
     const fallbackPageSize = positiveInteger(defaults.pageSize, 50);
     const hasPageSizeParam = params.has("pageSize");
@@ -222,7 +222,7 @@
     const validMinCounts = new Set((options.validMinCounts || [1, 2, 5, 10]).map(Number));
 
     return {
-      range: validRanges.has(params.get("range")) ? params.get("range") : fallbackRange,
+      range: parseRangeParam(params.get("range"), validRanges, fallbackRange, options),
       view: validViews.has(params.get("view")) ? params.get("view") : fallbackView,
       page: positiveInteger(params.get("page"), positiveInteger(defaults.page, 1)),
       pageSize: validPageSizes.has(parsedPageSize) ? parsedPageSize : hasPageSizeParam ? 50 : fallbackPageSize,
@@ -241,7 +241,7 @@
   function serializeUrlState(state, options = {}) {
     const params = new URLSearchParams();
     const defaults = {
-      range: "72h",
+      range: "7d",
       view: "songRank",
       page: 1,
       pageSize: 50,
@@ -252,7 +252,7 @@
       minCount: 1,
       ...(options.defaults || {}),
     };
-    const range = state.range || defaults.range;
+    const range = normalizeRangeId(state.range || defaults.range, options);
     const view = state.view || defaults.view;
     const page = positiveInteger(state.page, defaults.page);
     const pageSize = positiveInteger(state.pageSize, defaults.pageSize);
@@ -438,6 +438,33 @@
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
+  }
+
+  function parseRangeParam(value, validRanges, fallback, options = {}) {
+    const normalized = normalizeRangeId(value, options);
+    return validRanges.has(normalized) ? normalized : fallback;
+  }
+
+  function normalizeRangeId(value, options = {}) {
+    const id = cleanText(value);
+    if (!id) return "";
+    const aliases = options.rangeAliases || {};
+    return cleanText(aliases[id] || id);
+  }
+
+  function rangeIdCandidates(rangeId, options = {}) {
+    const canonical = normalizeRangeId(rangeId, options);
+    const candidates = [canonical];
+    const legacy = options.legacyRangeIds?.[canonical] || [];
+    for (const id of legacy) {
+      const cleanId = cleanText(id);
+      if (cleanId && !candidates.includes(cleanId)) candidates.push(cleanId);
+    }
+    const aliases = options.rangeAliases || {};
+    for (const [legacyId, targetId] of Object.entries(aliases)) {
+      if (targetId === canonical && !candidates.includes(legacyId)) candidates.push(legacyId);
+    }
+    return candidates.filter(Boolean);
   }
 
   function createSongSearchLookup(index) {
@@ -669,13 +696,15 @@
     const groups = Array.isArray(options.groups) ? options.groups : groupOccurrencesByVideo(occurrences);
     const inlineLimit = positiveInteger(options.inlineLimit, 3);
     const expanded = Boolean(options.expanded);
-    const videoCount = groups.length;
+    const totalVideoCount = nonNegativeInteger(options.totalVideoCount ?? options.videoCount, groups.length);
+    const videoCount = Math.max(groups.length, totalVideoCount);
     const occurrenceCount = groups.reduce((sum, group) => sum + (group.occurrences?.length || 0), 0);
     const inlineGroups = groups.slice(0, Math.min(inlineLimit, videoCount));
     const hiddenGroups = videoCount > inlineLimit ? groups.slice(inlineLimit) : [];
-    const canExpand = hiddenGroups.length > 0;
+    const externalDetailCount = Math.max(0, videoCount - inlineGroups.length - hiddenGroups.length);
+    const canExpand = hiddenGroups.length > 0 || (Boolean(options.hasExternalDetails) && externalDetailCount > 0);
     const mode = videoCount === 0 ? "none" : canExpand ? (expanded ? "expanded" : "collapsed") : "inline";
-    const remainingCount = hiddenGroups.length;
+    const remainingCount = Math.max(0, videoCount - inlineGroups.length);
 
     return {
       mode,
@@ -693,7 +722,7 @@
       collapsedAriaLabel: canExpand ? `查看其余 ${remainingCount} 个来源` : "",
       expandedLabel: "收起",
       expandedAriaLabel: "收起其余来源",
-      showCopyAll: videoCount === 3,
+      showCopyAll: videoCount > 1,
     };
   }
 
@@ -715,6 +744,8 @@
           item,
           title: cleanText(item.title || item.videoId || item.channelName || "来源视频"),
           channelName: cleanText(item.channelName),
+          publishedTimestamp: cleanText(item.publishedTimestamp || item.publishedAt || item.publishedTime),
+          firstSeenAt: cleanText(item.firstSeenAt || item.catalogFirstSeenAt || item.discoveredAt),
           occurrences: [],
           firstSeconds: Number.POSITIVE_INFINITY,
           occurrenceCount: 0,
@@ -734,10 +765,37 @@
         return group;
       })
       .sort((a, b) => {
-        const secondsA = a.firstSeconds === null ? Number.POSITIVE_INFINITY : a.firstSeconds;
-        const secondsB = b.firstSeconds === null ? Number.POSITIVE_INFINITY : b.firstSeconds;
-        return secondsA - secondsB || a.title.localeCompare(b.title);
+        return (
+          compareTimestampDesc(a.publishedTimestamp, b.publishedTimestamp) ||
+          compareTimestampDesc(a.firstSeenAt, b.firstSeenAt) ||
+          compareValues(a.videoId || a.key, b.videoId || b.key) ||
+          compareValues(a.title, b.title)
+        );
       });
+  }
+
+  function compareTimestampDesc(a, b) {
+    const timeA = timestampValue(a);
+    const timeB = timestampValue(b);
+    if (timeA === timeB) return 0;
+    if (timeA === null) return 1;
+    if (timeB === null) return -1;
+    return timeB - timeA;
+  }
+
+  function timestampValue(value) {
+    if (value === null || value === undefined || value === "") return null;
+    const direct = Number(value);
+    if (Number.isFinite(direct) && direct > 0) return direct;
+    const parsed = Date.parse(String(value));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function compareValues(a, b) {
+    return String(a || "").localeCompare(String(b || ""), "en", {
+      numeric: true,
+      sensitivity: "base",
+    });
   }
 
   function compareOccurrenceSeconds(a, b) {
@@ -1015,26 +1073,86 @@
 
   function runtimeRangePath(rangeId, meta, options = {}) {
     if (!meta && options.requireMeta) throw new Error(`runtime meta missing before loading ${rangeId}`);
-    return meta?.ranges?.[rangeId]?.path || `data/ui/${rangeId}.json`;
+    return runtimeRangeMeta(rangeId, meta, options)?.path || `data/ui/${normalizeRangeId(rangeId, options) || rangeId}.json`;
   }
 
-  function runtimeRangeMeta(rangeId, meta) {
-    return meta?.ranges?.[rangeId] || null;
+  function runtimeRangeMeta(rangeId, meta, options = {}) {
+    const ranges = meta?.ranges || {};
+    for (const id of rangeIdCandidates(rangeId, options)) {
+      if (ranges[id]) {
+        return {
+          id,
+          canonicalId: normalizeRangeId(rangeId, options),
+          ...ranges[id],
+        };
+      }
+    }
+    return null;
+  }
+
+  function runtimeRangeShards(rangeId, meta, options = {}) {
+    const rangeMeta = runtimeRangeMeta(rangeId, meta, options);
+    const shards = rangeMeta?.shards || {};
+    const page = firstObject(
+      rangeMeta?.pageShard,
+      rangeMeta?.pageShards,
+      rangeMeta?.pages,
+      shards.runtime,
+      shards.runtimePages,
+      shards.page,
+      shards.pages,
+    );
+    const sourceDetail = firstObject(
+      rangeMeta?.sourceDetailShard,
+      rangeMeta?.sourceDetailShards,
+      rangeMeta?.sourceDetails,
+      shards.sourceDetail,
+      shards.sourceDetails,
+    );
+    const search = firstObject(
+      rangeMeta?.searchShard,
+      rangeMeta?.searchShards,
+      rangeMeta?.search,
+      shards.search,
+      shards.searches,
+    );
+    return {
+      page,
+      sourceDetail,
+      search,
+      hasPageShard: Boolean(shardPath(page)),
+      hasSourceDetailShard: Boolean(shardPath(sourceDetail) || sourceDetail?.pathPattern || sourceDetail?.byKey),
+      hasSearchShard: Boolean(shardPath(search) || search?.pathPattern || search?.byKey),
+    };
+  }
+
+  function firstObject(...values) {
+    return values.find((value) => value && typeof value === "object") || null;
+  }
+
+  function shardPath(shard, key = "") {
+    if (!shard) return "";
+    if (typeof shard === "string") return shard;
+    if (Array.isArray(shard)) return shardPath(shard[0], key);
+    if (key && shard.byKey?.[key]) return shardPath(shard.byKey[key], key);
+    return cleanText(shard.path || shard.initialPath || shard.indexPath || shard.manifestPath);
   }
 
   function validateRuntimeRangePayload(payload, expected = {}) {
-    const rangeId = expected.rangeId || payload?.id || "";
-    const rangeMeta = expected.rangeMeta || runtimeRangeMeta(rangeId, expected.meta);
+    const rangeId = normalizeRangeId(expected.rangeId || payload?.id || "", expected);
+    const acceptedRangeIds = rangeIdCandidates(rangeId, expected);
+    const rangeMeta = expected.rangeMeta || runtimeRangeMeta(rangeId, expected.meta, expected);
     const itemCount = Number.isInteger(rangeMeta?.itemCount) ? rangeMeta.itemCount : null;
     const expectedDataVersion = expected.dataVersion || rangeMeta?.dataVersion || expected.meta?.dataVersion || "";
     const allowLegacyDataVersion = Boolean(expected.allowLegacyDataVersion);
+    const allowPartial = Boolean(expected.allowPartial);
     const errors = [];
 
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       throw runtimeRangeValidationError("runtime range payload must be object", { rangeId, path: expected.path });
     }
     if (payload.schemaVersion !== 1) errors.push("schemaVersion must be 1");
-    if (payload.id !== rangeId) errors.push(`id must be ${rangeId}`);
+    if (!acceptedRangeIds.includes(payload.id)) errors.push(`id must be ${acceptedRangeIds.join(" or ")}`);
     if (typeof payload.generatedAt !== "string") errors.push("generatedAt must be string");
     if (typeof payload.capturedAt !== "string") errors.push("capturedAt must be string");
     if (!allowLegacyDataVersion && expectedDataVersion && payload.dataVersion !== expectedDataVersion) {
@@ -1046,8 +1164,8 @@
     if (!Array.isArray(payload.items)) {
       errors.push("items must be array");
     } else {
-      if (itemCount !== null && payload.items.length !== itemCount) errors.push("items length does not match meta");
-      if (itemCount > 0 && payload.items.length === 0) errors.push("items unexpectedly empty");
+      if (!allowPartial && itemCount !== null && payload.items.length !== itemCount) errors.push("items length does not match meta");
+      if (!allowPartial && itemCount > 0 && payload.items.length === 0) errors.push("items unexpectedly empty");
       validateRuntimeItems(payload.items, errors);
     }
     if (errors.length) {
@@ -1173,6 +1291,7 @@
     runtimeRangeMeta,
     runtimeRangePayloadFromGroup,
     runtimeRangePath,
+    runtimeRangeShards,
     serializeUrlState,
     sanitizeQueryDraft,
     shouldPrefetchRuntimeRange,

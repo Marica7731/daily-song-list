@@ -1,10 +1,36 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T16:26:29.460Z",
-  "retentionDays": 35,
+  "generatedAt": "2026-07-16T18:41:07.659Z",
+  "retentionPolicy": "permanent",
+  "retentionDays": null,
   "cadence": "hourly",
-  "latestSnapshotId": "20260716T160000Z",
+  "latestSnapshotId": "20260716T170000Z",
+  "snapshotCount": 71,
+  "shards": [
+    {
+      "id": "2026-07",
+      "path": "data/snapshots/index/2026/07.json",
+      "snapshotCount": 71,
+      "latestSnapshotId": "20260716T170000Z"
+    }
+  ],
   "snapshots": [
+    {
+      "id": "20260716T170000Z",
+      "file": "20260716T170000Z.json",
+      "path": "data/snapshots/20260716T170000Z.json",
+      "generatedAt": "2026-07-16T17:58:53.141Z",
+      "capturedAt": "2026-07-16T17:58:53.141Z",
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
+      "label": "07-16 17:58",
+      "itemCounts": {
+        "72h": 325,
+        "7d": 325,
+        "1m": 1304,
+        "all": 1304
+      }
+    },
     {
       "id": "20260716T160000Z",
       "file": "20260716T160000Z.json",
@@ -13,10 +39,12 @@
       "capturedAt": "2026-07-16T16:26:20.373Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/17 上午12:26",
+      "label": "07-16 16:26",
       "itemCounts": {
         "72h": 337,
-        "1m": 1304
+        "7d": 337,
+        "1m": 1304,
+        "all": 1304
       }
     },
     {
@@ -27,10 +55,12 @@
       "capturedAt": "2026-07-16T14:34:29.518Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 下午10:34",
+      "label": "07-16 14:34",
       "itemCounts": {
         "72h": 352,
-        "1m": 1284
+        "7d": 352,
+        "1m": 1284,
+        "all": 1284
       }
     },
     {
@@ -41,10 +71,12 @@
       "capturedAt": "2026-07-16T12:31:08.217Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 下午08:31",
+      "label": "07-16 12:31",
       "itemCounts": {
         "72h": 361,
-        "1m": 1269
+        "7d": 361,
+        "1m": 1269,
+        "all": 1269
       }
     },
     {
@@ -55,10 +87,12 @@
       "capturedAt": "2026-07-16T09:45:05.595Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 下午05:45",
+      "label": "07-16 09:45",
       "itemCounts": {
         "72h": 364,
-        "1m": 1255
+        "7d": 364,
+        "1m": 1255,
+        "all": 1255
       }
     },
     {
@@ -69,10 +103,12 @@
       "capturedAt": "2026-07-16T06:49:26.180Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 下午02:49",
+      "label": "07-16 06:49",
       "itemCounts": {
         "72h": 364,
-        "1m": 1246
+        "7d": 364,
+        "1m": 1246,
+        "all": 1246
       }
     },
     {
@@ -83,10 +119,12 @@
       "capturedAt": "2026-07-16T03:52:45.574Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 上午11:52",
+      "label": "07-16 03:52",
       "itemCounts": {
         "72h": 364,
-        "1m": 1236
+        "7d": 364,
+        "1m": 1236,
+        "all": 1236
       }
     },
     {
@@ -97,10 +135,12 @@
       "capturedAt": "2026-07-16T00:29:11.982Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 上午08:29",
+      "label": "07-16 00:29",
       "itemCounts": {
         "72h": 361,
-        "1m": 1224
+        "7d": 361,
+        "1m": 1224,
+        "all": 1224
       }
     },
     {
@@ -111,10 +151,12 @@
       "capturedAt": "2026-07-15T22:33:22.574Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 上午06:33",
+      "label": "07-15 22:33",
       "itemCounts": {
         "72h": 372,
-        "1m": 1217
+        "7d": 372,
+        "1m": 1217,
+        "all": 1217
       }
     },
     {
@@ -125,10 +167,12 @@
       "capturedAt": "2026-07-15T21:30:26.337Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 上午05:30",
+      "label": "07-15 21:30",
       "itemCounts": {
         "72h": 363,
-        "1m": 1208
+        "7d": 363,
+        "1m": 1208,
+        "all": 1208
       }
     },
     {
@@ -139,10 +183,12 @@
       "capturedAt": "2026-07-15T19:51:05.845Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 上午03:51",
+      "label": "07-15 19:51",
       "itemCounts": {
         "72h": 357,
-        "1m": 1197
+        "7d": 357,
+        "1m": 1197,
+        "all": 1197
       }
     },
     {
@@ -153,10 +199,12 @@
       "capturedAt": "2026-07-15T18:30:22.026Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 上午02:30",
+      "label": "07-15 18:30",
       "itemCounts": {
         "72h": 362,
-        "1m": 1191
+        "7d": 362,
+        "1m": 1191,
+        "all": 1191
       }
     },
     {
@@ -167,10 +215,12 @@
       "capturedAt": "2026-07-15T17:51:14.857Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 上午01:51",
+      "label": "07-15 17:51",
       "itemCounts": {
         "72h": 356,
-        "1m": 1183
+        "7d": 356,
+        "1m": 1183,
+        "all": 1183
       }
     },
     {
@@ -181,10 +231,12 @@
       "capturedAt": "2026-07-15T16:57:08.307Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/16 上午12:57",
+      "label": "07-15 16:57",
       "itemCounts": {
         "72h": 348,
-        "1m": 1169
+        "7d": 348,
+        "1m": 1169,
+        "all": 1169
       }
     },
     {
@@ -195,10 +247,12 @@
       "capturedAt": "2026-07-15T15:41:10.968Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/15 下午11:41",
+      "label": "07-15 15:41",
       "itemCounts": {
         "72h": 357,
-        "1m": 1154
+        "7d": 357,
+        "1m": 1154,
+        "all": 1154
       }
     },
     {
@@ -209,10 +263,12 @@
       "capturedAt": "2026-07-15T14:42:29.839Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/15 下午10:42",
+      "label": "07-15 14:42",
       "itemCounts": {
         "72h": 373,
-        "1m": 1150
+        "7d": 373,
+        "1m": 1150,
+        "all": 1150
       }
     },
     {
@@ -223,10 +279,12 @@
       "capturedAt": "2026-07-15T11:47:32.829Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/15 下午07:47",
+      "label": "07-15 11:47",
       "itemCounts": {
         "72h": 383,
-        "1m": 1126
+        "7d": 383,
+        "1m": 1126,
+        "all": 1126
       }
     },
     {
@@ -237,10 +295,12 @@
       "capturedAt": "2026-07-15T09:22:09.516Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/15 下午05:22",
+      "label": "07-15 09:22",
       "itemCounts": {
         "72h": 385,
-        "1m": 1110
+        "7d": 385,
+        "1m": 1110,
+        "all": 1110
       }
     },
     {
@@ -251,10 +311,12 @@
       "capturedAt": "2026-07-15T06:28:28.009Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/15 下午02:28",
+      "label": "07-15 06:28",
       "itemCounts": {
         "72h": 389,
-        "1m": 1096
+        "7d": 389,
+        "1m": 1096,
+        "all": 1096
       }
     },
     {
@@ -265,10 +327,12 @@
       "capturedAt": "2026-07-15T03:19:54.144Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/15 上午11:19",
+      "label": "07-15 03:19",
       "itemCounts": {
         "72h": 390,
-        "1m": 1080
+        "7d": 390,
+        "1m": 1080,
+        "all": 1080
       }
     },
     {
@@ -279,10 +343,12 @@
       "capturedAt": "2026-07-15T00:05:48.576Z",
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-      "label": "07/15 上午08:05",
+      "label": "07-15 00:05",
       "itemCounts": {
         "72h": 390,
-        "1m": 1070
+        "7d": 390,
+        "1m": 1070,
+        "all": 1070
       }
     },
     {
@@ -293,10 +359,12 @@
       "capturedAt": "2026-07-14T23:37:00.372Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/15 上午07:37",
+      "label": "07-14 23:37",
       "itemCounts": {
         "72h": 390,
-        "1m": 1070
+        "7d": 390,
+        "1m": 1070,
+        "all": 1070
       }
     },
     {
@@ -307,10 +375,12 @@
       "capturedAt": "2026-07-14T22:13:53.905Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/15 上午06:13",
+      "label": "07-14 22:13",
       "itemCounts": {
         "72h": 385,
-        "1m": 1063
+        "7d": 385,
+        "1m": 1063,
+        "all": 1063
       }
     },
     {
@@ -321,10 +391,12 @@
       "capturedAt": "2026-07-14T21:13:08.860Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/15 上午05:13",
+      "label": "07-14 21:13",
       "itemCounts": {
         "72h": 386,
-        "1m": 1057
+        "7d": 386,
+        "1m": 1057,
+        "all": 1057
       }
     },
     {
@@ -335,10 +407,12 @@
       "capturedAt": "2026-07-14T19:41:20.884Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/15 上午03:41",
+      "label": "07-14 19:41",
       "itemCounts": {
         "72h": 382,
-        "1m": 1045
+        "7d": 382,
+        "1m": 1045,
+        "all": 1045
       }
     },
     {
@@ -349,10 +423,12 @@
       "capturedAt": "2026-07-14T18:50:58.428Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/15 上午02:50",
+      "label": "07-14 18:50",
       "itemCounts": {
         "72h": 377,
-        "1m": 1036
+        "7d": 377,
+        "1m": 1036,
+        "all": 1036
       }
     },
     {
@@ -363,10 +439,12 @@
       "capturedAt": "2026-07-14T17:28:05.256Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/15 上午01:28",
+      "label": "07-14 17:28",
       "itemCounts": {
         "72h": 382,
-        "1m": 1023
+        "7d": 382,
+        "1m": 1023,
+        "all": 1023
       }
     },
     {
@@ -377,10 +455,12 @@
       "capturedAt": "2026-07-14T15:34:43.907Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 下午11:34",
+      "label": "07-14 15:34",
       "itemCounts": {
         "72h": 397,
-        "1m": 1003
+        "7d": 397,
+        "1m": 1003,
+        "all": 1003
       }
     },
     {
@@ -391,10 +471,12 @@
       "capturedAt": "2026-07-14T14:07:31.945Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 下午10:07",
+      "label": "07-14 14:07",
       "itemCounts": {
         "72h": 420,
-        "1m": 988
+        "7d": 420,
+        "1m": 988,
+        "all": 988
       }
     },
     {
@@ -405,10 +487,12 @@
       "capturedAt": "2026-07-14T11:43:55.825Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 下午07:43",
+      "label": "07-14 11:43",
       "itemCounts": {
         "72h": 442,
-        "1m": 974
+        "7d": 442,
+        "1m": 974,
+        "all": 974
       }
     },
     {
@@ -419,10 +503,12 @@
       "capturedAt": "2026-07-14T09:16:21.299Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 下午05:16",
+      "label": "07-14 09:16",
       "itemCounts": {
         "72h": 441,
-        "1m": 952
+        "7d": 441,
+        "1m": 952,
+        "all": 952
       }
     },
     {
@@ -433,10 +519,12 @@
       "capturedAt": "2026-07-14T06:24:38.093Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 下午02:24",
+      "label": "07-14 06:24",
       "itemCounts": {
         "72h": 453,
-        "1m": 938
+        "7d": 453,
+        "1m": 938,
+        "all": 938
       }
     },
     {
@@ -447,10 +535,12 @@
       "capturedAt": "2026-07-14T03:20:42.708Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 上午11:20",
+      "label": "07-14 03:20",
       "itemCounts": {
         "72h": 449,
-        "1m": 923
+        "7d": 449,
+        "1m": 923,
+        "all": 923
       }
     },
     {
@@ -461,10 +551,12 @@
       "capturedAt": "2026-07-14T00:05:32.447Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 上午08:05",
+      "label": "07-14 00:05",
       "itemCounts": {
         "72h": 450,
-        "1m": 913
+        "7d": 450,
+        "1m": 913,
+        "all": 913
       }
     },
     {
@@ -475,10 +567,12 @@
       "capturedAt": "2026-07-13T23:08:12.856Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 上午07:08",
+      "label": "07-13 23:08",
       "itemCounts": {
         "72h": 447,
-        "1m": 910
+        "7d": 447,
+        "1m": 910,
+        "all": 910
       }
     },
     {
@@ -489,10 +583,12 @@
       "capturedAt": "2026-07-13T22:08:18.896Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 上午06:08",
+      "label": "07-13 22:08",
       "itemCounts": {
         "72h": 440,
-        "1m": 901
+        "7d": 440,
+        "1m": 901,
+        "all": 901
       }
     },
     {
@@ -503,10 +599,12 @@
       "capturedAt": "2026-07-13T20:26:19.922Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 上午04:26",
+      "label": "07-13 20:26",
       "itemCounts": {
         "72h": 433,
-        "1m": 890
+        "7d": 433,
+        "1m": 890,
+        "all": 890
       }
     },
     {
@@ -517,10 +615,12 @@
       "capturedAt": "2026-07-13T18:53:20.659Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/14 上午02:53",
+      "label": "07-13 18:53",
       "itemCounts": {
         "72h": 435,
-        "1m": 882
+        "7d": 435,
+        "1m": 882,
+        "all": 882
       }
     },
     {
@@ -531,10 +631,12 @@
       "capturedAt": "2026-07-13T15:56:10.026Z",
       "curationVersion": "curation-v1:6193201176e1",
       "curationHash": "6193201176e136f92502c799b566b8d755ab0b545f7d6a1e267847538f04dc51",
-      "label": "07/13 下午11:56",
+      "label": "07-13 15:56",
       "itemCounts": {
         "72h": 461,
-        "1m": 854
+        "7d": 461,
+        "1m": 854,
+        "all": 854
       }
     },
     {
@@ -545,10 +647,12 @@
       "capturedAt": "2026-07-13T12:22:43.972Z",
       "curationVersion": "curation-v1:247c48f55755",
       "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-      "label": "07/13 下午08:22",
+      "label": "07-13 12:22",
       "itemCounts": {
         "72h": 531,
-        "1m": 403
+        "7d": 531,
+        "1m": 403,
+        "all": 403
       }
     },
     {
@@ -559,10 +663,12 @@
       "capturedAt": "2026-07-13T04:45:07.206Z",
       "curationVersion": "curation-v1:247c48f55755",
       "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-      "label": "07/13 下午12:45",
+      "label": "07-13 04:45",
       "itemCounts": {
         "72h": 507,
-        "1m": 395
+        "7d": 507,
+        "1m": 395,
+        "all": 395
       }
     },
     {
@@ -573,10 +679,12 @@
       "capturedAt": "2026-07-13T00:14:47.892Z",
       "curationVersion": "curation-v1:247c48f55755",
       "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-      "label": "07/13 上午08:14",
+      "label": "07-13 00:14",
       "itemCounts": {
         "72h": 492,
-        "1m": 393
+        "7d": 492,
+        "1m": 393,
+        "all": 393
       }
     },
     {
@@ -587,10 +695,12 @@
       "capturedAt": "2026-07-12T23:11:48.987Z",
       "curationVersion": "curation-v1:247c48f55755",
       "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-      "label": "07/13 上午07:11",
+      "label": "07-12 23:11",
       "itemCounts": {
         "72h": 484,
-        "1m": 391
+        "7d": 484,
+        "1m": 391,
+        "all": 391
       }
     },
     {
@@ -601,10 +711,12 @@
       "capturedAt": "2026-07-12T22:10:29.951Z",
       "curationVersion": "curation-v1:247c48f55755",
       "curationHash": "247c48f55755af1cfff922171887d349bd657c1f778698e2b94f9c3a48c21a2c",
-      "label": "07/13 上午06:10",
+      "label": "07-12 22:10",
       "itemCounts": {
         "72h": 476,
-        "1m": 389
+        "7d": 476,
+        "1m": 389,
+        "all": 389
       }
     },
     {
@@ -615,10 +727,12 @@
       "capturedAt": "2026-07-12T19:26:35.083Z",
       "curationVersion": "curation-v1:4a0d0261af37",
       "curationHash": "4a0d0261af370621e15f5bf858bc1085d6d327b9f45aeec8e1bbe2634e95dc65",
-      "label": "07/13 上午03:26",
+      "label": "07-12 19:26",
       "itemCounts": {
         "72h": 460,
-        "1m": 388
+        "7d": 460,
+        "1m": 388,
+        "all": 388
       }
     },
     {
@@ -629,10 +743,12 @@
       "capturedAt": "2026-07-12T18:49:16.726Z",
       "curationVersion": "curation-v1:4a0d0261af37",
       "curationHash": "4a0d0261af370621e15f5bf858bc1085d6d327b9f45aeec8e1bbe2634e95dc65",
-      "label": "07/13 上午02:49",
+      "label": "07-12 18:49",
       "itemCounts": {
         "72h": 455,
-        "1m": 388
+        "7d": 455,
+        "1m": 388,
+        "all": 388
       }
     },
     {
@@ -641,10 +757,14 @@
       "path": "data/snapshots/20260712T170000Z.json",
       "generatedAt": "2026-07-12T17:19:24.254Z",
       "capturedAt": "2026-07-12T17:19:24.254Z",
-      "label": "07/13 上午01:19",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 17:19",
       "itemCounts": {
         "72h": 449,
-        "1m": 384
+        "7d": 449,
+        "1m": 384,
+        "all": 384
       }
     },
     {
@@ -653,10 +773,14 @@
       "path": "data/snapshots/20260712T150000Z.json",
       "generatedAt": "2026-07-12T15:16:08.431Z",
       "capturedAt": "2026-07-12T15:16:08.431Z",
-      "label": "07/12 下午11:16",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 15:16",
       "itemCounts": {
         "72h": 430,
-        "1m": 378
+        "7d": 430,
+        "1m": 378,
+        "all": 378
       }
     },
     {
@@ -665,10 +789,14 @@
       "path": "data/snapshots/20260712T130000Z.json",
       "generatedAt": "2026-07-12T13:57:17.554Z",
       "capturedAt": "2026-07-12T13:57:17.554Z",
-      "label": "07/12 下午09:57",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 13:57",
       "itemCounts": {
         "72h": 402,
-        "1m": 375
+        "7d": 402,
+        "1m": 375,
+        "all": 375
       }
     },
     {
@@ -677,10 +805,14 @@
       "path": "data/snapshots/20260712T110000Z.json",
       "generatedAt": "2026-07-12T11:29:00.685Z",
       "capturedAt": "2026-07-12T11:29:00.685Z",
-      "label": "07/12 下午07:29",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 11:29",
       "itemCounts": {
         "72h": 399,
-        "1m": 369
+        "7d": 399,
+        "1m": 369,
+        "all": 369
       }
     },
     {
@@ -689,10 +821,14 @@
       "path": "data/snapshots/20260712T100000Z.json",
       "generatedAt": "2026-07-12T10:07:11.074Z",
       "capturedAt": "2026-07-12T10:07:11.074Z",
-      "label": "07/12 下午06:07",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 10:07",
       "itemCounts": {
         "72h": 390,
-        "1m": 298
+        "7d": 390,
+        "1m": 298,
+        "all": 298
       }
     },
     {
@@ -701,10 +837,14 @@
       "path": "data/snapshots/20260712T070000Z.json",
       "generatedAt": "2026-07-12T07:43:08.366Z",
       "capturedAt": "2026-07-12T07:43:08.366Z",
-      "label": "07/12 下午03:43",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 07:43",
       "itemCounts": {
         "72h": 381,
-        "1m": 258
+        "7d": 381,
+        "1m": 258,
+        "all": 258
       }
     },
     {
@@ -713,10 +853,14 @@
       "path": "data/snapshots/20260712T060000Z.json",
       "generatedAt": "2026-07-12T06:41:30.979Z",
       "capturedAt": "2026-07-12T06:41:30.979Z",
-      "label": "07/12 下午02:41",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 06:41",
       "itemCounts": {
         "72h": 378,
-        "1m": 201
+        "7d": 378,
+        "1m": 201,
+        "all": 201
       }
     },
     {
@@ -725,10 +869,14 @@
       "path": "data/snapshots/20260712T040000Z.json",
       "generatedAt": "2026-07-12T04:39:24.404Z",
       "capturedAt": "2026-07-12T04:39:24.404Z",
-      "label": "07/12 下午12:39",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 04:39",
       "itemCounts": {
         "72h": 372,
-        "1m": 149
+        "7d": 372,
+        "1m": 149,
+        "all": 149
       }
     },
     {
@@ -737,10 +885,14 @@
       "path": "data/snapshots/20260712T030000Z.json",
       "generatedAt": "2026-07-12T03:35:22.622Z",
       "capturedAt": "2026-07-12T03:35:22.622Z",
-      "label": "07/12 上午11:35",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 03:35",
       "itemCounts": {
         "72h": 351,
-        "1m": 148
+        "7d": 351,
+        "1m": 148,
+        "all": 148
       }
     },
     {
@@ -749,10 +901,14 @@
       "path": "data/snapshots/20260712T000000Z.json",
       "generatedAt": "2026-07-12T00:13:40.424Z",
       "capturedAt": "2026-07-12T00:13:40.424Z",
-      "label": "07/12 上午08:13",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-12 00:13",
       "itemCounts": {
         "72h": 333,
-        "1m": 146
+        "7d": 333,
+        "1m": 146,
+        "all": 146
       }
     },
     {
@@ -761,10 +917,14 @@
       "path": "data/snapshots/20260711T230000Z.json",
       "generatedAt": "2026-07-11T23:11:08.282Z",
       "capturedAt": "2026-07-11T23:11:08.282Z",
-      "label": "07/12 上午07:11",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 23:11",
       "itemCounts": {
         "72h": 330,
-        "1m": 146
+        "7d": 330,
+        "1m": 146,
+        "all": 146
       }
     },
     {
@@ -773,10 +933,14 @@
       "path": "data/snapshots/20260711T220000Z.json",
       "generatedAt": "2026-07-11T22:03:36.257Z",
       "capturedAt": "2026-07-11T22:03:36.257Z",
-      "label": "07/12 上午06:03",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 22:03",
       "itemCounts": {
         "72h": 317,
-        "1m": 143
+        "7d": 317,
+        "1m": 143,
+        "all": 143
       }
     },
     {
@@ -785,10 +949,14 @@
       "path": "data/snapshots/20260711T210000Z.json",
       "generatedAt": "2026-07-11T21:06:05.471Z",
       "capturedAt": "2026-07-11T21:06:05.471Z",
-      "label": "07/12 上午05:06",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 21:06",
       "itemCounts": {
         "72h": 317,
-        "1m": 143
+        "7d": 317,
+        "1m": 143,
+        "all": 143
       }
     },
     {
@@ -797,10 +965,14 @@
       "path": "data/snapshots/20260711T200000Z.json",
       "generatedAt": "2026-07-11T20:55:59.237Z",
       "capturedAt": "2026-07-11T20:55:59.237Z",
-      "label": "07/12 上午04:55",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 20:55",
       "itemCounts": {
         "72h": 315,
-        "1m": 134
+        "7d": 315,
+        "1m": 134,
+        "all": 134
       }
     },
     {
@@ -809,10 +981,14 @@
       "path": "data/snapshots/20260711T190000Z.json",
       "generatedAt": "2026-07-11T19:27:50.898Z",
       "capturedAt": "2026-07-11T19:27:50.898Z",
-      "label": "07/12 上午03:27",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 19:27",
       "itemCounts": {
         "72h": 304,
-        "1m": 130
+        "7d": 304,
+        "1m": 130,
+        "all": 130
       }
     },
     {
@@ -821,10 +997,14 @@
       "path": "data/snapshots/20260711T180000Z.json",
       "generatedAt": "2026-07-11T18:36:39.279Z",
       "capturedAt": "2026-07-11T18:36:39.279Z",
-      "label": "07/12 上午02:36",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 18:36",
       "itemCounts": {
         "72h": 295,
-        "1m": 123
+        "7d": 295,
+        "1m": 123,
+        "all": 123
       }
     },
     {
@@ -833,10 +1013,14 @@
       "path": "data/snapshots/20260711T170000Z.json",
       "generatedAt": "2026-07-11T17:52:54.048Z",
       "capturedAt": "2026-07-11T17:52:54.048Z",
-      "label": "07/12 上午01:52",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 17:52",
       "itemCounts": {
         "72h": 286,
-        "1m": 119
+        "7d": 286,
+        "1m": 119,
+        "all": 119
       }
     },
     {
@@ -845,10 +1029,14 @@
       "path": "data/snapshots/20260711T160000Z.json",
       "generatedAt": "2026-07-11T16:36:27.926Z",
       "capturedAt": "2026-07-11T16:36:27.926Z",
-      "label": "07/12 上午12:36",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 16:36",
       "itemCounts": {
         "72h": 268,
-        "1m": 117
+        "7d": 268,
+        "1m": 117,
+        "all": 117
       }
     },
     {
@@ -857,10 +1045,14 @@
       "path": "data/snapshots/20260711T150000Z.json",
       "generatedAt": "2026-07-11T15:27:17.429Z",
       "capturedAt": "2026-07-11T15:27:17.429Z",
-      "label": "07/11 下午11:27",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 15:27",
       "itemCounts": {
         "72h": 250,
-        "1m": 88
+        "7d": 250,
+        "1m": 88,
+        "all": 88
       }
     },
     {
@@ -869,10 +1061,14 @@
       "path": "data/snapshots/20260711T140000Z.json",
       "generatedAt": "2026-07-11T14:58:51.603Z",
       "capturedAt": "2026-07-11T14:58:51.603Z",
-      "label": "07/11 下午10:58",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 14:58",
       "itemCounts": {
         "72h": 232,
-        "1m": 82
+        "7d": 232,
+        "1m": 82,
+        "all": 82
       }
     },
     {
@@ -881,10 +1077,14 @@
       "path": "data/snapshots/20260711T130000Z.json",
       "generatedAt": "2026-07-11T13:56:08.689Z",
       "capturedAt": "2026-07-11T13:56:08.689Z",
-      "label": "07/11 下午09:56",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 13:56",
       "itemCounts": {
         "72h": 182,
-        "1m": 42
+        "7d": 182,
+        "1m": 42,
+        "all": 42
       }
     },
     {
@@ -893,10 +1093,14 @@
       "path": "data/snapshots/20260711T120000Z.json",
       "generatedAt": "2026-07-11T12:49:26.920Z",
       "capturedAt": "2026-07-11T12:49:26.920Z",
-      "label": "07/11 下午08:49",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 12:49",
       "itemCounts": {
         "72h": 70,
-        "1m": 20
+        "7d": 70,
+        "1m": 20,
+        "all": 20
       }
     },
     {
@@ -905,10 +1109,14 @@
       "path": "data/snapshots/20260711T110000Z.json",
       "generatedAt": "2026-07-11T11:16:54.192Z",
       "capturedAt": "2026-07-11T11:16:54.192Z",
-      "label": "07/11 下午07:16",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 11:16",
       "itemCounts": {
         "72h": 3,
-        "1m": 0
+        "7d": 3,
+        "1m": 0,
+        "all": 0
       }
     },
     {
@@ -917,10 +1125,14 @@
       "path": "data/snapshots/20260711T100000Z.json",
       "generatedAt": "2026-07-11T10:17:02.372Z",
       "capturedAt": "2026-07-11T10:17:02.372Z",
-      "label": "07/11 下午06:17",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 10:17",
       "itemCounts": {
         "72h": 3,
-        "1m": 0
+        "7d": 3,
+        "1m": 0,
+        "all": 0
       }
     },
     {
@@ -929,10 +1141,14 @@
       "path": "data/snapshots/20260711T090000Z.json",
       "generatedAt": "2026-07-11T09:57:54.786Z",
       "capturedAt": "2026-07-11T09:57:54.786Z",
-      "label": "07/11 下午05:57",
+      "curationVersion": "",
+      "curationHash": "",
+      "label": "07-11 09:57",
       "itemCounts": {
         "72h": 3,
-        "1m": 0
+        "7d": 3,
+        "1m": 0,
+        "all": 0
       }
     }
   ]

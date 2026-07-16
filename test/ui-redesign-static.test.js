@@ -65,12 +65,14 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /function createThumbnailImage/u);
   assert.doesNotMatch(appSource, /maxresdefault/u);
   assert.match(appSource, /const RESPONSIVE_BREAKPOINTS = \{[\s\S]*mobileMax: 720,[\s\S]*tabletMax: 919/u);
+  assert.match(appSource, /const SOURCE_INLINE_LIMITS = \{[\s\S]*mobile: 2,[\s\S]*tablet: 3,[\s\S]*desktop: 3/u);
   assert.match(appSource, /const SOURCE_GROUP_LIMITS = \{[\s\S]*mobile: \{ initial: 3 \},[\s\S]*tablet: \{ initial: 6 \},[\s\S]*desktop: \{ initial: 9 \}/u);
   assert.match(appSource, /function getResponsiveMode/u);
   assert.match(appSource, /window\.matchMedia\?\.\(`\(max-width: \$\{RESPONSIVE_BREAKPOINTS\.mobileMax\}px\)`\)\?\.matches/u);
   assert.match(appSource, /window\.matchMedia\?\.\(`\(max-width: \$\{RESPONSIVE_BREAKPOINTS\.tabletMax\}px\)`\)\?\.matches/u);
   assert.match(appSource, /function isCompactRankMode/u);
   assert.match(appSource, /function sourceInitialLimitForMode/u);
+  assert.match(appSource, /function sourceInlineLimitForMode/u);
   assert.doesNotMatch(appSource, /function sourceBatchSizeForMode/u);
   assert.match(appSource, /shouldKeepSingleDrawerOpen\(\)/u);
   assert.match(appSource, /const nextVisible = groups\.length/u);
@@ -100,7 +102,7 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /\.source-inline-main\s*\{[\s\S]*grid-template-rows: auto auto;[\s\S]*gap: 1px;/u);
   assert.match(cssSource, /\.source-inline-meta\s*\{[\s\S]*display: inline-flex;[\s\S]*gap: 4px;/u);
   assert.match(cssSource, /\.source-inline-time,[\s\S]*\.source-inline-extra-time,[\s\S]*\.source-inline-time-more\s*\{[\s\S]*background: transparent;[\s\S]*font-variant-numeric: tabular-nums;/u);
-  assert.match(cssSource, /\.source-inline-tail\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
+  assert.match(cssSource, /\.source-inline-tail\s*\{[\s\S]*display: contents;/u);
   assert.match(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[^}]*display: none/u);
@@ -135,7 +137,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.rank-expand::after\s*\{[\s\S]*border-right: 1\.5px solid currentcolor;[\s\S]*transform: translateY\(-1px\) rotate\(45deg\);/u);
   assert.match(cssSource, /\.rank-expand\[aria-expanded="true"\]::after\s*\{[\s\S]*rotate\(225deg\)/u);
   assert.match(cssSource, /\.source-copy-icon\s*\{[\s\S]*width: var\(--chip-icon-size\);[\s\S]*padding: 0;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 52px;[\s\S]*height: 29px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 56px;[\s\S]*height: 32px;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 48px;[\s\S]*height: 27px;/u);
   assert.doesNotMatch(cssSource, /\.source-copy-icon span|ui-chip-icon-label/u);
   assert.match(cssSource, /\.trend-badge\s*\{[\s\S]*min-height: 20px;[\s\S]*font-size: 10\.5px;[\s\S]*white-space: nowrap;/u);

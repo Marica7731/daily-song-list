@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T14:35:40.584Z",
+  "generatedAt": "2026-07-16T18:41:28.871Z",
   "reviewId": "review:P3unvwP23h0:9f8087a1379108ea626b",
   "video": {
     "videoId": "P3unvwP23h0",
@@ -11,18 +11,19 @@
   "source": {
     "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
     "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "🦁本日のおしながき🦁\r\n※敬称略 \r\n11:09 HOT LIMIT / T.M.Revolution\r\n17:29 Fire◎Flower / Halyosy\r\n28:49 霞ゆく空背にして / Janne Da Arc\r\n34:50 rain stops, good-bye / におP\r\n40:49 地球最後の告白を / kemu\r\n47:03 私は雨 / シド\r\n58:51 未完成交響曲 / ONE OK ROCK\r\n1:05:03 激動 / UVERworld\r\n1:15:53 悠久休暇 / いれいす\r\n1:20:44 愛をありがとう / いれいす\r\n\r\n◇その他◇\r\n4:10 声入り\r\n7:18 枠開け\r\n1:26:23 スパチャ読み\r\n1:32:36 ED\r\n\r\n\r\nThanks🦁",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 60,
-    "riskLevel": "medium",
+    "riskScore": 30,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_activity_marker_ratio_high",
-      "short_unknown_title"
+      "niche_unknown_artist",
+      "short_unknown_title",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -36,16 +37,15 @@
       "rawHash": "6e9d5089ae5319b778d5dc8a3e3d010601795913b6fe79035d0459d32828c273",
       "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
       "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -64,8 +64,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -85,8 +84,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -99,14 +97,13 @@
       "rawHash": "1b09589a1a3a978692d8285fc0f790818ec6cf39baf07fa4b6bdaa0efe109da9",
       "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
       "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -126,8 +123,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -147,8 +143,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -161,14 +156,13 @@
       "rawHash": "0b6a34e507b88b92e1e71674a15f266ea24c19e8a081b3d1d907fabe924e4d7a",
       "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
       "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -181,14 +175,13 @@
       "rawHash": "ddc7943f48ee4740085caa0089423338e45be65a17b20df70e6f1700d725069c",
       "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
       "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -201,14 +194,13 @@
       "rawHash": "bb71dec892b806fadc021e7ac1eaba7f2e92cea64a376e87fe8801ef82098750",
       "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
       "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -221,14 +213,13 @@
       "rawHash": "b1188224126a87999dc6243b5a19de214934a5b1c682eb76b16c01e60dca3815",
       "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
       "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -241,65 +232,13 @@
       "rawHash": "a702133a099de9202b3a815e7592e32cfc5b64fa3c538b4d016982e74e2e140d",
       "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
       "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "obvious_non_song_text",
-      "seconds": 250,
-      "time": "0:04:10",
-      "title": "声入り",
-      "artist": "",
-      "raw": "4:10 声入り",
-      "rawHash": "6a312077c68bad255cf154d28b5dbba9c7267d5b42e4dc8722eb114e940319dc",
-      "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
-      "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "obvious_non_song_text"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "activity_marker_title",
-      "seconds": 5183,
-      "time": "1:26:23",
-      "title": "スパチャ読み",
-      "artist": "未記載",
-      "raw": "1:26:23 スパチャ読み",
-      "rawHash": "44ff90981a05d8bacb7ae848a354a10900a5cb4c86583f286937f257f8fc7279",
-      "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
-      "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "activity_marker_title"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 5556,
-      "time": "1:32:36",
-      "title": "ED",
-      "artist": "未記載",
-      "raw": "1:32:36 ED",
-      "rawHash": "9ad092f4c60adc70716097d032cda325dbf7682fbab37b99c3608c2bfbc86421",
-      "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
-      "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
+        "known_artist"
       ]
     }
   ]

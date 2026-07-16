@@ -73,11 +73,13 @@ test("carries fresh previous song lists and skips previously inspected stable vi
   assert.equal(carry.reason, "previous_latest_fresh");
   assert.deepEqual(
     carry.videos.map((item) => item.videoId).sort(),
-    ["AAAAAAAAAAA", "CCCCCCCCCCC", "GGGGGGGGGGG", "HHHHHHHHHHH"],
+    ["AAAAAAAAAAA", "BBBBBBBBBBB", "CCCCCCCCCCC", "DDDDDDDDDDD", "GGGGGGGGGGG", "HHHHHHHHHHH"],
   );
-  assert.deepEqual(carry.counts, { h72: 1, month: 3 });
+  assert.deepEqual(carry.counts, { h72: 2, month: 4 });
   assert.equal(carry.skipVideoIds.has("AAAAAAAAAAA"), true);
+  assert.equal(carry.skipVideoIds.has("BBBBBBBBBBB"), true);
   assert.equal(carry.skipVideoIds.has("CCCCCCCCCCC"), true);
+  assert.equal(carry.skipVideoIds.has("DDDDDDDDDDD"), true);
   assert.equal(carry.skipVideoIds.has("GGGGGGGGGGG"), true);
   assert.equal(carry.skipVideoIds.has("HHHHHHHHHHH"), true);
   assert.equal(carry.skipVideoIds.has("EEEEEEEEEEE"), true);
@@ -284,7 +286,7 @@ test("artist-rich mixed sources drop title-only rows without rejecting pure titl
   assert.deepEqual(titleOnly.rejectedEntries, []);
 });
 
-test("incremental selection skips known videos, scans 72h, and reserves monthly refresh", () => {
+test("incremental selection skips known videos, scans 7d, and reserves monthly refresh", () => {
   const candidates = [
     candidate("AAAAAAAAAAA", 2, ["today"]),
     candidate("BBBBBBBBBBB", 10, ["today"]),
@@ -298,8 +300,8 @@ test("incremental selection skips known videos, scans 72h, and reserves monthly 
     excludeVideoIds: new Set(["AAAAAAAAAAA"]),
   });
 
-  assert.equal(selection.mode, "incremental_72h_with_carry_forward");
-  assert.equal(selection.recentScanHorizonHours, 72);
+  assert.equal(selection.mode, "incremental_7d_with_carry_forward");
+  assert.equal(selection.recentScanHorizonHours, 168);
   assert.equal(selection.monthRefreshReserveLimit, 1);
   assert.equal(selection.skippedKnownCandidateCount, 1);
   assert.deepEqual(
@@ -539,7 +541,7 @@ test("fetched videos win over carried videos while preserving month membership",
   assert.deepEqual(merged[0].sourceGroups.sort(), ["month", "today"]);
 });
 
-test("monthly group includes every usable video within the 35 day carry-forward window", () => {
+test("all group includes every usable catalog video while recent group uses 7 days", () => {
   const groups = buildGroups(
     [
       video("AAAAAAAAAAA", 2, ["today"]),
@@ -548,17 +550,18 @@ test("monthly group includes every usable video within the 35 day carry-forward 
       video("DDDDDDDDDDD", 3, ["today", "month"]),
       video("EEEEEEEEEEE", 24 * 40, ["month"]),
       video("FFFFFFFFFFF", 4, ["today", "month"], { sourceUrls: [TODAY_SEARCH_URL] }),
+      video("GGGGGGGGGGG", 24 * 6, ["today"]),
     ],
     NOW,
   );
 
   assert.deepEqual(
-    groups["72h"].items.map((item) => item.videoId),
-    ["AAAAAAAAAAA", "DDDDDDDDDDD", "FFFFFFFFFFF"],
+    groups["7d"].items.map((item) => item.videoId),
+    ["AAAAAAAAAAA", "DDDDDDDDDDD", "FFFFFFFFFFF", "GGGGGGGGGGG"],
   );
   assert.deepEqual(
-    groups["1m"].items.map((item) => item.videoId),
-    ["AAAAAAAAAAA", "DDDDDDDDDDD", "FFFFFFFFFFF", "BBBBBBBBBBB"],
+    groups.all.items.map((item) => item.videoId),
+    ["AAAAAAAAAAA", "DDDDDDDDDDD", "FFFFFFFFFFF", "GGGGGGGGGGG", "BBBBBBBBBBB", "CCCCCCCCCCC", "EEEEEEEEEEE"],
   );
 });
 
@@ -582,7 +585,7 @@ test("rank diffs compare current ranks and counts to previous snapshot", () => {
   const diff = buildRankDiffs(current, {
     entry: { id: "20260711T120000Z", path: "data/snapshots/20260711T120000Z.json" },
     payload: previous,
-  })["72h"];
+  })["7d"];
 
   assert.equal(diff.previous.snapshotId, "20260711T120000Z");
   assertRankDiff(diff.songRank, "Beta", {
@@ -644,7 +647,7 @@ test("rank diffs compare configured aliases using canonical song entity keys", (
       payload: previous,
     },
     { songAliasContext },
-  )["72h"];
+  )["7d"];
   const entry = rankDiffByLabel(diff.songRank, "かくれんぼ");
 
   assert.equal(entry.entityKey, "かくれんぼ::alia");
@@ -661,8 +664,8 @@ test("rank diffs use stable new-entry fields without previous snapshot", () => {
 
   const diffs = buildRankDiffs(current, null);
 
-  assert.equal(diffs["72h"].previous, null);
-  assertRankDiff(diffs["72h"].songRank, "Fresh", {
+  assert.equal(diffs["7d"].previous, null);
+  assertRankDiff(diffs["7d"].songRank, "Fresh", {
     previousRank: null,
     currentRank: 1,
     rankDelta: null,
@@ -671,7 +674,7 @@ test("rank diffs use stable new-entry fields without previous snapshot", () => {
     countDelta: 1,
     isNew: true,
   });
-  assertRankDiff(diffs["1m"].artistRank, "Artist B", {
+  assertRankDiff(diffs.all.artistRank, "Artist B", {
     previousRank: null,
     currentRank: 1,
     rankDelta: null,
@@ -693,7 +696,7 @@ test("rank diffs preserve competition ranking for tied counts", () => {
     "1m": [],
   });
 
-  const diff = buildRankDiffs(current, null)["72h"];
+  const diff = buildRankDiffs(current, null)["7d"];
 
   assert.equal(rankDiffByLabel(diff.songRank, "Alpha").currentRank, 1);
   assert.equal(rankDiffByLabel(diff.songRank, "Beta").currentRank, 2);

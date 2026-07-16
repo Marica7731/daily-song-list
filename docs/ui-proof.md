@@ -9,19 +9,31 @@ npm run check:ui-proof
 
 The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/manifest.json) records screenshot hashes, dimensions, generation time, source fingerprint, viewport, URL parameters, and selector metadata.
 
+`7d`, `all`, partition pagination, search index, and snapshot index images are proof fixtures for the current shipped runtime contract.
+
 ## Desktop
 
 | Song ranking | Monthly ranking | Video tab |
 | --- | --- | --- |
 | ![Desktop song ranking](assets/screenshots/desktop-song-rank.png) | ![Desktop monthly ranking](assets/screenshots/desktop-monthly-song-rank.png) | ![Desktop video tab](assets/screenshots/desktop-video-view.png) |
 
+| 7d range fixture | All range fixture | Partition pagination |
+| --- | --- | --- |
+| ![Desktop 7d range fixture](assets/screenshots/desktop-range-7d.png) | ![Desktop all range fixture](assets/screenshots/desktop-range-all.png) | ![Desktop partition pagination fixture](assets/screenshots/desktop-partition-pagination.png) |
+
 | Query panel | Expanded source drawer | Inline source thumbnails |
 | --- | --- | --- |
 | ![Desktop query panel](assets/screenshots/desktop-query-panel.png) | ![Desktop expanded sources](assets/screenshots/desktop-source-expanded.png) | ![Desktop inline source thumbnails](assets/screenshots/desktop-source-inline-3.png) |
 
-| Middle pagination | Long timestamp source |
-| --- | --- |
-| ![Desktop middle pagination](assets/screenshots/desktop-pagination-middle.png) | ![Desktop long timestamp source](assets/screenshots/desktop-source-long-time.png) |
+| Middle pagination | Long timestamp source | Search and snapshot indexes |
+| --- | --- | --- |
+| ![Desktop middle pagination](assets/screenshots/desktop-pagination-middle.png) | ![Desktop long timestamp source](assets/screenshots/desktop-source-long-time.png) | ![Desktop search and snapshot index fixture](assets/screenshots/desktop-search-snapshot-index.png) |
+
+## Tablet
+
+| Inline source thumbnails |
+| --- |
+| ![Tablet inline source thumbnails](assets/screenshots/tablet-source-inline-3.png) |
 
 ## Mobile Main Views
 
@@ -61,10 +73,10 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Mobile three source thumbnail tail](assets/screenshots/mobile-source-inline-3.png) | ![Mobile more source collapsed](assets/screenshots/mobile-source-more-than-3.png) | ![Mobile more source expanded](assets/screenshots/mobile-source-more-than-3-expanded.png) |
 
-| Thumbnail fallback | Long channel name | Long timestamp |
+| Sources new-to-old | Thumbnail fallback | Long channel name |
 | --- | --- | --- |
-| ![Mobile thumbnail fallback](assets/screenshots/mobile-source-thumb-fallback.png) | ![Mobile long channel source](assets/screenshots/mobile-source-long-channel.png) | ![Mobile long timestamp source](assets/screenshots/mobile-source-long-time.png) |
+| ![Mobile sources ordered new-to-old](assets/screenshots/mobile-source-new-to-old.png) | ![Mobile thumbnail fallback](assets/screenshots/mobile-source-thumb-fallback.png) | ![Mobile long channel source](assets/screenshots/mobile-source-long-channel.png) |
 
-| Extra timestamps |
-| --- |
-| ![Mobile extra timestamps](assets/screenshots/mobile-source-extra-times.png) |
+| Long timestamp | Extra timestamps |
+| --- | --- |
+| ![Mobile long timestamp source](assets/screenshots/mobile-source-long-time.png) | ![Mobile extra timestamps](assets/screenshots/mobile-source-extra-times.png) |

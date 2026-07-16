@@ -5,7 +5,8 @@ const { BLOCKLIST_HASH, BLOCKLIST_VERSION, matchBlockedSource } = require("../as
 const { NON_SONG_RULES_PATH, OVERRIDES_PATH, validateCurationOverrides } = require("./curation");
 const { SONG_ALIASES_PATH, canonicalizeSongIdentity, loadSongAliasContext, validateSongAliasConfig } = require("./song-aliases");
 const { SUPPLEMENTAL_KNOWN_SONGS_PATH, loadSupplementalKnownSongs } = require("./song-search-index");
-const { MONTH_CATALOG_DAYS, VIDEO_CATALOG_PATH, isWithinCatalogWindow } = require("./video-catalog");
+const { CATALOG_RETENTION_POLICY, MONTH_CATALOG_DAYS, VIDEO_CATALOG_PATH, isWithinCatalogWindow } = require("./video-catalog");
+const { CANONICAL_RANGES, DIFF_RANGES, groupForRange } = require("./range-config");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -13,11 +14,8 @@ const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const INDEX_PATH = path.join(DATA_DIR, "snapshots", "index.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 const UI_META_PATH = path.join(DATA_DIR, "ui", "meta.json");
-const RANGES = ["72h", "1m"];
-const DIFF_PATHS = {
-  "72h": path.join(DATA_DIR, "diff", "latest-72h.json"),
-  "1m": path.join(DATA_DIR, "diff", "latest-1m.json"),
-};
+const RANGES = CANONICAL_RANGES;
+const DIFF_PATHS = Object.fromEntries(DIFF_RANGES.map((range) => [range.id, path.join(DATA_DIR, "diff", range.file)]));
 const BRACKET_PAIRS = [
   ["【", "】"],
   ["［", "］"],
@@ -36,11 +34,16 @@ const RUNTIME_VIDEO_FIELDS = new Set([
   "channelUrl",
   "keyword",
   "publishedText",
+  "publishedTimestamp",
+  "catalogFirstSeenAt",
+  "catalogLastSeenAt",
+  "catalogLastInspectedAt",
   "thumbnailUrl",
   "songs",
 ]);
 const RUNTIME_SONG_FIELDS = new Set(["seconds", "title", "artist", "isNiche"]);
-const H72_MS = 72 * 60 * 60 * 1000;
+const RECENT_WINDOW_DAYS = 7;
+const RECENT_WINDOW_MS = RECENT_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 const scope = parseValidationScope(process.argv.slice(2));
 
 const payload = readJson(LATEST_PATH);
@@ -54,8 +57,8 @@ if (payload.schemaVersion !== 1) errors.push("latest.schemaVersion must be 1");
 if (payload.blocklistVersion !== BLOCKLIST_VERSION) errors.push("latest.blocklistVersion must match current blocklist");
 if (payload.blocklistHash !== BLOCKLIST_HASH) errors.push("latest.blocklistHash must match current blocklist");
 if (!payload.groups || typeof payload.groups !== "object") errors.push("latest.groups missing");
-for (const groupId of ["72h", "1m"]) {
-  const group = payload.groups?.[groupId];
+for (const groupId of RANGES) {
+  const group = groupForRange(payload.groups, groupId);
   if (!group) {
     errors.push(`groups.${groupId} missing`);
     continue;
@@ -65,11 +68,11 @@ for (const groupId of ["72h", "1m"]) {
     validateNotBlockedSource(`groups.${groupId}[${videoIndex}]`, item);
     if (!/^[A-Za-z0-9_-]{11}$/.test(item.videoId || "")) errors.push(`${groupId}[${videoIndex}].videoId invalid`);
     if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`${groupId}[${videoIndex}].songs empty`);
-    if (groupId === "72h" && Number.isFinite(capturedMs) && !isWithinWindow(item.publishedTimestamp, capturedMs, H72_MS)) {
-      errors.push(`${groupId}[${videoIndex}].publishedTimestamp must be within 72 hours`);
+    if (groupId === "7d" && Number.isFinite(capturedMs) && !isWithinWindow(item.publishedTimestamp, capturedMs, RECENT_WINDOW_MS)) {
+      errors.push(`${groupId}[${videoIndex}].publishedTimestamp must be within ${RECENT_WINDOW_DAYS} days`);
     }
-    if (groupId === "1m" && Number.isFinite(capturedMs) && !isWithinCatalogWindow(item.publishedTimestamp, capturedMs)) {
-      errors.push(`${groupId}[${videoIndex}].publishedTimestamp must be within ${MONTH_CATALOG_DAYS} days`);
+    if (groupId === "all" && Number.isFinite(capturedMs) && !isWithinCatalogWindow(item.publishedTimestamp, capturedMs)) {
+      errors.push(`${groupId}[${videoIndex}].publishedTimestamp must not be in the future`);
     }
     for (const [songIndex, song] of (item.songs || []).entries()) {
       if (!song.title) errors.push(`${groupId}[${videoIndex}].songs[${songIndex}].title missing`);
@@ -85,6 +88,12 @@ for (const groupId of ["72h", "1m"]) {
 
 const index = readJson(INDEX_PATH);
 if (index.cadence !== "hourly") errors.push("snapshot index cadence must be hourly");
+if (index.retentionPolicy && index.retentionPolicy !== CATALOG_RETENTION_POLICY) {
+  errors.push(`snapshot index retentionPolicy must be ${CATALOG_RETENTION_POLICY}`);
+}
+if (!index.retentionPolicy && !Number.isInteger(index.retentionDays)) {
+  errors.push("snapshot index retentionDays must be integer for legacy indexes");
+}
 if (!Array.isArray(index.snapshots) || !index.snapshots.length) errors.push("snapshot index has no snapshots");
 for (const entry of index.snapshots || []) {
   if (!/^[0-9]{8}T[0-9]{4}00Z$/.test(entry.id || "")) errors.push(`invalid snapshot id: ${entry.id}`);
@@ -93,6 +102,7 @@ for (const entry of index.snapshots || []) {
 }
 
 for (const [groupId, diffPath] of Object.entries(DIFF_PATHS)) {
+  if (!shouldValidateDiffFile(groupId, diffPath)) continue;
   validateDiffFile(groupId, diffPath);
 }
 
@@ -115,7 +125,7 @@ if (errors.length) {
 }
 
 console.log(
-  `[validate] ok scope=${scope} 72h=${payload.groups["72h"].items.length} 1m=${payload.groups["1m"].items.length} snapshots=${index.snapshots.length}`,
+  `[validate] ok scope=${scope} 7d=${groupForRange(payload.groups, "7d")?.items?.length || 0} all=${groupForRange(payload.groups, "all")?.items?.length || 0} snapshots=${index.snapshots.length}`,
 );
 
 function parseValidationScope(args) {
@@ -131,6 +141,20 @@ function parseValidationScope(args) {
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function readJsonIfExists(filePath) {
+  try {
+    return readJson(filePath);
+  } catch {
+    return null;
+  }
+}
+
+function shouldValidateDiffFile(groupId, diffPath) {
+  if (fs.existsSync(diffPath)) return true;
+  const meta = readJsonIfExists(UI_META_PATH);
+  return Boolean(meta?.diffs?.[groupId]);
 }
 
 function isWithinWindow(publishedTimestamp, nowMs, windowMs) {
@@ -213,7 +237,7 @@ function validateRuntimeUiFiles() {
   if (meta.blocklistVersion !== BLOCKLIST_VERSION) errors.push("ui.meta.blocklistVersion must match current blocklist");
   if (meta.blocklistHash !== BLOCKLIST_HASH) errors.push("ui.meta.blocklistHash must match current blocklist");
 
-  for (const groupId of RANGES) {
+  for (const groupId of runtimeRangeIds(meta)) {
     const rangeMeta = meta.ranges?.[groupId];
     if (!rangeMeta) {
       errors.push(`ui.meta.ranges.${groupId} missing`);
@@ -237,14 +261,79 @@ function validateRuntimeUiFiles() {
     if (!Number.isInteger(rangeMeta.itemCount) || rangeMeta.itemCount < 0) {
       errors.push(`ui.meta.ranges.${groupId}.itemCount must be non-negative integer`);
     }
-    if (meta.diffs?.[groupId]?.path !== `data/diff/latest-${groupId}.json`) {
+    if (meta.diffs?.[groupId] && meta.diffs[groupId].path !== `data/diff/latest-${groupId}.json`) {
       errors.push(`ui.meta.diffs.${groupId}.path invalid`);
     }
     validateRuntimeRangeFile(groupId, rangeMeta, meta);
     validateRuntimeRangeFile(groupId, { ...rangeMeta, path: rangeMeta.legacyPath, sha256: null }, meta, {
       label: `ui.${groupId}.legacy`,
     });
+    validateRuntimeShardSet(groupId, rangeMeta, meta);
   }
+}
+
+function runtimeRangeIds(meta) {
+  const ids = Object.keys(meta.ranges || {});
+  return ids.length ? ids : RANGES;
+}
+
+function validateRuntimeShardSet(groupId, rangeMeta, meta) {
+  const shards = rangeMeta.shards || meta.shards?.ranges?.[groupId] || null;
+  if (!shards) return;
+  validateRuntimeShardManifest(`${groupId}.runtime`, shards.runtime, groupId, "runtime-page-manifest", "items", meta);
+  validateRuntimeShardManifest(`${groupId}.sourceDetails`, shards.sourceDetails, groupId, "source-detail-manifest", "sources", meta);
+  validateRuntimeShardManifest(`${groupId}.search`, shards.search, groupId, "search-manifest", "records", meta);
+}
+
+function validateRuntimeShardManifest(label, shardMeta, groupId, expectedKind, recordField, meta) {
+  if (!shardMeta) {
+    errors.push(`ui.shards.${label} missing`);
+    return;
+  }
+  for (const field of ["manifestPath", "manifestLegacyPath", "sha256"]) {
+    if (typeof shardMeta[field] !== "string" || !shardMeta[field]) errors.push(`ui.shards.${label}.${field} must be string`);
+  }
+  if (!Number.isInteger(shardMeta.pageSize) || shardMeta.pageSize <= 0) errors.push(`ui.shards.${label}.pageSize must be positive integer`);
+  if (!Number.isInteger(shardMeta.itemCount) || shardMeta.itemCount < 0) errors.push(`ui.shards.${label}.itemCount must be non-negative integer`);
+  if (!Number.isInteger(shardMeta.pageCount) || shardMeta.pageCount <= 0) errors.push(`ui.shards.${label}.pageCount must be positive integer`);
+  const manifestPath = path.join(ROOT, shardMeta.manifestPath || "");
+  if (!fs.existsSync(manifestPath)) {
+    errors.push(`missing runtime shard manifest: ${shardMeta.manifestPath}`);
+    return;
+  }
+  const manifestText = fs.readFileSync(manifestPath, "utf8");
+  if (isSha256(shardMeta.sha256) && sha256Text(manifestText) !== shardMeta.sha256) {
+    errors.push(`ui.shards.${label}.sha256 must match manifest contents`);
+  }
+  const manifest = JSON.parse(manifestText);
+  if (manifest.kind !== expectedKind) errors.push(`ui.shards.${label}.kind must be ${expectedKind}`);
+  if (manifest.rangeId !== groupId) errors.push(`ui.shards.${label}.rangeId must be ${groupId}`);
+  if (manifest.dataVersion !== meta.dataVersion) errors.push(`ui.shards.${label}.dataVersion must match ui.meta.dataVersion`);
+  if (manifest.itemCount !== shardMeta.itemCount) errors.push(`ui.shards.${label}.itemCount must match manifest`);
+  if (manifest.pageCount !== shardMeta.pageCount) errors.push(`ui.shards.${label}.pageCount must match manifest`);
+  if (!Array.isArray(manifest.pages) || manifest.pages.length !== manifest.pageCount) {
+    errors.push(`ui.shards.${label}.pages length must match pageCount`);
+    return;
+  }
+  let itemTotal = 0;
+  for (const [pageIndex, pageMeta] of manifest.pages.entries()) {
+    const pagePath = path.join(ROOT, pageMeta.path || "");
+    if (!fs.existsSync(pagePath)) {
+      errors.push(`missing runtime shard page: ${pageMeta.path}`);
+      continue;
+    }
+    const pageText = fs.readFileSync(pagePath, "utf8");
+    if (!isSha256(pageMeta.sha256) || sha256Text(pageText) !== pageMeta.sha256) {
+      errors.push(`ui.shards.${label}.pages[${pageIndex}].sha256 must match page contents`);
+    }
+    const page = JSON.parse(pageText);
+    if (page.rangeId !== groupId) errors.push(`ui.shards.${label}.pages[${pageIndex}].rangeId must be ${groupId}`);
+    if (page.dataVersion !== meta.dataVersion) errors.push(`ui.shards.${label}.pages[${pageIndex}].dataVersion must match ui.meta.dataVersion`);
+    if (page.pageIndex !== pageIndex + 1) errors.push(`ui.shards.${label}.pages[${pageIndex}].pageIndex invalid`);
+    if (!Array.isArray(page[recordField])) errors.push(`ui.shards.${label}.pages[${pageIndex}].${recordField} must be array`);
+    itemTotal += Array.isArray(page[recordField]) ? page[recordField].length : 0;
+  }
+  if (itemTotal !== manifest.itemCount) errors.push(`ui.shards.${label}.pages item total must match manifest.itemCount`);
 }
 
 function validateVideoCatalog() {
@@ -254,7 +343,11 @@ function validateVideoCatalog() {
   }
   const catalog = readJson(VIDEO_CATALOG_PATH);
   if (catalog.schemaVersion !== 1) errors.push("video-catalog.schemaVersion must be 1");
-  if (catalog.retentionDays !== MONTH_CATALOG_DAYS) errors.push(`video-catalog.retentionDays must be ${MONTH_CATALOG_DAYS}`);
+  if (catalog.retentionPolicy === CATALOG_RETENTION_POLICY) {
+    if (catalog.retentionDays !== null) errors.push("video-catalog.retentionDays must be null for permanent catalogs");
+  } else if (catalog.retentionDays !== MONTH_CATALOG_DAYS) {
+    errors.push(`video-catalog.retentionDays must be ${MONTH_CATALOG_DAYS} for legacy catalogs`);
+  }
   if (!Array.isArray(catalog.videos)) {
     errors.push("video-catalog.videos must be array");
     return;
@@ -269,7 +362,7 @@ function validateVideoCatalog() {
     seen.add(item.videoId);
     catalogIds.add(item.videoId);
     if (Number.isFinite(capturedMs) && !isWithinCatalogWindow(item.publishedTimestamp, capturedMs)) {
-      errors.push(`${label}.publishedTimestamp must be within ${MONTH_CATALOG_DAYS} days`);
+      errors.push(`${label}.publishedTimestamp must not be in the future`);
     }
     for (const field of ["title", "channelName", "firstSeenAt", "lastSeenAt", "lastInspectedAt", "qualityStatus"]) {
       if (typeof item[field] !== "string") errors.push(`${label}.${field} must be string`);
@@ -279,8 +372,8 @@ function validateVideoCatalog() {
     if (!Array.isArray(item.sourceUrls)) errors.push(`${label}.sourceUrls must be array`);
     if (!Array.isArray(item.songs) || item.songs.length <= 0) errors.push(`${label}.songs must be non-empty array`);
   }
-  for (const [videoIndex, item] of (payload.groups?.["1m"]?.items || []).entries()) {
-    if (!catalogIds.has(item.videoId)) errors.push(`1m[${videoIndex}].videoId missing from video catalog: ${item.videoId}`);
+  for (const [videoIndex, item] of (groupForRange(payload.groups, "all")?.items || []).entries()) {
+    if (!catalogIds.has(item.videoId)) errors.push(`all[${videoIndex}].videoId missing from video catalog: ${item.videoId}`);
   }
 }
 

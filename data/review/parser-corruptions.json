@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T14:39:29.519Z",
+  "generatedAt": "2026-07-16T18:46:08.575Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-16T14:34:29.518Z",
+  "latestGeneratedAt": "2026-07-16T17:58:53.141Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 1718,
+    "totalCandidates": 1714,
     "uniqueVideos": 256,
     "uniqueSources": 314,
     "confirmedNoiseCount": 0,
-    "parserCorruptionCount": 1718,
+    "parserCorruptionCount": 1714,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
       "confirmed_noise": 0,
-      "parser_corruption": 1718,
+      "parser_corruption": 1714,
       "likely_noise": 0,
       "needs_review": 0,
       "likely_song": 0
@@ -3133,12 +3133,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=590s",
       "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
       "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
-      "sourceOrigin": "latest;review:history-_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceOrigin": "latest;review:history-_a3qNvKIFd8-4a36c72636de61966fde.json;review:_a3qNvKIFd8-4a36c72636de61966fde.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -3286,9 +3287,9 @@
       "sourceOrigin": "latest;review:8hU9BykZDgo-02d620d42a680810c992.json;review:history-8hU9BykZDgo-02d620d42a680810c992.json;review:history-8hU9BykZDgo-42e4d984ee4b0aab1929.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "all",
         "review",
-        "snapshot:20260716T140000Z",
+        "snapshot:20260716T170000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -3559,8 +3560,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m"
+        "7d",
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -9626,8 +9627,9 @@
       "sourceOrigin": "latest;review:history-s7mgjgru1SA-17dc6bf6823c6e9ca740.json;review:s7mgjgru1SA-17dc6bf6823c6e9ca740.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -10245,10 +10247,10 @@
       "sourceOrigin": "latest;review:GtXaUNGXp3c-19d3c9d41c6b502d6ec4.json;review:history-GtXaUNGXp3c-19d3c9d41c6b502d6ec4.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -10293,7 +10295,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "1m"
+        "7d",
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -10956,7 +10959,7 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "1m"
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -11002,7 +11005,7 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "1m"
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -11048,8 +11051,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m"
+        "7d",
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -11095,9 +11098,9 @@
       "sourceOrigin": "latest;review:history-mcPfrWY7pUo-9c597bb3cb3d73ef2c5c.json;review:mcPfrWY7pUo-9c597bb3cb3d73ef2c5c.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "snapshot:20260716T140000Z",
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -11145,9 +11148,9 @@
       "sourceOrigin": "latest;review:history-mcPfrWY7pUo-9c597bb3cb3d73ef2c5c.json;review:mcPfrWY7pUo-9c597bb3cb3d73ef2c5c.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "snapshot:20260716T140000Z",
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -11195,8 +11198,8 @@
       "sourceOrigin": "latest;review:history-lUbnHmfYqeA-8e82f64ea437731f0ddd.json;review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -11244,9 +11247,9 @@
       "sourceOrigin": "latest;review:history-lUbnHmfYqeA-35e4863b5bf0a629440c.json;review:history-lUbnHmfYqeA-8e82f64ea437731f0ddd.json;review:lUbnHmfYqeA-8e82f64ea437731f0ddd.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "all",
         "snapshot:20260714T210000Z",
-        "snapshot:20260716T140000Z",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -13616,8 +13619,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m"
+        "7d",
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -20909,8 +20912,9 @@
       "sourceOrigin": "latest;review:history-jT-l8E9Xsow-07eb54c01819ff9e79b4.json;review:history-jT-l8E9Xsow-34bc8e115ed67dd8a6a3.json;review:history-jT-l8E9Xsow-b2d1dc65931974d3ba99.json;review:jT-l8E9Xsow-07eb54c01819ff9e79b4.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z",
         "review"
@@ -21444,9 +21448,9 @@
       "sourceOrigin": "latest;review:history-kQVdDhuS2js-dbff8ac38f56e8488ef2.json;review:kQVdDhuS2js-dbff8ac38f56e8488ef2.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "snapshot:20260716T140000Z",
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -23642,13 +23646,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Ni4eel4yuXk&t=2561s",
       "sourceId": "UgymHtkyqWAMvNmq5-V4AaABAg",
       "sourceHash": "7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963",
-      "sourceOrigin": "latest;review:Ni4eel4yuXk-7c8916d1842c73094cbb.json;review:history-Ni4eel4yuXk-7c8916d1842c73094cbb.json",
+      "sourceOrigin": "latest;review:history-Ni4eel4yuXk-7c8916d1842c73094cbb.json;review:Ni4eel4yuXk-7c8916d1842c73094cbb.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -23692,13 +23696,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Ni4eel4yuXk&t=3435s",
       "sourceId": "UgymHtkyqWAMvNmq5-V4AaABAg",
       "sourceHash": "7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963",
-      "sourceOrigin": "latest;review:Ni4eel4yuXk-7c8916d1842c73094cbb.json;review:history-Ni4eel4yuXk-7c8916d1842c73094cbb.json",
+      "sourceOrigin": "latest;review:history-Ni4eel4yuXk-7c8916d1842c73094cbb.json;review:Ni4eel4yuXk-7c8916d1842c73094cbb.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -23742,13 +23746,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Ni4eel4yuXk&t=4626s",
       "sourceId": "UgymHtkyqWAMvNmq5-V4AaABAg",
       "sourceHash": "7c8916d1842c73094cbbf8a79577a40c4b26a60541d7c23db2ebf494bfb99963",
-      "sourceOrigin": "latest;review:Ni4eel4yuXk-7c8916d1842c73094cbb.json;review:history-Ni4eel4yuXk-7c8916d1842c73094cbb.json",
+      "sourceOrigin": "latest;review:history-Ni4eel4yuXk-7c8916d1842c73094cbb.json;review:Ni4eel4yuXk-7c8916d1842c73094cbb.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -26405,7 +26409,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "1m"
+        "7d",
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -26628,8 +26633,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m"
+        "7d",
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33531,12 +33536,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U&t=1305s",
       "sourceId": "legacy:ZTi1cpRaW8U",
       "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
-      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json;review:history-ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "sourceOrigin": "latest;review:history-ZTi1cpRaW8U-938d64179a2e87620ead.json;review:ZTi1cpRaW8U-938d64179a2e87620ead.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -33720,7 +33726,7 @@
       "sourceOrigin": "latest;review:history-GOVCYwJ2xu0-6ab1df19bffc56270c06.json;review:history-GOVCYwJ2xu0-b47f6c93905e490535fc.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "all",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T190000Z"
       ],
@@ -33768,8 +33774,9 @@
       "sourceOrigin": "latest;review:history-l4dBePG7umU-dc7d730d6e9f80e0cab7.json;review:l4dBePG7umU-dc7d730d6e9f80e0cab7.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -34051,9 +34058,10 @@
       "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z",
+        "snapshot:20260716T170000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -34100,9 +34108,10 @@
       "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-9bd5b9883224f18a6191.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z",
+        "snapshot:20260716T170000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T190000Z"
       ],
@@ -34150,9 +34159,10 @@
       "sourceOrigin": "latest;review:DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-2257ba3c337830479cc8.json;review:history-DuDkasY22Mc-e044153fc703f3bc54c5.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z",
+        "snapshot:20260716T170000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -34412,15 +34422,15 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM&t=6954s",
       "sourceId": "legacy:_lKgLhWSCCM",
       "sourceHash": "ba5c9cc71aa9b31e467ab2ab07bd66ffea6cc13a7c538f216b78e77b3abc38cc",
-      "sourceOrigin": "latest;review:_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:history-_lKgLhWSCCM-ce6d964f00e006a457bc.json",
+      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:history-_lKgLhWSCCM-ce6d964f00e006a457bc.json;review:_lKgLhWSCCM-373b0c82505415e34abb.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "review",
+        "all",
         "snapshot:20260711T150000Z",
-        "snapshot:20260716T140000Z",
+        "snapshot:20260716T170000Z",
         "snapshot:20260712T190000Z",
-        "snapshot:20260713T120000Z"
+        "snapshot:20260713T120000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -34463,14 +34473,14 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_lKgLhWSCCM&t=10329s",
       "sourceId": "legacy:_lKgLhWSCCM",
       "sourceHash": "ba5c9cc71aa9b31e467ab2ab07bd66ffea6cc13a7c538f216b78e77b3abc38cc",
-      "sourceOrigin": "latest;review:_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json",
+      "sourceOrigin": "latest;review:history-_lKgLhWSCCM-0dc7cae1159c6de43f9a.json;review:history-_lKgLhWSCCM-373b0c82505415e34abb.json;review:history-_lKgLhWSCCM-ba5c9cc71aa9b31e467a.json;review:_lKgLhWSCCM-373b0c82505415e34abb.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "review",
+        "all",
         "snapshot:20260711T150000Z",
-        "snapshot:20260716T140000Z",
-        "snapshot:20260712T190000Z"
+        "snapshot:20260716T170000Z",
+        "snapshot:20260712T190000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -47389,9 +47399,9 @@
       "sourceOrigin": "latest;review:history-qIh2Y1RX9Hs-bdf7d49a6bf8ee77b5cd.json;review:qIh2Y1RX9Hs-bdf7d49a6bf8ee77b5cd.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "snapshot:20260716T140000Z",
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -47912,6 +47922,53 @@
       "reviewId": "review:Igp81Rj-QHc:f2c8512d5d09b31d3972",
       "sourcePath": "data/review/sources/history-Igp81Rj-QHc-f2c8512d5d09b31d3972.json",
       "reviewLocator": "data/review/sources/history-Igp81Rj-QHc-f2c8512d5d09b31d3972.json#d123d3b88ea4cf903f4047b14e1398650e223ba6288241daa147c7f0cc666c60"
+    },
+    {
+      "title": "you",
+      "artist": "米倉千尋(アカペラ",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 3453,
+      "time": "0:57:33",
+      "raw": "0:57:33 「you」/米倉千尋(アカペラ）",
+      "rawHash": "742bae4cabedd08535e8ccd2619216d39085c566911d30f5f12e38c82799efaf",
+      "videoId": "FUl6r5rHMfw",
+      "videoTitle": "【初見さん20人と会いたい！】楽しい歌枠！初見さん大歓迎！💛【新人VTuberの雑談／歌枠】🐻",
+      "channelName": "桜庭 羽奈【パレデミア学園】",
+      "channelId": "UCPgg_A08ksSYP-VivJGniRw",
+      "channelHandle": "/@%E6%A1%9C%E5%BA%AD%E7%BE%BD%E5%A5%88",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FUl6r5rHMfw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FUl6r5rHMfw&t=3453s",
+      "sourceId": "UgwBOFYWsHTsaLKrhRt4AaABAg",
+      "sourceHash": "ebbd73d94b715fe2560b4303bc7c7b4a63791cc53621d8bbb9eb0d070d9c54cf",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "safe_artist_cleanup"
+      ],
+      "replacementSuggestion": {
+        "artist": "米倉千尋"
+      },
+      "reviewId": "",
+      "sourcePath": "",
+      "reviewLocator": "742bae4cabedd08535e8ccd2619216d39085c566911d30f5f12e38c82799efaf",
+      "repairedTitle": "you",
+      "repairedArtist": "米倉千尋",
+      "repairReasons": [
+        "safe_artist_cleanup"
+      ]
     },
     {
       "title": "トリノコシティ",
@@ -51738,13 +51795,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=JJc_HICmBrU&t=4438s",
       "sourceId": "legacy:JJc_HICmBrU",
       "sourceHash": "52ac8eb415fdeb60c844810baef33ac473cbd33d8e7801c1ff8f40a03cf97cca",
-      "sourceOrigin": "latest;review:JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-96f5649a92eae0d1a47f.json",
+      "sourceOrigin": "latest;review:history-JJc_HICmBrU-52ac8eb415fdeb60c844.json;review:history-JJc_HICmBrU-96f5649a92eae0d1a47f.json;review:JJc_HICmBrU-52ac8eb415fdeb60c844.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z",
-        "snapshot:20260711T150000Z"
+        "all",
+        "snapshot:20260716T170000Z",
+        "snapshot:20260711T150000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -51832,9 +51889,9 @@
       "sourceOrigin": "latest;review:history-xViV766_DLE-536412ac8eb61e0c4c30.json;review:xViV766_DLE-536412ac8eb61e0c4c30.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "snapshot:20260716T140000Z",
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",
@@ -51881,10 +51938,10 @@
       "sourceOrigin": "latest;review:GkmXWhgz1QA-629bb5cdfb7e5c3c8e4a.json;review:history-GkmXWhgz1QA-629bb5cdfb7e5c3c8e4a.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -51927,12 +51984,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=K4ODEKmZw2M&t=4446s",
       "sourceId": "legacy:K4ODEKmZw2M",
       "sourceHash": "8513628ce54958e285669af5504b7f13eb7fe596e9ab85930262ad149030c07d",
-      "sourceOrigin": "latest;review:K4ODEKmZw2M-8513628ce54958e28566.json;review:history-K4ODEKmZw2M-8513628ce54958e28566.json",
+      "sourceOrigin": "latest;review:history-K4ODEKmZw2M-8513628ce54958e28566.json;review:K4ODEKmZw2M-8513628ce54958e28566.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -51975,12 +52032,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=RNi5KJKQm04&t=456s",
       "sourceId": "legacy:RNi5KJKQm04",
       "sourceHash": "df87c41c0267ba4c06d8d82b5e8bea6ce32d98e63a9b2dc284e160e08b58c713",
-      "sourceOrigin": "latest;review:RNi5KJKQm04-df87c41c0267ba4c06d8.json;review:history-RNi5KJKQm04-df87c41c0267ba4c06d8.json",
+      "sourceOrigin": "latest;review:history-RNi5KJKQm04-df87c41c0267ba4c06d8.json;review:RNi5KJKQm04-df87c41c0267ba4c06d8.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -52201,236 +52258,6 @@
       "reviewId": "review:vrBqIjPGYn0:ff2dd8fbfd76243132c5",
       "sourcePath": "data/review/sources/history-vrBqIjPGYn0-ff2dd8fbfd76243132c5.json",
       "reviewLocator": "data/review/sources/history-vrBqIjPGYn0-ff2dd8fbfd76243132c5.json#095c0972b1f868e2d41a216d6a2f559c68dbee049b782948cd9eb370470ea1ae"
-    },
-    {
-      "title": "This game",
-      "artist": "鈴木このみ",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 305,
-      "time": "0:05:05",
-      "raw": "0:05:05💎01.💙⚡This game  /  鈴木このみ",
-      "rawHash": "6003da8b030e293e40db22e64090bc212049830e91c55b7becb37a1d18f46714",
-      "videoId": "_Mt_wiii-iA",
-      "videoTitle": "【歌枠】MaiRちゃんとコラボ歌枠！七海うらら初Zepp記念 #Sparkleセッション #うらすとりーむ",
-      "channelName": "七海うらら*歌channel",
-      "channelId": "UCpmSwekVKXnObCY7hpdHXdQ",
-      "channelHandle": "/channel/UCpmSwekVKXnObCY7hpdHXdQ",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA&t=305s",
-      "sourceId": "legacy:_Mt_wiii-iA",
-      "sourceHash": "be2b1b952477f7fad9d5a340b6ba160d9a035f5b054b4eaefece007335677757",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split"
-      ],
-      "replacementSuggestion": {
-        "title": "💙⚡This game"
-      },
-      "reviewId": "",
-      "sourcePath": "",
-      "reviewLocator": "6003da8b030e293e40db22e64090bc212049830e91c55b7becb37a1d18f46714",
-      "repairedTitle": "💙⚡This game",
-      "repairedArtist": "鈴木このみ",
-      "repairReasons": [
-        "delimiter_split"
-      ]
-    },
-    {
-      "title": "ライラック",
-      "artist": "Mrs. GREEN APPLE",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 936,
-      "time": "0:15:36",
-      "raw": "0:15:36💎02.💙⚡ ライラック  /  Mrs. GREEN APPLE",
-      "rawHash": "e2779279ab24a0ef8325449a369d2bede34041e4102b5d8830be6bbb8d4b35ee",
-      "videoId": "_Mt_wiii-iA",
-      "videoTitle": "【歌枠】MaiRちゃんとコラボ歌枠！七海うらら初Zepp記念 #Sparkleセッション #うらすとりーむ",
-      "channelName": "七海うらら*歌channel",
-      "channelId": "UCpmSwekVKXnObCY7hpdHXdQ",
-      "channelHandle": "/channel/UCpmSwekVKXnObCY7hpdHXdQ",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA&t=936s",
-      "sourceId": "legacy:_Mt_wiii-iA",
-      "sourceHash": "be2b1b952477f7fad9d5a340b6ba160d9a035f5b054b4eaefece007335677757",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split"
-      ],
-      "replacementSuggestion": {
-        "title": "💙⚡ ライラック"
-      },
-      "reviewId": "",
-      "sourcePath": "",
-      "reviewLocator": "e2779279ab24a0ef8325449a369d2bede34041e4102b5d8830be6bbb8d4b35ee",
-      "repairedTitle": "💙⚡ ライラック",
-      "repairedArtist": "Mrs. GREEN APPLE",
-      "repairReasons": [
-        "delimiter_split"
-      ]
-    },
-    {
-      "title": "ビビデバ",
-      "artist": "星街すいせい",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 1919,
-      "time": "0:31:59",
-      "raw": "0:31:59💎03.💙⚡ ビビデバ  /  星街すいせい",
-      "rawHash": "b7a98577a354ef3d69696888e1221234ef0d97aafc89b9482774b6ccbdc59205",
-      "videoId": "_Mt_wiii-iA",
-      "videoTitle": "【歌枠】MaiRちゃんとコラボ歌枠！七海うらら初Zepp記念 #Sparkleセッション #うらすとりーむ",
-      "channelName": "七海うらら*歌channel",
-      "channelId": "UCpmSwekVKXnObCY7hpdHXdQ",
-      "channelHandle": "/channel/UCpmSwekVKXnObCY7hpdHXdQ",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA&t=1919s",
-      "sourceId": "legacy:_Mt_wiii-iA",
-      "sourceHash": "be2b1b952477f7fad9d5a340b6ba160d9a035f5b054b4eaefece007335677757",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split"
-      ],
-      "replacementSuggestion": {
-        "title": "💙⚡ ビビデバ"
-      },
-      "reviewId": "",
-      "sourcePath": "",
-      "reviewLocator": "b7a98577a354ef3d69696888e1221234ef0d97aafc89b9482774b6ccbdc59205",
-      "repairedTitle": "💙⚡ ビビデバ",
-      "repairedArtist": "星街すいせい",
-      "repairReasons": [
-        "delimiter_split"
-      ]
-    },
-    {
-      "title": "God knows",
-      "artist": "涼宮ハルヒ（CV:平野綾）",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 3342,
-      "time": "0:55:42",
-      "raw": "0:55:42💎05.💙⚡ God knows...  /  涼宮ハルヒ（CV:平野綾）",
-      "rawHash": "684f06dbd5fd496c1928bf06603739c5b4829bc480c6fe6b57e6737b2accbcda",
-      "videoId": "_Mt_wiii-iA",
-      "videoTitle": "【歌枠】MaiRちゃんとコラボ歌枠！七海うらら初Zepp記念 #Sparkleセッション #うらすとりーむ",
-      "channelName": "七海うらら*歌channel",
-      "channelId": "UCpmSwekVKXnObCY7hpdHXdQ",
-      "channelHandle": "/channel/UCpmSwekVKXnObCY7hpdHXdQ",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA&t=3342s",
-      "sourceId": "legacy:_Mt_wiii-iA",
-      "sourceHash": "be2b1b952477f7fad9d5a340b6ba160d9a035f5b054b4eaefece007335677757",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split"
-      ],
-      "replacementSuggestion": {
-        "title": "💙⚡ God knows"
-      },
-      "reviewId": "",
-      "sourcePath": "",
-      "reviewLocator": "684f06dbd5fd496c1928bf06603739c5b4829bc480c6fe6b57e6737b2accbcda",
-      "repairedTitle": "💙⚡ God knows",
-      "repairedArtist": "涼宮ハルヒ（CV:平野綾）",
-      "repairReasons": [
-        "delimiter_split"
-      ]
-    },
-    {
-      "title": "君の知らない物語",
-      "artist": "supercell",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 5003,
-      "time": "1:23:23",
-      "raw": "1:23:23💎06.💙⚡ 君の知らない物語  /  supercell",
-      "rawHash": "0579d17dc8f0527f77a9395c4e66b87235b325d09bf7f1f858f5835968b23a0b",
-      "videoId": "_Mt_wiii-iA",
-      "videoTitle": "【歌枠】MaiRちゃんとコラボ歌枠！七海うらら初Zepp記念 #Sparkleセッション #うらすとりーむ",
-      "channelName": "七海うらら*歌channel",
-      "channelId": "UCpmSwekVKXnObCY7hpdHXdQ",
-      "channelHandle": "/channel/UCpmSwekVKXnObCY7hpdHXdQ",
-      "youtubeUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_Mt_wiii-iA&t=5003s",
-      "sourceId": "legacy:_Mt_wiii-iA",
-      "sourceHash": "be2b1b952477f7fad9d5a340b6ba160d9a035f5b054b4eaefece007335677757",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "delimiter_split"
-      ],
-      "replacementSuggestion": {
-        "title": "💙⚡ 君の知らない物語"
-      },
-      "reviewId": "",
-      "sourcePath": "",
-      "reviewLocator": "0579d17dc8f0527f77a9395c4e66b87235b325d09bf7f1f858f5835968b23a0b",
-      "repairedTitle": "💙⚡ 君の知らない物語",
-      "repairedArtist": "supercell",
-      "repairReasons": [
-        "delimiter_split"
-      ]
     },
     {
       "title": "深海少女 💎 ゆうゆ",
@@ -53776,41 +53603,36 @@
       "videoId": "jnLfOka9vK0",
       "videoTitle": "【 弾き語り / KARAOKE 】夏がそこまで来ている気がする歌枠【 #紗倉おと 】",
       "channelName": "紗倉おと-Sakura Oto-🎸",
-      "channelId": "UC5ZEWtlwM3d4x4iLDOnzuww",
-      "channelHandle": "/@oto0415",
+      "channelId": "",
+      "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=jnLfOka9vK0",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jnLfOka9vK0&t=1637s",
       "sourceId": "Ugz72331-vaP-nOeVTt4AaABAg",
       "sourceHash": "12221603763bfc4830a3eff4c3eb9ec1544a2ed885b2fdde7a26387d4ab45883",
-      "sourceOrigin": "latest;review:history-jnLfOka9vK0-12221603763bfc4830a3.json;review:jnLfOka9vK0-12221603763bfc4830a3.json",
-      "sourceScope": "current",
+      "sourceOrigin": "review:history-jnLfOka9vK0-12221603763bfc4830a3.json",
+      "sourceScope": "history",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
-        "review"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
+        "known_song",
+        "known_artist"
       ],
-      "sourceRiskReasons": [],
+      "sourceRiskReasons": [
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "parser_corruption",
-        "delimiter_split"
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
         "title": "🎸残ってる"
       },
       "reviewId": "review:jnLfOka9vK0:12221603763bfc4830a3",
-      "sourcePath": "data/review/sources/jnLfOka9vK0-12221603763bfc4830a3.json",
-      "reviewLocator": "data/review/sources/jnLfOka9vK0-12221603763bfc4830a3.json#6b8b3c753da2f9218d2463d4ee8e495a093a55a958405f3a5de38396ad0f62aa",
-      "repairedTitle": "🎸残ってる",
-      "repairedArtist": "吉澤嘉代子",
-      "repairReasons": [
-        "delimiter_split"
-      ]
+      "sourcePath": "data/review/sources/history-jnLfOka9vK0-12221603763bfc4830a3.json",
+      "reviewLocator": "data/review/sources/history-jnLfOka9vK0-12221603763bfc4830a3.json#6b8b3c753da2f9218d2463d4ee8e495a093a55a958405f3a5de38396ad0f62aa"
     },
     {
       "title": "あの夢をなぞって",
@@ -53824,41 +53646,36 @@
       "videoId": "jnLfOka9vK0",
       "videoTitle": "【 弾き語り / KARAOKE 】夏がそこまで来ている気がする歌枠【 #紗倉おと 】",
       "channelName": "紗倉おと-Sakura Oto-🎸",
-      "channelId": "UC5ZEWtlwM3d4x4iLDOnzuww",
-      "channelHandle": "/@oto0415",
+      "channelId": "",
+      "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=jnLfOka9vK0",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jnLfOka9vK0&t=2271s",
       "sourceId": "Ugz72331-vaP-nOeVTt4AaABAg",
       "sourceHash": "12221603763bfc4830a3eff4c3eb9ec1544a2ed885b2fdde7a26387d4ab45883",
-      "sourceOrigin": "latest;review:history-jnLfOka9vK0-12221603763bfc4830a3.json;review:jnLfOka9vK0-12221603763bfc4830a3.json",
-      "sourceScope": "current",
+      "sourceOrigin": "review:history-jnLfOka9vK0-12221603763bfc4830a3.json",
+      "sourceScope": "history",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
-        "review"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
+        "known_song",
+        "known_artist"
       ],
-      "sourceRiskReasons": [],
+      "sourceRiskReasons": [
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "parser_corruption",
-        "delimiter_split"
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
         "title": "🎸あの夢をなぞって"
       },
       "reviewId": "review:jnLfOka9vK0:12221603763bfc4830a3",
-      "sourcePath": "data/review/sources/jnLfOka9vK0-12221603763bfc4830a3.json",
-      "reviewLocator": "data/review/sources/jnLfOka9vK0-12221603763bfc4830a3.json#f5fc74a02908b86c70c17a3d5af38198a75059a8abc829f3c0b1a04127482cab",
-      "repairedTitle": "🎸あの夢をなぞって",
-      "repairedArtist": "YOASOBI",
-      "repairReasons": [
-        "delimiter_split"
-      ]
+      "sourcePath": "data/review/sources/history-jnLfOka9vK0-12221603763bfc4830a3.json",
+      "reviewLocator": "data/review/sources/history-jnLfOka9vK0-12221603763bfc4830a3.json#f5fc74a02908b86c70c17a3d5af38198a75059a8abc829f3c0b1a04127482cab"
     },
     {
       "title": "①🎸ガーネット",
@@ -53918,41 +53735,36 @@
       "videoId": "syskgllO_tg",
       "videoTitle": "【 弾き語り / KARAOKE 】夏用のパジャマを買ったんだ歌枠【 #紗倉おと 】 #shorts",
       "channelName": "紗倉おと-Sakura Oto-🎸",
-      "channelId": "UC5ZEWtlwM3d4x4iLDOnzuww",
-      "channelHandle": "/@oto0415",
+      "channelId": "",
+      "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=syskgllO_tg",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=syskgllO_tg&t=996s",
-      "sourceId": "legacy:syskgllO_tg",
-      "sourceHash": "1e93ca2163aa68a86d43c38b895a1ea4c47a9b6f41e169474340dd133e8491dc",
-      "sourceOrigin": "latest;review:history-syskgllO_tg-3f76ac3cbae640af10ac.json;review:syskgllO_tg-3f76ac3cbae640af10ac.json",
-      "sourceScope": "current",
+      "sourceId": "selected:syskgllO_tg:3f76ac3cbae640af",
+      "sourceHash": "3f76ac3cbae640af10ac162221a0a83566a27e446ccd872e3340c9e2293f94eb",
+      "sourceOrigin": "review:history-syskgllO_tg-3f76ac3cbae640af10ac.json",
+      "sourceScope": "history",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
-        "review"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
+        "known_song",
+        "known_artist"
       ],
-      "sourceRiskReasons": [],
+      "sourceRiskReasons": [
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "parser_corruption",
-        "delimiter_split"
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
         "title": "🎸ガーネット"
       },
       "reviewId": "review:syskgllO_tg:3f76ac3cbae640af10ac",
-      "sourcePath": "data/review/sources/syskgllO_tg-3f76ac3cbae640af10ac.json",
-      "reviewLocator": "data/review/sources/syskgllO_tg-3f76ac3cbae640af10ac.json#50fe0b9d9ea03ab82a35f7e72c51ed26a00395df3b611bae200d7ebe9d80d6e8",
-      "repairedTitle": "🎸ガーネット",
-      "repairedArtist": "奥華子",
-      "repairReasons": [
-        "delimiter_split"
-      ]
+      "sourcePath": "data/review/sources/history-syskgllO_tg-3f76ac3cbae640af10ac.json",
+      "reviewLocator": "data/review/sources/history-syskgllO_tg-3f76ac3cbae640af10ac.json#50fe0b9d9ea03ab82a35f7e72c51ed26a00395df3b611bae200d7ebe9d80d6e8"
     },
     {
       "title": "②🎸最後の雨",
@@ -54012,41 +53824,36 @@
       "videoId": "syskgllO_tg",
       "videoTitle": "【 弾き語り / KARAOKE 】夏用のパジャマを買ったんだ歌枠【 #紗倉おと 】 #shorts",
       "channelName": "紗倉おと-Sakura Oto-🎸",
-      "channelId": "UC5ZEWtlwM3d4x4iLDOnzuww",
-      "channelHandle": "/@oto0415",
+      "channelId": "",
+      "channelHandle": "",
       "youtubeUrl": "https://www.youtube.com/watch?v=syskgllO_tg",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=syskgllO_tg&t=1490s",
-      "sourceId": "legacy:syskgllO_tg",
-      "sourceHash": "1e93ca2163aa68a86d43c38b895a1ea4c47a9b6f41e169474340dd133e8491dc",
-      "sourceOrigin": "latest;review:history-syskgllO_tg-3f76ac3cbae640af10ac.json;review:syskgllO_tg-3f76ac3cbae640af10ac.json",
-      "sourceScope": "current",
+      "sourceId": "selected:syskgllO_tg:3f76ac3cbae640af",
+      "sourceHash": "3f76ac3cbae640af10ac162221a0a83566a27e446ccd872e3340c9e2293f94eb",
+      "sourceOrigin": "review:history-syskgllO_tg-3f76ac3cbae640af10ac.json",
+      "sourceScope": "history",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
-        "review"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
       "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
+        "known_song",
+        "known_artist"
       ],
-      "sourceRiskReasons": [],
+      "sourceRiskReasons": [
+        "source_multiple_niche_short_titles"
+      ],
       "riskReasons": [
         "parser_corruption",
-        "delimiter_split"
+        "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": {
         "title": "🎸最後の雨"
       },
       "reviewId": "review:syskgllO_tg:3f76ac3cbae640af10ac",
-      "sourcePath": "data/review/sources/syskgllO_tg-3f76ac3cbae640af10ac.json",
-      "reviewLocator": "data/review/sources/syskgllO_tg-3f76ac3cbae640af10ac.json#2baeda2aa4642a7b316fe56af47fa3711516b27718716ca52d564871357a6cc6",
-      "repairedTitle": "🎸最後の雨",
-      "repairedArtist": "中西保志",
-      "repairReasons": [
-        "delimiter_split"
-      ]
+      "sourcePath": "data/review/sources/history-syskgllO_tg-3f76ac3cbae640af10ac.json",
+      "reviewLocator": "data/review/sources/history-syskgllO_tg-3f76ac3cbae640af10ac.json#2baeda2aa4642a7b316fe56af47fa3711516b27718716ca52d564871357a6cc6"
     },
     {
       "title": "③　クラクラ☆クライマックス",
@@ -60384,6 +60191,54 @@
       "reviewLocator": "data/review/sources/history-eF-XelhsSEU-f63e7fe7b6832fdda9f2.json#452c9722d51051e07dcdf4b208a5134f5ec58f1f7ea5f86bba992d5795d64735"
     },
     {
+      "title": "君は僕に似ている",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 11640,
+      "time": "3:14:00",
+      "raw": "3:14:00 君は僕に似ている/See-Saw（アカペラ）",
+      "rawHash": "aa62d6ac0c95a7104131b5667bc6311e6c8dca44f041ecdc40955cbf01e57185",
+      "videoId": "7VNWlyfFQzM",
+      "videoTitle": "【歌枠 / 耐久】初見さん来ないと24時間歌枠！？初見さん・常連さん・ROM専さん大歓迎【 星瑠璃メロウ 】",
+      "channelName": "星瑠璃メロウ / Hoshiruri Mellow",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=7VNWlyfFQzM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=7VNWlyfFQzM&t=11640s",
+      "sourceId": "legacy:7VNWlyfFQzM",
+      "sourceHash": "3ea49c4ac65dd57fc8cdfb066431a58e25d082848b631c3c13021143f76cc585",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "known_title",
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "delimiter_split",
+        "known_song_unknown_artist"
+      ],
+      "replacementSuggestion": {
+        "artist": "See-Saw（アカペラ）"
+      },
+      "reviewId": "",
+      "sourcePath": "",
+      "reviewLocator": "aa62d6ac0c95a7104131b5667bc6311e6c8dca44f041ecdc40955cbf01e57185",
+      "repairedTitle": "君は僕に似ている",
+      "repairedArtist": "See-Saw（アカペラ）",
+      "repairReasons": [
+        "delimiter_split"
+      ]
+    },
+    {
       "title": "_おつつ::_みああ",
       "artist": "",
       "isNiche": false,
@@ -61068,55 +60923,6 @@
       "reviewLocator": "data/review/sources/history-5-qelaIZQAI-6ab94e05faa26d2628fc.json#cf6d925ed65837c3cd4e5dd548799c451a9d27c6287ddaa7cf9a123af62842dc"
     },
     {
-      "title": "果てなく続くストーリー\tMISIA",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7800,
-      "time": "2:10:00",
-      "raw": "12\t果てなく続くストーリー\tMISIA\t2:10:00",
-      "rawHash": "55bc8566a9d7befa15c08bed8898a5f7ffc0fe1ece15e856bea1fa47ff860009",
-      "videoId": "iIs_WEI1OtI",
-      "videoTitle": "【歌枠】新機材で歌います🤍❄️Singing Stream【#vtuber /#vsinger /#蒼星すい】",
-      "channelName": "蒼星すい",
-      "channelId": "UCcZPZ680duJJXnm9J0AAuBg",
-      "channelHandle": "/@aoisui_",
-      "youtubeUrl": "https://www.youtube.com/watch?v=iIs_WEI1OtI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=iIs_WEI1OtI&t=7800s",
-      "sourceId": "Ugy_Ar84xUPR3_bmWQJ4AaABAg",
-      "sourceHash": "4103f2c3202ed4b7c983f420723d10f27511b6620e89430d21744f86fcd6581b",
-      "sourceOrigin": "latest",
-      "sourceScope": "current",
-      "ranges": [
-        "72h",
-        "1m"
-      ],
-      "classification": "parser_corruption",
-      "suggestedAction": "replace_entry",
-      "positiveEvidence": [
-        "known_title_artist",
-        "inferred_artist"
-      ],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "parser_corruption",
-        "combined_title_artist_lookup",
-        "known_song_unknown_artist"
-      ],
-      "replacementSuggestion": {
-        "title": "果てなく続くストーリー",
-        "artist": "MISIA"
-      },
-      "reviewId": "",
-      "sourcePath": "",
-      "reviewLocator": "55bc8566a9d7befa15c08bed8898a5f7ffc0fe1ece15e856bea1fa47ff860009",
-      "repairedTitle": "果てなく続くストーリー",
-      "repairedArtist": "MISIA",
-      "repairReasons": [
-        "combined_title_artist_lookup"
-      ]
-    },
-    {
       "title": "Secret base ～君がくれたもの～ ／ZONE",
       "artist": "『キッズ・ウォー3 〜ざけんなよ〜』主題歌",
       "isNiche": false,
@@ -61539,10 +61345,10 @@
       "sourceOrigin": "latest;review:9sOmvPqyofA-17ee0bb4967375731fb6.json;review:history-9sOmvPqyofA-17ee0bb4967375731fb6.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -64792,7 +64598,8 @@
       "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
-        "1m"
+        "7d",
+        "all"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -66464,13 +66271,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=1932s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -66514,13 +66321,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=2583s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -66564,13 +66371,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=2864s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -68707,9 +68514,10 @@
       "sourceOrigin": "latest;review:6Yr7EJ9tZhY-ed9e22068fa16c9b0cf7.json;review:history-6Yr7EJ9tZhY-ed9e22068fa16c9b0cf7.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -69652,13 +69460,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=KtHV8Wl5gkA&t=9447s",
       "sourceId": "Ugw5hHPiQDmndGudu914AaABAg",
       "sourceHash": "bd25c889d82a55860de9401c7fe22e276d6d78d2b05b676d0d5f383d0714c80f",
-      "sourceOrigin": "latest;review:KtHV8Wl5gkA-bd25c889d82a55860de9.json;review:history-KtHV8Wl5gkA-bd25c889d82a55860de9.json",
+      "sourceOrigin": "latest;review:history-KtHV8Wl5gkA-bd25c889d82a55860de9.json;review:KtHV8Wl5gkA-bd25c889d82a55860de9.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -71445,9 +71253,10 @@
       "sourceOrigin": "latest;review:5_B31kedAE4-5cf114dc51ce3e4ead89.json;review:history-5_B31kedAE4-5cf114dc51ce3e4ead89.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z"
+        "snapshot:20260716T170000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -78210,9 +78019,10 @@
       "sourceOrigin": "latest;review:GhIEeGjpSOw-051a0c4426b788de9b59.json;review:history-GhIEeGjpSOw-051a0c4426b788de9b59.json;review:history-GhIEeGjpSOw-1ad2ae90deea8541a98e.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
+        "7d",
+        "all",
         "review",
-        "snapshot:20260716T140000Z",
+        "snapshot:20260716T170000Z",
         "snapshot:20260712T190000Z"
       ],
       "classification": "parser_corruption",
@@ -78300,13 +78110,13 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=OqoxrEUVIdw&t=5025s",
       "sourceId": "Ugx35JdL6AaOJsIufsF4AaABAg",
       "sourceHash": "376f90f226594e01fd7bd571198239798aab89f5b497b6afd2ac3fe25e2a6a56",
-      "sourceOrigin": "latest;review:OqoxrEUVIdw-376f90f226594e01fd7b.json;review:history-OqoxrEUVIdw-376f90f226594e01fd7b.json",
+      "sourceOrigin": "latest;review:history-OqoxrEUVIdw-376f90f226594e01fd7b.json;review:OqoxrEUVIdw-376f90f226594e01fd7b.json",
       "sourceScope": "current",
       "ranges": [
-        "72h",
-        "1m",
-        "review",
-        "snapshot:20260716T140000Z"
+        "7d",
+        "all",
+        "snapshot:20260716T170000Z",
+        "review"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -78352,8 +78162,8 @@
       "sourceOrigin": "latest;review:history-ouJ1GdYwl_k-3d4c9578d2034b34cf4c.json;review:ouJ1GdYwl_k-3d4c9578d2034b34cf4c.json",
       "sourceScope": "current",
       "ranges": [
-        "1m",
-        "snapshot:20260716T140000Z",
+        "all",
+        "snapshot:20260716T170000Z",
         "review"
       ],
       "classification": "parser_corruption",

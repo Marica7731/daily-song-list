@@ -6,7 +6,7 @@
     <title>YouTube 歌枠歌曲排行</title>
     <meta
       name="description"
-      content="YouTube 最近72小时和最近35天累计时间戳歌单快照，支持直接跳转到歌曲时间点。"
+      content="YouTube 最近7天和累计全量时间戳歌单快照，支持直接跳转到歌曲时间点。"
     />
     <link rel="canonical" href="https://ytb-song-rank.culua.com/" />
     <meta name="theme-color" content="#0f766e" />
@@ -14,29 +14,29 @@
     <meta property="og:title" content="YouTube 歌枠歌曲排行" />
     <meta
       property="og:description"
-      content="YouTube 最近72小时和最近35天累计时间戳歌单快照，支持直接跳转到歌曲时间点。"
+      content="YouTube 最近7天和累计全量时间戳歌单快照，支持直接跳转到歌曲时间点。"
     />
     <meta property="og:url" content="https://ytb-song-rank.culua.com/" />
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles.css?v=h8960fd11b580" />
+    <link rel="stylesheet" href="assets/styles.css?v=h2af0eb615fb4" />
   </head>
   <body>
     <main class="layout">
       <section class="controls" id="controls" aria-label="榜单查询">
         <div class="controls-inner">
           <div class="segmented range-mode" role="group" aria-label="范围">
-            <button class="tab active" type="button" data-range="72h" aria-pressed="true">最近72小时</button>
+            <button class="tab active" type="button" data-range="7d" aria-pressed="true">最近7天</button>
             <button
               class="tab"
               type="button"
-              data-range="1m"
+              data-range="all"
               aria-pressed="false"
-              title="最近35天累计；YouTube 月度搜索用于补充发现视频。"
-              aria-description="最近35天累计；YouTube 月度搜索用于补充发现视频。"
+              title="累计全量；YouTube 月度搜索和历史快照用于补充发现视频。"
+              aria-description="累计全量；YouTube 月度搜索和历史快照用于补充发现视频。"
             >
-              月度
+              本月
             </button>
           </div>
 
@@ -255,9 +255,9 @@
     </button>
     <div class="toast" id="toast" aria-live="polite" hidden></div>
 
-    <script src="assets/blocked-vtuber-meta.js?v=h8960fd11b580" defer></script>
-    <script src="assets/frontend-utils.js?v=h8960fd11b580" defer></script>
-    <script src="assets/ranking-utils.js?v=h8960fd11b580" defer></script>
-    <script src="assets/app.js?v=h8960fd11b580" defer></script>
+    <script src="assets/blocked-vtuber-meta.js?v=h2af0eb615fb4" defer></script>
+    <script src="assets/frontend-utils.js?v=h2af0eb615fb4" defer></script>
+    <script src="assets/ranking-utils.js?v=h2af0eb615fb4" defer></script>
+    <script src="assets/app.js?v=h2af0eb615fb4" defer></script>
   </body>
 </html>

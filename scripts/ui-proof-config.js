@@ -3,12 +3,17 @@
 const expectedScreenshots = [
   "desktop-song-rank.png",
   "desktop-monthly-song-rank.png",
+  "desktop-range-7d.png",
+  "desktop-range-all.png",
   "desktop-video-view.png",
   "desktop-query-panel.png",
   "desktop-source-expanded.png",
   "desktop-source-inline-3.png",
+  "desktop-partition-pagination.png",
+  "desktop-search-snapshot-index.png",
   "desktop-pagination-middle.png",
   "desktop-source-long-time.png",
+  "tablet-source-inline-3.png",
   "mobile-song-rank.png",
   "mobile-artist-rank.png",
   "mobile-song-index.png",
@@ -29,6 +34,7 @@ const expectedScreenshots = [
   "mobile-source-inline-1.png",
   "mobile-source-inline-2.png",
   "mobile-source-inline-3.png",
+  "mobile-source-new-to-old.png",
   "mobile-source-more-than-3.png",
   "mobile-source-more-than-3-expanded.png",
   "mobile-source-thumb-fallback.png",
@@ -42,14 +48,82 @@ const proofInputPaths = [
   "assets/app.js",
   "assets/styles.css",
   "assets/frontend-utils.js",
+  "README.md",
   "docs/ui-spec.md",
+  "docs/ui-proof.md",
   "scripts/capture-readme-screenshots.js",
   "scripts/validate-ui-proof.js",
   "scripts/ui-proof-config.js",
   "test/fixtures/ui-proof-runtime.json",
+  "test/ui-proof-fixtures.test.js",
+  "docs/data-architecture.md",
+  "docs/range-migration.md",
+  "docs/storage-layout.md",
+  "docs/backfill.md",
 ];
+
+const screenshotContracts = {
+  "desktop-range-7d.png": {
+    scene: "fixture-range-7d",
+    params: { fixture: "range", range: "7d" },
+    viewport: { width: 1440, height: 900 },
+  },
+  "desktop-range-all.png": {
+    scene: "fixture-range-all",
+    params: { fixture: "range", range: "all" },
+    viewport: { width: 1440, height: 900 },
+  },
+  "mobile-source-inline-2.png": {
+    scene: "fixture-double",
+    params: { fixture: "double" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-source-inline-3.png": {
+    scene: "fixture-triple",
+    params: { fixture: "triple" },
+    viewport: { width: 390, height: 844 },
+  },
+  "desktop-source-inline-3.png": {
+    scene: "fixture-triple",
+    params: { fixture: "triple" },
+    viewport: { width: 1440, height: 900 },
+  },
+  "tablet-source-inline-3.png": {
+    scene: "fixture-triple",
+    params: { fixture: "triple" },
+    viewport: { width: 820, height: 900 },
+  },
+  "mobile-source-new-to-old.png": {
+    scene: "fixture-newToOld",
+    params: { fixture: "newToOld" },
+    viewport: { width: 390, height: 844 },
+  },
+  "desktop-partition-pagination.png": {
+    scene: "fixture-partition-pagination",
+    params: { fixture: "partition-pagination" },
+    viewport: { width: 1440, height: 900 },
+  },
+  "desktop-search-snapshot-index.png": {
+    scene: "fixture-search-snapshot-index",
+    params: { fixture: "search-snapshot-index" },
+    viewport: { width: 1440, height: 900 },
+  },
+};
+
+const proofCoverage = {
+  rangeFixtures: ["7d", "all"],
+  sourceFixtures: {
+    mobileTwo: "mobile-source-inline-2.png",
+    desktopThree: "desktop-source-inline-3.png",
+    tabletThree: "tablet-source-inline-3.png",
+    newToOld: "mobile-source-new-to-old.png",
+  },
+  dataIndexFixtures: ["desktop-partition-pagination.png", "desktop-search-snapshot-index.png"],
+};
 
 module.exports = {
   expectedScreenshots,
+  proofCoverage,
   proofInputPaths,
+  screenshotContracts,
 };

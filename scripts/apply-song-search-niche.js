@@ -6,6 +6,7 @@ const {
   songSearchSourceSummary,
 } = require("./song-search-index");
 const { loadSongAliasContext } = require("./song-aliases");
+const { CANONICAL_RANGES, groupForRange, legacyAliasManifest } = require("./range-config");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -36,8 +37,12 @@ async function main() {
 
   const annotatedLatest = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(latest, songSearchIndex, songAliasContext), summary);
   writeJson(LATEST_PATH, annotatedLatest);
-  if (annotatedLatest.groups["72h"]) writeJson(path.join(DATA_DIR, "72h.json"), annotatedLatest.groups["72h"]);
-  if (annotatedLatest.groups["1m"]) writeJson(path.join(DATA_DIR, "1m.json"), annotatedLatest.groups["1m"]);
+  for (const rangeId of CANONICAL_RANGES) {
+    const group = groupForRange(annotatedLatest.groups, rangeId);
+    if (group) writeJson(path.join(DATA_DIR, `${rangeId}.json`), group);
+  }
+  writeJson(path.join(DATA_DIR, "72h.json"), legacyAliasManifest("72h", groupForRange(annotatedLatest.groups, "7d")));
+  writeJson(path.join(DATA_DIR, "1m.json"), legacyAliasManifest("1m", groupForRange(annotatedLatest.groups, "all")));
 
   annotateLatestSnapshot(annotatedLatest, summary);
   annotateAudit(summary);

@@ -30,7 +30,7 @@ test("range cache and trend Map are wired into rendering", () => {
 test("runtime range load validates meta-bound payloads and has fallback paths", () => {
   assert.match(functionBody("async function loadRuntimeRange"), /runtime meta missing/u);
   assert.match(appSource, /async function tryRuntimeRangeLoad[\s\S]*validateRuntimeRangePayload/u);
-  assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*data\/\$\{rangeId\}\.json/u);
+  assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*runtimeRangeIdCandidates\(rangeId\)\.map/u);
   assert.match(appSource, /async function loadRuntimeRangeFallback[\s\S]*SNAPSHOT_LATEST_PATH/u);
   assert.doesNotMatch(functionBody("async function loadRuntimeRangeFallback"), /state\.runtimeMeta\?\.filterVersion/u);
   assert.match(functionBody("async function loadRuntimeRangeFallback"), /filterVersion: Number\.isInteger\(raw\.filterVersion\) \? raw\.filterVersion : 0/u);
@@ -59,10 +59,10 @@ test("initial URL state accepts ordinary query params without shared marker", ()
   assert.match(body, /state\.sharedUrlApplied = shouldApplySharedState/u);
 });
 
-test("monthly range copy describes 35 day catalog semantics", () => {
+test("monthly range copy describes all-range catalog semantics", () => {
   assert.doesNotMatch(indexSource, /来自 YouTube 月度搜索筛选/u);
-  assert.match(indexSource, /最近35天累计；YouTube 月度搜索用于补充发现视频。/u);
-  assert.match(indexSource, /最近72小时和最近35天累计时间戳歌单快照/u);
+  assert.match(indexSource, /累计全量；YouTube 月度搜索和历史快照用于补充发现视频。/u);
+  assert.match(indexSource, /最近7天和累计全量时间戳歌单快照/u);
   assert.match(appSource, /monthlyCoverageNote/u);
 });
 
@@ -109,7 +109,7 @@ test("song and index rows inline source previews and expand only remaining video
   assert.match(stripBody, /source-inline-empty/u);
   assert.match(stripBody, /renderSourceInlineGroup/u);
   assert.match(stripBody, /renderSourceInlineMoreButton/u);
-  assert.match(stripBody, /model\.showCopyAll && !model\.canExpand/u);
+  assert.match(stripBody, /model\.showCopyAll && options\.showCopyAll !== false && !options\.isExpanded/u);
   assert.match(stripBody, /renderInlineCopySongLinksButton/u);
 });
 
@@ -131,7 +131,7 @@ test("source drawer append-more reveals all remaining sources without rebuilding
   assert.match(footerBody, /button\.dataset\.collapseSource = "true"/u);
   assert.doesNotMatch(footerBody, /createElement\("button"\)|remove\(\)/u);
 
-  const expandedBody = functionBody("function setSourceDrawerExpanded");
+  const expandedBody = functionBody("async function setSourceDrawerExpanded");
   assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
 });

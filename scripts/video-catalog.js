@@ -1,18 +1,24 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
 const VIDEO_CATALOG_PATH = path.join(DATA_DIR, "video-catalog.json");
 const CATALOG_MIGRATION_REPORT_PATH = path.join(DATA_DIR, "catalog-migration-report.json");
+const CATALOG_SEGMENT_DIR = path.join(DATA_DIR, "catalog-segments");
+const CATALOG_SEGMENT_MANIFEST_PATH = path.join(CATALOG_SEGMENT_DIR, "manifest.json");
 const MONTH_CATALOG_DAYS = 35;
 const MONTH_CATALOG_MS = MONTH_CATALOG_DAYS * 24 * 60 * 60 * 1000;
+const CATALOG_RETENTION_POLICY = "permanent";
+const CATALOG_SEGMENT_SIZE = positiveInteger(process.env.DAILY_SONG_CATALOG_SEGMENT_SIZE, 500);
 
 function createEmptyVideoCatalog(generatedAt = new Date().toISOString()) {
   return {
     schemaVersion: 1,
     generatedAt,
-    retentionDays: MONTH_CATALOG_DAYS,
+    retentionPolicy: CATALOG_RETENTION_POLICY,
+    retentionDays: null,
     videos: [],
   };
 }
@@ -25,10 +31,13 @@ function loadVideoCatalog(filePath = VIDEO_CATALOG_PATH) {
 
 function normalizeVideoCatalog(catalog) {
   const generatedAt = stringValue(catalog?.generatedAt) || new Date().toISOString();
+  const retentionPolicy =
+    catalog?.retentionPolicy || (catalog?.retentionDays == null ? CATALOG_RETENTION_POLICY : "legacy_month");
   return {
     schemaVersion: 1,
     generatedAt,
-    retentionDays: MONTH_CATALOG_DAYS,
+    retentionPolicy,
+    retentionDays: retentionPolicy === CATALOG_RETENTION_POLICY ? null : catalog?.retentionDays ?? MONTH_CATALOG_DAYS,
     videos: Array.isArray(catalog?.videos) ? catalog.videos.map(normalizeCatalogEntry).filter(Boolean) : [],
   };
 }
@@ -67,10 +76,6 @@ function rebuildVideoCatalogFromVideos(videos, capturedAt, options = {}) {
 
   const retained = [];
   for (const entry of byVideoId.values()) {
-    if (!isWithinCatalogWindow(entry.publishedTimestamp, now.getTime())) {
-      stats.expiredVideoCount += 1;
-      continue;
-    }
     const previousEntry = previousByVideoId.get(entry.videoId);
     if (!previousEntry) stats.addedVideoCount += 1;
     else if (catalogEntrySignature(previousEntry) !== catalogEntrySignature(entry)) stats.updatedVideoCount += 1;
@@ -83,7 +88,8 @@ function rebuildVideoCatalogFromVideos(videos, capturedAt, options = {}) {
     catalog: {
       schemaVersion: 1,
       generatedAt: nowIso,
-      retentionDays: MONTH_CATALOG_DAYS,
+      retentionPolicy: CATALOG_RETENTION_POLICY,
+      retentionDays: null,
       videos: retained,
     },
     stats,
@@ -192,20 +198,113 @@ function normalizeSongs(songs) {
 function catalogSummary(catalog, capturedAt) {
   const normalized = normalizeVideoCatalog(catalog);
   const nowMs = asDate(capturedAt).getTime();
-  const monthVideoCount = normalized.videos.filter((entry) => isWithinCatalogWindow(entry.publishedTimestamp, nowMs)).length;
+  const allVideoCount = normalized.videos.filter((entry) => isWithinCatalogWindow(entry.publishedTimestamp, nowMs)).length;
+  const monthVideoCount = normalized.videos.filter((entry) => isWithinLegacyMonthWindow(entry.publishedTimestamp, nowMs)).length;
   return {
     path: "data/video-catalog.json",
     generatedAt: normalized.generatedAt,
-    retentionDays: MONTH_CATALOG_DAYS,
+    retentionPolicy: CATALOG_RETENTION_POLICY,
+    retentionDays: null,
     catalogVideoCount: normalized.videos.length,
+    allVideoCount,
     monthVideoCount,
   };
 }
 
 function isWithinCatalogWindow(publishedTimestamp, nowMs) {
+  if (!Number.isFinite(publishedTimestamp)) return true;
+  const age = nowMs - publishedTimestamp;
+  return age >= 0;
+}
+
+function isWithinLegacyMonthWindow(publishedTimestamp, nowMs) {
   if (!Number.isFinite(publishedTimestamp)) return false;
   const age = nowMs - publishedTimestamp;
   return age >= 0 && age <= MONTH_CATALOG_MS;
+}
+
+function buildCatalogSegments(catalog, options = {}) {
+  const normalized = normalizeVideoCatalog(catalog);
+  const segmentSize = positiveInteger(options.segmentSize, CATALOG_SEGMENT_SIZE);
+  const baseDir = options.baseDir || "data/catalog-segments";
+  const videos = normalized.videos || [];
+  const chunks = chunkArray(videos, segmentSize);
+  const segments = chunks.map((chunk, index) => {
+    const segmentIndex = index + 1;
+    const payload = {
+      schemaVersion: 1,
+      kind: "video-catalog-segment",
+      generatedAt: normalized.generatedAt,
+      retentionPolicy: CATALOG_RETENTION_POLICY,
+      retentionDays: null,
+      segmentIndex,
+      segmentCount: chunks.length,
+      segmentSize,
+      itemCount: chunk.length,
+      videos: chunk,
+    };
+    const text = stringifyJson(payload);
+    const sha256 = sha256Text(text);
+    return {
+      payload,
+      text,
+      index: segmentIndex,
+      file: `segment-${String(segmentIndex).padStart(4, "0")}.${sha256.slice(0, 12)}.json`,
+      path: `${baseDir}/segment-${String(segmentIndex).padStart(4, "0")}.${sha256.slice(0, 12)}.json`,
+      sha256,
+      bytes: Buffer.byteLength(text, "utf8"),
+      itemCount: chunk.length,
+    };
+  });
+  const manifest = {
+    schemaVersion: 1,
+    kind: "video-catalog-segment-manifest",
+    generatedAt: normalized.generatedAt,
+    retentionPolicy: CATALOG_RETENTION_POLICY,
+    retentionDays: null,
+    segmentSize,
+    itemCount: videos.length,
+    segmentCount: segments.length,
+    segments: segments.map(({ index, path: segmentPath, sha256, bytes, itemCount }) => ({
+      index,
+      path: segmentPath,
+      sha256,
+      bytes,
+      itemCount,
+    })),
+  };
+  return { manifest, segments };
+}
+
+function writeCatalogSegments(catalog, options = {}) {
+  const baseDir = options.baseDir || "data/catalog-segments";
+  const absoluteDir = path.join(ROOT, baseDir);
+  const { manifest, segments } = buildCatalogSegments(catalog, { ...options, baseDir });
+  fs.mkdirSync(absoluteDir, { recursive: true });
+  const current = new Set();
+  for (const segment of segments) {
+    fs.writeFileSync(path.join(ROOT, segment.path), `${segment.text}\n`, "utf8");
+    current.add(path.basename(segment.path));
+  }
+  cleanupOldCatalogSegments(absoluteDir, current);
+  fs.writeFileSync(path.join(absoluteDir, "manifest.json"), `${stringifyJson(manifest)}\n`, "utf8");
+  return manifest;
+}
+
+function cleanupOldCatalogSegments(absoluteDir, currentFiles) {
+  if (!fs.existsSync(absoluteDir)) return;
+  for (const name of fs.readdirSync(absoluteDir)) {
+    if (!/^segment-\d{4}\.[0-9a-f]{12}\.json$/u.test(name)) continue;
+    if (!currentFiles.has(name)) fs.unlinkSync(path.join(absoluteDir, name));
+  }
+}
+
+function writeVideoCatalog(catalog, filePath = VIDEO_CATALOG_PATH, options = {}) {
+  const normalized = normalizeVideoCatalog(catalog);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, `${JSON.stringify(normalized, null, 2)}\n`, "utf8");
+  writeCatalogSegments(normalized, options);
+  return normalized;
 }
 
 function isBetterCatalogEntry(candidate, existing) {
@@ -258,18 +357,44 @@ function asDate(value) {
   return Number.isFinite(date.getTime()) ? date : new Date();
 }
 
+function chunkArray(items, size) {
+  const chunks = [];
+  for (let index = 0; index < items.length; index += size) chunks.push(items.slice(index, index + size));
+  return chunks.length ? chunks : [[]];
+}
+
+function stringifyJson(value) {
+  return JSON.stringify(value);
+}
+
+function sha256Text(text) {
+  return crypto.createHash("sha256").update(text).digest("hex");
+}
+
+function positiveInteger(value, fallback = 1) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 module.exports = {
   CATALOG_MIGRATION_REPORT_PATH,
+  CATALOG_RETENTION_POLICY,
+  CATALOG_SEGMENT_MANIFEST_PATH,
+  CATALOG_SEGMENT_SIZE,
   MONTH_CATALOG_DAYS,
   MONTH_CATALOG_MS,
   VIDEO_CATALOG_PATH,
+  buildCatalogSegments,
   catalogSummary,
   catalogToVideos,
   createEmptyVideoCatalog,
+  isWithinLegacyMonthWindow,
   isWithinCatalogWindow,
   loadVideoCatalog,
   mergeVideosIntoCatalog,
   normalizeVideoCatalog,
   rebuildVideoCatalogFromVideos,
   videoToCatalogEntry,
+  writeCatalogSegments,
+  writeVideoCatalog,
 };

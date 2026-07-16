@@ -34,8 +34,10 @@ const {
   parseUrlState,
   queryTriggerModel,
   rankToggleModel,
+  runtimeRangeMeta,
   runtimeRangePayloadFromGroup,
   runtimeRangePath,
+  runtimeRangeShards,
   serializeUrlState,
   sanitizeQueryDraft,
   shouldPrefetchRuntimeRange,
@@ -300,6 +302,20 @@ test("groups source occurrences by video with sorted timestamps", () => {
   );
 });
 
+test("groups source occurrences by publish time, first seen, then video id", () => {
+  const groups = groupOccurrencesByVideo([
+    occurrence("B0000000001", "channel B", { seconds: 30 }, { publishedTimestamp: "2026-07-10T00:00:00Z", firstSeenAt: "2026-07-12T00:00:00Z" }),
+    occurrence("A0000000001", "channel A", { seconds: 90 }, { publishedTimestamp: "2026-07-12T00:00:00Z", firstSeenAt: "2026-07-11T00:00:00Z" }),
+    occurrence("C0000000001", "channel C", { seconds: 12 }, { publishedTimestamp: "2026-07-10T00:00:00Z", firstSeenAt: "2026-07-13T00:00:00Z" }),
+    occurrence("D0000000001", "channel D", { seconds: 18 }, { publishedTimestamp: "2026-07-10T00:00:00Z", firstSeenAt: "2026-07-12T00:00:00Z" }),
+  ]);
+
+  assert.deepEqual(
+    groups.map((group) => group.videoId),
+    ["A0000000001", "C0000000001", "B0000000001", "D0000000001"],
+  );
+});
+
 test("builds whole-video setlist text from original songs", () => {
   const item = {
     _allSongs: [
@@ -348,9 +364,9 @@ test("builds same-song source link text from unique source videos", () => {
   assert.equal(
     links,
     [
-      "未知频道 https://www.youtube.com/watch?v=VideoC&t=9s",
-      "こは太郎 https://www.youtube.com/watch?v=VideoB&t=12s",
       "羽海乃ゆき https://www.youtube.com/watch?v=VideoA&t=75s",
+      "こは太郎 https://www.youtube.com/watch?v=VideoB&t=12s",
+      "未知频道 https://www.youtube.com/watch?v=VideoC&t=9s",
       "中文频道 https://www.youtube.com/watch?v=VideoD&t=120s",
       "Orihime Haruka https://www.youtube.com/watch?v=VideoE&t=121s",
     ].join("\n"),
@@ -583,7 +599,7 @@ test("source presentation model inlines up to three videos and expands only the 
     ["A:2", "B:1"],
   );
   assert.equal(twoVideosWithDuplicateTimestamps.canExpand, false);
-  assert.equal(twoVideosWithDuplicateTimestamps.showCopyAll, false);
+  assert.equal(twoVideosWithDuplicateTimestamps.showCopyAll, true);
 
   const threeVideos = sourcePresentationModel([
     occurrence("A", "channel A"),
@@ -596,6 +612,25 @@ test("source presentation model inlines up to three videos and expands only the 
     ["A", "B", "C"],
   );
   assert.equal(threeVideos.showCopyAll, true);
+
+  const threeVideosMobile = sourcePresentationModel(
+    [
+      occurrence("A", "channel A"),
+      occurrence("B", "channel B"),
+      occurrence("C", "channel C"),
+    ],
+    { inlineLimit: 2 },
+  );
+  assert.equal(threeVideosMobile.mode, "collapsed");
+  assert.deepEqual(
+    threeVideosMobile.inlineGroups.map((group) => group.videoId),
+    ["A", "B"],
+  );
+  assert.deepEqual(
+    threeVideosMobile.hiddenGroups.map((group) => group.videoId),
+    ["C"],
+  );
+  assert.equal(threeVideosMobile.remainingCount, 1);
 
   const fourVideos = sourcePresentationModel([
     occurrence("A", "channel A"),
@@ -619,7 +654,7 @@ test("source presentation model inlines up to three videos and expands only the 
   assert.equal(fourVideos.expandedLabel, "收起");
   assert.equal(fourVideos.hasMore, true);
   assert.equal(fourVideos.canExpand, true);
-  assert.equal(fourVideos.showCopyAll, false);
+  assert.equal(fourVideos.showCopyAll, true);
 
   const expanded = sourcePresentationModel(
     [
@@ -658,6 +693,20 @@ test("source presentation distinguishes videos from many timestamps", () => {
   assert.equal(oneVideoManyTimes.canExpand, false);
 });
 
+test("source presentation can represent external detail shards without duplicating inline groups", () => {
+  const model = sourcePresentationModel([occurrence("A", "channel A"), occurrence("B", "channel B")], {
+    inlineLimit: 2,
+    totalVideoCount: 5,
+    hasExternalDetails: true,
+  });
+  assert.equal(model.mode, "collapsed");
+  assert.equal(model.videoCount, 5);
+  assert.equal(model.inlineVisibleCount, 2);
+  assert.equal(model.hiddenGroups.length, 0);
+  assert.equal(model.remainingCount, 3);
+  assert.equal(model.collapsedLabel, "+3来源");
+});
+
 test("url state parses and serializes range, view, page, pageSize, bucket, outside, q, and snapshot", () => {
   const options = urlStateOptions();
   const parsed = parseUrlState(
@@ -666,7 +715,7 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
   );
 
   assert.deepEqual(parsed, {
-    range: "1m",
+    range: "all",
     view: "songAz",
     page: 3,
     pageSize: 100,
@@ -684,7 +733,7 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
   const serialized = serializeUrlState(parsed, options);
 
   assert.deepEqual(Object.fromEntries(new URLSearchParams(serialized)), {
-    range: "1m",
+    range: "all",
     view: "songAz",
     page: "3",
     pageSize: "100",
@@ -886,17 +935,49 @@ test("summary video count keeps source totals separate from hidden-unknown visib
 
 test("runtime range path follows URL range and meta paths", () => {
   const parsed = parseUrlState("?range=1m", urlStateOptions());
-  assert.equal(parsed.range, "1m");
+  assert.equal(parsed.range, "all");
   assert.equal(
     runtimeRangePath(parsed.range, {
       ranges: {
-        "1m": { path: "data/ui/1m.abcdef123456.json" },
+        all: { path: "data/ui/all.abcdef123456.json" },
       },
     }),
-    "data/ui/1m.abcdef123456.json",
+    "data/ui/all.abcdef123456.json",
   );
   assert.equal(runtimeRangePath("72h", null), "data/ui/72h.json");
   assert.throws(() => runtimeRangePath("72h", null, { requireMeta: true }), /runtime meta missing/u);
+});
+
+test("runtime range ids accept 7d/all and legacy 72h/1m aliases", () => {
+  const options = {
+    validRanges: ["7d", "all"],
+    rangeAliases: { "72h": "7d", "1m": "all" },
+    legacyRangeIds: { "7d": ["72h"], all: ["1m"] },
+    defaults: { range: "7d", view: "songRank", page: 1, pageSize: 50 },
+  };
+  assert.equal(parseUrlState("?range=72h", options).range, "7d");
+  assert.equal(parseUrlState("?range=1m", options).range, "all");
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState({ range: "all" }, options))), {
+    range: "all",
+  });
+
+  const meta = {
+    ranges: {
+      "72h": { path: "data/ui/72h.abcdef123456.json", itemCount: 1 },
+      "1m": {
+        path: "data/ui/1m.abcdef123456.json",
+        itemCount: 2,
+        shards: {
+          pages: { path: "data/ui/all-page-1.abcdef123456.json" },
+          sourceDetails: { pathPattern: "data/ui/source/{key}.json" },
+          search: { pathPattern: "data/ui/search/{key}.json" },
+        },
+      },
+    },
+  };
+  assert.equal(runtimeRangePath("7d", meta, options), "data/ui/72h.abcdef123456.json");
+  assert.equal(runtimeRangeMeta("all", meta, options).id, "1m");
+  assert.equal(runtimeRangeShards("all", meta, options).hasPageShard, true);
 });
 
 test("runtime range validation rejects version mismatches and empty current ranges", () => {
@@ -916,6 +997,26 @@ test("runtime range validation rejects version mismatches and empty current rang
   assert.throws(
     () => validateRuntimeRangePayload(runtimePayloadFixture({ items: [] }), { rangeId: "1m", meta }),
     /items length does not match meta/u,
+  );
+});
+
+test("runtime range validation accepts aliased partial shards", () => {
+  const meta = {
+    dataVersion: "a".repeat(64),
+    ranges: {
+      "1m": { itemCount: 20, dataVersion: "a".repeat(64), path: "data/ui/all-page-1.abcdef123456.json" },
+    },
+  };
+  const payload = runtimePayloadFixture({ id: "1m", dataVersion: "a".repeat(64), partial: true });
+  assert.equal(
+    validateRuntimeRangePayload(payload, {
+      rangeId: "all",
+      meta,
+      allowPartial: true,
+      rangeAliases: { "1m": "all" },
+      legacyRangeIds: { all: ["1m"] },
+    }).id,
+    "1m",
   );
 });
 
@@ -981,7 +1082,7 @@ test("url state falls back to safe defaults and only accepts configured snapshot
     options,
   );
 
-  assert.equal(parsed.range, "72h");
+  assert.equal(parsed.range, "7d");
   assert.equal(parsed.view, "songRank");
   assert.equal(parsed.page, 1);
   assert.equal(parsed.pageSize, 50);
@@ -1219,7 +1320,9 @@ function assertPageTokensOrdered(tokens) {
 
 function urlStateOptions() {
   return {
-    validRanges: ["72h", "1m"],
+    validRanges: ["7d", "all"],
+    rangeAliases: { "72h": "7d", "1m": "all" },
+    legacyRangeIds: { "7d": ["72h"], all: ["1m"] },
     validViews: ["songRank", "artistRank", "songAz", "videos"],
     validPageSizes: [50, 100, 200],
     latestSnapshotPath: "data/latest.json",
@@ -1228,7 +1331,7 @@ function urlStateOptions() {
       { id: "archive-20260711", path: "data/snapshots/2026-07-11.json" },
     ],
     defaults: {
-      range: "72h",
+      range: "7d",
       view: "songRank",
       page: 1,
       pageSize: 50,

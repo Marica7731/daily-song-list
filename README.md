@@ -1,11 +1,11 @@
 # Daily Song List
 
-Small GitHub Pages site that collects YouTube videos with usable timestamp song lists, then exposes jump links for two ranges:
+Small GitHub Pages site that collects YouTube videos with usable timestamp song lists, then exposes jump links for the current two runtime ranges:
 
-- `72h`: videos published within the last 72 hours.
-- `1m`: videos in the monthly carry-forward window that were returned by YouTube's monthly search filter.
+- `7d`: videos published within the last 7 days.
+- `all`: the accumulated catalog of videos with usable timestamp song lists.
 
-The site keeps one successful snapshot per hour. If a scheduled scrape fails, existing `data/latest.json` and snapshot files remain untouched, so the page continues to show the last successful result.
+`72h` and `1m` remain compatibility aliases for old links and legacy data paths. The site keeps successful hourly snapshots permanently. If a scheduled scrape fails, existing `data/latest.json`, snapshot files, and browser runtime files remain untouched, so the page continues to show the last successful result.
 
 ## UI Screenshots
 
@@ -15,7 +15,7 @@ These committed screenshots are the repository homepage proof set for the curren
 npm run screenshots:readme -- https://ytb-song-rank.culua.com/
 ```
 
-The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). The full committed UI proof matrix lives in [`docs/ui-proof.md`](docs/ui-proof.md), with freshness checked by `docs/assets/screenshots/manifest.json`.
+The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). The full committed UI proof matrix lives in [`docs/ui-proof.md`](docs/ui-proof.md), with freshness checked by `docs/assets/screenshots/manifest.json`. Data flow, storage, range migration, and backfill details live in [`docs/data-architecture.md`](docs/data-architecture.md), [`docs/storage-layout.md`](docs/storage-layout.md), [`docs/range-migration.md`](docs/range-migration.md), and [`docs/backfill.md`](docs/backfill.md).
 
 ### Desktop Web
 
@@ -23,13 +23,21 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-song-rank.png" alt="Desktop song ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-monthly-song-rank.png" alt="Desktop monthly ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
 
+| 7d range fixture | All range fixture | Data partitions |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/desktop-range-7d.png" alt="Desktop 7d range proof fixture" width="320" /> | <img src="docs/assets/screenshots/desktop-range-all.png" alt="Desktop all range proof fixture" width="320" /> | <img src="docs/assets/screenshots/desktop-partition-pagination.png" alt="Desktop partition pagination proof fixture" width="320" /> |
+
 | Search and filters | Expanded sources | 3 inline sources |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-query-panel.png" alt="Desktop unified search and filter panel" width="320" /> | <img src="docs/assets/screenshots/desktop-source-expanded.png" alt="Desktop expanded song sources" width="320" /> | <img src="docs/assets/screenshots/desktop-source-inline-3.png" alt="Desktop inline source thumbnails" width="320" /> |
 
-| Middle pagination | Long timestamp source |
-| --- | --- |
-| <img src="docs/assets/screenshots/desktop-pagination-middle.png" alt="Desktop middle pagination state" width="320" /> | <img src="docs/assets/screenshots/desktop-source-long-time.png" alt="Desktop inline source with long timestamp" width="320" /> |
+| Middle pagination | Long timestamp source | Search and snapshot indexes |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/desktop-pagination-middle.png" alt="Desktop middle pagination state" width="320" /> | <img src="docs/assets/screenshots/desktop-source-long-time.png" alt="Desktop inline source with long timestamp" width="320" /> | <img src="docs/assets/screenshots/desktop-search-snapshot-index.png" alt="Desktop search and snapshot index proof fixture" width="320" /> |
+
+| Tablet 3 inline sources |
+| --- |
+| <img src="docs/assets/screenshots/tablet-source-inline-3.png" alt="Tablet inline source thumbnails" width="260" /> |
 
 ### Mobile H5
 
@@ -53,13 +61,17 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-source-inline-3.png" alt="Mobile three source inline row with thumbnail tail action" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3.png" alt="Mobile row with more than three sources" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3-expanded.png" alt="Mobile row with all remaining sources expanded" width="180" /> |
 
-| Thumbnail fallback | Long channel | Long timestamp |
+| New-to-old sources | Thumbnail fallback | Long channel |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-source-thumb-fallback.png" alt="Mobile inline source thumbnail fallback" width="180" /> | <img src="docs/assets/screenshots/mobile-source-long-channel.png" alt="Mobile inline source with long channel name" width="180" /> | <img src="docs/assets/screenshots/mobile-source-long-time.png" alt="Mobile inline source with long timestamp" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-source-new-to-old.png" alt="Mobile sources ordered from newest to oldest" width="180" /> | <img src="docs/assets/screenshots/mobile-source-thumb-fallback.png" alt="Mobile inline source thumbnail fallback" width="180" /> | <img src="docs/assets/screenshots/mobile-source-long-channel.png" alt="Mobile inline source with long channel name" width="180" /> |
 
-| Extra timestamps | Filtered summary | Active controls |
+| Long timestamp | Extra timestamps | Filtered summary |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-source-extra-times.png" alt="Mobile inline source with extra timestamps" width="180" /> | <img src="docs/assets/screenshots/mobile-summary-filtered.png" alt="Mobile filtered summary with natural units" width="180" /> | <img src="docs/assets/screenshots/mobile-controls-active.png" alt="Mobile compact active controls" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-source-long-time.png" alt="Mobile inline source with long timestamp" width="180" /> | <img src="docs/assets/screenshots/mobile-source-extra-times.png" alt="Mobile inline source with extra timestamps" width="180" /> | <img src="docs/assets/screenshots/mobile-summary-filtered.png" alt="Mobile filtered summary with natural units" width="180" /> |
+
+| Active controls |
+| --- |
+| <img src="docs/assets/screenshots/mobile-controls-active.png" alt="Mobile compact active controls" width="180" /> |
 
 | Active query strip | Recent searches | Suggestions |
 | --- | --- | --- |
@@ -73,7 +85,7 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 
 1. `scripts/update-songlist.js` fetches YouTube search pages for `歌枠` and `弾き語り` using the same `today` and `month` filter URLs used by `Marica7731/mygit`.
    - Search pages are expanded through YouTube search continuation requests, matching the ranking project's "scroll until more results are loaded" behavior without requiring a browser in GitHub Actions.
-   - When the previous successful snapshot is fresh, already inspected videos are carried forward and skipped. The `72h` and `1m` views keep separate source membership: a recent video enters `1m` only when it also came from the monthly search filter. The new inspection queue usually scans today's and one-day-old candidates, then refreshes a small number of monthly-filter candidates. If carried monthly results are below the backfill target, the queue reserves less of the inspection budget for recent-only videos and fills the remaining budget from monthly-filter candidates first.
+   - When the previous successful snapshot is fresh, already inspected videos are carried forward and skipped. The `7d` view is a fixed publish-time window; the `all` view is built from the permanent video catalog. The new inspection queue usually scans today's and one-day-old candidates, then refreshes a small number of catalog/backfill candidates. If carried catalog results are below the backfill target, the queue reserves less of the inspection budget for recent-only videos and fills the remaining budget from catalog candidates first.
    - If the previous successful snapshot is missing or too old, the script falls back to a full recovery queue covering today's, one-day-old, and two-day-old candidates before filling the remaining budget with monthly-filter candidates.
 2. It fetches each candidate watch page, extracts description and first comment continuations, parses timestamped song lists, and skips videos without usable songs.
    - Timestamp sources now keep stable review identity: YouTube comments and replies use their `commentId`, descriptions use `description:<videoId>:<hash>`, and hash fallback uses normalized source text SHA-256.
@@ -86,14 +98,18 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
    - A channel-first regional VTuber source blocklist runs before inspection, during carry-forward, before final merge, during derived-data rebuilds, and in the front-end as an in-memory safety filter for existing snapshots. Daily Song List mirrors the canonical list from `Marica7731/mygit` into `config/blocked-vtuber-channels.json`, then regenerates `assets/blocked-vtuber-meta.js` and `assets/blocked-vtuber-channels.js`; runtime payloads carry `blocklistVersion` and `blocklistHash` so stale data is re-filtered instead of trusted.
 3. It writes:
    - `data/latest.json`
-   - `data/72h.json`
-   - `data/1m.json`
+   - `data/7d.json`
+   - `data/all.json`
+   - `data/72h.json` and `data/1m.json` compatibility alias manifests
    - `data/ui/meta.json`
-   - `data/ui/72h.<hash>.json`
-   - `data/ui/1m.<hash>.json`
-   - `data/ui/72h.json` and `data/ui/1m.json` as legacy fallback files
-   - `data/diff/latest-72h.json`
-   - `data/diff/latest-1m.json`
+   - `data/ui/7d.<hash>.json`
+   - `data/ui/all.<hash>.json`
+   - `data/ui/7d.json` and `data/ui/all.json` as legacy fallback files
+   - `data/ui/ranges/<range>/manifest.<hash>.json` and `page-*.json`
+   - `data/ui/source-details/<range>/manifest.<hash>.json` and `page-*.json`
+   - `data/ui/search/<range>/manifest.<hash>.json` and `page-*.json`
+   - `data/diff/latest-7d.json`
+   - `data/diff/latest-all.json`
    - `data/audit.json`
    - `data/review/queue.json`
    - `data/review/sources/<videoId>-<sourceHash>.json`
@@ -104,23 +120,25 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
    - `data/review/confirmed-noise.json`
    - `data/quality-report.json`
    - `data/snapshots/<hour>.json`
+   - `data/snapshots/index/YYYY/MM.json`
    - `data/snapshots/index.json`
    - `data/status.json`
-   - `data/latest.json`, `data/72h.json`, `data/1m.json`, snapshots, and `data/audit.json` remain readable generation/review artifacts.
-   - `data/ui/meta.json` is written last and points to content-hashed compact runtime range files. `dataVersion` and range `sha256` bind the meta file to the exact range payloads so the browser can reject mismatched or empty runtime data instead of rendering a normal empty page.
-   - `data/ui/*.json` is the compact browser runtime payload. It keeps only the fields the UI needs, uses `seconds` to format timestamp labels, and carries `filterVersion`, `nicheAnnotated`, and `dataVersion` so current data can skip the front-end compatibility safety scan.
+   - `data/latest.json`, `data/7d.json`, `data/all.json`, snapshots, and `data/audit.json` remain readable generation/review artifacts.
+   - `data/ui/meta.json` is written last and points to content-hashed compact runtime range files plus sharded runtime, source-detail, and search manifests. `dataVersion` and range/shard `sha256` values bind the meta file to the exact payloads so the browser can reject mismatched or empty runtime data instead of rendering a normal empty page.
+   - `data/ui/*.json` and `data/ui/**/page-*.json` are the compact browser runtime payloads. They keep only the fields the UI needs, use `seconds` to format timestamp labels, and carry `filterVersion`, `nicheAnnotated`, and `dataVersion` so current data can skip the front-end compatibility safety scan.
    - The diff files compare latest ranks against the previous successful snapshot but are written in compact runtime form. Each `songRank` and `artistRank` entry keeps only `entityKey`, `rankDelta`, `countDelta`, and `isNew`; unchanged entries are omitted. `rankDelta` is `previousRank - currentRank`, so positive values mean the entity moved up and negative values mean it moved down.
    - `curationVersion` and `curationHash` are written into latest payloads, runtime meta, snapshots, and rank diff metadata. Rank diffs clean the previous snapshot in memory with the same current curation rules before comparing, so a new correction does not silently compare cleaned current data with dirty previous data.
+   - The committed `7d`, `all`, partition, search-index, and snapshot-index UI proof cases cover the current runtime architecture and are checked with the screenshot manifest.
 4. `index.html` + `assets/app.js` render the latest data and allow switching to an hourly snapshot.
    - Default view is song appearance ranking.
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
    - Ranking rows place count and trend in a fixed right-side `rank-side` column. Song and song-index source previews now occupy a dedicated grid area spanning the content and right-side columns, grouped by unique source video.
    - Responsive ranking layout uses one maintained breakpoint system: mobile is `<=720px`, tablet is `721px-919px`, and desktop is `>=920px`. Mobile and tablet drawers render in-place below the current row, keep only one row expanded at a time, and use timestamp links whose visible text is only the time while the accessible label keeps song, artist, and channel context.
-   - `FrontendUtils.sourcePresentationModel` inlines 0-3 unique source videos. Inline sources render compact 16:9 video thumbnails without overlay text; the primary timestamp sits below the channel name in the source meta row and remains a jump link. Four or more source videos show the first three inline plus compact `+N来源`; one click renders all remaining sources and changes the control to `收起`. One-source rows no longer open drawers.
+   - `FrontendUtils.sourcePresentationModel` inlines compact source videos by responsive proof contract: mobile 4+ rows show two inline sources, while desktop/tablet proof fixtures lock the 3-source layout. Inline sources render compact 16:9 video thumbnails without overlay text; the primary timestamp sits below the channel name in the source meta row and remains a jump link. Four or more source videos show a compact `+N来源`; one click renders all remaining sources and changes the control to `收起`. One-source rows no longer open drawers.
    - The unified query panel opens its shell before suggestions, recent searches, query indexes, or result-count previews run. Search input updates only the draft query text, clear button, suggestions timer, and preview timer; IME composition does not rebuild the whole form on every intermediate character.
    - Each inline source includes a micro video thumbnail, channel link, timestamp meta link, optional extra-time toggle, and compact setlist-copy icon. Exactly three-source inline rows place the third source in a tail row with a fixed 28px same-song link-copy icon; 4+ rows use the same tail row for the third source plus compact `+N来源` / `收起` and expose the song-level copy action in the expanded source toolbar.
    - Pagination uses one token model across songs, artists, song index, and videos. Numeric pagination uses non-clickable ellipsis markers; mobile top pagination uses a compact page stepper, and the song index combines bucket selection with page selection in one toolbar.
-   - Initial load reads `data/ui/meta.json` first, then loads only the active hash range file from `meta.ranges`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact monthly range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
+   - Initial load reads `data/ui/meta.json` first, then loads only the active range shard manifest and first page from `meta.ranges[range].shards.runtime`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact cumulative range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
    - `debug=1` adds a read-only runtime panel with `dataVersion`, active range path, status fields, fallback state, and recent resource timings.
    - Initial load skips `song-search-known-songs.json` when payload songs already contain `isNiche`; older snapshots load that index only when niche annotation is missing. Current data with a supported `filterVersion` and matching blocklist hash skips the full front-end safety filter after loading only the tiny blocklist meta asset; older or historical payloads dynamically load `blocked-vtuber-channels.js` and `source-filter.js` before rendering.
    - Each range keeps derived occurrences, per-view lazy song records, per-view lazy artist records, video search data, and per-record `videoCount` in memory. Pagination and page-size changes reuse those records and only rebuild the visible page DOM. Prepared historical snapshots keep the existing 5-entry in-memory LRU cache, while immutable hourly snapshot JSON uses browser cache.
@@ -179,7 +197,7 @@ Screenshots are written to `artifacts/h5-redesign/` and should not be committed.
 
 For repository-homepage screenshots, run `npm run screenshots:readme -- <base-url>` and commit the refreshed files in `docs/assets/screenshots/`. This set should be updated with every shipped UI change so the README reflects the current deployed interface, while `artifacts/h5-redesign/` remains the disposable full acceptance output.
 
-`npm run rebuild:derived` never fetches YouTube. It rereads local `data/latest.json` song `raw` fields with the current parser, reapplies durable curation rules and manual overrides, reuses local `data/song-search-known-songs.json`, rewrites `data/latest.json`, `data/72h.json`, `data/1m.json`, rank diffs, review reports, and compact `data/ui/*` runtime files. Use it for parser/rule/report fixes that should update the current published dataset without changing the remote scrape input.
+`npm run rebuild:derived` never fetches YouTube. It rereads local `data/latest.json` song `raw` fields with the current parser, reapplies durable curation rules and manual overrides, reuses local `data/song-search-known-songs.json`, rewrites `data/latest.json`, `data/7d.json`, `data/all.json`, legacy alias manifests, rank diffs, review reports, and compact `data/ui/*` plus sharded `data/ui/**` runtime files. Use it for parser/rule/report fixes that should update the current published dataset without changing the remote scrape input.
 
 `scripts/sync-blocked-vtuber-channels.js --source <mygit>/config/blocked-vtuber-channels.json` updates the local mirror of the canonical regional VTuber blocklist. After syncing, run `npm run blocklist:generate`, `npm run blocklist:validate`, and `npm run rebuild:derived` so generated browser assets and runtime payload hashes all refer to the same list.
 
@@ -205,7 +223,7 @@ Useful environment variables:
 - `DAILY_SONG_RETRY_JITTER_MS`: extra random delay added after retryable YouTube responses, default `0`; GitHub Actions uses `5000`.
 - `DAILY_SONG_MAX_429_ERRORS`: stop inspecting new videos after this many YouTube 429 responses, default `8`.
 - `DAILY_SONG_COMMENT_REPLY_LIMIT`: max reply continuations, default `12`.
-- `DAILY_SONG_SNAPSHOT_RETENTION_DAYS`: hourly snapshot retention, default `35`.
+- `DAILY_SONG_SNAPSHOT_RETENTION_DAYS`: legacy compatibility knob; successful hourly snapshots are now kept permanently in the committed snapshot tree.
 - `DAILY_SONG_INSPECTION_CACHE_RETENTION_DAYS`: retention for videos that were inspected but did not produce usable songs, default matches snapshot retention.
 - `DAILY_SONG_INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS`: short skip window for videos that recently failed inspection, default `6`.
 - `DAILY_SONG_INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS`: only skip videos with no usable setlist or no timestamp candidates after the video itself is at least this old, default `48`. This keeps just-ended streams eligible for later reinspection while avoiding repeated work on two-day-old videos that still have no usable setlist/progress comments.

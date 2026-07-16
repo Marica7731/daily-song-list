@@ -2,7 +2,8 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
-  MONTH_CATALOG_DAYS,
+  CATALOG_RETENTION_POLICY,
+  buildCatalogSegments,
   catalogSummary,
   catalogToVideos,
   createEmptyVideoCatalog,
@@ -12,26 +13,27 @@ const {
 
 const NOW = new Date("2026-07-13T13:00:00Z");
 
-test("video catalog keeps one usable entry per video within 35 days", () => {
+test("video catalog keeps one usable entry per video permanently", () => {
   const result = rebuildVideoCatalogFromVideos(
     [
       video("AAAAAAAAAAA", 2, "new song"),
       video("AAAAAAAAAAA", 3, "older duplicate"),
       video("BBBBBBBBBBB", 24 * 34, "month song"),
-      video("CCCCCCCCCCC", 24 * 36, "expired song"),
+      video("CCCCCCCCCCC", 24 * 36, "older song"),
       { ...video("DDDDDDDDDDD", 1, ""), songs: [] },
     ],
     NOW,
     { curationVersion: "curation-v1:test" },
   );
 
-  assert.equal(result.catalog.retentionDays, MONTH_CATALOG_DAYS);
+  assert.equal(result.catalog.retentionPolicy, CATALOG_RETENTION_POLICY);
+  assert.equal(result.catalog.retentionDays, null);
   assert.deepEqual(
     result.catalog.videos.map((entry) => entry.videoId),
-    ["AAAAAAAAAAA", "BBBBBBBBBBB"],
+    ["AAAAAAAAAAA", "BBBBBBBBBBB", "CCCCCCCCCCC"],
   );
   assert.equal(result.catalog.videos[0].songs[0].title, "new song");
-  assert.equal(result.stats.expiredVideoCount, 1);
+  assert.equal(result.stats.expiredVideoCount, 0);
   assert.equal(result.stats.skippedInvalidVideoCount, 1);
 });
 
@@ -74,12 +76,32 @@ test("video catalog merge preserves firstSeenAt while replacing refreshed songs"
 });
 
 test("video catalog summary reports month coverage", () => {
-  const result = rebuildVideoCatalogFromVideos([video("AAAAAAAAAAA", 2, "song")], NOW);
+  const result = rebuildVideoCatalogFromVideos([video("AAAAAAAAAAA", 2, "song"), video("BBBBBBBBBBB", 24 * 40, "old song")], NOW);
   const summary = catalogSummary(result.catalog, NOW);
 
   assert.equal(summary.path, "data/video-catalog.json");
-  assert.equal(summary.catalogVideoCount, 1);
+  assert.equal(summary.retentionPolicy, CATALOG_RETENTION_POLICY);
+  assert.equal(summary.catalogVideoCount, 2);
+  assert.equal(summary.allVideoCount, 2);
   assert.equal(summary.monthVideoCount, 1);
+});
+
+test("video catalog segments split permanent catalog records", () => {
+  const result = rebuildVideoCatalogFromVideos(
+    [video("AAAAAAAAAAA", 2, "song A"), video("BBBBBBBBBBB", 3, "song B"), video("CCCCCCCCCCC", 4, "song C")],
+    NOW,
+  );
+  const { manifest, segments } = buildCatalogSegments(result.catalog, { segmentSize: 2 });
+
+  assert.equal(manifest.retentionPolicy, CATALOG_RETENTION_POLICY);
+  assert.equal(manifest.itemCount, 3);
+  assert.equal(manifest.segmentCount, 2);
+  assert.deepEqual(
+    manifest.segments.map((segment) => segment.itemCount),
+    [2, 1],
+  );
+  assert.match(manifest.segments[0].path, /^data\/catalog-segments\/segment-0001\.[0-9a-f]{12}\.json$/u);
+  assert.equal(segments[0].payload.videos.length, 2);
 });
 
 function video(videoId, hoursAgo, title) {

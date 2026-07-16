@@ -2,13 +2,17 @@
   "name": "daily-song-list",
   "version": "1.0.0",
   "private": true,
-  "description": "Hourly YouTube timestamp song-list snapshots for 72H and one-month views.",
+  "description": "Hourly YouTube timestamp song-list snapshots for 7-day and cumulative views.",
   "scripts": {
     "update": "npm run update:core && npm run review:build",
     "update:core": "node scripts/update-songlist.js && node scripts/apply-song-search-niche.js && node scripts/build-runtime-data.js && npm run validate:core",
     "review:build": "node scripts/build-review-queue.js && node scripts/export-dirty-candidates.js && npm run validate:review",
     "rebuild:video-catalog": "node scripts/rebuild-video-catalog.js",
     "rebuild:derived": "node scripts/rebuild-derived-data.js && node scripts/build-review-queue.js && node scripts/export-dirty-candidates.js && node scripts/build-runtime-data.js",
+    "migrate:ranges-v2": "node scripts/migrate-permanent-data.js --dry-run",
+    "migrate:catalog-unbounded": "node scripts/migrate-permanent-data.js",
+    "import:git-history": "node scripts/migrate-permanent-data.js --dry-run",
+    "backfill:history": "node scripts/migrate-permanent-data.js",
     "build:runtime": "node scripts/build-runtime-data.js",
     "version:assets": "node scripts/update-asset-version.js",
     "blocklist:generate": "node scripts/generate-blocked-vtuber-channels.js",
@@ -27,6 +31,7 @@
     "check:budget": "node scripts/check-runtime-budgets.js",
     "check": "node scripts/check-js-syntax.js && npm run check:ui-proof && npm run blocklist:validate && npm test && npm run validate && npm run check:budget",
     "serve": "python -m http.server 8080",
+    "test:scale": "node --test test/data-architecture.test.js",
     "test": "node --test"
   },
   "engines": {

@@ -44,9 +44,9 @@
 - 1 个唯一来源视频：内联显示微缩封面、频道、主时间戳、复制歌单按钮。若同一视频有多个时间点，只展开额外时间点，不打开 drawer。
 - 2 个唯一来源视频：全部内联显示，不打开 drawer，不显示复制全部链接入口。
 - 3 个唯一来源视频：手机两列布局，前两项在第一行；第二行使用 `.source-inline-tail`，第三个来源占 `minmax(0, 1fr)`，复制同一首歌全部来源链接是固定约 28px 图标按钮。复制全部链接不得占据等宽空卡片。
-- 4 个以上唯一来源视频：默认内联前 3 个，紧凑显示 `+N来源`，完整语义写入 `title` 和 `aria-label`。点击一次后显示所有剩余来源，按钮变为 `收起`。不得再出现二次 `查看更多来源`。
-- 4+ 折叠态同样使用 `.source-inline-tail`，第三个来源占剩余宽度，`+N来源` / `收起` 按钮自适应文字且最大宽度约 92px。
-- 4+ 折叠态的前 3 个来源必须真实渲染且至少显示非空频道名；不得用 `display:none` 隐藏第 2、3 个来源、频道名、时间点或复制按钮来伪装压缩。
+- 4 个以上唯一来源视频：移动端默认内联前 2 个，平板和桌面 proof fixture 覆盖 3 个来源布局；紧凑显示 `+N来源`，完整语义写入 `title` 和 `aria-label`。点击一次后显示所有剩余来源，按钮变为 `收起`。不得再出现二次 `查看更多来源`。
+- 4+ 折叠态移动端允许 2 个真实内联来源和 1 个紧凑复制全部入口；平板/桌面 3 来源 fixture 使用 `.source-inline-tail`，第三个来源占剩余宽度，`+N来源` / `收起` 按钮自适应文字且最大宽度约 92px。
+- 4+ 折叠态的内联来源必须真实渲染且至少显示非空频道名；不得用 `display:none` 隐藏第 2 个移动来源，或隐藏平板/桌面第 3 个来源、频道名、时间点或复制按钮来伪装压缩。
 - 来源预览是 `.rank-row` / `.index-row` 的直接子元素，使用 `grid-area: sources` 横跨内容列和右侧列；手机排行网格为 `"rank content side"`、`". sources sources"`、`"drawer drawer drawer"`。
 - `.source-inline-more` 是 4+ 来源折叠态的第四格；展开后同一个按钮变为顶部唯一 `收起` 入口。Drawer 工具栏不得再提供第二个顶部收起按钮。
 - Drawer 只用于 4+ 的剩余来源，宽度必须占满榜单可用宽度，内容高度由实际内容决定。工具栏文案使用 `其余 N 个来源`，右侧只保留复制全部链接图标；长列表可以保留一个弱化底部 `收起`。
@@ -105,12 +105,22 @@
 README 截图矩阵至少包括：
 
 - 桌面歌曲榜、月度榜、视频页、查询面板、展开来源、中页分页。
+- 桌面 `7d`、`all` range fixture；这些是当前核心 runtime 的 proof。
+- 桌面分片分页 fixture、搜索索引 fixture 和快照索引 fixture。
+- 平板 3 来源内联 fixture。
 - 手机歌曲榜、歌手榜、歌曲索引、索引中页、索引末页、视频页、展开视频、active query strip、query recent、query suggestions、query history、展开来源。
 - 手机 320px 分页。
 - 手机 0 来源、1 来源、2 来源、3 来源、4+ 来源收起、4+ 来源展开、长频道名、长时间戳、额外时间点和封面 fallback。
+- 手机来源新到旧 fixture，至少用 `publishedAt` 降序校验来源显示顺序。
 - 移动筛选后摘要、活动查询控制区和底部导航选中态。
 - 截图脚本必须验证视觉可见性，不得只检查 DOM 或 `data-source-video-count`：内联来源缩略图必须无遮挡，页面中不得存在 `.source-inline-time-overlay`，来源主时间戳必须可见且不溢出，来源频道不能 `display:none`，来源预览必须横跨内容和右侧列，展开 drawer 不得重复前三个内联来源，移动查询按钮不能显示孤立数字徽标/圆点，视频页和展开来源的首个缩略图必须实际可见。
-- `docs/assets/screenshots/manifest.json` 记录全部截图 SHA256、尺寸、生成时间、视口、URL 参数、选择器和 UI 源码指纹。只要 `index.html`、`assets/app.js`、`assets/styles.css`、`assets/frontend-utils.js`、`docs/ui-spec.md`、截图脚本或 UI proof fixture 变化但截图未刷新，`npm run check` 必须失败并提示运行 `npm run screenshots:readme`。
+- `docs/assets/screenshots/manifest.json` 记录全部截图 SHA256、尺寸、生成时间、视口、URL 参数、选择器和 UI 源码指纹。`scripts/validate-ui-proof.js` 还要校验 `scripts/ui-proof-config.js` 中 fixture screenshot 的 scene、viewport 和 URL params。只要 `index.html`、`assets/app.js`、`assets/styles.css`、`assets/frontend-utils.js`、`docs/ui-spec.md`、`docs/data-architecture.md`、`docs/range-migration.md`、`docs/storage-layout.md`、`docs/backfill.md`、截图脚本或 UI proof fixture 变化但截图未刷新，`npm run check` 必须失败并提示运行 `npm run screenshots:readme`。
+
+## 数据与 Range 文档
+
+- 当前核心 runtime 生成 `7d` 与 `all`；`72h` 与 `1m` 只作为 legacy alias 兼容旧 URL 和旧文件入口。
+- 数据架构见 `docs/data-architecture.md`，存储文件职责见 `docs/storage-layout.md`，backfill 语义见 `docs/backfill.md`。
+- 分片分页、搜索索引和快照索引 proof 必须来自 `test/fixtures/ui-proof-runtime.json`，不得依赖当前本地 `data/` 文件是否正好包含某个结果。
 
 ## 移动垂直预算与强调色
 

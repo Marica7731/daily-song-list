@@ -3,7 +3,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-const { expectedScreenshots, proofInputPaths } = require("./ui-proof-config");
+const { expectedScreenshots, proofInputPaths, screenshotContracts } = require("./ui-proof-config");
 
 const repoRoot = path.join(__dirname, "..");
 const screenshotDir = path.join(repoRoot, "docs", "assets", "screenshots");
@@ -49,6 +49,11 @@ function markdownScreenshotRefs(relativePath) {
 
 function validateUiProof(options = {}) {
   const errors = [];
+  const expectedNames = new Set();
+  for (const name of expectedScreenshots) {
+    if (expectedNames.has(name)) errors.push(`UI proof screenshot duplicated in config: ${name}`);
+    expectedNames.add(name);
+  }
   const expectedPaths = expectedScreenshots.map((name) => `docs/assets/screenshots/${name}`);
   if (!fs.existsSync(manifestPath)) {
     errors.push("UI proof manifest missing: docs/assets/screenshots/manifest.json");
@@ -111,6 +116,28 @@ function validateUiProof(options = {}) {
     if (!expectedPaths.includes(entry)) errors.push(`UI proof manifest has unexpected screenshot: ${entry}`);
   }
 
+  for (const [name, contract] of Object.entries(screenshotContracts || {})) {
+    if (!expectedScreenshots.includes(name)) errors.push(`UI proof contract references unknown screenshot: ${name}`);
+    const screenshotPath = `docs/assets/screenshots/${name}`;
+    const entry = manifestScreenshots.get(screenshotPath);
+    if (!entry) continue;
+    if (contract.scene && entry.scene !== contract.scene) {
+      errors.push(`UI proof screenshot scene mismatch: ${screenshotPath}`);
+    }
+    if (contract.viewport) {
+      for (const key of ["width", "height"]) {
+        if (entry.viewport?.[key] !== contract.viewport[key]) {
+          errors.push(`UI proof screenshot viewport ${key} mismatch: ${screenshotPath}`);
+        }
+      }
+    }
+    for (const [key, value] of Object.entries(contract.params || {})) {
+      if (entry.urlParams?.[key] !== value) {
+        errors.push(`UI proof screenshot param ${key} mismatch: ${screenshotPath}`);
+      }
+    }
+  }
+
   const markdownRefs = [...new Set([...markdownScreenshotRefs("README.md"), ...markdownScreenshotRefs("docs/ui-proof.md")])];
   for (const ref of markdownRefs) {
     if (!fs.existsSync(path.join(repoRoot, ref))) errors.push(`UI proof markdown references missing screenshot: ${ref}`);
@@ -139,6 +166,7 @@ module.exports = {
   pngDimensions,
   proofInputEntries,
   proofInputHash,
+  screenshotContracts,
   sha256Buffer,
   validateUiProof,
 };

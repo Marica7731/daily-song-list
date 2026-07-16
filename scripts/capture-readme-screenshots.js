@@ -418,12 +418,14 @@ async function assertInlineSourceCase(page, row, kind, label) {
     return;
   }
 
+  const expectedInlineVisible = shape.viewportWidth <= 720 ? 2 : 3;
+  const maxCollapsedCopyAll = shape.viewportWidth <= 720 ? 1 : 0;
   if (
     shape.sourceVideoCount <= 3 ||
-    shape.inlineVisibleCount !== 3 ||
-    shape.items.length !== 3 ||
+    shape.inlineVisibleCount !== expectedInlineVisible ||
+    shape.items.length !== expectedInlineVisible ||
     shape.toggleCount !== 1 ||
-    shape.copyAllCount !== 0 ||
+    shape.copyAllCount > maxCollapsedCopyAll ||
     shape.items.some(
       (item) =>
         !item.visible ||
@@ -505,7 +507,8 @@ async function assertExpandedSourceVisible(page, row, label) {
     shape.inlineCollapseCount !== 1 ||
     shape.toolbarCollapseCount !== 0 ||
     shape.bottomCollapseCount > 1 ||
-    shape.copySongLinksCount !== 1 ||
+    shape.copySongLinksCount < 1 ||
+    shape.copySongLinksCount > 2 ||
     (shape.viewportWidth <= 720 && shape.toolbarHeight > 32) ||
     shape.duplicateVideoIds.length ||
     shape.repeatedInlineVideoIds.length ||
@@ -553,7 +556,7 @@ function sourceItemHtml(group) {
   const extraLabel = group.extraCountLabel || `+${extraTimes.length}`;
   const extraCount = Number.parseInt(String(extraLabel).replace(/\D+/gu, ""), 10) || extraTimes.length;
   return `
-    <span class="source-inline-item" data-video-id="${escapeHtml(group.videoId || "fallback")}">
+    <span class="source-inline-item" data-video-id="${escapeHtml(group.videoId || "fallback")}" data-published-at="${escapeHtml(group.publishedAt || "")}">
       <a class="source-inline-thumb source-link" href="https://www.youtube.com/watch?v=${videoId}&t=${seconds}s" target="_blank" rel="noreferrer" tabindex="-1" aria-label="打开来源视频时间戳：${escapeHtml(group.title)}">
         <img class="source-inline-thumb-image" alt="" loading="lazy" decoding="async" fetchpriority="low" width="56" height="32" src="${fixtureThumbSrc(group)}" />
       </a>
@@ -582,7 +585,7 @@ function sourceItemHtml(group) {
   `;
 }
 
-function fixtureSourceStripHtml(caseName) {
+function fixtureSourceStripHtml(caseName, viewport = {}) {
   const fixture = proofFixture.sourceCases[caseName];
   if (!fixture) throw new Error(`unknown proof fixture: ${caseName}`);
   const groups = fixture.groups || [];
@@ -590,17 +593,18 @@ function fixtureSourceStripHtml(caseName) {
   if (!count) {
     return '<div class="source-inline-strip source-inline-none" data-source-video-count="0" data-inline-visible-count="0"><span class="source-inline-empty">无来源</span></div>';
   }
-  const hasTailAction = caseName === "triple";
-  const head = hasTailAction ? groups.slice(0, 2) : groups;
-  const tail = hasTailAction ? groups[2] : null;
+  const inlineLimit = Number(viewport.width) <= 720 ? 2 : 3;
+  const head = groups.slice(0, Math.min(inlineLimit, groups.length));
+  const remainingCount = Math.max(0, count - head.length);
+  const hasActions = count > 1 || remainingCount > 0;
   return `
-    <div class="source-inline-strip source-inline-inline${hasTailAction ? " has-tail-action" : ""}" data-source-video-count="${count}" data-inline-visible-count="${Math.min(count, 3)}">
+    <div class="source-inline-strip source-inline-${remainingCount ? "collapsed" : "inline"}${hasActions ? " has-tail-action" : ""}" data-source-video-count="${count}" data-inline-visible-count="${head.length}">
       <div class="source-inline-preview-rail" aria-label="来源预览">
         <div class="source-inline-preview-list">${head.map(sourceItemHtml).join("")}</div>
       </div>
       ${
-        tail
-          ? `<div class="source-inline-tail">${sourceItemHtml(tail)}<div class="source-inline-actions"><button class="source-inline-copy-all source-copy-icon ui-chip ui-chip-icon" type="button" data-copy-song-links="true" title="复制全部链接" aria-label="复制同一首歌全部来源时间点链接"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"/><path d="M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.15-1.15"/></svg></button></div></div>`
+        hasActions
+          ? `<div class="source-inline-actions">${remainingCount ? `<button class="source-inline-more ui-chip" type="button" data-toggle-source="true" data-source-summary-toggle="true" aria-expanded="false">+${remainingCount}来源</button>` : ""}<button class="source-inline-copy-all source-copy-icon ui-chip ui-chip-icon" type="button" data-copy-song-links="true" title="复制全部链接" aria-label="复制同一首歌全部来源时间点链接"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"/><path d="M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.15-1.15"/></svg></button></div>`
           : ""
       }
     </div>
@@ -628,7 +632,7 @@ async function captureFixtureSourceCase(browser, viewport, caseName, name) {
                 <div class="rank-subline"><span class="subline-primary">Proof Artist</span></div>
               </div>
               <div class="rank-side"><span class="rank-count"><span class="rank-count-value">1次</span></span></div>
-              ${fixtureSourceStripHtml(caseName)}
+              ${fixtureSourceStripHtml(caseName, viewport)}
             </div>
           </section>
         </main>
@@ -684,13 +688,18 @@ async function assertFixtureSourceProof(page, caseName, label) {
         extraButtonExpanded: more?.getAttribute("aria-expanded") || "",
         extraHidden: extra?.hidden ?? null,
         extraTimeTexts: Array.from(extra?.querySelectorAll(".source-inline-extra-time") || []).map((link) => link.textContent || ""),
+        publishedAt: item.dataset.publishedAt || "",
       };
     });
     const copyAll = node.querySelector(".source-inline-copy-all");
+    const moreButton = node.querySelector(".source-inline-more");
     return {
       sourceVideoCount: Number(node.querySelector(".source-inline-strip")?.dataset.sourceVideoCount || 0),
+      inlineVisibleCount: Number(node.querySelector(".source-inline-strip")?.dataset.inlineVisibleCount || 0),
       emptyVisible: visible(node.querySelector(".source-inline-empty")),
       items,
+      moreText: moreButton?.textContent || "",
+      moreWidth: moreButton?.getBoundingClientRect().width || 0,
       copyAllWidth: copyAll?.getBoundingClientRect().width || 0,
       thumbCount: node.querySelectorAll(".source-inline-thumb-image").length,
       overlayCount: node.querySelectorAll(".source-inline-time-overlay").length,
@@ -702,7 +711,7 @@ async function assertFixtureSourceProof(page, caseName, label) {
     if (shape.sourceVideoCount !== 0 || !shape.emptyVisible || shape.items.length !== 0) throw new Error(`${label} none fixture invalid: ${JSON.stringify(shape)}`);
     return;
   }
-  if (shape.items.length !== shape.sourceVideoCount || shape.thumbCount !== shape.items.length || shape.overlayCount !== 0) {
+  if (shape.items.length !== shape.inlineVisibleCount || shape.thumbCount !== shape.items.length || shape.overlayCount !== 0) {
     throw new Error(`${label} fixture source count invalid: ${JSON.stringify(shape)}`);
   }
   if (shape.overlayCount !== 0) throw new Error(`${label} overlay should not exist: ${JSON.stringify(shape)}`);
@@ -732,8 +741,223 @@ async function assertFixtureSourceProof(page, caseName, label) {
       throw new Error(`${label} expanded extra times invalid: ${JSON.stringify(shape)}`);
     }
   }
-  if (caseName === "triple" && (shape.copyAllWidth < 26 || shape.copyAllWidth > 32 || shape.items[2].width < 180)) {
-    throw new Error(`${label} fixture tail invalid: ${JSON.stringify(shape)}`);
+  if (caseName === "newToOld") {
+    const dates = shape.items.map((item) => Date.parse(item.publishedAt));
+    if (dates.some((value) => !Number.isFinite(value)) || dates.some((value, index) => index > 0 && value > dates[index - 1])) {
+      throw new Error(`${label} source order is not new-to-old: ${JSON.stringify(shape)}`);
+    }
+  }
+  if (shape.sourceVideoCount > shape.inlineVisibleCount) {
+    const expectedRemaining = shape.sourceVideoCount - shape.inlineVisibleCount;
+    if (shape.moreText !== `+${expectedRemaining}来源` || shape.moreWidth < 32) {
+      throw new Error(`${label} fixture more action invalid: ${JSON.stringify(shape)}`);
+    }
+  }
+  if (shape.sourceVideoCount > 1 && (shape.copyAllWidth < 26 || shape.copyAllWidth > 32)) {
+    throw new Error(`${label} fixture copy action invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
+function rangeFixtureModels() {
+  const future = proofFixture.rangeCases || {};
+  return [future["7d"], future.all].filter(Boolean);
+}
+
+function rangeFixtureHtml(activeRange) {
+  const ranges = rangeFixtureModels();
+  const active = ranges.find((range) => range.id === activeRange);
+  if (!active) throw new Error(`unknown range fixture: ${activeRange}`);
+  return `
+    <section class="controls proof-range-fixture" id="controls" aria-label="Range fixture">
+      <div class="controls-inner">
+        <div class="segmented range-mode" role="group" aria-label="范围">
+          ${ranges
+            .map(
+              (range) =>
+                `<button class="tab${range.id === activeRange ? " active" : ""}" type="button" data-range="${escapeHtml(range.id)}" aria-pressed="${range.id === activeRange ? "true" : "false"}">${escapeHtml(range.label)}</button>`,
+            )
+            .join("")}
+        </div>
+        <div class="segmented view-mode" role="group" aria-label="视图">
+          <button class="tab active" type="button" aria-pressed="true">歌曲</button>
+          <button class="tab" type="button" aria-pressed="false">歌手</button>
+          <button class="tab" type="button" aria-pressed="false">索引</button>
+          <button class="tab" type="button" aria-pressed="false">视频</button>
+        </div>
+        <button class="query-trigger has-active-query" id="queryTrigger" type="button" aria-label="打开搜索与筛选">
+          <svg class="query-trigger-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" /></svg>
+          <span class="query-trigger-text">${escapeHtml(active.title)} proof</span>
+        </button>
+      </div>
+      <div class="summary" id="summary">
+        <div class="summary-main">
+          <span class="summary-metrics">
+            <span>${escapeHtml(active.label)}</span>
+            <span>${escapeHtml(active.itemCount)}个视频</span>
+            <span>${escapeHtml(active.runtimePath)}</span>
+          </span>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+async function captureRangeFixtureCase(browser, viewport, rangeId, name) {
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body>
+        <main class="layout">
+          ${rangeFixtureHtml(rangeId)}
+        </main>
+      </body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  await assertRangeFixtureProof(page, rangeId, name);
+  await saveElement(page, page.locator(".proof-range-fixture").first(), name, {
+    minBytes: 5_000,
+    viewport,
+    params: { fixture: "range", range: rangeId },
+    selector: ".proof-range-fixture",
+    scene: `fixture-range-${rangeId}`,
+  });
+  await page.close();
+}
+
+async function assertRangeFixtureProof(page, rangeId, label) {
+  const shape = await page.locator(".proof-range-fixture").first().evaluate((node, expectedRange) => {
+    const active = node.querySelector(".range-mode .tab[aria-pressed='true']");
+    const buttons = Array.from(node.querySelectorAll(".range-mode .tab")).map((button) => ({
+      range: button.dataset.range || "",
+      text: button.textContent.trim(),
+      pressed: button.getAttribute("aria-pressed") || "",
+      width: button.getBoundingClientRect().width,
+    }));
+    return {
+      buttons,
+      activeRange: active?.dataset.range || "",
+      activeText: active?.textContent?.trim() || "",
+      summaryText: node.querySelector("#summary")?.textContent || "",
+      expectedRange,
+      overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+    };
+  }, rangeId);
+  if (shape.overflow) throw new Error(`${label} range fixture overflow: ${JSON.stringify(shape)}`);
+  if (shape.activeRange !== rangeId || shape.buttons.length !== 2 || !shape.buttons.some((button) => button.range === "7d") || !shape.buttons.some((button) => button.range === "all")) {
+    throw new Error(`${label} range fixture invalid: ${JSON.stringify(shape)}`);
+  }
+  if (!shape.summaryText.includes(rangeId === "7d" ? "7d" : "all") && !shape.summaryText.includes(shape.activeText)) {
+    throw new Error(`${label} range summary invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
+function dataIndexRowsHtml(kind) {
+  const fixture = proofFixture.dataIndexCase || {};
+  if (kind === "partition-pagination") {
+    return (fixture.partitions || [])
+      .map(
+        (entry, index) => `
+        <div class="rank-row proof-index-row" data-proof-index-kind="partition">
+          <span class="rank-number">${String(index + 1).padStart(2, "0")}</span>
+          <div class="rank-content">
+            <h2 class="rank-title">${escapeHtml(entry.range)} 分片分页</h2>
+            <div class="rank-subline"><span class="subline-primary">${escapeHtml(entry.path)}</span></div>
+          </div>
+          <div class="rank-side"><span class="rank-count"><span class="rank-count-value">${escapeHtml(entry.page)}/${escapeHtml(entry.pageCount)}</span></span></div>
+        </div>`,
+      )
+      .join("");
+  }
+  const searchRows = (fixture.searchIndexes || [])
+    .map(
+      (entry, index) => `
+      <div class="rank-row proof-index-row" data-proof-index-kind="search">
+        <span class="rank-number">S${index + 1}</span>
+        <div class="rank-content">
+          <h2 class="rank-title">${escapeHtml(entry.scope)} 搜索索引</h2>
+          <div class="rank-subline"><span class="subline-primary">${escapeHtml(entry.key)}</span></div>
+        </div>
+        <div class="rank-side"><span class="rank-count"><span class="rank-count-value">${escapeHtml(entry.terms.length)}词</span></span></div>
+      </div>`,
+    )
+    .join("");
+  const snapshotRows = (fixture.snapshotIndex || [])
+    .map(
+      (entry, index) => `
+      <div class="rank-row proof-index-row" data-proof-index-kind="snapshot">
+        <span class="rank-number">H${index + 1}</span>
+        <div class="rank-content">
+          <h2 class="rank-title">${escapeHtml(entry.id)} 快照索引</h2>
+          <div class="rank-subline"><span class="subline-primary">${escapeHtml(entry.path)}</span></div>
+        </div>
+        <div class="rank-side"><span class="rank-count"><span class="rank-count-value">${escapeHtml(entry.generatedAt.slice(11, 16))}</span></span></div>
+      </div>`,
+    )
+    .join("");
+  return `${searchRows}${snapshotRows}`;
+}
+
+async function captureDataIndexFixtureCase(browser, viewport, kind, name) {
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body>
+        <main class="layout">
+          <section class="content-shell rank-panel proof-data-index-fixture" data-proof-index-kind="${escapeHtml(kind)}">
+            ${dataIndexRowsHtml(kind)}
+          </section>
+        </main>
+      </body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  await assertDataIndexFixtureProof(page, kind, name);
+  await saveElement(page, page.locator(".proof-data-index-fixture").first(), name, {
+    minBytes: 5_000,
+    viewport,
+    params: { fixture: kind },
+    selector: ".proof-data-index-fixture",
+    scene: `fixture-${kind}`,
+  });
+  await page.close();
+}
+
+async function assertDataIndexFixtureProof(page, kind, label) {
+  const shape = await page.locator(".proof-data-index-fixture").first().evaluate((node, expectedKind) => {
+    const rows = Array.from(node.querySelectorAll(".proof-index-row")).map((row) => ({
+      kind: row.dataset.proofIndexKind || "",
+      text: row.textContent.trim(),
+    }));
+    return {
+      expectedKind,
+      rows,
+      overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+    };
+  }, kind);
+  if (shape.overflow) throw new Error(`${label} data index fixture overflow: ${JSON.stringify(shape)}`);
+  if (kind === "partition-pagination") {
+    if (shape.rows.length !== 2 || shape.rows.some((row) => row.kind !== "partition") || !shape.rows.every((row) => /page-\d{3}/u.test(row.text))) {
+      throw new Error(`${label} partition fixture invalid: ${JSON.stringify(shape)}`);
+    }
+    return;
+  }
+  if (shape.rows.filter((row) => row.kind === "search").length < 2 || shape.rows.filter((row) => row.kind === "snapshot").length < 3) {
+    throw new Error(`${label} search/snapshot fixture invalid: ${JSON.stringify(shape)}`);
   }
 }
 
@@ -843,16 +1067,22 @@ async function main() {
   const browser = await chromium.launch();
   const desktop = { width: 1440, height: 900 };
   const desktopWide = { width: 1366, height: 768 };
+  const tablet = { width: 820, height: 900 };
   const mobile = { width: 390, height: 844 };
 
   try {
     await openPage(browser, desktop, {}, "desktop-song-rank.png");
     await openPage(browser, desktopWide, { range: "1m", pageSize: 100 }, "desktop-monthly-song-rank.png");
+    await captureRangeFixtureCase(browser, desktop, "7d", "desktop-range-7d.png");
+    await captureRangeFixtureCase(browser, desktop, "all", "desktop-range-all.png");
     await openPage(browser, desktopWide, { view: "videos" }, "desktop-video-view.png");
     await captureQueryPanel(browser, desktop, "desktop-query-panel.png", { filterTab: true });
     await captureExpandedSource(browser, desktop, {}, "desktop-source-expanded.png");
     await captureFixtureSourceCase(browser, desktop, "triple", "desktop-source-inline-3.png");
+    await captureDataIndexFixtureCase(browser, desktop, "partition-pagination", "desktop-partition-pagination.png");
+    await captureDataIndexFixtureCase(browser, desktop, "search-snapshot-index", "desktop-search-snapshot-index.png");
     await captureFixtureSourceCase(browser, desktop, "longTime", "desktop-source-long-time.png");
+    await captureFixtureSourceCase(browser, tablet, "triple", "tablet-source-inline-3.png");
 
     await openPage(browser, mobile, {}, "mobile-song-rank.png");
     await openPage(browser, mobile, { view: "artistRank" }, "mobile-artist-rank.png");
@@ -891,7 +1121,8 @@ async function main() {
     await captureFixtureSourceCase(browser, mobile, "none", "mobile-source-inline-0.png");
     await captureSourceCase(browser, mobile, "single", "mobile-source-inline-1.png");
     await captureFixtureSourceCase(browser, mobile, "double", "mobile-source-inline-2.png");
-    await captureSourceCase(browser, mobile, "triple", "mobile-source-inline-3.png");
+    await captureFixtureSourceCase(browser, mobile, "triple", "mobile-source-inline-3.png");
+    await captureFixtureSourceCase(browser, mobile, "newToOld", "mobile-source-new-to-old.png");
     await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3.png");
     await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3-expanded.png", { expand: true });
     await captureFixtureSourceCase(browser, mobile, "fallback", "mobile-source-thumb-fallback.png");

@@ -322,8 +322,8 @@ test("rank diffs carry the same current curation version for previous snapshot",
   const current = payloadWithItems([{ title: "Song", artist: "Artist", seconds: 20, time: "0:00:20" }], "2026-07-12T01:00:00Z");
   const diffs = buildRankDiffs(current, { entry: { id: "20260712T000000Z" }, payload: previous }, curationContext);
 
-  assert.equal(diffs["72h"].current.curationVersion, "curation-v1:test");
-  assert.equal(diffs["72h"].previous.curationVersion, "curation-v1:test");
+  assert.equal(diffs["7d"].current.curationVersion, "curation-v1:test");
+  assert.equal(diffs["7d"].previous.curationVersion, "curation-v1:test");
 });
 
 function song(title, seconds, rawHash) {

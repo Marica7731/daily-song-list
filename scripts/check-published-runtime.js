@@ -32,7 +32,25 @@ async function main() {
     if (meta.status.capturedAt) assert(meta.status.capturedAt === meta.capturedAt, "meta.status capturedAt must match meta");
   }
 
-  for (const rangeId of ["72h", "1m"]) {
+  assert(meta.rangeAliases?.["72h"] === "7d", "meta.rangeAliases.72h must point to 7d");
+  assert(meta.rangeAliases?.["1m"] === "all", "meta.rangeAliases.1m must point to all");
+  assert(Array.isArray(meta.canonicalRanges), "meta.canonicalRanges must be array");
+  assert(meta.canonicalRanges.includes("7d"), "meta.canonicalRanges must include 7d");
+  assert(meta.canonicalRanges.includes("all"), "meta.canonicalRanges must include all");
+
+  for (const [legacyId, canonicalId] of [
+    ["72h", "7d"],
+    ["1m", "all"],
+  ]) {
+    const alias = await fetchJson(`data/${legacyId}.json`);
+    assert(alias.schemaVersion === 2, `data/${legacyId}.json schemaVersion must be 2`);
+    assert(alias.id === legacyId, `data/${legacyId}.json id mismatch`);
+    assert(alias.aliasOf === canonicalId, `data/${legacyId}.json aliasOf must be ${canonicalId}`);
+    assert(alias.path === `data/${canonicalId}.json`, `data/${legacyId}.json path must point to data/${canonicalId}.json`);
+    assert(Number.isFinite(alias.itemCount) && alias.itemCount > 0, `data/${legacyId}.json itemCount must be non-empty`);
+  }
+
+  for (const rangeId of ["7d", "all"]) {
     const rangeMeta = meta.ranges?.[rangeId];
     assert(rangeMeta, `meta.ranges.${rangeId} missing`);
     assert(rangeMeta?.dataVersion === meta.dataVersion, `range ${rangeId} dataVersion must match meta`);
@@ -47,6 +65,15 @@ async function main() {
     assert(Array.isArray(json.items), `range ${rangeId} items must be array`);
     assert(json.items.length === rangeMeta.itemCount, `range ${rangeId} itemCount mismatch`);
     assert(json.items.length > 0, `range ${rangeId} items must be non-empty`);
+
+    const canonicalFull = await fetchJson(`data/${rangeId}.json`);
+    assert(canonicalFull.id === rangeId, `data/${rangeId}.json id mismatch`);
+    assert(Array.isArray(canonicalFull.items), `data/${rangeId}.json items must be array`);
+    assert(canonicalFull.items.length === rangeMeta.itemCount, `data/${rangeId}.json itemCount mismatch`);
+
+    await checkShard(rangeId, "runtime", rangeMeta.shards?.runtime, meta, "runtime-page-manifest", "items");
+    await checkShard(rangeId, "sourceDetails", rangeMeta.shards?.sourceDetails, meta, "source-detail-manifest", "sources");
+    await checkShard(rangeId, "search", rangeMeta.shards?.search, meta, "search-manifest", "records");
   }
 
   if (errors.length) {
@@ -62,10 +89,57 @@ async function main() {
       `dataVersion=${meta.dataVersion}`,
       `capturedAt=${meta.capturedAt}`,
       `status=${status?.status || "unknown"}`,
-      `72h=${meta.ranges["72h"].itemCount}`,
-      `1m=${meta.ranges["1m"].itemCount}`,
+      `7d=${meta.ranges["7d"].itemCount}`,
+      `all=${meta.ranges["all"].itemCount}`,
+      `7dPages=${meta.ranges["7d"].shards.runtime.pageCount}`,
+      `allPages=${meta.ranges["all"].shards.runtime.pageCount}`,
     ].join(" "),
   );
+}
+
+async function checkShard(rangeId, shardName, shardMeta, meta, expectedKind, recordField) {
+  assert(shardMeta, `range ${rangeId} ${shardName} shard missing`);
+  assert(new RegExp(`^data/ui/.+/${rangeId}/manifest\\.[0-9a-f]{12}\\.json$`, "u").test(shardMeta?.manifestPath || ""), `range ${rangeId} ${shardName} manifest path must be hashed`);
+  assert(shardMeta?.manifestLegacyPath?.endsWith(`/${rangeId}/manifest.json`), `range ${rangeId} ${shardName} legacy manifest path missing`);
+  assert(isSha256(shardMeta?.sha256), `range ${rangeId} ${shardName} sha256 missing`);
+  assert(Number.isFinite(shardMeta?.pageCount) && shardMeta.pageCount > 0, `range ${rangeId} ${shardName} pageCount must be positive`);
+  assert(Number.isFinite(shardMeta?.itemCount) && shardMeta.itemCount > 0, `range ${rangeId} ${shardName} itemCount must be positive`);
+
+  const { json: manifest, text: manifestText, statusCode } = await fetchJsonWithText(shardMeta.manifestPath);
+  assert(statusCode === 200, `range ${rangeId} ${shardName} manifest HTTP status must be 200`);
+  assert(sha256Text(manifestText) === shardMeta.sha256, `range ${rangeId} ${shardName} manifest sha256 mismatch`);
+  assert(manifest.kind === expectedKind, `range ${rangeId} ${shardName} manifest kind mismatch`);
+  assert(manifest.rangeId === rangeId, `range ${rangeId} ${shardName} manifest rangeId mismatch`);
+  assert(manifest.dataVersion === meta.dataVersion, `range ${rangeId} ${shardName} manifest dataVersion mismatch`);
+  assert(manifest.itemCount === shardMeta.itemCount, `range ${rangeId} ${shardName} manifest itemCount mismatch`);
+  assert(manifest.pageCount === shardMeta.pageCount, `range ${rangeId} ${shardName} manifest pageCount mismatch`);
+  assert(Array.isArray(manifest.pages) && manifest.pages.length === manifest.pageCount, `range ${rangeId} ${shardName} manifest pages mismatch`);
+
+  const samplePages = uniqueSamplePages(manifest.pages);
+  for (const pageMeta of samplePages) {
+    assert(pageMeta.path && isSha256(pageMeta.sha256), `range ${rangeId} ${shardName} page metadata invalid`);
+    const { json: page, text: pageText } = await fetchJsonWithText(pageMeta.path);
+    assert(sha256Text(pageText) === pageMeta.sha256, `range ${rangeId} ${shardName} page ${pageMeta.index} sha256 mismatch`);
+    assert(page.rangeId === rangeId, `range ${rangeId} ${shardName} page ${pageMeta.index} rangeId mismatch`);
+    assert(page.dataVersion === meta.dataVersion, `range ${rangeId} ${shardName} page ${pageMeta.index} dataVersion mismatch`);
+    assert(page.pageIndex === pageMeta.index, `range ${rangeId} ${shardName} page ${pageMeta.index} index mismatch`);
+    assert(Array.isArray(page[recordField]), `range ${rangeId} ${shardName} page ${pageMeta.index} ${recordField} must be array`);
+    assert(page[recordField].length === pageMeta.itemCount, `range ${rangeId} ${shardName} page ${pageMeta.index} itemCount mismatch`);
+    assert(page[recordField].length > 0, `range ${rangeId} ${shardName} page ${pageMeta.index} must be non-empty`);
+  }
+}
+
+function uniqueSamplePages(pages) {
+  if (!Array.isArray(pages) || pages.length === 0) return [];
+  const indexes = [0, Math.floor((pages.length - 1) / 2), pages.length - 1];
+  const seen = new Set();
+  return indexes
+    .map((index) => pages[index])
+    .filter((page) => {
+      if (!page || seen.has(page.index)) return false;
+      seen.add(page.index);
+      return true;
+    });
 }
 
 async function fetchJson(path) {

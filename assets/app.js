@@ -6,8 +6,16 @@ const VIEWS = {
 };
 
 const RANGE_LABELS = {
-  "72h": "最近72小时",
-  "1m": "月度",
+  "7d": "最近7天",
+  all: "本月",
+};
+const RANGE_ALIASES = {
+  "72h": "7d",
+  "1m": "all",
+};
+const LEGACY_RANGE_IDS = {
+  "7d": ["72h"],
+  all: ["1m"],
 };
 
 const SNAPSHOT_LATEST_PATH = "data/latest.json";
@@ -21,7 +29,11 @@ const QUERY_SUGGESTION_SCAN_LIMIT = 640;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
-const SOURCE_INLINE_LIMIT = 3;
+const SOURCE_INLINE_LIMITS = {
+  mobile: 2,
+  tablet: 3,
+  desktop: 3,
+};
 const SOURCE_EXPAND_CHUNK_SIZE = 12;
 const MAX_COMPACT_INITIALIZED_DRAWERS = 3;
 // Keep these breakpoints synchronized with assets/styles.css:
@@ -225,7 +237,7 @@ const state = {
   status: null,
   snapshots: [],
   currentSnapshotPath: SNAPSHOT_LATEST_PATH,
-  range: "72h",
+  range: "7d",
   view: "songRank",
   filter: "",
   nicheOnly: false,
@@ -257,6 +269,8 @@ const state = {
   sourceFilterPromise: null,
   rankDiffs: {},
   rankDiffLoads: new Map(),
+  sourceDetailCache: new Map(),
+  sourceDetailLoads: new Map(),
   loadedResources: [],
   compactDrawerLru: [],
   firstContentMeasured: false,
@@ -331,7 +345,7 @@ window.printSongListPerformance = function printSongListPerformance() {
   const runtime = {
     dataVersion: state.runtimeMeta?.dataVersion || "",
     range: state.range,
-    rangePath: state.runtimeMeta?.ranges?.[state.range]?.path || "",
+    rangePath: runtimeRangeMeta(state.range)?.path || "",
     rangeDataVersion: state.runtimeRangePayloads.get(state.range)?.dataVersion || "",
     status: state.status || null,
     warning: state.runtimeWarnings.get(state.range) || null,
@@ -550,7 +564,7 @@ function bindEvents() {
     if (sourceToggle) {
       event.preventDefault();
       if (sourceToggle.closest(".artist-song-group")) {
-        toggleArtistSongSource(sourceToggle);
+        toggleArtistSongSource(sourceToggle).catch((error) => showToast(`展开来源失败：${error.message}`));
         return;
       }
       toggleSourceDrawer(sourceToggle.closest(".rank-row, .index-row"));
@@ -592,7 +606,7 @@ function bindEvents() {
     const artistSongSource = event.target.closest("[data-toggle-artist-song-source]");
     if (artistSongSource) {
       event.preventDefault();
-      toggleArtistSongSource(artistSongSource);
+      toggleArtistSongSource(artistSongSource).catch((error) => showToast(`展开来源失败：${error.message}`));
       return;
     }
 
@@ -1806,6 +1820,7 @@ function applyInitialUrlState() {
   const parsed = window.FrontendUtils.parseUrlState(window.location.search, {
     defaults,
     validRanges: Object.keys(RANGE_LABELS),
+    rangeAliases: RANGE_ALIASES,
     validViews: Object.keys(VIEWS),
     validPageSizes: LIST_PAGE_SIZE_OPTIONS,
     validRankMetrics: Object.keys(RANK_METRICS),
@@ -1865,6 +1880,7 @@ function syncUrlState(urlMode = "replace") {
       defaults: defaultUrlState(),
       latestSnapshotPath: SNAPSHOT_LATEST_PATH,
       snapshots: state.snapshots,
+      rangeAliases: RANGE_ALIASES,
     },
   );
   const nextUrl = `${window.location.pathname}${serialized ? `?${serialized}` : ""}${window.location.hash}`;
@@ -1896,7 +1912,7 @@ function renderOrSyncUrl(options = {}) {
 
 function defaultUrlState() {
   return {
-    range: "72h",
+    range: "7d",
     view: "songRank",
     page: 1,
     pageSize: DEFAULT_LIST_PAGE_SIZE,
@@ -2024,6 +2040,7 @@ async function loadSnapshotPath(path, previousPath = state.currentSnapshotPath, 
 }
 
 async function switchRange(nextRange, options = {}) {
+  nextRange = canonicalRangeId(nextRange);
   if (!nextRange || state.range === nextRange) return;
   const previousRange = state.range;
   state.range = nextRange;
@@ -2048,6 +2065,7 @@ async function switchRange(nextRange, options = {}) {
 }
 
 async function ensureLatestRange(rangeId) {
+  rangeId = canonicalRangeId(rangeId);
   if (state.payload?.groups?.[rangeId]) return state.payload.groups[rangeId];
   const payload = await loadRuntimeRange(rangeId);
   await applyRuntimeRangePayload(payload, { resetPage: false, syncUrl: false, merge: true });
@@ -2055,6 +2073,7 @@ async function ensureLatestRange(rangeId) {
 }
 
 async function loadRuntimeRange(rangeId) {
+  rangeId = canonicalRangeId(rangeId);
   const existing = state.runtimeRangePayloads.get(rangeId);
   if (existing) return existing;
   if (state.runtimeRangeLoads.has(rangeId)) return state.runtimeRangeLoads.get(rangeId);
@@ -2072,18 +2091,68 @@ async function loadRuntimeRange(rangeId) {
 }
 
 function runtimeRangePath(rangeId) {
-  return window.FrontendUtils.runtimeRangePath(rangeId, state.runtimeMeta, { requireMeta: true });
+  return window.FrontendUtils.runtimeRangePath(rangeId, state.runtimeMeta, { requireMeta: true, ...runtimeRangeOptions() });
+}
+
+function runtimeRangeMeta(rangeId) {
+  return window.FrontendUtils.runtimeRangeMeta(canonicalRangeId(rangeId), state.runtimeMeta, runtimeRangeOptions());
+}
+
+function runtimeRangeShards(rangeId) {
+  return window.FrontendUtils.runtimeRangeShards(canonicalRangeId(rangeId), state.runtimeMeta, runtimeRangeOptions());
+}
+
+function runtimeRangeOptions() {
+  return {
+    rangeAliases: RANGE_ALIASES,
+    legacyRangeIds: LEGACY_RANGE_IDS,
+  };
+}
+
+function canonicalRangeId(rangeId) {
+  return RANGE_ALIASES[rangeId] || rangeId || "";
+}
+
+function runtimeRangeIdCandidates(rangeId) {
+  const canonical = canonicalRangeId(rangeId);
+  return [canonical, ...(LEGACY_RANGE_IDS[canonical] || [])].filter(Boolean);
+}
+
+function runtimeRangeInitialPath(rangeId) {
+  const shards = runtimeRangeShards(rangeId);
+  return shardInitialPath(shards.page) || runtimeRangePath(rangeId);
+}
+
+function shardInitialPath(shard) {
+  if (!shard) return "";
+  if (typeof shard === "string") return shard;
+  if (Array.isArray(shard)) return shardInitialPath(shard[0]);
+  return cleanText(shard.path || shard.initialPath || shard.indexPath || shard.manifestPath);
 }
 
 async function loadRuntimeRangeWithFallback(rangeId) {
-  const primaryPath = runtimeRangePath(rangeId);
-  const primaryError = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: cacheModeForPath(primaryPath) });
+  rangeId = canonicalRangeId(rangeId);
+  const shards = runtimeRangeShards(rangeId);
+  if (shards.hasPageShard) {
+    const shardResult = await loadRuntimeRangeFromShards(rangeId).catch((error) => ({ error }));
+    if (!shardResult.error) {
+      state.runtimeWarnings.delete(rangeId);
+      return shardResult;
+    }
+    console.warn(`[runtime] shard load failed for ${rangeId}: ${shardResult.error?.message || shardResult.error}`);
+  }
+  if (shouldRejectFullAllRuntimeLoad(rangeId)) {
+    throw new Error("all 范围缺少 page shard，已阻止读取完整 all JSON");
+  }
+  const primaryPath = runtimeRangeInitialPath(rangeId);
+  const allowPartial = primaryPath !== runtimeRangePath(rangeId) || Boolean(runtimeRangeShards(rangeId).hasPageShard);
+  const primaryError = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: cacheModeForPath(primaryPath), allowPartial });
   if (primaryError.ok) {
     state.runtimeWarnings.delete(rangeId);
     return primaryError.payload;
   }
 
-  const retry = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: "reload" });
+  const retry = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: "reload", allowPartial });
   if (retry.ok) {
     state.runtimeWarnings.delete(rangeId);
     return retry.payload;
@@ -2094,16 +2163,66 @@ async function loadRuntimeRangeWithFallback(rangeId) {
   throw new Error(`运行时范围读取失败：${retry.error?.message || primaryError.error?.message || primaryPath}`);
 }
 
+async function loadRuntimeRangeFromShards(rangeId) {
+  const rangeMeta = runtimeRangeMeta(rangeId);
+  const shards = runtimeRangeShards(rangeId);
+  const runtimeShard = shards.page;
+  const manifestPath = shardManifestPath(runtimeShard);
+  if (!manifestPath) throw new Error(`runtime shard manifest missing for ${rangeId}`);
+  const manifest = await readJson(manifestPath, { cache: cacheModeForPath(manifestPath) });
+  const pages = Array.isArray(manifest.pages) ? manifest.pages : [];
+  if (!pages.length) throw new Error(`runtime shard manifest has no pages for ${rangeId}`);
+  const pagePayloads = await Promise.all(
+    pages.map((page) => readJson(page.path, { cache: cacheModeForPath(page.path) })),
+  );
+  const items = pagePayloads.flatMap((page) => (Array.isArray(page.items) ? page.items : []));
+  const payload = {
+    schemaVersion: 1,
+    id: rangeId,
+    title: RANGE_LABELS[rangeId] || rangeId,
+    generatedAt: manifest.generatedAt || rangeMeta?.generatedAt || state.runtimeMeta?.generatedAt || "",
+    capturedAt: manifest.capturedAt || state.runtimeMeta?.capturedAt || "",
+    dataVersion: manifest.dataVersion || rangeMeta?.dataVersion || state.runtimeMeta?.dataVersion || "",
+    filterVersion: Number.isInteger(state.runtimeMeta?.filterVersion) ? state.runtimeMeta.filterVersion : 0,
+    blocklistVersion: state.runtimeMeta?.blocklistVersion || "",
+    blocklistHash: state.runtimeMeta?.blocklistHash || "",
+    nicheAnnotated: state.runtimeMeta?.nicheAnnotated === true,
+    items,
+    shardedFrom: manifestPath,
+  };
+  return normalizeRuntimeRangePayload(window.FrontendUtils.validateRuntimeRangePayload(payload, {
+    rangeId,
+    meta: state.runtimeMeta,
+    path: manifestPath,
+    ...runtimeRangeOptions(),
+  }), rangeId);
+}
+
+function shardManifestPath(shard) {
+  if (!shard) return "";
+  if (typeof shard === "string") return shard;
+  if (Array.isArray(shard)) return shardManifestPath(shard[0]);
+  return cleanText(shard.manifestPath || shard.manifestLegacyPath || shard.path || shard.indexPath);
+}
+
+function shouldRejectFullAllRuntimeLoad(rangeId) {
+  const rangeMeta = runtimeRangeMeta(rangeId);
+  return canonicalRangeId(rangeId) === "all" && rangeMeta?.id === "all" && !runtimeRangeShards(rangeId).hasPageShard;
+}
+
 async function tryRuntimeRangeLoad(rangeId, path, options = {}) {
   try {
     const payload = await readJson(path, options);
+    const allowPartial = Boolean(options.allowPartial || isPartialRuntimePayload(payload));
     return {
       ok: true,
-      payload: window.FrontendUtils.validateRuntimeRangePayload(payload, {
+      payload: normalizeRuntimeRangePayload(window.FrontendUtils.validateRuntimeRangePayload(payload, {
         rangeId,
         meta: state.runtimeMeta,
         path,
-      }),
+        allowPartial,
+        ...runtimeRangeOptions(),
+      }), rangeId),
     };
   } catch (error) {
     return { ok: false, error };
@@ -2111,11 +2230,12 @@ async function tryRuntimeRangeLoad(rangeId, path, options = {}) {
 }
 
 async function loadRuntimeRangeFallback(rangeId, errors) {
-  const attempts = [`data/${rangeId}.json`, SNAPSHOT_LATEST_PATH];
+  rangeId = canonicalRangeId(rangeId);
+  const attempts = [...runtimeRangeIdCandidates(rangeId).map((id) => `data/${id}.json`), SNAPSHOT_LATEST_PATH];
   for (const fallbackPath of attempts) {
     try {
       const raw = await readJson(fallbackPath, { cache: "no-cache" });
-      const group = fallbackPath === SNAPSHOT_LATEST_PATH ? raw.groups?.[rangeId] : raw;
+      const group = fallbackPath === SNAPSHOT_LATEST_PATH ? runtimeGroupFromPayload(raw, rangeId) : raw;
       const payload = window.FrontendUtils.runtimeRangePayloadFromGroup(group, {
         rangeId,
         generatedAt: raw.generatedAt || group?.generatedAt || state.runtimeMeta?.generatedAt || "",
@@ -2129,6 +2249,7 @@ async function loadRuntimeRangeFallback(rangeId, errors) {
         rangeId,
         path: fallbackPath,
         allowLegacyDataVersion: true,
+        ...runtimeRangeOptions(),
       });
       const message = `${RANGE_LABELS[rangeId] || rangeId}精简数据读取失败，当前使用备用数据 ${fallbackPath}`;
       state.runtimeWarnings.set(rangeId, {
@@ -2145,17 +2266,50 @@ async function loadRuntimeRangeFallback(rangeId, errors) {
   return null;
 }
 
+function runtimeGroupFromPayload(payload, rangeId) {
+  const groups = payload?.groups || {};
+  for (const id of runtimeRangeIdCandidates(rangeId)) {
+    if (groups[id]) return groups[id];
+  }
+  return null;
+}
+
+function normalizeRuntimeRangePayload(payload, rangeId) {
+  const canonical = canonicalRangeId(rangeId || payload?.id);
+  if (!payload || payload.id === canonical) return payload;
+  return {
+    ...payload,
+    id: canonical,
+    title: payload.title || RANGE_LABELS[canonical] || canonical,
+  };
+}
+
+function isPartialRuntimePayload(payload) {
+  return Boolean(
+    payload?.partial ||
+      payload?.isPartial ||
+      payload?.pageShard ||
+      payload?.shard ||
+      payload?.totalItemCount ||
+      payload?.sourceDetailPath ||
+      payload?.searchShardPath,
+  );
+}
+
 async function applyRuntimeRangePayload(rangePayload, options = {}) {
   const isFallbackPayload = Boolean(rangePayload?.fallbackFrom);
+  const rangeId = canonicalRangeId(rangePayload?.id || state.range);
+  rangePayload = normalizeRuntimeRangePayload(rangePayload, rangeId);
   window.FrontendUtils.validateRuntimeRangePayload(rangePayload, {
-    rangeId: rangePayload?.id || state.range,
+    rangeId,
     meta: isFallbackPayload ? null : state.runtimeMeta,
-    path: rangePayload?.fallbackFrom || state.runtimeMeta?.ranges?.[rangePayload?.id || state.range]?.path,
+    path: rangePayload?.fallbackFrom || runtimeRangeMeta(rangeId)?.path,
     allowLegacyDataVersion: isFallbackPayload,
+    allowPartial: isPartialRuntimePayload(rangePayload),
+    ...runtimeRangeOptions(),
   });
   const payload = latestPayloadFromRuntimeRange(rangePayload, state.runtimeMeta);
   const prepared = await measureAsync("prepare-payload", () => preparePayload(payload));
-  const rangeId = rangePayload.id;
   if (!options.merge) state.rangeCache.clear();
   await prewarmRangeCache(prepared.groups?.[rangeId], SNAPSHOT_LATEST_PATH, rangeId);
   await yieldToBrowser();
@@ -2178,7 +2332,7 @@ async function applyRuntimeRangePayload(rangePayload, options = {}) {
 }
 
 function latestPayloadFromRuntimeRange(rangePayload, meta) {
-  const rangeId = rangePayload?.id || state.range;
+  const rangeId = canonicalRangeId(rangePayload?.id || state.range);
   const group = {
     id: rangeId,
     title: rangePayload?.title || RANGE_LABELS[rangeId] || rangeId,
@@ -2226,10 +2380,25 @@ function applyPreparedSnapshotPayload(payload, path, options = {}) {
 
 async function preparePayload(payload) {
   const sourceFiltered = await applySourceFilterIfNeeded(payload);
-  if (window.FrontendUtils.hasNicheAnnotations(sourceFiltered)) return sourceFiltered;
+  if (window.FrontendUtils.hasNicheAnnotations(sourceFiltered)) return normalizePayloadRangeGroups(sourceFiltered);
   await ensureSongSearchLookup();
-  if (!state.songSearchLookup.available) return sourceFiltered;
-  return window.FrontendUtils.annotatePayloadWithNiche(sourceFiltered, state.songSearchLookup);
+  if (!state.songSearchLookup.available) return normalizePayloadRangeGroups(sourceFiltered);
+  return normalizePayloadRangeGroups(window.FrontendUtils.annotatePayloadWithNiche(sourceFiltered, state.songSearchLookup));
+}
+
+function normalizePayloadRangeGroups(payload) {
+  const groups = payload?.groups || {};
+  const nextGroups = { ...groups };
+  for (const [legacyId, canonicalId] of Object.entries(RANGE_ALIASES)) {
+    if (!nextGroups[canonicalId] && groups[legacyId]) {
+      nextGroups[canonicalId] = {
+        ...groups[legacyId],
+        id: canonicalId,
+        title: RANGE_LABELS[canonicalId] || groups[legacyId].title || canonicalId,
+      };
+    }
+  }
+  return nextGroups === groups ? payload : { ...payload, groups: nextGroups };
 }
 
 async function applySourceFilterIfNeeded(payload) {
@@ -2413,9 +2582,10 @@ function scheduleCurrentRankDiffLoad() {
 }
 
 async function loadRankDiffForRange(rangeId) {
+  rangeId = canonicalRangeId(rangeId);
   if (state.rankDiffs?.[rangeId]) return false;
   if (state.rankDiffLoads.has(rangeId)) return state.rankDiffLoads.get(rangeId);
-  const path = state.runtimeMeta?.diffs?.[rangeId]?.path || `data/diff/latest-${rangeId}.json`;
+  const path = runtimeDiffPath(rangeId);
   const promise = measureAsync("load-rank-diff", () => readJson(path, { cache: "no-cache" }))
     .then((diff) => {
       state.rankDiffs = {
@@ -2436,6 +2606,14 @@ async function loadRankDiffForRange(rangeId) {
     });
   state.rankDiffLoads.set(rangeId, promise);
   return promise;
+}
+
+function runtimeDiffPath(rangeId) {
+  const diffs = state.runtimeMeta?.diffs || {};
+  for (const id of runtimeRangeIdCandidates(rangeId)) {
+    if (diffs[id]?.path) return diffs[id].path;
+  }
+  return `data/diff/latest-${canonicalRangeId(rangeId)}.json`;
 }
 
 function buildRankDiffLookup(diff) {
@@ -2463,11 +2641,11 @@ function updateVisibleTrendBadges() {
 function scheduleOtherRangePrefetch() {
   if (!isLatestSnapshot() || !canPrefetchOtherRange()) return;
   const otherRange = Object.keys(RANGE_LABELS).find((rangeId) => rangeId !== state.range);
-  if (!otherRange || state.runtimeRangePayloads.has(otherRange)) return;
+  if (!otherRange || state.runtimeRangePayloads.has(otherRange) || !canPrefetchRuntimeRange(otherRange)) return;
   if (state.rangePrefetchTimer) window.clearTimeout(state.rangePrefetchTimer);
   const run = () => {
     state.rangePrefetchTimer = 0;
-    if (!canPrefetchOtherRange() || state.runtimeRangePayloads.has(otherRange)) return;
+    if (!canPrefetchOtherRange() || state.runtimeRangePayloads.has(otherRange) || !canPrefetchRuntimeRange(otherRange)) return;
     loadRuntimeRange(otherRange).catch(() => {});
   };
   state.rangePrefetchTimer = window.setTimeout(() => {
@@ -2480,8 +2658,9 @@ function scheduleOtherRangePrefetch() {
 }
 
 function prefetchRuntimeRangeOnIntent(rangeId) {
+  rangeId = canonicalRangeId(rangeId);
   if (!rangeId || rangeId === state.range || state.runtimeRangePayloads.has(rangeId)) return;
-  if (!isLatestSnapshot() || !canPrefetchOtherRange()) return;
+  if (!isLatestSnapshot() || !canPrefetchOtherRange() || !canPrefetchRuntimeRange(rangeId)) return;
   loadRuntimeRange(rangeId).catch(() => {});
 }
 
@@ -2491,6 +2670,12 @@ function canPrefetchOtherRange() {
     connection,
     visibilityState: document.visibilityState,
   });
+}
+
+function canPrefetchRuntimeRange(rangeId) {
+  const canonical = canonicalRangeId(rangeId);
+  if (canonical !== "all") return true;
+  return runtimeRangeShards(canonical).hasPageShard;
 }
 
 function setSnapshotBusy(isBusy, message = "") {
@@ -2777,7 +2962,7 @@ function renderDebugPanel() {
     els.debugPanel.setAttribute("aria-label", "运行时诊断");
     els.summary?.after(els.debugPanel);
   }
-  const rangeMeta = state.runtimeMeta?.ranges?.[state.range] || null;
+  const rangeMeta = runtimeRangeMeta(state.range);
   const rangePayload = state.runtimeRangePayloads.get(state.range) || null;
   els.debugPanel.textContent = JSON.stringify(
     {
@@ -3533,10 +3718,8 @@ function sourceVideoCountForSummary(rangeCache) {
 }
 
 function monthlyCoverageNote() {
-  if (state.range !== "1m" || !isLatestSnapshot()) return "";
-  const catalog = state.runtimeMeta?.catalog;
-  const retentionDays = Number(catalog?.retentionDays) || 35;
-  return `最近${retentionDays}天累计`;
+  if (state.range !== "all" || !isLatestSnapshot()) return "";
+  return "累计全量";
 }
 
 function rangeFallbackNote() {
@@ -3905,6 +4088,10 @@ function sourceInitialLimitForMode(mode = getResponsiveMode()) {
   return SOURCE_GROUP_LIMITS[mode]?.initial || SOURCE_GROUP_LIMITS.desktop.initial;
 }
 
+function sourceInlineLimitForMode(mode = getResponsiveMode()) {
+  return SOURCE_INLINE_LIMITS[mode] || SOURCE_INLINE_LIMITS.desktop;
+}
+
 function shouldKeepSingleDrawerOpen() {
   return isCompactRankMode();
 }
@@ -4172,12 +4359,15 @@ function renderRankRecord({
   const safeOccurrences = occurrences || [];
   const occurrenceCount = safeOccurrences.length;
   const isExpanded = state.expandedRows.has(rowKey);
+  const sourceDetailPath = sourceDetailPathForRecord(record, safeOccurrences);
   const sourcePresentation =
     mode === "artist"
       ? null
       : window.FrontendUtils.sourcePresentationModel(safeOccurrences, {
           expanded: isExpanded,
-          inlineLimit: SOURCE_INLINE_LIMIT,
+          inlineLimit: sourceInlineLimitForMode(),
+          totalVideoCount: sourceVideoCount,
+          hasExternalDetails: Boolean(sourceDetailPath),
         });
   const expandable = mode === "artist" ? artistSongCount > 1 || sourceVideoCount > 1 || occurrenceCount > 1 : Boolean(sourcePresentation?.canExpand);
 
@@ -4198,6 +4388,7 @@ function renderRankRecord({
   row.dataset.trendKey = record?.key || key;
   row._sourceOccurrences = safeOccurrences;
   row._sourceDetailOccurrences = sourcePresentation?.hiddenGroups?.flatMap((group) => group.occurrences) || [];
+  row._sourceDetailPath = sourceDetailPath;
   row._sourceVideoCount = sourceVideoCount;
   row._artistSongGroups = songGroups.length ? songGroups : null;
   row._getArtistSongGroups = getSongGroups;
@@ -4271,9 +4462,12 @@ function renderIndexRecord(record) {
   const drawerId = `source-drawer-${rowKey}`;
   const sourceVideoCount = Math.max(0, Number(record.videoCount) || 0);
   const isExpanded = state.expandedRows.has(rowKey);
+  const sourceDetailPath = sourceDetailPathForRecord(record, record.occurrences);
   const sourcePresentation = window.FrontendUtils.sourcePresentationModel(record.occurrences, {
     expanded: isExpanded,
-    inlineLimit: SOURCE_INLINE_LIMIT,
+    inlineLimit: sourceInlineLimitForMode(),
+    totalVideoCount: sourceVideoCount,
+    hasExternalDetails: Boolean(sourceDetailPath),
   });
   const expandable = sourcePresentation.canExpand;
 
@@ -4284,6 +4478,7 @@ function renderIndexRecord(record) {
   row.dataset.drawerMode = "index";
   row._sourceOccurrences = record.occurrences;
   row._sourceDetailOccurrences = sourcePresentation.hiddenGroups.flatMap((group) => group.occurrences);
+  row._sourceDetailPath = sourceDetailPath;
   row._sourceVideoCount = sourceVideoCount;
 
   row.append(
@@ -4534,10 +4729,9 @@ function renderSourceInlineStrip(model, options = {}) {
   const list = document.createElement("div");
   list.className = "source-inline-preview-list";
 
-  const hasTailAction = Boolean(model.canExpand || (model.showCopyAll && !model.canExpand && options.showCopyAll !== false));
-  const headGroups = hasTailAction && model.inlineGroups.length >= 3 ? model.inlineGroups.slice(0, 2) : model.inlineGroups;
-  const tailGroup = hasTailAction && model.inlineGroups.length >= 3 ? model.inlineGroups[2] : null;
-  for (const group of headGroups) {
+  const showInlineCopyAll = Boolean(model.showCopyAll && options.showCopyAll !== false && !options.isExpanded);
+  const hasActions = Boolean(model.canExpand || showInlineCopyAll);
+  for (const group of model.inlineGroups) {
     list.append(renderSourceInlineGroup(group));
   }
   rail.append(list);
@@ -4545,7 +4739,7 @@ function renderSourceInlineStrip(model, options = {}) {
 
   const actions = document.createElement("div");
   actions.className = "source-inline-actions";
-  if (hasTailAction) {
+  if (hasActions) {
     strip.classList.add("has-tail-action");
   }
 
@@ -4564,16 +4758,10 @@ function renderSourceInlineStrip(model, options = {}) {
     );
   }
 
-  if (model.showCopyAll && !model.canExpand && options.showCopyAll !== false) {
+  if (showInlineCopyAll) {
     actions.append(renderInlineCopySongLinksButton(options.occurrences || []));
   }
-  if (tailGroup) {
-    const tail = document.createElement("div");
-    tail.className = "source-inline-tail";
-    tail.append(renderSourceInlineGroup(tailGroup));
-    if (actions.childElementCount) tail.append(actions);
-    strip.append(tail);
-  } else if (actions.childElementCount) {
+  if (actions.childElementCount) {
     strip.append(actions);
   }
 
@@ -4744,6 +4932,86 @@ function renderInlineSource(occurrence) {
 
   wrapper.append(time, separator, channel);
   return wrapper;
+}
+
+function sourceDetailPathForRecord(record, occurrences = []) {
+  const candidates = [
+    record?.sourceDetailPath,
+    record?.sourceDetail?.path,
+    record?.sourceDetails?.path,
+    record?.detailPath,
+    record?.detail?.path,
+    occurrences?.[0]?.sourceDetailPath,
+    occurrences?.[0]?.sourceDetail?.path,
+    occurrences?.[0]?.item?.sourceDetailPath,
+    occurrences?.[0]?.item?.sourceDetail?.path,
+    sourceDetailPathFromShard(record, occurrences),
+  ];
+  return cleanText(candidates.find(Boolean));
+}
+
+function sourceDetailPathFromShard(record, occurrences = []) {
+  const shard = runtimeRangeShards(state.range).sourceDetail;
+  if (!shard) return "";
+  const key = cleanText(record?.key || record?.sourceKey || record?.entityKey || occurrences?.[0]?.sourceKey);
+  if (key && shard.byKey?.[key]) return shardInitialPath(shard.byKey[key]);
+  if (key && shard.pathPattern) {
+    return String(shard.pathPattern)
+      .replaceAll("{range}", encodeURIComponent(state.range))
+      .replaceAll("{key}", encodeURIComponent(key));
+  }
+  return "";
+}
+
+async function sourceDetailOccurrencesForContainer(container, currentOccurrences = []) {
+  const path = cleanText(container?._sourceDetailPath);
+  if (!path || container?._sourceDetailLoaded) return currentOccurrences || [];
+  const loaded = await loadSourceDetailOccurrences(path);
+  container._sourceDetailLoaded = true;
+  if (!loaded.length) return currentOccurrences || [];
+  return remainingSourceDetailOccurrences(loaded, container._sourceOccurrences || container._songSourceOccurrences || currentOccurrences);
+}
+
+async function loadSourceDetailOccurrences(path) {
+  if (state.sourceDetailCache.has(path)) return state.sourceDetailCache.get(path);
+  if (state.sourceDetailLoads.has(path)) return state.sourceDetailLoads.get(path);
+  const load = readJson(path, { cache: cacheModeForPath(path) })
+    .then((payload) => normalizeSourceDetailOccurrences(payload))
+    .then((occurrences) => {
+      state.sourceDetailCache.set(path, occurrences);
+      return occurrences;
+    })
+    .finally(() => {
+      state.sourceDetailLoads.delete(path);
+    });
+  state.sourceDetailLoads.set(path, load);
+  return load;
+}
+
+function normalizeSourceDetailOccurrences(payload) {
+  if (Array.isArray(payload)) return payload.filter(isOccurrenceLike);
+  if (Array.isArray(payload?.occurrences)) return payload.occurrences.filter(isOccurrenceLike);
+  if (Array.isArray(payload?.sourceOccurrences)) return payload.sourceOccurrences.filter(isOccurrenceLike);
+  if (Array.isArray(payload?.groups)) return payload.groups.flatMap((group) => group?.occurrences || []).filter(isOccurrenceLike);
+  if (Array.isArray(payload?.items)) return collectSongOccurrences(payload.items);
+  return [];
+}
+
+function isOccurrenceLike(value) {
+  return Boolean(value?.item && value?.song);
+}
+
+function remainingSourceDetailOccurrences(loadedOccurrences, inlineOccurrences) {
+  const inlineVideoIds = new Set(
+    window.FrontendUtils.groupOccurrencesByVideo(inlineOccurrences)
+      .map((group) => group.videoId || group.key)
+      .filter(Boolean),
+  );
+  if (!inlineVideoIds.size) return loadedOccurrences;
+  const groups = window.FrontendUtils.groupOccurrencesByVideo(loadedOccurrences);
+  return groups
+    .filter((group) => !inlineVideoIds.has(group.videoId || group.key))
+    .flatMap((group) => group.occurrences || []);
 }
 
 function appendSublineNode(container, node) {
@@ -5181,10 +5449,13 @@ function renderArtistSongGroup(group) {
 
   const sourcePresentation = window.FrontendUtils.sourcePresentationModel(group.occurrences, {
     expanded: false,
-    inlineLimit: SOURCE_INLINE_LIMIT,
+    inlineLimit: sourceInlineLimitForMode(),
+    totalVideoCount: group.videoCount,
+    hasExternalDetails: Boolean(sourceDetailPathForRecord(group, group.occurrences)),
   });
   sources._sourceOccurrences = sourcePresentation.hiddenGroups.flatMap((sourceGroup) => sourceGroup.occurrences);
   sources._songSourceOccurrences = group.occurrences;
+  sources._sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
 
   meta.append(renderCopySongLinksIconButton(group.occurrences));
   header.append(meta);
@@ -5229,11 +5500,11 @@ function toggleSourceDrawer(row) {
   const drawer = row.querySelector(".source-drawer");
   const nextExpanded = Boolean(drawer?.hidden);
   if (nextExpanded && shouldKeepSingleDrawerOpen()) closeOtherMobileSourceDrawers(row);
-  setSourceDrawerExpanded(row, nextExpanded);
+  setSourceDrawerExpanded(row, nextExpanded).catch((error) => showToast(`展开来源失败：${error.message}`));
 }
 
 function collapseSourceDrawer(row, options = {}) {
-  setSourceDrawerExpanded(row, false, options);
+  setSourceDrawerExpanded(row, false, options).catch((error) => showToast(`收起来源失败：${error.message}`));
 }
 
 function closeOtherMobileSourceDrawers(currentRow) {
@@ -5243,7 +5514,7 @@ function closeOtherMobileSourceDrawers(currentRow) {
   }
 }
 
-function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
+async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   if (!row) return;
   const drawer = row.querySelector(".source-drawer");
   const buttons = Array.from(row.querySelectorAll("[data-toggle-source]"));
@@ -5254,7 +5525,11 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     const songGroups =
       mode === "artist" ? row._artistSongGroups || row._getArtistSongGroups?.() || [] : row._artistSongGroups || [];
     if (mode === "artist") row._artistSongGroups = songGroups;
-    const drawerOccurrences = mode === "artist" ? row._sourceOccurrences || [] : row._sourceDetailOccurrences || row._sourceOccurrences || [];
+    let drawerOccurrences = mode === "artist" ? row._sourceOccurrences || [] : row._sourceDetailOccurrences || row._sourceOccurrences || [];
+    if (mode !== "artist") {
+      drawerOccurrences = await sourceDetailOccurrencesForContainer(row, drawerOccurrences);
+      row._sourceDetailOccurrences = drawerOccurrences;
+    }
     initializeSourceDrawer(drawer, {
       mode,
       occurrences: drawerOccurrences,
@@ -5265,6 +5540,7 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   if (nextExpanded) appendMobileSourceCollapse(drawer);
   drawer.hidden = !nextExpanded;
   row.classList.toggle("is-expanded", nextExpanded);
+  syncInlineCopyAllButton(row, nextExpanded);
   for (const button of buttons) {
     button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
     if (button.dataset.sourceSummaryToggle === "true") {
@@ -5306,6 +5582,20 @@ function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   if (!nextExpanded && options.keepVisible) {
     window.requestAnimationFrame(() => keepSourceRowVisible(row));
   }
+}
+
+function syncInlineCopyAllButton(row, isExpanded) {
+  const actions = row?.querySelector(":scope .source-inline-strip > .source-inline-actions");
+  if (!actions) return;
+  const existing = actions.querySelector(":scope > [data-copy-song-links]");
+  if (isExpanded) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
+  const occurrences = row._sourceOccurrences || [];
+  if (window.FrontendUtils.groupOccurrencesByVideo(occurrences).length <= 1) return;
+  actions.append(renderInlineCopySongLinksButton(occurrences));
 }
 
 function trackCompactInitializedDrawer(row, isExpanded) {
@@ -5377,14 +5667,16 @@ function toggleArtistSongLimit(row) {
   window.requestAnimationFrame(() => focusWithoutScrolling(firstNewGroup || drawer));
 }
 
-function toggleArtistSongSource(button) {
+async function toggleArtistSongSource(button) {
   const section = button.closest(".artist-song-group");
   const sources = document.getElementById(button.getAttribute("aria-controls")) || section?._artistSongSources;
   if (!section || !sources) return;
   const nextExpanded = sources.hidden;
   if (nextExpanded && isCompactRankMode()) closeSiblingArtistSongSources(section);
   if (nextExpanded && sources.dataset.sourceDeferred === "true") {
-    appendSourceDrawerLinks(sources, sources._sourceOccurrences || [], {
+    const sourceOccurrences = await sourceDetailOccurrencesForContainer(sources, sources._sourceOccurrences || []);
+    sources._sourceOccurrences = sourceOccurrences;
+    appendSourceDrawerLinks(sources, sourceOccurrences, {
       copyOccurrences: sources._songSourceOccurrences || sources._sourceOccurrences || [],
       showToolbar: false,
     });
@@ -5698,9 +5990,11 @@ async function readJson(path, options = {}) {
 function cacheModeForPath(path) {
   if (/^data\/snapshots\/[^/]+\.json$/u.test(path)) return "force-cache";
   if (path === UI_META_PATH || path === SNAPSHOT_LATEST_PATH || path === STATUS_PATH || path === "data/snapshots/index.json") return "no-cache";
-  if (/^data\/ui\/(?:72h|1m)\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
-  if (/^data\/ui\/(?:72h|1m)\.json$/u.test(path)) return "no-cache";
-  if (/^data\/diff\/latest-(?:72h|1m)\.json$/u.test(path)) return "no-cache";
+  if (/^data\/ui\/(?:7d|all|72h|1m)\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
+  if (/^data\/ui\/(?:ranges|source-details|search)\/(?:7d|all)\/(?:manifest|page-\d{4})\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
+  if (/^data\/ui\/(?:ranges|source-details|search)\/(?:7d|all)\/manifest\.json$/u.test(path)) return "no-cache";
+  if (/^data\/ui\/(?:7d|all|72h|1m)\.json$/u.test(path)) return "no-cache";
+  if (/^data\/diff\/latest-(?:7d|all|72h|1m)\.json$/u.test(path)) return "no-cache";
   if (path === SONG_SEARCH_INDEX_PATH) return "no-cache";
   return "no-cache";
 }
@@ -5870,9 +6164,17 @@ function snapshotOptionLabel(entry) {
   const parts = dateParts(entry.capturedAt || entry.generatedAt || entry.id);
   const counts = entry.itemCounts || {};
   const time = parts ? `${parts.hour}:${parts.minute}` : "未知时间";
-  const h72 = Number.isFinite(Number(counts["72h"])) ? Number(counts["72h"]) : 0;
-  const month = Number.isFinite(Number(counts["1m"])) ? Number(counts["1m"]) : 0;
-  return `${time} · 72H ${h72} · 月度 ${month}`;
+  const h7 = rangeItemCount(counts, "7d");
+  const month = rangeItemCount(counts, "all");
+  return `${time} · 7天 ${h7} · 本月 ${month}`;
+}
+
+function rangeItemCount(counts, rangeId) {
+  for (const id of runtimeRangeIdCandidates(rangeId)) {
+    const value = Number(counts?.[id]);
+    if (Number.isFinite(value)) return value;
+  }
+  return 0;
 }
 
 function formatRank(rank) {

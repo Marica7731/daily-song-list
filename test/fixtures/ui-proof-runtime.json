@@ -116,6 +116,105 @@
           "title": "Fallback source"
         }
       ]
+    },
+    "newToOld": {
+      "sourceVideoCount": 3,
+      "sort": "publishedAt-desc",
+      "groups": [
+        {
+          "videoId": "MoEy0c7xcis",
+          "time": "04:12",
+          "seconds": 252,
+          "publishedAt": "2026-07-16T14:00:00Z",
+          "channelName": "Newest Proof Channel",
+          "title": "Newest source video"
+        },
+        {
+          "videoId": "1K8486twdv4",
+          "time": "12:30",
+          "seconds": 750,
+          "publishedAt": "2026-07-15T09:00:00Z",
+          "channelName": "Middle Proof Channel",
+          "title": "Middle source video"
+        },
+        {
+          "videoId": "XIUGV-zqRWc",
+          "time": "1:02:03",
+          "seconds": 3723,
+          "publishedAt": "2026-07-12T20:00:00Z",
+          "channelName": "Oldest Proof Channel",
+          "title": "Oldest source video"
+        }
+      ]
     }
+  },
+  "rangeCases": {
+    "7d": {
+      "id": "7d",
+      "label": "最近7天",
+      "title": "最近7天",
+      "description": "Future fixed-window range fixture; not enabled by current core runtime.",
+      "runtimePath": "data/ui/7d.abcdef123456.json",
+      "legacyPath": "data/ui/7d.json",
+      "diffPath": "data/diff/latest-7d.json",
+      "itemCount": 700
+    },
+    "all": {
+      "id": "all",
+      "label": "全部",
+      "title": "全部历史",
+      "description": "Future catalog-backed range fixture; not enabled by current core runtime.",
+      "runtimePath": "data/ui/all.abcdef123456.json",
+      "legacyPath": "data/ui/all.json",
+      "diffPath": "data/diff/latest-all.json",
+      "itemCount": 12000
+    }
+  },
+  "dataIndexCase": {
+    "partitions": [
+      {
+        "range": "7d",
+        "page": 12,
+        "pageCount": 86,
+        "pageSize": 50,
+        "path": "data/ui/7d/page-012.abcdef123456.json"
+      },
+      {
+        "range": "all",
+        "page": 241,
+        "pageCount": 241,
+        "pageSize": 50,
+        "path": "data/ui/all/page-241.abcdef123456.json"
+      }
+    ],
+    "searchIndexes": [
+      {
+        "scope": "songRank",
+        "key": "query-index::all::hide-unknown::songRank",
+        "terms": ["少女レイ", "HOT LIMIT"]
+      },
+      {
+        "scope": "videos",
+        "key": "query-index::niche::show-unknown::videos",
+        "terms": ["夏祭り", "星間飛行"]
+      }
+    ],
+    "snapshotIndex": [
+      {
+        "id": "latest",
+        "path": "data/latest.json",
+        "generatedAt": "2026-07-16T16:00:00Z"
+      },
+      {
+        "id": "20260716T160000Z",
+        "path": "data/snapshots/20260716T160000Z.json",
+        "generatedAt": "2026-07-16T16:00:00Z"
+      },
+      {
+        "id": "20260716T140000Z",
+        "path": "data/snapshots/20260716T140000Z.json",
+        "generatedAt": "2026-07-16T14:00:00Z"
+      }
+    ]
   }
 }

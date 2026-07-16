@@ -23,7 +23,18 @@ const {
   loadVideoCatalog,
   mergeVideosIntoCatalog,
   rebuildVideoCatalogFromVideos,
+  writeCatalogSegments,
+  writeVideoCatalog,
 } = require("./video-catalog");
+const {
+  CANONICAL_RANGES,
+  DIFF_RANGES,
+  RANGE_TITLES,
+  WEEK_MS,
+  canonicalItemCounts,
+  groupForRange,
+  legacyAliasManifest,
+} = require("./range-config");
 const {
   applyCurationToSources,
   applyCurationToVideos,
@@ -107,8 +118,8 @@ const REQUEST_JITTER_MS = nonNegativeInteger(process.env.DAILY_SONG_REQUEST_JITT
 const RATE_LIMIT_COOLDOWN_MS = nonNegativeInteger(process.env.DAILY_SONG_429_COOLDOWN_MS, 15_000);
 const RETRY_JITTER_MS = nonNegativeInteger(process.env.DAILY_SONG_RETRY_JITTER_MS, 0);
 const MAX_429_ERRORS = nonNegativeInteger(process.env.DAILY_SONG_MAX_429_ERRORS, 8);
-const SNAPSHOT_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_SNAPSHOT_RETENTION_DAYS, 35);
-const INSPECTION_CACHE_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_INSPECTION_CACHE_RETENTION_DAYS, SNAPSHOT_RETENTION_DAYS);
+const SNAPSHOT_RETENTION_DAYS = nonNegativeInteger(process.env.DAILY_SONG_SNAPSHOT_RETENTION_DAYS, 0);
+const INSPECTION_CACHE_RETENTION_DAYS = positiveInteger(process.env.DAILY_SONG_INSPECTION_CACHE_RETENTION_DAYS, 35);
 const INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS = positiveInteger(process.env.DAILY_SONG_INSPECTION_CACHE_FETCH_ERROR_TTL_HOURS, 6);
 const INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS = positiveInteger(process.env.DAILY_SONG_INSPECTION_CACHE_NO_USABLE_MIN_AGE_HOURS, 48);
 const CARRY_FORWARD_MAX_AGE_HOURS = positiveInteger(process.env.DAILY_SONG_CARRY_FORWARD_MAX_AGE_HOURS, 36);
@@ -119,14 +130,12 @@ const MONTH_BACKFILL_RECENT_BUCKET_LIMIT = positiveInteger(
   Math.max(1, Math.floor(VIDEO_LIMIT / 8)),
 );
 const MYGIT_TODAY_SNAPSHOTS_ENABLED = !isDisabledEnv(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOTS);
-const MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS = positiveInteger(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS, 35);
-const MYGIT_TODAY_SNAPSHOT_LIMIT = positiveInteger(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_LIMIT, 35);
-const H72_MS = 72 * 60 * 60 * 1000;
-const MONTH_CARRY_MS = 35 * 24 * 60 * 60 * 1000;
-const DIFF_RANGES = [
-  { id: "72h", file: "latest-72h.json" },
-  { id: "1m", file: "latest-1m.json" },
-];
+const MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS = positiveInteger(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS, 0);
+const MYGIT_TODAY_SNAPSHOT_LIMIT = positiveInteger(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_LIMIT, 0);
+const RECENT_WINDOW_DAYS = positiveInteger(process.env.DAILY_SONG_RECENT_WINDOW_DAYS, 7);
+const RECENT_WINDOW_MS = RECENT_WINDOW_DAYS === 7 ? WEEK_MS : RECENT_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+const RECENT_WINDOW_HOURS = RECENT_WINDOW_DAYS * 24;
+const H72_MS = RECENT_WINDOW_MS;
 const rankCollator = new Intl.Collator("en", {
   numeric: true,
   sensitivity: "base",
@@ -183,7 +192,8 @@ async function main() {
     curationVersion: curationContext.version,
     curationHash: curationContext.hash,
   });
-  writeJson(VIDEO_CATALOG_PATH, catalogRefresh.catalog);
+  writeVideoCatalog(catalogRefresh.catalog, VIDEO_CATALOG_PATH);
+  const catalogSegments = writeCatalogSegments(catalogRefresh.catalog);
 
   const groupVideos = catalogToVideos(catalogRefresh.catalog);
   assertNoBlockedVideos(groupVideos, "catalogRefresh");
@@ -211,7 +221,9 @@ async function main() {
       fetchedUsableVideoCount: fetchedVideos.length,
       carriedVideoCount: carryForward.videos.length,
       carried72hVideoCount: carryForward.counts.h72,
+      carried7dVideoCount: carryForward.counts.h72,
       carriedMonthVideoCount: carryForward.counts.month,
+      carriedAllVideoCount: carryForward.counts.month,
       blocklistVersion: BLOCKLIST_VERSION,
       blocklistHash: BLOCKLIST_HASH,
       blacklistedSourceCount: BLOCKED_REGIONAL_VTUBER_CHANNELS.entries.length,
@@ -256,12 +268,20 @@ async function main() {
       auditSummary: summarizeAudits(audits),
       videoCatalog: {
         ...catalogSummary(catalogRefresh.catalog, capturedAt),
+        segments: {
+          path: "data/catalog-segments/manifest.json",
+          segmentSize: catalogSegments.segmentSize,
+          segmentCount: catalogSegments.segmentCount,
+          itemCount: catalogSegments.itemCount,
+        },
         addedVideoCount: catalogRefresh.stats.addedVideoCount,
         updatedVideoCount: catalogRefresh.stats.updatedVideoCount,
         expiredVideoCount: catalogRefresh.stats.expiredVideoCount,
         fromCurrentRunVideoCount: videos.length,
-        h72VideoCount: groups["72h"]?.items?.length || 0,
-        monthVideoCount: groups["1m"]?.items?.length || 0,
+        h72VideoCount: groups["7d"]?.items?.length || 0,
+        recent7dVideoCount: groups["7d"]?.items?.length || 0,
+        monthVideoCount: groups.all?.items?.length || 0,
+        allVideoCount: groups.all?.items?.length || 0,
       },
       inspectionCache: {
         path: "data/inspection-cache.json",
@@ -318,8 +338,7 @@ async function main() {
     videos: audits,
   });
   writeJson(INSPECTION_CACHE_PATH, inspectionCache.cache);
-  writeJson(path.join(DATA_DIR, "72h.json"), groups["72h"]);
-  writeJson(path.join(DATA_DIR, "1m.json"), groups["1m"]);
+  writeRangeArtifacts(groups);
   writeRankDiffFiles(payload, previousSnapshot, curationContext);
   writeSnapshot(payload, capturedAt);
   writeJson(STATUS_PATH, payload.status);
@@ -692,14 +711,13 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now, options 
   if (ageHours > CARRY_FORWARD_MAX_AGE_HOURS) return empty("previous_latest_too_old", from, ageHours);
 
   const videos = new Map();
-  for (const item of previousPayload.groups["72h"]?.items || []) {
+  for (const item of rangeItems(previousPayload, "7d")) {
     if (isBlockedSource(item)) continue;
-    if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, H72_MS)) continue;
+    if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, RECENT_WINDOW_MS)) continue;
     if (upsertCarriedVideo(videos, item, ["today"], from)) counts.h72 += 1;
   }
-  for (const item of previousPayload.groups["1m"]?.items || []) {
+  for (const item of rangeItems(previousPayload, "all")) {
     if (isBlockedSource(item)) continue;
-    if (!isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS)) continue;
     if (upsertCarriedVideo(videos, item, ["month"], from)) counts.month += 1;
   }
 
@@ -718,6 +736,11 @@ function collectCarryForwardVideos(previousPayload, previousAudit, now, options 
     skipVideoIds,
     inspectionCacheSkipCount: inspectionCacheSkipIds.size,
   };
+}
+
+function rangeItems(payload, rangeId) {
+  const group = groupForRange(payload?.groups, rangeId);
+  return Array.isArray(group?.items) ? group.items : [];
 }
 
 function upsertCarriedVideo(videos, item, sourceGroups, from) {
@@ -899,7 +922,7 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
   const nowMs = now.getTime();
   const carryForwardEnabled = Boolean(options.carryForwardEnabled);
   const excludeVideoIds = options.excludeVideoIds || new Set();
-  const recentScanHorizonMs = H72_MS;
+  const recentScanHorizonMs = RECENT_WINDOW_MS;
   const carriedMonthVideoCount = Number(options.carriedMonthVideoCount);
   const monthBackfillEnabled =
     carryForwardEnabled && Number.isFinite(carriedMonthVideoCount) && carriedMonthVideoCount < MONTH_BACKFILL_TARGET;
@@ -974,8 +997,8 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
     mode: monthBackfillEnabled
       ? "incremental_month_backfill_with_carry_forward"
       : carryForwardEnabled
-        ? "incremental_72h_with_carry_forward"
-        : "full_72h_recovery",
+        ? "incremental_7d_with_carry_forward"
+        : "full_7d_recovery",
     recentScanHorizonHours: Math.round(recentScanHorizonMs / (60 * 60 * 1000)),
     monthBackfillEnabled,
     monthBackfillTarget: MONTH_BACKFILL_TARGET,
@@ -986,14 +1009,27 @@ function selectCandidatesForInspection(candidates, now, options = {}) {
   };
 }
 
-function recentBuckets(nowMs, horizonMs = H72_MS) {
+function recentBuckets(nowMs, horizonMs = RECENT_WINDOW_MS) {
   const cutoff = nowMs - horizonMs;
-  const buckets = [
-    { id: "today", from: nowMs - 24 * 60 * 60 * 1000, to: nowMs + 1 },
-    { id: "one_day_ago", from: nowMs - 48 * 60 * 60 * 1000, to: nowMs - 24 * 60 * 60 * 1000 },
-    { id: "two_days_ago", from: nowMs - H72_MS, to: nowMs - 48 * 60 * 60 * 1000 },
-  ];
+  const dayMs = 24 * 60 * 60 * 1000;
+  const dayCount = Math.max(1, Math.ceil(horizonMs / dayMs));
+  const buckets = Array.from({ length: dayCount }, (_, index) => {
+    const to = index === 0 ? nowMs + 1 : nowMs - index * dayMs;
+    const from = Math.max(cutoff, nowMs - (index + 1) * dayMs);
+    return {
+      id: recentBucketId(index),
+      from,
+      to,
+    };
+  });
   return buckets.filter((bucket) => bucket.to > cutoff);
+}
+
+function recentBucketId(index) {
+  if (index === 0) return "today";
+  if (index === 1) return "one_day_ago";
+  if (index === 2) return "two_days_ago";
+  return `${index}_days_ago`;
 }
 
 async function inspectCandidates(candidates, curationContext = loadCurationContext()) {
@@ -1511,8 +1547,8 @@ function incrementPlainCount(target, key, amount = 1) {
 
 function buildGroups(videos, capturedAt) {
   const nowMs = capturedAt.getTime();
-  const in72h = (item) => Boolean(item.publishedTimestamp && nowMs - item.publishedTimestamp <= H72_MS);
-  const inMonthWindow = (item) => isWithinAgeWindow(item.publishedTimestamp, nowMs, MONTH_CARRY_MS);
+  const inRecentWindow = (item) =>
+    Boolean(item.publishedTimestamp && nowMs - item.publishedTimestamp >= 0 && nowMs - item.publishedTimestamp <= RECENT_WINDOW_MS);
   const sortVideos = (items) =>
     [...items].sort((a, b) => {
       const timeDiff = (b.publishedTimestamp || 0) - (a.publishedTimestamp || 0);
@@ -1521,19 +1557,21 @@ function buildGroups(videos, capturedAt) {
     });
 
   return {
-    "72h": {
-      id: "72h",
-      title: "72H timestamp song lists",
+    "7d": {
+      id: "7d",
+      title: RANGE_TITLES["7d"],
+      windowDays: RECENT_WINDOW_DAYS,
       generatedAt: capturedAt.toISOString(),
       updatedAt: capturedAt.toISOString(),
-      items: sortVideos(videos.filter((item) => in72h(item))),
+      items: sortVideos(videos.filter((item) => inRecentWindow(item))),
     },
-    "1m": {
-      id: "1m",
-      title: "Last 35 days timestamp song lists",
+    all: {
+      id: "all",
+      title: RANGE_TITLES.all,
+      retentionPolicy: "permanent",
       generatedAt: capturedAt.toISOString(),
       updatedAt: capturedAt.toISOString(),
-      items: sortVideos(videos.filter((item) => inMonthWindow(item))),
+      items: sortVideos(videos),
     },
   };
 }
@@ -1576,6 +1614,8 @@ function writeRankDiffFiles(payload, previousSnapshot = readPreviousSuccessfulSn
   for (const range of DIFF_RANGES) {
     writeRuntimeJson(path.join(DIFF_DIR, range.file), compactRankDiff(diffs[range.id]));
   }
+  if (diffs["7d"]) writeRuntimeJson(path.join(DIFF_DIR, "latest-72h.json"), { ...compactRankDiff(diffs["7d"]), range: "72h", aliasOf: "7d" });
+  if (diffs.all) writeRuntimeJson(path.join(DIFF_DIR, "latest-1m.json"), { ...compactRankDiff(diffs.all), range: "1m", aliasOf: "all" });
   return diffs;
 }
 
@@ -1591,8 +1631,8 @@ function buildRankDiffs(payload, previousSnapshot = null, curationContext = null
         rangeId: range.id,
         current,
         previous,
-        currentGroup: payload?.groups?.[range.id],
-        previousGroup: previousPayload?.groups?.[range.id],
+        currentGroup: groupForRange(payload?.groups, range.id),
+        previousGroup: groupForRange(previousPayload?.groups, range.id),
         aliasContext,
       }),
     ]),
@@ -1655,6 +1695,15 @@ function buildRankDiffEntries(currentState, previousState) {
       isNew: previousRank == null,
     };
   });
+}
+
+function writeRangeArtifacts(groups) {
+  for (const rangeId of CANONICAL_RANGES) {
+    const group = groupForRange(groups, rangeId);
+    if (group) writeJson(path.join(DATA_DIR, `${rangeId}.json`), group);
+  }
+  writeJson(path.join(DATA_DIR, "72h.json"), legacyAliasManifest("72h", groupForRange(groups, "7d")));
+  writeJson(path.join(DATA_DIR, "1m.json"), legacyAliasManifest("1m", groupForRange(groups, "all")));
 }
 
 function collectSongOccurrences(items) {
@@ -1790,14 +1839,14 @@ function writeSnapshot(payload, capturedAt) {
   const snapshotId = hourSnapshotId(capturedAt);
   const snapshotPath = path.join(SNAPSHOT_DIR, `${snapshotId}.json`);
   writeJson(snapshotPath, { ...payload, snapshotId });
+  const itemCounts = canonicalItemCounts(payload.groups);
 
   const index = readJsonIfExists(SNAPSHOT_INDEX_PATH) || { snapshots: [] };
-  const cutoff = Date.now() - SNAPSHOT_RETENTION_DAYS * 24 * 60 * 60 * 1000;
   const entries = new Map();
   for (const entry of Array.isArray(index.snapshots) ? index.snapshots : []) {
     if (!entry || !/^[0-9]{8}T[0-9]{4}00Z$/.test(entry.id)) continue;
     const entryTime = Date.parse(entry.capturedAt || entry.generatedAt || entry.id);
-    if (!Number.isFinite(entryTime) || entryTime < cutoff) continue;
+    if (!Number.isFinite(entryTime)) continue;
     if (!fs.existsSync(path.join(SNAPSHOT_DIR, `${entry.id}.json`))) continue;
     entries.set(entry.id, entry);
   }
@@ -1810,28 +1859,55 @@ function writeSnapshot(payload, capturedAt) {
     curationVersion: payload.curationVersion || "",
     curationHash: payload.curationHash || "",
     label: formatSnapshotLabel(capturedAt),
-    itemCounts: {
-      "72h": payload.groups["72h"].items.length,
-      "1m": payload.groups["1m"].items.length,
-    },
+    itemCounts,
   });
 
   const snapshots = [...entries.values()].sort((a, b) => Date.parse(b.capturedAt) - Date.parse(a.capturedAt));
-  const keep = new Set(snapshots.map((entry) => `${entry.id}.json`));
-  for (const dirent of fs.readdirSync(SNAPSHOT_DIR, { withFileTypes: true })) {
-    if (dirent.isFile() && /^[0-9]{8}T[0-9]{4}00Z\.json$/.test(dirent.name) && !keep.has(dirent.name)) {
-      fs.rmSync(path.join(SNAPSHOT_DIR, dirent.name));
-    }
-  }
-
+  const shardManifest = writeSnapshotIndexShards(snapshots);
   writeJson(SNAPSHOT_INDEX_PATH, {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
-    retentionDays: SNAPSHOT_RETENTION_DAYS,
+    retentionPolicy: "permanent",
+    retentionDays: null,
     cadence: "hourly",
     latestSnapshotId: snapshots[0]?.id || "",
+    snapshotCount: snapshots.length,
+    shards: shardManifest,
     snapshots,
   });
+}
+
+function writeSnapshotIndexShards(snapshots) {
+  const shardDir = path.join(SNAPSHOT_DIR, "index");
+  const byMonth = new Map();
+  for (const entry of snapshots || []) {
+    const id = entry?.id || "";
+    const match = id.match(/^([0-9]{4})([0-9]{2})/u);
+    const key = match ? `${match[1]}-${match[2]}` : "unknown";
+    if (!byMonth.has(key)) byMonth.set(key, []);
+    byMonth.get(key).push(entry);
+  }
+  const shards = [];
+  for (const [key, entries] of [...byMonth.entries()].sort((a, b) => b[0].localeCompare(a[0]))) {
+    const [year, month] = key.split("-");
+    const fileName = key === "unknown" ? "unknown.json" : path.join(year, `${month}.json`);
+    const relativePath = `data/snapshots/index/${fileName.replace(/\\/g, "/")}`;
+    writeJson(path.join(shardDir, fileName), {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      retentionPolicy: "permanent",
+      shard: key,
+      snapshotCount: entries.length,
+      snapshots: entries,
+    });
+    shards.push({
+      id: key,
+      path: relativePath,
+      snapshotCount: entries.length,
+      latestSnapshotId: entries[0]?.id || "",
+    });
+  }
+  return shards;
 }
 
 async function markFailure(error) {

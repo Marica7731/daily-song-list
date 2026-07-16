@@ -5,6 +5,8 @@ const {
   buildClientGroup,
   buildRuntimeMeta,
   buildRuntimeRangePayload,
+  buildSearchRecords,
+  buildSourceDetailRecords,
   compactRankDiff,
   compactRankDiffEntries,
   CURRENT_FILTER_VERSION,
@@ -46,12 +48,16 @@ test("buildClientGroup keeps only runtime video and song fields", () => {
   });
 
   assert.deepEqual(Object.keys(group.items[0]).sort(), [
+    "catalogFirstSeenAt",
+    "catalogLastInspectedAt",
+    "catalogLastSeenAt",
     "channelHandle",
     "channelId",
     "channelName",
     "channelUrl",
     "keyword",
     "publishedText",
+    "publishedTimestamp",
     "songs",
     "thumbnailUrl",
     "title",
@@ -70,6 +76,13 @@ test("runtime meta uses the expected range and diff paths", () => {
       items: [{ videoId: "BBBBBBBBBBB" }, { videoId: "CCCCCCCCCCC" }],
       nicheAnnotated: true,
     },
+    "7d": { id: "7d", generatedAt: "2026-07-12T15:00:00Z", items: [{ videoId: "AAAAAAAAAAA" }], nicheAnnotated: true },
+    all: {
+      id: "all",
+      generatedAt: "2026-07-12T15:00:00Z",
+      items: [{ videoId: "BBBBBBBBBBB" }, { videoId: "CCCCCCCCCCC" }],
+      nicheAnnotated: true,
+    },
   };
   const meta = buildRuntimeMeta(
     {
@@ -80,9 +93,11 @@ test("runtime meta uses the expected range and diff paths", () => {
         rebuiltDerivedAt: "2026-07-12T16:30:00Z",
         videoCatalog: {
           path: "data/video-catalog.json",
-          retentionDays: 35,
+          retentionPolicy: "permanent",
+          retentionDays: null,
           catalogVideoCount: 12,
-          monthVideoCount: 12,
+          allVideoCount: 12,
+          monthVideoCount: 4,
         },
       },
     },
@@ -100,20 +115,26 @@ test("runtime meta uses the expected range and diff paths", () => {
   assert.equal(meta.nicheAnnotated, true);
   assert.equal(meta.latestCapture.capturedAt, "2026-07-12T15:00:00Z");
   assert.equal(meta.latestDerived.rebuiltDerivedAt, "2026-07-12T16:30:00Z");
-  assert.deepEqual(meta.latestCapture.itemCounts, { "72h": 1, "1m": 2 });
-  assert.equal(meta.ranges["72h"].path, "data/ui/72h.json");
-  assert.equal(meta.ranges["72h"].legacyPath, "data/ui/72h.json");
-  assert.match(meta.ranges["72h"].sha256, /^[0-9a-f]{64}$/u);
-  assert.equal(meta.ranges["72h"].dataVersion, meta.dataVersion);
-  assert.equal(meta.ranges["72h"].itemCount, 1);
-  assert.equal(meta.ranges["1m"].itemCount, 2);
+  assert.deepEqual(meta.latestCapture.itemCounts, { "7d": 1, all: 2 });
+  assert.deepEqual(meta.rangeAliases, { "72h": "7d", "1m": "all" });
+  assert.equal(meta.ranges["7d"].path, "data/ui/7d.json");
+  assert.equal(meta.ranges["7d"].legacyPath, "data/ui/7d.json");
+  assert.equal(meta.ranges["7d"].canonicalRangeId, "7d");
+  assert.deepEqual(meta.ranges["7d"].legacyRangeIds, ["72h"]);
+  assert.match(meta.ranges["7d"].sha256, /^[0-9a-f]{64}$/u);
+  assert.equal(meta.ranges["7d"].dataVersion, meta.dataVersion);
+  assert.equal(meta.ranges["7d"].itemCount, 1);
+  assert.deepEqual(meta.ranges.all.legacyRangeIds, ["1m"]);
+  assert.equal(meta.ranges.all.itemCount, 2);
   assert.deepEqual(meta.catalog, {
     path: "data/video-catalog.json",
-    retentionDays: 35,
+    retentionPolicy: "permanent",
+    retentionDays: null,
     catalogVideoCount: 12,
-    monthVideoCount: 12,
+    allVideoCount: 12,
+    monthVideoCount: 4,
   });
-  assert.deepEqual(meta.diffs["72h"], { path: "data/diff/latest-72h.json" });
+  assert.deepEqual(meta.diffs["7d"], { path: "data/diff/latest-7d.json" });
 });
 
 test("runtime range payload carries filterVersion and niche annotation state", () => {
@@ -139,11 +160,94 @@ test("runtime range payload carries filterVersion and niche annotation state", (
   const range = buildRuntimeRangePayload(payload, "72h");
 
   assert.equal(range.id, "72h");
+  assert.equal(range.canonicalRangeId, "7d");
+  assert.deepEqual(range.legacyRangeIds, []);
   assert.equal(range.filterVersion, CURRENT_FILTER_VERSION);
   assert.equal(range.blocklistVersion, BLOCKLIST_VERSION);
   assert.equal(range.blocklistHash, BLOCKLIST_HASH);
   assert.equal(range.nicheAnnotated, true);
   assert.equal(range.items[0].songs[0].isNiche, true);
+});
+
+test("canonical runtime ranges can be built from legacy payload groups", () => {
+  const payload = {
+    generatedAt: "2026-07-12T15:00:00Z",
+    capturedAt: "2026-07-12T15:00:00Z",
+    groups: {
+      "72h": {
+        id: "72h",
+        title: "legacy recent",
+        items: [
+          {
+            videoId: "AAAAAAAAAAA",
+            title: "video",
+            channelName: "channel",
+            songs: [{ seconds: 75, title: "song", artist: "artist", isNiche: false }],
+          },
+        ],
+      },
+      "1m": {
+        id: "1m",
+        title: "legacy all",
+        items: [
+          {
+            videoId: "BBBBBBBBBBB",
+            title: "older video",
+            channelName: "channel",
+            songs: [{ seconds: 30, title: "old song", artist: "artist", isNiche: false }],
+          },
+        ],
+      },
+    },
+  };
+
+  const recent = buildRuntimeRangePayload(payload, "7d");
+  const all = buildRuntimeRangePayload(payload, "all");
+
+  assert.equal(recent.id, "7d");
+  assert.deepEqual(recent.legacyRangeIds, ["72h"]);
+  assert.equal(recent.items[0].videoId, "AAAAAAAAAAA");
+  assert.equal(all.id, "all");
+  assert.deepEqual(all.legacyRangeIds, ["1m"]);
+  assert.equal(all.items[0].videoId, "BBBBBBBBBBB");
+});
+
+test("source detail and search records split heavy runtime fields out of page payloads", () => {
+  const items = [
+    {
+      videoId: "AAAAAAAAAAA",
+      title: "video",
+      channelName: "channel",
+      channelId: "UCID",
+      channelHandle: "@handle",
+      keyword: "歌枠",
+      keywords: ["歌枠", "弾き語り"],
+      keywordKeys: ["utawaku"],
+      publishedText: "1 hour ago",
+      publishedTimestamp: Date.parse("2026-07-12T14:00:00Z"),
+      durationText: "1:00:00",
+      sourceGroups: ["today"],
+      sourceUrls: ["https://example.test/source"],
+      sourceQuality: { sourceType: "comment", sourceScore: 10 },
+      songs: [
+        { seconds: 75, title: "Song A", artist: "Artist A", isNiche: false },
+        { seconds: 125, title: "Song B", artist: "Artist B", isNiche: true },
+      ],
+    },
+  ];
+
+  const details = buildSourceDetailRecords(items);
+  const search = buildSearchRecords(items);
+
+  assert.equal(details[0].videoId, "AAAAAAAAAAA");
+  assert.deepEqual(details[0].keywords, ["歌枠", "弾き語り"]);
+  assert.equal(details[0].songCount, 2);
+  assert.equal(search.length, 3);
+  assert.deepEqual(
+    search.map((record) => record.type),
+    ["video", "song", "song"],
+  );
+  assert.equal(search[1].searchText.includes("song a"), true);
 });
 
 test("compact rank diff removes unchanged entries and detailed fields", () => {

@@ -14,14 +14,16 @@ const {
   catalogToVideos,
   loadVideoCatalog,
   rebuildVideoCatalogFromVideos,
+  writeVideoCatalog,
 } = require("./video-catalog");
+const { CANONICAL_RANGES, WEEK_MS, groupForRange, legacyAliasManifest } = require("./range-config");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const STATUS_PATH = path.join(DATA_DIR, "status.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
-const RANGES = ["72h", "1m"];
+const RANGES = CANONICAL_RANGES;
 
 if (require.main === module) {
   main();
@@ -117,10 +119,11 @@ function main() {
   });
   const catalogGroupVideos = catalogToVideos(catalogRefresh.catalog);
   assertNoBlockedVideos(catalogGroupVideos, "rebuild-derived catalog");
-  writeJson(VIDEO_CATALOG_PATH, catalogRefresh.catalog);
+  writeVideoCatalog(catalogRefresh.catalog, VIDEO_CATALOG_PATH);
+  const nextGroups = applyGroupQualityFilters(buildGroups(catalogGroupVideos, capturedAt));
   payload = {
     ...payload,
-    groups: applyGroupQualityFilters(buildGroups(catalogGroupVideos, capturedAt)),
+    groups: nextGroups,
     source: {
       ...(payload.source || {}),
       blockedSourceAudit: blockedSourceAudit.summary(),
@@ -129,8 +132,13 @@ function main() {
         addedVideoCount: catalogRefresh.stats.addedVideoCount,
         updatedVideoCount: catalogRefresh.stats.updatedVideoCount,
         expiredVideoCount: catalogRefresh.stats.expiredVideoCount,
-        h72VideoCount: catalogRefresh.catalog.videos.filter((item) => capturedAt.getTime() - item.publishedTimestamp <= 72 * 60 * 60 * 1000).length,
+        h72VideoCount: catalogRefresh.catalog.videos.filter((item) => {
+          const published = Number(item.publishedTimestamp);
+          return Number.isFinite(published) && capturedAt.getTime() - published >= 0 && capturedAt.getTime() - published <= WEEK_MS;
+        }).length,
+        recent7dVideoCount: nextGroups["7d"]?.items?.length || 0,
         monthVideoCount: catalogRefresh.stats.catalogVideoCount,
+        allVideoCount: catalogRefresh.stats.catalogVideoCount,
       },
     },
   };
@@ -139,6 +147,8 @@ function main() {
   for (const rangeId of RANGES) {
     if (payload.groups?.[rangeId]) writeJson(path.join(DATA_DIR, `${rangeId}.json`), payload.groups[rangeId]);
   }
+  writeJson(path.join(DATA_DIR, "72h.json"), legacyAliasManifest("72h", groupForRange(payload.groups, "7d")));
+  writeJson(path.join(DATA_DIR, "1m.json"), legacyAliasManifest("1m", groupForRange(payload.groups, "all")));
   writeDerivedStatus(payload);
   writeRankDiffFiles(payload, undefined, curationContext);
 

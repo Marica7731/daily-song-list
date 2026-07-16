@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T14:35:40.584Z",
+  "generatedAt": "2026-07-16T18:41:28.871Z",
   "reviewId": "review:2ZvQO0y-k0c:4a4fb2a034ed3f7a6534",
   "video": {
     "videoId": "2ZvQO0y-k0c",
@@ -11,16 +11,17 @@
   "source": {
     "sourceId": "Ugz5AoBxNyUCZPfq8fl4AaABAg",
     "sourceHash": "4a4fb2a034ed3f7a653474082d49d1f84958885152957d97029599b8fe198ddb",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "SET LIST   🐍:_kiba:\r\n00:01:40　開演\r\n\r\n00:04:27　KING / Kanaria feat. GUMI\r\n00:07:34　HOT LIMIT / T.M.Revolution\r\n00:14:23　本能 / 椎名林檎\r\n00:24:15　夜に駆ける / YOASOBI\r\n00:31:23　アンノウン・マザーグース / wowaka feat. 初音ミク\r\n\r\n00:38:43　きょういくばんぐみのテーマ / やみの おねえさん\r\n00:41:11　忘れじの言の葉 / 未来古代楽団 feat. 安次嶺希和子\r\n00:46:03　キューティーハニー / 倖田來未\r\n00:49:27　real Emotion / 倖田來未\r\n00:57:08　おやすみ泣き声、さよなら歌姫 / クリープハイプ ※歌みた 2025/11/04\r\n\r\n01:03:54　さよならミッドナイト / 大柴広己 ※歌みた 2024/05/23\r\n01:11:03　いのちの名前 / 木村弓\r\n01:19:04　Bunny Girl / AKASAKI\r\n01:22:55　アイネクライネ / 米津玄師\r\n01:28:52　プロポーズ / 内緒のピアス feat. 可不\r\n\r\n01:33:36　鬼ノ宴 / 友成空",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 10,
+    "riskScore": 16,
     "riskLevel": "low",
     "riskReasons": [
+      "niche_unknown_artist",
       "short_unknown_title"
     ]
   },
@@ -35,16 +36,15 @@
       "rawHash": "dc9575a9bcbec6ba85359512f691093b477d6bdfef9bf37b8971900d1af0b17a",
       "sourceId": "Ugz5AoBxNyUCZPfq8fl4AaABAg",
       "sourceHash": "4a4fb2a034ed3f7a653474082d49d1f84958885152957d97029599b8fe198ddb",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -63,8 +63,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -84,8 +83,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -105,8 +103,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -126,8 +123,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -147,8 +143,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -168,8 +163,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -189,8 +183,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -210,8 +203,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -231,8 +223,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -252,8 +243,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -273,8 +263,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -294,8 +283,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -315,8 +303,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -336,8 +323,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -357,8 +343,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -378,8 +363,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     }
   ]

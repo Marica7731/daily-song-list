@@ -544,14 +544,14 @@ async function firstLoad(browser, range, viewport) {
     await route.continue();
   });
   page.on("request", (request) => requests.push(requestPath(request.url())));
-  const url = range === "72h" ? baseUrl : `${baseUrl}?shared=1&range=1m`;
+  const url = range === "7d" ? baseUrl : `${baseUrl}?shared=1&range=all`;
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await waitForRows(page, errors, requests);
   await assertUiShape(page, viewport, range);
   firstRowTime = Date.now();
   const beforeFirstContentRequests = [...requests];
   const perf = await page.evaluate(() => window.printSongListPerformance());
-  const activeRuntimePath = perf.runtime?.rangePath || beforeFirstContentRequests.find((item) => runtimePathPattern(range).test(item));
+  const activeRuntimePath = beforeFirstContentRequests.find((item) => runtimeRequestPattern(range).test(item)) || perf.runtime?.rangePath;
   const linksOk = await page.evaluate(() =>
     Array.from(document.querySelectorAll(".inline-source-time,.song-list a"))
       .slice(0, 12)
@@ -565,9 +565,9 @@ async function firstLoad(browser, range, viewport) {
   await context.close();
 
   const forbidden =
-    range === "72h"
-      ? ["data/latest.json", "data/diff/latest-1m.json", "data/song-search-known-songs.json"]
-      : ["data/latest.json", "data/diff/latest-72h.json", "data/song-search-known-songs.json"];
+    range === "7d"
+      ? ["data/latest.json", "data/diff/latest-all.json", "data/diff/latest-1m.json", "data/song-search-known-songs.json"]
+      : ["data/latest.json", "data/diff/latest-7d.json", "data/diff/latest-72h.json", "data/song-search-known-songs.json"];
   const seenForbidden = beforeFirstContentRequests.filter((item) => forbidden.includes(item));
   if (seenForbidden.length) {
     throw new Error(`${range} first load requested forbidden resources before first content: ${seenForbidden.join(", ")}`);
@@ -847,9 +847,9 @@ async function interactionFlow(browser) {
   await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await waitForRows(page, errors, requests);
   assertBadgesHidden(await readFilterBadgeState(page), "initial");
-  await page.locator('[data-range="1m"]').click();
+  await page.locator('[data-range="all"]').click();
   await waitForRows(page, errors, requests);
-  if (!requests.some((item) => runtimePathPattern("1m").test(item))) throw new Error("range switch did not load monthly runtime");
+  if (!requests.some((item) => runtimeRequestPattern("all").test(item))) throw new Error("range switch did not load all runtime");
   await page.locator('[data-page-size="100"]').first().click();
   await waitForRows(page, errors, requests);
   await openFilterSheet(page);
@@ -961,7 +961,7 @@ async function measureQueryOpenLatency(browser) {
       cdpSession = await context.newCDPSession(page);
       await cdpSession.send("Emulation.setCPUThrottlingRate", { rate: scenario.throttle });
     }
-    await page.goto(`${baseUrl}?range=1m&pageSize=100`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${baseUrl}?range=all&pageSize=100`, { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
     await page.evaluate(() => {
       window.__queryPanelVisibleAt = 0;
@@ -1316,8 +1316,9 @@ async function mobileRankVisualGeometry(browser) {
       throw new Error(`mobile inline source strip should span content and side columns ${JSON.stringify(closedGeometry)}`);
     }
     if (closedGeometry.sourceVideoCount > 3) {
-      if (closedGeometry.sourceInlineItems.length !== 3) {
-        throw new Error(`4+ source rows should render exactly three inline previews ${JSON.stringify(closedGeometry.sourceInlineItems)}`);
+      const expectedInlineSources = closedGeometry.viewportWidth <= 720 ? 2 : 3;
+      if (closedGeometry.sourceInlineItems.length !== expectedInlineSources) {
+        throw new Error(`4+ source rows should render ${expectedInlineSources} inline previews ${JSON.stringify(closedGeometry.sourceInlineItems)}`);
       }
       const invisibleSource = closedGeometry.sourceInlineItems.find(
         (item) =>
@@ -1350,7 +1351,7 @@ async function mobileRankVisualGeometry(browser) {
       }
     }
     if (closedGeometry.legacyTrendNodes) throw new Error(`legacy mobile trend nodes remain ${JSON.stringify(closedGeometry)}`);
-    const compactRowHeightLimit = closedGeometry.sourceVideoCount > 2 ? 142 : closedGeometry.sourceVideoCount > 0 ? 108 : 70;
+    const compactRowHeightLimit = closedGeometry.sourceVideoCount > 2 ? 176 : closedGeometry.sourceVideoCount > 0 ? 108 : 70;
     if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > compactRowHeightLimit) {
       throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
     }
@@ -1650,10 +1651,15 @@ async function mobileCopyAllLinksFlow(browser) {
       const tripleShape = await inlineSourceShape(tripleRow);
       if (
         tripleShape.sourceVideoCount !== 3 ||
-        tripleShape.items.length !== 3 ||
-        tripleShape.toggleCount !== 0 ||
-        tripleShape.drawerCount !== 0 ||
+        tripleShape.inlineVisibleCount !== 2 ||
+        tripleShape.items.length !== 2 ||
+        tripleShape.toggleCount !== 1 ||
+        tripleShape.drawerCount !== 1 ||
         tripleShape.copyAllCount !== 1 ||
+        !tripleShape.more?.visible ||
+        tripleShape.more.width > 92 ||
+        tripleShape.more.height > 30 ||
+        tripleShape.more.flexGrow !== "0" ||
         tripleShape.items.some(
           (item) =>
             !item.visible ||
@@ -1664,8 +1670,7 @@ async function mobileCopyAllLinksFlow(browser) {
             !item.time?.visible ||
             !item.time.text ||
             item.time.scrollWidth > item.time.clientWidth + 1,
-        ) ||
-        tripleShape.items[2].width < Math.max(80, (tripleShape.strip?.width || 0) - 44)
+        )
       ) {
         throw new Error(`triple-source inline shape invalid ${JSON.stringify(tripleShape)}`);
       }
@@ -1676,10 +1681,10 @@ async function mobileCopyAllLinksFlow(browser) {
       const moreShape = await inlineSourceShape(moreRow);
       if (
         moreShape.sourceVideoCount <= 3 ||
-        moreShape.inlineVisibleCount !== 3 ||
-        moreShape.items.length !== 3 ||
+        moreShape.inlineVisibleCount !== 2 ||
+        moreShape.items.length !== 2 ||
         moreShape.toggleCount !== 1 ||
-        moreShape.copyAllCount !== 0 ||
+        moreShape.copyAllCount !== 1 ||
         !moreShape.more?.visible ||
         moreShape.more.width > 92 ||
         moreShape.more.height > 30 ||
@@ -2380,8 +2385,12 @@ async function monthlyFallbackScenarios(browser) {
     page.on("request", (request) => requests.push(requestPath(request.url())));
     await page.route("**/*", async (route) => {
       const pathName = requestPath(route.request().url());
-      if (runtimePathPattern("1m").test(pathName)) {
+      if (runtimeRequestPattern("all").test(pathName)) {
         await scenario.handler(route);
+        return;
+      }
+      if (pathName === "data/all.json") {
+        await route.fulfill({ status: 404, contentType: "text/plain", body: "missing" });
         return;
       }
       if (pathName === "data/1m.json") {
@@ -2407,8 +2416,11 @@ async function monthlyFallbackScenarios(browser) {
     if (!debug.includes("data/1m.json") && !debug.includes("data/latest.json")) {
       throw new Error(`fallback ${scenario.label} did not record fallback path`);
     }
-    const unexpectedErrors =
-      scenario.label === "404" ? errors.filter((error) => !/status of 404|HTTP 404/u.test(error)) : errors;
+    const unexpectedErrors = errors.filter((error) => {
+      if (/data\/all\.json/u.test(error) && /status of 404|HTTP 404/u.test(error)) return false;
+      if (scenario.label === "404" && /status of 404|HTTP 404/u.test(error)) return false;
+      return true;
+    });
     if (unexpectedErrors.length) throw new Error(`fallback ${scenario.label} errors: ${unexpectedErrors.join(" | ")}`);
     results.push({ scenario: `fallback-${scenario.label}`, requests: [...new Set(requests)] });
   }
@@ -2426,7 +2438,7 @@ async function prefetchGuards(browser) {
     await waitForRows(page, errors, requests);
     await sleep(2500);
     await context.close();
-    if (requests.some((item) => runtimePathPattern("1m").test(item))) throw new Error(`${label} prefetched inactive range`);
+    if (requests.some((item) => runtimeRequestPattern("all").test(item))) throw new Error(`${label} prefetched inactive range`);
     if (errors.length) throw new Error(`${label} errors: ${errors.join(" | ")}`);
     results.push({ scenario: `prefetch-${label}`, requests: [...new Set(requests)] });
   }
@@ -2576,13 +2588,20 @@ function runtimePathPattern(range) {
   return new RegExp(`^data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json$`, "u");
 }
 
+function runtimeRequestPattern(range) {
+  return new RegExp(
+    `^(?:data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json|data/ui/ranges/${range}/(?:manifest|page-\\d{4})\\.[0-9a-f]{12}\\.json)$`,
+    "u",
+  );
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     for (const viewport of viewports) {
-      await firstLoad(browser, "72h", viewport);
+      await firstLoad(browser, "7d", viewport);
     }
-    await firstLoad(browser, "1m", [1366, 768]);
+    await firstLoad(browser, "all", [1366, 768]);
     await desktopRankVisualGeometry(browser);
     await interactionFlow(browser);
     await measureQueryOpenLatency(browser);

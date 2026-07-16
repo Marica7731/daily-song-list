@@ -12,9 +12,10 @@ const {
   catalogSummary,
   catalogToVideos,
   createEmptyVideoCatalog,
-  isWithinCatalogWindow,
   rebuildVideoCatalogFromVideos,
+  writeVideoCatalog,
 } = require("./video-catalog");
+const { CANONICAL_RANGES, groupForRange, legacyAliasManifest } = require("./range-config");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -22,7 +23,7 @@ const UI_DIR = path.join(DATA_DIR, "ui");
 const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const SNAPSHOT_INDEX_PATH = path.join(DATA_DIR, "snapshots", "index.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
-const RANGES = ["72h", "1m"];
+const RANGES = CANONICAL_RANGES;
 
 if (require.main === module) {
   main();
@@ -42,7 +43,7 @@ function main() {
     curationVersion: curationContext.version,
     curationHash: curationContext.hash,
   });
-  writeJson(VIDEO_CATALOG_PATH, catalogResult.catalog);
+  writeVideoCatalog(catalogResult.catalog, VIDEO_CATALOG_PATH);
 
   let payload = {
     ...latest,
@@ -62,12 +63,16 @@ function main() {
         from72hSupplementVideoCount: migration.report.from72hSupplementVideoCount,
         conflictCount: migration.report.conflictCount,
         h72VideoCount: 0,
+        recent7dVideoCount: 0,
         monthVideoCount: 0,
+        allVideoCount: 0,
       },
     },
   };
-  payload.source.videoCatalog.h72VideoCount = payload.groups["72h"]?.items?.length || 0;
-  payload.source.videoCatalog.monthVideoCount = payload.groups["1m"]?.items?.length || 0;
+  payload.source.videoCatalog.h72VideoCount = payload.groups["7d"]?.items?.length || 0;
+  payload.source.videoCatalog.recent7dVideoCount = payload.groups["7d"]?.items?.length || 0;
+  payload.source.videoCatalog.monthVideoCount = payload.groups.all?.items?.length || 0;
+  payload.source.videoCatalog.allVideoCount = payload.groups.all?.items?.length || 0;
   payload = canonicalizePayloadSongAliases(payload, songAliasContext);
 
   const songSearchIndex = mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
@@ -84,7 +89,7 @@ function main() {
     curationVersion: curationContext.version,
     curationHash: curationContext.hash,
   });
-  writeJson(VIDEO_CATALOG_PATH, canonicalCatalogResult.catalog);
+  writeVideoCatalog(canonicalCatalogResult.catalog, VIDEO_CATALOG_PATH);
   payload = {
     ...payload,
     groups: applyGroupQualityFilters(buildGroups(catalogToVideos(canonicalCatalogResult.catalog), capturedAt)),
@@ -97,17 +102,23 @@ function main() {
         updatedVideoCount: 0,
         expiredVideoCount: catalogResult.stats.expiredVideoCount + canonicalCatalogResult.stats.expiredVideoCount,
         h72VideoCount: 0,
+        recent7dVideoCount: 0,
         monthVideoCount: 0,
+        allVideoCount: 0,
       },
     },
   };
-  payload.source.videoCatalog.h72VideoCount = payload.groups["72h"]?.items?.length || 0;
-  payload.source.videoCatalog.monthVideoCount = payload.groups["1m"]?.items?.length || 0;
+  payload.source.videoCatalog.h72VideoCount = payload.groups["7d"]?.items?.length || 0;
+  payload.source.videoCatalog.recent7dVideoCount = payload.groups["7d"]?.items?.length || 0;
+  payload.source.videoCatalog.monthVideoCount = payload.groups.all?.items?.length || 0;
+  payload.source.videoCatalog.allVideoCount = payload.groups.all?.items?.length || 0;
 
   writeJson(LATEST_PATH, payload);
   for (const rangeId of RANGES) {
     writeJson(path.join(DATA_DIR, `${rangeId}.json`), payload.groups[rangeId]);
   }
+  writeJson(path.join(DATA_DIR, "72h.json"), legacyAliasManifest("72h", groupForRange(payload.groups, "7d")));
+  writeJson(path.join(DATA_DIR, "1m.json"), legacyAliasManifest("1m", groupForRange(payload.groups, "all")));
   writeRankDiffFiles(payload, undefined, curationContext);
   writeRuntimeFiles(payload);
 
@@ -120,14 +131,13 @@ function main() {
   };
   writeJson(CATALOG_MIGRATION_REPORT_PATH, report);
   console.log(
-    `[video-catalog] videos=${payload.source.videoCatalog.catalogVideoCount} 72h=${payload.groups["72h"].items.length} 1m=${payload.groups["1m"].items.length} conflicts=${report.conflictCount}`,
+    `[video-catalog] videos=${payload.source.videoCatalog.catalogVideoCount} 7d=${payload.groups["7d"].items.length} all=${payload.groups.all.items.length} conflicts=${report.conflictCount}`,
   );
 }
 
 function collectMigrationVideos(capturedAt) {
-  const nowMs = capturedAt.getTime();
   const latest = readJson(LATEST_PATH);
-  const latestMonthIds = new Set((latest.groups?.["1m"]?.items || []).map((item) => item.videoId));
+  const latestAllIds = new Set((groupForRange(latest.groups, "all")?.items || []).map((item) => item.videoId));
   const byVideoId = new Map();
   const report = {
     scannedSourceCount: 0,
@@ -144,6 +154,8 @@ function collectMigrationVideos(capturedAt) {
 
   const sources = [
     { label: "latest", payload: latest, kind: "latest" },
+    { label: "data/7d.json", payload: rangePayload("7d"), kind: "standalone" },
+    { label: "data/all.json", payload: rangePayload("all"), kind: "standalone" },
     { label: "data/72h.json", payload: rangePayload("72h"), kind: "standalone" },
     { label: "data/1m.json", payload: rangePayload("1m"), kind: "standalone" },
     ...snapshotSources(),
@@ -157,10 +169,6 @@ function collectMigrationVideos(capturedAt) {
         report.skippedInvalidVideoCount += 1;
         continue;
       }
-      if (!isWithinCatalogWindow(item.publishedTimestamp, nowMs)) {
-        report.skippedExpiredVideoCount += 1;
-        continue;
-      }
       const existing = byVideoId.get(item.videoId);
       if (!existing) {
         byVideoId.set(item.videoId, {
@@ -169,7 +177,7 @@ function collectMigrationVideos(capturedAt) {
           migrationSourceKind: source.kind,
         });
         incrementSourceCount(report, source.kind);
-        if (source.kind === "latest" && !latestMonthIds.has(item.videoId)) report.from72hSupplementVideoCount += 1;
+        if (source.kind === "latest" && !latestAllIds.has(item.videoId)) report.from72hSupplementVideoCount += 1;
         continue;
       }
       mergeDiscoveryMetadata(existing, item);
