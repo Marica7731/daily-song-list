@@ -12,6 +12,7 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /id="queryTrigger"[\s\S]*aria-controls="queryDialog"/u);
   assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
   assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
+  assert.match(indexSource, /class="bottom-nav-icon-wrap"[\s\S]*data-view="artistRank"[\s\S]*class="bottom-nav-icon-wrap"[\s\S]*data-view="songAz"[\s\S]*class="bottom-nav-icon-wrap"/u);
   assert.match(indexSource, /id="queryDialog"[\s\S]*role="dialog"[\s\S]*aria-labelledby="queryDialogTitle"[\s\S]*搜索与筛选/u);
   assert.match(indexSource, /id="queryInput"[\s\S]*id="searchSuggestions"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
@@ -24,6 +25,8 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*class="query-trigger"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
+  assert.match(cssSource, /\.bottom-nav-icon-wrap\s*\{[\s\S]*width: 34px;[\s\S]*height: 24px;/u);
+  assert.match(cssSource, /\.bottom-nav-item\.active \.bottom-nav-icon-wrap,[\s\S]*\.bottom-nav-item\[aria-current="page"\] \.bottom-nav-icon-wrap\s*\{[\s\S]*background: var\(--accent-soft\);/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 620px\)/u);
 });
 
@@ -52,7 +55,10 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1/u);
   assert.match(appSource, /className = "source-video-thumb-link"/u);
   assert.match(appSource, /className = "source-inline-thumb source-link"/u);
-  assert.match(appSource, /className = "source-inline-time-overlay"/u);
+  assert.match(appSource, /thumb\.tabIndex = -1/u);
+  assert.match(appSource, /className = "source-inline-meta"/u);
+  assert.match(appSource, /renderSourceTimestampLink\(firstOccurrence, "source-inline-time"\)/u);
+  assert.doesNotMatch(appSource, /className = "source-inline-time-overlay"/u);
   assert.match(appSource, /createThumbnailImage\(\{ \.\.\.item, videoId, thumbnailUrl: item\.thumbnailUrl \|\| group\.thumbnailUrl \}, "source-inline-thumb-image"[\s\S]*preferCompact: true/u);
   assert.match(appSource, /className = "source-time-extra-toggle"/u);
   assert.match(appSource, /function renderCopySetlistIconButton/u);
@@ -90,7 +96,10 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /\.source-inline-strip\s*\{[\s\S]*grid-area: sources;/u);
   assert.match(cssSource, /\.source-inline-thumb\s*\{[\s\S]*width: 56px;[\s\S]*height: 32px;[\s\S]*border-radius: 6px;/u);
   assert.match(cssSource, /\.source-inline-thumb-image\s*\{[\s\S]*object-fit: cover;/u);
-  assert.match(cssSource, /\.source-inline-time-overlay\s*\{[\s\S]*position: absolute;[\s\S]*background: rgba\(17, 24, 39, 0\.78\);/u);
+  assert.doesNotMatch(cssSource, /\.source-inline-time-overlay/u);
+  assert.match(cssSource, /\.source-inline-main\s*\{[\s\S]*grid-template-rows: auto auto;[\s\S]*gap: 1px;/u);
+  assert.match(cssSource, /\.source-inline-meta\s*\{[\s\S]*display: inline-flex;[\s\S]*gap: 4px;/u);
+  assert.match(cssSource, /\.source-inline-time,[\s\S]*\.source-inline-extra-time,[\s\S]*\.source-inline-time-more\s*\{[\s\S]*background: transparent;[\s\S]*font-variant-numeric: tabular-nums;/u);
   assert.match(cssSource, /\.source-inline-tail\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
   assert.match(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
@@ -193,6 +202,10 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /summary-metrics/u);
   assert.match(appSource, /function compactSummaryMetrics/u);
   assert.match(appSource, /function compactSummaryNote/u);
+  assert.doesNotMatch(functionBody("function compactSummaryMetrics"), /首结果/u);
+  assert.match(functionBody("function compactSummaryMetrics"), /首歌曲\|首小众歌曲\|次收录\|次小众收录\|个视频/u);
+  assert.match(functionBody("function compactSummaryNote"), /已隐藏无歌手/u);
+  assert.match(functionBody("function renderActiveQueryStrip"), /if \(items\.length >= 2\)/u);
   assert.match(appSource, /variant === "top"[\s\S]*`\$\{pageInfo\.startIndex \+ 1\}-\$\{pageInfo\.endIndex\} \/ \$\{pageInfo\.total\}/u);
   assert.match(appSource, /function paginationTokenOptions/u);
   assert.match(appSource, /renderPageButton\("上一页"[\s\S]*\{ icon: "prev" \}/u);

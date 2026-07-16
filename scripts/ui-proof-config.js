@@ -8,6 +8,7 @@ const expectedScreenshots = [
   "desktop-source-expanded.png",
   "desktop-source-inline-3.png",
   "desktop-pagination-middle.png",
+  "desktop-source-long-time.png",
   "mobile-song-rank.png",
   "mobile-artist-rank.png",
   "mobile-song-index.png",
@@ -16,10 +17,13 @@ const expectedScreenshots = [
   "mobile-video-view.png",
   "mobile-video-expanded.png",
   "mobile-pagination-320.png",
+  "mobile-bottom-nav-active.png",
   "mobile-active-query-strip.png",
   "mobile-query-recent.png",
   "mobile-query-suggestions.png",
   "mobile-query-history.png",
+  "mobile-summary-filtered.png",
+  "mobile-controls-active.png",
   "mobile-source-expanded.png",
   "mobile-source-inline-0.png",
   "mobile-source-inline-1.png",
@@ -29,6 +33,8 @@ const expectedScreenshots = [
   "mobile-source-more-than-3-expanded.png",
   "mobile-source-thumb-fallback.png",
   "mobile-source-long-channel.png",
+  "mobile-source-long-time.png",
+  "mobile-source-extra-times.png",
 ];
 
 const proofInputPaths = [

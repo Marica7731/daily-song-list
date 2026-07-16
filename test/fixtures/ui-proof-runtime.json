@@ -75,6 +75,36 @@
         }
       ]
     },
+    "longTime": {
+      "sourceVideoCount": 1,
+      "groups": [
+        {
+          "videoId": "XIUGV-zqRWc",
+          "time": "12:34:56",
+          "seconds": 45296,
+          "channelName": "Long Time Proof Channel",
+          "title": "Long timestamp source"
+        }
+      ]
+    },
+    "extraTimes": {
+      "sourceVideoCount": 1,
+      "groups": [
+        {
+          "videoId": "JieYJhMRcxQ",
+          "time": "38:00",
+          "seconds": 2280,
+          "channelName": "Extra Times Proof Channel",
+          "title": "Extra timestamp source",
+          "extraTimes": [
+            { "time": "2:36:03", "seconds": 9363 },
+            { "time": "8:40:21", "seconds": 31221 },
+            { "time": "12:34:56", "seconds": 45296 }
+          ],
+          "extraCountLabel": "+88"
+        }
+      ]
+    },
     "fallback": {
       "sourceVideoCount": 1,
       "groups": [

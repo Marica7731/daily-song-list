@@ -27,9 +27,9 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-query-panel.png" alt="Desktop unified search and filter panel" width="320" /> | <img src="docs/assets/screenshots/desktop-source-expanded.png" alt="Desktop expanded song sources" width="320" /> | <img src="docs/assets/screenshots/desktop-source-inline-3.png" alt="Desktop inline source thumbnails" width="320" /> |
 
-| Middle pagination |
-| --- |
-| <img src="docs/assets/screenshots/desktop-pagination-middle.png" alt="Desktop middle pagination state" width="320" /> |
+| Middle pagination | Long timestamp source |
+| --- | --- |
+| <img src="docs/assets/screenshots/desktop-pagination-middle.png" alt="Desktop middle pagination state" width="320" /> | <img src="docs/assets/screenshots/desktop-source-long-time.png" alt="Desktop inline source with long timestamp" width="320" /> |
 
 ### Mobile H5
 
@@ -53,17 +53,21 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-source-inline-3.png" alt="Mobile three source inline row with thumbnail tail action" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3.png" alt="Mobile row with more than three sources" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3-expanded.png" alt="Mobile row with all remaining sources expanded" width="180" /> |
 
-| Thumbnail fallback | Long channel |
-| --- | --- |
-| <img src="docs/assets/screenshots/mobile-source-thumb-fallback.png" alt="Mobile inline source thumbnail fallback" width="180" /> | <img src="docs/assets/screenshots/mobile-source-long-channel.png" alt="Mobile inline source with long channel name" width="180" /> |
+| Thumbnail fallback | Long channel | Long timestamp |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-source-thumb-fallback.png" alt="Mobile inline source thumbnail fallback" width="180" /> | <img src="docs/assets/screenshots/mobile-source-long-channel.png" alt="Mobile inline source with long channel name" width="180" /> | <img src="docs/assets/screenshots/mobile-source-long-time.png" alt="Mobile inline source with long timestamp" width="180" /> |
+
+| Extra timestamps | Filtered summary | Active controls |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-source-extra-times.png" alt="Mobile inline source with extra timestamps" width="180" /> | <img src="docs/assets/screenshots/mobile-summary-filtered.png" alt="Mobile filtered summary with natural units" width="180" /> | <img src="docs/assets/screenshots/mobile-controls-active.png" alt="Mobile compact active controls" width="180" /> |
 
 | Active query strip | Recent searches | Suggestions |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-active-query-strip.png" alt="Mobile active query strip with search and filters" width="180" /> | <img src="docs/assets/screenshots/mobile-query-recent.png" alt="Mobile search and filter panel with recent searches" width="180" /> | <img src="docs/assets/screenshots/mobile-query-suggestions.png" alt="Mobile search suggestions in query panel" width="180" /> |
 
-| Snapshot controls |
-| --- |
-| <img src="docs/assets/screenshots/mobile-query-history.png" alt="Mobile query panel history snapshot controls" width="180" /> |
+| Snapshot controls | Bottom navigation |
+| --- | --- |
+| <img src="docs/assets/screenshots/mobile-query-history.png" alt="Mobile query panel history snapshot controls" width="180" /> | <img src="docs/assets/screenshots/mobile-bottom-nav-active.png" alt="Mobile bottom navigation active icon state" width="180" /> |
 
 ## How it Works
 
@@ -112,9 +116,9 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
    - Ranking rows place count and trend in a fixed right-side `rank-side` column. Song and song-index source previews now occupy a dedicated grid area spanning the content and right-side columns, grouped by unique source video.
    - Responsive ranking layout uses one maintained breakpoint system: mobile is `<=720px`, tablet is `721px-919px`, and desktop is `>=920px`. Mobile and tablet drawers render in-place below the current row, keep only one row expanded at a time, and use timestamp links whose visible text is only the time while the accessible label keeps song, artist, and channel context.
-   - `FrontendUtils.sourcePresentationModel` inlines 0-3 unique source videos. Inline sources render compact 16:9 video thumbnails with the primary timestamp overlaid on the thumbnail. Four or more source videos show the first three inline plus compact `+N来源`; one click renders all remaining sources and changes the control to `收起`. One-source rows no longer open drawers.
+   - `FrontendUtils.sourcePresentationModel` inlines 0-3 unique source videos. Inline sources render compact 16:9 video thumbnails without overlay text; the primary timestamp sits below the channel name in the source meta row and remains a jump link. Four or more source videos show the first three inline plus compact `+N来源`; one click renders all remaining sources and changes the control to `收起`. One-source rows no longer open drawers.
    - The unified query panel opens its shell before suggestions, recent searches, query indexes, or result-count previews run. Search input updates only the draft query text, clear button, suggestions timer, and preview timer; IME composition does not rebuild the whole form on every intermediate character.
-   - Each inline source includes a micro video thumbnail, timestamp overlay, channel link, and compact setlist-copy icon. Exactly three-source inline rows place the third source in a tail row with a fixed 28px same-song link-copy icon; 4+ rows use the same tail row for the third source plus compact `+N来源` / `收起` and expose the song-level copy action in the expanded source toolbar.
+   - Each inline source includes a micro video thumbnail, channel link, timestamp meta link, optional extra-time toggle, and compact setlist-copy icon. Exactly three-source inline rows place the third source in a tail row with a fixed 28px same-song link-copy icon; 4+ rows use the same tail row for the third source plus compact `+N来源` / `收起` and expose the song-level copy action in the expanded source toolbar.
    - Pagination uses one token model across songs, artists, song index, and videos. Numeric pagination uses non-clickable ellipsis markers; mobile top pagination uses a compact page stepper, and the song index combines bucket selection with page selection in one toolbar.
    - Initial load reads `data/ui/meta.json` first, then loads only the active hash range file from `meta.ranges`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact monthly range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
    - `debug=1` adds a read-only runtime panel with `dataVersion`, active range path, status fields, fallback state, and recent resource timings.

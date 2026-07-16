@@ -1231,8 +1231,8 @@ async function mobileRankVisualGeometry(browser) {
         const channelStyle = channel ? getComputedStyle(channel) : null;
         const thumb = node.querySelector(".source-inline-thumb");
         const thumbBox = thumb?.getBoundingClientRect();
-        const overlay = node.querySelector(".source-inline-time-overlay");
-        const overlayBox = overlay?.getBoundingClientRect();
+        const time = node.querySelector(".source-inline-time");
+        const timeBox = time?.getBoundingClientRect();
         return {
           left: box.left,
           right: box.right,
@@ -1250,9 +1250,12 @@ async function mobileRankVisualGeometry(browser) {
           channelHeight: channelBox?.height || 0,
           thumbWidth: thumbBox?.width || 0,
           thumbHeight: thumbBox?.height || 0,
-          overlayText: overlay?.textContent?.trim() || "",
-          overlayWidth: overlayBox?.width || 0,
-          overlayHeight: overlayBox?.height || 0,
+          timeText: time?.textContent?.trim() || "",
+          timeWidth: timeBox?.width || 0,
+          timeHeight: timeBox?.height || 0,
+          timeScrollWidth: time?.scrollWidth || 0,
+          timeClientWidth: time?.clientWidth || 0,
+          overlayCount: node.querySelectorAll(".source-inline-time-overlay").length,
         };
       });
       const sourceMoreButton = button
@@ -1329,8 +1332,10 @@ async function mobileRankVisualGeometry(browser) {
           item.channelHeight <= 0 ||
           item.thumbWidth < (closedGeometry.viewportWidth <= 340 ? 46 : 48) ||
           item.thumbHeight < (closedGeometry.viewportWidth <= 340 ? 26 : 27) ||
-          !item.overlayText ||
-          item.overlayHeight <= 0,
+          item.overlayCount !== 0 ||
+          !item.timeText ||
+          item.timeHeight <= 0 ||
+          item.timeScrollWidth > item.timeClientWidth + 1,
       );
       if (invisibleSource) {
         throw new Error(`inline source preview is visually hidden ${JSON.stringify({ invisibleSource, sourceInlineItems: closedGeometry.sourceInlineItems })}`);
@@ -1595,6 +1600,7 @@ async function mobileCopyAllLinksFlow(browser) {
       inlineItems: node.querySelectorAll(".source-inline-item").length,
       inlineThumbs: node.querySelectorAll(".source-inline-thumb-image").length,
       inlineTimeOverlays: node.querySelectorAll(".source-inline-time-overlay").length,
+      inlineTimes: node.querySelectorAll(".source-inline-time").length,
       inlineChannels: node.querySelectorAll(".source-inline-channel").length,
       setlistButtons: node.querySelectorAll(".source-inline-item [data-copy-setlist]").length,
       actionHeight: node.querySelector(".source-inline-item [data-copy-setlist]")?.getBoundingClientRect().height || 0,
@@ -1605,7 +1611,8 @@ async function mobileCopyAllLinksFlow(browser) {
       singleSourceShape.drawers !== 0 ||
       singleSourceShape.inlineItems !== 1 ||
       singleSourceShape.inlineThumbs !== 1 ||
-      singleSourceShape.inlineTimeOverlays !== 1 ||
+      singleSourceShape.inlineTimeOverlays !== 0 ||
+      singleSourceShape.inlineTimes !== 1 ||
       singleSourceShape.inlineChannels !== 1 ||
       singleSourceShape.setlistButtons !== 1
     ) {
@@ -1621,7 +1628,10 @@ async function mobileCopyAllLinksFlow(browser) {
       !singleVisibleShape.items[0]?.channel?.visible ||
       !singleVisibleShape.items[0]?.channel?.text ||
       !singleVisibleShape.items[0]?.thumbVisible ||
-      !singleVisibleShape.items[0]?.overlayVisible ||
+      singleVisibleShape.items[0]?.overlayCount !== 0 ||
+      !singleVisibleShape.items[0]?.time?.visible ||
+      !singleVisibleShape.items[0]?.time?.text ||
+      singleVisibleShape.items[0]?.time?.scrollWidth > singleVisibleShape.items[0]?.time?.clientWidth + 1 ||
       !singleVisibleShape.items[0]?.copyVisible
     ) {
       throw new Error(`single-source inline visibility invalid ${JSON.stringify(singleVisibleShape)}`);
@@ -1644,7 +1654,17 @@ async function mobileCopyAllLinksFlow(browser) {
         tripleShape.toggleCount !== 0 ||
         tripleShape.drawerCount !== 0 ||
         tripleShape.copyAllCount !== 1 ||
-        tripleShape.items.some((item) => !item.visible || !item.channel?.visible || !item.channel.text || !item.thumbVisible || !item.overlayVisible) ||
+        tripleShape.items.some(
+          (item) =>
+            !item.visible ||
+            !item.channel?.visible ||
+            !item.channel.text ||
+            !item.thumbVisible ||
+            item.overlayCount !== 0 ||
+            !item.time?.visible ||
+            !item.time.text ||
+            item.time.scrollWidth > item.time.clientWidth + 1,
+        ) ||
         tripleShape.items[2].width < Math.max(80, (tripleShape.strip?.width || 0) - 44)
       ) {
         throw new Error(`triple-source inline shape invalid ${JSON.stringify(tripleShape)}`);
@@ -1876,7 +1896,7 @@ async function inlineSourceShape(row) {
     const items = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => {
       const channel = item.querySelector(".source-inline-channel");
       const thumb = item.querySelector(".source-inline-thumb");
-      const overlay = item.querySelector(".source-inline-time-overlay");
+      const time = item.querySelector(".source-inline-time");
       return {
         ...rectFor(item),
         visible: visible(item),
@@ -1891,8 +1911,16 @@ async function inlineSourceShape(row) {
         thumbVisible: visible(thumb),
         thumbWidth: thumb?.getBoundingClientRect().width || 0,
         thumbHeight: thumb?.getBoundingClientRect().height || 0,
-        overlayVisible: visible(overlay),
-        overlayText: overlay?.textContent?.trim() || "",
+        overlayCount: item.querySelectorAll(".source-inline-time-overlay").length,
+        time: time
+          ? {
+              ...rectFor(time),
+              visible: visible(time),
+              text: time.textContent.trim(),
+              scrollWidth: time.scrollWidth,
+              clientWidth: time.clientWidth,
+            }
+          : null,
       };
     });
     const more = node.querySelector(".source-inline-more");
@@ -2066,7 +2094,7 @@ async function compactSourceDrawerFlow(browser) {
       const remainingMatch = moreText.match(/查看更多\s*(\d+)个来源/u);
       const expectedTotal = remainingMatch ? beforeGroupCount + Number.parseInt(remainingMatch[1], 10) : sourceCountFromText(moreText);
       let expandedTimestampBeforeMore = false;
-      const firstTimestampToggle = row.locator('[data-toggle-source-times][aria-expanded="false"]').first();
+      const firstTimestampToggle = row.locator('.source-drawer [data-toggle-source-times][aria-expanded="false"]').first();
       if ((await firstTimestampToggle.count()) > 0) {
         await firstTimestampToggle.click();
         const expandedState = await firstTimestampToggle.getAttribute("aria-expanded");
@@ -2123,12 +2151,29 @@ async function compactSourceDrawerFlow(browser) {
       expectedReopenGroupCount = afterGroupCount;
     }
 
-    const moreTimes = row.locator('[data-toggle-source-times][aria-expanded="false"]');
+    const moreTimes = row.locator('.source-drawer [data-toggle-source-times][aria-expanded="false"]');
     if ((await moreTimes.count()) > 0) {
-      const beforeVisibleTimes = await countVisibleInRow(row, ".source-time-primary, .source-time-extra");
-      await moreTimes.first().click();
-      const afterVisibleTimes = await waitForVisibleCountAbove(row, ".source-time-primary, .source-time-extra", beforeVisibleTimes);
-      if (afterVisibleTimes <= beforeVisibleTimes) throw new Error("source timestamp expander did not add visible timestamps");
+      const timeToggle = await moreTimes.first().elementHandle();
+      if (!timeToggle) throw new Error("source timestamp expander locator disappeared before click");
+      await timeToggle.click();
+      const timeExpansion = await timeToggle.evaluate((button) => {
+        const panelId = button.getAttribute("aria-controls") || "";
+        const panel = panelId ? document.getElementById(panelId) : null;
+        const isVisible = (node) => {
+          const style = window.getComputedStyle(node);
+          const box = node.getBoundingClientRect();
+          return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+        };
+        return {
+          expanded: button.getAttribute("aria-expanded"),
+          panelId,
+          panelHidden: panel ? panel.hidden : null,
+          extraTimes: panel ? Array.from(panel.querySelectorAll(".source-time-extra")).filter(isVisible).length : 0,
+        };
+      });
+      if (timeExpansion.expanded !== "true" || timeExpansion.panelHidden !== false || timeExpansion.extraTimes < 1) {
+        throw new Error(`source timestamp expander did not expose its controlled timestamps ${JSON.stringify(timeExpansion)}`);
+      }
     }
 
     const bottomScreenshotPath = shotPath(`source-drawer-bottom-${viewport.join("x")}.png`);
@@ -2479,6 +2524,47 @@ async function mobileActiveQueryStripGeometry(browser) {
     if (geometry.clear.right > geometry.viewportWidth + 1) throw new Error(`active query clear button offscreen ${JSON.stringify(geometry)}`);
     const screenshotPath = shotPath(`active-query-strip-${viewport.join("x")}.png`);
     await page.screenshot({ path: screenshotPath, fullPage: false });
+
+    const singleConditionUrl = new URL(baseUrl);
+    singleConditionUrl.searchParams.set("showUnknown", "1");
+    await page.goto(singleConditionUrl.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    const singleConditionGeometry = await page.evaluate(() => {
+      const rectFor = (node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          left: box.left,
+          right: box.right,
+          width: box.width,
+          height: box.height,
+          scrollWidth: node.scrollWidth,
+          clientWidth: node.clientWidth,
+          text: node.textContent || "",
+        };
+      };
+      const strip = document.querySelector("#activeQueryStrip");
+      const clear = document.querySelector("#activeQueryStrip .active-query-clear");
+      const chips = Array.from(document.querySelectorAll("#activeQueryStrip .active-query-chip")).map(rectFor);
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        strip: strip ? rectFor(strip) : null,
+        clear: clear ? rectFor(clear) : null,
+        chips,
+      };
+    });
+    if (singleConditionGeometry.scrollWidth > singleConditionGeometry.viewportWidth + 1) {
+      throw new Error(`single active query strip page overflow ${JSON.stringify(singleConditionGeometry)}`);
+    }
+    if (
+      !singleConditionGeometry.strip ||
+      singleConditionGeometry.chips.length !== 1 ||
+      singleConditionGeometry.clear ||
+      !/显示无歌手/u.test(singleConditionGeometry.chips[0].text)
+    ) {
+      throw new Error(`single active query should not show clear all ${JSON.stringify(singleConditionGeometry)}`);
+    }
+
     const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
     await context.close();
     if (errors.length || unhandled) throw new Error(`active query strip errors: ${errors.join(" | ")} ${unhandled}`);

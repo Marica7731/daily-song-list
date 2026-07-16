@@ -1451,12 +1451,14 @@ function renderActiveQueryStrip() {
     button.append(text, close);
     els.activeQueryStrip.append(button);
   }
-  const clearAll = document.createElement("button");
-  clearAll.className = "active-query-clear";
-  clearAll.type = "button";
-  clearAll.dataset.queryClear = "all";
-  clearAll.textContent = "清除全部";
-  els.activeQueryStrip.append(clearAll);
+  if (items.length >= 2) {
+    const clearAll = document.createElement("button");
+    clearAll.className = "active-query-clear";
+    clearAll.type = "button";
+    clearAll.dataset.queryClear = "all";
+    clearAll.textContent = "清除全部";
+    els.activeQueryStrip.append(clearAll);
+  }
 }
 
 function activeQueryItems(draft) {
@@ -3482,17 +3484,16 @@ function compactSummaryMetrics(metrics) {
         return text
           .replace(/^显示\s+/u, "")
           .replace(/\s*\/\s*[0-9,]+/u, "")
-          .replace(/首歌曲/u, "首结果")
-          .replace(/次收录/u, "次收录")
-          .replace(/个视频/u, "视频")
-          .replace(/([0-9,])\s+(首结果|次收录|视频)/gu, "$1$2");
+          .replace(/([0-9,])\s+(首歌曲|首小众歌曲|次收录|次小众收录|个视频|个小众视频|个时间戳)/gu, "$1$2");
       }
-      return text.replace(/首歌曲/u, "首").replace(/次收录/u, "次").replace(/个视频/u, "视频").replace(/([0-9,])\s+(首|次|视频)/gu, "$1$2");
+      return text.replace(/([0-9,])\s+(首歌曲|次收录|个视频|个时间戳)/gu, "$1$2");
     });
 }
 
 function compactSummaryNote(note) {
-  return String(note)
+  let text = String(note);
+  if (state.filter) text = text.replace(/隐藏([0-9,]+)条无歌手收录/u, "已隐藏无歌手");
+  return text
     .replace(/隐藏([0-9,]+)条无歌手收录/u, "隐藏$1条无歌手")
     .replace(/最近([0-9]+)天累计/u, "近$1天")
     .replace(/\s*·\s*/gu, "  ");
@@ -3509,7 +3510,7 @@ function summaryNote(selection, extra = "", rangeCache = null) {
 
 function summaryVideoMetric(rangeCache, selection) {
   const model = summaryVideoCountModel(rangeCache, selection);
-  return model.usesSourceCount ? `视频${model.ratioText}` : metric(model.visibleCount, "个视频");
+  return model.usesSourceCount ? `${model.ratioText} 个视频` : metric(model.visibleCount, "个视频");
 }
 
 function summaryVideoVisibilityNote(rangeCache, selection) {
@@ -4593,6 +4594,7 @@ function renderSourceInlineGroup(group) {
   thumb.href = youtubeTimeUrl(videoId, firstSeconds);
   thumb.target = "_blank";
   thumb.rel = "noreferrer";
+  thumb.tabIndex = -1;
   thumb.setAttribute("aria-label", `打开来源视频时间戳：${group.title || videoId || "来源视频"}`);
   thumb.append(
     createThumbnailImage({ ...item, videoId, thumbnailUrl: item.thumbnailUrl || group.thumbnailUrl }, "source-inline-thumb-image", {
@@ -4601,14 +4603,6 @@ function renderSourceInlineGroup(group) {
       height: 32,
     }),
   );
-  const timeOverlay = document.createElement("span");
-  timeOverlay.className = "source-inline-time-overlay";
-  if (firstOccurrence) {
-    timeOverlay.textContent = firstOccurrence.song?.time || formatSeconds(firstSeconds);
-  } else {
-    timeOverlay.textContent = formatSeconds(firstSeconds);
-  }
-  thumb.append(timeOverlay);
   wrapper.append(thumb);
 
   const extraTimes = (group.occurrences || []).slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
@@ -4624,8 +4618,8 @@ function renderSourceInlineGroup(group) {
     more.dataset.toggleSourceTimes = "true";
     more.setAttribute("aria-expanded", "false");
     more.setAttribute("aria-controls", extraTimesId);
-    more.setAttribute("aria-label", `显示另外 ${extraTimes.length} 个时间点`);
-    more.title = `另外 ${extraTimes.length} 个时间点`;
+    more.setAttribute("aria-label", `显示另外${extraTimes.length}个时间点`);
+    more.title = `另外${extraTimes.length}个时间点`;
     more.append(document.createTextNode(`+${extraTimes.length}`));
     const unit = document.createElement("span");
     unit.className = "source-inline-time-more-unit";
@@ -4651,7 +4645,24 @@ function renderSourceInlineGroup(group) {
   channel.setAttribute("aria-label", channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`);
   channel.title = channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`;
   main.append(channel);
-  if (extraTimeButton) main.append(extraTimeButton);
+
+  const meta = document.createElement("span");
+  meta.className = "source-inline-meta";
+  if (firstOccurrence) {
+    meta.append(renderSourceTimestampLink(firstOccurrence, "source-inline-time"));
+  } else {
+    const time = document.createElement("a");
+    time.className = "source-link source-inline-time";
+    time.href = youtubeTimeUrl(videoId, firstSeconds);
+    time.target = "_blank";
+    time.rel = "noreferrer";
+    time.textContent = formatSeconds(firstSeconds);
+    time.title = [group.title || item.title || videoId || "来源视频", time.textContent].filter(Boolean).join(" · ");
+    time.setAttribute("aria-label", `打开时间戳：${time.title}`);
+    meta.append(time);
+  }
+  if (extraTimeButton) meta.append(extraTimeButton);
+  main.append(meta);
   wrapper.append(main);
 
   wrapper.append(renderCopySetlistButton(item, "复制歌单", "source-inline-copy source-copy-icon ui-chip ui-chip-icon"));

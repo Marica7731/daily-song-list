@@ -266,6 +266,23 @@ async function captureExpandedVideo(browser, viewport, name) {
   await page.close();
 }
 
+async function captureElementFromPage(browser, viewport, params, selector, name, options = {}) {
+  const page = await newPage(browser, viewport);
+  await page.goto(appUrl(params), { waitUntil: "networkidle" });
+  await waitForApp(page);
+  const locator = page.locator(selector).first();
+  await locator.waitFor({ state: "visible", timeout: 15_000 });
+  if (options.assert) await options.assert(page, locator);
+  await saveElement(page, locator, name, {
+    minBytes: options.minBytes ?? 3_000,
+    viewport,
+    params,
+    selector,
+    scene: options.scene,
+  });
+  await page.close();
+}
+
 async function assertVideoThumbVisible(page, label) {
   const shape = await page.evaluate(() => {
     const thumb = document.querySelector(".video-card .thumb-link");
@@ -306,7 +323,7 @@ async function assertInlineSourceCase(page, row, kind, label) {
       const channel = item.querySelector(".source-inline-channel");
       const thumb = item.querySelector(".source-inline-thumb");
       const image = item.querySelector(".source-inline-thumb-image");
-      const overlay = item.querySelector(".source-inline-time-overlay");
+      const time = item.querySelector(".source-inline-time");
       return {
         ...rectFor(item),
         visible: visible(item),
@@ -318,8 +335,11 @@ async function assertInlineSourceCase(page, row, kind, label) {
         thumbWidth: thumb?.getBoundingClientRect().width || 0,
         thumbHeight: thumb?.getBoundingClientRect().height || 0,
         thumbLoaded: Boolean(image?.currentSrc || image?.src),
-        overlayText: overlay?.textContent?.trim() || "",
-        overlayVisible: visible(overlay),
+        overlayCount: item.querySelectorAll(".source-inline-time-overlay").length,
+        timeText: time?.textContent?.trim() || "",
+        timeVisible: visible(time),
+        timeScrollWidth: time?.scrollWidth || 0,
+        timeClientWidth: time?.clientWidth || 0,
         copyVisible: visible(item.querySelector("[data-copy-setlist]")),
       };
     });
@@ -358,8 +378,10 @@ async function assertInlineSourceCase(page, row, kind, label) {
       !shape.items[0]?.channelText ||
       !shape.items[0]?.thumbVisible ||
       !shape.items[0]?.thumbLoaded ||
-      !shape.items[0]?.overlayVisible ||
-      !shape.items[0]?.overlayText ||
+      shape.items[0]?.overlayCount !== 0 ||
+      !shape.items[0]?.timeVisible ||
+      !shape.items[0]?.timeText ||
+      shape.items[0]?.timeScrollWidth > shape.items[0]?.timeClientWidth + 1 ||
       !shape.items[0]?.copyVisible
     ) {
       throw new Error(`${label} single-source visibility invalid: ${JSON.stringify(shape)}`);
@@ -374,7 +396,19 @@ async function assertInlineSourceCase(page, row, kind, label) {
       shape.toggleCount !== 0 ||
       shape.drawerCount !== 0 ||
       shape.copyAllCount !== 1 ||
-      shape.items.some((item) => !item.visible || !item.channelVisible || item.channelWidth < 6 || !item.channelText || !item.thumbVisible || !item.thumbLoaded || !item.overlayVisible)
+      shape.items.some(
+        (item) =>
+          !item.visible ||
+          !item.channelVisible ||
+          item.channelWidth < 6 ||
+          !item.channelText ||
+          !item.thumbVisible ||
+          !item.thumbLoaded ||
+          item.overlayCount !== 0 ||
+          !item.timeVisible ||
+          !item.timeText ||
+          item.timeScrollWidth > item.timeClientWidth + 1,
+      )
     ) {
       throw new Error(`${label} triple-source visibility invalid: ${JSON.stringify(shape)}`);
     }
@@ -390,7 +424,19 @@ async function assertInlineSourceCase(page, row, kind, label) {
     shape.items.length !== 3 ||
     shape.toggleCount !== 1 ||
     shape.copyAllCount !== 0 ||
-    shape.items.some((item) => !item.visible || !item.channelVisible || item.channelWidth < 6 || !item.channelText || !item.thumbVisible || !item.thumbLoaded || !item.overlayVisible) ||
+    shape.items.some(
+      (item) =>
+        !item.visible ||
+        !item.channelVisible ||
+        item.channelWidth < 6 ||
+        !item.channelText ||
+        !item.thumbVisible ||
+        !item.thumbLoaded ||
+        item.overlayCount !== 0 ||
+        !item.timeVisible ||
+        !item.timeText ||
+        item.timeScrollWidth > item.timeClientWidth + 1,
+    ) ||
     !shape.more?.visible ||
     shape.more.width > 92 ||
     shape.more.height > 30 ||
@@ -493,21 +539,45 @@ function fixtureThumbSrc(group) {
   return group.videoId ? `https://i.ytimg.com/vi/${encodeURIComponent(group.videoId)}/mqdefault.jpg` : proofPlaceholderSvg();
 }
 
+function sourceTimeLinkHtml(group, time, seconds, className) {
+  const videoId = encodeURIComponent(group.videoId || "proof");
+  const label = [group.title || "来源视频", group.channelName || "", time].filter(Boolean).join(" · ");
+  return `<a class="source-link ${className}" href="https://www.youtube.com/watch?v=${videoId}&t=${Math.max(0, Number(seconds) || 0)}s" target="_blank" rel="noreferrer" title="${escapeHtml(label)}" aria-label="打开时间戳：${escapeHtml(label)}">${escapeHtml(time)}</a>`;
+}
+
 function sourceItemHtml(group) {
   const videoId = encodeURIComponent(group.videoId || "proof");
   const seconds = Math.max(0, Number(group.seconds) || 0);
+  const extraTimes = Array.isArray(group.extraTimes) ? group.extraTimes : [];
+  const extraId = `source-inline-extra-${escapeHtml(group.videoId || "proof")}-${seconds}`;
+  const extraLabel = group.extraCountLabel || `+${extraTimes.length}`;
+  const extraCount = Number.parseInt(String(extraLabel).replace(/\D+/gu, ""), 10) || extraTimes.length;
   return `
     <span class="source-inline-item" data-video-id="${escapeHtml(group.videoId || "fallback")}">
-      <a class="source-inline-thumb source-link" href="https://www.youtube.com/watch?v=${videoId}&t=${seconds}s" target="_blank" rel="noreferrer" aria-label="打开来源视频时间戳：${escapeHtml(group.title)}">
+      <a class="source-inline-thumb source-link" href="https://www.youtube.com/watch?v=${videoId}&t=${seconds}s" target="_blank" rel="noreferrer" tabindex="-1" aria-label="打开来源视频时间戳：${escapeHtml(group.title)}">
         <img class="source-inline-thumb-image" alt="" loading="lazy" decoding="async" fetchpriority="low" width="56" height="32" src="${fixtureThumbSrc(group)}" />
-        <span class="source-inline-time-overlay">${escapeHtml(group.time)}</span>
       </a>
       <span class="source-inline-main">
         <a class="source-inline-channel" href="https://www.youtube.com/results?search_query=${encodeURIComponent(group.channelName || "")}" target="_blank" rel="noreferrer">${escapeHtml(group.channelName)}</a>
+        <span class="source-inline-meta">
+          ${sourceTimeLinkHtml(group, group.time, seconds, "source-inline-time")}
+          ${
+            extraTimes.length
+              ? `<button class="source-inline-time-more" type="button" data-toggle-source-times="true" aria-expanded="false" aria-controls="${extraId}" title="另外${extraCount}个时间点" aria-label="显示另外${extraCount}个时间点">${escapeHtml(extraLabel)}<span class="source-inline-time-more-unit">时间点</span></button>`
+              : ""
+          }
+        </span>
       </span>
       <button class="source-inline-copy source-copy-icon ui-chip ui-chip-icon" type="button" data-copy-setlist="true" aria-label="复制该视频歌单">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l10-2v13"/><circle cx="7" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
       </button>
+      ${
+        extraTimes.length
+          ? `<span class="source-extra-times source-inline-extra-times" id="${extraId}" hidden>${extraTimes
+              .map((entry) => sourceTimeLinkHtml(group, entry.time, entry.seconds, "source-inline-extra-time"))
+              .join("")}</span>`
+          : ""
+      }
     </span>
   `;
 }
@@ -566,6 +636,14 @@ async function captureFixtureSourceCase(browser, viewport, caseName, name) {
     </html>`,
     { waitUntil: "networkidle" },
   );
+  if (caseName === "extraTimes" && name.includes("extra")) {
+    await page.locator("[data-toggle-source-times]").first().evaluate((button) => {
+      const target = document.getElementById(button.getAttribute("aria-controls") || "");
+      button.setAttribute("aria-expanded", "true");
+      if (target) target.hidden = false;
+    });
+    await sleep(100);
+  }
   await assertFixtureSourceProof(page, caseName, name);
   const row = page.locator(".proof-row").first();
   await saveElement(page, row, name, {
@@ -588,16 +666,24 @@ async function assertFixtureSourceProof(page, caseName, label) {
     };
     const items = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => {
       const thumb = item.querySelector(".source-inline-thumb");
-      const overlay = item.querySelector(".source-inline-time-overlay");
       const channel = item.querySelector(".source-inline-channel");
+      const time = item.querySelector(".source-inline-time");
+      const more = item.querySelector(".source-inline-time-more");
+      const extra = item.querySelector(".source-inline-extra-times");
       return {
         width: item.getBoundingClientRect().width,
         thumbWidth: thumb?.getBoundingClientRect().width || 0,
         thumbHeight: thumb?.getBoundingClientRect().height || 0,
-        overlayText: overlay?.textContent || "",
-        overlayVisible: visible(overlay),
         channelWidth: channel?.getBoundingClientRect().width || 0,
         channelText: channel?.textContent || "",
+        timeText: time?.textContent || "",
+        timeVisible: visible(time),
+        timeScrollWidth: time?.scrollWidth || 0,
+        timeClientWidth: time?.clientWidth || 0,
+        extraButtonText: more?.textContent || "",
+        extraButtonExpanded: more?.getAttribute("aria-expanded") || "",
+        extraHidden: extra?.hidden ?? null,
+        extraTimeTexts: Array.from(extra?.querySelectorAll(".source-inline-extra-time") || []).map((link) => link.textContent || ""),
       };
     });
     const copyAll = node.querySelector(".source-inline-copy-all");
@@ -616,14 +702,108 @@ async function assertFixtureSourceProof(page, caseName, label) {
     if (shape.sourceVideoCount !== 0 || !shape.emptyVisible || shape.items.length !== 0) throw new Error(`${label} none fixture invalid: ${JSON.stringify(shape)}`);
     return;
   }
-  if (shape.items.length !== shape.sourceVideoCount || shape.thumbCount !== shape.items.length || shape.overlayCount !== shape.items.length) {
+  if (shape.items.length !== shape.sourceVideoCount || shape.thumbCount !== shape.items.length || shape.overlayCount !== 0) {
     throw new Error(`${label} fixture source count invalid: ${JSON.stringify(shape)}`);
   }
-  if (shape.items.some((item) => item.thumbWidth < 46 || item.thumbWidth > 56 || item.thumbHeight < 27 || item.thumbHeight > 32 || !item.overlayVisible || !item.overlayText || item.channelWidth < 28 || !item.channelText)) {
+  if (shape.overlayCount !== 0) throw new Error(`${label} overlay should not exist: ${JSON.stringify(shape)}`);
+  if (
+    shape.items.some(
+      (item) =>
+        item.thumbWidth < 46 ||
+        item.thumbWidth > 56 ||
+        item.thumbHeight < 27 ||
+        item.thumbHeight > 32 ||
+        !item.timeVisible ||
+        !item.timeText ||
+        item.timeScrollWidth > item.timeClientWidth + 1 ||
+        item.channelWidth < 28 ||
+        !item.channelText,
+    )
+  ) {
     throw new Error(`${label} fixture geometry invalid: ${JSON.stringify(shape)}`);
+  }
+  if (caseName === "longTime" && !shape.items.some((item) => item.timeText === "12:34:56")) {
+    throw new Error(`${label} long time missing: ${JSON.stringify(shape)}`);
+  }
+  if (caseName === "extraTimes") {
+    const first = shape.items[0];
+    if (!first.extraButtonText.includes("+88")) throw new Error(`${label} extra time button missing: ${JSON.stringify(shape)}`);
+    if (label.includes("extra-times") && (first.extraButtonExpanded !== "true" || first.extraHidden !== false || first.extraTimeTexts.length !== 3)) {
+      throw new Error(`${label} expanded extra times invalid: ${JSON.stringify(shape)}`);
+    }
   }
   if (caseName === "triple" && (shape.copyAllWidth < 26 || shape.copyAllWidth > 32 || shape.items[2].width < 180)) {
     throw new Error(`${label} fixture tail invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
+async function assertFilteredSummaryCopy(page) {
+  const shape = await page.evaluate(() => {
+    const summary = document.querySelector("#summary");
+    return {
+      text: summary?.textContent || "",
+      lineHeight: Number.parseFloat(getComputedStyle(summary).lineHeight) || 16,
+      height: summary?.getBoundingClientRect().height || 0,
+    };
+  });
+  if (/首结果|[0-9,]+视频/u.test(shape.text) || !/[0-9,]+首歌曲/u.test(shape.text) || !/[0-9,]+个视频/u.test(shape.text)) {
+    throw new Error(`filtered summary copy invalid: ${JSON.stringify(shape)}`);
+  }
+  if (shape.height > shape.lineHeight * 2.8) throw new Error(`filtered summary too tall: ${JSON.stringify(shape)}`);
+}
+
+async function assertMobileControlsCompact(page) {
+  const shape = await page.evaluate(() => {
+    const rectFor = (node) => {
+      const box = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return {
+        top: box.top,
+        bottom: box.bottom,
+        width: box.width,
+        height: box.height,
+        paddingTop: Number.parseFloat(style.paddingTop) || 0,
+        paddingBottom: Number.parseFloat(style.paddingBottom) || 0,
+      };
+    };
+    const controls = document.querySelector(".controls");
+    const range = document.querySelector(".range-mode");
+    const trigger = document.querySelector("#queryTrigger");
+    const next = document.querySelector("#activeQueryStrip:not([hidden]), #summary");
+    return {
+      controls: controls ? rectFor(controls) : null,
+      range: range ? rectFor(range) : null,
+      trigger: trigger ? rectFor(trigger) : null,
+      next: next ? rectFor(next) : null,
+      scrollWidth: document.body.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    };
+  });
+  if (!shape.controls || !shape.range || !shape.trigger) throw new Error(`mobile controls missing: ${JSON.stringify(shape)}`);
+  if (shape.controls.height > 48 || shape.controls.paddingTop > 6 || shape.controls.paddingBottom > 6) {
+    throw new Error(`mobile controls too large: ${JSON.stringify(shape)}`);
+  }
+  if (Math.abs(shape.range.height - shape.trigger.height) > 1) throw new Error(`mobile controls height mismatch: ${JSON.stringify(shape)}`);
+  if (shape.next && shape.next.top - shape.controls.bottom > 8) throw new Error(`mobile controls gap too large: ${JSON.stringify(shape)}`);
+  if (shape.scrollWidth > shape.clientWidth) throw new Error(`mobile controls overflow: ${JSON.stringify(shape)}`);
+}
+
+async function assertBottomNavIconSelection(page) {
+  const shape = await page.evaluate(() => {
+    const active = document.querySelector(".bottom-nav-item[aria-current='page']");
+    const wrap = active?.querySelector(".bottom-nav-icon-wrap");
+    const itemBox = active?.getBoundingClientRect();
+    const wrapBox = wrap?.getBoundingClientRect();
+    return {
+      itemWidth: itemBox?.width || 0,
+      itemHeight: itemBox?.height || 0,
+      wrapWidth: wrapBox?.width || 0,
+      wrapHeight: wrapBox?.height || 0,
+      activeText: active?.textContent?.trim() || "",
+    };
+  });
+  if (shape.itemHeight < 42 || shape.wrapWidth < 28 || shape.wrapWidth > shape.itemWidth * 0.65 || shape.wrapHeight > 28) {
+    throw new Error(`bottom nav active geometry invalid: ${JSON.stringify(shape)}`);
   }
 }
 
@@ -672,6 +852,7 @@ async function main() {
     await captureQueryPanel(browser, desktop, "desktop-query-panel.png", { filterTab: true });
     await captureExpandedSource(browser, desktop, {}, "desktop-source-expanded.png");
     await captureFixtureSourceCase(browser, desktop, "triple", "desktop-source-inline-3.png");
+    await captureFixtureSourceCase(browser, desktop, "longTime", "desktop-source-long-time.png");
 
     await openPage(browser, mobile, {}, "mobile-song-rank.png");
     await openPage(browser, mobile, { view: "artistRank" }, "mobile-artist-rank.png");
@@ -681,12 +862,28 @@ async function main() {
     await openPage(browser, mobile, { view: "videos" }, "mobile-video-view.png");
     await captureExpandedVideo(browser, mobile, "mobile-video-expanded.png");
     await openPage(browser, { width: 320, height: 700 }, { page: 7, pageSize: 100, showUnknown: 1 }, "mobile-pagination-320.png");
+    await captureElementFromPage(browser, mobile, { view: "videos" }, "#mobileBottomNav", "mobile-bottom-nav-active.png", {
+      assert: assertBottomNavIconSelection,
+      scene: "mobile-bottom-nav-active",
+      selector: "#mobileBottomNav",
+    });
     await openPage(
       browser,
       mobile,
       { q: "少女レイ", metric: "videos", minCount: 2, showUnknown: 1 },
       "mobile-active-query-strip.png",
     );
+    await captureElementFromPage(browser, mobile, { q: "少女レイ" }, "#summary", "mobile-summary-filtered.png", {
+      assert: assertFilteredSummaryCopy,
+      scene: "mobile-summary-filtered",
+      selector: "#summary",
+    });
+    await captureElementFromPage(browser, mobile, { q: "少女レイ" }, ".controls", "mobile-controls-active.png", {
+      assert: assertMobileControlsCompact,
+      minBytes: 2_500,
+      scene: "mobile-controls-active",
+      selector: ".controls",
+    });
     await captureQueryPanel(browser, mobile, "mobile-query-recent.png");
     await captureQueryPanel(browser, mobile, "mobile-query-suggestions.png", { searchText: "少女レイ" });
     await captureQueryPanel(browser, mobile, "mobile-query-history.png", { openHistory: true, scrollBottom: true });
@@ -699,6 +896,8 @@ async function main() {
     await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3-expanded.png", { expand: true });
     await captureFixtureSourceCase(browser, mobile, "fallback", "mobile-source-thumb-fallback.png");
     await captureFixtureSourceCase(browser, mobile, "longChannel", "mobile-source-long-channel.png");
+    await captureFixtureSourceCase(browser, mobile, "longTime", "mobile-source-long-time.png");
+    await captureFixtureSourceCase(browser, mobile, "extraTimes", "mobile-source-extra-times.png");
     await openPage(browser, desktop, { page: 7, pageSize: 100, showUnknown: 1 }, "desktop-pagination-middle.png");
   } finally {
     await browser.close();

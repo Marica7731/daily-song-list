@@ -19,9 +19,9 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Desktop query panel](assets/screenshots/desktop-query-panel.png) | ![Desktop expanded sources](assets/screenshots/desktop-source-expanded.png) | ![Desktop inline source thumbnails](assets/screenshots/desktop-source-inline-3.png) |
 
-| Middle pagination |
-| --- |
-| ![Desktop middle pagination](assets/screenshots/desktop-pagination-middle.png) |
+| Middle pagination | Long timestamp source |
+| --- | --- |
+| ![Desktop middle pagination](assets/screenshots/desktop-pagination-middle.png) | ![Desktop long timestamp source](assets/screenshots/desktop-source-long-time.png) |
 
 ## Mobile Main Views
 
@@ -43,9 +43,13 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Mobile active query strip](assets/screenshots/mobile-active-query-strip.png) | ![Mobile recent searches](assets/screenshots/mobile-query-recent.png) | ![Mobile query suggestions](assets/screenshots/mobile-query-suggestions.png) |
 
-| Snapshot history |
+| Snapshot history | Filtered summary | Active controls |
+| --- | --- | --- |
+| ![Mobile query history](assets/screenshots/mobile-query-history.png) | ![Mobile filtered summary](assets/screenshots/mobile-summary-filtered.png) | ![Mobile active controls](assets/screenshots/mobile-controls-active.png) |
+
+| Bottom navigation |
 | --- |
-| ![Mobile query history](assets/screenshots/mobile-query-history.png) |
+| ![Mobile active bottom navigation](assets/screenshots/mobile-bottom-nav-active.png) |
 
 ## Source States
 
@@ -57,6 +61,10 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Mobile three source thumbnail tail](assets/screenshots/mobile-source-inline-3.png) | ![Mobile more source collapsed](assets/screenshots/mobile-source-more-than-3.png) | ![Mobile more source expanded](assets/screenshots/mobile-source-more-than-3-expanded.png) |
 
-| Thumbnail fallback | Long channel name |
-| --- | --- |
-| ![Mobile thumbnail fallback](assets/screenshots/mobile-source-thumb-fallback.png) | ![Mobile long channel source](assets/screenshots/mobile-source-long-channel.png) |
+| Thumbnail fallback | Long channel name | Long timestamp |
+| --- | --- | --- |
+| ![Mobile thumbnail fallback](assets/screenshots/mobile-source-thumb-fallback.png) | ![Mobile long channel source](assets/screenshots/mobile-source-long-channel.png) | ![Mobile long timestamp source](assets/screenshots/mobile-source-long-time.png) |
+
+| Extra timestamps |
+| --- |
+| ![Mobile extra timestamps](assets/screenshots/mobile-source-extra-times.png) |

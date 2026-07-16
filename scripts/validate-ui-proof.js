@@ -71,6 +71,9 @@ function validateUiProof(options = {}) {
     if (manifest.proofInputHash !== currentProofHash) {
       errors.push("UI 验收截图已过期，请运行 npm run screenshots:readme");
     }
+    if (manifest.uiSourceFingerprint !== currentProofHash) {
+      errors.push("UI source fingerprint mismatch, please run npm run screenshots:readme");
+    }
     const manifestInputPaths = new Set((manifest.proofInputs || []).map((entry) => entry.path));
     for (const entry of currentInputs) {
       if (!manifestInputPaths.has(entry.path)) errors.push(`UI proof manifest missing input: ${entry.path}`);
