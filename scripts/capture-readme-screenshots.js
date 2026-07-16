@@ -72,8 +72,107 @@ async function assertNoPageOverflow(page, label) {
   }
 }
 
+async function assertNoVisibleClipping(page, label) {
+  const clipped = await page.evaluate(() => {
+    const selectors = [
+      ".controls",
+      "#summary",
+      "#activeQueryStrip:not([hidden])",
+      ".pagination-row",
+      ".rank-row:not(.skeleton-row)",
+      ".index-row",
+      ".video-card",
+      ".source-inline-item",
+      ".source-drawer:not([hidden])",
+      ".query-panel",
+      ".mobile-bottom-nav",
+    ];
+    const viewportWidth = document.documentElement.clientWidth;
+    const visible = (node) => {
+      const style = getComputedStyle(node);
+      const box = node.getBoundingClientRect();
+      return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+    };
+    return selectors
+      .flatMap((selector) =>
+        Array.from(document.querySelectorAll(selector))
+          .filter(visible)
+          .slice(0, 20)
+          .map((node) => {
+            const box = node.getBoundingClientRect();
+            return {
+              selector,
+              left: Math.round(box.left * 10) / 10,
+              right: Math.round(box.right * 10) / 10,
+              width: Math.round(box.width * 10) / 10,
+              text: node.textContent.trim().slice(0, 60),
+            };
+          }),
+      )
+      .filter((item) => item.left < -1 || item.right > viewportWidth + 1);
+  });
+  if (clipped.length) throw new Error(`${label} visible clipping: ${JSON.stringify(clipped.slice(0, 8))}`);
+}
+
+async function assertSongIndexToolbarSpacing(page, label) {
+  const shape = await page.evaluate(() => {
+    const rectFor = (selector) => {
+      const node = document.querySelector(selector);
+      if (!node) return null;
+      const box = node.getBoundingClientRect();
+      return {
+        top: box.top,
+        bottom: box.bottom,
+        height: box.height,
+        text: node.textContent.trim().slice(0, 80),
+      };
+    };
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      toolbar: rectFor(".index-toolbar"),
+      nextBlock: rectFor(".index-toolbar + .index-section, .index-toolbar + .index-list"),
+    };
+  });
+  if (shape.viewportWidth > 720 || !shape.toolbar || !shape.nextBlock) return;
+  if (shape.toolbar.height > 48 || shape.nextBlock.top < shape.toolbar.bottom + 2) {
+    throw new Error(`${label} mobile song index toolbar overlaps content: ${JSON.stringify(shape)}`);
+  }
+}
+
+async function warmVisiblePriorityImages(page) {
+  await page
+    .waitForFunction(
+      () =>
+        Array.from(document.querySelectorAll("img[loading='eager']")).every((img) => {
+          const box = img.getBoundingClientRect();
+          const visible = box.width > 0 && box.height > 0 && box.bottom >= 0 && box.top <= window.innerHeight + 120;
+          return !visible || img.complete || img.naturalWidth > 0;
+        }),
+      null,
+      { timeout: 5_000 },
+    )
+    .catch(() => {});
+}
+
+async function warmImagesInElement(page, locator, selector = "img") {
+  await locator.locator(selector).evaluateAll((images) => {
+    for (const img of images) {
+      img.loading = "eager";
+      img.fetchPriority = "high";
+    }
+  });
+  const count = await locator.locator(selector).count();
+  for (let index = 0; index < count; index += 1) {
+    await locator.locator(selector).nth(index).scrollIntoViewIfNeeded().catch(() => {});
+    if (index % 8 === 7) await page.waitForTimeout(120);
+  }
+  await page.waitForTimeout(500);
+  await locator.scrollIntoViewIfNeeded().catch(() => {});
+}
+
 async function save(page, name, options = {}) {
   await assertNoPageOverflow(page, name);
+  await assertNoVisibleClipping(page, name);
   const file = screenshotPath(name);
   await page.screenshot({
     path: file,
@@ -89,6 +188,7 @@ async function save(page, name, options = {}) {
 
 async function saveElement(page, locator, name, options = {}) {
   await assertNoPageOverflow(page, name);
+  await assertNoVisibleClipping(page, name);
   const file = screenshotPath(name);
   await locator.screenshot({ path: file });
   const stats = fs.statSync(file);
@@ -120,7 +220,9 @@ async function openPage(browser, viewport, params, name, options = {}) {
   const page = await newPage(browser, viewport);
   await page.goto(appUrl(params), { waitUntil: "networkidle" });
   await waitForApp(page);
+  await warmVisiblePriorityImages(page);
   if (params?.view === "videos") await assertVideoThumbVisible(page, name);
+  if (params?.view === "songAz") await assertSongIndexToolbarSpacing(page, name);
   await save(page, name, { ...options, viewport, params });
   await page.close();
 }
@@ -173,7 +275,9 @@ async function captureExpandedSource(browser, viewport, params, name) {
       return Boolean(img?.currentSrc || img?.src) && (img?.naturalWidth || 0) > 0;
     }, null, { timeout: 8_000 })
     .catch(() => {});
-  await assertExpandedSourceVisible(page, page.locator(".rank-row.is-expanded, .index-row.is-expanded").first(), name);
+  const expandedRow = page.locator(".rank-row.is-expanded, .index-row.is-expanded").first();
+  await warmImagesInElement(page, expandedRow, ".source-drawer .source-video-thumb");
+  await assertExpandedSourceVisible(page, expandedRow, name);
   await sleep(500);
   await save(page, name, { viewport, params, selector: ".rank-row.is-expanded, .index-row.is-expanded" });
   await page.close();
@@ -224,11 +328,23 @@ async function captureSourceCase(browser, viewport, kind, name, options = {}) {
     await sleep(350);
   }
   if (options.expand) {
+    await warmImagesInElement(page, row, ".source-drawer .source-video-thumb");
     await assertExpandedSourceVisible(page, row, name);
   } else {
+    await warmImagesInElement(page, row, ".source-inline-thumb-image");
     await assertInlineSourceCase(page, row, kind, name);
   }
-  await saveElement(page, row, name, { minBytes: kind === "single" ? 4_000 : 6_000, viewport, params: found.params, selector: `.rank-row source-${kind}` });
+  if (options.viewportOnly) {
+    await row.evaluate((node) => {
+      const stickyOffset = window.matchMedia?.("(max-width: 720px)")?.matches ? 52 : 12;
+      const top = window.scrollY + node.getBoundingClientRect().top - stickyOffset;
+      window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
+    });
+    await sleep(150);
+    await save(page, name, { viewport, params: found.params, selector: `.rank-row source-${kind}` });
+  } else {
+    await saveElement(page, row, name, { minBytes: kind === "single" ? 4_000 : 6_000, viewport, params: found.params, selector: `.rank-row source-${kind}` });
+  }
   await page.close();
 }
 
@@ -243,6 +359,8 @@ async function captureSongIndexPage(browser, viewport, target, name) {
   const nextPage = target === "last" ? pageCount : Math.max(1, Math.ceil(pageCount / 2));
   await page.goto(appUrl({ view: "songAz", page: nextPage }), { waitUntil: "networkidle" });
   await waitForApp(page);
+  await warmVisiblePriorityImages(page);
+  await assertSongIndexToolbarSpacing(page, name);
   await save(page, name, { viewport, params: { view: "songAz", page: nextPage } });
   await page.close();
 }
@@ -258,6 +376,10 @@ async function captureExpandedVideo(browser, viewport, name) {
     await page.waitForFunction(() => document.querySelector(".video-more:not(.video-more-top)")?.getAttribute("aria-expanded") === "true", null, {
       timeout: 5_000,
     });
+    await page.waitForFunction(() => {
+      const buttons = Array.from(document.querySelectorAll(".video-card .video-more[aria-expanded='true']"));
+      return buttons.length === 2 && buttons.every((button) => button.textContent.trim() === "收起歌曲");
+    }, null, { timeout: 5_000 });
     await sleep(350);
   } else {
     throw new Error(`${name} did not find an expandable video card`);
@@ -298,7 +420,7 @@ async function assertVideoThumbVisible(page, label) {
       naturalWidth: image?.naturalWidth || 0,
     };
   });
-  if (shape.display === "none" || shape.visibility === "hidden" || shape.width < 100 || shape.height < 50 || !shape.currentSrc) {
+  if (shape.display === "none" || shape.visibility === "hidden" || shape.width < 100 || shape.height < 50 || !shape.currentSrc || shape.naturalWidth <= 0) {
     throw new Error(`${label} video thumbnail is not visible: ${JSON.stringify(shape)}`);
   }
 }
@@ -334,7 +456,7 @@ async function assertInlineSourceCase(page, row, kind, label) {
         thumbVisible: visible(thumb),
         thumbWidth: thumb?.getBoundingClientRect().width || 0,
         thumbHeight: thumb?.getBoundingClientRect().height || 0,
-        thumbLoaded: Boolean(image?.currentSrc || image?.src),
+        thumbLoaded: Boolean(image?.currentSrc || image?.src) && (image?.naturalWidth || 0) > 0,
         overlayCount: item.querySelectorAll(".source-inline-time-overlay").length,
         timeText: time?.textContent?.trim() || "",
         timeVisible: visible(time),
@@ -478,7 +600,7 @@ async function assertExpandedSourceVisible(page, row, label) {
         channelText: group.querySelector(".source-video-channel")?.textContent?.trim() || "",
         thumbVisible: visible(thumb),
         thumbWidth: thumb?.getBoundingClientRect().width || 0,
-        imgLoaded: Boolean(img?.currentSrc || img?.src),
+        imgLoaded: Boolean(img?.currentSrc || img?.src) && (img?.naturalWidth || 0) > 0,
       };
     });
     const toolbar = node.querySelector(".source-drawer:not([hidden]) .source-drawer-toolbar");
@@ -494,6 +616,7 @@ async function assertExpandedSourceVisible(page, row, label) {
       copySongLinksCount: node.querySelectorAll("[data-copy-song-links]").length,
       toolbarHeight: toolbar?.getBoundingClientRect().height || 0,
       groups,
+      loadedImageCount: groups.filter((group) => group.imgLoaded).length,
       duplicateVideoIds: groups
         .map((group) => group.videoId)
         .filter((id, index, list) => id && list.indexOf(id) !== index),
@@ -513,7 +636,7 @@ async function assertExpandedSourceVisible(page, row, label) {
     shape.duplicateVideoIds.length ||
     shape.repeatedInlineVideoIds.length ||
     shape.groups.some((group) => !group.channelText || !group.thumbVisible || group.thumbWidth < 50) ||
-    !shape.groups[0]?.imgLoaded
+    shape.loadedImageCount < Math.min(6, shape.groups.length)
   ) {
     throw new Error(`${label} expanded source visibility invalid: ${JSON.stringify(shape)}`);
   }
@@ -1124,7 +1247,7 @@ async function main() {
     await captureFixtureSourceCase(browser, mobile, "triple", "mobile-source-inline-3.png");
     await captureFixtureSourceCase(browser, mobile, "newToOld", "mobile-source-new-to-old.png");
     await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3.png");
-    await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3-expanded.png", { expand: true });
+    await captureSourceCase(browser, mobile, "more", "mobile-source-more-than-3-expanded.png", { expand: true, viewportOnly: true });
     await captureFixtureSourceCase(browser, mobile, "fallback", "mobile-source-thumb-fallback.png");
     await captureFixtureSourceCase(browser, mobile, "longChannel", "mobile-source-long-channel.png");
     await captureFixtureSourceCase(browser, mobile, "longTime", "mobile-source-long-time.png");

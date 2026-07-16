@@ -3503,11 +3503,12 @@ mark {
   }
 
   .index-toolbar {
-    top: calc(var(--controls-height) + 2px);
+    position: static;
+    top: auto;
     grid-template-columns: minmax(116px, 0.72fr) minmax(0, 1fr);
     align-items: center;
     gap: var(--space-1);
-    min-height: 36px;
+    min-height: 40px;
     margin-bottom: var(--space-1);
     padding: 4px;
     border: 1px solid var(--line);
@@ -3517,6 +3518,9 @@ mark {
 
   .index-bucket-select {
     display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 30px;
   }
 
   .index-bucket-select span {
@@ -3528,12 +3532,20 @@ mark {
   }
 
   .index-pagination {
+    grid-column: 2;
+    grid-row: 1;
     min-width: 0;
+    min-height: 30px;
     padding: 0;
+    justify-content: flex-end;
   }
 
   .index-pagination .pagination-controls {
     justify-content: flex-end;
+  }
+
+  .index-pagination .pagination-stepper-index {
+    width: auto;
   }
 
   .index-pagination .page-select-compact {
@@ -3550,6 +3562,10 @@ mark {
   }
 
   .index-toolbar + .index-section {
+    margin-top: var(--space-2);
+  }
+
+  .index-toolbar + .index-list {
     margin-top: var(--space-2);
   }
 
@@ -3758,8 +3774,8 @@ mark {
     bottom: var(--visual-viewport-bottom);
     left: 0;
     width: 100%;
-    height: min(calc(var(--visual-viewport-height) - 10px), 92dvh);
-    max-height: min(calc(var(--visual-viewport-height) - 10px), 92dvh);
+    height: min(calc(var(--visual-viewport-height) - 10px), 84dvh);
+    max-height: min(calc(var(--visual-viewport-height) - 10px), 84dvh);
     border-radius: var(--radius-panel) var(--radius-panel) 0 0;
   }
 

@@ -3418,7 +3418,7 @@ function renderSongRank(group, rangeCache, selection) {
   const fragment = document.createDocumentFragment();
   appendPagination(fragment, { pageInfo, unit: "首歌曲", variant: "top" });
   fragment.append(renderRankHeader("song"));
-  for (const record of pageInfo.visible) {
+  for (const [index, record] of pageInfo.visible.entries()) {
     fragment.append(
       renderRankRecord({
         mode: "song",
@@ -3434,6 +3434,7 @@ function renderSongRank(group, rangeCache, selection) {
         countUnit: rankCountUnit(),
         occurrences: record.occurrences,
         trend: trendForRecord("songRank", record),
+        priorityInlineMedia: index < 8,
       }),
     );
   }
@@ -3530,6 +3531,7 @@ function renderSongIndexView(group, rangeCache, selection) {
 
   const pageInfo = pagedSlice(bucketModel.records);
   const groups = groupSongIndex(pageInfo.visible);
+  const priorityIndexRecords = new Set(pageInfo.visible.slice(0, 8));
   const fragment = document.createDocumentFragment();
   fragment.append(renderIndexToolbar(bucketModel, pageInfo));
 
@@ -3548,7 +3550,7 @@ function renderSongIndexView(group, rangeCache, selection) {
       list.className = "index-list";
       const listFragment = document.createDocumentFragment();
       for (const record of groupEntry.records) {
-        listFragment.append(renderIndexRecord(record));
+        listFragment.append(renderIndexRecord(record, { priorityInlineMedia: priorityIndexRecords.has(record) }));
       }
       list.append(listFragment);
       section.append(list);
@@ -3558,8 +3560,8 @@ function renderSongIndexView(group, rangeCache, selection) {
     const list = document.createElement("div");
     list.className = "index-list index-list-flat";
     const listFragment = document.createDocumentFragment();
-    for (const record of pageInfo.visible) {
-      listFragment.append(renderIndexRecord(record));
+    for (const [index, record] of pageInfo.visible.entries()) {
+      listFragment.append(renderIndexRecord(record, { priorityInlineMedia: index < 8 }));
     }
     list.append(listFragment);
     fragment.append(list);
@@ -4350,6 +4352,7 @@ function renderRankRecord({
   getSongGroups = null,
   trend = null,
   isNiche = false,
+  priorityInlineMedia = false,
 }) {
   const row = document.createElement("article");
   const rowKey = makeDomId(key);
@@ -4436,6 +4439,7 @@ function renderRankRecord({
         mode,
         rankCount: count,
         rankMetric: state.rankMetric,
+        priorityMedia: priorityInlineMedia,
       }),
     );
   }
@@ -4456,7 +4460,7 @@ function renderRankRecord({
   return row;
 }
 
-function renderIndexRecord(record) {
+function renderIndexRecord(record, options = {}) {
   const row = document.createElement("article");
   const rowKey = makeDomId(`index-${record.key}`);
   const drawerId = `source-drawer-${rowKey}`;
@@ -4510,6 +4514,7 @@ function renderIndexRecord(record) {
       mode: "index",
       rankCount: record.count,
       rankMetric: "occurrences",
+      priorityMedia: Boolean(options.priorityInlineMedia),
     }),
   );
   if (expandable) {
@@ -4732,7 +4737,7 @@ function renderSourceInlineStrip(model, options = {}) {
   const showInlineCopyAll = Boolean(model.showCopyAll && options.showCopyAll !== false && !options.isExpanded);
   const hasActions = Boolean(model.canExpand || showInlineCopyAll);
   for (const group of model.inlineGroups) {
-    list.append(renderSourceInlineGroup(group));
+    list.append(renderSourceInlineGroup(group, { priorityMedia: Boolean(options.priorityMedia) }));
   }
   rail.append(list);
   strip.append(rail);
@@ -4768,7 +4773,7 @@ function renderSourceInlineStrip(model, options = {}) {
   return strip;
 }
 
-function renderSourceInlineGroup(group) {
+function renderSourceInlineGroup(group, options = {}) {
   const item = group.item || group.occurrences?.[0]?.item || {};
   const firstOccurrence = group.occurrences?.[0];
   const videoId = item.videoId || group.videoId || "";
@@ -4789,6 +4794,7 @@ function renderSourceInlineGroup(group) {
       preferCompact: true,
       width: 56,
       height: 32,
+      priority: options.priorityMedia ? "high" : "auto",
     }),
   );
   wrapper.append(thumb);
@@ -5092,8 +5098,8 @@ function appendSourceGroupRange(drawer, groups, start, end) {
   const safeStart = Math.max(0, start);
   const safeEnd = Math.min(groups.length, Math.max(safeStart, end));
   let firstAppended = null;
-  for (const group of groups.slice(safeStart, safeEnd)) {
-    const node = renderSourceVideoGroup(group);
+  for (const [offset, group] of groups.slice(safeStart, safeEnd).entries()) {
+    const node = renderSourceVideoGroup(group, { priorityMedia: safeStart + offset < 6 });
     if (!firstAppended) firstAppended = node;
     fragment.append(node);
   }
@@ -5218,7 +5224,7 @@ function renderSourceCollapseButton(drawerId, mode = "song", className = "source
   return button;
 }
 
-function renderSourceVideoGroup(group) {
+function renderSourceVideoGroup(group, options = {}) {
   const section = document.createElement("section");
   section.className = "source-video-group";
 
@@ -5233,7 +5239,12 @@ function renderSourceVideoGroup(group) {
   thumbLink.target = "_blank";
   thumbLink.rel = "noreferrer";
   thumbLink.setAttribute("aria-label", `打开来源视频时间戳：${group.title || videoId || "来源视频"}`);
-  thumbLink.append(createThumbnailImage({ ...videoItem, videoId, thumbnailUrl: videoItem.thumbnailUrl || group.thumbnailUrl }, "source-video-thumb", { preferCompact: true }));
+  thumbLink.append(
+    createThumbnailImage({ ...videoItem, videoId, thumbnailUrl: videoItem.thumbnailUrl || group.thumbnailUrl }, "source-video-thumb", {
+      preferCompact: true,
+      priority: options.priorityMedia ? "high" : "auto",
+    }),
+  );
   section.append(thumbLink);
 
   const main = document.createElement("div");
@@ -6278,9 +6289,10 @@ function createThumbnailImage(item, className, optionsOrWidth = {}, height = 90)
   const img = document.createElement("img");
   img.className = className;
   img.alt = "";
-  img.loading = "lazy";
+  const highPriority = options.priority === "high";
+  img.loading = highPriority ? "eager" : "lazy";
   img.decoding = "async";
-  img.fetchPriority = "low";
+  img.fetchPriority = highPriority ? "high" : "low";
   img.width = width;
   img.height = resolvedHeight;
   const thumbnailCandidates = videoThumbnailCandidates(item || {}, options);

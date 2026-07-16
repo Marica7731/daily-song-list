@@ -60,6 +60,10 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /renderSourceTimestampLink\(firstOccurrence, "source-inline-time"\)/u);
   assert.doesNotMatch(appSource, /className = "source-inline-time-overlay"/u);
   assert.match(appSource, /createThumbnailImage\(\{ \.\.\.item, videoId, thumbnailUrl: item\.thumbnailUrl \|\| group\.thumbnailUrl \}, "source-inline-thumb-image"[\s\S]*preferCompact: true/u);
+  assert.match(appSource, /priorityMedia: priorityInlineMedia/u);
+  assert.match(appSource, /priority: options\.priorityMedia \? "high" : "auto"/u);
+  assert.match(appSource, /img\.loading = highPriority \? "eager" : "lazy"/u);
+  assert.match(appSource, /img\.fetchPriority = highPriority \? "high" : "low"/u);
   assert.match(appSource, /className = "source-time-extra-toggle"/u);
   assert.match(appSource, /function renderCopySetlistIconButton/u);
   assert.match(appSource, /function createThumbnailImage/u);
@@ -107,6 +111,7 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[^}]*display: none/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-count\.is-strong\s*\{[\s\S]*background: transparent;[\s\S]*color: var\(--muted\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.index-toolbar\s*\{[\s\S]*position: static;[\s\S]*top: auto;/u);
   assert.match(cssSource, /\.rank-row::before\s*\{[\s\S]*grid-area: rank;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row::before\s*\{[\s\S]*display: none;/u);
   assert.match(cssSource, /\.query-count\[hidden\]\s*\{[\s\S]*display: none;/u);
