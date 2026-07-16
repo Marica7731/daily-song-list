@@ -10,6 +10,7 @@ test("core, review, and code checks use separate workflow files and concurrency 
   const core = readWorkflow("update-core.yml");
   const review = readWorkflow("build-review.yml");
   const check = readWorkflow("check-code.yml");
+  const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"));
 
   assert.match(core, /name:\s*Update core song-list data/u);
   assert.match(core, /group:\s*daily-song-list-core/u);
@@ -36,6 +37,9 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(check, /name:\s*Check code/u);
   assert.match(check, /group:\s*daily-song-list-check-\$\{\{ github\.ref \}\}/u);
   assert.match(check, /npm run check/u);
+  assert.match(check, /"docs\/\*\*"/u);
+  assert.equal(pkg.scripts["check:ui-proof"], "node scripts/validate-ui-proof.js");
+  assert.match(pkg.scripts.check, /npm run check:ui-proof/u);
 });
 
 test("legacy combined update workflow is removed", () => {
@@ -44,14 +48,31 @@ test("legacy combined update workflow is removed", () => {
 
 test("README screenshot gallery is refreshable and references committed images", () => {
   const readme = fs.readFileSync(path.join(repoRoot, "README.md"), "utf8");
+  const uiProof = fs.readFileSync(path.join(repoRoot, "docs", "ui-proof.md"), "utf8");
+  const manifestPath = path.join(repoRoot, "docs", "assets", "screenshots", "manifest.json");
   assert.match(readme, /npm run screenshots:readme -- https:\/\/ytb-song-rank\.culua\.com\//u);
+  assert.match(readme, /docs\/ui-proof\.md/u);
   assert.match(readme, /docs\/assets\/screenshots\/desktop-song-rank\.png/u);
   assert.match(readme, /docs\/assets\/screenshots\/mobile-query-suggestions\.png/u);
+  assert.match(readme, /docs\/assets\/screenshots\/mobile-source-inline-2\.png/u);
 
   const screenshotRefs = [...readme.matchAll(/src="(docs\/assets\/screenshots\/[^"]+\.png)"/gu)].map((match) => match[1]);
   assert.ok(screenshotRefs.length >= 12, `expected broad screenshot coverage, found ${screenshotRefs.length}`);
   for (const ref of screenshotRefs) {
     assert.equal(fs.existsSync(path.join(repoRoot, ref)), true, `missing README screenshot: ${ref}`);
+  }
+
+  const proofRefs = [...uiProof.matchAll(/\]\((assets\/screenshots\/[^)]+\.png)\)/gu)].map((match) => `docs/${match[1]}`);
+  assert.ok(proofRefs.length >= 20, `expected full UI proof coverage, found ${proofRefs.length}`);
+  for (const ref of proofRefs) {
+    assert.equal(fs.existsSync(path.join(repoRoot, ref)), true, `missing UI proof screenshot: ${ref}`);
+  }
+  if (fs.existsSync(manifestPath)) {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    const manifestRefs = new Set((manifest.screenshots || []).map((entry) => entry.path));
+    for (const ref of [...screenshotRefs, ...proofRefs]) {
+      assert.equal(manifestRefs.has(ref), true, `manifest missing screenshot ref: ${ref}`);
+    }
   }
 });
 

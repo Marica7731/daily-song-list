@@ -1,0 +1,49 @@
+"use strict";
+
+const expectedScreenshots = [
+  "desktop-song-rank.png",
+  "desktop-monthly-song-rank.png",
+  "desktop-video-view.png",
+  "desktop-query-panel.png",
+  "desktop-source-expanded.png",
+  "desktop-source-inline-3.png",
+  "desktop-pagination-middle.png",
+  "mobile-song-rank.png",
+  "mobile-artist-rank.png",
+  "mobile-song-index.png",
+  "mobile-song-index-middle-page.png",
+  "mobile-song-index-last-page.png",
+  "mobile-video-view.png",
+  "mobile-video-expanded.png",
+  "mobile-pagination-320.png",
+  "mobile-active-query-strip.png",
+  "mobile-query-recent.png",
+  "mobile-query-suggestions.png",
+  "mobile-query-history.png",
+  "mobile-source-expanded.png",
+  "mobile-source-inline-0.png",
+  "mobile-source-inline-1.png",
+  "mobile-source-inline-2.png",
+  "mobile-source-inline-3.png",
+  "mobile-source-more-than-3.png",
+  "mobile-source-more-than-3-expanded.png",
+  "mobile-source-thumb-fallback.png",
+  "mobile-source-long-channel.png",
+];
+
+const proofInputPaths = [
+  "index.html",
+  "assets/app.js",
+  "assets/styles.css",
+  "assets/frontend-utils.js",
+  "docs/ui-spec.md",
+  "scripts/capture-readme-screenshots.js",
+  "scripts/validate-ui-proof.js",
+  "scripts/ui-proof-config.js",
+  "test/fixtures/ui-proof-runtime.json",
+];
+
+module.exports = {
+  expectedScreenshots,
+  proofInputPaths,
+};

@@ -51,6 +51,9 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /FrontendUtils\.groupOccurrencesByVideo\(occurrences\)/u);
   assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1/u);
   assert.match(appSource, /className = "source-video-thumb-link"/u);
+  assert.match(appSource, /className = "source-inline-thumb source-link"/u);
+  assert.match(appSource, /className = "source-inline-time-overlay"/u);
+  assert.match(appSource, /createThumbnailImage\(\{ \.\.\.item, videoId, thumbnailUrl: item\.thumbnailUrl \|\| group\.thumbnailUrl \}, "source-inline-thumb-image"[\s\S]*preferCompact: true/u);
   assert.match(appSource, /className = "source-time-extra-toggle"/u);
   assert.match(appSource, /function renderCopySetlistIconButton/u);
   assert.match(appSource, /function createThumbnailImage/u);
@@ -85,6 +88,10 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-header\s*\{[\s\S]*display: none/u);
   assert.match(cssSource, /\.source-inline-strip\s*\{[\s\S]*grid-area: sources;/u);
+  assert.match(cssSource, /\.source-inline-thumb\s*\{[\s\S]*width: 56px;[\s\S]*height: 32px;[\s\S]*border-radius: 6px;/u);
+  assert.match(cssSource, /\.source-inline-thumb-image\s*\{[\s\S]*object-fit: cover;/u);
+  assert.match(cssSource, /\.source-inline-time-overlay\s*\{[\s\S]*position: absolute;[\s\S]*background: rgba\(17, 24, 39, 0\.78\);/u);
+  assert.match(cssSource, /\.source-inline-tail\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
   assert.match(cssSource, /\.source-drawer\s*\{[\s\S]*grid-area: drawer;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[\s\S]*width: 100%;[\s\S]*min-width: 0;/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-drawer\s*\{[^}]*display: none/u);
@@ -92,6 +99,7 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /\.rank-row::before\s*\{[\s\S]*grid-area: rank;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row::before\s*\{[\s\S]*display: none;/u);
   assert.match(cssSource, /\.query-count\[hidden\]\s*\{[\s\S]*display: none;/u);
+  assert.doesNotMatch(cssSource, /\.query-trigger\.has-active-query::after/u);
 });
 
 test("high-density rank and source rules are encoded in css and browser checks", () => {
@@ -118,6 +126,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.rank-expand::after\s*\{[\s\S]*border-right: 1\.5px solid currentcolor;[\s\S]*transform: translateY\(-1px\) rotate\(45deg\);/u);
   assert.match(cssSource, /\.rank-expand\[aria-expanded="true"\]::after\s*\{[\s\S]*rotate\(225deg\)/u);
   assert.match(cssSource, /\.source-copy-icon\s*\{[\s\S]*width: var\(--chip-icon-size\);[\s\S]*padding: 0;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 52px;[\s\S]*height: 29px;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 48px;[\s\S]*height: 27px;/u);
   assert.doesNotMatch(cssSource, /\.source-copy-icon span|ui-chip-icon-label/u);
   assert.match(cssSource, /\.trend-badge\s*\{[\s\S]*min-height: 20px;[\s\S]*font-size: 10\.5px;[\s\S]*white-space: nowrap;/u);
   assert.match(cssSource, /\.trend-up,[\s\S]*\.trend-increase,[\s\S]*\.trend-new/u);
@@ -181,6 +191,8 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main"[\s\S]*"note"/u);
   assert.match(cssSource, /\.summary-actions\s*\{[\s\S]*grid-area: actions;[\s\S]*margin-left: 0;/u);
   assert.match(appSource, /summary-metrics/u);
+  assert.match(appSource, /function compactSummaryMetrics/u);
+  assert.match(appSource, /function compactSummaryNote/u);
   assert.match(appSource, /variant === "top"[\s\S]*`\$\{pageInfo\.startIndex \+ 1\}-\$\{pageInfo\.endIndex\} \/ \$\{pageInfo\.total\}/u);
   assert.match(appSource, /function paginationTokenOptions/u);
   assert.match(appSource, /renderPageButton\("上一页"[\s\S]*\{ icon: "prev" \}/u);

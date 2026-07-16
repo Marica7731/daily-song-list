@@ -38,10 +38,13 @@
 歌曲榜和歌曲索引使用同一模型：`FrontendUtils.sourcePresentationModel`。
 
 - 0 个唯一来源视频：内容列显示弱化 `无来源`，没有按钮，没有 drawer。
-- 1 个唯一来源视频：内联显示时间点、频道、复制歌单按钮。若同一视频有多个时间点，只展开额外时间点，不打开 drawer。
+- 内联来源必须显示微缩视频封面。封面固定 16:9，手机默认 52px × 29px，320px 极窄屏 48px × 27px，平板和桌面 56px × 32px。图片使用 `object-fit: cover`，`loading="lazy"`、`decoding="async"`、`fetchpriority="low"`。
+- 主时间戳叠加在封面左下角，不再作为独立大色块占用横向空间。叠层使用深色半透明背景、白色 tabular 数字，必须完整显示长时间戳。
+- 1 个唯一来源视频：内联显示微缩封面、频道、复制歌单按钮。若同一视频有多个时间点，只展开额外时间点，不打开 drawer。
 - 2 个唯一来源视频：全部内联显示，不打开 drawer，不显示复制全部链接入口。
-- 3 个唯一来源视频：手机两列布局，前两项在第一行，第三项和复制同一首歌全部来源链接按钮在第二行。
+- 3 个唯一来源视频：手机两列布局，前两项在第一行；第二行使用 `.source-inline-tail`，第三个来源占 `minmax(0, 1fr)`，复制同一首歌全部来源链接是固定约 28px 图标按钮。复制全部链接不得占据等宽空卡片。
 - 4 个以上唯一来源视频：默认内联前 3 个，紧凑显示 `+N来源`，完整语义写入 `title` 和 `aria-label`。点击一次后显示所有剩余来源，按钮变为 `收起`。不得再出现二次 `查看更多来源`。
+- 4+ 折叠态同样使用 `.source-inline-tail`，第三个来源占剩余宽度，`+N来源` / `收起` 按钮自适应文字且最大宽度约 92px。
 - 4+ 折叠态的前 3 个来源必须真实渲染且至少显示非空频道名；不得用 `display:none` 隐藏第 2、3 个来源、频道名、时间点或复制按钮来伪装压缩。
 - 来源预览是 `.rank-row` / `.index-row` 的直接子元素，使用 `grid-area: sources` 横跨内容列和右侧列；手机排行网格为 `"rank content side"`、`". sources sources"`、`"drawer drawer drawer"`。
 - `.source-inline-more` 是 4+ 来源折叠态的第四格；展开后同一个按钮变为顶部唯一 `收起` 入口。Drawer 工具栏不得再提供第二个顶部收起按钮。
@@ -58,13 +61,14 @@
 
 ## 查询面板
 
-- 移动端 `queryTrigger` 是固定正方形，只显示一个图标；不得显示没有上下文的数字徽标。存在活动条件时使用边框、浅背景或 6px 状态点表达，语义由按钮 `aria-label` 列出数量和条件。
+- 移动端 `queryTrigger` 是固定正方形，只显示一个图标；不得显示没有上下文的数字徽标、圆点或未读提示。存在活动条件时只能使用边框、浅背景和品牌色图标表达状态，语义由按钮 `aria-label` 列出数量和条件。
 - `queryDialog` 是唯一搜索与筛选入口。
 - 搜索输入固定在 tab 上方，始终可见。
 - 面板内部有 `搜索` / `筛选` 两个 tab。搜索 tab 包含最近搜索和建议；筛选 tab 包含内容范围、排行条件、显示设置和历史快照。
 - 历史快照默认折叠，展开后显示日期和时间选择。
 - Footer 只有左侧重置和右侧主操作，结果数量写入主按钮文本。
 - `active-query-strip` 是移动端解释活动条件的主位置。存在时高度约 26px-28px，chip 高度 24px-26px，单行横向滚动；隐藏时 `display:none`，不得留下空白。
+- 移动摘要指标必须是独立 `span` 并通过 CSS `gap` 分隔，不得在文本中插入可能换到行首的中点。搜索/筛选状态强调当前结果，例如 `5首结果`、`8次收录`、`6视频`，不重复展示完整数据库总量。
 
 ## 歌曲索引
 
@@ -89,19 +93,21 @@
 - `npm run version:assets`
 - `CODEX_SCREENSHOT_TAG=source-full-width-v1 npm run verify:local -- http://127.0.0.1:8080/`
 - `npm run screenshots:readme -- http://127.0.0.1:8080/`
+- `npm run check:ui-proof`
 
 README 截图矩阵至少包括：
 
 - 桌面歌曲榜、月度榜、视频页、查询面板、展开来源、中页分页。
 - 手机歌曲榜、歌手榜、歌曲索引、索引中页、索引末页、视频页、展开视频、active query strip、query recent、query suggestions、query history、展开来源。
 - 手机 320px 分页。
-- 手机 1 来源、3 来源、4+ 来源收起和 4+ 来源展开。
-- 截图脚本必须验证视觉可见性，不得只检查 DOM 或 `data-source-video-count`：来源频道不能 `display:none`，来源预览必须横跨内容和右侧列，展开 drawer 不得重复前三个内联来源，移动查询按钮不能显示孤立数字徽标，视频页和展开来源的首个缩略图必须实际可见。
+- 手机 0 来源、1 来源、2 来源、3 来源、4+ 来源收起、4+ 来源展开、长频道名和封面 fallback。
+- 截图脚本必须验证视觉可见性，不得只检查 DOM 或 `data-source-video-count`：内联来源缩略图和时间叠层必须可见，来源频道不能 `display:none`，来源预览必须横跨内容和右侧列，展开 drawer 不得重复前三个内联来源，移动查询按钮不能显示孤立数字徽标/圆点，视频页和展开来源的首个缩略图必须实际可见。
+- `docs/assets/screenshots/manifest.json` 记录全部截图 SHA256、尺寸、生成时间、视口、URL 参数、选择器和 UI 源码指纹。只要 `index.html`、`assets/app.js`、`assets/styles.css`、`assets/frontend-utils.js`、`docs/ui-spec.md`、截图脚本或 UI proof fixture 变化但截图未刷新，`npm run check` 必须失败并提示运行 `npm run screenshots:readme`。
 
 ## 移动垂直预算与强调色
 
 - `controls`：42px-44px。
 - `active-query-strip`：存在时 26px-28px。
-- `summary`：约 34px-48px，主摘要最多两行；更新时间与主指标使用中点分隔。
+- `summary`：约 34px-48px，主摘要最多两行；更新时间与主指标处于同一 flex 信息流，移动端使用 gap 而不是文本中点分隔。
 - `pagination-top`：32px-36px。
 - 实心品牌色只用于当前范围、当前页和查询面板主要提交按钮。单个内容区域最多一个高强调实心控件；剩余来源按钮不得成为大面积绿色 CTA。

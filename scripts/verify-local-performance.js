@@ -333,6 +333,7 @@ async function assertUiShape(page, viewport, range) {
           visibleNumericBadgeCount: visibleTriggerChildren.filter((child) => /^\d+$/u.test(child.text.trim())).length,
           visibleChildren: visibleTriggerChildren,
           hasActiveClass: queryTrigger.classList.contains("has-active-query"),
+          afterContent: getComputedStyle(queryTrigger, "::after").content,
         }
       : null;
     const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row), .index-row, .video-card"));
@@ -462,6 +463,9 @@ async function assertUiShape(page, viewport, range) {
     }
     if (result.queryTrigger.visibleSvgCount !== 1 || result.queryTrigger.visibleNumericBadgeCount !== 0) {
       throw new Error(`mobile query trigger should expose one icon and no visible number ${JSON.stringify(result.queryTrigger)}`);
+    }
+    if (result.queryTrigger.afterContent && result.queryTrigger.afterContent !== "none") {
+      throw new Error(`mobile query trigger should not draw notification dot ${JSON.stringify(result.queryTrigger)}`);
     }
     if (
       result.queryTrigger.visibleChildren.some(
@@ -1225,6 +1229,10 @@ async function mobileRankVisualGeometry(browser) {
         const channel = node.querySelector(".source-inline-channel");
         const channelBox = channel?.getBoundingClientRect();
         const channelStyle = channel ? getComputedStyle(channel) : null;
+        const thumb = node.querySelector(".source-inline-thumb");
+        const thumbBox = thumb?.getBoundingClientRect();
+        const overlay = node.querySelector(".source-inline-time-overlay");
+        const overlayBox = overlay?.getBoundingClientRect();
         return {
           left: box.left,
           right: box.right,
@@ -1240,6 +1248,11 @@ async function mobileRankVisualGeometry(browser) {
           channelVisibility: channelStyle?.visibility || "",
           channelWidth: channelBox?.width || 0,
           channelHeight: channelBox?.height || 0,
+          thumbWidth: thumbBox?.width || 0,
+          thumbHeight: thumbBox?.height || 0,
+          overlayText: overlay?.textContent?.trim() || "",
+          overlayWidth: overlayBox?.width || 0,
+          overlayHeight: overlayBox?.height || 0,
         };
       });
       const sourceMoreButton = button
@@ -1313,14 +1326,18 @@ async function mobileRankVisualGeometry(browser) {
           item.channelDisplay === "none" ||
           item.channelVisibility === "hidden" ||
           item.channelWidth < (closedGeometry.viewportWidth <= 340 ? 18 : 28) ||
-          item.channelHeight <= 0,
+          item.channelHeight <= 0 ||
+          item.thumbWidth < (closedGeometry.viewportWidth <= 340 ? 46 : 48) ||
+          item.thumbHeight < (closedGeometry.viewportWidth <= 340 ? 26 : 27) ||
+          !item.overlayText ||
+          item.overlayHeight <= 0,
       );
       if (invisibleSource) {
         throw new Error(`inline source preview is visually hidden ${JSON.stringify({ invisibleSource, sourceInlineItems: closedGeometry.sourceInlineItems })}`);
       }
       if (
         !closedGeometry.sourceMoreButton ||
-        closedGeometry.sourceMoreButton.width > closedGeometry.sourceStrip.width / 2 + 8 ||
+        closedGeometry.sourceMoreButton.width > 92 ||
         closedGeometry.sourceMoreButton.height > 30 ||
         closedGeometry.sourceMoreButton.flexGrow !== "0"
       ) {
@@ -1328,7 +1345,7 @@ async function mobileRankVisualGeometry(browser) {
       }
     }
     if (closedGeometry.legacyTrendNodes) throw new Error(`legacy mobile trend nodes remain ${JSON.stringify(closedGeometry)}`);
-    const compactRowHeightLimit = closedGeometry.sourceVideoCount > 3 ? 126 : 90;
+    const compactRowHeightLimit = closedGeometry.sourceVideoCount > 2 ? 142 : closedGeometry.sourceVideoCount > 0 ? 108 : 70;
     if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > compactRowHeightLimit) {
       throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
     }
@@ -1576,7 +1593,8 @@ async function mobileCopyAllLinksFlow(browser) {
       drawerButtons: node.querySelectorAll("[data-toggle-source]").length,
       drawers: node.querySelectorAll(".source-drawer").length,
       inlineItems: node.querySelectorAll(".source-inline-item").length,
-      inlineTimes: node.querySelectorAll(".source-inline-time").length,
+      inlineThumbs: node.querySelectorAll(".source-inline-thumb-image").length,
+      inlineTimeOverlays: node.querySelectorAll(".source-inline-time-overlay").length,
       inlineChannels: node.querySelectorAll(".source-inline-channel").length,
       setlistButtons: node.querySelectorAll(".source-inline-item [data-copy-setlist]").length,
       actionHeight: node.querySelector(".source-inline-item [data-copy-setlist]")?.getBoundingClientRect().height || 0,
@@ -1586,7 +1604,8 @@ async function mobileCopyAllLinksFlow(browser) {
       singleSourceShape.drawerButtons !== 0 ||
       singleSourceShape.drawers !== 0 ||
       singleSourceShape.inlineItems !== 1 ||
-      singleSourceShape.inlineTimes !== 1 ||
+      singleSourceShape.inlineThumbs !== 1 ||
+      singleSourceShape.inlineTimeOverlays !== 1 ||
       singleSourceShape.inlineChannels !== 1 ||
       singleSourceShape.setlistButtons !== 1
     ) {
@@ -1601,7 +1620,8 @@ async function mobileCopyAllLinksFlow(browser) {
       !singleVisibleShape.items[0]?.visible ||
       !singleVisibleShape.items[0]?.channel?.visible ||
       !singleVisibleShape.items[0]?.channel?.text ||
-      !singleVisibleShape.items[0]?.timeVisible ||
+      !singleVisibleShape.items[0]?.thumbVisible ||
+      !singleVisibleShape.items[0]?.overlayVisible ||
       !singleVisibleShape.items[0]?.copyVisible
     ) {
       throw new Error(`single-source inline visibility invalid ${JSON.stringify(singleVisibleShape)}`);
@@ -1624,7 +1644,8 @@ async function mobileCopyAllLinksFlow(browser) {
         tripleShape.toggleCount !== 0 ||
         tripleShape.drawerCount !== 0 ||
         tripleShape.copyAllCount !== 1 ||
-        tripleShape.items.some((item) => !item.visible || !item.channel?.visible || !item.channel.text)
+        tripleShape.items.some((item) => !item.visible || !item.channel?.visible || !item.channel.text || !item.thumbVisible || !item.overlayVisible) ||
+        tripleShape.items[2].width < Math.max(80, (tripleShape.strip?.width || 0) - 44)
       ) {
         throw new Error(`triple-source inline shape invalid ${JSON.stringify(tripleShape)}`);
       }
@@ -1640,7 +1661,7 @@ async function mobileCopyAllLinksFlow(browser) {
         moreShape.toggleCount !== 1 ||
         moreShape.copyAllCount !== 0 ||
         !moreShape.more?.visible ||
-        moreShape.more.width > (moreShape.strip?.width || 0) / 2 + 8 ||
+        moreShape.more.width > 92 ||
         moreShape.more.height > 30 ||
         moreShape.more.flexGrow !== "0" ||
         !moreShape.strip ||
@@ -1854,6 +1875,8 @@ async function inlineSourceShape(row) {
     const side = node.querySelector(".rank-side");
     const items = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => {
       const channel = item.querySelector(".source-inline-channel");
+      const thumb = item.querySelector(".source-inline-thumb");
+      const overlay = item.querySelector(".source-inline-time-overlay");
       return {
         ...rectFor(item),
         visible: visible(item),
@@ -1865,7 +1888,11 @@ async function inlineSourceShape(row) {
             }
           : null,
         copyVisible: visible(item.querySelector("[data-copy-setlist]")),
-        timeVisible: visible(item.querySelector(".source-inline-time")),
+        thumbVisible: visible(thumb),
+        thumbWidth: thumb?.getBoundingClientRect().width || 0,
+        thumbHeight: thumb?.getBoundingClientRect().height || 0,
+        overlayVisible: visible(overlay),
+        overlayText: overlay?.textContent?.trim() || "",
       };
     });
     const more = node.querySelector(".source-inline-more");
@@ -2430,6 +2457,7 @@ async function mobileActiveQueryStripGeometry(browser) {
               visibleSvgCount: visibleTriggerChildren.filter((node) => node.tagName.toLowerCase() === "svg").length,
               visibleNumericBadgeCount: visibleTriggerChildren.filter((node) => /^\d+$/u.test((node.textContent || "").trim())).length,
               hasActiveClass: queryTrigger.classList.contains("has-active-query"),
+              afterContent: getComputedStyle(queryTrigger, "::after").content,
             }
           : null,
       };
@@ -2438,6 +2466,9 @@ async function mobileActiveQueryStripGeometry(browser) {
     if (!geometry.strip || !geometry.clear || geometry.chips.length < 3) throw new Error(`active query strip missing pieces ${JSON.stringify(geometry)}`);
     if (!geometry.queryTrigger?.hasActiveClass || geometry.queryTrigger.visibleSvgCount !== 1 || geometry.queryTrigger.visibleNumericBadgeCount !== 0) {
       throw new Error(`active query trigger state invalid ${JSON.stringify(geometry)}`);
+    }
+    if (geometry.queryTrigger.afterContent && geometry.queryTrigger.afterContent !== "none") {
+      throw new Error(`active query trigger should not expose notification dot ${JSON.stringify(geometry.queryTrigger)}`);
     }
     if (!/当前有 4 个条件：少女レイ、只看小众、按视频、2次以上/u.test(geometry.queryTrigger.ariaLabel)) {
       throw new Error(`active query trigger aria label missing condition detail ${JSON.stringify(geometry.queryTrigger)}`);

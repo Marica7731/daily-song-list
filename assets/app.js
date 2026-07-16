@@ -3440,17 +3440,11 @@ function renderSummary(group, metrics, note = "") {
     main.append(fallback);
   }
 
-  const metricParts = metrics.filter(Boolean);
+  const metricParts = compactSummaryMetrics(metrics);
   if (metricParts.length) {
     const metricNode = document.createElement("span");
     metricNode.className = "summary-metrics";
-    metricParts.forEach((part, index) => {
-      if (index) {
-        const separator = document.createElement("span");
-        separator.className = "summary-separator";
-        separator.textContent = " · ";
-        metricNode.append(separator);
-      }
+    metricParts.forEach((part) => {
       const item = document.createElement("span");
       item.className = "summary-metric";
       item.textContent = part;
@@ -3458,10 +3452,7 @@ function renderSummary(group, metrics, note = "") {
     });
     const statusNode = renderSummaryStatusNode();
     if (statusNode) {
-      const separator = document.createElement("span");
-      separator.className = "summary-separator";
-      separator.textContent = " · ";
-      metricNode.append(separator, statusNode);
+      metricNode.append(statusNode);
     }
     main.append(metricNode);
   } else {
@@ -3473,12 +3464,39 @@ function renderSummary(group, metrics, note = "") {
   if (note) {
     const noteNode = document.createElement("span");
     noteNode.className = "summary-note";
-    noteNode.textContent = note;
+    noteNode.textContent = compactSummaryNote(note);
+    noteNode.title = note;
     els.summary.append(noteNode);
   }
 
   const actions = renderSummaryActions();
   if (actions.childElementCount) els.summary.append(actions);
+}
+
+function compactSummaryMetrics(metrics) {
+  const hasSearchOrFilter = Boolean(state.filter || state.nicheOnly || !state.hideUnknownArtist || state.minCount > 1 || state.trend !== "all");
+  return metrics
+    .filter(Boolean)
+    .map((part) => {
+      const text = String(part);
+      if (hasSearchOrFilter) {
+        return text
+          .replace(/^显示\s+/u, "")
+          .replace(/\s*\/\s*[0-9,]+/u, "")
+          .replace(/首歌曲/u, "首结果")
+          .replace(/次收录/u, "次收录")
+          .replace(/个视频/u, "视频")
+          .replace(/([0-9,])\s+(首结果|次收录|视频)/gu, "$1$2");
+      }
+      return text.replace(/首歌曲/u, "首").replace(/次收录/u, "次").replace(/个视频/u, "视频").replace(/([0-9,])\s+(首|次|视频)/gu, "$1$2");
+    });
+}
+
+function compactSummaryNote(note) {
+  return String(note)
+    .replace(/隐藏([0-9,]+)条无歌手收录/u, "隐藏$1条无歌手")
+    .replace(/最近([0-9]+)天累计/u, "近$1天")
+    .replace(/\s*·\s*/gu, "  ");
 }
 
 function hiddenUnknownNote(selection) {
@@ -4516,7 +4534,10 @@ function renderSourceInlineStrip(model, options = {}) {
   const list = document.createElement("div");
   list.className = "source-inline-preview-list";
 
-  for (const group of model.inlineGroups) {
+  const hasTailAction = Boolean(model.canExpand || (model.showCopyAll && !model.canExpand && options.showCopyAll !== false));
+  const headGroups = hasTailAction && model.inlineGroups.length >= 3 ? model.inlineGroups.slice(0, 2) : model.inlineGroups;
+  const tailGroup = hasTailAction && model.inlineGroups.length >= 3 ? model.inlineGroups[2] : null;
+  for (const group of headGroups) {
     list.append(renderSourceInlineGroup(group));
   }
   rail.append(list);
@@ -4524,6 +4545,9 @@ function renderSourceInlineStrip(model, options = {}) {
 
   const actions = document.createElement("div");
   actions.className = "source-inline-actions";
+  if (hasTailAction) {
+    strip.classList.add("has-tail-action");
+  }
 
   if (model.canExpand) {
     actions.append(
@@ -4543,7 +4567,15 @@ function renderSourceInlineStrip(model, options = {}) {
   if (model.showCopyAll && !model.canExpand && options.showCopyAll !== false) {
     actions.append(renderInlineCopySongLinksButton(options.occurrences || []));
   }
-  if (actions.childElementCount) strip.append(actions);
+  if (tailGroup) {
+    const tail = document.createElement("div");
+    tail.className = "source-inline-tail";
+    tail.append(renderSourceInlineGroup(tailGroup));
+    if (actions.childElementCount) tail.append(actions);
+    strip.append(tail);
+  } else if (actions.childElementCount) {
+    strip.append(actions);
+  }
 
   return strip;
 }
@@ -4557,22 +4589,34 @@ function renderSourceInlineGroup(group) {
   wrapper.className = "source-inline-item";
   wrapper.dataset.videoId = videoId;
 
-  const timeCluster = document.createElement("span");
-  timeCluster.className = "source-inline-time-cluster";
+  const thumb = document.createElement("a");
+  thumb.className = "source-inline-thumb source-link";
+  thumb.href = youtubeTimeUrl(videoId, firstSeconds);
+  thumb.target = "_blank";
+  thumb.rel = "noreferrer";
+  thumb.setAttribute("aria-label", `打开来源视频时间戳：${group.title || videoId || "来源视频"}`);
+  thumb.append(
+    createThumbnailImage({ ...item, videoId, thumbnailUrl: item.thumbnailUrl || group.thumbnailUrl }, "source-inline-thumb-image", {
+      preferCompact: true,
+      width: 56,
+      height: 32,
+    }),
+  );
+  const timeOverlay = document.createElement("span");
+  timeOverlay.className = "source-inline-time-overlay";
   if (firstOccurrence) {
-    timeCluster.append(renderSourceTimestampLink(firstOccurrence, "source-inline-time"));
+    timeOverlay.textContent = firstOccurrence.song?.time || formatSeconds(firstSeconds);
   } else {
-    const fallback = document.createElement("a");
-    fallback.className = "source-link source-inline-time";
-    fallback.href = youtubeTimeUrl(videoId, firstSeconds);
-    fallback.target = "_blank";
-    fallback.rel = "noreferrer";
-    fallback.textContent = formatSeconds(firstSeconds);
-    timeCluster.append(fallback);
+    timeOverlay.textContent = formatSeconds(firstSeconds);
   }
+  thumb.append(timeOverlay);
+  wrapper.append(thumb);
 
   const extraTimes = (group.occurrences || []).slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
   let extraTimesNode = null;
+  let extraTimeButton = null;
+  const main = document.createElement("span");
+  main.className = "source-inline-main";
   if (extraTimes.length) {
     const extraTimesId = `source-inline-extra-${makeDomId(`${videoId}-${firstSeconds}-${group.channelName || ""}`)}`;
     const more = document.createElement("button");
@@ -4588,7 +4632,6 @@ function renderSourceInlineGroup(group) {
     unit.className = "source-inline-time-more-unit";
     unit.textContent = "时间点";
     more.append(unit);
-    timeCluster.append(more);
 
     const extra = document.createElement("span");
     extra.className = "source-extra-times source-inline-extra-times";
@@ -4596,8 +4639,8 @@ function renderSourceInlineGroup(group) {
     extra.hidden = true;
     for (const occurrence of extraTimes) extra.append(renderSourceTimestampLink(occurrence, "source-inline-extra-time"));
     extraTimesNode = extra;
+    extraTimeButton = more;
   }
-  wrapper.append(timeCluster);
 
   const channelLink = window.FrontendUtils.youtubeChannelLink({ ...item, channelName: group.channelName });
   const channel = document.createElement("a");
@@ -4608,7 +4651,9 @@ function renderSourceInlineGroup(group) {
   channel.textContent = group.channelName || "未知频道";
   channel.setAttribute("aria-label", channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`);
   channel.title = channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`;
-  wrapper.append(channel);
+  main.append(channel);
+  if (extraTimeButton) main.append(extraTimeButton);
+  wrapper.append(main);
 
   wrapper.append(renderCopySetlistButton(item, "复制歌单", "source-inline-copy source-copy-icon ui-chip ui-chip-icon"));
   if (extraTimesNode) wrapper.append(extraTimesNode);
@@ -5923,6 +5968,7 @@ function createThumbnailImage(item, className, optionsOrWidth = {}, height = 90)
   img.alt = "";
   img.loading = "lazy";
   img.decoding = "async";
+  img.fetchPriority = "low";
   img.width = width;
   img.height = resolvedHeight;
   const thumbnailCandidates = videoThumbnailCandidates(item || {}, options);

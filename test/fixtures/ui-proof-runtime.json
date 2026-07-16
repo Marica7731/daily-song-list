@@ -1,0 +1,91 @@
+{
+  "sourceCases": {
+    "none": {
+      "sourceVideoCount": 0,
+      "title": "No Source Fixture",
+      "artist": "Proof Artist",
+      "groups": []
+    },
+    "single": {
+      "sourceVideoCount": 1,
+      "groups": [
+        {
+          "videoId": "MoEy0c7xcis",
+          "time": "38:16",
+          "seconds": 2296,
+          "channelName": "短いチャンネル",
+          "title": "Fixture source video"
+        }
+      ]
+    },
+    "double": {
+      "sourceVideoCount": 2,
+      "groups": [
+        {
+          "videoId": "MoEy0c7xcis",
+          "time": "38:16",
+          "seconds": 2296,
+          "channelName": "短いチャンネル",
+          "title": "Fixture source video A"
+        },
+        {
+          "videoId": "1K8486twdv4",
+          "time": "1:08:07",
+          "seconds": 4087,
+          "channelName": "Proof Channel B",
+          "title": "Fixture source video B"
+        }
+      ]
+    },
+    "triple": {
+      "sourceVideoCount": 3,
+      "groups": [
+        {
+          "videoId": "MoEy0c7xcis",
+          "time": "38:16",
+          "seconds": 2296,
+          "channelName": "短いチャンネル",
+          "title": "Fixture source video A"
+        },
+        {
+          "videoId": "1K8486twdv4",
+          "time": "1:08:07",
+          "seconds": 4087,
+          "channelName": "Proof Channel B",
+          "title": "Fixture source video B"
+        },
+        {
+          "videoId": "XIUGV-zqRWc",
+          "time": "10:18:32",
+          "seconds": 37112,
+          "channelName": "Proof Channel C",
+          "title": "Fixture source video C"
+        }
+      ]
+    },
+    "longChannel": {
+      "sourceVideoCount": 1,
+      "groups": [
+        {
+          "videoId": "JieYJhMRcxQ",
+          "time": "1:08:07",
+          "seconds": 4087,
+          "channelName": "これは非常に長いチャンネル名 / Extremely Long Proof Channel Name",
+          "title": "Long channel source"
+        }
+      ]
+    },
+    "fallback": {
+      "sourceVideoCount": 1,
+      "groups": [
+        {
+          "videoId": "",
+          "time": "10:18:32",
+          "seconds": 37112,
+          "channelName": "Fallback Thumb Channel",
+          "title": "Fallback source"
+        }
+      ]
+    }
+  }
+}

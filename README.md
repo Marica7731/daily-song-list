@@ -15,7 +15,7 @@ These committed screenshots are the repository homepage proof set for the curren
 npm run screenshots:readme -- https://ytb-song-rank.culua.com/
 ```
 
-The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md).
+The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). The full committed UI proof matrix lives in [`docs/ui-proof.md`](docs/ui-proof.md), with freshness checked by `docs/assets/screenshots/manifest.json`.
 
 ### Desktop Web
 
@@ -23,9 +23,13 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md).
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-song-rank.png" alt="Desktop song ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-monthly-song-rank.png" alt="Desktop monthly ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
 
-| Search and filters | Expanded sources | Middle pagination |
+| Search and filters | Expanded sources | 3 inline sources |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/desktop-query-panel.png" alt="Desktop unified search and filter panel" width="320" /> | <img src="docs/assets/screenshots/desktop-source-expanded.png" alt="Desktop expanded song sources" width="320" /> | <img src="docs/assets/screenshots/desktop-pagination-middle.png" alt="Desktop middle pagination state" width="320" /> |
+| <img src="docs/assets/screenshots/desktop-query-panel.png" alt="Desktop unified search and filter panel" width="320" /> | <img src="docs/assets/screenshots/desktop-source-expanded.png" alt="Desktop expanded song sources" width="320" /> | <img src="docs/assets/screenshots/desktop-source-inline-3.png" alt="Desktop inline source thumbnails" width="320" /> |
+
+| Middle pagination |
+| --- |
+| <img src="docs/assets/screenshots/desktop-pagination-middle.png" alt="Desktop middle pagination state" width="320" /> |
 
 ### Mobile H5
 
@@ -41,13 +45,17 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md).
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-video-view.png" alt="Mobile video tab" width="180" /> | <img src="docs/assets/screenshots/mobile-video-expanded.png" alt="Mobile expanded video card" width="180" /> | <img src="docs/assets/screenshots/mobile-source-expanded.png" alt="Mobile expanded song sources" width="180" /> |
 
-| 1 source inline | 3 sources inline | More sources |
+| 0 source | 1 source inline | 2 sources inline |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-source-inline-1.png" alt="Mobile one source inline row" width="180" /> | <img src="docs/assets/screenshots/mobile-source-inline-3.png" alt="Mobile three source inline row" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3.png" alt="Mobile row with more than three sources" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-source-inline-0.png" alt="Mobile source row with no source" width="180" /> | <img src="docs/assets/screenshots/mobile-source-inline-1.png" alt="Mobile one source inline row with thumbnail" width="180" /> | <img src="docs/assets/screenshots/mobile-source-inline-2.png" alt="Mobile two source inline row with thumbnails" width="180" /> |
 
-| More sources expanded |
-| --- |
-| <img src="docs/assets/screenshots/mobile-source-more-than-3-expanded.png" alt="Mobile row with all remaining sources expanded" width="180" /> |
+| 3 sources inline | More sources | More expanded |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-source-inline-3.png" alt="Mobile three source inline row with thumbnail tail action" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3.png" alt="Mobile row with more than three sources" width="180" /> | <img src="docs/assets/screenshots/mobile-source-more-than-3-expanded.png" alt="Mobile row with all remaining sources expanded" width="180" /> |
+
+| Thumbnail fallback | Long channel |
+| --- | --- |
+| <img src="docs/assets/screenshots/mobile-source-thumb-fallback.png" alt="Mobile inline source thumbnail fallback" width="180" /> | <img src="docs/assets/screenshots/mobile-source-long-channel.png" alt="Mobile inline source with long channel name" width="180" /> |
 
 | Active query strip | Recent searches | Suggestions |
 | --- | --- | --- |
@@ -104,9 +112,9 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md).
    - Artist ranking, song A-Z/kana-romaji sorting, and original video list views are available from the view tabs.
    - Ranking rows place count and trend in a fixed right-side `rank-side` column. Song and song-index source previews now occupy a dedicated grid area spanning the content and right-side columns, grouped by unique source video.
    - Responsive ranking layout uses one maintained breakpoint system: mobile is `<=720px`, tablet is `721px-919px`, and desktop is `>=920px`. Mobile and tablet drawers render in-place below the current row, keep only one row expanded at a time, and use timestamp links whose visible text is only the time while the accessible label keeps song, artist, and channel context.
-   - `FrontendUtils.sourcePresentationModel` inlines 0-3 unique source videos. Four or more source videos show the first three inline plus compact `+N来源`; one click renders all remaining sources and changes the control to `收起`. One-source rows no longer open drawers.
+   - `FrontendUtils.sourcePresentationModel` inlines 0-3 unique source videos. Inline sources render compact 16:9 video thumbnails with the primary timestamp overlaid on the thumbnail. Four or more source videos show the first three inline plus compact `+N来源`; one click renders all remaining sources and changes the control to `收起`. One-source rows no longer open drawers.
    - The unified query panel opens its shell before suggestions, recent searches, query indexes, or result-count previews run. Search input updates only the draft query text, clear button, suggestions timer, and preview timer; IME composition does not rebuild the whole form on every intermediate character.
-   - Each inline source includes the timestamp, channel link, and compact setlist-copy icon. Exactly three-source inline rows expose one same-song `复制全部链接` icon; 4+ rows reserve the fourth preview cell for `+N来源` / `收起` and expose the same song-level copy action in the expanded source toolbar.
+   - Each inline source includes a micro video thumbnail, timestamp overlay, channel link, and compact setlist-copy icon. Exactly three-source inline rows place the third source in a tail row with a fixed 28px same-song link-copy icon; 4+ rows use the same tail row for the third source plus compact `+N来源` / `收起` and expose the song-level copy action in the expanded source toolbar.
    - Pagination uses one token model across songs, artists, song index, and videos. Numeric pagination uses non-clickable ellipsis markers; mobile top pagination uses a compact page stepper, and the song index combines bucket selection with page selection in one toolbar.
    - Initial load reads `data/ui/meta.json` first, then loads only the active hash range file from `meta.ranges`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact monthly range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
    - `debug=1` adds a read-only runtime panel with `dataVersion`, active range path, status fields, fallback state, and recent resource timings.
