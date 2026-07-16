@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T18:41:28.871Z",
+  "generatedAt": "2026-07-16T18:51:17.687Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 20417,
-  "unknownArtistCount": 3204,
-  "nicheUnknownArtistCount": 1662,
-  "highRiskEntryCount": 616,
-  "highRiskSourceCount": 20,
+  "totalSongs": 20688,
+  "unknownArtistCount": 3246,
+  "nicheUnknownArtistCount": 1744,
+  "highRiskEntryCount": 630,
+  "highRiskSourceCount": 23,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 0,
+  "ruleDroppedEntryCount": 16,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 0,
-  "parserCorruptionCount": 36,
-  "likelyNoiseCount": 0,
-  "needsReviewCount": 1658,
-  "likelySongCount": 11324,
+  "confirmedNoiseCount": 39,
+  "parserCorruptionCount": 35,
+  "likelyNoiseCount": 1,
+  "needsReviewCount": 1707,
+  "likelySongCount": 12036,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -61,6 +61,17 @@
       "riskReasons": {
         "known_song_unknown_artist": 9,
         "parser_corruption": 2
+      }
+    },
+    {
+      "value": "結束",
+      "count": 10,
+      "classifications": {
+        "likely_song": 10
+      },
+      "riskReasons": {
+        "short_unknown_title": 10,
+        "source_multiple_unknown_artists": 10
       }
     },
     {
@@ -214,16 +225,6 @@
       "riskReasons": {
         "known_song_unknown_artist": 6
       }
-    },
-    {
-      "value": "君の知らない物語",
-      "count": 6,
-      "classifications": {
-        "likely_song": 6
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 6
-      }
     }
   ],
   "topRiskChannels": [
@@ -233,7 +234,7 @@
     },
     {
       "value": "汐音ベリーちゃん Berry Ch",
-      "count": 7
+      "count": 8
     },
     {
       "value": "音魂ヒビクHibiku Otodama",
@@ -244,7 +245,15 @@
       "count": 5
     },
     {
+      "value": "ただのかえる【TADANO KAERU】",
+      "count": 5
+    },
+    {
       "value": "芽森ひより",
+      "count": 5
+    },
+    {
+      "value": "菜鳥ひなた / Hinata Natori",
       "count": 5
     },
     {
@@ -260,11 +269,15 @@
       "count": 4
     },
     {
-      "value": "ただのかえる【TADANO KAERU】",
+      "value": "にっこりわたち^^*",
       "count": 4
     },
     {
-      "value": "にっこりわたち^^*",
+      "value": "ひーくん / hi-kun",
+      "count": 4
+    },
+    {
+      "value": "ラティオ・ユィリスOfficial",
       "count": 4
     },
     {
@@ -276,7 +289,11 @@
       "count": 4
     },
     {
-      "value": "菜鳥ひなた / Hinata Natori",
+      "value": "茶々プラムム / Pulamumu",
+      "count": 4
+    },
+    {
+      "value": "彷徨 鈴【Samayoi Suzu】",
       "count": 4
     },
     {
@@ -289,22 +306,6 @@
     },
     {
       "value": "Cecil Ch.月城セシル【セシんもーZ】",
-      "count": 3
-    },
-    {
-      "value": "Hibiki ch🔴💦叶 響",
-      "count": 3
-    },
-    {
-      "value": "NEPHLA",
-      "count": 3
-    },
-    {
-      "value": "Norn Ch. 氷々樹ノルン",
-      "count": 3
-    },
-    {
-      "value": "Roboco Ch. - ロボ子",
       "count": 3
     }
   ],
@@ -386,8 +387,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
+        "source_multiple_niche_short_titles",
+        "parser_corruption"
       ]
     },
     {
@@ -502,9 +503,37 @@
       ]
     },
     {
+      "videoId": "XVSh-QToF_Y",
+      "title": "【Chaos歌回】電腦回來啦~~~回歸歌回居然在下午? 【歌枠】【卡俄斯 Chaos】",
+      "channelName": "Chaos ch.卡俄斯",
+      "riskScore": 78,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
+      ]
+    },
+    {
       "videoId": "rjkpOwMiGek",
       "title": "〖#歌枠 〗真夜中だけど歌います✨ #vsinger #凰牙人類攻略",
       "channelName": "RUKI Ch. 凰牙るき",
+      "riskScore": 78,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
+      "videoId": "hWv55PnjmEo",
+      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
+      "channelName": "ミナミイズミ / IZUMI MINAMI",
       "riskScore": 78,
       "riskLevel": "high",
       "riskReasons": [
@@ -529,6 +558,20 @@
       ]
     },
     {
+      "videoId": "4CgnNOuQMjw",
+      "title": "【 #歌枠 】5周年ライブまで毎日歌練習#4【練習配信】 #vtuber #浅葱サキ #バーチャルyoutuber 声優 #shorts",
+      "channelName": "Saki Ch. 浅葱サキ",
+      "riskScore": 77,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
       "videoId": "ZSNptWSG6i4",
       "title": "【 歌枠￤KARAOKE 】1曲だけでも聴いてかない？【ゆそる／ピスパレ】",
       "channelName": "ゆそる",
@@ -541,51 +584,18 @@
         "source_multiple_niche_short_titles",
         "short_unknown_title"
       ]
-    },
-    {
-      "videoId": "zAqcZDpOM1Q",
-      "title": "【雑＆歌枠】どでかいお知らせあります！！！！！！ハニカムステーション！-204【HACHI 】",
-      "channelName": "HACHI",
-      "riskScore": 76,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "short_unknown_title",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "n6EQoAdmQMA",
-      "title": "【朝活/雑談歌枠】初見歓迎✨️150人におはよう目標☀あなたのお姉さんアイドルVtuber🪼💜【天辻ゆらぐ/パレデミア学園】 #新人Vtuber #ゆらぐっどたいむ",
-      "channelName": "天辻 ゆらぐ",
-      "riskScore": 76,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "VE-1uMHoZh0",
-      "title": "12時間歌枠耐久！チャンネル登録者様450人！いいね50！目指すぞ！#新人vtuber #労働村の村人1",
-      "channelName": "労働村の村人1",
-      "riskScore": 74,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-16T18:51:17.687Z",
+      "totalSongs": 20688,
+      "unknownArtistCount": 3246,
+      "nicheUnknownArtistCount": 1744,
+      "highRiskEntryCount": 630,
+      "highRiskSourceCount": 23
+    },
     {
       "generatedAt": "2026-07-16T18:41:28.871Z",
       "totalSongs": 20417,
@@ -735,14 +745,6 @@
       "totalSongs": 15002,
       "unknownArtistCount": 2749,
       "nicheUnknownArtistCount": 1340,
-      "highRiskEntryCount": 408,
-      "highRiskSourceCount": 18
-    },
-    {
-      "generatedAt": "2026-07-13T20:02:20.467Z",
-      "totalSongs": 14421,
-      "unknownArtistCount": 2703,
-      "nicheUnknownArtistCount": 1323,
       "highRiskEntryCount": 408,
       "highRiskSourceCount": 18
     }

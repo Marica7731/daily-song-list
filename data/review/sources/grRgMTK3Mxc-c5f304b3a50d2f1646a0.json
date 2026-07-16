@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-16T18:51:17.687Z",
+  "reviewId": "review:grRgMTK3Mxc:c5f304b3a50d2f1646a0",
+  "video": {
+    "videoId": "grRgMTK3Mxc",
+    "title": "【弾き語り】超武技暗黒弾語り",
+    "channelName": "XXX",
+    "youtubeUrl": "https://www.youtube.com/watch?v=grRgMTK3Mxc"
+  },
+  "source": {
+    "sourceId": "Ugzp10FMHugybWi5TQV4AaABAg",
+    "sourceHash": "c5f304b3a50d2f1646a0aef36a874177d8ee76964cf708524c5ef2a3c7225aa0",
+    "sourceType": "comment",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "1:38:25 笑った😂\n原曲聴いてみたら、がなり声で歌ってるのに優しい歌声でびっくりしたのと、少し涙腺にきた😢\nここで初めて知った曲多いから原曲も聴かねばという気持ち！",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 35,
+    "riskLevel": "medium",
+    "riskReasons": [
+      "conversation_entry"
+    ]
+  },
+  "entries": [
+    {
+      "status": "accepted",
+      "seconds": 5905,
+      "time": "1:38:25",
+      "title": "笑った😂",
+      "artist": "未記載",
+      "raw": "1:38:25 笑った😂",
+      "rawHash": "bf8a65705c8c9abbe6daddc572eed33de40c37eb8c20cbd519ac72256855373f",
+      "sourceId": "Ugzp10FMHugybWi5TQV4AaABAg",
+      "sourceHash": "c5f304b3a50d2f1646a0aef36a874177d8ee76964cf708524c5ef2a3c7225aa0",
+      "isNiche": false,
+      "classification": "likely_noise",
+      "suggestedAction": "drop_entry",
+      "replacementSuggestion": null,
+      "riskReasons": [
+        "conversation_entry"
+      ],
+      "positiveEvidence": [
+        "structured_setlist"
+      ]
+    }
+  ]
+}
