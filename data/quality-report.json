@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T08:57:09.053Z",
+  "generatedAt": "2026-07-16T14:35:40.584Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 19568,
-  "unknownArtistCount": 3046,
-  "nicheUnknownArtistCount": 1568,
-  "highRiskEntryCount": 496,
+  "totalSongs": 20198,
+  "unknownArtistCount": 3185,
+  "nicheUnknownArtistCount": 1657,
+  "highRiskEntryCount": 616,
   "highRiskSourceCount": 20,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 6,
+  "ruleDroppedEntryCount": 7,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 3,
-  "parserCorruptionCount": 38,
-  "likelyNoiseCount": 0,
-  "needsReviewCount": 1565,
-  "likelySongCount": 11322,
+  "confirmedNoiseCount": 60,
+  "parserCorruptionCount": 39,
+  "likelyNoiseCount": 1,
+  "needsReviewCount": 1651,
+  "likelySongCount": 11252,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -84,6 +84,16 @@
       }
     },
     {
+      "value": "夜明けと蛍",
+      "count": 9,
+      "classifications": {
+        "likely_song": 9
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 9
+      }
+    },
+    {
       "value": "HOT LIMIT",
       "count": 8,
       "classifications": {
@@ -124,17 +134,17 @@
       }
     },
     {
-      "value": "夜明けと蛍",
-      "count": 8,
+      "value": "ヴィラン",
+      "count": 7,
       "classifications": {
-        "likely_song": 8
+        "likely_song": 7
       },
       "riskReasons": {
-        "known_song_unknown_artist": 8
+        "known_song_unknown_artist": 7
       }
     },
     {
-      "value": "ヴィラン",
+      "value": "からくりピエロ",
       "count": 7,
       "classifications": {
         "likely_song": 7
@@ -186,16 +196,6 @@
       }
     },
     {
-      "value": "からくりピエロ",
-      "count": 6,
-      "classifications": {
-        "likely_song": 6
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 6
-      }
-    },
-    {
       "value": "シャルル",
       "count": 6,
       "classifications": {
@@ -228,23 +228,27 @@
   ],
   "topRiskChannels": [
     {
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 12
+    },
+    {
+      "value": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "count": 10
+    },
+    {
       "value": "UTANO ch. 白玖ウタノ",
       "count": 9
     },
     {
-      "value": "汐音ベリーちゃん Berry Ch",
-      "count": 8
+      "value": "音魂ヒビクHibiku Otodama",
+      "count": 6
     },
     {
       "value": "MUZU‐むずちゃんねる‐【Vtuber】",
       "count": 5
     },
     {
-      "value": "音魂ヒビクHibiku Otodama",
-      "count": 5
-    },
-    {
-      "value": "菜鳥ひなた / Hinata Natori",
+      "value": "芽森ひより",
       "count": 5
     },
     {
@@ -252,19 +256,7 @@
       "count": 4
     },
     {
-      "value": "wouca",
-      "count": 4
-    },
-    {
       "value": "じゅだ@ボカロP",
-      "count": 4
-    },
-    {
-      "value": "ただのかえる【TADANO KAERU】",
-      "count": 4
-    },
-    {
-      "value": "ひーくん / hi-kun",
       "count": 4
     },
     {
@@ -276,11 +268,7 @@
       "count": 4
     },
     {
-      "value": "芽森ひより",
-      "count": 4
-    },
-    {
-      "value": "茶々プラムム / Pulamumu",
+      "value": "菜鳥ひなた / Hinata Natori",
       "count": 4
     },
     {
@@ -289,6 +277,10 @@
     },
     {
       "value": "-sumica-澄花",
+      "count": 3
+    },
+    {
+      "value": "Cecil Ch.月城セシル【セシんもーZ】",
       "count": 3
     },
     {
@@ -305,6 +297,14 @@
     },
     {
       "value": "Norn Ch. 氷々樹ノルン",
+      "count": 3
+    },
+    {
+      "value": "Roboco Ch. - ロボ子",
+      "count": 3
+    },
+    {
+      "value": "Ruka Ch. 雨海ルカ",
       "count": 3
     }
   ],
@@ -375,8 +375,7 @@
       "riskReasons": [
         "source_many_activity_entries",
         "source_multiple_niche_short_titles",
-        "activity_marker_title",
-        "source_many_topic_entries"
+        "activity_marker_title"
       ]
     },
     {
@@ -387,8 +386,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "source_multiple_niche_short_titles",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
       ]
     },
     {
@@ -407,6 +406,20 @@
     {
       "videoId": "EVH6nEzjzDQ",
       "title": "【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 #VTuber #AITuber #VSinger",
+      "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
+      "riskScore": 84,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "hzYBmJoWsh8",
+      "title": "【歌枠 / Singing Stream】🎵夜ふかし歌枠🎵 コメントから作詞・作曲して歌う！初見さん歓迎🎤 #VTuber #AITuber #VSinger",
       "channelName": "音成みらね / Mirane ch. 【VSingerAI】",
       "riskScore": 84,
       "riskLevel": "high",
@@ -503,20 +516,6 @@
       ]
     },
     {
-      "videoId": "hWv55PnjmEo",
-      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "riskScore": 78,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
       "videoId": "ZTi1cpRaW8U",
       "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
       "channelName": "闇咲とうか",
@@ -587,6 +586,14 @@
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-16T14:35:40.584Z",
+      "totalSongs": 20198,
+      "unknownArtistCount": 3185,
+      "nicheUnknownArtistCount": 1657,
+      "highRiskEntryCount": 616,
+      "highRiskSourceCount": 20
+    },
     {
       "generatedAt": "2026-07-16T08:57:09.053Z",
       "totalSongs": 19568,
@@ -738,14 +745,6 @@
       "nicheUnknownArtistCount": 1318,
       "highRiskEntryCount": 410,
       "highRiskSourceCount": 19
-    },
-    {
-      "generatedAt": "2026-07-13T13:53:41.296Z",
-      "totalSongs": 13853,
-      "unknownArtistCount": 2782,
-      "nicheUnknownArtistCount": 1423,
-      "highRiskEntryCount": 418,
-      "highRiskSourceCount": 20
     }
   ]
 }

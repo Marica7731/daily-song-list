@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-16T14:35:40.584Z",
+  "reviewId": "review:3s_1yRIJwIo:f324d992f96c3b30c0b4",
+  "video": {
+    "videoId": "3s_1yRIJwIo",
+    "title": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+    "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+    "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo"
+  },
+  "source": {
+    "sourceId": "UgzU_9B4AonShKlh22N4AaABAg",
+    "sourceHash": "f324d992f96c3b30c0b4a517012ef626fee60a09ebbc3863159fed8c720046d9",
+    "sourceType": "comment",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "だはー\n🎻🛵 57:06\n💍📘58:37",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 0,
+    "riskLevel": "low",
+    "riskReasons": []
+  },
+  "entries": [
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 3426,
+      "time": "0:57:06",
+      "title": "",
+      "artist": "",
+      "raw": "🎻🛵 57:06",
+      "rawHash": "528a8723c2a36deffa4fea9ff73c9ded26cf25582cfef91615560e6263d17cc0",
+      "sourceId": "UgzU_9B4AonShKlh22N4AaABAg",
+      "sourceHash": "f324d992f96c3b30c0b4a517012ef626fee60a09ebbc3863159fed8c720046d9",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "empty_after_timestamp",
+      "seconds": 3517,
+      "time": "0:58:37",
+      "title": "",
+      "artist": "",
+      "raw": "💍📘58:37",
+      "rawHash": "34327acf21440e8546cc1ab8bca07dcdd7b6d512e62eb7d15d5a5448757d915b",
+      "sourceId": "UgzU_9B4AonShKlh22N4AaABAg",
+      "sourceHash": "f324d992f96c3b30c0b4a517012ef626fee60a09ebbc3863159fed8c720046d9",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "empty_after_timestamp"
+      ]
+    }
+  ]
+}

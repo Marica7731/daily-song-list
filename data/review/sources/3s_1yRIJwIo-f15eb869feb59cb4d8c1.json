@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-16T14:35:40.584Z",
+  "reviewId": "review:3s_1yRIJwIo:f15eb869feb59cb4d8c1",
+  "video": {
+    "videoId": "3s_1yRIJwIo",
+    "title": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+    "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+    "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo"
+  },
+  "source": {
+    "sourceId": "UgyOUCGBCvwqmTEaaI54AaABAg",
+    "sourceHash": "f15eb869feb59cb4d8c1ec5e96f5c06a3e7ea4048e3f8ea8d5fb130407d0f980",
+    "sourceType": "comment",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "配信お疲れ様でした🍵⟡꙳\nソロからペアまでたくさん聞けて嬉しかったです😻✨みんな声の相性が良くて耳が幸せでした🤦🏻‍♀️💘あと特に好き曲 1:03:55 (ロウワー)((みゃーみゃーずの感情的な歌い方と上ハモを交互にする感じと、 1:07:10 のいすみゃのフェイクがすきだァ...😭",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 1,
+    "riskLevel": "low",
+    "riskReasons": []
+  },
+  "entries": [
+    {
+      "status": "accepted",
+      "seconds": 3835,
+      "time": "1:03:55",
+      "title": "(ロウワー)((みゃーみゃーずの感情的な歌い方と上ハモを交互にする感じと",
+      "artist": "未記載",
+      "raw": "1:03:55 (ロウワー)((みゃーみゃーずの感情的な歌い方と上ハモを交互にする感じと、",
+      "rawHash": "4bbda71845a6d3f74497cd802312510ce1f0b70e06aad5a7de1a9f0c2b53201f",
+      "sourceId": "UgyOUCGBCvwqmTEaaI54AaABAg",
+      "sourceHash": "f15eb869feb59cb4d8c1ec5e96f5c06a3e7ea4048e3f8ea8d5fb130407d0f980",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
+      "positiveEvidence": [
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 4030,
+      "time": "1:07:10",
+      "title": "のいすみゃのフェイクがすきだァ...😭",
+      "artist": "未記載",
+      "raw": "1:07:10 のいすみゃのフェイクがすきだァ...😭",
+      "rawHash": "3edc69925bd2ac8b7aed9be1213567c3757ea94b38bbec65698c83cced1da092",
+      "sourceId": "UgyOUCGBCvwqmTEaaI54AaABAg",
+      "sourceHash": "f15eb869feb59cb4d8c1ec5e96f5c06a3e7ea4048e3f8ea8d5fb130407d0f980",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    }
+  ]
+}

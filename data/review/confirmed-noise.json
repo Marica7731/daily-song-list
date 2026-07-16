@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T09:01:16.162Z",
+  "generatedAt": "2026-07-16T14:39:29.519Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-16T06:49:26.180Z",
+  "latestGeneratedAt": "2026-07-16T14:34:29.518Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 127,
-    "uniqueVideos": 39,
-    "uniqueSources": 55,
-    "confirmedNoiseCount": 127,
+    "totalCandidates": 184,
+    "uniqueVideos": 45,
+    "uniqueSources": 70,
+    "confirmedNoiseCount": 184,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 127,
+      "confirmed_noise": 184,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -75,6 +75,690 @@
       "reviewId": "review:gORDBq5IpBo:17d6ef2c258112269e6d",
       "sourcePath": "data/review/sources/history-gORDBq5IpBo-17d6ef2c258112269e6d.json",
       "reviewLocator": "data/review/sources/history-gORDBq5IpBo-17d6ef2c258112269e6d.json#d8eb03009af3034fbd74b2b50b5aeb1bfca1bd1894b26ec1f05ca2d430d24340"
+    },
+    {
+      "title": "open",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 288,
+      "time": "0:04:48",
+      "raw": "00:04:48 open",
+      "rawHash": "1f6ceea412012f633b5f01f4a250ddc0fe8c46619617070918b031666b36c6f9",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=288s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#1f6ceea412012f633b5f01f4a250ddc0fe8c46619617070918b031666b36c6f9"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 840,
+      "time": "0:14:00",
+      "raw": "14:00-",
+      "rawHash": "f47cded2f3efa48a023cd6ee2db202b66bc721f106fea51926795299dfa52d97",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=840s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#f47cded2f3efa48a023cd6ee2db202b66bc721f106fea51926795299dfa52d97"
+    },
+    {
+      "title": "8",
+      "artist": "30は 3Dのゆるちと 1 on 1(ゴーグル使用)　ツーショット撮影あり",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 900,
+      "time": "0:15:00",
+      "raw": "15:00 8/30は 3Dのゆるちと 1 on 1(ゴーグル使用) ツーショット撮影あり",
+      "rawHash": "1f8404829885ca1b1d543f1226b556949530504dc73f4d11b20ebeadf0c09a5e",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=900s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#1f8404829885ca1b1d543f1226b556949530504dc73f4d11b20ebeadf0c09a5e"
+    },
+    {
+      "title": "不思議な恥ずかしいコメントが来てた　そして不可解なRP",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1081,
+      "time": "0:18:01",
+      "raw": "00:18:01 不思議な恥ずかしいコメントが来てた そして不可解なRP",
+      "rawHash": "07fa7c7b817e05bee39dd8e981d826e2ee5f5fe4304097f41d000abf26664e63",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=1081s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#07fa7c7b817e05bee39dd8e981d826e2ee5f5fe4304097f41d000abf26664e63"
+    },
+    {
+      "title": "～ RAP & ROCK歌枠",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1140,
+      "time": "0:19:00",
+      "raw": "明日は19:00～ RAP & ROCK歌枠",
+      "rawHash": "48973be1fc7c8391341908761616225c4af4c04e3321d0cdc41e89ec97efd8fd",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=1140s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#48973be1fc7c8391341908761616225c4af4c04e3321d0cdc41e89ec97efd8fd"
+    },
+    {
+      "title": "Reset/平原綾香 2006/03",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2024,
+      "time": "0:33:44",
+      "raw": "00:33:44 Reset/平原綾香 2006/03/22 ネイチャーアドベンチャーゲーム『大神』 エンディングテーマ",
+      "rawHash": "834ee96ff09069a44d2a8e871fc747cf44e234c4b0e7cc129530798bfa9fc606",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=2024s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#834ee96ff09069a44d2a8e871fc747cf44e234c4b0e7cc129530798bfa9fc606"
+    },
+    {
+      "title": "HIBANA/感覚ピエロ 2021/09",
+      "artist": "09 テイルズ オブ アライズ オープニング",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 3882,
+      "time": "1:04:42",
+      "raw": "01:04:42 HIBANA/感覚ピエロ 2021/09/09 テイルズ オブ アライズ オープニング",
+      "rawHash": "b2fd2d39aa87299518548439ca47aceff8551d1841dbdba8d66ef49c446e448f",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=3882s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#b2fd2d39aa87299518548439ca47aceff8551d1841dbdba8d66ef49c446e448f"
+    },
+    {
+      "title": "カルマ/BUMP OF CHICKEN 2005/11",
+      "artist": "23 テイルズ オブ ジ アビス オープニング",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 4186,
+      "time": "1:09:46",
+      "raw": "01:09:46 カルマ/BUMP OF CHICKEN 2005/11/23 テイルズ オブ ジ アビス オープニング",
+      "rawHash": "c79477f19abd9fb2205035f9607224bd61dcaf805d5b482fdde9312ab7915b02",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=4186s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#c79477f19abd9fb2205035f9607224bd61dcaf805d5b482fdde9312ab7915b02"
+    },
+    {
+      "title": "予習中 Preparation",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4455,
+      "time": "1:14:15",
+      "raw": "01:14:15 [予習中 Preparation]",
+      "rawHash": "ff864c6979ec4fb17b7ba635718a383b8d004799004e57a4f2ae09f2c48c8793",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=4455s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#ff864c6979ec4fb17b7ba635718a383b8d004799004e57a4f2ae09f2c48c8793"
+    },
+    {
+      "title": "7",
+      "artist": "20 来週月曜日　ふぁにかに　あと4日に迫りました",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 5515,
+      "time": "1:31:55",
+      "raw": "01:31:55 7/20 来週月曜日 ふぁにかに あと4日に迫りました",
+      "rawHash": "203284d6921c8f426d2563f50eadacc0b6be0a9a52ed760019ac41c3177718a2",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=5515s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#203284d6921c8f426d2563f50eadacc0b6be0a9a52ed760019ac41c3177718a2"
+    },
+    {
+      "title": "8",
+      "artist": "29 おりづるVTuberフェス(広島県)出演",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 6429,
+      "time": "1:47:09",
+      "raw": "01:47:09 8/29 おりづるVTuberフェス(広島県)出演",
+      "rawHash": "93637f18ae4d0120ac7c3c159a4696e0d3a4c161db2032ffc0e98b33d397fc9b",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=6429s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#93637f18ae4d0120ac7c3c159a4696e0d3a4c161db2032ffc0e98b33d397fc9b"
+    },
+    {
+      "title": "グッズ全部セット予約販売中",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6758,
+      "time": "1:52:38",
+      "raw": "01:52:38 グッズ全部セット予約販売中",
+      "rawHash": "18a6d41daeddef2f9148586c2828fdd10549925adfc784fd18187290c419f1c7",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=6758s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#18a6d41daeddef2f9148586c2828fdd10549925adfc784fd18187290c419f1c7"
+    },
+    {
+      "title": "言いたいこと",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7090,
+      "time": "1:58:10",
+      "raw": "01:58:10 言いたいこと",
+      "rawHash": "cf071f35ac97536411d76744bb733bb949debd203f0d1d8367968a5c6c1acbf6",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=7090s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#cf071f35ac97536411d76744bb733bb949debd203f0d1d8367968a5c6c1acbf6"
+    },
+    {
+      "title": "お祓いではなく神社に成功祈願しに行く？",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7664,
+      "time": "2:07:44",
+      "raw": "02:07:44 お祓いではなく神社に成功祈願しに行く？",
+      "rawHash": "20d4f434217e4f63a287b54885634a507b68e449556cbfcb4b3e120d915e5403",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=7664s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#20d4f434217e4f63a287b54885634a507b68e449556cbfcb4b3e120d915e5403"
+    },
+    {
+      "title": "スパチャ読み",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8263,
+      "time": "2:17:43",
+      "raw": "02:17:43 スパチャ読み",
+      "rawHash": "0f013a7e4f9ee20cc34bfd279974e5817c1be0c104dcc30b6d06631a19cb4ced",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=8263s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#0f013a7e4f9ee20cc34bfd279974e5817c1be0c104dcc30b6d06631a19cb4ced"
+    },
+    {
+      "title": "ニコニコ動画組曲のおかげでいろいろ歌える",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8681,
+      "time": "2:24:41",
+      "raw": "02:24:41 ニコニコ動画組曲のおかげでいろいろ歌える",
+      "rawHash": "46764a068ff9b8066ac83595aa26b58d448fc021e92b3db4e7df5562b6005a93",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=8681s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#46764a068ff9b8066ac83595aa26b58d448fc021e92b3db4e7df5562b6005a93"
+    },
+    {
+      "title": "返礼品届いてる",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 9205,
+      "time": "2:33:25",
+      "raw": "02:33:25 返礼品届いてる",
+      "rawHash": "8394c966d513388264a4c5314181bd57bbbc7ea505c9bd238f71ccb4dbbfae14",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=9205s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#8394c966d513388264a4c5314181bd57bbbc7ea505c9bd238f71ccb4dbbfae14"
+    },
+    {
+      "title": "おつちゅっちゅる～",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 9882,
+      "time": "2:44:42",
+      "raw": "02:44:42 おつちゅっちゅる～",
+      "rawHash": "e7178f893fa12a46cbedeb72d62c1a4ceeac15a0c5748b6a00de610a92eaf963",
+      "videoId": "_a3qNvKIFd8",
+      "videoTitle": "【#歌枠】テイルズ多めのゲーソン縛り！🎮神曲揃い✨【#ちゆるの縁側 /KARAOKE/Vsinger】",
+      "channelName": "CHIYURU ch.三日月ちゆる",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_a3qNvKIFd8&t=9882s",
+      "sourceId": "UgwQTJpVYf0Y3XvVcWp4AaABAg",
+      "sourceHash": "4a36c72636de61966fded93c737b22f6f67af3b6475fddec874a8cf1d6a2f562",
+      "sourceOrigin": "review:_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_a3qNvKIFd8:4a36c72636de61966fde",
+      "sourcePath": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json",
+      "reviewLocator": "data/review/sources/_a3qNvKIFd8-4a36c72636de61966fde.json#e7178f893fa12a46cbedeb72d62c1a4ceeac15a0c5748b6a00de610a92eaf963"
     },
     {
       "title": "8/29、8",
@@ -855,24 +1539,63 @@
       "reviewLocator": "data/review/sources/history-8KDs7OP6_KM-92d430c2418abbe57f06.json#aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7"
     },
     {
-      "title": "をうかさんの『風待ちジェット』が聴きたい！！ってここ最近ずっと思っていたので、歌って貰えて本当に嬉しい",
+      "title": "声入り",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 250,
+      "time": "0:04:10",
+      "raw": "4:10 声入り",
+      "rawHash": "6a312077c68bad255cf154d28b5dbba9c7267d5b42e4dc8722eb114e940319dc",
+      "videoId": "P3unvwP23h0",
+      "videoTitle": "【#歌枠】いろんな世代へむけて歌う（俺の好きな歌を）【いれいす/悠佑】",
+      "channelName": "Yusuke ch.悠佑",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=P3unvwP23h0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=P3unvwP23h0&t=250s",
+      "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
+      "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
+      "sourceOrigin": "review:P3unvwP23h0-9f8087a1379108ea626b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:P3unvwP23h0:9f8087a1379108ea626b",
+      "sourcePath": "data/review/sources/P3unvwP23h0-9f8087a1379108ea626b.json",
+      "reviewLocator": "data/review/sources/P3unvwP23h0-9f8087a1379108ea626b.json#6a312077c68bad255cf154d28b5dbba9c7267d5b42e4dc8722eb114e940319dc"
+    },
+    {
+      "title": "最後の曲「愛をありがとう」なのめっちゃ良かったです！めっっちゃ楽しかったです！おつにきでした！",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 6855,
-      "time": "1:54:15",
-      "raw": "1:54:15 をうかさんの『風待ちジェット』が聴きたい！！ってここ最近ずっと思っていたので、歌って貰えて本当に嬉しい:_bikurimark::_shuku:",
-      "rawHash": "9d87551c8fda4ec9c5a27f0112a87c55c3023fe64719a6b2124d7958baed7a58",
-      "videoId": "20OiQfiWXp8",
-      "videoTitle": "【歌枠】今日はリクエスト曲を歌いたい気分🥂初見さんも大歓迎♫｜karaoke【wouca : RK Music】#utawouca 51",
-      "channelName": "wouca",
+      "seconds": 4848,
+      "time": "1:20:48",
+      "raw": "あにきの歌声超かっこよくて最高でした！！1:20:48最後の曲「愛をありがとう」なのめっちゃ良かったです！めっっちゃ楽しかったです！おつにきでした！",
+      "rawHash": "0981d94652de26aae0d18e146310fada298e14faa7dda99f5e792ad6a972f3e3",
+      "videoId": "P3unvwP23h0",
+      "videoTitle": "【#歌枠】いろんな世代へむけて歌う（俺の好きな歌を）【いれいす/悠佑】",
+      "channelName": "Yusuke ch.悠佑",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=20OiQfiWXp8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=20OiQfiWXp8&t=6855s",
-      "sourceId": "UgwMQnc92knyuZL4otl4AaABAg",
-      "sourceHash": "aaf3427f3f132775d1421a5a4492978843206e47348ce1b5103067e6abf9aea0",
-      "sourceOrigin": "review:20OiQfiWXp8-aaf3427f3f132775d142.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=P3unvwP23h0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=P3unvwP23h0&t=4848s",
+      "sourceId": "UgyliCK1T2iLkdt2zr14AaABAg",
+      "sourceHash": "0981d94652de26aae0d18e146310fada298e14faa7dda99f5e792ad6a972f3e3",
+      "sourceOrigin": "review:P3unvwP23h0-0981d94652de26aae0d1.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -885,9 +1608,122 @@
         "title_only_non_song_candidate"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:20OiQfiWXp8:aaf3427f3f132775d142",
-      "sourcePath": "data/review/sources/20OiQfiWXp8-aaf3427f3f132775d142.json",
-      "reviewLocator": "data/review/sources/20OiQfiWXp8-aaf3427f3f132775d142.json#9d87551c8fda4ec9c5a27f0112a87c55c3023fe64719a6b2124d7958baed7a58"
+      "reviewId": "review:P3unvwP23h0:0981d94652de26aae0d1",
+      "sourcePath": "data/review/sources/P3unvwP23h0-0981d94652de26aae0d1.json",
+      "reviewLocator": "data/review/sources/P3unvwP23h0-0981d94652de26aae0d1.json#0981d94652de26aae0d18e146310fada298e14faa7dda99f5e792ad6a972f3e3"
+    },
+    {
+      "title": "スパチャ読み",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5183,
+      "time": "1:26:23",
+      "raw": "1:26:23 スパチャ読み",
+      "rawHash": "44ff90981a05d8bacb7ae848a354a10900a5cb4c86583f286937f257f8fc7279",
+      "videoId": "P3unvwP23h0",
+      "videoTitle": "【#歌枠】いろんな世代へむけて歌う（俺の好きな歌を）【いれいす/悠佑】",
+      "channelName": "Yusuke ch.悠佑",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=P3unvwP23h0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=P3unvwP23h0&t=5183s",
+      "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
+      "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
+      "sourceOrigin": "review:P3unvwP23h0-9f8087a1379108ea626b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:P3unvwP23h0:9f8087a1379108ea626b",
+      "sourcePath": "data/review/sources/P3unvwP23h0-9f8087a1379108ea626b.json",
+      "reviewLocator": "data/review/sources/P3unvwP23h0-9f8087a1379108ea626b.json#44ff90981a05d8bacb7ae848a354a10900a5cb4c86583f286937f257f8fc7279"
+    },
+    {
+      "title": "ED",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5556,
+      "time": "1:32:36",
+      "raw": "1:32:36 ED",
+      "rawHash": "9ad092f4c60adc70716097d032cda325dbf7682fbab37b99c3608c2bfbc86421",
+      "videoId": "P3unvwP23h0",
+      "videoTitle": "【#歌枠】いろんな世代へむけて歌う（俺の好きな歌を）【いれいす/悠佑】",
+      "channelName": "Yusuke ch.悠佑",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=P3unvwP23h0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=P3unvwP23h0&t=5556s",
+      "sourceId": "Ugyv-WBfAYwZN_D49sx4AaABAg",
+      "sourceHash": "9f8087a1379108ea626bfe6cfae5fefcbd4a9ee9ac9651d42250575df992d93f",
+      "sourceOrigin": "review:P3unvwP23h0-9f8087a1379108ea626b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:P3unvwP23h0:9f8087a1379108ea626b",
+      "sourcePath": "data/review/sources/P3unvwP23h0-9f8087a1379108ea626b.json",
+      "reviewLocator": "data/review/sources/P3unvwP23h0-9f8087a1379108ea626b.json#9ad092f4c60adc70716097d032cda325dbf7682fbab37b99c3608c2bfbc86421"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "2ZvQO0y-k0c",
+      "videoTitle": "【#vtuber 】歌枠！ゲリラです【#初見歓迎 】#歌枠",
+      "channelName": "アネリ・フローレンス_Anery Florence",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=2ZvQO0y-k0c",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=2ZvQO0y-k0c&t=240s",
+      "sourceId": "description:2ZvQO0y-k0c:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:2ZvQO0y-k0c-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:2ZvQO0y-k0c:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/2ZvQO0y-k0c-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/2ZvQO0y-k0c-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "企画説明",
@@ -935,6 +1771,43 @@
       "reviewId": "review:OCULwDtQ8Bs:a5f12251209c4a3d1b6a",
       "sourcePath": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json",
       "reviewLocator": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json#157a1fd8246db0b268cff62bf11c52381f7dbf657bc3a6342fe9372512776e0a"
+    },
+    {
+      "title": "スタート",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 173,
+      "time": "0:02:53",
+      "raw": "0:02:53 スタート",
+      "rawHash": "2b1b112f20cf2edca4e4903e54b9e1ce23810a6195a917adb42be2d3e3dfc5f7",
+      "videoId": "TezIV2DS7HM",
+      "videoTitle": "【#karaoke/定期歌枠】ありがとうJOYSOUND🎤猫又魔女が歌う月魅の夜☪️第39夜【#ずご生/魅璃亞】",
+      "channelName": "ずごっくゲームス！",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=TezIV2DS7HM",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=TezIV2DS7HM&t=173s",
+      "sourceId": "Ugw2bw9ry1pCJNdPIwd4AaABAg",
+      "sourceHash": "805703f6a1867c51e3593174e361d0ed5183a5214ad16110d2e366d33ebd10cf",
+      "sourceOrigin": "review:TezIV2DS7HM-805703f6a1867c51e359.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "activity_marker_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:TezIV2DS7HM:805703f6a1867c51e359",
+      "sourcePath": "data/review/sources/TezIV2DS7HM-805703f6a1867c51e359.json",
+      "reviewLocator": "data/review/sources/TezIV2DS7HM-805703f6a1867c51e359.json#2b1b112f20cf2edca4e4903e54b9e1ce23810a6195a917adb42be2d3e3dfc5f7"
     },
     {
       "title": "3次会",
@@ -3571,88 +4444,6 @@
       "reviewLocator": "data/review/sources/history-qENxBvbn29Y-d20b81982796f791041d.json#1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
     },
     {
-      "title": "オープニングトーク",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 106,
-      "time": "0:01:46",
-      "raw": "0:01:46 オープニングトーク",
-      "rawHash": "105792dad071d5f4b0a38a168cd441329b6fec106c8a09fab30cd33fc11d519a",
-      "videoId": "3HsBNG-zTjo",
-      "videoTitle": "【#アニソン歌枠 #らんちぅ寿希】おたよりは来るのか！？君の眠気を極熱ヴォイスで吹っ飛ばす【#Vtuber #KARAOKE】",
-      "channelName": "らんちぅ寿希Live",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=3HsBNG-zTjo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3HsBNG-zTjo&t=106s",
-      "sourceId": "UgxIWHWl_8cSgmL6xUp4AaABAg",
-      "sourceHash": "f85d973ff748059e66e2c6f68c6b90f0289697fae8f47c0e0e651f4f49808440",
-      "sourceOrigin": "review:3HsBNG-zTjo-f85d973ff748059e66e2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries",
-        "source_many_activity_entries",
-        "activity_marker_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries",
-        "source_many_activity_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:3HsBNG-zTjo:f85d973ff748059e66e2",
-      "sourcePath": "data/review/sources/3HsBNG-zTjo-f85d973ff748059e66e2.json",
-      "reviewLocator": "data/review/sources/3HsBNG-zTjo-f85d973ff748059e66e2.json#105792dad071d5f4b0a38a168cd441329b6fec106c8a09fab30cd33fc11d519a"
-    },
-    {
-      "title": "エンディングトーク",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 10691,
-      "time": "2:58:11",
-      "raw": "2:58:11 エンディングトーク",
-      "rawHash": "48658757ae9fcdb1a598d2a18f372ae06b7e99ed6d49728e88d2efd6a8d3eb54",
-      "videoId": "3HsBNG-zTjo",
-      "videoTitle": "【#アニソン歌枠 #らんちぅ寿希】おたよりは来るのか！？君の眠気を極熱ヴォイスで吹っ飛ばす【#Vtuber #KARAOKE】",
-      "channelName": "らんちぅ寿希Live",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=3HsBNG-zTjo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3HsBNG-zTjo&t=10691s",
-      "sourceId": "UgxIWHWl_8cSgmL6xUp4AaABAg",
-      "sourceHash": "f85d973ff748059e66e2c6f68c6b90f0289697fae8f47c0e0e651f4f49808440",
-      "sourceOrigin": "review:3HsBNG-zTjo-f85d973ff748059e66e2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries",
-        "source_many_activity_entries",
-        "activity_marker_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries",
-        "source_many_activity_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:3HsBNG-zTjo:f85d973ff748059e66e2",
-      "sourcePath": "data/review/sources/3HsBNG-zTjo-f85d973ff748059e66e2.json",
-      "reviewLocator": "data/review/sources/3HsBNG-zTjo-f85d973ff748059e66e2.json#48658757ae9fcdb1a598d2a18f372ae06b7e99ed6d49728e88d2efd6a8d3eb54"
-    },
-    {
       "title": "おつくわタイム",
       "artist": "",
       "isNiche": false,
@@ -4692,6 +5483,687 @@
       "reviewLocator": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json#f8ffdd2e900c59a53890c676eda6dccf63ef5df5a2b9af9115ec0480a2630780"
     },
     {
+      "title": "Open",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 69,
+      "time": "0:01:09",
+      "raw": "▶Open 1:09",
+      "rawHash": "63ca1d7e0f3733f23432a86e864162f628eae907c47bc5c7ee04ca1c2ebf559a",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=69s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#63ca1d7e0f3733f23432a86e864162f628eae907c47bc5c7ee04ca1c2ebf559a"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=240s",
+      "sourceId": "description:mITiZB23OV8:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:mITiZB23OV8-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/mITiZB23OV8-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+    },
+    {
+      "title": "02",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 462,
+      "time": "0:07:42",
+      "raw": "0:07:42 ■02",
+      "rawHash": "4f77d120a014a62d3384e8d4933ea5d0d3a113dec84dc9a8802ba20330954d5b",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=462s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#4f77d120a014a62d3384e8d4933ea5d0d3a113dec84dc9a8802ba20330954d5b"
+    },
+    {
+      "title": "03",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 805,
+      "time": "0:13:25",
+      "raw": "0:13:25 ■03",
+      "rawHash": "eb770b651a8f796042f9621b2476eca4efad85c2257f6ce3e47729aa9d735ed6",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=805s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#eb770b651a8f796042f9621b2476eca4efad85c2257f6ce3e47729aa9d735ed6"
+    },
+    {
+      "title": "04",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1332,
+      "time": "0:22:12",
+      "raw": "0:22:12 ■04",
+      "rawHash": "4c386870f9b80c1020296f8098682c029ec7fb32ea97cc9b12fdb7938b5945e4",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=1332s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#4c386870f9b80c1020296f8098682c029ec7fb32ea97cc9b12fdb7938b5945e4"
+    },
+    {
+      "title": "05",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1910,
+      "time": "0:31:50",
+      "raw": "0:31:50 ■05",
+      "rawHash": "0029e96fb8ec4df34c7c4d1457435b1ac567528462831074ed840b905d8143c1",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=1910s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#0029e96fb8ec4df34c7c4d1457435b1ac567528462831074ed840b905d8143c1"
+    },
+    {
+      "title": "06",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2355,
+      "time": "0:39:15",
+      "raw": "0:39:15 ■06",
+      "rawHash": "d54641b0aef173f66584f7fd66a797b78eb640547e84fbef7bbf16eedb5dd1b2",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=2355s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#d54641b0aef173f66584f7fd66a797b78eb640547e84fbef7bbf16eedb5dd1b2"
+    },
+    {
+      "title": "07",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2751,
+      "time": "0:45:51",
+      "raw": "0:45:51 ■07",
+      "rawHash": "9503ae963fc12a1dd508c49fec099f5e33c999eb9c3939d1533aa9f0433b1b10",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=2751s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#9503ae963fc12a1dd508c49fec099f5e33c999eb9c3939d1533aa9f0433b1b10"
+    },
+    {
+      "title": "08",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3355,
+      "time": "0:55:55",
+      "raw": "0:55:55 ■08",
+      "rawHash": "4ba32ffe9085ba00be3bb031c37c230e018403d0d622e11149852f0d3070ac33",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=3355s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#4ba32ffe9085ba00be3bb031c37c230e018403d0d622e11149852f0d3070ac33"
+    },
+    {
+      "title": "09",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3870,
+      "time": "1:04:30",
+      "raw": "1:04:30 ■09",
+      "rawHash": "60363060e81525c156195946d9266f5e57111fde7df3da4d045b37cbbdef42f1",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=3870s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#60363060e81525c156195946d9266f5e57111fde7df3da4d045b37cbbdef42f1"
+    },
+    {
+      "title": "10",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4453,
+      "time": "1:14:13",
+      "raw": "1:14:13 ■10",
+      "rawHash": "420dd4e294bda95287c016123fcecb73612ea26737224622d29245405e0dc969",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=4453s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#420dd4e294bda95287c016123fcecb73612ea26737224622d29245405e0dc969"
+    },
+    {
+      "title": "11",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4876,
+      "time": "1:21:16",
+      "raw": "1:21:16 ■11",
+      "rawHash": "c485c6ee00814f3a6e5a59f69aeadf87660f363b730f4a65dd20934e4cde58fd",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=4876s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#c485c6ee00814f3a6e5a59f69aeadf87660f363b730f4a65dd20934e4cde58fd"
+    },
+    {
+      "title": "12",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5310,
+      "time": "1:28:30",
+      "raw": "1:28:30 ■12",
+      "rawHash": "ea8af12a7ced4596c126be91fb60a188cb2642babe270a5a7e7d3650afabe479",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=5310s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#ea8af12a7ced4596c126be91fb60a188cb2642babe270a5a7e7d3650afabe479"
+    },
+    {
+      "title": "13",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5730,
+      "time": "1:35:30",
+      "raw": "1:35:30 ■13",
+      "rawHash": "267bffb401c85c86261d5d8bd6664757f5b53f01e11b333d6d57cc52e4528c99",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=5730s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#267bffb401c85c86261d5d8bd6664757f5b53f01e11b333d6d57cc52e4528c99"
+    },
+    {
+      "title": "14",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6874,
+      "time": "1:54:34",
+      "raw": "1:54:34 ■14",
+      "rawHash": "1e4137f780dcc5a3c8ce0d17d63485d304865e486ff5761ce0ddd9ca36c4d5de",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=6874s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#1e4137f780dcc5a3c8ce0d17d63485d304865e486ff5761ce0ddd9ca36c4d5de"
+    },
+    {
+      "title": "15",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7245,
+      "time": "2:00:45",
+      "raw": "2:00:45 ■15",
+      "rawHash": "34b303510418c3383a2324b4d83633fb656d79984c712311870c6a6bc41975d1",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=7245s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#34b303510418c3383a2324b4d83633fb656d79984c712311870c6a6bc41975d1"
+    },
+    {
+      "title": "16",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7977,
+      "time": "2:12:57",
+      "raw": "2:12:57 ■16",
+      "rawHash": "9dcfc14064dffb7c295fdbb320d27734bee793500426313ceb1327de76d79302",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=7977s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#9dcfc14064dffb7c295fdbb320d27734bee793500426313ceb1327de76d79302"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8382,
+      "time": "2:19:42",
+      "raw": "2:19:42",
+      "rawHash": "74ec2b11cd336afde37adac1b9d011ba1d090543bf208e5469f1244c95acc4cf",
+      "videoId": "mITiZB23OV8",
+      "videoTitle": "【#歌枠 ／ #karaoke 】１曲だけでも聴いてって！夏が始まった歌枠🎐",
+      "channelName": "黒衣緋真 / Kokui Hisana 【でぃあめろ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mITiZB23OV8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mITiZB23OV8&t=8382s",
+      "sourceId": "UgzSe9W_2BPkWpGLBZp4AaABAg",
+      "sourceHash": "f0991a95abae201e5f8874a744a9b7b3d63ce05c2f073f412c64928a211c20e1",
+      "sourceOrigin": "review:mITiZB23OV8-f0991a95abae201e5f88.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mITiZB23OV8:f0991a95abae201e5f88",
+      "sourcePath": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json",
+      "reviewLocator": "data/review/sources/mITiZB23OV8-f0991a95abae201e5f88.json#74ec2b11cd336afde37adac1b9d011ba1d090543bf208e5469f1244c95acc4cf"
+    },
+    {
       "title": "こんひなー",
       "artist": "未記載",
       "isNiche": true,
@@ -5059,6 +6531,146 @@
       "reviewLocator": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json#a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
     },
     {
+      "title": "～まったり🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～まったり🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515",
+      "videoId": "xViV766_DLE",
+      "videoTitle": "22:30～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=xViV766_DLE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=xViV766_DLE&t=1350s",
+      "sourceId": "description:xViV766_DLE:132becd39bd29e7b",
+      "sourceHash": "132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515",
+      "sourceOrigin": "review:xViV766_DLE-132becd39bd29e7b52fa.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:xViV766_DLE:132becd39bd29e7b52fa",
+      "sourcePath": "data/review/sources/xViV766_DLE-132becd39bd29e7b52fa.json",
+      "reviewLocator": "data/review/sources/xViV766_DLE-132becd39bd29e7b52fa.json#132becd39bd29e7b52fac1c7c2fb29f9c414f7b5b5bba25a3ffbff97947f7515"
+    },
+    {
+      "title": "～まったり💭癒しのアコギとお歌💙睡眠導入や作業のBGMにも🐧見つけてください！【#歌枠 /#弾き語り/#Vtuber】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～まったり💭癒しのアコギとお歌💙睡眠導入や作業のBGMにも🐧見つけてください！【#歌枠 /#弾き語り/#Vtuber】Singing Stream",
+      "rawHash": "9303c7504cf9f7f1bab883b26b66354b40aee6d05e4093052d68a9ba04887b4d",
+      "videoId": "xViV766_DLE",
+      "videoTitle": "22:30～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=xViV766_DLE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=xViV766_DLE&t=1350s",
+      "sourceId": "description:xViV766_DLE:9303c7504cf9f7f1",
+      "sourceHash": "9303c7504cf9f7f1bab883b26b66354b40aee6d05e4093052d68a9ba04887b4d",
+      "sourceOrigin": "review:xViV766_DLE-9303c7504cf9f7f1bab8.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:xViV766_DLE:9303c7504cf9f7f1bab8",
+      "sourcePath": "data/review/sources/xViV766_DLE-9303c7504cf9f7f1bab8.json",
+      "reviewLocator": "data/review/sources/xViV766_DLE-9303c7504cf9f7f1bab8.json#9303c7504cf9f7f1bab883b26b66354b40aee6d05e4093052d68a9ba04887b4d"
+    },
+    {
+      "title": "～今夜もまったりアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～今夜もまったりアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61",
+      "videoId": "xViV766_DLE",
+      "videoTitle": "22:30～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=xViV766_DLE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=xViV766_DLE&t=1350s",
+      "sourceId": "description:xViV766_DLE:bbdc421e4adea4c7",
+      "sourceHash": "bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61",
+      "sourceOrigin": "review:xViV766_DLE-bbdc421e4adea4c7f0be.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:xViV766_DLE:bbdc421e4adea4c7f0be",
+      "sourcePath": "data/review/sources/xViV766_DLE-bbdc421e4adea4c7f0be.json",
+      "reviewLocator": "data/review/sources/xViV766_DLE-bbdc421e4adea4c7f0be.json#bbdc421e4adea4c7f0be08f1cf2d07a2e7a96d750d0762befe7d845b5c5f1d61"
+    },
+    {
+      "title": "～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8",
+      "videoId": "xViV766_DLE",
+      "videoTitle": "22:30～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=xViV766_DLE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=xViV766_DLE&t=1350s",
+      "sourceId": "description:xViV766_DLE:c34ca03a358bd9ce",
+      "sourceHash": "c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8",
+      "sourceOrigin": "review:xViV766_DLE-c34ca03a358bd9ce0a30.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:xViV766_DLE:c34ca03a358bd9ce0a30",
+      "sourcePath": "data/review/sources/xViV766_DLE-c34ca03a358bd9ce0a30.json",
+      "reviewLocator": "data/review/sources/xViV766_DLE-c34ca03a358bd9ce0a30.json#c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8"
+    },
+    {
       "title": "おつにょ",
       "artist": "未記載",
       "isNiche": true,
@@ -5108,6 +6720,536 @@
       "reviewId": "review:FlhwC9s1Nk8:4aa61da2d1b34d7d38e8",
       "sourcePath": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json",
       "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
+    },
+    {
+      "title": "パンダヒーロー/🎻🛵. 🐟🍴 .🏰🍬 ,💍📘",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 124,
+      "time": "0:02:04",
+      "raw": "2:04 パンダヒーロー/🎻🛵. 🐟🍴 .🏰🍬 ,💍📘",
+      "rawHash": "efe617164272c39206f0169cc355acfde99188f38fee80af6b0179e0065380ca",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=124s",
+      "sourceId": "UgyxFht4AcFbak_5O9V4AaABAg",
+      "sourceHash": "688fc9206da33c4828591b3b88f397d5b356366ce10d84e874a41abc5a7b782e",
+      "sourceOrigin": "review:3s_1yRIJwIo-688fc9206da33c482859.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:688fc9206da33c482859",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json#efe617164272c39206f0169cc355acfde99188f38fee80af6b0179e0065380ca"
+    },
+    {
+      "title": "骸骨学団とリリア/🎻🛵. 🐟🍴",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1993,
+      "time": "0:33:13",
+      "raw": "33:13 骸骨学団とリリア/🎻🛵. 🐟🍴",
+      "rawHash": "1818fbe37eae517f69eafd0306d520f85bf9fc5b1a036d11a1db6d7e13a05738",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=1993s",
+      "sourceId": "UgyxFht4AcFbak_5O9V4AaABAg",
+      "sourceHash": "688fc9206da33c4828591b3b88f397d5b356366ce10d84e874a41abc5a7b782e",
+      "sourceOrigin": "review:3s_1yRIJwIo-688fc9206da33c482859.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:688fc9206da33c482859",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json#1818fbe37eae517f69eafd0306d520f85bf9fc5b1a036d11a1db6d7e13a05738"
+    },
+    {
+      "title": "六兆年と一夜物語/🎻🛵. 🏰🍬",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2309,
+      "time": "0:38:29",
+      "raw": "38:29 六兆年と一夜物語/🎻🛵. 🏰🍬",
+      "rawHash": "6adbff05b504e3f7b18fd40c5d480808fb99e9fc27969c483fb45246747cf671",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=2309s",
+      "sourceId": "UgyxFht4AcFbak_5O9V4AaABAg",
+      "sourceHash": "688fc9206da33c4828591b3b88f397d5b356366ce10d84e874a41abc5a7b782e",
+      "sourceOrigin": "review:3s_1yRIJwIo-688fc9206da33c482859.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:688fc9206da33c482859",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json#6adbff05b504e3f7b18fd40c5d480808fb99e9fc27969c483fb45246747cf671"
+    },
+    {
+      "title": "地球最後の告白を/🐟🍴. 💍📘",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2606,
+      "time": "0:43:26",
+      "raw": "43:26 地球最後の告白を/🐟🍴. 💍📘",
+      "rawHash": "d54ee3deeebfc951e0ff3e9b260b567f9ce0cfca9c9790de81d265903f9c6cf9",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=2606s",
+      "sourceId": "UgyxFht4AcFbak_5O9V4AaABAg",
+      "sourceHash": "688fc9206da33c4828591b3b88f397d5b356366ce10d84e874a41abc5a7b782e",
+      "sourceOrigin": "review:3s_1yRIJwIo-688fc9206da33c482859.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:688fc9206da33c482859",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json#d54ee3deeebfc951e0ff3e9b260b567f9ce0cfca9c9790de81d265903f9c6cf9"
+    },
+    {
+      "title": "とらみゃ先輩といすみゃのハモリが綺麗すぎて耳が幸せ✨",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3003,
+      "time": "0:50:03",
+      "raw": "50:03 とらみゃ先輩といすみゃのハモリが綺麗すぎて耳が幸せ✨️",
+      "rawHash": "c67f2b94af032c71bc4f02803a2a97d9416916a9b067bc7f764b2754cffaf5be",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=3003s",
+      "sourceId": "Ugx_vnPhbPNbxXu9dbx4AaABAg",
+      "sourceHash": "c67f2b94af032c71bc4f02803a2a97d9416916a9b067bc7f764b2754cffaf5be",
+      "sourceOrigin": "review:3s_1yRIJwIo-c67f2b94af032c71bc4f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:c67f2b94af032c71bc4f",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-c67f2b94af032c71bc4f.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-c67f2b94af032c71bc4f.json#c67f2b94af032c71bc4f02803a2a97d9416916a9b067bc7f764b2754cffaf5be"
+    },
+    {
+      "title": "フィクサー/🐟🍴 .🏰🍬",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3003,
+      "time": "0:50:03",
+      "raw": "50:03 フィクサー/🐟🍴 .🏰🍬",
+      "rawHash": "32c6004516b06265633e06d61e070e93f5f87df8017f2c50cb2d3099f7cabd52",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=3003s",
+      "sourceId": "UgyxFht4AcFbak_5O9V4AaABAg",
+      "sourceHash": "688fc9206da33c4828591b3b88f397d5b356366ce10d84e874a41abc5a7b782e",
+      "sourceOrigin": "review:3s_1yRIJwIo-688fc9206da33c482859.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:688fc9206da33c482859",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json#32c6004516b06265633e06d61e070e93f5f87df8017f2c50cb2d3099f7cabd52"
+    },
+    {
+      "title": "First Love/🎻🛵 .💍📘",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3374,
+      "time": "0:56:14",
+      "raw": "56:14 First Love/🎻🛵 .💍📘",
+      "rawHash": "277eb7b848f90ef3a199247328700605e68428df8a13485b371a809ab50558fc",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=3374s",
+      "sourceId": "UgyxFht4AcFbak_5O9V4AaABAg",
+      "sourceHash": "688fc9206da33c4828591b3b88f397d5b356366ce10d84e874a41abc5a7b782e",
+      "sourceOrigin": "review:3s_1yRIJwIo-688fc9206da33c482859.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:688fc9206da33c482859",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json#277eb7b848f90ef3a199247328700605e68428df8a13485b371a809ab50558fc"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3426,
+      "time": "0:57:06",
+      "raw": "🎻🛵 57:06",
+      "rawHash": "528a8723c2a36deffa4fea9ff73c9ded26cf25582cfef91615560e6263d17cc0",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=3426s",
+      "sourceId": "UgzU_9B4AonShKlh22N4AaABAg",
+      "sourceHash": "f324d992f96c3b30c0b4a517012ef626fee60a09ebbc3863159fed8c720046d9",
+      "sourceOrigin": "review:3s_1yRIJwIo-f324d992f96c3b30c0b4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:f324d992f96c3b30c0b4",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-f324d992f96c3b30c0b4.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-f324d992f96c3b30c0b4.json#528a8723c2a36deffa4fea9ff73c9ded26cf25582cfef91615560e6263d17cc0"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3517,
+      "time": "0:58:37",
+      "raw": "💍📘58:37",
+      "rawHash": "34327acf21440e8546cc1ab8bca07dcdd7b6d512e62eb7d15d5a5448757d915b",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=3517s",
+      "sourceId": "UgzU_9B4AonShKlh22N4AaABAg",
+      "sourceHash": "f324d992f96c3b30c0b4a517012ef626fee60a09ebbc3863159fed8c720046d9",
+      "sourceOrigin": "review:3s_1yRIJwIo-f324d992f96c3b30c0b4.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:f324d992f96c3b30c0b4",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-f324d992f96c3b30c0b4.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-f324d992f96c3b30c0b4.json#34327acf21440e8546cc1ab8bca07dcdd7b6d512e62eb7d15d5a5448757d915b"
+    },
+    {
+      "title": "ロウワー/🏰🍬. 💍📘",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3835,
+      "time": "1:03:55",
+      "raw": "1:03:55 ロウワー/🏰🍬. 💍📘",
+      "rawHash": "f66f2c6db35d37f6838800b5987466eed973972d89dbe2f3a176157c4cfed45c",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=3835s",
+      "sourceId": "UgyxFht4AcFbak_5O9V4AaABAg",
+      "sourceHash": "688fc9206da33c4828591b3b88f397d5b356366ce10d84e874a41abc5a7b782e",
+      "sourceOrigin": "review:3s_1yRIJwIo-688fc9206da33c482859.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:688fc9206da33c482859",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json#f66f2c6db35d37f6838800b5987466eed973972d89dbe2f3a176157c4cfed45c"
+    },
+    {
+      "title": "のいすみゃのフェイクがすきだァ...😭",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4030,
+      "time": "1:07:10",
+      "raw": "1:07:10 のいすみゃのフェイクがすきだァ...😭",
+      "rawHash": "3edc69925bd2ac8b7aed9be1213567c3757ea94b38bbec65698c83cced1da092",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=4030s",
+      "sourceId": "UgyOUCGBCvwqmTEaaI54AaABAg",
+      "sourceHash": "f15eb869feb59cb4d8c1ec5e96f5c06a3e7ea4048e3f8ea8d5fb130407d0f980",
+      "sourceOrigin": "review:3s_1yRIJwIo-f15eb869feb59cb4d8c1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:f15eb869feb59cb4d8c1",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-f15eb869feb59cb4d8c1.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-f15eb869feb59cb4d8c1.json#3edc69925bd2ac8b7aed9be1213567c3757ea94b38bbec65698c83cced1da092"
+    },
+    {
+      "title": "脳漿炸裂ガール/🎻🛵 .🐟🍴 .🏰🍬, 💍📘",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4182,
+      "time": "1:09:42",
+      "raw": "1:09:42 脳漿炸裂ガール/🎻🛵 .🐟🍴 .🏰🍬, 💍📘",
+      "rawHash": "f5d534fd548be282461a2306a092111cc87a23fd37c40ad12f01a2692db7731b",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=4182s",
+      "sourceId": "UgyxFht4AcFbak_5O9V4AaABAg",
+      "sourceHash": "688fc9206da33c4828591b3b88f397d5b356366ce10d84e874a41abc5a7b782e",
+      "sourceOrigin": "review:3s_1yRIJwIo-688fc9206da33c482859.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:688fc9206da33c482859",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-688fc9206da33c482859.json#f5d534fd548be282461a2306a092111cc87a23fd37c40ad12f01a2692db7731b"
+    },
+    {
+      "title": "「大阪府警ですぅ」からのやり取り好き",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4258,
+      "time": "1:10:58",
+      "raw": "1:10:58 「大阪府警ですぅ」からのやり取り好き",
+      "rawHash": "4d205682390a03817cce072c869d9a5f84ef4b6da90fb485caeb9e3482ceb3f1",
+      "videoId": "3s_1yRIJwIo",
+      "videoTitle": "【 歌枠 】みゃーみゃーずがお呼びしみゃす！#1 【篠宮ゆの / 城瀬いすみ / 弦月藤士郎 / 渚トラウト 】",
+      "channelName": "篠宮ゆの / Shinomiya Yuno 【 にじさんじ 】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3s_1yRIJwIo&t=4258s",
+      "sourceId": "Ugxa924B8TBqUaWEn5p4AaABAg",
+      "sourceHash": "4d205682390a03817cce072c869d9a5f84ef4b6da90fb485caeb9e3482ceb3f1",
+      "sourceOrigin": "review:3s_1yRIJwIo-4d205682390a03817cce.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3s_1yRIJwIo:4d205682390a03817cce",
+      "sourcePath": "data/review/sources/3s_1yRIJwIo-4d205682390a03817cce.json",
+      "reviewLocator": "data/review/sources/3s_1yRIJwIo-4d205682390a03817cce.json#4d205682390a03817cce072c869d9a5f84ef4b6da90fb485caeb9e3482ceb3f1"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "0sFdw6TfxM4",
+      "videoTitle": "【歌枠】不要一直聊天的話可以唱多少歌呢🫧 | 知花Chika",
+      "channelName": "知花 / Chika Ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=0sFdw6TfxM4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=0sFdw6TfxM4&t=240s",
+      "sourceId": "description:0sFdw6TfxM4:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:0sFdw6TfxM4-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:0sFdw6TfxM4:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/0sFdw6TfxM4-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/0sFdw6TfxM4-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "閉会式",
