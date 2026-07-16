@@ -583,6 +583,7 @@ test("source presentation model inlines up to three videos and expands only the 
     ["A:2", "B:1"],
   );
   assert.equal(twoVideosWithDuplicateTimestamps.canExpand, false);
+  assert.equal(twoVideosWithDuplicateTimestamps.showCopyAll, false);
 
   const threeVideos = sourcePresentationModel([
     occurrence("A", "channel A"),
@@ -618,6 +619,7 @@ test("source presentation model inlines up to three videos and expands only the 
   assert.equal(fourVideos.expandedLabel, "收起");
   assert.equal(fourVideos.hasMore, true);
   assert.equal(fourVideos.canExpand, true);
+  assert.equal(fourVideos.showCopyAll, false);
 
   const expanded = sourcePresentationModel(
     [
@@ -847,9 +849,10 @@ test("summary video count keeps source totals separate from hidden-unknown visib
     filter: "",
   }), {
     count: 1099,
-    note: "当前范围目录 1224 视频",
+    note: "",
     sourceCount: 1224,
     visibleCount: 1099,
+    ratioText: "1099/1224",
     usesSourceCount: true,
   });
 
@@ -863,6 +866,7 @@ test("summary video count keeps source totals separate from hidden-unknown visib
     note: "",
     sourceCount: 1224,
     visibleCount: 37,
+    ratioText: "37",
     usesSourceCount: false,
   });
 
@@ -875,7 +879,8 @@ test("summary video count keeps source totals separate from hidden-unknown visib
     note: "",
     sourceCount: 1224,
     visibleCount: 1224,
-    usesSourceCount: false,
+    ratioText: "1224/1224",
+    usesSourceCount: true,
   });
 });
 

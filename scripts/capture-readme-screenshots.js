@@ -228,7 +228,7 @@ async function captureSourceCase(browser, viewport, kind, name, options = {}) {
   } else {
     await assertInlineSourceCase(page, row, kind, name);
   }
-  await saveElement(page, row, name);
+  await saveElement(page, row, name, { minBytes: kind === "single" ? 4_000 : 6_000 });
   await page.close();
 }
 
@@ -299,6 +299,8 @@ async function assertInlineSourceCase(page, row, kind, label) {
       return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height };
     };
     const strip = node.querySelector(".source-inline-strip");
+    const content = node.querySelector(".rank-content, .index-content");
+    const side = node.querySelector(".rank-side");
     const more = node.querySelector(".source-inline-more");
     const items = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => {
       const channel = item.querySelector(".source-inline-channel");
@@ -317,8 +319,12 @@ async function assertInlineSourceCase(page, row, kind, label) {
       viewportWidth: document.documentElement.clientWidth,
       sourceVideoCount: Number(strip?.dataset.sourceVideoCount || 0),
       inlineVisibleCount: Number(strip?.dataset.inlineVisibleCount || 0),
+      strip: strip ? rectFor(strip) : null,
+      content: content ? rectFor(content) : null,
+      side: side ? rectFor(side) : null,
       toggleCount: node.querySelectorAll("[data-toggle-source]").length,
       drawerCount: node.querySelectorAll(".source-drawer").length,
+      copyAllCount: node.querySelectorAll("[data-copy-song-links]").length,
       items,
       more: more
         ? {
@@ -337,6 +343,7 @@ async function assertInlineSourceCase(page, row, kind, label) {
       shape.items.length !== 1 ||
       shape.toggleCount !== 0 ||
       shape.drawerCount !== 0 ||
+      shape.copyAllCount !== 0 ||
       !shape.items[0]?.visible ||
       !shape.items[0]?.channelVisible ||
       shape.items[0]?.channelWidth < 6 ||
@@ -355,6 +362,7 @@ async function assertInlineSourceCase(page, row, kind, label) {
       shape.items.length !== 3 ||
       shape.toggleCount !== 0 ||
       shape.drawerCount !== 0 ||
+      shape.copyAllCount !== 1 ||
       shape.items.some((item) => !item.visible || !item.channelVisible || item.channelWidth < 6 || !item.channelText)
     ) {
       throw new Error(`${label} triple-source visibility invalid: ${JSON.stringify(shape)}`);
@@ -367,11 +375,17 @@ async function assertInlineSourceCase(page, row, kind, label) {
     shape.inlineVisibleCount !== 3 ||
     shape.items.length !== 3 ||
     shape.toggleCount !== 1 ||
+    shape.copyAllCount !== 0 ||
     shape.items.some((item) => !item.visible || !item.channelVisible || item.channelWidth < 6 || !item.channelText) ||
     !shape.more?.visible ||
-    shape.more.width > 112 ||
+    shape.more.width > (shape.strip?.width || 0) / 2 + 8 ||
     shape.more.height > 30 ||
     shape.more.flexGrow !== "0" ||
+    !shape.strip ||
+    !shape.content ||
+    !shape.side ||
+    Math.abs(shape.strip.left - shape.content.left) > 2 ||
+    Math.abs(shape.strip.right - shape.side.right) > 3 ||
     shape.items[0].left < 0 ||
     shape.items[0].right > shape.viewportWidth
   ) {
@@ -390,19 +404,33 @@ async function assertExpandedSourceVisible(page, row, label) {
     const groups = Array.from(node.querySelectorAll(".source-drawer:not([hidden]) .source-video-group")).map((group) => {
       const thumb = group.querySelector(".source-video-thumb-link");
       const img = group.querySelector(".source-video-thumb");
+      const title = group.querySelector(".source-video-title");
+      let videoId = "";
+      try {
+        videoId = new URL(title?.href || "").searchParams.get("v") || "";
+      } catch {
+        videoId = "";
+      }
       return {
-        videoId: group.querySelector(".source-video-title")?.href || group.textContent.trim(),
+        videoId: videoId || group.textContent.trim(),
         channelText: group.querySelector(".source-video-channel")?.textContent?.trim() || "",
         thumbVisible: visible(thumb),
         thumbWidth: thumb?.getBoundingClientRect().width || 0,
         imgLoaded: Boolean(img?.currentSrc || img?.src),
       };
     });
+    const toolbar = node.querySelector(".source-drawer:not([hidden]) .source-drawer-toolbar");
     const inlineVideoIds = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => item.dataset.videoId).filter(Boolean);
     return {
+      viewportWidth: document.documentElement.clientWidth,
       buttonExpanded: node.querySelector("[data-toggle-source]")?.getAttribute("aria-expanded") || "",
       remainingCount: Number(node.querySelector("[data-toggle-source]")?.dataset.remainingCount || 0),
       sourceGroupMore: node.querySelectorAll("[data-toggle-source-groups]").length,
+      inlineCollapseCount: node.querySelectorAll(".source-inline-more[data-toggle-source][aria-expanded='true']").length,
+      toolbarCollapseCount: node.querySelectorAll(".source-collapse-top[data-collapse-source]").length,
+      bottomCollapseCount: node.querySelectorAll(".source-collapse-bottom[data-collapse-source]").length,
+      copySongLinksCount: node.querySelectorAll("[data-copy-song-links]").length,
+      toolbarHeight: toolbar?.getBoundingClientRect().height || 0,
       groups,
       duplicateVideoIds: groups
         .map((group) => group.videoId)
@@ -414,6 +442,11 @@ async function assertExpandedSourceVisible(page, row, label) {
     shape.buttonExpanded !== "true" ||
     shape.groups.length !== shape.remainingCount ||
     shape.sourceGroupMore !== 0 ||
+    shape.inlineCollapseCount !== 1 ||
+    shape.toolbarCollapseCount !== 0 ||
+    shape.bottomCollapseCount > 1 ||
+    shape.copySongLinksCount !== 1 ||
+    (shape.viewportWidth <= 720 && shape.toolbarHeight > 32) ||
     shape.duplicateVideoIds.length ||
     shape.repeatedInlineVideoIds.length ||
     shape.groups.some((group) => !group.channelText || !group.thumbVisible || group.thumbWidth < 50) ||

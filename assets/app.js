@@ -2670,7 +2670,7 @@ function renderStatus(status) {
     alerts.push("精简数据读取失败，当前使用备用数据");
   }
   const displayAt = capturedAt || rebuiltDerivedAt || attemptedAt;
-  const statusText = currentStatus.status === "success" ? `更新 ${formatDate(displayAt)}` : capturedAt ? `上次成功 ${formatDate(capturedAt)}` : "状态异常";
+  const statusText = currentStatus.status === "success" ? `${formatTime(displayAt)}更新` : capturedAt ? `上次成功 ${formatDate(capturedAt)}` : "状态异常";
   setStatusSummary({
     text: statusText,
     kind: currentStatus.status === "success" ? "success" : "fallback",
@@ -3483,7 +3483,7 @@ function renderSummary(group, metrics, note = "") {
 
 function hiddenUnknownNote(selection) {
   const count = Number(selection?.hiddenUnknownCount) || 0;
-  return state.hideUnknownArtist && count > 0 ? `已隐藏 ${count} 条无歌手收录` : "";
+  return state.hideUnknownArtist && count > 0 ? `隐藏${count}条无歌手收录` : "";
 }
 
 function summaryNote(selection, extra = "", rangeCache = null) {
@@ -3492,7 +3492,7 @@ function summaryNote(selection, extra = "", rangeCache = null) {
 
 function summaryVideoMetric(rangeCache, selection) {
   const model = summaryVideoCountModel(rangeCache, selection);
-  return model.usesSourceCount ? `可见${model.visibleCount}视频` : metric(model.visibleCount, "个视频");
+  return model.usesSourceCount ? `视频${model.ratioText}` : metric(model.visibleCount, "个视频");
 }
 
 function summaryVideoVisibilityNote(rangeCache, selection) {
@@ -3517,10 +3517,8 @@ function sourceVideoCountForSummary(rangeCache) {
 function monthlyCoverageNote() {
   if (state.range !== "1m" || !isLatestSnapshot()) return "";
   const catalog = state.runtimeMeta?.catalog;
-  const catalogVideoCount = Number(catalog?.catalogVideoCount);
   const retentionDays = Number(catalog?.retentionDays) || 35;
-  if (!Number.isFinite(catalogVideoCount) || catalogVideoCount <= 0) return "最近35天累计";
-  return `最近${retentionDays}天累计 · 总目录${catalogVideoCount}视频`;
+  return `最近${retentionDays}天累计`;
 }
 
 function rangeFallbackNote() {
@@ -4201,13 +4199,7 @@ function renderRankRecord({
       songGroups,
       songCount,
       songPreview,
-      drawerId,
-      isExpanded,
       videoCount,
-      sourcePresentation,
-      trend,
-      rankCount: count,
-      rankMetric: state.rankMetric,
     }),
   );
   row.append(
@@ -4226,6 +4218,18 @@ function renderRankRecord({
       trend,
     }),
   );
+  if (mode !== "artist") {
+    row.append(
+      renderSourceInlineStrip(sourcePresentation, {
+        drawerId,
+        isExpanded,
+        occurrences: safeOccurrences,
+        mode,
+        rankCount: count,
+        rankMetric: state.rankMetric,
+      }),
+    );
+  }
   if (expandable) {
     row.append(
       renderSourceDrawer({
@@ -4268,12 +4272,7 @@ function renderIndexRecord(record) {
     renderRecordContent(record.title, songMeta(record), {
       mode: "index",
       occurrences: record.occurrences,
-      drawerId,
-      isExpanded,
       videoCount: record.videoCount,
-      sourcePresentation,
-      rankCount: record.count,
-      rankMetric: "occurrences",
       headingLevel: 3,
     }),
   );
@@ -4286,6 +4285,16 @@ function renderIndexRecord(record) {
       occurrences: record.occurrences,
       videoCount: sourceVideoCount,
       count: record.count,
+      rankCount: record.count,
+      rankMetric: "occurrences",
+    }),
+  );
+  row.append(
+    renderSourceInlineStrip(sourcePresentation, {
+      drawerId,
+      isExpanded,
+      occurrences: record.occurrences,
+      mode: "index",
       rankCount: record.count,
       rankMetric: "occurrences",
     }),
@@ -4309,8 +4318,8 @@ function renderRankHeader(mode = "song") {
   const header = document.createElement("div");
   header.className = "rank-header";
 
-  const contentLabel = mode === "artist" ? "歌手与曲目" : "歌曲与歌手";
-  const countLabel = state.rankMetric === "videos" ? "视频与来源" : "次数与来源";
+  const contentLabel = mode === "artist" ? "歌手与曲目" : "歌曲、歌手与来源";
+  const countLabel = state.rankMetric === "videos" ? "视频数 / 趋势" : "次数 / 趋势";
   for (const label of ["排名", contentLabel, countLabel]) {
     const item = document.createElement("span");
     item.textContent = label;
@@ -4327,12 +4336,7 @@ function renderRecordContent(title, meta, options) {
     songGroups = [],
     songCount = songGroups.length,
     songPreview = songGroups.slice(0, 2).map((group) => group.title),
-    drawerId,
-    isExpanded,
     videoCount,
-    sourcePresentation = null,
-    rankCount = 0,
-    rankMetric = state.rankMetric,
     headingLevel = 2,
   } = options;
   const content = document.createElement("div");
@@ -4361,19 +4365,6 @@ function renderRecordContent(title, meta, options) {
   }
   if (metaLine.childNodes.length) subline.append(metaLine);
   content.append(subline);
-
-  if (mode !== "artist") {
-    content.append(
-      renderSourceInlineStrip(sourcePresentation || window.FrontendUtils.sourcePresentationModel(occurrences, { expanded: isExpanded, inlineLimit: SOURCE_INLINE_LIMIT }), {
-        drawerId,
-        isExpanded,
-        occurrences,
-        mode,
-        rankCount,
-        rankMetric,
-      }),
-    );
-  }
 
   return content;
 }
@@ -4566,8 +4557,10 @@ function renderSourceInlineGroup(group) {
   wrapper.className = "source-inline-item";
   wrapper.dataset.videoId = videoId;
 
+  const timeCluster = document.createElement("span");
+  timeCluster.className = "source-inline-time-cluster";
   if (firstOccurrence) {
-    wrapper.append(renderSourceTimestampLink(firstOccurrence, "source-inline-time"));
+    timeCluster.append(renderSourceTimestampLink(firstOccurrence, "source-inline-time"));
   } else {
     const fallback = document.createElement("a");
     fallback.className = "source-link source-inline-time";
@@ -4575,10 +4568,11 @@ function renderSourceInlineGroup(group) {
     fallback.target = "_blank";
     fallback.rel = "noreferrer";
     fallback.textContent = formatSeconds(firstSeconds);
-    wrapper.append(fallback);
+    timeCluster.append(fallback);
   }
 
   const extraTimes = (group.occurrences || []).slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
+  let extraTimesNode = null;
   if (extraTimes.length) {
     const extraTimesId = `source-inline-extra-${makeDomId(`${videoId}-${firstSeconds}-${group.channelName || ""}`)}`;
     const more = document.createElement("button");
@@ -4594,15 +4588,16 @@ function renderSourceInlineGroup(group) {
     unit.className = "source-inline-time-more-unit";
     unit.textContent = "时间点";
     more.append(unit);
-    wrapper.append(more);
+    timeCluster.append(more);
 
     const extra = document.createElement("span");
     extra.className = "source-extra-times source-inline-extra-times";
     extra.id = extraTimesId;
     extra.hidden = true;
     for (const occurrence of extraTimes) extra.append(renderSourceTimestampLink(occurrence, "source-inline-extra-time"));
-    wrapper.append(extra);
+    extraTimesNode = extra;
   }
+  wrapper.append(timeCluster);
 
   const channelLink = window.FrontendUtils.youtubeChannelLink({ ...item, channelName: group.channelName });
   const channel = document.createElement("a");
@@ -4616,6 +4611,7 @@ function renderSourceInlineGroup(group) {
   wrapper.append(channel);
 
   wrapper.append(renderCopySetlistButton(item, "复制歌单", "source-inline-copy source-copy-icon ui-chip ui-chip-icon"));
+  if (extraTimesNode) wrapper.append(extraTimesNode);
   wrapper.title = [firstOccurrence ? formatSeconds(firstSeconds) : "", group.channelName || "未知频道", group.title || item.title || videoId].filter(Boolean).join(" · ");
   wrapper.setAttribute("aria-label", wrapper.title);
   return wrapper;
@@ -4838,8 +4834,11 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
 
   const actions = document.createElement("div");
   actions.className = "source-drawer-actions";
-  actions.append(renderCopySongLinksButton(occurrences));
-  actions.append(renderSourceCollapseButton(drawer.id, drawer.dataset.sourceMode || "song", "source-action source-collapse-top ui-chip"));
+  const copyAll = renderCopySongLinksButton(occurrences);
+  copyAll.title = "复制全部链接";
+  copyAll.textContent = "";
+  copyAll.append(renderLinkListIcon());
+  actions.append(copyAll);
   toolbar.append(actions);
   return toolbar;
 }
@@ -4872,6 +4871,11 @@ function appendMobileSourceCollapse(drawer) {
     return;
   }
   if (!isCompactRankMode()) {
+    existing?.remove();
+    return;
+  }
+  const groupCount = drawer._sourceGroups?.length || drawer.querySelectorAll(":scope > .source-video-group").length;
+  if (groupCount < 8) {
     existing?.remove();
     return;
   }
@@ -5956,6 +5960,12 @@ function formatDate(value) {
   const parts = dateParts(value);
   if (!parts) return value ? String(value) : "未知";
   return `${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
+}
+
+function formatTime(value) {
+  const parts = dateParts(value);
+  if (!parts) return value ? String(value) : "未知";
+  return `${parts.hour}:${parts.minute}`;
 }
 
 function dateParts(value) {

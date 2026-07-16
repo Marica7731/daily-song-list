@@ -383,12 +383,14 @@
     const visibleCount = nonNegativeInteger(options.visibleCount ?? options.visibleVideoCount, 0);
     const sourceCount = nonNegativeInteger(options.sourceCount ?? options.sourceVideoCount, visibleCount);
     const hasSearchFilter = cleanText(options.filter ?? options.q).length > 0;
-    const usesSourceCount = Boolean(options.hideUnknownArtist) && !hasSearchFilter && sourceCount > visibleCount;
+    const hasSourceDirectory = sourceCount > 0;
+    const usesSourceCount = hasSourceDirectory && !hasSearchFilter;
     return {
       count: visibleCount,
-      note: usesSourceCount ? `当前范围目录 ${sourceCount} 视频` : "",
+      note: "",
       sourceCount,
       visibleCount,
+      ratioText: usesSourceCount ? `${visibleCount}/${sourceCount}` : String(visibleCount),
       usesSourceCount,
     };
   }
@@ -691,7 +693,7 @@
       collapsedAriaLabel: canExpand ? `查看其余 ${remainingCount} 个来源` : "",
       expandedLabel: "收起",
       expandedAriaLabel: "收起其余来源",
-      showCopyAll: videoCount > 1,
+      showCopyAll: videoCount === 3,
     };
   }
 

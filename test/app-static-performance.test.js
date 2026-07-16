@@ -83,6 +83,7 @@ test("song and index rows inline source previews and expand only remaining video
   assert.match(rankRecordBody, /occurrences: mode === "artist" \? safeOccurrences : row\._sourceDetailOccurrences/u);
   assert.match(rankRecordBody, /copyOccurrences: safeOccurrences/u);
   assert.match(rankRecordBody, /renderRankSide/u);
+  assert.match(rankRecordBody, /renderSourceInlineStrip\(sourcePresentation/u);
 
   const indexRecordBody = functionBody("function renderIndexRecord");
   assert.match(indexRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(record\.videoCount\) \|\| 0\)/u);
@@ -92,10 +93,11 @@ test("song and index rows inline source previews and expand only remaining video
   assert.match(indexRecordBody, /occurrences: row\._sourceDetailOccurrences/u);
   assert.match(indexRecordBody, /copyOccurrences: record\.occurrences/u);
   assert.match(indexRecordBody, /renderRankSide/u);
+  assert.match(indexRecordBody, /renderSourceInlineStrip\(sourcePresentation/u);
 
   const contentBody = functionBody("function renderRecordContent");
-  assert.match(contentBody, /renderSourceInlineStrip/u);
-  assert.match(contentBody, /sourcePresentationModel\(occurrences/u);
+  assert.doesNotMatch(contentBody, /renderSourceInlineStrip/u);
+  assert.doesNotMatch(contentBody, /sourcePresentationModel\(occurrences/u);
 
   const sideBody = functionBody("function renderRankSide");
   assert.match(sideBody, /if \(mode === "artist"\)/u);

@@ -449,7 +449,10 @@ async function assertUiShape(page, viewport, range) {
     throw new Error(`visible share/copy-current-link entry remains ${JSON.stringify(result)}`);
   }
   if (viewport[0] <= 720) {
-    if (!result.controls || result.controls.height > 50) throw new Error(`mobile controls not one row ${JSON.stringify(result.controls)}`);
+    if (!result.controls || result.controls.height > 46) throw new Error(`mobile controls not one row ${JSON.stringify(result.controls)}`);
+    if (result.summary && result.controls && result.summary.top - result.controls.bottom > 8) {
+      throw new Error(`mobile controls left excessive whitespace before summary ${JSON.stringify({ controls: result.controls, summary: result.summary })}`);
+    }
     if (!result.queryTrigger) throw new Error("mobile query trigger missing");
     if (result.queryTrigger.width < 34 || result.queryTrigger.width > 36 || result.queryTrigger.height < 34 || result.queryTrigger.height > 36) {
       throw new Error(`mobile query trigger geometry invalid ${JSON.stringify(result.queryTrigger)}`);
@@ -480,8 +483,8 @@ async function assertUiShape(page, viewport, range) {
       throw new Error(`mobile summary repeats range: ${result.summary.text}`);
     }
     if (!result.topSelect || result.topPageSize) throw new Error(`mobile top pagination should expose page select without page size ${JSON.stringify(result)}`);
-    if (result.topSelect.width > 92) throw new Error(`mobile top page select too wide ${JSON.stringify(result.topSelect)}`);
-    if (result.topControls.some((control) => control.width > 31 || control.height > 31)) {
+    if (result.topSelect.width > 88) throw new Error(`mobile top page select too wide ${JSON.stringify(result.topSelect)}`);
+    if (result.topControls.some((control) => control.width > 30 || control.height > 30)) {
       throw new Error(`mobile top pagination buttons too large ${JSON.stringify(result.topControls)}`);
     }
     if (
@@ -511,7 +514,7 @@ async function assertUiShape(page, viewport, range) {
       throw new Error(`first mobile title is covered ${JSON.stringify(result)}`);
     }
     if (result.firstTitle.fontSize < 14) throw new Error(`first mobile title font too small ${JSON.stringify(result.firstTitle)}`);
-    if (result.firstButton && result.firstButton.height < 28) throw new Error(`mobile first action chip too small ${JSON.stringify(result.firstButton)}`);
+    if (result.firstButton && result.firstButton.height < 26) throw new Error(`mobile first action chip too small ${JSON.stringify(result.firstButton)}`);
     if (!result.secondRow || result.secondRow.top >= viewport[1]) throw new Error(`next mobile row entry is not visible ${JSON.stringify(result.secondRow)}`);
   } else if (viewport[0] <= 919) {
     if (result.topSelect || result.topPageSize) throw new Error(`tablet top pagination includes page select/page size ${JSON.stringify(result)}`);
@@ -729,7 +732,8 @@ async function desktopRankVisualGeometry(browser) {
         copyAllInToolbar: node.querySelectorAll(".source-drawer-toolbar [data-copy-song-links]").length,
         copyAllInsideCards: node.querySelectorAll(".source-video-group [data-copy-song-links]").length,
         moreButtons: node.querySelectorAll("[data-toggle-source-groups]").length,
-        collapseButtons: node.querySelectorAll("[data-collapse-source]").length,
+        toolbarCollapseButtons: node.querySelectorAll(".source-drawer-toolbar [data-collapse-source]").length,
+        bottomCollapseButtons: node.querySelectorAll(".source-collapse-bottom[data-collapse-source]").length,
         countText: node.querySelector(".source-drawer-count")?.textContent?.trim() || "",
         groups,
         firstRowGroups,
@@ -748,7 +752,8 @@ async function desktopRankVisualGeometry(browser) {
     if (sourceGeometry.moreButtons) {
       throw new Error(`desktop source drawer should not expose a second source expander ${JSON.stringify(sourceGeometry)}`);
     }
-    if (sourceGeometry.collapseButtons !== 1) throw new Error(`desktop source drawer should render one toolbar collapse action ${JSON.stringify(sourceGeometry)}`);
+    if (sourceGeometry.toolbarCollapseButtons !== 0) throw new Error(`desktop source drawer should not duplicate the inline collapse action ${JSON.stringify(sourceGeometry)}`);
+    if (sourceGeometry.bottomCollapseButtons !== 0) throw new Error(`desktop source drawer should not render a mobile-only bottom collapse action ${JSON.stringify(sourceGeometry)}`);
     if (sourceGeometry.toolbar.bottom > sourceGeometry.firstGroup.top + 8) {
       throw new Error(`desktop source toolbar not before cards ${JSON.stringify(sourceGeometry)}`);
     }
@@ -1285,8 +1290,14 @@ async function mobileRankVisualGeometry(browser) {
     if (!closedGeometry.content) throw new Error(`mobile rank content geometry missing ${JSON.stringify(closedGeometry)}`);
     if (!closedGeometry.subline || closedGeometry.subline.display !== "flex") throw new Error(`mobile rank subline should be a single flex line ${JSON.stringify(closedGeometry)}`);
     if (!closedGeometry.metaLine || !closedGeometry.side || !closedGeometry.sideTop) throw new Error(`mobile rank pieces missing ${JSON.stringify(closedGeometry)}`);
-    if (!closedGeometry.sourceStrip || closedGeometry.sourceStrip.right > closedGeometry.side.left + 1) {
-      throw new Error(`mobile inline source strip should stay in content column ${JSON.stringify(closedGeometry)}`);
+    if (
+      !closedGeometry.sourceStrip ||
+      Math.abs(closedGeometry.sourceStrip.left - closedGeometry.content.left) > 2 ||
+      Math.abs(closedGeometry.sourceStrip.right - closedGeometry.side.right) > 3 ||
+      closedGeometry.sourceStrip.width < closedGeometry.content.width + closedGeometry.side.width * 0.75 ||
+      closedGeometry.sourceStripScrollWidth > closedGeometry.sourceStripClientWidth + 1
+    ) {
+      throw new Error(`mobile inline source strip should span content and side columns ${JSON.stringify(closedGeometry)}`);
     }
     if (closedGeometry.sourceVideoCount > 3) {
       if (closedGeometry.sourceInlineItems.length !== 3) {
@@ -1301,7 +1312,7 @@ async function mobileRankVisualGeometry(browser) {
           !item.channelText ||
           item.channelDisplay === "none" ||
           item.channelVisibility === "hidden" ||
-          item.channelWidth < 6 ||
+          item.channelWidth < (closedGeometry.viewportWidth <= 340 ? 18 : 28) ||
           item.channelHeight <= 0,
       );
       if (invisibleSource) {
@@ -1309,11 +1320,11 @@ async function mobileRankVisualGeometry(browser) {
       }
       if (
         !closedGeometry.sourceMoreButton ||
-        closedGeometry.sourceMoreButton.width > 112 ||
-        closedGeometry.sourceMoreButton.height > 28 ||
+        closedGeometry.sourceMoreButton.width > closedGeometry.sourceStrip.width / 2 + 8 ||
+        closedGeometry.sourceMoreButton.height > 30 ||
         closedGeometry.sourceMoreButton.flexGrow !== "0"
       ) {
-        throw new Error(`source more button should stay compact ${JSON.stringify(closedGeometry.sourceMoreButton)}`);
+        throw new Error(`source more button should stay in the fourth grid cell ${JSON.stringify(closedGeometry.sourceMoreButton)}`);
       }
     }
     if (closedGeometry.legacyTrendNodes) throw new Error(`legacy mobile trend nodes remain ${JSON.stringify(closedGeometry)}`);
@@ -1340,8 +1351,8 @@ async function mobileRankVisualGeometry(browser) {
     if (closedGeometry.title && closedGeometry.count && closedGeometry.count.top > closedGeometry.title.top + 8) {
       throw new Error(`mobile count should stay in the right-side upper area ${JSON.stringify(closedGeometry)}`);
     }
-    if (closedGeometry.count && closedGeometry.button && closedGeometry.button.left < closedGeometry.content.left - 1) {
-      throw new Error(`mobile source more button should live in the content column ${JSON.stringify(closedGeometry)}`);
+    if (closedGeometry.count && closedGeometry.button && (closedGeometry.button.left < closedGeometry.content.left - 1 || closedGeometry.button.right > closedGeometry.side.right + 1)) {
+      throw new Error(`mobile source more button should stay inside the source preview span ${JSON.stringify(closedGeometry)}`);
     }
 
     const expandableRows = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])");
@@ -1418,8 +1429,8 @@ async function mobileRankVisualGeometry(browser) {
       throw new Error(`source channel should sit after primary timestamp ${JSON.stringify(expandedGeometry)}`);
     }
     if (expandedGeometry.drawer.rowGap !== "0px") throw new Error(`mobile source drawer should have no grid row gap ${JSON.stringify(expandedGeometry)}`);
-    assertClose(expandedGeometry.firstGroup.paddingTop, 7, 1, "source group top padding", expandedGeometry);
-    assertClose(expandedGeometry.firstGroup.paddingBottom, 7, 1, "source group bottom padding", expandedGeometry);
+    assertClose(expandedGeometry.firstGroup.paddingTop, 6, 1, "source group top padding", expandedGeometry);
+    assertClose(expandedGeometry.firstGroup.paddingBottom, 6, 1, "source group bottom padding", expandedGeometry);
     if (!expandedGeometry.copyButtons.length || expandedGeometry.copyButtons.some((button) => button.height < 28 || button.width < 28 || button.width !== button.height)) {
       throw new Error(`source copy button height invalid ${JSON.stringify(expandedGeometry)}`);
     }
@@ -1539,7 +1550,7 @@ async function mobileCopyAllLinksFlow(browser) {
           !button.ariaLabel.startsWith("复制该视频歌单：") ||
           button.title !== "复制歌单" ||
           Math.abs(button.width - button.height) > 1 ||
-          button.width < 28 ||
+          button.width < 26 ||
           button.width > (viewport[0] <= 720 ? 30 : 32)),
     );
     if (invalidSetlistButton) {
@@ -1581,7 +1592,7 @@ async function mobileCopyAllLinksFlow(browser) {
     ) {
       throw new Error(`single-source inline structure invalid ${JSON.stringify(singleSourceShape)}`);
     }
-    if (singleSourceShape.actionHeight < 28 || singleSourceShape.actionHeight > 34) {
+    if (singleSourceShape.actionHeight < 26 || singleSourceShape.actionHeight > 30) {
       throw new Error(`single-source inline copy size invalid ${JSON.stringify(singleSourceShape)}`);
     }
     const singleVisibleShape = await inlineSourceShape(singleSourceRow);
@@ -1612,6 +1623,7 @@ async function mobileCopyAllLinksFlow(browser) {
         tripleShape.items.length !== 3 ||
         tripleShape.toggleCount !== 0 ||
         tripleShape.drawerCount !== 0 ||
+        tripleShape.copyAllCount !== 1 ||
         tripleShape.items.some((item) => !item.visible || !item.channel?.visible || !item.channel.text)
       ) {
         throw new Error(`triple-source inline shape invalid ${JSON.stringify(tripleShape)}`);
@@ -1626,10 +1638,16 @@ async function mobileCopyAllLinksFlow(browser) {
         moreShape.inlineVisibleCount !== 3 ||
         moreShape.items.length !== 3 ||
         moreShape.toggleCount !== 1 ||
+        moreShape.copyAllCount !== 0 ||
         !moreShape.more?.visible ||
-        moreShape.more.width > 112 ||
-        moreShape.more.height > 28 ||
+        moreShape.more.width > (moreShape.strip?.width || 0) / 2 + 8 ||
+        moreShape.more.height > 30 ||
         moreShape.more.flexGrow !== "0" ||
+        !moreShape.strip ||
+        !moreShape.content ||
+        !moreShape.side ||
+        Math.abs(moreShape.strip.left - moreShape.content.left) > 2 ||
+        Math.abs(moreShape.strip.right - moreShape.side.right) > 3 ||
         moreShape.items.some((item) => !item.visible || !item.channel?.visible || !item.channel.text)
       ) {
         throw new Error(`4+ source inline shape invalid ${JSON.stringify(moreShape)}`);
@@ -1832,6 +1850,8 @@ async function inlineSourceShape(row) {
       };
     };
     const strip = node.querySelector(".source-inline-strip");
+    const content = node.querySelector(".rank-content");
+    const side = node.querySelector(".rank-side");
     const items = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => {
       const channel = item.querySelector(".source-inline-channel");
       return {
@@ -1852,6 +1872,9 @@ async function inlineSourceShape(row) {
     return {
       sourceVideoCount: Number(strip?.dataset.sourceVideoCount || 0),
       inlineVisibleCount: Number(strip?.dataset.inlineVisibleCount || 0),
+      strip: strip ? rectFor(strip) : null,
+      content: content ? rectFor(content) : null,
+      side: side ? rectFor(side) : null,
       toggleCount: node.querySelectorAll("[data-toggle-source]").length,
       drawerCount: node.querySelectorAll(".source-drawer").length,
       copyAllCount: node.querySelectorAll("[data-copy-song-links]").length,
@@ -1919,6 +1942,7 @@ async function compactSourceDrawerFlow(browser) {
       };
       const drawer = node.querySelector(".source-drawer");
       const content = node.querySelector(".rank-content");
+      const sourceStrip = node.querySelector(".source-inline-strip");
       const rank = node.querySelector(".rank-number");
       const countNode = node.querySelector(".rank-count");
       const style = getComputedStyle(node);
@@ -1936,6 +1960,7 @@ async function compactSourceDrawerFlow(browser) {
         },
         drawer: drawer ? rectFor(drawer) : null,
         content: content ? rectFor(content) : null,
+        sourceStrip: sourceStrip ? rectFor(sourceStrip) : null,
         rank: rank ? rectFor(rank) : null,
         count: countNode ? rectFor(countNode) : null,
         sourceGroups,
@@ -1946,15 +1971,20 @@ async function compactSourceDrawerFlow(browser) {
     if (geometry.rowBox.borderLeft > 0 && !/rgba\(0,\s*0,\s*0,\s*0\)|transparent/u.test(geometry.rowBox.borderLeftColor)) {
       throw new Error(`top rank accent line should not continue through compact drawer ${JSON.stringify(geometry)}`);
     }
-    const expectedLeft = geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft;
-    const expectedWidth = geometry.row.width - geometry.rowBox.borderLeft - geometry.rowBox.borderRight - geometry.rowBox.paddingLeft - geometry.rowBox.paddingRight;
+    const expectedLeft =
+      viewport[0] <= 720 || !geometry.sourceStrip ? geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft : geometry.sourceStrip.left;
+    const expectedWidth =
+      viewport[0] <= 720 || !geometry.sourceStrip
+        ? geometry.row.width - geometry.rowBox.borderLeft - geometry.rowBox.borderRight - geometry.rowBox.paddingLeft - geometry.rowBox.paddingRight
+        : geometry.sourceStrip.width;
     if (Math.abs(geometry.drawer.left - expectedLeft) > 3) {
       throw new Error(`${scenario.label} source drawer left offset invalid ${JSON.stringify(geometry)}`);
     }
     if (Math.abs(geometry.drawer.width - expectedWidth) > 4) {
       throw new Error(`${scenario.label} source drawer width invalid ${JSON.stringify(geometry)}`);
     }
-    if (geometry.content && geometry.drawer.top - geometry.content.bottom > 18) {
+    const drawerAnchor = geometry.sourceStrip || geometry.content;
+    if (drawerAnchor && geometry.drawer.top - drawerAnchor.bottom > 18) {
       throw new Error(`${scenario.label} source drawer has excessive blank gap ${JSON.stringify(geometry)}`);
     }
     if (geometry.sourceGroups.some((group) => group.width > geometry.drawer.width + 1 || group.left < geometry.drawer.left - 1 || group.right > geometry.drawer.right + 1)) {
@@ -1964,6 +1994,16 @@ async function compactSourceDrawerFlow(browser) {
     const sourceSemantics = await row.evaluate((node) => {
       const title = node.querySelector(".source-video-title");
       const timeLinks = Array.from(node.querySelectorAll(".source-time-primary, .source-time-extra"));
+      const inlineVideoIds = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => item.dataset.videoId).filter(Boolean);
+      const drawerVideoIds = Array.from(node.querySelectorAll(".source-drawer:not([hidden]) .source-video-title"))
+        .map((link) => {
+          try {
+            return new URL(link.href).searchParams.get("v") || "";
+          } catch {
+            return "";
+          }
+        })
+        .filter(Boolean);
       return {
         titleHref: title?.href || "",
         titleText: title?.textContent?.trim() || "",
@@ -1974,6 +2014,7 @@ async function compactSourceDrawerFlow(browser) {
         badTimeText: timeLinks.map((link) => link.textContent.trim()).filter((text) => !/^\d{1,2}:\d{2}(?::\d{2})?$/u.test(text)),
         missingTimeAria: timeLinks.filter((link) => !/打开时间戳：.+\d{1,2}:\d{2}/u.test(link.getAttribute("aria-label") || "")).length,
         oldTimestampSpans: node.querySelectorAll(".source-time-link .source-song, .source-time-link .source-artist").length,
+        repeatedInlineVideoIds: drawerVideoIds.filter((id) => inlineVideoIds.includes(id)),
       };
     });
     if (!sourceSemantics.titleHref || !/youtube\.com\/watch\?v=.+[?&]t=\d+s/u.test(sourceSemantics.titleHref)) {
@@ -1985,6 +2026,7 @@ async function compactSourceDrawerFlow(browser) {
     if (sourceSemantics.badTimeText.length || sourceSemantics.missingTimeAria || sourceSemantics.oldTimestampSpans) {
       throw new Error(`source timestamp labels should only show time while aria keeps context ${JSON.stringify(sourceSemantics)}`);
     }
+    if (sourceSemantics.repeatedInlineVideoIds.length) throw new Error(`source drawer duplicated inline preview videos ${JSON.stringify(sourceSemantics)}`);
     if (sourceSemantics.titleHeight > 44) throw new Error(`source video title exceeds compact two-line height ${JSON.stringify(sourceSemantics)}`);
 
     let expectedReopenGroupCount = null;
@@ -2063,34 +2105,39 @@ async function compactSourceDrawerFlow(browser) {
     }
 
     const bottomScreenshotPath = shotPath(`source-drawer-bottom-${viewport.join("x")}.png`);
-    const collapseTop = row.locator(".source-collapse-top[data-collapse-source]");
+    const collapseTop = row.locator(".source-inline-more[data-toggle-source][aria-expanded='true']");
+    const toolbarCollapse = row.locator(".source-collapse-top[data-collapse-source]");
     const collapseBottom = row.locator(".source-collapse-bottom[data-collapse-source]");
-    if ((await collapseTop.count()) < 1) throw new Error(`${scenario.label} source drawer should have a toolbar collapse button`);
-    if ((await collapseBottom.count()) !== 1) throw new Error(`${scenario.label} source drawer should have exactly one bottom collapse button`);
-    await retryDetachedAction(() => collapseBottom.scrollIntoViewIfNeeded(), "scroll bottom source collapse");
-    const bottomCoverage = await page.evaluate(() => {
-      const collapse = document.querySelector(".rank-row.is-expanded .source-collapse-bottom[data-collapse-source]");
-      const nav = document.querySelector("#mobileBottomNav");
-      const collapseBox = collapse?.getBoundingClientRect();
-      const navBox = nav?.getBoundingClientRect();
-      return {
-        collapseBottom: collapseBox?.bottom || 0,
-        navTop: navBox?.top || window.innerHeight,
-        collapseHeight: collapseBox?.height || 0,
-      };
-    });
-    if (bottomCoverage.collapseHeight > 0 && bottomCoverage.collapseBottom > bottomCoverage.navTop - 4) {
-      throw new Error(`source bottom collapse is covered by mobile nav ${JSON.stringify(bottomCoverage)}`);
+    if ((await toolbarCollapse.count()) !== 0) throw new Error(`${scenario.label} source drawer should not duplicate a toolbar collapse button`);
+    if ((await collapseTop.count()) !== 1) throw new Error(`${scenario.label} inline source preview should expose exactly one top collapse button`);
+    if ((await collapseBottom.count()) > 1) throw new Error(`${scenario.label} source drawer should expose at most one bottom collapse button`);
+    if ((await collapseBottom.count()) > 0) {
+      await retryDetachedAction(() => collapseBottom.scrollIntoViewIfNeeded(), "scroll bottom source collapse");
+      const bottomCoverage = await page.evaluate(() => {
+        const collapse = document.querySelector(".rank-row.is-expanded .source-collapse-bottom[data-collapse-source]");
+        const nav = document.querySelector("#mobileBottomNav");
+        const collapseBox = collapse?.getBoundingClientRect();
+        const navBox = nav?.getBoundingClientRect();
+        return {
+          collapseBottom: collapseBox?.bottom || 0,
+          navTop: navBox?.top || window.innerHeight,
+          collapseHeight: collapseBox?.height || 0,
+        };
+      });
+      if (bottomCoverage.collapseHeight > 0 && bottomCoverage.collapseBottom > bottomCoverage.navTop - 4) {
+        throw new Error(`source bottom collapse is covered by mobile nav ${JSON.stringify(bottomCoverage)}`);
+      }
     }
     await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
-    await retryDetachedAction(() => collapseBottom.click(), "click bottom source collapse");
+    const closeControl = (await collapseBottom.count()) > 0 ? collapseBottom : collapseTop;
+    await retryDetachedAction(() => closeControl.click(), "click source collapse");
     await page.waitForFunction(
       (index) => document.querySelectorAll(".rank-row:not(.skeleton-row):has([data-toggle-source])")[index]?.classList.contains("is-expanded") === false,
       selectedIndex,
     );
     const closedExpanded = await button.getAttribute("aria-expanded");
-    if (closedExpanded !== "false") throw new Error(`source bottom collapse aria-expanded expected false, got ${closedExpanded}`);
-    if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 0) throw new Error("source bottom collapse left an expanded row");
+    if (closedExpanded !== "false") throw new Error(`source collapse aria-expanded expected false, got ${closedExpanded}`);
+    if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 0) throw new Error("source collapse left an expanded row");
 
     const screenshotPath = shotPath(`source-drawer-${viewport.join("x")}.png`);
     await button.click();
