@@ -79,7 +79,10 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Sync latest main before generating data
-        run: git pull --ff-only origin main
+        id: sync
+        run: |
+          git pull --ff-only origin main
+          echo "base_head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Update compact runtime data
         id: core
@@ -87,33 +90,89 @@ jobs:
         continue-on-error: true
         env:
           DAILY_SONG_EVENT_SCHEDULE: ${{ github.event.schedule }}
+          DAILY_SONG_DISPATCH_REASON: ${{ inputs.reason || github.event_name }}
+          DAILY_SONG_RUNNER_STARTED_AT: ${{ steps.runmeta.outputs.started_at }}
         run: node scripts/run-core-update.js
+
+      - name: Regenerate on latest main when remote moved
+        if: steps.core.outcome == 'success' && steps.core.outputs.updated == 'true'
+        env:
+          DAILY_SONG_EVENT_SCHEDULE: ${{ github.event.schedule }}
+          DAILY_SONG_DISPATCH_REASON: ${{ inputs.reason || github.event_name }}
+          DAILY_SONG_RUNNER_STARTED_AT: ${{ steps.runmeta.outputs.started_at }}
+        run: |
+          git fetch origin main
+          remote_head="$(git rev-parse origin/main)"
+          if [ "$remote_head" = "${{ steps.sync.outputs.base_head }}" ]; then
+            echo "Remote main did not move during generation."
+            exit 0
+          fi
+          echo "Remote main moved from ${{ steps.sync.outputs.base_head }} to $remote_head; regenerating core data on the latest base."
+          git reset --hard "$remote_head"
+          node scripts/run-core-update.js
 
       - name: Restore core data after core failure
         if: always() && steps.core.outcome != 'success'
         env:
           DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
           DAILY_SONG_FAILURE_OUTCOME: ${{ steps.core.outcome }}
+          DAILY_SONG_RUNNER_STARTED_AT: ${{ steps.runmeta.outputs.started_at }}
         run: |
-          git restore --worktree -- data/latest.json data/7d.json data/all.json data/72h.json data/1m.json data/audit.json data/inspection-cache.json data/video-catalog.json data/song-search-known-songs.json data/snapshots data/diff data/ui data/catalog-segments
-          git clean -fd -- data/snapshots data/diff data/ui data/catalog-segments
+          node scripts/run-core-update.js restore-after-failure
           npm run mark:failure
 
-      - name: Commit core data or failure status
+      - name: Configure git identity
         if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit core data
+        if: steps.core.outcome == 'success'
+        run: |
           git add data/latest.json data/7d.json data/all.json data/72h.json data/1m.json data/audit.json data/inspection-cache.json data/status.json data/video-catalog.json data/song-search-known-songs.json data/snapshots data/diff data/ui data/catalog-segments
           if git diff --cached --quiet; then
             echo "No core data changes to commit."
             exit 0
           fi
           git commit -m "chore: update core song-list data"
+
+      - name: Commit failure status
+        if: always() && steps.core.outcome != 'success'
+        run: |
+          git add data/status.json
+          if git diff --cached --quiet; then
+            echo "No failure status changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: mark failed core song-list update"
+
+      - name: Push core changes
+        if: always()
+        env:
+          CORE_OUTCOME: ${{ steps.core.outcome }}
+          DAILY_SONG_EVENT_SCHEDULE: ${{ github.event.schedule }}
+          DAILY_SONG_DISPATCH_REASON: ${{ inputs.reason || github.event_name }}
+          DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
+          DAILY_SONG_FAILURE_OUTCOME: ${{ steps.core.outcome }}
+          DAILY_SONG_RUNNER_STARTED_AT: ${{ steps.runmeta.outputs.started_at }}
+        run: |
           for attempt in 1 2 3; do
-            git pull --rebase origin main
-            if git push; then
+            if git push origin HEAD:main; then
               exit 0
+            fi
+            echo "Push attempt ${attempt} failed; rebuilding against latest main before retry."
+            git fetch origin main
+            git reset --hard origin/main
+            if [ "$CORE_OUTCOME" = "success" ]; then
+              node scripts/run-core-update.js
+              git add data/latest.json data/7d.json data/all.json data/72h.json data/1m.json data/audit.json data/inspection-cache.json data/status.json data/video-catalog.json data/song-search-known-songs.json data/snapshots data/diff data/ui data/catalog-segments
+              git commit -m "chore: update core song-list data" || true
+            else
+              node scripts/run-core-update.js restore-after-failure
+              npm run mark:failure
+              git add data/status.json
+              git commit -m "chore: mark failed core song-list update" || true
             fi
             sleep 5
           done
