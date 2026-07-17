@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "external-song-identity-review-candidates.v1",
+  "generatedAt": "2026-07-17T14:30:00.000Z",
+  "externalSystem": "vsinger-moment.mcp-public",
+  "adapterVersion": "vsinger-moment-adapter-v1",
+  "matchingVersion": "external-song-enrichment.v1",
+  "candidates": [
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:manual-curation",
+      "localTitle": "KING",
+      "localArtist": "Kanaria",
+      "canonicalTitleCandidate": "KING",
+      "canonicalArtistCandidate": "Kanaria",
+      "titleAliases": [
+        "King"
+      ],
+      "artistAliases": [],
+      "kanaRomajiCandidates": [],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Amanual-curation",
+      "matchingReason": "exact-title-artist",
+      "confidence": 0.98,
+      "decision": "manual-curation-priority",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:manual-curation",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Amanual-curation",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "2222222222222222222222222222222222222222222222222222222222222222",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "manual-curation-priority",
+        "confidence": 0.98
+      }
+    },
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:no-local",
+      "localTitle": null,
+      "localArtist": null,
+      "canonicalTitleCandidate": "外部だけの曲",
+      "canonicalArtistCandidate": "External Artist",
+      "titleAliases": [],
+      "artistAliases": [],
+      "kanaRomajiCandidates": [],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ano-local",
+      "matchingReason": "external-song-not-found-locally",
+      "confidence": 0.45,
+      "decision": "external-only",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:no-local",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ano-local",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "external-only",
+        "confidence": 0.45
+      }
+    },
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:piano-version",
+      "localTitle": "夜に駆ける",
+      "localArtist": "YOASOBI",
+      "canonicalTitleCandidate": "夜に駆ける Piano Ver.",
+      "canonicalArtistCandidate": "YOASOBI",
+      "titleAliases": [
+        "夜に駆ける",
+        "Yoru ni Kakeru Piano Ver."
+      ],
+      "artistAliases": [],
+      "kanaRomajiCandidates": [],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Apiano-version",
+      "matchingReason": "title-alias-artist",
+      "confidence": 0.82,
+      "decision": "review-required",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:piano-version",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Apiano-version",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "review-required",
+        "confidence": 0.82
+      }
+    },
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:remix",
+      "localTitle": "フォニイ",
+      "localArtist": "ツミキ",
+      "canonicalTitleCandidate": "フォニイ Remix",
+      "canonicalArtistCandidate": "ツミキ",
+      "titleAliases": [
+        "フォニイ",
+        "phony Remix"
+      ],
+      "artistAliases": [
+        "Tsumiki"
+      ],
+      "kanaRomajiCandidates": [
+        "Tsumiki"
+      ],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Aremix",
+      "matchingReason": "title-alias-artist",
+      "confidence": 0.7,
+      "decision": "rejected-version-conflict",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:remix",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Aremix",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "rejected-version-conflict",
+        "confidence": 0.7
+      }
+    },
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:same-title-a",
+      "localTitle": "花",
+      "localArtist": "Singer A",
+      "canonicalTitleCandidate": "花",
+      "canonicalArtistCandidate": "Singer A",
+      "titleAliases": [],
+      "artistAliases": [],
+      "kanaRomajiCandidates": [],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-a",
+      "matchingReason": "exact-title-artist",
+      "confidence": 0.84,
+      "decision": "review-required",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:same-title-a",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-a",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "review-required",
+        "confidence": 0.84
+      }
+    },
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:same-title-b",
+      "localTitle": null,
+      "localArtist": null,
+      "canonicalTitleCandidate": "花",
+      "canonicalArtistCandidate": "Singer B",
+      "titleAliases": [],
+      "artistAliases": [],
+      "kanaRomajiCandidates": [],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-b",
+      "matchingReason": "external-song-not-found-locally",
+      "confidence": 0.45,
+      "decision": "external-only",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:same-title-b",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-b",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "1111111111111111111111111111111111111111111111111111111111111111",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "external-only",
+        "confidence": 0.45
+      }
+    }
+  ]
+}

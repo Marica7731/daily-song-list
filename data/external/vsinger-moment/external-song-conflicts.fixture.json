@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "external-song-conflict-report.v1",
+  "generatedAt": "2026-07-17T14:30:00.000Z",
+  "externalSystem": "vsinger-moment.mcp-public",
+  "adapterVersion": "vsinger-moment-adapter-v1",
+  "matchingVersion": "external-song-enrichment.v1",
+  "conflicts": [
+    {
+      "type": "artist_kana_romaji",
+      "externalSongId": "song:feat",
+      "artist": "Giga",
+      "aliases": [
+        "ギガP",
+        "Giga-P"
+      ],
+      "decision": "candidate-only"
+    },
+    {
+      "type": "artist_kana_romaji",
+      "externalSongId": "song:jp-standard",
+      "artist": "みきとP",
+      "aliases": [
+        "MikitoP",
+        "みきとぴー"
+      ],
+      "decision": "candidate-only"
+    },
+    {
+      "type": "artist_kana_romaji",
+      "externalSongId": "song:kana-romaji-singer",
+      "artist": "ryo",
+      "aliases": [
+        "りょう",
+        "ryo"
+      ],
+      "decision": "candidate-only"
+    },
+    {
+      "type": "artist_kana_romaji",
+      "externalSongId": "song:remix",
+      "artist": "ツミキ",
+      "aliases": [
+        "Tsumiki"
+      ],
+      "decision": "candidate-only"
+    },
+    {
+      "type": "external_missing_local",
+      "externalSongId": "song:no-local",
+      "title": "外部だけの曲",
+      "artist": "External Artist",
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ano-local",
+      "decision": "review-required"
+    },
+    {
+      "type": "external_missing_local",
+      "externalSongId": "song:same-title-b",
+      "title": "花",
+      "artist": "Singer B",
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-b",
+      "decision": "review-required"
+    },
+    {
+      "type": "local_missing_external",
+      "title": "本站だけの曲",
+      "artist": "Local Artist",
+      "localKey": "本站だけの曲::localartist",
+      "decision": "no-external-candidate"
+    },
+    {
+      "type": "same_title_different_artist",
+      "externalSongId": "song:same-title-a",
+      "title": "花",
+      "externalArtist": "Singer A",
+      "localArtists": [
+        "Singer A"
+      ],
+      "decision": "manual-review-required"
+    },
+    {
+      "type": "version_suffix_difference",
+      "externalSongId": "song:piano-version",
+      "externalTitle": "夜に駆ける Piano Ver.",
+      "localTitle": "夜に駆ける",
+      "decision": "review-required"
+    },
+    {
+      "type": "version_suffix_difference",
+      "externalSongId": "song:remix",
+      "externalTitle": "フォニイ Remix",
+      "localTitle": "フォニイ",
+      "decision": "rejected-version-conflict"
+    }
+  ]
+}

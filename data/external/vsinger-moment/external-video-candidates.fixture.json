@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "external-video-candidates.v1",
+  "generatedAt": "2026-07-17T14:30:00.000Z",
+  "externalSystem": "vsinger-moment.mcp-public",
+  "adapterVersion": "vsinger-moment-adapter-v1",
+  "matchingVersion": "external-song-enrichment.v1",
+  "candidates": [
+    {
+      "videoId": "AAAAAAAAAAA",
+      "externalSongId": "song:jp-standard",
+      "reportedSongTitle": "少女レイ",
+      "reportedArtist": "みきとP",
+      "reportedSinger": null,
+      "reportedTimestamp": null,
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ajp-standard",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "verificationStatus": "unverified",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:jp-standard",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ajp-standard",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "video-candidate-unverified",
+        "confidence": 0.5
+      }
+    },
+    {
+      "videoId": "BBBBBBBBBBB",
+      "externalSongId": "song:kana-romaji-singer",
+      "reportedSongTitle": "メルト",
+      "reportedArtist": "ryo",
+      "reportedSinger": "藍月なくる / Aitsuki Nakuru",
+      "reportedTimestamp": "0:01:07",
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Akana-romaji-singer",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "verificationStatus": "unverified",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:kana-romaji-singer",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Akana-romaji-singer",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "video-candidate-unverified",
+        "confidence": 0.5
+      }
+    },
+    {
+      "videoId": "CCCCCCCCCCC",
+      "externalSongId": "song:no-local",
+      "reportedSongTitle": "外部だけの曲",
+      "reportedArtist": "External Artist",
+      "reportedSinger": "External Singer",
+      "reportedTimestamp": "0:02:03",
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ano-local",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "verificationStatus": "unverified",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:no-local",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ano-local",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "3333333333333333333333333333333333333333333333333333333333333333",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "video-candidate-unverified",
+        "confidence": 0.5
+      }
+    }
+  ]
+}
