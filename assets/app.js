@@ -34,6 +34,9 @@ const SOURCE_INLINE_LIMITS = {
   tablet: 3,
   desktop: 3,
 };
+const SOURCE_DRAWER_CHUNK_DOM_LIMIT = 32;
+const SOURCE_DRAWER_WINDOW_STEP = 16;
+const SOURCE_DRAWER_ESTIMATED_ROW_HEIGHT = 88;
 const MAX_COMPACT_INITIALIZED_DRAWERS = 3;
 // Keep these breakpoints synchronized with assets/styles.css:
 // mobile <= 720px, tablet 721-919px, desktop >= 920px.
@@ -265,6 +268,8 @@ const state = {
   rankDiffLoads: new Map(),
   sourceDetailCache: new Map(),
   sourceDetailLoads: new Map(),
+  videoSetlistCache: new Map(),
+  videoSetlistLoads: new Map(),
   requestRuntime: {
     summaryCache: new Map(),
     viewManifestCache: new Map(),
@@ -511,7 +516,7 @@ function bindEvents() {
     if (copySetlist) {
       event.preventDefault();
       event.stopPropagation();
-      copyVideoSetlist(copySetlist._videoItem).catch((error) => showToast(`复制失败：${error.message}`));
+      copyVideoSetlist(copySetlist._videoItem, copySetlist).catch((error) => showToast(`复制失败：${error.message}`));
       return;
     }
 
@@ -605,6 +610,13 @@ function bindEvents() {
     if (sourceCollapse) {
       event.preventDefault();
       collapseSourceDrawer(sourceCollapse.closest(".rank-row, .index-row"), { keepVisible: true });
+      return;
+    }
+
+    const sourceRetry = event.target.closest("[data-source-detail-retry]");
+    if (sourceRetry) {
+      event.preventDefault();
+      retrySourceDetailLoad(sourceRetry);
       return;
     }
 
@@ -5754,7 +5766,10 @@ async function sourceDetailOccurrencesForContainer(container, currentOccurrences
     return container._sourceDetailOccurrences;
   }
   if (!path || container?._sourceDetailLoaded) return currentOccurrences || [];
-  const loaded = await loadSourceDetailOccurrences(path, cleanText(container?._sourceDetailKey));
+  const signal = container?._sourceDetailAbortController?.signal;
+  const loaded = await loadSourceDetailOccurrences(path, cleanText(container?._sourceDetailKey), {
+    signal: signal?.aborted ? undefined : signal,
+  });
   container._sourceDetailLoaded = true;
   if (!loaded.length) return currentOccurrences || [];
   const merged = window.FrontendUtils.mergeCompleteSourceOccurrences(
@@ -5765,12 +5780,11 @@ async function sourceDetailOccurrencesForContainer(container, currentOccurrences
   return merged;
 }
 
-async function loadSourceDetailOccurrences(path, key = "") {
+async function loadSourceDetailOccurrences(path, key = "", options = {}) {
   const cacheKey = key ? `${path}#${key}` : path;
   if (state.sourceDetailCache.has(cacheKey)) return state.sourceDetailCache.get(cacheKey);
   if (state.sourceDetailLoads.has(cacheKey)) return state.sourceDetailLoads.get(cacheKey);
-  const load = readJson(path, { cache: cacheModeForPath(path) })
-    .then((payload) => normalizeSourceDetailOccurrences(payload, key))
+  const load = loadSourceDetailOccurrencesIncremental(path, key, options)
     .then((occurrences) => {
       state.sourceDetailCache.set(cacheKey, occurrences);
       return occurrences;
@@ -5782,10 +5796,36 @@ async function loadSourceDetailOccurrences(path, key = "") {
   return load;
 }
 
+async function loadSourceDetailOccurrencesIncremental(path, key = "", options = {}) {
+  const manifest = await readJson(path, { cache: cacheModeForPath(path), signal: options.signal });
+  const runtime = sourceDetailRuntime();
+  if (!runtime.isSourceDetailManifest(manifest)) return normalizeSourceDetailOccurrences(manifest, key);
+  const chunkPaths = runtime.sourceDetailChunkPaths(manifest);
+  const loaded = [];
+  for (const [index, chunkPath] of chunkPaths.entries()) {
+    const payload = await readJson(chunkPath, { cache: cacheModeForPath(chunkPath), signal: options.signal });
+    const chunkOccurrences = normalizeSourceDetailOccurrences(payload, key);
+    loaded.push(...chunkOccurrences);
+    if (typeof options.onChunk === "function") {
+      options.onChunk(chunkOccurrences, {
+        index: index + 1,
+        chunkCount: chunkPaths.length,
+        loadedOccurrences: loaded.slice(),
+        manifest,
+      });
+    }
+    if (index < chunkPaths.length - 1) await waitForSourceDetailIdle();
+  }
+  return loaded;
+}
+
 function normalizeSourceDetailOccurrences(payload, key = "") {
+  const runtime = sourceDetailRuntime();
+  if (runtime?.normalizeSourceDetailOccurrences) return runtime.normalizeSourceDetailOccurrences(payload, key);
   if (Array.isArray(payload)) return payload.filter(isOccurrenceLike);
   if (Array.isArray(payload?.occurrences)) return payload.occurrences.filter(isOccurrenceLike);
   if (Array.isArray(payload?.sourceOccurrences)) return payload.sourceOccurrences.filter(isOccurrenceLike);
+  if (Array.isArray(payload?.sources) && payload?.kind === "source-detail-chunk-v3") return sourceEntriesToOccurrences(payload.sources);
   if (Array.isArray(payload?.groups)) return payload.groups.flatMap((group) => group?.occurrences || []).filter(isOccurrenceLike);
   if (Array.isArray(payload?.items)) return collectSongOccurrences(payload.items);
   if (Array.isArray(payload?.sources)) return collectSongOccurrences(payload.sources);
@@ -5795,6 +5835,84 @@ function normalizeSourceDetailOccurrences(payload, key = "") {
     return (source?.occurrences || []).filter(isOccurrenceLike);
   }
   return [];
+}
+
+function sourceEntriesToOccurrences(sources = []) {
+  return (sources || []).flatMap((source) => {
+    const item = {
+      videoId: cleanText(source?.videoId),
+      title: cleanText(source?.videoTitle || source?.title || source?.videoId),
+      channelName: cleanText(source?.channelName),
+      channelId: cleanText(source?.channelId),
+      channelHandle: cleanText(source?.channelHandle),
+      publishedTimestamp: Number.isFinite(Number(source?.publishedTimestamp)) ? Number(source.publishedTimestamp) : null,
+      catalogFirstSeenAt: cleanText(source?.firstSeenAt),
+      _requiresVideoSetlist: true,
+    };
+    return (source?.timepoints || [])
+      .filter((point) => cleanText(point?.title))
+      .map((point) => {
+        const seconds = Math.max(0, Math.floor(Number(point.seconds) || 0));
+        return {
+          item,
+          song: {
+            seconds,
+            time: formatSeconds(seconds),
+            title: cleanText(point.title),
+            artist: cleanText(point.artist),
+            isNiche: point.isNiche === true,
+          },
+          searchText: normalizeSearch([item.videoId, item.title, item.channelName, point.title, point.artist].join(" ")),
+        };
+      });
+  });
+}
+
+function sourceDetailRuntime() {
+  return window.SourceDetailRuntime || sourceDetailRuntimeFallback;
+}
+
+const sourceDetailRuntimeFallback = {
+  isSourceDetailManifest(payload) {
+    return payload?.kind === "source-detail-manifest-v3" && Array.isArray(payload.chunks);
+  },
+  sourceDetailChunkPaths(payload) {
+    return (payload?.chunks || [])
+      .map((chunk) => ({
+        index: Number(chunk.index) || 0,
+        path: cleanText(chunk.path || chunk.legacyPath),
+      }))
+      .filter((chunk) => chunk.index > 0 && chunk.path)
+      .sort((a, b) => a.index - b.index)
+      .map((chunk) => chunk.path);
+  },
+  normalizeSourceDetailOccurrences(payload, key = "") {
+    if (Array.isArray(payload?.sources) && payload?.kind === "source-detail-chunk-v3") return sourceEntriesToOccurrences(payload.sources);
+    if (Array.isArray(payload)) return payload.filter(isOccurrenceLike);
+    if (Array.isArray(payload?.occurrences)) return payload.occurrences.filter(isOccurrenceLike);
+    if (Array.isArray(payload?.sourceOccurrences)) return payload.sourceOccurrences.filter(isOccurrenceLike);
+    if (Array.isArray(payload?.groups)) return payload.groups.flatMap((group) => group?.occurrences || []).filter(isOccurrenceLike);
+    if (Array.isArray(payload?.items)) return collectSongOccurrences(payload.items);
+    if (Array.isArray(payload?.sources)) return collectSongOccurrences(payload.sources);
+    if (Array.isArray(payload?.records)) {
+      const matched = key ? payload.records.find((record) => record?.key === key) : null;
+      const source = matched || (payload.records.length === 1 ? payload.records[0] : null);
+      return (source?.occurrences || []).filter(isOccurrenceLike);
+    }
+    return [];
+  },
+  videoSetlistPath(videoId) {
+    const safeVideoId = cleanText(videoId);
+    const prefix = encodeURIComponent(safeVideoId.slice(0, 2) || "__");
+    return `data/ui/video-setlists/${prefix}/${encodeURIComponent(safeVideoId)}.json`;
+  },
+};
+
+function waitForSourceDetailIdle() {
+  if (window.requestIdleCallback) {
+    return new Promise((resolve) => window.requestIdleCallback(resolve, { timeout: 250 }));
+  }
+  return new Promise((resolve) => window.setTimeout(resolve, 0));
 }
 
 function isOccurrenceLike(value) {
@@ -5852,21 +5970,32 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
   drawer._sourceGroups = groups;
   if (options.toolbarVariant) drawer.dataset.toolbarVariant = options.toolbarVariant;
+  const totalCount = Number.isFinite(options.totalCount) ? options.totalCount : groups.length;
   const visibleCount = groups.length;
   drawer.dataset.visibleSourceGroups = String(visibleCount);
   const shouldShowToolbar = options.showToolbar !== false;
   if (shouldShowToolbar && !drawer.querySelector(":scope > .source-drawer-toolbar")) {
-    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount: groups.length }));
+    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount }));
   } else {
-    updateSourceDrawerCount(drawer, visibleCount, groups.length);
+    updateSourceDrawerCount(drawer, visibleCount, totalCount);
   }
+  const copyAll = drawer.querySelector(":scope > .source-drawer-toolbar [data-copy-song-links]");
+  if (copyAll) copyAll._sourceOccurrences = drawer._songSourceOccurrences;
 
-  appendSourceGroupRange(drawer, groups, sourceRenderedGroupCount(drawer), visibleCount);
+  if (shouldVirtualizeSourceGroups(groups)) {
+    renderVirtualSourceGroups(drawer, { start: drawer._sourceWindowStart || 0 });
+  } else {
+    appendSourceGroupRange(drawer, groups, sourceRenderedGroupCount(drawer), visibleCount);
+  }
   appendMobileSourceCollapse(drawer);
 }
 
 function sourceRenderedGroupCount(drawer) {
   return drawer.querySelectorAll(":scope > .source-video-group").length;
+}
+
+function shouldVirtualizeSourceGroups(groups) {
+  return (groups?.length || 0) > SOURCE_DRAWER_CHUNK_DOM_LIMIT;
 }
 
 function appendSourceGroupRange(drawer, groups, start, end) {
@@ -5875,13 +6004,85 @@ function appendSourceGroupRange(drawer, groups, start, end) {
   const safeEnd = Math.min(groups.length, Math.max(safeStart, end));
   let firstAppended = null;
   for (const [offset, group] of groups.slice(safeStart, safeEnd).entries()) {
-    const node = renderSourceVideoGroup(group, { priorityMedia: safeStart + offset < 6 });
+    const node = renderSourceVideoGroup(group, { priorityMedia: false });
     if (!firstAppended) firstAppended = node;
     fragment.append(node);
   }
   const anchor = drawer.querySelector(":scope > .source-collapse-bottom") || null;
   drawer.insertBefore(fragment, anchor);
   return firstAppended;
+}
+
+function renderVirtualSourceGroups(drawer, options = {}) {
+  const groups = drawer._sourceGroups || [];
+  const windowSize = SOURCE_DRAWER_CHUNK_DOM_LIMIT;
+  const maxStart = Math.max(0, groups.length - windowSize);
+  const start = Math.min(Math.max(0, Number(options.start) || 0), maxStart);
+  const end = Math.min(groups.length, start + windowSize);
+  drawer._sourceWindowStart = start;
+  drawer._sourceWindowEnd = end;
+  clearVirtualSourceGroups(drawer);
+  const fragment = document.createDocumentFragment();
+  fragment.append(renderSourceWindowSpacer("top", start));
+  fragment.append(renderSourceWindowSentinel("top"));
+  for (const group of groups.slice(start, end)) {
+    fragment.append(renderSourceVideoGroup(group, { priorityMedia: false }));
+  }
+  fragment.append(renderSourceWindowSentinel("bottom"));
+  fragment.append(renderSourceWindowSpacer("bottom", Math.max(0, groups.length - end)));
+  const anchor = drawer.querySelector(":scope > .source-collapse-bottom") || null;
+  drawer.insertBefore(fragment, anchor);
+  setupSourceWindowObserver(drawer);
+}
+
+function clearVirtualSourceGroups(drawer) {
+  for (const node of drawer.querySelectorAll(":scope > .source-video-group, :scope > [data-source-window-node]")) {
+    node.remove();
+  }
+}
+
+function renderSourceWindowSpacer(position, count) {
+  const spacer = document.createElement("div");
+  spacer.dataset.sourceWindowNode = "true";
+  spacer.dataset.sourceWindowSpacer = position;
+  spacer.setAttribute("aria-hidden", "true");
+  spacer.style.height = `${Math.max(0, count) * SOURCE_DRAWER_ESTIMATED_ROW_HEIGHT}px`;
+  return spacer;
+}
+
+function renderSourceWindowSentinel(position) {
+  const sentinel = document.createElement("div");
+  sentinel.dataset.sourceWindowNode = "true";
+  sentinel.dataset.sourceWindowSentinel = position;
+  sentinel.setAttribute("aria-hidden", "true");
+  sentinel.style.minHeight = "1px";
+  return sentinel;
+}
+
+function setupSourceWindowObserver(drawer) {
+  if (drawer._sourceWindowObserver) {
+    drawer._sourceWindowObserver.disconnect();
+    drawer._sourceWindowObserver = null;
+  }
+  if (!window.IntersectionObserver || !shouldVirtualizeSourceGroups(drawer._sourceGroups || [])) return;
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const edge = entry.target.dataset.sourceWindowSentinel;
+      if (edge === "bottom") shiftSourceWindow(drawer, SOURCE_DRAWER_WINDOW_STEP);
+      if (edge === "top") shiftSourceWindow(drawer, -SOURCE_DRAWER_WINDOW_STEP);
+    }
+  }, { root: null, rootMargin: "240px 0px" });
+  drawer._sourceWindowObserver = observer;
+  for (const sentinel of drawer.querySelectorAll(":scope > [data-source-window-sentinel]")) observer.observe(sentinel);
+}
+
+function shiftSourceWindow(drawer, delta) {
+  const groups = drawer._sourceGroups || [];
+  if (!shouldVirtualizeSourceGroups(groups)) return;
+  const nextStart = Math.min(Math.max(0, (drawer._sourceWindowStart || 0) + delta), Math.max(0, groups.length - SOURCE_DRAWER_CHUNK_DOM_LIMIT));
+  if (nextStart === drawer._sourceWindowStart) return;
+  renderVirtualSourceGroups(drawer, { start: nextStart });
 }
 
 function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
@@ -6024,7 +6225,7 @@ function renderSourceVideoGroup(group, options = {}) {
   main.append(extra);
   section.append(main);
 
-  section.append(renderCopySetlistIconButton(videoItem));
+  section.append(renderCopySetlistIconButton({ ...videoItem, videoId, _requiresVideoSetlist: true }));
   return section;
 }
 
@@ -6052,6 +6253,7 @@ function renderCopySetlistButton(item, label = "复制歌单", className = "copy
   button.type = "button";
   button.dataset.copySetlist = "true";
   button._videoItem = item || {};
+  if (item?.videoId) button.dataset.videoSetlistPath = sourceDetailRuntime().videoSetlistPath(item.videoId);
   button.title = label || "复制歌单";
   button.setAttribute("aria-label", `复制该视频歌单：${item?.title || item?.videoId || "来源视频"}`);
   button.append(renderMusicNoteIcon());
@@ -6265,17 +6467,29 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     drawer.setAttribute("aria-busy", "true");
     try {
       if (mode !== "artist") {
-        drawerOccurrences = await sourceDetailOccurrencesForContainer(row, drawerOccurrences);
-        row._sourceDetailOccurrences = drawerOccurrences;
+        if (row._sourceDetailLoaded) {
+          drawerOccurrences = await sourceDetailOccurrencesForContainer(row, drawerOccurrences);
+        }
+        initializeSourceDrawer(drawer, {
+          mode,
+          occurrences: drawerOccurrences,
+          copyOccurrences: row._sourceOccurrences || drawerOccurrences,
+          songGroups,
+        });
+        prepareSourceDrawerLoading(row, drawer, drawerOccurrences);
+        startSourceDetailHydration(row, drawer, drawerOccurrences);
+      } else {
+        initializeSourceDrawer(drawer, {
+          mode,
+          occurrences: drawerOccurrences,
+          copyOccurrences: row._sourceOccurrences || drawerOccurrences,
+          songGroups,
+        });
+        drawer.setAttribute("aria-busy", "false");
       }
-      initializeSourceDrawer(drawer, {
-        mode,
-        occurrences: drawerOccurrences,
-        copyOccurrences: row._sourceOccurrences || drawerOccurrences,
-        songGroups,
-      });
-    } finally {
+    } catch (error) {
       drawer.setAttribute("aria-busy", "false");
+      throw error;
     }
   }
   if (nextExpanded) appendMobileSourceCollapse(drawer);
@@ -6316,6 +6530,7 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   if (nextExpanded) {
     state.expandedRows.add(row.dataset.rowKey);
   } else {
+    abortSourceDetailHydration(row);
     state.expandedRows.delete(row.dataset.rowKey);
   }
   trackCompactInitializedDrawer(row, nextExpanded);
@@ -6323,6 +6538,187 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   if (!nextExpanded && options.keepVisible) {
     window.requestAnimationFrame(() => keepSourceRowVisible(row));
   }
+}
+
+function prepareSourceDrawerLoading(row, drawer, previewOccurrences = []) {
+  const previewCount = window.FrontendUtils.groupOccurrencesByVideo(previewOccurrences).length;
+  const totalCount = sourceDetailExpectedCount(row, previewOccurrences);
+  updateSourceDrawerLoadingStatus(drawer, previewCount, totalCount, {
+    loading: Boolean(row._sourceDetailPath && previewCount < totalCount && !row._sourceDetailLoaded),
+  });
+  if (row._sourceDetailPath && previewCount < totalCount && !row._sourceDetailLoaded) {
+    appendSourceDrawerSkeleton(drawer, Math.min(3, Math.max(1, totalCount - previewCount)));
+  }
+}
+
+function startSourceDetailHydration(row, drawer, previewOccurrences = []) {
+  const path = cleanText(row?._sourceDetailPath);
+  if (!path || row?._sourceDetailLoaded) {
+    drawer.setAttribute("aria-busy", "false");
+    return;
+  }
+  removeSourceDetailRetry(drawer);
+  abortSourceDetailHydration(row);
+  const key = cleanText(row?._sourceDetailKey);
+  const cacheKey = sourceDetailCacheKey(path, key);
+  const preview = previewOccurrences || row._sourceOccurrences || [];
+  if (state.sourceDetailCache.has(cacheKey)) {
+    applySourceDetailOccurrencesToDrawer(row, drawer, state.sourceDetailCache.get(cacheKey), preview, { complete: true });
+    drawer.setAttribute("aria-busy", "false");
+    return;
+  }
+  const controller = new AbortController();
+  row._sourceDetailAbortController = controller;
+  drawer.setAttribute("aria-busy", "true");
+  const load = loadSourceDetailOccurrencesIncremental(path, key, {
+    signal: controller.signal,
+    onChunk: (_chunkOccurrences, progress) => {
+      applySourceDetailOccurrencesToDrawer(row, drawer, progress.loadedOccurrences, preview, {
+        complete: progress.index >= progress.chunkCount,
+      });
+    },
+  })
+    .then((occurrences) => {
+      state.sourceDetailCache.set(cacheKey, occurrences);
+      applySourceDetailOccurrencesToDrawer(row, drawer, occurrences, preview, { complete: true });
+      return occurrences;
+    })
+    .catch((error) => {
+      if (isAbortError(error)) return [];
+      markSourceDetailFailure(row, drawer, preview);
+      return [];
+    })
+    .finally(() => {
+      if (row._sourceDetailAbortController === controller) delete row._sourceDetailAbortController;
+      drawer.setAttribute("aria-busy", "false");
+      state.sourceDetailLoads.delete(cacheKey);
+    });
+  state.sourceDetailLoads.set(cacheKey, load);
+}
+
+function applySourceDetailOccurrencesToDrawer(row, drawer, detailOccurrences, previewOccurrences = [], options = {}) {
+  const merged = window.FrontendUtils.mergeCompleteSourceOccurrences(detailOccurrences || [], previewOccurrences || []);
+  row._sourceDetailOccurrences = merged;
+  drawer._sourceOccurrences = merged;
+  drawer._songSourceOccurrences = merged;
+  resetSourceDrawerRenderedRows(drawer);
+  appendSourceDrawerLinks(drawer, merged, {
+    showToolbar: true,
+    copyOccurrences: merged,
+    totalCount: sourceDetailExpectedCount(row, merged),
+  });
+  removeSourceDrawerSkeleton(drawer);
+  updateSourceDrawerLoadingStatus(drawer, window.FrontendUtils.groupOccurrencesByVideo(merged).length, sourceDetailExpectedCount(row, merged), {
+    loading: !options.complete,
+  });
+  if (options.complete) row._sourceDetailLoaded = true;
+}
+
+function resetSourceDrawerRenderedRows(drawer) {
+  for (const node of drawer.querySelectorAll(":scope > .source-video-group, :scope > [data-source-window-node], :scope > [data-source-skeleton]")) {
+    node.remove();
+  }
+  delete drawer._sourceWindowStart;
+  delete drawer._sourceWindowEnd;
+  if (drawer._sourceWindowObserver) {
+    drawer._sourceWindowObserver.disconnect();
+    drawer._sourceWindowObserver = null;
+  }
+}
+
+function sourceDetailExpectedCount(row, occurrences = []) {
+  const loadedCount = window.FrontendUtils.groupOccurrencesByVideo(occurrences || []).length;
+  return Math.max(loadedCount, Number(row?._sourceVideoCount) || 0);
+}
+
+function updateSourceDrawerLoadingStatus(drawer, loadedCount, totalCount, options = {}) {
+  const count = drawer.querySelector(":scope > .source-drawer-toolbar .source-drawer-count");
+  if (!count) return;
+  if (options.error) {
+    count.textContent = "来源读取失败，重试";
+    return;
+  }
+  if (options.loading && totalCount > loadedCount) {
+    count.textContent = `已加载 ${loadedCount} / ${totalCount} · 正在加载来源`;
+    return;
+  }
+  count.textContent = sourceDrawerCountText(loadedCount, totalCount);
+}
+
+function appendSourceDrawerSkeleton(drawer, count) {
+  removeSourceDrawerSkeleton(drawer);
+  const fragment = document.createDocumentFragment();
+  for (let index = 0; index < count; index += 1) {
+    const section = document.createElement("section");
+    section.className = "source-video-group";
+    section.dataset.sourceSkeleton = "true";
+    section.setAttribute("aria-hidden", "true");
+    const main = document.createElement("div");
+    main.className = "source-video-main";
+    const line = document.createElement("div");
+    line.className = "source-video-title";
+    line.textContent = "正在加载来源";
+    main.append(line);
+    section.append(main);
+    fragment.append(section);
+  }
+  const anchor = drawer.querySelector(":scope > .source-collapse-bottom") || null;
+  drawer.insertBefore(fragment, anchor);
+}
+
+function removeSourceDrawerSkeleton(drawer) {
+  for (const node of drawer.querySelectorAll(":scope > [data-source-skeleton]")) node.remove();
+}
+
+function markSourceDetailFailure(row, drawer, previewOccurrences = []) {
+  removeSourceDrawerSkeleton(drawer);
+  updateSourceDrawerLoadingStatus(drawer, window.FrontendUtils.groupOccurrencesByVideo(previewOccurrences || []).length, sourceDetailExpectedCount(row, previewOccurrences), {
+    error: true,
+  });
+  appendSourceDetailRetry(drawer);
+}
+
+function appendSourceDetailRetry(drawer) {
+  const actions = drawer.querySelector(":scope > .source-drawer-toolbar .source-drawer-actions");
+  if (!actions || actions.querySelector("[data-source-detail-retry]")) return;
+  const button = document.createElement("button");
+  button.className = "source-action ui-chip";
+  button.type = "button";
+  button.dataset.sourceDetailRetry = "true";
+  button.textContent = "重试";
+  button.setAttribute("aria-label", "来源读取失败，重试");
+  actions.insertBefore(button, actions.firstChild);
+}
+
+function removeSourceDetailRetry(drawer) {
+  drawer.querySelector(":scope > .source-drawer-toolbar [data-source-detail-retry]")?.remove();
+}
+
+function retrySourceDetailLoad(button) {
+  const row = button.closest(".rank-row, .index-row");
+  const drawer = row?.querySelector(".source-drawer");
+  if (!row || !drawer) return;
+  const preview = row._sourceOccurrences || [];
+  removeSourceDetailRetry(drawer);
+  appendSourceDrawerSkeleton(drawer, 3);
+  updateSourceDrawerLoadingStatus(drawer, window.FrontendUtils.groupOccurrencesByVideo(preview).length, sourceDetailExpectedCount(row, preview), {
+    loading: true,
+  });
+  startSourceDetailHydration(row, drawer, preview);
+}
+
+function abortSourceDetailHydration(row) {
+  if (!row?._sourceDetailAbortController) return;
+  row._sourceDetailAbortController.abort();
+  delete row._sourceDetailAbortController;
+}
+
+function sourceDetailCacheKey(path, key = "") {
+  return key ? `${path}#${key}` : path;
+}
+
+function isAbortError(error) {
+  return error?.name === "AbortError" || /aborted|abort/i.test(String(error?.message || ""));
 }
 
 function syncInlineCopyAllButton(row, isExpanded) {
@@ -6697,7 +7093,10 @@ function cacheModeForPath(path) {
   if (/^data\/ui\/ranges\/(?:7d|all)\/summary\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/views\/.+\/(?:index|manifest|page-\d{4})\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/records\/(?:song|artist|video)\/shard-\d{4}\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
+  if (/^data\/ui\/ranges\/(?:7d|all)\/sources\/[0-9a-f]{2}\/[^/]+\/(?:manifest|chunk-\d{4})\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
+  if (/^data\/ui\/ranges\/(?:7d|all)\/sources\/[0-9a-f]{2}\/[^/]+\/(?:manifest|chunk-\d{4})\.json$/u.test(path)) return "no-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/sources\/[^/]+\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
+  if (/^data\/ui\/video-setlists\/[^/]+\/[^/]+\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/search\/.+\/page-\d{4}\.[0-9a-f]{12}\.json$/u.test(path)) return "force-cache";
   if (/^data\/ui\/ranges\/(?:7d|all)\/(?:views|records|sources|search)\/.+\/manifest\.json$/u.test(path)) return "no-cache";
   if (/^data\/ui\/(?:7d|all|72h|1m)\.json$/u.test(path)) return "no-cache";
@@ -6791,17 +7190,79 @@ function renderTrendBadge(trend) {
   return badge;
 }
 
-async function copyVideoSetlist(item) {
-  const text = window.FrontendUtils.buildSetlistText(item, {
-    isUnknownArtistName: window.RankingUtils.isUnknownArtistName,
-  });
-  if (!text) {
-    showToast("这场视频没有可复制的歌单");
-    return;
+async function copyVideoSetlist(item, button = null) {
+  setCopySetlistButtonLoading(button, true);
+  try {
+    const sourceItem = await completeVideoSetlistItem(item);
+    const text = window.FrontendUtils.buildSetlistText(sourceItem, {
+      isUnknownArtistName: window.RankingUtils.isUnknownArtistName,
+    });
+    if (!text) {
+      showToast("这场视频没有可复制的歌单");
+      return;
+    }
+    await writeClipboardText(text);
+    const count = text.split("\n").filter(Boolean).length;
+    showToast(`已复制整场歌单 · ${count}首`);
+  } catch (error) {
+    if (button) {
+      button.title = "歌单读取失败，重试";
+      button.setAttribute("aria-label", "歌单读取失败，重试");
+    }
+    throw error;
+  } finally {
+    setCopySetlistButtonLoading(button, false);
   }
-  await writeClipboardText(text);
-  const count = text.split("\n").filter(Boolean).length;
-  showToast(`已复制整场歌单 · ${count}首`);
+}
+
+async function completeVideoSetlistItem(item = {}) {
+  const songs = item._allSongs || item.songs || [];
+  const needsRemote = item._requiresVideoSetlist === true || !Array.isArray(songs) || songs.length <= 1;
+  if (!needsRemote) return item;
+  const videoId = cleanText(item.videoId);
+  if (!videoId) return item;
+  const setlist = await loadVideoSetlist(videoId, item);
+  return {
+    ...item,
+    title: setlist.title || item.title || videoId,
+    channelName: setlist.channelName || item.channelName || "",
+    songs: setlist.songs || [],
+    _allSongs: setlist.songs || [],
+  };
+}
+
+async function loadVideoSetlist(videoId, fallbackItem = {}) {
+  const key = cleanText(videoId);
+  if (state.videoSetlistCache.has(key)) return state.videoSetlistCache.get(key);
+  if (state.videoSetlistLoads.has(key)) return state.videoSetlistLoads.get(key);
+  const path = sourceDetailRuntime().videoSetlistPath(key);
+  const load = readJson(path, { cache: cacheModeForPath(path) })
+    .then((payload) => ({
+      videoId: key,
+      title: cleanText(payload?.title || fallbackItem.title || key),
+      channelName: cleanText(payload?.channelName || fallbackItem.channelName),
+      songs: Array.isArray(payload?.songs) ? payload.songs : [],
+      dataVersion: cleanText(payload?.dataVersion),
+      generatedAt: cleanText(payload?.generatedAt),
+    }))
+    .then((payload) => {
+      state.videoSetlistCache.set(key, payload);
+      return payload;
+    })
+    .catch((error) => {
+      throw new Error(`歌单读取失败，重试（${error.message}）`);
+    })
+    .finally(() => {
+      state.videoSetlistLoads.delete(key);
+    });
+  state.videoSetlistLoads.set(key, load);
+  return load;
+}
+
+function setCopySetlistButtonLoading(button, isLoading) {
+  if (!button) return;
+  button.disabled = isLoading;
+  button.setAttribute("aria-busy", isLoading ? "true" : "false");
 }
 
 async function copySongSourceLinks(occurrences) {
