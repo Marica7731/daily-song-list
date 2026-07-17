@@ -26,6 +26,7 @@ const {
   formatSetlistTime,
   formatSeconds,
   groupOccurrencesByVideo,
+  mergeCompleteSourceOccurrences,
   isSongSearchKnown,
   indexBucketButtonModel,
   makeQueryDraftFromState,
@@ -586,7 +587,7 @@ test("mobile page stepper exposes stable neighbor and arrow targets", () => {
   });
 });
 
-test("source presentation model inlines up to three videos and expands only the rest", () => {
+test("source presentation model inlines previews and expands to the complete source list", () => {
   const empty = sourcePresentationModel([]);
   assert.equal(empty.mode, "none");
   assert.equal(empty.videoCount, 0);
@@ -667,12 +668,12 @@ test("source presentation model inlines up to three videos and expands only the 
     ["D"],
   );
   assert.equal(fourVideos.remainingCount, 1);
-  assert.equal(fourVideos.collapsedLabel, "+1来源");
-  assert.equal(fourVideos.collapsedAriaLabel, "查看其余 1 个来源");
-  assert.equal(fourVideos.expandedLabel, "收起");
+  assert.equal(fourVideos.collapsedLabel, "查看全部来源");
+  assert.equal(fourVideos.collapsedAriaLabel, "查看该歌曲的全部 4 个来源");
+  assert.equal(fourVideos.expandedLabel, "收起来源");
   assert.equal(fourVideos.hasMore, true);
   assert.equal(fourVideos.canExpand, true);
-  assert.equal(fourVideos.showCopyAll, true);
+  assert.equal(fourVideos.showCopyAll, false);
 
   const expanded = sourcePresentationModel(
     [
@@ -684,10 +685,14 @@ test("source presentation model inlines up to three videos and expands only the 
     { expanded: true },
   );
   assert.equal(expanded.mode, "expanded");
-  assert.equal(expanded.inlineVisibleCount, 3);
+  assert.equal(expanded.inlineVisibleCount, 0);
+  assert.deepEqual(
+    expanded.inlineGroups.map((group) => group.videoId),
+    [],
+  );
   assert.deepEqual(
     expanded.detailGroups.map((group) => group.videoId),
-    ["D"],
+    ["A", "B", "C", "D"],
   );
   assert.equal(expanded.hasMore, false);
 });
@@ -698,8 +703,8 @@ test("source presentation distinguishes videos from many timestamps", () => {
   assert.equal(model.videoCount, 114);
   assert.equal(model.inlineVisibleCount, 3);
   assert.equal(model.remainingCount, 111);
-  assert.equal(model.collapsedLabel, "+111来源");
-  assert.equal(model.collapsedAriaLabel, "查看其余 111 个来源");
+  assert.equal(model.collapsedLabel, "查看全部来源");
+  assert.equal(model.collapsedAriaLabel, "查看该歌曲的全部 114 个来源");
 
   const oneVideoManyTimes = sourcePresentationModel(
     Array.from({ length: 89 }, (_, index) => occurrence("A", "channel A", { seconds: index + 1 })),
@@ -722,7 +727,44 @@ test("source presentation can represent external detail shards without duplicati
   assert.equal(model.inlineVisibleCount, 2);
   assert.equal(model.hiddenGroups.length, 0);
   assert.equal(model.remainingCount, 3);
-  assert.equal(model.collapsedLabel, "+3来源");
+  assert.equal(model.collapsedLabel, "查看全部来源");
+});
+
+test("source detail merge preserves complete source lists without duplicating previews", () => {
+  const preview = [
+    occurrence("A", "channel A", { seconds: 10 }, { publishedTimestamp: "2026-07-15T00:00:00Z" }),
+    occurrence("B", "channel B", { seconds: 20 }, { publishedTimestamp: "2026-07-14T00:00:00Z" }),
+  ];
+  const completeDetail = [
+    occurrence("A", "channel A", { seconds: 10 }, { publishedTimestamp: "2026-07-15T00:00:00Z" }),
+    occurrence("B", "channel B", { seconds: 20 }, { publishedTimestamp: "2026-07-14T00:00:00Z" }),
+    occurrence("C", "channel C", { seconds: 30 }, { publishedTimestamp: "2026-07-13T00:00:00Z" }),
+  ];
+
+  assert.deepEqual(
+    mergeCompleteSourceOccurrences(completeDetail, preview).map(({ item }) => item.videoId),
+    ["A", "B", "C"],
+  );
+
+  const remainderDetail = [
+    occurrence("C", "channel C", { seconds: 30 }, { publishedTimestamp: "2026-07-13T00:00:00Z" }),
+    occurrence("D", "channel D", { seconds: 40 }, { publishedTimestamp: "2026-07-12T00:00:00Z" }),
+  ];
+
+  assert.deepEqual(
+    mergeCompleteSourceOccurrences(remainderDetail, preview).map(({ item }) => item.videoId),
+    ["A", "B", "C", "D"],
+  );
+
+  const duplicateDetail = [
+    occurrence("B", "channel B", { seconds: 20 }, { publishedTimestamp: "2026-07-14T00:00:00Z" }),
+    occurrence("C", "channel C", { seconds: 30 }, { publishedTimestamp: "2026-07-13T00:00:00Z" }),
+  ];
+
+  assert.deepEqual(
+    mergeCompleteSourceOccurrences(duplicateDetail, preview).map(({ item }) => item.videoId),
+    ["A", "B", "C"],
+  );
 });
 
 test("url state parses and serializes range, view, page, pageSize, bucket, outside, q, and snapshot", () => {
@@ -998,8 +1040,8 @@ test("summary video count keeps source totals separate from hidden-unknown visib
     note: "",
     sourceCount: 1224,
     visibleCount: 1224,
-    ratioText: "1224/1224",
-    usesSourceCount: true,
+    ratioText: "1224",
+    usesSourceCount: false,
   });
 });
 

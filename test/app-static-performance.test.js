@@ -63,7 +63,7 @@ test("monthly range copy describes all-range catalog semantics", () => {
   assert.doesNotMatch(indexSource, /来自 YouTube 月度搜索筛选/u);
   assert.match(indexSource, /累计全量；YouTube 月度搜索和历史快照用于补充发现视频。/u);
   assert.match(indexSource, /最近7天和累计全量时间戳歌单快照/u);
-  assert.match(appSource, /monthlyCoverageNote/u);
+  assert.doesNotMatch(appSource, /monthlyCoverageNote/u);
 });
 
 test("record videoCount is used for rank values and row rendering", () => {
@@ -72,14 +72,14 @@ test("record videoCount is used for rank values and row rendering", () => {
   assert.match(appSource, /videoCount:\s*record\.videoCount/u);
 });
 
-test("song and index rows inline source previews and expand only remaining videos", () => {
+test("song and index rows inline source previews and expand to full source lists", () => {
   const rankRecordBody = functionBody("function renderRankRecord");
   assert.match(rankRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(videoCount\) \|\| 0\)/u);
   assert.match(rankRecordBody, /const safeOccurrences = occurrences \|\| \[\]/u);
   assert.match(rankRecordBody, /const occurrenceCount = safeOccurrences\.length/u);
   assert.match(rankRecordBody, /sourcePresentationModel\(safeOccurrences/u);
   assert.match(rankRecordBody, /Boolean\(sourcePresentation\?\.canExpand\)/u);
-  assert.match(rankRecordBody, /row\._sourceDetailOccurrences = sourcePresentation\?\.hiddenGroups\?\.flatMap/u);
+  assert.match(rankRecordBody, /row\._sourceDetailOccurrences = safeOccurrences/u);
   assert.match(rankRecordBody, /occurrences: mode === "artist" \? safeOccurrences : row\._sourceDetailOccurrences/u);
   assert.match(rankRecordBody, /copyOccurrences: safeOccurrences/u);
   assert.match(rankRecordBody, /renderRankSide/u);
@@ -89,7 +89,7 @@ test("song and index rows inline source previews and expand only remaining video
   assert.match(indexRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(record\.videoCount\) \|\| 0\)/u);
   assert.match(indexRecordBody, /sourcePresentationModel\(record\.occurrences/u);
   assert.match(indexRecordBody, /const expandable = sourcePresentation\.canExpand/u);
-  assert.match(indexRecordBody, /row\._sourceDetailOccurrences = sourcePresentation\.hiddenGroups\.flatMap/u);
+  assert.match(indexRecordBody, /row\._sourceDetailOccurrences = record\.occurrences/u);
   assert.match(indexRecordBody, /occurrences: row\._sourceDetailOccurrences/u);
   assert.match(indexRecordBody, /copyOccurrences: record\.occurrences/u);
   assert.match(indexRecordBody, /renderRankSide/u);
@@ -113,27 +113,25 @@ test("song and index rows inline source previews and expand only remaining video
   assert.match(stripBody, /renderInlineCopySongLinksButton/u);
 });
 
-test("source drawer append-more reveals all remaining sources without rebuilding old cards", () => {
-  const expandBody = functionBody("function expandSourceVideoGroups");
-  assert.match(expandBody, /const nextVisible = groups\.length/u);
-  assert.match(expandBody, /SOURCE_EXPAND_CHUNK_SIZE/u);
-  assert.match(expandBody, /await yieldToBrowser\(\)/u);
-  assert.match(expandBody, /convertSourceGroupMoreToCollapse\(button, drawer\)/u);
-  assert.doesNotMatch(expandBody, /sourceBatchSizeForMode/u);
+test("source drawer renders complete source lists without rebuilding old cards", () => {
+  const appendLinksBody = functionBody("function appendSourceDrawerLinks");
+  assert.match(appendLinksBody, /const visibleCount = groups\.length/u);
+  assert.match(appendLinksBody, /appendSourceGroupRange\(drawer, groups, sourceRenderedGroupCount\(drawer\), visibleCount\)/u);
+  assert.doesNotMatch(appendLinksBody, /sourceVisibleGroupCount|syncSourceGroupMoreButton|sourceBatchSizeForMode/u);
 
   const appendRangeBody = functionBody("function appendSourceGroupRange");
   assert.match(appendRangeBody, /document\.createDocumentFragment\(\)/u);
   assert.match(appendRangeBody, /drawer\.insertBefore\(fragment/u);
   assert.doesNotMatch(appendRangeBody, /replaceChildren/u);
 
-  const footerBody = functionBody("function convertSourceGroupMoreToCollapse");
-  assert.match(footerBody, /delete button\.dataset\.toggleSourceGroups/u);
-  assert.match(footerBody, /button\.dataset\.collapseSource = "true"/u);
-  assert.doesNotMatch(footerBody, /createElement\("button"\)|remove\(\)/u);
+  assert.doesNotMatch(appSource, /function expandSourceVideoGroups|function convertSourceGroupMoreToCollapse|data-toggle-source-groups/u);
 
   const expandedBody = functionBody("async function setSourceDrawerExpanded");
   assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
+  assert.match(expandedBody, /sourceDetailOccurrencesForContainer\(row, drawerOccurrences\)/u);
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
+  assert.match(functionBody("function sourceDetailOccurrencesForContainer"), /mergeCompleteSourceOccurrences/u);
+  assert.doesNotMatch(appSource, /function remainingSourceDetailOccurrences/u);
 });
 
 test("artist rank song details share inline source model and append remaining songs in batches", () => {
@@ -145,7 +143,7 @@ test("artist rank song details share inline source model and append remaining so
   assert.match(renderArtistBody, /sourcePresentationModel\(group\.occurrences/u);
   assert.match(renderArtistBody, /renderSourceInlineStrip\(sourcePresentation/u);
   assert.match(renderArtistBody, /sources\.dataset\.sourceDeferred = "true"/u);
-  assert.match(renderArtistBody, /sourcePresentation\.hiddenGroups\.flatMap/u);
+  assert.match(renderArtistBody, /sources\._sourceOccurrences = group\.occurrences/u);
   assert.doesNotMatch(renderArtistBody, /dataset\.toggleArtistSongSource = "true"/u);
   assert.match(renderArtistBody, /renderCopySongLinksIconButton\(group\.occurrences\)/u);
 
@@ -153,7 +151,6 @@ test("artist rank song details share inline source model and append remaining so
   assert.match(toggleSourceBody, /sources\.dataset\.sourceDeferred === "true"/u);
   assert.match(toggleSourceBody, /copyOccurrences: sources\._songSourceOccurrences \|\| sources\._sourceOccurrences/u);
   assert.match(toggleSourceBody, /showToolbar: false/u);
-  assert.match(functionBody("function appendSourceDrawerLinks"), /drawer\.dataset\.sourceMode === "artist-song"/u);
   assert.match(toggleSourceBody, /closeSiblingArtistSongSources\(section\)/u);
 
   const toggleLimitBody = functionBody("function toggleArtistSongLimit");

@@ -133,13 +133,13 @@ async function waitForQueryFilterControls(page) {
   await page.waitForFunction(
     () => {
       const searchInput = document.querySelector("#queryInput");
-      const filterPanel = document.querySelector("#queryFilterPanel");
+      const filterPanel = document.querySelector(".query-filter-matrix");
       const filterTabs = document.querySelectorAll("[data-query-panel-tab], .query-tabs");
       const niche = document.querySelector("#nicheOnlyToggle");
       const hideUnknown = document.querySelector("#hideUnknownToggle");
       return (
-        filterPanel?.hidden === false &&
         filterTabs.length === 0 &&
+        Boolean(filterPanel?.getBoundingClientRect().height) &&
         Boolean(searchInput?.getBoundingClientRect().height) &&
         Boolean(niche?.getBoundingClientRect().height) &&
         Boolean(hideUnknown?.getBoundingClientRect().height)
@@ -743,6 +743,7 @@ async function desktopRankVisualGeometry(browser) {
         .filter((button) => button.top >= top - 2 && button.top <= firstRowBottom);
       return {
         remainingCount: Number(node.querySelector("[data-toggle-source]")?.dataset.remainingCount || 0),
+        videoCount: Number(node.querySelector("[data-toggle-source]")?.dataset.videoCount || 0),
         drawer: drawer ? rectFor(drawer) : null,
         toolbar: toolbar ? rectFor(toolbar) : null,
         firstGroup: firstGroup ? rectFor(firstGroup) : null,
@@ -768,13 +769,13 @@ async function desktopRankVisualGeometry(browser) {
     if (sourceGeometry.copyAllButtons !== 1 || sourceGeometry.copyAllInToolbar !== 1 || sourceGeometry.copyAllInsideCards !== 0) {
       throw new Error(`desktop copy-all placement invalid ${JSON.stringify(sourceGeometry)}`);
     }
-    if (!sourceGeometry.remainingCount || sourceGeometry.groups.length !== sourceGeometry.remainingCount) {
-      throw new Error(`desktop source drawer should render all remaining sources on one click ${JSON.stringify(sourceGeometry)}`);
+    if (!sourceGeometry.videoCount || sourceGeometry.groups.length !== sourceGeometry.videoCount) {
+      throw new Error(`desktop source drawer should render all sources on one click ${JSON.stringify(sourceGeometry)}`);
     }
     if (sourceGeometry.moreButtons) {
       throw new Error(`desktop source drawer should not expose a second source expander ${JSON.stringify(sourceGeometry)}`);
     }
-    if (sourceGeometry.toolbarCollapseButtons !== 0) throw new Error(`desktop source drawer should not duplicate the inline collapse action ${JSON.stringify(sourceGeometry)}`);
+    if (sourceGeometry.toolbarCollapseButtons !== 1) throw new Error(`desktop source drawer should expose one toolbar collapse action ${JSON.stringify(sourceGeometry)}`);
     if (sourceGeometry.bottomCollapseButtons !== 0) throw new Error(`desktop source drawer should not render a mobile-only bottom collapse action ${JSON.stringify(sourceGeometry)}`);
     if (sourceGeometry.toolbar.bottom > sourceGeometry.firstGroup.top + 8) {
       throw new Error(`desktop source toolbar not before cards ${JSON.stringify(sourceGeometry)}`);
@@ -793,52 +794,6 @@ async function desktopRankVisualGeometry(browser) {
     if (sourceGeometry.copyButtons.length > 1) {
       const top = sourceGeometry.copyButtons[0].top;
       for (const button of sourceGeometry.copyButtons) assertClose(button.top, top, 3, "desktop source copy button top", sourceGeometry);
-    }
-    if (sourceGeometry.moreButtons) {
-      const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
-      const expectedTotal = sourceCountFromText(sourceGeometry.countText);
-      const preservedBefore = await row.locator(".source-video-group").first().evaluate((node) => {
-        node.dataset.codexPreserve = "1";
-        const image = node.querySelector("img");
-        if (image) image.dataset.codexPreserve = "1";
-        return {
-          text: node.textContent || "",
-          imageSrc: image?.currentSrc || image?.src || "",
-        };
-      });
-      const footerHandle = await row.locator("[data-toggle-source-groups]").first().elementHandle();
-      await row.locator("[data-toggle-source-groups]").first().evaluate((node) => {
-        node.dataset.codexFooterPreserve = "1";
-      });
-      await row.locator("[data-toggle-source-groups]").first().click();
-      const afterGroupCount = expectedTotal
-        ? await waitForVisibleCountAtLeast(row, ".source-video-group", expectedTotal)
-        : await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
-      if (afterGroupCount <= beforeGroupCount) throw new Error("desktop source group expander did not add visible groups");
-      if (expectedTotal && afterGroupCount !== expectedTotal) {
-        throw new Error(`desktop source group expander should reveal all remaining groups: before=${beforeGroupCount} after=${afterGroupCount} total=${expectedTotal}`);
-      }
-      if ((await row.locator("[data-toggle-source-groups]").count()) !== 0) throw new Error("desktop source group expander remained after revealing all sources");
-      const footerAfter = footerHandle
-        ? await footerHandle.evaluate((node) => ({
-            preserved: node.dataset.codexFooterPreserve === "1",
-            collapse: node.dataset.collapseSource === "true",
-            text: node.textContent.trim(),
-            connected: node.isConnected,
-          }))
-        : null;
-      if (!footerAfter?.preserved || !footerAfter.collapse || footerAfter.text !== "收起" || !footerAfter.connected) {
-        throw new Error(`desktop source group footer did not become collapse in place ${JSON.stringify(footerAfter)}`);
-      }
-      const preservedAfter = await row.locator(".source-video-group").first().evaluate((node) => ({
-        preserved: node.dataset.codexPreserve === "1",
-        imagePreserved: node.querySelector("img")?.dataset.codexPreserve === "1",
-        text: node.textContent || "",
-        imageSrc: node.querySelector("img")?.currentSrc || node.querySelector("img")?.src || "",
-      }));
-      if (!preservedAfter.preserved || !preservedAfter.imagePreserved || preservedAfter.text !== preservedBefore.text || preservedAfter.imageSrc !== preservedBefore.imageSrc) {
-        throw new Error(`desktop source group expander rebuilt existing source cards ${JSON.stringify({ preservedBefore, preservedAfter })}`);
-      }
     }
     const secondRow = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])").nth(1);
     if ((await secondRow.count()) === 1) {
@@ -936,7 +891,7 @@ async function interactionFlow(browser) {
     groups.some((group) => group.querySelectorAll(".source-time-link:not([hidden])").length > 10),
   );
   if (oversizedTimestampGroup) throw new Error("source drawer rendered more than 10 timestamps in a collapsed video group");
-  await page.locator("[data-toggle-source]").first().click();
+  await page.locator(".rank-row.is-expanded .source-collapse-top[data-collapse-source], .rank-row.is-expanded .source-collapse-bottom[data-collapse-source]").first().click();
   await page.locator('.view-mode [data-view="artistRank"]').click();
   await waitForRows(page, errors, requests);
   await page.locator('.view-mode [data-view="videos"]').click();
@@ -1140,10 +1095,11 @@ async function mobileFilterSheetFlow(browser) {
     if (!nicheToggle?.label || !unknownToggle?.label || !nicheToggle.input || !unknownToggle.input || !nicheToggle.text || !unknownToggle.text) {
       throw new Error(`mobile filter toggles missing ${JSON.stringify(topGeometry)}`);
     }
-    assertClose(nicheToggle.label.left, unknownToggle.label.left, 1, "sheet toggle left", topGeometry);
-    assertClose(nicheToggle.label.right, unknownToggle.label.right, 1, "sheet toggle right", topGeometry);
+    assertClose(nicheToggle.label.top, unknownToggle.label.top, 1, "sheet toggle top", topGeometry);
+    assertClose(nicheToggle.label.bottom, unknownToggle.label.bottom, 1, "sheet toggle bottom", topGeometry);
     assertClose(nicheToggle.label.width, unknownToggle.label.width, 1, "sheet toggle width", topGeometry);
     assertClose(nicheToggle.label.height, unknownToggle.label.height, 1, "sheet toggle height", topGeometry);
+    if (nicheToggle.label.right > unknownToggle.label.left - 4) throw new Error(`sheet toggles overlap ${JSON.stringify(topGeometry)}`);
     if (!nicheToggle.label.borderRadius || !unknownToggle.label.borderRadius) throw new Error(`sheet toggle border radius missing ${JSON.stringify(topGeometry)}`);
     assertClose(nicheToggle.label.borderRadius, unknownToggle.label.borderRadius, 1, "sheet toggle radius", topGeometry);
     assertClose(nicheToggle.input.centerY - nicheToggle.label.centerY, unknownToggle.input.centerY - unknownToggle.label.centerY, 1, "sheet checkbox center offset", topGeometry);
@@ -1155,7 +1111,7 @@ async function mobileFilterSheetFlow(browser) {
     assertClose(topGeometry.segmented[0].height, topGeometry.segmented[1].height, 1, "metric segmented height", topGeometry);
     if (!topGeometry.selects.length) throw new Error(`mobile filter select controls missing ${JSON.stringify(topGeometry)}`);
     for (const select of topGeometry.selects) {
-      if (select.height < 36 || select.height > 38) throw new Error(`filter select height invalid ${JSON.stringify(topGeometry)}`);
+      if (select.height < 32 || select.height > 38) throw new Error(`filter select height invalid ${JSON.stringify(topGeometry)}`);
     }
     const selectHeights = topGeometry.selects.map((item) => item.height);
     if (Math.max(...selectHeights) - Math.min(...selectHeights) > 1) throw new Error(`filter select heights differ ${JSON.stringify(topGeometry)}`);
@@ -1620,7 +1576,7 @@ async function mobileCopyAllLinksFlow(browser) {
       throw new Error(`copy setlist icon button invalid ${JSON.stringify({ invalidSetlistButton, setlistButtonsShape: setlistButtonsShape.slice(0, 12) })}`);
     }
 
-    await row.locator("[data-copy-setlist]").first().click();
+    await row.locator(".source-drawer:not([hidden]) .source-video-group [data-copy-setlist]").first().click();
     await page.waitForFunction(() => (window.__clipboardWrites || []).length > 1, null, { timeout: 5000 });
     const setlistCopied = await page.evaluate(() => (window.__clipboardWrites[1] || "").split("\n").filter(Boolean).length);
     if (!setlistCopied) throw new Error("copy setlist did not write clipboard text");
@@ -1695,8 +1651,9 @@ async function mobileCopyAllLinksFlow(browser) {
         tripleShape.items.length !== 2 ||
         tripleShape.toggleCount !== 1 ||
         tripleShape.drawerCount !== 1 ||
-        tripleShape.copyAllCount !== 1 ||
+        tripleShape.copyAllCount !== 0 ||
         !tripleShape.more?.visible ||
+        tripleShape.more.text !== "查看全部来源" ||
         tripleShape.more.width > 92 ||
         tripleShape.more.height > 30 ||
         tripleShape.more.flexGrow !== "0" ||
@@ -1724,8 +1681,9 @@ async function mobileCopyAllLinksFlow(browser) {
         moreShape.inlineVisibleCount !== 2 ||
         moreShape.items.length !== 2 ||
         moreShape.toggleCount !== 1 ||
-        moreShape.copyAllCount !== 1 ||
+        moreShape.copyAllCount !== 0 ||
         !moreShape.more?.visible ||
+        moreShape.more.text !== "查看全部来源" ||
         moreShape.more.width > 92 ||
         moreShape.more.height > 30 ||
         moreShape.more.flexGrow !== "0" ||
@@ -2024,12 +1982,12 @@ async function compactSourceDrawerFlow(browser) {
     if ((await page.locator(".rank-row.is-expanded, .index-row.is-expanded").count()) !== 1) {
       throw new Error(`${scenario.label} source drawer should keep exactly one row expanded`);
     }
-    const expectedRemaining = Number.parseInt((await button.getAttribute("data-remaining-count")) || "0", 10);
-    if (!expectedRemaining) throw new Error(`${scenario.label} source drawer toggle missing remaining count`);
+    const expectedVideoCount = Number.parseInt((await button.getAttribute("data-video-count")) || "0", 10);
+    if (!expectedVideoCount) throw new Error(`${scenario.label} source drawer toggle missing video count`);
     if ((await row.locator("[data-toggle-source-groups]").count()) !== 0) throw new Error("song source drawer should not expose a second source group expander");
     const visibleGroupsOnOpen = await countVisibleInRow(row, ".source-video-group");
-    if (visibleGroupsOnOpen !== expectedRemaining) {
-      throw new Error(`${scenario.label} source drawer should reveal all remaining groups on one click: expected=${expectedRemaining} actual=${visibleGroupsOnOpen}`);
+    if (visibleGroupsOnOpen !== expectedVideoCount) {
+      throw new Error(`${scenario.label} source drawer should reveal all groups on one click: expected=${expectedVideoCount} actual=${visibleGroupsOnOpen}`);
     }
 
     const geometry = await row.evaluate((node) => {
@@ -2039,7 +1997,9 @@ async function compactSourceDrawerFlow(browser) {
       };
       const drawer = node.querySelector(".source-drawer");
       const content = node.querySelector(".rank-content");
-      const sourceStrip = node.querySelector(".source-inline-strip");
+      const sourceStripNode = node.querySelector(".source-inline-strip");
+      const sourceStripVisible = sourceStripNode && getComputedStyle(sourceStripNode).display !== "none" && sourceStripNode.getBoundingClientRect().height > 0;
+      const sourceStrip = sourceStripVisible ? sourceStripNode : null;
       const rank = node.querySelector(".rank-number");
       const countNode = node.querySelector(".rank-count");
       const style = getComputedStyle(node);
@@ -2069,11 +2029,13 @@ async function compactSourceDrawerFlow(browser) {
       throw new Error(`top rank accent line should not continue through compact drawer ${JSON.stringify(geometry)}`);
     }
     const expectedLeft =
-      viewport[0] <= 720 || !geometry.sourceStrip ? geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft : geometry.sourceStrip.left;
+      viewport[0] <= 720
+        ? geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft
+        : geometry.sourceStrip?.left || geometry.content?.left || geometry.drawer.left;
     const expectedWidth =
-      viewport[0] <= 720 || !geometry.sourceStrip
+      viewport[0] <= 720
         ? geometry.row.width - geometry.rowBox.borderLeft - geometry.rowBox.borderRight - geometry.rowBox.paddingLeft - geometry.rowBox.paddingRight
-        : geometry.sourceStrip.width;
+        : geometry.sourceStrip?.width || Math.max(0, (geometry.count?.right || geometry.drawer.right) - expectedLeft);
     if (Math.abs(geometry.drawer.left - expectedLeft) > 3) {
       throw new Error(`${scenario.label} source drawer left offset invalid ${JSON.stringify(geometry)}`);
     }
@@ -2091,7 +2053,14 @@ async function compactSourceDrawerFlow(browser) {
     const sourceSemantics = await row.evaluate((node) => {
       const title = node.querySelector(".source-video-title");
       const timeLinks = Array.from(node.querySelectorAll(".source-time-primary, .source-time-extra"));
-      const inlineVideoIds = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => item.dataset.videoId).filter(Boolean);
+      const inlineVideoIds = Array.from(node.querySelectorAll(".source-inline-item"))
+        .filter((item) => {
+          const box = item.getBoundingClientRect();
+          const style = getComputedStyle(item);
+          return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+        })
+        .map((item) => item.dataset.videoId)
+        .filter(Boolean);
       const drawerVideoIds = Array.from(node.querySelectorAll(".source-drawer:not([hidden]) .source-video-title"))
         .map((link) => {
           try {
@@ -2126,72 +2095,13 @@ async function compactSourceDrawerFlow(browser) {
     if (sourceSemantics.repeatedInlineVideoIds.length) throw new Error(`source drawer duplicated inline preview videos ${JSON.stringify(sourceSemantics)}`);
     if (sourceSemantics.titleHeight > 44) throw new Error(`source video title exceeds compact two-line height ${JSON.stringify(sourceSemantics)}`);
 
-    let expectedReopenGroupCount = null;
-    let preservedFirstGroupText = "";
-    const moreGroups = row.locator("[data-toggle-source-groups]");
-    if ((await moreGroups.count()) > 0) {
-      const beforeGroupCount = await countVisibleInRow(row, ".source-video-group");
-      const moreText = (await moreGroups.first().textContent()) || "";
-      if (!/查看更多 \d+个来源/u.test(moreText)) throw new Error(`source group expander text invalid: ${moreText}`);
-      const remainingMatch = moreText.match(/查看更多\s*(\d+)个来源/u);
-      const expectedTotal = remainingMatch ? beforeGroupCount + Number.parseInt(remainingMatch[1], 10) : sourceCountFromText(moreText);
-      let expandedTimestampBeforeMore = false;
-      const firstTimestampToggle = row.locator('.source-drawer [data-toggle-source-times][aria-expanded="false"]').first();
-      if ((await firstTimestampToggle.count()) > 0) {
-        await firstTimestampToggle.click();
-        const expandedState = await firstTimestampToggle.getAttribute("aria-expanded");
-        if (expandedState !== "true") throw new Error(`source timestamp toggle did not expand before loading all groups: ${expandedState}`);
-        await firstTimestampToggle.evaluate((node) => {
-          node.dataset.codexPreserveTimeToggle = "1";
-        });
-        expandedTimestampBeforeMore = true;
-      }
-      preservedFirstGroupText = await row.locator(".source-video-group").first().evaluate((node) => {
-        node.dataset.codexPreserve = "1";
-        const image = node.querySelector("img");
-        if (image) image.dataset.codexPreserve = "1";
-        return node.textContent || "";
-      });
-      const footerHandle = await moreGroups.first().elementHandle();
-      await moreGroups.first().evaluate((node) => {
-        node.dataset.codexFooterPreserve = "1";
-      });
-      await moreGroups.first().click();
-      const afterGroupCount = expectedTotal
-        ? await waitForVisibleCountAtLeast(row, ".source-video-group", expectedTotal)
-        : await waitForVisibleCountAbove(row, ".source-video-group", beforeGroupCount);
-      if (afterGroupCount <= beforeGroupCount) throw new Error("source group expander did not add visible groups");
-      if (expectedTotal && afterGroupCount !== expectedTotal) {
-        throw new Error(`${scenario.label} source group expander should reveal all remaining groups: before=${beforeGroupCount} after=${afterGroupCount} total=${expectedTotal}`);
-      }
-      if ((await moreGroups.count()) !== 0) throw new Error(`${scenario.label} source group expander should be removed after revealing all sources`);
-      const footerAfter = footerHandle
-        ? await footerHandle.evaluate((node) => ({
-            preserved: node.dataset.codexFooterPreserve === "1",
-            collapse: node.dataset.collapseSource === "true",
-            text: node.textContent.trim(),
-            connected: node.isConnected,
-          }))
-        : null;
-      if (!footerAfter?.preserved || !footerAfter.collapse || footerAfter.text !== "收起" || !footerAfter.connected) {
-        throw new Error(`${scenario.label} source group footer did not become collapse in place ${JSON.stringify(footerAfter)}`);
-      }
-      const preservedAfter = await row.locator(".source-video-group").first().evaluate((node) => ({
-        preserved: node.dataset.codexPreserve === "1",
-        imagePreserved: node.querySelector("img")?.dataset.codexPreserve === "1",
-        text: node.textContent || "",
-        preservedExpandedTimeButtons: Array.from(node.querySelectorAll("[data-toggle-source-times]")).filter(
-          (button) => button.dataset.codexPreserveTimeToggle === "1" && button.getAttribute("aria-expanded") === "true",
-        ).length,
-      }));
-      if (!preservedAfter.preserved || !preservedAfter.imagePreserved || preservedAfter.text !== preservedFirstGroupText) {
-        throw new Error(`${scenario.label} source group expander rebuilt existing cards ${JSON.stringify(preservedAfter)}`);
-      }
-      if (expandedTimestampBeforeMore && preservedAfter.preservedExpandedTimeButtons < 1) {
-        throw new Error(`${scenario.label} source group expander did not preserve expanded timestamp state ${JSON.stringify(preservedAfter)}`);
-      }
-      expectedReopenGroupCount = afterGroupCount;
-    }
+    const expectedReopenGroupCount = visibleGroupsOnOpen;
+    const preservedFirstGroupText = await row.locator(".source-video-group").first().evaluate((node) => {
+      node.dataset.codexPreserve = "1";
+      const image = node.querySelector("img");
+      if (image) image.dataset.codexPreserve = "1";
+      return node.textContent || "";
+    });
 
     const moreTimes = row.locator('.source-drawer [data-toggle-source-times][aria-expanded="false"]');
     if ((await moreTimes.count()) > 0) {
@@ -2222,7 +2132,7 @@ async function compactSourceDrawerFlow(browser) {
     const collapseTop = row.locator(".source-inline-more[data-toggle-source][aria-expanded='true']");
     const toolbarCollapse = row.locator(".source-collapse-top[data-collapse-source]");
     const collapseBottom = row.locator(".source-collapse-bottom[data-collapse-source]");
-    if ((await toolbarCollapse.count()) !== 0) throw new Error(`${scenario.label} source drawer should not duplicate a toolbar collapse button`);
+    if ((await toolbarCollapse.count()) !== 1) throw new Error(`${scenario.label} source drawer should expose one toolbar collapse button`);
     if ((await collapseTop.count()) !== 1) throw new Error(`${scenario.label} inline source preview should expose exactly one top collapse button`);
     if ((await collapseBottom.count()) > 1) throw new Error(`${scenario.label} source drawer should expose at most one bottom collapse button`);
     if ((await collapseBottom.count()) > 0) {
@@ -2243,7 +2153,7 @@ async function compactSourceDrawerFlow(browser) {
       }
     }
     await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
-    const closeControl = (await collapseBottom.count()) > 0 ? collapseBottom : collapseTop;
+    const closeControl = (await collapseBottom.count()) > 0 ? collapseBottom : toolbarCollapse;
     await retryDetachedAction(() => closeControl.click(), "click source collapse");
     await page.waitForFunction(
       (index) => document.querySelectorAll(".rank-row:not(.skeleton-row):has([data-toggle-source])")[index]?.classList.contains("is-expanded") === false,
@@ -2296,38 +2206,6 @@ async function countVisibleInRow(row, selector) {
       return !node.hidden && style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
     }).length,
   );
-}
-
-async function waitForVisibleCountAbove(row, selector, minimum) {
-  const deadline = Date.now() + 3000;
-  let latest = await countVisibleInRow(row, selector);
-  while (latest <= minimum && Date.now() < deadline) {
-    await new Promise((resolve) => {
-      setTimeout(resolve, 50);
-    });
-    latest = await countVisibleInRow(row, selector);
-  }
-  return latest;
-}
-
-async function waitForVisibleCountAtLeast(row, selector, minimum) {
-  const deadline = Date.now() + 5000;
-  let latest = await countVisibleInRow(row, selector);
-  while (latest < minimum && Date.now() < deadline) {
-    await new Promise((resolve) => {
-      setTimeout(resolve, 50);
-    });
-    latest = await countVisibleInRow(row, selector);
-  }
-  return latest;
-}
-
-function sourceCountFromText(text) {
-  const value = String(text || "");
-  const progress = value.match(/\/(\d+)\s*个来源/u);
-  if (progress) return Number.parseInt(progress[1], 10);
-  const total = value.match(/(\d+)\s*个来源/u);
-  return total ? Number.parseInt(total[1], 10) : 0;
 }
 
 async function selectSnapshotDate(page, value) {

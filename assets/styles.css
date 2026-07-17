@@ -34,6 +34,7 @@
   --space-4: 16px;
   --space-6: 24px;
   --radius-control: 8px;
+  --radius-small: 4px;
   --radius-panel: 12px;
   --radius-pill: 999px;
   --radius-thumbnail: 6px;
@@ -759,11 +760,11 @@ svg {
 .query-search-section {
   position: relative;
   display: block;
-  padding: 12px 16px 0;
+  padding: 10px 16px 0;
 }
 
 .query-search-section input {
-  min-height: 40px;
+  min-height: 38px;
   padding-right: 42px;
 }
 
@@ -775,28 +776,30 @@ svg {
 
 .query-panel-body {
   display: grid;
-  gap: var(--space-4);
+  align-content: start;
+  gap: var(--space-3);
   min-height: 0;
   overflow: auto;
-  padding: 12px 16px 16px;
+  padding: 10px 16px 12px;
 }
 
-.query-tab-panel {
+.query-discovery-panel,
+.query-filter-matrix {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
   min-width: 0;
 }
 
-.query-tab-panel[hidden] {
+.query-filter-matrix[hidden] {
   display: none;
 }
 
 .query-section {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
   min-width: 0;
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--line);
+  padding-top: 0;
+  border-top: 0;
 }
 
 .query-section[hidden] {
@@ -811,14 +814,21 @@ svg {
 
 .recent-query-chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--space-2);
+  max-height: 32px;
+  overflow: auto hidden;
+  scrollbar-width: none;
+}
+
+.recent-query-chips::-webkit-scrollbar {
+  display: none;
 }
 
 .query-suggestions {
   display: grid;
   gap: var(--space-2);
-  max-height: 188px;
+  max-height: 112px;
   overflow: auto;
 }
 
@@ -878,24 +888,51 @@ mark {
 
 .query-field {
   display: grid;
-  gap: var(--space-2);
+  gap: 4px;
   min-width: 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
 }
 
 .query-field select,
 .query-field input:not([type="checkbox"]):not([type="radio"]) {
-  min-height: var(--filter-control-height);
+  min-height: 34px;
 }
 
 .query-history-section summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: 0 10px;
+  background: #ffffff;
   cursor: pointer;
   color: var(--ink);
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 700;
   list-style: none;
+}
+
+.query-history-section summary::after {
+  content: "›";
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.query-history-section[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.query-history-section summary strong {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .query-history-section summary::-webkit-details-marker {
@@ -903,29 +940,57 @@ mark {
 }
 
 .query-history-section[open] {
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
-.query-toggle-grid {
+.query-history-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
+}
+
+.query-quick-toggles,
+.query-compact-fields,
+.query-context-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.query-metric-control {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.query-compact-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .query-toggle {
   position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--space-2);
+  gap: 6px;
   align-items: center;
-  min-height: var(--filter-control-height);
+  min-height: 34px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  padding: 0 10px;
+  padding: 0 8px;
   background: var(--panel);
   color: var(--ink);
   font-size: 12px;
   font-weight: 700;
+}
+
+.query-toggle input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
 }
 
 .query-toggle small {
@@ -942,18 +1007,19 @@ mark {
 .query-segmented {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
+  gap: 4px;
 }
 
 .query-segmented label {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--filter-control-height);
+  min-height: 34px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   background: #ffffff;
   color: var(--muted);
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -1295,6 +1361,12 @@ mark {
   max-width: 100%;
   overflow: hidden;
   padding-top: 2px;
+}
+
+.rank-row.is-expanded > .source-inline-strip,
+.index-row.is-expanded > .source-inline-strip,
+.artist-song-group.is-expanded > .source-inline-strip {
+  display: none;
 }
 
 .source-inline-preview-rail {
@@ -1879,6 +1951,20 @@ mark {
   gap: var(--chip-gap);
 }
 
+.source-drawer-actions .source-collapse-top {
+  min-height: var(--chip-height);
+  border-color: var(--line);
+  background: #ffffff;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.source-drawer-actions .source-collapse-top:hover {
+  background: #f8fafc;
+  color: var(--accent-strong);
+}
+
 .source-drawer-actions .source-copy-all svg {
   width: 15px;
   height: 15px;
@@ -2068,7 +2154,6 @@ mark {
 
 .source-action,
 .source-time-more,
-.source-group-more,
 .source-collapse-bottom {
   display: inline-flex;
   align-items: center;
@@ -2086,14 +2171,12 @@ mark {
   white-space: nowrap;
 }
 
-.source-group-more,
 .source-collapse-bottom {
   grid-column: 1 / -1;
 }
 
 .source-action:hover,
 .source-time-more:hover,
-.source-group-more:hover,
 .source-collapse-bottom:hover {
   background: var(--accent-soft);
   color: var(--accent-strong);
@@ -2116,10 +2199,6 @@ mark {
   flex-wrap: wrap;
   gap: var(--space-2);
   min-width: 0;
-}
-
-.source-group-more {
-  justify-self: start;
 }
 
 .source-collapse-bottom {
@@ -3699,7 +3778,6 @@ mark {
     padding-inline: 6px;
   }
 
-  .source-group-more,
   .source-time-more,
   .source-collapse-bottom {
     min-height: var(--chip-height);
@@ -3707,7 +3785,6 @@ mark {
     background: #f8fafc;
   }
 
-  .source-group-more,
   .source-collapse-bottom {
     justify-self: start;
     width: auto;
@@ -3779,15 +3856,35 @@ mark {
     right: 0;
     bottom: var(--visual-viewport-bottom);
     left: 0;
+    display: flex;
+    flex-direction: column;
     width: 100%;
     height: auto;
-    max-height: min(calc(var(--visual-viewport-height) - 10px), 84dvh);
+    max-height: min(calc(var(--visual-viewport-height) - 8px), 92dvh);
     border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  }
+
+  .query-panel-header {
+    min-height: 44px;
+    padding-block: 8px;
   }
 
   .query-panel-header,
   .query-panel-footer {
     padding-inline: 12px;
+  }
+
+  .query-search-section {
+    padding-top: 8px;
+  }
+
+  .query-search-section input {
+    min-height: 36px;
+  }
+
+  .clear-query-button {
+    top: 9px;
+    right: 13px;
   }
 
   .query-search-section,
@@ -3796,15 +3893,86 @@ mark {
   }
 
   .query-panel-body {
-    padding-bottom: 16px;
+    flex: 0 1 auto;
+    gap: 8px;
+    padding-top: 8px;
+    padding-bottom: 12px;
   }
 
   .query-panel-footer {
     grid-template-columns: auto auto;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    padding-block: 8px calc(8px + env(safe-area-inset-bottom));
   }
 
-  .query-toggle-grid {
+  .query-discovery-panel,
+  .query-filter-matrix {
+    gap: 8px;
+  }
+
+  .query-panel h2 {
+    font-size: 15px;
+  }
+
+  .query-section-heading h3,
+  .suggestions-section h3 {
+    font-size: 13px;
+  }
+
+  .query-section-heading {
+    min-height: 24px;
+  }
+
+  .search-chip,
+  .suggestion-item {
+    min-height: 30px;
+    padding-inline: 8px;
+    font-size: 11.5px;
+  }
+
+  .query-suggestions {
+    max-height: 108px;
+  }
+
+  .query-toggle {
+    min-height: 32px;
+    border-radius: var(--radius-small);
+    padding-inline: 8px;
+    font-size: 11.5px;
+  }
+
+  .query-toggle input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+  }
+
+  .query-metric-control {
+    grid-template-columns: 34px minmax(0, 1fr);
+  }
+
+  .query-segmented label {
+    min-height: 32px;
+    border-radius: var(--radius-small);
+    font-size: 11.5px;
+  }
+
+  .query-field {
+    font-size: 10.5px;
+  }
+
+  .query-field select,
+  .query-field input:not([type="checkbox"]):not([type="radio"]) {
+    height: 32px;
+    min-height: 32px;
+  }
+
+  .query-history-section summary {
+    min-height: 36px;
+    border-radius: var(--radius-small);
+    padding-inline: 8px;
+    font-size: 11.5px;
+  }
+
+  .query-history-fields {
     grid-template-columns: 1fr;
   }
 

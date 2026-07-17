@@ -157,7 +157,7 @@ async function assertExpandedSourceBottomVisible(page, row, label) {
       viewportHeight: window.innerHeight,
     };
   });
-  if (!metrics.hasDrawer || metrics.groupCount < 8 || !metrics.hasCollapse || metrics.collapseText !== "收起") {
+  if (!metrics.hasDrawer || metrics.groupCount < 8 || !metrics.hasCollapse || metrics.collapseText !== "收起来源") {
     throw new Error(`${label} source drawer bottom controls missing: ${JSON.stringify(metrics)}`);
   }
   if (metrics.buttonTop < 0 || metrics.buttonBottom > metrics.navTop - 6) {
@@ -346,11 +346,11 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
 }
 
 async function assertUnifiedQueryPanel(page, name) {
-  await page.waitForSelector("#queryFilterPanel:not([hidden]) #hideUnknownToggle", { timeout: 15_000 });
+  await page.waitForSelector("#queryDialog .query-filter-matrix #hideUnknownToggle", { timeout: 15_000 });
   const result = await page.evaluate(() => ({
     tabCount: document.querySelectorAll(".query-tabs, [data-query-panel-tab]").length,
     searchVisible: Boolean(document.querySelector("#queryInput")?.getBoundingClientRect().height),
-    filterVisible: Boolean(document.querySelector("#queryFilterPanel")?.getBoundingClientRect().height),
+    filterVisible: Boolean(document.querySelector(".query-filter-matrix")?.getBoundingClientRect().height),
     hideUnknownChecked: Boolean(document.querySelector("#hideUnknownToggle")?.checked),
   }));
   if (result.tabCount !== 0 || !result.searchVisible || !result.filterVisible) {
@@ -870,11 +870,19 @@ async function assertExpandedSourceVisible(page, row, label) {
       };
     });
     const toolbar = node.querySelector(".source-drawer:not([hidden]) .source-drawer-toolbar");
-    const inlineVideoIds = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => item.dataset.videoId).filter(Boolean);
+    const inlineVideoIds = Array.from(node.querySelectorAll(".source-inline-item"))
+      .filter((item) => {
+        const box = item.getBoundingClientRect();
+        const style = getComputedStyle(item);
+        return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      })
+      .map((item) => item.dataset.videoId)
+      .filter(Boolean);
     return {
       viewportWidth: document.documentElement.clientWidth,
       buttonExpanded: node.querySelector("[data-toggle-source]")?.getAttribute("aria-expanded") || "",
       remainingCount: Number(node.querySelector("[data-toggle-source]")?.dataset.remainingCount || 0),
+      videoCount: Number(node.querySelector("[data-toggle-source]")?.dataset.videoCount || 0),
       sourceGroupMore: node.querySelectorAll("[data-toggle-source-groups]").length,
       inlineCollapseCount: node.querySelectorAll(".source-inline-more[data-toggle-source][aria-expanded='true']").length,
       toolbarCollapseCount: node.querySelectorAll(".source-collapse-top[data-collapse-source]").length,
@@ -891,10 +899,10 @@ async function assertExpandedSourceVisible(page, row, label) {
   });
   if (
     shape.buttonExpanded !== "true" ||
-    shape.groups.length !== shape.remainingCount ||
+    shape.groups.length !== shape.videoCount ||
     shape.sourceGroupMore !== 0 ||
     shape.inlineCollapseCount !== 1 ||
-    shape.toolbarCollapseCount !== 0 ||
+    shape.toolbarCollapseCount !== 1 ||
     shape.bottomCollapseCount > 1 ||
     shape.copySongLinksCount < 1 ||
     shape.copySongLinksCount > 2 ||
@@ -985,7 +993,8 @@ function fixtureSourceStripHtml(caseName, viewport = {}) {
   const inlineLimit = Number(viewport.width) <= 720 ? 2 : 3;
   const head = groups.slice(0, Math.min(inlineLimit, groups.length));
   const remainingCount = Math.max(0, count - head.length);
-  const hasActions = count > 1 || remainingCount > 0;
+  const showCopyAll = count > 1 && remainingCount === 0;
+  const hasActions = showCopyAll || remainingCount > 0;
   return `
     <div class="source-inline-strip source-inline-${remainingCount ? "collapsed" : "inline"}${hasActions ? " has-tail-action" : ""}" data-source-video-count="${count}" data-inline-visible-count="${head.length}">
       <div class="source-inline-preview-rail" aria-label="来源预览">
@@ -993,7 +1002,7 @@ function fixtureSourceStripHtml(caseName, viewport = {}) {
       </div>
       ${
         hasActions
-          ? `<div class="source-inline-actions">${remainingCount ? `<button class="source-inline-more ui-chip" type="button" data-toggle-source="true" data-source-summary-toggle="true" aria-expanded="false">+${remainingCount}来源</button>` : ""}<button class="source-inline-copy-all source-copy-icon ui-chip ui-chip-icon" type="button" data-copy-song-links="true" title="复制全部链接" aria-label="复制同一首歌全部来源时间点链接"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"/><path d="M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.15-1.15"/></svg></button></div>`
+          ? `<div class="source-inline-actions">${remainingCount ? `<button class="source-inline-more ui-chip" type="button" data-toggle-source="true" data-source-summary-toggle="true" aria-expanded="false" data-video-count="${count}" aria-label="查看该歌曲的全部 ${count} 个来源">查看全部来源</button>` : ""}${showCopyAll ? `<button class="source-inline-copy-all source-copy-icon ui-chip ui-chip-icon" type="button" data-copy-song-links="true" title="复制全部链接" aria-label="复制同一首歌全部来源时间点链接"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"/><path d="M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.15-1.15"/></svg></button>` : ""}</div>`
           : ""
       }
     </div>
@@ -1137,10 +1146,10 @@ async function assertFixtureSourceProof(page, caseName, label) {
     }
   }
   if (shape.sourceVideoCount > shape.inlineVisibleCount) {
-    const expectedRemaining = shape.sourceVideoCount - shape.inlineVisibleCount;
-    if (shape.moreText !== `+${expectedRemaining}来源` || shape.moreWidth < 32) {
+    if (shape.moreText !== "查看全部来源" || shape.moreWidth < 68 || shape.copyAllWidth !== 0) {
       throw new Error(`${label} fixture more action invalid: ${JSON.stringify(shape)}`);
     }
+    return;
   }
   if (shape.sourceVideoCount > 1 && (shape.copyAllWidth < 26 || shape.copyAllWidth > 32)) {
     throw new Error(`${label} fixture copy action invalid: ${JSON.stringify(shape)}`);

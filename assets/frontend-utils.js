@@ -443,7 +443,7 @@
     const sourceCount = nonNegativeInteger(options.sourceCount ?? options.sourceVideoCount, visibleCount);
     const hasSearchFilter = cleanText(options.filter ?? options.q).length > 0;
     const hasSourceDirectory = sourceCount > 0;
-    const usesSourceCount = hasSourceDirectory && !hasSearchFilter;
+    const usesSourceCount = hasSourceDirectory && !hasSearchFilter && visibleCount !== sourceCount;
     return {
       count: visibleCount,
       note: "",
@@ -758,30 +758,36 @@
     const totalVideoCount = nonNegativeInteger(options.totalVideoCount ?? options.videoCount, groups.length);
     const videoCount = Math.max(groups.length, totalVideoCount);
     const occurrenceCount = groups.reduce((sum, group) => sum + (group.occurrences?.length || 0), 0);
-    const inlineGroups = groups.slice(0, Math.min(inlineLimit, videoCount));
+    const previewGroups = expanded ? [] : groups.slice(0, Math.min(inlineLimit, groups.length));
+    const inlineGroups = previewGroups;
     const hiddenGroups = videoCount > inlineLimit ? groups.slice(inlineLimit) : [];
-    const externalDetailCount = Math.max(0, videoCount - inlineGroups.length - hiddenGroups.length);
+    const allGroups = expanded ? groups : [];
+    const externalDetailCount = Math.max(0, videoCount - previewGroups.length - hiddenGroups.length);
     const canExpand = hiddenGroups.length > 0 || (Boolean(options.hasExternalDetails) && externalDetailCount > 0);
     const mode = videoCount === 0 ? "none" : canExpand ? (expanded ? "expanded" : "collapsed") : "inline";
-    const remainingCount = Math.max(0, videoCount - inlineGroups.length);
+    const remainingCount = Math.max(0, videoCount - previewGroups.length);
 
     return {
       mode,
       videoCount,
       occurrenceCount,
       inlineLimit,
+      previewGroups,
+      allGroups,
+      showPreview: !expanded && videoCount > 0,
+      showDrawer: expanded && canExpand,
       inlineGroups,
-      inlineVisibleCount: inlineGroups.length,
+      inlineVisibleCount: previewGroups.length,
       hiddenGroups,
-      detailGroups: expanded ? hiddenGroups : [],
+      detailGroups: expanded ? allGroups : [],
       remainingCount,
       hasMore: canExpand && !expanded,
       canExpand,
-      collapsedLabel: canExpand ? `+${remainingCount}来源` : "",
-      collapsedAriaLabel: canExpand ? `查看其余 ${remainingCount} 个来源` : "",
-      expandedLabel: "收起",
-      expandedAriaLabel: "收起其余来源",
-      showCopyAll: videoCount > 1,
+      collapsedLabel: canExpand ? "查看全部来源" : "",
+      collapsedAriaLabel: canExpand ? `查看该歌曲的全部 ${videoCount} 个来源` : "",
+      expandedLabel: "收起来源",
+      expandedAriaLabel: "收起来源",
+      showCopyAll: videoCount > 1 && !canExpand,
     };
   }
 
@@ -831,6 +837,42 @@
           compareValues(a.title, b.title)
         );
       });
+  }
+
+  function mergeCompleteSourceOccurrences(detailOccurrences = [], previewOccurrences = []) {
+    const previewGroups = groupOccurrencesByVideo(previewOccurrences);
+    const detailGroups = groupOccurrencesByVideo(detailOccurrences);
+    const previewKeys = new Set(previewGroups.map((group) => group.videoId || group.key).filter(Boolean));
+    const detailKeys = new Set(detailGroups.map((group) => group.videoId || group.key).filter(Boolean));
+    const detailIsComplete = previewKeys.size > 0 && [...previewKeys].every((key) => detailKeys.has(key));
+    const source = detailIsComplete ? detailOccurrences : [...(previewOccurrences || []), ...(detailOccurrences || [])];
+    const seen = new Set();
+    const merged = [];
+    for (const occurrence of source || []) {
+      if (!occurrence) continue;
+      const key = occurrenceIdentityKey(occurrence);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      merged.push(occurrence);
+    }
+    return groupOccurrencesByVideo(merged).flatMap((group) => group.occurrences || []);
+  }
+
+  function buildCompleteSourceGroups(detailOccurrences = [], previewOccurrences = []) {
+    return groupOccurrencesByVideo(mergeCompleteSourceOccurrences(detailOccurrences, previewOccurrences));
+  }
+
+  function occurrenceIdentityKey(occurrence) {
+    const item = occurrence?.item || {};
+    const song = occurrence?.song || {};
+    const videoKey = cleanText(item.videoId) || `${cleanText(item.channelName)}::${cleanText(item.title)}` || "unknown";
+    const seconds = validSeconds(song.seconds);
+    return [
+      videoKey,
+      seconds === null ? "" : String(seconds),
+      normalizeSearch(song.title || ""),
+      normalizeSearch(song.artist || ""),
+    ].join("::");
   }
 
   function compareTimestampDesc(a, b) {
@@ -1337,6 +1379,8 @@
     formatSetlistTime,
     formatSeconds,
     groupOccurrencesByVideo,
+    mergeCompleteSourceOccurrences,
+    buildCompleteSourceGroups,
     hasNicheAnnotations,
     isNicheSong,
     isSongSearchKnown,

@@ -20,7 +20,7 @@
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles.css?v=h6740f105f4b3" />
+    <link rel="stylesheet" href="assets/styles.css?v=h5303dcfc2ad5" />
   </head>
   <body>
     <main class="layout">
@@ -153,7 +153,7 @@
           </button>
         </label>
         <div class="query-panel-body">
-          <div class="query-tab-panel" id="querySearchPanel">
+          <div class="query-discovery-panel">
             <section class="query-section recent-query-section" id="recentSearchSection">
               <div class="query-section-heading">
                 <h3>最近搜索</h3>
@@ -167,35 +167,32 @@
             </section>
           </div>
 
-          <div class="query-tab-panel" id="queryFilterPanel">
-            <section class="query-section">
-              <h3>内容范围</h3>
-              <div class="query-toggle-grid">
-                <label class="query-toggle" title="未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。">
-                  <input id="nicheOnlyToggle" type="checkbox" aria-describedby="nicheHelp" />
-                  <span>只看小众</span>
-                  <small id="nicheHelp">未匹配到已知曲库的歌曲</small>
-                </label>
-                <label class="query-toggle" title="开启后排除空歌手、未記載、待补歌手等收录。">
-                  <input id="hideUnknownToggle" type="checkbox" aria-describedby="hideUnknownHelp" />
-                  <span>隐藏无歌手</span>
-                  <small id="hideUnknownHelp">开启后排除空歌手、未記載、待补歌手等收录</small>
-                </label>
-              </div>
-            </section>
-
-            <section class="query-section" id="metricFilterGroup">
-              <h3>排行条件</h3>
-              <label class="query-field">
-                <span>排行口径</span>
-                <span class="query-segmented" role="group" aria-label="排行口径">
-                  <label><input type="radio" name="queryMetric" value="occurrences" checked />按收录</label>
-                  <label><input type="radio" name="queryMetric" value="videos" />按视频</label>
-                </span>
+          <section class="query-filter-matrix" aria-label="搜索筛选条件">
+            <div class="query-quick-toggles">
+              <label class="query-toggle" title="未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。">
+                <input id="nicheOnlyToggle" type="checkbox" aria-describedby="nicheHelp" />
+                <span>只看小众</span>
+                <small id="nicheHelp">未匹配到已知曲库的歌曲</small>
               </label>
-              <label class="query-field" id="trendFilterGroup">
-                <span>趋势筛选</span>
-                <select id="trendFilterSelect">
+              <label class="query-toggle" title="开启后排除空歌手、未記載、待补歌手等收录。">
+                <input id="hideUnknownToggle" type="checkbox" aria-describedby="hideUnknownHelp" />
+                <span>隐藏无歌手</span>
+                <small id="hideUnknownHelp">开启后排除空歌手、未記載、待补歌手等收录</small>
+              </label>
+            </div>
+
+            <div class="query-metric-control" id="metricFilterGroup">
+              <span class="query-compact-label">排序</span>
+              <span class="query-segmented" role="group" aria-label="排行口径">
+                <label><input type="radio" name="queryMetric" value="occurrences" checked />按收录</label>
+                <label><input type="radio" name="queryMetric" value="videos" />按视频</label>
+              </span>
+            </div>
+
+            <div class="query-compact-fields">
+              <label class="query-field query-compact-field" id="trendFilterGroup" title="趋势筛选">
+                <span aria-label="趋势筛选">趋势</span>
+                <select id="trendFilterSelect" aria-label="趋势筛选">
                   <option value="all">全部</option>
                   <option value="new">新上榜</option>
                   <option value="up">上升</option>
@@ -203,40 +200,43 @@
                 </select>
                 <small id="trendFilterHint"></small>
               </label>
-              <label class="query-field" id="minCountFilterGroup">
-                <span>最低收录</span>
-                <select id="minCountSelect">
+              <label class="query-field query-compact-field" id="minCountFilterGroup" title="最低收录">
+                <span aria-label="最低收录">最低</span>
+                <select id="minCountSelect" aria-label="最低收录">
                   <option value="1">不限</option>
                   <option value="2">2次以上</option>
                   <option value="5">5次以上</option>
                   <option value="10">10次以上</option>
                 </select>
               </label>
-            </section>
+            </div>
 
-            <section class="query-section" id="displayFilterGroup">
-              <h3>显示设置</h3>
-              <label class="query-field page-size-filter">
-                <span>每页数量</span>
-                <select id="queryPageSizeSelect">
+            <div class="query-context-fields">
+              <label class="query-field query-compact-field page-size-filter" id="displayFilterGroup" title="每页数量">
+                <span aria-label="每页数量">每页</span>
+                <select id="queryPageSizeSelect" aria-label="每页数量">
                   <option value="50">50</option>
                   <option value="100">100</option>
                 </select>
               </label>
-            </section>
-
-            <details class="query-section query-history-section">
-              <summary>历史快照</summary>
-              <label class="query-field">
-                <span>快照日期</span>
-                <select id="querySnapshotDateSelect"></select>
-              </label>
-              <label class="query-field">
-                <span>快照时间</span>
-                <select id="querySnapshotSelect"></select>
-              </label>
-            </details>
-          </div>
+              <details class="query-history-section">
+                <summary>
+                  <span>历史快照</span>
+                  <strong id="querySnapshotSummary">最新数据</strong>
+                </summary>
+                <div class="query-history-fields">
+                  <label class="query-field query-compact-field">
+                    <span>快照日期</span>
+                    <select id="querySnapshotDateSelect"></select>
+                  </label>
+                  <label class="query-field query-compact-field">
+                    <span>快照时间</span>
+                    <select id="querySnapshotSelect"></select>
+                  </label>
+                </div>
+              </details>
+            </div>
+          </section>
         </div>
         <footer class="query-panel-footer">
           <button class="secondary-button" id="resetQueryButton" type="button">重置条件</button>
@@ -251,9 +251,9 @@
     </button>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="assets/blocked-vtuber-meta.js?v=h6740f105f4b3" defer></script>
-    <script src="assets/frontend-utils.js?v=h6740f105f4b3" defer></script>
-    <script src="assets/ranking-utils.js?v=h6740f105f4b3" defer></script>
-    <script src="assets/app.js?v=h6740f105f4b3" defer></script>
+    <script src="assets/blocked-vtuber-meta.js?v=h5303dcfc2ad5" defer></script>
+    <script src="assets/frontend-utils.js?v=h5303dcfc2ad5" defer></script>
+    <script src="assets/ranking-utils.js?v=h5303dcfc2ad5" defer></script>
+    <script src="assets/app.js?v=h5303dcfc2ad5" defer></script>
   </body>
 </html>
