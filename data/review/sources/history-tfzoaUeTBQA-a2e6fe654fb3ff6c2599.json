@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T14:14:54.844Z",
+  "generatedAt": "2026-07-17T19:43:39.695Z",
   "reviewId": "review:tfzoaUeTBQA:a2e6fe654fb3ff6c2599",
   "video": {
     "videoId": "tfzoaUeTBQA",
@@ -15,14 +15,15 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260717T120000Z"
+    "snapshotId": "20260717T170000Z"
   },
   "risk": {
-    "riskScore": 30,
-    "riskLevel": "low",
+    "riskScore": 44,
+    "riskLevel": "medium",
     "riskReasons": [
       "source_multiple_unknown_artists",
       "niche_unknown_artist",
+      "source_multiple_niche_short_titles",
       "short_unknown_title"
     ]
   },
@@ -205,16 +206,15 @@
       "rawHash": "de9072926dc661b6bf27a450c2dcb0529147426af8ba415d666f7a5429c26299",
       "sourceId": "selected:tfzoaUeTBQA:a2e6fe654fb3ff6c",
       "sourceHash": "a2e6fe654fb3ff6c259940bc929ddda8811011fe6ef2b6f4c5066ffada70acfd",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -226,16 +226,15 @@
       "rawHash": "2a1152460a353faa73f77e40f1ea71228983e4f90c3698c32f5aa73cee889666",
       "sourceId": "selected:tfzoaUeTBQA:a2e6fe654fb3ff6c",
       "sourceHash": "a2e6fe654fb3ff6c259940bc929ddda8811011fe6ef2b6f4c5066ffada70acfd",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -247,16 +246,15 @@
       "rawHash": "58fa2559dc55e9f7b1fd2e4a97165d6c9a5e46dbd87833ef1b60274d367f9246",
       "sourceId": "selected:tfzoaUeTBQA:a2e6fe654fb3ff6c",
       "sourceHash": "a2e6fe654fb3ff6c259940bc929ddda8811011fe6ef2b6f4c5066ffada70acfd",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",

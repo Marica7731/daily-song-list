@@ -1,14 +1,14 @@
 # 全量小众无歌手人工审核清单
 
-生成时间：2026-07-17T14:18:54.857Z
+生成时间：2026-07-17T19:48:44.386Z
 
-候选总数：2394
-唯一视频数：393
-唯一来源数：475
+候选总数：2447
+唯一视频数：406
+唯一来源数：488
 已确认非歌曲：104
 已确认解析错误：233
 高概率非歌曲：294
-需要人工判断：1762
+需要人工判断：1815
 高概率真实歌曲：1
 
 ## 已确认非歌曲
@@ -189,7 +189,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:07:30](https://www.youtube.com/watch?v=U1VskIZthjM&t=450s) | チューニング | 未記載 | snapshot:20260711T170000Z | activity_marker_title, niche_unknown_artist, source_multiple_unknown_artists, source_unknown_artist_ratio_high, source_multiple_niche_short_titles | structured_setlist | drop_entry | data/review/sources/history\-U1VskIZthjM\-0d12ff496ed4245eaee8\.json\#ca7a6b5ca7168bb0be564f55398b812fdac3eead321da123bf17df8dea8c9d9f |
+| [0:07:30](https://www.youtube.com/watch?v=U1VskIZthjM&t=450s) | チューニング | 未記載 | snapshot:20260711T170000Z | activity_marker_title, niche_unknown_artist, source_multiple_unknown_artists, source_multiple_niche_short_titles | structured_setlist | drop_entry | data/review/sources/history\-U1VskIZthjM\-0d12ff496ed4245eaee8\.json\#ca7a6b5ca7168bb0be564f55398b812fdac3eead321da123bf17df8dea8c9d9f |
 
 ### 【歌枠】2周年ありがとう！50曲歌います！歌ったら告知します！【鬼ヶ谷テン/ネオポルテ】
 - 视频：[bQtUhOfrJC0](https://www.youtube.com/watch?v=bQtUhOfrJC0)
@@ -366,7 +366,7 @@
 | [0:21:25](https://www.youtube.com/watch?v=zwtMKjgBz6Y&t=1285s) | 初音ミクの暴走／cosMo（暴走P） | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_artist, structured_setlist | replace_entry | data/review/sources/history\-zwtMKjgBz6Y\-2d12651df732001e80c1\.json\#b9edad7ef5cb622758e5a23e0e86e87ed67b2ccb283e36d8787c16a1f43b3d95 |
 | [0:31:53](https://www.youtube.com/watch?v=zwtMKjgBz6Y&t=1913s) | デリヘル呼んだら君が来た／ナナホシ管弦楽団 | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_artist, structured_setlist | replace_entry | data/review/sources/history\-zwtMKjgBz6Y\-2d12651df732001e80c1\.json\#9acee406d8c79350741d0756e455fa9ebe65744ff252ffbea679671d8924c69c |
 | [1:17:21](https://www.youtube.com/watch?v=zwtMKjgBz6Y&t=4641s) | Notebook／buzzG | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_artist, structured_setlist | replace_entry | data/review/sources/history\-zwtMKjgBz6Y\-2d12651df732001e80c1\.json\#f1c5fd80ae60be76e7f259684c3258b76eba80fdd3dc568c292e2b6a484f4209 |
-| [2:00:46](https://www.youtube.com/watch?v=zwtMKjgBz6Y&t=7246s) | 恋愛勇者／Last Note\. | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-zwtMKjgBz6Y\-2d12651df732001e80c1\.json\#15887b8c68f5ab07551110a9821e8a36d79f352e8972960f0c9b5e163bcee021 |
+| [2:00:46](https://www.youtube.com/watch?v=zwtMKjgBz6Y&t=7246s) | 恋愛勇者／Last Note\. | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_artist, structured_setlist | replace_entry | data/review/sources/history\-zwtMKjgBz6Y\-2d12651df732001e80c1\.json\#15887b8c68f5ab07551110a9821e8a36d79f352e8972960f0c9b5e163bcee021 |
 | [2:34:05](https://www.youtube.com/watch?v=zwtMKjgBz6Y&t=9245s) | 1925／とみー（ショコラビット） | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-zwtMKjgBz6Y\-2d12651df732001e80c1\.json\#cf7bf2fd395f234be85c029e01a442b65ab548c074de6d5b6d1466b065eb168d |
 | [4:09:04](https://www.youtube.com/watch?v=zwtMKjgBz6Y&t=14944s) | 音偽バナシ／DECO\*27 | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-zwtMKjgBz6Y\-2d12651df732001e80c1\.json\#11facfd27d8e4852a2f24751bc1881ca645b68981455853548b887b34bed784c |
 
@@ -425,7 +425,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:09:50](https://www.youtube.com/watch?v=_a3qNvKIFd8&t=590s) | ダイヤモンド愛 | 未記載 | 7d, all, review, snapshot:20260717T120000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/\_a3qNvKIFd8\-4a36c72636de61966fde\.json\#edfbfa3d104ed139a2ce39372974dab69614e8482fc7815250b4d30668e9e3db |
+| [0:09:50](https://www.youtube.com/watch?v=_a3qNvKIFd8&t=590s) | ダイヤモンド愛 | 未記載 | 7d, all, review, snapshot:20260717T170000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/\_a3qNvKIFd8\-4a36c72636de61966fde\.json\#edfbfa3d104ed139a2ce39372974dab69614e8482fc7815250b4d30668e9e3db |
 
 ### 【 \#歌枠┊︎KARAOKE 】ギャップがあるvtuber❤ \#初見さんも大歓迎 \#vtuber \#singing
 - 视频：[9KS1yo\_4NPY](https://www.youtube.com/watch?v=9KS1yo_4NPY)
@@ -544,7 +544,7 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [2:15:35](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8135s) | （2010）GO\! GO\! MANIAC | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_unknown_artist_ratio_high | known_artist, structured_setlist | replace_entry | data/review/sources/history\-jT\-l8E9Xsow\-addd6bca4c4f9b4bb19a\.json\#42b953bc08cdd78d7a9c3b60324c0f92a802240dbda9f2ae53929a6b52d7d029 |
-| [2:15:35](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8135s) | 35 （2010）GO\! GO\! MANIAC | 未記載 | 7d, all, review, snapshot:20260717T120000Z, snapshot:20260713T120000Z, snapshot:20260712T220000Z | parser_corruption, delimiter_split, niche_unknown_artist, source_multiple_unknown_artists | inferred_artist | replace_entry | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#42b953bc08cdd78d7a9c3b60324c0f92a802240dbda9f2ae53929a6b52d7d029 |
+| [2:15:35](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8135s) | 35 （2010）GO\! GO\! MANIAC | 未記載 | all, review, snapshot:20260717T170000Z, snapshot:20260713T120000Z, snapshot:20260712T220000Z | parser_corruption, delimiter_split, niche_unknown_artist, source_multiple_unknown_artists | inferred_artist | replace_entry | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#42b953bc08cdd78d7a9c3b60324c0f92a802240dbda9f2ae53929a6b52d7d029 |
 
 ### 【アニソン歌枠 第543回】昭和・平成・令和のアニソンのごった煮はいかがですか？Let's sing ANIME music【うさ丸】
 - 视频：[kQVdDhuS2js](https://www.youtube.com/watch?v=kQVdDhuS2js)
@@ -552,7 +552,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:29:00](https://www.youtube.com/watch?v=kQVdDhuS2js&t=1740s) | 夢冒険 | 未記載 | 7d, all, review, snapshot:20260717T120000Z | parser_corruption, delimiter_split, niche_unknown_artist, short_unknown_title | inferred_artist | replace_entry | data/review/sources/kQVdDhuS2js\-dbff8ac38f56e8488ef2\.json\#83a0da7d69f60875dbdd9a57f92f0fd8532e750398faec3e0e97c2ef514912a7 |
+| [0:29:00](https://www.youtube.com/watch?v=kQVdDhuS2js&t=1740s) | 夢冒険 | 未記載 | 7d, all, snapshot:20260717T170000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/kQVdDhuS2js\-dbff8ac38f56e8488ef2\.json\#83a0da7d69f60875dbdd9a57f92f0fd8532e750398faec3e0e97c2ef514912a7 |
 
 ### 【歌枠 / KARAOKE】ゆったりまったりいつも通りいろんな曲を歌うぞ～【うりん / JPVtuber】
 - 视频：[tNfKtVb6E7s](https://www.youtube.com/watch?v=tNfKtVb6E7s)
@@ -618,7 +618,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [1:20:47](https://www.youtube.com/watch?v=Kg4cWnWbWkc&t=4847s) | Love Story/ﾃｲﾗｰｽｳｨﾌﾄ | 未記載 | snapshot:20260711T190000Z | niche_unknown_artist, parser_corruption, source_multiple_niche_short_titles | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-Kg4cWnWbWkc\-47abf6bd780feac945bd\.json\#8673daf00074ebea60457e74485adee06971a5f4fecf012947ab9754d58bb7e3 |
+| [1:20:47](https://www.youtube.com/watch?v=Kg4cWnWbWkc&t=4847s) | Love Story/ﾃｲﾗｰｽｳｨﾌﾄ | 未記載 | snapshot:20260711T190000Z | niche_unknown_artist, parser_corruption, source_multiple_niche_short_titles | known_artist, structured_setlist | replace_entry | data/review/sources/history\-Kg4cWnWbWkc\-47abf6bd780feac945bd\.json\#8673daf00074ebea60457e74485adee06971a5f4fecf012947ab9754d58bb7e3 |
 | [2:00:28](https://www.youtube.com/watch?v=Kg4cWnWbWkc&t=7228s) | ﾄｳｷｮｳﾄ·ﾛｯｸ·ｼﾃｨ/えこ。 | 未記載 | snapshot:20260711T190000Z | niche_unknown_artist, parser_corruption, source_multiple_niche_short_titles | known_artist, structured_setlist | replace_entry | data/review/sources/history\-Kg4cWnWbWkc\-47abf6bd780feac945bd\.json\#5918e0a180e156dc1f3ed1808549948e009e59ba86cb4b302783386370314185 |
 
 ### 【 朝活歌枠 】２５０人におはようしたい☀️初見さん・ROM勢さんも大歓迎✨️【 \#新人vtuber 】【 \#朝活 】【 \#歌枠 】
@@ -647,9 +647,9 @@
 | [0:39:18](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=2358s) | ＊ 09\. 栞 | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_unknown_artists, source_multiple_niche_short_titles | known_song, structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#1d04d99b37e8d902a8f0f8d454a4a90546b6b5a2b8afc5244734f88d11af026c |
 | [0:44:24](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=2664s) | ＊ 10\. セレナーデ | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_unknown_artists, source_multiple_niche_short_titles | known_song, structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#200c1d4ccf01d2e0df68b1f4b2e514d10aa1be93d1f57a3525f7258cbba66359 |
 | [0:50:46](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3046s) | ＊ 11\. About me | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_unknown_artists, source_multiple_niche_short_titles | known_song, structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#d8bae911eb2d2fc6d01f12703e0bac3569e58e93b5d83dd8af735012a50e713a |
-| [0:55:51](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3351s) | ＊ 12\. 不可抗力 | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_unknown_artists, source_multiple_niche_short_titles | known_song, structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#8108c824f5223f30490cdb301194d27ccdae519d7f1a1ab1c307b0aa5e65e1b4 |
+| [0:55:51](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3351s) | ＊ 12\. 不可抗力 | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_niche_short_titles | structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#8108c824f5223f30490cdb301194d27ccdae519d7f1a1ab1c307b0aa5e65e1b4 |
 | [1:00:05](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3605s) | ＊ 13\. にわかには信じがたいものです | 未記載 | snapshot:20260712T190000Z | conversation_entry, niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_niche_short_titles | structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#1edf32cf9023f2336f8e655c949b8d1e7ec650f8012fc01e19b23b90980a69b0 |
-| [1:03:19](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3799s) | ＊ 14\. SHAMROCK | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_unknown_artists, source_multiple_niche_short_titles | known_song, structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#2c8aaa1dc6e718b3a7176c7ce33b75180718982cb96b926e44992fec395aa33f |
+| [1:03:19](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3799s) | ＊ 14\. SHAMROCK | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_niche_short_titles | structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#2c8aaa1dc6e718b3a7176c7ce33b75180718982cb96b926e44992fec395aa33f |
 | [1:08:16](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=4096s) | ＊ 15\. 阿修羅ちゃん | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_unknown_artists, source_multiple_niche_short_titles | known_song, structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#6adc9b768ab4f2736aa9d85e196f38955d420a3cdeddc2bf61e8c40854cdfba4 |
 | [1:12:35](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=4355s) | ＊ 16\. IN\_MY\_HEAD | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_niche_short_titles | structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#7aad22b69624ca0a0e18d08850f02cb8553833d08c78d5301c95670d6cc05e74 |
 | [1:17:53](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=4673s) | ＊ 17\. GURU | 未記載 | snapshot:20260712T190000Z, snapshot:20260714T230000Z | parser_corruption, source_many_topic_entries, source_many_activity_entries, source_multiple_unknown_artists, source_multiple_niche_short_titles | known_song, structured_setlist | replace_entry | data/review/sources/history\-bQtUhOfrJC0\-369ea67228f3b93b75b0\.json\#0c9831185182c3346085446ea278dac15e719d35aa05f237b265c8f6d1c0b22d |
@@ -881,7 +881,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:43:03](https://www.youtube.com/watch?v=YFxEarwYgQs&t=2583s) | エージェント夜を往く | 未記載 | 7d, all, snapshot:20260717T120000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/YFxEarwYgQs\-9fb8f1cd783d187c7f26\.json\#2b25acbb5b4a157af3419f75cec6950c7cf5578ccc4f8720454daac398e87bcb |
+| [0:43:03](https://www.youtube.com/watch?v=YFxEarwYgQs&t=2583s) | エージェント夜を往く | 未記載 | 7d, all, snapshot:20260717T170000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/YFxEarwYgQs\-9fb8f1cd783d187c7f26\.json\#2b25acbb5b4a157af3419f75cec6950c7cf5578ccc4f8720454daac398e87bcb |
 
 ### ☀️朝活歌枠☀️【目指せおはよう50人！】初見さん/ROMさん大歓迎💥≪パレデミア学園 / 灯野ぺけ。≫ \#vtuber \#朝活 \#歌枠
 - 视频：[6s6vcztl98s](https://www.youtube.com/watch?v=6s6vcztl98s)
@@ -963,7 +963,7 @@
 | [0:40:17](https://www.youtube.com/watch?v=gUaAI5HtUHo&t=2417s) | 青い栞/Galileo Galilei/アニメ「あの日見た花の名前を僕達はまだ知らない。」OP | 未記載 | snapshot:20260712T190000Z | conversation_entry, niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-gUaAI5HtUHo\-84d14e24645a09becf4d\.json\#f4d7be5126c66fbcd4cf43923dd0e67876aecc10738f8b1e7c9fc0d18a169f00 |
 | [0:59:53](https://www.youtube.com/watch?v=gUaAI5HtUHo&t=3593s) | Magic/Mrs\. GREEN APPLE/「コカ・コーラ Coke STUDIO Magic」篇CMソング | 未記載 | snapshot:20260712T190000Z | conversation_entry, niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries | known_artist, structured_setlist | replace_entry | data/review/sources/history\-gUaAI5HtUHo\-84d14e24645a09becf4d\.json\#20af1cd842d2b7006c5d0130a9ef6239d3c39447dcd6daee5ba339893caae4e7 |
 | [1:07:31](https://www.youtube.com/watch?v=gUaAI5HtUHo&t=4051s) | トゲめくスピカ/ポルカドットスティングレイ/音楽番組「みんなのうた」放送曲 | 未記載 | snapshot:20260712T190000Z | conversation_entry, niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-gUaAI5HtUHo\-84d14e24645a09becf4d\.json\#1a9f49620da0a535a59eb6317dc2b6f0cbabea063f5d4b910b4164ee94753869 |
-| [1:17:37](https://www.youtube.com/watch?v=gUaAI5HtUHo&t=4657s) | レム/ポルカドットスティングレイ | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-gUaAI5HtUHo\-84d14e24645a09becf4d\.json\#55233bebe51100083025dcdd301c0cc48013d41813fee781a456ec02df021f8d |
+| [1:17:37](https://www.youtube.com/watch?v=gUaAI5HtUHo&t=4657s) | レム/ポルカドットスティングレイ | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries | known_artist, structured_setlist | replace_entry | data/review/sources/history\-gUaAI5HtUHo\-84d14e24645a09becf4d\.json\#55233bebe51100083025dcdd301c0cc48013d41813fee781a456ec02df021f8d |
 | [1:47:11](https://www.youtube.com/watch?v=gUaAI5HtUHo&t=6431s) | 残灯花火/Orangestar feat\.初音ミク | 未記載 | snapshot:20260712T190000Z | parser_corruption, source_many_topic_entries, source_multiple_unknown_artists | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-gUaAI5HtUHo\-84d14e24645a09becf4d\.json\#b43f316bf871d0e88ad5afcc80939e8f6512b8c11378fd5c2b329f808b249b6c |
 | [2:00:28](https://www.youtube.com/watch?v=gUaAI5HtUHo&t=7228s) | うたかた花火/supercell/アニメ「NARUTO ナルト 疾風伝」ED | 未記載 | snapshot:20260712T190000Z | conversation_entry, niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_many_topic_entries | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-gUaAI5HtUHo\-84d14e24645a09becf4d\.json\#4cd9594de960a60597685434b19eb8d4ff2582f6d8a14fb51d1f3352c81f84e7 |
 
@@ -973,7 +973,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:34:19](https://www.youtube.com/watch?v=IVNayNo7j0E&t=2059s) | 八月の夜/SILENT SIREN/バンタンデザイン研究所「サマーセミナー」CMソング | 未記載 | snapshot:20260712T190000Z | conversation_entry, niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_unknown_artist_ratio_high | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-IVNayNo7j0E\-6cda1d806a687bf11611\.json\#c41264a35049db7975c8786eccfe5fed9bd322fa751e5ed6eb8609deda1e35b8 |
+| [0:34:19](https://www.youtube.com/watch?v=IVNayNo7j0E&t=2059s) | 八月の夜/SILENT SIREN/バンタンデザイン研究所「サマーセミナー」CMソング | 未記載 | snapshot:20260712T190000Z | conversation_entry, niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_unknown_artist_ratio_high | known_artist, structured_setlist | replace_entry | data/review/sources/history\-IVNayNo7j0E\-6cda1d806a687bf11611\.json\#c41264a35049db7975c8786eccfe5fed9bd322fa751e5ed6eb8609deda1e35b8 |
 | [0:54:05](https://www.youtube.com/watch?v=IVNayNo7j0E&t=3245s) | Kitai/あさぎーにょ | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_unknown_artist_ratio_high | known_artist, structured_setlist | replace_entry | data/review/sources/history\-IVNayNo7j0E\-6cda1d806a687bf11611\.json\#1cfe11868ab86567b4bdf60bfa2069f283f7b35ed622fd0b1d423c89a93d6537 |
 | [1:07:50](https://www.youtube.com/watch?v=IVNayNo7j0E&t=4070s) | 私は、私達は。/MORE MORE JUMP\! | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_unknown_artist_ratio_high | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-IVNayNo7j0E\-6cda1d806a687bf11611\.json\#8d81eea3dbf9a40bd2e8fd95b2ebe39504544c7000400c2f2958831bcf9cd33c |
 | [1:16:55](https://www.youtube.com/watch?v=IVNayNo7j0E&t=4615s) | スーパーヒーロー/Guiano\.IA | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_unknown_artist_ratio_high | known_artist, structured_setlist | replace_entry | data/review/sources/history\-IVNayNo7j0E\-6cda1d806a687bf11611\.json\#f059bac2f75f12a78a2b12d002ff46661d95a187e05a8b4acb9d63489811f8d2 |
@@ -1952,6 +1952,7 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:09:44](https://www.youtube.com/watch?v=GO8HLO9vl6I&t=584s) | ぼなぺてぃーと♡S | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/GO8HLO9vl6I\-4fce31559bf7e4759df2\.json\#75960b52cf4933f6e1439b57b88b230f33afbc3fba4ccfa27123ca3910d49105 |
+| [1:06:52](https://www.youtube.com/watch?v=GO8HLO9vl6I&t=4012s) | my sweet heart | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/GO8HLO9vl6I\-4fce31559bf7e4759df2\.json\#4e7d2fc70f43fd1c7fe17105457e01acec94499517c12c4068172b4d6072990f |
 | [1:17:50](https://www.youtube.com/watch?v=GO8HLO9vl6I&t=4670s) | Puppy love | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/GO8HLO9vl6I\-4fce31559bf7e4759df2\.json\#0f1d1269eba8f97370512e336b5f49ef73d7601b36d4a35640bafb4944bbf91b |
 | [1:46:54](https://www.youtube.com/watch?v=GO8HLO9vl6I&t=6414s) | CREAR | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/GO8HLO9vl6I\-4fce31559bf7e4759df2\.json\#f265955a7af9ac27da4e2d4612f9a516cbc1c9fb4dbadd4a1830e720ff870add |
 | [1:55:48](https://www.youtube.com/watch?v=GO8HLO9vl6I&t=6948s) | 魔法がとけちゃう5秒前 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/GO8HLO9vl6I\-4fce31559bf7e4759df2\.json\#f4e8a1ea3529fa46c38a1b7c4cce9a995df9151152f039d918e773db7dce3e49 |
@@ -2039,15 +2040,23 @@
 | [0:20:35](https://www.youtube.com/watch?v=sVA6bzkhqEY&t=1235s) | 夏灯篭 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/sVA6bzkhqEY\-650117e0179d0918a78f\.json\#a7319ef3866ec02f40bb58cfb461b903353fa3413cb4124a5584a66d97c7f8f3 |
 | [1:12:49](https://www.youtube.com/watch?v=sVA6bzkhqEY&t=4369s) | Empty Town | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/sVA6bzkhqEY\-650117e0179d0918a78f\.json\#a989a9ad25462c1bb0bf9b3b65ddc47031ae6a5055c54b0982c0b3d7734a7b71 |
 
+### 【歌枠】ゆったり歌枠！！ハニカムステーション！\-205【HACHI 】
+- 视频：[WVzSNAYQPFM](https://www.youtube.com/watch?v=WVzSNAYQPFM)
+- 频道：HACHI
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:47:33](https://www.youtube.com/watch?v=WVzSNAYQPFM&t=2853s) | 万有引力 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/WVzSNAYQPFM\-e3bb3f4957f0d1440cc3\.json\#a1fb43c84ae9861a426a7d028f3b8a04fc7e0206a906aa86a51fa0a8c689d49e |
+
 ### 【雑＆歌枠】どでかいお知らせあります！！！！！！ハニカムステーション！\-204【HACHI 】
 - 视频：[zAqcZDpOM1Q](https://www.youtube.com/watch?v=zAqcZDpOM1Q)
 - 频道：HACHI
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:03:54](https://www.youtube.com/watch?v=zAqcZDpOM1Q&t=234s) | Empty Town | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zAqcZDpOM1Q\-53ec2f117486ce0a5115\.json\#30361c588c4278122c10689ca8d3442d621f3617ff308d367eb9a1f74f51cc3e |
-| [0:16:56](https://www.youtube.com/watch?v=zAqcZDpOM1Q&t=1016s) | ばいばい、テディベア | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zAqcZDpOM1Q\-53ec2f117486ce0a5115\.json\#80c7c6e6eeb70f6e727f4a682488616648d67f9192e3aaf94830bbc151ed6331 |
-| [0:47:18](https://www.youtube.com/watch?v=zAqcZDpOM1Q&t=2838s) | √64 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zAqcZDpOM1Q\-53ec2f117486ce0a5115\.json\#419018cb7e362e80c91c27636dd0fc5d0b80b7fb00a3b2f25171a0b1739e44f6 |
+| [0:03:54](https://www.youtube.com/watch?v=zAqcZDpOM1Q&t=234s) | Empty Town | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zAqcZDpOM1Q\-53ec2f117486ce0a5115\.json\#30361c588c4278122c10689ca8d3442d621f3617ff308d367eb9a1f74f51cc3e |
+| [0:16:56](https://www.youtube.com/watch?v=zAqcZDpOM1Q&t=1016s) | ばいばい、テディベア | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zAqcZDpOM1Q\-53ec2f117486ce0a5115\.json\#80c7c6e6eeb70f6e727f4a682488616648d67f9192e3aaf94830bbc151ed6331 |
+| [0:47:18](https://www.youtube.com/watch?v=zAqcZDpOM1Q&t=2838s) | √64 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zAqcZDpOM1Q\-53ec2f117486ce0a5115\.json\#419018cb7e362e80c91c27636dd0fc5d0b80b7fb00a3b2f25171a0b1739e44f6 |
 
 ### 🌻歌枠🍖clearくんと歌う
 - 视频：[QxwwGwKxvWE](https://www.youtube.com/watch?v=QxwwGwKxvWE)
@@ -2073,12 +2082,12 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:27:23](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=1643s) | 碧いうさぎ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#16dd4f1342e3a1ce96362084145967e22073b86ab149572a05eee8ab1dffff45 |
-| [0:34:35](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=2075s) | MajiでKoiする5秒前 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#4b10b378cfecea25a3546e91013835bd6016ea4e0f5a6866ff6c726a3686aae7 |
-| [1:21:48](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=4908s) | はじまりはいつも雨 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#30f248b2894b2cead71c4596bdb1c73a199ef6f46919abfb3348d16e33447aa7 |
-| [1:28:46](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=5326s) | ただ泣きたくなるの | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#cecfcaa876af02dd80cfda898476cca078eaa93d43a826f53e4376e000e476f9 |
-| [1:46:45](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=6405s) | 揺れる想い | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#74a35c063007fed31d48e30a513903bd7849c15a3783161d14a246234ded3650 |
-| [2:10:30](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=7830s) | SAY YES | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#4f9295e7d122e6e7a7db91248270bb64b780c420536e24fdab84824706801d10 |
+| [0:27:23](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=1643s) | 碧いうさぎ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#16dd4f1342e3a1ce96362084145967e22073b86ab149572a05eee8ab1dffff45 |
+| [0:34:35](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=2075s) | MajiでKoiする5秒前 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#4b10b378cfecea25a3546e91013835bd6016ea4e0f5a6866ff6c726a3686aae7 |
+| [1:21:48](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=4908s) | はじまりはいつも雨 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#30f248b2894b2cead71c4596bdb1c73a199ef6f46919abfb3348d16e33447aa7 |
+| [1:28:46](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=5326s) | ただ泣きたくなるの | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#cecfcaa876af02dd80cfda898476cca078eaa93d43a826f53e4376e000e476f9 |
+| [1:46:45](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=6405s) | 揺れる想い | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#74a35c063007fed31d48e30a513903bd7849c15a3783161d14a246234ded3650 |
+| [2:10:30](https://www.youtube.com/watch?v=MUI0wCHRbmI&t=7830s) | SAY YES | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/MUI0wCHRbmI\-9df327c205a96bb2ebe0\.json\#4f9295e7d122e6e7a7db91248270bb64b780c420536e24fdab84824706801d10 |
 
 ### 🎤 歌枠 ｜ 盛りあげるよ！ マクロスシリーズ歌枠！ \#花うさ singing vtuber vsinger karaoke アニソン 歌回 懐メロ 立花うさ 花うさ
 - 视频：[8S6f0gcfQOk](https://www.youtube.com/watch?v=8S6f0gcfQOk)
@@ -2272,44 +2281,44 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:01:03](https://www.youtube.com/watch?v=zJEa2XSxky4&t=63s) | こんここね〜 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#a53cd3460a187ddfcdb013c47953a4df793feb0e84380aef33d83515d27ecb75 |
-| [0:01:10](https://www.youtube.com/watch?v=zJEa2XSxky4&t=70s) | あぶない刑事など | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#838607d6ed9e597c209cb642445cda1759dff5ca88acefd49902587575ef1a24 |
-| [0:03:02](https://www.youtube.com/watch?v=zJEa2XSxky4&t=182s) | 歯医者 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#9503daf924bd9a113c8e738207b2906e7cb7773687f0994086969ced0872f299 |
-| [0:05:31](https://www.youtube.com/watch?v=zJEa2XSxky4&t=331s) | まつ毛パーマ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#c6806ed2a31a61efbab01f8fbcd5d5d2bcd27029898454eda39042ef81290dd0 |
-| [0:07:41](https://www.youtube.com/watch?v=zJEa2XSxky4&t=461s) | 滑舌 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#46f36c6fea50872ccdb61f74e7938efbdc31ad836b4850be7ec436732f0d8251 |
-| [0:09:06](https://www.youtube.com/watch?v=zJEa2XSxky4&t=546s) | 胸がドキドキ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#93d481ecf6cc4c0f0b3dece302f31814fc21b0cd6841ca715d862af28f44760e |
-| [0:21:17](https://www.youtube.com/watch?v=zJEa2XSxky4&t=1277s) | コナン歌や連載など | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#3a3c93355dc3ddb9a14e6aa3c2f02240ca9fd896cce89d0addeb0dd01ac669ea |
-| [0:24:35](https://www.youtube.com/watch?v=zJEa2XSxky4&t=1475s) | アニメや漫画 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#2d455dcc471eef2da2a047de9e1d2f6f9f68aa0825885dc6a7f81138232400ec |
-| [0:29:28](https://www.youtube.com/watch?v=zJEa2XSxky4&t=1768s) | 放送日など | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#248d02e7f4562f9a5a1bf8d1834b42efe425531770f6632c269f158bb49d345b |
-| [0:32:17](https://www.youtube.com/watch?v=zJEa2XSxky4&t=1937s) | ルパンコラボなど | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#acec0116a7821fb8a0a963449e621d7f8f752f01760f21b763bb1b11950467ce |
-| [0:33:35](https://www.youtube.com/watch?v=zJEa2XSxky4&t=2015s) | 星のかがやきよ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#1a8847f7318d20c2033e1ec22123f87367d6dba71ffaf742dcd146123cfe6a37 |
-| [0:47:48](https://www.youtube.com/watch?v=zJEa2XSxky4&t=2868s) | 歌を聴くきっかけ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#12f6e6e93f27bbaec4977a3d42448bb7183cbd1be00fb13ff1c9fc96e1739b11 |
-| [0:50:17](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3017s) | 探偵や刑事物を | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#c40ab73abbd23c0bbfd1df8af387671a66a406526c8fbf8b370898dfbf50ec87 |
-| [0:53:02](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3182s) | サウンドトラック | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#cccd91d3aaaf2c2ba0156f46b2bde7ab442fd5cf8bb2039e56aa602bd80c0198 |
-| [0:54:56](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3296s) | 他にも見てたの | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#c7e9f03c3c63658fb645a7ac007dabbe14bfdb29bcaa04f24314c05e3d497634 |
-| [0:59:13](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3553s) | 銀狼怪奇ファイルなど | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#044ee5ad22814213ab8f09aa58d1c9d23e5ae2360d933d0bc51ca04a7594ce04 |
-| [1:03:41](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3821s) | 金田一の犯人の | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#94245d8773ba23f089414449ba959ff0eaafd75b58d1cfdd4dc785f464f202e0 |
-| [1:07:09](https://www.youtube.com/watch?v=zJEa2XSxky4&t=4029s) | いいペース | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#f910e61cba6c8b78352427ab5a16c5c2473638c3da881147f29b7e69638c24ee |
-| [1:14:59](https://www.youtube.com/watch?v=zJEa2XSxky4&t=4499s) | 青い青いこの地球に | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#fb5d4afd1aa7b65d7fa9e88393b800dbb4bbbd90e47efca83933070440e4905e |
-| [1:17:27](https://www.youtube.com/watch?v=zJEa2XSxky4&t=4647s) | ファンネームも | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#1ac7de379abd69871f9617f51d4e1af4c68a455e57b5a126193880f667834d14 |
-| [1:23:36](https://www.youtube.com/watch?v=zJEa2XSxky4&t=5016s) | 眠る君の横顔に微笑みを | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#b5b7f889e6ce6746ad4a9e73b9ed955fef9752214a797a6726b4524140a290bd |
-| [1:28:10](https://www.youtube.com/watch?v=zJEa2XSxky4&t=5290s) | 初だしものが | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#0ef2deb79d6ea57b7af5f8408d61fd122aca691862ae650fdf4b5439adecaafc |
-| [1:29:50](https://www.youtube.com/watch?v=zJEa2XSxky4&t=5390s) | コナンもどんどん | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#022528a19584ac101eef108a3b241078a55a3c49c79c0f1c0d44a5ba84d8d660 |
-| [1:52:01](https://www.youtube.com/watch?v=zJEa2XSxky4&t=6721s) | 君がいない夏 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#b375a14a2d9c4984281aa26ea63192cd852fb94533c62f289a682cd2f347b7f7 |
-| [1:56:27](https://www.youtube.com/watch?v=zJEa2XSxky4&t=6987s) | コナン君という光 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#268767b3e6f1fe1176cf9e55058de921ff15c66a19ec089d5a6ab41a057f1c02 |
-| [2:06:00](https://www.youtube.com/watch?v=zJEa2XSxky4&t=7560s) | NEXTここねぇヒント | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#17d537bf5325e24339f42dbfa182a40908d197427bfed521bab2253e126f4025 |
-| [2:07:46](https://www.youtube.com/watch?v=zJEa2XSxky4&t=7666s) | 全ビンゴしたら | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#3b65f89d953d2b27b3bf99aab4704d04c3c4298fa8d7313bf86f27c3dbf369d3 |
-| [2:12:18](https://www.youtube.com/watch?v=zJEa2XSxky4&t=7938s) | コミ障 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#e87b8a1e645ebdb7e95ea73464bedb41eb9dcff50360ba464a1cb6ae0c543254 |
-| [2:16:47](https://www.youtube.com/watch?v=zJEa2XSxky4&t=8207s) | ほかの箱さんとも | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#4c1bb16dd7f5ac82076d3a423c300e8188d773bf6ac2e43a7601148c2ae29273 |
-| [2:20:17](https://www.youtube.com/watch?v=zJEa2XSxky4&t=8417s) | カラオケやお酒 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#00cc4cdd8561030e9cb573cf2d15f70ca1be311072e6a64b4ab235482d584dcb |
-| [2:21:39](https://www.youtube.com/watch?v=zJEa2XSxky4&t=8499s) | 小、中学生の頃は | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#8cfe3c8fcfe593511065c51c775a95bb9637625fa2a7d84ff89b443c916edab6 |
-| [2:25:18](https://www.youtube.com/watch?v=zJEa2XSxky4&t=8718s) | 間が開くと&バイト時代 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#744af87cd750b1947c11cb7f7cddbd494778233bb0b4c007d4f34185856f9904 |
-| [2:31:50](https://www.youtube.com/watch?v=zJEa2XSxky4&t=9110s) | お見守り | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#1eb9940107e79069e7c7384b058c72c1ded2cf3b7c12ee6a4467224a88ef95c4 |
-| [2:41:20](https://www.youtube.com/watch?v=zJEa2XSxky4&t=9680s) | プライム購入 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#5d4675b899e4d3c7564fb4500f65d806a3e2f7975a818e250cd6afbeeaed607a |
-| [2:44:54](https://www.youtube.com/watch?v=zJEa2XSxky4&t=9894s) | 広島の&コラボするまで | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#910626e7dd64b9728bade57cba17398efc0cb124605538a1d3f1826f55d75a70 |
-| [2:47:40](https://www.youtube.com/watch?v=zJEa2XSxky4&t=10060s) | 喋れてたのは | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#de3edb52994229dfd993749bcef1f9cf95e580dc4b52e32bf05d349320fd7d86 |
-| [2:52:48](https://www.youtube.com/watch?v=zJEa2XSxky4&t=10368s) | おちょこ探してた | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#76b3adebc4cc3257105b432eb25a7b1cd83142212656291c62a6bcaad73cfbf0 |
-| [2:59:18](https://www.youtube.com/watch?v=zJEa2XSxky4&t=10758s) | またここね〜 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#456d2a34ef7c5840536fb8c6d2df94892b34918d1152f5cece119ffb685008f6 |
+| [0:01:03](https://www.youtube.com/watch?v=zJEa2XSxky4&t=63s) | こんここね〜 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#a53cd3460a187ddfcdb013c47953a4df793feb0e84380aef33d83515d27ecb75 |
+| [0:01:10](https://www.youtube.com/watch?v=zJEa2XSxky4&t=70s) | あぶない刑事など | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#838607d6ed9e597c209cb642445cda1759dff5ca88acefd49902587575ef1a24 |
+| [0:03:02](https://www.youtube.com/watch?v=zJEa2XSxky4&t=182s) | 歯医者 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#9503daf924bd9a113c8e738207b2906e7cb7773687f0994086969ced0872f299 |
+| [0:05:31](https://www.youtube.com/watch?v=zJEa2XSxky4&t=331s) | まつ毛パーマ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#c6806ed2a31a61efbab01f8fbcd5d5d2bcd27029898454eda39042ef81290dd0 |
+| [0:07:41](https://www.youtube.com/watch?v=zJEa2XSxky4&t=461s) | 滑舌 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#46f36c6fea50872ccdb61f74e7938efbdc31ad836b4850be7ec436732f0d8251 |
+| [0:09:06](https://www.youtube.com/watch?v=zJEa2XSxky4&t=546s) | 胸がドキドキ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#93d481ecf6cc4c0f0b3dece302f31814fc21b0cd6841ca715d862af28f44760e |
+| [0:21:17](https://www.youtube.com/watch?v=zJEa2XSxky4&t=1277s) | コナン歌や連載など | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#3a3c93355dc3ddb9a14e6aa3c2f02240ca9fd896cce89d0addeb0dd01ac669ea |
+| [0:24:35](https://www.youtube.com/watch?v=zJEa2XSxky4&t=1475s) | アニメや漫画 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#2d455dcc471eef2da2a047de9e1d2f6f9f68aa0825885dc6a7f81138232400ec |
+| [0:29:28](https://www.youtube.com/watch?v=zJEa2XSxky4&t=1768s) | 放送日など | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#248d02e7f4562f9a5a1bf8d1834b42efe425531770f6632c269f158bb49d345b |
+| [0:32:17](https://www.youtube.com/watch?v=zJEa2XSxky4&t=1937s) | ルパンコラボなど | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#acec0116a7821fb8a0a963449e621d7f8f752f01760f21b763bb1b11950467ce |
+| [0:33:35](https://www.youtube.com/watch?v=zJEa2XSxky4&t=2015s) | 星のかがやきよ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#1a8847f7318d20c2033e1ec22123f87367d6dba71ffaf742dcd146123cfe6a37 |
+| [0:47:48](https://www.youtube.com/watch?v=zJEa2XSxky4&t=2868s) | 歌を聴くきっかけ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#12f6e6e93f27bbaec4977a3d42448bb7183cbd1be00fb13ff1c9fc96e1739b11 |
+| [0:50:17](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3017s) | 探偵や刑事物を | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#c40ab73abbd23c0bbfd1df8af387671a66a406526c8fbf8b370898dfbf50ec87 |
+| [0:53:02](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3182s) | サウンドトラック | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#cccd91d3aaaf2c2ba0156f46b2bde7ab442fd5cf8bb2039e56aa602bd80c0198 |
+| [0:54:56](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3296s) | 他にも見てたの | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#c7e9f03c3c63658fb645a7ac007dabbe14bfdb29bcaa04f24314c05e3d497634 |
+| [0:59:13](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3553s) | 銀狼怪奇ファイルなど | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#044ee5ad22814213ab8f09aa58d1c9d23e5ae2360d933d0bc51ca04a7594ce04 |
+| [1:03:41](https://www.youtube.com/watch?v=zJEa2XSxky4&t=3821s) | 金田一の犯人の | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#94245d8773ba23f089414449ba959ff0eaafd75b58d1cfdd4dc785f464f202e0 |
+| [1:07:09](https://www.youtube.com/watch?v=zJEa2XSxky4&t=4029s) | いいペース | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#f910e61cba6c8b78352427ab5a16c5c2473638c3da881147f29b7e69638c24ee |
+| [1:14:59](https://www.youtube.com/watch?v=zJEa2XSxky4&t=4499s) | 青い青いこの地球に | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#fb5d4afd1aa7b65d7fa9e88393b800dbb4bbbd90e47efca83933070440e4905e |
+| [1:17:27](https://www.youtube.com/watch?v=zJEa2XSxky4&t=4647s) | ファンネームも | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#1ac7de379abd69871f9617f51d4e1af4c68a455e57b5a126193880f667834d14 |
+| [1:23:36](https://www.youtube.com/watch?v=zJEa2XSxky4&t=5016s) | 眠る君の横顔に微笑みを | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#b5b7f889e6ce6746ad4a9e73b9ed955fef9752214a797a6726b4524140a290bd |
+| [1:28:10](https://www.youtube.com/watch?v=zJEa2XSxky4&t=5290s) | 初だしものが | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#0ef2deb79d6ea57b7af5f8408d61fd122aca691862ae650fdf4b5439adecaafc |
+| [1:29:50](https://www.youtube.com/watch?v=zJEa2XSxky4&t=5390s) | コナンもどんどん | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#022528a19584ac101eef108a3b241078a55a3c49c79c0f1c0d44a5ba84d8d660 |
+| [1:52:01](https://www.youtube.com/watch?v=zJEa2XSxky4&t=6721s) | 君がいない夏 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#b375a14a2d9c4984281aa26ea63192cd852fb94533c62f289a682cd2f347b7f7 |
+| [1:56:27](https://www.youtube.com/watch?v=zJEa2XSxky4&t=6987s) | コナン君という光 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#268767b3e6f1fe1176cf9e55058de921ff15c66a19ec089d5a6ab41a057f1c02 |
+| [2:06:00](https://www.youtube.com/watch?v=zJEa2XSxky4&t=7560s) | NEXTここねぇヒント | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#17d537bf5325e24339f42dbfa182a40908d197427bfed521bab2253e126f4025 |
+| [2:07:46](https://www.youtube.com/watch?v=zJEa2XSxky4&t=7666s) | 全ビンゴしたら | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#3b65f89d953d2b27b3bf99aab4704d04c3c4298fa8d7313bf86f27c3dbf369d3 |
+| [2:12:18](https://www.youtube.com/watch?v=zJEa2XSxky4&t=7938s) | コミ障 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#e87b8a1e645ebdb7e95ea73464bedb41eb9dcff50360ba464a1cb6ae0c543254 |
+| [2:16:47](https://www.youtube.com/watch?v=zJEa2XSxky4&t=8207s) | ほかの箱さんとも | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#4c1bb16dd7f5ac82076d3a423c300e8188d773bf6ac2e43a7601148c2ae29273 |
+| [2:20:17](https://www.youtube.com/watch?v=zJEa2XSxky4&t=8417s) | カラオケやお酒 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#00cc4cdd8561030e9cb573cf2d15f70ca1be311072e6a64b4ab235482d584dcb |
+| [2:21:39](https://www.youtube.com/watch?v=zJEa2XSxky4&t=8499s) | 小、中学生の頃は | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#8cfe3c8fcfe593511065c51c775a95bb9637625fa2a7d84ff89b443c916edab6 |
+| [2:25:18](https://www.youtube.com/watch?v=zJEa2XSxky4&t=8718s) | 間が開くと&バイト時代 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#744af87cd750b1947c11cb7f7cddbd494778233bb0b4c007d4f34185856f9904 |
+| [2:31:50](https://www.youtube.com/watch?v=zJEa2XSxky4&t=9110s) | お見守り | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#1eb9940107e79069e7c7384b058c72c1ded2cf3b7c12ee6a4467224a88ef95c4 |
+| [2:41:20](https://www.youtube.com/watch?v=zJEa2XSxky4&t=9680s) | プライム購入 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#5d4675b899e4d3c7564fb4500f65d806a3e2f7975a818e250cd6afbeeaed607a |
+| [2:44:54](https://www.youtube.com/watch?v=zJEa2XSxky4&t=9894s) | 広島の&コラボするまで | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#910626e7dd64b9728bade57cba17398efc0cb124605538a1d3f1826f55d75a70 |
+| [2:47:40](https://www.youtube.com/watch?v=zJEa2XSxky4&t=10060s) | 喋れてたのは | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#de3edb52994229dfd993749bcef1f9cf95e580dc4b52e32bf05d349320fd7d86 |
+| [2:52:48](https://www.youtube.com/watch?v=zJEa2XSxky4&t=10368s) | おちょこ探してた | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#76b3adebc4cc3257105b432eb25a7b1cd83142212656291c62a6bcaad73cfbf0 |
+| [2:59:18](https://www.youtube.com/watch?v=zJEa2XSxky4&t=10758s) | またここね〜 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/zJEa2XSxky4\-50a55c9a5d4d37efbf4b\.json\#456d2a34ef7c5840536fb8c6d2df94892b34918d1152f5cece119ffb685008f6 |
 
 ### 【お久しぶりの弾き語り】寝落ち・作業用枠｜夜の教室六月最後の夜【\#こたつちゃ配信中】
 - 视频：[jFEmsTpjCzU](https://www.youtube.com/watch?v=jFEmsTpjCzU)
@@ -2384,6 +2393,7 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:36:39](https://www.youtube.com/watch?v=ZUYcc-MtfBc&t=2199s) | SnowMix♪ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/ZUYcc\-MtfBc\-9d84ffb9f2966f696135\.json\#0a0d55adc7fa870423f2d261fc2e835c57ef5a8d02c7f5df871de8144a15b5cc |
+| [1:19:40](https://www.youtube.com/watch?v=ZUYcc-MtfBc&t=4780s) | シャカビーチ〜Laka Laka La〜 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/ZUYcc\-MtfBc\-9d84ffb9f2966f696135\.json\#361ec63c44792fbdb14bbc238ee08b87b68d1222eeb2edf49b68035166f9bc2e |
 | [2:46:05](https://www.youtube.com/watch?v=ZUYcc-MtfBc&t=9965s) | 星寂夜 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/ZUYcc\-MtfBc\-9d84ffb9f2966f696135\.json\#4b4f4190758df81024602e021cfb23c771dd6cce48585648b3f783f3c46362d7 |
 
 ### 【 睡眠導入歌枠 】ピアノ伴奏縛り🎤初見さん大歓迎🫶🏻今日はここで寝落ち！！【 \#儚羽みう┊︎新人vtubar 】
@@ -2455,6 +2465,7 @@
 | [0:05:33](https://www.youtube.com/watch?v=sAvPguxfkbI&t=333s) | メシア | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/sAvPguxfkbI\-bac86e4c83769ec92f95\.json\#887a8ecfc89ef6a167475696cfb561db337198189400eb08f0618ac911a192e7 |
 | [0:13:59](https://www.youtube.com/watch?v=sAvPguxfkbI&t=839s) | 結びどき（オリジナル） | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/sAvPguxfkbI\-bac86e4c83769ec92f95\.json\#2c3d8392d4d62e38799dbf0dcd7f0ed96ad4819134ab90e236a35228ed5dfc2d |
 | [0:34:11](https://www.youtube.com/watch?v=sAvPguxfkbI&t=2051s) | 嗚呼、麗しき人生 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/sAvPguxfkbI\-bac86e4c83769ec92f95\.json\#2c44a408eb1b033be7db6d324b242ccf6748715089068321bf091cdf394b7a37 |
+| [0:51:09](https://www.youtube.com/watch?v=sAvPguxfkbI&t=3069s) | 乙女のポリシー | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/sAvPguxfkbI\-bac86e4c83769ec92f95\.json\#cb51428a0fa373444903d700056418316f935186b4405fc1d5c17688c659ba83 |
 | [1:00:34](https://www.youtube.com/watch?v=sAvPguxfkbI&t=3634s) | 1000の言葉 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/sAvPguxfkbI\-bac86e4c83769ec92f95\.json\#cb0d837a5ef81ba037b986158c12093c4870e9722c8030f0f3f042b9d12a53a6 |
 | [1:24:04](https://www.youtube.com/watch?v=sAvPguxfkbI&t=5044s) | 天生鬼才 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/sAvPguxfkbI\-bac86e4c83769ec92f95\.json\#cc0c2bd7e346daf3fa61fbf4ac497d0808572d335db9b380e24b090a5a06bf62 |
 | [1:32:23](https://www.youtube.com/watch?v=sAvPguxfkbI&t=5543s) | OH MY MY MY | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/sAvPguxfkbI\-bac86e4c83769ec92f95\.json\#5e1a675c0259f9a742a46b99471c07b2d609415fd0792ae7b1d67b1089c10984 |
@@ -2466,7 +2477,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:57:41](https://www.youtube.com/watch?v=ZxmFiv4aueM&t=3461s) | 掌／Mr\.Children | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/ZxmFiv4aueM\-fd3868139354d7776290\.json\#0491a78fa15bc02e63a0a520ec02fd5206fcbd77e036d45abe67110f1f69d760 |
+| [0:57:41](https://www.youtube.com/watch?v=ZxmFiv4aueM&t=3461s) | 掌／Mr\.Children | 未記載 | all, review | niche_unknown_artist |  | manual_review | data/review/sources/ZxmFiv4aueM\-fd3868139354d7776290\.json\#0491a78fa15bc02e63a0a520ec02fd5206fcbd77e036d45abe67110f1f69d760 |
 
 ### 【歌枠/Karaoke】ママVTuberがカラオケ配信をします！｜SINGING STREAM🎤【JP VTuber / 配信中】
 - 视频：[FNs4kpdpWGM](https://www.youtube.com/watch?v=FNs4kpdpWGM)
@@ -2654,6 +2665,7 @@
 | [0:17:30](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=1050s) | 行って良かった。安心した | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#47aa206bfe8f31b8d4f8dd852f49576935da6e5a9a636eddcdabde96f09c5fdf |
 | [0:26:05](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=1565s) | 生きるよすが\(ワンコーラス\) | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#02ba49a89c4d59a13bacca3194ce0d9982dd88daf58e9a5677f63712272edaf4 |
 | [0:36:11](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=2171s) | 高い声を出す時に思ってた | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#d5ce19db6f84cd791854fa25911d72f1badae20a0363ca780706439e830bd213 |
+| [0:39:21](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=2361s) | 雨とペトラ piano ver | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#5073543e6b2d6bf1a29343785ec7ca790e763f0fb370581c167c671dd8b04a74 |
 | [0:55:38](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=3338s) | にゃー | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#2b1261af08355ad699b57553603141bd80dba561f226ada491ccf3f4bf64bc62 |
 | [1:09:14](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=4154s) | 色んな答え合わせしてたら悲しくなってきた | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#a417eb945d5d42329b23b56611fc90c679949b5d453e15246b024bf45f3cba2b |
 | [1:09:44](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=4184s) | 季節は次々4んでいく | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#1a1a42aaf60294d2c3a424984ce3489f5289e1dc2c94f52072baea6fbf7d7b6d |
@@ -2665,6 +2677,7 @@
 | [2:21:11](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=8471s) | お願いダーリン | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#1d4d605563bbac6e2c0e888bc47dc541eacfdc584d8879aa82ef9830c4a88a16 |
 | [2:34:41](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=9281s) | んー、にゃー | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#24713c5d131fc6335d3efbc0c08f9e0fa3edede4ca7a5ea88ff6ebd4c3d3a1e0 |
 | [2:45:32](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=9932s) | 喉を休めた方がいいけど主な原因は鼻 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#a7b00d143921f6320c42b2fee29cb34e97e8a3026c7bd93a92f83c21d42e0830 |
+| [2:47:12](https://www.youtube.com/watch?v=_zMnCDv-Tw4&t=10032s) | HEART STATION | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_zMnCDv\-Tw4\-d4054090b33362464db1\.json\#4ef2f3723e799555dfa2c39450d3ee2182ba34a564995895f51379445a828068 |
 
 ### 【 歌枠 】 リクエスト◎ 台風だし雨海の出番っしょ！ 【 雨海ルカ / WeatherPlanet 】
 - 视频：[I82L8E7O8Sw](https://www.youtube.com/watch?v=I82L8E7O8Sw)
@@ -2673,11 +2686,15 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:48:39](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=2919s) | 自分の歌う曲の傾向 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#18dcd646028db2ffa1b59ea253fc48fe411f28d1b3871a79d453ac0b63dd5369 |
+| [0:50:48](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=3048s) | ワンルームシュガーライフ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#35af648ca785dd21f722f7386bc009ba2f0640a6723754ef466749b17d72332e |
 | [0:58:52](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=3532s) | にゃんにゃん | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#7a432aea66abc7005244f3b2143bf4ff6afb69f936ecf24064bc69c78c0a6f3a |
 | [1:13:02](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=4382s) | ロストワンの号哭\(ワンコーラス\) | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#618d3bc22b834b0d381dcbfd7fdfe81928e6d2e43fba821966dc66d186fd2b62 |
 | [1:43:18](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=6198s) | 噛んじゃった | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#fe8bfc9b6a9c67bf95305f66e4e265ce3a57a4356dab39bfc74853481888b08b |
+| [2:02:00](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=7320s) | drivers license | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#8098ae34b31997beac63e503298016fcca12f762958a5f708b15bafa416b5789 |
 | [2:13:21](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=8001s) | ECHO\(ワンコーラス\) | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#6fac60f8e2aad6a48950a794248186079905b4d163691b3340a615d86028334b |
+| [2:34:51](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=9291s) | Angel | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#39128fc28db059851adb66615ae712a9220a8bb2dd2eb6070e7a4efa90983f12 |
 | [2:45:46](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=9946s) | ろあちゃんの新衣装可愛かった | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#3e03de3049e41765bdf3517734a65d0f5fc05b6ae26d0238678d5efe36fc0da2 |
+| [2:57:38](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=10658s) | DADA | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#9381e5289d8194bc055e2fc87bd7ce6325e3f2c4bc4cd89ba6e4ee0e7d0fcdfe |
 | [3:00:44](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=10844s) | にゃにゃ | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#aee39b8dcada5bb9c225431e8ffc1ed16a38c9af1757fa91e19d6f8b47f073b7 |
 | [3:02:23](https://www.youtube.com/watch?v=I82L8E7O8Sw&t=10943s) | 今日は日本三國見てもいいよな | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/I82L8E7O8Sw\-7f78a6def8df2d574904\.json\#75b958740434f502d8f6ef8a526279e0068f9ad684f4e1bb837e526c72bc5f7f |
 
@@ -2807,6 +2824,14 @@
 | [1:11:30](https://www.youtube.com/watch?v=totUCq2IKSI&t=4290s) | 水彩銀河のクロニクル | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/totUCq2IKSI\-52c38855f39d77efeb23\.json\#01b735fe14e9d51eb2849ac3cd4455ad1342f7a6965c840b56682fdb60eada8d |
 | [1:47:32](https://www.youtube.com/watch?v=totUCq2IKSI&t=6452s) | 沈殿 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/totUCq2IKSI\-52c38855f39d77efeb23\.json\#fae6e61ffcd210d02a58ff66c675e668447d0111cd92efa97a651112e6e89aed |
 
+### 【睡眠導入】眠れない夜の弾き語り \#4
+- 视频：[ulT7yX74FPE](https://www.youtube.com/watch?v=ulT7yX74FPE)
+- 频道：xea
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:19:38](https://www.youtube.com/watch?v=ulT7yX74FPE&t=1178s) | 夢のまた夢 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/ulT7yX74FPE\-098a7af9e5693e1bfdfc\.json\#d3ddb87e718f895715270d78522a8f9b599b8e359dad26577d2c9359b827ea0f |
+
 ### 【睡眠導入】眠れない夜の弾き語り \#5
 - 视频：[B1AoYBQFfhA](https://www.youtube.com/watch?v=B1AoYBQFfhA)
 - 频道：xea
@@ -2850,6 +2875,7 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:11:46](https://www.youtube.com/watch?v=fnm5-5hlij4&t=706s) | アルクアラウンド | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/fnm5\-5hlij4\-bbe40e90d865474e71e1\.json\#424345dec678b06198bde4a8fc30955b8fb67ffc2c884132f8d9282cd49be1b1 |
+| [0:21:36](https://www.youtube.com/watch?v=fnm5-5hlij4&t=1296s) | モス | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/fnm5\-5hlij4\-bbe40e90d865474e71e1\.json\#c21d2a091d675f0e3b6ad26c40838e0f1a980112fd5c6f8cb032c209b9a5f686 |
 
 ### 【\#歌枠】いろんな世代へむけて歌う（俺の好きな歌を）【いれいす/悠佑】
 - 视频：[P3unvwP23h0](https://www.youtube.com/watch?v=P3unvwP23h0)
@@ -2873,34 +2899,34 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:02:48](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=168s) | あーあーあ”ーあ”ぁ”ー | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ef77487343348387582551ba4caec90e858b7f979fdceb70e082a2f15f72f100 |
-| [0:12:32](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=752s) | 今、エコーが・・・ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ae04032a61c444452376f75d23444a2427b625ce698b45c7383fb7d15dee777c |
-| [0:16:34](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=994s) | （1999）おジャ魔女カーニバル\!\! | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#62c07339896770dcdd758410e1d8bf8bc9275a1871cb32c903329f22da320d5c |
-| [0:21:41](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=1301s) | （2000）🆕おジャ魔女はココにいる | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#3ee496d008d84cd2921554dd1088e629d24bd36b11c587833e01fa90c511a065 |
-| [0:28:47](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=1727s) | （1999）Butter\-Fly | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#47fb375d2c4df1b15b46f2608807ced4a34cb1bd8ce85bd3f8b4b3d220a8ab95 |
-| [0:35:41](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2141s) | （2000）ハム太郎 とっとこうた | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ae2444d1c9372adeba2d388a659ff5e44a30d974d2bc428d91c6193eefbc5a5a |
-| [0:38:11](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2291s) | （2003）Grip\! | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#c6b00903febe6a0c085e61f9788c35dc1c6c5601ecd3e4012e743f9560805024 |
-| [0:45:35](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2735s) | （2002）my sweet heart | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#59fec4b2be15fa93ed88503d04c8e68fbcd141764ed9f78f2828330a0597b011 |
-| [0:52:02](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=3122s) | （2002）恋はア・ラ・モード | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#db0b91c2395d68bf790235ed25bc6a254f334771039c8d680250271c77ddd6a3 |
-| [1:03:52](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=3832s) | （2008）ブルーバード | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#526cfdfd23b707c9db60f1ff174c826eef5a01d84a0bc61ae7eee58750c09473 |
-| [1:07:40](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=4060s) | （2009）ホタルノヒカリ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ac276b8c4745d1ace2c8e4eb8d479b95f6478309ca79da5feb823330a1798ab4 |
-| [1:22:10](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=4930s) | （2004）カサブタ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#edff2f383b780d7b00306421ec0f98454667cf734e2ee3100538337bc7ef897a |
-| [1:30:32](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=5432s) | （2005）DANZEN\!ふたりはプリキュア | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#6e50acea879270385749f644f68c885db65573529460bba970af866eba0537ac |
-| [1:35:29](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=5729s) | 一番下の妹がスマイルプリキュア見てて・・・ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#8fc993a13a8c75c83eef0dd48d914222a0d1d026a98188f8bb177c25e3992618 |
-| [1:39:23](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=5963s) | （2007）プリキュア5、スマイル go go\! | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#40043f5612f7baeabde9a5a6cb3e778747ce1c2259b9c8cf8b45206f7f19a934 |
-| [1:47:53](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=6473s) | （2004）🆕ケロッ\!とマーチ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#642e9a89555be351993c7344e709bc4088908682f4a21ab06a5323d3afc852ad |
-| [1:52:25](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=6745s) | （2004）ピカピカの太陽 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ef129eee8781068a905ff1b78657063fa2679a614406730b2f467f29a51b3907 |
-| [1:57:50](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7070s) | （2005）ETERNAL BLAZE | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#a14f48bad0d0b5dbb0a0d46f8b2af9344a452afb85c7d5d490b6ba3c33c9da1c |
-| [2:05:56](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7556s) | （2007）空色デイズ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#5c6eacc8b01182663a1e05a07bc9d3b073535aa1dfb7b429df53779f065a46a1 |
-| [2:10:13](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7813s) | （2009）Don't say "lazy" | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#50fbb7a1c4ca0a4777a2ee05b27836bfc7c60fe0a69f8c1cc06b9b789a2bd377 |
-| [2:22:09](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8529s) | （2007）こころのたまご | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#bc0c708f52123bf464d415e2a1ac2a4d389b62d48792fbc05524fb910fd087b5 |
-| [2:27:01](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8821s) | （2010）Irony | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#acd989b2e11eef59f35ecc0b7ccd205e7ba9aaa905b36e060228b1230b4baa32 |
-| [2:31:58](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9118s) | （2013）reunion | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#a1f7d38131bebd58f55f2a1ba8399dba08e8752e784de5a17437b171a502a2e8 |
-| [2:39:38](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9578s) | （2011）コネクト | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#c44157eb057625a81ae04385d55e60c38607b8e0bb60fc773efe3749062c695c |
-| [2:45:49](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9949s) | （2012）ルミナス | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#1dfffb7f8297f3f6a610f8f8a7c9f209df887b570bc7009f7b4b4001ea5539f8 |
-| [2:52:58](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=10378s) | （2013）カラフル | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#0c89c12911ddffe8e912a71c20874f0993030809afc164a36d680f8c0756a5f6 |
-| [3:00:05](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=10805s) | コットンと焼肉行く約束してて・・・ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#5d000f926c4372c6d783ba21aa2e9b776b01baea265a85e691b62d3da1187553 |
-| [3:18:58](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=11938s) | 今日歌えなかったのは次回に | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#422261041564a0d2caf75fc686f470164e53a6db83e97b1edae919e13a5f514a |
+| [0:02:48](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=168s) | あーあーあ”ーあ”ぁ”ー | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ef77487343348387582551ba4caec90e858b7f979fdceb70e082a2f15f72f100 |
+| [0:12:32](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=752s) | 今、エコーが・・・ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ae04032a61c444452376f75d23444a2427b625ce698b45c7383fb7d15dee777c |
+| [0:16:34](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=994s) | （1999）おジャ魔女カーニバル\!\! | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#62c07339896770dcdd758410e1d8bf8bc9275a1871cb32c903329f22da320d5c |
+| [0:21:41](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=1301s) | （2000）🆕おジャ魔女はココにいる | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#3ee496d008d84cd2921554dd1088e629d24bd36b11c587833e01fa90c511a065 |
+| [0:28:47](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=1727s) | （1999）Butter\-Fly | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#47fb375d2c4df1b15b46f2608807ced4a34cb1bd8ce85bd3f8b4b3d220a8ab95 |
+| [0:35:41](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2141s) | （2000）ハム太郎 とっとこうた | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ae2444d1c9372adeba2d388a659ff5e44a30d974d2bc428d91c6193eefbc5a5a |
+| [0:38:11](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2291s) | （2003）Grip\! | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#c6b00903febe6a0c085e61f9788c35dc1c6c5601ecd3e4012e743f9560805024 |
+| [0:45:35](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=2735s) | （2002）my sweet heart | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#59fec4b2be15fa93ed88503d04c8e68fbcd141764ed9f78f2828330a0597b011 |
+| [0:52:02](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=3122s) | （2002）恋はア・ラ・モード | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#db0b91c2395d68bf790235ed25bc6a254f334771039c8d680250271c77ddd6a3 |
+| [1:03:52](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=3832s) | （2008）ブルーバード | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#526cfdfd23b707c9db60f1ff174c826eef5a01d84a0bc61ae7eee58750c09473 |
+| [1:07:40](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=4060s) | （2009）ホタルノヒカリ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ac276b8c4745d1ace2c8e4eb8d479b95f6478309ca79da5feb823330a1798ab4 |
+| [1:22:10](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=4930s) | （2004）カサブタ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#edff2f383b780d7b00306421ec0f98454667cf734e2ee3100538337bc7ef897a |
+| [1:30:32](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=5432s) | （2005）DANZEN\!ふたりはプリキュア | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#6e50acea879270385749f644f68c885db65573529460bba970af866eba0537ac |
+| [1:35:29](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=5729s) | 一番下の妹がスマイルプリキュア見てて・・・ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#8fc993a13a8c75c83eef0dd48d914222a0d1d026a98188f8bb177c25e3992618 |
+| [1:39:23](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=5963s) | （2007）プリキュア5、スマイル go go\! | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#40043f5612f7baeabde9a5a6cb3e778747ce1c2259b9c8cf8b45206f7f19a934 |
+| [1:47:53](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=6473s) | （2004）🆕ケロッ\!とマーチ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#642e9a89555be351993c7344e709bc4088908682f4a21ab06a5323d3afc852ad |
+| [1:52:25](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=6745s) | （2004）ピカピカの太陽 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#ef129eee8781068a905ff1b78657063fa2679a614406730b2f467f29a51b3907 |
+| [1:57:50](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7070s) | （2005）ETERNAL BLAZE | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#a14f48bad0d0b5dbb0a0d46f8b2af9344a452afb85c7d5d490b6ba3c33c9da1c |
+| [2:05:56](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7556s) | （2007）空色デイズ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#5c6eacc8b01182663a1e05a07bc9d3b073535aa1dfb7b429df53779f065a46a1 |
+| [2:10:13](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=7813s) | （2009）Don't say "lazy" | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#50fbb7a1c4ca0a4777a2ee05b27836bfc7c60fe0a69f8c1cc06b9b789a2bd377 |
+| [2:22:09](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8529s) | （2007）こころのたまご | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#bc0c708f52123bf464d415e2a1ac2a4d389b62d48792fbc05524fb910fd087b5 |
+| [2:27:01](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8821s) | （2010）Irony | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#acd989b2e11eef59f35ecc0b7ccd205e7ba9aaa905b36e060228b1230b4baa32 |
+| [2:31:58](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9118s) | （2013）reunion | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#a1f7d38131bebd58f55f2a1ba8399dba08e8752e784de5a17437b171a502a2e8 |
+| [2:39:38](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9578s) | （2011）コネクト | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#c44157eb057625a81ae04385d55e60c38607b8e0bb60fc773efe3749062c695c |
+| [2:45:49](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=9949s) | （2012）ルミナス | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#1dfffb7f8297f3f6a610f8f8a7c9f209df887b570bc7009f7b4b4001ea5539f8 |
+| [2:52:58](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=10378s) | （2013）カラフル | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#0c89c12911ddffe8e912a71c20874f0993030809afc164a36d680f8c0756a5f6 |
+| [3:00:05](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=10805s) | コットンと焼肉行く約束してて・・・ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#5d000f926c4372c6d783ba21aa2e9b776b01baea265a85e691b62d3da1187553 |
+| [3:18:58](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=11938s) | 今日歌えなかったのは次回に | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#422261041564a0d2caf75fc686f470164e53a6db83e97b1edae919e13a5f514a |
 
 ### 【 歌枠 / 月曜定期 】今週も一緒に頑張ろうね！１曲だけでもいかがですか？ \#アールテテ配信
 - 视频：[57wzXF51pAE](https://www.youtube.com/watch?v=57wzXF51pAE)
@@ -2931,6 +2957,14 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [2:14:00](https://www.youtube.com/watch?v=ywrHMeh82oQ&t=8040s) | おつるきヨ～～ヨヨヨﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖﾖ | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/ywrHMeh82oQ\-c9a0c3900cb8a5b5f1a3\.json\#97ca85f5ff642de7b5fe019ef0ed268975f8dcded3dce203de68efca152ae3eb |
+
+### 【 \#歌枠 / Karaoke 】懐かしのボカロ曲いっぱい歌います！！🎤初見さんも大歓迎！【 \#あかつきるき \#VSinger 】
+- 视频：[08CQUlMMcQc](https://www.youtube.com/watch?v=08CQUlMMcQc)
+- 频道：あかつき るき / Akatsuki Luci
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [2:26:46](https://www.youtube.com/watch?v=08CQUlMMcQc&t=8806s) | ヴァイ | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/08CQUlMMcQc\-2e670230d2db6b510c54\.json\#d4fe97d983894bb8e212db709954c4bb6e8e7a5ff4227a2df748911ec27b3d7f |
 
 ### 【歌枠】王が通るぞ【\#あくび・でもんすぺーど】
 - 视频：[xYAgCeSyo2Q](https://www.youtube.com/watch?v=xYAgCeSyo2Q)
@@ -2979,7 +3013,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:51:25](https://www.youtube.com/watch?v=kQVdDhuS2js&t=3085s) | 素敵な君 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title |  | manual_review | data/review/sources/kQVdDhuS2js\-dbff8ac38f56e8488ef2\.json\#3c22c55a9d0369540fdc69b6be1082bae3746909ff8ffab89f8b3398a0c1b021 |
+| [0:51:25](https://www.youtube.com/watch?v=kQVdDhuS2js&t=3085s) | 素敵な君 | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/kQVdDhuS2js\-dbff8ac38f56e8488ef2\.json\#3c22c55a9d0369540fdc69b6be1082bae3746909ff8ffab89f8b3398a0c1b021 |
 
 ### 【\#弾き語り \#131】6月も終わりだね！告知あるよ！雑談と弾き語り！【Vtuber/エクト】
 - 视频：[Pqfy9RqzA9Q](https://www.youtube.com/watch?v=Pqfy9RqzA9Q)
@@ -3014,10 +3048,10 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:19:42](https://www.youtube.com/watch?v=pVNZdov-qo0&t=1182s) | \(邪気放出\) | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pVNZdov\-qo0\-242e384d92b9946c7585\.json\#4c1dbf340a350ee849bbcb8cd589d9b2fabaec83389cf606f59cd3d4d39e482d |
-| [0:32:18](https://www.youtube.com/watch?v=pVNZdov-qo0&t=1938s) | サマータイム | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pVNZdov\-qo0\-242e384d92b9946c7585\.json\#37ff4b8eb9d7109979c452f3efc7e70a5a8048d845aa043d97aa49df492caa13 |
-| [0:38:21](https://www.youtube.com/watch?v=pVNZdov-qo0&t=2301s) | \(グミのしゃりしゃり\) | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pVNZdov\-qo0\-242e384d92b9946c7585\.json\#6210036345de11d4346e014d915d8d05fac7d8cd916ecd8eb7d290008d14495a |
-| [1:17:30](https://www.youtube.com/watch?v=pVNZdov-qo0&t=4650s) | swim | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/pVNZdov\-qo0\-242e384d92b9946c7585\.json\#2c7c3ad0baefa5e314d51bb33d413a0cff804a0fb0e5824ab8c48d21c90d5063 |
+| [0:19:42](https://www.youtube.com/watch?v=pVNZdov-qo0&t=1182s) | \(邪気放出\) | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pVNZdov\-qo0\-242e384d92b9946c7585\.json\#4c1dbf340a350ee849bbcb8cd589d9b2fabaec83389cf606f59cd3d4d39e482d |
+| [0:32:18](https://www.youtube.com/watch?v=pVNZdov-qo0&t=1938s) | サマータイム | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pVNZdov\-qo0\-242e384d92b9946c7585\.json\#37ff4b8eb9d7109979c452f3efc7e70a5a8048d845aa043d97aa49df492caa13 |
+| [0:38:21](https://www.youtube.com/watch?v=pVNZdov-qo0&t=2301s) | \(グミのしゃりしゃり\) | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pVNZdov\-qo0\-242e384d92b9946c7585\.json\#6210036345de11d4346e014d915d8d05fac7d8cd916ecd8eb7d290008d14495a |
+| [1:17:30](https://www.youtube.com/watch?v=pVNZdov-qo0&t=4650s) | swim | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/pVNZdov\-qo0\-242e384d92b9946c7585\.json\#2c7c3ad0baefa5e314d51bb33d413a0cff804a0fb0e5824ab8c48d21c90d5063 |
 
 ### 【 \#歌枠｜\#karaoke 】 朝歌活【 カシ・オトハ｜\#VEE 】
 - 视频：[vyVvQ\_I18xY](https://www.youtube.com/watch?v=vyVvQ_I18xY)
@@ -3074,9 +3108,9 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:54:12](https://www.youtube.com/watch?v=LmAxCaEmQD0&t=3252s) | アクア色ぱれっと | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LmAxCaEmQD0\-60072fa5711408504dd1\.json\#2aa55f878aed01e322172dbabc24b12e2431e245c6ac036c1f87f8a7c992e6d4 |
-| [1:12:09](https://www.youtube.com/watch?v=LmAxCaEmQD0&t=4329s) | 檄！帝国歌撃団 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LmAxCaEmQD0\-60072fa5711408504dd1\.json\#75ae340f0d16a745327663439e7c8b5686626aa31f5c14abca674a38aae90fc8 |
-| [2:00:14](https://www.youtube.com/watch?v=LmAxCaEmQD0&t=7214s) | Starry Heayens | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LmAxCaEmQD0\-60072fa5711408504dd1\.json\#794d83f8c2425a8700c57f2b953ea19acbe4a747a20bdc6a7345bca379ebcabb |
+| [0:54:12](https://www.youtube.com/watch?v=LmAxCaEmQD0&t=3252s) | アクア色ぱれっと | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LmAxCaEmQD0\-60072fa5711408504dd1\.json\#2aa55f878aed01e322172dbabc24b12e2431e245c6ac036c1f87f8a7c992e6d4 |
+| [1:12:09](https://www.youtube.com/watch?v=LmAxCaEmQD0&t=4329s) | 檄！帝国歌撃団 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LmAxCaEmQD0\-60072fa5711408504dd1\.json\#75ae340f0d16a745327663439e7c8b5686626aa31f5c14abca674a38aae90fc8 |
+| [2:00:14](https://www.youtube.com/watch?v=LmAxCaEmQD0&t=7214s) | Starry Heayens | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LmAxCaEmQD0\-60072fa5711408504dd1\.json\#794d83f8c2425a8700c57f2b953ea19acbe4a747a20bdc6a7345bca379ebcabb |
 
 ### 猫のゆるジャズ喫茶【Vtuber 歌枠】 / 初見様リクエスト１曲どうぞ♪ 広告無 BGMに最適♪プロ歌手が Jazz, Bossa, Pop, Soul など歌うよ
 - 视频：[pRh6tLOLMxk](https://www.youtube.com/watch?v=pRh6tLOLMxk)
@@ -3084,17 +3118,17 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:12:03](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=723s) | My Blue Heaven | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#d309bcc976c987e7e4d1b4afe7650742be70f11478a458a7408a646467c366ba |
-| [0:34:12](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=2052s) | Sway | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#095c79fb0a01f1fc3c4d5e16647ea100c547331ee31bd7d4b440cd31fa0b8214 |
-| [0:59:45](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=3585s) | 天国のキッス | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#5f5d5471e6ef11d752699f30630c448225f47acd0acae1259b74282efd088089 |
-| [1:23:21](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=5001s) | Alice in wonderland | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#2afa957f910555d3a04dd3021fb0e22212dfb346c8fb57442a6d4635e368d4b7 |
-| [1:41:28](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=6088s) | ガラスの林檎 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#c841cfc797e27eb2de6d501adc4f0b9113f023986932da4768bb388240972e17 |
-| [2:07:17](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=7637s) | Give me the simple life | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#8f9c38adcf19a6e8de9c5ba2b31a480b9ca791e7aeb142f27cc0f8f8c4968023 |
-| [2:42:19](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=9739s) | I can't give you anything but love | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#507cd79b7a365fe8f31fc776ce55d6d828e9b3ea4afceb528fb13cb60db14e5d |
-| [2:51:06](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=10266s) | Lover , Come back to me | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#10b20b8cb550d03d7e7e7e44d00762027eab31169d3d07c4fcc883aedf5162e7 |
-| [3:17:02](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=11822s) | It don't mean a thing | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#ebc743c2f0baa560d0536dfb3a21c59f514432305ecb511e0f54987a4c143250 |
-| [3:21:30](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=12090s) | おやすみのうた | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#0367da58aad7ed2275c5ec9472ab0a946473bd3d6edc5835b8d330f64792e928 |
-| [3:26:30](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=12390s) | りんごのうた~hikari | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#ab658bd9bd5601baa652163aac169ed65fd35d860d17a629388a4deacea0f268 |
+| [0:12:03](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=723s) | My Blue Heaven | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#d309bcc976c987e7e4d1b4afe7650742be70f11478a458a7408a646467c366ba |
+| [0:34:12](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=2052s) | Sway | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#095c79fb0a01f1fc3c4d5e16647ea100c547331ee31bd7d4b440cd31fa0b8214 |
+| [0:59:45](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=3585s) | 天国のキッス | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#5f5d5471e6ef11d752699f30630c448225f47acd0acae1259b74282efd088089 |
+| [1:23:21](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=5001s) | Alice in wonderland | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#2afa957f910555d3a04dd3021fb0e22212dfb346c8fb57442a6d4635e368d4b7 |
+| [1:41:28](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=6088s) | ガラスの林檎 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#c841cfc797e27eb2de6d501adc4f0b9113f023986932da4768bb388240972e17 |
+| [2:07:17](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=7637s) | Give me the simple life | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#8f9c38adcf19a6e8de9c5ba2b31a480b9ca791e7aeb142f27cc0f8f8c4968023 |
+| [2:42:19](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=9739s) | I can't give you anything but love | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#507cd79b7a365fe8f31fc776ce55d6d828e9b3ea4afceb528fb13cb60db14e5d |
+| [2:51:06](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=10266s) | Lover , Come back to me | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#10b20b8cb550d03d7e7e7e44d00762027eab31169d3d07c4fcc883aedf5162e7 |
+| [3:17:02](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=11822s) | It don't mean a thing | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#ebc743c2f0baa560d0536dfb3a21c59f514432305ecb511e0f54987a4c143250 |
+| [3:21:30](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=12090s) | おやすみのうた | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#0367da58aad7ed2275c5ec9472ab0a946473bd3d6edc5835b8d330f64792e928 |
+| [3:26:30](https://www.youtube.com/watch?v=pRh6tLOLMxk&t=12390s) | りんごのうた~hikari | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/pRh6tLOLMxk\-f17b5e19c2af4e1dea5d\.json\#ab658bd9bd5601baa652163aac169ed65fd35d860d17a629388a4deacea0f268 |
 
 ### 猫のゆるジャズ喫茶【Vtuber 歌枠】 / 初見様リクエスト１曲どうぞ♪ 広告無 BGMに最適♪プロ歌手が Jazz, Bossa, Pop, Soul など歌うよ
 - 视频：[dY1DbsZ6nHU](https://www.youtube.com/watch?v=dY1DbsZ6nHU)
@@ -3171,6 +3205,8 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:12:12](https://www.youtube.com/watch?v=VmLgly38CwY&t=732s) | MOTTAI | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/VmLgly38CwY\-13471331dc10d8e60dc6\.json\#4b3ef27907049132dec03b202b906dae5cee865552db432001c7c5f374a7c59c |
+| [1:48:39](https://www.youtube.com/watch?v=VmLgly38CwY&t=6519s) | ヤラララ | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/VmLgly38CwY\-13471331dc10d8e60dc6\.json\#a0a21597e845d7b9fac3ba6242262ce347da2914097e7b6fc8541550b728cb0a |
 | [1:59:52](https://www.youtube.com/watch?v=VmLgly38CwY&t=7192s) | お願いダーリン | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/VmLgly38CwY\-13471331dc10d8e60dc6\.json\#8f3d53882b97915e0e3c939d200d3f7c5685c42ba584236c74406ebb22070daa |
 
 ### 【歌枠/告知アリ】最強音圧！推理アニメ・サスペンス系アニメのアニソン縛りで盛り上がっていこう🎤 \#あおぎり高校 \#千代浦蝶美
@@ -3199,8 +3235,10 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:46:22](https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=2782s) | Justiφ's | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_Oe\-nuMiM2I\-ce9a7a8a358dfc233a65\.json\#a1ee38d5173f70f2a5c29f8af65407858156dfd76b95ab11d6eb888c31486985 |
+| [0:54:20](https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=3260s) | Round ZERO ～ BLADE BRAVE | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_Oe\-nuMiM2I\-ce9a7a8a358dfc233a65\.json\#c6299bb683c082eade03589eccf3a4f58965a37e7c224894c06ffa3c813de9cf |
 | [1:01:58](https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=3718s) | ぼくドラえもん | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_Oe\-nuMiM2I\-ce9a7a8a358dfc233a65\.json\#88721d0913cd439950a7534d5c5b0323c60ee1e770754ef748b94665aa13cfff |
 | [1:07:05](https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=4025s) | 夢は終わらない ～こぼれ落ちる時の雫～ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_Oe\-nuMiM2I\-ce9a7a8a358dfc233a65\.json\#7dcebd40e5782c957f8d09b44f5ec3289511903e938fd8d1228b2c470a7b99a1 |
+| [1:16:52](https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=4612s) | 永遠の明日 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_Oe\-nuMiM2I\-ce9a7a8a358dfc233a65\.json\#41b0f5c8e9b29f651e3345e14937e79df01be32d68a07754c4aab74d62b63371 |
 | [1:26:10](https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=5170s) | BURN | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_Oe\-nuMiM2I\-ce9a7a8a358dfc233a65\.json\#80b43a93ec63689eb5427664c5e07cd00d09931dd3b6b1fec3dd0d1b4b2ec52f |
 | [1:30:11](https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=5411s) | 夜の海辺へようこそ～～～♪　屋台は出てませんorz | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_Oe\-nuMiM2I\-ce9a7a8a358dfc233a65\.json\#4959d67ae5709b6af92b1b91ab2361956ae6d5fee5f93f7c9141a71281e981cd |
 | [1:40:48](https://www.youtube.com/watch?v=_Oe-nuMiM2I&t=6048s) | DREAMS | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/\_Oe\-nuMiM2I\-ce9a7a8a358dfc233a65\.json\#f01c1b66d2d73eb11830f51beaf9e1c149f6a3cdd7ceb8b87e0efab458ccba19 |
@@ -3233,6 +3271,14 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:03:23](https://www.youtube.com/watch?v=ymb6AkROobg&t=203s) | ワンコメさんが不機嫌 | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/ymb6AkROobg\-5300cca739f21225928a\.json\#f64af0ea6b07473b096bb700ddc80d04893f0f9ef9fd4522893df41f49530acb |
 
+### 【モテたい】人生初の神曲カラオケ配信をやる【歌枠】
+- 视频：[a4ZJuD9qSGw](https://www.youtube.com/watch?v=a4ZJuD9qSGw)
+- 频道：ニキ【すごいイケメン】
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [1:55:01](https://www.youtube.com/watch?v=a4ZJuD9qSGw&t=6901s) | 花束のかわりにメロディーを | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/a4ZJuD9qSGw\-0fd9a7f3beb7a112c2a0\.json\#34588048d57e552afe9171fcf21ba04a47f7fdf2209ad37513abaccff28a27ca |
+
 ### 【 KARAOKE / \#歌枠 】疲れた人に送る泣ける楽曲縛り歌枠⟡\.\*【 \#ニュイLive / \#vtuber 】
 - 视频：[PqJN3yjfBHs](https://www.youtube.com/watch?v=PqJN3yjfBHs)
 - 频道：ニュイ・ルナベル / Nui Lunaveil
@@ -3240,6 +3286,7 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:00:05](https://www.youtube.com/watch?v=PqJN3yjfBHs&t=5s) | いかないで \-Piano Ver | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/PqJN3yjfBHs\-3fadd0e2daa88090eda5\.json\#3691a44f1b63c2ff60fcdce6c6fb2872c2be74ca37fe134bcc314261197af739 |
+| [0:06:01](https://www.youtube.com/watch?v=PqJN3yjfBHs&t=361s) | letter song \-Piano Ver | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/PqJN3yjfBHs\-3fadd0e2daa88090eda5\.json\#0fe0ccbbebeb905c2d59833b7ddd8d7f585cf65ca93bf17fbaeeaef41a2b4233 |
 | [0:13:20](https://www.youtube.com/watch?v=PqJN3yjfBHs&t=800s) | 明日世界が終わるなら | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/PqJN3yjfBHs\-3fadd0e2daa88090eda5\.json\#52a68e759c6e19536d133687a8bdcfc5d5376d03c56c3c1f0b78bda338a0afb2 |
 | [1:03:13](https://www.youtube.com/watch?v=PqJN3yjfBHs&t=3793s) | アイロニ \-Piano Ver | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/PqJN3yjfBHs\-3fadd0e2daa88090eda5\.json\#30a5d218d1e83cff79ded2faa9364a76b703c7641c4b69038b2f5345d8af1433 |
 | [2:57:45](https://www.youtube.com/watch?v=PqJN3yjfBHs&t=10665s) | アヤノの幸福理論 \-Piano Ver | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/PqJN3yjfBHs\-3fadd0e2daa88090eda5\.json\#62835c2da9882accac0c13fcb020c3b1e63da878d24f3bb3f3af7aeafc889646 |
@@ -3301,6 +3348,14 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [1:17:51](https://www.youtube.com/watch?v=kk5aFZC9Q1E&t=4671s) | 君が眩しいから僕は星が見えない | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/kk5aFZC9Q1E\-f71cfc6e29c48088d250\.json\#6b8724ed5a6a4f4f3f78db29c8b17fe09231cc6cd1dae7e378d57921808cd47a |
 
+### 【\#星海のメロウ歌枠リレー】水辺で聴きたい曲をあなたに【\#vsinger / ブランク・ウリカ 】
+- 视频：[T8KbOc1ZP9I](https://www.youtube.com/watch?v=T8KbOc1ZP9I)
+- 频道：ブランク・ウリカ \- Blanc Ulica \-
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:18:46](https://www.youtube.com/watch?v=T8KbOc1ZP9I&t=1126s) | 本日のお夕飯の発表 | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/T8KbOc1ZP9I\-3fabfcb365e8c1d2a177\.json\#3c1a887aa72ce8dccbe8afb34cdb571f45dad735a967e3ab3c89dd0464a42d4f |
+
 ### 【歌枠 / KARAOKE】古のボカロ曲縛りで歌う！！寝る前に一曲聞いてって～！
 - 视频：[7QAFzOFDJ6U](https://www.youtube.com/watch?v=7QAFzOFDJ6U)
 - 频道：ぺるしあ・てん
@@ -3338,10 +3393,11 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:32:28](https://www.youtube.com/watch?v=37WV6tXih-8&t=1948s) | あえいうえおあお〜 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#40bb68129ea05a0e804a259017e1e2c97dd65e64688c2057b4d556e268be8042 |
-| [1:48:23](https://www.youtube.com/watch?v=37WV6tXih-8&t=6503s) | 点描の詩 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#b941c005f6bdf10cd07475767d2a25cd9a249c1582394663d8b836b9a3c48b1f |
-| [1:54:42](https://www.youtube.com/watch?v=37WV6tXih-8&t=6882s) | ミライチズ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#a7a31900395b963b31d5b8caf00a8196473991304fde4e890133d2e8bca8f3ba |
-| [1:59:08](https://www.youtube.com/watch?v=37WV6tXih-8&t=7148s) | ワライカタ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#ee1f10706707f750526bbe5bc41688e9f4e03a6095a079fc4f74c4c19df0eb1f |
+| [0:32:28](https://www.youtube.com/watch?v=37WV6tXih-8&t=1948s) | あえいうえおあお〜 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#40bb68129ea05a0e804a259017e1e2c97dd65e64688c2057b4d556e268be8042 |
+| [1:48:23](https://www.youtube.com/watch?v=37WV6tXih-8&t=6503s) | 点描の詩 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#b941c005f6bdf10cd07475767d2a25cd9a249c1582394663d8b836b9a3c48b1f |
+| [1:54:42](https://www.youtube.com/watch?v=37WV6tXih-8&t=6882s) | ミライチズ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#a7a31900395b963b31d5b8caf00a8196473991304fde4e890133d2e8bca8f3ba |
+| [1:59:08](https://www.youtube.com/watch?v=37WV6tXih-8&t=7148s) | ワライカタ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#ee1f10706707f750526bbe5bc41688e9f4e03a6095a079fc4f74c4c19df0eb1f |
+| [2:28:48](https://www.youtube.com/watch?v=37WV6tXih-8&t=8928s) | 花束のかわりにメロディーを | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/37WV6tXih\-8\-a94d9ff308ff1d5dbc27\.json\#9f7fb26b421423060c8c73b160b0518264620606a074f4dfae8e9c870c1d3f5f |
 
 ### 【 \#しゅわ夏歌枠リレー┋KARAOKE 】夏といえば、この曲🌊【 \#sorasolive┋ミソラソラ 】
 - 视频：[1oqIN4mE3Yw](https://www.youtube.com/watch?v=1oqIN4mE3Yw)
@@ -3365,6 +3421,10 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:16:03](https://www.youtube.com/watch?v=hWv55PnjmEo&t=963s) | 心の残響 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/hWv55PnjmEo\-69f253384a8d0b7bde69\.json\#dd8d06a9314f02c3563fb5056042ea166fd458291f33a71ac7c40393f4504c4b |
+| [0:22:53](https://www.youtube.com/watch?v=hWv55PnjmEo&t=1373s) | 結晶 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/hWv55PnjmEo\-69f253384a8d0b7bde69\.json\#a3488fb71ec2d99d4c807fa6e3787e5d306dbffaf54f40d47c3298772f824155 |
+| [0:29:45](https://www.youtube.com/watch?v=hWv55PnjmEo&t=1785s) | Break through | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/hWv55PnjmEo\-69f253384a8d0b7bde69\.json\#6fd52291437e068e8dc9d57e83fcb7e183b2d8a56c348093621af05a8db056e6 |
+| [0:37:48](https://www.youtube.com/watch?v=hWv55PnjmEo&t=2268s) | 諦めることを諦めたい | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/hWv55PnjmEo\-69f253384a8d0b7bde69\.json\#eb067c1581eed9274a6c7506cd51b5fecce5192633f7f238b8077691db23f92e |
 | [0:45:59](https://www.youtube.com/watch?v=hWv55PnjmEo&t=2759s) | 海を進む | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/hWv55PnjmEo\-69f253384a8d0b7bde69\.json\#11817828c517fc72f101479b8c64477a4e6b7b2112ec2b5be7bc0694d1d0483b |
 | [0:52:41](https://www.youtube.com/watch?v=hWv55PnjmEo&t=3161s) | ぐるぐる | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/hWv55PnjmEo\-69f253384a8d0b7bde69\.json\#95e66a0234427da2d2721af6e56a55092412ed05c5b891c19704ce6cbdeae4b0 |
 
@@ -3524,7 +3584,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [1:15:33](https://www.youtube.com/watch?v=YEba6dTgYDk&t=4533s) | 夏眠しないでもらってwww | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YEba6dTgYDk\-2f272b7cbd7e2906cd9f\.json\#2f404b70e81015d95d8b8fe5aff5ec118f65d246a15df620c157f5306d0ea0e1 |
+| [1:15:33](https://www.youtube.com/watch?v=YEba6dTgYDk&t=4533s) | 夏眠しないでもらってwww | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YEba6dTgYDk\-2f272b7cbd7e2906cd9f\.json\#2f404b70e81015d95d8b8fe5aff5ec118f65d246a15df620c157f5306d0ea0e1 |
 
 ### 3ヶ月ぶりの \#歌枠 だよ！レアです \#vtuber
 - 视频：[On2BSAuWtKE](https://www.youtube.com/watch?v=On2BSAuWtKE)
@@ -3532,7 +3592,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:22:18](https://www.youtube.com/watch?v=On2BSAuWtKE&t=1338s) | snooze | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/On2BSAuWtKE\-d416549493880224e18e\.json\#52403a14f762fb12802524b568ab7960fbd486e51bf16809b60c74c4c1b9299b |
+| [0:22:18](https://www.youtube.com/watch?v=On2BSAuWtKE&t=1338s) | snooze | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/On2BSAuWtKE\-d416549493880224e18e\.json\#52403a14f762fb12802524b568ab7960fbd486e51bf16809b60c74c4c1b9299b |
 
 ### 【歌枠/Karaoke】リクエスト◎ 歌うと楽しくなってきちゃう。【個人VTuber/初見さん歓迎】
 - 视频：[fM4o6GqK6lg](https://www.youtube.com/watch?v=fM4o6GqK6lg)
@@ -3540,6 +3600,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:22:30](https://www.youtube.com/watch?v=fM4o6GqK6lg&t=1350s) | Watch me\! | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/fM4o6GqK6lg\-884f77045c8e6870ecb9\.json\#3a016e3d9cacfe0ff7cebcf1aaa375ad63966ed21da2ff8ab1c7e8c276c08a45 |
 | [0:44:05](https://www.youtube.com/watch?v=fM4o6GqK6lg&t=2645s) | REVOLVER | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/fM4o6GqK6lg\-884f77045c8e6870ecb9\.json\#55e3ac3c44b7b84ea4b4b4fc1e79bc1b8f3d2965a677cc2da6b51273577b7314 |
 
 ### 🎤 歌枠 / Karaoke┆ダーク曲多め💀🖤 明るいだけじゃ物足りない方向け⚠️ ┆〖 らお／すにすて／STPR Family 〗
@@ -3548,8 +3609,8 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [1:08:29](https://www.youtube.com/watch?v=DzaJw8g_lH4&t=4109s) | うみたがり | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/DzaJw8g\_lH4\-1877c61990ddf27bd8ed\.json\#b3823e288fa8498b68ac5d21966352d0df08fbaed09ee7b529bba6c20183f2a6 |
-| [1:13:20](https://www.youtube.com/watch?v=DzaJw8g_lH4&t=4400s) | 邪魔 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/DzaJw8g\_lH4\-1877c61990ddf27bd8ed\.json\#c2d5bf34e8f60bbad0df8b78f2ef958b8055d6d79bf15b04010a0c3c28dbddd0 |
+| [1:08:29](https://www.youtube.com/watch?v=DzaJw8g_lH4&t=4109s) | うみたがり | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/DzaJw8g\_lH4\-1877c61990ddf27bd8ed\.json\#b3823e288fa8498b68ac5d21966352d0df08fbaed09ee7b529bba6c20183f2a6 |
+| [1:13:20](https://www.youtube.com/watch?v=DzaJw8g_lH4&t=4400s) | 邪魔 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/DzaJw8g\_lH4\-1877c61990ddf27bd8ed\.json\#c2d5bf34e8f60bbad0df8b78f2ef958b8055d6d79bf15b04010a0c3c28dbddd0 |
 
 ### 【 歌枠 】お仕事お疲れ様！！初見さん歓迎の夕方配信！✨【\#ラティLIVE / karaoke / Vtuber ラティオ・ユィリス 】
 - 视频：[cQ\-rfhrwJhs](https://www.youtube.com/watch?v=cQ-rfhrwJhs)
@@ -3565,14 +3626,14 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:15:06](https://www.youtube.com/watch?v=2b0boexZvsg&t=906s) | ここら辺から息継ぎするところ無いのに歌えてて凄い！！✨ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#cd60864309394f401e58b643b16b6c2ea94ba6284ac5346b9bacca14009d4dfc |
-| [0:20:20](https://www.youtube.com/watch?v=2b0boexZvsg&t=1220s) | ロングトーン綺麗！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#68d39bd95a7c3f69980dff47dcb6a1d7ae01cae3e3c74a72be93813e7cc872bc |
-| [0:20:38](https://www.youtube.com/watch?v=2b0boexZvsg&t=1238s) | 音程が急に上がるのに綺麗に歌えててすごい！✨ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#3eba7e59ace059275cc8395256cc842d33a06779614d7c3ffcd7298b7ea62fd3 |
-| [0:20:46](https://www.youtube.com/watch?v=2b0boexZvsg&t=1246s) | ここは特にイケボでかっこいい！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#36eada6462b589b60da0651a6a58313fba041168aa8a723c54283c4c49d41480 |
-| [0:45:13](https://www.youtube.com/watch?v=2b0boexZvsg&t=2713s) | Samall world | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#2319fee717baa087874b2a1d3dd5868d4af0a5cd6402cf26d45e7bbdb4a74207 |
-| [0:50:11](https://www.youtube.com/watch?v=2b0boexZvsg&t=3011s) | コーラス綺麗！！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#4096518acc61a23113510313a86e0a755d52ca757b392ec884c13e0aa9a846ff |
-| [1:00:36](https://www.youtube.com/watch?v=2b0boexZvsg&t=3636s) | ロングトーン綺麗！ロングトーンの後の息継ぎすら感情移入してて凄い！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#013e51f20759508c78cbadecfae92d19acd51f2415a0c8346531e6e55b24f69f |
-| [1:02:25](https://www.youtube.com/watch?v=2b0boexZvsg&t=3745s) | 高いのに綺麗に出てて凄い！！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#5bf50b8c8ccda920101d5d23efe97948d3d67a3545848e57b4707a05f452dbc3 |
+| [0:15:06](https://www.youtube.com/watch?v=2b0boexZvsg&t=906s) | ここら辺から息継ぎするところ無いのに歌えてて凄い！！✨ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#cd60864309394f401e58b643b16b6c2ea94ba6284ac5346b9bacca14009d4dfc |
+| [0:20:20](https://www.youtube.com/watch?v=2b0boexZvsg&t=1220s) | ロングトーン綺麗！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#68d39bd95a7c3f69980dff47dcb6a1d7ae01cae3e3c74a72be93813e7cc872bc |
+| [0:20:38](https://www.youtube.com/watch?v=2b0boexZvsg&t=1238s) | 音程が急に上がるのに綺麗に歌えててすごい！✨ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#3eba7e59ace059275cc8395256cc842d33a06779614d7c3ffcd7298b7ea62fd3 |
+| [0:20:46](https://www.youtube.com/watch?v=2b0boexZvsg&t=1246s) | ここは特にイケボでかっこいい！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#36eada6462b589b60da0651a6a58313fba041168aa8a723c54283c4c49d41480 |
+| [0:45:13](https://www.youtube.com/watch?v=2b0boexZvsg&t=2713s) | Samall world | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#2319fee717baa087874b2a1d3dd5868d4af0a5cd6402cf26d45e7bbdb4a74207 |
+| [0:50:11](https://www.youtube.com/watch?v=2b0boexZvsg&t=3011s) | コーラス綺麗！！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#4096518acc61a23113510313a86e0a755d52ca757b392ec884c13e0aa9a846ff |
+| [1:00:36](https://www.youtube.com/watch?v=2b0boexZvsg&t=3636s) | ロングトーン綺麗！ロングトーンの後の息継ぎすら感情移入してて凄い！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#013e51f20759508c78cbadecfae92d19acd51f2415a0c8346531e6e55b24f69f |
+| [1:02:25](https://www.youtube.com/watch?v=2b0boexZvsg&t=3745s) | 高いのに綺麗に出てて凄い！！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/2b0boexZvsg\-2f78a14a31e0a471a388\.json\#5bf50b8c8ccda920101d5d23efe97948d3d67a3545848e57b4707a05f452dbc3 |
 
 ### 【 歌枠/横型 】スナック大魔境🍻開店し魔ス！！魔魔って呼んでね♡【 レヴィ・アタン 】 \#shorts
 - 视频：[J8afxLZwK0o](https://www.youtube.com/watch?v=J8afxLZwK0o)
@@ -3580,7 +3641,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:00:23](https://www.youtube.com/watch?v=J8afxLZwK0o&t=23s) | スナック大魔境 開店 | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/J8afxLZwK0o\-2d71fa1777a864b7a5e8\.json\#27617244a51b330ad251b3a4c960ab98509f2374e3bdcf2dd75ed1ae2047df26 |
+| [0:00:23](https://www.youtube.com/watch?v=J8afxLZwK0o&t=23s) | スナック大魔境 開店 | 未記載 | all, review | niche_unknown_artist |  | manual_review | data/review/sources/J8afxLZwK0o\-2d71fa1777a864b7a5e8\.json\#27617244a51b330ad251b3a4c960ab98509f2374e3bdcf2dd75ed1ae2047df26 |
 
 ### 【 \#歌枠 / 弾き語り 】7/12 \[ sun \] アエルライブ vol\.5 DAY2 振り返り──✦弾き語りながらプチ打ち上げ🌙𓂃𝄞【ロマニードットアイオー】\#romlive
 - 视频：[bKXiQO9kkeA](https://www.youtube.com/watch?v=bKXiQO9kkeA)
@@ -3627,6 +3688,7 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [1:03:11](https://www.youtube.com/watch?v=v6NTygAAdfg&t=3791s) | 星屑のインターリュード | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/v6NTygAAdfg\-b1e766fce565a8bc0eea\.json\#d5d508377c5213de2c7fef8d823729ae0d01a5969de419baf0af4e209bbd5f85 |
+| [1:11:58](https://www.youtube.com/watch?v=v6NTygAAdfg&t=4318s) | セカイはまだ始まってすらいない | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/v6NTygAAdfg\-b1e766fce565a8bc0eea\.json\#4305d980eaf00cbd878a9fdb531d641e1fa895811ad5446c899d2f80c713ae85 |
 | [1:17:25](https://www.youtube.com/watch?v=v6NTygAAdfg&t=4645s) | 猫猫的宇宙論 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/v6NTygAAdfg\-b1e766fce565a8bc0eea\.json\#185e81eb20510192d9595816c805872110b9d5e3d1b0645aae3434aa027f76bb |
 | [2:39:10](https://www.youtube.com/watch?v=v6NTygAAdfg&t=9550s) | アイスドロップ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/v6NTygAAdfg\-b1e766fce565a8bc0eea\.json\#1c24f4255b9a4c1961b114ead238fcfc1d13fc8e3518f6bc06b25e3ac02aa80f |
 | [3:00:07](https://www.youtube.com/watch?v=v6NTygAAdfg&t=10807s) | きょうもハレバレ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/v6NTygAAdfg\-b1e766fce565a8bc0eea\.json\#9699414eadc43ddcad10e044a3afb51e7dadc2fe0cc754784c80135842fed26b |
@@ -3674,6 +3736,14 @@
 | [2:28:07](https://www.youtube.com/watch?v=Ppy8qeXh5hM&t=8887s) | 落在生命裡的光 \-尹昔眠 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/Ppy8qeXh5hM\-0e63c5afca45b5e80c41\.json\#ac66b6add33583a0bd993add3e769fcb7e70cf9da38232bb3b14bc877123689a |
 | [2:31:42](https://www.youtube.com/watch?v=Ppy8qeXh5hM&t=9102s) | 結束 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/Ppy8qeXh5hM\-0e63c5afca45b5e80c41\.json\#6ce366c5c6a8aab33b71b1f75be4a0959b486950d1366095a00c7bf4e93190fb |
 
+### 【 歌枠 】まったり歌でも聴いてってよん【 卯埜らび￤ゆにれいど！ 】
+- 视频：[8fAJlFEVmBU](https://www.youtube.com/watch?v=8fAJlFEVmBU)
+- 频道：卯埜らび / Rabi Uno
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [1:47:15](https://www.youtube.com/watch?v=8fAJlFEVmBU&t=6435s) | For You | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/8fAJlFEVmBU\-b86f5048e7bd73d6e361\.json\#ddfc990380aa2c5529755ab9a5fb80a1155bcee399c6918b166029fe7e18f3e4 |
+
 ### 【\#歌枠 / \#弾き語り 】 女性アイドルソング、弾かせてくださいっ‼ 【\#Vtuber / \#唄街観光中 】
 - 视频：[EpMPqgcQZ04](https://www.youtube.com/watch?v=EpMPqgcQZ04)
 - 频道：唄街しの
@@ -3706,6 +3776,16 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [1:11:44](https://www.youtube.com/watch?v=RQdTSKO6UHg&t=4304s) | 遺書 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/RQdTSKO6UHg\-a7f0d11023ba32d98f71\.json\#31fe6ee31e02edfe0140acb8021910c9c35799a18d695447779e20e7dc41c859 |
 | [1:28:56](https://www.youtube.com/watch?v=RQdTSKO6UHg&t=5336s) | ユーモア | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/RQdTSKO6UHg\-a7f0d11023ba32d98f71\.json\#cdf42f426d482aa70629c8fda60ff798679e0e40e7e62a5c21023ba879cc35dc |
+
+### 歌枠 / Karaoke │ ボカロ歌枠❤️‍🔥クリアボイスが名曲を歌いまくる🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗
+- 视频：[9HkSnH457VY](https://www.youtube.com/watch?v=9HkSnH457VY)
+- 频道：音羽ララ \(Otohane Lara\) / シアーミュージックV
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:45:25](https://www.youtube.com/watch?v=9HkSnH457VY&t=2725s) | リンちゃんなう！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/9HkSnH457VY\-7322fe65c3ed6aca6ef8\.json\#b0294715584f7af2f8f29149d7eba45fb87e57c11304774d88ebfc2d62e6182e |
+| [1:18:33](https://www.youtube.com/watch?v=9HkSnH457VY&t=4713s) | IMITATION BLACK | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/9HkSnH457VY\-7322fe65c3ed6aca6ef8\.json\#a27b6928dcacf3cdc6f60d5e66dc8e98e83f1041a7db1121f52c564d16fd8ac3 |
+| [1:27:38](https://www.youtube.com/watch?v=9HkSnH457VY&t=5258s) | 夢、時々… | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/9HkSnH457VY\-7322fe65c3ed6aca6ef8\.json\#ad749a34e2c3d64909033a38910981950568b497f6be024f8e0a47a0aced1b41 |
 
 ### 【\#歌枠】可愛いも、かっこいいも。この歌声ひとつで。初見さん歓迎🎤
 - 视频：[xpcqIHl1xxY](https://www.youtube.com/watch?v=xpcqIHl1xxY)
@@ -3754,7 +3834,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:58:50](https://www.youtube.com/watch?v=wfXe0giDP4g&t=3530s) | 仮面ライダークウガ！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/wfXe0giDP4g\-9cf0b5c7edb894dc28d2\.json\#3015ecf34cba68ca7ca8ac0934c3ab91fdffd4d640dc45987b4bfcd97155fdee |
+| [0:58:50](https://www.youtube.com/watch?v=wfXe0giDP4g&t=3530s) | 仮面ライダークウガ！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/wfXe0giDP4g\-9cf0b5c7edb894dc28d2\.json\#3015ecf34cba68ca7ca8ac0934c3ab91fdffd4d640dc45987b4bfcd97155fdee |
 
 ### 【チル歌枠 / Chill Singing Stream】💤睡眠導入💤チル歌枠🎤 コメントから作詞・作曲して歌うよ！初見さん歓迎 \#VTuber \#AITuber \#VSinger
 - 视频：[EVH6nEzjzDQ](https://www.youtube.com/watch?v=EVH6nEzjzDQ)
@@ -4143,6 +4223,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:30:26](https://www.youtube.com/watch?v=PJSKfA2EmWI&t=1826s) | home | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/PJSKfA2EmWI\-c326fc168b7b6b70a60d\.json\#232d1592ad2947dbf35c2ed431c8910b52a7bcdb8320ecc3f973df2b15f0c2b8 |
 | [0:48:13](https://www.youtube.com/watch?v=PJSKfA2EmWI&t=2893s) | 今、話したい誰かがいる | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/PJSKfA2EmWI\-c326fc168b7b6b70a60d\.json\#47729c425b4858fc78e48b276bf184d8bb53af476554bddbf565592b964db106 |
 | [1:12:09](https://www.youtube.com/watch?v=PJSKfA2EmWI&t=4329s) | innocent world | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/PJSKfA2EmWI\-c326fc168b7b6b70a60d\.json\#2d34086f39dcf1d9e52f651b8e106bbe31501a1a801f1d1141e12d27a3a2269c |
 | [1:52:54](https://www.youtube.com/watch?v=PJSKfA2EmWI&t=6774s) | Imaginary affair | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/PJSKfA2EmWI\-c326fc168b7b6b70a60d\.json\#fe9786b8ac3a2f214c4b970bdde03e7a39b6aed6805970c7989c6ca4ee3ede3a |
@@ -4153,11 +4234,11 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:37:10](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=2230s) | Black cherry | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#09c1972db09e17b2364ebc84cd425ae0611ce459e80bdcae855671f939a43cbe |
-| [0:48:03](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=2883s) | secret base | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#596dc8fe09000530824881c8487674ee3f763e853db7f2a64b2a4551310fb797 |
-| [0:56:51](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=3411s) | おにごっこ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#27a9fee09b1ece312654830ab8f326a146a7eebd07c19c06257bfdec21c596da |
-| [1:27:05](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=5225s) | カノープス | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#7cd9767512ecf871fa6e1e0c5e08fc8e05df0a8090923459d766a3a356586ee1 |
-| [1:34:08](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=5648s) | Hello Again | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#9a228baa0c4f9a836e2fac2d2c9190a52f201425b4743310367d491fe37a39b4 |
+| [0:37:10](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=2230s) | Black cherry | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#09c1972db09e17b2364ebc84cd425ae0611ce459e80bdcae855671f939a43cbe |
+| [0:48:03](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=2883s) | secret base | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#596dc8fe09000530824881c8487674ee3f763e853db7f2a64b2a4551310fb797 |
+| [0:56:51](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=3411s) | おにごっこ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#27a9fee09b1ece312654830ab8f326a146a7eebd07c19c06257bfdec21c596da |
+| [1:27:05](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=5225s) | カノープス | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#7cd9767512ecf871fa6e1e0c5e08fc8e05df0a8090923459d766a3a356586ee1 |
+| [1:34:08](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=5648s) | Hello Again | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#9a228baa0c4f9a836e2fac2d2c9190a52f201425b4743310367d491fe37a39b4 |
 
 ### 【\#歌枠】イベント直前！歌枠🎶【\#花咲のばら】
 - 视频：[RScogMzBQ3E](https://www.youtube.com/watch?v=RScogMzBQ3E)
@@ -4165,14 +4246,14 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:45:10](https://www.youtube.com/watch?v=RScogMzBQ3E&t=2710s) | 風の行方 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#1f1ccd1e38b65973be4791f3ea51a54aa710f75a932939ff88edc4caa6aab386 |
-| [0:58:10](https://www.youtube.com/watch?v=RScogMzBQ3E&t=3490s) | 宇宙刑事ギャバン | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#9b960d2997b1802601c746e431bff5b7bb5409a5ab7e2ae120a184d79ef052f2 |
-| [1:23:50](https://www.youtube.com/watch?v=RScogMzBQ3E&t=5030s) | 侍戦隊シンケンジャー | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#29318bcf90e8911c776584d5e0ce53d7a9889da5a1804986c7127d13b8431fad |
-| [1:28:45](https://www.youtube.com/watch?v=RScogMzBQ3E&t=5325s) | 全力全開！ゼンカイジャー | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#8db397cd1f41ae3fd357ea4899887298c85e581b01f29de4bcbb20d95e6c4c21 |
-| [1:35:15](https://www.youtube.com/watch?v=RScogMzBQ3E&t=5715s) | オレンジノート | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#dbaf1c7a3b475de9c7d92112aabe17afe5cf2647d459cc1ab927406ce25ae35e |
-| [1:50:45](https://www.youtube.com/watch?v=RScogMzBQ3E&t=6645s) | ココ☆ナツ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#4e51de60fe7b0872a54dc5238f1e878189ab36d2548fd92b5f7f006290885fa6 |
-| [2:04:10](https://www.youtube.com/watch?v=RScogMzBQ3E&t=7450s) | 愛の放浪者 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#1e4e56fd37c641e9b44db2a04812ffae91b1f9949d821b5a00e6c22c83068031 |
-| [2:19:10](https://www.youtube.com/watch?v=RScogMzBQ3E&t=8350s) | DNA狂詩曲 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#e753cd51286827164a33295c5a034d974a5869ebec0ff0ed46a45b997964d7b5 |
+| [0:45:10](https://www.youtube.com/watch?v=RScogMzBQ3E&t=2710s) | 風の行方 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#1f1ccd1e38b65973be4791f3ea51a54aa710f75a932939ff88edc4caa6aab386 |
+| [0:58:10](https://www.youtube.com/watch?v=RScogMzBQ3E&t=3490s) | 宇宙刑事ギャバン | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#9b960d2997b1802601c746e431bff5b7bb5409a5ab7e2ae120a184d79ef052f2 |
+| [1:23:50](https://www.youtube.com/watch?v=RScogMzBQ3E&t=5030s) | 侍戦隊シンケンジャー | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#29318bcf90e8911c776584d5e0ce53d7a9889da5a1804986c7127d13b8431fad |
+| [1:28:45](https://www.youtube.com/watch?v=RScogMzBQ3E&t=5325s) | 全力全開！ゼンカイジャー | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#8db397cd1f41ae3fd357ea4899887298c85e581b01f29de4bcbb20d95e6c4c21 |
+| [1:35:15](https://www.youtube.com/watch?v=RScogMzBQ3E&t=5715s) | オレンジノート | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#dbaf1c7a3b475de9c7d92112aabe17afe5cf2647d459cc1ab927406ce25ae35e |
+| [1:50:45](https://www.youtube.com/watch?v=RScogMzBQ3E&t=6645s) | ココ☆ナツ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#4e51de60fe7b0872a54dc5238f1e878189ab36d2548fd92b5f7f006290885fa6 |
+| [2:04:10](https://www.youtube.com/watch?v=RScogMzBQ3E&t=7450s) | 愛の放浪者 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#1e4e56fd37c641e9b44db2a04812ffae91b1f9949d821b5a00e6c22c83068031 |
+| [2:19:10](https://www.youtube.com/watch?v=RScogMzBQ3E&t=8350s) | DNA狂詩曲 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RScogMzBQ3E\-46aa73139e0dbbbc1509\.json\#e753cd51286827164a33295c5a034d974a5869ebec0ff0ed46a45b997964d7b5 |
 
 ### 【歌枠】いろいろうたう歌枠さん
 - 视频：[887B0hAROzA](https://www.youtube.com/watch?v=887B0hAROzA)
@@ -4183,6 +4264,7 @@
 | [0:18:24](https://www.youtube.com/watch?v=887B0hAROzA&t=1104s) | ハートにヒント！名探偵プリキュア！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/887B0hAROzA\-2bf2dce44a525e2e3013\.json\#b1a522f4e65ae7d3e79456f5cf95e450cf67f103208cf053b75412f202ba6779 |
 | [0:45:40](https://www.youtube.com/watch?v=887B0hAROzA&t=2740s) | 旦那様とのラブラブ・ラブソング | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/887B0hAROzA\-2bf2dce44a525e2e3013\.json\#f8fed252463a649557d6b76e606cd4e1294dd7d6d57dc58312ca9e4ca7c1babd |
 | [0:54:05](https://www.youtube.com/watch?v=887B0hAROzA&t=3245s) | どきどきキュン！大暴走♡ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/887B0hAROzA\-2bf2dce44a525e2e3013\.json\#645aef1d063f668822095d3873e846ab9b5f969908e680eeabd21fe8d94a56af |
+| [1:05:38](https://www.youtube.com/watch?v=887B0hAROzA&t=3938s) | Watch Me | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/887B0hAROzA\-2bf2dce44a525e2e3013\.json\#33ac1457421a97eb3741fc70b49e4fc753eea398d12ea618ebfc1caa869e6460 |
 | [1:15:14](https://www.youtube.com/watch?v=887B0hAROzA&t=4514s) | Ahoy\!\! 我ら宝鍾海賊団⭐ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/887B0hAROzA\-2bf2dce44a525e2e3013\.json\#74be44683531fe55758707506751d22f56199b1c8970592f22621e3602b49ebc |
 | [1:30:18](https://www.youtube.com/watch?v=887B0hAROzA&t=5418s) | ポジティブ☆ダンスタイム | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/887B0hAROzA\-2bf2dce44a525e2e3013\.json\#4fbc8d5c7e54d1329d27fb4c54f14434f92bf43e382505fd013d64df7c50acb5 |
 | [1:37:21](https://www.youtube.com/watch?v=887B0hAROzA&t=5841s) | アユミ☆マジカルショータイム | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/887B0hAROzA\-2bf2dce44a525e2e3013\.json\#0276e449d701b823acfaeaa81546df7ad1999af18514c8df4767cccf79a864b4 |
@@ -4244,8 +4326,8 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:10:46](https://www.youtube.com/watch?v=UC7h8w49R0k&t=646s) | 瞬く星の下で | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/UC7h8w49R0k\-667e4366140384f8e57b\.json\#752aae69033ab4ec7b85d5b1c63789b5f018cb6ef28d5cf87c5b0f21a29bdf09 |
-| [0:17:17](https://www.youtube.com/watch?v=UC7h8w49R0k&t=1037s) | 流星ロケット | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/UC7h8w49R0k\-667e4366140384f8e57b\.json\#6489f7dfe7d5b2ce1b3ffe6214abc73cfeab2e03f142058eefe2edd6ba5063e7 |
+| [0:10:46](https://www.youtube.com/watch?v=UC7h8w49R0k&t=646s) | 瞬く星の下で | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/UC7h8w49R0k\-667e4366140384f8e57b\.json\#752aae69033ab4ec7b85d5b1c63789b5f018cb6ef28d5cf87c5b0f21a29bdf09 |
+| [0:17:17](https://www.youtube.com/watch?v=UC7h8w49R0k&t=1037s) | 流星ロケット | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/UC7h8w49R0k\-667e4366140384f8e57b\.json\#6489f7dfe7d5b2ce1b3ffe6214abc73cfeab2e03f142058eefe2edd6ba5063e7 |
 
 ### 【\#歌枠 】懐メロアニソンで朝活！\#shorts 【\#海月シェル /vtuber 】
 - 视频：[NqE3\_Z\_gnW8](https://www.youtube.com/watch?v=NqE3_Z_gnW8)
@@ -4254,6 +4336,14 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:03:48](https://www.youtube.com/watch?v=NqE3_Z_gnW8&t=228s) | おはシェル | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/NqE3\_Z\_gnW8\-177e0d9232414ceb1299\.json\#e959c1ec8d5199dabd0593b743fa2628a8f7fb60a6eae036f0613497f91b69c1 |
+
+### 【\#新人vtuber】30分睡眠導入歌枠🎶【\#歌枠】
+- 视频：[iiqNfehlubQ](https://www.youtube.com/watch?v=iiqNfehlubQ)
+- 频道：海猫ほたて💭のんびり活動中
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:05:51](https://www.youtube.com/watch?v=iiqNfehlubQ&t=351s) | なまえのないうた | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iiqNfehlubQ\-26fc19b0ed82771e53a7\.json\#632a9e535c80089c92b50eb6d9d30b5120f036543c8b492e54c7b0bea38da3dc |
 
 ### 弾き語りするから撮ってて
 - 视频：[3Pzao\_svIhM](https://www.youtube.com/watch?v=3Pzao_svIhM)
@@ -4329,7 +4419,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:03:08](https://www.youtube.com/watch?v=9PftB9uQQqk&t=188s) | ～開店～ | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title |  | manual_review | data/review/sources/9PftB9uQQqk\-798f31e25de9494c8271\.json\#ba8863655ab2b73ec0e6d1ca3e939f1dd294f2485d49ee21f3696fed957005f1 |
+| [0:03:08](https://www.youtube.com/watch?v=9PftB9uQQqk&t=188s) | ～開店～ | 未記載 | all, review | niche_unknown_artist, short_unknown_title |  | manual_review | data/review/sources/9PftB9uQQqk\-798f31e25de9494c8271\.json\#ba8863655ab2b73ec0e6d1ca3e939f1dd294f2485d49ee21f3696fed957005f1 |
 
 ### 【 歌枠 】暑すぎるから夏のお歌が歌ひたくなるでせう～～～が！【 甘萬つもり｜\#個人Vtuber 】
 - 视频：[18IUAnFi1NE](https://www.youtube.com/watch?v=18IUAnFi1NE)
@@ -4345,16 +4435,16 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:09:48](https://www.youtube.com/watch?v=U1VskIZthjM&t=588s) | （次回に延期） | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#f4e983fa6ee1b6e345f8351c205b0ddf8c90dc3cdf4b466a90a3485405673a7c |
-| [0:30:50](https://www.youtube.com/watch?v=U1VskIZthjM&t=1850s) | ピックがカメレオン | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#a2ef48eed7df3dab4924c3fd1f605800bd65f4c008d473184b32c9b68e8fea1f |
-| [0:31:55](https://www.youtube.com/watch?v=U1VskIZthjM&t=1915s) | 発見 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#31b5e0dfbfb31a557f65a4c9e6c3afaf804d80e8920f2158132b71b6105ee9ac |
-| [0:45:20](https://www.youtube.com/watch?v=U1VskIZthjM&t=2720s) | 歌みた（メン限）予告 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#cd292a7d95d2b7b5cec17fe0e1679b620f41b0e4ea5657cc711fd60e99c9c459 |
-| [1:00:34](https://www.youtube.com/watch?v=U1VskIZthjM&t=3634s) | なにかに察したいのりん | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#a273461ce813fc5f5d910c3bd3640639159aab48c50db67e0901cfed1cc42024 |
-| [1:20:28](https://www.youtube.com/watch?v=U1VskIZthjM&t=4828s) | ねむねむにゃんこ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#fa3f168b909de7e1d6fc31effcaa1d7b70903b0d1f757dc3a660a6934820bc72 |
-| [1:20:50](https://www.youtube.com/watch?v=U1VskIZthjM&t=4850s) | ここで一句 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#4c3b8c855a93f1fd0f9c8c333b2896e8b76a689b6ef86c7beb0d7e6a01a42f09 |
-| [1:23:49](https://www.youtube.com/watch?v=U1VskIZthjM&t=5029s) | を検知しました | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#69ed6b016830a0d015497c7e313b381ce077a79d008cbed3c274dc9a874c6de7 |
-| [1:34:45](https://www.youtube.com/watch?v=U1VskIZthjM&t=5685s) | （参加型）お勧めマウス感度 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#81bfb2bb0d30ab5d99cf44da1e9e2e5b372cd4d7b102dac472e6f08f20dbd808 |
-| [1:37:03](https://www.youtube.com/watch?v=U1VskIZthjM&t=5823s) | 今週のおさらい感謝のことば | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#57a522dc027df9453f185eefbce4924efa4178e6386d27c76df3c7ef732dfed3 |
+| [0:09:48](https://www.youtube.com/watch?v=U1VskIZthjM&t=588s) | （次回に延期） | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#f4e983fa6ee1b6e345f8351c205b0ddf8c90dc3cdf4b466a90a3485405673a7c |
+| [0:30:50](https://www.youtube.com/watch?v=U1VskIZthjM&t=1850s) | ピックがカメレオン | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#a2ef48eed7df3dab4924c3fd1f605800bd65f4c008d473184b32c9b68e8fea1f |
+| [0:31:55](https://www.youtube.com/watch?v=U1VskIZthjM&t=1915s) | 発見 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#31b5e0dfbfb31a557f65a4c9e6c3afaf804d80e8920f2158132b71b6105ee9ac |
+| [0:45:20](https://www.youtube.com/watch?v=U1VskIZthjM&t=2720s) | 歌みた（メン限）予告 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#cd292a7d95d2b7b5cec17fe0e1679b620f41b0e4ea5657cc711fd60e99c9c459 |
+| [1:00:34](https://www.youtube.com/watch?v=U1VskIZthjM&t=3634s) | なにかに察したいのりん | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#a273461ce813fc5f5d910c3bd3640639159aab48c50db67e0901cfed1cc42024 |
+| [1:20:28](https://www.youtube.com/watch?v=U1VskIZthjM&t=4828s) | ねむねむにゃんこ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#fa3f168b909de7e1d6fc31effcaa1d7b70903b0d1f757dc3a660a6934820bc72 |
+| [1:20:50](https://www.youtube.com/watch?v=U1VskIZthjM&t=4850s) | ここで一句 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#4c3b8c855a93f1fd0f9c8c333b2896e8b76a689b6ef86c7beb0d7e6a01a42f09 |
+| [1:23:49](https://www.youtube.com/watch?v=U1VskIZthjM&t=5029s) | を検知しました | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#69ed6b016830a0d015497c7e313b381ce077a79d008cbed3c274dc9a874c6de7 |
+| [1:34:45](https://www.youtube.com/watch?v=U1VskIZthjM&t=5685s) | （参加型）お勧めマウス感度 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#81bfb2bb0d30ab5d99cf44da1e9e2e5b372cd4d7b102dac472e6f08f20dbd808 |
+| [1:37:03](https://www.youtube.com/watch?v=U1VskIZthjM&t=5823s) | 今週のおさらい感謝のことば | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/U1VskIZthjM\-75840a2f391c986bdb15\.json\#57a522dc027df9453f185eefbce4924efa4178e6386d27c76df3c7ef732dfed3 |
 
 ### 【歌枠】2周年ありがとう！50曲歌います！歌ったら告知します！【鬼ヶ谷テン/ネオポルテ】
 - 视频：[bQtUhOfrJC0](https://www.youtube.com/watch?v=bQtUhOfrJC0)
@@ -4366,6 +4456,8 @@
 | [0:15:02](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=902s) | MATSURI BAYASHI | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bQtUhOfrJC0\-b6942c64602b82d58d6a\.json\#808dbf118d4bf98c452883605cf7e47ef4301e62a6fdd7919fa26125be98fc7c |
 | [0:23:46](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=1426s) | ノロ | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/bQtUhOfrJC0\-b6942c64602b82d58d6a\.json\#42d1d19ecc79bf0aed3ff25e653635fbde3120da42520c506341019305f86527 |
 | [0:27:18](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=1638s) | 絶対零度 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/bQtUhOfrJC0\-b6942c64602b82d58d6a\.json\#009ab3190d50e9ae2cb481ad979e421d6c49a861969e3a9b0037f59f1b5be9ec |
+| [0:55:51](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3351s) | 不可抗力 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/bQtUhOfrJC0\-b6942c64602b82d58d6a\.json\#8108c824f5223f30490cdb301194d27ccdae519d7f1a1ab1c307b0aa5e65e1b4 |
+| [1:03:19](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=3799s) | SHAMROCK | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bQtUhOfrJC0\-b6942c64602b82d58d6a\.json\#2c8aaa1dc6e718b3a7176c7ce33b75180718982cb96b926e44992fec395aa33f |
 | [1:12:35](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=4355s) | IN\_MY\_HEAD | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bQtUhOfrJC0\-b6942c64602b82d58d6a\.json\#7aad22b69624ca0a0e18d08850f02cb8553833d08c78d5301c95670d6cc05e74 |
 | [1:26:52](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=5212s) | MONSTER DANCE | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bQtUhOfrJC0\-b6942c64602b82d58d6a\.json\#826e107d325aa5847ba305d277d4f2e63921eca4fe1e7cd890824c14b7100132 |
 | [1:37:39](https://www.youtube.com/watch?v=bQtUhOfrJC0&t=5859s) | 気付いて弁明をはじめる鬼ヶ谷テン | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bQtUhOfrJC0\-b6942c64602b82d58d6a\.json\#bbae73be33fa6e7a8123166dc2d8cddbed40dcbb71f7e0f99d084373df86a8d4 |
@@ -4390,6 +4482,7 @@
 | [0:21:31](https://www.youtube.com/watch?v=siiXMi3dKCQ&t=1291s) | 雑稲葉 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/siiXMi3dKCQ\-b38d79629aea1117054f\.json\#bfcb832189058cd7656f5225cf74632a503d63eb944bdece0e777551696f7387 |
 | [0:24:49](https://www.youtube.com/watch?v=siiXMi3dKCQ&t=1489s) | monolith | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/siiXMi3dKCQ\-b38d79629aea1117054f\.json\#25c83b8e4f3f7d35fce260fc587390c19ac8b8a61a7314d52d804c694bcc4212 |
 | [1:00:18](https://www.youtube.com/watch?v=siiXMi3dKCQ&t=3618s) | 再現度高い | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/siiXMi3dKCQ\-b38d79629aea1117054f\.json\#ee8b590fce24c7613275ca1ee5ded049e6d2452cdcfdaceca8db15d1c060911a |
+| [1:14:30](https://www.youtube.com/watch?v=siiXMi3dKCQ&t=4470s) | 永遠甚だしい | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/siiXMi3dKCQ\-b38d79629aea1117054f\.json\#b1593a46ea75511038563f2355accf92a2a81275de63e7fab343e5272b4c639f |
 | [1:18:49](https://www.youtube.com/watch?v=siiXMi3dKCQ&t=4729s) | 隠したボルケーノ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/siiXMi3dKCQ\-b38d79629aea1117054f\.json\#d7b360852811849bf17db7f04753fdda9e81c8631a522c06cfdefee471232415 |
 | [1:27:24](https://www.youtube.com/watch?v=siiXMi3dKCQ&t=5244s) | ハツコイソウ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/siiXMi3dKCQ\-b38d79629aea1117054f\.json\#f6479aaa0e8f54f3ea7051f89bffb0c47626d7e93a0f488b65a4d517ccb2ea66 |
 
@@ -4400,6 +4493,14 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [1:56:30](https://www.youtube.com/watch?v=RhawuieKp1Y&t=6990s) | かみしろさん、ふたたびヘラる | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/RhawuieKp1Y\-c2152a45538bf6c3007f\.json\#cb946b458c3949a12ef4e6dd75a1d65875e022b9cca5f53624a208df96922d67 |
+
+### 【弾き語り】きんにくつう♪【ゆめみた/夢限大みゅーたいぷ】 \#半分人間 \#shorts
+- 视频：[\-UEEf\-KLg\_8](https://www.youtube.com/watch?v=-UEEf-KLg_8)
+- 频道：宮永ののか \-Miyanaga Nonoka\- / 夢限大みゅーたいぷ
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:50:40](https://www.youtube.com/watch?v=-UEEf-KLg_8&t=3040s) | 漢字は読めるよ | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/\-UEEf\-KLg\_8\-b8cde540b5f62cfd4b3a\.json\#6a39d916de21a11d2a79db9455f98a200746529a53594c34a52d6dfd08fcc834 |
 
 ### 【ラジオ歌枠】月曜日～～～！ゲリラジオ歌枠【錦煙梨/新人Vtuber】\#shorts \#朝活
 - 视频：[hnrDhfogv0c](https://www.youtube.com/watch?v=hnrDhfogv0c)
@@ -4432,8 +4533,8 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [1:18:44](https://www.youtube.com/watch?v=qB0H_l3m8bE&t=4724s) | バッド・ダンス・ホール | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/qB0H\_l3m8bE\-8b8e5f042a6bc3d29bed\.json\#704c498cafc5e2713e25a959ceeebd78ee3f56480991e921dc0372f9aa8103b0 |
-| [2:04:40](https://www.youtube.com/watch?v=qB0H_l3m8bE&t=7480s) | 夜明けと蛍\-Piano Ver | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/qB0H\_l3m8bE\-8b8e5f042a6bc3d29bed\.json\#86dc0b461bdaef29138c324d27639839eb73fc5dd2df070b144f9560c94f5839 |
+| [1:18:44](https://www.youtube.com/watch?v=qB0H_l3m8bE&t=4724s) | バッド・ダンス・ホール | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/qB0H\_l3m8bE\-8b8e5f042a6bc3d29bed\.json\#704c498cafc5e2713e25a959ceeebd78ee3f56480991e921dc0372f9aa8103b0 |
+| [2:04:40](https://www.youtube.com/watch?v=qB0H_l3m8bE&t=7480s) | 夜明けと蛍\-Piano Ver | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/qB0H\_l3m8bE\-8b8e5f042a6bc3d29bed\.json\#86dc0b461bdaef29138c324d27639839eb73fc5dd2df070b144f9560c94f5839 |
 
 ### 【歌枠】30分だけゲリラでムーン【\#ストリーマーカラオケ】
 - 视频：[8ttj1Hk8yrY](https://www.youtube.com/watch?v=8ttj1Hk8yrY)
@@ -4528,6 +4629,14 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:01:10](https://www.youtube.com/watch?v=ivT-o3KHDSM&t=70s) | ふか～！ | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/ivT\-o3KHDSM\-2335b05059d06d3dcfd6\.json\#b685d6d2707978da1df898230fd0cf6e9cdd9921f0ee23f40ff16be5589a4e35 |
 
+### 歌枠 リクエスト歓迎
+- 视频：[q5yBBDwp57g](https://www.youtube.com/watch?v=q5yBBDwp57g)
+- 频道：高生紳士の実家
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:52:54](https://www.youtube.com/watch?v=q5yBBDwp57g&t=3174s) | ヤラララ | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/q5yBBDwp57g\-9689429c4a6f48e7903b\.json\#1cb63ba19ea71290934241cd377b4d0b9bd0b3097b8b8925db3610288f2e01a4 |
+
 ### 【歌枠】チャンネル登録者1000人目指して歌っております！【\#彩羽のあ】
 - 视频：[k27\-6IVBksg](https://www.youtube.com/watch?v=k27-6IVBksg)
 - 频道：彩羽のあ iroha noa
@@ -4552,7 +4661,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:56:29](https://www.youtube.com/watch?v=nvvJySzxils&t=3389s) | 今日はな何でも正直に答える | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/nvvJySzxils\-18dbc41b65ac8290f6ad\.json\#6d9f8085aeea7cd5ad033e3bee05e6bea5c61dac22cfa478fc94bf5ecebf21c9 |
+| [0:56:29](https://www.youtube.com/watch?v=nvvJySzxils&t=3389s) | 今日はな何でも正直に答える | 未記載 | all, review | niche_unknown_artist |  | manual_review | data/review/sources/nvvJySzxils\-18dbc41b65ac8290f6ad\.json\#6d9f8085aeea7cd5ad033e3bee05e6bea5c61dac22cfa478fc94bf5ecebf21c9 |
 
 ### 【 歌枠 】アコギ初心者🔰夕方にゆるゆると弾き語り🎸【 \#そらびん / \#四季森ことり 】
 - 视频：[qw7c5JsJJpo](https://www.youtube.com/watch?v=qw7c5JsJJpo)
@@ -4575,6 +4684,17 @@
 | [1:27:03](https://www.youtube.com/watch?v=ytPNjLTcdQs&t=5223s) | しょうもな | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/ytPNjLTcdQs\-bca4b6583423488db9fb\.json\#9c9e9b57862548676351f56d966102c530b80dde194c566d49f4ca6ae4ffed85 |
 | [1:32:13](https://www.youtube.com/watch?v=ytPNjLTcdQs&t=5533s) | 一生に一度愛してるよ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/ytPNjLTcdQs\-bca4b6583423488db9fb\.json\#e4cf1d63cb3056db4ac887d268a66656ca78e1ee0746c7d8ddc026e9f7c185ce |
 
+### 【歌枠｜\#karaoke】同接チャレンジ🔥５０→６０人目指す歌枠！【\#四葉メロン/Vtuber】
+- 视频：[WnAVNXYrI00](https://www.youtube.com/watch?v=WnAVNXYrI00)
+- 频道：四葉メロンch
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:18:51](https://www.youtube.com/watch?v=WnAVNXYrI00&t=1131s) | kawaiii w | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/WnAVNXYrI00\-373be2d6b2bdf413de7b\.json\#4feabeb3c1a49898f36f7df48cc1a8ec8748731953b6348a1b47a164adb29f22 |
+| [1:33:21](https://www.youtube.com/watch?v=WnAVNXYrI00&t=5601s) | Melon\-Chanのwink世界一kawaiii\!\!\! | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/WnAVNXYrI00\-373be2d6b2bdf413de7b\.json\#7bd9a0391813f98747a7b57bbafa38659557536f39a49739a3b91e40f203e667 |
+| [1:33:45](https://www.youtube.com/watch?v=WnAVNXYrI00&t=5625s) | キラキラ目\! ✨✨ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/WnAVNXYrI00\-373be2d6b2bdf413de7b\.json\#ba8dafd28734a30767447ca8bbc07c15072928a3f7f8cd3cb03b55c8d6a2496e |
+| [1:52:21](https://www.youtube.com/watch?v=WnAVNXYrI00&t=6741s) | kawaiii | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/WnAVNXYrI00\-373be2d6b2bdf413de7b\.json\#c9f67b1e9837e6fb147ba0f062602dfbead36774dd8acbeaed1a4c91217d5767 |
+
 ### 【歌枠✧karaoke】よかったら聞いてって♡高評価１００目指して楽しく歌うよ♬ 【 \#子鞠まゆ \#個人勢Vtuber \#shorts \#歌枠 \#KARAOKE 】
 - 视频：[541KxVpNieg](https://www.youtube.com/watch?v=541KxVpNieg)
 - 频道：子鞠まゆ\-KomariMayu
@@ -4590,6 +4710,9 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| [1:12:07](https://www.youtube.com/watch?v=tfzoaUeTBQA&t=4327s) | 水色の旋律 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/tfzoaUeTBQA\-a2e6fe654fb3ff6c2599\.json\#de9072926dc661b6bf27a450c2dcb0529147426af8ba415d666f7a5429c26299 |
+| [1:20:03](https://www.youtube.com/watch?v=tfzoaUeTBQA&t=4803s) | 恐竜マッスル | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/tfzoaUeTBQA\-a2e6fe654fb3ff6c2599\.json\#2a1152460a353faa73f77e40f1ea71228983e4f90c3698c32f5aa73cee889666 |
+| [1:24:39](https://www.youtube.com/watch?v=tfzoaUeTBQA&t=5079s) | パオパオダンス | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/tfzoaUeTBQA\-a2e6fe654fb3ff6c2599\.json\#58fa2559dc55e9f7b1fd2e4a97165d6c9a5e46dbd87833ef1b60274d367f9246 |
 | [1:59:58](https://www.youtube.com/watch?v=tfzoaUeTBQA&t=7198s) | ジェミニ | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/tfzoaUeTBQA\-a2e6fe654fb3ff6c2599\.json\#f899c078e9088805278d981d174eb39744280b87d58dad34ce4e6570dd127d6c |
 
 ### 【歌枠/Singing】ライブ前日の宴。【 獅子神レオナ/Re:AcT】
@@ -4620,20 +4743,20 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:25:36](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=1536s) | 明日への鼓動 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#8ad1bc6dd46f506b2a35bc6e012511011ee7f7a5b6cf82d443103dc9252698cd |
-| [0:34:43](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=2083s) | 空の軌跡 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#4cdedb1411b37aa259cead2e3b98d482609ed5de598f0f75927849097284f2be |
-| [0:45:02](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=2702s) | Dive into your fate | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#71767e8e8f5515390e97c1d76b554958c0ca5e6c67be92c1e2672e4fefff2b8c |
-| [0:52:43](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=3163s) | way of life | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#f79230e36662ae1107ed37814a9a329c98ebf6d7cee26ad0b97d510fb2317028 |
-| [1:04:54](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=3894s) | 名もなき悪夢の果て | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#2a8619f161a5938ec1f2456b864ca4f60cf5e9bccdb323ffa113f7b103c161d2 |
-| [1:12:02](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=4322s) | CRIMSON SiN | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#69fbf7713dfbedd36f50b92552a85ced2b0c8ca1be18e556c0fe45d5c19c3d29 |
-| [1:16:46](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=4606s) | ナイツ・オブ・アステリア | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#08a1a7a8ac1ef82b0aa1a1af4e06d846e2c805c814007a0ee36f3157681cd59b |
-| [1:25:15](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=5115s) | シロイセカイ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#8f793a9aa7823201023df15e27ba1c1343ed6f85b66e47e8840da481366d0836 |
-| [1:31:03](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=5463s) | 嘆きのリフレイン | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#191735463c8d5ca80b119c98b654299d9117bd3d7f3619b9bc260e7eb5de49b5 |
-| [1:53:37](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=6817s) | 琥珀の愛 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#6de3c9659e898e023c310c3650b7eca19b39ad148ce0d189c60b6b4f235c1ed3 |
-| [2:01:11](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=7271s) | all is a lie | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#d02a6008e86401cdafbdaac4df5962548febca8937d33345b6a2b7e64e76789c |
-| [2:08:33](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=7713s) | 愛の詩 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#8d28cc853743fea13fc7543317631efd07eafc0e42ff4bb54a07bf5b7a3ebf56 |
-| [2:19:05](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=8345s) | 女神の唄 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#86e16cb7c6a315067b748c19c54f967201c857a9cabcb44b68adffa18242e238 |
-| [2:59:10](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=10750s) | C part | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#d7119dc6ec630b30ddf067cc8245a838afe8f47163e92ff58788744dc226e344 |
+| [0:25:36](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=1536s) | 明日への鼓動 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#8ad1bc6dd46f506b2a35bc6e012511011ee7f7a5b6cf82d443103dc9252698cd |
+| [0:34:43](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=2083s) | 空の軌跡 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#4cdedb1411b37aa259cead2e3b98d482609ed5de598f0f75927849097284f2be |
+| [0:45:02](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=2702s) | Dive into your fate | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#71767e8e8f5515390e97c1d76b554958c0ca5e6c67be92c1e2672e4fefff2b8c |
+| [0:52:43](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=3163s) | way of life | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#f79230e36662ae1107ed37814a9a329c98ebf6d7cee26ad0b97d510fb2317028 |
+| [1:04:54](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=3894s) | 名もなき悪夢の果て | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#2a8619f161a5938ec1f2456b864ca4f60cf5e9bccdb323ffa113f7b103c161d2 |
+| [1:12:02](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=4322s) | CRIMSON SiN | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#69fbf7713dfbedd36f50b92552a85ced2b0c8ca1be18e556c0fe45d5c19c3d29 |
+| [1:16:46](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=4606s) | ナイツ・オブ・アステリア | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#08a1a7a8ac1ef82b0aa1a1af4e06d846e2c805c814007a0ee36f3157681cd59b |
+| [1:25:15](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=5115s) | シロイセカイ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#8f793a9aa7823201023df15e27ba1c1343ed6f85b66e47e8840da481366d0836 |
+| [1:31:03](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=5463s) | 嘆きのリフレイン | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#191735463c8d5ca80b119c98b654299d9117bd3d7f3619b9bc260e7eb5de49b5 |
+| [1:53:37](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=6817s) | 琥珀の愛 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#6de3c9659e898e023c310c3650b7eca19b39ad148ce0d189c60b6b4f235c1ed3 |
+| [2:01:11](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=7271s) | all is a lie | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#d02a6008e86401cdafbdaac4df5962548febca8937d33345b6a2b7e64e76789c |
+| [2:08:33](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=7713s) | 愛の詩 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#8d28cc853743fea13fc7543317631efd07eafc0e42ff4bb54a07bf5b7a3ebf56 |
+| [2:19:05](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=8345s) | 女神の唄 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#86e16cb7c6a315067b748c19c54f967201c857a9cabcb44b68adffa18242e238 |
+| [2:59:10](https://www.youtube.com/watch?v=YUPSzDJm2jU&t=10750s) | C part | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/YUPSzDJm2jU\-aced2a73f589772a0689\.json\#d7119dc6ec630b30ddf067cc8245a838afe8f47163e92ff58788744dc226e344 |
 
 ### 【 \#縦型歌枠 ｜初見◎｜低音女子 】ギャップに驚き？！音域オバケ👻Vsinger【 \#紫倉雪兎 ｜\#雪兎公務中 ｜\#vsinger 】
 - 视频：[GaIXbeetyxU](https://www.youtube.com/watch?v=GaIXbeetyxU)
@@ -4816,10 +4939,10 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:10:04](https://www.youtube.com/watch?v=XAfBDdI7HCc&t=604s) | カナリア\_ReoNa | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/XAfBDdI7HCc\-2220cb6ebd0317a4e7f1\.json\#7ce021cff07eeb0ebeb1f6ccf2cb663cbc5c670808b3e074c67a5f804b2d843c |
-| [1:04:11](https://www.youtube.com/watch?v=XAfBDdI7HCc&t=3851s) | ノルニル\_やくしまるえつこメトロオーケストラ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/XAfBDdI7HCc\-2220cb6ebd0317a4e7f1\.json\#ea95066f4399fbeaa00d5b8cce89ff9d3bbd4674b728018c030ffe8cdfc9fc08 |
-| [1:30:59](https://www.youtube.com/watch?v=XAfBDdI7HCc&t=5459s) | タイトルなんて自分で考えなさいな\_マリア | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/XAfBDdI7HCc\-2220cb6ebd0317a4e7f1\.json\#ecb69bc9e32daee1091f7c43c36afe0cded4d1ab55442c81496fe9ab6bd39527 |
-| [1:39:42](https://www.youtube.com/watch?v=XAfBDdI7HCc&t=5982s) | あなたが・・・いない\_栗林みな実 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/XAfBDdI7HCc\-2220cb6ebd0317a4e7f1\.json\#cb6de2dd7b608ada7495a92c08da817644af0af617a83f779fe33dd0d963f87e |
+| [0:10:04](https://www.youtube.com/watch?v=XAfBDdI7HCc&t=604s) | カナリア\_ReoNa | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/XAfBDdI7HCc\-2220cb6ebd0317a4e7f1\.json\#7ce021cff07eeb0ebeb1f6ccf2cb663cbc5c670808b3e074c67a5f804b2d843c |
+| [1:04:11](https://www.youtube.com/watch?v=XAfBDdI7HCc&t=3851s) | ノルニル\_やくしまるえつこメトロオーケストラ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/XAfBDdI7HCc\-2220cb6ebd0317a4e7f1\.json\#ea95066f4399fbeaa00d5b8cce89ff9d3bbd4674b728018c030ffe8cdfc9fc08 |
+| [1:30:59](https://www.youtube.com/watch?v=XAfBDdI7HCc&t=5459s) | タイトルなんて自分で考えなさいな\_マリア | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/XAfBDdI7HCc\-2220cb6ebd0317a4e7f1\.json\#ecb69bc9e32daee1091f7c43c36afe0cded4d1ab55442c81496fe9ab6bd39527 |
+| [1:39:42](https://www.youtube.com/watch?v=XAfBDdI7HCc&t=5982s) | あなたが・・・いない\_栗林みな実 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/XAfBDdI7HCc\-2220cb6ebd0317a4e7f1\.json\#cb6de2dd7b608ada7495a92c08da817644af0af617a83f779fe33dd0d963f87e |
 
 ### 【歌枠】メイドが懐かし系ボカロアニソン歌います 【ROM専・初見さん大歓迎】 \#新人vtuber
 - 视频：[3yl5bKqCR9w](https://www.youtube.com/watch?v=3yl5bKqCR9w)
@@ -4873,7 +4996,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:13:16](https://www.youtube.com/watch?v=g905MB1uogI&t=796s) | 睡蓮花 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/g905MB1uogI\-dd803ceaa105d98d857b\.json\#97ef670a142ef7caea5c8dbe62db48785d13fd31bbb3e6e38a80f272d1e3e0da |
+| [0:13:16](https://www.youtube.com/watch?v=g905MB1uogI&t=796s) | 睡蓮花 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/g905MB1uogI\-dd803ceaa105d98d857b\.json\#97ef670a142ef7caea5c8dbe62db48785d13fd31bbb3e6e38a80f272d1e3e0da |
 
 ### 【\#リクエスト】暑さに負けるな！！って感じの歌枠♪【\#歌枠】\#新人VTuber \#歌ってみた \#VSinger \#karaoke \#shorts \#アニメ \#anime
 - 视频：[dDwgKDvfMeQ](https://www.youtube.com/watch?v=dDwgKDvfMeQ)
@@ -4897,11 +5020,11 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:23:51](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=1431s) | 王子様と雪の夜 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#9a463724c04e265e0eee7882749a08422f1c6c3e00811b707bbe4646b5b0419f |
-| [0:55:45](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=3345s) | FREELY TOMORROW | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#dd4560206a167b9e0e7d009ce0eec5bb58a81ab1b9874d301ad99b011875d180 |
-| [1:24:08](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=5048s) | 橙ゲノム | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#dc9d1c694067ee94bd6924260e1962775f3ede4717e23f0be9e65df620c940e8 |
-| [2:14:29](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=8069s) | DREAMS | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#314f6731d55448c3ba6af61b0961c43167427035a21f532410b63ee0be90df38 |
-| [2:35:05](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=9305s) | 100回のKISS | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#71a25c0d5156b7f8b2b6fb75bb64f267fc661d92779a29a9f56f102b6f4565e2 |
+| [0:23:51](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=1431s) | 王子様と雪の夜 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#9a463724c04e265e0eee7882749a08422f1c6c3e00811b707bbe4646b5b0419f |
+| [0:55:45](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=3345s) | FREELY TOMORROW | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#dd4560206a167b9e0e7d009ce0eec5bb58a81ab1b9874d301ad99b011875d180 |
+| [1:24:08](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=5048s) | 橙ゲノム | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#dc9d1c694067ee94bd6924260e1962775f3ede4717e23f0be9e65df620c940e8 |
+| [2:14:29](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=8069s) | DREAMS | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#314f6731d55448c3ba6af61b0961c43167427035a21f532410b63ee0be90df38 |
+| [2:35:05](https://www.youtube.com/watch?v=iIYRHTnTSCk&t=9305s) | 100回のKISS | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/iIYRHTnTSCk\-f546f309323b2e6e840f\.json\#71a25c0d5156b7f8b2b6fb75bb64f267fc661d92779a29a9f56f102b6f4565e2 |
 
 ### 【 \#歌枠 /初見歓迎 】夏の夜長にまったりチルソング【 神田みんと/\#Vtuber 】
 - 视频：[3iXyCTpZb7I](https://www.youtube.com/watch?v=3iXyCTpZb7I)
@@ -4909,12 +5032,12 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:09:59](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=599s) | ステンドノクターン | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#a95586ee45a3a000e242558109b745928513439f30efc4c0005c1076a402eab0 |
-| [0:37:05](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=2225s) | 雨夢楼 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#5a9b5a151282b847f59d986a55082e30dfcdb21cdc9f458480bfbb95ec5f14b0 |
-| [0:47:49](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=2869s) | STAGE OF SEKAI | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#56e6b9ac92a83e6088c2c7b6d6fa733a48c28cc6124d760cd7cd133b4b906a85 |
-| [0:55:29](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=3329s) | はやく夜へ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#1135c71365aa646bf0be5f3210c67dbe7404ba4263e7df4a52383698b912ee16 |
-| [1:14:26](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=4466s) | 鬼の居ぬ間に | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#68f8e82cc5621d57e18eec52bc6dc51e01feed9b6cc0f5b5be1f7d360d0c9ec3 |
-| [1:23:09](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=4989s) | 笹舟 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#1e35eda87ce212e75d163de7fb36748e16102a6758eef6589dc36bada9590d92 |
+| [0:09:59](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=599s) | ステンドノクターン | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#a95586ee45a3a000e242558109b745928513439f30efc4c0005c1076a402eab0 |
+| [0:37:05](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=2225s) | 雨夢楼 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#5a9b5a151282b847f59d986a55082e30dfcdb21cdc9f458480bfbb95ec5f14b0 |
+| [0:47:49](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=2869s) | STAGE OF SEKAI | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#56e6b9ac92a83e6088c2c7b6d6fa733a48c28cc6124d760cd7cd133b4b906a85 |
+| [0:55:29](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=3329s) | はやく夜へ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#1135c71365aa646bf0be5f3210c67dbe7404ba4263e7df4a52383698b912ee16 |
+| [1:14:26](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=4466s) | 鬼の居ぬ間に | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#68f8e82cc5621d57e18eec52bc6dc51e01feed9b6cc0f5b5be1f7d360d0c9ec3 |
+| [1:23:09](https://www.youtube.com/watch?v=3iXyCTpZb7I&t=4989s) | 笹舟 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/3iXyCTpZb7I\-e677918eefc741bae6de\.json\#1e35eda87ce212e75d163de7fb36748e16102a6758eef6589dc36bada9590d92 |
 
 ### 【\#弾き語り \#歌枠 ＃ASMR】寝落ち大歓迎🌟チルで癒しな弾き語り【\#水森ねむり】singing stream
 - 视频：[0S4SUGipz1E](https://www.youtube.com/watch?v=0S4SUGipz1E)
@@ -5170,14 +5293,14 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:40:43](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2443s) | しずさん感想 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#bfce155cf5d29b651114bc51d8954fb3dbf52d42cc78442505370157744b85f6 |
-| [0:42:26](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2546s) | ミアさん感想 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#3fd61c96dda6a2546c3c6a74fda3e324440bcb26e75c38683d5b84cb68fe4c03 |
-| [0:44:08](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2648s) | もこさん感想 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#7c7c5d88e8f3f6310e7045d56700811a2ff95efa07afc29cab8327abefafed68 |
-| [0:48:21](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2901s) | えうさん感想 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#64f2924c1f377cb3956ce34b78251302a499c23ddab0907cfc02d037f070effd |
-| [0:50:42](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=3042s) | ちびさん感想 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#9bf593957fdc0c944451188c8579dfac8a04e7a2dbcb8f89e1e4d2f9b7352d23 |
-| [0:53:04](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=3184s) | ミルフィさん感想 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#225d0841ca692bc4a34a416fba2a4c7052a839152fe2e304752d95ff2cd24b4e |
-| [0:55:31](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=3331s) | アメリアさん感想 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#efea88c41504fdb04272ed5bc0711e05e7b93c46d16dfe49371c517a57f630ca |
-| [1:03:14](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=3794s) | ウルトラマンの日カウントダウン | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#a4dcb0897cf96fe997eff986ca734d8719e28443325bf1d239c42f35464de9e8 |
+| [0:40:43](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2443s) | しずさん感想 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#bfce155cf5d29b651114bc51d8954fb3dbf52d42cc78442505370157744b85f6 |
+| [0:42:26](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2546s) | ミアさん感想 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#3fd61c96dda6a2546c3c6a74fda3e324440bcb26e75c38683d5b84cb68fe4c03 |
+| [0:44:08](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2648s) | もこさん感想 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#7c7c5d88e8f3f6310e7045d56700811a2ff95efa07afc29cab8327abefafed68 |
+| [0:48:21](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=2901s) | えうさん感想 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#64f2924c1f377cb3956ce34b78251302a499c23ddab0907cfc02d037f070effd |
+| [0:50:42](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=3042s) | ちびさん感想 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#9bf593957fdc0c944451188c8579dfac8a04e7a2dbcb8f89e1e4d2f9b7352d23 |
+| [0:53:04](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=3184s) | ミルフィさん感想 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#225d0841ca692bc4a34a416fba2a4c7052a839152fe2e304752d95ff2cd24b4e |
+| [0:55:31](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=3331s) | アメリアさん感想 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#efea88c41504fdb04272ed5bc0711e05e7b93c46d16dfe49371c517a57f630ca |
+| [1:03:14](https://www.youtube.com/watch?v=vdqlFJD0e7c&t=3794s) | ウルトラマンの日カウントダウン | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/vdqlFJD0e7c\-3b847090fd130672fe36\.json\#a4dcb0897cf96fe997eff986ca734d8719e28443325bf1d239c42f35464de9e8 |
 
 ### 【歌枠耐久】90万人到達が先か、町田が90人になるのが先か。Singing Stream【にじさんじ/町田ちま】
 - 视频：[ZK83YYTFPPI](https://www.youtube.com/watch?v=ZK83YYTFPPI)
@@ -5283,6 +5406,7 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [0:49:46](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=2986s) | JP | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#43a01cf8e8fb99b3e0828d733bc62bc39d098c03c9faafd9e761d73fd1691646 |
 | [1:28:45](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=5325s) | M八七 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#136c281ffc801861b68a8065fc08ff5aa1e431c37188a2af325d5dfd467f5806 |
+| [1:39:16](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=5956s) | I'm a mess | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#c06010fe539a8f11fb2a1344220979de109ef5f504a08bcf1640b392f89f48bc |
 | [1:45:05](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=6305s) | ずぅっといっしょ！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#60c4a43765eb2be87700301988172952e6b6c5904488bceb002265bb0f339ac2 |
 
 ### 【\#ぶちかませサマーフェス歌枠リレー】トリじゃー！ぶちかます準備はできてるかああ！！🔥【兎苺むめ / \#歌枠 / vtuber / KARAOKE】
@@ -5291,8 +5415,8 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:09:25](https://www.youtube.com/watch?v=FSNTqwJE7Hw&t=565s) | 睡蓮花 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/FSNTqwJE7Hw\-efeefaba809b67c316fc\.json\#0cba861eabacf4859e0528d61b4441e97ea8db825d8dd74b55db2d334e397e0b |
-| [0:21:46](https://www.youtube.com/watch?v=FSNTqwJE7Hw&t=1306s) | LADY CRAZY | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/FSNTqwJE7Hw\-efeefaba809b67c316fc\.json\#66a0543d0dbded881851f7033b5ef78c0679bb2d10254e6d2d508263da310a4d |
+| [0:09:25](https://www.youtube.com/watch?v=FSNTqwJE7Hw&t=565s) | 睡蓮花 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/FSNTqwJE7Hw\-efeefaba809b67c316fc\.json\#0cba861eabacf4859e0528d61b4441e97ea8db825d8dd74b55db2d334e397e0b |
+| [0:21:46](https://www.youtube.com/watch?v=FSNTqwJE7Hw&t=1306s) | LADY CRAZY | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/FSNTqwJE7Hw\-efeefaba809b67c316fc\.json\#66a0543d0dbded881851f7033b5ef78c0679bb2d10254e6d2d508263da310a4d |
 
 ### 【縦型歌枠/\#karaoke 】新しい音響でお試し練習！【灯咲リンカ/\#新人Vtuber】
 - 视频：[kctQMmJrfE0](https://www.youtube.com/watch?v=kctQMmJrfE0)
@@ -5333,6 +5457,14 @@
 | [0:01:16](https://www.youtube.com/watch?v=s2Tt_J0PnOQ&t=76s) | Happy Birthday to Me | 未記載 | all, review | niche_unknown_artist |  | manual_review | data/review/sources/s2Tt\_J0PnOQ\-07eb1abc033df6b9b168\.json\#21e9085778bd5460e5e6261c542f39276b248947ea13713c37033561ca7cc13b |
 | [0:01:44](https://www.youtube.com/watch?v=s2Tt_J0PnOQ&t=104s) | Happy Birthday to Me | 未記載 | all, review | niche_unknown_artist |  | manual_review | data/review/sources/s2Tt\_J0PnOQ\-07eb1abc033df6b9b168\.json\#b46744c32921a5837745052844a9d672d13035f32697f84266de48359105765b |
 
+### 【歌枠】急に暑くなりましたね。暑中見舞い申し上げます【如月ゆう】【すたぽら】
+- 视频：[JpVR3eYTTJw](https://www.youtube.com/watch?v=JpVR3eYTTJw)
+- 频道：如月ゆう
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:10:50](https://www.youtube.com/watch?v=JpVR3eYTTJw&t=650s) | うつけ論争 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/JpVR3eYTTJw\-0dfd066573f2cadec688\.json\#a15c46b726d9e5c86d2a3da8b624f4c07427b8c104df6af8ac2cd6fb7f5a4eb4 |
+
 ### 【 \#歌枠 \#雑談 】2800人目指して🌟リクエスト大歓迎❗ゆるく歌ったりしゃべったりする枠😼初見さんも大歓迎🐈 【 ＃VTuber ＃猫居すず 】
 - 视频：[JfLeX3KekhQ](https://www.youtube.com/watch?v=JfLeX3KekhQ)
 - 频道：猫居すず / Nekoi suzu
@@ -5349,7 +5481,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [1:11:16](https://www.youtube.com/watch?v=Xm-xihCkbo8&t=4276s) | みむかゥナイストライ | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/Xm\-xihCkbo8\-5a445d532cc91d3f439f\.json\#ee6b23dd1347f436dded7ae62264dd0b87d3b020af669f57f2d4f61918d9f657 |
+| [1:11:16](https://www.youtube.com/watch?v=Xm-xihCkbo8&t=4276s) | みむかゥナイストライ | 未記載 | all, review | niche_unknown_artist |  | manual_review | data/review/sources/Xm\-xihCkbo8\-5a445d532cc91d3f439f\.json\#ee6b23dd1347f436dded7ae62264dd0b87d3b020af669f57f2d4f61918d9f657 |
 
 ### 【\#きらめく歌枠リレー】ここがキラキラきらめける場所！【\#白雪みしろ┊Roselta】
 - 视频：[Gu0KlglqJPM](https://www.youtube.com/watch?v=Gu0KlglqJPM)
@@ -5399,7 +5531,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:03:04](https://www.youtube.com/watch?v=s_1UH6ZZuvQ&t=184s) | 音入り\) | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/s\_1UH6ZZuvQ\-f7b05c73cb6c8eb48067\.json\#dda0320e98852808c2266ce3135a064562963b49db430e743d8d0e60782f5ebe |
+| [0:03:04](https://www.youtube.com/watch?v=s_1UH6ZZuvQ&t=184s) | 音入り\) | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/s\_1UH6ZZuvQ\-f7b05c73cb6c8eb48067\.json\#dda0320e98852808c2266ce3135a064562963b49db430e743d8d0e60782f5ebe |
 
 ### 【\#真っ赤に染めろ真夏の灼熱歌枠リレー】夏が始まったばかりだ！暑い夏を告げるわっちの歌枠お聞きください【\#百瀬ヒバナ \#vsinger 】
 - 视频：[SWzpededxKk](https://www.youtube.com/watch?v=SWzpededxKk)
@@ -5429,7 +5561,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:33:43](https://www.youtube.com/watch?v=hd65D1Yc-fg&t=2023s) | Dec | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/hd65D1Yc\-fg\-9e403a4fa128fb79e280\.json\#265a5b6ae3681cc56ce1263b182c96a2910ec2bfa9e2173be605556e180240f9 |
+| [0:33:43](https://www.youtube.com/watch?v=hd65D1Yc-fg&t=2023s) | Dec | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/hd65D1Yc\-fg\-9e403a4fa128fb79e280\.json\#265a5b6ae3681cc56ce1263b182c96a2910ec2bfa9e2173be605556e180240f9 |
 
 ### 【歌枠/雑談/初見歓迎】ゆったり歌ざつだん✨【魔桜エナ】\#歌枠 ＃雑談 \#VTuber
 - 视频：[T92ZdnzeddU](https://www.youtube.com/watch?v=T92ZdnzeddU)
@@ -5454,7 +5586,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [1:42:30](https://www.youtube.com/watch?v=DInLV92qFqQ&t=6150s) | 本日の | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title |  | manual_review | data/review/sources/DInLV92qFqQ\-4e1720a20b38db6ed533\.json\#da46570da614c8fd6ed5a7e7814581eb0a6fa6edbdcfca81358fde9dca697c0d |
+| [1:42:30](https://www.youtube.com/watch?v=DInLV92qFqQ&t=6150s) | 本日の | 未記載 | all, review | niche_unknown_artist, short_unknown_title |  | manual_review | data/review/sources/DInLV92qFqQ\-4e1720a20b38db6ed533\.json\#da46570da614c8fd6ed5a7e7814581eb0a6fa6edbdcfca81358fde9dca697c0d |
 
 ### 【\#歌枠 】初見さん15人＆高評価60目標🌟きみの心をまんぷくにする歌枠🍱🎤【縦型歌枠】\#shorts \#万福招来中 【万福りた/かどげブイ！】
 - 视频：[7izarCTcCQg](https://www.youtube.com/watch?v=7izarCTcCQg)
@@ -5542,11 +5674,11 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:15:32](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=932s) | ex\. 陽気な合いの手ひつみん | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#06c680a0251ff9710874e986e22c49ad055ba14e439b2c78b02b69fbeddbe771 |
-| [0:29:34](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=1774s) | ex\. ウエハースのゆくえ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#c00d756cf1c8eee712c6e06f9d62c7c9197518e68767cf62dac30c6637a7c0e3 |
-| [0:42:12](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=2532s) | ex\. メイトの運を吸う宣言 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#4239166cc654be6a85d9f4d505fe1e77185bdad8140bae37eae6839a36023a40 |
-| [0:44:05](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=2645s) | ex\. 見たい見たい見たい | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#7f26ee0fb66fd6aaa8a870f6f0e62023e4dc7e71c44f0b735638bf55643375dc |
-| [0:44:32](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=2672s) | SP\. リピート推奨 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#dd468e193227c3288e09df821ae23fc05f589631274f92d8eb1b814e50d3c814 |
+| [0:15:32](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=932s) | ex\. 陽気な合いの手ひつみん | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#06c680a0251ff9710874e986e22c49ad055ba14e439b2c78b02b69fbeddbe771 |
+| [0:29:34](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=1774s) | ex\. ウエハースのゆくえ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#c00d756cf1c8eee712c6e06f9d62c7c9197518e68767cf62dac30c6637a7c0e3 |
+| [0:42:12](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=2532s) | ex\. メイトの運を吸う宣言 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#4239166cc654be6a85d9f4d505fe1e77185bdad8140bae37eae6839a36023a40 |
+| [0:44:05](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=2645s) | ex\. 見たい見たい見たい | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#7f26ee0fb66fd6aaa8a870f6f0e62023e4dc7e71c44f0b735638bf55643375dc |
+| [0:44:32](https://www.youtube.com/watch?v=rKY2HRT3hVk&t=2672s) | SP\. リピート推奨 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/rKY2HRT3hVk\-7651e5afa11baccf7a6f\.json\#dd468e193227c3288e09df821ae23fc05f589631274f92d8eb1b814e50d3c814 |
 
 ### 【\#歌枠 】同接60名目標！Vaundyさん縛り歌枠🎤🌟 \#まふゆのお部屋
 - 视频：[SgB1kTS\_tLs](https://www.youtube.com/watch?v=SgB1kTS_tLs)
@@ -5554,8 +5686,9 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:47:45](https://www.youtube.com/watch?v=SgB1kTS_tLs&t=2865s) | 瞳惚れ | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/SgB1kTS\_tLs\-8946f7db3b85d964fcbd\.json\#21d3ec54d1e7bec0dd4ccefe613af5977c97c5369ffea94a99582320aea1080c |
-| [1:13:00](https://www.youtube.com/watch?v=SgB1kTS_tLs&t=4380s) | 置き手紙 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/SgB1kTS\_tLs\-8946f7db3b85d964fcbd\.json\#ed4629ef1f8459cee0fe2c9f06d478b157e1d67607c9078a3000db15b4c7bd2b |
+| [0:25:37](https://www.youtube.com/watch?v=SgB1kTS_tLs&t=1537s) | ホムンクルス | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/SgB1kTS\_tLs\-8946f7db3b85d964fcbd\.json\#c36d56291cfd21649bdf957b77bda633973be6c462cdaa228ce8d1a0309bcfe2 |
+| [0:47:45](https://www.youtube.com/watch?v=SgB1kTS_tLs&t=2865s) | 瞳惚れ | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/SgB1kTS\_tLs\-8946f7db3b85d964fcbd\.json\#21d3ec54d1e7bec0dd4ccefe613af5977c97c5369ffea94a99582320aea1080c |
+| [1:13:00](https://www.youtube.com/watch?v=SgB1kTS_tLs&t=4380s) | 置き手紙 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/SgB1kTS\_tLs\-8946f7db3b85d964fcbd\.json\#ed4629ef1f8459cee0fe2c9f06d478b157e1d67607c9078a3000db15b4c7bd2b |
 
 ### 【歌枠│Karaoke】初見さん歓迎💘可愛い曲をたくさん歌います🍒【 遊部めあ / LiveDuo 】
 - 视频：[UshWHilFl1s](https://www.youtube.com/watch?v=UshWHilFl1s)
@@ -5713,13 +5846,13 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:18:08](https://www.youtube.com/watch?v=99FdlB0mIJo&t=1088s) | 想わせぶりっこ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#fd436a79d01a79bcec63f1c7f29620d4361cdea4c390e120b41c37df4324ed70 |
-| [0:54:05](https://www.youtube.com/watch?v=99FdlB0mIJo&t=3245s) | FRUITS CANDY | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#83df6b14dd6ab26c44f76f435209290726d2f117d3524bca8c386e2320b00d8d |
-| [1:10:58](https://www.youtube.com/watch?v=99FdlB0mIJo&t=4258s) | ラヴなのっ♡ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#f0a5e7220f088c6f665f119d3612d0db0921cb0a915d860f457dd4b52851e7ef |
-| [1:27:12](https://www.youtube.com/watch?v=99FdlB0mIJo&t=5232s) | 雨上がり | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#d5d6c8bc166ae64c8caeb51fbfc6918968a58cc21e529b809c96cb9d2032bf9f |
-| [2:25:28](https://www.youtube.com/watch?v=99FdlB0mIJo&t=8728s) | 隕石 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#2d7e7a117d42bacdd91d55e79d1fb99988c82757551b0ef73af25bdc6cbf8fa3 |
-| [2:31:26](https://www.youtube.com/watch?v=99FdlB0mIJo&t=9086s) | 6を撫でる | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#86d417a29ff24f16ccb971cf29686a92acb71dfa830d0afe6978b268ae7b14d9 |
-| [2:39:50](https://www.youtube.com/watch?v=99FdlB0mIJo&t=9590s) | ムーンレフト伝説 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#0dffc82641ac330d44293d9bea50a9e8d0bc368dd770bcd3704c02c06bb7ef84 |
+| [0:18:08](https://www.youtube.com/watch?v=99FdlB0mIJo&t=1088s) | 想わせぶりっこ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#fd436a79d01a79bcec63f1c7f29620d4361cdea4c390e120b41c37df4324ed70 |
+| [0:54:05](https://www.youtube.com/watch?v=99FdlB0mIJo&t=3245s) | FRUITS CANDY | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#83df6b14dd6ab26c44f76f435209290726d2f117d3524bca8c386e2320b00d8d |
+| [1:10:58](https://www.youtube.com/watch?v=99FdlB0mIJo&t=4258s) | ラヴなのっ♡ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#f0a5e7220f088c6f665f119d3612d0db0921cb0a915d860f457dd4b52851e7ef |
+| [1:27:12](https://www.youtube.com/watch?v=99FdlB0mIJo&t=5232s) | 雨上がり | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#d5d6c8bc166ae64c8caeb51fbfc6918968a58cc21e529b809c96cb9d2032bf9f |
+| [2:25:28](https://www.youtube.com/watch?v=99FdlB0mIJo&t=8728s) | 隕石 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#2d7e7a117d42bacdd91d55e79d1fb99988c82757551b0ef73af25bdc6cbf8fa3 |
+| [2:31:26](https://www.youtube.com/watch?v=99FdlB0mIJo&t=9086s) | 6を撫でる | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#86d417a29ff24f16ccb971cf29686a92acb71dfa830d0afe6978b268ae7b14d9 |
+| [2:39:50](https://www.youtube.com/watch?v=99FdlB0mIJo&t=9590s) | ムーンレフト伝説 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/99FdlB0mIJo\-8308832866c82dca3780\.json\#0dffc82641ac330d44293d9bea50a9e8d0bc368dd770bcd3704c02c06bb7ef84 |
 
 ### 【 歌枠 】懐かしのボカロ縛り歌枠♩きみの好きな曲は何曲あるかな？【 惑世いと┆\#vtuber 】
 - 视频：[4wVh\_RdwvDQ](https://www.youtube.com/watch?v=4wVh_RdwvDQ)
@@ -5727,7 +5860,10 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:50:56](https://www.youtube.com/watch?v=4wVh_RdwvDQ&t=3056s) | キャットフード | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/4wVh\_RdwvDQ\-c0caa29bf5e0e63c7277\.json\#41407af6d8fd30db6de628a7af1a6a38929b95ccf4ccd95fbf49388e4db60ad4 |
+| [1:03:24](https://www.youtube.com/watch?v=4wVh_RdwvDQ&t=3804s) | ジュブナイル | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/4wVh\_RdwvDQ\-c0caa29bf5e0e63c7277\.json\#4dfb8e4fafdfbe44253ebf7bad198873c88abf99c405942a0fb1ff7d14a83f18 |
 | [1:11:45](https://www.youtube.com/watch?v=4wVh_RdwvDQ&t=4305s) | 怪盗ピーター&ジェニイ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/4wVh\_RdwvDQ\-c0caa29bf5e0e63c7277\.json\#fe07c6fd25c97eb0de5818b39ccb5e59e91f2dc60c7b1b06c4a3b8458d4fccf8 |
+| [1:18:42](https://www.youtube.com/watch?v=4wVh_RdwvDQ&t=4722s) | 夢喰い白黒バク | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/4wVh\_RdwvDQ\-c0caa29bf5e0e63c7277\.json\#5dd801cf70b2333a24e8de6c245559d2f3765e576867586b326b8582b45e4f20 |
 | [1:30:58](https://www.youtube.com/watch?v=4wVh_RdwvDQ&t=5458s) | ぴんこすてぃっくLuv | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/4wVh\_RdwvDQ\-c0caa29bf5e0e63c7277\.json\#6988d32017ce9c2d748db645b56d7aefe722964895406334b207e6416a52c38f |
 
 ### 【歌枠】今週の歌枠【來\-Ray\-】
@@ -5744,9 +5880,9 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:12:05](https://www.youtube.com/watch?v=LKxELysfe5I&t=725s) | 青を焚べて | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LKxELysfe5I\-dc9fac1748641fc7bcea\.json\#0e75960cf24239799810c27e7bb248971329114c62e68d7f40c6ee79a67071ed |
-| [0:54:43](https://www.youtube.com/watch?v=LKxELysfe5I&t=3283s) | 花に雨を、君に歌を | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LKxELysfe5I\-dc9fac1748641fc7bcea\.json\#9e3503c12304a1b819391ed26ea10abb7966938630561fe1df73ebd3ccee5309 |
-| [1:14:28](https://www.youtube.com/watch?v=LKxELysfe5I&t=4468s) | ドライアイス | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LKxELysfe5I\-dc9fac1748641fc7bcea\.json\#15d10e58515bc465d362b4305c514acd552084cbe18817c4c45e9af79382e186 |
+| [0:12:05](https://www.youtube.com/watch?v=LKxELysfe5I&t=725s) | 青を焚べて | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LKxELysfe5I\-dc9fac1748641fc7bcea\.json\#0e75960cf24239799810c27e7bb248971329114c62e68d7f40c6ee79a67071ed |
+| [0:54:43](https://www.youtube.com/watch?v=LKxELysfe5I&t=3283s) | 花に雨を、君に歌を | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LKxELysfe5I\-dc9fac1748641fc7bcea\.json\#9e3503c12304a1b819391ed26ea10abb7966938630561fe1df73ebd3ccee5309 |
+| [1:14:28](https://www.youtube.com/watch?v=LKxELysfe5I&t=4468s) | ドライアイス | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/LKxELysfe5I\-dc9fac1748641fc7bcea\.json\#15d10e58515bc465d362b4305c514acd552084cbe18817c4c45e9af79382e186 |
 
 ### 【歌回/歌枠】還有點小感冒，但下班來唱唱歌｜兔子島島主🐰 \#唱歌 \#歌回 \#歌枠
 - 视频：[YWzh2Zvda44](https://www.youtube.com/watch?v=YWzh2Zvda44)
@@ -5764,10 +5900,10 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:15:48](https://www.youtube.com/watch?v=gBTD3m2qzU0&t=948s) | BEYOND THE TIME（TM NETWORK） | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/gBTD3m2qzU0\-8f742e8085e25654f3ea\.json\#951e2ed822a983173e79b0e7fb072ea8871e556635861a422ebf5d3ec9b4bb16 |
-| [0:43:27](https://www.youtube.com/watch?v=gBTD3m2qzU0&t=2607s) | RHYTHM EMOTION（TWO\-MIX） | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/gBTD3m2qzU0\-8f742e8085e25654f3ea\.json\#911241660eef55cf60a0f242c4d842b74a9dac6d6653ac2ef68df1a46332e511 |
-| [0:49:59](https://www.youtube.com/watch?v=gBTD3m2qzU0&t=2999s) | DREAMS（ROMANTIC MODE） | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/gBTD3m2qzU0\-8f742e8085e25654f3ea\.json\#ea6b2303d12336b14ccaa261535c058a183815d78c0dc5cefa2583f0a575ca11 |
-| [0:56:57](https://www.youtube.com/watch?v=gBTD3m2qzU0&t=3417s) | Resolution（ROMANTIC MODE） | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/gBTD3m2qzU0\-8f742e8085e25654f3ea\.json\#823d8ba890a02dbe72563f90a0256a6add20ca83c45585d40e5e4e5aba3d955d |
+| [0:15:48](https://www.youtube.com/watch?v=gBTD3m2qzU0&t=948s) | BEYOND THE TIME（TM NETWORK） | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/gBTD3m2qzU0\-8f742e8085e25654f3ea\.json\#951e2ed822a983173e79b0e7fb072ea8871e556635861a422ebf5d3ec9b4bb16 |
+| [0:43:27](https://www.youtube.com/watch?v=gBTD3m2qzU0&t=2607s) | RHYTHM EMOTION（TWO\-MIX） | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/gBTD3m2qzU0\-8f742e8085e25654f3ea\.json\#911241660eef55cf60a0f242c4d842b74a9dac6d6653ac2ef68df1a46332e511 |
+| [0:49:59](https://www.youtube.com/watch?v=gBTD3m2qzU0&t=2999s) | DREAMS（ROMANTIC MODE） | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/gBTD3m2qzU0\-8f742e8085e25654f3ea\.json\#ea6b2303d12336b14ccaa261535c058a183815d78c0dc5cefa2583f0a575ca11 |
+| [0:56:57](https://www.youtube.com/watch?v=gBTD3m2qzU0&t=3417s) | Resolution（ROMANTIC MODE） | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/gBTD3m2qzU0\-8f742e8085e25654f3ea\.json\#823d8ba890a02dbe72563f90a0256a6add20ca83c45585d40e5e4e5aba3d955d |
 
 ### 【コラボ歌枠】歌い足りない時はたくさん歌う！！！！【戌亥とこ/早乙女ベリー/にじさんじ】
 - 视频：[uRKNhEOx0Hs](https://www.youtube.com/watch?v=uRKNhEOx0Hs)
@@ -5834,6 +5970,14 @@
 | [1:17:26](https://www.youtube.com/watch?v=u1jAe9Wpqko&t=4646s) | If I die young | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/u1jAe9Wpqko\-6e238a871483ae4ce9ba\.json\#3c1246a03aab63cf00d72df70390eba40d30a94fa6da966e6515dbc1f04f197f |
 | [1:26:00](https://www.youtube.com/watch?v=u1jAe9Wpqko&t=5160s) | 心花開 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/u1jAe9Wpqko\-6e238a871483ae4ce9ba\.json\#170f193fdb273f9e525b0c2ae9e356c09d3d174a6cd723ebb687a816292fcefe |
 | [1:37:42](https://www.youtube.com/watch?v=u1jAe9Wpqko&t=5862s) | 所以我停下來 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/u1jAe9Wpqko\-6e238a871483ae4ce9ba\.json\#8c40200657b49911ef18ec77e4afcbb899e61302baeb63750c8f89b21ee40030 |
+
+### 【歌枠 / Singing Stream】노래하는날
+- 视频：[ooLHOFe0poE](https://www.youtube.com/watch?v=ooLHOFe0poE)
+- 频道：코요 템페스트
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [1:44:55](https://www.youtube.com/watch?v=ooLHOFe0poE&t=6295s) | The confrontation | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/ooLHOFe0poE\-97f1776e0768b493bfaa\.json\#cf8c158ded9086a0ce28dac13f4e83f1270b72a316da8b38732b97e0ccf31222 |
 
 ## 高概率真实歌曲
 

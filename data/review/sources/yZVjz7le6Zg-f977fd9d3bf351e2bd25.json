@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-17T19:43:39.695Z",
+  "reviewId": "review:yZVjz7le6Zg:f977fd9d3bf351e2bd25",
+  "video": {
+    "videoId": "yZVjz7le6Zg",
+    "title": "【 #歌枠 / #耐久 】同接10人３分キープ耐久‼️登録者さん500人目指してます🎙️🔥【語部シオン/ #新人vtuber 】",
+    "channelName": "語部シオン【Kataribe Shion】",
+    "youtubeUrl": "https://www.youtube.com/watch?v=yZVjz7le6Zg"
+  },
+  "source": {
+    "sourceId": "UgzsDsYr2jOxinvRK_F4AaABAg",
+    "sourceHash": "f977fd9d3bf351e2bd25fa19a6a613ba92b4784074055f96761897cdb6fc2bed",
+    "sourceType": "comment",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "耐久歌枠ありがとうございました‼\nお客さん方のおかげで、めっちゃ想定より早く達成させていただきとても嬉しくて・・・😢✨\n本当にありがとうございました🙏\nまた来週23日18:00~【同接15人】頑張ります💪🔥また応援に来てくれたら嬉しいです・・・！\nそして、その前に19日の日曜は20:30~いつもの歌枠します🎙ぜひご来場ください🚪\nお客さんに会えるのを楽しみにお待ちしております📖\n本当にありがとうございました✨",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 0,
+    "riskLevel": "low",
+    "riskReasons": []
+  },
+  "entries": [
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 1080,
+      "time": "0:18:00",
+      "title": "~【同接15人】頑張ります💪🔥また応援に来てくれたら嬉しいです・・・！",
+      "artist": "未記載",
+      "raw": "また来週23日18:00~【同接15人】頑張ります💪🔥また応援に来てくれたら嬉しいです・・・！",
+      "rawHash": "b4d229654051aabb578aced14cdb83b909fca3310e5d790e783769af06aefe4f",
+      "sourceId": "UgzsDsYr2jOxinvRK_F4AaABAg",
+      "sourceHash": "f977fd9d3bf351e2bd25fa19a6a613ba92b4784074055f96761897cdb6fc2bed",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "activity_title",
+      "seconds": 1230,
+      "time": "0:20:30",
+      "title": "~いつもの歌枠します🎙ぜひご来場ください🚪",
+      "artist": "未記載",
+      "raw": "そして、その前に19日の日曜は20:30~いつもの歌枠します🎙ぜひご来場ください🚪",
+      "rawHash": "0fbfdfe786ddfab5f2fa7c2c970ea1ee0f10db2d95c483deb37e3e426dbc1153",
+      "sourceId": "UgzsDsYr2jOxinvRK_F4AaABAg",
+      "sourceHash": "f977fd9d3bf351e2bd25fa19a6a613ba92b4784074055f96761897cdb6fc2bed",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "activity_title"
+      ]
+    }
+  ]
+}

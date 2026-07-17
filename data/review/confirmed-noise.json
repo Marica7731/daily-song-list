@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T14:18:54.857Z",
+  "generatedAt": "2026-07-17T19:48:44.386Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-17T12:46:37.972Z",
+  "latestGeneratedAt": "2026-07-17T17:37:38.702Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 139,
-    "uniqueVideos": 43,
-    "uniqueSources": 60,
-    "confirmedNoiseCount": 139,
+    "totalCandidates": 202,
+    "uniqueVideos": 50,
+    "uniqueSources": 76,
+    "confirmedNoiseCount": 202,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 139,
+      "confirmed_noise": 202,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -352,6 +352,1040 @@
       "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
     },
     {
+      "title": "「Boys & Girls」めっちゃ良かったです🥰",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 184,
+      "time": "0:03:04",
+      "raw": "3:04「Boys & Girls」めっちゃ良かったです🥰",
+      "rawHash": "b971d9ea25838487b5369a7f68e57c8dbb6bf8c9a79c31e109b541e2a2b6c7d5",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=184s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#b971d9ea25838487b5369a7f68e57c8dbb6bf8c9a79c31e109b541e2a2b6c7d5"
+    },
+    {
+      "title": "スポーツ何気に見てます「高評価100」",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 734,
+      "time": "0:12:14",
+      "raw": "12:14 スポーツ何気に見てます「高評価100」",
+      "rawHash": "e253d32d6225acf45b4d17131c634d7567f704ac1887f0084ad1d28eab4f1691",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=734s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#e253d32d6225acf45b4d17131c634d7567f704ac1887f0084ad1d28eab4f1691"
+    },
+    {
+      "title": "スクショTIME📸",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 974,
+      "time": "0:16:14",
+      "raw": "16:14 スクショTIME📸",
+      "rawHash": "21054913b1a99a80b5a86c3b469b86f50c40f75168573084fc8e7c43315dc814",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=974s",
+      "sourceId": "UgwaBj625lvaUAyRip94AaABAg",
+      "sourceHash": "0e8978adb29a7d53f07f8be1d302be2ae3b680c7228b994fd2cdd08f2752ef1c",
+      "sourceOrigin": "review:BOuGDiQI_7E-0e8978adb29a7d53f07f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:0e8978adb29a7d53f07f",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-0e8978adb29a7d53f07f.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-0e8978adb29a7d53f07f.json#21054913b1a99a80b5a86c3b469b86f50c40f75168573084fc8e7c43315dc814"
+    },
+    {
+      "title": "オープニングスクショ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 975,
+      "time": "0:16:15",
+      "raw": "16:15 オープニングスクショ",
+      "rawHash": "5a21d77861e4be579da5eb4b2148a73beadd31b99fbda043265767d5b180971c",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=975s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#5a21d77861e4be579da5eb4b2148a73beadd31b99fbda043265767d5b180971c"
+    },
+    {
+      "title": "それでは今日も楽しく盛り上がっていきましょー🎶カンパーイ🍻",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1018,
+      "time": "0:16:58",
+      "raw": "16:58 それでは今日も楽しく盛り上がっていきましょー🎶カンパーイ🍻",
+      "rawHash": "18bc067217ce2a9be998ac304113b1fec0d0034fff9c1836d31ad0683d36bf17",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=1018s",
+      "sourceId": "UgwaBj625lvaUAyRip94AaABAg",
+      "sourceHash": "0e8978adb29a7d53f07f8be1d302be2ae3b680c7228b994fd2cdd08f2752ef1c",
+      "sourceOrigin": "review:BOuGDiQI_7E-0e8978adb29a7d53f07f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:0e8978adb29a7d53f07f",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-0e8978adb29a7d53f07f.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-0e8978adb29a7d53f07f.json#18bc067217ce2a9be998ac304113b1fec0d0034fff9c1836d31ad0683d36bf17"
+    },
+    {
+      "title": "Xアカウント紹介",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1106,
+      "time": "0:18:26",
+      "raw": "18:26 Xアカウント紹介",
+      "rawHash": "f884f44684159d19ed49be4f7642a081806bd2b618b7a80d1ecfd4482b5b9746",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=1106s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#f884f44684159d19ed49be4f7642a081806bd2b618b7a80d1ecfd4482b5b9746"
+    },
+    {
+      "title": "レコーディングの話、曲のヒントもありがとう❣公開が待ち遠しいよ🤗撮影も頑張ってね✊",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1465,
+      "time": "0:24:25",
+      "raw": "24:25レコーディングの話、曲のヒントもありがとう❣公開が待ち遠しいよ🤗撮影も頑張ってね✊",
+      "rawHash": "c56c5fa682f685ed21239e632138dffe481d0dc620f618e59adc5ee2b940c2e0",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=1465s",
+      "sourceId": "Ugw2MfuHA5XJGIhKdjl4AaABAg",
+      "sourceHash": "b57f651aff4e44b375674f4cf179d6d597f51d3a66f16a10ec70c9d4dc00ce39",
+      "sourceOrigin": "review:BOuGDiQI_7E-b57f651aff4e44b37567.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:b57f651aff4e44b37567",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-b57f651aff4e44b37567.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-b57f651aff4e44b37567.json#c56c5fa682f685ed21239e632138dffe481d0dc620f618e59adc5ee2b940c2e0"
+    },
+    {
+      "title": "「Over Drive」とっても素敵でした😊",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1921,
+      "time": "0:32:01",
+      "raw": "32:01「Over Drive」とっても素敵でした😊",
+      "rawHash": "6fc6b60010540d0831742c1e434c48655d76b1f67a814559bf1bbf4f700285b3",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=1921s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#6fc6b60010540d0831742c1e434c48655d76b1f67a814559bf1bbf4f700285b3"
+    },
+    {
+      "title": "「BOY MEETS GIRL」めっちゃ良かった🥰",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2696,
+      "time": "0:44:56",
+      "raw": "44:56「BOY MEETS GIRL」めっちゃ良かった🥰",
+      "rawHash": "aff92a082bc344bc5744a676feaa4d4e166245090cd943af8f1a8a7a88f44570",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=2696s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#aff92a082bc344bc5744a676feaa4d4e166245090cd943af8f1a8a7a88f44570"
+    },
+    {
+      "title": "BOY MEETS GIRL",
+      "artist": "TRF「高評価200」",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 2697,
+      "time": "0:44:57",
+      "raw": "4曲目 44:57 BOY MEETS GIRL / TRF「高評価200」",
+      "rawHash": "86d504db389c8d511cbeb35e3732ae97ae0daa6593df817d59679bb0b286b772",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=2697s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#86d504db389c8d511cbeb35e3732ae97ae0daa6593df817d59679bb0b286b772"
+    },
+    {
+      "title": "ワンマンライブチケット🎫発売中よろしくお願いします😆そして重大なお知らせ🙌👏👏👏",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3037,
+      "time": "0:50:37",
+      "raw": "50:37 ワンマンライブチケット🎫発売中よろしくお願いします😆そして重大なお知らせ🙌👏👏👏",
+      "rawHash": "c1bcd8c43cb0db38cd85fc5fb5899192b7b4ff0ec6ff078b8ebd54b213578a98",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=3037s",
+      "sourceId": "UgwaBj625lvaUAyRip94AaABAg",
+      "sourceHash": "0e8978adb29a7d53f07f8be1d302be2ae3b680c7228b994fd2cdd08f2752ef1c",
+      "sourceOrigin": "review:BOuGDiQI_7E-0e8978adb29a7d53f07f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:0e8978adb29a7d53f07f",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-0e8978adb29a7d53f07f.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-0e8978adb29a7d53f07f.json#c1bcd8c43cb0db38cd85fc5fb5899192b7b4ff0ec6ff078b8ebd54b213578a98"
+    },
+    {
+      "title": "新しい情報公開🤩会場限定コラボCD発売！めっちゃ嬉しい‼コラボ新曲って楽しみすぎる😆✨",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3124,
+      "time": "0:52:04",
+      "raw": "52:04新しい情報公開🤩会場限定コラボCD発売！めっちゃ嬉しい‼コラボ新曲って楽しみすぎる😆✨",
+      "rawHash": "ded6ee167989cd8d9441795274932c9bb038f2ced8a48882394e854ae26f7dff",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=3124s",
+      "sourceId": "Ugw2MfuHA5XJGIhKdjl4AaABAg",
+      "sourceHash": "b57f651aff4e44b375674f4cf179d6d597f51d3a66f16a10ec70c9d4dc00ce39",
+      "sourceOrigin": "review:BOuGDiQI_7E-b57f651aff4e44b37567.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:b57f651aff4e44b37567",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-b57f651aff4e44b37567.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-b57f651aff4e44b37567.json#ded6ee167989cd8d9441795274932c9bb038f2ced8a48882394e854ae26f7dff"
+    },
+    {
+      "title": "「Time goes by」めっちゃ素敵でした🥰",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3883,
+      "time": "1:04:43",
+      "raw": "1:04:43「Time goes by」めっちゃ素敵でした🥰",
+      "rawHash": "f0a5a7c231b5cad5670c2fbf05a1f7a7b8dd9f419214a7654e8c1200fea0b24a",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=3883s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#f0a5a7c231b5cad5670c2fbf05a1f7a7b8dd9f419214a7654e8c1200fea0b24a"
+    },
+    {
+      "title": "アングルチェンジ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4310,
+      "time": "1:11:50",
+      "raw": "1:11:50 アングルチェンジ",
+      "rawHash": "04e72175b252339b639bd68b529f06379be0805c1a3313f361dee3a00db3a463",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=4310s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#04e72175b252339b639bd68b529f06379be0805c1a3313f361dee3a00db3a463"
+    },
+    {
+      "title": "後半戦もハイテンションで盛り上がっていきましょー🥳カンパーイ🍻",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4510,
+      "time": "1:15:10",
+      "raw": "1:15:10 後半戦もハイテンションで盛り上がっていきましょー🥳カンパーイ🍻",
+      "rawHash": "809f46fef2b6ce641d31e1fb4b6e456f6df885fa28ac57b4ec8494272c485dc9",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=4510s",
+      "sourceId": "UgwaBj625lvaUAyRip94AaABAg",
+      "sourceHash": "0e8978adb29a7d53f07f8be1d302be2ae3b680c7228b994fd2cdd08f2752ef1c",
+      "sourceOrigin": "review:BOuGDiQI_7E-0e8978adb29a7d53f07f.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:0e8978adb29a7d53f07f",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-0e8978adb29a7d53f07f.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-0e8978adb29a7d53f07f.json#809f46fef2b6ce641d31e1fb4b6e456f6df885fa28ac57b4ec8494272c485dc9"
+    },
+    {
+      "title": "いけいけどんどん「高評価300」突破！おめでとう",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4920,
+      "time": "1:22:00",
+      "raw": "1:22:00 いけいけどんどん「高評価300」突破！おめでとう",
+      "rawHash": "515dd7a37351e2ce04f19f45f39c18d223452680b0c34349f3832fdc03e120f3",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=4920s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#515dd7a37351e2ce04f19f45f39c18d223452680b0c34349f3832fdc03e120f3"
+    },
+    {
+      "title": "高評価👍300突破おめでとう🎉めっちゃ早かったね😆",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4946,
+      "time": "1:22:26",
+      "raw": "1:22:26高評価👍300突破おめでとう🎉めっちゃ早かったね😆",
+      "rawHash": "43489a484c77b86f026b072fa515e34e33c704255a68094d37c865cb15790cf9",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=4946s",
+      "sourceId": "Ugw2MfuHA5XJGIhKdjl4AaABAg",
+      "sourceHash": "b57f651aff4e44b375674f4cf179d6d597f51d3a66f16a10ec70c9d4dc00ce39",
+      "sourceOrigin": "review:BOuGDiQI_7E-b57f651aff4e44b37567.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:b57f651aff4e44b37567",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-b57f651aff4e44b37567.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-b57f651aff4e44b37567.json#43489a484c77b86f026b072fa515e34e33c704255a68094d37c865cb15790cf9"
+    },
+    {
+      "title": "高評価300超え👏👏👏おめでとう😁",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4953,
+      "time": "1:22:33",
+      "raw": "1:22:33 高評価300超え👏👏👏おめでとう😁",
+      "rawHash": "ad12020dc8368cbf05ab90ca5fb4fcbd59c49eab225e14cc7e89076591d18dcf",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=4953s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#ad12020dc8368cbf05ab90ca5fb4fcbd59c49eab225e14cc7e89076591d18dcf"
+    },
+    {
+      "title": "Miiさん余興コーナー、腕立て伏せ🥰とっても頑張った😆",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6361,
+      "time": "1:46:01",
+      "raw": "1:46:01 Miiさん余興コーナー、腕立て伏せ🥰とっても頑張った😆",
+      "rawHash": "fb150991a62f49b5d00f76331270dea1917c7df7c35b8a79445c6cadaf89822b",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=6361s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#fb150991a62f49b5d00f76331270dea1917c7df7c35b8a79445c6cadaf89822b"
+    },
+    {
+      "title": "Miiちゃま😍腕立て伏せ💪💪💪頑張れ📢ワンマンライブ🎤🎸🍅💎に向けて体力つけないと💪💪💪",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6400,
+      "time": "1:46:40",
+      "raw": "1:46:40 Miiちゃま😍腕立て伏せ💪💪💪頑張れ📢ワンマンライブ🎤🎸🍅💎に向けて体力つけないと💪💪💪",
+      "rawHash": "7c6f0d61c5fc10835ee9d992bc371779e128a1aaa945e2c2eabdac3b533e709a",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=6400s",
+      "sourceId": "UgwsLHDLPhFCGNIihXF4AaABAg",
+      "sourceHash": "7c6f0d61c5fc10835ee9d992bc371779e128a1aaa945e2c2eabdac3b533e709a",
+      "sourceOrigin": "review:BOuGDiQI_7E-7c6f0d61c5fc10835ee9.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:7c6f0d61c5fc10835ee9",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-7c6f0d61c5fc10835ee9.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-7c6f0d61c5fc10835ee9.json#7c6f0d61c5fc10835ee9d992bc371779e128a1aaa945e2c2eabdac3b533e709a"
+    },
+    {
+      "title": "「Jewel」最高でした😊",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7733,
+      "time": "2:08:53",
+      "raw": "2:08:53「Jewel」最高でした😊",
+      "rawHash": "04ba1cc728187f16aced9ac7c0aaca1f5912115bc153ab1142d27cdb52387a0f",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=7733s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#04ba1cc728187f16aced9ac7c0aaca1f5912115bc153ab1142d27cdb52387a0f"
+    },
+    {
+      "title": "スパチャ紹介",
+      "artist": "約24分",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 8299,
+      "time": "2:18:19",
+      "raw": "2:18:19 スパチャ紹介(約24分)",
+      "rawHash": "ec2522dfadcdbe2db0e8f9cd507c08eeb7959ad54429dbc262867292df68841e",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=8299s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#ec2522dfadcdbe2db0e8f9cd507c08eeb7959ad54429dbc262867292df68841e"
+    },
+    {
+      "title": "スパチャ読まれた時😊",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 9492,
+      "time": "2:38:12",
+      "raw": "2:38:12スパチャ読まれた時😊",
+      "rawHash": "cc55700fda045fc9b6835ae380dbf13da97a5dbf83d672ed9f1303f252a85afb",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=9492s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#cc55700fda045fc9b6835ae380dbf13da97a5dbf83d672ed9f1303f252a85afb"
+    },
+    {
+      "title": "スパチャ",
+      "artist": "スティッカーで応援してくれた【45名】の皆さんとみんなへ(約15分)",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 10213,
+      "time": "2:50:13",
+      "raw": "2:50:13 スパチャ/スティッカーで応援してくれた【45名】の皆さんとみんなへ(約15分)",
+      "rawHash": "9fc2a8695b4a644317838b0f1c5c09318a6998266716b0a98892bb1faf7d5910",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=10213s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#9fc2a8695b4a644317838b0f1c5c09318a6998266716b0a98892bb1faf7d5910"
+    },
+    {
+      "title": "サインコーナー、「マサ」いただきました🥰",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 10428,
+      "time": "2:53:48",
+      "raw": "2:53:48 サインコーナー、「マサ」いただきました🥰",
+      "rawHash": "023b010a0c87d1a41a1976f14865bbf2d5f975589a24e46f49447e6b6fa32d05",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=10428s",
+      "sourceId": "Ugw_ybFXAeKTSHSBF2Z4AaABAg",
+      "sourceHash": "08c49cbd11576fa36d7be94cab2c8f81c3d2aa9e4c733f194e126c25589a3118",
+      "sourceOrigin": "review:BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:08c49cbd11576fa36d7b",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-08c49cbd11576fa36d7b.json#023b010a0c87d1a41a1976f14865bbf2d5f975589a24e46f49447e6b6fa32d05"
+    },
+    {
+      "title": "ぼくも一緒にシャワー🚿したーい🤤🤤🤤「何を考えてるんだ🤤早く寝ろ😡」って🤣✌早く寝れなーい😭😭😭いつもありがとう🌻🌈Miiちゃま😍✌",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 11479,
+      "time": "3:11:19",
+      "raw": "3:11:19 ぼくも一緒にシャワー🚿したーい🤤🤤🤤「何を考えてるんだ🤤早く寝ろ😡」って🤣✌️早く寝れなーい😭😭😭いつもありがとう🌻🌈Miiちゃま😍✌️",
+      "rawHash": "0ec250229cbdcec010219579c50d21a5f7a345f2820ef20e0b8bcaedffa63eec",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=11479s",
+      "sourceId": "UgzInBpWQDVQiwRrRA14AaABAg",
+      "sourceHash": "2f38dd03f5e989396675c554ab72f8702a10263839539e1ca0151b0dff5eca67",
+      "sourceOrigin": "review:BOuGDiQI_7E-2f38dd03f5e989396675.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:2f38dd03f5e989396675",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-2f38dd03f5e989396675.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-2f38dd03f5e989396675.json#0ec250229cbdcec010219579c50d21a5f7a345f2820ef20e0b8bcaedffa63eec"
+    },
+    {
+      "title": "Miiちゃんからバイバイと見せかけて/Mii助参上/眠れない子守歌/ Progressive(オリジナル曲)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 11533,
+      "time": "3:12:13",
+      "raw": "3:12:13 Miiちゃんからバイバイと見せかけて/Mii助参上/眠れない子守歌/ Progressive(オリジナル曲)",
+      "rawHash": "8e572d7f3d5e8530dc56291d24e36630e9148ef5d8b889a4a4065d5d8041e360",
+      "videoId": "BOuGDiQI_7E",
+      "videoTitle": "【#歌枠】夏のハイテンション90's Girls Rock❣初見さんも大歓迎だよ！",
+      "channelName": "MINT SPEC 【90's J-ROCK COVER】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=BOuGDiQI_7E&t=11533s",
+      "sourceId": "Ugzu6UCD8xrxBQY6UPh4AaABAg",
+      "sourceHash": "50983c7bf22eed5fb5a1ba069ba72f8300ccf4849f8388541039b38300e92064",
+      "sourceOrigin": "review:BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:BOuGDiQI_7E:50983c7bf22eed5fb5a1",
+      "sourcePath": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json",
+      "reviewLocator": "data/review/sources/BOuGDiQI_7E-50983c7bf22eed5fb5a1.json#8e572d7f3d5e8530dc56291d24e36630e9148ef5d8b889a4a4065d5d8041e360"
+    },
+    {
+      "title": "～】久々の歌枠🐈！ちょっと聴いてって🫶【歌枠企画11回目 】#歌枠 #karaoke #vtuber #vsinger#作業用bgm",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1320,
+      "time": "0:22:00",
+      "raw": "【22:00～】久々の歌枠🐈！ちょっと聴いてって🫶【歌枠企画11回目 】#歌枠 #karaoke #vtuber #vsinger#作業用bgm",
+      "rawHash": "87681548b47c4fbea28d3a7fd6f15b2fef42e0dc4f00431a8463c12e37349cac",
+      "videoId": "27fzacEQ4SE",
+      "videoTitle": "【22:00～】久々の歌枠🐈！ちょっと聴いてって🫶【歌枠企画11回目 】#歌枠 #karaoke #vtuber #vsinger#作業用bgm",
+      "channelName": "MONICO ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=27fzacEQ4SE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=27fzacEQ4SE&t=1320s",
+      "sourceId": "description:27fzacEQ4SE:87681548b47c4fbe",
+      "sourceHash": "87681548b47c4fbea28d3a7fd6f15b2fef42e0dc4f00431a8463c12e37349cac",
+      "sourceOrigin": "review:27fzacEQ4SE-87681548b47c4fbea28d.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:27fzacEQ4SE:87681548b47c4fbea28d",
+      "sourcePath": "data/review/sources/27fzacEQ4SE-87681548b47c4fbea28d.json",
+      "reviewLocator": "data/review/sources/27fzacEQ4SE-87681548b47c4fbea28d.json#87681548b47c4fbea28d3a7fd6f15b2fef42e0dc4f00431a8463c12e37349cac"
+    },
+    {
       "title": "終わりのあいさつ",
       "artist": "未記載",
       "isNiche": true,
@@ -392,6 +1426,41 @@
       "reviewId": "review:bxffMK15LHs:5cf57224d41b29303872",
       "sourcePath": "data/review/sources/history-bxffMK15LHs-5cf57224d41b29303872.json",
       "reviewLocator": "data/review/sources/history-bxffMK15LHs-5cf57224d41b29303872.json#fd6a5cd683bca5b171dc6311e2df242c285a278d7bef351e8f45c31d1e76dc41"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "-13SFVj4z1M",
+      "videoTitle": "【#縦型歌枠】チルなあたしで色々歌うよ【NERA/新人ロックvsinger】 #vsinger #shorts #singingstream",
+      "channelName": "NERA",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-13SFVj4z1M",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-13SFVj4z1M&t=240s",
+      "sourceId": "description:-13SFVj4z1M:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:-13SFVj4z1M-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:-13SFVj4z1M:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/-13SFVj4z1M-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/-13SFVj4z1M-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "本編開始",
@@ -569,310 +1638,6 @@
       "reviewId": "review:1rCEayGJi54:0c2f16f9fd5431eb7a53",
       "sourcePath": "data/review/sources/history-1rCEayGJi54-0c2f16f9fd5431eb7a53.json",
       "reviewLocator": "data/review/sources/history-1rCEayGJi54-0c2f16f9fd5431eb7a53.json#d666ea7b1f54b3f61ef96c1a74453c89b183202a6616c1b209c2a7c84e5da5d0"
-    },
-    {
-      "title": "ハロウタノン",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 190,
-      "time": "0:03:10",
-      "raw": "00:03:10 ハロウタノン",
-      "rawHash": "7d5603bc47c58dc78987421c3887cb727874b6e8b5d8535cdfb52568f4a0ea45",
-      "videoId": "ZTllfu3tcCw",
-      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=190s",
-      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
-      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
-      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
-      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#7d5603bc47c58dc78987421c3887cb727874b6e8b5d8535cdfb52568f4a0ea45"
-    },
-    {
-      "title": "90年代アニソンにした理由",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 525,
-      "time": "0:08:45",
-      "raw": "00:08:45 90年代アニソンにした理由",
-      "rawHash": "8f40a192ee36d163338d46774e21083bb874d3cdb4208c6131ce6073635e1ac1",
-      "videoId": "ZTllfu3tcCw",
-      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=525s",
-      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
-      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
-      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
-      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#8f40a192ee36d163338d46774e21083bb874d3cdb4208c6131ce6073635e1ac1"
-    },
-    {
-      "title": "~",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 685,
-      "time": "0:11:25",
-      "raw": "00:11:25~",
-      "rawHash": "ae445642217380149fab36554a6b57c392415e7adf4cdb9c5eaefd8408dfed77",
-      "videoId": "ZTllfu3tcCw",
-      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=685s",
-      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
-      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
-      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "bad_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
-      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#ae445642217380149fab36554a6b57c392415e7adf4cdb9c5eaefd8408dfed77"
-    },
-    {
-      "title": "復習:光と影を抱きしめたまま",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6850,
-      "time": "1:54:10",
-      "raw": "01:54:10 01:23:09 復習:光と影を抱きしめたまま",
-      "rawHash": "1b47f15de61fd1910cca661ed309027a1b4cf586a60ea8f47a56bff8a3175687",
-      "videoId": "ZTllfu3tcCw",
-      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=6850s",
-      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
-      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
-      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
-      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#1b47f15de61fd1910cca661ed309027a1b4cf586a60ea8f47a56bff8a3175687"
-    },
-    {
-      "title": "イベント情報",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7096,
-      "time": "1:58:16",
-      "raw": "01:58:16 イベント情報",
-      "rawHash": "b3664566c950f671a45dfa376a3edc73bd29719924358418cdd4fbe5a952cf19",
-      "videoId": "ZTllfu3tcCw",
-      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=7096s",
-      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
-      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
-      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
-      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#b3664566c950f671a45dfa376a3edc73bd29719924358418cdd4fbe5a952cf19"
-    },
-    {
-      "title": "桃の冷静パスタの話",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7261,
-      "time": "2:01:01",
-      "raw": "02:01:01 桃の冷静パスタの話",
-      "rawHash": "358e9b51c45ad7cb173669aaf19b3dbe7144d4a67ca724275cefe821c467345b",
-      "videoId": "ZTllfu3tcCw",
-      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=7261s",
-      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
-      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
-      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
-      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#358e9b51c45ad7cb173669aaf19b3dbe7144d4a67ca724275cefe821c467345b"
-    },
-    {
-      "title": "スパチャ読み",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 8637,
-      "time": "2:23:57",
-      "raw": "02:23:57 スパチャ読み",
-      "rawHash": "33022201dd3a50ab7e6d3d549d16573df2922d472436a10df5ef43ad63ee693e",
-      "videoId": "ZTllfu3tcCw",
-      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=8637s",
-      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
-      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
-      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "activity_marker_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
-      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#33022201dd3a50ab7e6d3d549d16573df2922d472436a10df5ef43ad63ee693e"
-    },
-    {
-      "title": "おつウタノン",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 8981,
-      "time": "2:29:41",
-      "raw": "02:29:41 おつウタノン",
-      "rawHash": "fb5749a1e9cbc568de8d0faa59efad0c0411dbd514481ca0d0adec41a6408281",
-      "videoId": "ZTllfu3tcCw",
-      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
-      "channelName": "UTANO ch. 白玖ウタノ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=8981s",
-      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
-      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
-      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "activity_marker_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
-      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
-      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#fb5749a1e9cbc568de8d0faa59efad0c0411dbd514481ca0d0adec41a6408281"
     },
     {
       "title": "おつウタノン",
@@ -1159,24 +1924,24 @@
       "reviewLocator": "data/review/sources/history-8KDs7OP6_KM-92d430c2418abbe57f06.json#aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7"
     },
     {
-      "title": "開始予定いっけな～い！遅刻遅刻～💦ゴンッ【VIER/NynChord Production】",
+      "title": "ｳﾞｧｲ",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 1110,
-      "time": "0:18:30",
-      "raw": "【#歌枠/#VIERtime4】18時～18:30開始予定いっけな～い！遅刻遅刻～💦ゴンッ【VIER/NynChord Production】",
-      "rawHash": "5e89e23aa9c9bf45e4a71157e9c38cd0f7d7120e893ed9445d097b463121a9b7",
-      "videoId": "PJinUIuvOmc",
-      "videoTitle": "【#歌枠/#VIERtime4】18時～18:30開始予定いっけな～い！遅刻遅刻～💦ゴンッ【VIER/NynChord Production】",
-      "channelName": "VIER",
+      "seconds": 8762,
+      "time": "2:26:02",
+      "raw": "2:26:02 ｳﾞｧｲ",
+      "rawHash": "c93042d6ee962d61483628f65e529efea6df31f5a67bb621e1a97c1f7e3559a8",
+      "videoId": "08CQUlMMcQc",
+      "videoTitle": "【 #歌枠 / Karaoke 】懐かしのボカロ曲いっぱい歌います！！🎤初見さんも大歓迎！【 #あかつきるき #VSinger 】",
+      "channelName": "あかつき るき / Akatsuki Luci",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PJinUIuvOmc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJinUIuvOmc&t=1110s",
-      "sourceId": "description:PJinUIuvOmc:5e89e23aa9c9bf45",
-      "sourceHash": "5e89e23aa9c9bf45e4a71157e9c38cd0f7d7120e893ed9445d097b463121a9b7",
-      "sourceOrigin": "review:PJinUIuvOmc-5e89e23aa9c9bf45e4a7.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=08CQUlMMcQc",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=08CQUlMMcQc&t=8762s",
+      "sourceId": "Ugzr3YzRS7UscAXeUiF4AaABAg",
+      "sourceHash": "2e670230d2db6b510c545c03d21e1a4e58f3114c7bf790f0489d8fedcc956094",
+      "sourceOrigin": "review:08CQUlMMcQc-2e670230d2db6b510c54.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -1184,49 +1949,16 @@
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
-      "sourceRiskReasons": [],
+      "sourceRiskReasons": [
+        "short_unknown_title"
+      ],
       "riskReasons": [
-        "title_only_non_song_candidate"
+        "bad_title"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:PJinUIuvOmc:5e89e23aa9c9bf45e4a7",
-      "sourcePath": "data/review/sources/PJinUIuvOmc-5e89e23aa9c9bf45e4a7.json",
-      "reviewLocator": "data/review/sources/PJinUIuvOmc-5e89e23aa9c9bf45e4a7.json#5e89e23aa9c9bf45e4a71157e9c38cd0f7d7120e893ed9445d097b463121a9b7"
-    },
-    {
-      "title": "骸骨マイクシルバーからゴールドにチェンジ🎙✨",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1679,
-      "time": "0:27:59",
-      "raw": "27:59 骸骨マイクシルバーからゴールドにチェンジ🎙️✨",
-      "rawHash": "aa4ba7c647fa29bc51f6fa6fd61c88aadcbc9bd4a8e8c7d487166445efb20064",
-      "videoId": "PJinUIuvOmc",
-      "videoTitle": "【#歌枠/#VIERtime4】18時～18:30開始予定いっけな～い！遅刻遅刻～💦ゴンッ【VIER/NynChord Production】",
-      "channelName": "VIER",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PJinUIuvOmc",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJinUIuvOmc&t=1679s",
-      "sourceId": "UgzwHreFvTkp62zo0cp4AaABAg",
-      "sourceHash": "1aa766dd9340bf4e24ec3e0540fa39c477f6403e62bdbb73dc2ef547aba78ed4",
-      "sourceOrigin": "review:PJinUIuvOmc-1aa766dd9340bf4e24ec.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:PJinUIuvOmc:1aa766dd9340bf4e24ec",
-      "sourcePath": "data/review/sources/PJinUIuvOmc-1aa766dd9340bf4e24ec.json",
-      "reviewLocator": "data/review/sources/PJinUIuvOmc-1aa766dd9340bf4e24ec.json#aa4ba7c647fa29bc51f6fa6fd61c88aadcbc9bd4a8e8c7d487166445efb20064"
+      "reviewId": "review:08CQUlMMcQc:2e670230d2db6b510c54",
+      "sourcePath": "data/review/sources/08CQUlMMcQc-2e670230d2db6b510c54.json",
+      "reviewLocator": "data/review/sources/08CQUlMMcQc-2e670230d2db6b510c54.json#c93042d6ee962d61483628f65e529efea6df31f5a67bb621e1a97c1f7e3559a8"
     },
     {
       "title": "企画説明",
@@ -1322,24 +2054,24 @@
       "reviewLocator": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json#49ace4d8ff76b11cacad06ea1ae3f39f9c749d81c8d547fba4a0525048970f51"
     },
     {
-      "title": "10",
-      "artist": "07/2026",
+      "title": "かわいいね",
+      "artist": "未記載",
       "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "01al5AjDB9E",
-      "videoTitle": "ゆる歌枠",
-      "channelName": "みゆた",
+      "isUnknownArtist": true,
+      "seconds": 7515,
+      "time": "2:05:15",
+      "raw": "2:05:15 かわいいね",
+      "rawHash": "7aa2625b56a3ceb4f56200ea42ddbc8a074b351763b38319bae2eb660aca9131",
+      "videoId": "Zvx1jIgtwYw",
+      "videoTitle": "【#歌枠 / KARAOKE】アカペラでうたったりするかも…#shorts #RIOTMUSIC #vtuber #vsinger 【 #無原唱レコード / #メーメントヴァニタス 】",
+      "channelName": "メーメントヴァニタス / MEMENTOVANITAS",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=01al5AjDB9E",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=01al5AjDB9E&t=240s",
-      "sourceId": "description:01al5AjDB9E:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:01al5AjDB9E-b9e788e059bd3238a48e.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Zvx1jIgtwYw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Zvx1jIgtwYw&t=7515s",
+      "sourceId": "UgynUp6CQw0LUqJyQ1d4AaABAg",
+      "sourceHash": "7aa2625b56a3ceb4f56200ea42ddbc8a074b351763b38319bae2eb660aca9131",
+      "sourceOrigin": "review:Zvx1jIgtwYw-7aa2625b56a3ceb4f562.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -1349,12 +2081,12 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "source_level_likely_non_song_entry"
+        "title_only_non_song_candidate"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:01al5AjDB9E:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/01al5AjDB9E-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/01al5AjDB9E-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+      "reviewId": "review:Zvx1jIgtwYw:7aa2625b56a3ceb4f562",
+      "sourcePath": "data/review/sources/Zvx1jIgtwYw-7aa2625b56a3ceb4f562.json",
+      "reviewLocator": "data/review/sources/Zvx1jIgtwYw-7aa2625b56a3ceb4f562.json#7aa2625b56a3ceb4f56200ea42ddbc8a074b351763b38319bae2eb660aca9131"
     },
     {
       "title": "曲終わり",
@@ -4228,46 +4960,6 @@
       "reviewLocator": "data/review/sources/history-9hgQ0Qbv0iM-bde69793cef445c039d7.json#9d4f9fca8470dad9bb6c857e2fc1a04bd38153a2e1d4bbbc4f24a9a6d9607646"
     },
     {
-      "title": "POP STAR",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 241,
-      "time": "0:04:01",
-      "raw": "4:01 POP STAR",
-      "rawHash": "f6ce4188818a483c0a5151693b3a913a801bfa8757b1b0090aa893361ee9ac92",
-      "videoId": "UC7h8w49R0k",
-      "videoTitle": "【定期 #歌枠】#40 ～星の歌 編～【解 #VTuber】",
-      "channelName": "解 -Kai-",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=UC7h8w49R0k",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=UC7h8w49R0k&t=241s",
-      "sourceId": "Ugxn5-kXNQZZwRFC5bp4AaABAg",
-      "sourceHash": "667e4366140384f8e57b1bd2cfeb9d6cc23440e21cf834a3e583b28199a9c7c0",
-      "sourceOrigin": "review:UC7h8w49R0k-667e4366140384f8e57b.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:UC7h8w49R0k:667e4366140384f8e57b",
-      "sourcePath": "data/review/sources/UC7h8w49R0k-667e4366140384f8e57b.json",
-      "reviewLocator": "data/review/sources/UC7h8w49R0k-667e4366140384f8e57b.json#f6ce4188818a483c0a5151693b3a913a801bfa8757b1b0090aa893361ee9ac92"
-    },
-    {
       "title": "1を手で表現した",
       "artist": "未記載",
       "isNiche": true,
@@ -4345,7 +5037,6 @@
         "structured_setlist"
       ],
       "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
         "activity_marker_title",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
@@ -4356,7 +5047,6 @@
         "activity_marker_title",
         "niche_unknown_artist",
         "source_multiple_unknown_artists",
-        "source_unknown_artist_ratio_high",
         "source_multiple_niche_short_titles"
       ],
       "replacementSuggestion": null,
@@ -4393,14 +5083,12 @@
         "structured_setlist"
       ],
       "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
         "activity_marker_title",
         "source_multiple_unknown_artists"
       ],
       "riskReasons": [
         "activity_marker_title",
-        "source_multiple_unknown_artists",
-        "source_unknown_artist_ratio_high"
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:U1VskIZthjM:6c438ca8a819e5f62b46",
@@ -4567,6 +5255,41 @@
       "reviewId": "review:bQtUhOfrJC0:369ea67228f3b93b75b0",
       "sourcePath": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json",
       "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#94d0460c44ee3fdcf285036380173e529ff34e0b7d7367cf4f480bc63c992425"
+    },
+    {
+      "title": "_ののののの",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 440,
+      "time": "0:07:20",
+      "raw": "7:20 :_ののののの:",
+      "rawHash": "a23b6e4e88fcdca82120987ea613471a7e309aaacad30d3955e842e1bc4bd3d3",
+      "videoId": "-UEEf-KLg_8",
+      "videoTitle": "【弾き語り】きんにくつう♪【ゆめみた/夢限大みゅーたいぷ】 #半分人間 #shorts",
+      "channelName": "宮永ののか -Miyanaga Nonoka- / 夢限大みゅーたいぷ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-UEEf-KLg_8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=-UEEf-KLg_8&t=440s",
+      "sourceId": "UgyCxmPV9bD2ihh0jIZ4AaABAg",
+      "sourceHash": "a23b6e4e88fcdca82120987ea613471a7e309aaacad30d3955e842e1bc4bd3d3",
+      "sourceOrigin": "review:-UEEf-KLg_8-a23b6e4e88fcdca82120.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "custom_emoji_only"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:-UEEf-KLg_8:a23b6e4e88fcdca82120",
+      "sourcePath": "data/review/sources/-UEEf-KLg_8-a23b6e4e88fcdca82120.json",
+      "reviewLocator": "data/review/sources/-UEEf-KLg_8-a23b6e4e88fcdca82120.json#a23b6e4e88fcdca82120987ea613471a7e309aaacad30d3955e842e1bc4bd3d3"
     },
     {
       "title": "再開",
@@ -4979,6 +5702,76 @@
       "reviewLocator": "data/review/sources/history-zaPAqsqcC0k-7158af31feaaf86ddbf9.json#c24465d5d26f2e820af43b1c7d7886264b2a8d37e384c26cdf4eb83a126ec8d4"
     },
     {
+      "title": "~【同接15人】頑張ります💪🔥また応援に来てくれたら嬉しいです・・・！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1080,
+      "time": "0:18:00",
+      "raw": "また来週23日18:00~【同接15人】頑張ります💪🔥また応援に来てくれたら嬉しいです・・・！",
+      "rawHash": "b4d229654051aabb578aced14cdb83b909fca3310e5d790e783769af06aefe4f",
+      "videoId": "yZVjz7le6Zg",
+      "videoTitle": "【 #歌枠 / #耐久 】同接10人３分キープ耐久‼️登録者さん500人目指してます🎙️🔥【語部シオン/ #新人vtuber 】",
+      "channelName": "語部シオン【Kataribe Shion】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yZVjz7le6Zg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yZVjz7le6Zg&t=1080s",
+      "sourceId": "UgzsDsYr2jOxinvRK_F4AaABAg",
+      "sourceHash": "f977fd9d3bf351e2bd25fa19a6a613ba92b4784074055f96761897cdb6fc2bed",
+      "sourceOrigin": "review:yZVjz7le6Zg-f977fd9d3bf351e2bd25.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yZVjz7le6Zg:f977fd9d3bf351e2bd25",
+      "sourcePath": "data/review/sources/yZVjz7le6Zg-f977fd9d3bf351e2bd25.json",
+      "reviewLocator": "data/review/sources/yZVjz7le6Zg-f977fd9d3bf351e2bd25.json#b4d229654051aabb578aced14cdb83b909fca3310e5d790e783769af06aefe4f"
+    },
+    {
+      "title": "~いつもの歌枠します🎙ぜひご来場ください🚪",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1230,
+      "time": "0:20:30",
+      "raw": "そして、その前に19日の日曜は20:30~いつもの歌枠します🎙ぜひご来場ください🚪",
+      "rawHash": "0fbfdfe786ddfab5f2fa7c2c970ea1ee0f10db2d95c483deb37e3e426dbc1153",
+      "videoId": "yZVjz7le6Zg",
+      "videoTitle": "【 #歌枠 / #耐久 】同接10人３分キープ耐久‼️登録者さん500人目指してます🎙️🔥【語部シオン/ #新人vtuber 】",
+      "channelName": "語部シオン【Kataribe Shion】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yZVjz7le6Zg",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yZVjz7le6Zg&t=1230s",
+      "sourceId": "UgzsDsYr2jOxinvRK_F4AaABAg",
+      "sourceHash": "f977fd9d3bf351e2bd25fa19a6a613ba92b4784074055f96761897cdb6fc2bed",
+      "sourceOrigin": "review:yZVjz7le6Zg-f977fd9d3bf351e2bd25.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yZVjz7le6Zg:f977fd9d3bf351e2bd25",
+      "sourcePath": "data/review/sources/yZVjz7le6Zg-f977fd9d3bf351e2bd25.json",
+      "reviewLocator": "data/review/sources/yZVjz7le6Zg-f977fd9d3bf351e2bd25.json#0fbfdfe786ddfab5f2fa7c2c970ea1ee0f10db2d95c483deb37e3e426dbc1153"
+    },
+    {
       "title": "2周年記念お写真公開！",
       "artist": "未記載",
       "isNiche": true,
@@ -5022,6 +5815,690 @@
       "reviewId": "review:wkmPLI98ccU:c42bc673a091cab8fb3a",
       "sourcePath": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json",
       "reviewLocator": "data/review/sources/history-wkmPLI98ccU-c42bc673a091cab8fb3a.json#f8ffdd2e900c59a53890c676eda6dccf63ef5df5a2b9af9115ec0480a2630780"
+    },
+    {
+      "title": "やほやほ",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 271,
+      "time": "0:04:31",
+      "raw": "0:04:31 やほやほ[Opening]",
+      "rawHash": "f50fedbb4280162d62d965f3220f522941f22dc4c72e0aa60815099893d857ff",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=271s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#f50fedbb4280162d62d965f3220f522941f22dc4c72e0aa60815099893d857ff"
+    },
+    {
+      "title": "おはなしタイム[Talk time] 今週の振り返り",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 502,
+      "time": "0:08:22",
+      "raw": "0:08:22 おはなしタイム[Talk time] 今週の振り返り",
+      "rawHash": "c337c1a707c6da87817f7d2258b4e90aa5d5ce8822c92aa818ed45812fac5ddc",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=502s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#c337c1a707c6da87817f7d2258b4e90aa5d5ce8822c92aa818ed45812fac5ddc"
+    },
+    {
+      "title": "デートの誘い文句！by黒咲ルシアver",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3433,
+      "time": "0:57:13",
+      "raw": "0:57:13 デートの誘い文句！by黒咲ルシアver.",
+      "rawHash": "9489e313478d195bbc9ecbdeac5ec04ae9374d68ef7391a71b20e570ed1b2f70",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=3433s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#9489e313478d195bbc9ecbdeac5ec04ae9374d68ef7391a71b20e570ed1b2f70"
+    },
+    {
+      "title": "作業中！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4625,
+      "time": "1:17:05",
+      "raw": "1:17:05 作業中！",
+      "rawHash": "f2de6efa5489989e7e2977b9e9bbc106e5a82405b90a2df8fb02a47347fcb0ab",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=4625s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#f2de6efa5489989e7e2977b9e9bbc106e5a82405b90a2df8fb02a47347fcb0ab"
+    },
+    {
+      "title": "戻ってきて…からの)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4701,
+      "time": "1:18:21",
+      "raw": "(1:18:21 戻ってきて…からの)",
+      "rawHash": "f3f4bd999481d2cbd383ca0e0b462899461120a83d686834a1768ad5a2941051",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=4701s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#f3f4bd999481d2cbd383ca0e0b462899461120a83d686834a1768ad5a2941051"
+    },
+    {
+      "title": "もう一度、作業へ…)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4717,
+      "time": "1:18:37",
+      "raw": "(1:18:37 もう一度、作業へ…)",
+      "rawHash": "7c4ca4312323ce2e26b41f06f2682ce1fbd9b57191b6f8942819da3bec2e50d9",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=4717s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#7c4ca4312323ce2e26b41f06f2682ce1fbd9b57191b6f8942819da3bec2e50d9"
+    },
+    {
+      "title": "ヘッドホンからイヤホンへ)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4781,
+      "time": "1:19:41",
+      "raw": "(1:19:41 ヘッドホンからイヤホンへ)",
+      "rawHash": "51bbd08d845aff444efe03997717d56bbbefbf1c2e20df85a14af78b699ebfe0",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=4781s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#51bbd08d845aff444efe03997717d56bbbefbf1c2e20df85a14af78b699ebfe0"
+    },
+    {
+      "title": "オリ曲♪moonlight♪初めて聞く人は挙手",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6186,
+      "time": "1:43:06",
+      "raw": "1:43:06 オリ曲♪moonlight♪初めて聞く人は挙手",
+      "rawHash": "7e09d56d234825877cd9cadb3c2427ffbfa9cf9a608b05e4875e4f962e3777f7",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=6186s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#7e09d56d234825877cd9cadb3c2427ffbfa9cf9a608b05e4875e4f962e3777f7"
+    },
+    {
+      "title": "…怒らない?!)",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6277,
+      "time": "1:44:37",
+      "raw": "(1:44:37 …怒らない?!)",
+      "rawHash": "d1327a374a5865f34eaaa627988f6002e88e5cc03eb6cea39ee9a4f4a1577f74",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=6277s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#d1327a374a5865f34eaaa627988f6002e88e5cc03eb6cea39ee9a4f4a1577f74"
+    },
+    {
+      "title": "ローゼンリッターさん♪HAPPY☆BIRTHDAY♪",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6863,
+      "time": "1:54:23",
+      "raw": "1:54:23 ローゼンリッターさん♪HAPPY☆BIRTHDAY♪",
+      "rawHash": "2b827cf400630e9efff14533c5fd3e9fcd932a5b99a5b0194bd778d0ccf49856",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=6863s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#2b827cf400630e9efff14533c5fd3e9fcd932a5b99a5b0194bd778d0ccf49856"
+    },
+    {
+      "title": "Resareさんご紹介",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7039,
+      "time": "1:57:19",
+      "raw": "1:57:19 Resareさんご紹介",
+      "rawHash": "79ca4883431cc59f0c237ed799f8f781256d34fdd433682a0965df40d4f0c97e",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=7039s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#79ca4883431cc59f0c237ed799f8f781256d34fdd433682a0965df40d4f0c97e"
+    },
+    {
+      "title": "告知[Notice] 7",
+      "artist": "19(日)『ぶいかふぇ♪vol.273』＠秋葉原",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 7199,
+      "time": "1:59:59",
+      "raw": "1:59:59 告知[Notice] 7/19(日)『ぶいかふぇ♪vol.273』＠秋葉原",
+      "rawHash": "36c7cb4061cc0853e973dbdc4306da2bd9fd1760d222ba13c248148d2bb522ec",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=7199s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#36c7cb4061cc0853e973dbdc4306da2bd9fd1760d222ba13c248148d2bb522ec"
+    },
+    {
+      "title": "告知[Notice] 7",
+      "artist": "25(土)『VIRTUALEYESGIGS -SPECIAL-』＠猫目石ネモ × 広瀬虎太郎 主催",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 7305,
+      "time": "2:01:45",
+      "raw": "2:01:45 告知[Notice] 7/25(土)『VIRTUALEYESGIGS -SPECIAL-』＠猫目石ネモ × 広瀬虎太郎 主催",
+      "rawHash": "12ad745f0c4104c1d33b72d98a437d582cc593236a160bdcd54a532dc7f61a81",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=7305s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#12ad745f0c4104c1d33b72d98a437d582cc593236a160bdcd54a532dc7f61a81"
+    },
+    {
+      "title": "告知[Notice] 9",
+      "artist": "27(日)『冠咲オウか 卒業ライブ』＠秋葉原エンタス",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 7443,
+      "time": "2:04:03",
+      "raw": "2:04:03 告知[Notice] 9/27(日)『冠咲オウか 卒業ライブ』＠秋葉原エンタス",
+      "rawHash": "7d41c178dedf0d150178af2c7a929987bc4b28a3eccff2682667927fd9967ae5",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=7443s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#7d41c178dedf0d150178af2c7a929987bc4b28a3eccff2682667927fd9967ae5"
+    },
+    {
+      "title": "告知[Notice] 12",
+      "artist": "13(日)『黒咲ルシア 2ndワンマンライブ＠東京都内某所",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 7505,
+      "time": "2:05:05",
+      "raw": "2:05:05 告知[Notice] 12/13(日)『黒咲ルシア 2ndワンマンライブ＠東京都内某所",
+      "rawHash": "d4799ef6096085e0997bb23b30351f73e5fce394b8a8efea13db37417d67203a",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=7505s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#d4799ef6096085e0997bb23b30351f73e5fce394b8a8efea13db37417d67203a"
+    },
+    {
+      "title": "さぁて来週のルシアさんは？",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7742,
+      "time": "2:09:02",
+      "raw": "2:09:02 さぁて来週のルシアさんは？[See you next week Lucia-san]",
+      "rawHash": "89c051ab33fa75ad5d7885b29e22926b5b6cf02558bb544cf10a07742885447b",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=7742s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#89c051ab33fa75ad5d7885b29e22926b5b6cf02558bb544cf10a07742885447b"
+    },
+    {
+      "title": "お礼",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8262,
+      "time": "2:17:42",
+      "raw": "2:17:42 お礼[Thank You]",
+      "rawHash": "4cfd9786f6b0ad4e2b6fc5701481019306d615c2dcf1cea991c972103d4a5008",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=8262s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#4cfd9786f6b0ad4e2b6fc5701481019306d615c2dcf1cea991c972103d4a5008"
+    },
+    {
+      "title": "じゃんけん",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8375,
+      "time": "2:19:35",
+      "raw": "2:19:35 じゃんけん[Rock-Paper-Scissors]",
+      "rawHash": "156670ba2c5506b5da0a2ff306c5fb83091390cd1f9d606e9465e2074c736d20",
+      "videoId": "4O6x-hfzHO0",
+      "videoTitle": "【#歌枠/karaoke】まったりいかが？バラード中心歌枠【黒咲ルシア/#Vsinger】",
+      "channelName": "黒咲ルシア / LUCIA CHANNEL",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4O6x-hfzHO0&t=8375s",
+      "sourceId": "UgzuLy2-HUX4dbmM1cR4AaABAg",
+      "sourceHash": "16f96fc97cbf90378f1467c9540765a7316ed8197f82b36b709a9c063ef21344",
+      "sourceOrigin": "review:4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4O6x-hfzHO0:16f96fc97cbf90378f14",
+      "sourcePath": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json",
+      "reviewLocator": "data/review/sources/4O6x-hfzHO0-16f96fc97cbf90378f14.json#156670ba2c5506b5da0a2ff306c5fb83091390cd1f9d606e9465e2074c736d20"
     },
     {
       "title": "こんひなー",
@@ -5391,6 +6868,406 @@
       "reviewLocator": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json#a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
     },
     {
+      "title": "メン限配信　超美麗3Dスイカ割りと花火",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 578,
+      "time": "0:09:38",
+      "raw": "0:09:38メン限配信 超美麗3Dスイカ割りと花火",
+      "rawHash": "5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=578s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320"
+    },
+    {
+      "title": "から歌枠",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1260,
+      "time": "0:21:00",
+      "raw": "はくろ_歌うVtuber 🚀🎐@毎週木曜21:00から歌枠",
+      "rawHash": "626d01a048c88d8eec593046f154723dc8f0dfe39f60c90503cd2682ab96bd1a",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1260s",
+      "sourceId": "description:GkmXWhgz1QA:626d01a048c88d8e",
+      "sourceHash": "626d01a048c88d8eec593046f154723dc8f0dfe39f60c90503cd2682ab96bd1a",
+      "sourceOrigin": "review:GkmXWhgz1QA-626d01a048c88d8eec59.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:626d01a048c88d8eec59",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-626d01a048c88d8eec59.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-626d01a048c88d8eec59.json#626d01a048c88d8eec593046f154723dc8f0dfe39f60c90503cd2682ab96bd1a"
+    },
+    {
+      "title": "～リアルライブチケット#耐久 7",
+      "artist": "30(木)Vack-ON!!アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～リアルライブチケット#耐久 7/30(木)Vack-ON!!アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:15961b651311723d",
+      "sourceHash": "15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6",
+      "sourceOrigin": "review:GkmXWhgz1QA-15961b651311723dc3ab.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:15961b651311723dc3ab",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-15961b651311723dc3ab.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-15961b651311723dc3ab.json#15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6"
+    },
+    {
+      "title": "～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:c34ca03a358bd9ce",
+      "sourceHash": "c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8",
+      "sourceOrigin": "review:GkmXWhgz1QA-c34ca03a358bd9ce0a30.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:c34ca03a358bd9ce0a30",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-c34ca03a358bd9ce0a30.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-c34ca03a358bd9ce0a30.json#c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8"
+    },
+    {
+      "title": "～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:5d44a7135bb15e6a",
+      "sourceHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
+      "sourceOrigin": "review:GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:5d44a7135bb15e6a43df",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json#5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb"
+    },
+    {
+      "title": "～眠れない夜の優しいアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～眠れない夜の優しいアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:921f12791a4b50ad",
+      "sourceHash": "921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca",
+      "sourceOrigin": "review:GkmXWhgz1QA-921f12791a4b50ad0e26.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:921f12791a4b50ad0e26",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-921f12791a4b50ad0e26.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-921f12791a4b50ad0e26.json#921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca"
+    },
+    {
+      "title": "「歌声に　夢の種から　花ひらく」　朝起きてアーカイブ視聴中　ピクミンの～種のうた～　いい♪（",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6520,
+      "time": "1:48:40",
+      "raw": "「歌声に 夢の種から 花ひらく」 朝起きてアーカイブ視聴中 ピクミンの～種のうた～ いい♪（1:48:40）",
+      "rawHash": "87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=6520s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd"
+    },
+    {
+      "title": "同接400人越えてたありがとう",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14300,
+      "time": "3:58:20",
+      "raw": "3:58:20同接400人越えてたありがとう",
+      "rawHash": "8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14300s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19"
+    },
+    {
+      "title": "かわいくFANBOX宣伝",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14354,
+      "time": "3:59:14",
+      "raw": "3:59:14かわいくFANBOX宣伝",
+      "rawHash": "00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14354s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f"
+    },
+    {
+      "title": "オープニング目に焼き付けといて",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14661,
+      "time": "4:04:21",
+      "raw": "4:04:21オープニング目に焼き付けといて",
+      "rawHash": "062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14661s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff"
+    },
+    {
       "title": "おつにょ",
       "artist": "未記載",
       "isNiche": true,
@@ -5442,24 +7319,24 @@
       "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
     },
     {
-      "title": "セルフBGMかわいい",
+      "title": "〜",
       "artist": "未記載",
       "isNiche": false,
       "isUnknownArtist": true,
-      "seconds": 2432,
-      "time": "0:40:32",
-      "raw": "40:32 セルフBGMかわいい",
-      "rawHash": "5f914192267e3c0a4b0484cf3e82c32b12365698b11d3a82457f4284baea596a",
-      "videoId": "4HqfLRm4EHw",
-      "videoTitle": "【 歌枠 】リクエスト歌枠🎤✨【にじさんじ / 珠乃井ナナ】",
-      "channelName": "珠乃井ナナ / Tamanoi Nana【にじさんじ】",
+      "seconds": 1260,
+      "time": "0:21:00",
+      "raw": "即興ピアノライブ 7/17(金)21:00〜",
+      "rawHash": "0f988f9f0c6c0e1dd38fdf1076c84692aaac9e8819f32547fa167abd49e7552b",
+      "videoId": "Mzqh7BkVDLs",
+      "videoTitle": "【#ピアノ弾き語り 】眠れぬ夜の子守唄【 #Vsinger 】Singing while playing the piano to help you sleep.",
+      "channelName": "朱の唄 Akane's Lullaby",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw&t=2432s",
-      "sourceId": "Ugw1UwgjoVSY9SI2ljR4AaABAg",
-      "sourceHash": "ac827648a82f676ab03ec9a605ace50ca187e8ba6bef69bedbf97ba49c4b4e39",
-      "sourceOrigin": "review:4HqfLRm4EHw-ac827648a82f676ab03e.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Mzqh7BkVDLs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Mzqh7BkVDLs&t=1260s",
+      "sourceId": "description:Mzqh7BkVDLs:0f988f9f0c6c0e1d",
+      "sourceHash": "0f988f9f0c6c0e1dd38fdf1076c84692aaac9e8819f32547fa167abd49e7552b",
+      "sourceOrigin": "review:Mzqh7BkVDLs-0f988f9f0c6c0e1dd38f.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -5469,47 +7346,12 @@
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "title_only_non_song_candidate"
+        "bad_title"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:4HqfLRm4EHw:ac827648a82f676ab03e",
-      "sourcePath": "data/review/sources/4HqfLRm4EHw-ac827648a82f676ab03e.json",
-      "reviewLocator": "data/review/sources/4HqfLRm4EHw-ac827648a82f676ab03e.json#5f914192267e3c0a4b0484cf3e82c32b12365698b11d3a82457f4284baea596a"
-    },
-    {
-      "title": "島唄　ナナたまの民謡ってやっぱ最高でえ…",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 2450,
-      "time": "0:40:50",
-      "raw": "40:50 島唄 ナナたまの民謡ってやっぱ最高でえ…",
-      "rawHash": "ab67ee5b51811d748566d7270eab3b0839549478d79ed8557bf17a6d7038ff4d",
-      "videoId": "4HqfLRm4EHw",
-      "videoTitle": "【 歌枠 】リクエスト歌枠🎤✨【にじさんじ / 珠乃井ナナ】",
-      "channelName": "珠乃井ナナ / Tamanoi Nana【にじさんじ】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw&t=2450s",
-      "sourceId": "Ugw1UwgjoVSY9SI2ljR4AaABAg",
-      "sourceHash": "ac827648a82f676ab03ec9a605ace50ca187e8ba6bef69bedbf97ba49c4b4e39",
-      "sourceOrigin": "review:4HqfLRm4EHw-ac827648a82f676ab03e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:4HqfLRm4EHw:ac827648a82f676ab03e",
-      "sourcePath": "data/review/sources/4HqfLRm4EHw-ac827648a82f676ab03e.json",
-      "reviewLocator": "data/review/sources/4HqfLRm4EHw-ac827648a82f676ab03e.json#ab67ee5b51811d748566d7270eab3b0839549478d79ed8557bf17a6d7038ff4d"
+      "reviewId": "review:Mzqh7BkVDLs:0f988f9f0c6c0e1dd38f",
+      "sourcePath": "data/review/sources/Mzqh7BkVDLs-0f988f9f0c6c0e1dd38f.json",
+      "reviewLocator": "data/review/sources/Mzqh7BkVDLs-0f988f9f0c6c0e1dd38f.json#0f988f9f0c6c0e1dd38fdf1076c84692aaac9e8819f32547fa167abd49e7552b"
     },
     {
       "title": "閉会式",
@@ -6466,6 +8308,44 @@
       "reviewLocator": "data/review/sources/history-nRgMw8dnlG8-62b83dd8aa2d847da937.json#0dce89020e61409914da0c5b40ed55716f9293cdc7099f25640b598c6bef4f29"
     },
     {
+      "title": "ラストトーク",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7355,
+      "time": "2:02:35",
+      "raw": "2:02:35 🗨ラストトーク",
+      "rawHash": "63943b04d898070625c3c88050e1b282e88323209de7744a7b5e6c9ac11eb2af",
+      "videoId": "w3td6ytVDoA",
+      "videoTitle": "【歌枠】あなたはだんだん眠くなーる。わいモナー #妃玖ノ記録【妃玖/RKmusic/Fused】",
+      "channelName": "妃玖 - kisaki",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=w3td6ytVDoA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=w3td6ytVDoA&t=7355s",
+      "sourceId": "UgymNvQkMyVFPU3h5E14AaABAg",
+      "sourceHash": "415b351f1d5781e6e27c0a32cf3479ea5a8ffc39e2ca5500a2005f781d0ea9fb",
+      "sourceOrigin": "review:w3td6ytVDoA-415b351f1d5781e6e27c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry",
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:w3td6ytVDoA:415b351f1d5781e6e27c",
+      "sourcePath": "data/review/sources/w3td6ytVDoA-415b351f1d5781e6e27c.json",
+      "reviewLocator": "data/review/sources/w3td6ytVDoA-415b351f1d5781e6e27c.json#63943b04d898070625c3c88050e1b282e88323209de7744a7b5e6c9ac11eb2af"
+    },
+    {
       "title": "全曲終了",
       "artist": "",
       "isNiche": false,
@@ -6602,24 +8482,24 @@
       "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json#fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
     },
     {
-      "title": "10",
-      "artist": "07/2026",
+      "title": "声入り",
+      "artist": "",
       "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "gBTD3m2qzU0",
-      "videoTitle": "【歌枠】昭和・平成アニソン縛り!!【カラオケ】",
-      "channelName": "壽ラオと⚡️KOTOBUKI Laoto",
+      "isUnknownArtist": true,
+      "seconds": 367,
+      "time": "0:06:07",
+      "raw": "0:06:07 声入り",
+      "rawHash": "5dc86197b8966df724dff6db0a00d112ac52b4e13a03f3faf2bf7e09632b73c9",
+      "videoId": "jIy9kpSLOsE",
+      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎短め歌枠🎀ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
+      "channelName": "魔ノむえる -Mano Mueru-",
       "channelId": "",
       "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=gBTD3m2qzU0",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gBTD3m2qzU0&t=240s",
-      "sourceId": "description:gBTD3m2qzU0:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:gBTD3m2qzU0-b9e788e059bd3238a48e.json",
+      "youtubeUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE&t=367s",
+      "sourceId": "UgyJhS3yBpovoUwKhSd4AaABAg",
+      "sourceHash": "18337eec68da3369c8ede2661d08e0a423f22f7017359ee697d4310e3f86e951",
+      "sourceOrigin": "review:jIy9kpSLOsE-18337eec68da3369c8ed.json",
       "sourceScope": "current",
       "ranges": [
         "review"
@@ -6627,14 +8507,511 @@
       "classification": "confirmed_noise",
       "suggestedAction": "drop_entry",
       "positiveEvidence": [],
-      "sourceRiskReasons": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
       "riskReasons": [
-        "source_level_likely_non_song_entry"
+        "obvious_non_song_text",
+        "source_many_topic_entries"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:gBTD3m2qzU0:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/gBTD3m2qzU0-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/gBTD3m2qzU0-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
+      "reviewId": "review:jIy9kpSLOsE:18337eec68da3369c8ed",
+      "sourcePath": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "reviewLocator": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json#5dc86197b8966df724dff6db0a00d112ac52b4e13a03f3faf2bf7e09632b73c9"
+    },
+    {
+      "title": "～　高評価200達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3410,
+      "time": "0:56:50",
+      "raw": "0:56:50～ 高評価200達成",
+      "rawHash": "1e5c574dd867cef481d8407e46e02d8b7eaa9e733f73608ed69d0a04fe125d3f",
+      "videoId": "jIy9kpSLOsE",
+      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎短め歌枠🎀ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
+      "channelName": "魔ノむえる -Mano Mueru-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE&t=3410s",
+      "sourceId": "UgyJhS3yBpovoUwKhSd4AaABAg",
+      "sourceHash": "18337eec68da3369c8ede2661d08e0a423f22f7017359ee697d4310e3f86e951",
+      "sourceOrigin": "review:jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:jIy9kpSLOsE:18337eec68da3369c8ed",
+      "sourcePath": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "reviewLocator": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json#1e5c574dd867cef481d8407e46e02d8b7eaa9e733f73608ed69d0a04fe125d3f"
+    },
+    {
+      "title": "～　角にょき",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4248,
+      "time": "1:10:48",
+      "raw": "1:10:48～ 角にょき",
+      "rawHash": "8993ba25df80fa556ff123387978f551f338a4638e512096cfe292c8a02ad8de",
+      "videoId": "jIy9kpSLOsE",
+      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎短め歌枠🎀ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
+      "channelName": "魔ノむえる -Mano Mueru-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE&t=4248s",
+      "sourceId": "UgyJhS3yBpovoUwKhSd4AaABAg",
+      "sourceHash": "18337eec68da3369c8ede2661d08e0a423f22f7017359ee697d4310e3f86e951",
+      "sourceOrigin": "review:jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:jIy9kpSLOsE:18337eec68da3369c8ed",
+      "sourcePath": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "reviewLocator": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json#8993ba25df80fa556ff123387978f551f338a4638e512096cfe292c8a02ad8de"
+    },
+    {
+      "title": "～　早着替えタイム",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7234,
+      "time": "2:00:34",
+      "raw": "2:00:34～ 早着替えタイム:_heart:",
+      "rawHash": "0f2d4ff8268d2ecb671e8c6598b928fa7e87903aec993686ffe3c6d61d42d0b4",
+      "videoId": "jIy9kpSLOsE",
+      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎短め歌枠🎀ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
+      "channelName": "魔ノむえる -Mano Mueru-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE&t=7234s",
+      "sourceId": "UgyJhS3yBpovoUwKhSd4AaABAg",
+      "sourceHash": "18337eec68da3369c8ede2661d08e0a423f22f7017359ee697d4310e3f86e951",
+      "sourceOrigin": "review:jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:jIy9kpSLOsE:18337eec68da3369c8ed",
+      "sourcePath": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "reviewLocator": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json#0f2d4ff8268d2ecb671e8c6598b928fa7e87903aec993686ffe3c6d61d42d0b4"
+    },
+    {
+      "title": "～　高評価300達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7441,
+      "time": "2:04:01",
+      "raw": "2:04:01～ 高評価300達成",
+      "rawHash": "73a9211e44e398617902fea2808c9b157ac82b7cb181520ef5468c35ade962be",
+      "videoId": "jIy9kpSLOsE",
+      "videoTitle": "〖 #歌枠￤KARAOKE 〗初見さん◎短め歌枠🎀ギャップボイスはお好きですか？ #まのちらいぶ 〖 #vsinger ￤魔ノむえる 〗",
+      "channelName": "魔ノむえる -Mano Mueru-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=jIy9kpSLOsE&t=7441s",
+      "sourceId": "UgyJhS3yBpovoUwKhSd4AaABAg",
+      "sourceHash": "18337eec68da3369c8ede2661d08e0a423f22f7017359ee697d4310e3f86e951",
+      "sourceOrigin": "review:jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:jIy9kpSLOsE:18337eec68da3369c8ed",
+      "sourcePath": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json",
+      "reviewLocator": "data/review/sources/jIy9kpSLOsE-18337eec68da3369c8ed.json#73a9211e44e398617902fea2808c9b157ac82b7cb181520ef5468c35ade962be"
+    },
+    {
+      "title": "スタート",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 49,
+      "time": "0:00:49",
+      "raw": "0:00:49 スタート",
+      "rawHash": "c0da9eb91b71c8dcdefa7554b15e00ad65db0ae1d50ba3fdaa65acdc354364c5",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=49s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#c0da9eb91b71c8dcdefa7554b15e00ad65db0ae1d50ba3fdaa65acdc354364c5"
+    },
+    {
+      "title": "おお振りの話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1395,
+      "time": "0:23:15",
+      "raw": "0:23:15 おお振りの話",
+      "rawHash": "2550935c74de784a11b1d765d8808b91fc1a299b711d7f0df6c19a782b87e65b",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=1395s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#2550935c74de784a11b1d765d8808b91fc1a299b711d7f0df6c19a782b87e65b"
+    },
+    {
+      "title": "2文字縛り",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2024,
+      "time": "0:33:44",
+      "raw": "0:33:44 2文字縛り",
+      "rawHash": "5635ebf0d61c0b665b0cf010a4dd6089404c2a17d373594a57a8921edbc38566",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=2024s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#5635ebf0d61c0b665b0cf010a4dd6089404c2a17d373594a57a8921edbc38566"
+    },
+    {
+      "title": "感電/ 〃",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2859,
+      "time": "0:47:39",
+      "raw": "0:47:39 感電/ 〃",
+      "rawHash": "b2c04609365d6338a7d773066aa8a3f9b879f49a4ba6a6b52fd57d1f7954c970",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=2859s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#b2c04609365d6338a7d773066aa8a3f9b879f49a4ba6a6b52fd57d1f7954c970"
+    },
+    {
+      "title": "RADWIMPSの話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3576,
+      "time": "0:59:36",
+      "raw": "0:59:36 RADWIMPSの話",
+      "rawHash": "1f896399a3f366451923e3b879fadd3fc97195528cefbde9948e56fec7ddf00a",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=3576s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#1f896399a3f366451923e3b879fadd3fc97195528cefbde9948e56fec7ddf00a"
+    },
+    {
+      "title": "M!LK楽曲の話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3750,
+      "time": "1:02:30",
+      "raw": "1:02:30 M!LK楽曲の話",
+      "rawHash": "0492ab4248b939377d1c9e65cc778886c87b49e5583958ea9b31d409fd9badec",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=3750s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#0492ab4248b939377d1c9e65cc778886c87b49e5583958ea9b31d409fd9badec"
+    },
+    {
+      "title": "クリームソーダユーフォリア / 〃",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5329,
+      "time": "1:28:49",
+      "raw": "1:28:49 クリームソーダユーフォリア / 〃",
+      "rawHash": "15ecdf9f8b089abe1c3d5611ce5b16f561722c860bcad90bc3296e72b59cf422",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=5329s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#15ecdf9f8b089abe1c3d5611ce5b16f561722c860bcad90bc3296e72b59cf422"
+    },
+    {
+      "title": "偽りの記憶と波の音 / 〃",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5812,
+      "time": "1:36:52",
+      "raw": "1:36:52 偽りの記憶と波の音 / 〃",
+      "rawHash": "feb560f86e9ef1266e496c9fb83ccfc43270afba3b14d4bb00fa7c14f3105623",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=5812s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#feb560f86e9ef1266e496c9fb83ccfc43270afba3b14d4bb00fa7c14f3105623"
+    },
+    {
+      "title": "オトノバ中間試験",
+      "artist": "UNISON SQUARE GARDEN",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 6602,
+      "time": "1:50:02",
+      "raw": "1:50:02 オトノバ中間試験 / UNISON SQUARE GARDEN",
+      "rawHash": "79946bba0850b98b3bbe377563c068427d64d6b60fb62eb5a086adcd828ca6bc",
+      "videoId": "tCcIzgJ6x9I",
+      "videoTitle": "【弾き語り】時を縫う【未知又バトヤ】",
+      "channelName": "未知又バトヤ - Batoya Michimata -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=tCcIzgJ6x9I&t=6602s",
+      "sourceId": "Ugz1R--ejtRC2loqLTp4AaABAg",
+      "sourceHash": "95fe5751262e5519f609d51d9d5cb0727644d5fd397e30324808eaa38937ee22",
+      "sourceOrigin": "review:tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:tCcIzgJ6x9I:95fe5751262e5519f609",
+      "sourcePath": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json",
+      "reviewLocator": "data/review/sources/tCcIzgJ6x9I-95fe5751262e5519f609.json#79946bba0850b98b3bbe377563c068427d64d6b60fb62eb5a086adcd828ca6bc"
     },
     {
       "title": "スタート",

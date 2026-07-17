@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T14:14:54.844Z",
+  "generatedAt": "2026-07-17T19:43:39.695Z",
   "reviewId": "review:UC7h8w49R0k:667e4366140384f8e57b",
   "video": {
     "videoId": "UC7h8w49R0k",
@@ -11,18 +11,19 @@
   "source": {
     "sourceId": "Ugxn5-kXNQZZwRFC5bp4AaABAg",
     "sourceHash": "667e4366140384f8e57b1bd2cfeb9d6cc23440e21cf834a3e583b28199a9c7c0",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "4:01 POP STAR\r\n10:46 瞬く星の下で\r\n17:17 流星ロケット\r\n24:29 君の知らない物語\r\n32:49 星間飛行\r\n39:18 ライオン\r\n47:06 星空のディスタンス\r\n54:17 地上の星\r\n1:02:56 ベテルギウス\r\n1:09:12 プラネタリウム／大塚愛\r\n1:18:51 夜空ノムコウ\r\n1:26:52 金星／ELLEGARDEN\r\n1:35:04 トレモロ\r\n1:42:14 太陽系デスコ\r\n1:48:00 夜明けと蛍\r\n1:55:31 オリオンをなぞる\r\n2:02:35 天体観測",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 54,
-    "riskLevel": "medium",
+    "riskScore": 34,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_unknown_artist_ratio_high",
-      "source_multiple_unknown_artists"
+      "niche_unknown_artist",
+      "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -36,16 +37,15 @@
       "rawHash": "752aae69033ab4ec7b85d5b1c63789b5f018cb6ef28d5cf87c5b0f21a29bdf09",
       "sourceId": "Ugxn5-kXNQZZwRFC5bp4AaABAg",
       "sourceHash": "667e4366140384f8e57b1bd2cfeb9d6cc23440e21cf834a3e583b28199a9c7c0",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -57,16 +57,15 @@
       "rawHash": "6489f7dfe7d5b2ce1b3ffe6214abc73cfeab2e03f142058eefe2edd6ba5063e7",
       "sourceId": "Ugxn5-kXNQZZwRFC5bp4AaABAg",
       "sourceHash": "667e4366140384f8e57b1bd2cfeb9d6cc23440e21cf834a3e583b28199a9c7c0",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -86,8 +85,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -108,8 +106,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -130,8 +127,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -152,8 +148,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -174,8 +169,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -196,8 +190,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -217,8 +210,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -239,8 +231,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -253,14 +244,13 @@
       "rawHash": "640c454355ad71a16a9215c578a883ebe61cd9decf6f88692022d52accd43d3d",
       "sourceId": "Ugxn5-kXNQZZwRFC5bp4AaABAg",
       "sourceHash": "667e4366140384f8e57b1bd2cfeb9d6cc23440e21cf834a3e583b28199a9c7c0",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -281,8 +271,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -303,8 +292,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -325,8 +313,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -347,8 +334,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -369,25 +355,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 241,
-      "time": "0:04:01",
-      "title": "POP STAR",
-      "artist": "未記載",
-      "raw": "4:01 POP STAR",
-      "rawHash": "f6ce4188818a483c0a5151693b3a913a801bfa8757b1b0090aa893361ee9ac92",
-      "sourceId": "Ugxn5-kXNQZZwRFC5bp4AaABAg",
-      "sourceHash": "667e4366140384f8e57b1bd2cfeb9d6cc23440e21cf834a3e583b28199a9c7c0",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
+        "known_song"
       ]
     }
   ]

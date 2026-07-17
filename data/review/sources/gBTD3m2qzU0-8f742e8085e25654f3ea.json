@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T14:14:54.844Z",
+  "generatedAt": "2026-07-17T19:43:39.695Z",
   "reviewId": "review:gBTD3m2qzU0:8f742e8085e25654f3ea",
   "video": {
     "videoId": "gBTD3m2qzU0",
@@ -11,16 +11,18 @@
   "source": {
     "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
     "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "タイムスタンプ（セトリ）です。アーティスト名は敬称略とさせていただいております。\n00:01:22 翔べ！ガンダム（池田鴻）\n00:07:23 ターンAターン（西城秀樹）\n00:15:48 BEYOND THE TIME（TM NETWORK）\n00:23:43 SHINING SOUL（清水咲斗子）\n00:29:38 TRUTH（清水咲斗子）\n00:38:36 JUST COMMUNICATION（TWO-MIX）\n00:43:27 RHYTHM EMOTION（TWO-MIX）\n00:49:59 DREAMS（ROMANTIC MODE）\n00:56:57 Resolution（ROMANTIC MODE）\n01:07:22 INVOKE -インヴォーク-（T.M.Revolution）\n01:13:28 あんなに一緒だったのに（See-Saw）\n01:19:56 Believe（玉置成実）\n01:25:27 Realize（玉置成実）",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 20,
+    "riskScore": 34,
     "riskLevel": "low",
     "riskReasons": [
+      "source_multiple_niche_short_titles",
+      "niche_unknown_artist",
       "source_multiple_unknown_artists"
     ]
   },
@@ -35,14 +37,13 @@
       "rawHash": "9575dcd2f6518a03df1947ab1af49979a47c9daa07968bac1d312e65cd076f8e",
       "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
       "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -55,14 +56,13 @@
       "rawHash": "f01c081daff9d97f570e705919030ab8309d79014520c60ae1f9516350d238cf",
       "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
       "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -75,16 +75,15 @@
       "rawHash": "951e2ed822a983173e79b0e7fb072ea8871e556635861a422ebf5d3ec9b4bb16",
       "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
       "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -96,14 +95,13 @@
       "rawHash": "f15b70b5bce912dcdbad276917c3dde721e6a276e73690a9f4753f68d059ccd5",
       "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
       "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -116,14 +114,13 @@
       "rawHash": "442039e1fa3a9364cea252576ac5943cb41a134e06aaa61bb9735b414ec80083",
       "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
       "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -144,8 +141,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -158,16 +154,15 @@
       "rawHash": "911241660eef55cf60a0f242c4d842b74a9dac6d6653ac2ef68df1a46332e511",
       "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
       "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -179,16 +174,15 @@
       "rawHash": "ea6b2303d12336b14ccaa261535c058a183815d78c0dc5cefa2583f0a575ca11",
       "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
       "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -200,16 +194,15 @@
       "rawHash": "823d8ba890a02dbe72563f90a0256a6add20ca83c45585d40e5e4e5aba3d955d",
       "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
       "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -229,30 +222,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "accepted",
-      "seconds": 4408,
-      "time": "1:13:28",
-      "title": "あんなに一緒だったのに",
-      "artist": "未記載",
-      "raw": "01:13:28 あんなに一緒だったのに（See-Saw）",
-      "rawHash": "662ccb831855a23eba292bfd54ae827b457360d6db52309ef3828a6e238c3aa5",
-      "sourceId": "UgwPGhPGZZYUVT7K8h14AaABAg",
-      "sourceHash": "8f742e8085e25654f3ea7098b24ddf4a52554cad7ac242e671069b671c6a4cec",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [
-        "known_song_unknown_artist"
-      ],
-      "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -272,8 +242,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -293,8 +262,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     }
   ]
