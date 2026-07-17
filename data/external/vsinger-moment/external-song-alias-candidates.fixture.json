@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "external-song-alias-candidates.v1",
+  "generatedAt": "2026-07-17T14:30:00.000Z",
+  "externalSystem": "vsinger-moment.mcp-public",
+  "adapterVersion": "vsinger-moment-adapter-v1",
+  "matchingVersion": "external-song-enrichment.v1",
+  "candidates": [
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:feat",
+      "localTitle": "劣等上等 feat. 鏡音リン・レン",
+      "localArtist": "Giga",
+      "canonicalTitleCandidate": "劣等上等 feat. 鏡音リン・レン",
+      "canonicalArtistCandidate": "Giga",
+      "titleAliases": [
+        "Rettou Joutou",
+        "Bring It On"
+      ],
+      "artistAliases": [
+        "ギガP",
+        "Giga-P"
+      ],
+      "kanaRomajiCandidates": [
+        "ギガP",
+        "Giga-P"
+      ],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Afeat",
+      "matchingReason": "exact-title-artist",
+      "confidence": 0.98,
+      "decision": "auto-accept",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:feat",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Afeat",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "auto-accept",
+        "confidence": 0.98
+      }
+    },
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:jp-standard",
+      "localTitle": "少女レイ",
+      "localArtist": "みきとP",
+      "canonicalTitleCandidate": "少女レイ",
+      "canonicalArtistCandidate": "みきとP",
+      "titleAliases": [
+        "Shoujo Rei",
+        "しょうじょれい"
+      ],
+      "artistAliases": [
+        "MikitoP",
+        "みきとぴー"
+      ],
+      "kanaRomajiCandidates": [
+        "MikitoP",
+        "みきとぴー"
+      ],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ajp-standard",
+      "matchingReason": "exact-title-artist",
+      "confidence": 0.98,
+      "decision": "auto-accept",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:jp-standard",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Ajp-standard",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "auto-accept",
+        "confidence": 0.98
+      }
+    },
+    {
+      "schemaVersion": "external-song-identity-candidate.v1",
+      "externalSongId": "song:kana-romaji-singer",
+      "localTitle": "メルト",
+      "localArtist": "ryo",
+      "canonicalTitleCandidate": "メルト",
+      "canonicalArtistCandidate": "ryo",
+      "titleAliases": [],
+      "artistAliases": [
+        "りょう"
+      ],
+      "kanaRomajiCandidates": [
+        "りょう",
+        "ryo"
+      ],
+      "sourceUrl": "https://vsinger-moment.jp/songs/song%3Akana-romaji-singer",
+      "matchingReason": "exact-title-artist",
+      "confidence": 0.98,
+      "decision": "auto-accept",
+      "provenance": {
+        "externalSystem": "vsinger-moment.mcp-public",
+        "externalId": "song:kana-romaji-singer",
+        "sourceUrl": "https://vsinger-moment.jp/songs/song%3Akana-romaji-singer",
+        "fetchedAt": "2026-07-17T14:01:04.845Z",
+        "rawHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "adapterVersion": "vsinger-moment-adapter-v1",
+        "matchingVersion": "external-song-enrichment.v1",
+        "decision": "auto-accept",
+        "confidence": 0.98
+      }
+    }
+  ]
+}

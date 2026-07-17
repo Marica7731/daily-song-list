@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://daily-song-list.local/schemas/vsinger-moment/external-video-candidates.schema.json",
+  "title": "VSinger Moment External Video Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "videoId",
+    "externalSongId",
+    "reportedSongTitle",
+    "reportedArtist",
+    "reportedSinger",
+    "reportedTimestamp",
+    "sourceUrl",
+    "fetchedAt",
+    "verificationStatus",
+    "provenance"
+  ],
+  "properties": {
+    "videoId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{11}$"
+    },
+    "externalSongId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reportedSongTitle": {
+      "type": ["string", "null"]
+    },
+    "reportedArtist": {
+      "type": ["string", "null"]
+    },
+    "reportedSinger": {
+      "type": ["string", "null"]
+    },
+    "reportedTimestamp": {
+      "type": ["string", "null"]
+    },
+    "sourceUrl": {
+      "type": ["string", "null"]
+    },
+    "fetchedAt": {
+      "type": "string"
+    },
+    "verificationStatus": {
+      "const": "unverified"
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "externalSystem",
+        "externalId",
+        "sourceUrl",
+        "fetchedAt",
+        "rawHash",
+        "adapterVersion",
+        "matchingVersion",
+        "decision",
+        "confidence"
+      ]
+    }
+  }
+}

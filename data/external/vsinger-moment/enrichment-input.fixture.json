@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "vsinger-moment.enrichment-input-fixture.v1",
+  "fixtureOnly": true,
+  "externalSongs": [
+    {
+      "externalSongId": "song:jp-standard",
+      "title": "少女レイ",
+      "artist": "みきとP",
+      "titleAliases": ["Shoujo Rei", "しょうじょれい"],
+      "artistAliases": ["MikitoP", "みきとぴー"],
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Ajp-standard",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AAAAAAAAAAA&t=123s"
+    },
+    {
+      "externalSongId": "song:kana-romaji-singer",
+      "title": "メルト",
+      "artist": "ryo",
+      "artistAliases": ["りょう", "ryo"],
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Akana-romaji-singer",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "performances": [
+        {
+          "singerName": "藍月なくる / Aitsuki Nakuru",
+          "youtubeUrl": "https://youtu.be/BBBBBBBBBBB?t=67",
+          "timestamp": "0:01:07",
+          "streamedAt": "2026-07-12T12:00:00+09:00"
+        }
+      ]
+    },
+    {
+      "externalSongId": "song:feat",
+      "title": "劣等上等 feat. 鏡音リン・レン",
+      "artist": "Giga",
+      "titleAliases": ["Rettou Joutou", "Bring It On"],
+      "artistAliases": ["ギガP", "Giga-P"],
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Afeat",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    {
+      "externalSongId": "song:piano-version",
+      "title": "夜に駆ける Piano Ver.",
+      "artist": "YOASOBI",
+      "titleAliases": ["夜に駆ける", "Yoru ni Kakeru Piano Ver."],
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Apiano-version",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    },
+    {
+      "externalSongId": "song:remix",
+      "title": "フォニイ Remix",
+      "artist": "ツミキ",
+      "titleAliases": ["フォニイ", "phony Remix"],
+      "artistAliases": ["Tsumiki"],
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Aremix",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    {
+      "externalSongId": "song:same-title-a",
+      "title": "花",
+      "artist": "Singer A",
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-a",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "externalSongId": "song:same-title-b",
+      "title": "花",
+      "artist": "Singer B",
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-b",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "externalSongId": "song:manual-curation",
+      "title": "KING",
+      "artist": "Kanaria",
+      "titleAliases": ["King"],
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Amanual-curation",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "2222222222222222222222222222222222222222222222222222222222222222"
+    },
+    {
+      "externalSongId": "song:no-local",
+      "title": "外部だけの曲",
+      "artist": "External Artist",
+      "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Ano-local",
+      "fetchedAt": "2026-07-17T14:01:04.845Z",
+      "rawHash": "3333333333333333333333333333333333333333333333333333333333333333",
+      "performances": [
+        {
+          "singerName": "External Singer",
+          "videoId": "CCCCCCCCCCC",
+          "timestamp": "0:02:03",
+          "streamedAt": "2026-07-11T12:00:00+09:00"
+        }
+      ]
+    }
+  ],
+  "localSongs": [
+    { "title": "少女レイ", "artist": "みきとP" },
+    { "title": "メルト", "artist": "ryo" },
+    { "title": "劣等上等 feat. 鏡音リン・レン", "artist": "Giga" },
+    { "title": "夜に駆ける", "artist": "YOASOBI" },
+    { "title": "フォニイ", "artist": "ツミキ" },
+    { "title": "花", "artist": "Singer A" },
+    { "title": "KING", "artist": "Kanaria" },
+    { "title": "本站だけの曲", "artist": "Local Artist" }
+  ],
+  "manualCuration": [
+    {
+      "title": "KING",
+      "artist": "Kanaria",
+      "reason": "existing-manual-curation"
+    }
+  ]
+}

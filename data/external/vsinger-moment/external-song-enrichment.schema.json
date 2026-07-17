@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://daily-song-list.local/schemas/vsinger-moment/external-song-enrichment.schema.json",
+  "title": "VSinger Moment Song Enrichment Candidate",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "externalSongId",
+    "canonicalTitleCandidate",
+    "canonicalArtistCandidate",
+    "confidence",
+    "decision",
+    "provenance"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "external-song-identity-candidate.v1"
+    },
+    "externalSongId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonicalTitleCandidate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonicalArtistCandidate": {
+      "type": ["string", "null"]
+    },
+    "titleAliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "artistAliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "kanaRomajiCandidates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "decision": {
+      "enum": [
+        "auto-accept",
+        "manual-curation-priority",
+        "review-required",
+        "rejected-version-conflict",
+        "rejected-ambiguous-local-match",
+        "external-only"
+      ]
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    }
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "externalSystem",
+        "externalId",
+        "sourceUrl",
+        "fetchedAt",
+        "rawHash",
+        "adapterVersion",
+        "matchingVersion",
+        "decision",
+        "confidence"
+      ],
+      "properties": {
+        "externalSystem": {
+          "const": "vsinger-moment.mcp-public"
+        },
+        "externalId": {
+          "type": "string"
+        },
+        "sourceUrl": {
+          "type": ["string", "null"]
+        },
+        "fetchedAt": {
+          "type": "string"
+        },
+        "rawHash": {
+          "type": "string"
+        },
+        "adapterVersion": {
+          "const": "vsinger-moment-adapter-v1"
+        },
+        "matchingVersion": {
+          "const": "external-song-enrichment.v1"
+        },
+        "decision": {
+          "type": "string"
+        },
+        "confidence": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

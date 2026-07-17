@@ -7,8 +7,19 @@
   "externalSongSchemaPath": "data/external/vsinger-moment/external-song.schema.json",
   "fixturePaths": [
     "data/external/vsinger-moment/aliases-fixture.json",
+    "data/external/vsinger-moment/enrichment-input.fixture.json",
+    "data/external/vsinger-moment/external-song-alias-candidates.fixture.json",
+    "data/external/vsinger-moment/external-known-song-candidates.fixture.json",
+    "data/external/vsinger-moment/external-song-identity-candidates.fixture.json",
+    "data/external/vsinger-moment/external-song-conflicts.fixture.json",
+    "data/external/vsinger-moment/external-video-candidates.fixture.json",
     "data/external/vsinger-moment/import-state.example.json",
     "data/external/vsinger-moment/conflict-report.example.json"
+  ],
+  "schemaPaths": [
+    "data/external/vsinger-moment/external-song.schema.json",
+    "data/external/vsinger-moment/external-song-enrichment.schema.json",
+    "data/external/vsinger-moment/external-video-candidates.schema.json"
   ],
   "fullCatalogStoredInGit": false,
   "cacheRoot": ".local-cache/vsinger-moment",
