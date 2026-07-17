@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T05:16:18.814Z",
+  "generatedAt": "2026-07-17T08:42:30.513Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-17T03:46:24.136Z",
+  "latestGeneratedAt": "2026-07-17T06:47:43.761Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 134,
-    "uniqueVideos": 41,
-    "uniqueSources": 58,
-    "confirmedNoiseCount": 134,
+    "totalCandidates": 125,
+    "uniqueVideos": 38,
+    "uniqueSources": 54,
+    "confirmedNoiseCount": 125,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 134,
+      "confirmed_noise": 125,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -24,6 +24,41 @@
     }
   },
   "items": [
+    {
+      "title": "7",
+      "artist": "17(金)12:00【 #ウミガリ ⑥ 】 安心してください。ストーリーを進め魔ス！※酔い止め摂取済み 【 レヴィ・アタン 】 #vtuber",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 720,
+      "time": "0:12:00",
+      "raw": "7/17(金)12:00【 #ウミガリ ⑥ 】 安心してください。ストーリーを進め魔ス！※酔い止め摂取済み 【 レヴィ・アタン 】 #vtuber",
+      "rawHash": "4b7532cd9cd9b833762ce0d6e42722adaca38efa51f8f1b1ff66abdacd065a56",
+      "videoId": "3SRJr2g_iaQ",
+      "videoTitle": "【 歌枠 】 同接350人耐久歌枠！横画面でリベンジ！ 【葵井詩雫】 Vsinger | karaoke | animesong",
+      "channelName": "aoi sizuku ch. 葵井詩雫",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=3SRJr2g_iaQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3SRJr2g_iaQ&t=720s",
+      "sourceId": "description:3SRJr2g_iaQ:4b7532cd9cd9b833",
+      "sourceHash": "4b7532cd9cd9b833762ce0d6e42722adaca38efa51f8f1b1ff66abdacd065a56",
+      "sourceOrigin": "review:3SRJr2g_iaQ-4b7532cd9cd9b833762c.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:3SRJr2g_iaQ:4b7532cd9cd9b833762c",
+      "sourcePath": "data/review/sources/3SRJr2g_iaQ-4b7532cd9cd9b833762c.json",
+      "reviewLocator": "data/review/sources/3SRJr2g_iaQ-4b7532cd9cd9b833762c.json#4b7532cd9cd9b833762ce0d6e42722adaca38efa51f8f1b1ff66abdacd065a56"
+    },
     {
       "title": "8",
       "artist": "29 おりづるVTuberフェス(広島県) 出演決定",
@@ -900,41 +935,6 @@
       "reviewId": "review:OCULwDtQ8Bs:a5f12251209c4a3d1b6a",
       "sourcePath": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json",
       "reviewLocator": "data/review/sources/history-OCULwDtQ8Bs-a5f12251209c4a3d1b6a.json#157a1fd8246db0b268cff62bf11c52381f7dbf657bc3a6342fe9372512776e0a"
-    },
-    {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "fIpK6zDo8c8",
-      "videoTitle": "【突発朝歌枠♪】ねむねむぼけぼけ【黒狐ゆき】",
-      "channelName": "くろきつねch. 黒狐ゆき",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=fIpK6zDo8c8",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fIpK6zDo8c8&t=240s",
-      "sourceId": "description:fIpK6zDo8c8:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:fIpK6zDo8c8-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:fIpK6zDo8c8:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/fIpK6zDo8c8-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/fIpK6zDo8c8-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "3次会",
@@ -3571,119 +3571,6 @@
       "reviewLocator": "data/review/sources/history-qENxBvbn29Y-d20b81982796f791041d.json#1ee0040da030653cb273fae780531fdfe821e1c9d56c69a1932e977ce6e63ac4"
     },
     {
-      "title": "オープニングトーク",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 100,
-      "time": "0:01:40",
-      "raw": "0:01:40 オープニングトーク",
-      "rawHash": "5c28d70bb64505032e98b9aa683dd49e6ec3821b575cd5fe65b86847cf153e18",
-      "videoId": "FyuP1SYDNzo",
-      "videoTitle": "【#懐メロ歌枠 #らんちぅ寿希】金曜日は70、80、90年代のヒット曲をお届け！早起きは3万円得！君の眠気をノスタルジーで吹っ飛ばす朝活【#Vtuber #KARAOKE】",
-      "channelName": "らんちぅ寿希Live",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=FyuP1SYDNzo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FyuP1SYDNzo&t=100s",
-      "sourceId": "UgyjYOo_bDdaIffIsYZ4AaABAg",
-      "sourceHash": "6be5731abe67a6af10e68d95bed5ccfbaeae22602ab46cb19a8df93ff3a0aa44",
-      "sourceOrigin": "review:FyuP1SYDNzo-6be5731abe67a6af10e6.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries",
-        "activity_marker_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:FyuP1SYDNzo:6be5731abe67a6af10e6",
-      "sourcePath": "data/review/sources/FyuP1SYDNzo-6be5731abe67a6af10e6.json",
-      "reviewLocator": "data/review/sources/FyuP1SYDNzo-6be5731abe67a6af10e6.json#5c28d70bb64505032e98b9aa683dd49e6ec3821b575cd5fe65b86847cf153e18"
-    },
-    {
-      "title": "ROMでずっと見てくれる方も一つの楽しみ方ですね～！",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 5999,
-      "time": "1:39:59",
-      "raw": "1:39:59 ROMでずっと見てくれる方も一つの楽しみ方ですね～！",
-      "rawHash": "890e08305af736b4b5ef71f7aaa9184f2befd217a1a79f05c1c055f4fd269878",
-      "videoId": "FyuP1SYDNzo",
-      "videoTitle": "【#懐メロ歌枠 #らんちぅ寿希】金曜日は70、80、90年代のヒット曲をお届け！早起きは3万円得！君の眠気をノスタルジーで吹っ飛ばす朝活【#Vtuber #KARAOKE】",
-      "channelName": "らんちぅ寿希Live",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=FyuP1SYDNzo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FyuP1SYDNzo&t=5999s",
-      "sourceId": "UgxxZ9JyO2nYTp58-Y54AaABAg",
-      "sourceHash": "43d400550675eb93367f8b4ab0d94e85a9769b9429c0c051ff040e1a57a7a091",
-      "sourceOrigin": "review:FyuP1SYDNzo-43d400550675eb93367f.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "title_only_non_song_candidate"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:FyuP1SYDNzo:43d400550675eb93367f",
-      "sourcePath": "data/review/sources/FyuP1SYDNzo-43d400550675eb93367f.json",
-      "reviewLocator": "data/review/sources/FyuP1SYDNzo-43d400550675eb93367f.json#890e08305af736b4b5ef71f7aaa9184f2befd217a1a79f05c1c055f4fd269878"
-    },
-    {
-      "title": "エンディングトーク",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 10738,
-      "time": "2:58:58",
-      "raw": "2:58:58 エンディングトーク",
-      "rawHash": "6ca30c5cd586d6356eb3c5323f5bbd9430ab314569d267767ecf23d457098c59",
-      "videoId": "FyuP1SYDNzo",
-      "videoTitle": "【#懐メロ歌枠 #らんちぅ寿希】金曜日は70、80、90年代のヒット曲をお届け！早起きは3万円得！君の眠気をノスタルジーで吹っ飛ばす朝活【#Vtuber #KARAOKE】",
-      "channelName": "らんちぅ寿希Live",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=FyuP1SYDNzo",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=FyuP1SYDNzo&t=10738s",
-      "sourceId": "UgyjYOo_bDdaIffIsYZ4AaABAg",
-      "sourceHash": "6be5731abe67a6af10e68d95bed5ccfbaeae22602ab46cb19a8df93ff3a0aa44",
-      "sourceOrigin": "review:FyuP1SYDNzo-6be5731abe67a6af10e6.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries",
-        "activity_marker_title"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:FyuP1SYDNzo:6be5731abe67a6af10e6",
-      "sourcePath": "data/review/sources/FyuP1SYDNzo-6be5731abe67a6af10e6.json",
-      "reviewLocator": "data/review/sources/FyuP1SYDNzo-6be5731abe67a6af10e6.json#6ca30c5cd586d6356eb3c5323f5bbd9430ab314569d267767ecf23d457098c59"
-    },
-    {
       "title": "おつくわタイム",
       "artist": "",
       "isNiche": false,
@@ -5141,166 +5028,6 @@
       "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
     },
     {
-      "title": "みなさんが静かになるまで30分かかりました",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1842,
-      "time": "0:30:42",
-      "raw": "0:30:42 みなさんが静かになるまで30分かかりました",
-      "rawHash": "a21e4bb2af9cc728df1805addd12f943627da54f131c934e3221c23c76ea3976",
-      "videoId": "Fl48C-hr-RA",
-      "videoTitle": "【 #歌枠 】ボカロ縛り歌枠！セトリ当たったら歌います！【 #新人vtuber / #宵吸あけル 】",
-      "channelName": "宵吸あけル / Yokyu Akeru",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA&t=1842s",
-      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
-      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
-      "sourceOrigin": "review:Fl48C-hr-RA-071fa7fc3bef205085d3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Fl48C-hr-RA:071fa7fc3bef205085d3",
-      "sourcePath": "data/review/sources/Fl48C-hr-RA-071fa7fc3bef205085d3.json",
-      "reviewLocator": "data/review/sources/Fl48C-hr-RA-071fa7fc3bef205085d3.json#a21e4bb2af9cc728df1805addd12f943627da54f131c934e3221c23c76ea3976"
-    },
-    {
-      "title": "休憩",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 7154,
-      "time": "1:59:14",
-      "raw": "1:59:14 休憩",
-      "rawHash": "13a20d1cf4f6c8e29ed7350a7a33350ff3606a541928e9ba9bd2475fe3cb3c8e",
-      "videoId": "Fl48C-hr-RA",
-      "videoTitle": "【 #歌枠 】ボカロ縛り歌枠！セトリ当たったら歌います！【 #新人vtuber / #宵吸あけル 】",
-      "channelName": "宵吸あけル / Yokyu Akeru",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA&t=7154s",
-      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
-      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
-      "sourceOrigin": "review:Fl48C-hr-RA-071fa7fc3bef205085d3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "activity_marker_title",
-        "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Fl48C-hr-RA:071fa7fc3bef205085d3",
-      "sourcePath": "data/review/sources/Fl48C-hr-RA-071fa7fc3bef205085d3.json",
-      "reviewLocator": "data/review/sources/Fl48C-hr-RA-071fa7fc3bef205085d3.json#13a20d1cf4f6c8e29ed7350a7a33350ff3606a541928e9ba9bd2475fe3cb3c8e"
-    },
-    {
-      "title": "_よきゅのよ::_よきゅのきゅ:の勝ちってコトぉ～？",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 9491,
-      "time": "2:38:11",
-      "raw": "2:38:11 :_よきゅのよ::_よきゅのきゅ:の勝ちってコトぉ～？",
-      "rawHash": "28956d79bb955be0746de31c8368d1ee479c9ee8e4913f7759f0af85fd024834",
-      "videoId": "Fl48C-hr-RA",
-      "videoTitle": "【 #歌枠 】ボカロ縛り歌枠！セトリ当たったら歌います！【 #新人vtuber / #宵吸あけル 】",
-      "channelName": "宵吸あけル / Yokyu Akeru",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA&t=9491s",
-      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
-      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
-      "sourceOrigin": "review:Fl48C-hr-RA-071fa7fc3bef205085d3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "custom_emoji_only",
-        "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Fl48C-hr-RA:071fa7fc3bef205085d3",
-      "sourcePath": "data/review/sources/Fl48C-hr-RA-071fa7fc3bef205085d3.json",
-      "reviewLocator": "data/review/sources/Fl48C-hr-RA-071fa7fc3bef205085d3.json#28956d79bb955be0746de31c8368d1ee479c9ee8e4913f7759f0af85fd024834"
-    },
-    {
-      "title": "パネルオープン！！ありがとうございました～！",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 9890,
-      "time": "2:44:50",
-      "raw": "2:44:50 パネルオープン！！ありがとうございました～！",
-      "rawHash": "b1bba29fd291ab3fb7beefd4c79945445c3c7091fa7fb412b12443892abdb59b",
-      "videoId": "Fl48C-hr-RA",
-      "videoTitle": "【 #歌枠 】ボカロ縛り歌枠！セトリ当たったら歌います！【 #新人vtuber / #宵吸あけル 】",
-      "channelName": "宵吸あけル / Yokyu Akeru",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA&t=9890s",
-      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
-      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
-      "sourceOrigin": "review:Fl48C-hr-RA-071fa7fc3bef205085d3.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_activity_marker_ratio_high",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Fl48C-hr-RA:071fa7fc3bef205085d3",
-      "sourcePath": "data/review/sources/Fl48C-hr-RA-071fa7fc3bef205085d3.json",
-      "reviewLocator": "data/review/sources/Fl48C-hr-RA-071fa7fc3bef205085d3.json#b1bba29fd291ab3fb7beefd4c79945445c3c7091fa7fb412b12443892abdb59b"
-    },
-    {
       "title": "閉会式",
       "artist": "未記載",
       "isNiche": true,
@@ -5981,82 +5708,6 @@
       "reviewId": "review:Nera7o9MuwM:a419475fe8504a93d6aa",
       "sourcePath": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json",
       "reviewLocator": "data/review/sources/history-Nera7o9MuwM-a419475fe8504a93d6aa.json#4f866c2f357403d49a0b8e4cacb9176291743f7952c9313431811aa70c5c9ae4"
-    },
-    {
-      "title": "声入り",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 245,
-      "time": "0:04:05",
-      "raw": "4:05 声入り",
-      "rawHash": "7965f18637b0ac353bee13e64bed6c20716b6e0cf3584e4f7517fa41c253f1ec",
-      "videoId": "MIgCUrmqhXI",
-      "videoTitle": "【 #歌枠 / KARAOKE 】寝坊罰ゲーム、ロリ×バブ縛り歌枠……初見さん、ROM歓迎◎【 #新人vtuber / #Vsinger /#天ノ羽うゆ 】",
-      "channelName": "天ノ羽うゆ / Amanou_uyu ch.",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=MIgCUrmqhXI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=MIgCUrmqhXI&t=245s",
-      "sourceId": "UgyjbjqtZ88f28lqlj94AaABAg",
-      "sourceHash": "32dd02994ad61a04d702f73882e1653bf208485f0219a8094afd12926ad87881",
-      "sourceOrigin": "review:MIgCUrmqhXI-32dd02994ad61a04d702.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_activity_marker_ratio_high"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_activity_marker_ratio_high"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:MIgCUrmqhXI:32dd02994ad61a04d702",
-      "sourcePath": "data/review/sources/MIgCUrmqhXI-32dd02994ad61a04d702.json",
-      "reviewLocator": "data/review/sources/MIgCUrmqhXI-32dd02994ad61a04d702.json#7965f18637b0ac353bee13e64bed6c20716b6e0cf3584e4f7517fa41c253f1ec"
-    },
-    {
-      "title": "あくび",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 2895,
-      "time": "0:48:15",
-      "raw": "48:15 あくび",
-      "rawHash": "b9b4c0fab383e1b8c2de0852dadd794f484b79a8de85bb2989d0815d31b8c7a1",
-      "videoId": "MIgCUrmqhXI",
-      "videoTitle": "【 #歌枠 / KARAOKE 】寝坊罰ゲーム、ロリ×バブ縛り歌枠……初見さん、ROM歓迎◎【 #新人vtuber / #Vsinger /#天ノ羽うゆ 】",
-      "channelName": "天ノ羽うゆ / Amanou_uyu ch.",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=MIgCUrmqhXI",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=MIgCUrmqhXI&t=2895s",
-      "sourceId": "UgyjbjqtZ88f28lqlj94AaABAg",
-      "sourceHash": "32dd02994ad61a04d702f73882e1653bf208485f0219a8094afd12926ad87881",
-      "sourceOrigin": "review:MIgCUrmqhXI-32dd02994ad61a04d702.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_activity_marker_ratio_high"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_activity_marker_ratio_high"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:MIgCUrmqhXI:32dd02994ad61a04d702",
-      "sourcePath": "data/review/sources/MIgCUrmqhXI-32dd02994ad61a04d702.json",
-      "reviewLocator": "data/review/sources/MIgCUrmqhXI-32dd02994ad61a04d702.json#b9b4c0fab383e1b8c2de0852dadd794f484b79a8de85bb2989d0815d31b8c7a1"
     },
     {
       "title": "閉会式",

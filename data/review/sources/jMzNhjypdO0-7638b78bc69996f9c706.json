@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T05:12:19.340Z",
+  "generatedAt": "2026-07-17T08:38:44.871Z",
   "reviewId": "review:jMzNhjypdO0:7638b78bc69996f9c706",
   "video": {
     "videoId": "jMzNhjypdO0",
@@ -18,9 +18,10 @@
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 38,
+    "riskScore": 52,
     "riskLevel": "medium",
     "riskReasons": [
+      "source_multiple_niche_short_titles",
       "parser_corruption"
     ]
   },
@@ -114,13 +115,12 @@
       "rawHash": "9f7aa2d2ac5c660bec821c25dc61ffe77881a39de0e6228acf68c22e9d64633d",
       "sourceId": "UgzbW3sI6DNGW2KkF3p4AaABAg",
       "sourceHash": "7638b78bc69996f9c706f43133844813926a14804c13b98bc705ccd846e72a2a",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_song",
         "known_artist"
       ]
     },
@@ -234,13 +234,12 @@
       "rawHash": "e4c2e992c468cc4ae4b30d3130a72104c2e7abf810a571cda788e154234e8870",
       "sourceId": "UgzbW3sI6DNGW2KkF3p4AaABAg",
       "sourceHash": "7638b78bc69996f9c706f43133844813926a14804c13b98bc705ccd846e72a2a",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_song",
         "known_artist"
       ]
     },
@@ -356,13 +355,12 @@
       "rawHash": "1d10d0727de328c8470b333a57b4066e5384f9173971e04c1d40bb1df34faf89",
       "sourceId": "UgzbW3sI6DNGW2KkF3p4AaABAg",
       "sourceHash": "7638b78bc69996f9c706f43133844813926a14804c13b98bc705ccd846e72a2a",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_song",
         "known_artist"
       ]
     },

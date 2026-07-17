@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T05:12:19.340Z",
+  "generatedAt": "2026-07-17T08:38:44.871Z",
   "reviewId": "review:jnLfOka9vK0:12221603763bfc4830a3",
   "video": {
     "videoId": "jnLfOka9vK0",
@@ -107,17 +107,21 @@
       "status": "accepted",
       "seconds": 1637,
       "time": "0:27:17",
-      "title": "🎸残ってる",
+      "title": "残ってる",
       "artist": "吉澤嘉代子",
       "raw": "0:27:17 ⑤🎸残ってる / 吉澤嘉代子",
       "rawHash": "6b8b3c753da2f9218d2463d4ee8e495a093a55a958405f3a5de38396ad0f62aa",
       "sourceId": "Ugz72331-vaP-nOeVTt4AaABAg",
       "sourceHash": "12221603763bfc4830a3eff4c3eb9ec1544a2ed885b2fdde7a26387d4ab45883",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "🎸残ってる"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"
@@ -127,17 +131,21 @@
       "status": "accepted",
       "seconds": 2271,
       "time": "0:37:51",
-      "title": "🎸あの夢をなぞって",
+      "title": "あの夢をなぞって",
       "artist": "YOASOBI",
       "raw": "0:37:51 ⑥🎸あの夢をなぞって / YOASOBI",
       "rawHash": "f5fc74a02908b86c70c17a3d5af38198a75059a8abc829f3c0b1a04127482cab",
       "sourceId": "Ugz72331-vaP-nOeVTt4AaABAg",
       "sourceHash": "12221603763bfc4830a3eff4c3eb9ec1544a2ed885b2fdde7a26387d4ab45883",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "🎸あの夢をなぞって"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
         "known_artist"

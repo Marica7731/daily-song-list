@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T05:12:19.340Z",
+  "generatedAt": "2026-07-17T08:38:44.871Z",
   "reviewId": "review:tfzoaUeTBQA:cac965e57704de3fe746",
   "video": {
     "videoId": "tfzoaUeTBQA",
@@ -262,14 +262,15 @@
       "sourceId": "selected:tfzoaUeTBQA:cac965e57704de3f",
       "sourceHash": "cac965e57704de3fe7464f4b5cf0a24395eaa154efe0c71ee77d6a25a18aa20a",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_song",
         "structured_setlist"
       ]
     },
@@ -417,14 +418,14 @@
       "sourceId": "selected:tfzoaUeTBQA:cac965e57704de3f",
       "sourceHash": "cac965e57704de3fe7464f4b5cf0a24395eaa154efe0c71ee77d6a25a18aa20a",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_song",
         "structured_setlist"
       ]
     },
@@ -439,14 +440,14 @@
       "sourceId": "selected:tfzoaUeTBQA:cac965e57704de3f",
       "sourceHash": "cac965e57704de3fe7464f4b5cf0a24395eaa154efe0c71ee77d6a25a18aa20a",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_song",
         "structured_setlist"
       ]
     },
@@ -461,14 +462,14 @@
       "sourceId": "selected:tfzoaUeTBQA:cac965e57704de3f",
       "sourceHash": "cac965e57704de3fe7464f4b5cf0a24395eaa154efe0c71ee77d6a25a18aa20a",
       "isNiche": true,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "positiveEvidence": [
-        "known_song",
         "structured_setlist"
       ]
     },

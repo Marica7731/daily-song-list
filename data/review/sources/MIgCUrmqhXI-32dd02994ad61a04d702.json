@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T05:12:19.340Z",
+  "generatedAt": "2026-07-17T08:38:44.871Z",
   "reviewId": "review:MIgCUrmqhXI:32dd02994ad61a04d702",
   "video": {
     "videoId": "MIgCUrmqhXI",
@@ -11,17 +11,17 @@
   "source": {
     "sourceId": "UgyjbjqtZ88f28lqlj94AaABAg",
     "sourceHash": "32dd02994ad61a04d702f73882e1653bf208485f0219a8094afd12926ad87881",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "セトリ＆タイムスタンプ\r\n4:05 声入り\r\n21:07 1. どんぐりころころ/童謡\r\n29:44 2. ぼくはくま/宇多田ヒカル\r\n35:14 3. アンパンマンのマーチ/ドリーミング\r\n38:58 4. きらきら星/童謡\r\n44:40 5. うさぎとかめ/童謡\r\n56:09 6. あわてんぼうのサンタクロース/童謡\r\n\r\n48:15 あくび",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 36,
-    "riskLevel": "medium",
+    "riskScore": 14,
+    "riskLevel": "low",
     "riskReasons": [
-      "source_activity_marker_ratio_high"
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -42,8 +42,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -56,14 +55,13 @@
       "rawHash": "87f54fbadf75837755cf4a8ab0124ba1d4b9a088d42419d92c4fdde7be0e463b",
       "sourceId": "UgyjbjqtZ88f28lqlj94AaABAg",
       "sourceHash": "32dd02994ad61a04d702f73882e1653bf208485f0219a8094afd12926ad87881",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -83,8 +81,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -97,14 +94,13 @@
       "rawHash": "000bcc5e98126128853418b33039d7e8faa5824d13b42a25b6021d5d5b7cecab",
       "sourceId": "UgyjbjqtZ88f28lqlj94AaABAg",
       "sourceHash": "32dd02994ad61a04d702f73882e1653bf208485f0219a8094afd12926ad87881",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -117,14 +113,13 @@
       "rawHash": "ceed3407bdb6fc38d7effdf37832a393af6574fbd72b3880d3181896e560cf67",
       "sourceId": "UgyjbjqtZ88f28lqlj94AaABAg",
       "sourceHash": "32dd02994ad61a04d702f73882e1653bf208485f0219a8094afd12926ad87881",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -144,42 +139,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "obvious_non_song_text",
-      "seconds": 245,
-      "time": "0:04:05",
-      "title": "声入り",
-      "artist": "",
-      "raw": "4:05 声入り",
-      "rawHash": "7965f18637b0ac353bee13e64bed6c20716b6e0cf3584e4f7517fa41c253f1ec",
-      "sourceId": "UgyjbjqtZ88f28lqlj94AaABAg",
-      "sourceHash": "32dd02994ad61a04d702f73882e1653bf208485f0219a8094afd12926ad87881",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "obvious_non_song_text"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 2895,
-      "time": "0:48:15",
-      "title": "あくび",
-      "artist": "未記載",
-      "raw": "48:15 あくび",
-      "rawHash": "b9b4c0fab383e1b8c2de0852dadd794f484b79a8de85bb2989d0815d31b8c7a1",
-      "sourceId": "UgyjbjqtZ88f28lqlj94AaABAg",
-      "sourceHash": "32dd02994ad61a04d702f73882e1653bf208485f0219a8094afd12926ad87881",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
+        "known_artist"
       ]
     }
   ]
