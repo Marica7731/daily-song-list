@@ -27,11 +27,16 @@ Allow: /songs/
 Allow: /streams/
 Allow: /videos/
 Disallow: /api/
+Disallow: /*?*singerId=
+Disallow: /*?*singerName=
 Crawl-delay: 1
 `);
 
   assert.equal(isAllowed(policy, "/songs?cursor=abc"), true);
   assert.equal(isAllowed(policy, "/streams?cursor=abc"), true);
+  assert.equal(isAllowed(policy, "/songs?singerId=f404dd51-2f38-499a-88f7-faf5d897d1ba"), false);
+  assert.equal(isAllowed(policy, "/songs/17f05e2a-68af-492f-864c-dad7e35e0985?singerId=f404dd51-2f38-499a-88f7-faf5d897d1ba"), false);
+  assert.equal(isAllowed(policy, "/streams?singerName=%E7%8D%85%E5%AD%90%E7%A5%9E"), false);
   assert.equal(isAllowed(policy, "/api/private"), false);
   assert.equal(crawlDelaySeconds(policy), 1);
 });

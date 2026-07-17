@@ -14,6 +14,17 @@ Allowed public routes:
 
 The crawler reads `robots.txt` before production work. If `/songs`, `/streams`, or `/videos` are disallowed, the scripts stop. The default request interval is `1000` ms and is raised automatically when robots declares a larger `Crawl-delay`.
 
+## Singer-Scoped Pages
+
+Public singer pages expose useful links such as `/songs?singerId=...` and `/songs/{uuid}?singerId=...`, and those pages can show per-singer song counts plus per-song occurrence positions. The path form `/singers/{uuid}` is allowed and useful for aggregate singer metadata, but it does not expose the full per-singer song and occurrence table. The full table currently depends on singer-scoped query pages, and the current `robots.txt` explicitly disallows query URLs containing `singerId` and `singerName`:
+
+```text
+Disallow: /*?*singerId=
+Disallow: /*?*singerName=
+```
+
+Do not use singer-scoped query pages for production crawling unless `robots.txt` changes or the site owner gives explicit permission. They are acceptable only as manual investigation evidence. The automated crawler must continue to use robots-allowed public routes and MCP as the supplemental gap-fill path.
+
 ## Commands
 
 Run the public capability probe first:
