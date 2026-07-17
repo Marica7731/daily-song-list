@@ -748,6 +748,9 @@ async function desktopRankVisualGeometry(browser) {
       return {
         remainingCount: Number(node.querySelector("[data-toggle-source]")?.dataset.remainingCount || 0),
         videoCount: Number(node.querySelector("[data-toggle-source]")?.dataset.videoCount || 0),
+        loadingState: drawer?.dataset.sourceLoadingState || "",
+        loadedCount: Number(drawer?.dataset.loadedCount || 0),
+        totalCount: Number(drawer?.dataset.totalCount || 0),
         drawer: drawer ? rectFor(drawer) : null,
         toolbar: toolbar ? rectFor(toolbar) : null,
         firstGroup: firstGroup ? rectFor(firstGroup) : null,
@@ -773,8 +776,15 @@ async function desktopRankVisualGeometry(browser) {
     if (sourceGeometry.copyAllButtons !== 1 || sourceGeometry.copyAllInToolbar !== 1 || sourceGeometry.copyAllInsideCards !== 0) {
       throw new Error(`desktop copy-all placement invalid ${JSON.stringify(sourceGeometry)}`);
     }
-    if (!sourceGeometry.videoCount || sourceGeometry.groups.length !== sourceGeometry.videoCount) {
-      throw new Error(`desktop source drawer should render all sources on one click ${JSON.stringify(sourceGeometry)}`);
+    if (
+      !sourceGeometry.videoCount ||
+      !["opening", "partial", "complete"].includes(sourceGeometry.loadingState) ||
+      sourceGeometry.groups.length < 1 ||
+      sourceGeometry.groups.length > sourceGeometry.loadedCount ||
+      sourceGeometry.loadedCount > sourceGeometry.videoCount ||
+      (sourceGeometry.totalCount && sourceGeometry.totalCount !== sourceGeometry.videoCount)
+    ) {
+      throw new Error(`desktop source drawer should reveal a valid loaded source window on one click ${JSON.stringify(sourceGeometry)}`);
     }
     if (sourceGeometry.moreButtons) {
       throw new Error(`desktop source drawer should not expose a second source expander ${JSON.stringify(sourceGeometry)}`);
@@ -1650,30 +1660,38 @@ async function mobileCopyAllLinksFlow(browser) {
       if (!tripleSourcePage.page) throw new Error("triple-source inline row not found");
       const tripleRow = page.locator(".rank-row:not(.skeleton-row)").nth(tripleSourcePage.rowIndex);
       const tripleShape = await inlineSourceShape(tripleRow);
-      if (
-        tripleShape.sourceVideoCount !== 3 ||
-        tripleShape.inlineVisibleCount !== 2 ||
-        tripleShape.items.length !== 2 ||
-        tripleShape.toggleCount !== 1 ||
-        tripleShape.drawerCount !== 1 ||
-        tripleShape.copyAllCount !== 0 ||
-        !tripleShape.more?.visible ||
-        tripleShape.more.text !== "查看全部来源" ||
-        tripleShape.more.width > 92 ||
-        tripleShape.more.height > 30 ||
-        tripleShape.more.flexGrow !== "0" ||
-        tripleShape.items.some(
-          (item) =>
-            !item.visible ||
-            !item.channel?.visible ||
-            !item.channel.text ||
-            !item.thumbVisible ||
-            item.overlayCount !== 0 ||
-            !item.time?.visible ||
-            !item.time.text ||
-            item.time.scrollWidth > item.time.clientWidth + 1,
-        )
-      ) {
+      const tripleItemsValid = tripleShape.items.every(
+        (item) =>
+          item.visible &&
+          item.channel?.visible &&
+          item.channel.text &&
+          item.thumbVisible &&
+          item.overlayCount === 0 &&
+          item.time?.visible &&
+          item.time.text &&
+          item.time.scrollWidth <= item.time.clientWidth + 1,
+      );
+      const tripleExpandableValid =
+        tripleShape.sourceVideoCount === 3 &&
+        tripleShape.inlineVisibleCount === 2 &&
+        tripleShape.items.length === 2 &&
+        tripleShape.toggleCount === 1 &&
+        tripleShape.drawerCount === 1 &&
+        tripleShape.copyAllCount === 0 &&
+        tripleShape.more?.visible &&
+        tripleShape.more.text === "查看全部来源" &&
+        tripleShape.more.width <= 92 &&
+        tripleShape.more.height <= 30 &&
+        tripleShape.more.flexGrow === "0";
+      const tripleInlineValid =
+        tripleShape.sourceVideoCount === 3 &&
+        tripleShape.inlineVisibleCount === 3 &&
+        tripleShape.items.length === 3 &&
+        tripleShape.toggleCount === 0 &&
+        tripleShape.drawerCount === 0 &&
+        tripleShape.copyAllCount === 1 &&
+        !tripleShape.more;
+      if ((!tripleExpandableValid && !tripleInlineValid) || !tripleItemsValid) {
         throw new Error(`triple-source inline shape invalid ${JSON.stringify(tripleShape)}`);
       }
 
@@ -1979,7 +1997,7 @@ async function compactSourceDrawerFlow(browser) {
     await button.click();
 
     await page.waitForSelector(
-      ".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group, .rank-row.is-expanded .source-drawer:not([hidden]) .source-link",
+      ".rank-row.is-expanded .source-drawer:not([hidden]) .source-video-group",
       { timeout: 15000 },
     );
     const afterExpanded = await button.getAttribute("aria-expanded");
@@ -1991,8 +2009,21 @@ async function compactSourceDrawerFlow(browser) {
     if (!expectedVideoCount) throw new Error(`${scenario.label} source drawer toggle missing video count`);
     if ((await row.locator("[data-toggle-source-groups]").count()) !== 0) throw new Error("song source drawer should not expose a second source group expander");
     const visibleGroupsOnOpen = await countVisibleInRow(row, ".source-video-group");
-    if (visibleGroupsOnOpen !== expectedVideoCount) {
-      throw new Error(`${scenario.label} source drawer should reveal all groups on one click: expected=${expectedVideoCount} actual=${visibleGroupsOnOpen}`);
+    const drawerStateOnOpen = await row.locator(".source-drawer:not([hidden])").first().evaluate((drawer) => ({
+      loadingState: drawer.dataset.sourceLoadingState || "",
+      loadedCount: Number(drawer.dataset.loadedCount || 0),
+      totalCount: Number(drawer.dataset.totalCount || 0),
+    }));
+    if (
+      visibleGroupsOnOpen < 1 ||
+      visibleGroupsOnOpen > drawerStateOnOpen.loadedCount ||
+      drawerStateOnOpen.loadedCount > expectedVideoCount ||
+      drawerStateOnOpen.totalCount !== expectedVideoCount ||
+      !["opening", "partial", "complete"].includes(drawerStateOnOpen.loadingState)
+    ) {
+      throw new Error(
+        `${scenario.label} source drawer should reveal a valid loaded source window: expected=${expectedVideoCount} actual=${visibleGroupsOnOpen} state=${JSON.stringify(drawerStateOnOpen)}`,
+      );
     }
 
     const geometry = await row.evaluate((node) => {
@@ -2174,7 +2205,7 @@ async function compactSourceDrawerFlow(browser) {
     await page.waitForSelector(".rank-row.is-expanded .source-drawer:not([hidden])", { timeout: 15000 });
     if (expectedReopenGroupCount) {
       const reopenedGroupCount = await countVisibleInRow(row, ".source-video-group");
-      if (reopenedGroupCount !== expectedReopenGroupCount) {
+      if (reopenedGroupCount < expectedReopenGroupCount) {
         throw new Error(`${scenario.label} source drawer reopen lost expanded source groups: before=${expectedReopenGroupCount} after=${reopenedGroupCount}`);
       }
       const preservedAfterReopen = await row.locator(".source-video-group").first().evaluate((node) => ({
@@ -2511,7 +2542,7 @@ function runtimePathPattern(range) {
 
 function runtimeRequestPattern(range) {
   return new RegExp(
-    `^(?:data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json|data/ui/ranges/${range}/(?:manifest|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/summary\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/views/.+/(?:manifest|index|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/records/(?:song|artist|video)/shard-\\d{4}\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/search/(?:manifest\\.[0-9a-f]{12}\\.json|[^/]+/page-\\d{4}\\.[0-9a-f]{12}\\.json)|data/ui/ranges/${range}/sources/(?:manifest|shard-\\d{4})\\.[0-9a-f]{12}\\.json)$`,
+    `^(?:data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json|data/ui/ranges/${range}/(?:manifest|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/summary\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/views/.+/(?:manifest|index|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/records/(?:song|artist|video)/shard-\\d{4}\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/search/(?:manifest\\.[0-9a-f]{12}\\.json|[^/]+/page-\\d{4}\\.[0-9a-f]{12}\\.json)|data/ui/ranges/${range}/sources/(?:manifest|shard-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/sources/[^/]+/[^/]+/(?:manifest|chunk-\\d{4})\\.[0-9a-f]{12}\\.json)$`,
     "u",
   );
 }

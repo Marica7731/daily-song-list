@@ -208,7 +208,8 @@ test("query overlay opens before suggestions and result preview work", () => {
   assert.ok(inertIndex > syncIndex, "query overlay should delay page inert work until after the visible shell");
   const beforeOpen = openBody.slice(0, openIndex);
   assert.doesNotMatch(beforeOpen, /renderSearchSuggestions|queryDraftResultCount|buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
-  assert.match(openBody, /requestAnimationFrame\(\(\) => \{[\s\S]*setTimeout\(\(\) => \{[\s\S]*setPageInert\(true\);[\s\S]*hydrateQueryOverlayAfterFirstFrame\(revision\)/u);
+  assert.match(openBody, /requestAnimationFrame\(\(\) => \{[\s\S]*setTimeout\(\(\) => \{[\s\S]*hydrateQueryOverlayAfterFirstFrame\(revision\)/u);
+  assert.match(openBody, /setTimeout\(\(\) => \{[\s\S]*setPageInert\(true\);[\s\S]*\}, QUERY_INERT_DELAY_MS\)/u);
 
   const bindBody = functionBody("function bindQueryOverlayEvents");
   assert.match(bindBody, /compositionstart/u);

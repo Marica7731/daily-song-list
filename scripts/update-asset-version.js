@@ -11,6 +11,8 @@ const VERSIONED_ASSETS = [
   "assets/source-filter.js",
   "assets/frontend-utils.js",
   "assets/ranking-utils.js",
+  "assets/request-scheduler.js",
+  "assets/source-detail-runtime.js",
   "assets/app.js",
 ];
 

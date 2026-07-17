@@ -24,7 +24,8 @@ const STATUS_PATH = "data/status.json";
 const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
-const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
+const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 900;
+const QUERY_INERT_DELAY_MS = 1200;
 const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
@@ -75,6 +76,11 @@ const DISPLAY_TIME_ZONE = "Asia/Shanghai";
 const STATUS_STALE_MINUTES = 120;
 const STATUS_STALE_MS = STATUS_STALE_MINUTES * 60 * 1000;
 const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
+const REQUEST_PRIORITY_FALLBACKS = Object.freeze({
+  USER_BLOCKING: "user-blocking",
+  NORMAL: "normal",
+  IDLE: "idle",
+});
 
 const KANA_BUCKETS = [
   { label: "あ", pattern: /^[ぁ-お]/u },
@@ -292,6 +298,7 @@ const state = {
   queryDraft: null,
   queryPreviewTimer: 0,
   querySuggestionTimer: 0,
+  querySuggestionHydrationTimer: 0,
   queryWorkRevision: 0,
   queryComposing: false,
   currentResultSummary: null,
@@ -660,6 +667,7 @@ function bindRangeIntentPrefetch(tab) {
 
 function switchView(nextView, options = {}) {
   if (!nextView || state.view === nextView) return;
+  bumpRequestRevision("page");
   storeViewPosition();
   state.view = nextView;
   state.expandedRows.clear();
@@ -772,9 +780,12 @@ function openQueryOverlay(trigger) {
     focusWithoutScrolling(els.queryInput || els.queryPanel || els.queryDialog);
     window.setTimeout(() => {
       if (!isCurrentQueryWork(revision)) return;
-      setPageInert(true);
       hydrateQueryOverlayAfterFirstFrame(revision);
     }, 0);
+    window.setTimeout(() => {
+      if (!isCurrentQueryWork(revision)) return;
+      setPageInert(true);
+    }, QUERY_INERT_DELAY_MS);
   });
 }
 
@@ -789,6 +800,8 @@ function closeOverlay(kind) {
   state.queryPreviewTimer = 0;
   window.clearTimeout(state.querySuggestionTimer);
   state.querySuggestionTimer = 0;
+  window.clearTimeout(state.querySuggestionHydrationTimer);
+  state.querySuggestionHydrationTimer = 0;
   state.queryComposing = false;
   advanceQueryWorkRevision();
   setPageInert(false);
@@ -899,6 +912,8 @@ function prepareQuerySearchShell(draft) {
 
 function scheduleSearchSuggestions(options = {}) {
   window.clearTimeout(state.querySuggestionTimer);
+  window.clearTimeout(state.querySuggestionHydrationTimer);
+  state.querySuggestionHydrationTimer = 0;
   const draft = sanitizeQueryDraft(state.queryDraft || makeQueryDraftFromState());
   const revision = options.revision || advanceQueryWorkRevision();
   const hasQuery = Boolean(String(draft.q || "").trim());
@@ -921,10 +936,19 @@ async function renderSearchSuggestions(query, draft = state.queryDraft || makeQu
   if (els.recentSearchSection) els.recentSearchSection.hidden = hasQuery || !readRecentSearches().length;
   els.searchSuggestions.replaceChildren();
   if (!hasQuery) return;
-  const suggestions = canUseRequestRuntime(draft.range || state.range)
-    ? await buildRequestSearchSuggestions(query, options)
-    : measureSync("search-suggest", () => buildSearchSuggestions(query, draft));
+  if (canUseRequestRuntime(draft.range || state.range)) {
+    renderSearchSuggestionGroups(buildQuickRequestSearchSuggestions(query, draft), query);
+    scheduleRequestSearchSuggestionHydration(query, draft, options);
+    return;
+  }
+  const suggestions = measureSync("search-suggest", () => buildSearchSuggestions(query, draft));
   if (options.revision && !isCurrentQueryWork(options.revision)) return;
+  renderSearchSuggestionGroups(suggestions, query);
+}
+
+function renderSearchSuggestionGroups(suggestions, query) {
+  if (!els.searchSuggestions) return;
+  els.searchSuggestions.replaceChildren();
   for (const group of suggestions) {
     if (!group.items.length) continue;
     const section = document.createElement("section");
@@ -953,6 +977,66 @@ async function renderSearchSuggestions(query, draft = state.queryDraft || makeQu
     empty.textContent = "暂无匹配建议";
     els.searchSuggestions.append(empty);
   }
+}
+
+function buildQuickRequestSearchSuggestions(query, draft = state.queryDraft || makeQueryDraftFromState()) {
+  const filterKey = normalizeSearch(query);
+  const lastResult = state.requestRuntime.lastResult;
+  const groups = {
+    songs: [],
+    artists: [],
+    channels: [],
+  };
+  const seen = {
+    songs: new Set(),
+    artists: new Set(),
+    channels: new Set(),
+  };
+  if (filterKey && lastResult?.range === canonicalRangeId(draft.range || state.range)) {
+    for (const record of lastResult.records || []) {
+      const title = cleanText(record?.title || "");
+      const name = cleanText(record?.name || "");
+      const meta = title ? songMeta(record).primary : cleanText(record?.meta || "");
+      const searchText = normalizeSearch([record?.searchText, title, name, meta].join(" "));
+      if (!searchText.includes(filterKey)) continue;
+      if (title && groups.songs.length < 5) {
+        pushSuggestion(groups.songs, seen.songs, { label: title, value: title, meta });
+      }
+      if (name && groups.artists.length < 3 && !window.RankingUtils.isUnknownArtistName(name)) {
+        pushSuggestion(groups.artists, seen.artists, { label: name, value: name, meta: "歌手" });
+      }
+      if (meta && groups.channels.length < 3 && !title) {
+        pushSuggestion(groups.channels, seen.channels, { label: meta, value: meta, meta: "频道" });
+      }
+      if (groups.songs.length >= 5 && groups.artists.length >= 3 && groups.channels.length >= 3) break;
+    }
+  }
+  if (!groups.songs.length && filterKey) {
+    pushSuggestion(groups.songs, seen.songs, { label: query, value: query, meta: "搜索" });
+  }
+  return [
+    { label: "歌曲", items: groups.songs },
+    { label: "歌手", items: groups.artists },
+    { label: "频道", items: groups.channels },
+  ];
+}
+
+function scheduleRequestSearchSuggestionHydration(query, draft, options = {}) {
+  window.clearTimeout(state.querySuggestionHydrationTimer);
+  const revision = options.revision || state.queryWorkRevision;
+  state.querySuggestionHydrationTimer = window.setTimeout(() => {
+    if (!isCurrentQueryWork(revision)) return;
+    buildRequestSearchSuggestions(query, options)
+      .then((suggestions) => {
+        if (!isCurrentQueryWork(revision)) return;
+        const currentQuery = cleanText(state.queryDraft?.q || "");
+        if (normalizeSearch(currentQuery) !== normalizeSearch(query)) return;
+        renderSearchSuggestionGroups(suggestions, query);
+      })
+      .catch(() => {
+        if (isCurrentQueryWork(revision)) renderSearchSuggestionGroups(buildQuickRequestSearchSuggestions(query, draft), query);
+      });
+  }, 360);
 }
 
 function appendHighlightedText(container, text, query) {
@@ -1290,6 +1374,7 @@ function readQueryDraftFromControls() {
 
 async function applyQueryDraft() {
   const draft = readQueryDraftFromControls();
+  bumpRequestRevision("query");
   const previousPath = state.currentSnapshotPath;
   closeOverlay("query");
   state.filter = draft.q;
@@ -1324,6 +1409,7 @@ function setQueryDraft(draft, options = {}) {
   const previousDraft = state.queryDraft || makeQueryDraftFromState();
   const nextDraft = sanitizeQueryDraft(draft);
   const revision = advanceQueryWorkRevision();
+  bumpRequestRevision("query");
   const syncMode = options.sync || "full";
   syncQueryPanelFromDraft(nextDraft, {
     previousDraft,
@@ -1345,6 +1431,7 @@ function applyQueryPatch(patch, options = {}) {
     ...makeQueryDraftFromState(),
     ...patch,
   });
+  bumpRequestRevision("query");
   const previousPath = state.currentSnapshotPath;
   state.filter = draft.q;
   state.nicheOnly = draft.nicheOnly;
@@ -1368,10 +1455,15 @@ function applyQueryPatch(patch, options = {}) {
 }
 
 async function applySnapshotPath(path, previousPath, options = {}) {
+  bumpRequestRevision("range");
+  bumpRequestRevision("page");
   const nextPath = path || SNAPSHOT_LATEST_PATH;
   if (nextPath === SNAPSHOT_LATEST_PATH) {
     state.currentSnapshotPath = SNAPSHOT_LATEST_PATH;
-    const rangePayload = await loadRuntimeRange(state.range);
+    const rangePayload = await loadRuntimeRange(state.range, {
+      priority: schedulerPriority("USER_BLOCKING"),
+      revision: captureRequestRevisions(["range", "page"]),
+    });
     await applyRuntimeRangePayload(rangePayload, { resetPage: false, syncUrl: options.syncUrl !== false, urlMode: options.urlMode || "replace" });
     scheduleCurrentRankDiffLoad();
     scheduleOtherRangePrefetch();
@@ -1935,7 +2027,10 @@ async function restoreStateFromUrl() {
         scheduleOtherRangePrefetch();
         return;
       }
-      const rangePayload = await loadRuntimeRange(state.range);
+      const rangePayload = await loadRuntimeRange(state.range, {
+        priority: schedulerPriority("USER_BLOCKING"),
+        revision: captureRequestRevisions(["range", "page"]),
+      });
       await applyRuntimeRangePayload(rangePayload, { resetPage: false, syncUrl: false });
       scheduleCurrentRankDiffLoad();
       scheduleOtherRangePrefetch();
@@ -1951,7 +2046,10 @@ async function restoreStateFromUrl() {
       return;
     }
     try {
-      await ensureLatestRange(state.range);
+      await ensureLatestRange(state.range, {
+        priority: schedulerPriority("USER_BLOCKING"),
+        revision: captureRequestRevisions(["range", "page"]),
+      });
     } catch (error) {
       showToast(`范围读取失败：${error.message}`);
       return;
@@ -2002,7 +2100,11 @@ function pagedSlice(items) {
 
 function setupSnapshotLoader() {
   state.snapshotLoader = window.FrontendUtils.createSnapshotLoader({
-    readJson,
+    readJson: (path, options = {}) => readJson(path, {
+      ...options,
+      priority: schedulerPriority("USER_BLOCKING"),
+      revision: compactRevisions([captureRequestRevision("range"), captureRequestRevision("query")]),
+    }),
     onBusy: (busy) => {
       setSnapshotBusy(busy, busy ? "正在读取快照" : "");
     },
@@ -2047,6 +2149,8 @@ async function loadSnapshotPath(path, previousPath = state.currentSnapshotPath, 
 async function switchRange(nextRange, options = {}) {
   nextRange = canonicalRangeId(nextRange);
   if (!nextRange || state.range === nextRange) return;
+  bumpRequestRevision("range");
+  bumpRequestRevision("page");
   const previousRange = state.range;
   state.range = nextRange;
   state.expandedRows.clear();
@@ -2065,7 +2169,10 @@ async function switchRange(nextRange, options = {}) {
   }
 
   try {
-    await ensureLatestRange(nextRange);
+    await ensureLatestRange(nextRange, {
+      priority: schedulerPriority("USER_BLOCKING"),
+      revision: captureRequestRevisions(["range", "page"]),
+    });
     renderOrSyncUrl(options);
     scheduleCurrentRankDiffLoad();
   } catch (error) {
@@ -2076,21 +2183,21 @@ async function switchRange(nextRange, options = {}) {
   }
 }
 
-async function ensureLatestRange(rangeId) {
+async function ensureLatestRange(rangeId, options = {}) {
   rangeId = canonicalRangeId(rangeId);
   if (state.payload?.groups?.[rangeId]) return state.payload.groups[rangeId];
-  const payload = await loadRuntimeRange(rangeId);
+  const payload = await loadRuntimeRange(rangeId, options);
   await applyRuntimeRangePayload(payload, { resetPage: false, syncUrl: false, merge: true });
   return state.payload?.groups?.[rangeId];
 }
 
-async function loadRuntimeRange(rangeId) {
+async function loadRuntimeRange(rangeId, options = {}) {
   rangeId = canonicalRangeId(rangeId);
   const existing = state.runtimeRangePayloads.get(rangeId);
   if (existing) return existing;
   if (state.runtimeRangeLoads.has(rangeId)) return state.runtimeRangeLoads.get(rangeId);
   if (!state.runtimeMeta) throw new Error(`runtime meta missing before loading ${rangeId}`);
-  const promise = loadRuntimeRangeWithFallback(rangeId)
+  const promise = loadRuntimeRangeWithFallback(rangeId, options)
     .then((payload) => {
       state.runtimeRangePayloads.set(rangeId, payload);
       return payload;
@@ -2176,11 +2283,11 @@ function shardInitialPath(shard) {
   return cleanText(shard.path || shard.initialPath || shard.indexPath || shard.manifestPath);
 }
 
-async function loadRuntimeRangeWithFallback(rangeId) {
+async function loadRuntimeRangeWithFallback(rangeId, readOptions = {}) {
   rangeId = canonicalRangeId(rangeId);
   const shards = runtimeRangeShards(rangeId);
   if (shards.hasPageShard) {
-    const shardResult = await loadRuntimeRangeFromShards(rangeId).catch((error) => ({ error }));
+    const shardResult = await loadRuntimeRangeFromShards(rangeId, readOptions).catch((error) => ({ error }));
     if (!shardResult.error) {
       state.runtimeWarnings.delete(rangeId);
       return shardResult;
@@ -2192,13 +2299,13 @@ async function loadRuntimeRangeWithFallback(rangeId) {
   }
   const primaryPath = runtimeRangeInitialPath(rangeId);
   const allowPartial = primaryPath !== runtimeRangePath(rangeId) || Boolean(runtimeRangeShards(rangeId).hasPageShard);
-  const primaryError = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: cacheModeForPath(primaryPath), allowPartial });
+  const primaryError = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: cacheModeForPath(primaryPath), allowPartial, ...readOptions });
   if (primaryError.ok) {
     state.runtimeWarnings.delete(rangeId);
     return primaryError.payload;
   }
 
-  const retry = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: "reload", allowPartial });
+  const retry = await tryRuntimeRangeLoad(rangeId, primaryPath, { cache: "reload", allowPartial, ...readOptions });
   if (retry.ok) {
     state.runtimeWarnings.delete(rangeId);
     return retry.payload;
@@ -2209,18 +2316,18 @@ async function loadRuntimeRangeWithFallback(rangeId) {
   throw new Error(`运行时范围读取失败：${retry.error?.message || primaryError.error?.message || primaryPath}`);
 }
 
-async function loadRuntimeRangeFromShards(rangeId) {
+async function loadRuntimeRangeFromShards(rangeId, readOptions = {}) {
   const rangeMeta = runtimeRangeMeta(rangeId);
   const shards = runtimeRangeShards(rangeId);
   const runtimeShard = shards.page;
   const manifestPath = shardManifestPath(runtimeShard);
   if (!manifestPath) throw new Error(`runtime shard manifest missing for ${rangeId}`);
-  const manifest = await readJson(manifestPath, { cache: cacheModeForPath(manifestPath) });
+  const manifest = await readJson(manifestPath, { cache: cacheModeForPath(manifestPath), ...readOptions });
   const pages = Array.isArray(manifest.pages) ? manifest.pages : [];
   if (!pages.length) throw new Error(`runtime shard manifest has no pages for ${rangeId}`);
   const firstPage = pages[0];
   if (!firstPage?.path) throw new Error(`runtime shard first page missing for ${rangeId}`);
-  const firstPagePayload = await readJson(firstPage.path, { cache: cacheModeForPath(firstPage.path) });
+  const firstPagePayload = await readJson(firstPage.path, { cache: cacheModeForPath(firstPage.path), ...readOptions });
   const items = Array.isArray(firstPagePayload.items) ? firstPagePayload.items : [];
   const payload = {
     schemaVersion: 1,
@@ -2694,7 +2801,12 @@ function scheduleOtherRangePrefetch() {
   const run = () => {
     state.rangePrefetchTimer = 0;
     if (!canPrefetchOtherRange() || state.runtimeRangePayloads.has(otherRange) || !canPrefetchRuntimeRange(otherRange)) return;
-    loadRuntimeRange(otherRange).catch(() => {});
+    loadRuntimeRange(otherRange, {
+      priority: schedulerPriority("IDLE"),
+      revision: captureRequestRevisions(["range"]),
+      prefetch: true,
+      prefetchKind: "next-page",
+    }).catch(() => {});
   };
   state.rangePrefetchTimer = window.setTimeout(() => {
     if (typeof requestIdleCallback === "function") {
@@ -2710,7 +2822,12 @@ function prefetchRuntimeRangeOnIntent(rangeId) {
   if (canUseRequestRuntime(rangeId)) return;
   if (!rangeId || rangeId === state.range || state.runtimeRangePayloads.has(rangeId)) return;
   if (!isLatestSnapshot() || !canPrefetchOtherRange() || !canPrefetchRuntimeRange(rangeId)) return;
-  loadRuntimeRange(rangeId).catch(() => {});
+  loadRuntimeRange(rangeId, {
+    priority: schedulerPriority("IDLE"),
+    revision: captureRequestRevisions(["range"]),
+    prefetch: true,
+    prefetchKind: "next-page",
+  }).catch(() => {});
 }
 
 function canPrefetchOtherRange() {
@@ -3079,9 +3196,70 @@ function render(options = {}) {
   scheduleCurrentRankDiffLoad();
 }
 
+function requestScheduler() {
+  return window.dailySongRequestScheduler || null;
+}
+
+function schedulerPriority(name) {
+  return window.RequestScheduler?.PRIORITIES?.[name] || REQUEST_PRIORITY_FALLBACKS[name] || REQUEST_PRIORITY_FALLBACKS.NORMAL;
+}
+
+function bumpRequestRevision(scope) {
+  const scheduler = requestScheduler();
+  return typeof scheduler?.bumpRevision === "function" ? scheduler.bumpRevision(scope) : null;
+}
+
+function captureRequestRevision(scope) {
+  const scheduler = requestScheduler();
+  return typeof scheduler?.captureRevision === "function" ? scheduler.captureRevision(scope) : null;
+}
+
+function captureRequestRevisions(scopes) {
+  const scheduler = requestScheduler();
+  if (typeof scheduler?.captureRevisions === "function") return scheduler.captureRevisions(scopes);
+  return (scopes || []).map(captureRequestRevision).filter(Boolean);
+}
+
+function compactRevisions(revisions) {
+  return (Array.isArray(revisions) ? revisions : [revisions]).filter(Boolean);
+}
+
+function makeAbortLikeError(reason, path) {
+  const error = new Error(`${path || "request"}: ${reason || "cancelled"}`);
+  error.name = "AbortError";
+  return error;
+}
+
+function schedulerIdleContext(overrides = {}) {
+  const queryDialogOpen = Boolean(state.activeOverlay === "query" || (els.queryDialog && !els.queryDialog.hidden));
+  return {
+    document,
+    queryPanelOpen: queryDialogOpen,
+    searchTyping: Boolean(state.queryComposing || state.querySuggestionTimer || state.queryPreviewTimer),
+    sourceDetailLoading: state.sourceDetailLoads.size > 0,
+    mainRequestActive: Boolean(state.requestRuntime.activeController),
+    ...overrides,
+  };
+}
+
+function scheduleRequestIdleTask(task, context = {}) {
+  const scheduler = requestScheduler();
+  const shouldRun = () => !scheduler || typeof scheduler.canStartIdlePrefetch !== "function" || scheduler.canStartIdlePrefetch(schedulerIdleContext(context));
+  const run = () => {
+    if (shouldRun()) task();
+  };
+  if (scheduler && typeof scheduler.waitForBrowserIdle === "function") {
+    scheduler.waitForBrowserIdle().then(run).catch(() => {});
+    return;
+  }
+  if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 1400 });
+  else window.setTimeout(run, 300);
+}
+
 async function renderRequestedRuntime(options = {}) {
   const renderMark = perfMark("render-request:start");
   const revision = ++state.requestRuntime.revision;
+  const schedulerRevision = bumpRequestRevision("page");
   if (state.requestRuntime.activeController) state.requestRuntime.activeController.abort();
   const controller = new AbortController();
   state.requestRuntime.activeController = controller;
@@ -3106,6 +3284,7 @@ async function renderRequestedRuntime(options = {}) {
       page: state.page,
       pageSize: currentPageSize(),
       signal: controller.signal,
+      revision: compactRevisions([schedulerRevision, captureRequestRevision("query"), captureRequestRevision("range")]),
     }));
     if (revision !== state.requestRuntime.revision || controller.signal.aborted) return;
     state.requestRuntime.lastResult = result;
@@ -3134,7 +3313,10 @@ async function renderRequestedRuntime(options = {}) {
       try {
         const rangeId = canonicalRangeId(state.range);
         state.requestRuntime.disabledRanges.add(rangeId);
-        const fallbackPayload = await loadRuntimeRange(rangeId);
+        const fallbackPayload = await loadRuntimeRange(rangeId, {
+          priority: schedulerPriority("USER_BLOCKING"),
+          revision: captureRequestRevisions(["range", "page"]),
+        });
         await applyRuntimeRangePayload(fallbackPayload, {
           resetPage: false,
           syncUrl: options.syncUrl !== false,
@@ -3195,7 +3377,15 @@ async function requestViewPage(request) {
   const range = canonicalRangeId(request.range);
   const requestMeta = requestRuntimeMeta(range);
   if (!requestMeta) throw new Error(`request runtime missing for ${range}`);
-  const summary = await loadRequestSummary(range, request.signal);
+  const readOptions = {
+    signal: request.signal,
+    priority: request.priority || (request.prefetch ? schedulerPriority("IDLE") : schedulerPriority("USER_BLOCKING")),
+    revision: request.revision,
+    prefetch: Boolean(request.prefetch),
+    prefetchKind: request.prefetchKind,
+    preemptible: request.prefetch !== false,
+  };
+  const summary = await loadRequestSummary(range, readOptions);
   const viewRef = requestViewRef(requestMeta, request.view, request.rankMetric, requestScopeKey(request.view));
   if (!viewRef?.manifestPath) throw new Error(`request view manifest missing: ${request.view}`);
   const filters = request.filters || {};
@@ -3204,7 +3394,7 @@ async function requestViewPage(request) {
   const directPage = canUseDirectRequestPage(request.view, filters) && pageSize === nativePageSize;
   const requestedPage = clampPage(request.page, viewRef.pageCount || 1);
   if (directPage && requestedPage === 1 && viewRef.bootstrapPath && request.view !== "songAz") {
-    const pagePayload = await readCachedRequestJson(state.requestRuntime.detailShardCache, viewRef.bootstrapPath, request.signal);
+    const pagePayload = await readCachedRequestJson(state.requestRuntime.detailShardCache, viewRef.bootstrapPath, readOptions);
     assertRequestViewPagePayload(pagePayload, viewRef.bootstrapPath);
     const records = hydrateRequestRecords(pagePayload.records || [], request.view);
     const entries = pagePayload.indexEntries || [];
@@ -3225,17 +3415,17 @@ async function requestViewPage(request) {
     return result;
   }
 
-  const manifest = await loadRequestViewManifest(viewRef.manifestPath, request.signal);
+  const manifest = await loadRequestViewManifest(viewRef.manifestPath, readOptions);
   if (directPage) {
     const page = clampPage(request.page, manifest.pageCount);
     const pageRef = manifest.pages?.[page - 1] || manifest.pages?.find((entry) => entry.index === page);
     if (!pageRef?.path) throw new Error(`request page missing: ${request.view} ${page}`);
-    const pagePayload = await readCachedRequestJson(state.requestRuntime.detailShardCache, pageRef.path, request.signal);
+    const pagePayload = await readCachedRequestJson(state.requestRuntime.detailShardCache, pageRef.path, readOptions);
     assertRequestViewPagePayload(pagePayload, pageRef.path);
     const records = hydrateRequestRecords(pagePayload.records || [], request.view);
     const entries = pagePayload.indexEntries || [];
     const bucketEntries = request.view === "songAz"
-      ? (await loadRequestViewIndex(manifest, request.signal)).records || []
+      ? (await loadRequestViewIndex(manifest, readOptions)).records || []
       : null;
     const result = buildRequestResult({
       request,
@@ -3254,17 +3444,17 @@ async function requestViewPage(request) {
     return result;
   }
 
-  const indexPayload = await loadRequestViewIndex(manifest, request.signal);
+  const indexPayload = await loadRequestViewIndex(manifest, readOptions);
   const sourceEntries = Array.isArray(indexPayload.records) ? indexPayload.records : [];
   let entries = sourceEntries;
   entries = await filterRequestIndexEntries(entries, {
     view: request.view,
     metric: manifest.metric || request.rankMetric,
     filters,
-    signal: request.signal,
+    readOptions,
   });
   const pageInfo = window.FrontendUtils.paginateItems(entries, { page: request.page, pageSize });
-  const records = await loadRequestDetailRecords(pageInfo.visible, request.signal);
+  const records = await loadRequestDetailRecords(pageInfo.visible, readOptions);
   const result = buildRequestResult({
     request,
     summary,
@@ -3356,25 +3546,33 @@ function requestFilterKey(filters = {}) {
   ].join("|");
 }
 
-async function loadRequestSummary(range, signal) {
+async function loadRequestSummary(range, readOptions = {}) {
   const requestMeta = requestRuntimeMeta(range);
   const path = requestMeta?.summary?.path;
   if (!path) throw new Error(`request summary missing for ${range}`);
-  return readCachedRequestJson(state.requestRuntime.summaryCache, path, signal);
+  return readCachedRequestJson(state.requestRuntime.summaryCache, path, readOptions);
 }
 
-async function loadRequestViewManifest(path, signal) {
-  return readCachedRequestJson(state.requestRuntime.viewManifestCache, path, signal);
+async function loadRequestViewManifest(path, readOptions = {}) {
+  return readCachedRequestJson(state.requestRuntime.viewManifestCache, path, readOptions);
 }
 
-async function loadRequestViewIndex(manifest, signal) {
+async function loadRequestViewIndex(manifest, readOptions = {}) {
   if (!manifest?.indexPath) throw new Error("request view index missing");
-  return readCachedRequestJson(state.requestRuntime.viewIndexCache, manifest.indexPath, signal);
+  return readCachedRequestJson(state.requestRuntime.viewIndexCache, manifest.indexPath, readOptions);
 }
 
-async function readCachedRequestJson(cache, path, signal) {
+function normalizeReadJsonOptions(options = {}) {
+  if (options && typeof options === "object" && "aborted" in options && typeof options.addEventListener === "function") {
+    return { signal: options };
+  }
+  return options || {};
+}
+
+async function readCachedRequestJson(cache, path, options = {}) {
   if (cache.has(path)) return cache.get(path);
-  const payload = await readJson(path, { cache: cacheModeForPath(path), signal });
+  const readOptions = normalizeReadJsonOptions(options);
+  const payload = await readJson(path, { cache: cacheModeForPath(path), ...readOptions });
   cache.set(path, payload);
   return payload;
 }
@@ -3384,7 +3582,7 @@ async function filterRequestIndexEntries(entries, options = {}) {
   const query = normalizeSearch(filters.q || "");
   let result = entries;
   if (query) {
-    const candidates = await loadRequestSearchCandidates(query, options.signal);
+    const candidates = await loadRequestSearchCandidates(query, options.readOptions || options);
     result = result.filter((entry) => candidates.has(`${entry.type}:${entry.detailKey}`) || normalizeSearch(entry.searchText).includes(query));
   }
   if (options.view === "songAz" && filters.indexBucket && filters.indexBucket !== INDEX_ALL_BUCKET) {
@@ -3437,8 +3635,8 @@ function applyRequestRanks(entries) {
   });
 }
 
-async function loadRequestSearchCandidates(query, signal) {
-  const records = await loadRequestSearchRecords(query, signal);
+async function loadRequestSearchCandidates(query, readOptions = {}) {
+  const records = await loadRequestSearchRecords(query, readOptions);
   const candidates = new Set();
   for (const record of records) candidates.add(`${record.type}:${record.detailKey}`);
   return candidates;
@@ -3447,7 +3645,11 @@ async function loadRequestSearchCandidates(query, signal) {
 async function buildRequestSearchSuggestions(query, options = {}) {
   const filterKey = normalizeSearch(query);
   if (!filterKey) return [];
-  const records = await loadRequestSearchRecords(filterKey, options.signal);
+  const records = await loadRequestSearchRecords(filterKey, {
+    signal: options.signal,
+    priority: options.priority || schedulerPriority("USER_BLOCKING"),
+    revision: options.revision || captureRequestRevisions(["query", "range"]),
+  });
   const groups = {
     songs: [],
     artists: [],
@@ -3494,18 +3696,19 @@ function pushSuggestion(target, seen, item) {
   target.push(item);
 }
 
-async function loadRequestSearchRecords(query, signal) {
+async function loadRequestSearchRecords(query, readOptions = {}) {
   const range = state.range;
   const requestMeta = requestRuntimeMeta(range);
   const manifestPath = requestMeta?.search?.manifestPath;
   if (!manifestPath) return [];
-  const manifest = await readCachedRequestJson(state.requestRuntime.searchManifestCache, manifestPath, signal);
+  const options = normalizeReadJsonOptions(readOptions);
+  const manifest = await readCachedRequestJson(state.requestRuntime.searchManifestCache, manifestPath, options);
   const bucket = requestSearchBucket(query);
   const bucketMeta = manifest.buckets?.[bucket] || manifest.buckets?._;
   if (!bucketMeta?.pages?.length) return [];
   const records = [];
   for (const page of bucketMeta.pages) {
-    const payload = await readCachedRequestJson(state.requestRuntime.searchShardCache, page.path, signal);
+    const payload = await readCachedRequestJson(state.requestRuntime.searchShardCache, page.path, options);
     for (const record of payload.records || []) {
       if (!normalizeSearch(record.searchText).includes(query)) continue;
       records.push(record);
@@ -3521,7 +3724,8 @@ function requestSearchBucket(query) {
   return `b${String(code % 64).padStart(2, "0")}`;
 }
 
-async function loadRequestDetailRecords(entries, signal) {
+async function loadRequestDetailRecords(entries, readOptions = {}) {
+  const options = normalizeReadJsonOptions(readOptions);
   const byShard = new Map();
   for (const entry of entries || []) {
     if (!entry.detailShard) continue;
@@ -3530,7 +3734,7 @@ async function loadRequestDetailRecords(entries, signal) {
   }
   const recordByKey = new Map();
   for (const [path, pathEntries] of byShard.entries()) {
-    const payload = await readCachedRequestJson(state.requestRuntime.detailShardCache, path, signal);
+    const payload = await readCachedRequestJson(state.requestRuntime.detailShardCache, path, options);
     for (const record of payload.records || []) {
       recordByKey.set(record.detailKey, record);
     }
@@ -3787,9 +3991,7 @@ function requestIndexBucketModel(result) {
 
 function scheduleAdjacentRequestPagePrefetch(result) {
   if (!result || !canUseRequestRuntime(result.range)) return;
-  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-  if (connection?.saveData) return;
-  const run = () => {
+  scheduleRequestIdleTask(() => {
     for (const page of [result.pageInfo.page - 1, result.pageInfo.page + 1]) {
       if (page < 1 || page > result.pageInfo.pageCount) continue;
       requestViewPage({
@@ -3799,12 +4001,13 @@ function scheduleAdjacentRequestPagePrefetch(result) {
         filters: requestFilterState(),
         page,
         pageSize: result.pageSize,
+        priority: schedulerPriority("IDLE"),
+        revision: captureRequestRevisions(["page", "query", "range"]),
         prefetch: true,
+        prefetchKind: page < result.pageInfo.page ? "previous-page" : "next-page",
       }).catch(() => {});
     }
-  };
-  if (typeof requestIdleCallback === "function") requestIdleCallback(run, { timeout: 1400 });
-  else window.setTimeout(run, 300);
+  }, { mainRequestActive: false });
 }
 
 function currentGroup() {
@@ -4887,6 +5090,13 @@ function sourceInlineLimitForMode(mode = getResponsiveMode()) {
   return SOURCE_INLINE_LIMITS[mode] || SOURCE_INLINE_LIMITS.desktop;
 }
 
+function sourceInlineLimitForRecord(sourceVideoCount, hasExternalDetails, mode = getResponsiveMode()) {
+  const baseLimit = sourceInlineLimitForMode(mode);
+  const total = Math.max(0, Number(sourceVideoCount) || 0);
+  if (!hasExternalDetails && total > baseLimit && total <= SOURCE_INLINE_LIMITS.desktop) return total;
+  return baseLimit;
+}
+
 function shouldKeepSingleDrawerOpen() {
   return isCompactRankMode();
 }
@@ -5157,7 +5367,7 @@ function renderRankRecord({
       ? null
       : window.FrontendUtils.sourcePresentationModel(safeOccurrences, {
           expanded: isExpanded,
-          inlineLimit: sourceInlineLimitForMode(),
+          inlineLimit: sourceInlineLimitForRecord(sourceVideoCount, Boolean(sourceDetailPath)),
           totalVideoCount: sourceVideoCount,
           hasExternalDetails: Boolean(sourceDetailPath),
         });
@@ -5259,7 +5469,7 @@ function renderIndexRecord(record, options = {}) {
   const sourceDetailPath = sourceDetailPathForRecord(record, record.occurrences);
   const sourcePresentation = window.FrontendUtils.sourcePresentationModel(record.occurrences, {
     expanded: isExpanded,
-    inlineLimit: sourceInlineLimitForMode(),
+    inlineLimit: sourceInlineLimitForRecord(sourceVideoCount, Boolean(sourceDetailPath)),
     totalVideoCount: sourceVideoCount,
     hasExternalDetails: Boolean(sourceDetailPath),
   });
@@ -5732,6 +5942,7 @@ function renderInlineSource(occurrence) {
 }
 
 function sourceDetailPathForRecord(record, occurrences = []) {
+  const hasExplicitSourceDetailKey = Object.prototype.hasOwnProperty.call(record || {}, "sourceDetailKey");
   const candidates = [
     record?.sourceDetailPath,
     record?.sourceDetail?.path,
@@ -5742,7 +5953,7 @@ function sourceDetailPathForRecord(record, occurrences = []) {
     occurrences?.[0]?.sourceDetail?.path,
     occurrences?.[0]?.item?.sourceDetailPath,
     occurrences?.[0]?.item?.sourceDetail?.path,
-    sourceDetailPathFromShard(record, occurrences),
+    hasExplicitSourceDetailKey ? "" : sourceDetailPathFromShard(record, occurrences),
   ];
   return cleanText(candidates.find(Boolean));
 }
@@ -5797,13 +6008,24 @@ async function loadSourceDetailOccurrences(path, key = "", options = {}) {
 }
 
 async function loadSourceDetailOccurrencesIncremental(path, key = "", options = {}) {
-  const manifest = await readJson(path, { cache: cacheModeForPath(path), signal: options.signal });
+  const manifest = await readJson(path, {
+    cache: cacheModeForPath(path),
+    signal: options.signal,
+    priority: options.priority || schedulerPriority("USER_BLOCKING"),
+    revision: options.revision,
+  });
   const runtime = sourceDetailRuntime();
   if (!runtime.isSourceDetailManifest(manifest)) return normalizeSourceDetailOccurrences(manifest, key);
   const chunkPaths = runtime.sourceDetailChunkPaths(manifest);
   const loaded = [];
   for (const [index, chunkPath] of chunkPaths.entries()) {
-    const payload = await readJson(chunkPath, { cache: cacheModeForPath(chunkPath), signal: options.signal });
+    const payload = await readJson(chunkPath, {
+      cache: cacheModeForPath(chunkPath),
+      signal: options.signal,
+      priority: index === 0 ? options.priority || schedulerPriority("USER_BLOCKING") : options.chunkPriority || schedulerPriority("IDLE"),
+      revision: options.revision,
+      preemptible: index > 0,
+    });
     const chunkOccurrences = normalizeSourceDetailOccurrences(payload, key);
     loaded.push(...chunkOccurrences);
     if (typeof options.onChunk === "function") {
@@ -6004,7 +6226,7 @@ function appendSourceGroupRange(drawer, groups, start, end) {
   const safeEnd = Math.min(groups.length, Math.max(safeStart, end));
   let firstAppended = null;
   for (const [offset, group] of groups.slice(safeStart, safeEnd).entries()) {
-    const node = renderSourceVideoGroup(group, { priorityMedia: false });
+    const node = takeSourceGroupNode(drawer, group);
     if (!firstAppended) firstAppended = node;
     fragment.append(node);
   }
@@ -6026,19 +6248,54 @@ function renderVirtualSourceGroups(drawer, options = {}) {
   fragment.append(renderSourceWindowSpacer("top", start));
   fragment.append(renderSourceWindowSentinel("top"));
   for (const group of groups.slice(start, end)) {
-    fragment.append(renderSourceVideoGroup(group, { priorityMedia: false }));
+    fragment.append(takeSourceGroupNode(drawer, group));
   }
   fragment.append(renderSourceWindowSentinel("bottom"));
   fragment.append(renderSourceWindowSpacer("bottom", Math.max(0, groups.length - end)));
   const anchor = drawer.querySelector(":scope > .source-collapse-bottom") || null;
   drawer.insertBefore(fragment, anchor);
   setupSourceWindowObserver(drawer);
+  requestSourceWindowViewportSync(drawer);
 }
 
 function clearVirtualSourceGroups(drawer) {
+  teardownSourceWindowTracking(drawer);
   for (const node of drawer.querySelectorAll(":scope > .source-video-group, :scope > [data-source-window-node]")) {
+    cacheSourceGroupNode(drawer, node);
     node.remove();
   }
+}
+
+function sourceGroupDomKey(group) {
+  const firstOccurrence = group?.occurrences?.[0] || {};
+  const videoItem = group?.item || firstOccurrence.item || {};
+  const videoId = cleanText(videoItem.videoId || group?.videoId || "");
+  const seconds = Math.max(0, Math.floor(Number(firstOccurrence.song?.seconds) || 0));
+  return [videoId, seconds, cleanText(group?.channelName || videoItem.channelName || "")].join("::");
+}
+
+function cacheSourceGroupNode(drawer, node) {
+  if (!node?.classList?.contains("source-video-group") || node.classList.contains("source-video-skeleton")) return;
+  const key = node.dataset.sourceGroupKey || "";
+  if (!key) return;
+  if (!drawer._sourceGroupNodeCache) drawer._sourceGroupNodeCache = new Map();
+  drawer._sourceGroupNodeCache.set(key, node);
+  if (drawer._sourceGroupNodeCache.size > SOURCE_DRAWER_CHUNK_DOM_LIMIT * 4) {
+    const firstKey = drawer._sourceGroupNodeCache.keys().next().value;
+    drawer._sourceGroupNodeCache.delete(firstKey);
+  }
+}
+
+function takeSourceGroupNode(drawer, group) {
+  const key = sourceGroupDomKey(group);
+  const cached = drawer._sourceGroupNodeCache?.get(key);
+  if (cached) {
+    drawer._sourceGroupNodeCache.delete(key);
+    return cached;
+  }
+  const node = renderSourceVideoGroup(group, { priorityMedia: false });
+  node.dataset.sourceGroupKey = key;
+  return node;
 }
 
 function renderSourceWindowSpacer(position, count) {
@@ -6066,15 +6323,73 @@ function setupSourceWindowObserver(drawer) {
   }
   if (!window.IntersectionObserver || !shouldVirtualizeSourceGroups(drawer._sourceGroups || [])) return;
   const observer = new IntersectionObserver((entries) => {
+    requestSourceWindowViewportSync(drawer);
     for (const entry of entries) {
       if (!entry.isIntersecting) continue;
       const edge = entry.target.dataset.sourceWindowSentinel;
       if (edge === "bottom") shiftSourceWindow(drawer, SOURCE_DRAWER_WINDOW_STEP);
       if (edge === "top") shiftSourceWindow(drawer, -SOURCE_DRAWER_WINDOW_STEP);
+      const spacer = entry.target.dataset.sourceWindowSpacer;
+      if (spacer === "bottom") shiftSourceWindow(drawer, SOURCE_DRAWER_WINDOW_STEP);
+      if (spacer === "top") shiftSourceWindow(drawer, -SOURCE_DRAWER_WINDOW_STEP);
     }
   }, { root: null, rootMargin: "240px 0px" });
   drawer._sourceWindowObserver = observer;
-  for (const sentinel of drawer.querySelectorAll(":scope > [data-source-window-sentinel]")) observer.observe(sentinel);
+  for (const node of drawer.querySelectorAll(":scope > [data-source-window-sentinel], :scope > [data-source-window-spacer]")) {
+    observer.observe(node);
+  }
+  setupSourceWindowViewportTracking(drawer);
+}
+
+function teardownSourceWindowTracking(drawer) {
+  if (drawer._sourceWindowObserver) {
+    drawer._sourceWindowObserver.disconnect();
+    drawer._sourceWindowObserver = null;
+  }
+  if (drawer._sourceWindowSyncCleanup) {
+    drawer._sourceWindowSyncCleanup();
+    delete drawer._sourceWindowSyncCleanup;
+  }
+  if (drawer._sourceWindowSyncFrame) {
+    window.cancelAnimationFrame(drawer._sourceWindowSyncFrame);
+    delete drawer._sourceWindowSyncFrame;
+  }
+}
+
+function setupSourceWindowViewportTracking(drawer) {
+  if (drawer._sourceWindowSyncCleanup) return;
+  const handler = () => requestSourceWindowViewportSync(drawer);
+  window.addEventListener("scroll", handler, { passive: true });
+  window.addEventListener("resize", handler, { passive: true });
+  drawer._sourceWindowSyncCleanup = () => {
+    window.removeEventListener("scroll", handler);
+    window.removeEventListener("resize", handler);
+  };
+}
+
+function requestSourceWindowViewportSync(drawer) {
+  if (!drawer || drawer._sourceWindowSyncFrame || !shouldVirtualizeSourceGroups(drawer._sourceGroups || [])) return;
+  drawer._sourceWindowSyncFrame = window.requestAnimationFrame(() => {
+    delete drawer._sourceWindowSyncFrame;
+    syncSourceWindowToViewport(drawer);
+  });
+}
+
+function syncSourceWindowToViewport(drawer) {
+  const groups = drawer._sourceGroups || [];
+  if (!shouldVirtualizeSourceGroups(groups) || drawer.hidden) return;
+  const box = drawer.getBoundingClientRect();
+  if (box.bottom < -240 || box.top > window.innerHeight + 240) return;
+  const toolbar = drawer.querySelector(":scope > .source-drawer-toolbar");
+  const toolbarHeight = toolbar?.getBoundingClientRect().height || 0;
+  const contentTop = box.top + toolbarHeight;
+  const firstVisibleOffset = Math.max(0, -contentTop + 24);
+  const maxStart = Math.max(0, groups.length - SOURCE_DRAWER_CHUNK_DOM_LIMIT);
+  const targetStart = Math.min(maxStart, Math.max(0, Math.floor(firstVisibleOffset / SOURCE_DRAWER_ESTIMATED_ROW_HEIGHT) - 2));
+  const currentStart = drawer._sourceWindowStart || 0;
+  const currentEnd = drawer._sourceWindowEnd || currentStart + SOURCE_DRAWER_CHUNK_DOM_LIMIT;
+  if (targetStart >= currentStart && targetStart < Math.max(currentStart + 1, currentEnd - 4)) return;
+  renderVirtualSourceGroups(drawer, { start: targetStart });
 }
 
 function shiftSourceWindow(drawer, delta) {
@@ -6095,7 +6410,7 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
   if (drawer.dataset.toolbarVariant === "artist") toolbar.classList.add("artist-source-toolbar");
 
   const count = document.createElement("span");
-  count.className = "source-drawer-count";
+  count.className = "source-drawer-count source-drawer-count-stack";
   count.textContent = sourceDrawerCountText(visibleCount, totalCount);
   toolbar.append(count);
 
@@ -6114,6 +6429,8 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
 function updateSourceDrawerCount(drawer, visibleCount, totalCount) {
   const count = drawer.querySelector(":scope > .source-drawer-toolbar .source-drawer-count");
   if (count) count.textContent = sourceDrawerCountText(visibleCount, totalCount);
+  drawer.dataset.loadedCount = String(Math.max(0, Number(visibleCount) || 0));
+  drawer.dataset.totalCount = String(Math.max(Number(totalCount) || 0, Number(visibleCount) || 0));
 }
 
 function sourceDrawerCountText(visibleCount, totalCount) {
@@ -6385,15 +6702,16 @@ function renderArtistSongGroup(group) {
   sources.hidden = true;
   section._artistSongSources = sources;
 
+  const sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
   const sourcePresentation = window.FrontendUtils.sourcePresentationModel(group.occurrences, {
     expanded: false,
-    inlineLimit: sourceInlineLimitForMode(),
+    inlineLimit: sourceInlineLimitForRecord(group.videoCount, Boolean(sourceDetailPath)),
     totalVideoCount: group.videoCount,
-    hasExternalDetails: Boolean(sourceDetailPathForRecord(group, group.occurrences)),
+    hasExternalDetails: Boolean(sourceDetailPath),
   });
   sources._sourceOccurrences = group.occurrences;
   sources._songSourceOccurrences = group.occurrences;
-  sources._sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
+  sources._sourceDetailPath = sourceDetailPath;
 
   meta.append(renderCopySongLinksIconButton(group.occurrences));
   header.append(meta);
@@ -6492,7 +6810,15 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
       throw error;
     }
   }
-  if (nextExpanded) appendMobileSourceCollapse(drawer);
+  if (nextExpanded) {
+    if (shouldVirtualizeSourceGroups(drawer._sourceGroups || [])) {
+      renderVirtualSourceGroups(drawer, { start: 0 });
+    }
+    appendMobileSourceCollapse(drawer);
+    if (shouldVirtualizeSourceGroups(drawer._sourceGroups || []) && !drawer._sourceWindowSyncCleanup) {
+      setupSourceWindowViewportTracking(drawer);
+    }
+  }
   drawer.hidden = !nextExpanded;
   row.classList.toggle("is-expanded", nextExpanded);
   syncInlineCopyAllButton(row, nextExpanded);
@@ -6531,6 +6857,7 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     state.expandedRows.add(row.dataset.rowKey);
   } else {
     abortSourceDetailHydration(row);
+    teardownSourceWindowTracking(drawer);
     state.expandedRows.delete(row.dataset.rowKey);
   }
   trackCompactInitializedDrawer(row, nextExpanded);
@@ -6569,9 +6896,13 @@ function startSourceDetailHydration(row, drawer, previewOccurrences = []) {
   }
   const controller = new AbortController();
   row._sourceDetailAbortController = controller;
-  drawer.setAttribute("aria-busy", "true");
+  const sourceRevision = bumpRequestRevision("source");
+  setSourceDrawerLoadingState(drawer, preview.length ? "partial" : "opening", window.FrontendUtils.groupOccurrencesByVideo(preview).length, sourceDetailExpectedCount(row, preview));
   const load = loadSourceDetailOccurrencesIncremental(path, key, {
     signal: controller.signal,
+    priority: schedulerPriority("USER_BLOCKING"),
+    chunkPriority: schedulerPriority("IDLE"),
+    revision: compactRevisions([sourceRevision, captureRequestRevision("range")]),
     onChunk: (_chunkOccurrences, progress) => {
       applySourceDetailOccurrencesToDrawer(row, drawer, progress.loadedOccurrences, preview, {
         complete: progress.index >= progress.chunkCount,
@@ -6601,7 +6932,7 @@ function applySourceDetailOccurrencesToDrawer(row, drawer, detailOccurrences, pr
   row._sourceDetailOccurrences = merged;
   drawer._sourceOccurrences = merged;
   drawer._songSourceOccurrences = merged;
-  resetSourceDrawerRenderedRows(drawer);
+  resetSourceDrawerRenderedRows(drawer, { preserveNodes: true });
   appendSourceDrawerLinks(drawer, merged, {
     showToolbar: true,
     copyOccurrences: merged,
@@ -6614,8 +6945,10 @@ function applySourceDetailOccurrencesToDrawer(row, drawer, detailOccurrences, pr
   if (options.complete) row._sourceDetailLoaded = true;
 }
 
-function resetSourceDrawerRenderedRows(drawer) {
+function resetSourceDrawerRenderedRows(drawer, options = {}) {
+  if (!options.preserveNodes) delete drawer._sourceGroupNodeCache;
   for (const node of drawer.querySelectorAll(":scope > .source-video-group, :scope > [data-source-window-node], :scope > [data-source-skeleton]")) {
+    if (options.preserveNodes) cacheSourceGroupNode(drawer, node);
     node.remove();
   }
   delete drawer._sourceWindowStart;
@@ -6634,15 +6967,46 @@ function sourceDetailExpectedCount(row, occurrences = []) {
 function updateSourceDrawerLoadingStatus(drawer, loadedCount, totalCount, options = {}) {
   const count = drawer.querySelector(":scope > .source-drawer-toolbar .source-drawer-count");
   if (!count) return;
+  const normalizedLoaded = Math.max(0, Number(loadedCount) || 0);
+  const normalizedTotal = Math.max(normalizedLoaded, Number(totalCount) || normalizedLoaded);
   if (options.error) {
+    setSourceDrawerLoadingState(drawer, "error", normalizedLoaded, normalizedTotal);
+    setSourceDrawerStatus(drawer, "来源读取失败", { error: true });
     count.textContent = "来源读取失败，重试";
     return;
   }
-  if (options.loading && totalCount > loadedCount) {
-    count.textContent = `已加载 ${loadedCount} / ${totalCount} · 正在加载来源`;
+  if (options.loading && normalizedTotal > normalizedLoaded) {
+    setSourceDrawerLoadingState(drawer, normalizedLoaded > 0 ? "partial" : "opening", normalizedLoaded, normalizedTotal);
+    setSourceDrawerStatus(drawer, "正在加载来源");
+    count.textContent = `已加载 ${normalizedLoaded} / ${normalizedTotal} · 正在加载来源`;
     return;
   }
-  count.textContent = sourceDrawerCountText(loadedCount, totalCount);
+  setSourceDrawerLoadingState(drawer, "complete", normalizedLoaded, normalizedTotal);
+  setSourceDrawerStatus(drawer, "");
+  count.textContent = sourceDrawerCountText(normalizedLoaded, normalizedTotal);
+}
+
+function setSourceDrawerLoadingState(drawer, stateName, loadedCount, totalCount) {
+  if (!drawer) return;
+  drawer.dataset.sourceLoadingState = stateName || "complete";
+  drawer.dataset.loadedCount = String(Math.max(0, Number(loadedCount) || 0));
+  drawer.dataset.totalCount = String(Math.max(Number(totalCount) || 0, Number(loadedCount) || 0));
+  const busy = stateName === "opening" || stateName === "partial";
+  drawer.setAttribute("aria-busy", busy ? "true" : "false");
+}
+
+function setSourceDrawerStatus(drawer, message, options = {}) {
+  if (!drawer) return;
+  drawer.querySelector(":scope > .source-drawer-status")?.remove();
+  if (!message) return;
+  const status = document.createElement("div");
+  status.className = "source-drawer-status";
+  status.setAttribute("role", options.error ? "alert" : "status");
+  status.textContent = message;
+  const toolbar = drawer.querySelector(":scope > .source-drawer-toolbar");
+  if (toolbar?.nextSibling) drawer.insertBefore(status, toolbar.nextSibling);
+  else if (toolbar) drawer.append(status);
+  else drawer.insertBefore(status, drawer.firstChild || null);
 }
 
 function appendSourceDrawerSkeleton(drawer, count) {
@@ -6650,16 +7014,19 @@ function appendSourceDrawerSkeleton(drawer, count) {
   const fragment = document.createDocumentFragment();
   for (let index = 0; index < count; index += 1) {
     const section = document.createElement("section");
-    section.className = "source-video-group";
+    section.className = "source-video-group source-video-skeleton";
     section.dataset.sourceSkeleton = "true";
     section.setAttribute("aria-hidden", "true");
+    const thumb = document.createElement("span");
+    thumb.className = "source-skeleton-thumb";
     const main = document.createElement("div");
-    main.className = "source-video-main";
+    main.className = "source-video-main source-skeleton-main";
     const line = document.createElement("div");
-    line.className = "source-video-title";
-    line.textContent = "正在加载来源";
-    main.append(line);
-    section.append(main);
+    line.className = "source-video-title source-skeleton-line";
+    const time = document.createElement("span");
+    time.className = "source-skeleton-time";
+    main.append(line, time);
+    section.append(thumb, main);
     fragment.append(section);
   }
   const anchor = drawer.querySelector(":scope > .source-collapse-bottom") || null;
@@ -6682,7 +7049,7 @@ function appendSourceDetailRetry(drawer) {
   const actions = drawer.querySelector(":scope > .source-drawer-toolbar .source-drawer-actions");
   if (!actions || actions.querySelector("[data-source-detail-retry]")) return;
   const button = document.createElement("button");
-  button.className = "source-action ui-chip";
+  button.className = "source-action ui-chip source-drawer-retry";
   button.type = "button";
   button.dataset.sourceDetailRetry = "true";
   button.textContent = "重试";
@@ -6745,7 +7112,7 @@ function trackCompactInitializedDrawer(row, isExpanded) {
     pruneCompactInitializedDrawers(row);
     return;
   }
-  pruneCompactInitializedDrawers();
+  pruneCompactInitializedDrawers(row);
 }
 
 function pruneCompactInitializedDrawers(currentRow = null) {
@@ -6771,13 +7138,18 @@ function pruneCompactInitializedDrawers(currentRow = null) {
 function resetSourceDrawerToDeferred(row) {
   const drawer = row?.querySelector(".source-drawer");
   if (!drawer || drawer.dataset.sourceDeferred === "true" || !drawer.hidden) return;
+  teardownSourceWindowTracking(drawer);
   drawer.replaceChildren();
   drawer.dataset.sourceDeferred = "true";
   delete drawer.dataset.visibleSourceGroups;
   delete drawer.dataset.visibleArtistSongs;
+  delete drawer.dataset.sourceLoadingState;
+  delete drawer.dataset.loadedCount;
+  delete drawer.dataset.totalCount;
   delete drawer.dataset.sourceRemainder;
   delete drawer.dataset.lastMoreScrollY;
   delete drawer.dataset.lastMoreScrollDelta;
+  delete drawer._sourceGroupNodeCache;
   delete drawer._sourceGroups;
   delete drawer._songSourceOccurrences;
   delete drawer._sourceOccurrences;
@@ -7067,7 +7439,48 @@ function indexBucketWeight(label) {
 
 async function readJson(path, options = {}) {
   const startedAt = performanceAvailable() ? performance.now() : 0;
-  const response = await fetch(path, { cache: options.cache || cacheModeForPath(path), signal: options.signal });
+  const cacheMode = options.cache || cacheModeForPath(path);
+  const scheduler = requestScheduler();
+  if (scheduler && typeof scheduler.requestResource === "function") {
+    const schedulerCacheMode = cacheMode === "no-cache" ? "reload" : cacheMode;
+    const result = await scheduler.requestResource({
+      key: options.requestKey || path,
+      cacheKey: `${path}::${schedulerCacheMode}`,
+      url: path,
+      priority: options.priority || inferRequestPriority(path, options),
+      revision: options.revision,
+      cacheMode: schedulerCacheMode,
+      prefetch: Boolean(options.prefetch),
+      prefetchKind: options.prefetchKind,
+      preemptible: options.preemptible,
+      signal: options.signal,
+      parser: async (response) => {
+        const text = await response.text();
+        const parseMark = perfMark("json-parse:start");
+        try {
+          return JSON.parse(text);
+        } finally {
+          perfMeasure("json-parse", parseMark);
+        }
+      },
+    });
+    if (result.status === "success") {
+      state.loadedResources.push({
+        path,
+        bytes: result.telemetry?.decodedBodySize || result.telemetry?.transferSize || 0,
+        cache: cacheMode,
+        priority: result.priority || result.telemetry?.priority || "",
+        requestStatus: result.status,
+        durationMs: startedAt ? Math.round((performance.now() - startedAt) * 10) / 10 : 0,
+      });
+      return result.data;
+    }
+    if (result.status === "aborted" || result.status === "stale" || result.status === "skipped") {
+      throw makeAbortLikeError(result.abortReason || result.reason || result.status, path);
+    }
+    throw new Error(`${path}: ${result.error?.message || result.status || "request failed"}`);
+  }
+  const response = await fetch(path, { cache: cacheMode, signal: options.signal });
   if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
   const text = await response.text();
   const parseMark = perfMark("json-parse:start");
@@ -7078,10 +7491,20 @@ async function readJson(path, options = {}) {
     state.loadedResources.push({
       path,
       bytes: text.length,
-      cache: options.cache || cacheModeForPath(path),
+      cache: cacheMode,
       durationMs: startedAt ? Math.round((performance.now() - startedAt) * 10) / 10 : 0,
     });
   }
+}
+
+function inferRequestPriority(path, options = {}) {
+  if (options.prefetch) return schedulerPriority("IDLE");
+  if (/^data\/ui\/video-setlists\//u.test(path)) return schedulerPriority("USER_BLOCKING");
+  if (/^data\/ui\/ranges\/(?:7d|all)\/sources\//u.test(path)) return schedulerPriority("USER_BLOCKING");
+  if (/^data\/ui\/ranges\/(?:7d|all)\/(?:views|records|search)\//u.test(path)) return schedulerPriority("USER_BLOCKING");
+  if (/^data\/ui\/ranges\/(?:7d|all)\/summary\./u.test(path)) return schedulerPriority("USER_BLOCKING");
+  if (/^data\/ui\/ranges\/(?:7d|all)\/(?:manifest|page-\d{4})/u.test(path)) return schedulerPriority("USER_BLOCKING");
+  return schedulerPriority("NORMAL");
 }
 
 function cacheModeForPath(path) {
@@ -7208,6 +7631,8 @@ async function copyVideoSetlist(item, button = null) {
     if (button) {
       button.title = "歌单读取失败，重试";
       button.setAttribute("aria-label", "歌单读取失败，重试");
+      button.dataset.copyState = "error";
+      button.classList.add("is-error");
     }
     throw error;
   } finally {
@@ -7236,7 +7661,12 @@ async function loadVideoSetlist(videoId, fallbackItem = {}) {
   if (state.videoSetlistCache.has(key)) return state.videoSetlistCache.get(key);
   if (state.videoSetlistLoads.has(key)) return state.videoSetlistLoads.get(key);
   const path = sourceDetailRuntime().videoSetlistPath(key);
-  const load = readJson(path, { cache: cacheModeForPath(path) })
+  const load = readJson(path, {
+    cache: cacheModeForPath(path),
+    priority: schedulerPriority("USER_BLOCKING"),
+    revision: compactRevisions([bumpRequestRevision("source"), captureRequestRevision("range")]),
+    requestKey: `video-setlist:${key}`,
+  })
     .then((payload) => ({
       videoId: key,
       title: cleanText(payload?.title || fallbackItem.title || key),
@@ -7263,6 +7693,11 @@ function setCopySetlistButtonLoading(button, isLoading) {
   if (!button) return;
   button.disabled = isLoading;
   button.setAttribute("aria-busy", isLoading ? "true" : "false");
+  button.classList.toggle("is-loading", isLoading);
+  if (isLoading) {
+    button.classList.remove("is-error");
+    delete button.dataset.copyState;
+  }
 }
 
 async function copySongSourceLinks(occurrences) {
