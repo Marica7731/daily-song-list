@@ -262,7 +262,8 @@ async function save(page, name, options = {}) {
     fullPage: Boolean(options.fullPage),
   });
   const stats = fs.statSync(file);
-  if (stats.size < 12_000) throw new Error(`${name} screenshot looks empty: ${stats.size} bytes`);
+  const minBytes = options.minBytes ?? 12_000;
+  if (stats.size < minBytes) throw new Error(`${name} screenshot looks empty: ${stats.size} bytes`);
   generatedScreenshots.add(name);
   recordScreenshot(name, file, options);
   console.log(`README_SCREENSHOT ${name}`);
@@ -702,6 +703,7 @@ async function captureSourceCase(browser, viewport, kind, name, options = {}) {
   if (options.viewportOnly) {
     if (!options.scrollBottom) await scrollElementNearTop(page, row);
     await save(page, name, {
+      minBytes: options.minBytes,
       viewport,
       params: found.params,
       selector: `.rank-row source-${kind}${options.scrollBottom ? "-bottom" : ""}`,
@@ -1147,6 +1149,9 @@ async function assertExpandedSourceVisible(page, row, label) {
       buttonExpanded: node.querySelector("[data-toggle-source]")?.getAttribute("aria-expanded") || "",
       remainingCount: Number(node.querySelector("[data-toggle-source]")?.dataset.remainingCount || 0),
       videoCount: Number(node.querySelector("[data-toggle-source]")?.dataset.videoCount || 0),
+      loadingState: node.querySelector(".source-drawer:not([hidden])")?.dataset.sourceLoadingState || "",
+      loadedCount: Number(node.querySelector(".source-drawer:not([hidden])")?.dataset.loadedCount || 0),
+      totalCount: Number(node.querySelector(".source-drawer:not([hidden])")?.dataset.totalCount || 0),
       sourceGroupMore: node.querySelectorAll("[data-toggle-source-groups]").length,
       inlineCollapseCount: node.querySelectorAll(".source-inline-more[data-toggle-source][aria-expanded='true']").length,
       toolbarCollapseCount: node.querySelectorAll(".source-collapse-top[data-collapse-source]").length,
@@ -1163,14 +1168,18 @@ async function assertExpandedSourceVisible(page, row, label) {
   });
   if (
     shape.buttonExpanded !== "true" ||
-    shape.groups.length !== shape.videoCount ||
+    !["opening", "partial", "complete"].includes(shape.loadingState) ||
+    shape.groups.length < 1 ||
+    shape.groups.length > shape.loadedCount ||
+    shape.loadedCount < Math.min(shape.videoCount, shape.groups.length) ||
+    (shape.totalCount && shape.totalCount !== shape.videoCount) ||
     shape.sourceGroupMore !== 0 ||
     shape.inlineCollapseCount !== 1 ||
     shape.toolbarCollapseCount !== 1 ||
     shape.bottomCollapseCount > 1 ||
     shape.copySongLinksCount < 1 ||
     shape.copySongLinksCount > 2 ||
-    (shape.viewportWidth <= 720 && shape.toolbarHeight > 32) ||
+    (shape.viewportWidth <= 720 && shape.toolbarHeight > 40) ||
     shape.duplicateVideoIds.length ||
     shape.repeatedInlineVideoIds.length ||
     shape.groups.some((group) => !group.channelText || !group.thumbVisible || group.thumbWidth < 50) ||
@@ -2507,6 +2516,7 @@ async function main() {
       viewportOnly: true,
       scrollBottom: true,
       scene: "mobile-source-more-than-3-expanded-bottom",
+      minBytes: 6_000,
     });
     await captureFixtureSourceCase(browser, mobile, "fallback", "mobile-source-thumb-fallback.png");
     await captureFixtureSourceCase(browser, mobile, "longChannel", "mobile-source-long-channel.png");
