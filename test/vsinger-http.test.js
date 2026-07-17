@@ -6,7 +6,8 @@ const test = require("node:test");
 
 const { VsingerHttpClient, VsingerHttpError } = require("../scripts/vsinger-http/http-client");
 const { parseYouTubeVideoId } = require("../scripts/vsinger-http/html-utils");
-const { writeShardedBundle, readJson } = require("../scripts/vsinger-http/bundle-writer");
+const { writeShardedBundle, readJson, writeJson } = require("../scripts/vsinger-http/bundle-writer");
+const { buildBackfillBundle } = require("../scripts/vsinger-http/build-backfill-bundle");
 const { applyMcpSupplement, buildNormalizedBundle, dedupeOccurrences } = require("../scripts/vsinger-http/model");
 const { parseRobotsTxt, isAllowed, crawlDelaySeconds } = require("../scripts/vsinger-http/robots");
 const { crawlSongs } = require("../scripts/vsinger-http/crawl-songs");
@@ -244,6 +245,95 @@ test("stream crawler writes setlist song catalog and sync state", async () => {
   assert.equal(manifest.counts.songs, 2);
   assert.equal(manifest.shards.syncState[0].file, "syncState.json");
   assert.equal(bundleSongs[0].displayTitle, "Arrietty's Song");
+});
+
+test("backfill bundle builder merges stage outputs and writes coverage report", () => {
+  const root = tempDir("backfill-build");
+  const songsDir = path.join(root, "songs");
+  const streamsDir = path.join(root, "streams");
+  const videoDetailsDir = path.join(root, "video-details");
+  const outputDir = path.join(root, "bundle");
+  const streamVideos = parseStreamsPage(streamsPageHtml({})).videos;
+  const detailVideo = parseVideoDetailPage(videoDetailHtml(), `https://vsinger-moment.jp/videos/${VIDEO_A}`);
+
+  writeJson(path.join(songsDir, "songs.json"), [
+    {
+      externalSongId: SONG_C,
+      title: "Catalog Only",
+      originalArtist: "Catalog Artist",
+      songPageUrl: `https://vsinger-moment.jp/songs/${SONG_C}`,
+    },
+  ]);
+  writeJson(path.join(songsDir, "crawl.json"), {
+    generatedAt: "2026-07-17T00:00:00.000Z",
+    coverageStatus: "count-mismatch",
+    stop: { reason: "no-next-cursor" },
+    pageCount: 1,
+    rawRowCount: 1,
+    uniqueSongCount: 1,
+    observedSiteSongCount: 20,
+    duplicateRowCount: 0,
+    duplicateRate: 0,
+    requestStats: { requestCount: 1, averageHtmlBytes: 100, averageResponseTimeMs: 10, totalBytes: 100 },
+    pages: [{ bytes: 100, elapsedMs: 10 }],
+  });
+  writeJson(path.join(songsDir, "sync-state.json"), {
+    lastSuccessfulSongCrawl: { coverageStatus: "count-mismatch" },
+    cursorCheckpoint: { nextPageUrl: "" },
+  });
+  writeJson(path.join(streamsDir, "videos.json"), streamVideos);
+  writeJson(path.join(streamsDir, "detail-queue.json"), [{ videoPageUrl: `https://vsinger-moment.jp/videos/${VIDEO_B}`, reasons: ["setlist_none"] }]);
+  writeJson(path.join(streamsDir, "crawl.json"), {
+    generatedAt: "2026-07-17T00:00:00.000Z",
+    coverageStatus: "partial",
+    stop: { reason: "max-pages" },
+    pageCount: 1,
+    rawRowCount: 2,
+    uniqueVideoCount: 2,
+    uniqueSetlistSongCount: 2,
+    duplicateRowCount: 0,
+    duplicateRate: 0,
+    occurrenceCount: 3,
+    streamWatermark: "2026-07-17",
+    requestStats: { requestCount: 1, averageHtmlBytes: 200, averageResponseTimeMs: 20, totalBytes: 200 },
+    pages: [{ setlistCount: 1, occurrenceCount: 3, bytes: 200, elapsedMs: 20 }],
+  });
+  writeJson(path.join(streamsDir, "sync-state.json"), {
+    lastSuccessfulStreamCrawl: { coverageStatus: "partial" },
+    streamWatermark: "2026-07-17",
+    cursorCheckpoint: { nextPageUrl: "https://vsinger-moment.jp/streams?cursor=next" },
+  });
+  writeJson(path.join(videoDetailsDir, "videos.json"), [detailVideo]);
+  writeJson(path.join(videoDetailsDir, "video-details.json"), {
+    kind: "vsinger-moment-http-video-detail-fill",
+    generatedAt: "2026-07-17T00:00:00.000Z",
+    requestedCount: 1,
+    fetchedCount: 1,
+    occurrenceCount: 3,
+    requestStats: { requestCount: 1, averageHtmlBytes: 300, averageResponseTimeMs: 30, totalBytes: 300 },
+    pages: [{ bytes: 300, elapsedMs: 30 }],
+  });
+
+  const { bundle, manifest } = buildBackfillBundle({
+    "songs-dir": songsDir,
+    "streams-dir": streamsDir,
+    "video-details-dir": videoDetailsDir,
+    "output-dir": outputDir,
+    generatedAt: "2026-07-17T00:00:00.000Z",
+  });
+  const report = readJson(path.join(outputDir, "backfill-report.json"));
+  const syncState = readJson(path.join(outputDir, "syncState.json"));
+
+  assert.equal(bundle.counts.songs, 3);
+  assert.equal(bundle.counts.videos, 2);
+  assert.equal(bundle.counts.occurrences, 3);
+  assert.equal(bundle.counts.conflicts, 0);
+  assert.equal(bundle.coverage.stages.songs.coverageStatus, "count-mismatch");
+  assert.equal(bundle.coverage.savings.avoidedVideoDetailRequestsByListSetlists, 1);
+  assert.equal(manifest.shards.coverage[0].file, "coverage.json");
+  assert.equal(report.coverage.requestStats.requestCount, 3);
+  assert.equal(syncState.knownSongIds.includes(SONG_C), true);
+  assert.equal(fs.existsSync(path.join(outputDir, "backfill-report.md")), true);
 });
 
 test("bundle writer is idempotent for the same normalized payload", () => {

@@ -63,6 +63,14 @@ npm run vsinger:fetch-video-details -- --queue artifacts/vsinger-http-backfill/s
 
 Do not fetch every `/videos/{uuid}` page. The streams crawler writes `detail-queue.json` only for videos that need补漏, such as missing setlists, missing YouTube IDs, missing song links, invalid timestamps, or conflicting public fields. A missing artist name in the list setlist does not by itself force a detail-page request.
 
+Build the unified VPS bundle from existing crawl outputs:
+
+```bash
+npm run vsinger:build-bundle -- --songs-dir artifacts/vsinger-http-backfill/songs --streams-dir artifacts/vsinger-http-backfill/streams --video-details-dir artifacts/vsinger-http-backfill/video-details --output-dir data/external/vsinger-http/backfill
+```
+
+This step does not request VSinger Moment. It merges the public songs catalog crawl, stream-list setlists, and queued video-detail補漏 into one normalized bundle with coverage, failures, conflicts, sync state, and a request report.
+
 ## Configuration
 
 - `VSINGER_HTTP_REQUEST_INTERVAL_MS`: default `1000`.
@@ -100,14 +108,14 @@ Dry-run and local crawl outputs are written under `artifacts/vsinger-http-backfi
 - `streams/sync-state.json`
 - `video-details/video-details.json`
 
-For VPS bundle generation, pass `--write-bundle`:
+For per-stage VPS bundle generation, pass `--write-bundle`:
 
 ```bash
 npm run vsinger:crawl:songs -- --write-bundle --bundle-dir data/external/vsinger-http/songs
 npm run vsinger:crawl:streams -- --write-bundle --bundle-dir data/external/vsinger-http/streams
 ```
 
-Bundle output is normalized and sharded:
+For the unified backfill bundle, prefer `npm run vsinger:build-bundle` after the stage outputs exist. Bundle output is normalized and sharded:
 
 - `manifest.json`
 - `songs-0001.json`, ...
@@ -116,6 +124,8 @@ Bundle output is normalized and sharded:
 - `coverage.json`
 - `failures.json`
 - `syncState.json`
+- `backfill-report.json`
+- `backfill-report.md`
 
 Large raw HTML is never committed. Raw HTML stays in `.local-cache/vsinger-http`.
 
