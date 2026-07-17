@@ -25,10 +25,12 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(core, /node scripts\/run-core-update\.js/u);
   assert.doesNotMatch(core, /review:build|build-review-queue|export-dirty-candidates/u);
   assert.match(core, /npm run mark:failure/u);
-  assert.match(core, /git restore --worktree -- data\/latest\.json/u);
-  assert.match(core, /git clean -fd -- data\/snapshots data\/diff data\/ui/u);
+  assert.match(core, /node scripts\/run-core-update\.js restore-after-failure/u);
+  assert.doesNotMatch(core, /git restore --worktree -- data\/latest\.json/u);
+  assert.doesNotMatch(core, /git clean -fd -- data\/snapshots data\/diff data\/ui/u);
   assert.match(core, /git add data\/latest\.json/u);
-  assert.match(core, /git pull --rebase origin main/u);
+  assert.match(core, /git push origin HEAD:main/u);
+  assert.match(core, /git fetch origin main/u);
   assert.match(core, /npm run check:published -- https:\/\/ytb-song-rank\.culua\.com\/ --expected-meta data\/ui\/meta\.json/u);
   assert.match(core, /if:\s*always\(\) && steps\.core\.outcome != 'success'/u);
 
