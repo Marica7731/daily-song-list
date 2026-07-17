@@ -56,6 +56,8 @@ npm run vsinger:crawl:streams -- --fresh --max-pages 10
 npm run vsinger:crawl:singers -- --fresh --max-pages 10
 ```
 
+Without `--fresh`, `songs`, `streams`, and `singers` reload their previous JSON outputs and append the next cursor batch. In that mode, `--max-pages` is the number of pages to request in the current invocation; `crawl.json`, `songs.json`, `videos.json`, `singers.json`, and sync state remain cumulative.
+
 Run larger validation batches:
 
 ```bash
@@ -69,6 +71,12 @@ Run full crawls after the 10-page and 100-page reports are stable:
 npm run vsinger:crawl:songs
 npm run vsinger:crawl:streams
 npm run vsinger:crawl:singers
+```
+
+For daily stream increments, pass an explicit stream date watermark. The historical checkpoint's saved `streamWatermark` is retained as sync metadata but is not used as an automatic stop condition while continuing a cursor crawl.
+
+```bash
+npm run vsinger:crawl:streams -- --fresh --stream-watermark 2026-07-17
 ```
 
 Run singer-scoped song and occurrence backfill only after explicit site-owner permission is confirmed:
@@ -247,13 +255,14 @@ The pipeline does not dedupe a whole stream by video ID alone, and does not use 
 
 ## Cursor Safety
 
-The songs and streams crawlers persist:
+The songs, streams, and singers crawlers persist:
 
 - visited cursor URLs
 - visited page hashes
-- discovered song IDs or video IDs
+- discovered song IDs, video IDs, or singer IDs
 - current cursor checkpoint
 - coverage status
+- cumulative normalized outputs across resumed batches
 
 The singer-scoped crawler persists the same recovery data per current singer:
 
@@ -295,4 +304,4 @@ node --test test/vsinger-http.test.js
 npm run check
 ```
 
-The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, singer-scoped checkpoint resume, cursor query placement, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, checkpoint resume, repeated same-song timestamps, and MCP supplement deduplication.
+The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, cumulative checkpoint resume for songs, streams, singers, and singer-scoped pages, cursor query placement, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, repeated same-song timestamps, and MCP supplement deduplication.

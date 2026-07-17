@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const path = require("node:path");
 
-const { writeJson } = require("./bundle-writer");
+const { readJson, writeJson } = require("./bundle-writer");
 const {
   createClient,
   cursorKey,
@@ -24,27 +24,30 @@ async function crawlSingers(options = {}) {
   const checkpoint = args.fresh ? null : loadCheckpoint(checkpointPath);
   const maxPages = args["max-pages"] ? Number(args["max-pages"]) : Infinity;
   const startUrl = args["start-url"] || checkpoint?.nextPageUrl || "https://vsinger-moment.jp/singers";
+  const previous = args.fresh ? {} : readJson(path.join(outputDir, "crawl.json"), {});
+  const previousSingers = args.fresh ? [] : readJson(path.join(outputDir, "singers.json"), previous.singers || []);
 
   const robots = args.robots || (await loadRobots(client));
   ensureRobotsAllowed(robots, "singers");
 
   const visitedCursorUrls = new Set(args.visitedCursorUrls || checkpoint?.visitedCursorUrls || []);
   const visitedPageHashes = new Set(args.visitedPageHashes || checkpoint?.visitedPageHashes || []);
-  const knownSingerIds = new Set(args.knownSingerIds || checkpoint?.knownSingerIds || []);
-  const singers = [];
-  const pages = [];
-  const failures = [];
+  const knownSingerIds = new Set(args.knownSingerIds || checkpoint?.knownSingerIds || previousSingers.map((singer) => singer.externalSingerId));
+  const singers = [...previousSingers];
+  const pages = Array.isArray(previous.pages) ? [...previous.pages] : [];
+  const failures = Array.isArray(previous.failures) ? [...previous.failures] : [];
   let nextPageUrl = startUrl;
   let stop = null;
-  let rawRowCount = 0;
-  let duplicateRowCount = 0;
+  let rawRowCount = Number(previous.rawRowCount || pages.reduce((sum, page) => sum + (Number(page.rawRowCount) || 0), 0));
+  let duplicateRowCount = Number(previous.duplicateRowCount || 0);
   let noProgressPages = 0;
   let cursorLoopDetected = false;
   let noProgressDetected = false;
-  let observedSingerCount = null;
-  let previousHash = "";
+  let observedSingerCount = previous.observedSingerCount || null;
+  let previousHash = pages.at(-1)?.pageHash || "";
+  let runPageCount = 0;
 
-  while (nextPageUrl && pages.length < maxPages) {
+  while (nextPageUrl && runPageCount < maxPages) {
     const key = cursorKey(nextPageUrl);
     if (visitedCursorUrls.has(key)) {
       cursorLoopDetected = true;
@@ -65,6 +68,7 @@ async function crawlSingers(options = {}) {
     const parsed = parseSingersPage(response.body, nextPageUrl);
     observedSingerCount = parsed.observedSingerCount || observedSingerCount;
     rawRowCount += parsed.rawRowCount;
+    runPageCount += 1;
     if (parsed.pageHash === previousHash) {
       stop = stopRecord("same-page-hash-consecutive", { pageHash: parsed.pageHash, pageUrl: nextPageUrl });
       break;
@@ -118,7 +122,7 @@ async function crawlSingers(options = {}) {
     nextPageUrl = parsed.nextPageUrl;
   }
 
-  if (!stop && pages.length >= maxPages) stop = stopRecord("max-pages", { maxPages });
+  if (!stop && runPageCount >= maxPages) stop = stopRecord("max-pages", { maxPages, runPageCount, totalPageCount: pages.length });
 
   const coverageStatus =
     cursorLoopDetected ? "cursor-loop" : noProgressDetected ? "no-progress" : stop?.reason === "no-next-cursor" && (!observedSingerCount || knownSingerIds.size >= observedSingerCount) ? "complete" : "partial";

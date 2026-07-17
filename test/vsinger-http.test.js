@@ -12,6 +12,7 @@ const { applyMcpSupplement, buildNormalizedBundle, dedupeOccurrences } = require
 const { parseRobotsTxt, isAllowed, crawlDelaySeconds } = require("../scripts/vsinger-http/robots");
 const { crawlSongs } = require("../scripts/vsinger-http/crawl-songs");
 const { crawlStreams } = require("../scripts/vsinger-http/crawl-streams");
+const { crawlSingers } = require("../scripts/vsinger-http/crawl-singers");
 const { crawlSingerSongs } = require("../scripts/vsinger-http/crawl-singer-songs");
 const { parseSingerDetailPage, parseSingersPage, parseSongOccurrencesPage, parseSongsPage, parseStreamsPage, parseVideoDetailPage } = require("../scripts/vsinger-http/parsers");
 
@@ -23,6 +24,7 @@ const VIDEO_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const VIDEO_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const VIDEO_C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
 const SINGER_A = "f404dd51-2f38-499a-88f7-faf5d897d1ba";
+const SINGER_B = "99999999-9999-4999-8999-999999999999";
 
 test("robots parser allows public catalog routes and blocks API", () => {
   const policy = parseRobotsTxt(`
@@ -64,6 +66,38 @@ test("singers parser extracts cards and detail aggregate metadata", () => {
   assert.equal(detail.repertoireSongCount, 1656);
   assert.equal(detail.totalSingingCount, 4122);
   assert.equal(detail.youtubeChannelId, "UCB1s_IdO-r0nUkY2mXeti-A");
+});
+
+test("singer crawler keeps cumulative outputs across checkpoint resume", async () => {
+  const dir = tempDir("singers-resume");
+  const first = await crawlSingers({
+    client: mockClient({
+      "https://vsinger-moment.jp/singers": singersPageHtml({ cursor: "resume-singers", cards: [singerCard()] }),
+      "https://vsinger-moment.jp/singers?cursor=resume-singers": singersPageHtml({ cards: [singerCard(SINGER_B, "歌手B")] }),
+    }),
+    robots: allowedRobots(),
+    fresh: true,
+    "max-pages": 1,
+    "output-dir": dir,
+  });
+  const second = await crawlSingers({
+    client: mockClient({
+      "https://vsinger-moment.jp/singers": singersPageHtml({ cursor: "resume-singers", cards: [singerCard()] }),
+      "https://vsinger-moment.jp/singers?cursor=resume-singers": singersPageHtml({ cards: [singerCard(SINGER_B, "歌手B")] }),
+    }),
+    robots: allowedRobots(),
+    "max-pages": 1,
+    "output-dir": dir,
+  });
+  const singers = readJson(path.join(dir, "singers.json"));
+
+  assert.equal(first.uniqueSingerCount, 1);
+  assert.equal(second.pageCount, 2);
+  assert.equal(second.uniqueSingerCount, 2);
+  assert.deepEqual(
+    singers.map((singer) => singer.externalSingerId),
+    [SINGER_A, SINGER_B],
+  );
 });
 
 test("songs parser extracts homepage and cursor rows", () => {
@@ -286,6 +320,26 @@ test("song crawler resumes from checkpoint cursor and known IDs", async () => {
   assert.equal(result.songs[0].externalSongId, SONG_B);
 });
 
+test("song crawler keeps cumulative outputs across checkpoint resume", async () => {
+  const dir = tempDir("song-cumulative-resume");
+  const pages = {
+    "https://vsinger-moment.jp/songs": songsPageHtml({ cursor: "resume-song", songs: [songCard(SONG_A, "A", "Artist")], observedCount: 2 }),
+    "https://vsinger-moment.jp/songs?cursor=resume-song": songsPageHtml({ songs: [songCard(SONG_B, "B", "Artist")], observedCount: 2 }),
+  };
+
+  const first = await crawlSongs({ client: mockClient(pages), robots: allowedRobots(), fresh: true, "max-pages": 1, "output-dir": dir });
+  const second = await crawlSongs({ client: mockClient(pages), robots: allowedRobots(), "max-pages": 1, "output-dir": dir });
+  const songs = readJson(path.join(dir, "songs.json"));
+
+  assert.equal(first.uniqueSongCount, 1);
+  assert.equal(second.pageCount, 2);
+  assert.equal(second.uniqueSongCount, 2);
+  assert.deepEqual(
+    songs.map((song) => song.externalSongId),
+    [SONG_A, SONG_B],
+  );
+});
+
 test("HTTP client retries 429, pauses on 403, and reuses ETag cache", async () => {
   let calls = 0;
   const retryClient = new VsingerHttpClient({
@@ -384,6 +438,27 @@ test("stream crawler writes setlist song catalog and sync state", async () => {
   assert.equal(manifest.counts.songs, 2);
   assert.equal(manifest.shards.syncState[0].file, "syncState.json");
   assert.equal(bundleSongs[0].displayTitle, "Arrietty's Song");
+});
+
+test("stream crawler keeps cumulative outputs across checkpoint resume", async () => {
+  const dir = tempDir("stream-cumulative-resume");
+  const pages = {
+    "https://vsinger-moment.jp/streams": streamsPageHtml({ cursor: "resume-stream", cards: [streamCardWithSetlist()] }),
+    "https://vsinger-moment.jp/streams?cursor=resume-stream": streamsPageHtml({ cards: [streamCardWithSetlist(VIDEO_C, "dQw4w9WgXcQ")] }),
+  };
+
+  const first = await crawlStreams({ client: mockClient(pages), robots: allowedRobots(), fresh: true, "max-pages": 1, "output-dir": dir });
+  const second = await crawlStreams({ client: mockClient(pages), robots: allowedRobots(), "max-pages": 1, "output-dir": dir });
+  const videos = readJson(path.join(dir, "videos.json"));
+
+  assert.equal(first.uniqueVideoCount, 1);
+  assert.equal(second.pageCount, 2);
+  assert.equal(second.uniqueVideoCount, 2);
+  assert.equal(second.occurrenceCount, 6);
+  assert.deepEqual(
+    videos.map((video) => video.externalVideoId),
+    [VIDEO_A, VIDEO_C],
+  );
 });
 
 test("backfill bundle builder merges stage outputs and writes coverage report", () => {
@@ -560,23 +635,24 @@ function songCard(id, title, artist, detailQuery = "") {
 <a href="https://www.youtube.com/watch?v=yCpZHgTbZxg">原曲</a></div></div>`;
 }
 
-function singersPageHtml({ cursor = "" }) {
+function singersPageHtml({ cursor = "", cards = [singerCard()] }) {
   return `<!doctype html><html><head><meta name="description" content="393名のVTuber・VSingerの歌唱活動を完全網羅！"></head><body>
-<main><div class="grid">${singerCard()}</div>
+<main><div class="grid">${cards.join("")}</div>
 ${cursor ? `<a class="w-full" href="/singers?cursor=${cursor}" data-discover="true">次のページを読み込む</a>` : ""}
 </main></body></html>`;
 }
 
-function singerCard() {
+function singerCard(id = SINGER_A, name = "獅子神レオナ/レオナちゃんねる") {
+  const encodedName = encodeURIComponent(name);
   return `<div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-200 flex flex-col h-full">
-<img src="https://yt3.ggpht.com/leona=s800-c-k-c0x00ffffff-no-rj" alt="獅子神レオナ/レオナちゃんねる"/>
-<div class="p-4 space-y-3 flex-1 flex flex-col"><div><h2 class="text-xl font-semibold text-gray-900">獅子神レオナ/レオナちゃんねる</h2></div>
+<img src="https://yt3.ggpht.com/leona=s800-c-k-c0x00ffffff-no-rj" alt="${name}"/>
+<div class="p-4 space-y-3 flex-1 flex flex-col"><div><h2 class="text-xl font-semibold text-gray-900">${name}</h2></div>
 <p class="text-gray-600 text-sm line-clamp-2">わいるど、がお～！</p>
 <span class="inline-block px-2 py-0.5 text-xs bg-purple-50 text-purple-700 rounded-full">バラード系楽曲が得意</span>
 <div><span title="最終配信">2026/7/17</span><span title="総歌唱数">4122<!-- -->回</span><span title="配信動画数">221<!-- -->本</span><span title="レパートリー数">1656<!-- -->曲</span></div>
-<a class="flex-1" href="/singers/${SINGER_A}" data-discover="true">詳細を見る</a>
-<a title="楽曲一覧" href="/songs?singerId=${SINGER_A}&amp;singerName=%E7%8D%85%E5%AD%90%E7%A5%9E%E3%83%AC%E3%82%AA%E3%83%8A%2F%E3%83%AC%E3%82%AA%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93%E3%81%AD%E3%82%8B">楽曲</a>
-<a title="配信一覧" href="/streams?singerId=${SINGER_A}&amp;singerName=%E7%8D%85%E5%AD%90%E7%A5%9E%E3%83%AC%E3%82%AA%E3%83%8A%2F%E3%83%AC%E3%82%AA%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93%E3%81%AD%E3%82%8B">配信</a>
+<a class="flex-1" href="/singers/${id}" data-discover="true">詳細を見る</a>
+<a title="楽曲一覧" href="/songs?singerId=${id}&amp;singerName=${encodedName}">楽曲</a>
+<a title="配信一覧" href="/streams?singerId=${id}&amp;singerName=${encodedName}">配信</a>
 <a href="https://www.youtube.com/channel/UCB1s_IdO-r0nUkY2mXeti-A">YouTube</a>
 </div></div>`;
 }
@@ -597,17 +673,16 @@ function singerDetailHtml() {
 </body></html>`;
 }
 
-function streamsPageHtml({ cursor = "" }) {
+function streamsPageHtml({ cursor = "", cards = [streamCardWithSetlist(), streamCardNoSetlist()] }) {
   return `<!doctype html><html><body>
-${streamCardWithSetlist()}
-${streamCardNoSetlist()}
+${cards.join("")}
 ${cursor ? `<a class="w-full" href="/streams?cursor=${cursor}" data-discover="true">次のページを読み込む</a>` : ""}
 </body></html>`;
 }
 
-function streamCardWithSetlist() {
+function streamCardWithSetlist(videoId = VIDEO_A, youtubeId = "PwEG0NtOoxE") {
   return `<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col"><div class="p-4">
-<img src="https://i.ytimg.com/vi/PwEG0NtOoxE/default.jpg" alt="video a"/>
+<img src="https://i.ytimg.com/vi/${youtubeId}/default.jpg" alt="video a"/>
 <a href="/singers/singer-a">宮守ゆり</a><h3 class="text-xs">星海のメロウ歌枠リレー</h3>
 <div class="text-xs text-gray-500"><svg class="lucide-calendar"></svg>2026/7/17</div>
 <details open><summary>セットリスト（<!-- -->3<!-- -->曲）</summary>
@@ -615,8 +690,8 @@ function streamCardWithSetlist() {
 <div class="text-xs text-gray-700 py-1"><span class="font-mono">00:14:30</span><a href="/songs/${SONG_B}">世界の約束</a></div>
 <div class="text-xs text-gray-700 py-1"><span class="font-mono">00:27:00</span><a href="/songs/${SONG_A}">Arrietty&#x27;s Song</a></div>
 </details>
-<a class="flex-1" href="/videos/${VIDEO_A}" data-discover="true">詳細を見る</a>
-<a href="https://www.youtube.com/watch?v=PwEG0NtOoxE">YouTube</a>
+<a class="flex-1" href="/videos/${videoId}" data-discover="true">詳細を見る</a>
+<a href="https://www.youtube.com/watch?v=${youtubeId}">YouTube</a>
 </div></div>`;
 }
 

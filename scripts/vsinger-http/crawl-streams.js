@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const path = require("node:path");
 
-const { writeJson, writeShardedBundle } = require("./bundle-writer");
+const { readJson, writeJson, writeShardedBundle } = require("./bundle-writer");
 const {
   createClient,
   cursorKey,
@@ -25,29 +25,35 @@ async function crawlStreams(options = {}) {
   const checkpoint = args.fresh ? null : loadCheckpoint(checkpointPath);
   const maxPages = args["max-pages"] ? Number(args["max-pages"]) : Infinity;
   const startUrl = args["start-url"] || checkpoint?.nextPageUrl || "https://vsinger-moment.jp/streams";
-  const watermark = args["stream-watermark"] || checkpoint?.streamWatermark || "";
+  const previous = args.fresh ? {} : readJson(path.join(outputDir, "crawl.json"), {});
+  const previousVideos = args.fresh ? [] : readJson(path.join(outputDir, "videos.json"), previous.videos || []);
+  const previousDetailQueue = args.fresh ? [] : readJson(path.join(outputDir, "detail-queue.json"), previous.detailQueue || []);
+  const stopWatermark = args["stream-watermark"] || "";
 
   const robots = args.robots || (await loadRobots(client));
   ensureRobotsAllowed(robots, "streams");
 
   const visitedCursorUrls = new Set(checkpoint?.visitedCursorUrls || []);
   const visitedPageHashes = new Set(checkpoint?.visitedPageHashes || []);
-  const knownVideoKeys = new Set((checkpoint?.knownExternalVideoIds || []).map((id) => `external:${id}`));
-  const videos = [];
-  const detailQueue = [];
-  const pages = [];
-  const failures = [];
+  const checkpointVideoKeys = (checkpoint?.knownExternalVideoIds || []).map((id) => `external:${id}`);
+  const previousVideoKeys = previousVideos.map((video) => video.youtubeVideoId || `external:${video.externalVideoId}`);
+  const knownVideoKeys = new Set([...checkpointVideoKeys, ...previousVideoKeys]);
+  const videos = [...previousVideos];
+  const detailQueue = [...previousDetailQueue];
+  const pages = Array.isArray(previous.pages) ? [...previous.pages] : [];
+  const failures = Array.isArray(previous.failures) ? [...previous.failures] : [];
   let nextPageUrl = startUrl;
   let stop = null;
-  let rawRowCount = 0;
-  let duplicateRowCount = 0;
+  let rawRowCount = Number(previous.rawRowCount || pages.reduce((sum, page) => sum + (Number(page.rawRowCount) || 0), 0));
+  let duplicateRowCount = Number(previous.duplicateRowCount || 0);
   let noProgressPages = 0;
   let cursorLoopDetected = false;
   let noProgressDetected = false;
-  let previousHash = "";
-  let streamWatermark = watermark;
+  let previousHash = pages.at(-1)?.pageHash || "";
+  let streamWatermark = stopWatermark || checkpoint?.streamWatermark || previous.streamWatermark || "";
+  let runPageCount = 0;
 
-  while (nextPageUrl && pages.length < maxPages) {
+  while (nextPageUrl && runPageCount < maxPages) {
     const key = cursorKey(nextPageUrl);
     if (visitedCursorUrls.has(key)) {
       cursorLoopDetected = true;
@@ -67,6 +73,7 @@ async function crawlStreams(options = {}) {
 
     const parsed = parseStreamsPage(response.body, nextPageUrl);
     rawRowCount += parsed.rawRowCount;
+    runPageCount += 1;
     if (parsed.pageHash === previousHash) {
       stop = stopRecord("same-page-hash-consecutive", { pageHash: parsed.pageHash, pageUrl: nextPageUrl });
       break;
@@ -81,8 +88,8 @@ async function crawlStreams(options = {}) {
         duplicateRowCount += 1;
         continue;
       }
-      if (watermark && video.streamedAt && video.streamedAt <= watermark) {
-        stop = stopRecord("stream-watermark", { streamWatermark: watermark, pageUrl: nextPageUrl });
+      if (stopWatermark && video.streamedAt && video.streamedAt <= stopWatermark) {
+        stop = stopRecord("stream-watermark", { streamWatermark: stopWatermark, pageUrl: nextPageUrl });
         break;
       }
       knownVideoKeys.add(videoKey);
@@ -131,7 +138,7 @@ async function crawlStreams(options = {}) {
     nextPageUrl = parsed.nextPageUrl;
   }
 
-  if (!stop && pages.length >= maxPages) stop = stopRecord("max-pages", { maxPages });
+  if (!stop && runPageCount >= maxPages) stop = stopRecord("max-pages", { maxPages, runPageCount, totalPageCount: pages.length });
 
   const uniqueVideos = dedupeVideos(videos);
   const occurrences = dedupeOccurrences(uniqueVideos.flatMap(occurrenceEntitiesFromVideo));
