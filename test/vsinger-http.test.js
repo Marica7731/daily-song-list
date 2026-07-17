@@ -12,13 +12,17 @@ const { applyMcpSupplement, buildNormalizedBundle, dedupeOccurrences } = require
 const { parseRobotsTxt, isAllowed, crawlDelaySeconds } = require("../scripts/vsinger-http/robots");
 const { crawlSongs } = require("../scripts/vsinger-http/crawl-songs");
 const { crawlStreams } = require("../scripts/vsinger-http/crawl-streams");
-const { parseSongsPage, parseStreamsPage, parseVideoDetailPage } = require("../scripts/vsinger-http/parsers");
+const { crawlSingerSongs } = require("../scripts/vsinger-http/crawl-singer-songs");
+const { parseSingerDetailPage, parseSingersPage, parseSongOccurrencesPage, parseSongsPage, parseStreamsPage, parseVideoDetailPage } = require("../scripts/vsinger-http/parsers");
 
 const SONG_A = "11111111-1111-4111-8111-111111111111";
 const SONG_B = "22222222-2222-4222-8222-222222222222";
 const SONG_C = "33333333-3333-4333-8333-333333333333";
+const SONG_D = "44444444-4444-4444-8444-444444444444";
 const VIDEO_A = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const VIDEO_B = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+const VIDEO_C = "cccccccc-cccc-4ccc-8ccc-cccccccccccc";
+const SINGER_A = "f404dd51-2f38-499a-88f7-faf5d897d1ba";
 
 test("robots parser allows public catalog routes and blocks API", () => {
   const policy = parseRobotsTxt(`
@@ -26,6 +30,7 @@ User-agent: *
 Allow: /songs/
 Allow: /streams/
 Allow: /videos/
+Allow: /singers/
 Disallow: /api/
 Disallow: /*?*singerId=
 Disallow: /*?*singerName=
@@ -34,11 +39,31 @@ Crawl-delay: 1
 
   assert.equal(isAllowed(policy, "/songs?cursor=abc"), true);
   assert.equal(isAllowed(policy, "/streams?cursor=abc"), true);
+  assert.equal(isAllowed(policy, "/singers?cursor=abc"), true);
+  assert.equal(isAllowed(policy, `/singers/${SINGER_A}`), true);
   assert.equal(isAllowed(policy, "/songs?singerId=f404dd51-2f38-499a-88f7-faf5d897d1ba"), false);
   assert.equal(isAllowed(policy, "/songs/17f05e2a-68af-492f-864c-dad7e35e0985?singerId=f404dd51-2f38-499a-88f7-faf5d897d1ba"), false);
   assert.equal(isAllowed(policy, "/streams?singerName=%E7%8D%85%E5%AD%90%E7%A5%9E"), false);
   assert.equal(isAllowed(policy, "/api/private"), false);
   assert.equal(crawlDelaySeconds(policy), 1);
+});
+
+test("singers parser extracts cards and detail aggregate metadata", () => {
+  const list = parseSingersPage(singersPageHtml({ cursor: "next-singers" }));
+  const detail = parseSingerDetailPage(singerDetailHtml(), `https://vsinger-moment.jp/singers/${SINGER_A}`);
+
+  assert.equal(list.observedSingerCount, 393);
+  assert.equal(list.singers.length, 1);
+  assert.equal(list.singers[0].externalSingerId, SINGER_A);
+  assert.equal(list.singers[0].singerName, "獅子神レオナ/レオナちゃんねる");
+  assert.equal(list.singers[0].totalSingingCount, 4122);
+  assert.equal(list.singers[0].streamVideoCount, 221);
+  assert.equal(list.singers[0].repertoireSongCount, 1656);
+  assert.equal(new URL(list.singers[0].singerSongsUrl).searchParams.get("singerId"), SINGER_A);
+  assert.equal(list.nextPageUrl, "https://vsinger-moment.jp/singers?cursor=next-singers");
+  assert.equal(detail.repertoireSongCount, 1656);
+  assert.equal(detail.totalSingingCount, 4122);
+  assert.equal(detail.youtubeChannelId, "UCB1s_IdO-r0nUkY2mXeti-A");
 });
 
 test("songs parser extracts homepage and cursor rows", () => {
@@ -81,6 +106,51 @@ test("video detail parser fills setlist artists and repeated same-song occurrenc
   assert.equal(parsed.setlistSongs[0].rawArtist, "セシル・コルベル");
   assert.equal(parsed.setlistSongs[2].externalSongId, SONG_A);
   assert.equal(parsed.setlistSongs[2].seconds, 1620);
+});
+
+test("singer-scoped song details parse occurrence history and require owner permission for crawl", async () => {
+  const parsed = parseSongOccurrencesPage(songOccurrenceDetailHtml(), `https://vsinger-moment.jp/songs/${SONG_D}?singerId=${SINGER_A}`);
+  assert.equal(parsed.historyCount, 2);
+  assert.equal(parsed.occurrences.length, 2);
+  assert.equal(parsed.occurrences[0].externalVideoId, VIDEO_A);
+  assert.equal(parsed.occurrences[0].youtubeVideoId, "PwEG0NtOoxE");
+  assert.equal(parsed.occurrences[0].seconds, 360);
+
+  const client = mockClient({
+    [`https://vsinger-moment.jp/songs?singerId=${SINGER_A}&singerName=${encodeURIComponent("獅子神レオナ/レオナちゃんねる")}`]: songsPageHtml({
+      songs: [songCard(SONG_D, "フィナーレ", "eill", `?singerId=${SINGER_A}`)],
+      observedCount: 1,
+    }),
+    [`https://vsinger-moment.jp/songs/${SONG_D}?singerId=${SINGER_A}`]: songOccurrenceDetailHtml(),
+  });
+
+  await assert.rejects(
+    () =>
+      crawlSingerSongs({
+        client,
+        robots: allowedRobots(),
+        "singer-id": SINGER_A,
+        "singer-name": "獅子神レオナ/レオナちゃんねる",
+        "output-dir": tempDir("singer-songs-no-permission"),
+      }),
+    /owner-permission/,
+  );
+
+  const result = await crawlSingerSongs({
+    client,
+    robots: allowedRobots(),
+    "owner-permission": true,
+    "singer-id": SINGER_A,
+    "singer-name": "獅子神レオナ/レオナちゃんねる",
+    "max-song-pages": 1,
+    "max-song-details": 1,
+    "output-dir": tempDir("singer-songs"),
+  });
+
+  assert.equal(result.ownerPermission.enabled, true);
+  assert.equal(result.uniqueSongCount, 1);
+  assert.equal(result.uniqueVideoCount, 2);
+  assert.equal(result.occurrenceCount, 2);
 });
 
 test("YouTube parser never treats VSinger UUIDs as YouTube IDs", () => {
@@ -257,6 +327,7 @@ test("backfill bundle builder merges stage outputs and writes coverage report", 
   const songsDir = path.join(root, "songs");
   const streamsDir = path.join(root, "streams");
   const videoDetailsDir = path.join(root, "video-details");
+  const singerSongsDir = path.join(root, "singer-songs");
   const outputDir = path.join(root, "bundle");
   const streamVideos = parseStreamsPage(streamsPageHtml({})).videos;
   const detailVideo = parseVideoDetailPage(videoDetailHtml(), `https://vsinger-moment.jp/videos/${VIDEO_A}`);
@@ -318,25 +389,68 @@ test("backfill bundle builder merges stage outputs and writes coverage report", 
     requestStats: { requestCount: 1, averageHtmlBytes: 300, averageResponseTimeMs: 30, totalBytes: 300 },
     pages: [{ bytes: 300, elapsedMs: 30 }],
   });
+  writeJson(path.join(singerSongsDir, "songs.json"), [
+    {
+      externalSongId: SONG_D,
+      title: "Singer Scoped",
+      originalArtist: "Singer Artist",
+      songPageUrl: `https://vsinger-moment.jp/songs/${SONG_D}?singerId=${SINGER_A}`,
+    },
+  ]);
+  writeJson(path.join(singerSongsDir, "videos.json"), [
+    {
+      externalVideoId: VIDEO_C,
+      youtubeVideoId: "dQw4w9WgXcQ",
+      youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      videoPageUrl: `https://vsinger-moment.jp/videos/${VIDEO_C}`,
+      videoTitle: "Singer scoped stream",
+      singerId: SINGER_A,
+      singerName: "獅子神レオナ/レオナちゃんねる",
+      streamedAt: "2025-12-23",
+      setlistStatus: "partial",
+      setlistSongs: [{ externalSongId: SONG_D, rawTitle: "Singer Scoped", rawArtist: "Singer Artist", seconds: 360, timestampText: "00:06:00", songPageUrl: `https://vsinger-moment.jp/songs/${SONG_D}` }],
+    },
+  ]);
+  writeJson(path.join(singerSongsDir, "crawl.json"), {
+    kind: "vsinger-moment-http-singer-songs-crawl",
+    generatedAt: "2026-07-17T00:00:00.000Z",
+    coverageStatus: "partial",
+    singersProcessed: 1,
+    pageCount: 1,
+    detailPageCount: 1,
+    uniqueSongCount: 1,
+    uniqueVideoCount: 1,
+    occurrenceCount: 1,
+    ownerPermission: { enabled: true, note: "test" },
+    requestStats: { requestCount: 2, averageHtmlBytes: 150, averageResponseTimeMs: 15, totalBytes: 300 },
+    pages: [{ bytes: 100, elapsedMs: 10 }, { bytes: 200, elapsedMs: 20 }],
+  });
+  writeJson(path.join(singerSongsDir, "sync-state.json"), {
+    lastSuccessfulSingerSongsCrawl: { coverageStatus: "partial" },
+    ownerPermission: { enabled: true, note: "test" },
+  });
 
   const { bundle, manifest } = buildBackfillBundle({
     "songs-dir": songsDir,
     "streams-dir": streamsDir,
     "video-details-dir": videoDetailsDir,
+    "singer-songs-dir": singerSongsDir,
     "output-dir": outputDir,
     generatedAt: "2026-07-17T00:00:00.000Z",
   });
   const report = readJson(path.join(outputDir, "backfill-report.json"));
   const syncState = readJson(path.join(outputDir, "syncState.json"));
 
-  assert.equal(bundle.counts.songs, 3);
-  assert.equal(bundle.counts.videos, 2);
-  assert.equal(bundle.counts.occurrences, 3);
+  assert.equal(bundle.counts.songs, 4);
+  assert.equal(bundle.counts.videos, 3);
+  assert.equal(bundle.counts.occurrences, 4);
   assert.equal(bundle.counts.conflicts, 0);
   assert.equal(bundle.coverage.stages.songs.coverageStatus, "count-mismatch");
   assert.equal(bundle.coverage.savings.avoidedVideoDetailRequestsByListSetlists, 1);
+  assert.equal(bundle.coverage.stages.singerSongs.ownerPermission.enabled, true);
+  assert.equal(bundle.coverage.savings.singerScopedOccurrencesImported, 1);
   assert.equal(manifest.shards.coverage[0].file, "coverage.json");
-  assert.equal(report.coverage.requestStats.requestCount, 3);
+  assert.equal(report.coverage.requestStats.requestCount, 5);
   assert.equal(syncState.knownSongIds.includes(SONG_C), true);
   assert.equal(fs.existsSync(path.join(outputDir, "backfill-report.md")), true);
 });
@@ -372,13 +486,50 @@ ${cursor ? `<a class="w-full" href="/songs?cursor=${cursor}" data-discover="true
 </main></body></html>`;
 }
 
-function songCard(id, title, artist) {
+function songCard(id, title, artist, detailQuery = "") {
   return `<div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-200 flex flex-col h-full">
 <div class="p-5 space-y-3 flex-1 flex flex-col"><div class="flex-1"><h2 class="text-lg">${title}</h2><p class="text-sm">${artist}</p></div>
 <span title="歌唱回数">2569<!-- -->回歌唱</span><span title="最新歌唱日">2026/7/15</span>
 <span class="truncate">最近:<!-- --> <a href="/singers/singer-a">むんもっしゅ</a></span>
-<a class="flex-1" href="/songs/${id}" data-discover="true">詳細を見る</a>
+<a class="flex-1" href="/songs/${id}${detailQuery}" data-discover="true">詳細を見る</a>
 <a href="https://www.youtube.com/watch?v=yCpZHgTbZxg">原曲</a></div></div>`;
+}
+
+function singersPageHtml({ cursor = "" }) {
+  return `<!doctype html><html><head><meta name="description" content="393名のVTuber・VSingerの歌唱活動を完全網羅！"></head><body>
+<main><div class="grid">${singerCard()}</div>
+${cursor ? `<a class="w-full" href="/singers?cursor=${cursor}" data-discover="true">次のページを読み込む</a>` : ""}
+</main></body></html>`;
+}
+
+function singerCard() {
+  return `<div class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden border border-gray-200 flex flex-col h-full">
+<img src="https://yt3.ggpht.com/leona=s800-c-k-c0x00ffffff-no-rj" alt="獅子神レオナ/レオナちゃんねる"/>
+<div class="p-4 space-y-3 flex-1 flex flex-col"><div><h2 class="text-xl font-semibold text-gray-900">獅子神レオナ/レオナちゃんねる</h2></div>
+<p class="text-gray-600 text-sm line-clamp-2">わいるど、がお～！</p>
+<span class="inline-block px-2 py-0.5 text-xs bg-purple-50 text-purple-700 rounded-full">バラード系楽曲が得意</span>
+<div><span title="最終配信">2026/7/17</span><span title="総歌唱数">4122<!-- -->回</span><span title="配信動画数">221<!-- -->本</span><span title="レパートリー数">1656<!-- -->曲</span></div>
+<a class="flex-1" href="/singers/${SINGER_A}" data-discover="true">詳細を見る</a>
+<a title="楽曲一覧" href="/songs?singerId=${SINGER_A}&amp;singerName=%E7%8D%85%E5%AD%90%E7%A5%9E%E3%83%AC%E3%82%AA%E3%83%8A%2F%E3%83%AC%E3%82%AA%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93%E3%81%AD%E3%82%8B">楽曲</a>
+<a title="配信一覧" href="/streams?singerId=${SINGER_A}&amp;singerName=%E7%8D%85%E5%AD%90%E7%A5%9E%E3%83%AC%E3%82%AA%E3%83%8A%2F%E3%83%AC%E3%82%AA%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93%E3%81%AD%E3%82%8B">配信</a>
+<a href="https://www.youtube.com/channel/UCB1s_IdO-r0nUkY2mXeti-A">YouTube</a>
+</div></div>`;
+}
+
+function singerDetailHtml() {
+  return `<!doctype html><html><head>
+<title>獅子神レオナ/レオナちゃんねる | VTuber・VSinger歌唱データベース - VSinger Moment</title>
+<meta name="description" content="獅子神レオナ/レオナちゃんねるの歌枠・歌ってみた動画を完全網羅！1656曲のレパートリーを4122回歌唱。"/>
+<meta property="og:url" content="https://vsinger-moment.jp/singers/${SINGER_A}"/>
+</head><body>
+<h1>獅子神レオナ/レオナちゃんねる</h1>
+<img src="https://yt3.ggpht.com/leona=s800-c-k-c0x00ffffff-no-rj" alt="獅子神レオナ/レオナちゃんねる"/>
+<a href="https://www.youtube.com/channel/UCB1s_IdO-r0nUkY2mXeti-A">YouTube</a>
+<div><div>221</div><div>歌枠動画</div></div><div><div>1656</div><div>レパートリー</div></div><div><div>4122</div><div>歌唱数</div></div>
+<a href="/songs?singerId=${SINGER_A}&amp;singerName=%E7%8D%85%E5%AD%90%E7%A5%9E%E3%83%AC%E3%82%AA%E3%83%8A%2F%E3%83%AC%E3%82%AA%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93%E3%81%AD%E3%82%8B">楽曲を探す</a>
+<a href="/streams?singerId=${SINGER_A}&amp;singerName=%E7%8D%85%E5%AD%90%E7%A5%9E%E3%83%AC%E3%82%AA%E3%83%8A%2F%E3%83%AC%E3%82%AA%E3%83%8A%E3%81%A1%E3%82%83%E3%82%93%E3%81%AD%E3%82%8B">歌枠を探す</a>
+<script type="application/ld+json">{"dateModified":"2026-07-16T02:01:50.141Z","lastReviewed":"2026-07-18T04:01:07.455Z"}</script>
+</body></html>`;
 }
 
 function streamsPageHtml({ cursor = "" }) {
@@ -428,6 +579,29 @@ ${videoDetailRow("00:27:00", SONG_A, "Arrietty&#x27;s Song", "セシル・コル
 </body></html>`;
 }
 
+function songOccurrenceDetailHtml() {
+  return `<!doctype html><html><head>
+<meta property="og:url" content="https://vsinger-moment.jp/songs/${SONG_D}"/>
+<title>フィナーレ / eill - VSinger Moment</title>
+</head><body>
+<h1>フィナーレ</h1><p>eill</p>
+<div>7 回歌われています</div><div>1 人が歌っています</div>
+<section><h2>歌唱履歴</h2><p>全 2 件</p>
+<div class="group border border-gray-200 rounded-lg">
+<a href="/singers/${SINGER_A}">獅子神レオナ/レオナちゃんねる</a>
+<a href="/videos/${VIDEO_A}">一時間だけ歌っちゃいますか</a>
+<span>2025/12/23</span><span>00:06:00</span>
+<a href="https://www.youtube.com/watch?v=PwEG0NtOoxE&amp;t=360s">YouTube</a>
+</div>
+<div class="group border border-gray-200 rounded-lg">
+<a href="/singers/${SINGER_A}">獅子神レオナ/レオナちゃんねる</a>
+<a href="/videos/${VIDEO_C}">睡眠は大事だよ</a>
+<span>2025/11/17</span><span>00:07:30</span>
+<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ&amp;t=450s">YouTube</a>
+</div>
+</section></body></html>`;
+}
+
 function videoDetailRow(time, songId, title, artist, seconds) {
   return `<div class="group border border-gray-200 rounded-lg"><button title="サイト内で視聴"><span class="text-[10px]">${time}</span></button>
 <h3>${title}</h3><p class="text-xs md:text-sm text-gray-600 leading-tight">${artist}</p>
@@ -439,6 +613,9 @@ function allowedRobots() {
   return {
     songsAllowed: true,
     streamsAllowed: true,
+    singersAllowed: true,
+    singerSongsQueryAllowed: false,
+    singerStreamsQueryAllowed: false,
     videosAllowed: true,
     apiAllowed: false,
     crawlDelay: 1,

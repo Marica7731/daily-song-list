@@ -39,13 +39,16 @@ async function loadRobots(client) {
     crawlDelay,
     songsAllowed: isAllowed(policy, "/songs", client.userAgent) && isAllowed(policy, "/songs?cursor=test", client.userAgent),
     streamsAllowed: isAllowed(policy, "/streams", client.userAgent) && isAllowed(policy, "/streams?cursor=test", client.userAgent),
+    singersAllowed: isAllowed(policy, "/singers", client.userAgent) && isAllowed(policy, "/singers?cursor=test", client.userAgent) && isAllowed(policy, "/singers/test", client.userAgent),
+    singerSongsQueryAllowed: isAllowed(policy, "/songs?singerId=test", client.userAgent),
+    singerStreamsQueryAllowed: isAllowed(policy, "/streams?singerId=test", client.userAgent),
     videosAllowed: isAllowed(policy, "/videos/test", client.userAgent),
     apiAllowed: isAllowed(policy, "/api/test", client.userAgent),
   };
 }
 
 function ensureRobotsAllowed(robots, route) {
-  const key = route === "songs" ? "songsAllowed" : route === "streams" ? "streamsAllowed" : "videosAllowed";
+  const key = route === "songs" ? "songsAllowed" : route === "streams" ? "streamsAllowed" : route === "singers" ? "singersAllowed" : "videosAllowed";
   if (!robots[key]) {
     const error = new Error(`robots.txt does not allow /${route}; production crawl stopped.`);
     error.code = "ROBOTS_DISALLOW";

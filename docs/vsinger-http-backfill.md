@@ -23,7 +23,9 @@ Disallow: /*?*singerId=
 Disallow: /*?*singerName=
 ```
 
-Do not use singer-scoped query pages for production crawling unless `robots.txt` changes or the site owner gives explicit permission. They are acceptable only as manual investigation evidence. The automated crawler must continue to use robots-allowed public routes and MCP as the supplemental gap-fill path.
+Do not use singer-scoped query pages for production crawling unless `robots.txt` changes or the site owner gives explicit permission. When explicit owner permission exists, run the singer-scoped crawler with `--owner-permission` or `VSINGER_OWNER_PERMISSION=1`; the run report records this permission gate in `ownerPermission`. Without that flag, the crawler stops before requesting singer query URLs.
+
+The singer profile UI also exposes a CSV download button, but that export is not treated as the full backfill source because it is limited in row count and time range. Use it only as manual comparison evidence, not as the catalog or occurrence authority.
 
 ## Commands
 
@@ -43,6 +45,7 @@ Run small dry runs before full crawl:
 ```bash
 npm run vsinger:crawl:songs -- --max-pages 10
 npm run vsinger:crawl:streams -- --max-pages 10
+npm run vsinger:crawl:singers -- --max-pages 10
 ```
 
 Use `--fresh` when regenerating a report from the first page instead of resuming the saved checkpoint:
@@ -50,6 +53,7 @@ Use `--fresh` when regenerating a report from the first page instead of resuming
 ```bash
 npm run vsinger:crawl:songs -- --fresh --max-pages 10
 npm run vsinger:crawl:streams -- --fresh --max-pages 10
+npm run vsinger:crawl:singers -- --fresh --max-pages 10
 ```
 
 Run larger validation batches:
@@ -64,6 +68,19 @@ Run full crawls after the 10-page and 100-page reports are stable:
 ```bash
 npm run vsinger:crawl:songs
 npm run vsinger:crawl:streams
+npm run vsinger:crawl:singers
+```
+
+Run singer-scoped song and occurrence backfill only after explicit site-owner permission is confirmed:
+
+```bash
+npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --fetch-song-details
+```
+
+For bounded validation against one singer:
+
+```bash
+npm run vsinger:crawl:singer-songs -- --owner-permission --singer-id f404dd51-2f38-499a-88f7-faf5d897d1ba --singer-name "獅子神レオナ/レオナちゃんねる" --max-song-pages 1 --max-song-details 2
 ```
 
 Fetch only queued video details:
@@ -118,6 +135,11 @@ Dry-run and local crawl outputs are written under `artifacts/vsinger-http-backfi
 - `streams/checkpoint.json`
 - `streams/sync-state.json`
 - `video-details/video-details.json`
+- `singers/singers.json`
+- `singer-songs/songs.json`
+- `singer-songs/videos.json`
+- `singer-songs/occurrences.json`
+- `singer-songs/raw-occurrences.json`
 
 For per-stage VPS bundle generation, pass `--write-bundle`:
 
@@ -257,4 +279,4 @@ node --test test/vsinger-http.test.js
 npm run check
 ```
 
-The dedicated tests cover parser behavior, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, checkpoint resume, repeated same-song timestamps, and MCP supplement deduplication.
+The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, checkpoint resume, repeated same-song timestamps, and MCP supplement deduplication.

@@ -13,28 +13,35 @@ function buildBackfillBundle(options = {}) {
   const songsDir = args["songs-dir"] || path.join(rootDir, "songs");
   const streamsDir = args["streams-dir"] || path.join(rootDir, "streams");
   const videoDetailsDir = args["video-details-dir"] || path.join(rootDir, "video-details");
+  const singerSongsDir = args["singer-songs-dir"] || path.join(rootDir, "singer-songs");
   const outputDir = args["output-dir"] || path.resolve(process.cwd(), "data", "external", "vsinger-http", "backfill");
 
   const songsCrawl = readJson(path.join(songsDir, "crawl.json"), {});
   const streamsCrawl = readJson(path.join(streamsDir, "crawl.json"), {});
   const videoDetails = readJson(path.join(videoDetailsDir, "video-details.json"), {});
+  const singerSongsCrawl = readJson(path.join(singerSongsDir, "crawl.json"), {});
   const songsSyncState = readJson(path.join(songsDir, "sync-state.json"), {});
   const streamsSyncState = readJson(path.join(streamsDir, "sync-state.json"), {});
+  const singerSongsSyncState = readJson(path.join(singerSongsDir, "sync-state.json"), {});
 
   const catalogSongs = readJson(path.join(songsDir, "songs.json"), []);
+  const singerSongs = readJson(path.join(singerSongsDir, "songs.json"), []);
   const streamVideos = readJson(path.join(streamsDir, "videos.json"), streamsCrawl.videos || []);
   const detailVideos = readJson(path.join(videoDetailsDir, "videos.json"), videoDetails.videos || []);
+  const singerVideos = readJson(path.join(singerSongsDir, "videos.json"), singerSongsCrawl.videos || []);
   const detailQueue = readJson(path.join(streamsDir, "detail-queue.json"), streamsCrawl.detailQueue || []);
 
-  const videos = mergeVideoRecords([...streamVideos, ...detailVideos]);
-  const normalized = buildNormalizedBundle({ songs: catalogSongs, videos }, generatedAt);
-  const conflicts = songConflicts([...catalogSongs, ...songsFromVideos(videos)]);
-  const failures = collectFailures({ songsCrawl, streamsCrawl, videoDetails });
+  const videos = mergeVideoRecords([...streamVideos, ...detailVideos, ...singerVideos]);
+  const sourceSongs = [...catalogSongs, ...singerSongs];
+  const normalized = buildNormalizedBundle({ songs: sourceSongs, videos }, generatedAt);
+  const conflicts = songConflicts([...sourceSongs, ...songsFromVideos(videos)]);
+  const failures = collectFailures({ songsCrawl, streamsCrawl, videoDetails, singerSongsCrawl });
   const coverage = buildCoverage({
     generatedAt,
     songsCrawl,
     streamsCrawl,
     videoDetails,
+    singerSongsCrawl,
     detailQueue,
     conflicts,
     failures,
@@ -43,6 +50,7 @@ function buildBackfillBundle(options = {}) {
     generatedAt,
     songsSyncState,
     streamsSyncState,
+    singerSongsSyncState,
     songs: normalized.songs,
     videos: normalized.videos,
     coverage,
@@ -62,7 +70,7 @@ function buildBackfillBundle(options = {}) {
   };
 
   const manifest = writeShardedBundle(outputDir, bundle, { shardSize: Number(args["shard-size"]) || undefined });
-  const report = buildReport({ bundle, manifest, songsCrawl, streamsCrawl, videoDetails, detailQueue });
+  const report = buildReport({ bundle, manifest, songsCrawl, streamsCrawl, videoDetails, singerSongsCrawl, detailQueue });
   writeJson(path.join(outputDir, "backfill-report.json"), report);
   writeReportMarkdown(path.join(outputDir, "backfill-report.md"), report);
   console.log(`CODEX_VSINGER_BACKFILL_BUNDLE_OK songs=${bundle.counts.songs} videos=${bundle.counts.videos} occurrences=${bundle.counts.occurrences} status=${coverage.overallStatus}`);
@@ -155,12 +163,13 @@ function songConflicts(rawSongs) {
   return conflicts;
 }
 
-function collectFailures({ songsCrawl, streamsCrawl, videoDetails }) {
+function collectFailures({ songsCrawl, streamsCrawl, videoDetails, singerSongsCrawl }) {
   const failures = [];
   for (const [stage, payload] of [
     ["songs", songsCrawl],
     ["streams", streamsCrawl],
     ["video-details", videoDetails],
+    ["singer-songs", singerSongsCrawl],
   ]) {
     for (const failure of payload.failures || []) {
       failures.push({ stage, ...failure });
@@ -169,10 +178,10 @@ function collectFailures({ songsCrawl, streamsCrawl, videoDetails }) {
   return failures;
 }
 
-function buildCoverage({ generatedAt, songsCrawl, streamsCrawl, videoDetails, detailQueue, conflicts, failures }) {
+function buildCoverage({ generatedAt, songsCrawl, streamsCrawl, videoDetails, singerSongsCrawl, detailQueue, conflicts, failures }) {
   const detailQueueCount = detailQueue.length || streamsCrawl.detailQueue?.length || 0;
   const streamsVideoCount = streamsCrawl.uniqueVideoCount || streamsCrawl.videoCount || 0;
-  const requestStats = totalRequestStats([songsCrawl, streamsCrawl, videoDetails]);
+  const requestStats = totalRequestStats([songsCrawl, streamsCrawl, videoDetails, singerSongsCrawl]);
   const songsCoverageStatus = songsCrawl.coverageStatus || "missing";
   const streamsCoverageStatus = streamsCrawl.coverageStatus || "missing";
   const overallStatus = songsCoverageStatus === "complete" && streamsCoverageStatus === "complete" && failures.length === 0 ? "complete" : "partial";
@@ -200,6 +209,17 @@ function buildCoverage({ generatedAt, songsCrawl, streamsCrawl, videoDetails, de
         occurrenceCount: videoDetails.occurrenceCount || 0,
         requestStats: videoDetails.requestStats || emptyRequestStats(),
       },
+      singerSongs: {
+        coverageStatus: singerSongsCrawl.kind ? singerSongsCrawl.coverageStatus || "partial" : "missing",
+        singersProcessed: singerSongsCrawl.singersProcessed || 0,
+        pageCount: singerSongsCrawl.pageCount || 0,
+        detailPageCount: singerSongsCrawl.detailPageCount || 0,
+        uniqueSongCount: singerSongsCrawl.uniqueSongCount || 0,
+        uniqueVideoCount: singerSongsCrawl.uniqueVideoCount || 0,
+        occurrenceCount: singerSongsCrawl.occurrenceCount || 0,
+        ownerPermission: singerSongsCrawl.ownerPermission || null,
+        requestStats: singerSongsCrawl.requestStats || emptyRequestStats(),
+      },
     },
     requestStats,
     report: {
@@ -209,6 +229,7 @@ function buildCoverage({ generatedAt, songsCrawl, streamsCrawl, videoDetails, de
     savings: {
       avoidedBulkMcpGetSongRequests: songsCrawl.observedSiteSongCount || 0,
       avoidedVideoDetailRequestsByListSetlists: Math.max(0, streamsVideoCount - detailQueueCount),
+      singerScopedOccurrencesImported: singerSongsCrawl.occurrenceCount || 0,
     },
     conflictCount: conflicts.length,
     failureCount: failures.length,
@@ -274,7 +295,7 @@ function totalRequestStats(payloads) {
   );
 }
 
-function buildSyncState({ generatedAt, songsSyncState, streamsSyncState, songs, videos, coverage }) {
+function buildSyncState({ generatedAt, songsSyncState, streamsSyncState, singerSongsSyncState, songs, videos, coverage }) {
   const knownSongIds = dedupeSongs(songs).map((song) => song.externalSongId);
   return {
     schemaVersion: 1,
@@ -282,6 +303,8 @@ function buildSyncState({ generatedAt, songsSyncState, streamsSyncState, songs, 
     updatedAt: generatedAt,
     lastSuccessfulSongCrawl: songsSyncState.lastSuccessfulSongCrawl || null,
     lastSuccessfulStreamCrawl: streamsSyncState.lastSuccessfulStreamCrawl || null,
+    lastSuccessfulSingerSongsCrawl: singerSongsSyncState.lastSuccessfulSingerSongsCrawl || null,
+    ownerPermission: singerSongsSyncState.ownerPermission || null,
     streamWatermark: streamsSyncState.streamWatermark || "",
     knownSongIds,
     knownExternalVideoIds: videos.map((video) => video.externalVideoId).filter(Boolean),
@@ -294,11 +317,12 @@ function buildSyncState({ generatedAt, songsSyncState, streamsSyncState, songs, 
       songs: coverage.stages.songs.coverageStatus,
       streams: coverage.stages.streams.coverageStatus,
       videoDetails: coverage.stages.videoDetails.coverageStatus,
+      singerSongs: coverage.stages.singerSongs.coverageStatus,
     },
   };
 }
 
-function buildReport({ bundle, manifest, songsCrawl, streamsCrawl, videoDetails, detailQueue }) {
+function buildReport({ bundle, manifest, songsCrawl, streamsCrawl, videoDetails, singerSongsCrawl, detailQueue }) {
   return {
     schemaVersion: 1,
     kind: "vsinger-moment-http-backfill-report",
@@ -325,6 +349,13 @@ function buildReport({ bundle, manifest, songsCrawl, streamsCrawl, videoDetails,
         generatedAt: videoDetails.generatedAt || "",
         fetchedCount: videoDetails.fetchedCount || 0,
       },
+      singerSongs: {
+        generatedAt: singerSongsCrawl.generatedAt || "",
+        singersProcessed: singerSongsCrawl.singersProcessed || 0,
+        uniqueSongCount: singerSongsCrawl.uniqueSongCount || 0,
+        occurrenceCount: singerSongsCrawl.occurrenceCount || 0,
+        ownerPermission: singerSongsCrawl.ownerPermission || null,
+      },
     },
   };
 }
@@ -349,6 +380,7 @@ function writeReportMarkdown(filePath, report) {
     `- Songs: ${report.coverage.stages.songs.coverageStatus} (${report.coverage.stages.songs.stopReason || "no stop"})`,
     `- Streams: ${report.coverage.stages.streams.coverageStatus} (${report.coverage.stages.streams.stopReason || "no stop"})`,
     `- Video details: ${report.coverage.stages.videoDetails.coverageStatus}`,
+    `- Singer-scoped songs: ${report.coverage.stages.singerSongs.coverageStatus}`,
     "",
     "## Request Report",
     "",
@@ -358,6 +390,7 @@ function writeReportMarkdown(filePath, report) {
     `- Streams average HTML bytes: ${report.coverage.report.streams.averageHtmlBytes}`,
     `- Streams average setlists/page: ${report.coverage.report.streams.setlistsPerPage}`,
     `- Streams average occurrences/page: ${report.coverage.report.streams.occurrencesPerPage}`,
+    `- Singer-scoped occurrence imports: ${report.coverage.savings.singerScopedOccurrencesImported}`,
     "",
     "## Savings",
     "",

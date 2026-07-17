@@ -32,6 +32,8 @@
     "vsinger:probe": "node scripts/vsinger-http/probe-public-pages.js",
     "vsinger:crawl:songs": "node scripts/vsinger-http/crawl-songs.js",
     "vsinger:crawl:streams": "node scripts/vsinger-http/crawl-streams.js",
+    "vsinger:crawl:singers": "node scripts/vsinger-http/crawl-singers.js",
+    "vsinger:crawl:singer-songs": "node scripts/vsinger-http/crawl-singer-songs.js",
     "vsinger:fetch-video-details": "node scripts/vsinger-http/fetch-video-details.js",
     "vsinger:build-bundle": "node scripts/vsinger-http/build-backfill-bundle.js",
     "validate": "node scripts/validate-data.js",
