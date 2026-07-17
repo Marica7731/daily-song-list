@@ -203,7 +203,7 @@ function buildCoverage({ generatedAt, songsCrawl, streamsCrawl, videoDetails, si
         detailQueueCount,
       }),
       videoDetails: {
-        coverageStatus: videoDetails.kind ? "partial" : "missing",
+        coverageStatus: videoDetails.kind ? videoDetails.coverageStatus || "partial" : "missing",
         requestedCount: videoDetails.requestedCount || 0,
         fetchedCount: videoDetails.fetchedCount || 0,
         occurrenceCount: videoDetails.occurrenceCount || 0,

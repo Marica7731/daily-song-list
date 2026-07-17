@@ -15,6 +15,7 @@ const { crawlSongs } = require("../scripts/vsinger-http/crawl-songs");
 const { crawlStreams } = require("../scripts/vsinger-http/crawl-streams");
 const { crawlSingers } = require("../scripts/vsinger-http/crawl-singers");
 const { crawlSingerSongs } = require("../scripts/vsinger-http/crawl-singer-songs");
+const { fetchVideoDetails } = require("../scripts/vsinger-http/fetch-video-details");
 const { parseSingerDetailPage, parseSingersPage, parseSongOccurrencesPage, parseSongsPage, parseStreamsPage, parseVideoDetailPage } = require("../scripts/vsinger-http/parsers");
 
 const SONG_A = "11111111-1111-4111-8111-111111111111";
@@ -149,6 +150,37 @@ test("video detail parser fills setlist artists and repeated same-song occurrenc
   assert.equal(parsed.setlistSongs[0].rawArtist, "セシル・コルベル");
   assert.equal(parsed.setlistSongs[2].externalSongId, SONG_A);
   assert.equal(parsed.setlistSongs[2].seconds, 1620);
+});
+
+test("video detail fetcher keeps cumulative outputs across queue batches", async () => {
+  const dir = tempDir("video-details-resume");
+  const queueItems = [
+    { externalVideoId: VIDEO_A, videoPageUrl: `https://vsinger-moment.jp/videos/${VIDEO_A}`, reasons: ["setlist_none"] },
+    { externalVideoId: VIDEO_C, videoPageUrl: `https://vsinger-moment.jp/videos/${VIDEO_C}`, reasons: ["setlist_incomplete"] },
+  ];
+  const pages = {
+    [`https://vsinger-moment.jp/videos/${VIDEO_A}`]: videoDetailHtml(VIDEO_A, "PwEG0NtOoxE"),
+    [`https://vsinger-moment.jp/videos/${VIDEO_C}`]: videoDetailHtml(VIDEO_C, "dQw4w9WgXcQ"),
+  };
+
+  const first = await fetchVideoDetails({ client: mockClient(pages), robots: allowedRobots(), queueItems, "max-videos": 1, "output-dir": dir });
+  const second = await fetchVideoDetails({ client: mockClient(pages), robots: allowedRobots(), queueItems, "max-videos": 1, "output-dir": dir });
+  const videos = readJson(path.join(dir, "videos.json"));
+  const checkpoint = readJson(path.join(dir, "checkpoint.json"));
+
+  assert.equal(first.runFetchedCount, 1);
+  assert.equal(first.remainingQueueCount, 1);
+  assert.equal(second.runFetchedCount, 1);
+  assert.equal(second.fetchedCount, 2);
+  assert.equal(second.videoCount, 2);
+  assert.equal(second.occurrenceCount, 6);
+  assert.equal(second.remainingQueueCount, 0);
+  assert.equal(second.coverageStatus, "complete");
+  assert.deepEqual(
+    videos.map((video) => video.externalVideoId),
+    [VIDEO_A, VIDEO_C],
+  );
+  assert.equal(checkpoint.processedQueueCount, 2);
 });
 
 test("singer-scoped song details parse occurrence history and require owner permission for crawl", async () => {
@@ -776,16 +808,16 @@ function streamCardNoSetlist() {
 </div></div>`;
 }
 
-function videoDetailHtml() {
+function videoDetailHtml(videoId = VIDEO_A, youtubeId = "PwEG0NtOoxE") {
   return `<!doctype html><html><head>
-<meta property="og:url" content="https://vsinger-moment.jp/videos/${VIDEO_A}"/>
+<meta property="og:url" content="https://vsinger-moment.jp/videos/${videoId}"/>
 <meta property="og:title" content="星海のメロウ歌枠リレー - VSinger Moment"/>
 <meta property="og:description" content="宮守ゆりの歌枠配信「星海」のセットリストと歌唱情報。3曲の歌唱データを収録。"/>
-<meta property="og:image" content="https://i.ytimg.com/vi/PwEG0NtOoxE/default.jpg"/>
+<meta property="og:image" content="https://i.ytimg.com/vi/${youtubeId}/default.jpg"/>
 </head><body>
-${videoDetailRow("00:07:01", SONG_A, "Arrietty&#x27;s Song", "セシル・コルベル", 421)}
-${videoDetailRow("00:14:30", SONG_B, "世界の約束", "倍賞千恵子", 870)}
-${videoDetailRow("00:27:00", SONG_A, "Arrietty&#x27;s Song", "セシル・コルベル", 1620)}
+${videoDetailRow("00:07:01", SONG_A, "Arrietty&#x27;s Song", "セシル・コルベル", 421, youtubeId)}
+${videoDetailRow("00:14:30", SONG_B, "世界の約束", "倍賞千恵子", 870, youtubeId)}
+${videoDetailRow("00:27:00", SONG_A, "Arrietty&#x27;s Song", "セシル・コルベル", 1620, youtubeId)}
 </body></html>`;
 }
 
@@ -812,10 +844,10 @@ function songOccurrenceDetailHtml() {
 </section></body></html>`;
 }
 
-function videoDetailRow(time, songId, title, artist, seconds) {
+function videoDetailRow(time, songId, title, artist, seconds, youtubeId = "PwEG0NtOoxE") {
   return `<div class="group border border-gray-200 rounded-lg"><button title="サイト内で視聴"><span class="text-[10px]">${time}</span></button>
 <h3>${title}</h3><p class="text-xs md:text-sm text-gray-600 leading-tight">${artist}</p>
-<a href="https://www.youtube.com/watch?v=PwEG0NtOoxE&amp;t=${seconds}s">YouTube</a>
+<a href="https://www.youtube.com/watch?v=${youtubeId}&amp;t=${seconds}s">YouTube</a>
 <a href="/songs/${songId}">曲詳細</a></div>`;
 }
 

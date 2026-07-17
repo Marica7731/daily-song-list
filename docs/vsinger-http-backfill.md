@@ -106,6 +106,15 @@ npm run vsinger:fetch-video-details -- --queue artifacts/vsinger-http-backfill/s
 
 Do not fetch every `/videos/{uuid}` page. The streams crawler writes `detail-queue.json` only for videos that need补漏, such as missing setlists, missing YouTube IDs, missing song links, invalid timestamps, or conflicting public fields. A missing artist name in the list setlist does not by itself force a detail-page request.
 
+For long detail queues, process bounded batches. The fetcher reloads previous `video-details` outputs, skips already processed queue items, and writes `checkpoint.json` plus `sync-state.json`:
+
+```bash
+npm run vsinger:fetch-video-details -- --queue artifacts/vsinger-http-backfill/streams/detail-queue.json --max-videos 100
+npm run vsinger:fetch-video-details -- --queue artifacts/vsinger-http-backfill/streams/detail-queue.json --max-videos 100
+```
+
+Persistent detail-page failures are recorded in `video-details.json.failures` and counted as processed queue items so one bad detail page cannot block later補漏. Retry those failures separately or use MCP for manual補漏.
+
 Build the unified VPS bundle from existing crawl outputs:
 
 ```bash
@@ -171,6 +180,10 @@ Dry-run and local crawl outputs are written under `artifacts/vsinger-http-backfi
 - `streams/checkpoint.json`
 - `streams/sync-state.json`
 - `video-details/video-details.json`
+- `video-details/videos.json`
+- `video-details/occurrences.json`
+- `video-details/checkpoint.json`
+- `video-details/sync-state.json`
 - `singers/singers.json`
 - `singer-songs/songs.json`
 - `singer-songs/videos.json`
@@ -327,4 +340,4 @@ node --test test/vsinger-http.test.js
 npm run check
 ```
 
-The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, cumulative checkpoint resume for songs, streams, singers, and singer-scoped pages, VPS worker orchestration, immutable bundle threshold decisions, cursor query placement, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, repeated same-song timestamps, and MCP supplement deduplication.
+The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, cumulative checkpoint resume for songs, streams, singers, video details, and singer-scoped pages, VPS worker orchestration, immutable bundle threshold decisions, cursor query placement, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, repeated same-song timestamps, and MCP supplement deduplication.

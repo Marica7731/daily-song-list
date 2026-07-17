@@ -13,20 +13,30 @@ async function fetchVideoDetails(options = {}) {
   const inputPath = args["queue"] || path.resolve(process.cwd(), "artifacts", "vsinger-http-backfill", "streams", "detail-queue.json");
   const queue = args.queueItems || readJson(inputPath, []);
   const maxVideos = args["max-videos"] ? Number(args["max-videos"]) : queue.length;
+  const previous = args.fresh ? {} : readJson(path.join(outputDir, "video-details.json"), {});
+  const previousVideos = args.fresh ? [] : readJson(path.join(outputDir, "videos.json"), previous.videos || []);
   const robots = args.robots || (await loadRobots(client));
   ensureRobotsAllowed(robots, "videos");
 
-  const videos = [];
-  const failures = [];
-  const pages = [];
-  for (const item of queue.slice(0, maxVideos)) {
+  const videos = [...previousVideos];
+  const failures = Array.isArray(previous.failures) ? [...previous.failures] : [];
+  const pages = Array.isArray(previous.pages) ? [...previous.pages] : [];
+  const processedQueueKeys = new Set(previous.processedQueueKeys || pages.map((page) => page.queueKey || page.pageUrl));
+  let runFetchedCount = 0;
+  let runFailureCount = 0;
+
+  for (const item of queue) {
+    if (runFetchedCount + runFailureCount >= maxVideos) break;
     if (!item.videoPageUrl) continue;
+    const key = queueItemKey(item);
+    if (processedQueueKeys.has(key)) continue;
     let response;
     try {
       response = await client.getText(item.videoPageUrl);
       const parsed = parseVideoDetailPage(response.body, item.videoPageUrl);
       videos.push({ ...parsed, detailQueueReasons: [], detailReasonsResolved: item.reasons || [] });
       pages.push({
+        queueKey: key,
         pageUrl: item.videoPageUrl,
         externalVideoId: parsed.externalVideoId,
         setlistCount: parsed.setlistSongs.length,
@@ -34,34 +44,79 @@ async function fetchVideoDetails(options = {}) {
         elapsedMs: response.elapsedMs,
         fromCache: response.fromCache,
       });
+      runFetchedCount += 1;
     } catch (error) {
-      failures.push({ videoPageUrl: item.videoPageUrl, reasons: item.reasons || [], message: error.message, status: error.status || null });
+      failures.push({ queueKey: key, videoPageUrl: item.videoPageUrl, reasons: item.reasons || [], message: error.message, status: error.status || null });
+      runFailureCount += 1;
     }
+    processedQueueKeys.add(key);
   }
 
   const uniqueVideos = dedupeVideos(videos);
   const occurrences = dedupeOccurrences(uniqueVideos.flatMap(occurrenceEntitiesFromVideo));
+  const remainingQueue = queue.filter((item) => item.videoPageUrl && !processedQueueKeys.has(queueItemKey(item)));
+  const processedQueueCount = queue.filter((item) => item.videoPageUrl && processedQueueKeys.has(queueItemKey(item))).length;
+  const coverageStatus = remainingQueue.length === 0 && failures.length === 0 ? "complete" : "partial";
   const result = {
     schemaVersion: 1,
     kind: "vsinger-moment-http-video-detail-fill",
     generatedAt: new Date().toISOString(),
     inputPath,
     requestedCount: queue.length,
+    processedQueueCount,
+    remainingQueueCount: remainingQueue.length,
+    runFetchedCount,
+    runFailureCount,
     fetchedCount: pages.length,
     videoCount: uniqueVideos.length,
     occurrenceCount: occurrences.length,
+    coverageStatus,
     requestStats: requestStatsFromPages(pages),
     pages,
     videos: uniqueVideos,
     occurrences,
     failures,
+    processedQueueKeys: [...processedQueueKeys],
   };
 
   writeJson(path.join(outputDir, "video-details.json"), result);
   writeJson(path.join(outputDir, "videos.json"), uniqueVideos);
   writeJson(path.join(outputDir, "occurrences.json"), occurrences);
-  console.log(`CODEX_VSINGER_VIDEO_DETAILS_OK fetched=${result.fetchedCount} videos=${result.videoCount} occurrences=${result.occurrenceCount}`);
+  writeJson(path.join(outputDir, "checkpoint.json"), {
+    schemaVersion: 1,
+    kind: "vsinger-moment-http-video-details-checkpoint",
+    updatedAt: result.generatedAt,
+    inputPath,
+    requestedCount: result.requestedCount,
+    processedQueueCount: result.processedQueueCount,
+    remainingQueueCount: result.remainingQueueCount,
+    processedQueueKeys: result.processedQueueKeys,
+    coverageStatus,
+  });
+  writeJson(path.join(outputDir, "sync-state.json"), {
+    schemaVersion: 1,
+    kind: "vsinger-moment-http-sync-state",
+    updatedAt: result.generatedAt,
+    lastSuccessfulVideoDetailFill: {
+      finishedAt: result.generatedAt,
+      coverageStatus,
+      requestedCount: result.requestedCount,
+      processedQueueCount: result.processedQueueCount,
+      remainingQueueCount: result.remainingQueueCount,
+      fetchedCount: result.fetchedCount,
+      videoCount: result.videoCount,
+      occurrenceCount: result.occurrenceCount,
+    },
+    knownExternalVideoIds: uniqueVideos.map((video) => video.externalVideoId).filter(Boolean),
+    processedQueueKeys: result.processedQueueKeys,
+    coverageStatus,
+  });
+  console.log(`CODEX_VSINGER_VIDEO_DETAILS_OK fetched=${result.fetchedCount} runFetched=${result.runFetchedCount} videos=${result.videoCount} occurrences=${result.occurrenceCount} remaining=${result.remainingQueueCount}`);
   return result;
+}
+
+function queueItemKey(item) {
+  return item.videoPageUrl || item.externalVideoId || "";
 }
 
 if (require.main === module) {
@@ -73,4 +128,5 @@ if (require.main === module) {
 
 module.exports = {
   fetchVideoDetails,
+  queueItemKey,
 };
