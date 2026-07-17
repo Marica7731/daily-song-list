@@ -32,7 +32,8 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(core, /git push origin HEAD:main/u);
   assert.match(core, /git fetch origin main/u);
   assert.match(core, /npm run check:published -- https:\/\/ytb-song-rank\.culua\.com\/ --expected-meta data\/ui\/meta\.json/u);
-  assert.match(core, /if:\s*always\(\) && steps\.core\.outcome != 'success'/u);
+  assert.match(core, /if:\s*always\(\) && \(steps\.core\.outcome != 'success' \|\| steps\.regenerate\.outcome == 'failure'\)/u);
+  assert.match(core, /DAILY_SONG_FAILURE_STAGE:\s*\$\{\{ steps\.regenerate\.outcome == 'failure' && 'regenerate' \|\| 'core' \}\}/u);
 
   assert.match(watchdog, /name:\s*Watch published song-list freshness/u);
   assert.match(watchdog, /cron:\s*"37 \* \* \* \*"/u);

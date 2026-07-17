@@ -118,8 +118,15 @@ function findPriorCompensationForStaleEvent(runs, previousCapturedAt, now = new 
   const lowerBound = Number.isFinite(previousMs) ? previousMs : now.getTime() - STALE_MINUTES * 60 * 1000;
   return runs
     .filter((run) => run.event === "workflow_dispatch")
+    .filter((run) => isSuccessfulOrActiveCompensationRun(run))
     .filter((run) => Date.parse(run.createdAt || "") >= lowerBound)
     .sort((a, b) => Date.parse(b.createdAt || "") - Date.parse(a.createdAt || ""))[0] || null;
+}
+
+function isSuccessfulOrActiveCompensationRun(run) {
+  if (!run || run.event !== "workflow_dispatch") return false;
+  if (run.status === "queued" || run.status === "in_progress") return true;
+  return run.status === "completed" && run.conclusion === "success";
 }
 
 function latestRun(runs) {
@@ -202,5 +209,6 @@ module.exports = {
   findBlockingCoreRun,
   findDispatchedRun,
   findPriorCompensationForStaleEvent,
+  isSuccessfulOrActiveCompensationRun,
   runWatchdog,
 };

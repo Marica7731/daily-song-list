@@ -26,6 +26,7 @@ const {
   evaluateWatchdog,
   findBlockingCoreRun,
   findPriorCompensationForStaleEvent,
+  isSuccessfulOrActiveCompensationRun,
 } = require("../scripts/watchdog-update");
 const {
   buildFailureStatus,
@@ -121,10 +122,14 @@ test("watchdog triggers stale data, skips fresh data, skips active fast, and ded
   assert.equal(stale.triggerReason, "stale_data");
 
   const priorDispatch = run({ databaseId: 22, conclusion: "failure", event: "workflow_dispatch", createdAt: "2026-07-17T01:10:00Z" });
-  assert.equal(findPriorCompensationForStaleEvent([priorDispatch], "2026-07-16T23:00:00Z", now).databaseId, 22);
+  assert.equal(findPriorCompensationForStaleEvent([priorDispatch], "2026-07-16T23:00:00Z", now), null);
+  assert.equal(isSuccessfulOrActiveCompensationRun(priorDispatch), false);
+  const duplicateDispatch = run({ databaseId: 23, conclusion: "success", event: "workflow_dispatch", createdAt: "2026-07-17T01:20:00Z" });
+  assert.equal(findPriorCompensationForStaleEvent([priorDispatch, duplicateDispatch], "2026-07-16T23:00:00Z", now).databaseId, 23);
+  assert.equal(isSuccessfulOrActiveCompensationRun(run({ databaseId: 24, status: "in_progress", conclusion: "", event: "workflow_dispatch" })), true);
   const duplicate = evaluateWatchdog({
     meta: { dataCapturedAt: "2026-07-16T23:00:00Z" },
-    coreRuns: [priorDispatch],
+    coreRuns: [priorDispatch, duplicateDispatch],
     now,
     staleMinutes: 75,
   });
@@ -245,6 +250,8 @@ test("workflow static checks keep backfill isolated and failure restore non-dest
 
   assert.doesNotMatch(core, /git clean/u);
   assert.match(core, /node scripts\/run-core-update\.js restore-after-failure/u);
+  assert.match(core, /steps\.regenerate\.outcome == 'failure'/u);
+  assert.match(core, /DAILY_SONG_FAILURE_STAGE: \$\{\{ steps\.regenerate\.outcome == 'failure' && 'regenerate' \|\| 'core' \}\}/u);
   assert.match(core, /git add data\/status\.json/u);
   assert.match(core, /git reset --hard origin\/main/u);
   assert.match(core, /npm run check:published -- https:\/\/ytb-song-rank\.culua\.com\/ --expected-meta data\/ui\/meta\.json/u);

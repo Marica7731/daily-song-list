@@ -95,7 +95,9 @@ jobs:
         run: node scripts/run-core-update.js
 
       - name: Regenerate on latest main when remote moved
+        id: regenerate
         if: steps.core.outcome == 'success' && steps.core.outputs.updated == 'true'
+        continue-on-error: true
         env:
           DAILY_SONG_EVENT_SCHEDULE: ${{ github.event.schedule }}
           DAILY_SONG_DISPATCH_REASON: ${{ inputs.reason || github.event_name }}
@@ -111,11 +113,12 @@ jobs:
           git reset --hard "$remote_head"
           node scripts/run-core-update.js
 
-      - name: Restore core data after core failure
-        if: always() && steps.core.outcome != 'success'
+      - name: Restore core data after core pipeline failure
+        if: always() && (steps.core.outcome != 'success' || steps.regenerate.outcome == 'failure')
         env:
           DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
-          DAILY_SONG_FAILURE_OUTCOME: ${{ steps.core.outcome }}
+          DAILY_SONG_FAILURE_OUTCOME: ${{ steps.regenerate.outcome == 'failure' && 'regenerate-failure' || steps.core.outcome }}
+          DAILY_SONG_FAILURE_STAGE: ${{ steps.regenerate.outcome == 'failure' && 'regenerate' || 'core' }}
           DAILY_SONG_RUNNER_STARTED_AT: ${{ steps.runmeta.outputs.started_at }}
         run: |
           node scripts/run-core-update.js restore-after-failure
@@ -128,7 +131,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Commit core data
-        if: steps.core.outcome == 'success'
+        if: steps.core.outcome == 'success' && steps.regenerate.outcome != 'failure'
         run: |
           git add data/latest.json data/7d.json data/all.json data/72h.json data/1m.json data/audit.json data/inspection-cache.json data/status.json data/video-catalog.json data/song-search-known-songs.json data/snapshots data/diff data/ui data/catalog-segments
           if git diff --cached --quiet; then
@@ -138,7 +141,7 @@ jobs:
           git commit -m "chore: update core song-list data"
 
       - name: Commit failure status
-        if: always() && steps.core.outcome != 'success'
+        if: always() && (steps.core.outcome != 'success' || steps.regenerate.outcome == 'failure')
         run: |
           git add data/status.json
           if git diff --cached --quiet; then
@@ -150,11 +153,12 @@ jobs:
       - name: Push core changes
         if: always()
         env:
-          CORE_OUTCOME: ${{ steps.core.outcome }}
+          CORE_OUTCOME: ${{ steps.core.outcome == 'success' && steps.regenerate.outcome != 'failure' && 'success' || 'failure' }}
           DAILY_SONG_EVENT_SCHEDULE: ${{ github.event.schedule }}
           DAILY_SONG_DISPATCH_REASON: ${{ inputs.reason || github.event_name }}
           DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
-          DAILY_SONG_FAILURE_OUTCOME: ${{ steps.core.outcome }}
+          DAILY_SONG_FAILURE_OUTCOME: ${{ steps.regenerate.outcome == 'failure' && 'regenerate-failure' || steps.core.outcome }}
+          DAILY_SONG_FAILURE_STAGE: ${{ steps.regenerate.outcome == 'failure' && 'regenerate' || 'core' }}
           DAILY_SONG_RUNNER_STARTED_AT: ${{ steps.runmeta.outputs.started_at }}
         run: |
           for attempt in 1 2 3; do
@@ -180,7 +184,7 @@ jobs:
           exit 1
 
       - name: Published runtime health check
-        if: steps.core.outcome == 'success' && steps.core.outputs.updated == 'true'
+        if: steps.core.outcome == 'success' && steps.regenerate.outcome != 'failure' && steps.core.outputs.updated == 'true'
         run: |
           sleep 75
           for attempt in 1 2 3 4 5; do
@@ -198,10 +202,11 @@ jobs:
           {
             echo "- completed_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "- core_outcome: ${{ steps.core.outcome }}"
+            echo "- regenerate_outcome: ${{ steps.regenerate.outcome }}"
             echo "- skipped: ${{ steps.core.outputs.skipped }}"
             echo "- updated: ${{ steps.core.outputs.updated }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Fail when core update failed
-        if: always() && steps.core.outcome != 'success'
+      - name: Fail when core pipeline failed
+        if: always() && (steps.core.outcome != 'success' || steps.regenerate.outcome == 'failure')
         run: exit 1
