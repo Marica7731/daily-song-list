@@ -30,23 +30,28 @@ const SHARD_MANIFEST_GZIP_BUDGET = 96 * 1024;
 const RUNTIME_PAGE_GZIP_BUDGET = 260 * 1024;
 const SOURCE_DETAIL_PAGE_GZIP_BUDGET = 220 * 1024;
 const SEARCH_PAGE_GZIP_BUDGET = 220 * 1024;
+const REQUEST_SEARCH_PAGE_GZIP_BUDGET = 220 * 1024;
 
 const meta = readJsonIfExists("data/ui/meta.json");
 const shardBudgetEntries = runtimeShardBudgetEntries(meta);
-const rows = [...legacyOrShardFileBudgets(meta), ...shardBudgetEntries].map((entry) => measureFile(entry.path, entry.gzipBudget));
-const firstScreenRows = firstScreenBudgetEntries(meta).map((entry) => measureFile(entry.path, entry.gzipBudget));
-const fallbackRows = FALLBACK_FILTER_ASSETS.map((entry) => measureFile(entry.path, entry.gzipBudget));
+const rows = [...legacyOrShardFileBudgets(meta), ...shardBudgetEntries].map((entry) => measureBudgetEntry(entry));
+const firstScreenRows = firstScreenBudgetEntries(meta).map((entry) => measureBudgetEntry(entry));
+const fallbackRows = FALLBACK_FILTER_ASSETS.map((entry) => measureBudgetEntry(entry));
 const firstScreenGzipTotal = firstScreenRows.reduce((sum, row) => sum + row.gzipBytes, 0);
 const fallbackGzipTotal = fallbackRows.reduce((sum, row) => sum + row.gzipBytes, 0);
 let failed = false;
 
 for (const row of [...rows, ...firstScreenRows, ...fallbackRows]) {
-  console.log(`[budget] ${row.path} raw=${row.rawBytes} gzip=${row.gzipBytes} budget=${row.gzipBudget}`);
+  if (!row.silent || row.gzipBytes > row.gzipBudget) {
+    console.log(`[budget] ${row.path} raw=${row.rawBytes} gzip=${row.gzipBytes} budget=${row.gzipBudget}`);
+  }
   if (row.gzipBytes > row.gzipBudget) {
     console.error(`[budget] ${row.path} exceeds gzip budget by ${row.gzipBytes - row.gzipBudget} bytes`);
     failed = true;
   }
 }
+const silentBudgetRows = rows.filter((row) => row.silent);
+if (silentBudgetRows.length) console.log(`[budget] request-search pages checked=${silentBudgetRows.length} budget=${REQUEST_SEARCH_PAGE_GZIP_BUDGET}`);
 
 console.log(`[budget] first-screen gzip=${firstScreenGzipTotal} budget=${FIRST_SCREEN_GZIP_BUDGET}`);
 if (firstScreenGzipTotal > FIRST_SCREEN_GZIP_BUDGET) {
@@ -60,6 +65,13 @@ if (fallbackGzipTotal > FALLBACK_FILTER_GZIP_BUDGET) {
 }
 
 if (failed) process.exit(1);
+
+function measureBudgetEntry(entry) {
+  return {
+    ...measureFile(entry.path, entry.gzipBudget),
+    silent: Boolean(entry.silent),
+  };
+}
 
 function measureFile(relativePath, gzipBudget = 0) {
   const absolutePath = path.join(ROOT, relativePath);
@@ -102,6 +114,7 @@ function runtimeShardBudgetEntries(meta) {
     appendShardBudgetEntries(entries, rangeId, "runtime", shards.runtime, RUNTIME_PAGE_GZIP_BUDGET);
     appendShardBudgetEntries(entries, rangeId, "sourceDetails", shards.sourceDetails, SOURCE_DETAIL_PAGE_GZIP_BUDGET);
     appendShardBudgetEntries(entries, rangeId, "search", shards.search, SEARCH_PAGE_GZIP_BUDGET);
+    appendRequestSearchBudgetEntries(entries, rangeId, shards.request?.search);
   }
   return entries;
 }
@@ -114,6 +127,46 @@ function appendShardBudgetEntries(entries, rangeId, shardName, shard, pageBudget
   for (const page of shard.pages || []) {
     if (page.path) entries.push({ path: page.path, gzipBudget: pageBudget, label: `${rangeId}.${shardName}.page` });
   }
+}
+
+function appendRequestSearchBudgetEntries(entries, rangeId, search) {
+  if (!search?.manifestPath) return;
+  entries.push({ path: search.manifestPath, gzipBudget: SHARD_MANIFEST_GZIP_BUDGET, label: `${rangeId}.request.search.manifest` });
+  const manifest = readJsonIfExists(search.manifestPath);
+  const seen = new Set();
+  for (const bucket of Object.values(manifest?.buckets || {})) {
+    for (const [pageIndex, page] of requestSearchBucketPages(bucket).entries()) {
+      const pagePath = requestSearchPagePath(page, bucket, pageIndex);
+      if (!pagePath || seen.has(pagePath)) continue;
+      seen.add(pagePath);
+      entries.push({
+        path: pagePath,
+        gzipBudget: REQUEST_SEARCH_PAGE_GZIP_BUDGET,
+        label: `${rangeId}.request.search.page`,
+        silent: true,
+      });
+    }
+  }
+}
+
+function requestSearchBucketPages(bucketMeta) {
+  if (Number.isInteger(bucketMeta?.c) && bucketMeta.c > 0) {
+    return Array.from({ length: bucketMeta.c }, (_, index) => index + 1);
+  }
+  if (Array.isArray(bucketMeta?.h)) return bucketMeta.h;
+  return Array.isArray(bucketMeta?.p) ? bucketMeta.p : bucketMeta?.pages || [];
+}
+
+function requestSearchPagePath(page, bucketMeta = null, pageIndex = 0) {
+  const bucketDir = bucketMeta?.d || bucketMeta?.dir || bucketMeta?.basePath || "";
+  if (Number.isInteger(page)) return bucketDir ? `${bucketDir}/page-${String(page).padStart(4, "0")}.json` : "";
+  if (typeof page !== "string") return page?.path || "";
+  if (page.includes("/")) return page;
+  if (!bucketDir) return page;
+  if (/^[a-f0-9]{12}$/u.test(page)) {
+    return `${bucketDir}/page-${String(pageIndex + 1).padStart(4, "0")}.${page}.json`;
+  }
+  return `${bucketDir}/${page}`;
 }
 
 function hasRuntimeShards(meta) {

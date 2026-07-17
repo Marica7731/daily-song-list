@@ -27,6 +27,8 @@ const SEARCH_DEBOUNCE_MS = 140;
 const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 900;
 const QUERY_INERT_DELAY_MS = 1200;
 const QUERY_SUGGESTION_SCAN_LIMIT = 360;
+const REQUEST_SEARCH_SUGGESTION_PAGE_LIMIT = 2;
+const REQUEST_SEARCH_SUGGESTION_RECORD_LIMIT = 80;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
@@ -299,6 +301,7 @@ const state = {
   queryPreviewTimer: 0,
   querySuggestionTimer: 0,
   querySuggestionHydrationTimer: 0,
+  querySearchController: null,
   queryWorkRevision: 0,
   queryComposing: false,
   currentResultSummary: null,
@@ -802,6 +805,7 @@ function closeOverlay(kind) {
   state.querySuggestionTimer = 0;
   window.clearTimeout(state.querySuggestionHydrationTimer);
   state.querySuggestionHydrationTimer = 0;
+  abortQuerySearchWork();
   state.queryComposing = false;
   advanceQueryWorkRevision();
   setPageInert(false);
@@ -811,12 +815,26 @@ function closeOverlay(kind) {
 }
 
 function advanceQueryWorkRevision() {
+  abortQuerySearchWork();
   state.queryWorkRevision += 1;
   return state.queryWorkRevision;
 }
 
 function isCurrentQueryWork(revision) {
   return state.activeOverlay === "query" && revision === state.queryWorkRevision;
+}
+
+function abortQuerySearchWork() {
+  if (!state.querySearchController) return;
+  state.querySearchController.abort();
+  state.querySearchController = null;
+}
+
+function createQuerySearchController() {
+  abortQuerySearchWork();
+  const controller = new AbortController();
+  state.querySearchController = controller;
+  return controller;
 }
 
 function hydrateQueryOverlayAfterFirstFrame(revision) {
@@ -1011,9 +1029,6 @@ function buildQuickRequestSearchSuggestions(query, draft = state.queryDraft || m
       if (groups.songs.length >= 5 && groups.artists.length >= 3 && groups.channels.length >= 3) break;
     }
   }
-  if (!groups.songs.length && filterKey) {
-    pushSuggestion(groups.songs, seen.songs, { label: query, value: query, meta: "搜索" });
-  }
   return [
     { label: "歌曲", items: groups.songs },
     { label: "歌手", items: groups.artists },
@@ -1026,15 +1041,20 @@ function scheduleRequestSearchSuggestionHydration(query, draft, options = {}) {
   const revision = options.revision || state.queryWorkRevision;
   state.querySuggestionHydrationTimer = window.setTimeout(() => {
     if (!isCurrentQueryWork(revision)) return;
-    buildRequestSearchSuggestions(query, options)
+    const controller = createQuerySearchController();
+    buildRequestSearchSuggestions(query, { ...options, signal: controller.signal })
       .then((suggestions) => {
         if (!isCurrentQueryWork(revision)) return;
         const currentQuery = cleanText(state.queryDraft?.q || "");
         if (normalizeSearch(currentQuery) !== normalizeSearch(query)) return;
         renderSearchSuggestionGroups(suggestions, query);
       })
-      .catch(() => {
+      .catch((error) => {
+        if (isAbortError(error)) return;
         if (isCurrentQueryWork(revision)) renderSearchSuggestionGroups(buildQuickRequestSearchSuggestions(query, draft), query);
+      })
+      .finally(() => {
+        if (state.querySearchController === controller) state.querySearchController = null;
       });
   }, 360);
 }
@@ -3649,6 +3669,8 @@ async function buildRequestSearchSuggestions(query, options = {}) {
     signal: options.signal,
     priority: options.priority || schedulerPriority("USER_BLOCKING"),
     revision: options.revision || captureRequestRevisions(["query", "range"]),
+    maxSearchPages: REQUEST_SEARCH_SUGGESTION_PAGE_LIMIT,
+    maxSearchRecords: REQUEST_SEARCH_SUGGESTION_RECORD_LIMIT,
   });
   const groups = {
     songs: [],
@@ -3697,31 +3719,95 @@ function pushSuggestion(target, seen, item) {
 }
 
 async function loadRequestSearchRecords(query, readOptions = {}) {
+  const filterKey = normalizeSearch(query);
+  if (!requestSearchShouldUseShards(filterKey)) return [];
   const range = state.range;
   const requestMeta = requestRuntimeMeta(range);
   const manifestPath = requestMeta?.search?.manifestPath;
   if (!manifestPath) return [];
   const options = normalizeReadJsonOptions(readOptions);
   const manifest = await readCachedRequestJson(state.requestRuntime.searchManifestCache, manifestPath, options);
-  const bucket = requestSearchBucket(query);
-  const bucketMeta = manifest.buckets?.[bucket] || manifest.buckets?._;
-  if (!bucketMeta?.pages?.length) return [];
+  const maxPages = positiveFiniteLimit(readOptions.maxSearchPages);
+  const maxRecords = positiveFiniteLimit(readOptions.maxSearchRecords);
   const records = [];
-  for (const page of bucketMeta.pages) {
-    const payload = await readCachedRequestJson(state.requestRuntime.searchShardCache, page.path, options);
-    for (const record of payload.records || []) {
-      if (!normalizeSearch(record.searchText).includes(query)) continue;
-      records.push(record);
+  const seenPages = new Set();
+  let pageCount = 0;
+  for (const bucket of requestSearchBucketsForQuery(filterKey)) {
+    const bucketMeta = manifest.buckets?.[bucket];
+    const pages = requestSearchBucketPages(bucketMeta);
+    if (!pages.length) continue;
+    for (const [pageIndex, page] of pages.entries()) {
+      const pagePath = requestSearchPagePath(page, bucketMeta, pageIndex);
+      if (!pagePath || seenPages.has(pagePath)) continue;
+      if (Number.isFinite(maxPages) && pageCount >= maxPages) return records;
+      seenPages.add(pagePath);
+      pageCount += 1;
+      const payload = await readCachedRequestJson(state.requestRuntime.searchShardCache, pagePath, options);
+      for (const record of payload.records || []) {
+        if (!normalizeSearch(record.searchText).includes(filterKey)) continue;
+        records.push(record);
+        if (Number.isFinite(maxRecords) && records.length >= maxRecords) return records;
+      }
     }
   }
   return records;
 }
 
+function requestSearchBucketPages(bucketMeta) {
+  if (Number.isInteger(bucketMeta?.c) && bucketMeta.c > 0) {
+    return Array.from({ length: bucketMeta.c }, (_, index) => index + 1);
+  }
+  if (Array.isArray(bucketMeta?.h)) return bucketMeta.h;
+  return Array.isArray(bucketMeta?.p) ? bucketMeta.p : bucketMeta?.pages || [];
+}
+
+function requestSearchPagePath(page, bucketMeta = null, pageIndex = 0) {
+  const bucketDir = bucketMeta?.d || bucketMeta?.dir || bucketMeta?.basePath || "";
+  if (Number.isInteger(page)) return bucketDir ? `${bucketDir}/page-${String(page).padStart(4, "0")}.json` : "";
+  if (typeof page !== "string") return page?.path || "";
+  if (page.includes("/")) return page;
+  if (!bucketDir) return page;
+  if (/^[a-f0-9]{12}$/u.test(page)) {
+    return `${bucketDir}/page-${String(pageIndex + 1).padStart(4, "0")}.${page}.json`;
+  }
+  return `${bucketDir}/${page}`;
+}
+
+function requestSearchShouldUseShards(query) {
+  return normalizeSearch(query)
+    .split(/\s+/u)
+    .some((token) => Array.from(token.replace(/\s+/gu, "")).length >= 2);
+}
+
+function requestSearchBucketsForQuery(query) {
+  const buckets = new Set();
+  const normalized = normalizeSearch(query);
+  for (const token of normalized.split(/\s+/u)) {
+    const compact = token.replace(/\s+/gu, "");
+    const chars = Array.from(compact);
+    if (chars.length >= 3) buckets.add(requestSearchPrefixBucket(compact, 3));
+    if (chars.length >= 2) buckets.add(requestSearchPrefixBucket(compact, 2));
+    if (chars.length >= 2) buckets.add(requestSearchBucket(compact));
+    if (buckets.size >= 48) break;
+  }
+  return Array.from(buckets);
+}
+
+function requestSearchPrefixBucket(query, length) {
+  const prefix = Array.from(normalizeSearch(query).replace(/\s+/gu, "")).slice(0, length).join("");
+  return prefix ? `p${length}:${prefix}` : "_";
+}
+
 function requestSearchBucket(query) {
   const normalized = normalizeSearch(query).replace(/\s+/gu, "");
-  const char = normalized[0] || "_";
+  const char = Array.from(normalized)[0] || "_";
   const code = char.codePointAt(0) || 95;
   return `b${String(code % 64).padStart(2, "0")}`;
+}
+
+function positiveFiniteLimit(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? Math.floor(number) : Infinity;
 }
 
 async function loadRequestDetailRecords(entries, readOptions = {}) {
@@ -6776,6 +6862,13 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   const buttons = Array.from(row.querySelectorAll("[data-toggle-source]"));
   if (!drawer || !buttons.length) return;
 
+  if (nextExpanded) {
+    drawer.hidden = false;
+    row.classList.add("is-expanded");
+    syncInlineCopyAllButton(row, true);
+    for (const button of buttons) button.setAttribute("aria-expanded", "true");
+  }
+
   if (nextExpanded && drawer.dataset.sourceDeferred === "true") {
     const mode = row.dataset.drawerMode || drawer.dataset.sourceMode || "song";
     const songGroups =
@@ -6874,6 +6967,7 @@ function prepareSourceDrawerLoading(row, drawer, previewOccurrences = []) {
     loading: Boolean(row._sourceDetailPath && previewCount < totalCount && !row._sourceDetailLoaded),
   });
   if (row._sourceDetailPath && previewCount < totalCount && !row._sourceDetailLoaded) {
+    setSourceDrawerLoadingState(drawer, "opening", previewCount, totalCount);
     appendSourceDrawerSkeleton(drawer, Math.min(3, Math.max(1, totalCount - previewCount)));
   }
 }
@@ -6897,7 +6991,7 @@ function startSourceDetailHydration(row, drawer, previewOccurrences = []) {
   const controller = new AbortController();
   row._sourceDetailAbortController = controller;
   const sourceRevision = bumpRequestRevision("source");
-  setSourceDrawerLoadingState(drawer, preview.length ? "partial" : "opening", window.FrontendUtils.groupOccurrencesByVideo(preview).length, sourceDetailExpectedCount(row, preview));
+  setSourceDrawerLoadingState(drawer, "opening", window.FrontendUtils.groupOccurrencesByVideo(preview).length, sourceDetailExpectedCount(row, preview));
   const load = loadSourceDetailOccurrencesIncremental(path, key, {
     signal: controller.signal,
     priority: schedulerPriority("USER_BLOCKING"),
@@ -7664,7 +7758,7 @@ async function loadVideoSetlist(videoId, fallbackItem = {}) {
   const load = readJson(path, {
     cache: cacheModeForPath(path),
     priority: schedulerPriority("USER_BLOCKING"),
-    revision: compactRevisions([bumpRequestRevision("source"), captureRequestRevision("range")]),
+    revision: compactRevisions([bumpRequestRevision("setlist"), captureRequestRevision("range")]),
     requestKey: `video-setlist:${key}`,
   })
     .then((payload) => ({

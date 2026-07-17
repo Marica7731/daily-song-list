@@ -33,7 +33,8 @@ const SEARCH_PAGE_SIZE = positiveInteger(process.env.DAILY_SONG_SEARCH_PAGE_SIZE
 const REQUEST_PAGE_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_PAGE_SIZE, 50);
 const REQUEST_DETAIL_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_DETAIL_SHARD_SIZE, 96);
 const REQUEST_SOURCE_CHUNK_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_CHUNK_SIZE, DEFAULT_SOURCE_CHUNK_SIZE);
-const REQUEST_SEARCH_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_SHARD_SIZE, 2000);
+const REQUEST_SEARCH_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_SHARD_SIZE, 480);
+const REQUEST_SEARCH_BUCKETS_PER_RECORD = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_BUCKETS_PER_RECORD, 16);
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
 
 if (require.main === module) {
@@ -806,6 +807,7 @@ function writeRequestSearch(options) {
   const bucketEntries = [];
   for (const [bucket, bucketRecords] of Array.from(buckets.entries()).sort((a, b) => a[0].localeCompare(b[0], "en"))) {
     const chunks = chunkArray(bucketRecords, REQUEST_SEARCH_SHARD_SIZE);
+    const bucketDir = `data/ui/ranges/${rangeId}/search/${requestBucketPathSegment(bucket)}`;
     const pages = chunks.map((chunk, index) => {
       const pageIndex = index + 1;
       const payload = {
@@ -822,7 +824,7 @@ function writeRequestSearch(options) {
       };
       const text = stringifyRuntimeJson(payload);
       const sha256 = sha256Text(text);
-      const pagePath = `data/ui/ranges/${rangeId}/search/${requestBucketPathSegment(bucket)}/page-${String(pageIndex).padStart(4, "0")}.${sha256.slice(0, 12)}.json`;
+      const pagePath = `${bucketDir}/page-${String(pageIndex).padStart(4, "0")}.json`;
       writeRuntimeJsonText(path.join(ROOT, pagePath), text);
       return {
         index: pageIndex,
@@ -832,7 +834,13 @@ function writeRequestSearch(options) {
         itemCount: chunk.length,
       };
     });
-    bucketEntries.push([bucket, { pageCount: pages.length, itemCount: bucketRecords.length, pages }]);
+    bucketEntries.push([
+      bucket,
+      {
+        d: bucketDir,
+        c: pages.length,
+      },
+    ]);
   }
   const manifestPayload = {
     schemaVersion: RUNTIME_SCHEMA_VERSION,
@@ -980,7 +988,7 @@ function writeKeyedRequestShardSet(options) {
 function cleanupRequestRuntimeFiles(rangeId) {
   const rangeDir = path.join(UI_DIR, "ranges", rangeId);
   for (const dirName of ["records", "sources", "views", "search"]) {
-    fs.rmSync(path.join(rangeDir, dirName), { recursive: true, force: true });
+    fs.rmSync(path.join(rangeDir, dirName), { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
   if (!fs.existsSync(rangeDir)) return;
   for (const file of fs.readdirSync(rangeDir, { withFileTypes: true })) {
@@ -1056,10 +1064,12 @@ function requestSearchBuckets(searchText) {
   const normalized = normalizeSearchText(searchText);
   const buckets = new Set();
   for (const token of normalized.split(/\s+/u)) {
-    const char = token[0] || "";
-    if (!char) continue;
-    buckets.add(requestSearchBucketId(char));
-    if (buckets.size >= 64) break;
+    const compact = token.replace(/\s+/gu, "");
+    const chars = Array.from(compact);
+    if (!chars.length) continue;
+    if (chars.length >= 2) buckets.add(requestSearchPrefixBucketId(compact, 2));
+    if (chars.length === 1) buckets.add(requestSearchBucketId(compact));
+    if (buckets.size >= REQUEST_SEARCH_BUCKETS_PER_RECORD) break;
   }
   if (!buckets.size) buckets.add("_");
   return buckets;
@@ -1070,9 +1080,14 @@ function requestBucketPathSegment(bucket) {
 }
 
 function requestSearchBucketId(value) {
-  const char = String(value || "_");
+  const char = Array.from(String(value || "_"))[0] || "_";
   const code = char.codePointAt(0) || 95;
   return `b${String(code % 64).padStart(2, "0")}`;
+}
+
+function requestSearchPrefixBucketId(value, length) {
+  const prefix = Array.from(normalizeSearchText(value).replace(/\s+/gu, "")).slice(0, length).join("");
+  return prefix ? `p${length}:${prefix}` : "_";
 }
 
 function collectRuntimeOccurrences(items) {
@@ -1620,6 +1635,7 @@ module.exports = {
   LEGACY_RANGE_IDS,
   RANGES,
   requestSearchBucketId,
+  requestSearchPrefixBucketId,
   requestSearchBuckets,
   REQUEST_SOURCE_CHUNK_SIZE,
   SEARCH_PAGE_SIZE,

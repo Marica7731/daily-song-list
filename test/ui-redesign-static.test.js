@@ -230,7 +230,8 @@ test("latest runtime uses request pagination instead of loading every page shard
   assert.match(appSource, /AbortController/u);
   assert.match(appSource, /scheduleAdjacentRequestPagePrefetch/u);
   assert.match(appSource, /loadRequestSearchRecords/u);
-  assert.match(appSource, /requestSearchBucket\(query\)/u);
+  assert.match(appSource, /requestSearchBucketsForQuery\(filterKey\)/u);
+  assert.match(appSource, /requestSearchPrefixBucket/u);
   assert.match(appSource, /loadRequestDetailRecords/u);
   assert.match(appSource, /sourceDetailKey/u);
   assert.doesNotMatch(appSource, /Promise\.all\(\s*pages\.map/u);

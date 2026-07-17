@@ -129,9 +129,16 @@ test("source drawer renders complete source lists without rebuilding old cards",
   const expandedBody = functionBody("async function setSourceDrawerExpanded");
   assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
   assert.match(expandedBody, /sourceDetailOccurrencesForContainer\(row, drawerOccurrences\)/u);
+  assert.ok(
+    expandedBody.indexOf("drawer.hidden = false") < expandedBody.indexOf('drawer.dataset.sourceDeferred === "true"'),
+    "source drawer must become visible before deferred detail hydration",
+  );
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
   assert.match(functionBody("function sourceDetailOccurrencesForContainer"), /mergeCompleteSourceOccurrences/u);
   assert.doesNotMatch(appSource, /function remainingSourceDetailOccurrences/u);
+
+  const hydrateBody = functionBody("function startSourceDetailHydration");
+  assert.match(hydrateBody, /setSourceDrawerLoadingState\(drawer, "opening"/u);
 });
 
 test("artist rank song details share inline source model and append remaining songs in batches", () => {
@@ -220,10 +227,25 @@ test("query overlay opens before suggestions and result preview work", () => {
   const suggestionBody = functionBody("function renderSearchSuggestions");
   assert.ok(suggestionBody.indexOf("if (!hasQuery) return") < suggestionBody.indexOf("buildSearchSuggestions"));
   assert.match(appSource, /const QUERY_SUGGESTION_SCAN_LIMIT = 360;/u);
+  const quickSuggestionsBody = functionBody("function buildQuickRequestSearchSuggestions");
+  assert.doesNotMatch(quickSuggestionsBody, /meta:\s*"搜索"/u);
+  const hydrationBody = functionBody("function scheduleRequestSearchSuggestionHydration");
+  assert.match(hydrationBody, /createQuerySearchController\(\)/u);
+  assert.match(hydrationBody, /signal:\s*controller\.signal/u);
+  assert.match(hydrationBody, /isAbortError\(error\)/u);
+  assert.match(functionBody("function loadRequestSearchRecords"), /requestSearchShouldUseShards\(filterKey\)/u);
+  assert.match(functionBody("function requestSearchBucketsForQuery"), /requestSearchPrefixBucket\(compact, 3\)/u);
   const countBody = functionBody("function queryDraftResultCount");
   assert.doesNotMatch(countBody, /buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
   assert.match(countBody, /queryResultCountCache/u);
   assert.match(functionBody("function createRangeCacheObject"), /queryIndexes:[\s\S]*queryIndexLoads:[\s\S]*queryResultCountCache:/u);
+});
+
+test("video setlist requests use independent scheduler revision", () => {
+  const setlistBody = functionBody("async function loadVideoSetlist");
+
+  assert.match(setlistBody, /bumpRequestRevision\("setlist"\)/u);
+  assert.doesNotMatch(setlistBody, /bumpRequestRevision\("source"\)/u);
 });
 
 test("range prefetch stays fast and does not use an 8 second delay", () => {

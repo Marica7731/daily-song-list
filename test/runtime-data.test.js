@@ -11,6 +11,7 @@ const {
   compactRankDiffEntries,
   CURRENT_FILTER_VERSION,
   requestSearchBucketId,
+  requestSearchPrefixBucketId,
   requestSearchBuckets,
 } = require("../scripts/build-runtime-data");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
@@ -254,11 +255,14 @@ test("source detail and search records split heavy runtime fields out of page pa
   assert.equal(search[1].searchText.includes("aaaaaaaaaaa"), true);
 });
 
-test("request search buckets route by token first character into bounded shards", () => {
+test("request search buckets route multi-character tokens into bounded prefix shards", () => {
   const buckets = requestSearchBuckets("Song A Artist A Channel Name AAAAAAAAAAA");
+  const bucketList = [...buckets];
 
-  assert.ok(buckets.size <= 8);
-  assert.ok([...buckets].every((bucket) => /^b\d{2}$/u.test(bucket)));
+  assert.ok(buckets.size <= 16);
+  assert.ok(bucketList.includes(requestSearchPrefixBucketId("Song", 2)));
+  assert.ok(bucketList.includes(requestSearchBucketId("a")));
+  assert.equal(bucketList.some((bucket) => /^b\d{2}$/u.test(bucket) && bucket === requestSearchBucketId("Song")), false);
   assert.equal(requestSearchBucketId("S"), requestSearchBucketId("S"));
   assert.equal(requestSearchBucketId("ヤ"), requestSearchBucketId("ヤ"));
   assert.notEqual(requestSearchBucketId("S"), requestSearchBucketId("T"));
