@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T19:44:03.979Z",
+  "generatedAt": "2026-07-17T03:49:37.666Z",
   "reviewId": "review:QW9BJmlUkmg:b7d9a8a19202b90b87ac",
   "video": {
     "videoId": "QW9BJmlUkmg",
@@ -11,18 +11,20 @@
   "source": {
     "sourceId": "Ugyj6S6jeY1GUTn_pEt4AaABAg",
     "sourceHash": "b7d9a8a19202b90b87ac6fe1278f2dce93dd2a869ab7c11d1f68aa83c4971e15",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "🌸タイムスタンプ💫\n11:44 Again（Mr.Children）\n41:41 Cry Baby （Official髭男dism）\n1:09:47 祝祭（RADWIMPS）\n1:30:31 Pretender（Official髭男dism)\n1:48:17 Choral A（Official髭男dism)\n2:05:41 アンビバレント（Uru）",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 24,
-    "riskLevel": "low",
+    "riskScore": 44,
+    "riskLevel": "medium",
     "riskReasons": [
+      "niche_unknown_artist",
       "source_multiple_unknown_artists",
-      "short_unknown_title"
+      "short_unknown_title",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -36,16 +38,15 @@
       "rawHash": "4fd1f117330495872388a3135b624318490b8b90545781a8d0b5d7efa3642c50",
       "sourceId": "Ugyj6S6jeY1GUTn_pEt4AaABAg",
       "sourceHash": "b7d9a8a19202b90b87ac6fe1278f2dce93dd2a869ab7c11d1f68aa83c4971e15",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -64,8 +65,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -78,17 +78,16 @@
       "rawHash": "ed8be8143d8765cfafebbb0cbefb32937c469d0f8cc99a50820a6eb0157b7bc8",
       "sourceId": "Ugyj6S6jeY1GUTn_pEt4AaABAg",
       "sourceHash": "b7d9a8a19202b90b87ac6fe1278f2dce93dd2a869ab7c11d1f68aa83c4971e15",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -107,8 +106,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -121,14 +119,13 @@
       "rawHash": "b3c6b668a4c01f52a4746ebfeb7321caf45c17be0c2cb6a51073340e6a04b56c",
       "sourceId": "Ugyj6S6jeY1GUTn_pEt4AaABAg",
       "sourceHash": "b7d9a8a19202b90b87ac6fe1278f2dce93dd2a869ab7c11d1f68aa83c4971e15",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -149,8 +146,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     }
   ]

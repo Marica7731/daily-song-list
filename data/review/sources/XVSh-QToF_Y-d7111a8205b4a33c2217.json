@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T19:44:03.979Z",
+  "generatedAt": "2026-07-17T03:49:37.666Z",
   "reviewId": "review:XVSh-QToF_Y:d7111a8205b4a33c2217",
   "video": {
     "videoId": "XVSh-QToF_Y",
@@ -11,18 +11,20 @@
   "source": {
     "sourceId": "UgzMtNzbzo9rOkOLNp94AaABAg",
     "sourceHash": "d7111a8205b4a33c22175950c699c293e4052a9403203a9a42f410b46540d6c7",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "少爺辛苦了💓\n唱的太好聽惹\n自留時間軸\n1:03:31 試唱想自由\n1:07:22 試唱把回憶拼好給你\n1:09:29 想自由\n1:47:32 後會無期\n1:52:52 夜空中最亮的星\n2:01:46 美麗的神話\n2:38:12 Lemon(中文一小段)\n2:39:11 Lemon",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 58,
-    "riskLevel": "medium",
+    "riskScore": 78,
+    "riskLevel": "high",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
+      "niche_unknown_artist",
       "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles",
       "short_unknown_title"
     ]
   },
@@ -37,16 +39,15 @@
       "rawHash": "c136df7074a1921158e84fc9832bdfde9ed68100bba8575c33bcc7c3bb747d79",
       "sourceId": "UgzMtNzbzo9rOkOLNp94AaABAg",
       "sourceHash": "d7111a8205b4a33c22175950c699c293e4052a9403203a9a42f410b46540d6c7",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -58,16 +59,15 @@
       "rawHash": "fe8c5e2ba46d3e1b67cdf2af486b3764fe2a6ccfe01a24fa2c0f16961125f5be",
       "sourceId": "UgzMtNzbzo9rOkOLNp94AaABAg",
       "sourceHash": "d7111a8205b4a33c22175950c699c293e4052a9403203a9a42f410b46540d6c7",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -79,17 +79,16 @@
       "rawHash": "805971f5a55239c8c09347c1678be8251e624a94e83b76ffa9cc2c1025915800",
       "sourceId": "UgzMtNzbzo9rOkOLNp94AaABAg",
       "sourceHash": "d7111a8205b4a33c22175950c699c293e4052a9403203a9a42f410b46540d6c7",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -101,17 +100,16 @@
       "rawHash": "0978b65d2d0ac2d01a0a8739df3d56ee42fd76d7bafbc887de95dc18fe4770fb",
       "sourceId": "UgzMtNzbzo9rOkOLNp94AaABAg",
       "sourceHash": "d7111a8205b4a33c22175950c699c293e4052a9403203a9a42f410b46540d6c7",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -123,16 +121,15 @@
       "rawHash": "33f43feae14e375a1578c9c957937806d1dcc224a0d88490e72cdca2ad5e59c4",
       "sourceId": "UgzMtNzbzo9rOkOLNp94AaABAg",
       "sourceHash": "d7111a8205b4a33c22175950c699c293e4052a9403203a9a42f410b46540d6c7",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -151,8 +148,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -173,25 +169,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "likely_non_song_entry",
-      "seconds": 7306,
-      "time": "2:01:46",
-      "title": "美麗的神話",
-      "artist": "未記載",
-      "raw": "2:01:46 美麗的神話",
-      "rawHash": "8824c34d4e52614448b2ac7d19440d5bd53cdceb7d2c243acbfe97021b0b9151",
-      "sourceId": "UgzMtNzbzo9rOkOLNp94AaABAg",
-      "sourceHash": "d7111a8205b4a33c22175950c699c293e4052a9403203a9a42f410b46540d6c7",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "likely_non_song_entry"
+        "known_song"
       ]
     }
   ]

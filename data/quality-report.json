@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T19:44:03.979Z",
+  "generatedAt": "2026-07-17T03:49:37.666Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 20688,
-  "unknownArtistCount": 3246,
-  "nicheUnknownArtistCount": 1744,
-  "highRiskEntryCount": 630,
+  "totalSongs": 22911,
+  "unknownArtistCount": 3340,
+  "nicheUnknownArtistCount": 1741,
+  "highRiskEntryCount": 629,
   "highRiskSourceCount": 23,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 16,
+  "ruleDroppedEntryCount": 3,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 39,
-  "parserCorruptionCount": 35,
-  "likelyNoiseCount": 1,
-  "needsReviewCount": 1707,
-  "likelySongCount": 12036,
+  "confirmedNoiseCount": 10,
+  "parserCorruptionCount": 45,
+  "likelyNoiseCount": 0,
+  "needsReviewCount": 1735,
+  "likelySongCount": 12818,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -33,12 +33,12 @@
     },
     {
       "value": "少女レイ",
-      "count": 19,
+      "count": 20,
       "classifications": {
-        "likely_song": 19
+        "likely_song": 20
       },
       "riskReasons": {
-        "known_song_unknown_artist": 19
+        "known_song_unknown_artist": 20
       }
     },
     {
@@ -53,23 +53,24 @@
     },
     {
       "value": "モニタリング",
-      "count": 11,
+      "count": 13,
       "classifications": {
-        "likely_song": 9,
-        "parser_corruption": 2
+        "likely_song": 10,
+        "parser_corruption": 3
       },
       "riskReasons": {
-        "known_song_unknown_artist": 9,
-        "parser_corruption": 2
+        "known_song_unknown_artist": 10,
+        "parser_corruption": 3
       }
     },
     {
       "value": "結束",
       "count": 10,
       "classifications": {
-        "likely_song": 10
+        "needs_review": 10
       },
       "riskReasons": {
+        "niche_unknown_artist": 10,
         "short_unknown_title": 10,
         "source_multiple_unknown_artists": 10
       }
@@ -86,6 +87,16 @@
     },
     {
       "value": "ray",
+      "count": 9,
+      "classifications": {
+        "likely_song": 9
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 9
+      }
+    },
+    {
+      "value": "花に亡霊",
       "count": 9,
       "classifications": {
         "likely_song": 9
@@ -135,16 +146,6 @@
       }
     },
     {
-      "value": "花に亡霊",
-      "count": 8,
-      "classifications": {
-        "likely_song": 8
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 8
-      }
-    },
-    {
       "value": "ヴィラン",
       "count": 7,
       "classifications": {
@@ -174,6 +175,16 @@
       "riskReasons": {
         "known_song_unknown_artist": 5,
         "parser_corruption": 2
+      }
+    },
+    {
+      "value": "シャルル",
+      "count": 7,
+      "classifications": {
+        "likely_song": 7
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 7
       }
     },
     {
@@ -207,16 +218,6 @@
       }
     },
     {
-      "value": "シャルル",
-      "count": 6,
-      "classifications": {
-        "likely_song": 6
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 6
-      }
-    },
-    {
       "value": "ビビデバ",
       "count": 6,
       "classifications": {
@@ -230,18 +231,38 @@
   "topRiskChannels": [
     {
       "value": "UTANO ch. 白玖ウタノ",
-      "count": 9
+      "count": 10
     },
     {
       "value": "汐音ベリーちゃん Berry Ch",
-      "count": 8
+      "count": 9
     },
     {
       "value": "音魂ヒビクHibiku Otodama",
+      "count": 7
+    },
+    {
+      "value": "Norn Ch. 氷々樹ノルン",
       "count": 6
     },
     {
+      "value": "苺咲べりぃ / Maisaki Berry",
+      "count": 6
+    },
+    {
+      "value": "Ellise Ch.",
+      "count": 5
+    },
+    {
+      "value": "Kyoka Ch. -響架-",
+      "count": 5
+    },
+    {
       "value": "MUZU‐むずちゃんねる‐【Vtuber】",
+      "count": 5
+    },
+    {
+      "value": "roji ろじ",
       "count": 5
     },
     {
@@ -249,19 +270,23 @@
       "count": 5
     },
     {
+      "value": "羽緒",
+      "count": 5
+    },
+    {
+      "value": "音ノ乃のの / NononoNono",
+      "count": 5
+    },
+    {
       "value": "芽森ひより",
       "count": 5
     },
     {
-      "value": "菜鳥ひなた / Hinata Natori",
-      "count": 5
-    },
-    {
-      "value": "Ellise Ch.",
+      "value": "-sumica-澄花",
       "count": 4
     },
     {
-      "value": "Kyoka Ch. -響架-",
+      "value": "NEPHLA",
       "count": 4
     },
     {
@@ -269,44 +294,20 @@
       "count": 4
     },
     {
+      "value": "ながやまめめ",
+      "count": 4
+    },
+    {
       "value": "にっこりわたち^^*",
       "count": 4
     },
     {
-      "value": "ひーくん / hi-kun",
+      "value": "ひでチャンネル",
       "count": 4
     },
     {
       "value": "ラティオ・ユィリスOfficial",
       "count": 4
-    },
-    {
-      "value": "羽月うずな / Hazuki Uzuna",
-      "count": 4
-    },
-    {
-      "value": "音ノ乃のの / NononoNono",
-      "count": 4
-    },
-    {
-      "value": "茶々プラムム / Pulamumu",
-      "count": 4
-    },
-    {
-      "value": "彷徨 鈴【Samayoi Suzu】",
-      "count": 4
-    },
-    {
-      "value": "苺咲べりぃ / Maisaki Berry",
-      "count": 4
-    },
-    {
-      "value": "-sumica-澄花",
-      "count": 3
-    },
-    {
-      "value": "Cecil Ch.月城セシル【セシんもーZ】",
-      "count": 3
     }
   ],
   "topRiskVideos": [
@@ -380,6 +381,19 @@
       ]
     },
     {
+      "videoId": "Fl48C-hr-RA",
+      "title": "【 #歌枠 】ボカロ縛り歌枠！セトリ当たったら歌います！【 #新人vtuber / #宵吸あけル 】",
+      "channelName": "宵吸あけル / Yokyu Akeru",
+      "riskScore": 92,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "kept_count_high_low_known_song_density",
+        "source_multiple_unknown_artists",
+        "short_unknown_title"
+      ]
+    },
+    {
       "videoId": "DuDkasY22Mc",
       "title": "【 歌枠 / #karaoke 】RADWIMPSさんの曲だけをたんまり歌う会🦉 【羽緒 / RK Music】#羽緒集魂中 #vtuber #vsinger #歌枠",
       "channelName": "羽緒",
@@ -387,8 +401,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "source_multiple_niche_short_titles",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
       ]
     },
     {
@@ -531,20 +545,6 @@
       ]
     },
     {
-      "videoId": "hWv55PnjmEo",
-      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "riskScore": 78,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
       "videoId": "ZTi1cpRaW8U",
       "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
       "channelName": "闇咲とうか",
@@ -588,6 +588,14 @@
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-17T03:49:37.666Z",
+      "totalSongs": 22911,
+      "unknownArtistCount": 3340,
+      "nicheUnknownArtistCount": 1741,
+      "highRiskEntryCount": 629,
+      "highRiskSourceCount": 23
+    },
     {
       "generatedAt": "2026-07-16T19:44:03.979Z",
       "totalSongs": 20688,
@@ -739,14 +747,6 @@
       "nicheUnknownArtistCount": 1487,
       "highRiskEntryCount": 660,
       "highRiskSourceCount": 23
-    },
-    {
-      "generatedAt": "2026-07-14T08:39:21.763Z",
-      "totalSongs": 15312,
-      "unknownArtistCount": 2893,
-      "nicheUnknownArtistCount": 1526,
-      "highRiskEntryCount": 544,
-      "highRiskSourceCount": 20
     }
   ]
 }

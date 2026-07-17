@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-17T03:49:37.666Z",
+  "reviewId": "review:Fl48C-hr-RA:071fa7fc3bef205085d3",
+  "video": {
+    "videoId": "Fl48C-hr-RA",
+    "title": "【 #歌枠 】ボカロ縛り歌枠！セトリ当たったら歌います！【 #新人vtuber / #宵吸あけル 】",
+    "channelName": "宵吸あけル / Yokyu Akeru",
+    "youtubeUrl": "https://www.youtube.com/watch?v=Fl48C-hr-RA"
+  },
+  "source": {
+    "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
+    "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
+    "sourceType": "comment",
+    "selected": true,
+    "sourceTextAvailable": true,
+    "sourceText": ":_おつよきゅのお::_おつよきゅのつ::_よきゅのよ::_よきゅのきゅ:さまでした！目がかすんで見えない！パネルの字ちっちゃ！（仕様だししょうがないな～:_よっつー:）\nなんか要所要所でざぁこざぁこ言ってる:_よきゅのよ::_よきゅのきゅ:が頭にチラつく配信でしたが、終始音域もテンションも高いしとにかく:_よしっ:\n最初はどんな展開になるのやらと思ってましたが３時間配信、楽しませていただきました！朝活まで少しは休んでネ！\n-------おまけ---------\n\n0:30:42　みなさんが静かになるまで30分かかりました\r\n1:25:33　ヨキュダヨ～（そっくり:_LOVE:）\r\n1:57:44　高っけ！高っけ！ヨシ！\r\n1:59:14　休憩\r\n2:38:11　:_よきゅのよ::_よきゅのきゅ:の勝ちってコトぉ～？\r\n2:42:30　おわり～～！！\r\n2:44:50　パネルオープン！！ありがとうございました～！",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 58,
+    "riskLevel": "medium",
+    "riskReasons": [
+      "source_activity_marker_ratio_high",
+      "source_many_topic_entries"
+    ]
+  },
+  "entries": [
+    {
+      "status": "accepted",
+      "seconds": 5133,
+      "time": "1:25:33",
+      "title": "ヨキュダヨ～",
+      "artist": "そっくり",
+      "raw": "1:25:33　ヨキュダヨ～（そっくり:_LOVE:）",
+      "rawHash": "13cd31f9f8c65b04a90cc0eec77011181e5bcaafd056caabdd967fb541eb751d",
+      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
+      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
+      "positiveEvidence": [
+        "known_artist",
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "accepted",
+      "seconds": 7064,
+      "time": "1:57:44",
+      "title": "高っけ！高っけ！ヨシ！",
+      "artist": "未記載",
+      "raw": "1:57:44　高っけ！高っけ！ヨシ！",
+      "rawHash": "872e67581853cee7cb9c3051cf7d4e2c9f025b29a32e6df7d134f9802d46cfd8",
+      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
+      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
+      "positiveEvidence": [
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "accepted",
+      "seconds": 9750,
+      "time": "2:42:30",
+      "title": "おわり～～！！",
+      "artist": "未記載",
+      "raw": "2:42:30　おわり～～！！",
+      "rawHash": "7d0c6399baab5d5b084c8712458f27b8c1c63e3abd1121bfd3f22b60acc87bfb",
+      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
+      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
+      "isNiche": false,
+      "classification": "likely_song",
+      "suggestedAction": "keep",
+      "replacementSuggestion": null,
+      "riskReasons": [],
+      "positiveEvidence": [
+        "structured_setlist"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 1842,
+      "time": "0:30:42",
+      "title": "みなさんが静かになるまで30分かかりました",
+      "artist": "未記載",
+      "raw": "0:30:42 みなさんが静かになるまで30分かかりました",
+      "rawHash": "a21e4bb2af9cc728df1805addd12f943627da54f131c934e3221c23c76ea3976",
+      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
+      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "activity_marker_title",
+      "seconds": 7154,
+      "time": "1:59:14",
+      "title": "休憩",
+      "artist": "未記載",
+      "raw": "1:59:14 休憩",
+      "rawHash": "13a20d1cf4f6c8e29ed7350a7a33350ff3606a541928e9ba9bd2475fe3cb3c8e",
+      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
+      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "activity_marker_title"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "custom_emoji_only",
+      "seconds": 9491,
+      "time": "2:38:11",
+      "title": "_よきゅのよ::_よきゅのきゅ:の勝ちってコトぉ～？",
+      "artist": "",
+      "raw": "2:38:11 :_よきゅのよ::_よきゅのきゅ:の勝ちってコトぉ～？",
+      "rawHash": "28956d79bb955be0746de31c8368d1ee479c9ee8e4913f7759f0af85fd024834",
+      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
+      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "custom_emoji_only"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 9890,
+      "time": "2:44:50",
+      "title": "パネルオープン！！ありがとうございました～！",
+      "artist": "未記載",
+      "raw": "2:44:50 パネルオープン！！ありがとうございました～！",
+      "rawHash": "b1bba29fd291ab3fb7beefd4c79945445c3c7091fa7fb412b12443892abdb59b",
+      "sourceId": "Ugx8QEiGft7b2hxz3454AaABAg",
+      "sourceHash": "071fa7fc3bef205085d386690aeb3f399c4a6df6867995bdb1f88405423c3714",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    }
+  ]
+}

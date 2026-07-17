@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-16T19:44:03.979Z",
+  "generatedAt": "2026-07-17T03:49:37.666Z",
   "reviewId": "review:4CgnNOuQMjw:3f1c11673497216e7fee",
   "video": {
     "videoId": "4CgnNOuQMjw",
@@ -11,19 +11,21 @@
   "source": {
     "sourceId": "UgxOcwtfmkDdOcs1WUx4AaABAg",
     "sourceHash": "3f1c11673497216e7fee312ac5ec1b15964c1db71bba6436e3674b5390aa0316",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "3:04　  スカ―\n7:31　  スカ―\n12:19　スカ―\n19:31　LOSER\n24:08   春を告げる",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 57,
-    "riskLevel": "medium",
+    "riskScore": 77,
+    "riskLevel": "high",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
+      "niche_unknown_artist",
       "short_unknown_title",
-      "source_multiple_unknown_artists"
+      "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -37,17 +39,16 @@
       "rawHash": "a3036abc13bbbceb1fbec808608dfa9535d5ecbacadc6f05ff16f682411fb99f",
       "sourceId": "UgxOcwtfmkDdOcs1WUx4AaABAg",
       "sourceHash": "3f1c11673497216e7fee312ac5ec1b15964c1db71bba6436e3674b5390aa0316",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -59,17 +60,16 @@
       "rawHash": "591ff3f74957180ef25cddbd5e6e9b5765c6757be333191ff4d3237af262c7f2",
       "sourceId": "UgxOcwtfmkDdOcs1WUx4AaABAg",
       "sourceHash": "3f1c11673497216e7fee312ac5ec1b15964c1db71bba6436e3674b5390aa0316",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -81,17 +81,16 @@
       "rawHash": "f89a271a700e9eb0cfe95a44516a6df51004a48624a4cda7383b9823620d181a",
       "sourceId": "UgxOcwtfmkDdOcs1WUx4AaABAg",
       "sourceHash": "3f1c11673497216e7fee312ac5ec1b15964c1db71bba6436e3674b5390aa0316",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -111,8 +110,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -133,8 +131,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     }
   ]
