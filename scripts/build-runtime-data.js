@@ -11,6 +11,11 @@ const {
   canonicalRangeId,
   groupForRange,
 } = require("./range-config");
+const {
+  DEFAULT_SOURCE_CHUNK_SIZE,
+  writeSourceEntityShardSet,
+  writeVideoSetlistFiles,
+} = require("./lib/source-entity-shards");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -27,7 +32,7 @@ const SOURCE_DETAIL_PAGE_SIZE = positiveInteger(process.env.DAILY_SONG_SOURCE_DE
 const SEARCH_PAGE_SIZE = positiveInteger(process.env.DAILY_SONG_SEARCH_PAGE_SIZE, 240);
 const REQUEST_PAGE_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_PAGE_SIZE, 50);
 const REQUEST_DETAIL_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_DETAIL_SHARD_SIZE, 96);
-const REQUEST_SOURCE_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_SHARD_SIZE, 48);
+const REQUEST_SOURCE_CHUNK_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_CHUNK_SIZE, DEFAULT_SOURCE_CHUNK_SIZE);
 const REQUEST_SEARCH_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_SHARD_SIZE, 2000);
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
 
@@ -426,24 +431,30 @@ function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
     }));
   }
 
-  const sourceShardSet = writeKeyedRequestShardSet({
-    kind: "request-source-detail",
+  const sourceShardSet = writeSourceEntityShardSet({
+    rootDir: ROOT,
     rangeId,
     dataVersion,
     generatedAt,
     capturedAt,
-    baseDir: `data/ui/ranges/${rangeId}/sources`,
-    pageSize: REQUEST_SOURCE_SHARD_SIZE,
+    chunkSize: REQUEST_SOURCE_CHUNK_SIZE,
+    schemaVersion: RUNTIME_SCHEMA_VERSION,
     records: sourceRecords,
-    recordName: "records",
   });
-  const sourcePathByKey = new Map(sourceShardSet.records.map((record) => [record.key, record.path]));
+  const sourcePathByKey = new Map(sourceShardSet.records.map((record) => [record.key, record.manifestPath || record.path]));
   for (const recordMap of Object.values(detailRecords)) {
     for (const record of recordMap.values()) {
       if (!record.sourceDetailKey) continue;
       record.sourceDetailPath = sourcePathByKey.get(record.sourceDetailKey) || "";
     }
   }
+  const videoSetlists = writeVideoSetlistFiles({
+    rootDir: ROOT,
+    items,
+    dataVersion,
+    generatedAt,
+    schemaVersion: RUNTIME_SCHEMA_VERSION,
+  });
 
   const detailShardSets = Object.fromEntries(
     Object.entries(detailRecords).map(([type, recordMap]) => [
@@ -499,6 +510,8 @@ function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
     summary: summarizeRequestSummary(summary),
     views: summarizeRequestViews(viewArtifacts),
     search: summarizeRequestSearch(search),
+    sourceDetails: summarizeSourceEntityShardSet(sourceShardSet),
+    videoSetlists: summarizeVideoSetlists(videoSetlists),
   };
 }
 
@@ -983,6 +996,22 @@ function summarizeRequestShardSet(shardSet) {
     pageSize: shardSet.pageSize,
     itemCount: shardSet.itemCount,
     pageCount: shardSet.pageCount,
+  };
+}
+
+function summarizeSourceEntityShardSet(shardSet) {
+  return {
+    kind: shardSet.kind,
+    chunkSize: shardSet.chunkSize,
+    itemCount: shardSet.itemCount,
+    totalSourceCount: shardSet.totalSourceCount,
+  };
+}
+
+function summarizeVideoSetlists(videoSetlists) {
+  return {
+    kind: videoSetlists.kind,
+    itemCount: videoSetlists.itemCount,
   };
 }
 
@@ -1576,6 +1605,7 @@ module.exports = {
   RANGES,
   requestSearchBucketId,
   requestSearchBuckets,
+  REQUEST_SOURCE_CHUNK_SIZE,
   SEARCH_PAGE_SIZE,
   SOURCE_DETAIL_PAGE_SIZE,
   RUNTIME_PAGE_SIZE,
