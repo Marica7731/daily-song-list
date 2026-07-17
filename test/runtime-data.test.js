@@ -248,6 +248,8 @@ test("source detail and search records split heavy runtime fields out of page pa
     ["video", "song", "song"],
   );
   assert.equal(search[1].searchText.includes("song a"), true);
+  assert.equal(search[0].searchText.includes("aaaaaaaaaaa"), true);
+  assert.equal(search[1].searchText.includes("aaaaaaaaaaa"), true);
 });
 
 test("compact rank diff removes unchanged entries and detailed fields", () => {

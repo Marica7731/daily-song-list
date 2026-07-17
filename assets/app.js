@@ -2694,7 +2694,7 @@ function showToast(message) {
   window.clearTimeout(els.toast._timer);
   els.toast._timer = window.setTimeout(() => {
     els.toast.hidden = true;
-  }, 3200);
+  }, 2200);
 }
 
 function setupBackToTopButton() {
@@ -3200,7 +3200,8 @@ function currentSelection(rangeCache) {
   if (!filterKey) {
     attachSelectionRecordGetters(selection, rangeCache, baseOccurrences, { hideUnknownForView, filtered: false });
   } else {
-    const occurrences = baseOccurrences.filter((occurrence) => occurrence.searchText.includes(filterKey));
+    const searchBaseOccurrences = hideUnknownForView ? selectedOccurrences(rangeCache, { hideUnknownForView: false }) : baseOccurrences;
+    const occurrences = searchBaseOccurrences.filter((occurrence) => occurrence.searchText.includes(filterKey));
     selection.occurrences = occurrences;
     selection.videoCount = uniqueVideoCount(occurrences);
     attachSelectionRecordGetters(selection, rangeCache, occurrences, { hideUnknownForView, filtered: true });
@@ -3681,11 +3682,11 @@ function compactSummaryMetrics(metrics) {
 
 function compactSummaryNote(note) {
   let text = String(note);
-  if (state.filter) text = text.replace(/隐藏([0-9,]+)条无歌手收录/u, "已隐藏无歌手");
   return text
-    .replace(/隐藏([0-9,]+)条无歌手收录/u, "隐藏$1条无歌手")
+    .replace(/隐藏([0-9,]+)条无歌手收录/u, "已隐藏无歌手")
+    .replace(/隐藏([0-9,]+)条无歌手/u, "已隐藏无歌手")
     .replace(/最近([0-9]+)天累计/u, "近$1天")
-    .replace(/\s*·\s*/gu, "  ");
+    .replace(/\s*·\s*/gu, " · ");
 }
 
 function hiddenUnknownNote(selection) {
@@ -4159,30 +4160,33 @@ function buildVideoViewItems(items, options = {}) {
   const normalizedFilter = normalizeSearch(filter);
   const result = [];
   for (const item of items || []) {
-    const sourceSongs = (item.songs || []).filter(
-      (song) =>
-        (!nicheOnly || window.FrontendUtils.isNicheSong(song)) &&
-        (!hideUnknownArtists || !window.RankingUtils.isUnknownArtistName(song?.artist)),
-    );
-    if (!sourceSongs.length) continue;
+    const nicheSongs = (item.songs || []).filter((song) => !nicheOnly || window.FrontendUtils.isNicheSong(song));
+    const sourceSongs = hideUnknownArtists ? nicheSongs.filter((song) => !window.RankingUtils.isUnknownArtistName(song?.artist)) : nicheSongs;
     const originalSongs = item._allSongs || item.songs || [];
     const sourceItem = item._sourceItem || item;
     if (!normalizedFilter) {
+      if (!sourceSongs.length) continue;
       result.push({ ...item, songs: sourceSongs, _displaySongs: sourceSongs, _allSongs: originalSongs, _sourceItem: sourceItem, _songSearchMatchCount: 0 });
       continue;
     }
 
-    const videoMatched = matchesSearch([item.title, item.channelName, item.keyword], filter);
-    const matchedSongs = sourceSongs.filter((song) => matchesSearch([song.title, song.artist], filter));
+    const videoMatched = matchesSearch([item.videoId, item.title, item.channelName, item.keyword], filter);
+    const searchableSongs = hideUnknownArtists ? nicheSongs : sourceSongs;
+    const matchedSongs = searchableSongs.filter((song) => matchesSearch([item.videoId, song.title, song.artist], filter));
     if (!videoMatched && !matchedSongs.length) continue;
 
     const matchedSongSet = new Set(matchedSongs);
+    const displaySourceSongs =
+      hideUnknownArtists && (videoMatched || matchedSongs.length)
+        ? nicheSongs.filter((song) => !window.RankingUtils.isUnknownArtistName(song?.artist) || videoMatched || matchedSongSet.has(song))
+        : sourceSongs;
+    if (!displaySourceSongs.length) continue;
     const displaySongs = videoMatched
-      ? sourceSongs
-      : [...matchedSongs, ...sourceSongs.filter((song) => !matchedSongSet.has(song))];
+      ? displaySourceSongs
+      : [...matchedSongs, ...displaySourceSongs.filter((song) => !matchedSongSet.has(song))];
     result.push({
       ...item,
-      songs: sourceSongs,
+      songs: displaySourceSongs,
       _displaySongs: displaySongs,
       _allSongs: originalSongs,
       _sourceItem: sourceItem,
@@ -4201,7 +4205,7 @@ function collectSongOccurrences(items) {
       occurrences.push({
         item,
         song,
-        searchText: normalizeSearch([item.title, item.channelName, item.keyword, song.title, song.artist].join(" ")),
+        searchText: normalizeSearch([item.videoId, item.title, item.channelName, item.keyword, song.title, song.artist].join(" ")),
       });
     }
   }
@@ -4314,7 +4318,7 @@ function incrementCount(map, name) {
 function songMeta(record) {
   const artists = sortedCountEntries(record.artists);
   return {
-    primary: artists.length ? artists.slice(0, 2).map(formatCountEntry).join("、") : "待补歌手",
+    primary: record.displayArtist || (artists.length ? artists.slice(0, 2).map(formatCountEntry).join("、") : "待补歌手"),
     missingPrimary: !artists.length,
     badges: isNicheRecord(record) ? ["小众"] : [],
   };
@@ -6033,7 +6037,8 @@ function uniqueVideoCount(occurrences) {
 }
 
 function isNicheRecord(record) {
-  return (record.occurrences || []).some(({ song }) => window.FrontendUtils.isNicheSong(song));
+  const occurrences = record.occurrences || [];
+  return occurrences.length > 0 && occurrences.every(({ song }) => window.FrontendUtils.isNicheSong(song));
 }
 
 function metric(value, label) {

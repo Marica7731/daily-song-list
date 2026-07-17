@@ -90,27 +90,35 @@ test("snapshot failure preserves previous path through failure callback", async 
   assert.equal(failure.error.message, "HTTP 404");
 });
 
-test("search clear and filtering use title, artist, channel, and video title", () => {
+test("search clear and filtering use title, artist, channel, video id, and video title", () => {
   const items = [
-    video("A", "歌枠 archive", "AZKi Channel", [
+    video("VmLgly38CwY", "歌枠 archive", "AZKi Channel", [
       song("First Good-Bye", "梶浦由記"),
       song("you", "癒月"),
     ]),
-    video("B", "雑談", "talk channel", [song("雑談", "")]),
+    video("OTHERID0001", "雑談", "talk channel", [song("雑談", "")]),
   ];
   const occurrences = items.flatMap((item) => item.songs.map((song) => ({ item, song })));
 
   assert.deepEqual(
     filterItemsBySearch(items, "azki").map((item) => item.videoId),
-    ["A"],
+    ["VmLgly38CwY"],
   );
   assert.deepEqual(
     filterItemsBySearch(items, "first").map((item) => item.videoId),
-    ["A"],
+    ["VmLgly38CwY"],
+  );
+  assert.deepEqual(
+    filterItemsBySearch(items, "VmLgly38CwY").map((item) => item.videoId),
+    ["VmLgly38CwY"],
   );
   assert.deepEqual(
     filterOccurrencesBySearch(occurrences, "癒月").map(({ song }) => song.title),
     ["you"],
+  );
+  assert.deepEqual(
+    filterOccurrencesBySearch(occurrences, "OTHERID0001").map(({ item }) => item.videoId),
+    ["OTHERID0001"],
   );
   assert.equal(filterItemsBySearch(items, normalizeSearch("")).length, 2);
   assert.equal(filterOccurrencesBySearch(occurrences, "").length, 3);

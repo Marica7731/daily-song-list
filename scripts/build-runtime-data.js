@@ -407,7 +407,7 @@ function buildSearchRecords(items) {
       title: item.title || "",
       channelName: item.channelName || "",
       keyword: item.keyword || "",
-      searchText: normalizeSearchText([item.title, item.channelName, item.keyword].join(" ")),
+      searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword].join(" ")),
     });
     for (const song of item.songs || []) {
       records.push({
@@ -417,7 +417,7 @@ function buildSearchRecords(items) {
         title: song.title || "",
         artist: song.artist || "",
         isNiche: song.isNiche === true,
-        searchText: normalizeSearchText([song.title, song.artist, item.title, item.channelName].join(" ")),
+        searchText: normalizeSearchText([item.videoId, song.title, song.artist, item.title, item.channelName].join(" ")),
       });
     }
   }

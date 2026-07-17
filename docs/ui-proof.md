@@ -21,6 +21,10 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- |
 | ![Desktop song index](assets/screenshots/desktop-song-index.png) | ![Desktop video tab](assets/screenshots/desktop-video-view.png) |
 
+| Summary baseline |
+| --- |
+| ![Desktop summary baseline](assets/screenshots/desktop-summary-baseline.png) |
+
 | 7d range fixture | All range fixture | Partition pagination |
 | --- | --- | --- |
 | ![Desktop 7d range fixture](assets/screenshots/desktop-range-7d.png) | ![Desktop all range fixture](assets/screenshots/desktop-range-all.png) | ![Desktop partition pagination fixture](assets/screenshots/desktop-partition-pagination.png) |
@@ -48,6 +52,10 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | Song ranking | Artist ranking | Song index |
 | --- | --- | --- |
 | ![Mobile song ranking](assets/screenshots/mobile-song-rank.png) | ![Mobile artist ranking](assets/screenshots/mobile-artist-rank.png) | ![Mobile song index](assets/screenshots/mobile-song-index.png) |
+
+| Summary baseline | Toast |
+| --- | --- |
+| ![Mobile summary baseline](assets/screenshots/mobile-summary-baseline.png) | ![Mobile copy setlist toast](assets/screenshots/mobile-toast-copy-setlist.png) |
 
 | All-time summary | Trend count increase | Trend rank down |
 | --- | --- | --- |

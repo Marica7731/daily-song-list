@@ -62,7 +62,7 @@
     if (!normalized) return items;
     return (items || []).filter((item) => {
       const songParts = (item.songs || []).flatMap((song) => [song.title, song.artist]);
-      return matchesSearch([item.title, item.channelName, item.keyword, ...songParts], normalized);
+      return matchesSearch([item.videoId, item.title, item.channelName, item.keyword, ...songParts], normalized);
     });
   }
 
@@ -70,7 +70,7 @@
     const normalized = normalizeSearch(filter);
     if (!normalized) return occurrences;
     return (occurrences || []).filter(({ item, song }) =>
-      matchesSearch([item?.title, item?.channelName, item?.keyword, song?.title, song?.artist], normalized),
+      matchesSearch([item?.videoId, item?.title, item?.channelName, item?.keyword, song?.title, song?.artist], normalized),
     );
   }
 

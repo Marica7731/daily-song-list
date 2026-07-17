@@ -1,6 +1,14 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { extractSearchItems } = require("./update-songlist");
+const { spawnSync } = require("node:child_process");
+const { extractSearchItems, fetchVideoSongList } = require("./update-songlist");
+const {
+  VIDEO_CATALOG_PATH,
+  loadVideoCatalog,
+  mergeVideosIntoCatalog,
+  writeCatalogSegments,
+  writeVideoCatalog,
+} = require("./video-catalog");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -16,15 +24,20 @@ async function main() {
 
   const searchRenderers = await diagnoseSearchRenderers(videoId);
   const watchSummary = await diagnoseWatchPage(videoId);
-  const local = diagnoseLocalData(videoId);
+  const before = diagnoseLocalData(videoId);
+  const forceInspection = forceInspect ? await runForceInspect(videoId, searchRenderers, watchSummary, before) : null;
+  const local = forceInspect ? diagnoseLocalData(videoId) : before;
   const diagnostic = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     videoId,
     forceInspect,
+    before: forceInspect ? summarizePresence(before) : undefined,
+    after: forceInspect ? summarizePresence(local) : undefined,
     firstFailureStage: firstFailureStage(local, watchSummary, searchRenderers),
     searchRenderers: summarizeSearchRenderers(searchRenderers),
     watchPage: watchSummary.summary,
+    forceInspection,
     presence: local.presence,
     exclusion: local.exclusion,
     final: {
@@ -45,7 +58,168 @@ async function main() {
   writeJson(path.join(outDir, "parsed-songs.json"), local.parsedSongs);
   writeJson(path.join(outDir, "rejected-songs.json"), local.rejectedSongs);
   fs.writeFileSync(path.join(outDir, "diagnostic.md"), diagnosticMarkdown(diagnostic, local), "utf8");
+  if (forceInspect && forceInspection?.error) {
+    console.error(`DIAGNOSE_VIDEO_FORCE_INSPECT_FAILED videoId=${videoId} error=${forceInspection.error.split("\n")[0]}`);
+    process.exitCode = 1;
+    return;
+  }
   console.log(`DIAGNOSE_VIDEO_OK videoId=${videoId} firstFailureStage=${diagnostic.firstFailureStage} songs=${local.parsedSongs.length}`);
+}
+
+async function runForceInspect(videoId, searchRenderers, watchSummary, beforeLocal) {
+  const startedAt = new Date();
+  const candidate = forceInspectCandidate(videoId, searchRenderers, watchSummary, beforeLocal);
+  const result = {
+    startedAt: startedAt.toISOString(),
+    candidate,
+    executedSteps: [
+      "construct_candidate_from_video_id",
+      "fetch_watch_page",
+      "extract_description",
+      "fetch_comment_continuation",
+      "fetch_comment_replies",
+      "parse_timestamp_songs",
+      "repair_and_curation",
+      "update_catalog",
+      "rebuild_latest_ranges_runtime_search",
+    ],
+    descriptionSourceCount: 0,
+    commentSourceCount: 0,
+    replySourceCount: 0,
+    parsedSongCount: 0,
+    acceptedSongCount: 0,
+    rejectedSongCount: 0,
+    selectedSourceId: "",
+    selectedSourceHash: "",
+    sourceTexts: [],
+    rejectionReasons: {},
+    catalogAdded: false,
+    allAdded: false,
+    recentAdded: false,
+    runtimeAdded: false,
+    searchAdded: false,
+    error: "",
+  };
+  try {
+    const inspected = await fetchVideoSongList(candidate);
+    const audit = inspected?.audit || {};
+    result.descriptionSourceCount = countSourcesByType(audit, "description");
+    result.commentSourceCount = countSourcesByType(audit, "comment");
+    result.replySourceCount = countSourcesByType(audit, "reply");
+    result.parsedSongCount = sumSourceCount(audit, "originalCount");
+    result.acceptedSongCount = inspected?.detail?.songs?.length || 0;
+    result.rejectedSongCount = audit.rejectedEntryCount || 0;
+    result.selectedSourceId = inspected?.detail?.selectedSourceId || "";
+    result.selectedSourceHash = inspected?.detail?.selectedSourceHash || "";
+    result.sourceTexts = (audit.sources || [])
+      .filter((source) => source.selected || source.sourceText)
+      .map((source) => ({
+        sourceId: source.sourceId || "",
+        sourceType: source.sourceType || "",
+        selected: source.selected === true,
+        keptCount: source.keptCount || 0,
+        sourceText: source.sourceText || "",
+      }))
+      .slice(0, 12);
+    result.rejectionReasons = countRejectedReasons(audit);
+    if (!inspected?.detail) {
+      result.error = `force inspect produced no detail: ${audit.result || "unknown"}`;
+      return result;
+    }
+
+    const beforeCatalog = loadVideoCatalog();
+    const hadVideo = beforeCatalog.videos.some((entry) => entry.videoId === videoId);
+    const catalogUpdate = mergeVideosIntoCatalog(beforeCatalog, [inspected.detail], startedAt, {
+      qualityStatus: "force_inspected",
+    });
+    writeVideoCatalog(catalogUpdate.catalog, VIDEO_CATALOG_PATH);
+    writeCatalogSegments(catalogUpdate.catalog);
+    result.catalogAdded = !hadVideo || catalogUpdate.stats.updatedVideoCount > 0 || catalogUpdate.stats.addedVideoCount > 0;
+    runNodeScript("rebuild-derived-data.js");
+    runNodeScript("build-review-queue.js");
+    runNodeScript("export-dirty-candidates.js");
+    runNodeScript("build-runtime-data.js");
+
+    const after = diagnoseLocalData(videoId);
+    result.allAdded = after.presence.all;
+    result.recentAdded = after.presence["7d"];
+    result.runtimeAdded = after.presence.runtimeRangeShard && after.presence.sourceDetailShard;
+    result.searchAdded = after.presence.searchShard;
+    return result;
+  } catch (error) {
+    result.error = error.stack || error.message;
+    return result;
+  }
+}
+
+function forceInspectCandidate(videoId, searchRenderers, watchSummary, local) {
+  const existing = local.sourceCandidates?.find((item) => item.videoId === videoId) || null;
+  const searchCandidate = searchRenderers.extractedCandidates?.find((item) => item.videoId === videoId) || null;
+  return {
+    videoId,
+    title: searchCandidate?.title || existing?.title || watchSummary.summary.title || videoId,
+    channelName: searchCandidate?.channelName || existing?.channelName || "",
+    channelId: searchCandidate?.channelId || existing?.channelId || "",
+    channelHandle: searchCandidate?.channelHandle || existing?.channelHandle || "",
+    keyword: "force-inspect",
+    keywords: ["force-inspect", videoId],
+    sourceGroups: uniqueStrings([...(searchCandidate?.sourceGroups || []), ...(existing?.sourceGroups || []), "force_inspect"]),
+    sourceUrls: uniqueStrings([searchRenderers.queryUrl, `https://www.youtube.com/watch?v=${videoId}`]),
+    publishedText: searchCandidate?.publishedText || existing?.publishedText || "",
+    publishedTimestamp: searchCandidate?.publishedTimestamp || existing?.publishedTimestamp || null,
+    durationText: searchCandidate?.durationText || existing?.durationText || "",
+    thumbnailUrl: searchCandidate?.thumbnailUrl || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    sourceRendererType: searchCandidate?.sourceRendererType || "",
+  };
+}
+
+function runNodeScript(scriptName) {
+  const scriptPath = path.join(__dirname, scriptName);
+  let lastChild = null;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const child = spawnSync(process.execPath, [scriptPath], {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: "pipe",
+    });
+    if (child.status === 0) return;
+    lastChild = child;
+    const retryable = /UNKNOWN: unknown error, open/u.test(`${child.stdout}\n${child.stderr}`);
+    if (!retryable || attempt >= 2) break;
+    sleepSync(750);
+  }
+  throw new Error(`${scriptName} failed status=${lastChild.status}\nstdout=${lastChild.stdout}\nstderr=${lastChild.stderr}`);
+}
+
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function summarizePresence(local) {
+  return {
+    presence: local.presence,
+    exclusion: local.exclusion,
+    parsedSongCount: local.parsedSongs.length,
+  };
+}
+
+function countSourcesByType(audit, type) {
+  return (audit.sources || []).filter((source) => source.sourceType === type).length;
+}
+
+function sumSourceCount(audit, key) {
+  return (audit.sources || []).reduce((sum, source) => sum + (Number(source[key]) || 0), 0);
+}
+
+function countRejectedReasons(audit) {
+  const counts = {};
+  for (const source of audit.sources || []) {
+    for (const [reason, count] of Object.entries(source.rejectedEntryReasons || {})) {
+      counts[reason] = (counts[reason] || 0) + count;
+    }
+    if (source.reason) counts[source.reason] = (counts[source.reason] || 0) + 1;
+  }
+  return counts;
 }
 
 async function diagnoseSearchRenderers(videoId) {
@@ -318,6 +492,10 @@ function extractRegex(text, regex) {
 function listValues(value) {
   if (Array.isArray(value)) return value.filter(Boolean).map(String);
   return value ? [String(value)] : [];
+}
+
+function uniqueStrings(values) {
+  return [...new Set((values || []).filter(Boolean).map(String))];
 }
 
 main().catch((error) => {

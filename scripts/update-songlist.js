@@ -10,7 +10,7 @@ const {
   isBlockedSource,
   matchBlockedSource,
 } = require("../assets/source-filter");
-const { createSongSearchLookup } = require("../assets/frontend-utils");
+const { createSongSearchLookup, normalizeSongSearchText } = require("../assets/frontend-utils");
 const { buildArtistRecords, buildCompetitionRanks, buildSongRecords } = require("../assets/ranking-utils");
 const { compactRankDiff, writeRuntimeJson } = require("./build-runtime-data");
 const { repairParsedEntry } = require("./entry-repair");
@@ -1165,6 +1165,7 @@ async function inspectCandidates(candidates, curationContext = loadCurationConte
 }
 
 async function fetchVideoSongList(candidate, curationContext = loadCurationContext()) {
+  curationContext = ensureInspectionContext(curationContext);
   const html = await fetchText(`https://www.youtube.com/watch?v=${candidate.videoId}&hl=ja&persist_hl=1`);
   const apiKey = extractRegex(html, /"INNERTUBE_API_KEY":"([^"]+)"/);
   const clientVersion = extractRegex(html, /"INNERTUBE_CLIENT_VERSION":"([^"]+)"/) || "2.20260601.00.00";
@@ -1172,6 +1173,8 @@ async function fetchVideoSongList(candidate, curationContext = loadCurationConte
   const comments = extractDescriptionCandidates(initialData).map((text, index) =>
     createSourceRecord({ videoId: candidate.videoId, sourceType: "description", text, index }),
   );
+  const titleKnownSongSource = createVideoTitleKnownSongSourceRecord(candidate, curationContext);
+  if (titleKnownSongSource) comments.push(titleKnownSongSource);
   const continuation = findCommentsContinuation(initialData);
   if (apiKey && continuation) {
     const response = await fetchYouTubeContinuation(apiKey, clientVersion, continuation);
@@ -1266,6 +1269,9 @@ async function fetchVideoSongList(candidate, curationContext = loadCurationConte
               identificationSource: selected.sourceQuality.singleSongIdentification.identificationSource,
               confidence: selected.sourceQuality.singleSongIdentification.confidence,
               identificationReason: selected.sourceQuality.singleSongIdentification.reason,
+              rawVideoTitle: selected.sourceQuality.singleSongIdentification.rawVideoTitle || "",
+              matchedKnownSong: selected.sourceQuality.singleSongIdentification.matchedKnownSong || "",
+              matchedArtist: selected.sourceQuality.singleSongIdentification.matchedArtist || "",
             }
           : {}),
       })),
@@ -1328,7 +1334,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   stats.riskLevel = riskLevel(stats.riskScore);
   stats.singleSongIdentification = singleSongIdentification(stats, candidate, cleaned, sourceText);
   const rejectedReason = manuallyRejectedSource ? "manual_reject_source" : rejectedSongSourceReason(stats, candidate);
-  const sourceTextIsNeeded = stats.riskScore > 0 || Boolean(rejectedReason);
+  const sourceTextIsNeeded = stats.riskScore > 0 || Boolean(rejectedReason) || stats.sourceType === "video_title" || Boolean(stats.singleSongIdentification);
   return {
     songs: cleaned,
     stats,
@@ -1497,6 +1503,18 @@ function singleSongIdentification(stats, candidate, songs, sourceText) {
   const knownSong = song.isNiche === false || song.repair?.knownTitle || song.repair?.knownTitleArtist || stats.knownSongCount > 0;
   const hasReliableTimestamp = stats.structuralCount > 0 && Number.isInteger(song.seconds) && song.seconds >= 0;
   const hasArtist = isUsableArtist(song.artist);
+  if (stats.sourceType === "video_title" && knownSong && hasArtist) {
+    return {
+      identificationSource: "video_title_known_song",
+      confidence: 0.92,
+      reason: "single_song_video_title",
+      sourceHash: song.sourceHash || stats.sourceHash || "",
+      sourceId: song.sourceId || stats.sourceId || "",
+      rawVideoTitle: candidate.title || "",
+      matchedKnownSong: title,
+      matchedArtist: song.artist || "",
+    };
+  }
   if (hasReliableTimestamp && (knownSong || hasArtist || titleCue)) {
     return {
       identificationSource: "timestamp_comment",
@@ -1520,6 +1538,93 @@ function singleSongIdentification(stats, candidate, songs, sourceText) {
     };
   }
   return null;
+}
+
+function ensureInspectionContext(context = loadCurationContext()) {
+  return {
+    ...context,
+    songSearchLookup: context?.songSearchLookup || loadSongSearchLookup(),
+    songAliasContext: context?.songAliasContext || loadSongAliasContext(),
+  };
+}
+
+function createVideoTitleKnownSongSourceRecord(candidate, curationContext = loadCurationContext()) {
+  if (!isHighConfidenceSingleSongVideoCandidate(candidate)) return null;
+  const lookup = curationContext?.songSearchLookup || loadSongSearchLookup();
+  const match = matchKnownTitleArtistFromVideoTitle(candidate?.title || "", lookup);
+  if (!match) return null;
+  return createSourceRecord({
+    videoId: candidate.videoId,
+    sourceType: "video_title",
+    text: `0:00 ${match.title} / ${match.artist}`,
+    index: -1,
+  });
+}
+
+function matchKnownTitleArtistFromVideoTitle(title, lookupInput = null) {
+  const lookup = lookupInput?.titleArtistKeys instanceof Set ? lookupInput : createSongSearchLookup(lookupInput || {});
+  if (!lookup?.titleArtistKeys?.size) return null;
+  const matches = new Map();
+  for (const pair of titleArtistPairsFromVideoTitle(title)) {
+    for (const candidate of [pair, { title: pair.artist, artist: pair.title }]) {
+      const titleKey = normalizeSongSearchText(candidate.title);
+      const artistKey = normalizeSongSearchText(candidate.artist);
+      if (!titleKey || !artistKey) continue;
+      const key = `${titleKey}::${artistKey}`;
+      if (lookup.titleArtistKeys.has(key)) {
+        matches.set(key, { title: cleanTitleKnownSongPart(candidate.title), artist: cleanTitleKnownSongPart(candidate.artist), key });
+      }
+    }
+  }
+  return matches.size === 1 ? [...matches.values()][0] : null;
+}
+
+function titleArtistPairsFromVideoTitle(title) {
+  const source = normalizeWhitespace(title).replace(/[\r\n]+/g, " ");
+  const cleaned = cleanVideoTitleForSongMatch(source);
+  const pairs = [];
+  const quoted = source.match(/[「『｢【\["'“‘]\s*([^」』｣】\]"'”’]{2,60})\s*[」』｣】\]"'”’]\s*(?:by|\/|／|\||｜|-|－|ー|covered by)?\s*([^#【】「」『』\[\]\(\)（）]{2,60})/iu);
+  if (quoted) pairs.push({ title: quoted[1], artist: quoted[2] });
+  const parts = cleaned
+    .split(/\s*(?:\/|／|\||｜| - | – | — |-|－)\s*/u)
+    .map(cleanTitleKnownSongPart)
+    .filter(Boolean);
+  for (let index = 0; index < parts.length - 1; index += 1) {
+    pairs.push({ title: parts[index], artist: parts[index + 1] });
+  }
+  return pairs
+    .map((pair) => ({ title: cleanTitleKnownSongPart(pair.title), artist: cleanTitleKnownSongPart(pair.artist) }))
+    .filter((pair) => pair.title && pair.artist && pair.title !== pair.artist);
+}
+
+function cleanVideoTitleForSongMatch(title) {
+  return normalizeWhitespace(title)
+    .replace(/[【\[][^】\]]*(?:歌ってみた|歌いました|cover|covered|カバー|shorts?|short|singing|song)[^】\]]*[】\]]/giu, " ")
+    .replace(/(?:#\S+|歌ってみた|歌いました|covered?\s*by|cover|カバー|shorts?|short|弾き語り|歌唱|singing|song|official|mv|music\s*video)/giu, " ");
+}
+
+function cleanTitleKnownSongPart(value) {
+  return normalizeWhitespace(value)
+    .replace(/[【\[\(（][^】\]\)）]*(?:歌ってみた|歌いました|cover|covered|カバー|shorts?|short|singing|song)[^】\]\)）]*[】\]\)）]/giu, " ")
+    .replace(/(?:#\S+|covered?\s*by|cover|カバー|歌ってみた|歌いました|shorts?|short|弾き語り|歌唱|singing|song|official|mv|music\s*video)$/iu, "")
+    .replace(/^[「『｢【\["'“‘]+|[」』｣】\]"'”’]+$/gu, "")
+    .trim();
+}
+
+function isHighConfidenceSingleSongVideoCandidate(candidate) {
+  const title = normalizeWhitespace(candidate?.title || "");
+  if (!title) return false;
+  const renderer = String(candidate?.sourceRendererType || "");
+  const text = `${title} ${candidate?.keyword || ""}`;
+  const hasSingleSongCue =
+    /(?:歌ってみた|歌いました|cover|covered|カバー|弾き語り|歌唱|singing|song|#shorts|shorts?)/iu.test(text) ||
+    renderer === "shortsLockupViewModel" ||
+    renderer === "reelItemRenderer";
+  if (!hasSingleSongCue) return false;
+  if (/(?:歌枠|セトリ|セットリスト|歌った曲|曲目|雑談|トーク|配信|ライブ|耐久|メドレー|medley|mashup|同時視聴|切り抜き|clip|告知)/iu.test(title)) {
+    return false;
+  }
+  return true;
 }
 
 function isKnownNoArtistSongListTheme(candidate) {
@@ -2903,6 +3008,7 @@ module.exports = {
   buildRankDiffs,
   collectCarryForwardVideos,
   collectInspectionCacheSkipIds,
+  createVideoTitleKnownSongSourceRecord,
   createRequestLimiter,
   extractSearchItems,
   extractMygitTodaySnapshotItems,
@@ -2910,11 +3016,13 @@ module.exports = {
   filterBlockedVideos,
   filterArtistRichMixedSourceSongs,
   fetchMygitTodaySnapshotSource,
+  fetchVideoSongList,
   hasMonthlyDiscoverySource,
   isBlockedSource,
   matchBlockedSource,
   mergeInspectionCache,
   mergeFetchedAndCarriedVideos,
+  matchKnownTitleArtistFromVideoTitle,
   normalizeMygitTodaySnapshotItem,
   parseRetryAfterMs,
   parseOptionalLimit,

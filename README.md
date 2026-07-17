@@ -27,6 +27,10 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- |
 | <img src="docs/assets/screenshots/desktop-song-index.png" alt="Desktop song index" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
 
+| Summary baseline |
+| --- |
+| <img src="docs/assets/screenshots/desktop-summary-baseline.png" alt="Desktop summary baseline" width="320" /> |
+
 | 7d range fixture | All range fixture | Data partitions |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-range-7d.png" alt="Desktop 7d range proof fixture" width="320" /> | <img src="docs/assets/screenshots/desktop-range-all.png" alt="Desktop all range proof fixture" width="320" /> | <img src="docs/assets/screenshots/desktop-partition-pagination.png" alt="Desktop partition pagination proof fixture" width="320" /> |
@@ -52,6 +56,10 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | Song ranking | Artist ranking | Song index |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-song-rank.png" alt="Mobile song ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-artist-rank.png" alt="Mobile artist ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-song-index.png" alt="Mobile song index" width="180" /> |
+
+| Summary baseline | Copy toast |
+| --- | --- |
+| <img src="docs/assets/screenshots/mobile-summary-baseline.png" alt="Mobile summary baseline" width="180" /> | <img src="docs/assets/screenshots/mobile-toast-copy-setlist.png" alt="Mobile copy setlist toast" width="180" /> |
 
 | All-time summary | Trend count increase | Trend rank down |
 | --- | --- | --- |

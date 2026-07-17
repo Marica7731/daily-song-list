@@ -6,8 +6,11 @@ const {
   buildArtistSongGroups,
   buildCompetitionRanks,
   buildSongRecords,
+  extractSongVariant,
   isUnknownArtistName,
+  normalizeSongWorkTitle,
   normalizeSongTitleKey,
+  songWorkTitleKey,
 } = require("../assets/ranking-utils");
 
 test("merges same title with the same known artist", () => {
@@ -65,6 +68,73 @@ test("does not merge kana romaji identities across different titles or identity 
   ]);
 
   assert.equal(records.length, 4);
+});
+
+test("merges same work title version variants and keeps variant labels", () => {
+  const records = buildSongRecords([
+    occurrence("前前前世", "RADWIMPS", "A"),
+    occurrence("前前前世 -Piano Ver", "RADWIMPS", "B", { isNiche: true }),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].title, "前前前世");
+  assert.equal(records[0].count, 2);
+  assert.deepEqual(records[0].variantLabels, ["Piano Ver"]);
+  assert.deepEqual(
+    records[0].occurrences.map(({ item }) => item.videoId),
+    ["A", "B"],
+  );
+});
+
+test("keeps unknown title suffixes and remix variants separated", () => {
+  const records = buildSongRecords([
+    occurrence("Song -Piano Ver", "Artist", "A"),
+    occurrence("Song Remix", "Artist", "B"),
+    occurrence("Song -Night Drive", "Artist", "C"),
+  ]);
+
+  assert.equal(records.length, 3);
+  assert.deepEqual(
+    records.map((record) => record.title).sort(),
+    ["Song", "Song -Night Drive", "Song Remix"].sort(),
+  );
+});
+
+test("merges dominant same-work artist typos without showing duplicate artist counts", () => {
+  const occurrences = Array.from({ length: 14 }, (_, index) => occurrence("前前前世", "RADWIMPS", `A${index}`));
+  occurrences.push(occurrence("前前前世", "RADWINPS", "B"));
+  const records = buildSongRecords(occurrences);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].count, 15);
+  assert.equal(records[0].displayArtist, "RADWIMPS");
+  assert.equal(records[0].artistIdentityKey, "radwimps");
+});
+
+test("front front front fixture conserves occurrences under work identity", () => {
+  const occurrences = [
+    ...Array.from({ length: 14 }, (_, index) => occurrence("前前前世", "RADWIMPS", `base${index}`)),
+    occurrence("前前前世", "RADWINPS", "typo"),
+    occurrence("前前前世", "RADWIMPS (14)", "counted-artist"),
+    occurrence("前前前世 -Piano Ver", "RADWIMPS", "piano", { isNiche: true }),
+  ];
+  const records = buildSongRecords(occurrences);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].title, "前前前世");
+  assert.equal(records[0].displayArtist, "RADWIMPS");
+  assert.equal(records[0].count, 17);
+  assert.equal(records[0].occurrences.length, 17);
+  assert.deepEqual(records[0].variantLabels, ["Piano Ver"]);
+});
+
+test("song work title key only strips whitelisted variants and list markers", () => {
+  assert.equal(songWorkTitleKey("前前前世 -Piano Ver"), songWorkTitleKey("前前前世"));
+  assert.equal(songWorkTitleKey("前前前世 33曲目"), songWorkTitleKey("前前前世"));
+  assert.notEqual(songWorkTitleKey("前前前世 Remix"), songWorkTitleKey("前前前世"));
+  assert.notEqual(songWorkTitleKey("前前前世 -Night Drive"), songWorkTitleKey("前前前世"));
+  assert.equal(normalizeSongWorkTitle("Song (Acoustic Ver)").variantLabel, "Acoustic Ver");
+  assert.equal(extractSongVariant("Song - Remix").variantLabel, "");
 });
 
 test("merges no-space feat annotations into an existing base artist", () => {
@@ -330,6 +400,17 @@ test("buildArtistSongGroups preserves niche state on song groups", () => {
 
   assert.equal(groups.find((group) => group.title === "Rare").isNiche, true);
   assert.equal(groups.find((group) => group.title === "Known").isNiche, false);
+});
+
+test("buildArtistSongGroups recalculates niche after merged variants", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("前前前世", "RADWIMPS", "A"),
+    occurrence("前前前世 -Piano Ver", "RADWIMPS", "B", { isNiche: true }),
+  ]);
+
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].title, "前前前世");
+  assert.equal(groups[0].isNiche, false);
 });
 
 function occurrence(title, artist, videoId, overrides = {}) {

@@ -1,12 +1,12 @@
 # 全量小众无歌手人工审核清单
 
-生成时间：2026-07-17T03:53:25.204Z
+生成时间：2026-07-17T05:16:18.814Z
 
-候选总数：2369
-唯一视频数：385
-唯一来源数：467
+候选总数：2370
+唯一视频数：386
+唯一来源数：468
 已确认非歌曲：104
-已确认解析错误：233
+已确认解析错误：234
 高概率非歌曲：294
 需要人工判断：1737
 高概率真实歌曲：1
@@ -514,6 +514,14 @@
 | [1:49:37](https://www.youtube.com/watch?v=j8AeciGQV5o&t=6577s) | 月虹／BUMP OF CHICKEN | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_artist, structured_setlist | replace_entry | data/review/sources/history\-j8AeciGQV5o\-898c500632eaa8b4951d\.json\#6cb2f8fd2cb855bc19ee75c48a4641a2685b984c825b9480a76929e5ca2483a8 |
 | [2:39:56](https://www.youtube.com/watch?v=j8AeciGQV5o&t=9596s) | アルカリレットウセイ／かいりきベア | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_artist, structured_setlist | replace_entry | data/review/sources/history\-j8AeciGQV5o\-898c500632eaa8b4951d\.json\#e7c6a56eea67a566a8b046385b09dbd062eb00000b68c3ecc7ece5f05734b14f |
 | [2:55:01](https://www.youtube.com/watch?v=j8AeciGQV5o&t=10501s) | brave heart／宮崎歩 | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption | known_song, known_artist, structured_setlist | replace_entry | data/review/sources/history\-j8AeciGQV5o\-898c500632eaa8b4951d\.json\#a2b6c901a8009c8dd284f808994b026ddaeadb863b43a0ddf4de5a40e6d1dd12 |
+
+### 【 \#歌枠 / \#KARAOKE 】アニソン好きによるアニソン歌枠🥀【 \#久遠たま 】
+- 视频：[ljWlIgFIS1Y](https://www.youtube.com/watch?v=ljWlIgFIS1Y)
+- 频道：QuonTama Ch\. 久遠たま
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [1:19:39](https://www.youtube.com/watch?v=ljWlIgFIS1Y&t=4779s) | ～ REALISM | 未記載 | all, review | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/ljWlIgFIS1Y\-d5caea083cf1fb1233ab\.json\#c534a898e5e2d77f80fb09d0825739a89ecd252515588f43e3138768ced9c119 |
 
 ### 【 歌枠】NO28\.ランチタイムに６月最後のろぼめろでぃ～ RBmelody 🎶 【ホロライブ/ ロボ子さん \#ろぼめろでぃ】
 - 视频：[uDVoQq2O9YU](https://www.youtube.com/watch?v=uDVoQq2O9YU)

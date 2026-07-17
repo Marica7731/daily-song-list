@@ -27,28 +27,31 @@
     const clean = options.cleanText || cleanText;
     const normalize = options.normalizeEntityKey || normalizeEntityKey;
     const normalizeArtist = options.normalizeArtistKey || normalizeArtistKey;
-    const normalizeTitle = options.normalizeSongTitleKey || normalizeSongTitleKey;
+    const normalizeTitle = options.songWorkTitleKey || songWorkTitleKey;
     const makeSortKey = options.makeSongSortKey || ((value) => normalize(value));
     const increment = options.incrementCount || incrementCount;
     const titleGroups = new Map();
 
     for (const occurrence of occurrences || []) {
       const title = clean(occurrence?.song?.title);
-      const titleKey = normalizeTitle(title);
+      const work = normalizeSongWorkTitle(title);
+      const titleKey = normalizeTitle(work.workTitle);
       if (!titleKey) continue;
 
       if (!titleGroups.has(titleKey)) {
         titleGroups.set(titleKey, {
           titleKey,
-          title,
+          title: work.workTitle,
           titleCounts: new Map(),
+          rawTitleCounts: new Map(),
           knownArtists: new Map(),
           unknownOccurrences: [],
         });
       }
 
       const titleGroup = titleGroups.get(titleKey);
-      incrementTitleCount(titleGroup.titleCounts, title);
+      incrementTitleCount(titleGroup.titleCounts, work.workTitle);
+      incrementTitleCount(titleGroup.rawTitleCounts, title);
       const artist = clean(occurrence?.song?.artist);
       const rawArtistKey = normalize(artist);
       const artistKey = normalizeArtist(artist) || rawArtistKey;
@@ -60,17 +63,20 @@
             artistKey,
             artistTitleKey: normalizeTitle(artist),
             artistBaseKeys: artistBaseKeys(artist, normalizeArtist),
-            title,
+            title: work.workTitle,
+            workTitle: work.workTitle,
+            canonicalWorkTitleKey: titleKey,
             sortKey: makeSortKey(title),
             count: 0,
             artists: new Map(),
             channels: new Map(),
+            variantLabelCounts: new Map(),
             occurrences: [],
           });
         }
-        addOccurrence(titleGroup.knownArtists.get(artistKey), occurrence, { clean, increment });
+        addOccurrence(titleGroup.knownArtists.get(artistKey), occurrence, { clean, increment, variantLabel: work.variantLabel });
       } else {
-        titleGroup.unknownOccurrences.push(occurrence);
+        titleGroup.unknownOccurrences.push({ occurrence, variantLabel: work.variantLabel });
       }
     }
 
@@ -94,8 +100,8 @@
       const unknownTarget =
         selectDominantRecord(knownRecords) || findKnownRecordFromCombinedTitle(titleGroup.titleKey, allKnownRecords);
       if (unknownTarget) {
-        for (const occurrence of titleGroup.unknownOccurrences) {
-          addOccurrence(unknownTarget, occurrence, { clean, increment, skipArtist: true });
+        for (const { occurrence, variantLabel } of titleGroup.unknownOccurrences) {
+          addOccurrence(unknownTarget, occurrence, { clean, increment, skipArtist: true, variantLabel });
         }
         continue;
       }
@@ -103,19 +109,22 @@
       const unknownRecord = {
         key: `${titleGroup.titleKey}::unknown`,
         title: displayTitle,
+        workTitle: displayTitle,
+        canonicalWorkTitleKey: titleGroup.titleKey,
         sortKey: makeSortKey(displayTitle),
         count: 0,
         artists: new Map(),
         channels: new Map(),
+        variantLabelCounts: new Map(),
         occurrences: [],
       };
-      for (const occurrence of titleGroup.unknownOccurrences) {
-        addOccurrence(unknownRecord, occurrence, { clean, increment, skipArtist: true });
+      for (const { occurrence, variantLabel } of titleGroup.unknownOccurrences) {
+        addOccurrence(unknownRecord, occurrence, { clean, increment, skipArtist: true, variantLabel });
       }
       records.push(unknownRecord);
     }
 
-    return records;
+    return finalizeSongRecords(mergeFinalDuplicateSongRecords(records, { makeSortKey, normalizeArtist }));
   }
 
   function buildArtistRecords(occurrences, options = {}) {
@@ -167,12 +176,12 @@
     return buildSongRecords(occurrences, options)
       .sort((a, b) => b.count - a.count || compare(a.sortKey, b.sortKey) || compare(a.title, b.title))
       .map((record) => ({
-        key: record.key,
-        title: record.title,
-        count: record.count,
-        isNiche: record.occurrences.some(({ song }) => isNicheSong(song)),
-        occurrences: record.occurrences,
-      }));
+      key: record.key,
+      title: record.title,
+      count: record.count,
+      isNiche: record.occurrences.length > 0 && record.occurrences.every(({ song }) => isNicheSong(song)),
+      occurrences: record.occurrences,
+    }));
   }
 
   function mergeKnownArtistVariants(titleGroup) {
@@ -186,6 +195,7 @@
       recordsByKey.delete(record.artistKey);
     }
     mergeKanaRomajiArtistVariants(recordsByKey);
+    mergeLikelyArtistTypoVariants(recordsByKey);
   }
 
   function mergeKanaRomajiArtistVariants(recordsByKey) {
@@ -215,6 +225,72 @@
     }
     if (matches.length !== 1) return null;
     return matches[0];
+  }
+
+  function mergeLikelyArtistTypoVariants(recordsByKey) {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
+      for (const record of records) {
+        if (recordsByKey.get(record.artistKey) !== record || record.count > 1) continue;
+        const target = selectLikelyArtistTypoTarget(record, recordsByKey);
+        if (!target) continue;
+        mergeRecord(target, record);
+        recordsByKey.delete(record.artistKey);
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  function selectLikelyArtistTypoTarget(record, recordsByKey) {
+    const matches = [];
+    for (const candidate of recordsByKey.values()) {
+      if (candidate === record || candidate.count < 3) continue;
+      if (candidate.titleKey !== record.titleKey) continue;
+      if (hasAnyArtistIdentityAnnotation(record) || hasAnyArtistIdentityAnnotation(candidate)) continue;
+      if (isLikelyArtistKeyTypo(record.artistKey, candidate.artistKey)) matches.push(candidate);
+    }
+    if (matches.length !== 1) return null;
+    return matches[0];
+  }
+
+  function hasAnyArtistIdentityAnnotation(record) {
+    return artistRecordNames(record).some(hasArtistIdentityAnnotation);
+  }
+
+  function isLikelyArtistKeyTypo(left, right) {
+    const a = String(left || "");
+    const b = String(right || "");
+    if (a.length < 6 || b.length < 6) return false;
+    if (Math.abs(a.length - b.length) > 1) return false;
+    return editDistanceAtMostOne(a, b);
+  }
+
+  function editDistanceAtMostOne(a, b) {
+    if (a === b) return true;
+    if (a.length === b.length) {
+      let diff = 0;
+      for (let index = 0; index < a.length; index += 1) {
+        if (a[index] !== b[index]) diff += 1;
+        if (diff > 1) return false;
+      }
+      return true;
+    }
+    const longer = a.length > b.length ? a : b;
+    const shorter = a.length > b.length ? b : a;
+    let diff = 0;
+    let shortIndex = 0;
+    for (let longIndex = 0; longIndex < longer.length; longIndex += 1) {
+      if (longer[longIndex] === shorter[shortIndex]) {
+        shortIndex += 1;
+        continue;
+      }
+      diff += 1;
+      if (diff > 1) return false;
+    }
+    return true;
   }
 
   function artistIdentityMatch(a, b) {
@@ -289,6 +365,7 @@
     target.occurrences.push(...source.occurrences);
     mergeCountMap(target.artists, source.artists);
     mergeCountMap(target.channels, source.channels);
+    mergeCountMap(target.variantLabelCounts, source.variantLabelCounts || new Map());
   }
 
   function mergeCountMap(target, source) {
@@ -435,6 +512,16 @@
     record.occurrences.push(occurrence);
     if (!options.skipArtist) options.increment(record.artists, options.clean(occurrence?.song?.artist));
     options.increment(record.channels, options.clean(occurrence?.item?.channelName));
+    incrementVariantLabel(record.variantLabelCounts, options.variantLabel);
+  }
+
+  function incrementVariantLabel(map, label) {
+    const cleanLabel = cleanText(label);
+    if (!cleanLabel) return;
+    const key = normalizeEntityKey(cleanLabel);
+    if (!key) return;
+    if (!map.has(key)) map.set(key, { key, name: cleanLabel, count: 0 });
+    map.get(key).count += 1;
   }
 
   function isKnownArtist(artist, artistKey) {
@@ -489,6 +576,109 @@
       .replace(/[’‘]/g, "'")
       .replace(/[“”]/g, '"')
       .replace(/[^\p{Letter}\p{Number}]+/gu, "");
+  }
+
+  function normalizeSongWorkTitle(value) {
+    const text = stripLeadingTitleListMarker(cleanText(value));
+    const extracted = extractSongVariant(text);
+    return {
+      displayTitle: text,
+      workTitle: extracted.workTitle || text,
+      variantLabel: extracted.variantLabel || "",
+      variantKind: extracted.variantKind || "",
+    };
+  }
+
+  function songWorkTitleKey(value) {
+    return normalizeSongTitleKey(normalizeSongWorkTitle(value).workTitle);
+  }
+
+  function extractSongVariant(value) {
+    const text = cleanText(value).normalize("NFKC");
+    if (!text) return { workTitle: "", variantLabel: "", variantKind: "" };
+    const bracket = text.match(/^(.+?)\s*[(（［\[【「『]\s*([^()（）\[\]［］【】「」『』]{1,80})\s*[)）］\]】」』]\s*$/u);
+    if (bracket && isWhitelistedSongVariant(bracket[2])) {
+      return { workTitle: bracket[1].trim(), variantLabel: cleanVariantLabel(bracket[2]), variantKind: "version" };
+    }
+    const separated = text.match(/^(.+?)\s*(?:[-ー–—|｜:：/／])\s*(.{1,80})\s*$/u);
+    if (separated && isWhitelistedSongVariant(separated[2])) {
+      return { workTitle: separated[1].trim(), variantLabel: cleanVariantLabel(separated[2]), variantKind: "version" };
+    }
+    const trailingListIndex = text.match(/^(.+?)\s+(?:[#＃]?\d{1,3}\s*(?:曲目|曲|番目))\s*$/u);
+    if (trailingListIndex) {
+      return { workTitle: trailingListIndex[1].trim(), variantLabel: cleanVariantLabel(text.slice(trailingListIndex[1].length)), variantKind: "list_marker" };
+    }
+    return { workTitle: text, variantLabel: "", variantKind: "" };
+  }
+
+  function cleanVariantLabel(value) {
+    return cleanText(value).replace(/^[\s:：\-ー–—|｜/／]+/u, "").trim();
+  }
+
+  function isWhitelistedSongVariant(value) {
+    const text = cleanVariantLabel(value).normalize("NFKC");
+    return (
+      /^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella|acappella|アカペラ|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更)$/iu.test(text)
+    );
+  }
+
+  function finalizeSongRecords(records) {
+    return records.map(finalizeSongRecord);
+  }
+
+  function finalizeSongRecord(record) {
+    record.variantLabels = sortedCountEntries(record.variantLabelCounts || new Map()).map((entry) => entry.name);
+    record.displayArtist = selectDisplayArtist(record);
+    record.artistIdentityKey = record.displayArtist ? normalizeArtistKey(record.displayArtist) : "unknown";
+    record.songIdentityKey = `${record.canonicalWorkTitleKey || record.titleKey || normalizeSongTitleKey(record.title)}::${record.artistIdentityKey}`;
+    return record;
+  }
+
+  function mergeFinalDuplicateSongRecords(records, options = {}) {
+    const byKey = new Map();
+    for (const record of records) {
+      const displayArtist = selectDisplayArtist(record);
+      const key = [
+        record.canonicalWorkTitleKey || record.titleKey || normalizeSongTitleKey(record.title),
+        displayArtist ? normalizeArtistKey(displayArtist) : record.artistKey || "unknown",
+      ].join("::");
+      const existing = byKey.get(key);
+      if (!existing) {
+        byKey.set(key, record);
+        continue;
+      }
+      const [winner, loser] = compareRecordDominance(existing, record) <= 0 ? [existing, record] : [record, existing];
+      mergeRecord(winner, loser);
+      if (winner === record) byKey.set(key, winner);
+      applyDisplayTitle(winner, selectCanonicalTitle(new Map([[winner.title, winner.count], [loser.title, loser.count]])) || winner.title, options.makeSortKey || ((value) => value));
+    }
+    return Array.from(byKey.values());
+  }
+
+  function selectDisplayArtist(record) {
+    const entries = sortedCountEntries(record.artists);
+    if (!entries.length) return "";
+    if (entries.length === 1 || shouldCollapseArtistAliases(entries)) return entries[0].name;
+    return entries.slice(0, 2).map((entry) => (entry.count > 1 ? `${entry.name} (${entry.count})` : entry.name)).join("、");
+  }
+
+  function shouldCollapseArtistAliases(entries) {
+    if (entries.length <= 1) return true;
+    const dominant = entries[0];
+    const total = entries.reduce((sum, entry) => sum + entry.count, 0);
+    if (dominant.count / total < 0.75) return false;
+    const dominantKey = normalizeArtistKey(dominant.name);
+    return entries.slice(1).every((entry) => isDisplayArtistAliasOf(entry.name, dominant.name) || isLikelyArtistKeyTypo(normalizeArtistKey(entry.name), dominantKey));
+  }
+
+  function isDisplayArtistAliasOf(alias, canonical) {
+    const canonicalKey = normalizeArtistKey(canonical);
+    if (!canonicalKey) return false;
+    return artistBaseKeys(alias, normalizeArtistKey).includes(canonicalKey);
+  }
+
+  function sortedCountEntries(map) {
+    return Array.from(map?.values?.() || []).sort((a, b) => b.count - a.count || compareValues(a.name, b.name));
   }
 
   function stripLeadingTitleListMarker(value) {
@@ -589,6 +779,7 @@
       .trim();
     return (
       /^(?:19|20)\d{2}年?$/u.test(normalized) ||
+      /^\d{1,5}$/u.test(normalized) ||
       /^(?:(?:self\s*)?cover|covered|original|原曲|原唱|retake|take\s*\d+|key|キー|歌詞|調整|途中)$/iu.test(normalized) ||
       /^(?:official|channel|ch\.?|youtube|yt)$/iu.test(normalized) ||
       /^(?:(?:piano|acoustic|アコースティック|ピアノ|アカペラ)(?:\s*(?:ver\.?|version|版))?)$/iu.test(normalized) ||
@@ -695,11 +886,14 @@
     buildCompetitionRanks,
     buildSongRecords,
     cleanText,
+    extractSongVariant,
     isUnknownArtistName,
     artistIdentityMatch,
     kanaRomajiKeys,
     normalizeArtistKey,
     normalizeEntityKey,
+    normalizeSongWorkTitle,
     normalizeSongTitleKey,
+    songWorkTitleKey,
   };
 });

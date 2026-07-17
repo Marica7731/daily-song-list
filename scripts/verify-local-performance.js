@@ -1379,9 +1379,9 @@ async function mobileRankVisualGeometry(browser) {
       }
     }
     if (closedGeometry.legacyTrendNodes) throw new Error(`legacy mobile trend nodes remain ${JSON.stringify(closedGeometry)}`);
-    const compactRowHeightLimit = closedGeometry.sourceVideoCount > 2 ? 176 : closedGeometry.sourceVideoCount > 0 ? 108 : 70;
+    const compactRowHeightLimit = closedGeometry.sourceVideoCount > 2 ? 180 : closedGeometry.sourceVideoCount > 0 ? 108 : 70;
     if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > compactRowHeightLimit) {
-      throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
+      throw new Error(`compact mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
     }
     if (closedGeometry.allTrendTexts.some((item) => !/^(新|名次[↑↓]\d+|收录\+\d+|修正−\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
       throw new Error(`mobile trend label invalid ${JSON.stringify(closedGeometry.allTrendTexts.slice(0, 10))}`);

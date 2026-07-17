@@ -342,7 +342,31 @@ function readJsonIfExists(filePath) {
 
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  writeFileAtomic(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function writeFileAtomic(filePath, text) {
+  const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tempPath, text, "utf8");
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
+    try {
+      fs.rmSync(filePath, { force: true });
+      fs.renameSync(tempPath, filePath);
+      return;
+    } catch (error) {
+      if (attempt >= 5) {
+        try {
+          fs.rmSync(tempPath, { force: true });
+        } catch {}
+        throw error;
+      }
+      sleepSync(200 * attempt);
+    }
+  }
+}
+
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 }
 
 module.exports = {

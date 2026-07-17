@@ -251,14 +251,17 @@ function isActivityMarkerTitle(title, artist, rules = loadNonSongRulesSafe(), op
   if (options.knownSong === true) return false;
   if (!isUnknownArtist(artist)) return false;
   const normalizedTitle = normalizeCurationTitle(title);
-  return rules.exactUnknownArtistTitles.includes(normalizedTitle) || matchesActivityTitlePattern(title, rules);
+  const exactTitles = Array.isArray(rules.exactUnknownArtistTitles) ? rules.exactUnknownArtistTitles : [];
+  return exactTitles.includes(normalizedTitle) || matchesActivityTitlePattern(title, rules);
 }
 
 function isCandidateActivityTitle(title, rules = loadNonSongRulesSafe()) {
   const normalizedTitle = normalizeCurationTitle(title);
+  const exactTitles = Array.isArray(rules.exactUnknownArtistTitles) ? rules.exactUnknownArtistTitles : [];
+  const candidateTitles = Array.isArray(rules.candidateActivityTitles) ? rules.candidateActivityTitles : [];
   return (
-    rules.exactUnknownArtistTitles.includes(normalizedTitle) ||
-    rules.candidateActivityTitles.includes(normalizedTitle) ||
+    exactTitles.includes(normalizedTitle) ||
+    candidateTitles.includes(normalizedTitle) ||
     matchesActivityTitlePattern(title, rules)
   );
 }

@@ -13,6 +13,7 @@ const {
   buildRankDiffs,
   collectCarryForwardVideos,
   collectInspectionCacheSkipIds,
+  createVideoTitleKnownSongSourceRecord,
   createRequestLimiter,
   extractSearchItems,
   extractMygitTodaySnapshotItems,
@@ -22,6 +23,7 @@ const {
   isBlockedSource,
   mergeInspectionCache,
   mergeFetchedAndCarriedVideos,
+  matchKnownTitleArtistFromVideoTitle,
   parseOptionalLimit,
   parseRetryAfterMs,
   randomJitterMs,
@@ -31,6 +33,7 @@ const {
   BLOCKED_REGIONAL_VTUBER_CHANNELS,
   MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
 } = require("../scripts/update-songlist");
+const { createSongSearchLookup, normalizeSongSearchText } = require("../assets/frontend-utils");
 const { createSongAliasContext } = require("../scripts/song-aliases");
 
 const NOW = new Date("2026-07-11T13:00:00Z");
@@ -467,6 +470,51 @@ test("search item extraction supports ordinary videos and Shorts renderers", () 
       ["SHORTID0002", "reelItemRenderer"],
       ["SHORTID0003", "shortsLockupViewModel"],
     ],
+  );
+});
+
+test("video title known-song detection creates conservative 0-second source for Shorts covers", () => {
+  const lookup = knownSongLookup([
+    ["発光帯", "ハナレグミ"],
+  ]);
+
+  const match = matchKnownTitleArtistFromVideoTitle("【歌ってみた】発光帯 / ハナレグミ #shorts", lookup);
+  assert.deepEqual(match, {
+    title: "発光帯",
+    artist: "ハナレグミ",
+    key: `${normalizeSongSearchText("発光帯")}::${normalizeSongSearchText("ハナレグミ")}`,
+  });
+
+  const source = createVideoTitleKnownSongSourceRecord(
+    {
+      videoId: "SHORTID0004",
+      title: "【歌ってみた】発光帯 / ハナレグミ #shorts",
+      sourceRendererType: "shortsLockupViewModel",
+    },
+    { songSearchLookup: lookup },
+  );
+
+  assert.equal(source.sourceType, "video_title");
+  assert.equal(source.text, "0:00 発光帯 / ハナレグミ");
+});
+
+test("video title known-song detection rejects ambiguous title pairs", () => {
+  const lookup = knownSongLookup([
+    ["発光帯", "ハナレグミ"],
+    ["Notebook", "buzzG"],
+  ]);
+
+  assert.equal(matchKnownTitleArtistFromVideoTitle("発光帯 / ハナレグミ / Notebook / buzzG cover", lookup), null);
+  assert.equal(
+    createVideoTitleKnownSongSourceRecord(
+      {
+        videoId: "SHORTID0005",
+        title: "発光帯 / ハナレグミ / Notebook / buzzG cover",
+        sourceRendererType: "shortsLockupViewModel",
+      },
+      { songSearchLookup: lookup },
+    ),
+    null,
   );
 });
 
@@ -990,4 +1038,11 @@ function jsonResponse(payload) {
     status: 200,
     json: async () => payload,
   };
+}
+
+function knownSongLookup(pairs) {
+  return createSongSearchLookup({
+    titleKeys: pairs.map(([title]) => normalizeSongSearchText(title)),
+    titleArtistKeys: pairs.map(([title, artist]) => `${normalizeSongSearchText(title)}::${normalizeSongSearchText(artist)}`),
+  });
 }

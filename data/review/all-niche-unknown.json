@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T03:53:25.204Z",
+  "generatedAt": "2026-07-17T05:16:18.814Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
   "latestGeneratedAt": "2026-07-17T03:46:24.136Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 2369,
-    "uniqueVideos": 385,
-    "uniqueSources": 467,
+    "totalCandidates": 2370,
+    "uniqueVideos": 386,
+    "uniqueSources": 468,
     "confirmedNoiseCount": 104,
-    "parserCorruptionCount": 233,
+    "parserCorruptionCount": 234,
     "likelyNoiseCount": 294,
     "needsReviewCount": 1737,
     "likelySongCount": 1,
     "byClassification": {
       "confirmed_noise": 104,
-      "parser_corruption": 233,
+      "parser_corruption": 234,
       "likely_noise": 294,
       "needs_review": 1737,
       "likely_song": 1
@@ -17468,6 +17468,54 @@
       "repairedTitle": "すぱちゃ よみよみっ！",
       "repairedArtist": "未記載",
       "repairReasons": []
+    },
+    {
+      "title": "～ REALISM",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4779,
+      "time": "1:19:39",
+      "raw": "18. 1:19:39 ～ REALISM／ELISA (アカペラ)",
+      "rawHash": "c534a898e5e2d77f80fb09d0825739a89ecd252515588f43e3138768ced9c119",
+      "videoId": "ljWlIgFIS1Y",
+      "videoTitle": "【 #歌枠 / #KARAOKE 】アニソン好きによるアニソン歌枠🥀【 #久遠たま 】",
+      "channelName": "QuonTama Ch. 久遠たま",
+      "channelId": "UCBC7vYFNQoGPupe5NxPG4Bw",
+      "channelHandle": "/@QuonTama",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ljWlIgFIS1Y",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ljWlIgFIS1Y&t=4779s",
+      "sourceId": "UgxwerrTPuD0SxazgRB4AaABAg",
+      "sourceHash": "d5caea083cf1fb1233ab72b9604601e03fede8dfeb89cf9db96536cb3d8d0f35",
+      "sourceOrigin": "latest;review:ljWlIgFIS1Y-d5caea083cf1fb1233ab.json",
+      "sourceScope": "current",
+      "ranges": [
+        "all",
+        "review"
+      ],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "positiveEvidence": [
+        "inferred_artist"
+      ],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "parser_corruption",
+        "delimiter_split",
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": {
+        "title": "19:39 ～ REALISM",
+        "artist": "ELISA (アカペラ)"
+      },
+      "reviewId": "review:ljWlIgFIS1Y:d5caea083cf1fb1233ab",
+      "sourcePath": "data/review/sources/ljWlIgFIS1Y-d5caea083cf1fb1233ab.json",
+      "reviewLocator": "data/review/sources/ljWlIgFIS1Y-d5caea083cf1fb1233ab.json#c534a898e5e2d77f80fb09d0825739a89ecd252515588f43e3138768ced9c119",
+      "repairedTitle": "19:39 ～ REALISM",
+      "repairedArtist": "ELISA (アカペラ)",
+      "repairReasons": [
+        "delimiter_split"
+      ]
     },
     {
       "title": "凸待ち1人目",

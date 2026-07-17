@@ -541,6 +541,110 @@ async function captureElementFromPage(browser, viewport, params, selector, name,
   await page.close();
 }
 
+async function captureToastCase(browser, viewport, name) {
+  const page = await newPage(browser, viewport);
+  await page.goto(appUrl({}), { waitUntil: "networkidle" });
+  await waitForApp(page);
+  await page.evaluate(() => {
+    const toast = document.querySelector("#toast");
+    toast.textContent = "已复制整场歌单 · 18首";
+    toast.hidden = false;
+  });
+  const locator = page.locator("#toast").first();
+  await locator.waitFor({ state: "visible", timeout: 3_000 });
+  await assertToastGeometry(page, name);
+  await saveElement(page, locator, name, {
+    minBytes: 800,
+    viewport,
+    params: {},
+    selector: "#toast",
+    scene: "mobile-toast-copy-setlist",
+  });
+  await page.close();
+}
+
+async function assertSummaryBaseline(page) {
+  const shape = await page.evaluate(() => {
+    const main = document.querySelector("#summary .summary-main");
+    const title = main?.querySelector(".summary-title");
+    const firstMetric = main?.querySelector(".summary-metric");
+    const nodes = Array.from(main?.querySelectorAll(".summary-title, .summary-metric, .summary-status") || []);
+    const visible = (node) => {
+      const style = getComputedStyle(node);
+      const box = node.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+    };
+    const firstTop = Math.min(...nodes.filter(visible).map((node) => node.getBoundingClientRect().top));
+    const firstLine = nodes
+      .filter((node) => visible(node) && node.getBoundingClientRect().top <= firstTop + 4)
+      .map((node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          className: node.className,
+          text: node.textContent.trim(),
+          top: Math.round(box.top * 10) / 10,
+          bottom: Math.round(box.bottom * 10) / 10,
+          height: Math.round(box.height * 10) / 10,
+          lineHeight: getComputedStyle(node).lineHeight,
+        };
+      });
+    const titleBox = title?.getBoundingClientRect();
+    const metricBox = firstMetric?.getBoundingClientRect();
+    return {
+      alignItems: main ? getComputedStyle(main).alignItems : "",
+      titleBottom: Math.round((titleBox?.bottom || 0) * 10) / 10,
+      firstMetricBottom: Math.round((metricBox?.bottom || 0) * 10) / 10,
+      firstLine,
+      text: main?.textContent?.trim() || "",
+    };
+  });
+  if (!/^(?:baseline|first baseline)$/u.test(shape.alignItems)) {
+    throw new Error(`summary align-items must be baseline: ${JSON.stringify(shape)}`);
+  }
+  if (!shape.titleBottom || !shape.firstMetricBottom || Math.abs(shape.titleBottom - shape.firstMetricBottom) > 1.5) {
+    throw new Error(`summary title and metric baseline mismatch: ${JSON.stringify(shape)}`);
+  }
+  const bottoms = shape.firstLine.map((item) => item.bottom);
+  if (!bottoms.length || Math.max(...bottoms) - Math.min(...bottoms) > 2) {
+    throw new Error(`summary first-line baseline mismatch: ${JSON.stringify(shape)}`);
+  }
+}
+
+async function assertToastGeometry(page, label) {
+  const shape = await page.evaluate(() => {
+    const toast = document.querySelector("#toast");
+    const nav = document.querySelector("#mobileBottomNav");
+    const toastBox = toast?.getBoundingClientRect();
+    const navBox = nav?.getBoundingClientRect();
+    const navVisible = nav && getComputedStyle(nav).display !== "none" && getComputedStyle(nav).visibility !== "hidden";
+    return {
+      width: Math.round((toastBox?.width || 0) * 10) / 10,
+      height: Math.round((toastBox?.height || 0) * 10) / 10,
+      left: Math.round((toastBox?.left || 0) * 10) / 10,
+      right: Math.round((toastBox?.right || 0) * 10) / 10,
+      centerDelta: Math.round((((toastBox?.left || 0) + (toastBox?.right || 0)) / 2 - window.innerWidth / 2) * 10) / 10,
+      bottom: Math.round((toastBox?.bottom || 0) * 10) / 10,
+      navTop: navVisible ? Math.round(navBox.top * 10) / 10 : window.innerHeight,
+      viewportWidth: window.innerWidth,
+      role: toast?.getAttribute("role") || "",
+      live: toast?.getAttribute("aria-live") || "",
+      text: toast?.textContent?.trim() || "",
+    };
+  });
+  if (
+    shape.width <= 0 ||
+    shape.width > Math.min(320, shape.viewportWidth - 32) + 1 ||
+    shape.height < 36 ||
+    shape.height > 44 ||
+    Math.abs(shape.centerDelta) > 1.5 ||
+    shape.bottom > shape.navTop - 6 ||
+    shape.role !== "status" ||
+    shape.live !== "polite"
+  ) {
+    throw new Error(`${label} toast geometry invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
 async function assertVideoThumbVisible(page, label) {
   const shape = await page.evaluate(() => {
     const thumb = document.querySelector(".video-card .thumb-link");
@@ -577,6 +681,7 @@ async function assertInlineSourceCase(page, row, kind, label) {
     const content = node.querySelector(".rank-content, .index-content");
     const side = node.querySelector(".rank-side");
     const more = node.querySelector(".source-inline-more");
+    const actions = node.querySelector(".source-inline-actions");
     const items = Array.from(node.querySelectorAll(".source-inline-item")).map((item) => {
       const channel = item.querySelector(".source-inline-channel");
       const thumb = item.querySelector(".source-inline-thumb");
@@ -608,6 +713,7 @@ async function assertInlineSourceCase(page, row, kind, label) {
       strip: strip ? rectFor(strip) : null,
       content: content ? rectFor(content) : null,
       side: side ? rectFor(side) : null,
+      actions: actions ? { ...rectFor(actions), justifyContent: getComputedStyle(actions).justifyContent } : null,
       toggleCount: node.querySelectorAll("[data-toggle-source]").length,
       drawerCount: node.querySelectorAll(".source-drawer").length,
       copyAllCount: node.querySelectorAll("[data-copy-song-links]").length,
@@ -710,6 +816,18 @@ async function assertInlineSourceCase(page, row, kind, label) {
     shape.items[0].right > shape.viewportWidth
   ) {
     throw new Error(`${label} 4+ source visibility invalid: ${JSON.stringify(shape)}`);
+  }
+  if (shape.viewportWidth <= 720) {
+    const lastItemBottom = Math.max(...shape.items.map((item) => item.bottom));
+    if (
+      !shape.actions ||
+      shape.actions.justifyContent !== "flex-start" ||
+      shape.actions.left > (shape.content?.left || 0) + 8 ||
+      shape.actions.top < lastItemBottom - 1 ||
+      shape.actions.top > lastItemBottom + 10
+    ) {
+      throw new Error(`${label} mobile source actions detached: ${JSON.stringify(shape)}`);
+    }
   }
 }
 
@@ -1649,6 +1767,12 @@ async function main() {
 
   try {
     await openPage(browser, desktop, {}, "desktop-song-rank.png");
+    await captureElementFromPage(browser, desktop, {}, "#summary", "desktop-summary-baseline.png", {
+      assert: assertSummaryBaseline,
+      minBytes: 1_500,
+      scene: "desktop-summary-baseline",
+      selector: "#summary",
+    });
     await openPage(browser, desktopWide, { range: "1m", pageSize: 100 }, "desktop-monthly-song-rank.png", {
       scene: "desktop-all-range-song-rank",
     });
@@ -1668,6 +1792,12 @@ async function main() {
     await captureFixtureSourceCase(browser, tablet, "triple", "tablet-source-inline-3.png");
 
     await openPage(browser, mobile, {}, "mobile-song-rank.png");
+    await captureElementFromPage(browser, mobile, {}, "#summary", "mobile-summary-baseline.png", {
+      assert: assertSummaryBaseline,
+      minBytes: 1_200,
+      scene: "mobile-summary-baseline",
+      selector: "#summary",
+    });
     await captureAllSummaryFixtureCase(browser, mobile, "mobile-all-monotonic-summary.png");
     await captureTrendFixtureCase(browser, mobile, "countIncrease", "mobile-trend-count-increase.png");
     await captureTrendFixtureCase(browser, mobile, "rankOnlyDown", "mobile-trend-rank-only-down.png");
@@ -1696,6 +1826,7 @@ async function main() {
       { q: "少女レイ", metric: "videos", minCount: 2, showUnknown: 1 },
       "mobile-active-query-strip.png",
     );
+    await captureToastCase(browser, mobile, "mobile-toast-copy-setlist.png");
     await captureElementFromPage(browser, mobile, { q: "少女レイ" }, "#summary", "mobile-summary-filtered.png", {
       assert: assertFilteredSummaryCopy,
       scene: "mobile-summary-filtered",

@@ -185,6 +185,18 @@ test("selection builds only the records needed by the current view", () => {
   assert.ok(prewarmBody.indexOf('state.view === "artistRank"') < prewarmBody.indexOf("selectedSongRecords"));
 });
 
+test("explicit search can match hidden unknown-artist sources and video ids", () => {
+  const selectionBody = functionBody("function currentSelection");
+  assert.match(selectionBody, /const searchBaseOccurrences = hideUnknownForView \? selectedOccurrences\(rangeCache, \{ hideUnknownForView: false \}\) : baseOccurrences/u);
+
+  const collectBody = functionBody("function collectSongOccurrences");
+  assert.match(collectBody, /\[item\.videoId, item\.title, item\.channelName, item\.keyword, song\.title, song\.artist\]/u);
+
+  const videoBody = functionBody("function buildVideoViewItems");
+  assert.match(videoBody, /const videoMatched = matchesSearch\(\[item\.videoId, item\.title, item\.channelName, item\.keyword\], filter\)/u);
+  assert.match(videoBody, /const searchableSongs = hideUnknownArtists \? nicheSongs : sourceSongs/u);
+});
+
 test("query overlay opens before suggestions and result preview work", () => {
   const openBody = functionBody("function openQueryOverlay");
   const setActiveIndex = openBody.indexOf('state.activeOverlay = "query"');

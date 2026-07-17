@@ -8,6 +8,7 @@ const {
   createSourceRecord,
   hashNormalizedText,
   isActivityMarkerTitle,
+  isCandidateActivityTitle,
   isConversationEntry,
   isParserCorruptionEntry,
   mergeCurationPatch,
@@ -139,6 +140,11 @@ test("curation drops high-confidence activity titles but keeps known songs", () 
 
   assert.deepEqual(videos[0].songs.map((item) => item.title), ["曲紹介"]);
   assert.equal(videos.curationStats.ruleDroppedEntries, 2);
+});
+
+test("candidate activity title handles legacy non-song rule objects", () => {
+  assert.equal(isCandidateActivityTitle("戻り", { exactUnknownArtistTitles: ["戻り"] }), true);
+  assert.equal(isCandidateActivityTitle("前前前世", { exactUnknownArtistTitles: [] }), false);
 });
 
 test("curation drops reviewed unknown-artist activity leftovers from production data", () => {

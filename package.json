@@ -21,6 +21,7 @@
     "compare:runtime-ranks": "node scripts/compare-runtime-ranks.js",
     "refresh:song-search": "node scripts/refresh-song-search-index.js",
     "diagnose:video": "node scripts/diagnose-video.js",
+    "diagnose:song-dedup": "node scripts/diagnose-song-dedup.js",
     "diagnose:song-identities": "node scripts/diagnose-song-identities.js",
     "migrate:song-identities": "node scripts/diagnose-song-identities.js",
     "explain:diff": "node scripts/explain-diff.js",

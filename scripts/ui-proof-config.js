@@ -9,6 +9,7 @@ const expectedScreenshots = [
   "desktop-range-all.png",
   "desktop-all-diff-explanation.png",
   "desktop-video-view.png",
+  "desktop-summary-baseline.png",
   "desktop-query-panel.png",
   "desktop-source-expanded.png",
   "desktop-song-kana-romaji-merged.png",
@@ -19,6 +20,7 @@ const expectedScreenshots = [
   "desktop-source-long-time.png",
   "tablet-source-inline-3.png",
   "mobile-song-rank.png",
+  "mobile-summary-baseline.png",
   "mobile-all-monotonic-summary.png",
   "mobile-trend-count-increase.png",
   "mobile-trend-rank-only-down.png",
@@ -35,6 +37,7 @@ const expectedScreenshots = [
   "mobile-pagination-320.png",
   "mobile-bottom-nav-active.png",
   "mobile-active-query-strip.png",
+  "mobile-toast-copy-setlist.png",
   "mobile-query-recent.png",
   "mobile-query-suggestions.png",
   "mobile-query-filter.png",
@@ -109,6 +112,18 @@ const screenshotContracts = {
     params: { fixture: "identity-merge" },
     viewport: { width: 1440, height: 900 },
   },
+  "desktop-summary-baseline.png": {
+    scene: "desktop-summary-baseline",
+    params: {},
+    selector: "#summary",
+    viewport: { width: 1440, height: 900 },
+  },
+  "mobile-summary-baseline.png": {
+    scene: "mobile-summary-baseline",
+    params: {},
+    selector: "#summary",
+    viewport: { width: 390, height: 844 },
+  },
   "mobile-all-monotonic-summary.png": {
     scene: "fixture-all-monotonic-summary",
     params: { fixture: "all-summary" },
@@ -178,6 +193,12 @@ const screenshotContracts = {
     viewport: { width: 390, height: 844 },
   },
   "mobile-query-history.png": {
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-toast-copy-setlist.png": {
+    scene: "mobile-toast-copy-setlist",
+    params: {},
+    selector: "#toast",
     viewport: { width: 390, height: 844 },
   },
   "mobile-video-expanded-bottom.png": {
