@@ -10,6 +10,7 @@ const { writeShardedBundle, readJson, writeJson } = require("../scripts/vsinger-
 const { buildBackfillBundle } = require("../scripts/vsinger-http/build-backfill-bundle");
 const { applyMcpSupplement, buildNormalizedBundle, dedupeOccurrences } = require("../scripts/vsinger-http/model");
 const { parseRobotsTxt, isAllowed, crawlDelaySeconds } = require("../scripts/vsinger-http/robots");
+const { runBackfillWorker, shouldWriteBundle } = require("../scripts/vsinger-http/run-backfill-worker");
 const { crawlSongs } = require("../scripts/vsinger-http/crawl-songs");
 const { crawlStreams } = require("../scripts/vsinger-http/crawl-streams");
 const { crawlSingers } = require("../scripts/vsinger-http/crawl-singers");
@@ -592,6 +593,75 @@ test("backfill bundle builder merges stage outputs and writes coverage report", 
   assert.equal(report.coverage.requestStats.requestCount, 5);
   assert.equal(syncState.knownSongIds.includes(SONG_C), true);
   assert.equal(fs.existsSync(path.join(outputDir, "backfill-report.md")), true);
+});
+
+test("backfill worker orchestrates stages and writes immutable bundle versions", async () => {
+  const root = tempDir("backfill-worker");
+  const bundleRoot = path.join(root, "bundles");
+  const report = await runBackfillWorker({
+    client: mockClient({
+      "https://vsinger-moment.jp/songs": songsPageHtml({ songs: [songCard(SONG_A, "A", "Artist")] }),
+      "https://vsinger-moment.jp/streams": streamsPageHtml({ cards: [streamCardWithSetlist()] }),
+      "https://vsinger-moment.jp/singers": singersPageHtml({ cards: [singerCard()] }),
+    }),
+    robots: allowedRobots(),
+    fresh: true,
+    "root-dir": root,
+    "bundle-root": bundleRoot,
+    "bundle-version": "test-version",
+    "force-bundle": true,
+    "song-pages": 1,
+    "stream-pages": 1,
+    "singer-pages": 1,
+    "skip-singer-songs": true,
+    "no-lock": true,
+    generatedAt: "2026-07-17T00:00:00.000Z",
+  });
+  const latest = readJson(path.join(bundleRoot, "latest.json"));
+  const state = readJson(path.join(root, "worker-state.json"));
+  const manifest = readJson(path.join(bundleRoot, "versions", "test-version", "manifest.json"));
+
+  assert.equal(report.stages.songs.pageCount, 1);
+  assert.equal(report.stages.streams.uniqueVideoCount, 1);
+  assert.equal(report.stages.singers.uniqueSingerCount, 1);
+  assert.equal(report.currentCounts.songs, 2);
+  assert.equal(report.bundle.version, "test-version");
+  assert.equal(latest.manifest, "versions/test-version/manifest.json");
+  assert.equal(state.lastBundle.version, "test-version");
+  assert.equal(manifest.counts.videos, 1);
+  assert.equal(manifest.counts.occurrences, 3);
+});
+
+test("backfill worker bundle threshold decisions use count and time deltas", () => {
+  assert.equal(shouldWriteBundle({ args: { "force-bundle": true }, currentCounts: { songs: 0, occurrences: 0 }, previousBundle: null, generatedAt: "2026-07-17T00:00:00.000Z" }).reason, "force-bundle");
+  assert.equal(shouldWriteBundle({ args: {}, currentCounts: { songs: 1, occurrences: 0 }, previousBundle: null, generatedAt: "2026-07-17T00:00:00.000Z" }).reason, "first-bundle");
+  assert.equal(
+    shouldWriteBundle({
+      args: { "bundle-song-threshold": 10 },
+      currentCounts: { songs: 15, occurrences: 0 },
+      previousBundle: { generatedAt: "2026-07-17T00:00:00.000Z", counts: { songs: 4, occurrences: 0 } },
+      generatedAt: "2026-07-17T00:10:00.000Z",
+    }).reason,
+    "song-threshold",
+  );
+  assert.equal(
+    shouldWriteBundle({
+      args: { "bundle-occurrence-threshold": 10 },
+      currentCounts: { songs: 0, occurrences: 15 },
+      previousBundle: { generatedAt: "2026-07-17T00:00:00.000Z", counts: { songs: 0, occurrences: 4 } },
+      generatedAt: "2026-07-17T00:10:00.000Z",
+    }).reason,
+    "occurrence-threshold",
+  );
+  assert.equal(
+    shouldWriteBundle({
+      args: { "bundle-interval-minutes": 30 },
+      currentCounts: { songs: 0, occurrences: 0 },
+      previousBundle: { generatedAt: "2026-07-17T00:00:00.000Z", counts: { songs: 0, occurrences: 0 } },
+      generatedAt: "2026-07-17T00:31:00.000Z",
+    }).reason,
+    "time-threshold",
+  );
 });
 
 test("bundle writer is idempotent for the same normalized payload", () => {

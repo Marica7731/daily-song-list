@@ -36,6 +36,7 @@
     "vsinger:crawl:singer-songs": "node scripts/vsinger-http/crawl-singer-songs.js",
     "vsinger:fetch-video-details": "node scripts/vsinger-http/fetch-video-details.js",
     "vsinger:build-bundle": "node scripts/vsinger-http/build-backfill-bundle.js",
+    "vsinger:run-backfill": "node scripts/vsinger-http/run-backfill-worker.js",
     "validate": "node scripts/validate-data.js",
     "validate:core": "node scripts/validate-data.js --core",
     "validate:review": "node scripts/validate-data.js --review",

@@ -114,6 +114,27 @@ npm run vsinger:build-bundle -- --songs-dir artifacts/vsinger-http-backfill/song
 
 This step does not request VSinger Moment. It merges the public songs catalog crawl, stream-list setlists, and queued video-detail補漏 into one normalized bundle with coverage, failures, conflicts, sync state, and a request report.
 
+Run the resumable VPS worker when you want one entry point to advance every stage and write versioned bundles:
+
+```bash
+npm run vsinger:run-backfill -- --song-pages 100 --stream-pages 100 --singer-pages 100 --video-detail-count 100 --bundle-root data/external/vsinger-http/backfill
+```
+
+With site-owner permission, include the singer-scoped stage:
+
+```bash
+npm run vsinger:run-backfill -- --owner-permission --owner-permission-note "site-owner email authorization" --fetch-song-details --singer-count 10 --singer-song-pages 20
+```
+
+The worker writes `worker-run.json` and `worker-state.json` under `artifacts/vsinger-http-backfill/`, keeps a local `worker.lock` by default to avoid two same-host workers, and writes immutable bundles under:
+
+```text
+data/external/vsinger-http/backfill/versions/{timestamp}/
+data/external/vsinger-http/backfill/latest.json
+```
+
+Bundle generation is triggered when there is no prior bundle, `--force-bundle` is set, at least `1000` new songs are present, at least `5000` new occurrences are present, or 60 minutes have elapsed since the previous bundle. These defaults can be changed with `--bundle-song-threshold`, `--bundle-occurrence-threshold`, and `--bundle-interval-minutes`.
+
 ## Configuration
 
 - `VSINGER_HTTP_REQUEST_INTERVAL_MS`: default `1000`.
@@ -157,6 +178,8 @@ Dry-run and local crawl outputs are written under `artifacts/vsinger-http-backfi
 - `singer-songs/raw-occurrences.json`
 - `singer-songs/checkpoint.json`
 - `singer-songs/sync-state.json`
+- `worker-run.json`
+- `worker-state.json`
 
 For per-stage VPS bundle generation, pass `--write-bundle`:
 
@@ -304,4 +327,4 @@ node --test test/vsinger-http.test.js
 npm run check
 ```
 
-The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, cumulative checkpoint resume for songs, streams, singers, and singer-scoped pages, cursor query placement, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, repeated same-song timestamps, and MCP supplement deduplication.
+The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, cumulative checkpoint resume for songs, streams, singers, and singer-scoped pages, VPS worker orchestration, immutable bundle threshold decisions, cursor query placement, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, repeated same-song timestamps, and MCP supplement deduplication.
