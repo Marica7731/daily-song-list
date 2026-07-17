@@ -407,7 +407,7 @@ function extractObservedSingerCount(html) {
 }
 
 function extractNextCursorUrl(html, route) {
-  const match = html.match(new RegExp(`href="(/${route}\\?cursor=[^"]+)"[^>]*>[\\s\\S]*?(?:次のページ|もっと見る)`, "i"));
+  const match = html.match(new RegExp(`href="(/${route}\\?[^"]*cursor=[^"]+)"[^>]*>[\\s\\S]*?(?:次のページ|もっと見る)`, "i"));
   if (!match) return "";
   return absoluteUrl(match[1], BASE_URL);
 }

@@ -78,6 +78,14 @@ test("songs parser extracts homepage and cursor rows", () => {
   assert.equal(parsed.songs[0].latestPerformanceDate, "2026-07-15");
   assert.equal(parsed.songs[0].recentSingerName, "むんもっしゅ");
   assert.equal(parsed.nextPageUrl, "https://vsinger-moment.jp/songs?cursor=abc");
+
+  const singerCursor = parseSongsPage(
+    songsPageHtml({
+      cursorHref: `/songs?singerId=${SINGER_A}&singerName=${encodeURIComponent("獅子神レオナ/レオナちゃんねる")}&cursor=singer-next`,
+      songs: [songCard(SONG_D, "フィナーレ", "eill", `?singerId=${SINGER_A}`)],
+    }),
+  );
+  assert.equal(new URL(singerCursor.nextPageUrl).searchParams.get("cursor"), "singer-next");
 });
 
 test("streams parser extracts setlists, missing setlists, and real YouTube IDs", () => {
@@ -151,6 +159,62 @@ test("singer-scoped song details parse occurrence history and require owner perm
   assert.equal(result.uniqueSongCount, 1);
   assert.equal(result.uniqueVideoCount, 2);
   assert.equal(result.occurrenceCount, 2);
+});
+
+test("singer-scoped crawler resumes current singer from checkpoint cursor", async () => {
+  const dir = tempDir("singer-songs-resume");
+  const singerName = "獅子神レオナ/レオナちゃんねる";
+  const encodedSingerName = encodeURIComponent(singerName);
+  const firstUrl = `https://vsinger-moment.jp/songs?singerId=${SINGER_A}&singerName=${encodedSingerName}`;
+  const secondUrl = `https://vsinger-moment.jp/songs?singerId=${SINGER_A}&singerName=${encodedSingerName}&cursor=resume`;
+  const pages = {
+    [firstUrl]: songsPageHtml({
+      cursorHref: `/songs?singerId=${SINGER_A}&singerName=${encodedSingerName}&cursor=resume`,
+      songs: [songCard(SONG_A, "A", "Artist", `?singerId=${SINGER_A}`)],
+      observedCount: 2,
+    }),
+    [secondUrl]: songsPageHtml({
+      songs: [songCard(SONG_B, "B", "Artist", `?singerId=${SINGER_A}`)],
+      observedCount: 2,
+    }),
+  };
+
+  const first = await crawlSingerSongs({
+    client: mockClient(pages),
+    robots: allowedRobots(),
+    fresh: true,
+    "owner-permission": true,
+    "singer-id": SINGER_A,
+    "singer-name": singerName,
+    "max-song-pages": 1,
+    "max-song-details": 0,
+    "output-dir": dir,
+  });
+  const checkpoint = readJson(path.join(dir, "checkpoint.json"));
+
+  assert.equal(first.stop.reason, "max-song-pages");
+  assert.equal(first.uniqueSongCount, 1);
+  assert.equal(checkpoint.currentSinger.nextPageUrl, secondUrl);
+  assert.deepEqual(checkpoint.currentSinger.discoveredSongIds, [SONG_A]);
+
+  const second = await crawlSingerSongs({
+    client: mockClient(pages),
+    robots: allowedRobots(),
+    "owner-permission": true,
+    "singer-id": SINGER_A,
+    "singer-name": singerName,
+    "max-song-pages": 2,
+    "max-song-details": 0,
+    "output-dir": dir,
+  });
+  const syncState = readJson(path.join(dir, "sync-state.json"));
+
+  assert.equal(second.stop.reason, "completed-targets");
+  assert.equal(second.pageCount, 2);
+  assert.equal(second.uniqueSongCount, 2);
+  assert.equal(second.nextSingerIndex, 1);
+  assert.equal(syncState.cursorCheckpoint.nextSingerIndex, 1);
+  assert.equal(readJson(path.join(dir, "checkpoint.json")).currentSinger, null);
 });
 
 test("YouTube parser never treats VSinger UUIDs as YouTube IDs", () => {
@@ -479,10 +543,11 @@ test("bundle writer is idempotent for the same normalized payload", () => {
   assert.equal(manifest.shards.syncState[0].file, "syncState.json");
 });
 
-function songsPageHtml({ cursor = "", songs = [], observedCount = 71877 }) {
+function songsPageHtml({ cursor = "", cursorHref = "", songs = [], observedCount = 71877 }) {
+  const nextHref = cursorHref || (cursor ? `/songs?cursor=${cursor}` : "");
   return `<!doctype html><html><head><meta name="description" content="${observedCount}曲以上のVTuber・VSingerカバー曲を完全網羅！"></head><body>
 <main><div class="grid">${songs.join("")}</div>
-${cursor ? `<a class="w-full" href="/songs?cursor=${cursor}" data-discover="true">次のページを読み込む</a>` : ""}
+${nextHref ? `<a class="w-full" href="${nextHref}" data-discover="true">次のページを読み込む</a>` : ""}
 </main></body></html>`;
 }
 

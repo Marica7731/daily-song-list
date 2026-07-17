@@ -77,6 +77,13 @@ Run singer-scoped song and occurrence backfill only after explicit site-owner pe
 npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --fetch-song-details
 ```
 
+For long VPS runs, process singer-scoped pages in resumable batches. Start the first batch with `--fresh`; rerun the same command without `--fresh` to continue from `singer-songs/checkpoint.json`. `--max-singers` is treated as the batch size from the saved `nextSingerIndex`, not as a permanent slice from the start of the singer list.
+
+```bash
+npm run vsinger:crawl:singer-songs -- --fresh --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 10 --fetch-song-details
+npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 10 --fetch-song-details
+```
+
 For bounded validation against one singer:
 
 ```bash
@@ -140,6 +147,8 @@ Dry-run and local crawl outputs are written under `artifacts/vsinger-http-backfi
 - `singer-songs/videos.json`
 - `singer-songs/occurrences.json`
 - `singer-songs/raw-occurrences.json`
+- `singer-songs/checkpoint.json`
+- `singer-songs/sync-state.json`
 
 For per-stage VPS bundle generation, pass `--write-bundle`:
 
@@ -246,6 +255,13 @@ The songs and streams crawlers persist:
 - current cursor checkpoint
 - coverage status
 
+The singer-scoped crawler persists the same recovery data per current singer:
+
+- `nextSingerIndex`
+- current singer ID, name, page URL, visited URLs, and discovered song IDs
+- cumulative `songs.json`, `videos.json`, `occurrences.json`, and `raw-occurrences.json`
+- permission evidence in `ownerPermission`
+
 The crawler stops on:
 
 - repeated cursor
@@ -279,4 +295,4 @@ node --test test/vsinger-http.test.js
 npm run check
 ```
 
-The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, checkpoint resume, repeated same-song timestamps, and MCP supplement deduplication.
+The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, singer-scoped checkpoint resume, cursor query placement, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, checkpoint resume, repeated same-song timestamps, and MCP supplement deduplication.
