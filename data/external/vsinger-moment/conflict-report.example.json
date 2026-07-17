@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "vsinger-moment.conflict-report.v1",
+  "sourceSystem": "vsinger-moment.mcp-public",
+  "fixtureOnly": true,
+  "generatedAt": "2026-07-17T14:01:04.845Z",
+  "conflicts": [
+    {
+      "type": "same_title_different_artist",
+      "title": "花",
+      "candidates": [
+        {
+          "externalSongId": "song:same-title-a",
+          "artist": "Singer A",
+          "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-a"
+        },
+        {
+          "externalSongId": "song:same-title-b",
+          "artist": "Singer B",
+          "sourcePageUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-b"
+        }
+      ],
+      "resolution": "manual-review-required"
+    },
+    {
+      "type": "external_count_disagrees_with_local_verified_sources",
+      "externalSongId": "song:conflict-count",
+      "singingCountReference": {
+        "value": 12,
+        "purpose": "quality_reference_only",
+        "note": "Do not feed local ranking. Re-check YouTube and local verified pipeline."
+      },
+      "resolution": "use-as-priority-signal-only"
+    }
+  ]
+}

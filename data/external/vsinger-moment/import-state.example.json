@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "vsinger-moment.import-state.v1",
+  "lastCursor": null,
+  "fetchedExternalSongIds": [
+    "song:jp-standard",
+    "song:english-title"
+  ],
+  "lastFetchedAt": "2026-07-17T14:01:04.845Z",
+  "failures": {
+    "song:api-error": {
+      "key": "song:api-error",
+      "message": "MCP HTTP 500: fixture upstream error",
+      "failedAt": "2026-07-17T14:01:04.845Z",
+      "retryCount": 1
+    },
+    "song:rate-limited": {
+      "key": "song:rate-limited",
+      "message": "MCP HTTP 429: fixture rate limit",
+      "failedAt": "2026-07-17T14:01:04.845Z",
+      "retryCount": 2
+    }
+  },
+  "retryCounts": {
+    "song:api-error": 1,
+    "song:rate-limited": 2
+  }
+}

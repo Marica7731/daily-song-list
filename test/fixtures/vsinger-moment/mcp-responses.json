@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "vsinger-moment.fixture-mcp-responses.v1",
+  "initialize": {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "protocolVersion": "2025-06-18",
+      "capabilities": {
+        "tools": {
+          "listChanged": true
+        }
+      },
+      "serverInfo": {
+        "name": "vsinger-moment",
+        "version": "1.0.0"
+      }
+    }
+  },
+  "toolsList": {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "tools": [
+        {
+          "name": "search_songs",
+          "inputSchema": {
+            "type": "object",
+            "required": ["query"],
+            "properties": {
+              "query": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50
+              }
+            }
+          }
+        },
+        {
+          "name": "get_song",
+          "inputSchema": {
+            "type": "object",
+            "required": ["songId"],
+            "properties": {
+              "songId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "name": "search_singers",
+          "inputSchema": {
+            "type": "object",
+            "required": ["query"],
+            "properties": {
+              "query": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "name": "get_singer",
+          "inputSchema": {
+            "type": "object",
+            "required": ["singerId"],
+            "properties": {
+              "singerId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "name": "get_video_setlist",
+          "inputSchema": {
+            "type": "object",
+            "required": ["videoId"],
+            "properties": {
+              "videoId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "name": "search",
+          "inputSchema": {
+            "type": "object",
+            "required": ["query"],
+            "properties": {
+              "query": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "name": "fetch",
+          "inputSchema": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "apiError": {
+    "status": 500,
+    "body": {
+      "message": "fixture upstream error"
+    }
+  },
+  "rateLimited": {
+    "status": 429,
+    "headers": {
+      "Retry-After": "2"
+    },
+    "body": {
+      "message": "fixture rate limit"
+    }
+  }
+}
