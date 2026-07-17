@@ -51,6 +51,10 @@
 - 来源预览是 `.rank-row` / `.index-row` 的直接子元素，使用 `grid-area: sources` 横跨内容列和右侧列；手机排行网格为 `"rank content side"`、`". sources sources"`、`"drawer drawer drawer"`。
 - `.source-inline-more` 是 3+ 来源折叠态的查看全部入口；展开后折叠预览条隐藏，drawer 顶部提供 `收起来源`。
 - Drawer 用于 3+ 的完整来源列表，宽度必须占满榜单可用宽度，内容高度由实际内容决定。工具栏文案使用 `全部 N 个来源`，右侧保留复制全部链接图标和一个顶部收起按钮；长列表可以保留一个弱化底部 `收起来源`。
+- 来源详情请求状态只通过 UI 状态类表达，不改变来源数据模型。点击 `查看全部来源` 后 100ms 内必须给所在 `.rank-row` / `.index-row` 加 `.is-expanded`、移除 `.source-drawer[hidden]`、把 `[data-toggle-source]` 的 `aria-expanded` 设为 `true`，让外部两条来源立即隐藏并显示 drawer。
+- 来源 drawer 长列表状态使用 `.source-drawer[data-source-loading-state]`。`opening` 显示 `全部 N 个来源` 与 `已加载 2 / N`，正文先保留已有两条来源，后续显示 3-5 条 `.source-video-skeleton`；`partial` 显示 `已加载 M / N`；`error` 显示 `已显示 M / N`、`来源读取失败` 和紧凑重试按钮；`complete` 只保留 `全部 N 个来源`。`data-total-count` 和 `data-loaded-count` 是 proof 与后续集成共同使用的计数字段。
+- 来源 drawer toolbar 在长列表中保持 sticky；来源行使用统一高度预算，移动端缩略图约 64px × 36px。频道和标题各一行省略，时间戳完整显示。加载更多 chunk 不得清空当前可见来源，也不得显示大转圈或整行覆盖 loading。
+- 来源复制歌单按钮只允许按钮内部 loading：给 `[data-copy-setlist]` 设置 `disabled`、`aria-busy="true"` 或 `.is-loading` 后显示小 spinner，按钮尺寸不变，来源行本身不得进入 loading。失败时使用 `.is-error` 或 `data-copy-state="error"`，并保留可重试按钮。
 - 歌手榜仍保留曲目展开逻辑，不使用歌曲来源内联模型。
 
 ## 分页
@@ -73,6 +77,7 @@
 - 歌手榜不受 `隐藏无歌手` 影响；该控制应隐藏或禁用，且不显示 chip、不计入条件数量。
 - 历史快照默认折叠，展开后显示日期和时间选择。
 - Footer 只有左侧重置和右侧主操作，结果数量写入主按钮文本。
+- 查询面板两列控件必须严格共用同一组列轴，底部两个按钮与上方两列左右边界一致。搜索 focus 外圈最多 2px；没有匹配建议时 `.suggestion-empty` 只占一行紧凑空间。320px × 700px、历史快照未展开时，主要筛选控件和 footer 必须同时可见且无横向溢出。
 - `active-query-strip` 是移动端解释活动条件的主位置。存在时高度约 26px-28px，chip 高度 24px-26px，单行横向滚动；隐藏时 `display:none`，不得留下空白。每个 chip 自带关闭按钮，只有活动条件数量大于等于 2 时才显示 `清除全部`。
 - 移动摘要指标必须是独立 `span` 并通过 CSS `gap` 分隔，不得在文本中插入可能换到行首的中点。搜索/筛选状态也使用自然中文量词，例如 `1首歌曲`、`3次收录`、`3个视频`，不得写成 `1首结果` 或 `3视频`。存在搜索词时，无歌手隐藏提示应压缩为 `已隐藏无歌手`，完整数量只放在 `title` 或查询面板说明。
 
@@ -137,3 +142,9 @@ README 截图矩阵至少包括：
 - `pagination-top`：32px-36px。
 - 移动 query panel 的 footer 是独立网格行；统一查询面板在手机端使用明确最大高度，让 `.query-panel-body` 成为实际滚动行，不得再用大额底部 padding 伪造 footer 避让。历史快照展开到底部时不应出现半屏空白。
 - 实心品牌色只用于当前范围、当前页和查询面板主要提交按钮。单个内容区域最多一个高强调实心控件；来源展开按钮不得成为大面积绿色 CTA。
+
+## 请求状态
+
+- 分页请求期间摘要和分页位置保持不变，旧列表保留并轻度弱化，列表下方显示 4-6 条中性色 skeleton；不得整页白屏或立即清空旧内容。
+- 筛选请求期间查询面板可以关闭，主列表显示轻量 loading。活动条件条要么立即更新为新条件，要么明确标注待应用状态，不能显示不确定的混合状态。
+- 页面请求失败时保留旧列表，显示紧凑错误条 `页面读取失败，重试`。错误色使用 `--warning` / `--warning-soft`，不得把整页替换成大面积错误面板。
