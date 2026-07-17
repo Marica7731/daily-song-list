@@ -7,9 +7,10 @@ const test = require("node:test");
 const { VsingerHttpClient, VsingerHttpError } = require("../scripts/vsinger-http/http-client");
 const { parseYouTubeVideoId } = require("../scripts/vsinger-http/html-utils");
 const { writeShardedBundle, readJson } = require("../scripts/vsinger-http/bundle-writer");
-const { applyMcpSupplement, dedupeOccurrences } = require("../scripts/vsinger-http/model");
+const { applyMcpSupplement, buildNormalizedBundle, dedupeOccurrences } = require("../scripts/vsinger-http/model");
 const { parseRobotsTxt, isAllowed, crawlDelaySeconds } = require("../scripts/vsinger-http/robots");
 const { crawlSongs } = require("../scripts/vsinger-http/crawl-songs");
+const { crawlStreams } = require("../scripts/vsinger-http/crawl-streams");
 const { parseSongsPage, parseStreamsPage, parseVideoDetailPage } = require("../scripts/vsinger-http/parsers");
 
 const SONG_A = "11111111-1111-4111-8111-111111111111";
@@ -57,7 +58,8 @@ test("streams parser extracts setlists, missing setlists, and real YouTube IDs",
   assert.equal(parsed.videos[0].setlistSongs.length, 3);
   assert.equal(parsed.videos[0].setlistSongs[0].externalSongId, SONG_A);
   assert.equal(parsed.videos[0].setlistSongs[0].seconds, 421);
-  assert.equal(parsed.videos[0].detailQueueReasons.includes("missing_setlist_artist"), true);
+  assert.equal(parsed.videos[0].setlistStatus, "complete");
+  assert.deepEqual(parsed.videos[0].detailQueueReasons, []);
   assert.equal(parsed.videos[1].setlistStatus, "none");
   assert.equal(parsed.videos[1].detailQueueReasons.includes("setlist_none"), true);
   assert.equal(parsed.nextPageUrl, "https://vsinger-moment.jp/streams?cursor=next-stream");
@@ -204,6 +206,46 @@ test("dedupe model keeps repeated same-song timestamps and avoids MCP duplicate 
   assert.equal(merged.occurrences.length, 1);
 });
 
+test("normalized bundle derives song entities from stream setlists", () => {
+  const parsed = parseStreamsPage(streamsPageHtml({}));
+  const bundle = buildNormalizedBundle({ videos: parsed.videos }, "2026-07-17T00:00:00.000Z");
+
+  assert.equal(bundle.counts.videos, 2);
+  assert.equal(bundle.counts.occurrences, 3);
+  assert.equal(bundle.counts.songs, 2);
+  assert.deepEqual(
+    bundle.songs.map((song) => [song.externalSongId, song.displayTitle]),
+    [
+      [SONG_A, "Arrietty's Song"],
+      [SONG_B, "世界の約束"],
+    ],
+  );
+});
+
+test("stream crawler writes setlist song catalog and sync state", async () => {
+  const dir = tempDir("stream-sync");
+  const bundleDir = path.join(dir, "bundle");
+  const result = await crawlStreams({
+    client: mockClient({
+      "https://vsinger-moment.jp/streams": streamsPageHtml({}),
+    }),
+    robots: allowedRobots(),
+    "output-dir": dir,
+    "write-bundle": true,
+    "bundle-dir": bundleDir,
+  });
+  const syncState = readJson(path.join(dir, "sync-state.json"));
+  const manifest = readJson(path.join(bundleDir, "manifest.json"));
+  const bundleSongs = readJson(path.join(bundleDir, "songs-0001.json"));
+
+  assert.equal(result.uniqueSetlistSongCount, 2);
+  assert.equal(syncState.knownSongIds.length, 2);
+  assert.equal(syncState.lastSuccessfulStreamCrawl.occurrenceCount, 3);
+  assert.equal(manifest.counts.songs, 2);
+  assert.equal(manifest.shards.syncState[0].file, "syncState.json");
+  assert.equal(bundleSongs[0].displayTitle, "Arrietty's Song");
+});
+
 test("bundle writer is idempotent for the same normalized payload", () => {
   const dir = tempDir("bundle");
   const bundle = {
@@ -216,6 +258,7 @@ test("bundle writer is idempotent for the same normalized payload", () => {
     ],
     coverage: { coverageStatus: "partial" },
     failures: [],
+    syncState: { coverageStatus: "partial" },
   };
   const first = writeShardedBundle(dir, bundle, { shardSize: 1 });
   const second = writeShardedBundle(dir, bundle, { shardSize: 1 });
@@ -224,6 +267,7 @@ test("bundle writer is idempotent for the same normalized payload", () => {
   assert.deepEqual(second.shards.songs, first.shards.songs);
   assert.deepEqual(manifest.shards.songs, first.shards.songs);
   assert.equal(manifest.shards.songs.length, 2);
+  assert.equal(manifest.shards.syncState[0].file, "syncState.json");
 });
 
 function songsPageHtml({ cursor = "", songs = [], observedCount = 71877 }) {

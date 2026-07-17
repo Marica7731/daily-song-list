@@ -14,7 +14,7 @@ const {
   stopRecord,
   writeRunOutput,
 } = require("./crawl-core");
-const { buildNormalizedBundle, dedupeOccurrences, dedupeVideos, occurrenceEntitiesFromVideo } = require("./model");
+const { buildNormalizedBundle, dedupeOccurrences, dedupeSongs, dedupeVideos, occurrenceEntitiesFromVideo, songCandidatesFromVideos, songEntityFromHttp } = require("./model");
 const { parseStreamsPage } = require("./parsers");
 
 async function crawlStreams(options = {}) {
@@ -135,6 +135,8 @@ async function crawlStreams(options = {}) {
 
   const uniqueVideos = dedupeVideos(videos);
   const occurrences = dedupeOccurrences(uniqueVideos.flatMap(occurrenceEntitiesFromVideo));
+  const setlistSongCandidates = dedupeSongs(songCandidatesFromVideos(uniqueVideos));
+  const setlistSongs = setlistSongCandidates.map((song) => songEntityFromHttp(song));
   const duplicateRate = rawRowCount ? duplicateRowCount / rawRowCount : 0;
   const result = {
     schemaVersion: 1,
@@ -145,6 +147,7 @@ async function crawlStreams(options = {}) {
     pageCount: pages.length,
     rawRowCount,
     uniqueVideoCount: uniqueVideos.length,
+    uniqueSetlistSongCount: setlistSongs.length,
     duplicateRowCount,
     duplicateRate,
     occurrenceCount: occurrences.length,
@@ -155,6 +158,7 @@ async function crawlStreams(options = {}) {
     requestStats: requestStatsFromPages(pages),
     pages,
     videos: uniqueVideos,
+    songs: setlistSongs,
     occurrences,
     detailQueue,
     failures,
@@ -162,15 +166,39 @@ async function crawlStreams(options = {}) {
 
   writeRunOutput(outputDir, "crawl", result);
   writeJson(path.join(outputDir, "videos.json"), uniqueVideos);
+  writeJson(path.join(outputDir, "songs.json"), setlistSongs);
   writeJson(path.join(outputDir, "occurrences.json"), occurrences);
   writeJson(path.join(outputDir, "detail-queue.json"), detailQueue);
+  writeJson(path.join(outputDir, "sync-state.json"), {
+    schemaVersion: 1,
+    kind: "vsinger-moment-http-sync-state",
+    updatedAt: result.generatedAt,
+    lastSuccessfulStreamCrawl: {
+      finishedAt: result.generatedAt,
+      coverageStatus: result.coverageStatus,
+      stopReason: result.stop?.reason || "",
+      pageCount: result.pageCount,
+      uniqueVideoCount: result.uniqueVideoCount,
+      occurrenceCount: result.occurrenceCount,
+    },
+    streamWatermark,
+    knownExternalVideoIds: uniqueVideos.map((video) => video.externalVideoId),
+    knownSongIds: setlistSongs.map((song) => song.externalSongId),
+    cursorCheckpoint: {
+      nextPageUrl: result.stop?.reason === "max-pages" ? result.pages.at(-1)?.nextPageUrl || "" : "",
+      visitedCursorUrls: [...visitedCursorUrls],
+      visitedPageHashes: [...visitedPageHashes],
+    },
+    coverageStatus: result.coverageStatus,
+  });
   if (args["write-bundle"]) {
-    const bundle = buildNormalizedBundle({ videos: uniqueVideos });
+    const bundle = buildNormalizedBundle({ songs: setlistSongCandidates, videos: uniqueVideos });
     bundle.coverage = {
       kind: "streams",
       pageCount: result.pageCount,
       rawRowCount: result.rawRowCount,
       uniqueVideoCount: result.uniqueVideoCount,
+      uniqueSetlistSongCount: result.uniqueSetlistSongCount,
       duplicateRowCount: result.duplicateRowCount,
       duplicateRate: result.duplicateRate,
       occurrenceCount: result.occurrenceCount,
@@ -179,6 +207,14 @@ async function crawlStreams(options = {}) {
       stop: result.stop,
       requestStats: result.requestStats,
       detailQueueCount: result.detailQueue.length,
+    };
+    bundle.syncState = {
+      lastSuccessfulStreamCrawl: result.generatedAt,
+      streamWatermark: result.streamWatermark,
+      knownExternalVideoIds: uniqueVideos.map((video) => video.externalVideoId),
+      knownSongIds: setlistSongs.map((song) => song.externalSongId),
+      cursorCheckpoint: result.stop?.reason === "max-pages" ? result.pages.at(-1)?.nextPageUrl || "" : "",
+      coverageStatus: result.coverageStatus,
     };
     bundle.failures = failures;
     writeShardedBundle(args["bundle-dir"] || path.resolve(process.cwd(), "data", "external", "vsinger-http", "streams"), bundle);

@@ -154,6 +154,27 @@ async function crawlSongs(options = {}) {
 
   writeRunOutput(outputDir, "crawl", result);
   writeJson(path.join(outputDir, "songs.json"), uniqueSongs);
+  writeJson(path.join(outputDir, "sync-state.json"), {
+    schemaVersion: 1,
+    kind: "vsinger-moment-http-sync-state",
+    updatedAt: result.generatedAt,
+    lastSuccessfulSongCrawl: {
+      finishedAt: result.generatedAt,
+      coverageStatus: result.coverageStatus,
+      stopReason: result.stop?.reason || "",
+      pageCount: result.pageCount,
+      uniqueSongCount: result.uniqueSongCount,
+      observedSiteSongCount: result.observedSiteSongCount,
+      coverageRatio: result.coverageRatio,
+    },
+    knownSongIds: uniqueSongs.map((song) => song.externalSongId),
+    cursorCheckpoint: {
+      nextPageUrl: result.stop?.reason === "max-pages" ? result.pages.at(-1)?.nextPageUrl || "" : "",
+      visitedCursorUrls: [...visitedCursorUrls],
+      visitedPageHashes: [...visitedPageHashes],
+    },
+    coverageStatus,
+  });
   if (args["write-bundle"]) {
     const bundle = buildNormalizedBundle({ songs: uniqueSongs });
     bundle.coverage = {
@@ -168,6 +189,12 @@ async function crawlSongs(options = {}) {
       coverageStatus: result.coverageStatus,
       stop: result.stop,
       requestStats: result.requestStats,
+    };
+    bundle.syncState = {
+      lastSuccessfulSongCrawl: result.generatedAt,
+      knownSongIds: uniqueSongs.map((song) => song.externalSongId),
+      cursorCheckpoint: result.stop?.reason === "max-pages" ? result.pages.at(-1)?.nextPageUrl || "" : "",
+      coverageStatus: result.coverageStatus,
     };
     bundle.failures = failures;
     writeShardedBundle(args["bundle-dir"] || path.resolve(process.cwd(), "data", "external", "vsinger-http", "songs"), bundle);

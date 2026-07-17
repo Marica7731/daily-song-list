@@ -7,8 +7,8 @@ function songEntityFromHttp(song, now = new Date().toISOString()) {
   return {
     canonicalSongId: canonicalSongId(song.externalSongId),
     externalSongId: song.externalSongId,
-    displayTitle: song.title || song.rawTitle || "",
-    displayArtist: song.originalArtist || song.rawArtist || "",
+    displayTitle: song.title || song.rawTitle || song.displayTitle || "",
+    displayArtist: song.originalArtist || song.rawArtist || song.displayArtist || "",
     titleAliases: [],
     artistAliases: [],
     sourceSystem: SOURCE_SYSTEM,
@@ -45,7 +45,7 @@ function occurrenceEntitiesFromVideo(video) {
 }
 
 function dedupeSongs(songs) {
-  return dedupeBy(songs, (song) => `${song.sourceSystem || SOURCE_SYSTEM}:${song.externalSongId}`);
+  return dedupeBy(songs, (song) => (song.externalSongId ? `${song.sourceSystem || SOURCE_SYSTEM}:${song.externalSongId}` : ""));
 }
 
 function dedupeVideos(videos) {
@@ -68,7 +68,7 @@ function applyMcpSupplement(base, supplement) {
 }
 
 function buildNormalizedBundle({ songs = [], videos = [] }, now = new Date().toISOString()) {
-  const songEntities = dedupeSongs(songs.map((song) => songEntityFromHttp(song, now)));
+  const songEntities = dedupeSongs([...songs, ...songCandidatesFromVideos(videos)].map((song) => songEntityFromHttp(song, now)));
   const videoEntities = dedupeVideos(videos.map(videoEntityFromHttp));
   const occurrenceEntities = dedupeOccurrences(videos.flatMap(occurrenceEntitiesFromVideo));
   return {
@@ -84,6 +84,26 @@ function buildNormalizedBundle({ songs = [], videos = [] }, now = new Date().toI
       occurrences: occurrenceEntities.length,
     },
   };
+}
+
+function songCandidatesFromVideos(videos = []) {
+  const candidates = [];
+  for (const video of videos) {
+    for (const song of video.setlistSongs || []) {
+      if (!song.externalSongId) continue;
+      candidates.push({
+        externalSongId: song.externalSongId,
+        rawTitle: song.rawTitle || "",
+        rawArtist: song.rawArtist || "",
+        songPageUrl: song.songPageUrl || "",
+        sourceSystem: SOURCE_SYSTEM,
+        fetchedAt: video.fetchedAt || new Date().toISOString(),
+        rawHash: video.rawHash || "",
+        provenanceVideoId: video.externalVideoId || "",
+      });
+    }
+  }
+  return candidates;
 }
 
 function canonicalSongId(externalSongId) {
@@ -120,6 +140,7 @@ module.exports = {
   dedupeSongs,
   dedupeVideos,
   occurrenceEntitiesFromVideo,
+  songCandidatesFromVideos,
   songEntityFromHttp,
   videoEntityFromHttp,
 };

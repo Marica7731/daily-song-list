@@ -91,7 +91,7 @@ function parseStreamsPage(html, pageUrl = `${BASE_URL}/streams`) {
       : setlistSongs.length
         ? setlistSongs.some((song) => song.seconds == null || !song.externalSongId)
           ? "incomplete"
-          : "complete_without_artist"
+          : "complete"
         : "unknown";
 
     videos.push({
@@ -255,7 +255,6 @@ function detailQueueReasons(video) {
   for (const song of video.setlistSongs || []) {
     if (!song.songPageUrl || !song.externalSongId) reasons.push("missing_song_link");
     if (song.seconds == null) reasons.push("invalid_timestamp");
-    if (!song.rawArtist) reasons.push("missing_setlist_artist");
   }
   return [...new Set(reasons)];
 }

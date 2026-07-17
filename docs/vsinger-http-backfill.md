@@ -61,7 +61,7 @@ Fetch only queued video details:
 npm run vsinger:fetch-video-details -- --queue artifacts/vsinger-http-backfill/streams/detail-queue.json
 ```
 
-Do not fetch every `/videos/{uuid}` page. The streams crawler writes `detail-queue.json` only for videos that need补漏, such as missing setlists, missing YouTube IDs, missing song links, invalid timestamps, or missing setlist artist detail.
+Do not fetch every `/videos/{uuid}` page. The streams crawler writes `detail-queue.json` only for videos that need补漏, such as missing setlists, missing YouTube IDs, missing song links, invalid timestamps, or conflicting public fields. A missing artist name in the list setlist does not by itself force a detail-page request.
 
 ## Configuration
 
@@ -93,9 +93,11 @@ Dry-run and local crawl outputs are written under `artifacts/vsinger-http-backfi
 - `songs/checkpoint.json`
 - `streams/crawl.json`
 - `streams/videos.json`
+- `streams/songs.json`
 - `streams/occurrences.json`
 - `streams/detail-queue.json`
 - `streams/checkpoint.json`
+- `streams/sync-state.json`
 - `video-details/video-details.json`
 
 For VPS bundle generation, pass `--write-bundle`:
@@ -113,6 +115,7 @@ Bundle output is normalized and sharded:
 - `occurrences-0001.json`, ...
 - `coverage.json`
 - `failures.json`
+- `syncState.json`
 
 Large raw HTML is never committed. Raw HTML stays in `.local-cache/vsinger-http`.
 

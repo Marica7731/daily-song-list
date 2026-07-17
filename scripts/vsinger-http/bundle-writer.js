@@ -28,7 +28,7 @@ function writeShardedBundle(outputDir, bundle, options = {}) {
     shards: {},
   };
 
-  for (const key of ["songs", "videos", "occurrences", "conflicts", "coverage", "failures"]) {
+  for (const key of ["songs", "videos", "occurrences", "conflicts", "coverage", "failures", "syncState"]) {
     const value = bundle[key];
     if (Array.isArray(value)) {
       manifest.shards[key] = writeArrayShards(outputDir, key, value, shardSize);
