@@ -262,7 +262,6 @@ const screenshotContracts = {
   },
   "desktop-source-view-all-partial.png": {
     scene: "desktop-source-view-all-partial",
-    params: { fixture: "source-view-all", state: "partial" },
     viewport: { width: 1440, height: 900 },
   },
   "mobile-update-stale-reason.png": {
@@ -271,27 +270,22 @@ const screenshotContracts = {
   },
   "mobile-source-view-all-opening.png": {
     scene: "mobile-source-view-all-opening",
-    params: { fixture: "source-view-all", state: "opening" },
     viewport: { width: 390, height: 844 },
   },
   "mobile-source-view-all-partial.png": {
     scene: "mobile-source-view-all-partial",
-    params: { fixture: "source-view-all", state: "partial" },
     viewport: { width: 390, height: 844 },
   },
   "mobile-source-view-all-complete.png": {
     scene: "mobile-source-view-all-complete",
-    params: { fixture: "source-view-all", state: "complete" },
     viewport: { width: 390, height: 844 },
   },
   "mobile-source-view-all-error.png": {
     scene: "mobile-source-view-all-error",
-    params: { fixture: "source-view-all", state: "error" },
     viewport: { width: 390, height: 844 },
   },
   "mobile-source-setlist-loading.png": {
     scene: "mobile-source-setlist-loading",
-    params: { fixture: "source-setlist", state: "loading" },
     viewport: { width: 390, height: 844 },
   },
   "mobile-active-query-strip.png": {

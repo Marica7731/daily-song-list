@@ -323,7 +323,15 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
   if (options.searchText) {
     await page.fill("#queryInput", options.searchText);
     if (options.expectEmptySuggestions) {
-      await page.waitForSelector(".suggestion-empty", { timeout: 15_000 });
+      await page.waitForFunction(
+        () => {
+          const empty = document.querySelector("#searchSuggestions .suggestion-empty");
+          const items = document.querySelectorAll("#searchSuggestions .suggestion-item");
+          return empty?.textContent.trim() === "暂无匹配建议" && items.length === 0;
+        },
+        null,
+        { timeout: 15_000 },
+      );
     } else {
       await page.waitForSelector(".suggestion-item", { timeout: 15_000 });
     }
@@ -373,6 +381,12 @@ async function captureRequestState(browser, viewport, name, options = {}) {
   }
   if (options.delayRequest) {
     await page.route("**/data/ui/ranges/**/views/**/page-*.json", async (route) => {
+      await sleep(1200);
+      await route.continue();
+    });
+  }
+  if (options.delaySearchRequest) {
+    await page.route("**/data/ui/ranges/**/search/**/*.json", async (route) => {
       await sleep(1200);
       await route.continue();
     });
@@ -655,7 +669,7 @@ async function findSourceCase(browser, viewport, kind) {
       const match = await page.evaluate((targetKind) => {
         const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)"));
         const matchesKind = (count) =>
-          targetKind === "single" ? count === 1 : targetKind === "triple" ? count === 3 : count > 3;
+          targetKind === "single" ? count === 1 : targetKind === "triple" ? count === 3 : targetKind === "many" ? count >= 40 : count > 3;
         for (const [index, row] of rows.entries()) {
           const strip = row.querySelector(".source-inline-strip");
           const count = Number(strip?.dataset.sourceVideoCount || 0);
@@ -1545,46 +1559,106 @@ function sourceViewAllFixtureHtml(state, viewport) {
 }
 
 async function captureSourceViewAllState(browser, viewport, state, name) {
+  const found = await findSourceCase(browser, viewport, "many");
   const page = await newPage(browser, viewport);
-  const cssHref = new URL("assets/styles.css", baseUrl).toString();
-  await page.setContent(
-    `<!doctype html>
-    <html lang="zh-CN">
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="${cssHref}" />
-      </head>
-      <body>
-        <main class="layout">${sourceViewAllFixtureHtml(state, viewport)}</main>
-        <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="主视图">
-          <button class="bottom-nav-item active" type="button" aria-current="page"><span class="bottom-nav-icon-wrap"></span><span>歌曲榜</span></button>
-        </nav>
-      </body>
-    </html>`,
-    { waitUntil: "networkidle" },
+  try {
+    if (state === "opening" || state === "partial" || state === "error") {
+      await page.route("**/data/ui/ranges/**/sources/**/*.json", async (route) => {
+        const url = route.request().url();
+        if (state === "error" && /\/(?:manifest|chunk-0001)\./u.test(url)) {
+          await route.fulfill({ status: 503, contentType: "application/json", body: "{\"error\":\"proof\"}" });
+          return;
+        }
+        if (state === "opening") {
+          await sleep(1600);
+        } else if (state === "partial" && /\/chunk-0002\./u.test(url)) {
+          await sleep(1600);
+        }
+        await route.continue();
+      });
+    }
+    await page.goto(appUrl(found.params), { waitUntil: "networkidle" });
+    await waitForApp(page);
+    const row = page.locator(".rank-row:not(.skeleton-row)").nth(found.rowIndex);
+    await row.evaluate((node) => node.scrollIntoView({ block: "center", inline: "nearest" }));
+    const startedAt = await page.evaluate(() => performance.now());
+    await row.locator("[data-toggle-source]").first().click();
+    await row.locator(".source-drawer:not([hidden])").first().waitFor({ state: "visible", timeout: 3_000 });
+    const openMs = await page.evaluate((start) => Math.round((performance.now() - start) * 10) / 10, startedAt);
+    console.log(`README_SOURCE_DRAWER_OPEN ${name} ${openMs}ms`);
+    if (openMs > 100) throw new Error(`${name} source drawer visible after ${openMs}ms`);
+    await waitForLiveSourceState(page, state);
+    await assertLiveSourceViewAllState(row, state, name);
+    if (state === "complete") await warmImagesInElement(page, row, ".source-drawer .source-video-thumb");
+    await saveElement(page, row, name, {
+      minBytes: 6_000,
+      viewport,
+      params: found.params,
+      selector: `.rank-row live-source-${state}`,
+      scene: name.replace(/\.png$/u, ""),
+    });
+  } finally {
+    await page.close();
+  }
+}
+
+async function waitForLiveSourceState(page, state) {
+  await page.waitForFunction(
+    (expected) => {
+      const drawer = document.querySelector(".source-drawer:not([hidden])");
+      if (!drawer) return false;
+      const stateName = drawer.dataset.sourceLoadingState || "";
+      if (expected === "opening") return stateName === "opening";
+      if (expected === "partial") {
+        const loaded = Number(drawer.dataset.loadedCount || 0);
+        const total = Number(drawer.dataset.totalCount || 0);
+        return stateName === "partial" && loaded > 0 && total > loaded;
+      }
+      if (expected === "complete") return stateName === "complete" && drawer.querySelectorAll(".source-video-group:not([data-source-skeleton])").length >= 8;
+      if (expected === "error") return stateName === "error" && Boolean(drawer.querySelector("[data-source-detail-retry]"));
+      return false;
+    },
+    state,
+    { timeout: 20_000 },
   );
-  const openMs = await page.evaluate(() => {
-    const started = performance.now();
-    const row = document.querySelector(".proof-source-state-row");
-    const drawer = document.querySelector(".source-drawer");
-    const toggle = document.querySelector("[data-toggle-source]");
-    row?.classList.add("is-expanded");
-    if (drawer) drawer.hidden = false;
-    toggle?.setAttribute("aria-expanded", "true");
-    return performance.now() - started;
+  await sleep(state === "opening" ? 180 : 320);
+}
+
+async function assertLiveSourceViewAllState(row, state, label) {
+  const shape = await row.evaluate((node) => {
+    const visible = (target) => {
+      if (!target) return false;
+      const box = target.getBoundingClientRect();
+      const style = getComputedStyle(target);
+      return !target.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+    };
+    const drawer = node.querySelector(".source-drawer:not([hidden])");
+    const groups = drawer ? Array.from(drawer.querySelectorAll(".source-video-group:not([data-source-skeleton])")) : [];
+    return {
+      state: drawer?.dataset.sourceLoadingState || "",
+      loadedCount: Number(drawer?.dataset.loadedCount || 0),
+      totalCount: Number(drawer?.dataset.totalCount || 0),
+      skeletonCount: drawer?.querySelectorAll("[data-source-skeleton]").length || 0,
+      retryVisible: Boolean(drawer?.querySelector("[data-source-detail-retry]")),
+      groupCount: groups.length,
+      ariaBusy: drawer?.getAttribute("aria-busy") || "",
+      inlineVisible: visible(node.querySelector(".source-inline-strip")),
+      toolbarText: drawer?.querySelector(".source-drawer-toolbar")?.textContent.trim() || "",
+    };
   });
-  console.log(`README_SOURCE_DRAWER_OPEN ${name} ${Math.round(openMs * 10) / 10}ms`);
-  await assertSourceViewAllFixture(page, state, name, openMs);
-  const locator = page.locator(".proof-source-state-fixture").first();
-  await saveElement(page, locator, name, {
-    minBytes: 6_000,
-    viewport,
-    params: { fixture: "source-view-all", state },
-    selector: ".proof-source-state-fixture",
-    scene: name.replace(/\.png$/u, ""),
-  });
-  await page.close();
+  if (shape.inlineVisible || shape.totalCount < 40) throw new Error(`${label} live source proof row invalid: ${JSON.stringify(shape)}`);
+  if (state === "opening" && (shape.state !== "opening" || shape.skeletonCount < 1 || shape.ariaBusy !== "true")) {
+    throw new Error(`${label} opening source state invalid: ${JSON.stringify(shape)}`);
+  }
+  if (state === "partial" && (shape.state !== "partial" || shape.loadedCount <= 0 || shape.loadedCount >= shape.totalCount || shape.groupCount > 40)) {
+    throw new Error(`${label} partial source state invalid: ${JSON.stringify(shape)}`);
+  }
+  if (state === "complete" && (shape.state !== "complete" || shape.loadedCount !== shape.totalCount || shape.groupCount > 40)) {
+    throw new Error(`${label} complete source state invalid: ${JSON.stringify(shape)}`);
+  }
+  if (state === "error" && (shape.state !== "error" || !shape.retryVisible || !shape.toolbarText.includes("重试"))) {
+    throw new Error(`${label} error source state invalid: ${JSON.stringify(shape)}`);
+  }
 }
 
 async function assertSourceViewAllFixture(page, state, label, openMs) {
@@ -1683,34 +1757,32 @@ function sourceSetlistLoadingFixtureHtml(viewport) {
 }
 
 async function captureSourceSetlistLoading(browser, viewport, name) {
+  const found = await findSourceCase(browser, viewport, "many");
   const page = await newPage(browser, viewport);
-  const cssHref = new URL("assets/styles.css", baseUrl).toString();
-  await page.setContent(
-    `<!doctype html>
-    <html lang="zh-CN">
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="${cssHref}" />
-      </head>
-      <body><main class="layout">${sourceSetlistLoadingFixtureHtml(viewport)}</main></body>
-    </html>`,
-    { waitUntil: "networkidle" },
-  );
-  await page.locator("[data-copy-setlist]").first().evaluate((button) => {
-    button.classList.add("is-loading");
-    button.disabled = true;
-    button.setAttribute("aria-busy", "true");
-  });
-  await assertSourceSetlistLoading(page, name);
-  await saveElement(page, page.locator(".proof-source-setlist-fixture").first(), name, {
-    minBytes: 4_000,
-    viewport,
-    params: { fixture: "source-setlist", state: "loading" },
-    selector: ".proof-source-setlist-fixture",
-    scene: "mobile-source-setlist-loading",
-  });
-  await page.close();
+  try {
+    await page.route("**/data/ui/video-setlists/**/*.json", async (route) => {
+      await sleep(1800);
+      await route.continue();
+    });
+    await page.goto(appUrl(found.params), { waitUntil: "networkidle" });
+    await waitForApp(page);
+    const row = page.locator(".rank-row:not(.skeleton-row)").nth(found.rowIndex);
+    await row.evaluate((node) => node.scrollIntoView({ block: "center", inline: "nearest" }));
+    await row.locator("[data-toggle-source]").first().click();
+    await row.locator(".source-drawer:not([hidden]) .source-video-group").first().waitFor({ state: "visible", timeout: 20_000 });
+    const button = row.locator(".source-drawer:not([hidden]) [data-copy-setlist]").first();
+    await button.click();
+    await button.evaluate((node) => node.getAttribute("aria-busy") === "true" || Promise.reject(new Error("setlist button not busy")));
+    await saveElement(page, row, name, {
+      minBytes: 4_000,
+      viewport,
+      params: found.params,
+      selector: ".rank-row live-source-setlist-loading",
+      scene: "mobile-source-setlist-loading",
+    });
+  } finally {
+    await page.close();
+  }
 }
 
 async function assertSourceSetlistLoading(page, label) {
@@ -2484,9 +2556,21 @@ async function main() {
     });
     await captureQueryPanel(browser, mobile, "mobile-query-footer-alignment.png", { filterTab: true, scrollBottom: true, scene: "mobile-query-footer-alignment" });
     await captureQueryPanel(browser, mobile, "mobile-query-history-alignment.png", { openHistory: true, scene: "mobile-query-history-alignment" });
-    await captureRequestStateFixture(browser, mobile, "mobile-page-request-loading.png", "page-loading");
-    await captureRequestStateFixture(browser, mobile, "mobile-filter-request-loading.png", "filter-loading");
-    await captureRequestStateFixture(browser, mobile, "mobile-page-request-error.png", "page-error");
+    await captureRequestState(browser, mobile, "mobile-page-request-loading.png", {
+      params: { range: "all", page: 2, pageSize: 50 },
+      delayRequest: true,
+      scene: "mobile-page-request-loading",
+    });
+    await captureRequestState(browser, mobile, "mobile-filter-request-loading.png", {
+      params: { range: "all", q: "少女レイ", pageSize: 50 },
+      delaySearchRequest: true,
+      scene: "mobile-filter-request-loading",
+    });
+    await captureRequestState(browser, mobile, "mobile-page-request-error.png", {
+      params: { range: "all", page: 2, pageSize: 50 },
+      failRequest: true,
+      scene: "mobile-page-request-error",
+    });
     await openPage(browser, desktop, { range: "all", page: 2, pageSize: 50 }, "desktop-request-pagination.png", {
       scene: "desktop-request-pagination",
     });

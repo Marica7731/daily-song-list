@@ -95,6 +95,14 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- |
 | ![Mobile active controls](assets/screenshots/mobile-controls-active.png) | ![Mobile active bottom navigation](assets/screenshots/mobile-bottom-nav-active.png) |
 
+| 320px query grid | Empty suggestions | Query footer |
+| --- | --- | --- |
+| ![Mobile query grid alignment](assets/screenshots/mobile-query-grid-alignment.png) | ![Mobile empty suggestions compact state](assets/screenshots/mobile-query-empty-suggestions-compact.png) | ![Mobile query footer alignment](assets/screenshots/mobile-query-footer-alignment.png) |
+
+| Query history alignment |
+| --- |
+| ![Mobile query history alignment](assets/screenshots/mobile-query-history-alignment.png) |
+
 | Page request loading | Page request error | Filter request loading |
 | --- | --- | --- |
 | ![Mobile page request loading](assets/screenshots/mobile-page-request-loading.png) | ![Mobile page request error](assets/screenshots/mobile-page-request-error.png) | ![Mobile filter request loading](assets/screenshots/mobile-filter-request-loading.png) |

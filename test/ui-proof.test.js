@@ -46,6 +46,13 @@ test("UI proof expected list covers source thumbnail states", () => {
     "mobile-video-diagnostic-result.png",
     "desktop-partition-pagination.png",
     "desktop-search-snapshot-index.png",
+    "mobile-query-grid-alignment.png",
+    "mobile-query-empty-suggestions-compact.png",
+    "mobile-query-footer-alignment.png",
+    "mobile-query-history-alignment.png",
+    "mobile-page-request-loading.png",
+    "mobile-filter-request-loading.png",
+    "mobile-page-request-error.png",
   ]) {
     assert.equal(expectedScreenshots.includes(name), true, `missing expected screenshot ${name}`);
   }
@@ -81,6 +88,11 @@ test("UI proof contracts pin new fixture scenes and proof docs", () => {
     minCount: 2,
   });
   assert.equal(screenshotContracts["mobile-video-expanded-bottom.png"].scene, "mobile-video-expanded-bottom");
+  assert.equal(screenshotContracts["mobile-query-grid-alignment.png"].scene, "mobile-query-grid-alignment");
+  assert.equal(screenshotContracts["mobile-query-empty-suggestions-compact.png"].scene, "mobile-query-empty-suggestions-compact");
+  assert.equal(screenshotContracts["mobile-query-footer-alignment.png"].scene, "mobile-query-footer-alignment");
+  assert.equal(screenshotContracts["mobile-query-history-alignment.png"].scene, "mobile-query-history-alignment");
+  assert.equal(screenshotContracts["mobile-source-setlist-loading.png"].scene, "mobile-source-setlist-loading");
 
   const inputPaths = proofInputEntries().map((entry) => entry.path);
   for (const inputPath of [
@@ -94,6 +106,32 @@ test("UI proof contracts pin new fixture scenes and proof docs", () => {
   ]) {
     assert.equal(inputPaths.includes(inputPath), true, `missing proof input ${inputPath}`);
   }
+});
+
+test("UI proof document references query alignment and live loading screenshots", () => {
+  const proofDoc = fs.readFileSync(path.join(repoRoot, "docs", "ui-proof.md"), "utf8");
+  for (const name of [
+    "mobile-query-grid-alignment.png",
+    "mobile-query-empty-suggestions-compact.png",
+    "mobile-query-footer-alignment.png",
+    "mobile-query-history-alignment.png",
+    "mobile-page-request-loading.png",
+    "mobile-filter-request-loading.png",
+    "mobile-page-request-error.png",
+  ]) {
+    assert.match(proofDoc, new RegExp(name.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&"), "u"));
+  }
+});
+
+test("formal loading screenshots are captured from live app routes", () => {
+  const script = fs.readFileSync(path.join(repoRoot, "scripts", "capture-readme-screenshots.js"), "utf8");
+  const mainBlock = script.slice(script.indexOf("await captureQueryPanel(browser, mobile"));
+
+  assert.doesNotMatch(mainBlock, /captureRequestStateFixture\(browser, mobile/u);
+  assert.match(mainBlock, /captureRequestState\(browser, mobile, "mobile-page-request-loading\.png"[\s\S]*delayRequest: true/u);
+  assert.match(mainBlock, /captureRequestState\(browser, mobile, "mobile-filter-request-loading\.png"[\s\S]*delaySearchRequest: true/u);
+  assert.match(script, /async function captureSourceViewAllState[\s\S]*findSourceCase\(browser, viewport, "many"\)/u);
+  assert.match(script, /async function captureSourceSetlistLoading[\s\S]*data\/ui\/video-setlists/u);
 });
 
 test("UI proof fingerprint changes when an input hash changes", () => {
