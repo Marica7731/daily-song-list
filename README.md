@@ -15,7 +15,7 @@ These committed screenshots are the repository homepage proof set for the curren
 npm run screenshots:readme -- https://ytb-song-rank.culua.com/
 ```
 
-The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). The full committed UI proof matrix lives in [`docs/ui-proof.md`](docs/ui-proof.md), with freshness checked by `docs/assets/screenshots/manifest.json`. Data flow, storage, range migration, and backfill details live in [`docs/data-architecture.md`](docs/data-architecture.md), [`docs/storage-layout.md`](docs/storage-layout.md), [`docs/range-migration.md`](docs/range-migration.md), and [`docs/backfill.md`](docs/backfill.md).
+The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). The full committed UI proof matrix lives in [`docs/ui-proof.md`](docs/ui-proof.md), with freshness checked by `docs/assets/screenshots/manifest.json`. Data flow, storage, range migration, and backfill details live in [`docs/data-architecture.md`](docs/data-architecture.md), [`docs/storage-layout.md`](docs/storage-layout.md), [`docs/range-migration.md`](docs/range-migration.md), and [`docs/backfill.md`](docs/backfill.md). VSinger Moment public HTML cursor backfill operations live in [`docs/vsinger-http-backfill.md`](docs/vsinger-http-backfill.md).
 
 ### Desktop Web
 
