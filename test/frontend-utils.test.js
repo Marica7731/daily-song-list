@@ -4,6 +4,7 @@ const test = require("node:test");
 const {
   annotatePayloadWithNiche,
   activeQueryConditionCount,
+  activeQueryConditionItems,
   buildSetlistText,
   buildSongSourceLinksText,
   buildIndexBucketModel,
@@ -13,12 +14,15 @@ const {
   createSnapshotLoader,
   createSongSearchLookup,
   createTrendLookup,
+  clearAllRestrictiveFilters,
+  clearRestrictiveFilter,
   desktopPageTokens,
   defaultQueryDraft,
   filterItemsBySearch,
   filterItemsByNiche,
   filterOccurrencesBySearch,
   filterOccurrencesByNiche,
+  filterEffectModel,
   formatSetlistTime,
   formatSeconds,
   groupOccurrencesByVideo,
@@ -737,7 +741,8 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     rankMetric: "occurrences",
     videoLayout: "cards",
     outside: true,
-    showUnknown: false,
+    hideUnknown: false,
+    showUnknown: true,
     q: "First Good-Bye",
     snapshotPath: "data/snapshots/2026-07-10.json",
     trend: "all",
@@ -777,7 +782,7 @@ test("url state parses trend, minCount, and legacy shared marker", () => {
       rankMetric: "occurrences",
       videoLayout: "cards",
       outside: false,
-      showUnknown: false,
+      hideUnknown: false,
       q: "",
       snapshotPath: "data/latest.json",
       trend: "up",
@@ -796,20 +801,29 @@ test("url state parses trend, minCount, and legacy shared marker", () => {
   assert.equal(Object.hasOwn(parseUrlState("?detail=javascript:alert(1)", options), "detail"), false);
 });
 
-test("url state uses showUnknown=1 only when unknown artists are visible", () => {
+test("url state uses hideUnknown=1 for restrictive unknown-artist filtering and reads legacy showUnknown", () => {
   const options = urlStateOptions();
-  const parsed = parseUrlState("?showUnknown=1&outside=1", options);
+  const hidden = parseUrlState("?hideUnknown=1&showUnknown=1&outside=1", options);
 
-  assert.equal(parsed.showUnknown, true);
-  assert.equal(parsed.outside, true);
-  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(parsed, options))), {
+  assert.equal(hidden.hideUnknown, true);
+  assert.equal(hidden.showUnknown, false);
+  assert.equal(hidden.outside, true);
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(hidden, options))), {
     outside: "1",
-    showUnknown: "1",
+    hideUnknown: "1",
   });
 
-  const defaults = parseUrlState("?showUnknown=0", options);
-  assert.equal(defaults.showUnknown, false);
-  assert.equal(new URLSearchParams(serializeUrlState(defaults, options)).has("showUnknown"), false);
+  const legacyVisible = parseUrlState("?showUnknown=1", options);
+  assert.equal(legacyVisible.hideUnknown, false);
+  assert.equal(legacyVisible.showUnknown, true);
+  assert.equal(new URLSearchParams(serializeUrlState(legacyVisible, options)).has("showUnknown"), false);
+
+  const legacyHidden = parseUrlState("?showUnknown=0", options);
+  assert.equal(legacyHidden.hideUnknown, true);
+  assert.equal(legacyHidden.showUnknown, false);
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(legacyHidden, options))), {
+    hideUnknown: "1",
+  });
 });
 
 test("query draft derives search and every filter field from applied state", () => {
@@ -840,7 +854,7 @@ test("query draft derives search and every filter field from applied state", () 
   assert.deepEqual(defaultQueryDraft({ pageSize: 100, snapshotPath: "data/snapshots/2026-07-10.json" }), {
     q: "",
     nicheOnly: false,
-    hideUnknownArtist: true,
+    hideUnknownArtist: false,
     rankMetric: "occurrences",
     trend: "all",
     minCount: 1,
@@ -866,12 +880,13 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
   );
 
   assert.equal(snapshotDraft.trend, "all");
-  assert.equal(activeQueryConditionCount(snapshotDraft, { ...options, view: "songRank" }), 6);
-  assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 6);
-  assert.equal(activeQueryConditionCount({ ...snapshotDraft, rankMetric: "videos", minCount: 10 }, { ...options, view: "videos" }), 4);
-  assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 5);
+  assert.equal(activeQueryConditionCount(snapshotDraft, { ...options, view: "songRank" }), 3);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 3);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, rankMetric: "videos", minCount: 10 }, { ...options, view: "videos" }), 2);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 3);
   assert.equal(activeQueryConditionCount(defaultQueryDraft(), { ...options, view: "songRank" }), 0);
-  assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), hideUnknownArtist: false }, { ...options, view: "songRank" }), 1);
+  assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), hideUnknownArtist: true }, { ...options, view: "songRank" }), 1);
+  assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), hideUnknownArtist: true }, { ...options, view: "artistRank" }), 0);
   assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ" }, { ...options, view: "songRank" }), 1);
   assert.equal(
     activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ", nicheOnly: true, minCount: 2 }, { ...options, view: "songRank" }),
@@ -895,13 +910,54 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
       labels: ["少女レイ", "只看小众", "2次以上"],
       hasActive: true,
       visibleCountText: "",
-      ariaLabel: "打开搜索与筛选，当前有 3 个条件：少女レイ、只看小众、2次以上",
+      ariaLabel: "打开搜索与筛选，当前有 3 个筛选条件：少女レイ、只看小众、2次以上",
     },
   );
   assert.equal(
-    queryTriggerModel({ ...defaultQueryDraft(), hideUnknownArtist: false }, { ...options, view: "songRank" }).visibleCountText,
+    queryTriggerModel({ ...defaultQueryDraft(), hideUnknownArtist: true }, { ...options, view: "songRank" }).visibleCountText,
     "1",
   );
+});
+
+test("restrictive filter helpers clear only real narrowing conditions", () => {
+  const options = queryDraftOptions();
+  const draft = {
+    ...defaultQueryDraft(),
+    q: "Proof Filter",
+    nicheOnly: true,
+    hideUnknownArtist: true,
+    rankMetric: "videos",
+    trend: "up",
+    minCount: 5,
+    pageSize: 100,
+    snapshotPath: "data/snapshots/2026-07-10.json",
+  };
+  const normalized = sanitizeQueryDraft(draft, options);
+  const items = activeQueryConditionItems(normalized, { ...options, view: "songRank", trendLabels: { up: "上升" } });
+
+  assert.deepEqual(
+    items.map((item) => [item.key, item.label]),
+    [
+      ["q", "Proof Filter"],
+      ["nicheOnly", "只看小众"],
+      ["hideUnknownArtist", "隐藏无歌手"],
+      ["minCount", "5次以上"],
+    ],
+  );
+  assert.deepEqual(filterEffectModel(normalized, { ...options, view: "songRank" }).count, 4);
+
+  assert.equal(clearRestrictiveFilter(normalized, "hideUnknownArtist", options).hideUnknownArtist, false);
+  assert.equal(clearRestrictiveFilter(normalized, "q", options).q, "");
+
+  const cleared = clearAllRestrictiveFilters(normalized, options);
+  assert.equal(cleared.q, "");
+  assert.equal(cleared.nicheOnly, false);
+  assert.equal(cleared.hideUnknownArtist, false);
+  assert.equal(cleared.trend, "all");
+  assert.equal(cleared.minCount, 1);
+  assert.equal(cleared.rankMetric, "videos");
+  assert.equal(cleared.pageSize, 100);
+  assert.equal(cleared.snapshotPath, "data/snapshots/2026-07-10.json");
 });
 
 test("summary video count keeps source totals separate from hidden-unknown visibility", () => {
@@ -1044,7 +1100,7 @@ test("runtime legacy group fallback converts to a validated runtime payload", ()
   const payload = runtimeRangePayloadFromGroup(group, {
     rangeId: "1m",
     capturedAt: "2026-07-13T15:56:10.026Z",
-    filterVersion: 3,
+    filterVersion: 4,
     fallbackFrom: "data/1m.json",
   });
 
@@ -1102,7 +1158,8 @@ test("url state falls back to safe defaults and only accepts configured snapshot
   assert.equal(parsed.pageSize, 50);
   assert.equal(parsed.bucket, "全部");
   assert.equal(parsed.outside, false);
-  assert.equal(parsed.showUnknown, false);
+  assert.equal(parsed.hideUnknown, false);
+  assert.equal(parsed.showUnknown, true);
   assert.equal(parsed.q, "x".repeat(200));
   assert.equal(parsed.snapshotPath, "data/latest.json");
 
@@ -1120,7 +1177,7 @@ test("url state falls back to safe defaults and only accepts configured snapshot
         pageSize: 50,
         bucket: "全部",
         outside: false,
-        showUnknown: false,
+        hideUnknown: false,
         q: "",
         snapshotPath: "data/snapshots/not-listed.json",
       },
@@ -1351,7 +1408,7 @@ function urlStateOptions() {
       pageSize: 50,
       bucket: "全部",
       outside: false,
-      showUnknown: false,
+      hideUnknown: false,
       q: "",
     },
   };
@@ -1371,7 +1428,7 @@ function queryDraftOptions() {
     defaults: {
       pageSize: 50,
       snapshotPath: "data/latest.json",
-      hideUnknownArtist: true,
+      hideUnknownArtist: false,
       rankMetric: "occurrences",
       trend: "all",
       minCount: 1,
@@ -1427,7 +1484,7 @@ function runtimePayloadFixture(overrides = {}) {
     generatedAt: "2026-07-13T15:56:10.026Z",
     capturedAt: "2026-07-13T15:56:10.026Z",
     dataVersion: "a".repeat(64),
-    filterVersion: 3,
+    filterVersion: 4,
     nicheAnnotated: true,
     items: [video("AAAAAAAAAAA", "video", "channel", [song("song", "artist", { isNiche: false })])],
     ...overrides,

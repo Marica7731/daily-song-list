@@ -713,7 +713,7 @@ svg {
   top: var(--query-anchor-top);
   right: var(--query-anchor-right);
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   width: min(540px, calc(100vw - 24px));
   max-height: min(calc(var(--visual-viewport-height) - var(--query-anchor-top) - var(--space-4)), 680px);
   overflow: hidden;
@@ -773,31 +773,9 @@ svg {
   right: 17px;
 }
 
-.query-tabs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-1);
-  padding: 10px 16px 0;
-}
-
-.query-tab {
-  min-height: 34px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-control);
-  background: transparent;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.query-tab.is-active,
-.query-tab[aria-selected="true"] {
-  border-color: rgba(15, 118, 110, 0.22);
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-}
-
 .query-panel-body {
+  display: grid;
+  gap: var(--space-4);
   min-height: 0;
   overflow: auto;
   padding: 12px 16px 16px;
@@ -3807,17 +3785,12 @@ mark {
     border-radius: var(--radius-panel) var(--radius-panel) 0 0;
   }
 
-  .query-panel.is-filter-tab {
-    height: min(calc(var(--visual-viewport-height) - 10px), 84dvh);
-  }
-
   .query-panel-header,
   .query-panel-footer {
     padding-inline: 12px;
   }
 
   .query-search-section,
-  .query-tabs,
   .query-panel-body {
     padding-inline: 12px;
   }

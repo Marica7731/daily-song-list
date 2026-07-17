@@ -325,8 +325,7 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
     await sleep(250);
   }
   if (options.filterTab || options.openHistory || options.scrollBottom) {
-    await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
-    await page.waitForSelector("#queryFilterPanel:not([hidden])", { timeout: 15_000 });
+    await assertUnifiedQueryPanel(page, name);
     await sleep(150);
   }
   if (options.openHistory || options.scrollBottom) {
@@ -342,8 +341,21 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
     await sleep(250);
   }
   if (options.openHistory) await assertQueryHistoryPanelSpacing(page, name);
-  await save(page, name, { viewport, params: options.params || {}, selector: "#queryDialog" });
+  await save(page, name, { viewport, params: options.params || {}, selector: "#queryDialog", scene: options.scene });
   await page.close();
+}
+
+async function assertUnifiedQueryPanel(page, name) {
+  await page.waitForSelector("#queryFilterPanel:not([hidden]) #hideUnknownToggle", { timeout: 15_000 });
+  const result = await page.evaluate(() => ({
+    tabCount: document.querySelectorAll(".query-tabs, [data-query-panel-tab]").length,
+    searchVisible: Boolean(document.querySelector("#queryInput")?.getBoundingClientRect().height),
+    filterVisible: Boolean(document.querySelector("#queryFilterPanel")?.getBoundingClientRect().height),
+    hideUnknownChecked: Boolean(document.querySelector("#hideUnknownToggle")?.checked),
+  }));
+  if (result.tabCount !== 0 || !result.searchVisible || !result.filterVisible) {
+    throw new Error(`query panel is not unified for ${name}: ${JSON.stringify(result)}`);
+  }
 }
 
 async function captureExpandedSource(browser, viewport, params, name) {
@@ -372,7 +384,7 @@ async function findSourceCase(browser, viewport, kind) {
   const page = await newPage(browser, viewport);
   try {
     for (let pageNumber = 1; pageNumber <= 25; pageNumber += 1) {
-      const params = { page: pageNumber, pageSize: 100, showUnknown: 1 };
+      const params = { page: pageNumber, pageSize: 100 };
       await page.goto(appUrl(params), { waitUntil: "networkidle" });
       await waitForApp(page);
       const match = await page.evaluate((targetKind) => {
@@ -1747,7 +1759,7 @@ function publishScreenshots() {
     throw new Error(`missing generated screenshot files before publish: ${missingFiles.join(", ")}`);
   }
   for (const name of expectedScreenshots) {
-    fs.copyFileSync(path.join(workDir, name), path.join(outputDir, name));
+    publishFileWithRetry(path.join(workDir, name), path.join(outputDir, name));
   }
   const tempManifest = path.join(outputDir, `manifest.${process.pid}.tmp`);
   fs.writeFileSync(tempManifest, `${JSON.stringify(manifest, null, 2)}\n`);
@@ -1756,6 +1768,21 @@ function publishScreenshots() {
   if (!validation.ok) throw new Error(`generated UI proof failed validation: ${validation.errors.join("; ")}`);
   fs.rmSync(workDir, { recursive: true, force: true });
   return manifest;
+}
+
+function publishFileWithRetry(source, destination) {
+  let lastError = null;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      fs.rmSync(destination, { force: true });
+      fs.copyFileSync(source, destination);
+      return;
+    } catch (error) {
+      lastError = error;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 80 * (attempt + 1));
+    }
+  }
+  throw lastError;
 }
 
 async function main() {
@@ -1782,7 +1809,7 @@ async function main() {
     await captureRangeFixtureCase(browser, desktop, "all", "desktop-range-all.png");
     await captureDiagnosticFixtureCase(browser, desktop, "diff", "desktop-all-diff-explanation.png");
     await openPage(browser, desktopWide, { view: "videos" }, "desktop-video-view.png");
-    await captureQueryPanel(browser, desktop, "desktop-query-panel.png", { filterTab: true });
+    await captureQueryPanel(browser, desktop, "desktop-query-panel.png", { filterTab: true, scene: "desktop-unified-query-panel" });
     await captureExpandedSource(browser, desktop, {}, "desktop-source-expanded.png");
     await captureIdentityMergeFixtureCase(browser, desktop, "desktop-song-kana-romaji-merged.png");
     await captureFixtureSourceCase(browser, desktop, "triple", "desktop-source-inline-3.png");
@@ -1814,7 +1841,7 @@ async function main() {
       scrollBottom: true,
       scene: "mobile-video-expanded-bottom",
     });
-    await openPage(browser, { width: 320, height: 700 }, { page: 7, pageSize: 100, showUnknown: 1 }, "mobile-pagination-320.png");
+    await openPage(browser, { width: 320, height: 700 }, { page: 7, pageSize: 100 }, "mobile-pagination-320.png");
     await captureElementFromPage(browser, mobile, { view: "videos" }, "#mobileBottomNav", "mobile-bottom-nav-active.png", {
       assert: assertBottomNavIconSelection,
       scene: "mobile-bottom-nav-active",
@@ -1823,14 +1850,16 @@ async function main() {
     await openPage(
       browser,
       mobile,
-      { q: "少女レイ", metric: "videos", minCount: 2, showUnknown: 1 },
+      { q: "少女レイ", hideUnknown: 1, metric: "videos", minCount: 2 },
       "mobile-active-query-strip.png",
+      { scene: "mobile-restrictive-filter-chips" },
     );
     await captureToastCase(browser, mobile, "mobile-toast-copy-setlist.png");
     await captureElementFromPage(browser, mobile, { q: "少女レイ" }, "#summary", "mobile-summary-filtered.png", {
       assert: assertFilteredSummaryCopy,
       scene: "mobile-summary-filtered",
       selector: "#summary",
+      minBytes: 2_500,
     });
     await captureElementFromPage(browser, mobile, { q: "少女レイ" }, ".controls", "mobile-controls-active.png", {
       assert: assertMobileControlsCompact,
@@ -1840,7 +1869,7 @@ async function main() {
     });
     await captureQueryPanel(browser, mobile, "mobile-query-recent.png");
     await captureQueryPanel(browser, mobile, "mobile-query-suggestions.png", { searchText: "少女レイ" });
-    await captureQueryPanel(browser, mobile, "mobile-query-filter.png", { filterTab: true });
+    await captureQueryPanel(browser, mobile, "mobile-query-filter.png", { filterTab: true, scene: "mobile-unified-filter-panel" });
     await captureQueryPanel(browser, mobile, "mobile-query-history.png", { openHistory: true, scrollBottom: true });
     await captureExpandedSource(browser, mobile, {}, "mobile-source-expanded.png");
     await captureFixtureSourceCase(browser, mobile, "none", "mobile-source-inline-0.png");
@@ -1860,7 +1889,7 @@ async function main() {
     await captureFixtureSourceCase(browser, mobile, "longChannel", "mobile-source-long-channel.png");
     await captureFixtureSourceCase(browser, mobile, "longTime", "mobile-source-long-time.png");
     await captureFixtureSourceCase(browser, mobile, "extraTimes", "mobile-source-extra-times.png");
-    await openPage(browser, desktop, { page: 7, pageSize: 100, showUnknown: 1 }, "desktop-pagination-middle.png");
+    await openPage(browser, desktop, { page: 7, pageSize: 100 }, "desktop-pagination-middle.png");
   } finally {
     await browser.close();
   }

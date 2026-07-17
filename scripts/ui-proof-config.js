@@ -118,6 +118,12 @@ const screenshotContracts = {
     selector: "#summary",
     viewport: { width: 1440, height: 900 },
   },
+  "desktop-query-panel.png": {
+    scene: "desktop-unified-query-panel",
+    params: {},
+    selector: "#queryDialog",
+    viewport: { width: 1440, height: 900 },
+  },
   "mobile-summary-baseline.png": {
     scene: "mobile-summary-baseline",
     params: {},
@@ -190,9 +196,16 @@ const screenshotContracts = {
     viewport: { width: 1440, height: 900 },
   },
   "mobile-query-filter.png": {
+    scene: "mobile-unified-filter-panel",
     viewport: { width: 390, height: 844 },
+    selector: "#queryDialog",
   },
   "mobile-query-history.png": {
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-active-query-strip.png": {
+    scene: "mobile-restrictive-filter-chips",
+    params: { q: "少女レイ", hideUnknown: 1, metric: "videos", minCount: 2 },
     viewport: { width: 390, height: 844 },
   },
   "mobile-toast-copy-setlist.png": {
@@ -220,6 +233,7 @@ const proofCoverage = {
   diagnostics: ["mobile-video-diagnostic-result.png", "desktop-all-diff-explanation.png"],
   identityFixtures: ["mobile-song-kana-romaji-merged.png", "desktop-song-kana-romaji-merged.png"],
   trendFixtures: ["mobile-trend-count-increase.png", "mobile-trend-rank-only-down.png", "mobile-trend-corrected-decrease.png"],
+  filterFixtures: ["mobile-query-filter.png", "mobile-active-query-strip.png", "desktop-query-panel.png"],
 };
 
 module.exports = {

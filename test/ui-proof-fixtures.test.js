@@ -25,7 +25,7 @@ test("UI proof range fixtures cover future 7d and all contracts without enabling
       pageSize: 50,
       bucket: "全部",
       outside: false,
-      showUnknown: false,
+      hideUnknown: false,
       q: "",
     },
   };
@@ -97,6 +97,11 @@ test("UI proof config covers diagnostics, identity merge, trend labels, and all 
   }
   assert.equal(expectedScreenshots.includes("mobile-all-monotonic-summary.png"), true);
   assert.equal(screenshotContracts["mobile-all-monotonic-summary.png"].scene, "fixture-all-monotonic-summary");
+  for (const name of proofCoverage.filterFixtures) {
+    assert.equal(expectedScreenshots.includes(name), true, `missing filter proof ${name}`);
+  }
+  assert.equal(screenshotContracts["mobile-active-query-strip.png"].params.hideUnknown, 1);
+  assert.equal(screenshotContracts["mobile-active-query-strip.png"].params.metric, "videos");
 });
 
 function occurrencesFromSourceCase(caseName) {

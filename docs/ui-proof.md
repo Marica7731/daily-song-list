@@ -33,9 +33,9 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- |
 | ![Desktop cumulative diff explanation proof](assets/screenshots/desktop-all-diff-explanation.png) | ![Desktop same-title kana and romaji merge proof](assets/screenshots/desktop-song-kana-romaji-merged.png) |
 
-| Query panel | Expanded source drawer | Inline source thumbnails |
+| Unified query panel | Expanded source drawer | Inline source thumbnails |
 | --- | --- | --- |
-| ![Desktop query panel](assets/screenshots/desktop-query-panel.png) | ![Desktop expanded sources](assets/screenshots/desktop-source-expanded.png) | ![Desktop inline source thumbnails](assets/screenshots/desktop-source-inline-3.png) |
+| ![Desktop unified search and filters panel](assets/screenshots/desktop-query-panel.png) | ![Desktop expanded sources](assets/screenshots/desktop-source-expanded.png) | ![Desktop inline source thumbnails](assets/screenshots/desktop-source-inline-3.png) |
 
 | Middle pagination | Long timestamp source | Search and snapshot indexes |
 | --- | --- | --- |
@@ -79,13 +79,13 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 
 ## Mobile Query
 
-| Active query strip | Recent searches | Search suggestions |
+| Restrictive filter chips | Recent searches | Search suggestions |
 | --- | --- | --- |
-| ![Mobile active query strip](assets/screenshots/mobile-active-query-strip.png) | ![Mobile recent searches](assets/screenshots/mobile-query-recent.png) | ![Mobile query suggestions](assets/screenshots/mobile-query-suggestions.png) |
+| ![Mobile restrictive filter chips](assets/screenshots/mobile-active-query-strip.png) | ![Mobile recent searches](assets/screenshots/mobile-query-recent.png) | ![Mobile query suggestions](assets/screenshots/mobile-query-suggestions.png) |
 
-| Filter controls | Snapshot history | Filtered summary |
+| Unified filter controls | Snapshot history | Filtered summary |
 | --- | --- | --- |
-| ![Mobile query filter](assets/screenshots/mobile-query-filter.png) | ![Mobile query history](assets/screenshots/mobile-query-history.png) | ![Mobile filtered summary](assets/screenshots/mobile-summary-filtered.png) |
+| ![Mobile unified query filter controls](assets/screenshots/mobile-query-filter.png) | ![Mobile query history](assets/screenshots/mobile-query-history.png) | ![Mobile filtered summary](assets/screenshots/mobile-summary-filtered.png) |
 
 | Active controls | Bottom navigation |
 | --- | --- |

@@ -25,7 +25,7 @@ const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
 const SEARCH_DEBOUNCE_MS = 140;
 const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
-const QUERY_SUGGESTION_SCAN_LIMIT = 640;
+const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
@@ -50,7 +50,7 @@ const SOURCE_GROUP_LIMITS = {
 const LIST_PAGE_SIZE_OPTIONS = [50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
 const VIDEO_PAGE_SIZE = 24;
-const CURRENT_FILTER_VERSION = 3;
+const CURRENT_FILTER_VERSION = 4;
 const RECENT_SEARCHES_KEY = "dailySongList.recentSearches";
 const RANK_METRICS = {
   occurrences: "收录次数",
@@ -241,7 +241,7 @@ const state = {
   view: "songRank",
   filter: "",
   nicheOnly: false,
-  hideUnknownArtist: true,
+  hideUnknownArtist: false,
   indexBucket: INDEX_ALL_BUCKET,
   pageSize: DEFAULT_LIST_PAGE_SIZE,
   rankMetric: "occurrences",
@@ -743,7 +743,7 @@ function bindQueryOverlayEvents() {
   });
   els.resetQueryButton?.addEventListener("click", () => {
     setQueryPanelTab("search");
-    setQueryDraft(defaultQueryDraft(), { sync: "full" });
+    setQueryDraft(window.FrontendUtils.clearAllRestrictiveFilters(state.queryDraft || makeQueryDraftFromState(), queryDraftOptions()), { sync: "full" });
   });
   els.applyQueryButton?.addEventListener("click", () => {
     applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
@@ -766,17 +766,21 @@ function openQueryOverlay(trigger) {
   const revision = advanceQueryWorkRevision();
   state.activeOverlay = "query";
   setDialogOpen(els.queryDialog, true);
-  setPageInert(true);
   setQueryPanelTab("search");
   syncQueryControlsFromDraft(state.queryDraft, { light: true, forceSnapshot: false });
-  prepareQuerySearchShell(state.queryDraft);
-  prepareQueryPreviewShell(state.queryDraft);
+  if (typeof window.__queryPanelVisibleAt === "number" && !window.__queryPanelVisibleAt) {
+    window.__queryPanelVisibleAt = performance.now();
+  }
   perfMeasure("query-open-visible", openMark);
   window.requestAnimationFrame(() => {
     if (!isCurrentQueryWork(revision)) return;
     updateQueryAnchorPosition();
     focusWithoutScrolling(els.queryInput || els.queryPanel || els.queryDialog);
-    window.setTimeout(() => hydrateQueryOverlayAfterFirstFrame(revision), 0);
+    window.setTimeout(() => {
+      if (!isCurrentQueryWork(revision)) return;
+      setPageInert(true);
+      hydrateQueryOverlayAfterFirstFrame(revision);
+    }, 0);
   });
 }
 
@@ -810,6 +814,7 @@ function isCurrentQueryWork(revision) {
 
 function hydrateQueryOverlayAfterFirstFrame(revision) {
   if (!isCurrentQueryWork(revision)) return;
+  syncQueryPanelFromDraft(state.queryDraft || makeQueryDraftFromState(), { syncMode: "full", forceSnapshot: false });
   renderRecentSearches();
   scheduleSearchSuggestions({ revision });
   scheduleQueryDraftPreview({ revision });
@@ -954,6 +959,11 @@ function renderSearchSuggestions(query, draft = state.queryDraft || makeQueryDra
 }
 
 function setQueryPanelTab(tabName = "search", options = {}) {
+  if (!els.queryTabButtons.length) {
+    els.queryPanel?.classList.remove("is-filter-tab", "is-search-tab");
+    for (const panel of els.queryTabPanels) panel.hidden = false;
+    return;
+  }
   const targetName = tabName === "filter" ? "filter" : "search";
   els.queryPanel?.classList.toggle("is-filter-tab", targetName === "filter");
   els.queryPanel?.classList.toggle("is-search-tab", targetName !== "filter");
@@ -1207,6 +1217,7 @@ function syncQueryPanelFromDraft(draft, options = {}) {
   syncQueryInputValue(next);
   syncQueryClearButton(next);
   if (options.syncMode === "input") return next;
+  if (options.syncMode === "light") return next;
   syncQueryToggleValues(next);
   syncQuerySelectValues(next);
   syncQuerySnapshotControls(next, previous, options);
@@ -1385,8 +1396,11 @@ async function applySnapshotPath(path, previousPath, options = {}) {
 
 function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromState()) {
   const rankView = state.view === "songRank" || state.view === "artistRank";
+  const hideUnknownField = els.hideUnknownToggle?.closest(".query-toggle");
   if (els.metricFilterGroup) els.metricFilterGroup.hidden = state.view === "videos";
   if (els.displayFilterGroup) els.displayFilterGroup.hidden = state.view === "videos";
+  if (hideUnknownField) hideUnknownField.hidden = state.view === "artistRank";
+  if (els.hideUnknownToggle) els.hideUnknownToggle.disabled = state.view === "artistRank";
   if (els.trendFilterGroup) els.trendFilterGroup.hidden = state.view === "songAz" || state.view === "videos";
   if (els.minCountSelect?.closest(".query-field")) els.minCountSelect.closest(".query-field").hidden = state.view === "videos";
   if (els.trendFilterSelect) {
@@ -1438,7 +1452,7 @@ function syncQueryTriggerState() {
     els.queryTrigger.classList.toggle("has-active-query", count > 0);
     els.queryTrigger.dataset.activeQueryCount = String(count);
     const labels = items.map((item) => item.fullLabel || item.label).filter(Boolean);
-    els.queryTrigger.setAttribute("aria-label", count > 0 ? `打开搜索与筛选，当前有 ${count} 个条件：${labels.join("、")}` : "打开搜索与筛选");
+    els.queryTrigger.setAttribute("aria-label", count > 0 ? `打开搜索与筛选，当前有 ${count} 个筛选条件：${labels.join("、")}` : "打开搜索与筛选");
   }
 }
 
@@ -1472,37 +1486,27 @@ function renderActiveQueryStrip() {
     clearAll.className = "active-query-clear";
     clearAll.type = "button";
     clearAll.dataset.queryClear = "all";
+    clearAll.setAttribute("aria-label", "清除全部筛选条件");
     clearAll.textContent = "清除全部";
     els.activeQueryStrip.append(clearAll);
   }
 }
 
 function activeQueryItems(draft) {
-  const items = [];
-  if (draft.q) items.push({ key: "q", label: draft.q, fullLabel: draft.q });
-  if (draft.nicheOnly) items.push({ key: "nicheOnly", label: "只看小众" });
-  if (!draft.hideUnknownArtist) items.push({ key: "hideUnknownArtist", label: "显示无歌手" });
-  if ((state.view === "songRank" || state.view === "artistRank") && draft.rankMetric !== "occurrences") items.push({ key: "rankMetric", label: "按视频" });
-  if ((state.view === "songRank" || state.view === "artistRank") && draft.trend !== "all") items.push({ key: "trend", label: TREND_FILTERS[draft.trend] || "趋势" });
-  if (state.view !== "videos" && draft.minCount > 1) items.push({ key: "minCount", label: `${draft.minCount}次以上` });
-  if (draft.snapshotPath !== SNAPSHOT_LATEST_PATH) items.push({ key: "snapshotPath", label: `历史 ${snapshotDateOptionLabel(snapshotDateValueForPath(draft.snapshotPath))}` });
-  return items;
+  return window.FrontendUtils.activeQueryConditionItems(draft, {
+    ...queryDraftOptions(),
+    view: state.view,
+    trendLabels: TREND_FILTERS,
+  });
 }
 
 function clearQueryCondition(key) {
+  const draft = makeQueryDraftFromState();
   if (key === "all") {
-    applyQueryPatch(defaultQueryDraft(), { focusTrigger: true });
+    applyQueryPatch(window.FrontendUtils.clearAllRestrictiveFilters(draft, queryDraftOptions()), { focusTrigger: true });
     return;
   }
-  const patch = {};
-  if (key === "q") patch.q = "";
-  else if (key === "nicheOnly") patch.nicheOnly = false;
-  else if (key === "hideUnknownArtist") patch.hideUnknownArtist = true;
-  else if (key === "rankMetric") patch.rankMetric = "occurrences";
-  else if (key === "trend") patch.trend = "all";
-  else if (key === "minCount") patch.minCount = 1;
-  else if (key === "snapshotPath") patch.snapshotPath = SNAPSHOT_LATEST_PATH;
-  applyQueryPatch(patch, { focusTrigger: true });
+  applyQueryPatch(window.FrontendUtils.clearRestrictiveFilter(draft, key, queryDraftOptions()), { focusTrigger: true });
 }
 
 function scheduleQueryDraftPreview(options = {}) {
@@ -1793,6 +1797,7 @@ function applyInitialUrlState() {
     "layout",
     "outside",
     "libraryOutside",
+    "hideUnknown",
     "showUnknown",
     "q",
     "snapshot",
@@ -1812,7 +1817,7 @@ function applyInitialUrlState() {
       minCount: defaults.minCount,
       videoLayout: defaults.videoLayout,
       nicheOnly: defaults.outside,
-      hideUnknownArtist: !defaults.showUnknown,
+      hideUnknownArtist: defaults.hideUnknown,
       filter: defaults.q,
       currentSnapshotPath: SNAPSHOT_LATEST_PATH,
     });
@@ -1843,7 +1848,7 @@ function applyInitialUrlState() {
   state.minCount = parsed.minCount;
   state.videoLayout = parsed.videoLayout;
   state.nicheOnly = parsed.outside;
-  state.hideUnknownArtist = !parsed.showUnknown;
+  state.hideUnknownArtist = parsed.hideUnknown;
   state.filter = parsed.q;
   state.currentSnapshotPath = parsed.snapshotPath;
   state.sharedUrlApplied = shouldApplySharedState;
@@ -1872,7 +1877,7 @@ function syncUrlState(urlMode = "replace") {
       rankMetric: state.rankMetric,
       videoLayout: state.videoLayout,
       outside: state.nicheOnly,
-      showUnknown: !state.hideUnknownArtist,
+      hideUnknown: state.hideUnknownArtist,
       q: state.filter,
       snapshotPath: state.currentSnapshotPath,
       trend: state.trend,
@@ -1924,7 +1929,7 @@ function defaultUrlState() {
     minCount: 1,
     videoLayout: "cards",
     outside: false,
-    showUnknown: false,
+    hideUnknown: false,
     q: "",
   };
 }
@@ -3200,8 +3205,7 @@ function currentSelection(rangeCache) {
   if (!filterKey) {
     attachSelectionRecordGetters(selection, rangeCache, baseOccurrences, { hideUnknownForView, filtered: false });
   } else {
-    const searchBaseOccurrences = hideUnknownForView ? selectedOccurrences(rangeCache, { hideUnknownForView: false }) : baseOccurrences;
-    const occurrences = searchBaseOccurrences.filter((occurrence) => occurrence.searchText.includes(filterKey));
+    const occurrences = baseOccurrences.filter((occurrence) => occurrence.searchText.includes(filterKey));
     selection.occurrences = occurrences;
     selection.videoCount = uniqueVideoCount(occurrences);
     attachSelectionRecordGetters(selection, rangeCache, occurrences, { hideUnknownForView, filtered: true });
@@ -3392,20 +3396,37 @@ function renderVideoList(group, rangeCache, selection) {
   els.content.append(fragment);
 }
 
+function songRecordSummaryTotals(rangeCache, baseRecords, options = {}) {
+  const hideUnknownForView = Boolean(options.hideUnknownForView);
+  const needsAllRecordDenominator = Boolean(state.filter || state.nicheOnly);
+  const needsNicheRecordDenominator = Boolean(state.filter && state.nicheOnly);
+  return {
+    total: needsAllRecordDenominator
+      ? hideUnknownForView
+        ? rangeCache.visibleSongRecords.length
+        : rangeCache.allSongRecords.length
+      : baseRecords.length,
+    nicheTotal: needsNicheRecordDenominator
+      ? hideUnknownForView
+        ? rangeCache.visibleNicheSongRecords.length
+        : rangeCache.nicheSongRecords.length
+      : 0,
+  };
+}
+
 function renderSongRank(group, rangeCache, selection) {
   const sourceOccurrences = rangeCache.occurrences;
   const hideUnknownForView = shouldHideUnknownForCurrentView();
   const sourceVisibleOccurrences = hideUnknownForView ? rangeCache.visibleOccurrences : sourceOccurrences;
-  const allRecords = hideUnknownForView ? rangeCache.visibleSongRecords : rangeCache.allSongRecords;
-  const nicheRecords = hideUnknownForView ? rangeCache.visibleNicheSongRecords : rangeCache.nicheSongRecords;
   const occurrences = selection.occurrences;
   const baseModel = rankingModelForSelection(rangeCache, selection, "song-rank", compareSongRank);
   const filteredModel = filteredRankModel(baseModel.records, "songRank");
   const { records, ranks, countFrequencies } = filteredModel;
+  const summaryTotals = songRecordSummaryTotals(rangeCache, baseModel.records, { hideUnknownForView });
   setCurrentResultSummary(makeQueryDraftFromState(), records.length);
 
   renderSummary(group, [
-    recordVisibilityMetric(records.length, baseModel.records.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
+    recordVisibilityMetric(records.length, baseModel.records.length, summaryTotals.total, summaryTotals.nicheTotal, "首歌曲", "首小众歌曲"),
     occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
     summaryVideoMetric(rangeCache, selection),
   ], summaryNote(selection, filterStatusNote("songRank", filteredModel), rangeCache));
@@ -3502,15 +3523,14 @@ function renderSongIndexView(group, rangeCache, selection) {
   const sourceOccurrences = rangeCache.occurrences;
   const hideUnknownForView = shouldHideUnknownForCurrentView();
   const sourceVisibleOccurrences = hideUnknownForView ? rangeCache.visibleOccurrences : sourceOccurrences;
-  const allRecords = hideUnknownForView ? rangeCache.visibleSongRecords : rangeCache.allSongRecords;
-  const nicheRecords = hideUnknownForView ? rangeCache.visibleNicheSongRecords : rangeCache.nicheSongRecords;
   const occurrences = selection.occurrences;
   const baseRecords = sortedSelectionRecords(rangeCache, selection, "song-az", compareSongAz);
   const records = filterRecordsByMinCount(baseRecords);
+  const summaryTotals = songRecordSummaryTotals(rangeCache, baseRecords, { hideUnknownForView });
   setCurrentResultSummary(makeQueryDraftFromState(), records.length);
 
   renderSummary(group, [
-    recordVisibilityMetric(records.length, baseRecords.length, allRecords.length, nicheRecords.length, "首歌曲", "首小众歌曲"),
+    recordVisibilityMetric(records.length, baseRecords.length, summaryTotals.total, summaryTotals.nicheTotal, "首歌曲", "首小众歌曲"),
     occurrenceVisibilityMetric(occurrences.length, sourceVisibleOccurrences.length, hideUnknownForView ? rangeCache.visibleNicheOccurrences.length : rangeCache.nicheOccurrences.length),
     summaryVideoMetric(rangeCache, selection),
   ], summaryNote(selection, "", rangeCache));
@@ -3665,7 +3685,7 @@ function renderSummary(group, metrics, note = "") {
 }
 
 function compactSummaryMetrics(metrics) {
-  const hasSearchOrFilter = Boolean(state.filter || state.nicheOnly || !state.hideUnknownArtist || state.minCount > 1 || state.trend !== "all");
+  const hasSearchOrFilter = Boolean(state.filter || state.nicheOnly || shouldHideUnknownForCurrentView() || state.minCount > 1 || state.trend !== "all");
   return metrics
     .filter(Boolean)
     .map((part) => {
@@ -4171,22 +4191,15 @@ function buildVideoViewItems(items, options = {}) {
     }
 
     const videoMatched = matchesSearch([item.videoId, item.title, item.channelName, item.keyword], filter);
-    const searchableSongs = hideUnknownArtists ? nicheSongs : sourceSongs;
-    const matchedSongs = searchableSongs.filter((song) => matchesSearch([item.videoId, song.title, song.artist], filter));
+    const matchedSongs = sourceSongs.filter((song) => matchesSearch([item.videoId, song.title, song.artist], filter));
     if (!videoMatched && !matchedSongs.length) continue;
 
     const matchedSongSet = new Set(matchedSongs);
-    const displaySourceSongs =
-      hideUnknownArtists && (videoMatched || matchedSongs.length)
-        ? nicheSongs.filter((song) => !window.RankingUtils.isUnknownArtistName(song?.artist) || videoMatched || matchedSongSet.has(song))
-        : sourceSongs;
-    if (!displaySourceSongs.length) continue;
-    const displaySongs = videoMatched
-      ? displaySourceSongs
-      : [...matchedSongs, ...displaySourceSongs.filter((song) => !matchedSongSet.has(song))];
+    if (!sourceSongs.length) continue;
+    const displaySongs = [...matchedSongs, ...sourceSongs.filter((song) => !matchedSongSet.has(song))];
     result.push({
       ...item,
-      songs: displaySourceSongs,
+      songs: sourceSongs,
       _displaySongs: displaySongs,
       _allSongs: originalSongs,
       _sourceItem: sourceItem,

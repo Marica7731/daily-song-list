@@ -118,31 +118,31 @@ async function waitForRows(page, errors = [], requests = []) {
 async function openFilterSheet(page) {
   await page.locator("#queryTrigger").click();
   await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
-  await page.locator('[data-query-panel-tab="filter"]').waitFor({ state: "visible", timeout: verifyTimeout(15000, 30000) });
-  await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
-  await waitForQueryFilterTab(page);
+  await waitForQueryFilterControls(page);
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
 }
 
 async function openMobileFilterSheet(page) {
   await page.locator("#queryTrigger").click();
   await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
-  await page.locator('[data-query-panel-tab="filter"]').waitFor({ state: "visible", timeout: verifyTimeout(15000, 30000) });
-  await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
-  await waitForQueryFilterTab(page);
+  await waitForQueryFilterControls(page);
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
 }
 
-async function waitForQueryFilterTab(page) {
+async function waitForQueryFilterControls(page) {
   await page.waitForFunction(
     () => {
-      const panel = document.querySelector("#queryDialog .query-panel");
+      const searchInput = document.querySelector("#queryInput");
       const filterPanel = document.querySelector("#queryFilterPanel");
-      const filterTab = document.querySelector('[data-query-panel-tab="filter"]');
+      const filterTabs = document.querySelectorAll("[data-query-panel-tab], .query-tabs");
+      const niche = document.querySelector("#nicheOnlyToggle");
+      const hideUnknown = document.querySelector("#hideUnknownToggle");
       return (
-        Boolean(panel?.classList.contains("is-filter-tab")) &&
         filterPanel?.hidden === false &&
-        filterTab?.getAttribute("aria-selected") === "true"
+        filterTabs.length === 0 &&
+        Boolean(searchInput?.getBoundingClientRect().height) &&
+        Boolean(niche?.getBoundingClientRect().height) &&
+        Boolean(hideUnknown?.getBoundingClientRect().height)
       );
     },
     null,
@@ -153,9 +153,8 @@ async function waitForQueryFilterTab(page) {
 async function openSnapshotFilters(page) {
   if ((await page.locator("#queryDialog:not([hidden])").count()) === 0) {
     await openFilterSheet(page);
-  } else if ((await page.locator("#queryFilterPanel:not([hidden])").count()) === 0) {
-    await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
-    await waitForQueryFilterTab(page);
+  } else {
+    await waitForQueryFilterControls(page);
   }
   await page.locator(".query-history-section").evaluate((section) => {
     section.open = true;
@@ -622,7 +621,6 @@ async function desktopRankVisualGeometry(browser) {
     const url = new URL(baseUrl);
     url.searchParams.set("range", "all");
     url.searchParams.set("pageSize", "100");
-    url.searchParams.set("showUnknown", "1");
     await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
     await page.waitForSelector(".rank-side .trend-badge", { timeout: verifyTimeout(15000, 30000) });
@@ -876,15 +874,24 @@ async function interactionFlow(browser) {
   await page.locator("#queryInput").fill("夜");
   const searchBeforeApply = await page.evaluate(() => window.location.search);
   if (new URLSearchParams(searchBeforeApply).has("q")) throw new Error(`query draft wrote q before apply: ${searchBeforeApply}`);
-  await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
-  await waitForQueryFilterTab(page);
   await setCheckbox(page, "#nicheOnlyToggle", true);
+  await setCheckbox(page, "#hideUnknownToggle", true);
   await page.locator("#applyQueryButton").click();
   await waitForRows(page, errors, requests);
   assertBadgesVisible(await readFilterBadgeState(page), "filtered");
   const activeConditions = await page.locator("#activeQueryStrip .active-query-chip").evaluateAll((items) => items.map((item) => item.textContent || ""));
-  if (!activeConditions.some((text) => text.includes("夜")) || !activeConditions.some((text) => text.includes("只看小众"))) {
-    throw new Error(`query strip did not expose search and niche filter: ${JSON.stringify(activeConditions)}`);
+  if (
+    !activeConditions.some((text) => text.includes("夜")) ||
+    !activeConditions.some((text) => text.includes("只看小众")) ||
+    !activeConditions.some((text) => text.includes("隐藏无歌手")) ||
+    activeConditions.some((text) => text.includes("按视频") || text.includes("历史快照"))
+  ) {
+    throw new Error(`query strip did not expose only restrictive filters: ${JSON.stringify(activeConditions)}`);
+  }
+  const filteredSearch = await page.evaluate(() => window.location.search);
+  const filteredParams = new URLSearchParams(filteredSearch);
+  if (filteredParams.get("hideUnknown") !== "1" || filteredParams.has("showUnknown")) {
+    throw new Error(`hideUnknown query param not serialized correctly: ${filteredSearch}`);
   }
   await openFilterSheet(page);
   const draftSearch = await page.locator("#queryInput").inputValue();
@@ -895,13 +902,14 @@ async function interactionFlow(browser) {
   await openFilterSheet(page);
   await page.locator("#queryInput").fill("");
   await setCheckbox(page, "#nicheOnlyToggle", false);
+  await setCheckbox(page, "#hideUnknownToggle", false);
   await page.locator("#metricFilterGroup .query-segmented label").filter({ hasText: "按收录" }).click();
   await page.locator("#applyQueryButton").click();
   await waitForRows(page, errors, requests);
   assertBadgesHidden(await readFilterBadgeState(page), "reset");
   const searchAfterOrdinaryInteractions = await page.evaluate(() => window.location.search);
   const resetParams = new URLSearchParams(searchAfterOrdinaryInteractions);
-  if (resetParams.has("q") || resetParams.has("outside") || resetParams.has("rankMetric")) {
+  if (resetParams.has("q") || resetParams.has("outside") || resetParams.has("hideUnknown") || resetParams.has("showUnknown") || resetParams.has("rankMetric")) {
     throw new Error(`reset query left active query params: ${searchAfterOrdinaryInteractions}`);
   }
   await page.waitForFunction(
@@ -1108,7 +1116,10 @@ async function mobileFilterSheetFlow(browser) {
       const selects = Array.from(document.querySelectorAll("#queryDialog select")).map(rectFor);
       const footerButtons = Array.from(document.querySelectorAll("#queryDialog .query-panel-footer button")).map(rectFor);
       const sheetBox = sheet ? rectFor(sheet) : null;
+      const search = document.querySelector("#queryInput");
       return {
+        search: search ? rectFor(search) : null,
+        queryTabCount: document.querySelectorAll(".query-tabs, [data-query-panel-tab]").length,
         toggles,
         segmented,
         selects,
@@ -1121,6 +1132,9 @@ async function mobileFilterSheetFlow(browser) {
     });
     if (topGeometry.documentOverflow > 1 || topGeometry.dialogOverflow > 1 || topGeometry.sheetOverflow > 1) {
       throw new Error(`mobile query panel overflow ${JSON.stringify(topGeometry)}`);
+    }
+    if (!topGeometry.search || topGeometry.queryTabCount !== 0) {
+      throw new Error(`mobile query panel must keep search and filters in one panel ${JSON.stringify(topGeometry)}`);
     }
     const [nicheToggle, unknownToggle] = topGeometry.toggles;
     if (!nicheToggle?.label || !unknownToggle?.label || !nicheToggle.input || !unknownToggle.input || !nicheToggle.text || !unknownToggle.text) {
@@ -1205,7 +1219,6 @@ async function mobileRankVisualGeometry(browser) {
     page.on("request", (request) => requests.push(requestPath(request.url())));
     const url = new URL(baseUrl);
     url.searchParams.set("pageSize", "100");
-    url.searchParams.set("showUnknown", "1");
     await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
     await page.waitForFunction(
@@ -1386,7 +1399,7 @@ async function mobileRankVisualGeometry(browser) {
     if (closedGeometry.allTrendTexts.some((item) => !/^(新|名次[↑↓]\d+|收录\+\d+|修正−\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
       throw new Error(`mobile trend label invalid ${JSON.stringify(closedGeometry.allTrendTexts.slice(0, 10))}`);
     }
-    if (/^[+−+\-↑↓]$/u.test(closedGeometry.trendText) || /收录/u.test(closedGeometry.trendText)) {
+    if (/^[+−+\-↑↓]$/u.test(closedGeometry.trendText)) {
       throw new Error(`compact trend should use semantic short labels ${JSON.stringify(closedGeometry)}`);
     }
     if (/^\d+(?:源|点|来源)$/u.test(closedGeometry.buttonText)) throw new Error(`compact source button should use complete Chinese units ${JSON.stringify(closedGeometry)}`);
@@ -1529,7 +1542,6 @@ async function mobileCopyAllLinksFlow(browser) {
     page.on("request", (request) => requests.push(requestPath(request.url())));
     const url = new URL(baseUrl);
     url.searchParams.set("pageSize", "100");
-    url.searchParams.set("showUnknown", "1");
     await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
 
@@ -1749,7 +1761,6 @@ async function mobileVideoCardGeometry(browser) {
     url.searchParams.set("view", "videos");
     url.searchParams.set("layout", "cards");
     url.searchParams.set("pageSize", "100");
-    url.searchParams.set("showUnknown", "1");
     await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
     await page.waitForSelector(".video-card .video-title", { timeout: verifyTimeout(15000, 30000) });
@@ -1880,7 +1891,6 @@ async function gotoFirstSourceCasePage(page, errors, requests, kind) {
   for (let pageNumber = 1; pageNumber <= 20; pageNumber += 1) {
     const targetUrl = new URL(baseUrl);
     targetUrl.searchParams.set("pageSize", "100");
-    targetUrl.searchParams.set("showUnknown", "1");
     targetUrl.searchParams.set("page", String(pageNumber));
     await page.goto(targetUrl.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
@@ -1989,7 +1999,6 @@ async function compactSourceDrawerFlow(browser) {
     page.on("request", (request) => requests.push(requestPath(request.url())));
     const url = new URL(baseUrl);
     url.searchParams.set("pageSize", "100");
-    url.searchParams.set("showUnknown", "1");
     await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
     await page.waitForLoadState("networkidle", { timeout: baseUrl.startsWith("https://") ? 10000 : 3000 }).catch(() => {});
@@ -2397,7 +2406,7 @@ async function monthlyFallbackScenarios(browser) {
             generatedAt: "2026-07-13T15:56:10.026Z",
             capturedAt: "2026-07-13T15:56:10.026Z",
             dataVersion: "0".repeat(64),
-            filterVersion: 3,
+            filterVersion: 4,
             nicheAnnotated: true,
             items: [],
           }),
@@ -2555,7 +2564,7 @@ async function mobileActiveQueryStripGeometry(browser) {
     if (geometry.queryTrigger.afterContent && geometry.queryTrigger.afterContent !== "none") {
       throw new Error(`active query trigger should not expose notification dot ${JSON.stringify(geometry.queryTrigger)}`);
     }
-    if (!/当前有 4 个条件：少女レイ、只看小众、按视频、2次以上/u.test(geometry.queryTrigger.ariaLabel)) {
+    if (!/当前有 3 个筛选条件：少女レイ、只看小众、2次以上/u.test(geometry.queryTrigger.ariaLabel)) {
       throw new Error(`active query trigger aria label missing condition detail ${JSON.stringify(geometry.queryTrigger)}`);
     }
     if (!/清除全部/u.test(geometry.clear.text) || geometry.clear.width < 58 || geometry.clear.scrollWidth > geometry.clear.clientWidth + 1) {
@@ -2566,7 +2575,7 @@ async function mobileActiveQueryStripGeometry(browser) {
     await page.screenshot({ path: screenshotPath, fullPage: false });
 
     const singleConditionUrl = new URL(baseUrl);
-    singleConditionUrl.searchParams.set("showUnknown", "1");
+    singleConditionUrl.searchParams.set("hideUnknown", "1");
     await page.goto(singleConditionUrl.toString(), { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
     const singleConditionGeometry = await page.evaluate(() => {
@@ -2600,7 +2609,7 @@ async function mobileActiveQueryStripGeometry(browser) {
       !singleConditionGeometry.strip ||
       singleConditionGeometry.chips.length !== 1 ||
       singleConditionGeometry.clear ||
-      !/显示无歌手/u.test(singleConditionGeometry.chips[0].text)
+      !/隐藏无歌手/u.test(singleConditionGeometry.chips[0].text)
     ) {
       throw new Error(`single active query should not show clear all ${JSON.stringify(singleConditionGeometry)}`);
     }

@@ -230,7 +230,7 @@
       rankMetric: validRankMetrics.has(rankMetric) ? rankMetric : defaults.rankMetric || "occurrences",
       videoLayout: validVideoLayouts.has(videoLayout) ? videoLayout : defaults.videoLayout || "cards",
       outside: parseBooleanParam(params.get("outside") ?? params.get("libraryOutside"), Boolean(defaults.outside)),
-      showUnknown: parseBooleanParam(params.get("showUnknown"), Boolean(defaults.showUnknown)),
+      ...parseUnknownArtistUrlState(params, defaults),
       q: params.has("q") ? String(params.get("q") || "").slice(0, 200) : defaults.q || "",
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
       trend: validTrendFilters.has(trend) ? trend : defaults.trend || "all",
@@ -272,7 +272,7 @@
     }
     if (view === "videos" && videoLayout !== defaults.videoLayout) params.set("layout", videoLayout);
     if (state.outside) params.set("outside", "1");
-    if (state.showUnknown) params.set("showUnknown", "1");
+    if (unknownArtistsHiddenForUrl(state, defaults)) params.set("hideUnknown", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
     if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
     if (view !== "videos" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
@@ -287,7 +287,7 @@
     return {
       q: "",
       nicheOnly: false,
-      hideUnknownArtist: true,
+      hideUnknownArtist: false,
       rankMetric: "occurrences",
       trend: "all",
       minCount: 1,
@@ -303,7 +303,7 @@
         ...defaultQueryDraft(defaults),
         q: source.filter ?? source.q ?? "",
         nicheOnly: Boolean(source.nicheOnly ?? source.outside),
-        hideUnknownArtist: typeof source.hideUnknownArtist === "boolean" ? source.hideUnknownArtist : !Boolean(source.showUnknown),
+        hideUnknownArtist: unknownArtistsHiddenForDraft(source, defaults),
         rankMetric: source.rankMetric,
         trend: source.trend,
         minCount: source.minCount,
@@ -346,23 +346,55 @@
   function activeQueryConditionItems(draft = {}, options = {}) {
     const normalized = sanitizeQueryDraft(draft, options);
     const view = options.view || "songRank";
-    const latestSnapshotPath = options.latestSnapshotPath || "data/latest.json";
     const items = [];
     if (normalized.q) items.push({ key: "q", label: normalized.q, fullLabel: normalized.q });
     if (normalized.nicheOnly) items.push({ key: "nicheOnly", label: "只看小众" });
-    if (!normalized.hideUnknownArtist) items.push({ key: "hideUnknownArtist", label: "显示无歌手" });
-    if ((view === "songRank" || view === "artistRank") && normalized.rankMetric !== "occurrences") {
-      items.push({ key: "rankMetric", label: "按视频" });
-    }
+    if (normalized.hideUnknownArtist && filterAppliesToView("hideUnknownArtist", view)) items.push({ key: "hideUnknownArtist", label: "隐藏无歌手" });
     if ((view === "songRank" || view === "artistRank") && normalized.trend !== "all") {
       const trendLabels = options.trendLabels || {};
       items.push({ key: "trend", label: trendLabels[normalized.trend] || "趋势" });
     }
     if (view !== "videos" && normalized.minCount > 1) items.push({ key: "minCount", label: `${normalized.minCount}次以上` });
-    if (normalized.snapshotPath && normalized.snapshotPath !== latestSnapshotPath) {
-      items.push({ key: "snapshotPath", label: options.snapshotLabel || "历史快照" });
-    }
     return items;
+  }
+
+  function clearRestrictiveFilter(draft = {}, key, options = {}) {
+    const normalized = sanitizeQueryDraft(draft, options);
+    if (key === "q") return { ...normalized, q: "" };
+    if (key === "nicheOnly") return { ...normalized, nicheOnly: false };
+    if (key === "hideUnknownArtist") return { ...normalized, hideUnknownArtist: false };
+    if (key === "trend") return { ...normalized, trend: "all" };
+    if (key === "minCount") return { ...normalized, minCount: 1 };
+    if (key === "all") return clearAllRestrictiveFilters(normalized, options);
+    return normalized;
+  }
+
+  function clearAllRestrictiveFilters(draft = {}, options = {}) {
+    const normalized = sanitizeQueryDraft(draft, options);
+    return {
+      ...normalized,
+      q: "",
+      nicheOnly: false,
+      hideUnknownArtist: false,
+      trend: "all",
+      minCount: 1,
+    };
+  }
+
+  function filterEffectModel(draft = {}, options = {}) {
+    const items = activeQueryConditionItems(draft, options);
+    return {
+      count: items.length,
+      items,
+      hasRestrictiveFilters: items.length > 0,
+    };
+  }
+
+  function filterAppliesToView(key, view = "songRank") {
+    if (key === "hideUnknownArtist") return view !== "artistRank";
+    if (key === "trend") return view === "songRank" || view === "artistRank";
+    if (key === "minCount") return view !== "videos";
+    return true;
   }
 
   function queryTriggerModel(draft = {}, options = {}) {
@@ -375,8 +407,35 @@
       labels,
       hasActive: count > 0,
       visibleCountText: !compact && count > 0 ? String(count) : "",
-      ariaLabel: count > 0 ? `打开搜索与筛选，当前有 ${count} 个条件：${labels.join("、")}` : "打开搜索与筛选",
+      ariaLabel: count > 0 ? `打开搜索与筛选，当前有 ${count} 个筛选条件：${labels.join("、")}` : "打开搜索与筛选",
     };
+  }
+
+  function parseUnknownArtistUrlState(params, defaults = {}) {
+    const defaultHideUnknown = Boolean(defaults.hideUnknown ?? defaults.hideUnknownArtist ?? false);
+    const hideUnknown = params.has("hideUnknown")
+      ? parseBooleanParam(params.get("hideUnknown"), defaultHideUnknown)
+      : params.has("showUnknown")
+        ? !parseBooleanParam(params.get("showUnknown"), !defaultHideUnknown)
+        : defaultHideUnknown;
+    return {
+      hideUnknown,
+      showUnknown: !hideUnknown,
+    };
+  }
+
+  function unknownArtistsHiddenForUrl(state = {}, defaults = {}) {
+    if (typeof state.hideUnknown === "boolean") return state.hideUnknown;
+    if (typeof state.hideUnknownArtist === "boolean") return state.hideUnknownArtist;
+    if (typeof state.showUnknown === "boolean") return !state.showUnknown;
+    return Boolean(defaults.hideUnknown ?? defaults.hideUnknownArtist ?? false);
+  }
+
+  function unknownArtistsHiddenForDraft(source = {}, defaults = {}) {
+    if (typeof source.hideUnknownArtist === "boolean") return source.hideUnknownArtist;
+    if (typeof source.hideUnknown === "boolean") return source.hideUnknown;
+    if (typeof source.showUnknown === "boolean") return !source.showUnknown;
+    return Boolean(defaults.hideUnknownArtist ?? defaults.hideUnknown ?? false);
   }
 
   function summaryVideoCountModel(options = {}) {
@@ -1268,10 +1327,13 @@
     createTrendLookup,
     activeQueryConditionCount,
     activeQueryConditionItems,
+    clearAllRestrictiveFilters,
+    clearRestrictiveFilter,
     filterItemsBySearch,
     filterItemsByNiche,
     filterOccurrencesBySearch,
     filterOccurrencesByNiche,
+    filterEffectModel,
     formatSetlistTime,
     formatSeconds,
     groupOccurrencesByVideo,

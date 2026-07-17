@@ -185,16 +185,18 @@ test("selection builds only the records needed by the current view", () => {
   assert.ok(prewarmBody.indexOf('state.view === "artistRank"') < prewarmBody.indexOf("selectedSongRecords"));
 });
 
-test("explicit search can match hidden unknown-artist sources and video ids", () => {
+test("explicit search stays intersected with hidden unknown-artist filtering", () => {
   const selectionBody = functionBody("function currentSelection");
-  assert.match(selectionBody, /const searchBaseOccurrences = hideUnknownForView \? selectedOccurrences\(rangeCache, \{ hideUnknownForView: false \}\) : baseOccurrences/u);
+  assert.match(selectionBody, /const occurrences = baseOccurrences\.filter\(\(occurrence\) => occurrence\.searchText\.includes\(filterKey\)\)/u);
+  assert.doesNotMatch(selectionBody, /searchBaseOccurrences/u);
 
   const collectBody = functionBody("function collectSongOccurrences");
   assert.match(collectBody, /\[item\.videoId, item\.title, item\.channelName, item\.keyword, song\.title, song\.artist\]/u);
 
   const videoBody = functionBody("function buildVideoViewItems");
   assert.match(videoBody, /const videoMatched = matchesSearch\(\[item\.videoId, item\.title, item\.channelName, item\.keyword\], filter\)/u);
-  assert.match(videoBody, /const searchableSongs = hideUnknownArtists \? nicheSongs : sourceSongs/u);
+  assert.match(videoBody, /const matchedSongs = sourceSongs\.filter\(\(song\) => matchesSearch/u);
+  assert.doesNotMatch(videoBody, /searchableSongs/u);
 });
 
 test("query overlay opens before suggestions and result preview work", () => {
@@ -204,11 +206,12 @@ test("query overlay opens before suggestions and result preview work", () => {
   const inertIndex = openBody.indexOf("setPageInert(true)");
   const syncIndex = openBody.indexOf("syncQueryControlsFromDraft");
   assert.ok(setActiveIndex >= 0 && openIndex > setActiveIndex, "query overlay should set active overlay before opening");
-  assert.ok(inertIndex > openIndex, "query overlay should mark the page inert immediately after opening");
-  assert.ok(syncIndex > inertIndex, "query controls should sync after the shell is visible");
+  assert.ok(syncIndex > openIndex, "query overlay should light-sync controls after the shell is visible");
+  assert.match(openBody, /syncQueryControlsFromDraft\(state\.queryDraft, \{ light: true, forceSnapshot: false \}\)/u);
+  assert.ok(inertIndex > syncIndex, "query overlay should delay page inert work until after the visible shell");
   const beforeOpen = openBody.slice(0, openIndex);
   assert.doesNotMatch(beforeOpen, /renderSearchSuggestions|queryDraftResultCount|buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
-  assert.match(openBody, /requestAnimationFrame\(\(\) => \{[\s\S]*hydrateQueryOverlayAfterFirstFrame\(revision\)/u);
+  assert.match(openBody, /requestAnimationFrame\(\(\) => \{[\s\S]*setTimeout\(\(\) => \{[\s\S]*setPageInert\(true\);[\s\S]*hydrateQueryOverlayAfterFirstFrame\(revision\)/u);
 
   const bindBody = functionBody("function bindQueryOverlayEvents");
   assert.match(bindBody, /compositionstart/u);
@@ -218,7 +221,7 @@ test("query overlay opens before suggestions and result preview work", () => {
 
   const suggestionBody = functionBody("function renderSearchSuggestions");
   assert.ok(suggestionBody.indexOf("if (!hasQuery) return") < suggestionBody.indexOf("buildSearchSuggestions"));
-  assert.match(appSource, /const QUERY_SUGGESTION_SCAN_LIMIT = 640;/u);
+  assert.match(appSource, /const QUERY_SUGGESTION_SCAN_LIMIT = 360;/u);
   const countBody = functionBody("function queryDraftResultCount");
   assert.doesNotMatch(countBody, /buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
   assert.match(countBody, /queryResultCountCache/u);

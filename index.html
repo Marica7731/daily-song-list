@@ -20,7 +20,7 @@
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles.css?v=h3eda7265276b" />
+    <link rel="stylesheet" href="assets/styles.css?v=h6740f105f4b3" />
   </head>
   <body>
     <main class="layout">
@@ -152,12 +152,8 @@
             </svg>
           </button>
         </label>
-        <div class="query-tabs" role="tablist" aria-label="搜索与筛选面板">
-          <button id="querySearchTab" class="query-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="querySearchPanel" data-query-panel-tab="search">搜索</button>
-          <button id="queryFilterTab" class="query-tab" type="button" role="tab" aria-selected="false" aria-controls="queryFilterPanel" data-query-panel-tab="filter" tabindex="-1">筛选</button>
-        </div>
         <div class="query-panel-body">
-          <div class="query-tab-panel" id="querySearchPanel" role="tabpanel" aria-labelledby="querySearchTab">
+          <div class="query-tab-panel" id="querySearchPanel">
             <section class="query-section recent-query-section" id="recentSearchSection">
               <div class="query-section-heading">
                 <h3>最近搜索</h3>
@@ -171,7 +167,7 @@
             </section>
           </div>
 
-          <div class="query-tab-panel" id="queryFilterPanel" role="tabpanel" aria-labelledby="queryFilterTab" hidden>
+          <div class="query-tab-panel" id="queryFilterPanel">
             <section class="query-section">
               <h3>内容范围</h3>
               <div class="query-toggle-grid">
@@ -180,10 +176,10 @@
                   <span>只看小众</span>
                   <small id="nicheHelp">未匹配到已知曲库的歌曲</small>
                 </label>
-                <label class="query-toggle" title="隐藏没有明确歌手的收录；取消后会在链接中写入 showUnknown=1。">
-                  <input id="hideUnknownToggle" type="checkbox" aria-describedby="hideUnknownHelp" checked />
+                <label class="query-toggle" title="开启后排除空歌手、未記載、待补歌手等收录。">
+                  <input id="hideUnknownToggle" type="checkbox" aria-describedby="hideUnknownHelp" />
                   <span>隐藏无歌手</span>
-                  <small id="hideUnknownHelp">隐藏空歌手、未記載、待补歌手等</small>
+                  <small id="hideUnknownHelp">开启后排除空歌手、未記載、待补歌手等收录</small>
                 </label>
               </div>
             </section>
@@ -255,9 +251,9 @@
     </button>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="assets/blocked-vtuber-meta.js?v=h3eda7265276b" defer></script>
-    <script src="assets/frontend-utils.js?v=h3eda7265276b" defer></script>
-    <script src="assets/ranking-utils.js?v=h3eda7265276b" defer></script>
-    <script src="assets/app.js?v=h3eda7265276b" defer></script>
+    <script src="assets/blocked-vtuber-meta.js?v=h6740f105f4b3" defer></script>
+    <script src="assets/frontend-utils.js?v=h6740f105f4b3" defer></script>
+    <script src="assets/ranking-utils.js?v=h6740f105f4b3" defer></script>
+    <script src="assets/app.js?v=h6740f105f4b3" defer></script>
   </body>
 </html>

@@ -27,6 +27,8 @@ test("UI proof expected list covers source thumbnail states", () => {
     "mobile-source-thumb-fallback.png",
     "mobile-source-long-channel.png",
     "mobile-query-filter.png",
+    "mobile-active-query-strip.png",
+    "desktop-query-panel.png",
     "mobile-video-expanded-bottom.png",
     "desktop-artist-rank.png",
     "desktop-song-index.png",
@@ -70,7 +72,14 @@ test("UI proof contracts pin new fixture scenes and proof docs", () => {
   assert.equal(screenshotContracts["mobile-source-new-to-old.png"].scene, "fixture-newToOld");
   assert.equal(screenshotContracts["desktop-partition-pagination.png"].scene, "fixture-partition-pagination");
   assert.equal(screenshotContracts["desktop-search-snapshot-index.png"].scene, "fixture-search-snapshot-index");
-  assert.equal(screenshotContracts["mobile-query-filter.png"].viewport.width, 390);
+  assert.equal(screenshotContracts["desktop-query-panel.png"].scene, "desktop-unified-query-panel");
+  assert.equal(screenshotContracts["mobile-query-filter.png"].scene, "mobile-unified-filter-panel");
+  assert.deepEqual(screenshotContracts["mobile-active-query-strip.png"].params, {
+    q: "少女レイ",
+    hideUnknown: 1,
+    metric: "videos",
+    minCount: 2,
+  });
   assert.equal(screenshotContracts["mobile-video-expanded-bottom.png"].scene, "mobile-video-expanded-bottom");
 
   const inputPaths = proofInputEntries().map((entry) => entry.path);
