@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T08:38:44.871Z",
+  "generatedAt": "2026-07-17T14:14:54.844Z",
   "reviewId": "review:hrYT1a0GmDw:73a265ac7b0bc7f12a6d",
   "video": {
     "videoId": "hrYT1a0GmDw",
@@ -226,11 +226,16 @@
       "sourceId": "selected:hrYT1a0GmDw:73a265ac7b0bc7f1",
       "sourceHash": "73a265ac7b0bc7f12a6d7ab0db33ff3ced53c13219cc5ddacd42afda333da5e1",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "・魔法戦隊マジレンジャー"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
+        "known_song",
         "known_artist",
         "structured_setlist"
       ]

@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T08:42:30.513Z",
+  "generatedAt": "2026-07-17T14:18:54.857Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-17T06:47:43.761Z",
+  "latestGeneratedAt": "2026-07-17T12:46:37.972Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 125,
-    "uniqueVideos": 38,
-    "uniqueSources": 54,
-    "confirmedNoiseCount": 125,
+    "totalCandidates": 139,
+    "uniqueVideos": 43,
+    "uniqueSources": 60,
+    "confirmedNoiseCount": 139,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 125,
+      "confirmed_noise": 139,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -24,41 +24,6 @@
     }
   },
   "items": [
-    {
-      "title": "7",
-      "artist": "17(金)12:00【 #ウミガリ ⑥ 】 安心してください。ストーリーを進め魔ス！※酔い止め摂取済み 【 レヴィ・アタン 】 #vtuber",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 720,
-      "time": "0:12:00",
-      "raw": "7/17(金)12:00【 #ウミガリ ⑥ 】 安心してください。ストーリーを進め魔ス！※酔い止め摂取済み 【 レヴィ・アタン 】 #vtuber",
-      "rawHash": "4b7532cd9cd9b833762ce0d6e42722adaca38efa51f8f1b1ff66abdacd065a56",
-      "videoId": "3SRJr2g_iaQ",
-      "videoTitle": "【 歌枠 】 同接350人耐久歌枠！横画面でリベンジ！ 【葵井詩雫】 Vsinger | karaoke | animesong",
-      "channelName": "aoi sizuku ch. 葵井詩雫",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=3SRJr2g_iaQ",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=3SRJr2g_iaQ&t=720s",
-      "sourceId": "description:3SRJr2g_iaQ:4b7532cd9cd9b833",
-      "sourceHash": "4b7532cd9cd9b833762ce0d6e42722adaca38efa51f8f1b1ff66abdacd065a56",
-      "sourceOrigin": "review:3SRJr2g_iaQ-4b7532cd9cd9b833762c.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:3SRJr2g_iaQ:4b7532cd9cd9b833762c",
-      "sourcePath": "data/review/sources/3SRJr2g_iaQ-4b7532cd9cd9b833762c.json",
-      "reviewLocator": "data/review/sources/3SRJr2g_iaQ-4b7532cd9cd9b833762c.json#4b7532cd9cd9b833762ce0d6e42722adaca38efa51f8f1b1ff66abdacd065a56"
-    },
     {
       "title": "8",
       "artist": "29 おりづるVTuberフェス(広島県) 出演決定",
@@ -606,6 +571,310 @@
       "reviewLocator": "data/review/sources/history-1rCEayGJi54-0c2f16f9fd5431eb7a53.json#d666ea7b1f54b3f61ef96c1a74453c89b183202a6616c1b209c2a7c84e5da5d0"
     },
     {
+      "title": "ハロウタノン",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 190,
+      "time": "0:03:10",
+      "raw": "00:03:10 ハロウタノン",
+      "rawHash": "7d5603bc47c58dc78987421c3887cb727874b6e8b5d8535cdfb52568f4a0ea45",
+      "videoId": "ZTllfu3tcCw",
+      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=190s",
+      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
+      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
+      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
+      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#7d5603bc47c58dc78987421c3887cb727874b6e8b5d8535cdfb52568f4a0ea45"
+    },
+    {
+      "title": "90年代アニソンにした理由",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 525,
+      "time": "0:08:45",
+      "raw": "00:08:45 90年代アニソンにした理由",
+      "rawHash": "8f40a192ee36d163338d46774e21083bb874d3cdb4208c6131ce6073635e1ac1",
+      "videoId": "ZTllfu3tcCw",
+      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=525s",
+      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
+      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
+      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
+      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#8f40a192ee36d163338d46774e21083bb874d3cdb4208c6131ce6073635e1ac1"
+    },
+    {
+      "title": "~",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 685,
+      "time": "0:11:25",
+      "raw": "00:11:25~",
+      "rawHash": "ae445642217380149fab36554a6b57c392415e7adf4cdb9c5eaefd8408dfed77",
+      "videoId": "ZTllfu3tcCw",
+      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=685s",
+      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
+      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
+      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "bad_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
+      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#ae445642217380149fab36554a6b57c392415e7adf4cdb9c5eaefd8408dfed77"
+    },
+    {
+      "title": "復習:光と影を抱きしめたまま",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6850,
+      "time": "1:54:10",
+      "raw": "01:54:10 01:23:09 復習:光と影を抱きしめたまま",
+      "rawHash": "1b47f15de61fd1910cca661ed309027a1b4cf586a60ea8f47a56bff8a3175687",
+      "videoId": "ZTllfu3tcCw",
+      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=6850s",
+      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
+      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
+      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
+      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#1b47f15de61fd1910cca661ed309027a1b4cf586a60ea8f47a56bff8a3175687"
+    },
+    {
+      "title": "イベント情報",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7096,
+      "time": "1:58:16",
+      "raw": "01:58:16 イベント情報",
+      "rawHash": "b3664566c950f671a45dfa376a3edc73bd29719924358418cdd4fbe5a952cf19",
+      "videoId": "ZTllfu3tcCw",
+      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=7096s",
+      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
+      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
+      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
+      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#b3664566c950f671a45dfa376a3edc73bd29719924358418cdd4fbe5a952cf19"
+    },
+    {
+      "title": "桃の冷静パスタの話",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 7261,
+      "time": "2:01:01",
+      "raw": "02:01:01 桃の冷静パスタの話",
+      "rawHash": "358e9b51c45ad7cb173669aaf19b3dbe7144d4a67ca724275cefe821c467345b",
+      "videoId": "ZTllfu3tcCw",
+      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=7261s",
+      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
+      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
+      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
+      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#358e9b51c45ad7cb173669aaf19b3dbe7144d4a67ca724275cefe821c467345b"
+    },
+    {
+      "title": "スパチャ読み",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8637,
+      "time": "2:23:57",
+      "raw": "02:23:57 スパチャ読み",
+      "rawHash": "33022201dd3a50ab7e6d3d549d16573df2922d472436a10df5ef43ad63ee693e",
+      "videoId": "ZTllfu3tcCw",
+      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=8637s",
+      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
+      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
+      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
+      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#33022201dd3a50ab7e6d3d549d16573df2922d472436a10df5ef43ad63ee693e"
+    },
+    {
+      "title": "おつウタノン",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8981,
+      "time": "2:29:41",
+      "raw": "02:29:41 おつウタノン",
+      "rawHash": "fb5749a1e9cbc568de8d0faa59efad0c0411dbd514481ca0d0adec41a6408281",
+      "videoId": "ZTllfu3tcCw",
+      "videoTitle": "【歌枠】90年代アニソンで激アツな華金にする🌸 #ウタノライブ【KARAOKE/Vsinger】",
+      "channelName": "UTANO ch. 白玖ウタノ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTllfu3tcCw&t=8981s",
+      "sourceId": "UgwxJAOlRNGdcntonzx4AaABAg",
+      "sourceHash": "9a3f07095481a3a1f14ed145376b6cf381f2752e16862e12fc4e74eae2af8bfc",
+      "sourceOrigin": "review:ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZTllfu3tcCw:9a3f07095481a3a1f14e",
+      "sourcePath": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json",
+      "reviewLocator": "data/review/sources/ZTllfu3tcCw-9a3f07095481a3a1f14e.json#fb5749a1e9cbc568de8d0faa59efad0c0411dbd514481ca0d0adec41a6408281"
+    },
+    {
       "title": "おつウタノン",
       "artist": "未記載",
       "isNiche": true,
@@ -890,6 +1159,76 @@
       "reviewLocator": "data/review/sources/history-8KDs7OP6_KM-92d430c2418abbe57f06.json#aab2d30d95b923da7db1d0dcbcad00218fa4f3c17037ba96d8e39b54bcfbf6b7"
     },
     {
+      "title": "開始予定いっけな～い！遅刻遅刻～💦ゴンッ【VIER/NynChord Production】",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1110,
+      "time": "0:18:30",
+      "raw": "【#歌枠/#VIERtime4】18時～18:30開始予定いっけな～い！遅刻遅刻～💦ゴンッ【VIER/NynChord Production】",
+      "rawHash": "5e89e23aa9c9bf45e4a71157e9c38cd0f7d7120e893ed9445d097b463121a9b7",
+      "videoId": "PJinUIuvOmc",
+      "videoTitle": "【#歌枠/#VIERtime4】18時～18:30開始予定いっけな～い！遅刻遅刻～💦ゴンッ【VIER/NynChord Production】",
+      "channelName": "VIER",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=PJinUIuvOmc",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJinUIuvOmc&t=1110s",
+      "sourceId": "description:PJinUIuvOmc:5e89e23aa9c9bf45",
+      "sourceHash": "5e89e23aa9c9bf45e4a71157e9c38cd0f7d7120e893ed9445d097b463121a9b7",
+      "sourceOrigin": "review:PJinUIuvOmc-5e89e23aa9c9bf45e4a7.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:PJinUIuvOmc:5e89e23aa9c9bf45e4a7",
+      "sourcePath": "data/review/sources/PJinUIuvOmc-5e89e23aa9c9bf45e4a7.json",
+      "reviewLocator": "data/review/sources/PJinUIuvOmc-5e89e23aa9c9bf45e4a7.json#5e89e23aa9c9bf45e4a71157e9c38cd0f7d7120e893ed9445d097b463121a9b7"
+    },
+    {
+      "title": "骸骨マイクシルバーからゴールドにチェンジ🎙✨",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1679,
+      "time": "0:27:59",
+      "raw": "27:59 骸骨マイクシルバーからゴールドにチェンジ🎙️✨",
+      "rawHash": "aa4ba7c647fa29bc51f6fa6fd61c88aadcbc9bd4a8e8c7d487166445efb20064",
+      "videoId": "PJinUIuvOmc",
+      "videoTitle": "【#歌枠/#VIERtime4】18時～18:30開始予定いっけな～い！遅刻遅刻～💦ゴンッ【VIER/NynChord Production】",
+      "channelName": "VIER",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=PJinUIuvOmc",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJinUIuvOmc&t=1679s",
+      "sourceId": "UgzwHreFvTkp62zo0cp4AaABAg",
+      "sourceHash": "1aa766dd9340bf4e24ec3e0540fa39c477f6403e62bdbb73dc2ef547aba78ed4",
+      "sourceOrigin": "review:PJinUIuvOmc-1aa766dd9340bf4e24ec.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:PJinUIuvOmc:1aa766dd9340bf4e24ec",
+      "sourcePath": "data/review/sources/PJinUIuvOmc-1aa766dd9340bf4e24ec.json",
+      "reviewLocator": "data/review/sources/PJinUIuvOmc-1aa766dd9340bf4e24ec.json#aa4ba7c647fa29bc51f6fa6fd61c88aadcbc9bd4a8e8c7d487166445efb20064"
+    },
+    {
       "title": "企画説明",
       "artist": "未記載",
       "isNiche": true,
@@ -981,6 +1320,41 @@
       "reviewId": "review:LIvCuQkMnVE:c545a9f2939f62a3983a",
       "sourcePath": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json",
       "reviewLocator": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json#49ace4d8ff76b11cacad06ea1ae3f39f9c749d81c8d547fba4a0525048970f51"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "01al5AjDB9E",
+      "videoTitle": "ゆる歌枠",
+      "channelName": "みゆた",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=01al5AjDB9E",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=01al5AjDB9E&t=240s",
+      "sourceId": "description:01al5AjDB9E:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:01al5AjDB9E-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:01al5AjDB9E:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/01al5AjDB9E-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/01al5AjDB9E-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "曲終わり",
@@ -3854,6 +4228,46 @@
       "reviewLocator": "data/review/sources/history-9hgQ0Qbv0iM-bde69793cef445c039d7.json#9d4f9fca8470dad9bb6c857e2fc1a04bd38153a2e1d4bbbc4f24a9a6d9607646"
     },
     {
+      "title": "POP STAR",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 241,
+      "time": "0:04:01",
+      "raw": "4:01 POP STAR",
+      "rawHash": "f6ce4188818a483c0a5151693b3a913a801bfa8757b1b0090aa893361ee9ac92",
+      "videoId": "UC7h8w49R0k",
+      "videoTitle": "【定期 #歌枠】#40 ～星の歌 編～【解 #VTuber】",
+      "channelName": "解 -Kai-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=UC7h8w49R0k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=UC7h8w49R0k&t=241s",
+      "sourceId": "Ugxn5-kXNQZZwRFC5bp4AaABAg",
+      "sourceHash": "667e4366140384f8e57b1bd2cfeb9d6cc23440e21cf834a3e583b28199a9c7c0",
+      "sourceOrigin": "review:UC7h8w49R0k-667e4366140384f8e57b.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:UC7h8w49R0k:667e4366140384f8e57b",
+      "sourcePath": "data/review/sources/UC7h8w49R0k-667e4366140384f8e57b.json",
+      "reviewLocator": "data/review/sources/UC7h8w49R0k-667e4366140384f8e57b.json#f6ce4188818a483c0a5151693b3a913a801bfa8757b1b0090aa893361ee9ac92"
+    },
+    {
       "title": "1を手で表現した",
       "artist": "未記載",
       "isNiche": true,
@@ -5028,6 +5442,76 @@
       "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
     },
     {
+      "title": "セルフBGMかわいい",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2432,
+      "time": "0:40:32",
+      "raw": "40:32 セルフBGMかわいい",
+      "rawHash": "5f914192267e3c0a4b0484cf3e82c32b12365698b11d3a82457f4284baea596a",
+      "videoId": "4HqfLRm4EHw",
+      "videoTitle": "【 歌枠 】リクエスト歌枠🎤✨【にじさんじ / 珠乃井ナナ】",
+      "channelName": "珠乃井ナナ / Tamanoi Nana【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw&t=2432s",
+      "sourceId": "Ugw1UwgjoVSY9SI2ljR4AaABAg",
+      "sourceHash": "ac827648a82f676ab03ec9a605ace50ca187e8ba6bef69bedbf97ba49c4b4e39",
+      "sourceOrigin": "review:4HqfLRm4EHw-ac827648a82f676ab03e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4HqfLRm4EHw:ac827648a82f676ab03e",
+      "sourcePath": "data/review/sources/4HqfLRm4EHw-ac827648a82f676ab03e.json",
+      "reviewLocator": "data/review/sources/4HqfLRm4EHw-ac827648a82f676ab03e.json#5f914192267e3c0a4b0484cf3e82c32b12365698b11d3a82457f4284baea596a"
+    },
+    {
+      "title": "島唄　ナナたまの民謡ってやっぱ最高でえ…",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2450,
+      "time": "0:40:50",
+      "raw": "40:50 島唄 ナナたまの民謡ってやっぱ最高でえ…",
+      "rawHash": "ab67ee5b51811d748566d7270eab3b0839549478d79ed8557bf17a6d7038ff4d",
+      "videoId": "4HqfLRm4EHw",
+      "videoTitle": "【 歌枠 】リクエスト歌枠🎤✨【にじさんじ / 珠乃井ナナ】",
+      "channelName": "珠乃井ナナ / Tamanoi Nana【にじさんじ】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw&t=2450s",
+      "sourceId": "Ugw1UwgjoVSY9SI2ljR4AaABAg",
+      "sourceHash": "ac827648a82f676ab03ec9a605ace50ca187e8ba6bef69bedbf97ba49c4b4e39",
+      "sourceOrigin": "review:4HqfLRm4EHw-ac827648a82f676ab03e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4HqfLRm4EHw:ac827648a82f676ab03e",
+      "sourcePath": "data/review/sources/4HqfLRm4EHw-ac827648a82f676ab03e.json",
+      "reviewLocator": "data/review/sources/4HqfLRm4EHw-ac827648a82f676ab03e.json#ab67ee5b51811d748566d7270eab3b0839549478d79ed8557bf17a6d7038ff4d"
+    },
+    {
       "title": "閉会式",
       "artist": "未記載",
       "isNiche": true,
@@ -6116,6 +6600,41 @@
       "reviewId": "review:C0ABKi9DGTs:ee77fcec7c9effc55c25",
       "sourcePath": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json",
       "reviewLocator": "data/review/sources/history-C0ABKi9DGTs-ee77fcec7c9effc55c25.json#fd1d537691d88d44f1c43c1486bdfa13e1e4768f0badcccfd7da12f837928ea2"
+    },
+    {
+      "title": "10",
+      "artist": "07/2026",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 240,
+      "time": "0:04:00",
+      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
+      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "videoId": "gBTD3m2qzU0",
+      "videoTitle": "【歌枠】昭和・平成アニソン縛り!!【カラオケ】",
+      "channelName": "壽ラオと⚡️KOTOBUKI Laoto",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=gBTD3m2qzU0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=gBTD3m2qzU0&t=240s",
+      "sourceId": "description:gBTD3m2qzU0:b9e788e059bd3238",
+      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
+      "sourceOrigin": "review:gBTD3m2qzU0-b9e788e059bd3238a48e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "source_level_likely_non_song_entry"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:gBTD3m2qzU0:b9e788e059bd3238a48e",
+      "sourcePath": "data/review/sources/gBTD3m2qzU0-b9e788e059bd3238a48e.json",
+      "reviewLocator": "data/review/sources/gBTD3m2qzU0-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
     },
     {
       "title": "スタート",

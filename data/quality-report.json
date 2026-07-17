@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T08:38:44.871Z",
+  "generatedAt": "2026-07-17T14:14:54.844Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 23056,
-  "unknownArtistCount": 3342,
-  "nicheUnknownArtistCount": 1785,
-  "highRiskEntryCount": 630,
-  "highRiskSourceCount": 23,
+  "totalSongs": 23480,
+  "unknownArtistCount": 3391,
+  "nicheUnknownArtistCount": 1766,
+  "highRiskEntryCount": 624,
+  "highRiskSourceCount": 22,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 2,
+  "ruleDroppedEntryCount": 11,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 1,
-  "parserCorruptionCount": 43,
+  "confirmedNoiseCount": 15,
+  "parserCorruptionCount": 41,
   "likelyNoiseCount": 0,
-  "needsReviewCount": 1781,
-  "likelySongCount": 13417,
+  "needsReviewCount": 1754,
+  "likelySongCount": 13137,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -86,6 +86,16 @@
       }
     },
     {
+      "value": "夜明けと蛍",
+      "count": 10,
+      "classifications": {
+        "likely_song": 10
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 10
+      }
+    },
+    {
       "value": "ray",
       "count": 9,
       "classifications": {
@@ -97,16 +107,6 @@
     },
     {
       "value": "花に亡霊",
-      "count": 9,
-      "classifications": {
-        "likely_song": 9
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 9
-      }
-    },
-    {
-      "value": "夜明けと蛍",
       "count": 9,
       "classifications": {
         "likely_song": 9
@@ -188,6 +188,16 @@
       }
     },
     {
+      "value": "君の知らない物語",
+      "count": 7,
+      "classifications": {
+        "likely_song": 7
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 7
+      }
+    },
+    {
       "value": "Bling-Bang-Bang-Born",
       "count": 6,
       "classifications": {
@@ -216,26 +226,16 @@
       "riskReasons": {
         "known_song_unknown_artist": 6
       }
-    },
-    {
-      "value": "ビビデバ",
-      "count": 6,
-      "classifications": {
-        "likely_song": 6
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 6
-      }
     }
   ],
   "topRiskChannels": [
     {
-      "value": "汐音ベリーちゃん Berry Ch",
+      "value": "UTANO ch. 白玖ウタノ",
       "count": 11
     },
     {
-      "value": "UTANO ch. 白玖ウタノ",
-      "count": 10
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 9
     },
     {
       "value": "音魂ヒビクHibiku Otodama",
@@ -243,10 +243,6 @@
     },
     {
       "value": "Norn Ch. 氷々樹ノルン",
-      "count": 6
-    },
-    {
-      "value": "ただのかえる【TADANO KAERU】",
       "count": 6
     },
     {
@@ -270,6 +266,10 @@
       "count": 5
     },
     {
+      "value": "ただのかえる【TADANO KAERU】",
+      "count": 5
+    },
+    {
       "value": "ひでチャンネル",
       "count": 5
     },
@@ -286,19 +286,15 @@
       "count": 5
     },
     {
-      "value": "菜鳥ひなた / Hinata Natori",
-      "count": 5
-    },
-    {
       "value": "-sumica-澄花",
       "count": 4
     },
     {
-      "value": "aoi sizuku ch. 葵井詩雫",
+      "value": "NEPHLA",
       "count": 4
     },
     {
-      "value": "NEPHLA",
+      "value": "Roboco Ch. - ロボ子",
       "count": 4
     },
     {
@@ -307,6 +303,10 @@
     },
     {
       "value": "ながやまめめ",
+      "count": 4
+    },
+    {
+      "value": "にっこりわたち^^*",
       "count": 4
     }
   ],
@@ -388,8 +388,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "source_multiple_niche_short_titles",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
       ]
     },
     {
@@ -532,20 +532,6 @@
       ]
     },
     {
-      "videoId": "hWv55PnjmEo",
-      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "riskScore": 78,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
       "videoId": "ZTi1cpRaW8U",
       "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
       "channelName": "闇咲とうか",
@@ -585,10 +571,32 @@
         "source_multiple_niche_short_titles",
         "short_unknown_title"
       ]
+    },
+    {
+      "videoId": "zAqcZDpOM1Q",
+      "title": "【雑＆歌枠】どでかいお知らせあります！！！！！！ハニカムステーション！-204【HACHI 】",
+      "channelName": "HACHI",
+      "riskScore": 76,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles"
+      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-17T14:14:54.844Z",
+      "totalSongs": 23480,
+      "unknownArtistCount": 3391,
+      "nicheUnknownArtistCount": 1766,
+      "highRiskEntryCount": 624,
+      "highRiskSourceCount": 22
+    },
     {
       "generatedAt": "2026-07-17T08:38:44.871Z",
       "totalSongs": 23056,
@@ -740,14 +748,6 @@
       "nicheUnknownArtistCount": 1532,
       "highRiskEntryCount": 538,
       "highRiskSourceCount": 19
-    },
-    {
-      "generatedAt": "2026-07-14T22:27:17.456Z",
-      "totalSongs": 16907,
-      "unknownArtistCount": 2944,
-      "nicheUnknownArtistCount": 1547,
-      "highRiskEntryCount": 544,
-      "highRiskSourceCount": 20
     }
   ]
 }

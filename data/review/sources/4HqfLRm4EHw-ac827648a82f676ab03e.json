@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-17T14:14:54.844Z",
+  "reviewId": "review:4HqfLRm4EHw:ac827648a82f676ab03e",
+  "video": {
+    "videoId": "4HqfLRm4EHw",
+    "title": "【 歌枠 】リクエスト歌枠🎤✨【にじさんじ / 珠乃井ナナ】",
+    "channelName": "珠乃井ナナ / Tamanoi Nana【にじさんじ】",
+    "youtubeUrl": "https://www.youtube.com/watch?v=4HqfLRm4EHw"
+  },
+  "source": {
+    "sourceId": "Ugw1UwgjoVSY9SI2ljR4AaABAg",
+    "sourceHash": "ac827648a82f676ab03ec9a605ace50ca187e8ba6bef69bedbf97ba49c4b4e39",
+    "sourceType": "comment",
+    "selected": false,
+    "sourceTextAvailable": true,
+    "sourceText": "リクエスト歌枠おつナナ～！！\n平成の名曲たちで彩る夏を感じる最高の歌枠だったわさ\n40:32　セルフBGMかわいい\n40:50　島唄　ナナたまの民謡ってやっぱ最高でえ…\nあと歌手の人とかが歌ってる時の音程取ったりロングトーンで表現取ったりするときの腕の動きが好きだからにじ3Dでナナたまの民謡系の歌歌ってる時の腕の動きがとても好き",
+    "snapshotId": ""
+  },
+  "risk": {
+    "riskScore": 0,
+    "riskLevel": "low",
+    "riskReasons": []
+  },
+  "entries": [
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 2432,
+      "time": "0:40:32",
+      "title": "セルフBGMかわいい",
+      "artist": "未記載",
+      "raw": "40:32 セルフBGMかわいい",
+      "rawHash": "5f914192267e3c0a4b0484cf3e82c32b12365698b11d3a82457f4284baea596a",
+      "sourceId": "Ugw1UwgjoVSY9SI2ljR4AaABAg",
+      "sourceHash": "ac827648a82f676ab03ec9a605ace50ca187e8ba6bef69bedbf97ba49c4b4e39",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    },
+    {
+      "status": "rejected",
+      "reason": "title_only_non_song_candidate",
+      "seconds": 2450,
+      "time": "0:40:50",
+      "title": "島唄　ナナたまの民謡ってやっぱ最高でえ…",
+      "artist": "未記載",
+      "raw": "40:50 島唄 ナナたまの民謡ってやっぱ最高でえ…",
+      "rawHash": "ab67ee5b51811d748566d7270eab3b0839549478d79ed8557bf17a6d7038ff4d",
+      "sourceId": "Ugw1UwgjoVSY9SI2ljR4AaABAg",
+      "sourceHash": "ac827648a82f676ab03ec9a605ace50ca187e8ba6bef69bedbf97ba49c4b4e39",
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ]
+    }
+  ]
+}
