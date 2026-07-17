@@ -7,10 +7,12 @@ const baseUrl = normalizeBaseUrl(options.baseUrl || process.env.DAILY_SONG_PUBLI
 const expectedMeta = loadExpectedMeta(options.expectedMetaPath || process.env.DAILY_SONG_EXPECTED_META || "");
 const errors = [];
 
-main().catch((error) => {
-  console.error(error.stack || error.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.stack || error.message);
+    process.exit(1);
+  });
+}
 
 async function main() {
   const checkedAt = new Date().toISOString();
@@ -21,6 +23,9 @@ async function main() {
   if (expectedMeta) {
     assert(meta.dataVersion === expectedMeta.dataVersion, `published dataVersion ${meta.dataVersion} must match expected ${expectedMeta.dataVersion}`);
     assert(meta.capturedAt === expectedMeta.capturedAt, `published capturedAt ${meta.capturedAt} must match expected ${expectedMeta.capturedAt}`);
+    if (expectedMeta.dataCapturedAt) {
+      assert(meta.dataCapturedAt === expectedMeta.dataCapturedAt, `published dataCapturedAt ${meta.dataCapturedAt} must match expected ${expectedMeta.dataCapturedAt}`);
+    }
   }
 
   const status = await fetchJson("data/status.json").catch((error) => {
@@ -220,3 +225,29 @@ function loadExpectedMeta(filePath) {
   if (!filePath) return null;
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
+
+async function waitForPublishedRuntime(validate, { attempts = 5, delayMs = 45_000, sleep = defaultSleep } = {}) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await validate(attempt);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) await sleep(delayMs);
+    }
+  }
+  throw lastError;
+}
+
+function defaultSleep(delayMs) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+}
+
+module.exports = {
+  isSha256,
+  parseArgs,
+  sha256Text,
+  waitForPublishedRuntime,
+};
