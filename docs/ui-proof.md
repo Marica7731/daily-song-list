@@ -41,6 +41,10 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Desktop middle pagination](assets/screenshots/desktop-pagination-middle.png) | ![Desktop long timestamp source](assets/screenshots/desktop-source-long-time.png) | ![Desktop search and snapshot index fixture](assets/screenshots/desktop-search-snapshot-index.png) |
 
+| Source drawer partial loading |
+| --- |
+| ![Desktop source drawer partial loading](assets/screenshots/desktop-source-view-all-partial.png) |
+
 ## Tablet
 
 | Inline source thumbnails |
@@ -91,6 +95,10 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- |
 | ![Mobile active controls](assets/screenshots/mobile-controls-active.png) | ![Mobile active bottom navigation](assets/screenshots/mobile-bottom-nav-active.png) |
 
+| Page request loading | Page request error | Filter request loading |
+| --- | --- | --- |
+| ![Mobile page request loading](assets/screenshots/mobile-page-request-loading.png) | ![Mobile page request error](assets/screenshots/mobile-page-request-error.png) | ![Mobile filter request loading](assets/screenshots/mobile-filter-request-loading.png) |
+
 ## Source States
 
 | 0 sources | 1 source | 2 sources |
@@ -112,3 +120,11 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | Long timestamp | Extra timestamps |
 | --- | --- |
 | ![Mobile long timestamp source](assets/screenshots/mobile-source-long-time.png) | ![Mobile extra timestamps](assets/screenshots/mobile-source-extra-times.png) |
+
+| Drawer opening | Drawer partial | Drawer complete |
+| --- | --- | --- |
+| ![Mobile source drawer opening](assets/screenshots/mobile-source-view-all-opening.png) | ![Mobile source drawer partial](assets/screenshots/mobile-source-view-all-partial.png) | ![Mobile source drawer complete](assets/screenshots/mobile-source-view-all-complete.png) |
+
+| Drawer error | Copy setlist loading |
+| --- | --- |
+| ![Mobile source drawer error](assets/screenshots/mobile-source-view-all-error.png) | ![Mobile source setlist copy loading](assets/screenshots/mobile-source-setlist-loading.png) |

@@ -20,6 +20,7 @@ const expectedScreenshots = [
   "desktop-request-pagination.png",
   "desktop-update-failure-status.png",
   "desktop-source-long-time.png",
+  "desktop-source-view-all-partial.png",
   "tablet-source-inline-3.png",
   "mobile-song-rank.png",
   "mobile-summary-baseline.png",
@@ -51,6 +52,11 @@ const expectedScreenshots = [
   "mobile-page-request-loading.png",
   "mobile-filter-request-loading.png",
   "mobile-page-request-error.png",
+  "mobile-source-view-all-opening.png",
+  "mobile-source-view-all-partial.png",
+  "mobile-source-view-all-complete.png",
+  "mobile-source-view-all-error.png",
+  "mobile-source-setlist-loading.png",
   "mobile-update-stale-reason.png",
   "mobile-summary-filtered.png",
   "mobile-controls-active.png",
@@ -215,7 +221,7 @@ const screenshotContracts = {
   },
   "mobile-query-grid-alignment.png": {
     scene: "mobile-query-grid-alignment",
-    viewport: { width: 390, height: 844 },
+    viewport: { width: 320, height: 700 },
     selector: "#queryDialog",
   },
   "mobile-query-empty-suggestions-compact.png": {
@@ -254,8 +260,38 @@ const screenshotContracts = {
     scene: "desktop-update-failure-status",
     viewport: { width: 1440, height: 900 },
   },
+  "desktop-source-view-all-partial.png": {
+    scene: "desktop-source-view-all-partial",
+    params: { fixture: "source-view-all", state: "partial" },
+    viewport: { width: 1440, height: 900 },
+  },
   "mobile-update-stale-reason.png": {
     scene: "mobile-update-stale-reason",
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-source-view-all-opening.png": {
+    scene: "mobile-source-view-all-opening",
+    params: { fixture: "source-view-all", state: "opening" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-source-view-all-partial.png": {
+    scene: "mobile-source-view-all-partial",
+    params: { fixture: "source-view-all", state: "partial" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-source-view-all-complete.png": {
+    scene: "mobile-source-view-all-complete",
+    params: { fixture: "source-view-all", state: "complete" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-source-view-all-error.png": {
+    scene: "mobile-source-view-all-error",
+    params: { fixture: "source-view-all", state: "error" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-source-setlist-loading.png": {
+    scene: "mobile-source-setlist-loading",
+    params: { fixture: "source-setlist", state: "loading" },
     viewport: { width: 390, height: 844 },
   },
   "mobile-active-query-strip.png": {
@@ -284,6 +320,14 @@ const proofCoverage = {
     tabletThree: "tablet-source-inline-3.png",
     newToOld: "mobile-source-new-to-old.png",
   },
+  sourceLoadingFixtures: [
+    "mobile-source-view-all-opening.png",
+    "mobile-source-view-all-partial.png",
+    "mobile-source-view-all-complete.png",
+    "mobile-source-view-all-error.png",
+    "mobile-source-setlist-loading.png",
+    "desktop-source-view-all-partial.png",
+  ],
   dataIndexFixtures: ["desktop-partition-pagination.png", "desktop-search-snapshot-index.png"],
   diagnostics: ["mobile-video-diagnostic-result.png", "desktop-all-diff-explanation.png"],
   identityFixtures: ["mobile-song-kana-romaji-merged.png", "desktop-song-kana-romaji-merged.png"],

@@ -345,6 +345,8 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
     await sleep(250);
   }
   if (options.openHistory) await assertQueryHistoryPanelSpacing(page, name);
+  if (name === "mobile-query-grid-alignment.png") await assertQueryGridAlignment(page, name);
+  if (name === "mobile-query-footer-alignment.png") await assertQueryFooterAlignment(page, name);
   await save(page, name, { viewport, params: options.params || {}, selector: "#queryDialog", scene: options.scene });
   await page.close();
 }
@@ -390,6 +392,129 @@ async function captureRequestState(browser, viewport, name, options = {}) {
   await page.close();
 }
 
+function paginationFixtureHtml() {
+  return `
+    <div class="pagination-row pagination-top" aria-label="分页">
+      <span class="pagination-note">第 2 / 27 页</span>
+      <div class="pagination-controls">
+        <button class="page-button" type="button" aria-label="上一页">‹</button>
+        <span class="page-select-compact"><span>2 / 27</span><select aria-label="当前页"><option>2</option></select></span>
+        <button class="page-button" type="button" aria-label="下一页">›</button>
+      </div>
+    </div>
+  `;
+}
+
+function requestFixtureRowsHtml() {
+  return [
+    rankRowProofHtml({ rank: "11", title: "少女レイ", artist: "みきとP / retained old list", count: "8次" }),
+    rankRowProofHtml({ rank: "12", title: "夜明けと蛍", artist: "n-buna / retained old list", count: "7次" }),
+    rankRowProofHtml({ rank: "13", title: "花に亡霊", artist: "ヨルシカ / retained old list", count: "6次" }),
+  ].join("");
+}
+
+function requestSkeletonRowsHtml(count = 5) {
+  return Array.from({ length: count }, () => `
+    <div class="rank-row skeleton-row request-skeleton-row" aria-hidden="true">
+      <span class="skeleton-rank"></span>
+      <span class="skeleton-lines"><span></span><span></span></span>
+      <span class="skeleton-count"></span>
+    </div>
+  `).join("");
+}
+
+function requestStateFixtureHtml(kind) {
+  const isError = kind === "page-error";
+  const isFilter = kind === "filter-loading";
+  const stripText = isError ? "页面读取失败" : isFilter ? "正在应用筛选" : "正在读取第 2 页";
+  return `
+    <section class="summary" id="summary" aria-live="polite">
+      <div class="summary-main">
+        <span class="summary-title">${isFilter ? "筛选结果" : "歌曲榜"}</span>
+        <span class="summary-metrics">
+          <span>最近7天</span>
+          <span>${isFilter ? "待应用：少女レイ" : "1,248首歌曲"}</span>
+          <span>旧内容保留</span>
+        </span>
+      </div>
+    </section>
+    <section class="content-shell rank-panel request-state-fixture${isError ? "" : " is-loading"}" id="videoList" aria-busy="${isError ? "false" : "true"}" data-request-state="${escapeHtml(kind)}">
+      ${paginationFixtureHtml()}
+      <div class="request-status-strip" data-state="${isError ? "error" : "loading"}">
+        <span>${escapeHtml(stripText)}</span>
+        ${isError ? '<button class="text-button" type="button">重试</button>' : ""}
+      </div>
+      <div class="request-retained-list" aria-label="请求期间保留的旧内容">
+        ${requestFixtureRowsHtml()}
+      </div>
+      ${isError ? "" : `<div class="request-skeleton-stack" aria-hidden="true">${requestSkeletonRowsHtml(isFilter ? 4 : 5)}</div>`}
+    </section>
+  `;
+}
+
+async function captureRequestStateFixture(browser, viewport, name, kind) {
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body>
+        <main class="layout">${requestStateFixtureHtml(kind)}</main>
+      </body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  await assertRequestStateFixture(page, kind, name);
+  await save(page, name, { viewport, params: {}, scene: name.replace(/\.png$/u, "") });
+  await page.close();
+}
+
+async function assertRequestStateFixture(page, kind, label) {
+  const shape = await page.evaluate(() => {
+    const summary = document.querySelector("#summary");
+    const pager = document.querySelector(".pagination-row");
+    const strip = document.querySelector(".request-status-strip");
+    const retainedRows = Array.from(document.querySelectorAll(".request-retained-list .rank-row"));
+    const skeletonRows = Array.from(document.querySelectorAll(".request-skeleton-row"));
+    const rect = (node) => {
+      const box = node?.getBoundingClientRect();
+      return box ? { top: box.top, bottom: box.bottom, height: box.height, width: box.width } : null;
+    };
+    return {
+      busy: document.querySelector("#videoList")?.getAttribute("aria-busy") || "",
+      summary: rect(summary),
+      pager: rect(pager),
+      strip: rect(strip),
+      stripText: strip?.textContent?.trim() || "",
+      retainedCount: retainedRows.length,
+      retainedOpacity: retainedRows.length ? getComputedStyle(document.querySelector(".request-retained-list")).opacity : "",
+      skeletonCount: skeletonRows.length,
+      skeletonHeights: skeletonRows.map((row) => Math.round(row.getBoundingClientRect().height * 10) / 10),
+      overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  if (shape.overflow || !shape.summary || !shape.pager || !shape.strip || shape.retainedCount < 3) {
+    throw new Error(`${label} request fixture missing stable regions: ${JSON.stringify(shape)}`);
+  }
+  if (kind === "page-error") {
+    if (shape.busy !== "false" || !shape.stripText.includes("页面读取失败") || !shape.stripText.includes("重试") || shape.skeletonCount !== 0) {
+      throw new Error(`${label} request error fixture invalid: ${JSON.stringify(shape)}`);
+    }
+    return;
+  }
+  if (shape.busy !== "true" || shape.skeletonCount < 4 || shape.skeletonCount > 6 || shape.retainedOpacity !== "0.52") {
+    throw new Error(`${label} request loading fixture invalid: ${JSON.stringify(shape)}`);
+  }
+  if (shape.skeletonHeights.some((height) => height < 56 || height > 72)) {
+    throw new Error(`${label} request skeleton height invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
 async function assertUnifiedQueryPanel(page, name) {
   await page.waitForSelector("#queryDialog .query-filter-matrix #hideUnknownToggle", { timeout: 15_000 });
   const result = await page.evaluate(() => ({
@@ -400,6 +525,100 @@ async function assertUnifiedQueryPanel(page, name) {
   }));
   if (result.tabCount !== 0 || !result.searchVisible || !result.filterVisible) {
     throw new Error(`query panel is not unified for ${name}: ${JSON.stringify(result)}`);
+  }
+}
+
+async function assertQueryGridAlignment(page, label) {
+  await page.locator("#queryInput").focus();
+  const shape = await page.evaluate(() => {
+    const rectFor = (node) => {
+      const box = node.getBoundingClientRect();
+      return {
+        left: Math.round(box.left * 10) / 10,
+        right: Math.round(box.right * 10) / 10,
+        top: Math.round(box.top * 10) / 10,
+        bottom: Math.round(box.bottom * 10) / 10,
+        width: Math.round(box.width * 10) / 10,
+        height: Math.round(box.height * 10) / 10,
+      };
+    };
+    const controls = [
+      "#nicheOnlyToggle",
+      "#hideUnknownToggle",
+      "#trendFilterSelect",
+      "#minCountSelect",
+      "#queryPageSizeSelect",
+      ".query-history-section",
+    ]
+      .map((selector) => document.querySelector(selector)?.closest("label, .query-context-card, .query-sort-field") || document.querySelector(selector))
+      .filter(Boolean)
+      .map(rectFor);
+    const input = document.querySelector("#queryInput");
+    const inputStyle = input ? getComputedStyle(input) : null;
+    const footer = document.querySelector(".query-panel-footer");
+    const body = document.querySelector(".query-panel-body");
+    const firstColumnLefts = controls.filter((_, index) => index % 2 === 0).map((rect) => rect.left);
+    const secondColumnLefts = controls.filter((_, index) => index % 2 === 1).map((rect) => rect.left);
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      bodyScroll: body ? body.scrollHeight - body.clientHeight : 0,
+      footerVisible: Boolean(footer?.getBoundingClientRect().height),
+      inputOutlineWidth: Number.parseFloat(inputStyle?.outlineWidth || "0"),
+      firstColumnLefts,
+      secondColumnLefts,
+      controlRects: controls,
+      overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  const maxDelta = (values) => (values.length ? Math.max(...values) - Math.min(...values) : 0);
+  if (
+    shape.overflow ||
+    shape.inputOutlineWidth > 2 ||
+    !shape.footerVisible ||
+    maxDelta(shape.firstColumnLefts) > 1 ||
+    maxDelta(shape.secondColumnLefts) > 1 ||
+    (shape.viewportWidth <= 320 && shape.bodyScroll > 1)
+  ) {
+    throw new Error(`${label} query grid geometry invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
+async function assertQueryFooterAlignment(page, label) {
+  const shape = await page.evaluate(() => {
+    const rectFor = (selector) => {
+      const node = document.querySelector(selector);
+      const box = node?.getBoundingClientRect();
+      return box
+        ? {
+            left: Math.round(box.left * 10) / 10,
+            right: Math.round(box.right * 10) / 10,
+            top: Math.round(box.top * 10) / 10,
+            bottom: Math.round(box.bottom * 10) / 10,
+            width: Math.round(box.width * 10) / 10,
+            height: Math.round(box.height * 10) / 10,
+          }
+        : null;
+    };
+    return {
+      firstToggle: rectFor(".query-toggle"),
+      secondToggle: rectFor(".query-toggle:nth-of-type(2)"),
+      reset: rectFor("#resetQueryButton"),
+      apply: rectFor("#applyQueryButton"),
+      footer: rectFor(".query-panel-footer"),
+      nav: rectFor("#mobileBottomNav"),
+      overlayZ: Number.parseInt(getComputedStyle(document.querySelector("#queryDialog")).zIndex || "0", 10) || 0,
+      navZ: Number.parseInt(getComputedStyle(document.querySelector("#mobileBottomNav")).zIndex || "0", 10) || 0,
+      overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  if (!shape.firstToggle || !shape.secondToggle || !shape.reset || !shape.apply || !shape.footer || shape.overflow) {
+    throw new Error(`${label} query footer geometry missing: ${JSON.stringify(shape)}`);
+  }
+  if (Math.abs(shape.firstToggle.left - shape.reset.left) > 1 || Math.abs(shape.secondToggle.left - shape.apply.left) > 1) {
+    throw new Error(`${label} query footer columns do not align: ${JSON.stringify(shape)}`);
+  }
+  if (shape.nav && shape.footer.bottom > shape.nav.top - 2 && shape.overlayZ <= shape.navZ) {
+    throw new Error(`${label} query footer is covered by bottom nav: ${JSON.stringify(shape)}`);
   }
 }
 
@@ -1201,6 +1420,327 @@ async function assertFixtureSourceProof(page, caseName, label) {
   }
 }
 
+const SOURCE_VIEW_ALL_TOTAL = 131;
+
+function sourceViewAllGroups(count) {
+  const base = [
+    ...(proofFixture.sourceCases.double?.groups || []),
+    ...(proofFixture.sourceCases.triple?.groups || []),
+    ...(proofFixture.sourceCases.newToOld?.groups || []),
+    ...(proofFixture.sourceCases.longTime?.groups || []),
+  ].filter(Boolean);
+  return Array.from({ length: count }, (_, index) => {
+    const item = base[index % base.length] || {};
+    return {
+      ...item,
+      videoId: item.videoId || `proof-${index + 1}`,
+      channelName: `${item.channelName || "Proof Channel"} ${index + 1}`,
+      title: `${item.title || "Fixture source video"} · ${index + 1}`,
+      time: item.time || "38:16",
+      seconds: Number(item.seconds) || 2296 + index * 61,
+    };
+  });
+}
+
+function sourceCopyIconHtml(extraClass = "", attributes = "") {
+  return `
+    <button class="source-copy-icon ui-chip ui-chip-icon${extraClass ? ` ${escapeHtml(extraClass)}` : ""}" type="button" data-copy-setlist="true" aria-label="复制该视频歌单" ${attributes}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l10-2v13"/><circle cx="7" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+    </button>
+  `;
+}
+
+function sourceDrawerGroupHtml(group, index) {
+  const videoId = encodeURIComponent(group.videoId || "proof");
+  const seconds = Math.max(0, Number(group.seconds) || 0);
+  return `
+    <article class="source-video-group" data-source-index="${index + 1}">
+      <a class="source-video-thumb-link" href="https://www.youtube.com/watch?v=${videoId}&t=${seconds}s" target="_blank" rel="noreferrer" tabindex="-1" aria-label="打开来源视频">
+        <img class="source-video-thumb" alt="" width="64" height="36" src="${fixtureThumbSrc(group)}" />
+      </a>
+      <div class="source-video-main">
+        <div class="source-video-topline">
+          ${sourceTimeLinkHtml(group, group.time, seconds, "source-time-primary")}
+          <span class="source-video-identity">
+            <a class="source-video-channel" href="https://www.youtube.com/results?search_query=${encodeURIComponent(group.channelName || "")}" target="_blank" rel="noreferrer">${escapeHtml(group.channelName)}</a>
+          </span>
+        </div>
+        <a class="source-video-title" href="https://www.youtube.com/watch?v=${videoId}" target="_blank" rel="noreferrer">${escapeHtml(group.title)}</a>
+      </div>
+      ${sourceCopyIconHtml()}
+    </article>
+  `;
+}
+
+function sourceDrawerSkeletonHtml(count) {
+  return Array.from({ length: count }, () => `
+    <div class="source-video-group source-video-skeleton" aria-hidden="true">
+      <span class="source-skeleton-thumb"></span>
+      <span class="source-skeleton-main">
+        <span class="source-skeleton-line"></span>
+        <span class="source-skeleton-line"></span>
+      </span>
+      <span class="source-skeleton-time"></span>
+    </div>
+  `).join("");
+}
+
+function sourceViewAllToolbarHtml(state) {
+  const loaded = state === "complete" ? SOURCE_VIEW_ALL_TOTAL : state === "partial" ? 24 : 2;
+  if (state === "complete") {
+    return `<span class="source-drawer-count">全部 ${SOURCE_VIEW_ALL_TOTAL} 个来源</span>`;
+  }
+  if (state === "error") {
+    return `<span class="source-drawer-count">已显示 ${loaded} / ${SOURCE_VIEW_ALL_TOTAL}</span>`;
+  }
+  return `
+    <span class="source-drawer-count-stack">
+      <span class="source-drawer-count">全部 ${SOURCE_VIEW_ALL_TOTAL} 个来源</span>
+      <span class="source-drawer-loaded">已加载 ${loaded} / ${SOURCE_VIEW_ALL_TOTAL}</span>
+    </span>
+  `;
+}
+
+function sourceViewAllFixtureHtml(state, viewport) {
+  const visibleCount = state === "complete" ? 8 : state === "partial" ? 6 : 2;
+  const skeletonCount = state === "opening" ? 4 : state === "partial" ? 0 : 0;
+  const groups = sourceViewAllGroups(visibleCount);
+  return `
+    <section class="content-shell rank-panel proof-source-state-fixture" data-proof-source-state="${escapeHtml(state)}">
+      <div class="rank-row proof-source-state-row">
+        <span class="rank-number">08</span>
+        <div class="rank-content">
+          <h2 class="rank-title">Source Drawer Loading Proof <span class="niche-badge">小众</span></h2>
+          <div class="rank-subline"><span class="subline-primary">Proof Artist</span><span>131 sources</span></div>
+        </div>
+        <div class="rank-side"><span class="rank-count"><span class="rank-count-value">24次</span></span></div>
+        ${fixtureSourceStripHtml("triple", viewport)}
+        <div class="source-drawer" hidden data-source-loading-state="${escapeHtml(state)}" data-total-count="${SOURCE_VIEW_ALL_TOTAL}" data-loaded-count="${state === "complete" ? SOURCE_VIEW_ALL_TOTAL : state === "partial" ? 24 : 2}">
+          <div class="source-drawer-toolbar">
+            ${sourceViewAllToolbarHtml(state)}
+            <div class="source-drawer-actions">
+              <button class="source-action source-copy-all ui-chip" type="button" data-copy-song-links="true" aria-label="复制全部链接">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"/><path d="M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.15-1.15"/></svg>
+              </button>
+              <button class="source-collapse-top ui-chip" type="button" data-collapse-source="true">收起</button>
+            </div>
+          </div>
+          ${state === "error" ? '<div class="source-drawer-status" role="alert"><span>来源读取失败</span><button class="source-drawer-retry" type="button">重试</button></div>' : ""}
+          ${groups.map(sourceDrawerGroupHtml).join("")}
+          ${skeletonCount ? sourceDrawerSkeletonHtml(skeletonCount) : ""}
+          <button class="source-collapse-bottom ui-chip" type="button" data-collapse-source="true">收起来源</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+async function captureSourceViewAllState(browser, viewport, state, name) {
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body>
+        <main class="layout">${sourceViewAllFixtureHtml(state, viewport)}</main>
+        <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="主视图">
+          <button class="bottom-nav-item active" type="button" aria-current="page"><span class="bottom-nav-icon-wrap"></span><span>歌曲榜</span></button>
+        </nav>
+      </body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  const openMs = await page.evaluate(() => {
+    const started = performance.now();
+    const row = document.querySelector(".proof-source-state-row");
+    const drawer = document.querySelector(".source-drawer");
+    const toggle = document.querySelector("[data-toggle-source]");
+    row?.classList.add("is-expanded");
+    if (drawer) drawer.hidden = false;
+    toggle?.setAttribute("aria-expanded", "true");
+    return performance.now() - started;
+  });
+  console.log(`README_SOURCE_DRAWER_OPEN ${name} ${Math.round(openMs * 10) / 10}ms`);
+  await assertSourceViewAllFixture(page, state, name, openMs);
+  const locator = page.locator(".proof-source-state-fixture").first();
+  await saveElement(page, locator, name, {
+    minBytes: 6_000,
+    viewport,
+    params: { fixture: "source-view-all", state },
+    selector: ".proof-source-state-fixture",
+    scene: name.replace(/\.png$/u, ""),
+  });
+  await page.close();
+}
+
+async function assertSourceViewAllFixture(page, state, label, openMs) {
+  const shape = await page.locator(".proof-source-state-fixture").first().evaluate((node) => {
+    const visible = (target) => {
+      if (!target) return false;
+      const box = target.getBoundingClientRect();
+      const style = getComputedStyle(target);
+      return !target.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+    };
+    const drawer = node.querySelector(".source-drawer");
+    const toolbar = node.querySelector(".source-drawer-toolbar");
+    const groups = Array.from(node.querySelectorAll(".source-video-group:not(.source-video-skeleton)"));
+    const skeletons = Array.from(node.querySelectorAll(".source-video-skeleton"));
+    const bottomNav = document.querySelector("#mobileBottomNav");
+    const bottomButton = node.querySelector(".source-collapse-bottom");
+    const navVisible = bottomNav && getComputedStyle(bottomNav).display !== "none" && getComputedStyle(bottomNav).visibility !== "hidden";
+    const navTop = navVisible ? bottomNav.getBoundingClientRect().top : window.innerHeight;
+    const bottomBox = bottomButton?.getBoundingClientRect();
+    return {
+      inlineVisible: visible(node.querySelector(".source-inline-strip")),
+      drawerVisible: visible(drawer),
+      totalCount: Number(drawer?.dataset.totalCount || 0),
+      loadedCount: Number(drawer?.dataset.loadedCount || 0),
+      toolbarText: toolbar?.textContent?.replace(/\s+/gu, " ").trim() || "",
+      toolbarHeight: Math.round((toolbar?.getBoundingClientRect().height || 0) * 10) / 10,
+      toolbarPosition: toolbar ? getComputedStyle(toolbar).position : "",
+      groupCount: groups.length,
+      groupHeights: groups.map((group) => Math.round(group.getBoundingClientRect().height * 10) / 10),
+      skeletonCount: skeletons.length,
+      skeletonHeights: skeletons.map((item) => Math.round(item.getBoundingClientRect().height * 10) / 10),
+      thumbSizes: groups.map((group) => {
+        const thumb = group.querySelector(".source-video-thumb-link");
+        const box = thumb?.getBoundingClientRect();
+        return { width: Math.round((box?.width || 0) * 10) / 10, height: Math.round((box?.height || 0) * 10) / 10 };
+      }),
+      channelOverflow: groups.some((group) => {
+        const channel = group.querySelector(".source-video-channel");
+        return channel && channel.scrollWidth > channel.clientWidth + 1 && getComputedStyle(channel).textOverflow !== "ellipsis";
+      }),
+      titleOverflow: groups.some((group) => {
+        const title = group.querySelector(".source-video-title");
+        return title && title.scrollWidth > title.clientWidth + 1 && getComputedStyle(title).textOverflow !== "ellipsis";
+      }),
+      errorText: node.querySelector(".source-drawer-status")?.textContent?.replace(/\s+/gu, " ").trim() || "",
+      bottomButtonBottom: Math.round((bottomBox?.bottom || 0) * 10) / 10,
+      navTop: Math.round(navTop * 10) / 10,
+      overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  if (openMs > 100 || shape.overflow || shape.inlineVisible || !shape.drawerVisible || shape.totalCount !== SOURCE_VIEW_ALL_TOTAL) {
+    throw new Error(`${label} source drawer open state invalid: ${JSON.stringify({ openMs, shape })}`);
+  }
+  if (shape.toolbarPosition !== "sticky" || shape.toolbarHeight < 28 || shape.toolbarHeight > 42) {
+    throw new Error(`${label} source drawer toolbar invalid: ${JSON.stringify(shape)}`);
+  }
+  if (shape.groupHeights.some((height) => height < 56 || height > 70) || shape.skeletonHeights.some((height) => height < 56 || height > 70)) {
+    throw new Error(`${label} source row height invalid: ${JSON.stringify(shape)}`);
+  }
+  if (shape.thumbSizes.some((size) => size.width < 62 || size.width > 66 || size.height < 34 || size.height > 38)) {
+    throw new Error(`${label} source thumbnail size invalid: ${JSON.stringify(shape)}`);
+  }
+  if (shape.channelOverflow || shape.titleOverflow) throw new Error(`${label} source text overflow invalid: ${JSON.stringify(shape)}`);
+  if (state === "opening" && (shape.loadedCount !== 2 || !shape.toolbarText.includes("已加载 2 / 131") || shape.skeletonCount < 3 || shape.skeletonCount > 5)) {
+    throw new Error(`${label} opening source state invalid: ${JSON.stringify(shape)}`);
+  }
+  if (state === "partial" && (shape.loadedCount !== 24 || !shape.toolbarText.includes("已加载 24 / 131") || shape.skeletonCount !== 0)) {
+    throw new Error(`${label} partial source state invalid: ${JSON.stringify(shape)}`);
+  }
+  if (state === "complete" && (shape.loadedCount !== SOURCE_VIEW_ALL_TOTAL || shape.toolbarText !== "全部 131 个来源 收起" || shape.skeletonCount !== 0)) {
+    throw new Error(`${label} complete source state invalid: ${JSON.stringify(shape)}`);
+  }
+  if (state === "error" && (shape.loadedCount !== 2 || !shape.toolbarText.includes("已显示 2 / 131") || !shape.errorText.includes("来源读取失败") || !shape.errorText.includes("重试"))) {
+    throw new Error(`${label} error source state invalid: ${JSON.stringify(shape)}`);
+  }
+  if (shape.bottomButtonBottom > shape.navTop - 6) {
+    throw new Error(`${label} source bottom action covered: ${JSON.stringify(shape)}`);
+  }
+}
+
+function sourceSetlistLoadingFixtureHtml(viewport) {
+  const fixture = proofFixture.sourceCases.single;
+  return `
+    <section class="content-shell rank-panel proof-source-setlist-fixture">
+      <div class="rank-row proof-row">
+        <span class="rank-number">05</span>
+        <div class="rank-content">
+          <h2 class="rank-title">Setlist Copy Loading Proof <span class="niche-badge">小众</span></h2>
+          <div class="rank-subline"><span class="subline-primary">Proof Artist</span></div>
+        </div>
+        <div class="rank-side"><span class="rank-count"><span class="rank-count-value">1次</span></span></div>
+        ${fixtureSourceStripHtml("single", viewport)}
+      </div>
+    </section>
+  `;
+}
+
+async function captureSourceSetlistLoading(browser, viewport, name) {
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body><main class="layout">${sourceSetlistLoadingFixtureHtml(viewport)}</main></body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  await page.locator("[data-copy-setlist]").first().evaluate((button) => {
+    button.classList.add("is-loading");
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+  });
+  await assertSourceSetlistLoading(page, name);
+  await saveElement(page, page.locator(".proof-source-setlist-fixture").first(), name, {
+    minBytes: 4_000,
+    viewport,
+    params: { fixture: "source-setlist", state: "loading" },
+    selector: ".proof-source-setlist-fixture",
+    scene: "mobile-source-setlist-loading",
+  });
+  await page.close();
+}
+
+async function assertSourceSetlistLoading(page, label) {
+  const shape = await page.locator(".proof-source-setlist-fixture").first().evaluate((node) => {
+    const button = node.querySelector("[data-copy-setlist]");
+    const item = node.querySelector(".source-inline-item");
+    const buttonBox = button?.getBoundingClientRect();
+    const itemBox = item?.getBoundingClientRect();
+    const before = button ? getComputedStyle(button, "::before") : null;
+    return {
+      buttonWidth: Math.round((buttonBox?.width || 0) * 10) / 10,
+      buttonHeight: Math.round((buttonBox?.height || 0) * 10) / 10,
+      itemOpacity: item ? getComputedStyle(item).opacity : "",
+      rowSkeletons: node.querySelectorAll(".skeleton-row").length,
+      disabled: Boolean(button?.disabled),
+      busy: button?.getAttribute("aria-busy") || "",
+      beforeDisplay: before?.display || "",
+      beforeWidth: before?.width || "",
+      itemHeight: Math.round((itemBox?.height || 0) * 10) / 10,
+      overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  if (
+    shape.overflow ||
+    shape.buttonWidth < 26 ||
+    shape.buttonWidth > 32 ||
+    shape.buttonHeight < 26 ||
+    shape.buttonHeight > 32 ||
+    shape.disabled !== true ||
+    shape.busy !== "true" ||
+    shape.beforeDisplay !== "block" ||
+    shape.rowSkeletons !== 0 ||
+    shape.itemOpacity !== "1" ||
+    shape.itemHeight < 34
+  ) {
+    throw new Error(`${label} source setlist loading invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
 function rangeFixtureModels() {
   const future = proofFixture.rangeCases || {};
   return [future["7d"], future.all].filter(Boolean);
@@ -1845,6 +2385,7 @@ async function main() {
   const desktopWide = { width: 1366, height: 768 };
   const tablet = { width: 820, height: 900 };
   const mobile = { width: 390, height: 844 };
+  const mobileNarrow = { width: 320, height: 700 };
 
   try {
     await openPage(browser, desktop, {}, "desktop-song-rank.png");
@@ -1870,6 +2411,7 @@ async function main() {
     await captureDataIndexFixtureCase(browser, desktop, "partition-pagination", "desktop-partition-pagination.png");
     await captureDataIndexFixtureCase(browser, desktop, "search-snapshot-index", "desktop-search-snapshot-index.png");
     await captureFixtureSourceCase(browser, desktop, "longTime", "desktop-source-long-time.png");
+    await captureSourceViewAllState(browser, desktop, "partial", "desktop-source-view-all-partial.png");
     await captureFixtureSourceCase(browser, tablet, "triple", "tablet-source-inline-3.png");
 
     await openPage(browser, mobile, {}, "mobile-song-rank.png");
@@ -1925,7 +2467,7 @@ async function main() {
     await captureQueryPanel(browser, mobile, "mobile-query-suggestions.png", { searchText: "少女レイ" });
     await captureQueryPanel(browser, mobile, "mobile-query-filter.png", { filterTab: true, scene: "mobile-unified-filter-panel" });
     await captureQueryPanel(browser, mobile, "mobile-query-history.png", { openHistory: true, scrollBottom: true });
-    await captureQueryPanel(browser, mobile, "mobile-query-grid-alignment.png", { filterTab: true, scene: "mobile-query-grid-alignment" });
+    await captureQueryPanel(browser, mobileNarrow, "mobile-query-grid-alignment.png", { filterTab: true, scene: "mobile-query-grid-alignment" });
     await captureQueryPanel(browser, mobile, "mobile-query-empty-suggestions-compact.png", {
       searchText: "zzzzzz-not-found-proof",
       expectEmptySuggestions: true,
@@ -1933,21 +2475,9 @@ async function main() {
     });
     await captureQueryPanel(browser, mobile, "mobile-query-footer-alignment.png", { filterTab: true, scrollBottom: true, scene: "mobile-query-footer-alignment" });
     await captureQueryPanel(browser, mobile, "mobile-query-history-alignment.png", { openHistory: true, scene: "mobile-query-history-alignment" });
-    await captureRequestState(browser, mobile, "mobile-page-request-loading.png", {
-      params: { page: 2 },
-      delayRequest: true,
-      scene: "mobile-page-request-loading",
-    });
-    await captureRequestState(browser, mobile, "mobile-filter-request-loading.png", {
-      params: { q: "少女レイ" },
-      delayRequest: true,
-      scene: "mobile-filter-request-loading",
-    });
-    await captureRequestState(browser, mobile, "mobile-page-request-error.png", {
-      params: { page: 2 },
-      failRequest: true,
-      scene: "mobile-page-request-error",
-    });
+    await captureRequestStateFixture(browser, mobile, "mobile-page-request-loading.png", "page-loading");
+    await captureRequestStateFixture(browser, mobile, "mobile-filter-request-loading.png", "filter-loading");
+    await captureRequestStateFixture(browser, mobile, "mobile-page-request-error.png", "page-error");
     await openPage(browser, desktop, { range: "all", page: 2, pageSize: 50 }, "desktop-request-pagination.png", {
       scene: "desktop-request-pagination",
     });
@@ -1959,6 +2489,11 @@ async function main() {
       failStatus: true,
       scene: "mobile-update-stale-reason",
     });
+    await captureSourceViewAllState(browser, mobile, "opening", "mobile-source-view-all-opening.png");
+    await captureSourceViewAllState(browser, mobile, "partial", "mobile-source-view-all-partial.png");
+    await captureSourceViewAllState(browser, mobile, "complete", "mobile-source-view-all-complete.png");
+    await captureSourceViewAllState(browser, mobile, "error", "mobile-source-view-all-error.png");
+    await captureSourceSetlistLoading(browser, mobile, "mobile-source-setlist-loading.png");
     await captureExpandedSource(browser, mobile, {}, "mobile-source-expanded.png");
     await captureFixtureSourceCase(browser, mobile, "none", "mobile-source-inline-0.png");
     await captureFixtureSourceCase(browser, mobile, "single", "mobile-source-inline-1.png");
