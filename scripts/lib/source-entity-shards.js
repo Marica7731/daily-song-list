@@ -96,15 +96,11 @@ function writeSourceEntityShard(options = {}) {
     const text = stableJson(payload);
     const sha256 = sha256Text(text);
     const fileName = `chunk-${String(chunkIndex).padStart(4, "0")}.${sha256.slice(0, 12)}.json`;
-    const legacyName = `chunk-${String(chunkIndex).padStart(4, "0")}.json`;
     const chunkPath = `${baseDir}/${fileName}`;
-    const legacyPath = `${baseDir}/${legacyName}`;
     writeText(path.join(rootDir, chunkPath), text);
-    writeText(path.join(rootDir, legacyPath), text);
     chunkEntries.push({
       index: chunkIndex,
       path: chunkPath,
-      legacyPath,
       sha256,
       bytes: Buffer.byteLength(text, "utf8"),
       gzipBytes: gzipBytes(text),
@@ -134,15 +130,13 @@ function writeSourceEntityShard(options = {}) {
   const manifestText = stableJson(manifest);
   const manifestSha256 = sha256Text(manifestText);
   const hashedManifestPath = `${baseDir}/manifest.${manifestSha256.slice(0, 12)}.json`;
-  const manifestPath = `${baseDir}/manifest.json`;
   writeText(path.join(rootDir, hashedManifestPath), manifestText);
-  writeText(path.join(rootDir, manifestPath), manifestText);
   return {
     key,
     songIdentityKey,
     prefix,
-    manifestPath,
-    hashedManifestPath,
+    manifestPath: hashedManifestPath,
+    manifestLegacyPath: `${baseDir}/manifest.json`,
     sha256: manifestSha256,
     bytes: Buffer.byteLength(manifestText, "utf8"),
     gzipBytes: gzipBytes(manifestText),

@@ -8,8 +8,12 @@
 - `data/ui/7d.<hash>.json`、`data/ui/all.<hash>.json`：内容 hash range payload，保留给 fallback 和兼容校验。
 - `data/ui/7d.json`、`data/ui/all.json`：legacy fallback，适合 `no-cache` 校验。
 - `data/ui/ranges/<range>/manifest.<hash>.json` 与 `page-*.json`：榜单 runtime 分片。浏览器首屏只需要读取当前 range 的 manifest 和第一页。
-- `data/ui/source-details/<range>/manifest.<hash>.json` 与 `page-*.json`：展开来源详情分片，按需读取。
-- `data/ui/search/<range>/manifest.<hash>.json` 与 `page-*.json`：搜索/筛选索引分片，查询面板按需读取。
+- `data/ui/ranges/<range>/views/...`：各 view/current filter 的 page manifest、index 和页面分片。页码切换只读取目标页。
+- `data/ui/ranges/<range>/records/<entity>/shard-*.json`：当前页详情记录分片。筛选只计算紧凑索引并读取当前页详情。
+- `data/ui/ranges/<range>/search/<prefix>/page-*.json`：搜索前缀分片。搜索只读取相关 prefix 页面。
+- `data/ui/ranges/<range>/sources/<prefix>/<songIdentity>/manifest.<hash>.json` 与 `chunk-*.json`：按歌曲来源详情。来源展开只读取当前歌曲，先加载首 chunk，再加载后续 chunk。
+- `data/ui/video-setlists/<prefix>/<videoId>.json`：按视频 setlist。只在 copy setlist 交互时读取。
+- `data/ui/source-details/<range>/manifest.<hash>.json` 与 `data/ui/search/<range>/manifest.<hash>.json`：旧 runtime 兼容产物，不是当前首屏/来源展开首选入口。
 - `data/diff/latest-7d.json`、`data/diff/latest-all.json`：最新榜单趋势 diff，首屏榜单渲染后再加载。
 - `data/status.json`：调度状态和失败信息。
 
@@ -36,7 +40,7 @@
 - `data/ui/ranges/7d/page-0012.<hash>.json`
 - `data/ui/ranges/all/page-0017.<hash>.json`
 
-当前真实输出位于 `data/ui/ranges/<range>/`、`data/ui/source-details/<range>/` 和 `data/ui/search/<range>/`。每个分片族都有 manifest 来绑定 range、pageSize、pageCount、page hash、搜索索引版本和 fallback 策略；`check:published` 会抽样验证线上 manifest 与分片页。
+当前真实输出主要位于 `data/ui/ranges/<range>/` 和 `data/ui/video-setlists/`。每个分片族都有 manifest 或 hash 文件名来绑定 range、pageSize、pageCount、page hash、搜索索引版本和 fallback 策略；`check:published` 会抽样验证线上 manifest 与分片页。
 
 ## UI Proof 存储
 

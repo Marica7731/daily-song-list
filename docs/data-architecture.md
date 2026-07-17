@@ -12,9 +12,11 @@
    - `data/ui/all.<hash>.json`
    - `data/ui/7d.json` 与 `data/ui/all.json` legacy fallback
    - `data/ui/ranges/<range>/manifest.<hash>.json` 与分页 runtime
-   - `data/ui/source-details/<range>/manifest.<hash>.json` 与按需来源详情页
-   - `data/ui/search/<range>/manifest.<hash>.json` 与查询索引页
-4. `assets/app.js` 先读 `data/ui/meta.json`，再按当前 range 读取分片 manifest 和当前页。快照由 `data/snapshots/index.json` 与 `data/snapshots/index/YYYY/MM.json` 提供索引，具体快照仍是独立 JSON。
+   - `data/ui/ranges/<range>/views/...`、`records/...` 与 `search/...` 按需分片
+   - `data/ui/ranges/<range>/sources/<prefix>/<songIdentity>/manifest.<hash>.json` 与按歌曲来源 chunk
+   - `data/ui/video-setlists/<prefix>/<videoId>.json` 按视频歌单详情
+   - `data/ui/source-details/<range>/manifest.<hash>.json` 与 `data/ui/search/<range>/manifest.<hash>.json` 作为旧 runtime 兼容产物
+4. `assets/app.js` 先读 `data/ui/meta.json`，再按当前 range 读取分片 manifest 和当前页。页码、搜索、筛选、来源展开、video setlist、range 切换和快照切换都通过 request scheduler 处理优先级；快照由 `data/snapshots/index.json` 与 `data/snapshots/index/YYYY/MM.json` 提供索引，具体快照仍是独立 JSON。
 
 ## Runtime 边界
 
@@ -22,7 +24,8 @@
 - `data/72h.json` 与 `data/1m.json` 是 alias manifest，不再是完整 range group。
 - 浏览器 runtime 只保留 UI 需要的字段：视频基础信息、歌曲标题/歌手、`seconds`、`isNiche`、`filterVersion`、`dataVersion`、blocklist 指纹。
 - `dataVersion` 绑定 meta、range payload、分片 manifest 和分片页；range/shard `sha256` 绑定 meta 与内容 hash 文件。
-- 搜索、分页、来源展开和快照选择是前端派生状态，不应回写 runtime payload。
+- 搜索、分页、来源展开、video setlist 和快照选择是前端派生状态，不应回写 runtime payload。
+- 来源展开只请求当前歌曲的 per-song source manifest 和 chunks；video setlist 只在用户点击 copy setlist 时按视频读取，不随来源展开批量下载。
 
 ## UI Proof
 

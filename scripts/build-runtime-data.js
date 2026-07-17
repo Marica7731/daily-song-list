@@ -548,11 +548,14 @@ function registerRequestDetailRecord({ type, record, scopeKey, detailRecords, so
   const recordMap = detailRecords[type];
   if (recordMap.has(detailKey)) return detailKey;
   if (type === "song") {
-    const sourceDetailKey = stableRequestKey(`song:${scopeKey}:${record.key}`);
-    sourceRecords.push({
-      key: sourceDetailKey,
-      occurrences: (record.occurrences || []).map((occurrence) => serializeOccurrence(occurrence, { includeSongs: true })),
-    });
+    const sourceVideoCount = Number(record.videoCount) || uniqueRuntimeVideoCount(record.occurrences || []);
+    const sourceDetailKey = sourceVideoCount > REQUEST_PREVIEW_SOURCE_LIMIT ? stableRequestKey(`song:${scopeKey}:${record.key}`) : "";
+    if (sourceDetailKey) {
+      sourceRecords.push({
+        key: sourceDetailKey,
+        occurrences: (record.occurrences || []).map((occurrence) => serializeOccurrence(occurrence, { includeSongs: true })),
+      });
+    }
     recordMap.set(detailKey, serializeSongRequestRecord(record, { detailKey, sourceDetailKey }));
   } else if (type === "artist") {
     recordMap.set(detailKey, serializeArtistRequestRecord(record, { detailKey }));
@@ -1152,7 +1155,7 @@ function serializeSongRequestRecord(record, options = {}) {
     artists: serializeCountMap(record.artists),
     channels: serializeCountMap(record.channels),
     variantLabels: Array.isArray(record.variantLabels) ? record.variantLabels : [],
-    occurrences: occurrences.slice(0, REQUEST_PREVIEW_SOURCE_LIMIT).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
+    occurrences: selectSourcePreviewOccurrences(occurrences, REQUEST_PREVIEW_SOURCE_LIMIT).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
     sourceDetailKey: options.sourceDetailKey || "",
     sourceDetailPath: "",
     searchText: requestRecordSearchText(record, "song"),
@@ -1296,6 +1299,19 @@ function requestRecordHasUnknownArtist(record) {
 
 function uniqueRuntimeVideoCount(occurrences) {
   return new Set((occurrences || []).map((occurrence) => occurrence.item?.videoId).filter(Boolean)).size;
+}
+
+function selectSourcePreviewOccurrences(occurrences, limit) {
+  const maxVideos = positiveInteger(limit, REQUEST_PREVIEW_SOURCE_LIMIT);
+  const selectedVideoIds = new Set();
+  for (const occurrence of occurrences || []) {
+    const videoId = occurrence?.item?.videoId;
+    if (!videoId || selectedVideoIds.has(videoId)) continue;
+    selectedVideoIds.add(videoId);
+    if (selectedVideoIds.size >= maxVideos) break;
+  }
+  if (!selectedVideoIds.size) return (occurrences || []).slice(0, maxVideos);
+  return (occurrences || []).filter((occurrence) => selectedVideoIds.has(occurrence?.item?.videoId));
 }
 
 function songIndexBucketForRequest(record) {
