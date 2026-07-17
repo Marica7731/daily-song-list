@@ -876,6 +876,8 @@ async function interactionFlow(browser) {
   await page.locator("#queryInput").fill("夜");
   const searchBeforeApply = await page.evaluate(() => window.location.search);
   if (new URLSearchParams(searchBeforeApply).has("q")) throw new Error(`query draft wrote q before apply: ${searchBeforeApply}`);
+  await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
+  await waitForQueryFilterTab(page);
   await setCheckbox(page, "#nicheOnlyToggle", true);
   await page.locator("#applyQueryButton").click();
   await waitForRows(page, errors, requests);
