@@ -137,9 +137,11 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
    - `data/ui/7d.<hash>.json`
    - `data/ui/all.<hash>.json`
    - `data/ui/7d.json` and `data/ui/all.json` as legacy fallback files
-   - `data/ui/ranges/<range>/manifest.<hash>.json` and `page-*.json`
-   - `data/ui/source-details/<range>/manifest.<hash>.json` and `page-*.json`
-   - `data/ui/search/<range>/manifest.<hash>.json` and `page-*.json`
+   - `data/ui/ranges/<range>/manifest.<hash>.json` and view/page shards
+   - `data/ui/ranges/<range>/records/<entity>/manifest.<hash>.json` and detail shards
+   - `data/ui/ranges/<range>/search/<prefix>/page-*.json` plus search manifests
+   - `data/ui/ranges/<range>/sources/<prefix>/<songIdentity>/manifest.<hash>.json` and source detail chunks
+   - `data/ui/video-setlists/<prefix>/<videoId>.json`
    - `data/diff/latest-7d.json`
    - `data/diff/latest-all.json`
    - `data/audit.json`
@@ -156,7 +158,7 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
    - `data/snapshots/index.json`
    - `data/status.json`
    - `data/latest.json`, `data/7d.json`, `data/all.json`, snapshots, and `data/audit.json` remain readable generation/review artifacts.
-   - `data/ui/meta.json` is written last and points to content-hashed compact runtime range files plus sharded runtime, source-detail, and search manifests. `dataVersion` and range/shard `sha256` values bind the meta file to the exact payloads so the browser can reject mismatched or empty runtime data instead of rendering a normal empty page.
+   - `data/ui/meta.json` is written last and points to content-hashed compact runtime range files plus sharded runtime, per-song source-detail, video-setlist, and search manifests. `dataVersion` and range/shard `sha256` values bind the meta file to the exact payloads so the browser can reject mismatched or empty runtime data instead of rendering a normal empty page.
    - `data/ui/*.json` and `data/ui/**/page-*.json` are the compact browser runtime payloads. They keep only the fields the UI needs, use `seconds` to format timestamp labels, and carry `filterVersion`, `nicheAnnotated`, and `dataVersion` so current data can skip the front-end compatibility safety scan.
    - The diff files compare latest ranks against the previous successful snapshot but are written in compact runtime form. Each `songRank` and `artistRank` entry keeps only `entityKey`, `rankDelta`, `countDelta`, and `isNew`; unchanged entries are omitted. `rankDelta` is `previousRank - currentRank`, so positive values mean the entity moved up and negative values mean it moved down.
    - `curationVersion` and `curationHash` are written into latest payloads, runtime meta, snapshots, and rank diff metadata. Rank diffs clean the previous snapshot in memory with the same current curation rules before comparing, so a new correction does not silently compare cleaned current data with dirty previous data.
@@ -169,6 +171,8 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
    - `FrontendUtils.sourcePresentationModel` inlines compact source videos by responsive proof contract: mobile 3+ rows show two inline sources, while desktop/tablet proof fixtures lock the 3-source layout. Inline sources render compact 16:9 video thumbnails without overlay text; the primary timestamp sits below the channel name in the source meta row and remains a jump link. Three or more source videos show a compact `查看全部来源`; one click renders the complete source list and the drawer toolbar provides `收起来源`. One-source rows no longer open drawers.
    - The unified query panel opens its shell before suggestions, recent searches, query indexes, or result-count previews run. Search input, recent searches, suggestions, and filters share one panel on mobile and desktop; there are no separate search/filter tabs. Search input updates only the draft query text, clear button, suggestions timer, and preview timer; IME composition does not rebuild the whole form on every intermediate character.
    - Each inline source includes a micro video thumbnail, channel link, timestamp meta link, optional extra-time toggle, and compact setlist-copy icon. Mobile rows keep the collapsed preview to two real inline sources and use a compact `查看全部来源` action for any 3+ source videos. Tablet and desktop proof fixtures lock the wider 3-source inline layout. The expanded source toolbar exposes the song-level copy action and the top collapse action.
+   - User-visible page, search, filter, source, video setlist, range, and snapshot requests go through `assets/request-scheduler.js`. Current-page and opened-source work is user-blocking, while adjacent-page prefetch and later source chunks are idle/preemptible so they cannot steal bandwidth from the drawer.
+   - Source drawers open immediately with partial loading state, then fetch the first per-song source chunk before loading remaining chunks incrementally. Video setlists are fetched only when a note/setlist copy button is used, so source expansion never downloads complete setlists for unrelated videos.
    - Pagination uses one token model across songs, artists, song index, and videos. Numeric pagination uses non-clickable ellipsis markers; mobile top pagination uses a compact page stepper, and the song index combines bucket selection with page selection in one toolbar.
    - Initial load reads `data/ui/meta.json` first, then loads only the active range shard manifest and first page from `meta.ranges[range].shards.runtime`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact cumulative range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.
    - `debug=1` adds a read-only runtime panel with `dataVersion`, active range path, status fields, fallback state, and recent resource timings.
@@ -215,8 +219,14 @@ npm run verify:local
 npm run screenshots:readme
 npm run version:assets
 npm run check
+npm run vsinger:discover-schema
+npm run vsinger:import-song-catalog
+npm run external:build-song-aliases
+npm run external:build-video-candidates
 python -m http.server 8080
 ```
+
+The VSinger commands are bounded adapter/enrichment tools. The schema and catalog commands default to `--dry-run`, and the normal `npm run update` / `npm run update:core` flow does not run a large external import. External alias and video-candidate outputs are candidate data with provenance for manual review; they do not change ranking counts or create verified site sources by themselves.
 
 For visual acceptance screenshots, start the static server and pass a traceable tag:
 
