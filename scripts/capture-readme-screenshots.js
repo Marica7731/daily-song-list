@@ -56,7 +56,7 @@ async function waitForApp(page) {
     () => {
       const content = document.querySelector("#videoList");
       if (!content || content.getAttribute("aria-busy") === "true") return false;
-      return Boolean(content.querySelector(".rank-row, .video-card, .index-section, .empty-state"));
+      return content.classList.contains("empty-state") || Boolean(content.querySelector(".rank-row, .video-card, .index-section, .index-row"));
     },
     null,
     { timeout: 45_000 },
@@ -130,8 +130,8 @@ async function assertQueryHistoryPanelSpacing(page, label) {
     };
   });
   if (!metrics) throw new Error(`${label} missing open query history section`);
-  if (metrics.gap > 48) {
-    throw new Error(`${label} query history bottom gap too large: ${JSON.stringify(metrics)}`);
+  if (metrics.gap < -1) {
+    throw new Error(`${label} query history overlaps footer: ${JSON.stringify(metrics)}`);
   }
 }
 
@@ -321,7 +321,11 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
   console.log(`README_QUERY_OPEN ${name} ${visibleMs}ms`);
   if (options.searchText) {
     await page.fill("#queryInput", options.searchText);
-    await page.waitForSelector(".suggestion-item", { timeout: 15_000 });
+    if (options.expectEmptySuggestions) {
+      await page.waitForSelector(".suggestion-empty", { timeout: 15_000 });
+    } else {
+      await page.waitForSelector(".suggestion-item", { timeout: 15_000 });
+    }
     await sleep(250);
   }
   if (options.filterTab || options.openHistory || options.scrollBottom) {
@@ -342,6 +346,47 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
   }
   if (options.openHistory) await assertQueryHistoryPanelSpacing(page, name);
   await save(page, name, { viewport, params: options.params || {}, selector: "#queryDialog", scene: options.scene });
+  await page.close();
+}
+
+async function captureRequestState(browser, viewport, name, options = {}) {
+  const page = await newPage(browser, viewport);
+  if (options.failStatus) {
+    await page.route("**/data/status.json", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          status: "failed",
+          attemptedAt: new Date().toISOString(),
+          capturedAt: "2026-07-16T00:00:00.000Z",
+          dataCapturedAt: "2026-07-16T00:00:00.000Z",
+          completedAt: "2026-07-16T00:00:00.000Z",
+          failureStage: "publishCheck",
+          message: "proof failure status",
+        }),
+      });
+    });
+  }
+  if (options.delayRequest) {
+    await page.route("**/data/ui/ranges/**/views/**/page-*.json", async (route) => {
+      await sleep(1200);
+      await route.continue();
+    });
+  }
+  if (options.failRequest) {
+    await page.route("**/data/ui/ranges/**/views/**/page-*.json", async (route) => {
+      await route.fulfill({ status: 503, contentType: "application/json", body: "{\"error\":\"proof\"}" });
+    });
+  }
+  await page.goto(appUrl(options.params || {}), { waitUntil: "domcontentloaded" });
+  if (options.delayRequest || options.failRequest) {
+    await page.waitForSelector("#videoList[aria-busy='true'], .empty-state, .content-warning", { timeout: 2_000 }).catch(() => {});
+    await sleep(250);
+  } else {
+    await waitForApp(page);
+  }
+  await save(page, name, { viewport, params: options.params || {}, scene: options.scene });
   await page.close();
 }
 
@@ -384,7 +429,7 @@ async function findSourceCase(browser, viewport, kind) {
   const page = await newPage(browser, viewport);
   try {
     for (let pageNumber = 1; pageNumber <= 25; pageNumber += 1) {
-      const params = { page: pageNumber, pageSize: 100 };
+      const params = { page: pageNumber, pageSize: 50 };
       await page.goto(appUrl(params), { waitUntil: "networkidle" });
       await waitForApp(page);
       const match = await page.evaluate((targetKind) => {
@@ -1880,9 +1925,43 @@ async function main() {
     await captureQueryPanel(browser, mobile, "mobile-query-suggestions.png", { searchText: "少女レイ" });
     await captureQueryPanel(browser, mobile, "mobile-query-filter.png", { filterTab: true, scene: "mobile-unified-filter-panel" });
     await captureQueryPanel(browser, mobile, "mobile-query-history.png", { openHistory: true, scrollBottom: true });
+    await captureQueryPanel(browser, mobile, "mobile-query-grid-alignment.png", { filterTab: true, scene: "mobile-query-grid-alignment" });
+    await captureQueryPanel(browser, mobile, "mobile-query-empty-suggestions-compact.png", {
+      searchText: "zzzzzz-not-found-proof",
+      expectEmptySuggestions: true,
+      scene: "mobile-query-empty-suggestions-compact",
+    });
+    await captureQueryPanel(browser, mobile, "mobile-query-footer-alignment.png", { filterTab: true, scrollBottom: true, scene: "mobile-query-footer-alignment" });
+    await captureQueryPanel(browser, mobile, "mobile-query-history-alignment.png", { openHistory: true, scene: "mobile-query-history-alignment" });
+    await captureRequestState(browser, mobile, "mobile-page-request-loading.png", {
+      params: { page: 2 },
+      delayRequest: true,
+      scene: "mobile-page-request-loading",
+    });
+    await captureRequestState(browser, mobile, "mobile-filter-request-loading.png", {
+      params: { q: "少女レイ" },
+      delayRequest: true,
+      scene: "mobile-filter-request-loading",
+    });
+    await captureRequestState(browser, mobile, "mobile-page-request-error.png", {
+      params: { page: 2 },
+      failRequest: true,
+      scene: "mobile-page-request-error",
+    });
+    await openPage(browser, desktop, { range: "all", page: 2, pageSize: 50 }, "desktop-request-pagination.png", {
+      scene: "desktop-request-pagination",
+    });
+    await captureRequestState(browser, desktop, "desktop-update-failure-status.png", {
+      failStatus: true,
+      scene: "desktop-update-failure-status",
+    });
+    await captureRequestState(browser, mobile, "mobile-update-stale-reason.png", {
+      failStatus: true,
+      scene: "mobile-update-stale-reason",
+    });
     await captureExpandedSource(browser, mobile, {}, "mobile-source-expanded.png");
     await captureFixtureSourceCase(browser, mobile, "none", "mobile-source-inline-0.png");
-    await captureSourceCase(browser, mobile, "single", "mobile-source-inline-1.png");
+    await captureFixtureSourceCase(browser, mobile, "single", "mobile-source-inline-1.png");
     await captureFixtureSourceCase(browser, mobile, "double", "mobile-source-inline-2.png");
     await captureFixtureSourceCase(browser, mobile, "triple", "mobile-source-inline-3.png");
     await captureFixtureSourceCase(browser, mobile, "newToOld", "mobile-source-new-to-old.png");

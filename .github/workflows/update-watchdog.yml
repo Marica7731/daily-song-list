@@ -1,0 +1,44 @@
+name: Watch published song-list freshness
+
+on:
+  schedule:
+    - cron: "37 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: daily-song-list-watchdog
+  cancel-in-progress: true
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check published freshness
+        id: watchdog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/watchdog-update.js
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Watchdog"
+            echo "- triggered: ${{ steps.watchdog.outputs.triggered }}"
+            echo "- reason: ${{ steps.watchdog.outputs.reason }}"
+            echo "- captured_at: ${{ steps.watchdog.outputs.captured_at }}"
+            echo "- age_minutes: ${{ steps.watchdog.outputs.age_minutes }}"
+          } >> "$GITHUB_STEP_SUMMARY"

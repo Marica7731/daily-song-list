@@ -710,6 +710,7 @@ svg {
 }
 
 .query-panel {
+  --query-grid-gap: 8px;
   position: absolute;
   top: var(--query-anchor-top);
   right: var(--query-anchor-right);
@@ -765,13 +766,23 @@ svg {
 
 .query-search-section input {
   min-height: 38px;
+  border-width: 1px;
   padding-right: 42px;
+}
+
+.query-search-section input:focus,
+.query-search-section input:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid rgba(15, 118, 110, 0.22);
+  outline-offset: 1px;
+  box-shadow: none;
 }
 
 .clear-query-button {
   position: absolute;
-  top: 13px;
+  top: 50%;
   right: 17px;
+  transform: translateY(-50%);
 }
 
 .query-panel-body {
@@ -832,6 +843,15 @@ svg {
   overflow: auto;
 }
 
+.suggestion-empty {
+  display: flex;
+  align-items: center;
+  min-height: 26px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .suggestion-group {
   display: grid;
   gap: var(--space-2);
@@ -870,16 +890,17 @@ mark {
 
 .query-panel-footer {
   display: grid;
-  grid-template-columns: auto auto;
-  justify-content: space-between;
-  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--query-grid-gap);
   border-top: 1px solid var(--line);
 }
 
 .query-panel-footer .primary-button,
 .query-panel-footer .secondary-button {
+  width: 100%;
   min-height: var(--control-large);
   border-radius: var(--radius-control);
+  white-space: nowrap;
 }
 
 .query-preview {
@@ -900,20 +921,34 @@ mark {
   min-height: 34px;
 }
 
+.query-context-card,
 .query-history-section summary {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 38px;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
-  padding: 0 10px;
+  padding: 6px 10px;
   background: #ffffff;
-  cursor: pointer;
   color: var(--ink);
   font-size: 12px;
   font-weight: 700;
+}
+
+.query-context-card {
+  gap: 3px;
+}
+
+.query-history-section {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.query-history-section summary {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  cursor: pointer;
   list-style: none;
 }
 
@@ -940,31 +975,30 @@ mark {
 }
 
 .query-history-section[open] {
+  grid-column: 1 / -1;
   gap: var(--space-2);
 }
 
 .query-history-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
+  gap: var(--query-grid-gap);
 }
 
-.query-quick-toggles,
-.query-compact-fields,
-.query-context-fields {
+.query-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
+  gap: var(--query-grid-gap);
 }
 
-.query-metric-control {
+.query-sort-field {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-2);
+  grid-column: 1 / -1;
+  gap: 5px;
   min-width: 0;
 }
 
+.query-field-caption,
 .query-compact-label {
   color: var(--muted);
   font-size: 11px;
@@ -977,7 +1011,7 @@ mark {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 6px;
   align-items: center;
-  min-height: 34px;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   padding: 0 8px;
@@ -1007,14 +1041,14 @@ mark {
 .query-segmented {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
+  gap: var(--query-grid-gap);
 }
 
 .query-segmented label {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   background: #ffffff;
@@ -1036,8 +1070,8 @@ mark {
 }
 
 .query-segmented label:has(input:focus-visible) {
-  outline: 3px solid rgba(15, 118, 110, 0.34);
-  outline-offset: 2px;
+  outline: 2px solid rgba(15, 118, 110, 0.24);
+  outline-offset: 1px;
 }
 
 /* 08. Shared content containers */
@@ -2665,6 +2699,7 @@ mark {
   display: grid;
   justify-items: center;
   gap: var(--space-3);
+  min-width: 0;
   padding: 34px 16px;
   border: 1px dashed var(--line-strong);
   border-radius: var(--radius-panel);
@@ -2674,8 +2709,15 @@ mark {
 }
 
 .empty p {
+  max-width: 100%;
   margin: 0;
+  overflow-wrap: anywhere;
   font-weight: 700;
+}
+
+.content-warning {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .clear-search {
@@ -2817,7 +2859,7 @@ mark {
     grid-template-areas:
       "rank content side"
       ". sources sources"
-      ". drawer drawer";
+      "drawer drawer drawer";
     min-height: 76px;
     content-visibility: visible;
     contain-intrinsic-size: auto;
@@ -3856,10 +3898,10 @@ mark {
     right: 0;
     bottom: var(--visual-viewport-bottom);
     left: 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     width: 100%;
-    height: auto;
+    height: min(calc(var(--visual-viewport-height) - 8px), 92dvh);
     max-height: min(calc(var(--visual-viewport-height) - 8px), 92dvh);
     border-radius: var(--radius-panel) var(--radius-panel) 0 0;
   }
@@ -3883,7 +3925,7 @@ mark {
   }
 
   .clear-query-button {
-    top: 9px;
+    top: 50%;
     right: 13px;
   }
 
@@ -3893,14 +3935,14 @@ mark {
   }
 
   .query-panel-body {
-    flex: 0 1 auto;
     gap: 8px;
+    min-height: 0;
+    overflow: auto;
     padding-top: 8px;
     padding-bottom: 12px;
   }
 
   .query-panel-footer {
-    grid-template-columns: auto auto;
     padding-block: 8px calc(8px + env(safe-area-inset-bottom));
   }
 
@@ -3945,12 +3987,8 @@ mark {
     height: 14px;
   }
 
-  .query-metric-control {
-    grid-template-columns: 34px minmax(0, 1fr);
-  }
-
   .query-segmented label {
-    min-height: 32px;
+    min-height: 36px;
     border-radius: var(--radius-small);
     font-size: 11.5px;
   }
@@ -3966,14 +4004,10 @@ mark {
   }
 
   .query-history-section summary {
-    min-height: 36px;
+    min-height: 40px;
     border-radius: var(--radius-small);
     padding-inline: 8px;
     font-size: 11.5px;
-  }
-
-  .query-history-fields {
-    grid-template-columns: 1fr;
   }
 
   .back-to-top {

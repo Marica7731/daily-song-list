@@ -17,6 +17,8 @@ const expectedScreenshots = [
   "desktop-partition-pagination.png",
   "desktop-search-snapshot-index.png",
   "desktop-pagination-middle.png",
+  "desktop-request-pagination.png",
+  "desktop-update-failure-status.png",
   "desktop-source-long-time.png",
   "tablet-source-inline-3.png",
   "mobile-song-rank.png",
@@ -42,6 +44,14 @@ const expectedScreenshots = [
   "mobile-query-suggestions.png",
   "mobile-query-filter.png",
   "mobile-query-history.png",
+  "mobile-query-grid-alignment.png",
+  "mobile-query-empty-suggestions-compact.png",
+  "mobile-query-footer-alignment.png",
+  "mobile-query-history-alignment.png",
+  "mobile-page-request-loading.png",
+  "mobile-filter-request-loading.png",
+  "mobile-page-request-error.png",
+  "mobile-update-stale-reason.png",
   "mobile-summary-filtered.png",
   "mobile-controls-active.png",
   "mobile-source-expanded.png",
@@ -203,6 +213,51 @@ const screenshotContracts = {
   "mobile-query-history.png": {
     viewport: { width: 390, height: 844 },
   },
+  "mobile-query-grid-alignment.png": {
+    scene: "mobile-query-grid-alignment",
+    viewport: { width: 390, height: 844 },
+    selector: "#queryDialog",
+  },
+  "mobile-query-empty-suggestions-compact.png": {
+    scene: "mobile-query-empty-suggestions-compact",
+    viewport: { width: 390, height: 844 },
+    selector: "#queryDialog",
+  },
+  "mobile-query-footer-alignment.png": {
+    scene: "mobile-query-footer-alignment",
+    viewport: { width: 390, height: 844 },
+    selector: "#queryDialog",
+  },
+  "mobile-query-history-alignment.png": {
+    scene: "mobile-query-history-alignment",
+    viewport: { width: 390, height: 844 },
+    selector: "#queryDialog",
+  },
+  "mobile-page-request-loading.png": {
+    scene: "mobile-page-request-loading",
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-filter-request-loading.png": {
+    scene: "mobile-filter-request-loading",
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-page-request-error.png": {
+    scene: "mobile-page-request-error",
+    viewport: { width: 390, height: 844 },
+  },
+  "desktop-request-pagination.png": {
+    scene: "desktop-request-pagination",
+    params: { range: "all", page: 2, pageSize: 50 },
+    viewport: { width: 1440, height: 900 },
+  },
+  "desktop-update-failure-status.png": {
+    scene: "desktop-update-failure-status",
+    viewport: { width: 1440, height: 900 },
+  },
+  "mobile-update-stale-reason.png": {
+    scene: "mobile-update-stale-reason",
+    viewport: { width: 390, height: 844 },
+  },
   "mobile-active-query-strip.png": {
     scene: "mobile-restrictive-filter-chips",
     params: { q: "少女レイ", hideUnknown: 1, metric: "videos", minCount: 2 },
@@ -233,7 +288,7 @@ const proofCoverage = {
   diagnostics: ["mobile-video-diagnostic-result.png", "desktop-all-diff-explanation.png"],
   identityFixtures: ["mobile-song-kana-romaji-merged.png", "desktop-song-kana-romaji-merged.png"],
   trendFixtures: ["mobile-trend-count-increase.png", "mobile-trend-rank-only-down.png", "mobile-trend-corrected-decrease.png"],
-  filterFixtures: ["mobile-query-filter.png", "mobile-active-query-strip.png", "desktop-query-panel.png"],
+  filterFixtures: ["mobile-query-filter.png", "mobile-query-grid-alignment.png", "mobile-active-query-strip.png", "desktop-query-panel.png"],
 };
 
 module.exports = {

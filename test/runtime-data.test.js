@@ -10,6 +10,8 @@ const {
   compactRankDiff,
   compactRankDiffEntries,
   CURRENT_FILTER_VERSION,
+  requestSearchBucketId,
+  requestSearchBuckets,
 } = require("../scripts/build-runtime-data");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
 
@@ -250,6 +252,16 @@ test("source detail and search records split heavy runtime fields out of page pa
   assert.equal(search[1].searchText.includes("song a"), true);
   assert.equal(search[0].searchText.includes("aaaaaaaaaaa"), true);
   assert.equal(search[1].searchText.includes("aaaaaaaaaaa"), true);
+});
+
+test("request search buckets route by token first character into bounded shards", () => {
+  const buckets = requestSearchBuckets("Song A Artist A Channel Name AAAAAAAAAAA");
+
+  assert.ok(buckets.size <= 8);
+  assert.ok([...buckets].every((bucket) => /^b\d{2}$/u.test(bucket)));
+  assert.equal(requestSearchBucketId("S"), requestSearchBucketId("S"));
+  assert.equal(requestSearchBucketId("ヤ"), requestSearchBucketId("ヤ"));
+  assert.notEqual(requestSearchBucketId("S"), requestSearchBucketId("T"));
 });
 
 test("compact rank diff removes unchanged entries and detailed fields", () => {

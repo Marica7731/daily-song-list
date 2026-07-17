@@ -129,21 +129,30 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
   assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: 34px;[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=|id="querySearchPanel"|id="queryFilterPanel"/u);
-  assert.match(indexSource, /class="query-discovery-panel"[\s\S]*class="query-filter-matrix"/u);
+  assert.match(indexSource, /class="query-discovery-panel"[\s\S]*class="[^"]*query-filter-matrix[^"]*"/u);
   assert.match(indexSource, /id="querySnapshotSummary"/u);
   assert.match(indexSource, /<\/div>\s*<footer class="query-panel-footer">/u);
   assert.doesNotMatch(indexSource, /<\/div>\s*<\/div>\s*<footer class="query-panel-footer">/u);
-  assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: auto auto;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\s*\{[\s\S]*height: auto;[\s\S]*max-height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);/u);
+  assert.match(indexSource, /class="query-filter-matrix query-form-grid"/u);
+  assert.match(indexSource, /class="query-sort-field" id="metricFilterGroup"/u);
+  assert.match(indexSource, /class="query-field query-compact-field query-context-card page-size-filter"/u);
+  assert.match(indexSource, /class="query-history-section query-context-card"/u);
+  assert.match(cssSource, /\.query-form-grid\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*gap: var\(--query-grid-gap\);/u);
+  assert.match(cssSource, /\.query-sort-field\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
+  assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
+  assert.doesNotMatch(cssSource, /grid-template-columns: auto auto;[\s\S]*justify-content: space-between/u);
+  assert.doesNotMatch(indexSource, /query-quick-toggles|query-compact-fields|query-context-fields|query-metric-control/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\s*\{[\s\S]*height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);[\s\S]*max-height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel-body\s*\{[\s\S]*padding-top: 8px;[\s\S]*padding-bottom: 12px;/u);
   assert.match(cssSource, /\.query-panel-body\s*\{[\s\S]*display: grid;[\s\S]*gap: var\(--space-3\);/u);
   assert.match(cssSource, /\.query-filter-matrix\s*\{/u);
   assert.doesNotMatch(cssSource, /\.query-tabs\b|\.query-tab\s*\{|\.query-tab\[|\.query-tab-panel\b|\.query-panel\.is-filter-tab/u);
   assert.doesNotMatch(cssSource, /\.query-panel\.is-filter-tab \.query-panel-body\s*\{[\s\S]*144px/u);
   assert.match(captureSource, /async function assertQueryHistoryPanelSpacing/u);
-  assert.match(captureSource, /query history bottom gap too large/u);
+  assert.match(captureSource, /query history overlaps footer/u);
   assert.doesNotMatch(appSource, /function setQueryPanelTab|queryTabButtons|queryTabPanels/u);
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"\. drawer drawer"/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
   assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
   assert.doesNotMatch(cssSource, /\.rank-actions-line|\.rank-trend-inline|\.rank-trend\s*\{/u);
@@ -211,6 +220,22 @@ test("search suggestions highlight safely without assigning untrusted innerHTML"
   assert.match(highlightBody, /mark\.textContent/u);
   assert.doesNotMatch(highlightBody, /innerHTML/u);
   assert.match(appSource, /RECENT_SEARCHES_KEY/u);
+});
+
+test("latest runtime uses request pagination instead of loading every page shard", () => {
+  assert.match(appSource, /function requestRuntimeMeta/u);
+  assert.match(appSource, /function canUseRequestRuntime/u);
+  assert.match(appSource, /async function requestViewPage/u);
+  assert.match(appSource, /buildRequestPageKey/u);
+  assert.match(appSource, /AbortController/u);
+  assert.match(appSource, /scheduleAdjacentRequestPagePrefetch/u);
+  assert.match(appSource, /loadRequestSearchRecords/u);
+  assert.match(appSource, /requestSearchBucket\(query\)/u);
+  assert.match(appSource, /loadRequestDetailRecords/u);
+  assert.match(appSource, /sourceDetailKey/u);
+  assert.doesNotMatch(appSource, /Promise\.all\(\s*pages\.map/u);
+  assert.doesNotMatch(appSource, /pagePayloads\.flatMap/u);
+  assert.doesNotMatch(appSource, /complete all runtime/i);
 });
 
 test("range cache song records are lazy getters", () => {

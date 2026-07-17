@@ -1222,13 +1222,21 @@
       shards.search,
       shards.searches,
     );
+    const request = firstObject(
+      rangeMeta?.requestShard,
+      rangeMeta?.requestShards,
+      rangeMeta?.request,
+      shards.request,
+    );
     return {
       page,
       sourceDetail,
       search,
+      request,
       hasPageShard: Boolean(shardPath(page)),
       hasSourceDetailShard: Boolean(shardPath(sourceDetail) || sourceDetail?.pathPattern || sourceDetail?.byKey),
       hasSearchShard: Boolean(shardPath(search) || search?.pathPattern || search?.byKey),
+      hasRequestShard: Boolean(request?.summary?.path || request?.views),
     };
   }
 

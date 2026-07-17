@@ -3,8 +3,19 @@ name: Update core song-list data
 on:
   schedule:
     - cron: "7 * * * *"
-    - cron: "37 * * * *"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "Update mode"
+        required: false
+        default: "fast"
+        type: choice
+        options:
+          - fast
+      reason:
+        description: "Dispatch reason"
+        required: false
+        default: "manual"
 
 permissions:
   contents: write
@@ -19,12 +30,13 @@ jobs:
     timeout-minutes: 45
     env:
       DAILY_SONG_SEARCH_LIMIT: "500"
-      DAILY_SONG_VIDEO_LIMIT: "160"
+      DAILY_SONG_UPDATE_MODE: ${{ inputs.mode || 'fast' }}
+      DAILY_SONG_VIDEO_LIMIT: "90"
       DAILY_SONG_VIDEO_CONCURRENCY: "1"
-      DAILY_SONG_RECENT_BUCKET_LIMIT: "70"
-      DAILY_SONG_MONTH_REFRESH_LIMIT: "20"
-      DAILY_SONG_MONTH_BACKFILL_TARGET: "3000"
-      DAILY_SONG_MONTH_BACKFILL_RECENT_BUCKET_LIMIT: "20"
+      DAILY_SONG_RECENT_BUCKET_LIMIT: "48"
+      DAILY_SONG_MONTH_REFRESH_LIMIT: "8"
+      DAILY_SONG_MONTH_BACKFILL_TARGET: "0"
+      DAILY_SONG_MONTH_BACKFILL_RECENT_BUCKET_LIMIT: "0"
       DAILY_SONG_MYGIT_TODAY_SNAPSHOTS: "1"
       DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS: "0"
       DAILY_SONG_MYGIT_TODAY_SNAPSHOT_LIMIT: "0"
@@ -62,7 +74,12 @@ jobs:
             echo "- run_id: $GITHUB_RUN_ID"
             echo "- run_attempt: $GITHUB_RUN_ATTEMPT"
             echo "- started_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- mode: $DAILY_SONG_UPDATE_MODE"
+            echo "- reason: ${{ inputs.reason || github.event_name }}"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Sync latest main before generating data
+        run: git pull --ff-only origin main
 
       - name: Update compact runtime data
         id: core
@@ -104,17 +121,17 @@ jobs:
           exit 1
 
       - name: Published runtime health check
-        if: steps.core.outcome == 'success'
+        if: steps.core.outcome == 'success' && steps.core.outputs.updated == 'true'
         run: |
           sleep 75
           for attempt in 1 2 3 4 5; do
-            if npm run check:published -- https://ytb-song-rank.culua.com/; then
+            if npm run check:published -- https://ytb-song-rank.culua.com/ --expected-meta data/ui/meta.json; then
               exit 0
             fi
             echo "Published runtime health check attempt ${attempt} failed; waiting for CDN propagation."
             sleep 45
           done
-          npm run check:published -- https://ytb-song-rank.culua.com/
+          npm run check:published -- https://ytb-song-rank.culua.com/ --expected-meta data/ui/meta.json
 
       - name: Finish run summary
         if: always()
@@ -122,6 +139,8 @@ jobs:
           {
             echo "- completed_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "- core_outcome: ${{ steps.core.outcome }}"
+            echo "- skipped: ${{ steps.core.outputs.skipped }}"
+            echo "- updated: ${{ steps.core.outputs.updated }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Fail when core update failed

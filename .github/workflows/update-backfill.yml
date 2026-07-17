@@ -1,0 +1,51 @@
+name: Prepare backfill inbox bundle
+
+on:
+  schedule:
+    - cron: "19 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-song-list-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      DAILY_SONG_UPDATE_MODE: "backfill"
+      DAILY_SONG_MONTH_BACKFILL_TARGET: "3000"
+      DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS: "7"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Sync latest main
+        run: git pull --ff-only origin main
+
+      - name: Prepare immutable backfill bundle
+        run: node scripts/run-backfill-update.js
+
+      - name: Commit backfill bundle
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/backfill-inbox
+          if git diff --cached --quiet; then
+            echo "No backfill bundle changes."
+            exit 0
+          fi
+          git commit -m "chore: prepare backfill inbox bundle"
+          git pull --rebase origin main
+          git push

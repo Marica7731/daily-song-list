@@ -590,6 +590,10 @@ async function firstLoad(browser, range, viewport) {
   if (seenForbidden.length) {
     throw new Error(`${range} first load requested forbidden resources before first content: ${seenForbidden.join(", ")}`);
   }
+  const fullRuntimeLoads = beforeFirstContentRequests.filter((item) => runtimePathPattern(range).test(item));
+  if (fullRuntimeLoads.length) {
+    throw new Error(`${range} first load requested full runtime JSON: ${fullRuntimeLoads.join(", ")}`);
+  }
   if (!activeRuntimePath || !beforeFirstContentRequests.includes(activeRuntimePath)) {
     throw new Error(`${range} did not request active runtime path before first content: ${activeRuntimePath || "missing"}`);
   }
@@ -798,6 +802,7 @@ async function desktopRankVisualGeometry(browser) {
     const secondRow = page.locator(".rank-row:not(.skeleton-row):has([data-toggle-source])").nth(1);
     if ((await secondRow.count()) === 1) {
       await secondRow.locator("[data-toggle-source]").first().click();
+      await page.waitForFunction(() => document.querySelectorAll(".rank-row.is-expanded").length >= 2, null, { timeout: 15000 });
       const expandedCount = await page.locator(".rank-row.is-expanded").count();
       if (expandedCount < 2) throw new Error(`desktop should allow multiple expanded rows, got ${expandedCount}`);
     }
@@ -2028,12 +2033,13 @@ async function compactSourceDrawerFlow(browser) {
     if (geometry.rowBox.borderLeft > 0 && !/rgba\(0,\s*0,\s*0,\s*0\)|transparent/u.test(geometry.rowBox.borderLeftColor)) {
       throw new Error(`top rank accent line should not continue through compact drawer ${JSON.stringify(geometry)}`);
     }
+    const isCompactDrawerViewport = viewport[0] <= 919;
     const expectedLeft =
-      viewport[0] <= 720
+      isCompactDrawerViewport
         ? geometry.row.left + geometry.rowBox.borderLeft + geometry.rowBox.paddingLeft
         : geometry.sourceStrip?.left || geometry.content?.left || geometry.drawer.left;
     const expectedWidth =
-      viewport[0] <= 720
+      isCompactDrawerViewport
         ? geometry.row.width - geometry.rowBox.borderLeft - geometry.rowBox.borderRight - geometry.rowBox.paddingLeft - geometry.rowBox.paddingRight
         : geometry.sourceStrip?.width || Math.max(0, (geometry.count?.right || geometry.drawer.right) - expectedLeft);
     if (Math.abs(geometry.drawer.left - expectedLeft) > 3) {
@@ -2505,7 +2511,7 @@ function runtimePathPattern(range) {
 
 function runtimeRequestPattern(range) {
   return new RegExp(
-    `^(?:data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json|data/ui/ranges/${range}/(?:manifest|page-\\d{4})\\.[0-9a-f]{12}\\.json)$`,
+    `^(?:data/ui/${range}(?:\\.[0-9a-f]{12})?\\.json|data/ui/ranges/${range}/(?:manifest|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/summary\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/views/.+/(?:manifest|index|page-\\d{4})\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/records/(?:song|artist|video)/shard-\\d{4}\\.[0-9a-f]{12}\\.json|data/ui/ranges/${range}/search/(?:manifest\\.[0-9a-f]{12}\\.json|[^/]+/page-\\d{4}\\.[0-9a-f]{12}\\.json)|data/ui/ranges/${range}/sources/(?:manifest|shard-\\d{4})\\.[0-9a-f]{12}\\.json)$`,
     "u",
   );
 }

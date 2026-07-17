@@ -10,14 +10,18 @@ test("core, review, and code checks use separate workflow files and concurrency 
   const core = readWorkflow("update-core.yml");
   const review = readWorkflow("build-review.yml");
   const check = readWorkflow("check-code.yml");
+  const watchdog = readWorkflow("update-watchdog.yml");
+  const backfill = readWorkflow("update-backfill.yml");
   const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"));
 
   assert.match(core, /name:\s*Update core song-list data/u);
   assert.match(core, /group:\s*daily-song-list-core/u);
   assert.match(core, /cancel-in-progress:\s*false/u);
-  assert.match(core, /cron:\s*"37 \* \* \* \*"/u);
+  assert.doesNotMatch(core, /cron:\s*"37 \* \* \* \*"/u);
   assert.match(core, /timeout-minutes:\s*35/u);
-  assert.match(core, /DAILY_SONG_MONTH_BACKFILL_TARGET:\s*"3000"/u);
+  assert.match(core, /DAILY_SONG_UPDATE_MODE:\s*\$\{\{ inputs\.mode \|\| 'fast' \}\}/u);
+  assert.match(core, /DAILY_SONG_MONTH_BACKFILL_TARGET:\s*"0"/u);
+  assert.match(core, /git pull --ff-only origin main/u);
   assert.match(core, /node scripts\/run-core-update\.js/u);
   assert.doesNotMatch(core, /review:build|build-review-queue|export-dirty-candidates/u);
   assert.match(core, /npm run mark:failure/u);
@@ -25,8 +29,21 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(core, /git clean -fd -- data\/snapshots data\/diff data\/ui/u);
   assert.match(core, /git add data\/latest\.json/u);
   assert.match(core, /git pull --rebase origin main/u);
-  assert.match(core, /npm run check:published -- https:\/\/ytb-song-rank\.culua\.com\//u);
+  assert.match(core, /npm run check:published -- https:\/\/ytb-song-rank\.culua\.com\/ --expected-meta data\/ui\/meta\.json/u);
   assert.match(core, /if:\s*always\(\) && steps\.core\.outcome != 'success'/u);
+
+  assert.match(watchdog, /name:\s*Watch published song-list freshness/u);
+  assert.match(watchdog, /cron:\s*"37 \* \* \* \*"/u);
+  assert.match(watchdog, /group:\s*daily-song-list-watchdog/u);
+  assert.match(watchdog, /actions:\s*write/u);
+  assert.match(watchdog, /node scripts\/watchdog-update\.js/u);
+
+  assert.match(backfill, /name:\s*Prepare backfill inbox bundle/u);
+  assert.match(backfill, /group:\s*daily-song-list-backfill/u);
+  assert.match(backfill, /DAILY_SONG_UPDATE_MODE:\s*"backfill"/u);
+  assert.match(backfill, /node scripts\/run-backfill-update\.js/u);
+  assert.match(backfill, /git add data\/backfill-inbox/u);
+  assert.doesNotMatch(backfill, /data\/latest\.json|data\/ui\/meta\.json/u);
 
   assert.match(review, /name:\s*Build review reports/u);
   assert.match(review, /group:\s*daily-song-list-review/u);
@@ -39,6 +56,9 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(check, /npm run check/u);
   assert.match(check, /"docs\/\*\*"/u);
   assert.equal(pkg.scripts["check:ui-proof"], "node scripts/validate-ui-proof.js");
+  assert.equal(pkg.scripts["health:update"], "node scripts/analyze-update-health.js");
+  assert.equal(pkg.scripts["watchdog:update"], "node scripts/watchdog-update.js");
+  assert.equal(pkg.scripts["backfill:inbox"], "node scripts/run-backfill-update.js");
   assert.match(pkg.scripts.check, /npm run check:ui-proof/u);
 });
 

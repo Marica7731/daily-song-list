@@ -1,7 +1,10 @@
 const crypto = require("node:crypto");
+const fs = require("node:fs");
 
 const DEFAULT_BASE_URL = "https://ytb-song-rank.culua.com/";
-const baseUrl = normalizeBaseUrl(process.argv[2] || process.env.DAILY_SONG_PUBLISHED_URL || DEFAULT_BASE_URL);
+const options = parseArgs(process.argv.slice(2));
+const baseUrl = normalizeBaseUrl(options.baseUrl || process.env.DAILY_SONG_PUBLISHED_URL || DEFAULT_BASE_URL);
+const expectedMeta = loadExpectedMeta(options.expectedMetaPath || process.env.DAILY_SONG_EXPECTED_META || "");
 const errors = [];
 
 main().catch((error) => {
@@ -15,6 +18,10 @@ async function main() {
   assert(meta.schemaVersion === 1, "meta.schemaVersion must be 1");
   assert(isSha256(meta.dataVersion), "meta.dataVersion must be sha256");
   assert(meta.capturedAt, "meta.capturedAt missing");
+  if (expectedMeta) {
+    assert(meta.dataVersion === expectedMeta.dataVersion, `published dataVersion ${meta.dataVersion} must match expected ${expectedMeta.dataVersion}`);
+    assert(meta.capturedAt === expectedMeta.capturedAt, `published capturedAt ${meta.capturedAt} must match expected ${expectedMeta.capturedAt}`);
+  }
 
   const status = await fetchJson("data/status.json").catch((error) => {
     errors.push(`status.json unavailable: ${error.message}`);
@@ -74,6 +81,7 @@ async function main() {
     await checkShard(rangeId, "runtime", rangeMeta.shards?.runtime, meta, "runtime-page-manifest", "items");
     await checkShard(rangeId, "sourceDetails", rangeMeta.shards?.sourceDetails, meta, "source-detail-manifest", "sources");
     await checkShard(rangeId, "search", rangeMeta.shards?.search, meta, "search-manifest", "records");
+    await checkRequestRuntime(rangeId, rangeMeta.shards?.request, meta);
   }
 
   if (errors.length) {
@@ -93,8 +101,25 @@ async function main() {
       `all=${meta.ranges["all"].itemCount}`,
       `7dPages=${meta.ranges["7d"].shards.runtime.pageCount}`,
       `allPages=${meta.ranges["all"].shards.runtime.pageCount}`,
+      `expected=${expectedMeta ? "matched" : "not-set"}`,
     ].join(" "),
   );
+}
+
+async function checkRequestRuntime(rangeId, requestMeta, meta) {
+  assert(requestMeta, `range ${rangeId} request runtime missing`);
+  const summary = await fetchJson(requestMeta.summary?.path || "");
+  assert(summary.kind === "request-summary", `range ${rangeId} request summary kind mismatch`);
+  assert(summary.dataVersion === meta.dataVersion, `range ${rangeId} request summary dataVersion mismatch`);
+  const defaultView = requestMeta.views?.songRank?.occurrences?.all;
+  assert(defaultView?.bootstrapPath, `range ${rangeId} request bootstrap missing`);
+  const page = await fetchJson(defaultView.bootstrapPath);
+  assert(page.kind === "request-view-page", `range ${rangeId} request bootstrap kind mismatch`);
+  assert(page.dataVersion === meta.dataVersion, `range ${rangeId} request bootstrap dataVersion mismatch`);
+  assert(Array.isArray(page.records) && page.records.length > 0, `range ${rangeId} request bootstrap records empty`);
+  const searchManifest = await fetchJson(requestMeta.search?.manifestPath || "");
+  assert(searchManifest.kind === "request-search-manifest", `range ${rangeId} request search manifest kind mismatch`);
+  assert(searchManifest.dataVersion === meta.dataVersion, `range ${rangeId} request search dataVersion mismatch`);
 }
 
 async function checkShard(rangeId, shardName, shardMeta, meta, expectedKind, recordField) {
@@ -175,4 +200,23 @@ function isSha256(value) {
 
 function sha256Text(text) {
   return crypto.createHash("sha256").update(text).digest("hex");
+}
+
+function parseArgs(args) {
+  const result = { baseUrl: "" };
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === "--expected-meta") {
+      result.expectedMetaPath = args[index + 1] || "";
+      index += 1;
+    } else if (!result.baseUrl) {
+      result.baseUrl = arg;
+    }
+  }
+  return result;
+}
+
+function loadExpectedMeta(filePath) {
+  if (!filePath) return null;
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
