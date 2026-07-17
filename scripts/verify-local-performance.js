@@ -118,6 +118,7 @@ async function waitForRows(page, errors = [], requests = []) {
 async function openFilterSheet(page) {
   await page.locator("#queryTrigger").click();
   await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.locator('[data-query-panel-tab="filter"]').waitFor({ state: "visible", timeout: verifyTimeout(15000, 30000) });
   await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
   await waitForQueryFilterTab(page);
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
@@ -126,6 +127,7 @@ async function openFilterSheet(page) {
 async function openMobileFilterSheet(page) {
   await page.locator("#queryTrigger").click();
   await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.locator('[data-query-panel-tab="filter"]').waitFor({ state: "visible", timeout: verifyTimeout(15000, 30000) });
   await page.locator('[data-query-panel-tab="filter"]').click({ force: true });
   await waitForQueryFilterTab(page);
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
@@ -144,7 +146,7 @@ async function waitForQueryFilterTab(page) {
       );
     },
     null,
-    { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 },
+    { timeout: verifyTimeout(15000, 30000) },
   );
 }
 
@@ -618,6 +620,7 @@ async function desktopRankVisualGeometry(browser) {
     const requests = [];
     page.on("request", (request) => requests.push(requestPath(request.url())));
     const url = new URL(baseUrl);
+    url.searchParams.set("range", "all");
     url.searchParams.set("pageSize", "100");
     url.searchParams.set("showUnknown", "1");
     await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
@@ -696,7 +699,7 @@ async function desktopRankVisualGeometry(browser) {
       throw new Error(`desktop trend visibility invalid ${JSON.stringify(geometry.trendCounts.slice(0, 10))}`);
     }
     if (!geometry.trendCounts.some((row) => row.visibleDesktop > 0)) throw new Error("desktop side area did not render any trend badge");
-    if (geometry.trendTexts.some((item) => !/^(新|升\d+|降\d+|增\d+|减\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
+    if (geometry.trendTexts.some((item) => !/^(新|名次[↑↓]\d+|收录\+\d+|修正−\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
       throw new Error(`desktop trend label invalid ${JSON.stringify(geometry.trendTexts.slice(0, 10))}`);
     }
     for (let index = 0; index < 3; index += 1) {
@@ -1378,7 +1381,7 @@ async function mobileRankVisualGeometry(browser) {
     if (closedGeometry.row && closedGeometry.title?.height < 25 && closedGeometry.row.height > compactRowHeightLimit) {
       throw new Error(`single-line mobile rank row too tall ${JSON.stringify(closedGeometry)}`);
     }
-    if (closedGeometry.allTrendTexts.some((item) => !/^(新|升\d+|降\d+|增\d+|减\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
+    if (closedGeometry.allTrendTexts.some((item) => !/^(新|名次[↑↓]\d+|收录\+\d+|修正−\d+)$/u.test(item.text) || item.scrollWidth > item.clientWidth + 1)) {
       throw new Error(`mobile trend label invalid ${JSON.stringify(closedGeometry.allTrendTexts.slice(0, 10))}`);
     }
     if (/^[+−+\-↑↓]$/u.test(closedGeometry.trendText) || /收录/u.test(closedGeometry.trendText)) {
@@ -1386,7 +1389,7 @@ async function mobileRankVisualGeometry(browser) {
     }
     if (/^\d+(?:源|点|来源)$/u.test(closedGeometry.buttonText)) throw new Error(`compact source button should use complete Chinese units ${JSON.stringify(closedGeometry)}`);
     if (closedGeometry.trend) {
-      if (!/^(新|升\d+|降\d+|增\d+|减\d+)$/u.test(closedGeometry.trendText)) throw new Error(`trend text invalid ${JSON.stringify(closedGeometry)}`);
+      if (!/^(新|名次[↑↓]\d+|收录\+\d+|修正−\d+)$/u.test(closedGeometry.trendText)) throw new Error(`trend text invalid ${JSON.stringify(closedGeometry)}`);
       if (closedGeometry.trendScrollWidth > closedGeometry.trendClientWidth + 1) throw new Error(`trend badge clipped ${JSON.stringify(closedGeometry)}`);
       if (closedGeometry.trend.height > 22) throw new Error(`trend badge too tall ${JSON.stringify(closedGeometry)}`);
       assertClose(closedGeometry.trend.centerY, closedGeometry.count.centerY, 2, "count and trend center", closedGeometry);

@@ -34,6 +34,14 @@ test("UI proof expected list covers source thumbnail states", () => {
     "tablet-source-inline-3.png",
     "desktop-range-7d.png",
     "desktop-range-all.png",
+    "desktop-all-diff-explanation.png",
+    "desktop-song-kana-romaji-merged.png",
+    "mobile-all-monotonic-summary.png",
+    "mobile-trend-count-increase.png",
+    "mobile-trend-rank-only-down.png",
+    "mobile-trend-corrected-decrease.png",
+    "mobile-song-kana-romaji-merged.png",
+    "mobile-video-diagnostic-result.png",
     "desktop-partition-pagination.png",
     "desktop-search-snapshot-index.png",
   ]) {
@@ -44,6 +52,14 @@ test("UI proof expected list covers source thumbnail states", () => {
 test("UI proof contracts pin new fixture scenes and proof docs", () => {
   assert.deepEqual(screenshotContracts["desktop-range-7d.png"].params, { fixture: "range", range: "7d" });
   assert.deepEqual(screenshotContracts["desktop-range-all.png"].params, { fixture: "range", range: "all" });
+  assert.equal(screenshotContracts["desktop-all-diff-explanation.png"].scene, "fixture-diff-explanation");
+  assert.equal(screenshotContracts["desktop-song-kana-romaji-merged.png"].scene, "fixture-identity-merge");
+  assert.equal(screenshotContracts["mobile-all-monotonic-summary.png"].scene, "fixture-all-monotonic-summary");
+  assert.equal(screenshotContracts["mobile-trend-count-increase.png"].scene, "fixture-trend-countIncrease");
+  assert.equal(screenshotContracts["mobile-trend-rank-only-down.png"].params.case, "rankOnlyDown");
+  assert.equal(screenshotContracts["mobile-trend-corrected-decrease.png"].params.case, "correctedDecrease");
+  assert.equal(screenshotContracts["mobile-song-kana-romaji-merged.png"].scene, "fixture-identity-merge");
+  assert.equal(screenshotContracts["mobile-video-diagnostic-result.png"].scene, "fixture-video-diagnostic");
   assert.deepEqual(screenshotContracts["desktop-monthly-song-rank.png"].params, { range: "1m", pageSize: 100 });
   assert.equal(screenshotContracts["desktop-monthly-song-rank.png"].scene, "desktop-all-range-song-rank");
   assert.deepEqual(screenshotContracts["desktop-artist-rank.png"].params, { view: "artistRank" });

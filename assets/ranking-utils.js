@@ -185,6 +185,92 @@
       mergeRecord(target, record);
       recordsByKey.delete(record.artistKey);
     }
+    mergeKanaRomajiArtistVariants(recordsByKey);
+  }
+
+  function mergeKanaRomajiArtistVariants(recordsByKey) {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
+      for (const record of records) {
+        if (recordsByKey.get(record.artistKey) !== record) continue;
+        const target = selectKanaRomajiTarget(record, recordsByKey);
+        if (!target) continue;
+        const [winner, loser] = compareRecordDominance(target, record) <= 0 ? [target, record] : [record, target];
+        if (winner === loser) continue;
+        mergeRecord(winner, loser);
+        recordsByKey.delete(loser.artistKey);
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  function selectKanaRomajiTarget(record, recordsByKey) {
+    const matches = [];
+    for (const candidate of recordsByKey.values()) {
+      if (candidate === record) continue;
+      if (artistIdentityMatch(record, candidate)) matches.push(candidate);
+    }
+    if (matches.length !== 1) return null;
+    return matches[0];
+  }
+
+  function artistIdentityMatch(a, b) {
+    const aNames = artistRecordNames(a);
+    const bNames = artistRecordNames(b);
+    for (const left of aNames) {
+      for (const right of bNames) {
+        if (hasArtistIdentityAnnotation(left) || hasArtistIdentityAnnotation(right)) continue;
+        if (kanaNameMatchesLatinName(left, right) || kanaNameMatchesLatinName(right, left)) return true;
+      }
+    }
+    return false;
+  }
+
+  function artistRecordNames(record) {
+    const names = [];
+    for (const entry of record.artists?.values?.() || []) {
+      if (entry?.name) names.push(entry.name);
+    }
+    return uniqueStrings(names);
+  }
+
+  function kanaNameMatchesLatinName(kanaName, latinName) {
+    const romanizedValues = kanaRomajiKeys(kanaName);
+    if (!romanizedValues.length) return false;
+    const tokens = latinArtistTokens(latinName);
+    if (!tokens.length) return false;
+    for (const romanized of romanizedValues) {
+      if (romanized.length < 4) continue;
+      for (const token of tokens) {
+        if (token === romanized || token.startsWith(romanized) || token.endsWith(romanized)) return true;
+      }
+    }
+    return false;
+  }
+
+  function kanaRomajiKeys(value) {
+    const normalized = cleanText(value).normalize("NFKC");
+    const segments = normalized.match(/[ぁ-んァ-ンー]{2,}/gu) || [];
+    return uniqueStrings(
+      segments
+        .filter((segment) => kanaMoraCount(segment) >= 2)
+        .map((segment) => normalizeArtistKey(romanizeJapaneseKana(segment)))
+        .filter((key) => key.length >= 4),
+    );
+  }
+
+  function kanaMoraCount(value) {
+    return Array.from(toHiraganaString(value)).filter((char) => !/[ゃゅょぁぃぅぇぉゎー]/u.test(char)).length;
+  }
+
+  function latinArtistTokens(value) {
+    return cleanText(value)
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .match(/[a-z0-9]{2,}/gu) || [];
   }
 
   function selectExistingBaseArtistRecord(record, recordsByKey) {
@@ -433,6 +519,7 @@
     addArtistBaseCandidate(candidates, stripTrailingNonArtistParenthetical(workBase), normalizeArtist);
     addArtistBaseCandidate(candidates, stripTrailingNonArtistDescriptor(workBase), normalizeArtist);
     addArtistBaseCandidate(candidates, stripTrailingNonArtistDescriptor(brokenBracketBase), normalizeArtist);
+    addArtistBaseCandidate(candidates, stripTrailingLatinAlias(text), normalizeArtist);
     addArtistBaseCandidate(candidates, stripTrailingNonArtistParenthetical(brokenBracketBase), normalizeArtist);
     addArtistBaseCandidate(candidates, workBase, normalizeArtist);
     addArtistBaseCandidate(candidates, brokenBracketBase, normalizeArtist);
@@ -463,6 +550,13 @@
     const spaced = text.match(/^(.+?)\s+([^\s].{0,80})\s*$/u);
     if (!spaced) return "";
     return isStandaloneNonArtistDescriptor(spaced[2]) ? spaced[1].trim() : "";
+  }
+
+  function stripTrailingLatinAlias(value) {
+    const match = String(value).normalize("NFKC").match(/^(.+?)\s+([A-Z][A-Z0-9]{2,12})\s*$/u);
+    if (!match) return "";
+    if (!/[^\p{Script=Latin}\p{Number}\s]/u.test(match[1])) return "";
+    return match[1].trim();
   }
 
   function stripArtistBeforeWorkAnnotation(value) {
@@ -496,6 +590,7 @@
     return (
       /^(?:19|20)\d{2}年?$/u.test(normalized) ||
       /^(?:(?:self\s*)?cover|covered|original|原曲|原唱|retake|take\s*\d+|key|キー|歌詞|調整|途中)$/iu.test(normalized) ||
+      /^(?:official|channel|ch\.?|youtube|yt)$/iu.test(normalized) ||
       /^(?:(?:piano|acoustic|アコースティック|ピアノ|アカペラ)(?:\s*(?:ver\.?|version|版))?)$/iu.test(normalized) ||
       /^(?:TV\s*size|TV\s*アニメ|TV\s*anime|TV|OP|ED|opening|ending|アニメ|動畫|动画|映画|ドラマ|主題歌|主题歌|テーマ|CM)(?:\s*(?:OP|ED|opening|ending|ver\.?|version|版|サイズ|size))?$/iu.test(
         normalized,
@@ -528,6 +623,72 @@
     return result;
   }
 
+  const KANA_DIGRAPHS = {
+    きゃ: "kya", きゅ: "kyu", きょ: "kyo", ぎゃ: "gya", ぎゅ: "gyu", ぎょ: "gyo",
+    しゃ: "sha", しゅ: "shu", しょ: "sho", しぇ: "she", じゃ: "ja", じゅ: "ju", じょ: "jo", じぇ: "je",
+    ちゃ: "cha", ちゅ: "chu", ちょ: "cho", ちぇ: "che", にゃ: "nya", にゅ: "nyu", にょ: "nyo",
+    ひゃ: "hya", ひゅ: "hyu", ひょ: "hyo", びゃ: "bya", びゅ: "byu", びょ: "byo",
+    ぴゃ: "pya", ぴゅ: "pyu", ぴょ: "pyo", みゃ: "mya", みゅ: "myu", みょ: "myo",
+    りゃ: "rya", りゅ: "ryu", りょ: "ryo", ゔぁ: "va", ゔぃ: "vi", ゔぇ: "ve", ゔぉ: "vo",
+    ふぁ: "fa", ふぃ: "fi", ふぇ: "fe", ふぉ: "fo", てぃ: "ti", でぃ: "di", とぅ: "tu", どぅ: "du",
+  };
+
+  const KANA_ROMAJI = {
+    あ: "a", い: "i", う: "u", え: "e", お: "o", ぁ: "a", ぃ: "i", ぅ: "u", ぇ: "e", ぉ: "o",
+    か: "ka", き: "ki", く: "ku", け: "ke", こ: "ko", が: "ga", ぎ: "gi", ぐ: "gu", げ: "ge", ご: "go",
+    さ: "sa", し: "shi", す: "su", せ: "se", そ: "so", ざ: "za", じ: "ji", ず: "zu", ぜ: "ze", ぞ: "zo",
+    た: "ta", ち: "chi", つ: "tsu", て: "te", と: "to", だ: "da", ぢ: "ji", づ: "zu", で: "de", ど: "do",
+    な: "na", に: "ni", ぬ: "nu", ね: "ne", の: "no", は: "ha", ひ: "hi", ふ: "fu", へ: "he", ほ: "ho",
+    ば: "ba", び: "bi", ぶ: "bu", べ: "be", ぼ: "bo", ぱ: "pa", ぴ: "pi", ぷ: "pu", ぺ: "pe", ぽ: "po",
+    ま: "ma", み: "mi", む: "mu", め: "me", も: "mo", や: "ya", ゆ: "yu", よ: "yo", ゃ: "ya", ゅ: "yu", ょ: "yo",
+    ら: "ra", り: "ri", る: "ru", れ: "re", ろ: "ro", わ: "wa", を: "o", ん: "n", ゔ: "vu",
+  };
+
+  function romanizeJapaneseKana(value) {
+    const normalized = toHiraganaString(value);
+    let result = "";
+    let doubleNext = false;
+    for (let index = 0; index < normalized.length; index += 1) {
+      const char = normalized[index];
+      if (char === "っ") {
+        doubleNext = true;
+        continue;
+      }
+      if (char === "ー") {
+        result += lastVowel(result);
+        doubleNext = false;
+        continue;
+      }
+      const pair = char + (normalized[index + 1] || "");
+      let romanized = KANA_DIGRAPHS[pair];
+      if (romanized) index += 1;
+      else romanized = KANA_ROMAJI[char];
+      if (romanized) {
+        if (doubleNext) result += firstConsonant(romanized);
+        result += romanized;
+        doubleNext = false;
+      } else {
+        result += char;
+        doubleNext = false;
+      }
+    }
+    return result;
+  }
+
+  function toHiraganaString(value) {
+    return String(value ?? "").normalize("NFKC").replace(/[ァ-ヶ]/gu, (char) => String.fromCharCode(char.charCodeAt(0) - 0x60));
+  }
+
+  function firstConsonant(value) {
+    const match = String(value).match(/^[bcdfghjklmnpqrstvwxyz]/iu);
+    return match ? match[0].toLowerCase() : "";
+  }
+
+  function lastVowel(value) {
+    const match = String(value).match(/[aeiou](?!.*[aeiou])/iu);
+    return match ? match[0].toLowerCase() : "";
+  }
+
   return {
     buildArtistRecords,
     buildArtistSongGroups,
@@ -535,6 +696,8 @@
     buildSongRecords,
     cleanText,
     isUnknownArtistName,
+    artistIdentityMatch,
+    kanaRomajiKeys,
     normalizeArtistKey,
     normalizeEntityKey,
     normalizeSongTitleKey,

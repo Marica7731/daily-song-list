@@ -260,28 +260,34 @@ test("trend display model uses compact semantic Chinese labels", () => {
     ariaLabel: "本期新进入榜单",
   });
   assert.deepEqual(trendDisplayModel({ rankDelta: 3, countDelta: 2 }), {
-    text: "升3",
-    kind: "up",
-    title: "排名上升 3 名，收录增加 2 次",
-    ariaLabel: "排名上升 3 名，收录增加 2 次",
+    text: "收录+2",
+    kind: "increase",
+    title: "收录增加 2 次；排名上升 3 名",
+    ariaLabel: "收录增加 2 次；排名上升 3 名",
   });
   assert.deepEqual(trendDisplayModel({ rankDelta: -4, countDelta: -1 }), {
-    text: "降4",
-    kind: "down",
-    title: "排名下降 4 名，收录减少 1 次",
-    ariaLabel: "排名下降 4 名，收录减少 1 次",
+    text: "修正−1",
+    kind: "decrease",
+    title: "数据修正导致收录减少 1 次；排名下降 4 名",
+    ariaLabel: "数据修正导致收录减少 1 次；排名下降 4 名",
   });
   assert.deepEqual(trendDisplayModel({ rankDelta: 0, countDelta: 5 }), {
-    text: "增5",
+    text: "收录+5",
     kind: "increase",
-    title: "收录增加 5 次",
-    ariaLabel: "收录增加 5 次",
+    title: "收录增加 5 次；排名未变化",
+    ariaLabel: "收录增加 5 次；排名未变化",
   });
   assert.deepEqual(trendDisplayModel({ rankDelta: 0, countDelta: -2 }), {
-    text: "减2",
+    text: "修正−2",
     kind: "decrease",
-    title: "收录减少 2 次",
-    ariaLabel: "收录减少 2 次",
+    title: "数据修正导致收录减少 2 次；排名未变化",
+    ariaLabel: "数据修正导致收录减少 2 次；排名未变化",
+  });
+  assert.deepEqual(trendDisplayModel({ rankDelta: -1, countDelta: 0 }), {
+    text: "名次↓1",
+    kind: "down",
+    title: "排名下降 1 名，收录次数未减少；其他歌曲增加导致相对名次变化",
+    ariaLabel: "排名下降 1 名，收录次数未减少；其他歌曲增加导致相对名次变化",
   });
   assert.equal(trendDisplayModel({ rankDelta: 0, countDelta: 0 }), null);
 });

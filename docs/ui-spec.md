@@ -32,6 +32,7 @@
 - 歌手、来源、频道和趋势是次级信息，使用 12px-13px。
 - 次数和趋势固定在右侧 `rank-side`，不得随标题长度移动。
 - 整行不可作为 YouTube 大链接；时间戳、频道和视频标题分别是独立链接。
+- 趋势标签必须明确对象：名次变化使用 `名次↑N` / `名次↓N`，收录增加使用 `收录+N`，数据修正减少使用 `修正−N`。禁止回退到裸 `升N`、`降N`、`增N`、`减N`。当名次和收录同时变化时，可见标签优先展示收录变化，`title` 和 `aria-label` 补全名次说明。
 
 ## 来源披露
 
@@ -107,8 +108,10 @@ README 截图矩阵至少包括：
 - 桌面歌曲榜、全量榜入口（legacy `1m` URL）、歌手榜、歌曲索引、视频页、查询面板、展开来源、中页分页。
 - 桌面 `7d`、`all` range fixture；这些是当前核心 runtime 的 proof。
 - 桌面分片分页 fixture、搜索索引 fixture 和快照索引 fixture。
+- 桌面累计 diff 解释 proof、桌面同标题假名/罗马音身份归并 proof。
 - 平板 3 来源内联 fixture。
 - 手机歌曲榜、歌手榜、歌曲索引、索引中页、索引末页、视频页、展开视频顶部和底部收起入口、active query strip、query recent、query suggestions、query filter、query history、展开来源。
+- 手机 all 单调摘要 proof、趋势名次下降 proof、趋势收录增加 proof、趋势修正减少 proof、同标题假名/罗马音身份归并 proof、指定视频诊断 proof。
 - 手机 320px 分页。
 - 手机 0 来源、1 来源、2 来源、3 来源、4+ 来源收起、4+ 来源展开顶部和底部收起入口、长频道名、长时间戳、额外时间点和封面 fallback。
 - 手机来源新到旧 fixture，至少用 `publishedAt` 降序校验来源显示顺序。

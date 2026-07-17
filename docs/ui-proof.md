@@ -25,6 +25,10 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Desktop 7d range fixture](assets/screenshots/desktop-range-7d.png) | ![Desktop all range fixture](assets/screenshots/desktop-range-all.png) | ![Desktop partition pagination fixture](assets/screenshots/desktop-partition-pagination.png) |
 
+| Cumulative diff proof | Kana/Romaji merge proof |
+| --- | --- |
+| ![Desktop cumulative diff explanation proof](assets/screenshots/desktop-all-diff-explanation.png) | ![Desktop same-title kana and romaji merge proof](assets/screenshots/desktop-song-kana-romaji-merged.png) |
+
 | Query panel | Expanded source drawer | Inline source thumbnails |
 | --- | --- | --- |
 | ![Desktop query panel](assets/screenshots/desktop-query-panel.png) | ![Desktop expanded sources](assets/screenshots/desktop-source-expanded.png) | ![Desktop inline source thumbnails](assets/screenshots/desktop-source-inline-3.png) |
@@ -44,6 +48,14 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | Song ranking | Artist ranking | Song index |
 | --- | --- | --- |
 | ![Mobile song ranking](assets/screenshots/mobile-song-rank.png) | ![Mobile artist ranking](assets/screenshots/mobile-artist-rank.png) | ![Mobile song index](assets/screenshots/mobile-song-index.png) |
+
+| All-time summary | Trend count increase | Trend rank down |
+| --- | --- | --- |
+| ![Mobile all-time monotonic summary proof](assets/screenshots/mobile-all-monotonic-summary.png) | ![Mobile trend count increase label](assets/screenshots/mobile-trend-count-increase.png) | ![Mobile trend rank-only down label](assets/screenshots/mobile-trend-rank-only-down.png) |
+
+| Trend correction | Kana/Romaji merge | Video diagnostic |
+| --- | --- | --- |
+| ![Mobile corrected count decrease label](assets/screenshots/mobile-trend-corrected-decrease.png) | ![Mobile same-title kana and romaji merge proof](assets/screenshots/mobile-song-kana-romaji-merged.png) | ![Mobile video diagnostic proof](assets/screenshots/mobile-video-diagnostic-result.png) |
 
 | Song index middle | Song index last | 320px pagination |
 | --- | --- | --- |

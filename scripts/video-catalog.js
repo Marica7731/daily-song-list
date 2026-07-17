@@ -130,8 +130,27 @@ function catalogToVideos(catalog) {
 function videoToCatalogEntry(video, nowIso, options = {}) {
   if (!isValidVideoId(video?.videoId)) return null;
   const songs = normalizeSongs(video.songs);
-  if (!songs.length) return null;
   const previous = options.previousEntry || null;
+  if (!songs.length) {
+    if (previous && !verifiedReductionReason(video, options)) {
+      return preservePreviousCatalogEntry(previous, video, nowIso, options, {
+        reason: "incoming_empty_song_set",
+        previousSongCount: normalizeSongs(previous.songs).length,
+        incomingSongCount: 0,
+        missingOccurrenceKeys: normalizeSongs(previous.songs).map(catalogSongOccurrenceKey).slice(0, 50),
+      });
+    }
+    return null;
+  }
+  const regression = previous ? songSetRegression(previous.songs, songs) : null;
+  if (regression?.isStrictSubset && !verifiedReductionReason(video, options)) {
+    return preservePreviousCatalogEntry(previous, video, nowIso, options, {
+      reason: "incoming_strict_song_subset",
+      previousSongCount: regression.previousCount,
+      incomingSongCount: regression.incomingCount,
+      missingOccurrenceKeys: regression.missingKeys.slice(0, 50),
+    });
+  }
   const publishedTimestamp = finiteTimestamp(video.publishedTimestamp);
   return {
     videoId: video.videoId,
@@ -155,7 +174,78 @@ function videoToCatalogEntry(video, nowIso, options = {}) {
     curationVersion: stringValue(options.curationVersion || video.curationVersion || previous?.curationVersion),
     curationHash: stringValue(options.curationHash || video.curationHash || previous?.curationHash),
     qualityStatus: stringValue(options.qualityStatus || video.qualityStatus || previous?.qualityStatus) || "usable",
+    ...(regression?.isSuperset
+      ? {
+          regressionAudit: {
+            reason: "incoming_song_superset",
+            previousSongCount: regression.previousCount,
+            incomingSongCount: regression.incomingCount,
+            checkedAt: nowIso,
+          },
+        }
+      : {}),
   };
+}
+
+function preservePreviousCatalogEntry(previous, video, nowIso, options, audit) {
+  return {
+    ...previous,
+    lastSeenAt: nowIso,
+    lastInspectedAt: stringValue(video.lastInspectedAt) || stringValue(video.catalogLastInspectedAt) || nowIso,
+    discoveryGroups: uniqueValues([
+      ...listValues(previous.discoveryGroups),
+      ...listValues(video.sourceGroups),
+      video.sourceGroup,
+    ]),
+    sourceUrls: uniqueValues([...listValues(previous.sourceUrls), ...listValues(video.sourceUrls)]),
+    curationVersion: stringValue(options.curationVersion || video.curationVersion || previous.curationVersion),
+    curationHash: stringValue(options.curationHash || video.curationHash || previous.curationHash),
+    qualityStatus: "suspicious_regression",
+    regressionAudit: {
+      ...audit,
+      incomingSelectedSourceId: stringValue(video.selectedSourceId || video.sourceId),
+      incomingSelectedSourceHash: stringValue(video.selectedSourceHash || video.sourceHash),
+      previousSelectedSourceId: stringValue(previous.selectedSourceId),
+      previousSelectedSourceHash: stringValue(previous.selectedSourceHash),
+      checkedAt: nowIso,
+    },
+  };
+}
+
+function verifiedReductionReason(video, options = {}) {
+  const reason = stringValue(video?.catalogReductionReason || video?.removalReason || options.reductionReason);
+  return /^(?:manual_curation|curation_removed|blocklist|manual_tombstone|verified_parser_correction|verified_source_replacement|identity_merge)$/u.test(
+    reason,
+  );
+}
+
+function songSetRegression(previousSongs, incomingSongs) {
+  const previousKeys = new Set(normalizeSongs(previousSongs).map(catalogSongOccurrenceKey));
+  const incomingKeys = new Set(normalizeSongs(incomingSongs).map(catalogSongOccurrenceKey));
+  if (!previousKeys.size || !incomingKeys.size) return null;
+  const missingKeys = [...previousKeys].filter((key) => !incomingKeys.has(key));
+  const addedKeys = [...incomingKeys].filter((key) => !previousKeys.has(key));
+  return {
+    previousCount: previousKeys.size,
+    incomingCount: incomingKeys.size,
+    missingKeys,
+    addedKeys,
+    isStrictSubset: missingKeys.length > 0 && addedKeys.length === 0,
+    isSuperset: missingKeys.length === 0 && addedKeys.length > 0,
+  };
+}
+
+function catalogSongOccurrenceKey(song) {
+  return [
+    Number.isInteger(song?.seconds) ? song.seconds : Math.max(0, Number(song?.seconds) || 0),
+    cleanIdentityPart(song?.title),
+    cleanIdentityPart(song?.artist),
+    cleanIdentityPart(song?.rawHash || song?.raw),
+  ].join("::");
+}
+
+function cleanIdentityPart(value) {
+  return stringValue(value).normalize("NFKC").toLocaleLowerCase().replace(/\s+/gu, " ").trim();
 }
 
 function normalizeCatalogEntry(entry) {
@@ -180,6 +270,7 @@ function normalizeCatalogEntry(entry) {
     curationVersion: stringValue(entry.curationVersion),
     curationHash: stringValue(entry.curationHash),
     qualityStatus: stringValue(entry.qualityStatus) || "usable",
+    ...(entry.regressionAudit && typeof entry.regressionAudit === "object" ? { regressionAudit: entry.regressionAudit } : {}),
   };
 }
 
@@ -326,6 +417,7 @@ function catalogEntrySignature(entry) {
     songs: (entry.songs || []).map((song) => [song.seconds, song.title, song.artist]),
     curationVersion: entry.curationVersion,
     qualityStatus: entry.qualityStatus,
+    regressionAudit: entry.regressionAudit || null,
   });
 }
 

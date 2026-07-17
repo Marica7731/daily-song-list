@@ -31,6 +31,10 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-range-7d.png" alt="Desktop 7d range proof fixture" width="320" /> | <img src="docs/assets/screenshots/desktop-range-all.png" alt="Desktop all range proof fixture" width="320" /> | <img src="docs/assets/screenshots/desktop-partition-pagination.png" alt="Desktop partition pagination proof fixture" width="320" /> |
 
+| Cumulative diff proof | Kana/Romaji merge proof |
+| --- | --- |
+| <img src="docs/assets/screenshots/desktop-all-diff-explanation.png" alt="Desktop cumulative diff explanation proof" width="320" /> | <img src="docs/assets/screenshots/desktop-song-kana-romaji-merged.png" alt="Desktop same-title kana and romaji merge proof" width="320" /> |
+
 | Search and filters | Expanded sources | 3 inline sources |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-query-panel.png" alt="Desktop unified search and filter panel" width="320" /> | <img src="docs/assets/screenshots/desktop-source-expanded.png" alt="Desktop expanded song sources" width="320" /> | <img src="docs/assets/screenshots/desktop-source-inline-3.png" alt="Desktop inline source thumbnails" width="320" /> |
@@ -48,6 +52,14 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | Song ranking | Artist ranking | Song index |
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/mobile-song-rank.png" alt="Mobile song ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-artist-rank.png" alt="Mobile artist ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-song-index.png" alt="Mobile song index" width="180" /> |
+
+| All-time summary | Trend count increase | Trend rank down |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-all-monotonic-summary.png" alt="Mobile all-time monotonic summary proof" width="180" /> | <img src="docs/assets/screenshots/mobile-trend-count-increase.png" alt="Mobile trend count increase label" width="180" /> | <img src="docs/assets/screenshots/mobile-trend-rank-only-down.png" alt="Mobile trend rank-only down label" width="180" /> |
+
+| Trend correction | Kana/Romaji merge | Video diagnostic |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/mobile-trend-corrected-decrease.png" alt="Mobile corrected count decrease label" width="180" /> | <img src="docs/assets/screenshots/mobile-song-kana-romaji-merged.png" alt="Mobile same-title kana and romaji merge proof" width="180" /> | <img src="docs/assets/screenshots/mobile-video-diagnostic-result.png" alt="Mobile video diagnostic proof" width="180" /> |
 
 | Song index middle | Song index last | 320px pagination |
 | --- | --- | --- |

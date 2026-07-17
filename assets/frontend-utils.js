@@ -945,6 +945,12 @@
     if (!trend) return null;
     const rankDelta = Number(trend.rankDelta) || 0;
     const countDelta = Number(trend.countDelta) || 0;
+    const rankText =
+      rankDelta > 0
+        ? `排名上升 ${rankDelta} 名`
+        : rankDelta < 0
+          ? `排名下降 ${Math.abs(rankDelta)} 名`
+          : "排名未变化";
     if (trend.isNew) {
       return {
         text: "新",
@@ -953,40 +959,39 @@
         ariaLabel: "本期新进入榜单",
       };
     }
-    if (rankDelta > 0) {
-      const countText = countDelta > 0 ? `，收录增加 ${countDelta} 次` : countDelta < 0 ? `，收录减少 ${Math.abs(countDelta)} 次` : "";
-      return {
-        text: `升${rankDelta}`,
-        kind: "up",
-        title: `排名上升 ${rankDelta} 名${countText}`,
-        ariaLabel: `排名上升 ${rankDelta} 名${countText}`,
-      };
-    }
-    if (rankDelta < 0) {
-      const value = Math.abs(rankDelta);
-      const countText = countDelta > 0 ? `，收录增加 ${countDelta} 次` : countDelta < 0 ? `，收录减少 ${Math.abs(countDelta)} 次` : "";
-      return {
-        text: `降${value}`,
-        kind: "down",
-        title: `排名下降 ${value} 名${countText}`,
-        ariaLabel: `排名下降 ${value} 名${countText}`,
-      };
-    }
     if (countDelta > 0) {
       return {
-        text: `增${countDelta}`,
+        text: `收录+${countDelta}`,
         kind: "increase",
-        title: `收录增加 ${countDelta} 次`,
-        ariaLabel: `收录增加 ${countDelta} 次`,
+        title: `收录增加 ${countDelta} 次；${rankText}`,
+        ariaLabel: `收录增加 ${countDelta} 次；${rankText}`,
       };
     }
     if (countDelta < 0) {
       const value = Math.abs(countDelta);
+      const reason = trend.reason || trend.reasonCode || "数据修正";
       return {
-        text: `减${value}`,
+        text: `修正−${value}`,
         kind: "decrease",
-        title: `收录减少 ${value} 次`,
-        ariaLabel: `收录减少 ${value} 次`,
+        title: `${reason}导致收录减少 ${value} 次；${rankText}`,
+        ariaLabel: `${reason}导致收录减少 ${value} 次；${rankText}`,
+      };
+    }
+    if (rankDelta > 0) {
+      return {
+        text: `名次↑${rankDelta}`,
+        kind: "up",
+        title: `排名上升 ${rankDelta} 名，收录次数未减少`,
+        ariaLabel: `排名上升 ${rankDelta} 名，收录次数未减少`,
+      };
+    }
+    if (rankDelta < 0) {
+      const value = Math.abs(rankDelta);
+      return {
+        text: `名次↓${value}`,
+        kind: "down",
+        title: `排名下降 ${value} 名，收录次数未减少；其他歌曲增加导致相对名次变化`,
+        ariaLabel: `排名下降 ${value} 名，收录次数未减少；其他歌曲增加导致相对名次变化`,
       };
     }
     return null;

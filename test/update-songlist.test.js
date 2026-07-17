@@ -14,6 +14,7 @@ const {
   collectCarryForwardVideos,
   collectInspectionCacheSkipIds,
   createRequestLimiter,
+  extractSearchItems,
   extractMygitTodaySnapshotItems,
   filterArtistRichMixedSourceSongs,
   fetchMygitTodaySnapshotSource,
@@ -21,6 +22,7 @@ const {
   isBlockedSource,
   mergeInspectionCache,
   mergeFetchedAndCarriedVideos,
+  parseOptionalLimit,
   parseRetryAfterMs,
   randomJitterMs,
   retryDelayMs,
@@ -390,6 +392,81 @@ test("mygit today snapshot index selects the latest retained snapshot per day", 
   assert.deepEqual(
     entries.map((entry) => entry.id),
     ["20260715T140648Z", "20260714T230000Z", "20260713T220000Z"],
+  );
+});
+
+test("mygit today snapshot zero limits mean unbounded", () => {
+  assert.equal(parseOptionalLimit("0", 3), 0);
+  assert.equal(parseOptionalLimit("", 3), 3);
+  assert.equal(parseOptionalLimit("5", 3), 5);
+  assert.throws(() => parseOptionalLimit("-1", 3), /Expected optional limit/u);
+
+  const entries = selectMygitTodaySnapshotEntries(
+    {
+      snapshots: [
+        { id: "20260715T140648Z", path: "data/today-snapshots/20260715T140648Z.json", capturedAt: "2026-07-15T14:06:48.000Z" },
+        { id: "20260714T230000Z", path: "data/today-snapshots/20260714T230000Z.json", capturedAt: "2026-07-14T23:00:00.000Z" },
+        { id: "20260713T220000Z", path: "data/today-snapshots/20260713T220000Z.json", capturedAt: "2026-07-13T22:00:00.000Z" },
+        { id: "20260710T220000Z", path: "data/today-snapshots/20260710T220000Z.json", capturedAt: "2026-07-10T22:00:00.000Z" },
+      ],
+    },
+    new Date("2026-07-15T15:00:00Z"),
+    { lookbackDays: 0, maxSnapshots: 0 },
+  );
+
+  assert.deepEqual(
+    entries.map((entry) => entry.id),
+    ["20260715T140648Z", "20260714T230000Z", "20260713T220000Z", "20260710T220000Z"],
+  );
+});
+
+test("search item extraction supports ordinary videos and Shorts renderers", () => {
+  const data = {
+    contents: [
+      {
+        videoRenderer: {
+          videoId: "VIDEOID0001",
+          title: { runs: [{ text: "ordinary video" }] },
+          ownerText: { runs: [{ text: "channel", navigationEndpoint: { browseEndpoint: { browseId: "UC123", canonicalBaseUrl: "/@ordinary" } } }] },
+          lengthText: { simpleText: "1:23:45" },
+        },
+      },
+      {
+        reelItemRenderer: {
+          videoId: "SHORTID0002",
+          headline: { simpleText: "short reel" },
+          navigationEndpoint: { reelWatchEndpoint: { videoId: "SHORTID0002" } },
+        },
+      },
+      {
+        shortsLockupViewModel: {
+          overlayMetadata: { primaryText: { content: "short lockup" } },
+          onTap: { innertubeCommand: { commandMetadata: { webCommandMetadata: { url: "/shorts/SHORTID0003" } } } },
+        },
+      },
+      {
+        richItemRenderer: {
+          content: {
+            reelItemRenderer: {
+              videoId: "SHORTID0003",
+              headline: { simpleText: "duplicate nested short" },
+            },
+          },
+        },
+      },
+      { richItemRenderer: { content: { playlistRenderer: { playlistId: "PL1234567890" } } } },
+    ],
+  };
+
+  const items = extractSearchItems(data);
+
+  assert.deepEqual(
+    items.map((item) => [item.videoId, item.sourceRendererType]),
+    [
+      ["VIDEOID0001", "videoRenderer"],
+      ["SHORTID0002", "reelItemRenderer"],
+      ["SHORTID0003", "shortsLockupViewModel"],
+    ],
   );
 });
 

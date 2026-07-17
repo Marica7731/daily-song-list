@@ -7,9 +7,11 @@ const expectedScreenshots = [
   "desktop-song-index.png",
   "desktop-range-7d.png",
   "desktop-range-all.png",
+  "desktop-all-diff-explanation.png",
   "desktop-video-view.png",
   "desktop-query-panel.png",
   "desktop-source-expanded.png",
+  "desktop-song-kana-romaji-merged.png",
   "desktop-source-inline-3.png",
   "desktop-partition-pagination.png",
   "desktop-search-snapshot-index.png",
@@ -17,6 +19,12 @@ const expectedScreenshots = [
   "desktop-source-long-time.png",
   "tablet-source-inline-3.png",
   "mobile-song-rank.png",
+  "mobile-all-monotonic-summary.png",
+  "mobile-trend-count-increase.png",
+  "mobile-trend-rank-only-down.png",
+  "mobile-trend-corrected-decrease.png",
+  "mobile-song-kana-romaji-merged.png",
+  "mobile-video-diagnostic-result.png",
   "mobile-artist-rank.png",
   "mobile-song-index.png",
   "mobile-song-index-middle-page.png",
@@ -91,6 +99,46 @@ const screenshotContracts = {
     params: { fixture: "range", range: "all" },
     viewport: { width: 1440, height: 900 },
   },
+  "desktop-all-diff-explanation.png": {
+    scene: "fixture-diff-explanation",
+    params: { fixture: "diff-explanation" },
+    viewport: { width: 1440, height: 900 },
+  },
+  "desktop-song-kana-romaji-merged.png": {
+    scene: "fixture-identity-merge",
+    params: { fixture: "identity-merge" },
+    viewport: { width: 1440, height: 900 },
+  },
+  "mobile-all-monotonic-summary.png": {
+    scene: "fixture-all-monotonic-summary",
+    params: { fixture: "all-summary" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-trend-count-increase.png": {
+    scene: "fixture-trend-countIncrease",
+    params: { fixture: "trend", case: "countIncrease" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-trend-rank-only-down.png": {
+    scene: "fixture-trend-rankOnlyDown",
+    params: { fixture: "trend", case: "rankOnlyDown" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-trend-corrected-decrease.png": {
+    scene: "fixture-trend-correctedDecrease",
+    params: { fixture: "trend", case: "correctedDecrease" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-song-kana-romaji-merged.png": {
+    scene: "fixture-identity-merge",
+    params: { fixture: "identity-merge" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-video-diagnostic-result.png": {
+    scene: "fixture-video-diagnostic",
+    params: { fixture: "video-diagnostic" },
+    viewport: { width: 390, height: 844 },
+  },
   "mobile-source-inline-2.png": {
     scene: "fixture-double",
     params: { fixture: "double" },
@@ -148,6 +196,9 @@ const proofCoverage = {
     newToOld: "mobile-source-new-to-old.png",
   },
   dataIndexFixtures: ["desktop-partition-pagination.png", "desktop-search-snapshot-index.png"],
+  diagnostics: ["mobile-video-diagnostic-result.png", "desktop-all-diff-explanation.png"],
+  identityFixtures: ["mobile-song-kana-romaji-merged.png", "desktop-song-kana-romaji-merged.png"],
+  trendFixtures: ["mobile-trend-count-increase.png", "mobile-trend-rank-only-down.png", "mobile-trend-corrected-decrease.png"],
 };
 
 module.exports = {

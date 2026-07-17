@@ -75,6 +75,115 @@ test("video catalog merge preserves firstSeenAt while replacing refreshed songs"
   assert.equal(catalogToVideos(result.catalog)[0].songs[0].index, 1);
 });
 
+test("video catalog preserves previous songs when a refreshed video loses a strict subset", () => {
+  const previous = {
+    ...createEmptyVideoCatalog("2026-07-12T00:00:00Z"),
+    videos: [
+      {
+        ...video("AAAAAAAAAAA", 2, "old song"),
+        firstSeenAt: "2026-07-12T01:00:00Z",
+        lastSeenAt: "2026-07-12T01:00:00Z",
+        lastInspectedAt: "2026-07-12T01:00:00Z",
+        songs: [songAt("星間飛行", 950), songAt("KICK BACK", 1166)],
+        curationVersion: "curation-v1:old",
+        qualityStatus: "usable",
+      },
+    ],
+  };
+
+  const result = mergeVideosIntoCatalog(
+    previous,
+    [
+      {
+        ...video("AAAAAAAAAAA", 1, "星間飛行"),
+        songs: [songAt("星間飛行", 950)],
+      },
+    ],
+    NOW,
+    { curationVersion: "curation-v1:new" },
+  );
+  const [entry] = result.catalog.videos;
+
+  assert.deepEqual(
+    entry.songs.map((item) => item.title),
+    ["星間飛行", "KICK BACK"],
+  );
+  assert.equal(entry.qualityStatus, "suspicious_regression");
+  assert.equal(entry.regressionAudit.reason, "incoming_strict_song_subset");
+  assert.equal(entry.regressionAudit.previousSongCount, 2);
+  assert.equal(entry.regressionAudit.incomingSongCount, 1);
+});
+
+test("video catalog preserves previous songs when a refreshed video has no usable timestamps", () => {
+  const previous = {
+    ...createEmptyVideoCatalog("2026-07-12T00:00:00Z"),
+    videos: [
+      {
+        ...video("AAAAAAAAAAA", 2, "old song"),
+        firstSeenAt: "2026-07-12T01:00:00Z",
+        lastSeenAt: "2026-07-12T01:00:00Z",
+        lastInspectedAt: "2026-07-12T01:00:00Z",
+        songs: [songAt("星間飛行", 950)],
+        curationVersion: "curation-v1:old",
+        qualityStatus: "usable",
+      },
+    ],
+  };
+
+  const result = mergeVideosIntoCatalog(previous, [{ ...video("AAAAAAAAAAA", 1, ""), songs: [] }], NOW, {
+    curationVersion: "curation-v1:new",
+  });
+  const [entry] = result.catalog.videos;
+
+  assert.deepEqual(
+    entry.songs.map((item) => item.title),
+    ["星間飛行"],
+  );
+  assert.equal(entry.qualityStatus, "suspicious_regression");
+  assert.equal(entry.regressionAudit.reason, "incoming_empty_song_set");
+  assert.equal(entry.regressionAudit.previousSongCount, 1);
+  assert.equal(entry.regressionAudit.incomingSongCount, 0);
+});
+
+test("video catalog accepts refreshed song supersets", () => {
+  const previous = {
+    ...createEmptyVideoCatalog("2026-07-12T00:00:00Z"),
+    videos: [
+      {
+        ...video("AAAAAAAAAAA", 2, "old song"),
+        firstSeenAt: "2026-07-12T01:00:00Z",
+        lastSeenAt: "2026-07-12T01:00:00Z",
+        lastInspectedAt: "2026-07-12T01:00:00Z",
+        songs: [songAt("星間飛行", 950)],
+        curationVersion: "curation-v1:old",
+        qualityStatus: "usable",
+      },
+    ],
+  };
+
+  const result = mergeVideosIntoCatalog(
+    previous,
+    [
+      {
+        ...video("AAAAAAAAAAA", 1, "星間飛行"),
+        songs: [songAt("星間飛行", 950), songAt("KICK BACK", 1166)],
+      },
+    ],
+    NOW,
+    { curationVersion: "curation-v1:new" },
+  );
+  const [entry] = result.catalog.videos;
+
+  assert.deepEqual(
+    entry.songs.map((item) => item.title),
+    ["星間飛行", "KICK BACK"],
+  );
+  assert.equal(entry.qualityStatus, "usable");
+  assert.equal(entry.regressionAudit.reason, "incoming_song_superset");
+  assert.equal(entry.regressionAudit.previousSongCount, 1);
+  assert.equal(entry.regressionAudit.incomingSongCount, 2);
+});
+
 test("video catalog summary reports month coverage", () => {
   const result = rebuildVideoCatalogFromVideos([video("AAAAAAAAAAA", 2, "song"), video("BBBBBBBBBBB", 24 * 40, "old song")], NOW);
   const summary = catalogSummary(result.catalog, NOW);
@@ -127,5 +236,14 @@ function song(title) {
     time: "0:01:00",
     title,
     artist: "artist",
+  };
+}
+
+function songAt(title, seconds) {
+  return {
+    ...song(title),
+    index: seconds,
+    seconds,
+    time: seconds === 950 ? "0:15:50" : "0:19:26",
   };
 }

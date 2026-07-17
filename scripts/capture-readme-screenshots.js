@@ -3,6 +3,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { expectedScreenshots } = require("./ui-proof-config");
 const { pngDimensions, proofInputEntries, proofInputHash, sha256Buffer, validateUiProof } = require("./validate-ui-proof");
+const { buildSongRecords } = require("../assets/ranking-utils");
+const { trendDisplayModel } = require("../assets/frontend-utils");
 const proofFixture = require("../test/fixtures/ui-proof-runtime.json");
 
 const args = process.argv.slice(2);
@@ -1218,6 +1220,320 @@ async function assertDataIndexFixtureProof(page, kind, label) {
   }
 }
 
+function trendFixtureCases() {
+  return {
+    countIncrease: {
+      title: "收录增长优先展示",
+      artist: "Trend Proof Artist",
+      count: "12次",
+      trend: { rankDelta: 7, countDelta: 12 },
+      expectedText: "收录+12",
+      expectedKind: "increase",
+    },
+    rankOnlyDown: {
+      title: "名次相对下滑",
+      artist: "Rank Proof Artist",
+      count: "4次",
+      trend: { rankDelta: -1, countDelta: 0 },
+      expectedText: "名次↓1",
+      expectedKind: "down",
+    },
+    correctedDecrease: {
+      title: "收录修正减少",
+      artist: "Correction Proof Artist",
+      count: "3次",
+      trend: { rankDelta: 0, countDelta: -2 },
+      expectedText: "修正−2",
+      expectedKind: "decrease",
+    },
+  };
+}
+
+function rankRowProofHtml({ rank = "01", title, artist, count = "1次", trendModel = null, subline = "" }) {
+  return `
+    <div class="rank-row proof-row">
+      <span class="rank-number">${escapeHtml(rank)}</span>
+      <div class="rank-content">
+        <h2 class="rank-title">${escapeHtml(title)} <span class="niche-badge">小众</span></h2>
+        <div class="rank-subline"><span class="subline-primary">${escapeHtml(artist)}</span>${subline ? `<span>${escapeHtml(subline)}</span>` : ""}</div>
+      </div>
+      <div class="rank-side">
+        <div class="rank-side-top">
+          <span class="rank-count"><span class="rank-count-value">${escapeHtml(count)}</span></span>
+          ${
+            trendModel
+              ? `<span class="trend-badge trend-${escapeHtml(trendModel.kind)}" title="${escapeHtml(trendModel.title)}" aria-label="${escapeHtml(trendModel.ariaLabel)}">${escapeHtml(trendModel.text)}</span>`
+              : ""
+          }
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function captureTrendFixtureCase(browser, viewport, caseName, name) {
+  const proof = trendFixtureCases()[caseName];
+  if (!proof) throw new Error(`unknown trend proof fixture: ${caseName}`);
+  const model = trendDisplayModel(proof.trend);
+  if (!model || model.text !== proof.expectedText || model.kind !== proof.expectedKind) {
+    throw new Error(`trend proof model mismatch: ${caseName} ${JSON.stringify(model)}`);
+  }
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body>
+        <main class="layout">
+          <section class="content-shell rank-panel proof-trend-fixture" data-proof-trend="${escapeHtml(caseName)}">
+            ${rankRowProofHtml({ rank: "07", title: proof.title, artist: proof.artist, count: proof.count, trendModel: model })}
+          </section>
+        </main>
+      </body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  await assertTrendFixtureProof(page, proof, name);
+  await saveElement(page, page.locator(".proof-trend-fixture").first(), name, {
+    minBytes: 4_000,
+    viewport,
+    params: { fixture: "trend", case: caseName },
+    selector: ".proof-trend-fixture",
+    scene: `fixture-trend-${caseName}`,
+  });
+  await page.close();
+}
+
+async function assertTrendFixtureProof(page, proof, label) {
+  const shape = await page.locator(".proof-trend-fixture").first().evaluate((node) => {
+    const badge = node.querySelector(".trend-badge");
+    return {
+      text: badge?.textContent?.trim() || "",
+      className: badge?.className || "",
+      title: badge?.getAttribute("title") || "",
+      ariaLabel: badge?.getAttribute("aria-label") || "",
+      badgeWidth: badge?.getBoundingClientRect().width || 0,
+      badgeScrollWidth: badge?.scrollWidth || 0,
+      badgeClientWidth: badge?.clientWidth || 0,
+      overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  if (shape.overflow || shape.text !== proof.expectedText || !shape.className.includes(`trend-${proof.expectedKind}`)) {
+    throw new Error(`${label} trend fixture invalid: ${JSON.stringify(shape)}`);
+  }
+  if (shape.badgeScrollWidth > shape.badgeClientWidth + 1 || shape.badgeWidth < 34) {
+    throw new Error(`${label} trend badge clips: ${JSON.stringify(shape)}`);
+  }
+}
+
+function identityMergeRecords() {
+  return buildSongRecords([
+    identityOccurrence("花に亡霊", "ヨルシカ", "proofA"),
+    identityOccurrence("花に亡霊", "Yorushika", "proofB"),
+    identityOccurrence("少女レイ", "みきとP", "proofC"),
+    identityOccurrence("少女レイ", "MikitoP", "proofD"),
+    identityOccurrence("からくりピエロ", "みきとP", "proofE"),
+    identityOccurrence("からくりピエロ", "MikitoP feat. 初音ミク", "proofF"),
+  ]);
+}
+
+function identityOccurrence(title, artist, videoId) {
+  return {
+    item: {
+      videoId,
+      title: `Identity proof ${videoId}`,
+      channelName: "Identity Proof Channel",
+      publishedTimestamp: Date.parse("2026-07-16T12:00:00Z"),
+    },
+    song: {
+      title,
+      artist,
+      seconds: 60,
+      time: "1:00",
+    },
+  };
+}
+
+async function captureIdentityMergeFixtureCase(browser, viewport, name) {
+  const records = identityMergeRecords();
+  const mergedRecords = records.filter((record) => record.count === 2 && ["花に亡霊", "少女レイ"].includes(record.title));
+  const protectedRecords = records.filter((record) => record.title === "からくりピエロ");
+  if (mergedRecords.length !== 2 || protectedRecords.length !== 2) {
+    throw new Error(`identity merge proof invalid: ${JSON.stringify(records.map((record) => ({ title: record.title, count: record.count })))}`);
+  }
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body>
+        <main class="layout">
+          <section class="content-shell rank-panel proof-identity-fixture">
+            ${rankRowProofHtml({ rank: "01", title: "花に亡霊", artist: "ヨルシカ / Yorushika", count: "2次", subline: "同名歌曲合并" })}
+            ${rankRowProofHtml({ rank: "02", title: "少女レイ", artist: "みきとP / MikitoP", count: "2次", subline: "假名与罗马音合并" })}
+            ${rankRowProofHtml({ rank: "03", title: "からくりピエロ", artist: "feat 身份保持拆分", count: "1次", subline: "不跨身份误合并" })}
+          </section>
+        </main>
+      </body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  await assertIdentityMergeFixtureProof(page, name);
+  await saveElement(page, page.locator(".proof-identity-fixture").first(), name, {
+    minBytes: 8_000,
+    viewport,
+    params: { fixture: "identity-merge" },
+    selector: ".proof-identity-fixture",
+    scene: "fixture-identity-merge",
+  });
+  await page.close();
+}
+
+async function assertIdentityMergeFixtureProof(page, label) {
+  const shape = await page.locator(".proof-identity-fixture").first().evaluate((node) => ({
+    rows: Array.from(node.querySelectorAll(".rank-row")).map((row) => row.textContent.trim()),
+    overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+  }));
+  if (shape.overflow || shape.rows.length !== 3 || !shape.rows[0].includes("2次") || !shape.rows[2].includes("不跨身份误合并")) {
+    throw new Error(`${label} identity merge fixture invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
+function allSummaryFixtureHtml() {
+  const all = proofFixture.rangeCases?.all || {};
+  const seven = proofFixture.rangeCases?.["7d"] || {};
+  return `
+    <section class="controls proof-all-summary-fixture" id="controls" aria-label="All range summary proof">
+      <div class="controls-inner">
+        <div class="segmented range-mode" role="group" aria-label="范围">
+          <button class="tab" type="button" data-range="7d" aria-pressed="false">${escapeHtml(seven.label || "最近7天")}</button>
+          <button class="tab active" type="button" data-range="all" aria-pressed="true">${escapeHtml(all.label || "全量累计")}</button>
+        </div>
+        <button class="query-trigger" id="queryTrigger" type="button" aria-label="打开搜索与筛选">
+          <svg class="query-trigger-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" /></svg>
+        </button>
+      </div>
+      <div class="summary" id="summary">
+        <div class="summary-main">
+          <span class="summary-title">歌曲榜</span>
+          <span class="summary-metrics">
+            <span>全量累计</span>
+            <span>${escapeHtml(all.itemCount || "1461")}个视频</span>
+            <span>永久快照不清理</span>
+          </span>
+        </div>
+        <p class="summary-note">子集刷新保留旧歌单，原始 occurrence 不回退。</p>
+      </div>
+    </section>
+  `;
+}
+
+async function captureAllSummaryFixtureCase(browser, viewport, name) {
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body>
+        <main class="layout">${allSummaryFixtureHtml()}</main>
+      </body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  await assertAllSummaryFixtureProof(page, name);
+  await saveElement(page, page.locator(".proof-all-summary-fixture").first(), name, {
+    minBytes: 5_000,
+    viewport,
+    params: { fixture: "all-summary" },
+    selector: ".proof-all-summary-fixture",
+    scene: "fixture-all-monotonic-summary",
+  });
+  await page.close();
+}
+
+async function assertAllSummaryFixtureProof(page, label) {
+  const shape = await page.locator(".proof-all-summary-fixture").first().evaluate((node) => ({
+    text: node.textContent.trim(),
+    height: node.getBoundingClientRect().height,
+    overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+  }));
+  if (shape.overflow || !shape.text.includes("全量累计") || !shape.text.includes("子集刷新保留旧歌单") || shape.height > 220) {
+    throw new Error(`${label} all summary fixture invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
+function diagnosticFixtureHtml(kind) {
+  if (kind === "video") {
+    return `
+      <section class="content-shell rank-panel proof-diagnostic-fixture" data-proof-diagnostic="video">
+        ${rankRowProofHtml({ rank: "ID", title: "VmLgly38CwY 已进入候选与 catalog", artist: "diagnose:video", count: "OK", subline: "search renderer / comments / runtime shard" })}
+        ${rankRowProofHtml({ rank: "ST", title: "firstFailureStage: no_failure_currently_recorded", artist: "诊断输出保留搜索与原始评论证据", count: "1份" })}
+      </section>
+    `;
+  }
+  return `
+    <section class="content-shell rank-panel proof-diagnostic-fixture" data-proof-diagnostic="diff">
+      ${rankRowProofHtml({ rank: "DF", title: "累计差异解释", artist: "explain:diff --range all", count: "all" })}
+      ${rankRowProofHtml({ rank: "RG", title: "incoming_strict_song_subset 会保留旧歌单", artist: "catalog regression audit", count: "safe" })}
+    </section>
+  `;
+}
+
+async function captureDiagnosticFixtureCase(browser, viewport, kind, name) {
+  const page = await newPage(browser, viewport);
+  const cssHref = new URL("assets/styles.css", baseUrl).toString();
+  await page.setContent(
+    `<!doctype html>
+    <html lang="zh-CN">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="${cssHref}" />
+      </head>
+      <body>
+        <main class="layout">${diagnosticFixtureHtml(kind)}</main>
+      </body>
+    </html>`,
+    { waitUntil: "networkidle" },
+  );
+  await assertDiagnosticFixtureProof(page, kind, name);
+  await saveElement(page, page.locator(".proof-diagnostic-fixture").first(), name, {
+    minBytes: 6_000,
+    viewport,
+    params: { fixture: kind === "video" ? "video-diagnostic" : "diff-explanation" },
+    selector: ".proof-diagnostic-fixture",
+    scene: kind === "video" ? "fixture-video-diagnostic" : "fixture-diff-explanation",
+  });
+  await page.close();
+}
+
+async function assertDiagnosticFixtureProof(page, kind, label) {
+  const shape = await page.locator(".proof-diagnostic-fixture").first().evaluate((node) => ({
+    kind: node.dataset.proofDiagnostic || "",
+    text: node.textContent.trim(),
+    overflow: document.body.scrollWidth > document.documentElement.clientWidth,
+  }));
+  const requiredText = kind === "video" ? "VmLgly38CwY" : "incoming_strict_song_subset";
+  if (shape.overflow || shape.kind !== kind || !shape.text.includes(requiredText)) {
+    throw new Error(`${label} diagnostic fixture invalid: ${JSON.stringify(shape)}`);
+  }
+}
+
 async function assertFilteredSummaryCopy(page) {
   const shape = await page.evaluate(() => {
     const summary = document.querySelector("#summary");
@@ -1340,9 +1656,11 @@ async function main() {
     await openPage(browser, desktop, { view: "songAz" }, "desktop-song-index.png");
     await captureRangeFixtureCase(browser, desktop, "7d", "desktop-range-7d.png");
     await captureRangeFixtureCase(browser, desktop, "all", "desktop-range-all.png");
+    await captureDiagnosticFixtureCase(browser, desktop, "diff", "desktop-all-diff-explanation.png");
     await openPage(browser, desktopWide, { view: "videos" }, "desktop-video-view.png");
     await captureQueryPanel(browser, desktop, "desktop-query-panel.png", { filterTab: true });
     await captureExpandedSource(browser, desktop, {}, "desktop-source-expanded.png");
+    await captureIdentityMergeFixtureCase(browser, desktop, "desktop-song-kana-romaji-merged.png");
     await captureFixtureSourceCase(browser, desktop, "triple", "desktop-source-inline-3.png");
     await captureDataIndexFixtureCase(browser, desktop, "partition-pagination", "desktop-partition-pagination.png");
     await captureDataIndexFixtureCase(browser, desktop, "search-snapshot-index", "desktop-search-snapshot-index.png");
@@ -1350,6 +1668,12 @@ async function main() {
     await captureFixtureSourceCase(browser, tablet, "triple", "tablet-source-inline-3.png");
 
     await openPage(browser, mobile, {}, "mobile-song-rank.png");
+    await captureAllSummaryFixtureCase(browser, mobile, "mobile-all-monotonic-summary.png");
+    await captureTrendFixtureCase(browser, mobile, "countIncrease", "mobile-trend-count-increase.png");
+    await captureTrendFixtureCase(browser, mobile, "rankOnlyDown", "mobile-trend-rank-only-down.png");
+    await captureTrendFixtureCase(browser, mobile, "correctedDecrease", "mobile-trend-corrected-decrease.png");
+    await captureIdentityMergeFixtureCase(browser, mobile, "mobile-song-kana-romaji-merged.png");
+    await captureDiagnosticFixtureCase(browser, mobile, "video", "mobile-video-diagnostic-result.png");
     await openPage(browser, mobile, { view: "artistRank" }, "mobile-artist-rank.png");
     await openPage(browser, mobile, { view: "songAz" }, "mobile-song-index.png");
     await captureSongIndexPage(browser, mobile, "middle", "mobile-song-index-middle-page.png");

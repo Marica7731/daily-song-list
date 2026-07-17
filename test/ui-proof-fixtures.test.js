@@ -83,6 +83,22 @@ test("UI proof data-index fixture covers partition pagination, search indexes, a
   assert.deepEqual([...snapshotTimes].sort((a, b) => b - a), snapshotTimes);
 });
 
+test("UI proof config covers diagnostics, identity merge, trend labels, and all range proof", () => {
+  for (const name of proofCoverage.trendFixtures) {
+    assert.equal(expectedScreenshots.includes(name), true, `missing trend proof ${name}`);
+    assert.equal(screenshotContracts[name].params.fixture, "trend");
+  }
+  for (const name of proofCoverage.identityFixtures) {
+    assert.equal(expectedScreenshots.includes(name), true, `missing identity proof ${name}`);
+    assert.equal(screenshotContracts[name].scene, "fixture-identity-merge");
+  }
+  for (const name of proofCoverage.diagnostics) {
+    assert.equal(expectedScreenshots.includes(name), true, `missing diagnostic proof ${name}`);
+  }
+  assert.equal(expectedScreenshots.includes("mobile-all-monotonic-summary.png"), true);
+  assert.equal(screenshotContracts["mobile-all-monotonic-summary.png"].scene, "fixture-all-monotonic-summary");
+});
+
 function occurrencesFromSourceCase(caseName) {
   return proofFixture.sourceCases[caseName].groups.map((group) => ({
     item: {

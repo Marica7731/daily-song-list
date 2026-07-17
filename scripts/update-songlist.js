@@ -62,6 +62,7 @@ const LATEST_PATH = path.join(DATA_DIR, "latest.json");
 const STATUS_PATH = path.join(DATA_DIR, "status.json");
 const AUDIT_PATH = path.join(DATA_DIR, "audit.json");
 const INSPECTION_CACHE_PATH = path.join(DATA_DIR, "inspection-cache.json");
+const MYGIT_TODAY_SNAPSHOT_STATE_PATH = path.join(DATA_DIR, "mygit-today-snapshot-import-state.json");
 const SONG_SEARCH_INDEX_PATH = path.join(DATA_DIR, "song-search-known-songs.json");
 const DISPLAY_TIME_ZONE = "Asia/Shanghai";
 
@@ -130,8 +131,8 @@ const MONTH_BACKFILL_RECENT_BUCKET_LIMIT = positiveInteger(
   Math.max(1, Math.floor(VIDEO_LIMIT / 8)),
 );
 const MYGIT_TODAY_SNAPSHOTS_ENABLED = !isDisabledEnv(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOTS);
-const MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS = positiveInteger(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS, 0);
-const MYGIT_TODAY_SNAPSHOT_LIMIT = positiveInteger(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_LIMIT, 0);
+const MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS = parseOptionalLimit(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS, 0);
+const MYGIT_TODAY_SNAPSHOT_LIMIT = parseOptionalLimit(process.env.DAILY_SONG_MYGIT_TODAY_SNAPSHOT_LIMIT, 0);
 const RECENT_WINDOW_DAYS = positiveInteger(process.env.DAILY_SONG_RECENT_WINDOW_DAYS, 7);
 const RECENT_WINDOW_MS = RECENT_WINDOW_DAYS === 7 ? WEEK_MS : RECENT_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 const RECENT_WINDOW_HOURS = RECENT_WINDOW_DAYS * 24;
@@ -356,7 +357,7 @@ async function collectCandidates(now) {
       mergeCandidate(byVideoId, item, search, nowMs);
     }
   }
-  const mygitResult = await fetchMygitTodaySnapshotSource(now);
+  const mygitResult = await fetchMygitTodaySnapshotSource(now, { persistState: true });
   if (mygitResult.summary) searchSummaries.push(mygitResult.summary);
   for (const item of mygitResult.items) {
     mergeCandidate(
@@ -449,8 +450,10 @@ async function fetchMygitTodaySnapshotSource(now, options = {}) {
   const indexUrl = options.indexUrl || MYGIT_TODAY_SNAPSHOT_INDEX_URL;
   const rawBaseUrl = String(options.rawBaseUrl || MYGIT_RAW_BASE_URL).replace(/\/+$/u, "");
   const fetchImpl = options.fetchImpl || fetch;
-  const lookbackDays = positiveInteger(options.lookbackDays, MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS);
-  const maxSnapshots = positiveInteger(options.maxSnapshots, MYGIT_TODAY_SNAPSHOT_LIMIT);
+  const lookbackDays = parseOptionalLimit(options.lookbackDays, MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS);
+  const maxSnapshots = parseOptionalLimit(options.maxSnapshots, MYGIT_TODAY_SNAPSHOT_LIMIT);
+  const statePath = options.statePath || MYGIT_TODAY_SNAPSHOT_STATE_PATH;
+  const importState = options.persistState ? loadMygitSnapshotImportState(statePath) : createMygitSnapshotImportState();
   const baseSummary = {
     sourceGroup: MYGIT_TODAY_SNAPSHOT_SOURCE_GROUP,
     sourceLabel: MYGIT_TODAY_SNAPSHOT_SOURCE_LABEL,
@@ -476,7 +479,11 @@ async function fetchMygitTodaySnapshotSource(now, options = {}) {
 
   try {
     const index = await fetchJsonUrl(fetchImpl, indexUrl);
-    const selectedEntries = selectMygitTodaySnapshotEntries(index, now, { lookbackDays, maxSnapshots });
+    const selectedEntries = selectMygitTodaySnapshotEntries(index, now, {
+      lookbackDays,
+      maxSnapshots,
+      importedSnapshotIds: importState.importedSnapshotIds,
+    });
     const byVideoId = new Map();
     const fetchedSnapshotIds = [];
     const snapshotErrors = [];
@@ -511,6 +518,16 @@ async function fetchMygitTodaySnapshotSource(now, options = {}) {
     console.log(
       `[mygit:${status}] snapshots=${fetchedSnapshotIds.length}/${selectedEntries.length} rawItems=${rawItemCount} items=${items.length} errors=${snapshotErrors.length}`,
     );
+    if (options.persistState) {
+      writeMygitSnapshotImportState(statePath, updateMygitSnapshotImportState(importState, {
+        attemptedAt: collectedAt,
+        status,
+        selectedEntries,
+        fetchedSnapshotIds,
+        itemCount: items.length,
+        snapshotErrors,
+      }));
+    }
     return {
       summary: {
         ...baseSummary,
@@ -528,6 +545,16 @@ async function fetchMygitTodaySnapshotSource(now, options = {}) {
     };
   } catch (error) {
     console.warn(`[mygit:error] ${error.message}`);
+    if (options.persistState) {
+      writeMygitSnapshotImportState(statePath, updateMygitSnapshotImportState(importState, {
+        attemptedAt: collectedAt,
+        status: "error",
+        selectedEntries: [],
+        fetchedSnapshotIds: [],
+        itemCount: 0,
+        snapshotErrors: [{ message: error.message }],
+      }));
+    }
     return {
       summary: {
         ...baseSummary,
@@ -543,11 +570,12 @@ async function fetchMygitTodaySnapshotSource(now, options = {}) {
 }
 
 function selectMygitTodaySnapshotEntries(index, now, options = {}) {
-  const lookbackDays = positiveInteger(options.lookbackDays, MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS);
-  const maxSnapshots = positiveInteger(options.maxSnapshots, MYGIT_TODAY_SNAPSHOT_LIMIT);
+  const lookbackDays = parseOptionalLimit(options.lookbackDays, MYGIT_TODAY_SNAPSHOT_LOOKBACK_DAYS);
+  const maxSnapshots = parseOptionalLimit(options.maxSnapshots, MYGIT_TODAY_SNAPSHOT_LIMIT);
+  const importedSnapshotIds = new Set(listValues(options.importedSnapshotIds));
   const nowMs = new Date(now).getTime();
   if (!Number.isFinite(nowMs)) return [];
-  const earliestMs = nowMs - lookbackDays * 24 * 60 * 60 * 1000;
+  const earliestMs = lookbackDays > 0 ? nowMs - lookbackDays * 24 * 60 * 60 * 1000 : Number.NEGATIVE_INFINITY;
   const latestAllowedMs = nowMs + 6 * 60 * 60 * 1000;
   const sorted = listValues(index?.snapshots)
     .map((entry) => ({ entry, timestamp: mygitSnapshotEntryTimestamp(entry) }))
@@ -556,10 +584,12 @@ function selectMygitTodaySnapshotEntries(index, now, options = {}) {
     .sort((a, b) => b.timestamp - a.timestamp);
   const byDay = new Map();
   for (const item of sorted) {
+    const snapshotId = item.entry?.id || item.entry?.file || item.entry?.path || "";
+    if (snapshotId && importedSnapshotIds.has(snapshotId)) continue;
     const day = mygitSnapshotEntryDay(item.entry, item.timestamp);
     if (!day || byDay.has(day)) continue;
     byDay.set(day, item.entry);
-    if (byDay.size >= maxSnapshots) break;
+    if (maxSnapshots > 0 && byDay.size >= maxSnapshots) break;
   }
   return [...byDay.values()];
 }
@@ -631,6 +661,57 @@ function upsertMygitSnapshotCandidate(byVideoId, item) {
   if (!existing.channelId && item.channelId) existing.channelId = item.channelId;
   if (!existing.channelHandle && item.channelHandle) existing.channelHandle = item.channelHandle;
   if (!existing.snapshotId && item.snapshotId) existing.snapshotId = item.snapshotId;
+}
+
+function createMygitSnapshotImportState() {
+  return {
+    schemaVersion: 1,
+    importedSnapshotIds: [],
+    nextCursor: "",
+    lastSuccessfulAt: "",
+    failedSnapshots: [],
+    importedVideoCount: 0,
+  };
+}
+
+function loadMygitSnapshotImportState(filePath = MYGIT_TODAY_SNAPSHOT_STATE_PATH) {
+  const state = readJsonIfExists(filePath) || createMygitSnapshotImportState();
+  return {
+    schemaVersion: 1,
+    importedSnapshotIds: uniqueValues(listValues(state.importedSnapshotIds)),
+    nextCursor: normalizeWhitespace(state.nextCursor || ""),
+    lastSuccessfulAt: normalizeWhitespace(state.lastSuccessfulAt || ""),
+    failedSnapshots: listValues(state.failedSnapshots).slice(0, 100),
+    importedVideoCount: nonNegativeInteger(state.importedVideoCount, 0),
+  };
+}
+
+function updateMygitSnapshotImportState(state, update) {
+  const importedSnapshotIds = new Set(listValues(state.importedSnapshotIds));
+  for (const snapshotId of update.fetchedSnapshotIds || []) importedSnapshotIds.add(snapshotId);
+  const selectedIds = listValues(update.selectedEntries).map((entry) => entry?.id || entry?.file || entry?.path).filter(Boolean);
+  const nextCursor = selectedIds.find((id) => !importedSnapshotIds.has(id)) || selectedIds.at(-1) || state.nextCursor || "";
+  const failures = [
+    ...listValues(update.snapshotErrors).map((error) => ({
+      at: update.attemptedAt || new Date().toISOString(),
+      snapshotId: error.snapshotId || "",
+      path: error.path || "",
+      message: error.message || String(error),
+    })),
+    ...listValues(state.failedSnapshots),
+  ].slice(0, 100);
+  return {
+    schemaVersion: 1,
+    importedSnapshotIds: [...importedSnapshotIds].sort(),
+    nextCursor,
+    lastSuccessfulAt: update.status === "success" || update.status === "partial" ? update.attemptedAt || new Date().toISOString() : state.lastSuccessfulAt || "",
+    failedSnapshots: failures,
+    importedVideoCount: nonNegativeInteger(state.importedVideoCount, 0) + nonNegativeInteger(update.itemCount, 0),
+  };
+}
+
+function writeMygitSnapshotImportState(filePath, state) {
+  writeJson(filePath, state);
 }
 
 function addSearchItems(target, items) {
@@ -1180,6 +1261,13 @@ async function fetchVideoSongList(candidate, curationContext = loadCurationConte
         rawHash: song.rawHash || hashNormalizedText(song.raw || ""),
         sourceId: song.sourceId || selectedSourceId,
         sourceHash: song.sourceHash || selectedSourceHash,
+        ...(selected.sourceQuality?.singleSongIdentification
+          ? {
+              identificationSource: selected.sourceQuality.singleSongIdentification.identificationSource,
+              confidence: selected.sourceQuality.singleSongIdentification.confidence,
+              identificationReason: selected.sourceQuality.singleSongIdentification.reason,
+            }
+          : {}),
       })),
     },
     audit,
@@ -1238,6 +1326,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   stats.riskReasons = riskReasons;
   stats.riskScore = riskScoreFromReasons(riskReasons, stats);
   stats.riskLevel = riskLevel(stats.riskScore);
+  stats.singleSongIdentification = singleSongIdentification(stats, candidate, cleaned, sourceText);
   const rejectedReason = manuallyRejectedSource ? "manual_reject_source" : rejectedSongSourceReason(stats, candidate);
   const sourceTextIsNeeded = stats.riskScore > 0 || Boolean(rejectedReason);
   return {
@@ -1257,6 +1346,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
       riskScore: stats.riskScore,
       riskLevel: stats.riskLevel,
       riskReasons,
+      singleSongIdentification: stats.singleSongIdentification,
       originalCount: stats.originalCount,
       keptCount: cleaned.length,
       knownSongCount: stats.knownSongCount,
@@ -1365,7 +1455,7 @@ function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType)
 function rejectedSongSourceReason(stats, candidate) {
   if (stats.keptCount <= 0) return "no_song_after_filter";
   if (stats.riskLevel === "high") return "high_risk_source";
-  if (stats.keptCount < 2 && !stats.hasSetlistKeyword) return "too_few_timestamp_songs";
+  if (stats.keptCount < 2 && !stats.hasSetlistKeyword && !stats.singleSongIdentification) return "too_few_timestamp_songs";
   if (stats.originalCount >= 6 && stats.artistCount === 0 && stats.topicCount >= 2 && !stats.hasSetlistKeyword) {
     return "topic_timeline_without_artists";
   }
@@ -1394,6 +1484,42 @@ function rejectedSongSourceReason(stats, candidate) {
     return "hibiku_topic_timeline_specialized_filter";
   }
   return "";
+}
+
+function singleSongIdentification(stats, candidate, songs, sourceText) {
+  if (stats.keptCount !== 1 || !Array.isArray(songs) || songs.length !== 1) return null;
+  const song = songs[0];
+  const title = normalizeWhitespace(song.title || "");
+  if (!title || isLikelyNonSongEntry(song) || isCandidateActivityTitle(title, song.artist) || isConversationEntry(song)) return null;
+  const titleCue = /(?:歌ってみた|歌いました|cover|covered|カバー|弾き語り|歌枠|karaoke|shorts?|short|歌唱|singing|song)/iu.test(
+    `${candidate.title || ""} ${sourceText || ""}`,
+  );
+  const knownSong = song.isNiche === false || song.repair?.knownTitle || song.repair?.knownTitleArtist || stats.knownSongCount > 0;
+  const hasReliableTimestamp = stats.structuralCount > 0 && Number.isInteger(song.seconds) && song.seconds >= 0;
+  const hasArtist = isUsableArtist(song.artist);
+  if (hasReliableTimestamp && (knownSong || hasArtist || titleCue)) {
+    return {
+      identificationSource: "timestamp_comment",
+      confidence: knownSong || hasArtist ? 0.86 : 0.72,
+      reason: knownSong ? "timestamp_known_song" : hasArtist ? "timestamp_title_artist" : "timestamp_single_song_cue",
+      sourceHash: song.sourceHash || stats.sourceHash || "",
+      sourceId: song.sourceId || stats.sourceId || "",
+      rawTitle: candidate.title || "",
+      rawSourceText: truncateAuditText(sourceText || "", 240),
+    };
+  }
+  if (titleCue && knownSong) {
+    return {
+      identificationSource: "video_title_known_song",
+      confidence: 0.8,
+      reason: "single_song_video_title",
+      sourceHash: song.sourceHash || stats.sourceHash || "",
+      sourceId: song.sourceId || stats.sourceId || "",
+      rawTitle: candidate.title || "",
+      rawSourceText: truncateAuditText(sourceText || "", 240),
+    };
+  }
+  return null;
 }
 
 function isKnownNoArtistSongListTheme(candidate) {
@@ -1927,23 +2053,111 @@ async function markFailure(error) {
 function extractSearchItems(data) {
   const items = [];
   for (const node of walkDicts(data)) {
-    const renderer = node.videoRenderer;
-    if (!renderer || !renderer.videoId) continue;
-    const videoId = renderer.videoId;
-    items.push({
-      videoId,
-      title: textFrom(renderer.title),
-      channelName: textFrom(renderer.ownerText || renderer.longBylineText || renderer.shortBylineText),
-      channelId: channelIdFromRenderer(renderer),
-      channelHandle: channelHandleFromRenderer(renderer),
-      publishedText: textFrom(renderer.publishedTimeText),
-      durationText: textFrom(renderer.lengthText),
-      statusText: statusTextFromRenderer(renderer),
-      thumbnailUrl: bestThumbnail(renderer.thumbnail),
-      viewText: textFrom(renderer.viewCountText || renderer.shortViewCountText),
-    });
+    for (const item of searchItemsFromNode(node)) items.push(item);
   }
   return dedupeByVideoId(items).filter((item) => item.title);
+}
+
+function searchItemsFromNode(node) {
+  if (!node || typeof node !== "object") return [];
+  if (node.videoRenderer) return [searchItemFromRenderer(node.videoRenderer, "videoRenderer")].filter(Boolean);
+  if (node.reelItemRenderer) return [searchItemFromRenderer(node.reelItemRenderer, "reelItemRenderer")].filter(Boolean);
+  if (node.shortsLockupViewModel) return [searchItemFromRenderer(node.shortsLockupViewModel, "shortsLockupViewModel")].filter(Boolean);
+  if (node.richItemRenderer) return richItemRendererSearchItems(node.richItemRenderer);
+  const generic = searchItemFromGenericEndpointNode(node);
+  return generic ? [generic] : [];
+}
+
+function richItemRendererSearchItems(renderer) {
+  const items = [];
+  for (const child of walkDicts(renderer.content || renderer.contents || renderer)) {
+    if (child === renderer) continue;
+    if (child.videoRenderer || child.reelItemRenderer || child.shortsLockupViewModel) {
+      items.push(...searchItemsFromNode(child));
+    }
+  }
+  return items;
+}
+
+function searchItemFromRenderer(renderer, sourceRendererType) {
+  const videoId = videoIdFromRenderer(renderer);
+  if (!isValidVideoId(videoId)) return null;
+  return {
+    videoId,
+    title: rendererTitle(renderer),
+    channelName: textFrom(renderer.ownerText || renderer.longBylineText || renderer.shortBylineText || renderer.channelName || renderer.shortByline),
+    channelId: channelIdFromRenderer(renderer),
+    channelHandle: channelHandleFromRenderer(renderer),
+    publishedText: textFrom(renderer.publishedTimeText || renderer.publishedTime || renderer.timestampText),
+    publishedTimestamp: finiteTimestamp(renderer.publishedTimestamp),
+    durationText: textFrom(renderer.lengthText || renderer.lengthTextAccessibility || renderer.durationText || renderer.thumbnailOverlays),
+    statusText: statusTextFromRenderer(renderer),
+    thumbnailUrl: bestThumbnail(renderer.thumbnail || renderer.thumbnailViewModel?.image || renderer.thumbnailViewModel),
+    viewText: textFrom(renderer.viewCountText || renderer.shortViewCountText || renderer.viewCountText?.content),
+    sourceRendererType,
+  };
+}
+
+function searchItemFromGenericEndpointNode(node) {
+  const videoId = videoIdFromRenderer(node);
+  if (!isValidVideoId(videoId)) return null;
+  const title = rendererTitle(node);
+  const thumbnailUrl = bestThumbnail(node.thumbnail || node.thumbnailViewModel?.image || node.thumbnailViewModel);
+  if (!title || !thumbnailUrl) return null;
+  return {
+    videoId,
+    title,
+    channelName: textFrom(node.ownerText || node.longBylineText || node.shortBylineText || node.channelName),
+    channelId: channelIdFromRenderer(node),
+    channelHandle: channelHandleFromRenderer(node),
+    publishedText: textFrom(node.publishedTimeText || node.timestampText),
+    durationText: textFrom(node.lengthText || node.durationText || node.thumbnailOverlays),
+    statusText: statusTextFromRenderer(node),
+    thumbnailUrl,
+    viewText: textFrom(node.viewCountText || node.shortViewCountText),
+    sourceRendererType: "genericWatchEndpoint",
+  };
+}
+
+function rendererTitle(renderer) {
+  return textFrom(
+    renderer.title ||
+      renderer.headline ||
+      renderer.videoTitle ||
+      renderer.accessibilityText ||
+      renderer.overlayMetadata?.primaryText ||
+      renderer.onTap?.innertubeCommand?.commandMetadata?.webCommandMetadata?.title,
+  );
+}
+
+function videoIdFromRenderer(renderer) {
+  const direct = firstValidVideoId(
+    renderer.videoId,
+    renderer.videoId?.videoId,
+    renderer.navigationEndpoint?.watchEndpoint?.videoId,
+    renderer.navigationEndpoint?.reelWatchEndpoint?.videoId,
+    renderer.onTap?.innertubeCommand?.watchEndpoint?.videoId,
+    renderer.onTap?.innertubeCommand?.reelWatchEndpoint?.videoId,
+    renderer.command?.watchEndpoint?.videoId,
+    renderer.command?.reelWatchEndpoint?.videoId,
+  );
+  if (direct) return direct;
+  for (const item of walkDicts(renderer)) {
+    const endpointId = firstValidVideoId(item.watchEndpoint?.videoId, item.reelWatchEndpoint?.videoId);
+    if (endpointId) return endpointId;
+    const url = item.commandMetadata?.webCommandMetadata?.url || item.url || item.webPageTypeUrl;
+    const urlId = extractVideoIdFromWatchUrl(url);
+    if (urlId) return urlId;
+  }
+  return "";
+}
+
+function firstValidVideoId(...values) {
+  for (const value of values) {
+    const text = typeof value === "string" ? value : "";
+    if (isValidVideoId(text)) return text;
+  }
+  return "";
 }
 
 function channelIdFromRenderer(renderer) {
@@ -2210,6 +2424,7 @@ function selectBestSongs(sources) {
     conversationEntryCount: best.stats.conversationEntryCount,
     conversationRatio: best.stats.conversationRatio,
     parserCorruptionCount: best.stats.parserCorruptionCount,
+    singleSongIdentification: best.stats.singleSongIdentification || null,
   };
   return best.songs;
 }
@@ -2362,7 +2577,10 @@ function extractVideoIdFromWatchUrl(url) {
     const shortsMatch = parsed.pathname.match(/\/(?:shorts|live|embed)\/([A-Za-z0-9_-]{11})(?:\/|$)/u);
     return shortsMatch?.[1] || "";
   } catch {
-    const match = value.match(/[?&]v=([A-Za-z0-9_-]{11})/u) || value.match(/youtu\.be\/([A-Za-z0-9_-]{11})/u);
+    const match =
+      value.match(/[?&]v=([A-Za-z0-9_-]{11})/u) ||
+      value.match(/(?:youtu\.be|youtube\.com\/watch)\/?([A-Za-z0-9_-]{11})/u) ||
+      value.match(/\/(?:shorts|live|embed)\/([A-Za-z0-9_-]{11})(?:[/?#]|$)/u);
     return match?.[1] || "";
   }
 }
@@ -2578,6 +2796,7 @@ function textFrom(value) {
   if (!value) return "";
   if (typeof value === "string") return normalizeWhitespace(value);
   if (typeof value.simpleText === "string") return normalizeWhitespace(value.simpleText);
+  if (typeof value.content === "string") return normalizeWhitespace(value.content);
   if (Array.isArray(value.runs)) return normalizeWhitespace(value.runs.map((run) => run.text || "").join(""));
   if (Array.isArray(value.accessibility?.accessibilityData?.label)) return normalizeWhitespace(value.accessibility.accessibilityData.label);
   return "";
@@ -2594,14 +2813,38 @@ function normalizeWhitespace(value) {
 }
 
 function dedupeByVideoId(items) {
-  const seen = new Set();
+  const seen = new Map();
   const result = [];
   for (const item of items) {
-    if (!item.videoId || seen.has(item.videoId)) continue;
-    seen.add(item.videoId);
+    if (!item.videoId) continue;
+    const previousIndex = seen.get(item.videoId);
+    if (previousIndex !== undefined) {
+      if (searchItemScore(item) > searchItemScore(result[previousIndex])) result[previousIndex] = item;
+      continue;
+    }
+    seen.set(item.videoId, result.length);
     result.push(item);
   }
   return result;
+}
+
+function searchItemScore(item) {
+  const rendererScore =
+    item?.sourceRendererType === "shortsLockupViewModel"
+      ? 4
+      : item?.sourceRendererType === "videoRenderer" || item?.sourceRendererType === "reelItemRenderer"
+        ? 3
+        : item?.sourceRendererType === "genericWatchEndpoint"
+          ? 1
+          : 0;
+  return (
+    rendererScore * 100 +
+    (item?.title ? 12 : 0) +
+    (item?.thumbnailUrl ? 8 : 0) +
+    (item?.channelName ? 4 : 0) +
+    (item?.publishedText || item?.publishedTimestamp ? 2 : 0) +
+    (item?.durationText ? 1 : 0)
+  );
 }
 
 function readJsonIfExists(filePath) {
@@ -2640,6 +2883,14 @@ function positiveInteger(value, fallback = 1) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function parseOptionalLimit(value, fallback = 0) {
+  if (value == null || value === "") return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  if (parsed < 0) throw new Error(`Expected optional limit to be 0 or a positive integer, got ${value}`);
+  return parsed;
+}
+
 function nonNegativeInteger(value, fallback = 0) {
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
@@ -2653,6 +2904,7 @@ module.exports = {
   collectCarryForwardVideos,
   collectInspectionCacheSkipIds,
   createRequestLimiter,
+  extractSearchItems,
   extractMygitTodaySnapshotItems,
   extractCommentTexts,
   filterBlockedVideos,
@@ -2665,6 +2917,7 @@ module.exports = {
   mergeFetchedAndCarriedVideos,
   normalizeMygitTodaySnapshotItem,
   parseRetryAfterMs,
+  parseOptionalLimit,
   randomJitterMs,
   retryDelayMs,
   selectMygitTodaySnapshotEntries,

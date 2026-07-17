@@ -40,6 +40,33 @@ test("merges safe artist spelling and annotation variants for the same title", (
   assert.equal(records[0].count, 3);
 });
 
+test("merges same-title kana and romaji artist identities conservatively", () => {
+  const records = buildSongRecords([
+    occurrence("花に亡霊", "ヨルシカ", "A"),
+    occurrence("花に亡霊", "Yorushika", "B"),
+    occurrence("Stellar Stellar", "星街すいせい", "C"),
+    occurrence("Stellar Stellar", "Hoshimachi Suisei", "D"),
+    occurrence("少女レイ", "みきとP", "E"),
+    occurrence("少女レイ", "MikitoP", "F"),
+    occurrence("不可解", "花譜 KAF", "G"),
+    occurrence("不可解", "花譜", "H"),
+  ]);
+
+  assert.equal(records.length, 4);
+  for (const record of records) assert.equal(record.count, 2);
+});
+
+test("does not merge kana romaji identities across different titles or identity annotations", () => {
+  const records = buildSongRecords([
+    occurrence("Song A", "ヨルシカ", "A"),
+    occurrence("Song B", "Yorushika", "B"),
+    occurrence("からくりピエロ", "みきとP", "C"),
+    occurrence("からくりピエロ", "MikitoP feat. 初音ミク", "D"),
+  ]);
+
+  assert.equal(records.length, 4);
+});
+
 test("merges no-space feat annotations into an existing base artist", () => {
   const records = buildSongRecords([
     occurrence("からくりピエロ", "40mP", "A"),
