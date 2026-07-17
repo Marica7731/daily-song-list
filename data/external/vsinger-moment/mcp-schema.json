@@ -1,0 +1,436 @@
+{
+  "schemaVersion": "vsinger-moment.mcp-schema-report.v1",
+  "endpoint": "https://vsinger-moment.jp/api/mcp-public",
+  "fetchedAt": "2026-07-17T14:01:04.845Z",
+  "requestCount": 3,
+  "protocolVersion": "2025-06-18",
+  "serverInfo": {
+    "name": "vsinger-moment",
+    "version": "1.0.0"
+  },
+  "capabilities": {
+    "tools": {
+      "listChanged": true
+    }
+  },
+  "tools": [
+    {
+      "name": "search",
+      "description": "VSinger Moment の歌唱パフォーマンスを横断検索する（deep research 互換）。曲名・歌手名・原曲アーティストで検索できる（配信タイトルは検索対象外）。結果の id は fetch でそのまま詳細取得できる。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "fetch",
+      "description": "search が返した id（stream:/singer:/song:/video: 接頭辞付き）の詳細ドキュメントを取得する（deep research 互換）。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "search_songs",
+      "description": "歌唱パフォーマンスを検索する。曲名・歌手名・原曲アーティストを横断し、誰がいつどの配信でその曲を歌ったかを返す（配信タイトルは検索対象外）。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "search_singers",
+      "description": "VSinger を名前・別名から探す。歌手の ID が分からないときの入口。結果の shortDescription は短い紹介文のみで、プロフィール全文・SNSリンク・歌唱統計は get_singer で取得する。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "get_singer",
+      "description": "歌手IDで VSinger のプロフィール（説明・SNSリンク・YouTubeチャンネル）と歌唱統計を取得する。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "singerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "singerId"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "get_song",
+      "description": "楽曲IDで曲の詳細（原曲アーティスト等）と歌唱履歴（誰がいつ歌ったか）を取得する。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "songId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "songId"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "get_video_setlist",
+      "description": "動画IDで配信の情報とセットリスト（タイムスタンプ付きの歌唱一覧）を取得する。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "videoId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "videoId"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "recent_streams",
+      "description": "最近の歌唱パフォーマンスを新しい順に一覧する（キーワード不要）。since/until で期間、singerId で歌手を絞り込める。日時は ISO 8601 形式のみ（例: 2026-07-01 / 2026-07-01T12:00:00+09:00）。タイムゾーンオフセットのない日時は日本時間（JST）として解釈される。YYYY-MM-DD は since ではその日の JST 0時、until ではその日の終わり（当日を含む）として解釈される。「今週配信された歌唱」「この歌手の直近の活動」に答える用途。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "since": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "until": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "singerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "random_singer",
+      "description": "VSinger をランダムに1名紹介する（毎回等確率・一期一会）。「誰かおすすめして」「新しい歌手と出会いたい」に答える用途。プロフィール・歌唱統計と直近の歌唱（最大3件）を返す。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "top_songs",
+      "description": "歌唱回数の多い楽曲ランキングを取得する（全期間の累計・多い順）。「一番カバーされている曲は？」「みんながよく歌う曲は？」に答える用途。期間指定（直近30日の人気等）はできない。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "top_singers",
+      "description": "活動量の多いVSingerランキングを取得する。sortBy で直近30日の歌唱数（デフォルト・今活発な歌手）・総歌唱数（全期間累計）・レパートリー数を選べる。統計は1日1回更新（statsAsOf が集計時点）で、公開中の歌唱のみを数えるため get_singer の統計とは数値が一致しないことがある。「最近活発な歌手は？」「一番歌っている歌手は？」に答える用途。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "sortBy": {
+            "type": "string",
+            "enum": [
+              "streamsLast30Days",
+              "totalStreams",
+              "totalSongs"
+            ],
+            "description": "ランキング軸。streamsLast30Days=直近30日の歌唱数（デフォルト）/ totalStreams=総歌唱数（全期間累計）/ totalSongs=レパートリー数"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "find_singers_for_artist",
+      "description": "原曲アーティスト名から、そのアーティストの曲をよく歌うVSingerを探す（歌唱回数の多い順・部分一致）。「YOASOBIの曲をよく歌う歌手は？」「自分の曲調に合う歌い手を探したい（似たアーティスト名で検索）」に答える用途。各歌手について直近30日の歌唱数・最終歌唱日時・よく歌う曲（最大3曲）を返す。プロフィール・SNSリンクは get_singer で取得する。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "artist": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "artist"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "create_listening_queue",
+      "description": "合計時間を指定してタイムスタンプ付きYouTube URLの連続リスニングキューを作る。「60分の作業用BGM」のような依頼に答える用途。keyword は文字どおりの検索語（曲名・歌手名・原曲アーティスト）で、曲調・用途（バラード中心・作業用等）の解釈はこのツールでは行わないため、クライアント側で具体的な検索語に変換して呼ぶこと。同一歌手は maxPerSinger 曲まで（既定2）。合計時間は targetMinutes を超えない（以下で可能な限り近づける）。時間はすべて推定歌唱時間であり実測ではない（各曲の durationEstimate に推定根拠を含む）。YouTubeのタイムスタンプURLは開始位置のみで曲の終わりに自動停止しない。status が partial または empty のときは黙って条件を変えず、keyword・targetMinutes・maxPerSinger のどれを調整するかユーザーに確認すること。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "targetMinutes": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 180
+          },
+          "maxPerSinger": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "context": {
+            "description": "このツールを呼ぶ目的やユーザーの依頼の要約（1文・任意）。検索品質の改善のためのログに記録されます",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "keyword",
+          "targetMinutes"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    },
+    {
+      "name": "propose_correction",
+      "description": "データの補正を提案する（唯一の書込ツール・人間レビュー制）。提案は即時反映されず、運営の調査と人間の承認を経て反映される。reason（提案理由）と sources（根拠となる情報ソースURL・1件以上）が必須。type別の proposedData: SONG={title?, original_artist?}（曲情報）/ SINGER={name?, description?, social_links?}（歌手情報）/ STREAM={setlist: [{timestamp, title, artist}]}（セットリスト全置換。各要素の timestamp/title/artist はすべて非空文字列が必須 — 現在値で artist が空欄の行も、正しい原曲アーティスト名を確認して記入すること。確認できない場合は推測で埋めず提案を見送る）。現在値はサーバが公開データから取得するため送信不要。1日あたりの受付件数に上限がある。",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SONG",
+              "STREAM",
+              "SINGER"
+            ]
+          },
+          "targetId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "proposedData": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "sources": {
+            "minItems": 1,
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          }
+        },
+        "required": [
+          "type",
+          "targetId",
+          "proposedData",
+          "reason",
+          "sources"
+        ]
+      },
+      "outputSchema": null,
+      "annotations": null
+    }
+  ]
+}

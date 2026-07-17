@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "vsinger-moment.external-manifest.v1",
+  "sourceSystem": "vsinger-moment.mcp-public",
+  "fixtureOnly": true,
+  "generatedAt": "2026-07-17T14:01:04.845Z",
+  "officialSchemaPath": "data/external/vsinger-moment/mcp-schema.json",
+  "externalSongSchemaPath": "data/external/vsinger-moment/external-song.schema.json",
+  "fixturePaths": [
+    "data/external/vsinger-moment/aliases-fixture.json",
+    "data/external/vsinger-moment/import-state.example.json",
+    "data/external/vsinger-moment/conflict-report.example.json"
+  ],
+  "fullCatalogStoredInGit": false,
+  "cacheRoot": ".local-cache/vsinger-moment",
+  "usageBoundary": {
+    "allowed": [
+      "known-song-candidates",
+      "canonical-title-candidates",
+      "canonical-artist-candidates",
+      "alias-candidates",
+      "kana-romaji-candidates",
+      "missing-local-song-candidates",
+      "video-candidates-for-verification"
+    ],
+    "forbidden": [
+      "local-collection-facts",
+      "local-singing-counts",
+      "local-rankings",
+      "local-timestamps",
+      "local-video-validity"
+    ]
+  }
+}

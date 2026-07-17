@@ -1,0 +1,138 @@
+{
+  "schemaVersion": "vsinger-moment.fixture-songs.v1",
+  "records": [
+    {
+      "case": "standard-japanese-title",
+      "songId": "song:jp-standard",
+      "songTitle": "少女レイ",
+      "originalArtist": "みきとP",
+      "titleAliases": ["Shoujo Rei", "しょうじょれい"],
+      "artistAliases": ["MikitoP", "みきとぴー"],
+      "streamedAt": "2026-07-14T12:00:00+09:00",
+      "streamCount": 770,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Ajp-standard",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AAAAAAAAAAA&t=123s"
+    },
+    {
+      "case": "english-title",
+      "songId": "song:english-title",
+      "songTitle": "KING",
+      "originalArtist": "Kanaria",
+      "titleAliases": ["King"],
+      "artistAliases": ["かなりあ"],
+      "streamedAt": "2026-07-13T12:00:00+09:00",
+      "streamCount": 42,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Aenglish-title",
+      "youtubeUrl": "https://www.youtube.com/watch?v=BBBBBBBBBBB&t=45s"
+    },
+    {
+      "case": "kana-and-romaji-singer",
+      "songId": "song:kana-romaji-singer",
+      "songTitle": "メルト",
+      "originalArtist": "ryo",
+      "singerName": "藍月なくる / Aitsuki Nakuru",
+      "artistKana": "りょう",
+      "artistRomaji": "ryo",
+      "streamedAt": "2026-07-12T12:00:00+09:00",
+      "streamCount": 18,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Akana-romaji-singer",
+      "youtubeUrl": "https://www.youtube.com/watch?v=CCCCCCCCCCC&t=67s"
+    },
+    {
+      "case": "feat-singer",
+      "songId": "song:feat",
+      "songTitle": "劣等上等 feat. 鏡音リン・レン",
+      "originalArtist": "Giga",
+      "titleAliases": ["Rettou Joutou", "Bring It On"],
+      "artistAliases": ["ギガP", "Giga-P"],
+      "streamedAt": "2026-07-11T12:00:00+09:00",
+      "streamCount": 25,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Afeat",
+      "youtubeUrl": "https://www.youtube.com/watch?v=DDDDDDDDDDD&t=89s"
+    },
+    {
+      "case": "same-title-different-artist-a",
+      "songId": "song:same-title-a",
+      "songTitle": "花",
+      "originalArtist": "Singer A",
+      "streamedAt": "2026-07-10T12:00:00+09:00",
+      "streamCount": 7,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-a",
+      "youtubeUrl": "https://www.youtube.com/watch?v=EEEEEEEEEEE&t=12s"
+    },
+    {
+      "case": "same-title-different-artist-b",
+      "songId": "song:same-title-b",
+      "songTitle": "花",
+      "originalArtist": "Singer B",
+      "streamedAt": "2026-07-09T12:00:00+09:00",
+      "streamCount": 3,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Asame-title-b",
+      "youtubeUrl": "https://www.youtube.com/watch?v=FFFFFFFFFFF&t=34s"
+    },
+    {
+      "case": "piano-version",
+      "songId": "song:piano-version",
+      "songTitle": "夜に駆ける Piano Ver.",
+      "originalArtist": "YOASOBI",
+      "titleAliases": ["Yoru ni Kakeru Piano Ver."],
+      "streamedAt": "2026-07-08T12:00:00+09:00",
+      "streamCount": 5,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Apiano-version",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GGGGGGGGGGG&t=56s"
+    },
+    {
+      "case": "remix",
+      "songId": "song:remix",
+      "songTitle": "フォニイ Remix",
+      "originalArtist": "ツミキ",
+      "titleAliases": ["phony Remix"],
+      "artistAliases": ["Tsumiki"],
+      "streamedAt": "2026-07-07T12:00:00+09:00",
+      "streamCount": 9,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Aremix",
+      "youtubeUrl": "https://www.youtube.com/watch?v=HHHHHHHHHHH&t=78s"
+    },
+    {
+      "case": "multiple-singing-history",
+      "id": "song:multiple-history",
+      "title": "怪物",
+      "originalArtist": "YOASOBI",
+      "performances": [
+        {
+          "streamedAt": "2026-07-01T12:00:00+09:00",
+          "singerName": "Singer One"
+        },
+        {
+          "streamedAt": "2026-07-16T12:00:00+09:00",
+          "singerName": "Singer Two"
+        }
+      ],
+      "streamCount": 2,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Amultiple-history"
+    },
+    {
+      "case": "no-youtube-link",
+      "songId": "song:no-youtube",
+      "songTitle": "リンクなしの曲",
+      "originalArtist": "Unknown",
+      "streamedAt": "2026-07-06T12:00:00+09:00",
+      "streamCount": 1,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Ano-youtube"
+    },
+    {
+      "case": "data-conflict",
+      "songId": "song:conflict",
+      "songTitle": "Conflict Song",
+      "originalArtist": "External Artist",
+      "localVerifiedArtist": "Local Artist",
+      "streamedAt": "2026-07-05T12:00:00+09:00",
+      "streamCount": 12,
+      "pageUrl": "https://vsinger-moment.jp/songs/song%3Aconflict",
+      "conflict": {
+        "field": "artist",
+        "resolution": "manual-review-required"
+      }
+    }
+  ]
+}

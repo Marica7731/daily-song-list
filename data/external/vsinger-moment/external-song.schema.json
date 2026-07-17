@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://daily-song-list.local/schemas/vsinger-moment/external-song.schema.json",
+  "title": "VSinger Moment External Song Candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "externalSongId",
+    "title",
+    "artist",
+    "titleAliases",
+    "artistAliases",
+    "latestPerformanceAt",
+    "singingCountReference",
+    "sourcePageUrl",
+    "sourceSystem",
+    "fetchedAt",
+    "rawHash",
+    "schemaVersion"
+  ],
+  "properties": {
+    "externalSongId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artist": {
+      "type": ["string", "null"]
+    },
+    "titleAliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "artistAliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "latestPerformanceAt": {
+      "type": ["string", "null"],
+      "description": "External reference only. YouTube or the local verification pipeline must confirm any local timestamp."
+    },
+    "singingCountReference": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["value", "purpose", "note"],
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "purpose": {
+          "const": "quality_reference_only"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "description": "Reference only for data quality, prioritization, and conflict reports. It must not feed local rankings or local collection counts."
+    },
+    "sourcePageUrl": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "sourceSystem": {
+      "const": "vsinger-moment.mcp-public"
+    },
+    "fetchedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rawHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "schemaVersion": {
+      "const": "vsinger-moment.external-song.v1"
+    }
+  }
+}
