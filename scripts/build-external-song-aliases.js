@@ -10,12 +10,13 @@ const DEFAULT_ALIAS_OUTPUT = path.join(ROOT, "data", "external", "vsinger-moment
 const DEFAULT_KNOWN_OUTPUT = path.join(ROOT, "data", "external", "vsinger-moment", "external-known-song-candidates.json");
 const DEFAULT_CONFLICT_OUTPUT = path.join(ROOT, "data", "external", "vsinger-moment", "external-song-conflicts.json");
 const DEFAULT_REVIEW_OUTPUT = path.join(ROOT, "data", "review", "external-song-identity-candidates.json");
+const DEFAULT_MANUAL_CURATION_INPUT = path.join(ROOT, "config", "curation-overrides.json");
 
 function main() {
   const options = parseArgs(process.argv.slice(2));
   const externalInput = readJson(options.externalInput);
   const localInput = readJson(options.localInput);
-  const manualCuration = options.manualCurationInput ? readJson(options.manualCurationInput) : [];
+  const manualCuration = readJsonIfExists(options.manualCurationInput, []);
   const result = buildSongEnrichment({
     externalSongs: externalInput.externalSongs || externalInput.records || externalInput.songs || externalInput,
     localSongs: localInput.localSongs || localInput.songs || localInput.records || localInput,
@@ -74,7 +75,7 @@ function parseArgs(args) {
     dryRun: false,
     externalInput: DEFAULT_EXTERNAL_INPUT,
     localInput: DEFAULT_LOCAL_INPUT,
-    manualCurationInput: null,
+    manualCurationInput: DEFAULT_MANUAL_CURATION_INPUT,
     aliasOutput: DEFAULT_ALIAS_OUTPUT,
     knownOutput: DEFAULT_KNOWN_OUTPUT,
     reviewOutput: DEFAULT_REVIEW_OUTPUT,
@@ -113,6 +114,11 @@ function parseArgs(args) {
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function readJsonIfExists(filePath, fallback) {
+  if (!filePath || !fs.existsSync(filePath)) return fallback;
+  return readJson(filePath);
 }
 
 function writeJson(filePath, value) {

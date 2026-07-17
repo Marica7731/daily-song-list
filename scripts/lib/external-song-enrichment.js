@@ -23,6 +23,7 @@ function buildSongEnrichment(options = {}) {
   const localSongs = normalizeLocalSongs(options.localSongs || []);
   const manualCurationKeys = buildManualCurationKeys(options.manualCuration || []);
   const externalTitleConflicts = externalSameTitleDifferentArtists(externalSongs);
+  const localTitleConflicts = localSameTitleDifferentArtists(localSongs);
   const localByTitle = groupBy(localSongs, (song) => song.titleKey);
   const externalMatchedKeys = new Set();
   const localMatchedKeys = new Set();
@@ -37,6 +38,7 @@ function buildSongEnrichment(options = {}) {
       external,
       matches,
       externalTitleConflicts,
+      localTitleConflicts,
       manualCurationKeys,
     });
     const selectedMatch = matches[0] || null;
@@ -246,7 +248,7 @@ function findLocalMatches(external, localSongs) {
   return matches;
 }
 
-function decideIdentityCandidate({ external, matches, externalTitleConflicts, manualCurationKeys }) {
+function decideIdentityCandidate({ external, matches, externalTitleConflicts, localTitleConflicts, manualCurationKeys }) {
   if (!matches.length) {
     return {
       decision: "external-only",
@@ -271,6 +273,13 @@ function decideIdentityCandidate({ external, matches, externalTitleConflicts, ma
     };
   }
   if (externalTitleConflicts.has(external.titleKey)) {
+    return {
+      decision: "review-required",
+      confidence: Math.min(match.confidence, 0.84),
+      reason: "same-title-different-artist",
+    };
+  }
+  if (localTitleConflicts.has(match.local.titleKey)) {
     return {
       decision: "review-required",
       confidence: Math.min(match.confidence, 0.84),
@@ -426,21 +435,52 @@ function buildExternalConflictEntries(external, selectedMatch, decision, localSa
 function buildManualCurationKeys(records) {
   const keys = new Set();
   for (const record of records || []) {
-    const title = record.title || record.canonicalTitle || record.songTitle;
-    const artist = record.artist || record.canonicalArtist || record.originalArtist;
-    const titleKey = normalizeTitleKey(title);
-    if (!titleKey) {
-      continue;
+    for (const candidate of manualCurationIdentityCandidates(record)) {
+      const titleKey = normalizeTitleKey(candidate.title);
+      if (!titleKey) {
+        continue;
+      }
+      keys.add(identityKey(titleKey, normalizeArtistKeySafe(candidate.artist)));
     }
-    keys.add(identityKey(titleKey, normalizeArtistKeySafe(artist)));
   }
   return keys;
+}
+
+function manualCurationIdentityCandidates(record) {
+  if (!record || typeof record !== "object") return [];
+  return [
+    record,
+    record.replacement,
+    record.original,
+    record.before,
+    record.after,
+    record.song,
+    record.canonical,
+  ]
+    .filter((item) => item && typeof item === "object")
+    .map((item) => ({
+      title: item.title || item.canonicalTitle || item.songTitle,
+      artist: item.artist || item.canonicalArtist || item.originalArtist,
+    }));
 }
 
 function externalSameTitleDifferentArtists(externalSongs) {
   const groups = groupBy(externalSongs, (song) => song.titleKey);
   const conflicts = new Set();
   for (const [titleKey, songs] of groups) {
+    const artistKeys = new Set(songs.map((song) => song.artistKey).filter(Boolean));
+    if (artistKeys.size > 1) {
+      conflicts.add(titleKey);
+    }
+  }
+  return conflicts;
+}
+
+function localSameTitleDifferentArtists(localSongs) {
+  const groups = groupBy(localSongs, (song) => song.titleKey);
+  const conflicts = new Set();
+  for (const [titleKey, songs] of groups) {
+    if (!titleKey) continue;
     const artistKeys = new Set(songs.map((song) => song.artistKey).filter(Boolean));
     if (artistKeys.size > 1) {
       conflicts.add(titleKey);

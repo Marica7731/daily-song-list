@@ -9,6 +9,7 @@ const {
   assertNoRankingInputs,
   buildSongEnrichment,
 } = require("../scripts/lib/external-song-enrichment");
+const { parseArgs } = require("../scripts/build-external-song-aliases");
 
 const FIXTURE_PATH = path.join(__dirname, "..", "data", "external", "vsinger-moment", "enrichment-input.fixture.json");
 const FIXTURE = JSON.parse(fs.readFileSync(FIXTURE_PATH, "utf8"));
@@ -85,6 +86,33 @@ test("same title with different artists is treated as ambiguous review material"
   assert.equal(result.conflictReport.some((item) => item.type === "same_title_different_artist"), true);
 });
 
+test("local same-title different-artist conflicts block automatic external identity adoption", () => {
+  const result = buildSongEnrichment({
+    externalSongs: [
+      {
+        externalSongId: "song:local-title-conflict",
+        title: "花",
+        artist: "Singer A",
+        sourcePageUrl: "https://vsinger-moment.jp/songs/song%3Alocal-title-conflict",
+        fetchedAt: NOW,
+        rawHash: "4444444444444444444444444444444444444444444444444444444444444444",
+      },
+    ],
+    localSongs: [
+      { title: "花", artist: "Singer A" },
+      { title: "花", artist: "Singer B" },
+    ],
+    now: NOW,
+  });
+  const candidate = result.reviewCandidates.find((item) => item.externalSongId === "song:local-title-conflict");
+
+  assert.equal(candidate.decision, "review-required");
+  assert.equal(candidate.confidence, 0.84);
+  assert.equal(result.automaticAliases.some((item) => item.externalSongId === "song:local-title-conflict"), false);
+  assert.equal(result.knownSongCandidates.some((item) => item.externalSongId === "song:local-title-conflict"), false);
+  assert.equal(result.conflictReport.some((item) => item.externalSongId === "song:local-title-conflict" && item.type === "same_title_different_artist"), true);
+});
+
 test("manual curation has the highest priority over external enrichment", () => {
   const result = buildFixtureResult();
   const candidate = result.reviewCandidates.find((item) => item.externalSongId === "song:manual-curation");
@@ -92,6 +120,38 @@ test("manual curation has the highest priority over external enrichment", () => 
   assert.equal(candidate.decision, "manual-curation-priority");
   assert.equal(candidate.confidence, 0.98);
   assert.equal(result.automaticAliases.some((item) => item.externalSongId === "song:manual-curation"), false);
+});
+
+test("curation override replacement identity has priority over automatic enrichment", () => {
+  const result = buildSongEnrichment({
+    externalSongs: [
+      {
+        externalSongId: "song:curation-replacement",
+        title: "KING",
+        artist: "Kanaria",
+        sourcePageUrl: "https://vsinger-moment.jp/songs/song%3Acuration-replacement",
+        fetchedAt: NOW,
+        rawHash: "5555555555555555555555555555555555555555555555555555555555555555",
+      },
+    ],
+    localSongs: [{ title: "KING", artist: "Kanaria" }],
+    manualCuration: [
+      {
+        action: "replace_entry",
+        sourceId: "description:AAAAAAAAAAA:0",
+        replacement: {
+          title: "KING",
+          artist: "Kanaria",
+        },
+      },
+    ],
+    now: NOW,
+  });
+  const candidate = result.reviewCandidates.find((item) => item.externalSongId === "song:curation-replacement");
+
+  assert.equal(candidate.decision, "manual-curation-priority");
+  assert.equal(result.automaticAliases.some((item) => item.externalSongId === "song:curation-replacement"), false);
+  assert.equal(result.knownSongCandidates.some((item) => item.externalSongId === "song:curation-replacement"), false);
 });
 
 test("known song candidates are independent and not all external songs become known", () => {
@@ -133,4 +193,11 @@ test("conflict report covers external-only and local-only identity gaps", () => 
   assert.equal(result.conflictReport.some((item) => item.type === "external_missing_local" && item.externalSongId === "song:no-local"), true);
   assert.equal(result.conflictReport.some((item) => item.type === "local_missing_external" && item.title === "本站だけの曲"), true);
   assert.equal(result.conflictReport.some((item) => item.type === "artist_kana_romaji"), true);
+});
+
+test("external alias builder defaults to durable curation overrides", () => {
+  const options = parseArgs([]);
+
+  assert.equal(path.basename(options.manualCurationInput), "curation-overrides.json");
+  assert.equal(path.basename(path.dirname(options.manualCurationInput)), "config");
 });
