@@ -21,7 +21,7 @@ apt-get install -y nodejs
 git clone https://github.com/Marica7731/daily-song-list.git /opt/culua/ytb-song-rank
 cd /opt/culua/ytb-song-rank
 git checkout main
-npm install
+npm install --no-package-lock
 python3 scripts/db/build-runtime-db.py --output /var/lib/culua/ytb-song-rank/song-rank.sqlite
 chown -R www-data:www-data /var/lib/culua/ytb-song-rank /var/log/culua/ytb-song-rank
 cp deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
