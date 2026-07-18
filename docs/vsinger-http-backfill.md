@@ -121,6 +121,20 @@ npm run vsinger:build-bundle -- --songs-dir artifacts/vsinger-http-backfill/song
 
 The merge step deduplicates songs, videos, and repeated occurrence keys while preserving same-song repeats at different timestamps. It marks the merged singer-scoped coverage as `complete` only when every shard reports `complete`, every shard has complete detail coverage, and the merged singer count reaches the planned target count.
 
+Build or refresh the browser runtime after a complete bundle is present:
+
+```bash
+npm run build:runtime
+```
+
+`scripts/build-runtime-data.js` automatically overlays `data/external/vsinger-http/backfill/manifest.json` into the compact `data/ui/**` runtime when the bundle is complete, has zero failures, and records owner-approved singer-scoped detail coverage. `data/latest.json` remains the core YouTube/search snapshot; the VSinger Moment source is exposed in `data/ui/meta.json` under `externalSources.vsingerMoment`.
+
+To rebuild the browser runtime without this external overlay:
+
+```bash
+DAILY_SONG_INCLUDE_VSINGER_BACKFILL=0 npm run build:runtime
+```
+
 For bounded validation against one singer:
 
 ```bash

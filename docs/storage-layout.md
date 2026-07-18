@@ -4,7 +4,7 @@
 
 ## 公开 runtime
 
-- `data/ui/meta.json`：浏览器入口。包含 `dataVersion`、range 文件路径、range hash、item count、status 摘要、catalog 摘要和 diff 路径。
+- `data/ui/meta.json`：浏览器入口。包含 `dataVersion`、range 文件路径、range hash、item count、status 摘要、catalog 摘要、外部来源摘要、diff 路径和各 shard manifest 摘要；分页列表保留在对应 manifest 文件内。
 - `data/ui/7d.<hash>.json`、`data/ui/all.<hash>.json`：内容 hash range payload，保留给 fallback 和兼容校验。
 - `data/ui/7d.json`、`data/ui/all.json`：legacy fallback，适合 `no-cache` 校验。
 - `data/ui/ranges/<range>/manifest.<hash>.json` 与 `page-*.json`：榜单 runtime 分片。浏览器首屏只需要读取当前 range 的 manifest 和第一页。
@@ -36,7 +36,7 @@
 - `data/ui/ranges/7d/page-0012.<hash>.json`
 - `data/ui/ranges/all/page-0017.<hash>.json`
 
-当前真实输出位于 `data/ui/ranges/<range>/`、`data/ui/source-details/<range>/` 和 `data/ui/search/<range>/`。每个分片族都有 manifest 来绑定 range、pageSize、pageCount、page hash、搜索索引版本和 fallback 策略；`check:published` 会抽样验证线上 manifest 与分片页。
+当前真实输出位于 `data/ui/ranges/<range>/`、`data/ui/source-details/<range>/` 和 `data/ui/search/<range>/`。每个分片族都有 manifest 来绑定 range、pageSize、pageCount、page hash、搜索索引版本和 fallback 策略；`data/ui/meta.json` 只保存这些 manifest 的路径、hash 和计数摘要，`check:published` 会抽样验证线上 manifest 与分片页。
 
 ## UI Proof 存储
 

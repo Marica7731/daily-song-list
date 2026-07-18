@@ -3,6 +3,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
 const RankingUtils = require("../assets/ranking-utils");
+const { augmentPayloadWithVsingerBackfill } = require("./vsinger-http/runtime-importer");
 const {
   CANONICAL_RANGES,
   LEGACY_RANGE_ALIASES,
@@ -30,13 +31,15 @@ const REQUEST_DETAIL_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST
 const REQUEST_SOURCE_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_SHARD_SIZE, 48);
 const REQUEST_SEARCH_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_SHARD_SIZE, 2000);
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
+const REQUEST_DETAIL_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_DETAIL_SHARD_MAX_BYTES, 8 * 1024 * 1024);
+const REQUEST_SOURCE_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_SHARD_MAX_BYTES, 8 * 1024 * 1024);
 
 if (require.main === module) {
   main();
 }
 
 function main() {
-  const payload = readJson(LATEST_PATH);
+  const payload = augmentPayloadWithVsingerBackfill(readJson(LATEST_PATH));
   const baseRangePayloads = Object.fromEntries(RANGES.map((rangeId) => [rangeId, buildRuntimeRangePayload(payload, rangeId)]));
   const dataVersion = computeRuntimeDataVersion(payload, baseRangePayloads);
   const rangePayloads = Object.fromEntries(
@@ -61,7 +64,7 @@ function main() {
     };
     writeRuntimeJsonText(path.join(ROOT, hashedPath), rangeJson);
     writeRuntimeJsonText(path.join(ROOT, legacyPath), rangeJson);
-    shardFiles[rangeId] = writeRuntimeShardSet(payload, rangePayload, rangeId, { dataVersion });
+    shardFiles[rangeId] = summarizeRuntimeShardSet(writeRuntimeShardSet(payload, rangePayload, rangeId, { dataVersion }));
   }
   writeRuntimeAliasFiles(rangeFiles, rangePayloads);
   cleanupOldRuntimeRangeFiles(rangeFiles);
@@ -99,6 +102,7 @@ function buildRuntimeMeta(payload, rangePayloads, options = {}) {
     blocklistVersion: payload.blocklistVersion || payload.source?.blocklistVersion || BLOCKLIST_VERSION,
     blocklistHash: payload.blocklistHash || payload.source?.blocklistHash || BLOCKLIST_HASH,
     catalog: payload.source?.videoCatalog || null,
+    externalSources: payload.source?.externalSources || null,
     status: runtimeStatus(payload, { capturedAt, rebuiltDerivedAt, dataVersion, itemCounts }),
     latestCapture: {
       capturedAt,
@@ -319,6 +323,15 @@ function writeRuntimeShardSet(payload, rangePayload, rangeId, options = {}) {
   return { runtime, sourceDetails, search, request };
 }
 
+function summarizeRuntimeShardSet(shardSet) {
+  return {
+    runtime: summarizePagedShardSet(shardSet.runtime),
+    sourceDetails: summarizePagedShardSet(shardSet.sourceDetails),
+    search: summarizePagedShardSet(shardSet.search),
+    request: shardSet.request,
+  };
+}
+
 function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
   const generatedAt = options.generatedAt || rangePayload.generatedAt || "";
   const capturedAt = options.capturedAt || rangePayload.capturedAt || generatedAt;
@@ -434,6 +447,7 @@ function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
     capturedAt,
     baseDir: `data/ui/ranges/${rangeId}/sources`,
     pageSize: REQUEST_SOURCE_SHARD_SIZE,
+    maxBytes: REQUEST_SOURCE_SHARD_MAX_BYTES,
     records: sourceRecords,
     recordName: "records",
   });
@@ -456,6 +470,7 @@ function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
         capturedAt,
         baseDir: `data/ui/ranges/${rangeId}/records/${type}`,
         pageSize: REQUEST_DETAIL_SHARD_SIZE,
+        maxBytes: REQUEST_DETAIL_SHARD_MAX_BYTES,
         records: Array.from(recordMap.values()),
         recordName: "records",
       }),
@@ -498,6 +513,8 @@ function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
     pageSize: REQUEST_PAGE_SIZE,
     summary: summarizeRequestSummary(summary),
     views: summarizeRequestViews(viewArtifacts),
+    records: Object.fromEntries(Object.entries(detailShardSets).map(([type, shardSet]) => [type, summarizeRequestShardSet(shardSet)])),
+    sources: summarizeRequestShardSet(sourceShardSet),
     search: summarizeRequestSearch(search),
   };
 }
@@ -542,7 +559,12 @@ function registerRequestDetailRecord({ type, record, scopeKey, detailRecords, so
     });
     recordMap.set(detailKey, serializeSongRequestRecord(record, { detailKey, sourceDetailKey }));
   } else if (type === "artist") {
-    recordMap.set(detailKey, serializeArtistRequestRecord(record, { detailKey }));
+    const sourceDetailKey = stableRequestKey(`artist:${scopeKey}:${record.key}`);
+    sourceRecords.push({
+      key: sourceDetailKey,
+      occurrences: (record.occurrences || []).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
+    });
+    recordMap.set(detailKey, serializeArtistRequestRecord(record, { detailKey, sourceDetailKey }));
   } else {
     recordMap.set(detailKey, serializeVideoRequestRecord(record, { detailKey }));
   }
@@ -677,9 +699,6 @@ function writeRequestViewVariant(options) {
 
   const pages = chunkArray(node.indexEntries, node.pageSize).map((entries, index) => {
     const pageIndex = index + 1;
-    const records = entries
-      .map((entry) => detailRecords[entry.type]?.get(entry.detailKey))
-      .filter(Boolean);
     const pagePayload = {
       schemaVersion: RUNTIME_SCHEMA_VERSION,
       kind: "request-view-page",
@@ -695,7 +714,7 @@ function writeRequestViewVariant(options) {
       pageSize: node.pageSize,
       totalCount: node.indexEntries.length,
       indexEntries: entries,
-      records,
+      records: entries.map(compactRequestPageRecord),
     };
     const text = stringifyRuntimeJson(pagePayload);
     const sha256 = sha256Text(text);
@@ -746,6 +765,10 @@ function writeRequestViewVariant(options) {
     pageCount: pages.length,
     pages,
   };
+}
+
+function compactRequestPageRecord(entry) {
+  return { ...entry };
 }
 
 function summarizeRequestViews(node) {
@@ -898,7 +921,28 @@ function writeRequestSourceFiles(options) {
 
 function writeKeyedRequestShardSet(options) {
   const { kind, rangeId, dataVersion, generatedAt, capturedAt, baseDir, pageSize, records, recordName } = options;
-  const pages = chunkArray(records, pageSize).map((chunk, index) => {
+  const maxBytes = Number(options.maxBytes) || 0;
+  const chunks = maxBytes
+    ? chunkRecordsByPayloadBytes(records, {
+        maxBytes,
+        pageSize,
+        buildPayload: (chunk, pageIndex, pageCount) => ({
+          schemaVersion: RUNTIME_SCHEMA_VERSION,
+          kind,
+          rangeId,
+          dataVersion,
+          generatedAt,
+          capturedAt,
+          page: pageIndex,
+          pageCount,
+          pageSize,
+          itemCount: chunk.length,
+          [recordName]: chunk,
+        }),
+      })
+    : chunkArray(records, pageSize);
+  const pageCount = chunks.length || 1;
+  const pages = chunks.map((chunk, index) => {
     const pageIndex = index + 1;
     const payload = {
       schemaVersion: RUNTIME_SCHEMA_VERSION,
@@ -908,7 +952,7 @@ function writeKeyedRequestShardSet(options) {
       generatedAt,
       capturedAt,
       page: pageIndex,
-      pageCount: Math.ceil(records.length / pageSize) || 1,
+      pageCount,
       pageSize,
       itemCount: chunk.length,
       [recordName]: chunk,
@@ -961,6 +1005,31 @@ function writeKeyedRequestShardSet(options) {
   };
 }
 
+function chunkRecordsByPayloadBytes(records, options = {}) {
+  const pageSize = positiveInteger(options.pageSize, records.length || 1);
+  const maxBytes = positiveInteger(options.maxBytes, Number.MAX_SAFE_INTEGER);
+  const buildPayload = options.buildPayload;
+  const chunks = [];
+  let chunk = [];
+  for (const record of records || []) {
+    if (chunk.length >= pageSize) {
+      chunks.push(chunk);
+      chunk = [];
+    }
+    if (chunk.length) {
+      const nextPayload = buildPayload([...chunk, record], 1, 1);
+      const nextBytes = Buffer.byteLength(stringifyRuntimeJson(nextPayload), "utf8");
+      if (nextBytes > maxBytes) {
+        chunks.push(chunk);
+        chunk = [];
+      }
+    }
+    chunk.push(record);
+  }
+  if (chunk.length) chunks.push(chunk);
+  return chunks;
+}
+
 function cleanupRequestRuntimeFiles(rangeId) {
   const rangeDir = path.join(UI_DIR, "ranges", rangeId);
   for (const dirName of ["records", "sources", "views", "search"]) {
@@ -972,6 +1041,19 @@ function cleanupRequestRuntimeFiles(rangeId) {
       fs.unlinkSync(path.join(rangeDir, file.name));
     }
   }
+}
+
+function summarizePagedShardSet(shardSet) {
+  if (!shardSet) return null;
+  return {
+    manifestPath: shardSet.manifestPath,
+    manifestLegacyPath: shardSet.manifestLegacyPath,
+    sha256: shardSet.sha256,
+    bytes: shardSet.bytes,
+    pageSize: shardSet.pageSize,
+    itemCount: shardSet.itemCount,
+    pageCount: shardSet.pageCount,
+  };
 }
 
 function summarizeRequestShardSet(shardSet) {
@@ -1142,7 +1224,9 @@ function serializeArtistRequestRecord(record, options = {}) {
     songs: serializeCountMap(record.songs),
     channels: serializeCountMap(record.channels),
     aliases: Array.isArray(record.aliases) ? record.aliases : [],
-    occurrences: occurrences.map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
+    occurrences: occurrences.slice(0, REQUEST_PREVIEW_SOURCE_LIMIT).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
+    sourceDetailKey: options.sourceDetailKey || "",
+    sourceDetailPath: "",
     searchText: requestRecordSearchText(record, "artist"),
   };
 }
@@ -1571,6 +1655,7 @@ module.exports = {
   compactRankDiffEntries,
   computeRuntimeDataVersion,
   CURRENT_FILTER_VERSION,
+  chunkRecordsByPayloadBytes,
   LEGACY_RANGE_ALIASES,
   LEGACY_RANGE_IDS,
   RANGES,

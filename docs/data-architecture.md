@@ -6,7 +6,7 @@
 
 1. `scripts/update-songlist.js` 抓取 YouTube 搜索结果、检查视频页、解析 description/comment 中的时间戳歌单，并合并 carry-forward 数据。
 2. `scripts/apply-song-search-niche.js` 用 `data/song-search-known-songs.json` 标记小众/已知歌曲。
-3. `scripts/build-runtime-data.js` 把完整生成结果压缩为浏览器 runtime：
+3. `scripts/build-runtime-data.js` 读取完整生成结果，并在完整、零失败、已记录站长授权的情况下叠加 `data/external/vsinger-http/backfill/manifest.json`，再压缩为浏览器 runtime：
    - `data/ui/meta.json`
    - `data/ui/7d.<hash>.json`
    - `data/ui/all.<hash>.json`
@@ -21,6 +21,7 @@
 - 完整生成/审核数据保留在 `data/latest.json`、`data/7d.json`、`data/all.json`、`data/audit.json`、`data/review/*`。
 - `data/72h.json` 与 `data/1m.json` 是 alias manifest，不再是完整 range group。
 - 浏览器 runtime 只保留 UI 需要的字段：视频基础信息、歌曲标题/歌手、`seconds`、`isNiche`、`filterVersion`、`dataVersion`、blocklist 指纹。
+- `data/ui/meta.json` 只保存 range、runtime/source-detail/search/request shard 的 manifest 摘要；分页列表留在各 shard manifest 中，避免首屏元数据随全量数据增长。
 - `dataVersion` 绑定 meta、range payload、分片 manifest 和分片页；range/shard `sha256` 绑定 meta 与内容 hash 文件。
 - 搜索、分页、来源展开和快照选择是前端派生状态，不应回写 runtime payload。
 
