@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "kind": "vsinger-moment-http-backfill-report",
+  "generatedAt": "2026-07-18T10:04:38.227Z",
+  "counts": {
+    "songs": 59347,
+    "videos": 63341,
+    "occurrences": 523962,
+    "conflicts": 5841,
+    "failures": 0
+  },
+  "manifest": {
+    "shardSize": 1000,
+    "shards": {
+      "songs": 60,
+      "videos": 64,
+      "occurrences": 524,
+      "conflicts": 6,
+      "coverage": 1,
+      "failures": 0,
+      "syncState": 1
+    }
+  },
+  "coverage": {
+    "schemaVersion": 1,
+    "kind": "vsinger-moment-http-backfill-coverage",
+    "generatedAt": "2026-07-18T10:04:38.227Z",
+    "overallStatus": "complete",
+    "stages": {
+      "songs": {
+        "coverageStatus": "count-mismatch",
+        "stopReason": "no-next-cursor",
+        "pageCount": 12,
+        "rawRowCount": 232,
+        "duplicateRowCount": 97,
+        "duplicateRate": 0.41810344827586204,
+        "cursorLoopDetected": false,
+        "noProgressDetected": false,
+        "requestStats": {
+          "requestCount": 12,
+          "averageHtmlBytes": 117006,
+          "averageResponseTimeMs": 457,
+          "totalBytes": 1404069
+        },
+        "uniqueSongCount": 135,
+        "observedSiteSongCount": 71890,
+        "coverageRatio": 0.0018778689664765613
+      },
+      "streams": {
+        "coverageStatus": "complete",
+        "stopReason": "no-next-cursor",
+        "pageCount": 3195,
+        "rawRowCount": 60566,
+        "duplicateRowCount": 0,
+        "duplicateRate": 0,
+        "cursorLoopDetected": false,
+        "noProgressDetected": false,
+        "requestStats": {
+          "requestCount": 129,
+          "averageHtmlBytes": 266304,
+          "averageResponseTimeMs": 388,
+          "totalBytes": 34353206,
+          "coverageStatus": "partial"
+        },
+        "uniqueVideoCount": 60566,
+        "uniqueSetlistSongCount": 59135,
+        "occurrenceCount": 512605,
+        "detailQueueCount": 24267
+      },
+      "videoDetails": {
+        "coverageStatus": "partial",
+        "requestedCount": 24267,
+        "fetchedCount": 600,
+        "occurrenceCount": 28,
+        "requestStats": {
+          "requestCount": 600,
+          "averageHtmlBytes": 32378,
+          "averageResponseTimeMs": 300,
+          "totalBytes": 19426685
+        }
+      },
+      "singerSongs": {
+        "coverageStatus": "complete",
+        "detailCoverageStatus": "complete",
+        "singersProcessed": 393,
+        "pageCount": 1931,
+        "detailPageCount": 36604,
+        "uniqueSongCount": 3048,
+        "uniqueVideoCount": 28632,
+        "occurrenceCount": 121890,
+        "ownerPermission": {
+          "enabled": true,
+          "note": "site-owner email authorization",
+          "acceptedAt": "2026-07-18T07:31:52.606Z",
+          "robotsSingerSongsQueryAllowed": false,
+          "mergedShardCount": 6
+        },
+        "requestStats": {
+          "requestCount": 38535,
+          "averageHtmlBytes": 65692,
+          "averageResponseTimeMs": 343,
+          "totalBytes": 2531438579
+        }
+      }
+    },
+    "requestStats": {
+      "requestCount": 39276,
+      "averageHtmlBytes": 65858,
+      "averageResponseTimeMs": 343,
+      "totalBytes": 2586622539
+    },
+    "report": {
+      "songs": {
+        "averageHtmlBytes": 117006,
+        "averageResponseTimeMs": 457,
+        "uniqueSongCount": 135,
+        "duplicateSongRows": 97,
+        "cursorStable": true,
+        "estimatedCompleteRequests": 6391,
+        "estimatedRuntimeSecondsAtOneRequestPerSecond": 6391
+      },
+      "streams": {
+        "averageHtmlBytes": 266304,
+        "averageResponseTimeMs": 388,
+        "videosPerPage": 19,
+        "setlistsPerPage": 14,
+        "occurrencesPerPage": 160,
+        "cursorStable": true,
+        "detailQueueCount": 24267
+      }
+    },
+    "savings": {
+      "avoidedBulkMcpGetSongRequests": 71890,
+      "avoidedVideoDetailRequestsByListSetlists": 36299,
+      "singerScopedOccurrencesImported": 121890
+    },
+    "conflictCount": 5841,
+    "failureCount": 0
+  },
+  "inputs": {
+    "songs": {
+      "generatedAt": "2026-07-17T22:55:08.138Z",
+      "coverageStatus": "count-mismatch",
+      "stopReason": "no-next-cursor"
+    },
+    "streams": {
+      "generatedAt": "2026-07-18T00:03:39.428Z",
+      "coverageStatus": "complete",
+      "stopReason": "no-next-cursor",
+      "detailQueueCount": 24267
+    },
+    "videoDetails": {
+      "generatedAt": "2026-07-18T00:21:12.632Z",
+      "fetchedCount": 600
+    },
+    "singerSongs": {
+      "generatedAt": "2026-07-18T10:00:20.774Z",
+      "singersProcessed": 393,
+      "uniqueSongCount": 3048,
+      "occurrenceCount": 121890,
+      "ownerPermission": {
+        "enabled": true,
+        "note": "site-owner email authorization",
+        "acceptedAt": "2026-07-18T07:31:52.606Z",
+        "robotsSingerSongsQueryAllowed": false,
+        "mergedShardCount": 6
+      }
+    }
+  }
+}
