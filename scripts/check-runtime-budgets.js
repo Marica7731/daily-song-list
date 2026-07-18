@@ -27,9 +27,11 @@ const FALLBACK_FILTER_ASSETS = [
 const FIRST_SCREEN_GZIP_BUDGET = 980 * 1024;
 const FALLBACK_FILTER_GZIP_BUDGET = 88 * 1024;
 const SHARD_MANIFEST_GZIP_BUDGET = 96 * 1024;
+const SEARCH_SHARD_MANIFEST_GZIP_BUDGET = 160 * 1024;
 const RUNTIME_PAGE_GZIP_BUDGET = 260 * 1024;
 const SOURCE_DETAIL_PAGE_GZIP_BUDGET = 220 * 1024;
 const SEARCH_PAGE_GZIP_BUDGET = 220 * 1024;
+const DATA_UI_RAW_FILE_BUDGET = 90 * 1024 * 1024;
 
 const meta = readJsonIfExists("data/ui/meta.json");
 const shardBudgetEntries = runtimeShardBudgetEntries(meta);
@@ -56,6 +58,11 @@ if (firstScreenGzipTotal > FIRST_SCREEN_GZIP_BUDGET) {
 console.log(`[budget] fallback-filter gzip=${fallbackGzipTotal} budget=${FALLBACK_FILTER_GZIP_BUDGET}`);
 if (fallbackGzipTotal > FALLBACK_FILTER_GZIP_BUDGET) {
   console.error(`[budget] fallback-filter exceeds gzip budget by ${fallbackGzipTotal - FALLBACK_FILTER_GZIP_BUDGET} bytes`);
+  failed = true;
+}
+
+for (const row of oversizedDataUiFiles()) {
+  console.error(`[budget] ${row.path} raw=${row.rawBytes} exceeds raw budget=${DATA_UI_RAW_FILE_BUDGET}`);
   failed = true;
 }
 
@@ -87,7 +94,7 @@ function legacyOrShardFileBudgets(meta) {
 function firstScreenBudgetEntries(meta) {
   if (!hasRuntimeShards(meta)) return [...BASE_FIRST_SCREEN_ASSETS, ...LEGACY_FIRST_SCREEN_RUNTIME_ASSETS];
   const rangeId = meta.ranges?.["7d"] ? "7d" : "72h";
-  const firstPage = runtimeShardsForRange(meta, rangeId)?.runtime?.pages?.[0]?.path;
+  const firstPage = shardPages(runtimeShardsForRange(meta, rangeId)?.runtime)?.[0]?.path;
   return firstPage
     ? [...BASE_FIRST_SCREEN_ASSETS, { path: firstPage, gzipBudget: RUNTIME_PAGE_GZIP_BUDGET }]
     : [...BASE_FIRST_SCREEN_ASSETS, ...LEGACY_FIRST_SCREEN_RUNTIME_ASSETS];
@@ -109,9 +116,10 @@ function runtimeShardBudgetEntries(meta) {
 function appendShardBudgetEntries(entries, rangeId, shardName, shard, pageBudget) {
   if (!shard) return;
   if (shard.manifestPath) {
-    entries.push({ path: shard.manifestPath, gzipBudget: SHARD_MANIFEST_GZIP_BUDGET, label: `${rangeId}.${shardName}.manifest` });
+    const manifestBudget = shardName === "search" ? SEARCH_SHARD_MANIFEST_GZIP_BUDGET : SHARD_MANIFEST_GZIP_BUDGET;
+    entries.push({ path: shard.manifestPath, gzipBudget: manifestBudget, label: `${rangeId}.${shardName}.manifest` });
   }
-  for (const page of shard.pages || []) {
+  for (const page of shardPages(shard)) {
     if (page.path) entries.push({ path: page.path, gzipBudget: pageBudget, label: `${rangeId}.${shardName}.page` });
   }
 }
@@ -124,10 +132,39 @@ function runtimeShardsForRange(meta, rangeId) {
   return meta?.ranges?.[rangeId]?.shards || meta?.shards?.ranges?.[rangeId] || null;
 }
 
+function shardPages(shard) {
+  if (!shard) return [];
+  if (Array.isArray(shard.pages)) return shard.pages;
+  const manifest = readJsonIfExists(shard.manifestPath || "");
+  return Array.isArray(manifest?.pages) ? manifest.pages : [];
+}
+
 function readJsonIfExists(relativePath) {
+  if (!relativePath) return null;
   try {
     return JSON.parse(fs.readFileSync(path.join(ROOT, relativePath), "utf8"));
   } catch {
     return null;
+  }
+}
+
+function oversizedDataUiFiles() {
+  const result = [];
+  collectOversizedFiles(path.join(ROOT, "data", "ui"), "data/ui", result);
+  return result;
+}
+
+function collectOversizedFiles(dir, relativeDir, result) {
+  if (!fs.existsSync(dir)) return;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const absolute = path.join(dir, entry.name);
+    const relative = `${relativeDir}/${entry.name}`;
+    if (entry.isDirectory()) {
+      collectOversizedFiles(absolute, relative, result);
+      continue;
+    }
+    if (!entry.isFile()) continue;
+    const rawBytes = fs.statSync(absolute).size;
+    if (rawBytes > DATA_UI_RAW_FILE_BUDGET) result.push({ path: relative, rawBytes });
   }
 }

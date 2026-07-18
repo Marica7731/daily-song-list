@@ -7,6 +7,7 @@ const {
   buildRuntimeRangePayload,
   buildSearchRecords,
   buildSourceDetailRecords,
+  chunkRecordsByPayloadBytes,
   compactRankDiff,
   compactRankDiffEntries,
   CURRENT_FILTER_VERSION,
@@ -262,6 +263,22 @@ test("request search buckets route by token first character into bounded shards"
   assert.equal(requestSearchBucketId("S"), requestSearchBucketId("S"));
   assert.equal(requestSearchBucketId("ヤ"), requestSearchBucketId("ヤ"));
   assert.notEqual(requestSearchBucketId("S"), requestSearchBucketId("T"));
+});
+
+test("request keyed shards split before the payload byte budget is exceeded", () => {
+  const records = [
+    { key: "a", value: "x".repeat(90) },
+    { key: "b", value: "y".repeat(90) },
+    { key: "c", value: "z".repeat(90) },
+  ];
+  const chunks = chunkRecordsByPayloadBytes(records, {
+    pageSize: 10,
+    maxBytes: 260,
+    buildPayload: (chunk) => ({ kind: "request-source-detail", records: chunk }),
+  });
+
+  assert.equal(chunks.length, 3);
+  assert.deepEqual(chunks.map((chunk) => chunk.map((record) => record.key)), [["a"], ["b"], ["c"]]);
 });
 
 test("compact rank diff removes unchanged entries and detailed fields", () => {

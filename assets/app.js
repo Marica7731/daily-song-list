@@ -3194,7 +3194,7 @@ async function requestViewPage(request) {
   if (directPage && requestedPage === 1 && viewRef.bootstrapPath && request.view !== "songAz") {
     const pagePayload = await readCachedRequestJson(state.requestRuntime.detailShardCache, viewRef.bootstrapPath, request.signal);
     assertRequestViewPagePayload(pagePayload, viewRef.bootstrapPath);
-    const records = hydrateRequestRecords(pagePayload.records || [], request.view);
+    const records = await hydrateRequestPageRecords(pagePayload, request.view, request.signal);
     const entries = pagePayload.indexEntries || [];
     const manifest = requestManifestFromViewRef(viewRef, request);
     const result = buildRequestResult({
@@ -3220,7 +3220,7 @@ async function requestViewPage(request) {
     if (!pageRef?.path) throw new Error(`request page missing: ${request.view} ${page}`);
     const pagePayload = await readCachedRequestJson(state.requestRuntime.detailShardCache, pageRef.path, request.signal);
     assertRequestViewPagePayload(pagePayload, pageRef.path);
-    const records = hydrateRequestRecords(pagePayload.records || [], request.view);
+    const records = await hydrateRequestPageRecords(pagePayload, request.view, request.signal);
     const entries = pagePayload.indexEntries || [];
     const bucketEntries = request.view === "songAz"
       ? (await loadRequestViewIndex(manifest, request.signal)).records || []
@@ -3283,6 +3283,23 @@ function assertRequestViewPagePayload(payload, path) {
   if (payload?.kind !== "request-view-page" || !Array.isArray(payload.records) || !Array.isArray(payload.indexEntries)) {
     throw new Error(`request page payload invalid: ${path}`);
   }
+}
+
+async function hydrateRequestPageRecords(payload, view, signal) {
+  const records = Array.isArray(payload?.records) ? payload.records : [];
+  const entries = Array.isArray(payload?.indexEntries) ? payload.indexEntries : [];
+  if (requestPageRecordsAreDetailed(records, view)) return hydrateRequestRecords(records, view);
+  if (entries.some((entry) => entry.detailShard)) return loadRequestDetailRecords(entries, signal);
+  return hydrateRequestRecords(records, view);
+}
+
+function requestPageRecordsAreDetailed(records, view) {
+  if (!records.length) return false;
+  return records.every((record) => {
+    if (view === "artistRank") return Array.isArray(record.occurrences) && Array.isArray(record.songs);
+    if (view === "videos") return Array.isArray(record.songs);
+    return Array.isArray(record.occurrences) && Array.isArray(record.artists);
+  });
 }
 
 function requestManifestFromViewRef(viewRef, request) {
@@ -5225,7 +5242,7 @@ function renderRankRecord({
     row.append(
       renderSourceDrawer({
         mode,
-        occurrences: mode === "artist" ? safeOccurrences : row._sourceDetailOccurrences,
+        occurrences: row._sourceDetailOccurrences,
         copyOccurrences: safeOccurrences,
         songGroups,
         drawerId,
@@ -6261,17 +6278,15 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     const songGroups =
       mode === "artist" ? row._artistSongGroups || row._getArtistSongGroups?.() || [] : row._artistSongGroups || [];
     if (mode === "artist") row._artistSongGroups = songGroups;
-    let drawerOccurrences = mode === "artist" ? row._sourceOccurrences || [] : row._sourceDetailOccurrences || row._sourceOccurrences || [];
+    let drawerOccurrences = row._sourceDetailOccurrences || row._sourceOccurrences || [];
     drawer.setAttribute("aria-busy", "true");
     try {
-      if (mode !== "artist") {
-        drawerOccurrences = await sourceDetailOccurrencesForContainer(row, drawerOccurrences);
-        row._sourceDetailOccurrences = drawerOccurrences;
-      }
+      drawerOccurrences = await sourceDetailOccurrencesForContainer(row, drawerOccurrences);
+      row._sourceDetailOccurrences = drawerOccurrences;
       initializeSourceDrawer(drawer, {
         mode,
         occurrences: drawerOccurrences,
-        copyOccurrences: row._sourceOccurrences || drawerOccurrences,
+        copyOccurrences: drawerOccurrences,
         songGroups,
       });
     } finally {

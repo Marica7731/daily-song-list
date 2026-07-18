@@ -80,7 +80,7 @@ test("song and index rows inline source previews and expand to full source lists
   assert.match(rankRecordBody, /sourcePresentationModel\(safeOccurrences/u);
   assert.match(rankRecordBody, /Boolean\(sourcePresentation\?\.canExpand\)/u);
   assert.match(rankRecordBody, /row\._sourceDetailOccurrences = safeOccurrences/u);
-  assert.match(rankRecordBody, /occurrences: mode === "artist" \? safeOccurrences : row\._sourceDetailOccurrences/u);
+  assert.match(rankRecordBody, /occurrences: row\._sourceDetailOccurrences/u);
   assert.match(rankRecordBody, /copyOccurrences: safeOccurrences/u);
   assert.match(rankRecordBody, /renderRankSide/u);
   assert.match(rankRecordBody, /renderSourceInlineStrip\(sourcePresentation/u);
@@ -129,6 +129,7 @@ test("source drawer renders complete source lists without rebuilding old cards",
   const expandedBody = functionBody("async function setSourceDrawerExpanded");
   assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
   assert.match(expandedBody, /sourceDetailOccurrencesForContainer\(row, drawerOccurrences\)/u);
+  assert.doesNotMatch(expandedBody, /mode !== "artist"/u);
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
   assert.match(functionBody("function sourceDetailOccurrencesForContainer"), /mergeCompleteSourceOccurrences/u);
   assert.doesNotMatch(appSource, /function remainingSourceDetailOccurrences/u);
