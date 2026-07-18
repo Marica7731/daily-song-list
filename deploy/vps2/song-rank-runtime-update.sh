@@ -48,7 +48,7 @@ cleanup() {
 trap cleanup EXIT
 
 export NODE_OPTIONS
-npm run db:build -- --output "${tmp_db}"
+python3 scripts/db/build-runtime-db.py --output "${tmp_db}"
 python3 scripts/db/query-runtime-db.py --db "${tmp_db}" --range all --view songs --q "少女レイ" --page-size 5 --summary-only
 
 if [[ -f "${DB_PATH}" ]]; then
