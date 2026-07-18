@@ -34,6 +34,7 @@
     "vsinger:crawl:streams": "node scripts/vsinger-http/crawl-streams.js",
     "vsinger:crawl:singers": "node scripts/vsinger-http/crawl-singers.js",
     "vsinger:crawl:singer-songs": "node scripts/vsinger-http/crawl-singer-songs.js",
+    "vsinger:shard:singer-songs": "node scripts/vsinger-http/shard-singer-songs.js",
     "vsinger:fetch-video-details": "node scripts/vsinger-http/fetch-video-details.js",
     "vsinger:build-bundle": "node scripts/vsinger-http/build-backfill-bundle.js",
     "vsinger:run-backfill": "node scripts/vsinger-http/run-backfill-worker.js",

@@ -92,6 +92,35 @@ npm run vsinger:crawl:singer-songs -- --fresh --owner-permission --singers-file 
 npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 1 --max-song-pages 1 --fetch-song-details
 ```
 
+For multi-VPS backfills, shard singer targets into disjoint ranges. Each VPS must use its own `--output-dir`; never point two machines at the same checkpoint directory. The planner writes shard singer files plus ready-to-run command lists:
+
+```bash
+npm run vsinger:shard:singer-songs -- --mode plan --singers-file artifacts/vsinger-http-backfill/singers/singers.json --singer-start-index 190 --singer-end-index 393 --shards 4 --owner-permission-note "site-owner email authorization" --request-interval-ms 1500
+```
+
+Planner outputs:
+
+- `artifacts/vsinger-http-backfill/singer-song-shards/manifest.json`
+- `artifacts/vsinger-http-backfill/singer-song-shards/commands.ps1`
+- `artifacts/vsinger-http-backfill/singer-song-shards/commands.sh`
+- `artifacts/vsinger-http-backfill/singer-song-shards/shard-*.singers.json`
+
+Run one generated command per VPS. By default, each command runs that whole shard to completion. Keep `--fresh` only for the first run of that shard; remove `--fresh` when resuming the same shard output directory. Use a conservative per-node `--request-interval-ms`, because total site load is the sum of all VPS workers even with site-owner permission. Add `--max-singers` or `--max-song-pages` to the planner only when you deliberately want each shard command to process a bounded batch instead of the full shard.
+
+After copying every shard output directory back, merge them into the normal singer-scoped output shape:
+
+```bash
+npm run vsinger:shard:singer-songs -- --mode merge --manifest artifacts/vsinger-http-backfill/singer-song-shards/manifest.json --output-dir artifacts/vsinger-http-backfill/singer-songs-merged
+```
+
+Then build the unified bundle with the merged singer-scoped directory:
+
+```bash
+npm run vsinger:build-bundle -- --songs-dir artifacts/vsinger-http-backfill/songs --streams-dir artifacts/vsinger-http-backfill/streams --video-details-dir artifacts/vsinger-http-backfill/video-details --singer-songs-dir artifacts/vsinger-http-backfill/singer-songs-merged --output-dir data/external/vsinger-http/backfill
+```
+
+The merge step deduplicates songs, videos, and repeated occurrence keys while preserving same-song repeats at different timestamps. It marks the merged singer-scoped coverage as `complete` only when every shard reports `complete`, every shard has complete detail coverage, and the merged singer count reaches the planned target count.
+
 For bounded validation against one singer:
 
 ```bash

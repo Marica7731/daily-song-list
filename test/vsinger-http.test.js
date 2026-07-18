@@ -16,6 +16,7 @@ const { crawlStreams } = require("../scripts/vsinger-http/crawl-streams");
 const { crawlSingers } = require("../scripts/vsinger-http/crawl-singers");
 const { crawlSingerSongs } = require("../scripts/vsinger-http/crawl-singer-songs");
 const { fetchVideoDetails } = require("../scripts/vsinger-http/fetch-video-details");
+const { mergeSingerSongShards, planSingerSongShards } = require("../scripts/vsinger-http/shard-singer-songs");
 const { parseSingerDetailPage, parseSingersPage, parseSongOccurrencesPage, parseSongsPage, parseStreamsPage, parseVideoDetailPage } = require("../scripts/vsinger-http/parsers");
 
 const SONG_A = "11111111-1111-4111-8111-111111111111";
@@ -291,6 +292,88 @@ test("singer-scoped crawler resumes current singer from checkpoint cursor", asyn
   assert.equal(second.nextSingerIndex, 1);
   assert.equal(syncState.cursorCheckpoint.nextSingerIndex, 1);
   assert.equal(readJson(path.join(dir, "checkpoint.json")).currentSinger, null);
+});
+
+test("singer-scoped shard planner writes portable disjoint shard commands", () => {
+  const dir = tempDir("singer-shard-plan");
+  const singersFile = path.join(dir, "singers.json");
+  writeJson(singersFile, {
+    singers: [
+      { externalSingerId: SINGER_A, singerName: "歌手A" },
+      { externalSingerId: SINGER_B, singerName: "歌手B" },
+      { externalSingerId: "77777777-7777-4777-8777-777777777777", singerName: "歌手C" },
+    ],
+  });
+
+  const plan = planSingerSongShards({
+    "singers-file": singersFile,
+    "output-dir": path.join(dir, "plan"),
+    shards: 2,
+    "owner-permission-note": "site-owner email authorization",
+    "request-interval-ms": 1500,
+  });
+  const firstShard = readJson(path.join(dir, "plan", "shard-001.singers.json"));
+  const secondShard = readJson(path.join(dir, "plan", "shard-002.singers.json"));
+
+  assert.equal(plan.shardCount, 2);
+  assert.deepEqual([plan.shards[0].singerStartIndex, plan.shards[0].singerEndIndex], [0, 1]);
+  assert.deepEqual([plan.shards[1].singerStartIndex, plan.shards[1].singerEndIndex], [1, 3]);
+  assert.equal(firstShard.singers[0].sourceSingerIndex, 0);
+  assert.deepEqual(secondShard.singers.map((singer) => singer.sourceSingerIndex), [1, 2]);
+  assert.match(plan.shards[0].command, /--owner-permission/);
+  assert.match(plan.shards[0].command, /--request-interval-ms 1500/);
+  assert.doesNotMatch(plan.shards[0].command, /\\/);
+});
+
+test("singer-scoped shard merger dedupes outputs and reports complete coverage", () => {
+  const dir = tempDir("singer-shard-merge");
+  const shardA = path.join(dir, "outputs", "shard-001");
+  const shardB = path.join(dir, "outputs", "shard-002");
+  fs.mkdirSync(shardA, { recursive: true });
+  fs.mkdirSync(shardB, { recursive: true });
+  writeSingerShard(shardA, {
+    singerIndex: 0,
+    singerId: SINGER_A,
+    singerName: "歌手A",
+    songId: SONG_A,
+    videoId: VIDEO_A,
+    youtubeVideoId: "PwEG0NtOoxE",
+    seconds: 360,
+  });
+  writeSingerShard(shardB, {
+    singerIndex: 1,
+    singerId: SINGER_B,
+    singerName: "歌手B",
+    songId: SONG_A,
+    videoId: VIDEO_A,
+    youtubeVideoId: "PwEG0NtOoxE",
+    seconds: 360,
+  });
+  const manifest = {
+    selectedSingerCount: 2,
+    shards: [
+      { outputDir: path.relative(process.cwd(), shardA) },
+      { outputDir: path.relative(process.cwd(), shardB) },
+    ],
+  };
+  const manifestPath = path.join(dir, "manifest.json");
+  writeJson(manifestPath, manifest);
+
+  const merged = mergeSingerSongShards({
+    manifest: manifestPath,
+    "output-dir": path.join(dir, "merged"),
+    generatedAt: "2026-07-18T00:00:00.000Z",
+    "require-complete": true,
+  });
+  const report = readJson(path.join(dir, "merged", "crawl.json"));
+
+  assert.equal(merged.coverageStatus, "complete");
+  assert.equal(merged.singersProcessed, 2);
+  assert.equal(merged.uniqueSongCount, 1);
+  assert.equal(merged.uniqueVideoCount, 1);
+  assert.equal(merged.occurrenceCount, 1);
+  assert.equal(report.outputFiles.songs, "songs.json");
+  assert.equal(report.shardMerge.sourceShardCount, 2);
 });
 
 test("YouTube parser never treats VSinger UUIDs as YouTube IDs", () => {
@@ -899,4 +982,77 @@ function mockClient(pages) {
 
 function tempDir(name) {
   return fs.mkdtempSync(path.join(os.tmpdir(), `vsinger-http-${name}-`));
+}
+
+function writeSingerShard(dir, { singerIndex, singerId, singerName, songId, videoId, youtubeVideoId, seconds }) {
+  const generatedAt = "2026-07-18T00:00:00.000Z";
+  const song = {
+    externalSongId: songId,
+    title: "Shard Song",
+    originalArtist: "Shard Artist",
+    songPageUrl: `https://vsinger-moment.jp/songs/${songId}?singerId=${singerId}`,
+    singerId,
+    singerName,
+    sourceSystem: "vsinger_moment_http",
+  };
+  const occurrence = {
+    externalSongId: songId,
+    externalVideoId: videoId,
+    youtubeVideoId,
+    youtubeUrl: `https://www.youtube.com/watch?v=${youtubeVideoId}&t=${seconds}s`,
+    videoPageUrl: `https://vsinger-moment.jp/videos/${videoId}`,
+    videoTitle: "Shard Stream",
+    singerId,
+    singerName,
+    streamedAt: "2026/7/18",
+    rawTitle: "Shard Song",
+    rawArtist: "Shard Artist",
+    songPageUrl: song.songPageUrl,
+    seconds,
+    timestampText: "00:06:00",
+    fetchedAt: generatedAt,
+    rawHash: "hash",
+  };
+  writeJson(path.join(dir, "songs.json"), [song]);
+  writeJson(path.join(dir, "raw-occurrences.json"), [occurrence]);
+  writeJson(path.join(dir, "crawl.json"), {
+    schemaVersion: 1,
+    kind: "vsinger-moment-http-singer-songs-crawl",
+    generatedAt,
+    ownerPermission: {
+      enabled: true,
+      note: "site-owner email authorization",
+      acceptedAt: generatedAt,
+      robotsSingerSongsQueryAllowed: false,
+    },
+    stop: { reason: "completed-targets" },
+    singerTargetCount: 1,
+    nextSingerIndex: 1,
+    remainingSingerCount: 0,
+    currentSinger: null,
+    singersProcessed: 1,
+    pageCount: 1,
+    detailPageCount: 1,
+    uniqueSongCount: 1,
+    uniqueVideoCount: 1,
+    occurrenceCount: 1,
+    detailCoverageStatus: "complete",
+    coverageStatus: "complete",
+    requestStats: { requestCount: 2, averageHtmlBytes: 100, averageResponseTimeMs: 10, totalBytes: 200 },
+    singers: [
+      {
+        externalSingerId: singerId,
+        singerName,
+        sourceSingerIndex: singerIndex,
+        stop: { reason: "no-next-cursor" },
+        pageCount: 1,
+        rawRowCount: 1,
+        uniqueSongCount: 1,
+        detailPagesFetched: 1,
+      },
+    ],
+    pages: [{ externalSingerId: singerId, rawRowCount: 1, bytes: 100, elapsedMs: 10 }],
+    detailPages: [{ externalSingerId: singerId, externalSongId: songId, occurrenceCount: 1, bytes: 100, elapsedMs: 10 }],
+    failures: [],
+  });
 }

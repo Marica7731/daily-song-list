@@ -223,7 +223,7 @@ async function crawlSingleSinger({ client, singer, singerIndex, maxSongPages, ma
 }
 
 function singerReport({ singer, stop, pageCount, rawRowCount, discoveredSongIds, detailPagesFetched }) {
-  return {
+  const report = {
     externalSingerId: singer.externalSingerId,
     singerName: singer.singerName,
     stop,
@@ -232,6 +232,8 @@ function singerReport({ singer, stop, pageCount, rawRowCount, discoveredSongIds,
     uniqueSongCount: discoveredSongIds.size,
     detailPagesFetched,
   };
+  if (Number.isInteger(singer.sourceSingerIndex)) report.sourceSingerIndex = singer.sourceSingerIndex;
+  return report;
 }
 
 async function fetchSongOccurrenceDetail({ client, song, singer, state }) {
@@ -310,7 +312,7 @@ function singerAtIndexMatches(singers, singerIndex, externalSingerId) {
 }
 
 function singerCheckpoint({ singer, singerIndex, nextPageUrl, visitedUrls, discoveredSongIds, pageCount, rawRowCount, detailPagesFetched }) {
-  return {
+  const checkpoint = {
     singerIndex,
     externalSingerId: singer.externalSingerId,
     singerName: singer.singerName,
@@ -321,6 +323,8 @@ function singerCheckpoint({ singer, singerIndex, nextPageUrl, visitedUrls, disco
     rawRowCount,
     detailPagesFetched,
   };
+  if (Number.isInteger(singer.sourceSingerIndex)) checkpoint.sourceSingerIndex = singer.sourceSingerIndex;
+  return checkpoint;
 }
 
 function upsertSingerReport(reports, report) {
@@ -508,28 +512,52 @@ function dedupeRawOccurrences(occurrences) {
 }
 
 function loadSingerTargets(args) {
+  let singers;
   if (args["singers-file"]) {
     const filePayload = JSON.parse(fs.readFileSync(args["singers-file"], "utf8"));
-    const singers = Array.isArray(filePayload) ? filePayload : filePayload.singers || [];
-    return singers.map(normalizeSingerTarget).filter((singer) => singer.externalSingerId);
+    singers = Array.isArray(filePayload) ? filePayload : filePayload.singers || [];
+    return sliceSingerTargets(singers.map(normalizeSingerTarget).filter((singer) => singer.externalSingerId), args);
   }
   const externalSingerId = args["singer-id"];
   if (!externalSingerId) throw new Error("Provide --singer-id or --singers-file.");
-  return [
+  singers = [
     normalizeSingerTarget({
       externalSingerId,
       singerName: args["singer-name"] || "",
       singerSongsUrl: args["start-url"] || "",
     }),
   ];
+  return sliceSingerTargets(singers, args);
 }
 
 function normalizeSingerTarget(singer) {
-  return {
+  const target = {
     externalSingerId: singer.externalSingerId || singer.singerId || "",
     singerName: singer.singerName || singer.name || "",
     singerSongsUrl: singer.singerSongsUrl || "",
   };
+  const sourceSingerIndex = Number(singer.sourceSingerIndex);
+  if (Number.isInteger(sourceSingerIndex)) target.sourceSingerIndex = sourceSingerIndex;
+  return target;
+}
+
+function sliceSingerTargets(singers, args) {
+  const startIndex = optionalIndex(args["singer-start-index"], 0, "singer-start-index");
+  const endIndex = optionalIndex(args["singer-end-index"], singers.length, "singer-end-index");
+  if (startIndex > endIndex) throw new Error(`--singer-start-index (${startIndex}) must be <= --singer-end-index (${endIndex}).`);
+  if (endIndex > singers.length) throw new Error(`--singer-end-index (${endIndex}) exceeds singer target count (${singers.length}).`);
+  if (startIndex < 0) throw new Error("--singer-start-index must be >= 0.");
+  return singers.slice(startIndex, endIndex).map((singer, offset) => ({
+    ...singer,
+    sourceSingerIndex: Number.isInteger(singer.sourceSingerIndex) ? singer.sourceSingerIndex : startIndex + offset,
+  }));
+}
+
+function optionalIndex(value, fallback, label) {
+  if (value == null || value === true || value === "") return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed)) throw new Error(`--${label} must be an integer.`);
+  return parsed;
 }
 
 function singerSongsUrl(singer) {
@@ -602,8 +630,13 @@ if (require.main === module) {
 }
 
 module.exports = {
+  buildSingerSongsResult,
+  buildSyncState,
   crawlSingerSongs,
+  dedupeRawOccurrences,
+  loadSingerTargets,
   ownerPermissionFromArgs,
   singerSongsReport,
+  sliceSingerTargets,
   videosFromSingerOccurrences,
 };
