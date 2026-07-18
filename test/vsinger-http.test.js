@@ -634,8 +634,8 @@ test("backfill bundle builder merges stage outputs and writes coverage report", 
   writeJson(path.join(streamsDir, "detail-queue.json"), [{ videoPageUrl: `https://vsinger-moment.jp/videos/${VIDEO_B}`, reasons: ["setlist_none"] }]);
   writeJson(path.join(streamsDir, "crawl.json"), {
     generatedAt: "2026-07-17T00:00:00.000Z",
-    coverageStatus: "partial",
-    stop: { reason: "max-pages" },
+    coverageStatus: "complete",
+    stop: { reason: "no-next-cursor" },
     pageCount: 1,
     rawRowCount: 2,
     uniqueVideoCount: 2,
@@ -648,7 +648,7 @@ test("backfill bundle builder merges stage outputs and writes coverage report", 
     pages: [{ setlistCount: 1, occurrenceCount: 3, bytes: 200, elapsedMs: 20 }],
   });
   writeJson(path.join(streamsDir, "sync-state.json"), {
-    lastSuccessfulStreamCrawl: { coverageStatus: "partial" },
+    lastSuccessfulStreamCrawl: { coverageStatus: "complete" },
     streamWatermark: "2026-07-17",
     cursorCheckpoint: { nextPageUrl: "https://vsinger-moment.jp/streams?cursor=next" },
   });
@@ -687,8 +687,10 @@ test("backfill bundle builder merges stage outputs and writes coverage report", 
   writeJson(path.join(singerSongsDir, "crawl.json"), {
     kind: "vsinger-moment-http-singer-songs-crawl",
     generatedAt: "2026-07-17T00:00:00.000Z",
-    coverageStatus: "partial",
+    coverageStatus: "complete",
+    detailCoverageStatus: "complete",
     singersProcessed: 1,
+    singerTargetCount: 1,
     pageCount: 1,
     detailPageCount: 1,
     uniqueSongCount: 1,
@@ -699,7 +701,7 @@ test("backfill bundle builder merges stage outputs and writes coverage report", 
     pages: [{ bytes: 100, elapsedMs: 10 }, { bytes: 200, elapsedMs: 20 }],
   });
   writeJson(path.join(singerSongsDir, "sync-state.json"), {
-    lastSuccessfulSingerSongsCrawl: { coverageStatus: "partial" },
+    lastSuccessfulSingerSongsCrawl: { coverageStatus: "complete", detailCoverageStatus: "complete" },
     ownerPermission: { enabled: true, note: "test" },
   });
 
@@ -718,7 +720,9 @@ test("backfill bundle builder merges stage outputs and writes coverage report", 
   assert.equal(bundle.counts.videos, 3);
   assert.equal(bundle.counts.occurrences, 4);
   assert.equal(bundle.counts.conflicts, 0);
+  assert.equal(bundle.coverage.overallStatus, "complete");
   assert.equal(bundle.coverage.stages.songs.coverageStatus, "count-mismatch");
+  assert.equal(bundle.coverage.stages.singerSongs.detailCoverageStatus, "complete");
   assert.equal(bundle.coverage.savings.avoidedVideoDetailRequestsByListSetlists, 1);
   assert.equal(bundle.coverage.stages.singerSongs.ownerPermission.enabled, true);
   assert.equal(bundle.coverage.savings.singerScopedOccurrencesImported, 1);

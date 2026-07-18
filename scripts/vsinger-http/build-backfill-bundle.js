@@ -184,7 +184,9 @@ function buildCoverage({ generatedAt, songsCrawl, streamsCrawl, videoDetails, si
   const requestStats = totalRequestStats([songsCrawl, streamsCrawl, videoDetails, singerSongsCrawl]);
   const songsCoverageStatus = songsCrawl.coverageStatus || "missing";
   const streamsCoverageStatus = streamsCrawl.coverageStatus || "missing";
-  const overallStatus = songsCoverageStatus === "complete" && streamsCoverageStatus === "complete" && failures.length === 0 ? "complete" : "partial";
+  const singerSongsCoverageStatus = singerSongsCrawl.coverageStatus || "missing";
+  const catalogCoverageComplete = songsCoverageStatus === "complete" || singerSongsCoverageStatus === "complete";
+  const overallStatus = catalogCoverageComplete && streamsCoverageStatus === "complete" && failures.length === 0 ? "complete" : "partial";
   return {
     schemaVersion: 1,
     kind: "vsinger-moment-http-backfill-coverage",
@@ -210,7 +212,8 @@ function buildCoverage({ generatedAt, songsCrawl, streamsCrawl, videoDetails, si
         requestStats: videoDetails.requestStats || emptyRequestStats(),
       },
       singerSongs: {
-        coverageStatus: singerSongsCrawl.kind ? singerSongsCrawl.coverageStatus || "partial" : "missing",
+        coverageStatus: singerSongsCrawl.kind ? singerSongsCoverageStatus : "missing",
+        detailCoverageStatus: singerSongsCrawl.kind ? singerSongsCrawl.detailCoverageStatus || "missing" : "missing",
         singersProcessed: singerSongsCrawl.singersProcessed || 0,
         pageCount: singerSongsCrawl.pageCount || 0,
         detailPageCount: singerSongsCrawl.detailPageCount || 0,
