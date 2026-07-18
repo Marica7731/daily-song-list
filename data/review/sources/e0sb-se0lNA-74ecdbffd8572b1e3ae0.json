@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T08:26:09.750Z",
+  "generatedAt": "2026-07-18T14:06:16.513Z",
   "reviewId": "review:e0sb-se0lNA:74ecdbffd8572b1e3ae0",
   "video": {
     "videoId": "e0sb-se0lNA",
@@ -11,18 +11,20 @@
   "source": {
     "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
     "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "☘️セトリタイスタ🍪\n0:01~マイクテスト兼待機\n1:15~待機あけ\n\n2:52 なんて素敵な土曜日\n\n8:01 違う、そうじゃない\n\n14:32 WILD CHALLENGER\n\n20:30 チチをもげ！\n\n25:46 俺ら東京さ行ぐだ\n\n歌枠リレー主催&トップバッター:_mitreおーつ::_mitreミトア::_mitreわいわい:\n緊張してるの見ながらにっこりしてた:_mitreはーと:\n相変わらずの:_mitreミトア:クオリティでめちゃ楽しかったし大満足だった:_mitreサイリウム:\n準備含めて本当にお疲れさまでした👏\n29:29~最後の最後でめっちゃ笑った😂",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 55,
+    "riskScore": 69,
     "riskLevel": "medium",
     "riskReasons": [
       "source_unknown_artist_ratio_high",
-      "source_multiple_unknown_artists"
+      "niche_unknown_artist",
+      "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -36,16 +38,15 @@
       "rawHash": "ab8d8b52cdbff69ffd3160c289f0595a254c09324c096bc3597d55c5eb91c1c7",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -57,16 +58,15 @@
       "rawHash": "d55ccec5528e3531091fa522660a35a583a81dbdec4f2fb305c0b845f6e48f9d",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -78,16 +78,15 @@
       "rawHash": "1b475b8aee94611ea73a8880178a61dcf97f74070d32cea4c350715b7319c58b",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -99,16 +98,15 @@
       "rawHash": "74de83b44ef0d9b35b9d68eef3032e9f933de5bde3561db83194c7597e93d7d8",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -120,16 +118,15 @@
       "rawHash": "57123139e39daa0407f4fa547029680874a63a54008581d8ec6709c02dc88189",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -149,8 +146,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -171,25 +167,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 1769,
-      "time": "0:29:29",
-      "title": "~最後の最後でめっちゃ笑った😂",
-      "artist": "未記載",
-      "raw": "29:29~最後の最後でめっちゃ笑った😂",
-      "rawHash": "cebd9d2066bd0491ab886682a6fbbee551ddb10367bc0b1560307fb138265d4b",
-      "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
-      "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
+        "known_song"
       ]
     }
   ]

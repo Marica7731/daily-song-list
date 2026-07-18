@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T08:33:19.001Z",
+  "generatedAt": "2026-07-18T14:13:21.047Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-18T06:29:13.274Z",
+  "latestGeneratedAt": "2026-07-18T12:43:13.684Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 2544,
-    "uniqueVideos": 410,
-    "uniqueSources": 492,
+    "totalCandidates": 2561,
+    "uniqueVideos": 417,
+    "uniqueSources": 499,
     "confirmedNoiseCount": 104,
     "parserCorruptionCount": 233,
     "likelyNoiseCount": 294,
-    "needsReviewCount": 1912,
+    "needsReviewCount": 1929,
     "likelySongCount": 1,
     "byClassification": {
       "confirmed_noise": 104,
       "parser_corruption": 233,
       "likely_noise": 294,
-      "needs_review": 1912,
+      "needs_review": 1929,
       "likely_song": 1
     }
   },
@@ -2592,7 +2592,7 @@
         "7d",
         "all",
         "review",
-        "snapshot:20260718T060000Z"
+        "snapshot:20260718T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -15731,7 +15731,6 @@
       "sourceOrigin": "latest;review:wau8EBFg1VE-8f90df73112a1d6bc9c2.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -28320,7 +28319,7 @@
       "ranges": [
         "all",
         "review",
-        "snapshot:20260718T060000Z",
+        "snapshot:20260718T120000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
@@ -29468,13 +29467,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=kQVdDhuS2js&t=1740s",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "sourceOrigin": "latest;review:kQVdDhuS2js-dbff8ac38f56e8488ef2.json;review:history-kQVdDhuS2js-dbff8ac38f56e8488ef2.json",
+      "sourceOrigin": "latest;review:history-kQVdDhuS2js-dbff8ac38f56e8488ef2.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
         "all",
-        "review",
-        "snapshot:20260718T060000Z"
+        "snapshot:20260718T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29485,8 +29483,7 @@
       "riskReasons": [
         "parser_corruption",
         "delimiter_split",
-        "niche_unknown_artist",
-        "short_unknown_title"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": {
         "artist": "アニメ三銃士"
@@ -29518,20 +29515,18 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=kQVdDhuS2js&t=3085s",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "sourceOrigin": "latest;review:kQVdDhuS2js-dbff8ac38f56e8488ef2.json",
+      "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all",
-        "review"
+        "all"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:kQVdDhuS2js:dbff8ac38f56e8488ef2",
@@ -30233,7 +30228,6 @@
       "sourceOrigin": "latest;review:kBQ29q_6aiA-3e137f92b6a21514599b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -30275,7 +30269,6 @@
       "sourceOrigin": "latest;review:kBQ29q_6aiA-3e137f92b6a21514599b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -30316,7 +30309,6 @@
       "sourceOrigin": "latest;review:kBQ29q_6aiA-3e137f92b6a21514599b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -30358,7 +30350,6 @@
       "sourceOrigin": "latest;review:kBQ29q_6aiA-3e137f92b6a21514599b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -30399,7 +30390,6 @@
       "sourceOrigin": "latest;review:kBQ29q_6aiA-3e137f92b6a21514599b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -32649,6 +32639,253 @@
       "repairReasons": []
     },
     {
+      "title": "イロトリドリ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 587,
+      "time": "0:09:47",
+      "raw": "00:09:47 イロトリドリ",
+      "rawHash": "a59f8999112f952ecd8a28ea2545b0749ba208e15d525f1401396b30d2aa741a",
+      "videoId": "fYisMjp6_6Q",
+      "videoTitle": "収益化2年記念歌枠🎤",
+      "channelName": "ちょき【Vsinger】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q&t=587s",
+      "sourceId": "UgzcdaYtgelTNUmu4vN4AaABAg",
+      "sourceHash": "275e0f16128b92b73765001438d0a8d82f1c05c2fbd607239574f6bd06399514",
+      "sourceOrigin": "latest;review:fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fYisMjp6_6Q:275e0f16128b92b73765",
+      "sourcePath": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "reviewLocator": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json#a59f8999112f952ecd8a28ea2545b0749ba208e15d525f1401396b30d2aa741a",
+      "repairedTitle": "イロトリドリ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "曇りのち、快晴",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1829,
+      "time": "0:30:29",
+      "raw": "00:30:29 曇りのち、快晴",
+      "rawHash": "526242f1f4e17974a61a594590ae7527644e554a51a16422010b0c307773d815",
+      "videoId": "fYisMjp6_6Q",
+      "videoTitle": "収益化2年記念歌枠🎤",
+      "channelName": "ちょき【Vsinger】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q&t=1829s",
+      "sourceId": "UgzcdaYtgelTNUmu4vN4AaABAg",
+      "sourceHash": "275e0f16128b92b73765001438d0a8d82f1c05c2fbd607239574f6bd06399514",
+      "sourceOrigin": "latest;review:fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fYisMjp6_6Q:275e0f16128b92b73765",
+      "sourcePath": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "reviewLocator": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json#526242f1f4e17974a61a594590ae7527644e554a51a16422010b0c307773d815",
+      "repairedTitle": "曇りのち、快晴",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "おきゅいんしチャイナ！",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2735,
+      "time": "0:45:35",
+      "raw": "00:45:35 おきゅいんしチャイナ！",
+      "rawHash": "caec066243ba9ee2a5afaa5e107734b0c81d851018c9587c2eee0721d1b9474b",
+      "videoId": "fYisMjp6_6Q",
+      "videoTitle": "収益化2年記念歌枠🎤",
+      "channelName": "ちょき【Vsinger】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q&t=2735s",
+      "sourceId": "UgzcdaYtgelTNUmu4vN4AaABAg",
+      "sourceHash": "275e0f16128b92b73765001438d0a8d82f1c05c2fbd607239574f6bd06399514",
+      "sourceOrigin": "latest;review:fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fYisMjp6_6Q:275e0f16128b92b73765",
+      "sourcePath": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "reviewLocator": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json#caec066243ba9ee2a5afaa5e107734b0c81d851018c9587c2eee0721d1b9474b",
+      "repairedTitle": "おきゅいんしチャイナ！",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ペンパイナッポーアッポーペン",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4760,
+      "time": "1:19:20",
+      "raw": "01:19:20 ペンパイナッポーアッポーペン（PPAP）",
+      "rawHash": "ec893b81181d618dcef9345b872a774aee9ad566b0caa28f84cdc77a0913172f",
+      "videoId": "fYisMjp6_6Q",
+      "videoTitle": "収益化2年記念歌枠🎤",
+      "channelName": "ちょき【Vsinger】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q&t=4760s",
+      "sourceId": "UgzcdaYtgelTNUmu4vN4AaABAg",
+      "sourceHash": "275e0f16128b92b73765001438d0a8d82f1c05c2fbd607239574f6bd06399514",
+      "sourceOrigin": "latest;review:fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fYisMjp6_6Q:275e0f16128b92b73765",
+      "sourcePath": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "reviewLocator": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json#ec893b81181d618dcef9345b872a774aee9ad566b0caa28f84cdc77a0913172f",
+      "repairedTitle": "ペンパイナッポーアッポーペン",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Onaraはずかしくないよ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4957,
+      "time": "1:22:37",
+      "raw": "01:22:37 Onaraはずかしくないよ",
+      "rawHash": "6bdb1ac413ee0f7eda7f8535308464cc5da0dbb3825633283b43a261603a603f",
+      "videoId": "fYisMjp6_6Q",
+      "videoTitle": "収益化2年記念歌枠🎤",
+      "channelName": "ちょき【Vsinger】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q&t=4957s",
+      "sourceId": "UgzcdaYtgelTNUmu4vN4AaABAg",
+      "sourceHash": "275e0f16128b92b73765001438d0a8d82f1c05c2fbd607239574f6bd06399514",
+      "sourceOrigin": "latest;review:fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fYisMjp6_6Q:275e0f16128b92b73765",
+      "sourcePath": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "reviewLocator": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json#6bdb1ac413ee0f7eda7f8535308464cc5da0dbb3825633283b43a261603a603f",
+      "repairedTitle": "Onaraはずかしくないよ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Five",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 11007,
+      "time": "3:03:27",
+      "raw": "03:03:27 Five",
+      "rawHash": "cc1079299403a54cd7770c7c1bbe1fe6b63cc61149ace2c8944ffd0523a00994",
+      "videoId": "fYisMjp6_6Q",
+      "videoTitle": "収益化2年記念歌枠🎤",
+      "channelName": "ちょき【Vsinger】",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=fYisMjp6_6Q&t=11007s",
+      "sourceId": "UgzcdaYtgelTNUmu4vN4AaABAg",
+      "sourceHash": "275e0f16128b92b73765001438d0a8d82f1c05c2fbd607239574f6bd06399514",
+      "sourceOrigin": "latest;review:fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:fYisMjp6_6Q:275e0f16128b92b73765",
+      "sourcePath": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json",
+      "reviewLocator": "data/review/sources/fYisMjp6_6Q-275e0f16128b92b73765.json#cc1079299403a54cd7770c7c1bbe1fe6b63cc61149ace2c8944ffd0523a00994",
+      "repairedTitle": "Five",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "お願いダーリン",
       "artist": "未記載",
       "isNiche": true,
@@ -32669,7 +32906,6 @@
       "sourceOrigin": "latest;review:VmLgly38CwY-13471331dc10d8e60dc6.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -36100,6 +36336,86 @@
       "sourcePath": "data/review/sources/vb-zluSm_kM-c4e1e7e409baa70f6a49.json",
       "reviewLocator": "data/review/sources/vb-zluSm_kM-c4e1e7e409baa70f6a49.json#ae1c83cfddbd3dc4cae4bf31c43e5d0801d4f4b59d6c4f44ffe7672dd1e9f1f9",
       "repairedTitle": "ミソラソラ大爆笑ポイント",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ネコミミソラ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4072,
+      "time": "1:07:52",
+      "raw": "【01:07:52】ネコミミソラ:_taiki:",
+      "rawHash": "cce4f9738c3c1873bf1cbc25848932ec8f13eb25e8a23bcd78cb2a40821d56a4",
+      "videoId": "ZCV21B68od4",
+      "videoTitle": "【 歌枠┋KARAOKE 】学マス、ラブライブなど！アイドル気分で歌うよ🩵【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "UC1NYgNBwE1i6dJNqljqhibg",
+      "channelHandle": "/channel/UC1NYgNBwE1i6dJNqljqhibg",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZCV21B68od4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZCV21B68od4&t=4072s",
+      "sourceId": "UgyJ2NLGDHgpPyKQAWt4AaABAg",
+      "sourceHash": "08b64789262006c8bc5402a41f74c13ba98fa4d6c5d69059f4ba2224fb438706",
+      "sourceOrigin": "latest;review:ZCV21B68od4-08b64789262006c8bc54.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZCV21B68od4:08b64789262006c8bc54",
+      "sourcePath": "data/review/sources/ZCV21B68od4-08b64789262006c8bc54.json",
+      "reviewLocator": "data/review/sources/ZCV21B68od4-08b64789262006c8bc54.json#cce4f9738c3c1873bf1cbc25848932ec8f13eb25e8a23bcd78cb2a40821d56a4",
+      "repairedTitle": "ネコミミソラ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ネコミミソラ撮影タイム",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4201,
+      "time": "1:10:01",
+      "raw": "【01:10:01】ネコミミソラ撮影タイム:_taiki:",
+      "rawHash": "3210317efaacf3bc333408743ea7c0b3ffdd148413012102626fb3c8de1cb7e3",
+      "videoId": "ZCV21B68od4",
+      "videoTitle": "【 歌枠┋KARAOKE 】学マス、ラブライブなど！アイドル気分で歌うよ🩵【 #sorasolive┋ミソラソラ 】",
+      "channelName": "ミソラソラ - Misorasora",
+      "channelId": "UC1NYgNBwE1i6dJNqljqhibg",
+      "channelHandle": "/channel/UC1NYgNBwE1i6dJNqljqhibg",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZCV21B68od4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZCV21B68od4&t=4201s",
+      "sourceId": "UgyJ2NLGDHgpPyKQAWt4AaABAg",
+      "sourceHash": "08b64789262006c8bc5402a41f74c13ba98fa4d6c5d69059f4ba2224fb438706",
+      "sourceOrigin": "latest;review:ZCV21B68od4-08b64789262006c8bc54.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZCV21B68od4:08b64789262006c8bc54",
+      "sourcePath": "data/review/sources/ZCV21B68od4-08b64789262006c8bc54.json",
+      "reviewLocator": "data/review/sources/ZCV21B68od4-08b64789262006c8bc54.json#3210317efaacf3bc333408743ea7c0b3ffdd148413012102626fb3c8de1cb7e3",
+      "repairedTitle": "ネコミミソラ撮影タイム",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -42937,7 +43253,6 @@
       "sourceOrigin": "latest;review:wcH48K_F3yI-4444ed92f16487e20033.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -44605,9 +44920,9 @@
       "channelHandle": "/@yamisakitoka",
       "youtubeUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U&t=2038s",
-      "sourceId": "legacy:ZTi1cpRaW8U",
-      "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
-      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "sourceId": "UgwtKgxdVMEOMZaG6Ul4AaABAg",
+      "sourceHash": "1ae77f6d3eb82d7e99f2fb06c9d2183cd49cb9e6c35336a72126db36842a5f89",
+      "sourceOrigin": "latest;review:ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
@@ -44623,9 +44938,9 @@
         "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:ZTi1cpRaW8U:938d64179a2e87620ead",
-      "sourcePath": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json",
-      "reviewLocator": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json#a9d6bdfd4c6595afa6f6d948b43c43f2c005b67530386ae1467ad0945f830279",
+      "reviewId": "review:ZTi1cpRaW8U:1ae77f6d3eb82d7e99f2",
+      "sourcePath": "data/review/sources/ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json",
+      "reviewLocator": "data/review/sources/ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json#a9d6bdfd4c6595afa6f6d948b43c43f2c005b67530386ae1467ad0945f830279",
       "repairedTitle": "あいらびゅ♡",
       "repairedArtist": "未記載",
       "repairReasons": []
@@ -44646,9 +44961,9 @@
       "channelHandle": "/@yamisakitoka",
       "youtubeUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U&t=2372s",
-      "sourceId": "legacy:ZTi1cpRaW8U",
-      "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
-      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "sourceId": "UgwtKgxdVMEOMZaG6Ul4AaABAg",
+      "sourceHash": "1ae77f6d3eb82d7e99f2fb06c9d2183cd49cb9e6c35336a72126db36842a5f89",
+      "sourceOrigin": "latest;review:ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
@@ -44664,9 +44979,9 @@
         "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:ZTi1cpRaW8U:938d64179a2e87620ead",
-      "sourcePath": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json",
-      "reviewLocator": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json#3daef01ec84da998f950997195377bce85ac66463ab8068c3995700a901d8634",
+      "reviewId": "review:ZTi1cpRaW8U:1ae77f6d3eb82d7e99f2",
+      "sourcePath": "data/review/sources/ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json",
+      "reviewLocator": "data/review/sources/ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json#3daef01ec84da998f950997195377bce85ac66463ab8068c3995700a901d8634",
       "repairedTitle": "せーのっ！",
       "repairedArtist": "未記載",
       "repairReasons": []
@@ -44687,9 +45002,9 @@
       "channelHandle": "/@yamisakitoka",
       "youtubeUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U&t=3893s",
-      "sourceId": "legacy:ZTi1cpRaW8U",
-      "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
-      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "sourceId": "UgwtKgxdVMEOMZaG6Ul4AaABAg",
+      "sourceHash": "1ae77f6d3eb82d7e99f2fb06c9d2183cd49cb9e6c35336a72126db36842a5f89",
+      "sourceOrigin": "latest;review:ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
@@ -44705,9 +45020,9 @@
         "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:ZTi1cpRaW8U:938d64179a2e87620ead",
-      "sourcePath": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json",
-      "reviewLocator": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json#0cd85ecc88b26447821fc597a261b0d56d364796bf406294613bb65cfed44bf3",
+      "reviewId": "review:ZTi1cpRaW8U:1ae77f6d3eb82d7e99f2",
+      "sourcePath": "data/review/sources/ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json",
+      "reviewLocator": "data/review/sources/ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json#0cd85ecc88b26447821fc597a261b0d56d364796bf406294613bb65cfed44bf3",
       "repairedTitle": "夏色プレゼント",
       "repairedArtist": "未記載",
       "repairReasons": []
@@ -44728,9 +45043,9 @@
       "channelHandle": "/@yamisakitoka",
       "youtubeUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U",
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZTi1cpRaW8U&t=4920s",
-      "sourceId": "legacy:ZTi1cpRaW8U",
-      "sourceHash": "b89d06dc2b6b1f04d5f91d78d54068ba1d8f5e500b9a8a31fb3344baf5628b6a",
-      "sourceOrigin": "latest;review:ZTi1cpRaW8U-938d64179a2e87620ead.json",
+      "sourceId": "UgwtKgxdVMEOMZaG6Ul4AaABAg",
+      "sourceHash": "1ae77f6d3eb82d7e99f2fb06c9d2183cd49cb9e6c35336a72126db36842a5f89",
+      "sourceOrigin": "latest;review:ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
@@ -44746,9 +45061,9 @@
         "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
-      "reviewId": "review:ZTi1cpRaW8U:938d64179a2e87620ead",
-      "sourcePath": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json",
-      "reviewLocator": "data/review/sources/ZTi1cpRaW8U-938d64179a2e87620ead.json#ef515e01895e4a43f872502fb796972ea4ff9dbb862f0b5f05c60a6252b2801a",
+      "reviewId": "review:ZTi1cpRaW8U:1ae77f6d3eb82d7e99f2",
+      "sourcePath": "data/review/sources/ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json",
+      "reviewLocator": "data/review/sources/ZTi1cpRaW8U-1ae77f6d3eb82d7e99f2.json#ef515e01895e4a43f872502fb796972ea4ff9dbb862f0b5f05c60a6252b2801a",
       "repairedTitle": "Be my friend",
       "repairedArtist": "未記載",
       "repairReasons": []
@@ -46724,6 +47039,130 @@
       "sourcePath": "data/review/sources/xpcqIHl1xxY-512def813a3afd47d4d2.json",
       "reviewLocator": "data/review/sources/xpcqIHl1xxY-512def813a3afd47d4d2.json#7093c9f2dba09205cdb890c07dc4cec1dff4201e1b611db79f86a03638319e1a",
       "repairedTitle": "Synthetic Sympathy",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Rock With You（Michael Jackson）",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 970,
+      "time": "0:16:10",
+      "raw": "02. 0:16:10 Rock With You（Michael Jackson）",
+      "rawHash": "4cfb57dd60ea3809fad6096b47cc925548b187dd996b17b558071fb45fdea4e2",
+      "videoId": "Dpxw-ocIWQQ",
+      "videoTitle": "【#歌枠】土曜ちるな弾き語り【#vtuber #vsinger】",
+      "channelName": "音魂ヒビクHibiku Otodama",
+      "channelId": "UCGKNbtDv8OTa8559buDu-Gw",
+      "channelHandle": "/@otodama_hibiku",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Dpxw-ocIWQQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Dpxw-ocIWQQ&t=970s",
+      "sourceId": "Ugxe3Q_ZEf1xeemPBnJ4AaABAg",
+      "sourceHash": "7651985093bde07cd6ac2eb612154c9711eb60932c219f8d9269a8cfd2bdb2af",
+      "sourceOrigin": "latest;review:Dpxw-ocIWQQ-7651985093bde07cd6ac.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Dpxw-ocIWQQ:7651985093bde07cd6ac",
+      "sourcePath": "data/review/sources/Dpxw-ocIWQQ-7651985093bde07cd6ac.json",
+      "reviewLocator": "data/review/sources/Dpxw-ocIWQQ-7651985093bde07cd6ac.json#4cfb57dd60ea3809fad6096b47cc925548b187dd996b17b558071fb45fdea4e2",
+      "repairedTitle": "Rock With You（Michael Jackson）",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "HONEY（L'Arc～en～Ciel）",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1550,
+      "time": "0:25:50",
+      "raw": "04. 0:25:50 HONEY（L'Arc～en～Ciel）",
+      "rawHash": "18d251a8c18c1c1ccc054ac30c7e6f2d52a255c15c94288b77c93c42be12b78e",
+      "videoId": "Dpxw-ocIWQQ",
+      "videoTitle": "【#歌枠】土曜ちるな弾き語り【#vtuber #vsinger】",
+      "channelName": "音魂ヒビクHibiku Otodama",
+      "channelId": "UCGKNbtDv8OTa8559buDu-Gw",
+      "channelHandle": "/@otodama_hibiku",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Dpxw-ocIWQQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Dpxw-ocIWQQ&t=1550s",
+      "sourceId": "Ugxe3Q_ZEf1xeemPBnJ4AaABAg",
+      "sourceHash": "7651985093bde07cd6ac2eb612154c9711eb60932c219f8d9269a8cfd2bdb2af",
+      "sourceOrigin": "latest;review:Dpxw-ocIWQQ-7651985093bde07cd6ac.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Dpxw-ocIWQQ:7651985093bde07cd6ac",
+      "sourcePath": "data/review/sources/Dpxw-ocIWQQ-7651985093bde07cd6ac.json",
+      "reviewLocator": "data/review/sources/Dpxw-ocIWQQ-7651985093bde07cd6ac.json#18d251a8c18c1c1ccc054ac30c7e6f2d52a255c15c94288b77c93c42be12b78e",
+      "repairedTitle": "HONEY（L'Arc～en～Ciel）",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "誘惑",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2342,
+      "time": "0:39:02",
+      "raw": "06. 0:39:02 誘惑（GLAY）",
+      "rawHash": "4b745be893f1431bb6d5a08ef87ed4861e9815b51026bb53e66470755100c221",
+      "videoId": "Dpxw-ocIWQQ",
+      "videoTitle": "【#歌枠】土曜ちるな弾き語り【#vtuber #vsinger】",
+      "channelName": "音魂ヒビクHibiku Otodama",
+      "channelId": "UCGKNbtDv8OTa8559buDu-Gw",
+      "channelHandle": "/@otodama_hibiku",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Dpxw-ocIWQQ",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Dpxw-ocIWQQ&t=2342s",
+      "sourceId": "Ugxe3Q_ZEf1xeemPBnJ4AaABAg",
+      "sourceHash": "7651985093bde07cd6ac2eb612154c9711eb60932c219f8d9269a8cfd2bdb2af",
+      "sourceOrigin": "latest;review:Dpxw-ocIWQQ-7651985093bde07cd6ac.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Dpxw-ocIWQQ:7651985093bde07cd6ac",
+      "sourcePath": "data/review/sources/Dpxw-ocIWQQ-7651985093bde07cd6ac.json",
+      "reviewLocator": "data/review/sources/Dpxw-ocIWQQ-7651985093bde07cd6ac.json#4b745be893f1431bb6d5a08ef87ed4861e9815b51026bb53e66470755100c221",
+      "repairedTitle": "誘惑",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -56628,18 +57067,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=281s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -56708,18 +57149,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=522s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -56788,18 +57231,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=1022s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -56827,18 +57272,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=1262s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -56948,18 +57395,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=2334s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -56987,18 +57436,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=2822s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57108,18 +57559,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=3289s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57188,18 +57641,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=3980s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57309,18 +57764,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=5069s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57348,18 +57805,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=5309s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57428,18 +57887,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=5554s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57467,18 +57928,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=5772s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57629,18 +58092,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=7126s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57873,18 +58338,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=8493s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -57953,18 +58420,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=8718s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58033,18 +58502,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=8947s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58113,18 +58584,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=9185s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58152,18 +58625,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=9400s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58232,18 +58707,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=9641s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58271,18 +58748,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=9874s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58351,18 +58830,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=10375s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58431,18 +58912,21 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=10628s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58511,18 +58995,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=10881s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58591,18 +59077,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=11122s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58671,18 +59159,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=11360s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58792,18 +59282,21 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=12387s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58913,18 +59406,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=13416s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -58993,18 +59488,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=13654s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59073,18 +59570,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=13898s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59194,18 +59693,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=14355s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59274,18 +59775,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=14857s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59313,18 +59816,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=15099s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59352,18 +59857,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=15348s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59432,18 +59939,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=15568s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59595,18 +60104,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=16381s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59716,18 +60227,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=16629s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59755,18 +60268,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=16841s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59835,18 +60350,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=17311s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -59915,18 +60432,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=17525s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60036,18 +60555,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=18011s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60116,18 +60637,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=18264s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60155,18 +60678,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=18514s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60235,18 +60760,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=18742s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60315,18 +60842,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=18987s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60395,18 +60924,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=19260s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60475,18 +61006,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=19507s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60555,18 +61088,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=19753s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60635,18 +61170,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=19996s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60715,18 +61252,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=20222s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60795,18 +61334,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=20435s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60875,18 +61416,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=20674s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60914,18 +61457,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=20886s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -60994,18 +61539,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=21112s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61074,18 +61621,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=21355s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61154,18 +61703,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=21591s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61193,18 +61744,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=21804s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61273,18 +61826,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=22040s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61353,18 +61908,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=22266s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61433,18 +61990,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=22489s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61513,18 +62072,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=22730s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61552,18 +62113,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=22955s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61632,18 +62195,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=23180s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61713,18 +62278,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=23421s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61752,18 +62319,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=23639s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61832,18 +62401,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=23915s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61871,18 +62442,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=24132s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -61951,18 +62524,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=24350s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62072,18 +62647,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=24810s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62193,18 +62770,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=25266s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62273,18 +62852,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=25505s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62353,18 +62934,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=25743s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62433,18 +63016,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=25972s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62513,18 +63098,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=26205s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62593,18 +63180,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=26420s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62632,18 +63221,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=26571s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62712,18 +63303,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=26785s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62792,18 +63385,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=27019s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62872,18 +63467,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=27239s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -62952,18 +63549,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=27474s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63032,18 +63631,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=27711s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63112,18 +63713,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=28187s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63192,18 +63795,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=28405s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63272,18 +63877,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=28639s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63352,18 +63959,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=28867s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63432,18 +64041,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=29096s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63512,18 +64123,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=29319s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63592,18 +64205,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=29540s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63672,18 +64287,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=29777s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63752,18 +64369,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=29995s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63832,18 +64451,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=30466s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63912,18 +64533,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=30688s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -63992,18 +64615,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=30923s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64072,18 +64697,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=31153s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64152,18 +64779,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=31407s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64273,18 +64902,21 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=31874s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64395,18 +65027,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=32903s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64475,18 +65109,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=33141s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64555,18 +65191,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=33382s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64635,18 +65273,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=33622s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64715,18 +65355,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=34131s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64795,18 +65437,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=34417s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64834,18 +65478,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=34636s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64914,18 +65560,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=35153s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -64994,18 +65642,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=35369s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65074,18 +65724,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=35600s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65195,18 +65847,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=36634s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65234,18 +65888,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=36859s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65355,18 +66011,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=37406s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65435,18 +66093,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=37934s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65515,18 +66175,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=38159s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65595,18 +66257,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=38376s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65675,18 +66339,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=38867s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65796,18 +66462,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=39584s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65876,18 +66544,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=39820s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -65956,18 +66626,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=40055s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -66036,18 +66708,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=40289s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -66116,18 +66790,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=40794s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -66196,18 +66872,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=41066s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -66276,18 +66954,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=41293s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -66356,18 +67036,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=41569s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -66436,18 +67118,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=j4R7MzZiZ6M&t=41791s",
       "sourceId": "Ugw18MPrKd6EwT_zgsZ4AaABAg",
       "sourceHash": "895f363a4e03cc9df921348248295bcba6ed3334accf1a1f9404153182163433",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:j4R7MzZiZ6M-895f363a4e03cc9df921.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:j4R7MzZiZ6M:895f363a4e03cc9df921",
@@ -67697,7 +68381,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -67738,7 +68421,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -67779,7 +68461,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -67821,7 +68502,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -67862,7 +68542,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -67903,7 +68582,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -67945,7 +68623,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -67986,7 +68663,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -68027,7 +68703,6 @@
       "sourceOrigin": "latest;review:LQZesaPzPlI-98aa897f12bf355d9d03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -68312,18 +68987,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=e0sb-se0lNA&t=1s",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:e0sb-se0lNA:74ecdbffd8572b1e3ae0",
@@ -68351,18 +69028,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=e0sb-se0lNA&t=75s",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:e0sb-se0lNA:74ecdbffd8572b1e3ae0",
@@ -68390,18 +69069,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=e0sb-se0lNA&t=172s",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:e0sb-se0lNA:74ecdbffd8572b1e3ae0",
@@ -68429,18 +69110,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=e0sb-se0lNA&t=481s",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:e0sb-se0lNA:74ecdbffd8572b1e3ae0",
@@ -68468,18 +69151,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=e0sb-se0lNA&t=872s",
       "sourceId": "UgwqHwY9sxFc-r8jHPB4AaABAg",
       "sourceHash": "74ecdbffd8572b1e3ae0d59e24d2b423f494dd126e583207a312a7f817cefdff",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:e0sb-se0lNA:74ecdbffd8572b1e3ae0",
@@ -76070,7 +76755,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -76111,7 +76795,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -76152,7 +76835,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -76193,7 +76875,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -76234,7 +76915,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -76275,7 +76955,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -76316,7 +76995,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -76357,7 +77035,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -76398,7 +77075,6 @@
       "sourceOrigin": "latest;review:xdGz1WKg4Mo-1451bf16ef53afeefb6b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -77448,7 +78124,6 @@
       "sourceOrigin": "latest;review:NCsD8D0VqIc-07f9dcbcd67ff58172b2.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -78699,7 +79374,6 @@
       "sourceOrigin": "latest;review:d7-88bfRMhE-2af412eb67b2d82cc7d4.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -78741,7 +79415,6 @@
       "sourceOrigin": "latest;review:d7-88bfRMhE-2af412eb67b2d82cc7d4.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -78782,7 +79455,6 @@
       "sourceOrigin": "latest;review:d7-88bfRMhE-2af412eb67b2d82cc7d4.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -78820,18 +79492,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=vTfe1s68rOw&t=4981s",
       "sourceId": "UgyseEBIMe2J6XJ09yN4AaABAg",
       "sourceHash": "f6b32005d7d75cbd8758328acbc1187fca406666fe60bd293d785943b46011ab",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:vTfe1s68rOw-f6b32005d7d75cbd8758.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:vTfe1s68rOw:f6b32005d7d75cbd8758",
@@ -79093,7 +79767,6 @@
       "sourceOrigin": "latest;review:qw7c5JsJJpo-163ff489d28d9a2f847b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -79708,7 +80381,6 @@
       "sourceOrigin": "latest;review:CaXlKc-XKQ0-d208f553f7e73a454a03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -79749,7 +80421,6 @@
       "sourceOrigin": "latest;review:CaXlKc-XKQ0-d208f553f7e73a454a03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -79791,7 +80462,6 @@
       "sourceOrigin": "latest;review:CaXlKc-XKQ0-d208f553f7e73a454a03.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -84579,6 +85249,46 @@
       "repairReasons": []
     },
     {
+      "title": "即興ピアノ演奏",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 323,
+      "time": "0:05:23",
+      "raw": "05:23   即興ピアノ演奏",
+      "rawHash": "09a68d85a0206ae9cdfde8aad753f52865a00fa52a6be7d6a3cd841f9205130f",
+      "videoId": "ZzqyeU2oVV4",
+      "videoTitle": "【歌枠 / 弾き語り】ピアノ×失恋ソング に浸りませんか？ Singing Stream 【ゆうぎり高校 / 篠崎シャノン】#vtuber #ピアノ",
+      "channelName": "篠崎シャノン / ゆうぎり高校",
+      "channelId": "UChrnxv-6qAikn3_oUwysZWg",
+      "channelHandle": "/@ShinozakiShanon",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZzqyeU2oVV4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=ZzqyeU2oVV4&t=323s",
+      "sourceId": "UgwbC1UPbX4YpkV6tkR4AaABAg",
+      "sourceHash": "fcb51a14a4def7f1a57756e6d040e6687e924395602831d9a8a4cbb1b612b0dd",
+      "sourceOrigin": "latest;review:ZzqyeU2oVV4-fcb51a14a4def7f1a577.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:ZzqyeU2oVV4:fcb51a14a4def7f1a577",
+      "sourcePath": "data/review/sources/ZzqyeU2oVV4-fcb51a14a4def7f1a577.json",
+      "reviewLocator": "data/review/sources/ZzqyeU2oVV4-fcb51a14a4def7f1a577.json#09a68d85a0206ae9cdfde8aad753f52865a00fa52a6be7d6a3cd841f9205130f",
+      "repairedTitle": "即興ピアノ演奏",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "シャノンちゃん即興演奏",
       "artist": "未記載",
       "isNiche": true,
@@ -86661,7 +87371,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86702,7 +87411,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86743,7 +87451,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86784,7 +87491,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86825,7 +87531,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86866,7 +87571,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86907,7 +87611,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86948,7 +87651,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86989,7 +87691,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -87030,7 +87731,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -87071,7 +87771,6 @@
       "sourceOrigin": "latest;review:3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -87088,6 +87787,47 @@
       "sourcePath": "data/review/sources/3yl5bKqCR9w-d8f119274bea2e1fcadf.json",
       "reviewLocator": "data/review/sources/3yl5bKqCR9w-d8f119274bea2e1fcadf.json#5afe1b5b3ee174c2a4ae7ac6b5df78df664d8387c6a5c6b0433d2fec728bf11e",
       "repairedTitle": "みくみくにしてあげる♪_初音ミク",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "悲しき雨降り",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 6222,
+      "time": "1:43:42",
+      "raw": "1:43:42 悲しき雨降り",
+      "rawHash": "1a30141d97365b0727b441a07717749d6fbbd494cadb06d97f2bd30a7f7f8d08",
+      "videoId": "_ZtpOpSX97k",
+      "videoTitle": "【 #歌枠/#karaoke 】雑談多めの歌枠✨グッズの紹介もするよ【 #shorts #vtuber #宵十めむ 】",
+      "channelName": "宵十めむ",
+      "channelId": "UCfYqTS8SlCyAA5ZE-rCwirg",
+      "channelHandle": "/@yoito_memu",
+      "youtubeUrl": "https://www.youtube.com/watch?v=_ZtpOpSX97k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=_ZtpOpSX97k&t=6222s",
+      "sourceId": "UgxJstftdXf6ocNExvB4AaABAg",
+      "sourceHash": "78041d762f0062996a5eb60b66207ec86f9381e9b0904659e700cf148cad8d6a",
+      "sourceOrigin": "latest;review:_ZtpOpSX97k-78041d762f0062996a5e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:_ZtpOpSX97k:78041d762f0062996a5e",
+      "sourcePath": "data/review/sources/_ZtpOpSX97k-78041d762f0062996a5e.json",
+      "reviewLocator": "data/review/sources/_ZtpOpSX97k-78041d762f0062996a5e.json#1a30141d97365b0727b441a07717749d6fbbd494cadb06d97f2bd30a7f7f8d08",
+      "repairedTitle": "悲しき雨降り",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -87112,7 +87852,6 @@
       "sourceOrigin": "latest;review:pv0BsotH36E-8f11116715bfe9be2612.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -87153,7 +87892,6 @@
       "sourceOrigin": "latest;review:pv0BsotH36E-8f11116715bfe9be2612.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -87194,7 +87932,6 @@
       "sourceOrigin": "latest;review:pv0BsotH36E-8f11116715bfe9be2612.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -87235,7 +87972,6 @@
       "sourceOrigin": "latest;review:pv0BsotH36E-8f11116715bfe9be2612.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -87276,7 +88012,6 @@
       "sourceOrigin": "latest;review:pv0BsotH36E-8f11116715bfe9be2612.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90086,7 +90821,6 @@
       "sourceOrigin": "latest;review:7H0rD_HdzkM-8da09a55f69f77f7e5d9.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90337,7 +91071,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90378,7 +91111,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90420,7 +91152,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90461,7 +91192,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90503,7 +91233,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90545,7 +91274,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90586,7 +91314,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90627,7 +91354,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90668,7 +91394,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90709,7 +91434,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90750,7 +91474,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90791,7 +91514,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90832,7 +91554,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90873,7 +91594,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90915,7 +91635,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90956,7 +91675,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -90997,7 +91715,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91038,7 +91755,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91079,7 +91795,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91120,7 +91835,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91161,7 +91875,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91202,7 +91915,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91243,7 +91955,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91284,7 +91995,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91325,7 +92035,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91366,7 +92075,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91407,7 +92115,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91448,7 +92155,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91489,7 +92195,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91530,7 +92235,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91571,7 +92275,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91660,7 +92363,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91701,7 +92403,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91742,7 +92443,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91784,7 +92484,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91825,7 +92524,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91866,7 +92564,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91907,7 +92604,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91948,7 +92644,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -91990,7 +92685,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92032,7 +92726,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92073,7 +92766,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92114,7 +92806,6 @@
       "sourceOrigin": "latest;review:_iQSnxRMFN0-bbce94cb749673463e48.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92607,7 +93298,6 @@
       "sourceOrigin": "latest;review:3kcOQG8D6hg-e1f79712066bfc988813.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92648,7 +93338,6 @@
       "sourceOrigin": "latest;review:3kcOQG8D6hg-e1f79712066bfc988813.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92690,7 +93379,6 @@
       "sourceOrigin": "latest;review:3kcOQG8D6hg-e1f79712066bfc988813.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -94930,7 +95618,6 @@
       "sourceOrigin": "latest;review:Sh9sLRpQT6k-3d478276df5bd923cd3a.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -94970,7 +95657,6 @@
       "sourceOrigin": "latest;review:Sh9sLRpQT6k-3d478276df5bd923cd3a.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -95423,7 +96109,6 @@
       "sourceOrigin": "latest;review:uuR1PVYhg0s-25f43272b365eeabcf42.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -95464,7 +96149,6 @@
       "sourceOrigin": "latest;review:uuR1PVYhg0s-25f43272b365eeabcf42.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -95505,7 +96189,6 @@
       "sourceOrigin": "latest;review:uuR1PVYhg0s-25f43272b365eeabcf42.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -95547,7 +96230,6 @@
       "sourceOrigin": "latest;review:uuR1PVYhg0s-25f43272b365eeabcf42.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -95772,7 +96454,6 @@
       "sourceOrigin": "latest;review:uuR1PVYhg0s-25f43272b365eeabcf42.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -95814,7 +96495,6 @@
       "sourceOrigin": "latest;review:uuR1PVYhg0s-25f43272b365eeabcf42.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -95856,7 +96536,6 @@
       "sourceOrigin": "latest;review:uuR1PVYhg0s-25f43272b365eeabcf42.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -95984,20 +96663,18 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=252s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all",
-        "review"
+        "all"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:YFxEarwYgQs:9fb8f1cd783d187c7f26",
@@ -96025,20 +96702,18 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=883s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all",
-        "review"
+        "all"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:YFxEarwYgQs:9fb8f1cd783d187c7f26",
@@ -96066,13 +96741,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=2583s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
         "all",
-        "review",
-        "snapshot:20260718T060000Z"
+        "snapshot:20260718T120000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -96083,8 +96757,7 @@
       "riskReasons": [
         "parser_corruption",
         "delimiter_split",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": {
         "artist": "ゲーム THE IDOLM@STER収録曲(菊地真)"
@@ -96822,7 +97495,6 @@
       "sourceOrigin": "latest;review:SlXkGknOdr4-ba4b69efc9081954854b.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -97079,7 +97751,6 @@
       "sourceOrigin": "latest;review:JfLeX3KekhQ-322ead573d1ee17f695e.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -97121,7 +97792,6 @@
       "sourceOrigin": "latest;review:JfLeX3KekhQ-322ead573d1ee17f695e.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -97163,7 +97833,6 @@
       "sourceOrigin": "latest;review:JfLeX3KekhQ-322ead573d1ee17f695e.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -97268,6 +97937,129 @@
       "sourcePath": "data/review/sources/Xm-xihCkbo8-5a445d532cc91d3f439f.json",
       "reviewLocator": "data/review/sources/Xm-xihCkbo8-5a445d532cc91d3f439f.json#ee6b23dd1347f436dded7ae62264dd0b87d3b020af669f57f2d4f61918d9f657",
       "repairedTitle": "みむかゥナイストライ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "てっててーん",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 7725,
+      "time": "2:08:45",
+      "raw": "2:08:45 てっててーん :_naki:",
+      "rawHash": "5e19f587adf004b6a713fba58860618bc4414f87172215480e23147d988cdd84",
+      "videoId": "Kwxkclbofwo",
+      "videoTitle": "【 縦型歌枠 】ランチタイム歌枠🕊✨1曲聴いていってね！ singing stream 【 #しらせライブ / #無原唱レコード 】 #shorts #Vtuber #Vsinger",
+      "channelName": "白河しらせ / SHIRASE SHIRAKAWA",
+      "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
+      "channelHandle": "/@SHIRASESHIRAKAWA",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Kwxkclbofwo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Kwxkclbofwo&t=7725s",
+      "sourceId": "UgyfdFDQYu4MbehChO94AaABAg",
+      "sourceHash": "b3fc47995e62900109ab37c875ac29a658082b8cff2f337297430631272a9790",
+      "sourceOrigin": "latest;review:Kwxkclbofwo-b3fc47995e62900109ab.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Kwxkclbofwo:b3fc47995e62900109ab",
+      "sourcePath": "data/review/sources/Kwxkclbofwo-b3fc47995e62900109ab.json",
+      "reviewLocator": "data/review/sources/Kwxkclbofwo-b3fc47995e62900109ab.json#5e19f587adf004b6a713fba58860618bc4414f87172215480e23147d988cdd84",
+      "repairedTitle": "てっててーん",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "今日のふにゃふにゃ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 9891,
+      "time": "2:44:51",
+      "raw": "2:44:51 今日のふにゃふにゃ:_nemu:",
+      "rawHash": "d89d8deaaed0661805acadae6a55dbfa774510d0b6dac7de7d4470dd0ed4d54f",
+      "videoId": "Kwxkclbofwo",
+      "videoTitle": "【 縦型歌枠 】ランチタイム歌枠🕊✨1曲聴いていってね！ singing stream 【 #しらせライブ / #無原唱レコード 】 #shorts #Vtuber #Vsinger",
+      "channelName": "白河しらせ / SHIRASE SHIRAKAWA",
+      "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
+      "channelHandle": "/@SHIRASESHIRAKAWA",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Kwxkclbofwo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Kwxkclbofwo&t=9891s",
+      "sourceId": "UgyfdFDQYu4MbehChO94AaABAg",
+      "sourceHash": "b3fc47995e62900109ab37c875ac29a658082b8cff2f337297430631272a9790",
+      "sourceOrigin": "latest;review:Kwxkclbofwo-b3fc47995e62900109ab.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Kwxkclbofwo:b3fc47995e62900109ab",
+      "sourcePath": "data/review/sources/Kwxkclbofwo-b3fc47995e62900109ab.json",
+      "reviewLocator": "data/review/sources/Kwxkclbofwo-b3fc47995e62900109ab.json#d89d8deaaed0661805acadae6a55dbfa774510d0b6dac7de7d4470dd0ed4d54f",
+      "repairedTitle": "今日のふにゃふにゃ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ばーいばーい！",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 9927,
+      "time": "2:45:27",
+      "raw": "2:45:27 ばーいばーい！:_otsu:",
+      "rawHash": "e6e1b4ddb67de68c617da715bf2f18a66cab81c4f65dfee933e5a6ba234cfd25",
+      "videoId": "Kwxkclbofwo",
+      "videoTitle": "【 縦型歌枠 】ランチタイム歌枠🕊✨1曲聴いていってね！ singing stream 【 #しらせライブ / #無原唱レコード 】 #shorts #Vtuber #Vsinger",
+      "channelName": "白河しらせ / SHIRASE SHIRAKAWA",
+      "channelId": "UCpa3ff1zCBfEqua3xD9pXsg",
+      "channelHandle": "/@SHIRASESHIRAKAWA",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Kwxkclbofwo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Kwxkclbofwo&t=9927s",
+      "sourceId": "UgyfdFDQYu4MbehChO94AaABAg",
+      "sourceHash": "b3fc47995e62900109ab37c875ac29a658082b8cff2f337297430631272a9790",
+      "sourceOrigin": "latest;review:Kwxkclbofwo-b3fc47995e62900109ab.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Kwxkclbofwo:b3fc47995e62900109ab",
+      "sourcePath": "data/review/sources/Kwxkclbofwo-b3fc47995e62900109ab.json",
+      "reviewLocator": "data/review/sources/Kwxkclbofwo-b3fc47995e62900109ab.json#e6e1b4ddb67de68c617da715bf2f18a66cab81c4f65dfee933e5a6ba234cfd25",
+      "repairedTitle": "ばーいばーい！",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -97760,7 +98552,6 @@
       "sourceOrigin": "latest;review:7ve8RwDo38U-5c1426f952409a325638.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -98326,6 +99117,47 @@
       "sourcePath": "data/review/sources/uRQJhSnOb-I-a46d21285888636ea31f.json",
       "reviewLocator": "data/review/sources/uRQJhSnOb-I-a46d21285888636ea31f.json#58e777113527b27e6899ed1748feb8b663aba0fdd2283af11712cb48042eb2e4",
       "repairedTitle": "VIERにネットミームが伝わらなかった",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Siip",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 5103,
+      "time": "1:25:03",
+      "raw": "1:25:03 2 / Siip",
+      "rawHash": "17b565ab1c791db45ade1929b0e4132d22e8e35547321e79f6bf08a316a2283a",
+      "videoId": "yeyIFQIGj-U",
+      "videoTitle": "【歌枠 / KARAOKE 】三連休前にしっとりピアノに合わせて歌う。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm",
+      "channelName": "不知名イヲ - Shirazuna Iwo -",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=yeyIFQIGj-U",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=yeyIFQIGj-U&t=5103s",
+      "sourceId": "UgxOf1GzKwrdOLFFqeR4AaABAg",
+      "sourceHash": "6dd99ba1436440836271bef78b4e1477cbcc07df1d2b3de665e60c482454cdb3",
+      "sourceOrigin": "latest;review:yeyIFQIGj-U-6dd99ba1436440836271.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:yeyIFQIGj-U:6dd99ba1436440836271",
+      "sourcePath": "data/review/sources/yeyIFQIGj-U-6dd99ba1436440836271.json",
+      "reviewLocator": "data/review/sources/yeyIFQIGj-U-6dd99ba1436440836271.json#17b565ab1c791db45ade1929b0e4132d22e8e35547321e79f6bf08a316a2283a",
+      "repairedTitle": "Siip",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -98913,7 +99745,6 @@
       "sourceOrigin": "latest;review:zW06j8QMnr4-2db28c8eb45cf22900a5.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -98954,7 +99785,6 @@
       "sourceOrigin": "latest;review:zW06j8QMnr4-2db28c8eb45cf22900a5.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -99042,7 +99872,6 @@
       "sourceOrigin": "latest;review:zW06j8QMnr4-2db28c8eb45cf22900a5.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -99083,7 +99912,6 @@
       "sourceOrigin": "latest;review:zW06j8QMnr4-2db28c8eb45cf22900a5.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -102686,7 +103514,6 @@
       "sourceOrigin": "latest;review:GhIEeGjpSOw-051a0c4426b788de9b59.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -102727,7 +103554,6 @@
       "sourceOrigin": "latest;review:GhIEeGjpSOw-051a0c4426b788de9b59.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -108701,7 +109527,6 @@
       "sourceOrigin": "latest;review:u1jAe9Wpqko-6e238a871483ae4ce9ba.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -108742,7 +109567,6 @@
       "sourceOrigin": "latest;review:u1jAe9Wpqko-6e238a871483ae4ce9ba.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -108783,7 +109607,6 @@
       "sourceOrigin": "latest;review:u1jAe9Wpqko-6e238a871483ae4ce9ba.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -108825,7 +109648,6 @@
       "sourceOrigin": "latest;review:u1jAe9Wpqko-6e238a871483ae4ce9ba.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -108866,7 +109688,6 @@
       "sourceOrigin": "latest;review:u1jAe9Wpqko-6e238a871483ae4ce9ba.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -108908,7 +109729,6 @@
       "sourceOrigin": "latest;review:u1jAe9Wpqko-6e238a871483ae4ce9ba.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],

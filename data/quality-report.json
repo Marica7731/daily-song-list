@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T08:26:09.750Z",
+  "generatedAt": "2026-07-18T14:06:16.513Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 25236,
-  "unknownArtistCount": 3613,
-  "nicheUnknownArtistCount": 1916,
-  "highRiskEntryCount": 745,
-  "highRiskSourceCount": 23,
+  "totalSongs": 25669,
+  "unknownArtistCount": 3653,
+  "nicheUnknownArtistCount": 1933,
+  "highRiskEntryCount": 755,
+  "highRiskSourceCount": 24,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 2,
+  "ruleDroppedEntryCount": 4,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 35,
-  "parserCorruptionCount": 50,
-  "likelyNoiseCount": 0,
-  "needsReviewCount": 1785,
-  "likelySongCount": 14312,
+  "confirmedNoiseCount": 18,
+  "parserCorruptionCount": 46,
+  "likelyNoiseCount": 7,
+  "needsReviewCount": 1926,
+  "likelySongCount": 14451,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -43,12 +43,12 @@
     },
     {
       "value": "IRIS OUT",
-      "count": 16,
+      "count": 17,
       "classifications": {
-        "likely_song": 16
+        "likely_song": 17
       },
       "riskReasons": {
-        "known_song_unknown_artist": 16
+        "known_song_unknown_artist": 17
       }
     },
     {
@@ -75,16 +75,6 @@
     },
     {
       "value": "ロミオとシンデレラ",
-      "count": 10,
-      "classifications": {
-        "likely_song": 10
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 10
-      }
-    },
-    {
-      "value": "花に亡霊",
       "count": 10,
       "classifications": {
         "likely_song": 10
@@ -126,18 +116,6 @@
       }
     },
     {
-      "value": "Bling-Bang-Bang-Born",
-      "count": 9,
-      "classifications": {
-        "confirmed_noise": 1,
-        "likely_song": 8
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 8,
-        "artist_rich_source_title_only_entry": 1
-      }
-    },
-    {
       "value": "ray",
       "count": 9,
       "classifications": {
@@ -145,6 +123,26 @@
       },
       "riskReasons": {
         "known_song_unknown_artist": 9
+      }
+    },
+    {
+      "value": "花に亡霊",
+      "count": 9,
+      "classifications": {
+        "likely_song": 9
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 9
+      }
+    },
+    {
+      "value": "Bling-Bang-Bang-Born",
+      "count": 8,
+      "classifications": {
+        "likely_song": 8
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 8
       }
     },
     {
@@ -232,16 +230,20 @@
   ],
   "topRiskChannels": [
     {
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 14
+    },
+    {
       "value": "UTANO ch. 白玖ウタノ",
       "count": 11
     },
     {
-      "value": "汐音ベリーちゃん Berry Ch",
-      "count": 10
+      "value": "音魂ヒビクHibiku Otodama",
+      "count": 8
     },
     {
-      "value": "音魂ヒビクHibiku Otodama",
-      "count": 7
+      "value": "Kyoka Ch. -響架-",
+      "count": 6
     },
     {
       "value": "Norn Ch. 氷々樹ノルン",
@@ -257,10 +259,6 @@
     },
     {
       "value": "Ellise Ch.",
-      "count": 5
-    },
-    {
-      "value": "Kyoka Ch. -響架-",
       "count": 5
     },
     {
@@ -368,6 +366,20 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
         "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "GkmXWhgz1QA",
+      "title": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
       ]
     },
     {
@@ -573,24 +585,18 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
-    },
-    {
-      "videoId": "ZSNptWSG6i4",
-      "title": "【 歌枠￤KARAOKE 】1曲だけでも聴いてかない？【ゆそる／ピスパレ】",
-      "channelName": "ゆそる",
-      "riskScore": 77,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-18T14:06:16.513Z",
+      "totalSongs": 25669,
+      "unknownArtistCount": 3653,
+      "nicheUnknownArtistCount": 1933,
+      "highRiskEntryCount": 755,
+      "highRiskSourceCount": 24
+    },
     {
       "generatedAt": "2026-07-18T08:26:09.750Z",
       "totalSongs": 25236,
@@ -742,14 +748,6 @@
       "nicheUnknownArtistCount": 1522,
       "highRiskEntryCount": 493,
       "highRiskSourceCount": 19
-    },
-    {
-      "generatedAt": "2026-07-14T23:49:35.907Z",
-      "totalSongs": 17157,
-      "unknownArtistCount": 2962,
-      "nicheUnknownArtistCount": 1475,
-      "highRiskEntryCount": 487,
-      "highRiskSourceCount": 18
     }
   ]
 }
