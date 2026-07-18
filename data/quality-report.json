@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T14:06:16.513Z",
+  "generatedAt": "2026-07-18T19:51:15.140Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 25669,
-  "unknownArtistCount": 3653,
-  "nicheUnknownArtistCount": 1933,
-  "highRiskEntryCount": 755,
+  "totalSongs": 26538,
+  "unknownArtistCount": 3686,
+  "nicheUnknownArtistCount": 1997,
+  "highRiskEntryCount": 751,
   "highRiskSourceCount": 24,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 4,
+  "ruleDroppedEntryCount": 1,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 18,
-  "parserCorruptionCount": 46,
-  "likelyNoiseCount": 7,
-  "needsReviewCount": 1926,
-  "likelySongCount": 14451,
+  "confirmedNoiseCount": 2,
+  "parserCorruptionCount": 50,
+  "likelyNoiseCount": 0,
+  "needsReviewCount": 1991,
+  "likelySongCount": 15553,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -231,7 +231,7 @@
   "topRiskChannels": [
     {
       "value": "汐音ベリーちゃん Berry Ch",
-      "count": 14
+      "count": 12
     },
     {
       "value": "UTANO ch. 白玖ウタノ",
@@ -243,14 +243,22 @@
     },
     {
       "value": "Kyoka Ch. -響架-",
-      "count": 6
+      "count": 7
+    },
+    {
+      "value": "ただのかえる【TADANO KAERU】",
+      "count": 7
+    },
+    {
+      "value": "羽緒",
+      "count": 7
     },
     {
       "value": "Norn Ch. 氷々樹ノルン",
       "count": 6
     },
     {
-      "value": "羽緒",
+      "value": "菜鳥ひなた / Hinata Natori",
       "count": 6
     },
     {
@@ -270,7 +278,7 @@
       "count": 5
     },
     {
-      "value": "ただのかえる【TADANO KAERU】",
+      "value": "おばけなの / Obake Nano ch",
       "count": 5
     },
     {
@@ -279,6 +287,10 @@
     },
     {
       "value": "ひでチャンネル",
+      "count": 5
+    },
+    {
+      "value": "羽月うずな / Hazuki Uzuna",
       "count": 5
     },
     {
@@ -295,18 +307,6 @@
     },
     {
       "value": "NEPHLA",
-      "count": 4
-    },
-    {
-      "value": "Poka ch. 泡ノ音ポカ",
-      "count": 4
-    },
-    {
-      "value": "Roboco Ch. - ロボ子",
-      "count": 4
-    },
-    {
-      "value": "Saki Ch. 浅葱サキ",
       "count": 4
     }
   ],
@@ -369,20 +369,6 @@
       ]
     },
     {
-      "videoId": "GkmXWhgz1QA",
-      "title": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "riskScore": 100,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ]
-    },
-    {
       "videoId": "3HsBNG-zTjo",
       "title": "【#アニソン歌枠 #らんちぅ寿希】おたよりは来るのか！？君の眠気を極熱ヴォイスで吹っ飛ばす【#Vtuber #KARAOKE】",
       "channelName": "らんちぅ寿希Live",
@@ -402,8 +388,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "parser_corruption",
-        "source_multiple_niche_short_titles"
+        "source_multiple_niche_short_titles",
+        "parser_corruption"
       ]
     },
     {
@@ -560,6 +546,20 @@
       ]
     },
     {
+      "videoId": "hWv55PnjmEo",
+      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
+      "channelName": "ミナミイズミ / IZUMI MINAMI",
+      "riskScore": 78,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles"
+      ]
+    },
+    {
       "videoId": "ZTi1cpRaW8U",
       "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
       "channelName": "闇咲とうか",
@@ -589,6 +589,14 @@
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-18T19:51:15.140Z",
+      "totalSongs": 26538,
+      "unknownArtistCount": 3686,
+      "nicheUnknownArtistCount": 1997,
+      "highRiskEntryCount": 751,
+      "highRiskSourceCount": 24
+    },
     {
       "generatedAt": "2026-07-18T14:06:16.513Z",
       "totalSongs": 25669,
@@ -739,14 +747,6 @@
       "unknownArtistCount": 2971,
       "nicheUnknownArtistCount": 1480,
       "highRiskEntryCount": 487,
-      "highRiskSourceCount": 19
-    },
-    {
-      "generatedAt": "2026-07-15T03:46:40.626Z",
-      "totalSongs": 17268,
-      "unknownArtistCount": 2970,
-      "nicheUnknownArtistCount": 1522,
-      "highRiskEntryCount": 493,
       "highRiskSourceCount": 19
     }
   ]

@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T14:13:21.047Z",
+  "generatedAt": "2026-07-18T19:56:21.590Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-18T12:43:13.684Z",
+  "latestGeneratedAt": "2026-07-18T18:24:05.083Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 142,
-    "uniqueVideos": 41,
-    "uniqueSources": 61,
-    "confirmedNoiseCount": 142,
+    "totalCandidates": 126,
+    "uniqueVideos": 39,
+    "uniqueSources": 55,
+    "confirmedNoiseCount": 126,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 142,
+      "confirmed_noise": 126,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -129,6 +129,43 @@
       "reviewId": "review:RJZKQyNjrOQ:2419b0e29aeb1329a357",
       "sourcePath": "data/review/sources/history-RJZKQyNjrOQ-2419b0e29aeb1329a357.json",
       "reviewLocator": "data/review/sources/history-RJZKQyNjrOQ-2419b0e29aeb1329a357.json#71166a0967ce19a99db022c14a2cd4c0d4566a1fecdc537586f19c758ad54d34"
+    },
+    {
+      "title": "START",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 248,
+      "time": "0:04:08",
+      "raw": "00. 00:04:08 START",
+      "rawHash": "eae87d72bf74b88965f0fb1c4194512f3d02956894fcc1cbb0aa90b21fe7cf67",
+      "videoId": "okW2MlmPGe8",
+      "videoTitle": "【深夜歌雜】你也是被腦袋的聲音吵醒嗎？一起度過周五最後的時間吧 ░ 歌枠｜Singing Stream #shorts",
+      "channelName": "Earendel ch.エアレンデル",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=okW2MlmPGe8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=okW2MlmPGe8&t=248s",
+      "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
+      "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
+      "sourceOrigin": "review:okW2MlmPGe8-2d2be7da34976147b0bb.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "short_unknown_title"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:okW2MlmPGe8:2d2be7da34976147b0bb",
+      "sourcePath": "data/review/sources/okW2MlmPGe8-2d2be7da34976147b0bb.json",
+      "reviewLocator": "data/review/sources/okW2MlmPGe8-2d2be7da34976147b0bb.json#eae87d72bf74b88965f0fb1c4194512f3d02956894fcc1cbb0aa90b21fe7cf67"
     },
     {
       "title": "謝罪会見",
@@ -981,193 +1018,6 @@
       "reviewId": "review:LIvCuQkMnVE:c545a9f2939f62a3983a",
       "sourcePath": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json",
       "reviewLocator": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json#49ace4d8ff76b11cacad06ea1ae3f39f9c749d81c8d547fba4a0525048970f51"
-    },
-    {
-      "title": "配信始まり",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 76,
-      "time": "0:01:16",
-      "raw": "1:16 配信始まり",
-      "rawHash": "092d9317160f14c8e29bea83886df76d6184f2f7f8ebc041753f7832d3eb9595",
-      "videoId": "GOTnzPVFFAE",
-      "videoTitle": "【 #歌枠 】歌みた出たのでちょこっと歌枠【#はくゆ / #VTuber】",
-      "channelName": "はくゆ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE&t=76s",
-      "sourceId": "UgxWlEKcDCsqBtG4BPd4AaABAg",
-      "sourceHash": "1a8bc91965e757e921f26a924de0580094571e62e2a48cdb749e9b48dd52b3a8",
-      "sourceOrigin": "review:GOTnzPVFFAE-1a8bc91965e757e921f2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GOTnzPVFFAE:1a8bc91965e757e921f2",
-      "sourcePath": "data/review/sources/GOTnzPVFFAE-1a8bc91965e757e921f2.json",
-      "reviewLocator": "data/review/sources/GOTnzPVFFAE-1a8bc91965e757e921f2.json#092d9317160f14c8e29bea83886df76d6184f2f7f8ebc041753f7832d3eb9595"
-    },
-    {
-      "title": "挨拶声入り",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 81,
-      "time": "0:01:21",
-      "raw": "1:21 挨拶声入り",
-      "rawHash": "dd99c57b314cf45a2102effd2e9ae6006d54ed54b5ff1cff00c11724dce13f10",
-      "videoId": "GOTnzPVFFAE",
-      "videoTitle": "【 #歌枠 】歌みた出たのでちょこっと歌枠【#はくゆ / #VTuber】",
-      "channelName": "はくゆ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE&t=81s",
-      "sourceId": "UgxWlEKcDCsqBtG4BPd4AaABAg",
-      "sourceHash": "1a8bc91965e757e921f26a924de0580094571e62e2a48cdb749e9b48dd52b3a8",
-      "sourceOrigin": "review:GOTnzPVFFAE-1a8bc91965e757e921f2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GOTnzPVFFAE:1a8bc91965e757e921f2",
-      "sourcePath": "data/review/sources/GOTnzPVFFAE-1a8bc91965e757e921f2.json",
-      "reviewLocator": "data/review/sources/GOTnzPVFFAE-1a8bc91965e757e921f2.json#dd99c57b314cf45a2102effd2e9ae6006d54ed54b5ff1cff00c11724dce13f10"
-    },
-    {
-      "title": "10",
-      "artist": "07/2026",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 240,
-      "time": "0:04:00",
-      "raw": "Santo Rosário | Sexta-feira | 04:00 | 10/07/2026 | Live Ao vivo",
-      "rawHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "videoId": "GOTnzPVFFAE",
-      "videoTitle": "【 #歌枠 】歌みた出たのでちょこっと歌枠【#はくゆ / #VTuber】",
-      "channelName": "はくゆ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE&t=240s",
-      "sourceId": "description:GOTnzPVFFAE:b9e788e059bd3238",
-      "sourceHash": "b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b",
-      "sourceOrigin": "review:GOTnzPVFFAE-b9e788e059bd3238a48e.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "source_level_likely_non_song_entry"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GOTnzPVFFAE:b9e788e059bd3238a48e",
-      "sourcePath": "data/review/sources/GOTnzPVFFAE-b9e788e059bd3238a48e.json",
-      "reviewLocator": "data/review/sources/GOTnzPVFFAE-b9e788e059bd3238a48e.json#b9e788e059bd3238a48e64ee0823552490e40fe83a5b7cf9789d47d3638ad97b"
-    },
-    {
-      "title": "お知らせ～",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4639,
-      "time": "1:17:19",
-      "raw": "1:17:19 お知らせ～",
-      "rawHash": "97defb4e603ff9ee3d2d8dc294b1be32acd2efa5d835406da1e6f81bcc9c7ffc",
-      "videoId": "GOTnzPVFFAE",
-      "videoTitle": "【 #歌枠 】歌みた出たのでちょこっと歌枠【#はくゆ / #VTuber】",
-      "channelName": "はくゆ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE&t=4639s",
-      "sourceId": "UgxWlEKcDCsqBtG4BPd4AaABAg",
-      "sourceHash": "1a8bc91965e757e921f26a924de0580094571e62e2a48cdb749e9b48dd52b3a8",
-      "sourceOrigin": "review:GOTnzPVFFAE-1a8bc91965e757e921f2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GOTnzPVFFAE:1a8bc91965e757e921f2",
-      "sourcePath": "data/review/sources/GOTnzPVFFAE-1a8bc91965e757e921f2.json",
-      "reviewLocator": "data/review/sources/GOTnzPVFFAE-1a8bc91965e757e921f2.json#97defb4e603ff9ee3d2d8dc294b1be32acd2efa5d835406da1e6f81bcc9c7ffc"
-    },
-    {
-      "title": "配信終了",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4962,
-      "time": "1:22:42",
-      "raw": "1:22:42 配信終了",
-      "rawHash": "f5ff10ecef30e912b4e4665e4927cdf8d20b6433d6429aff1b93c15b46a6bbf2",
-      "videoId": "GOTnzPVFFAE",
-      "videoTitle": "【 #歌枠 】歌みた出たのでちょこっと歌枠【#はくゆ / #VTuber】",
-      "channelName": "はくゆ",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GOTnzPVFFAE&t=4962s",
-      "sourceId": "UgxWlEKcDCsqBtG4BPd4AaABAg",
-      "sourceHash": "1a8bc91965e757e921f26a924de0580094571e62e2a48cdb749e9b48dd52b3a8",
-      "sourceOrigin": "review:GOTnzPVFFAE-1a8bc91965e757e921f2.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "activity_marker_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GOTnzPVFFAE:1a8bc91965e757e921f2",
-      "sourcePath": "data/review/sources/GOTnzPVFFAE-1a8bc91965e757e921f2.json",
-      "reviewLocator": "data/review/sources/GOTnzPVFFAE-1a8bc91965e757e921f2.json#f5ff10ecef30e912b4e4665e4927cdf8d20b6433d6429aff1b93c15b46a6bbf2"
     },
     {
       "title": "曲終わり",
@@ -5160,336 +5010,6 @@
       "reviewLocator": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json#a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
     },
     {
-      "title": "メン限配信　超美麗3Dスイカ割りと花火",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 578,
-      "time": "0:09:38",
-      "raw": "0:09:38メン限配信 超美麗3Dスイカ割りと花火",
-      "rawHash": "5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=578s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320"
-    },
-    {
-      "title": "～リアルライブチケット#耐久 7",
-      "artist": "30(木)Vack-ON!!アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "isNiche": false,
-      "isUnknownArtist": false,
-      "seconds": 1350,
-      "time": "0:22:30",
-      "raw": "22:30～リアルライブチケット#耐久 7/30(木)Vack-ON!!アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "rawHash": "15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
-      "sourceId": "description:GkmXWhgz1QA:15961b651311723d",
-      "sourceHash": "15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6",
-      "sourceOrigin": "review:GkmXWhgz1QA-15961b651311723dc3ab.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:15961b651311723dc3ab",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-15961b651311723dc3ab.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-15961b651311723dc3ab.json#15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6"
-    },
-    {
-      "title": "～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1350,
-      "time": "0:22:30",
-      "raw": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "rawHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
-      "sourceId": "description:GkmXWhgz1QA:5d44a7135bb15e6a",
-      "sourceHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
-      "sourceOrigin": "review:GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:5d44a7135bb15e6a43df",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json#5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb"
-    },
-    {
-      "title": "～眠れない夜の優しいアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1350,
-      "time": "0:22:30",
-      "raw": "22:30～眠れない夜の優しいアコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "rawHash": "921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
-      "sourceId": "description:GkmXWhgz1QA:921f12791a4b50ad",
-      "sourceHash": "921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca",
-      "sourceOrigin": "review:GkmXWhgz1QA-921f12791a4b50ad0e26.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [],
-      "riskReasons": [
-        "activity_title"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:921f12791a4b50ad0e26",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-921f12791a4b50ad0e26.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-921f12791a4b50ad0e26.json#921f12791a4b50ad0e26b5519d31b2cd336d320b6ea4baef6051a23740c6e4ca"
-    },
-    {
-      "title": "「歌声に　夢の種から　花ひらく」　朝起きてアーカイブ視聴中　ピクミンの～種のうた～　いい♪（",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6520,
-      "time": "1:48:40",
-      "raw": "「歌声に 夢の種から 花ひらく」 朝起きてアーカイブ視聴中 ピクミンの～種のうた～ いい♪（1:48:40）",
-      "rawHash": "87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=6520s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd"
-    },
-    {
-      "title": "同接400人越えてたありがとう",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 14300,
-      "time": "3:58:20",
-      "raw": "3:58:20同接400人越えてたありがとう",
-      "rawHash": "8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14300s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19"
-    },
-    {
-      "title": "かわいくFANBOX宣伝",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 14354,
-      "time": "3:59:14",
-      "raw": "3:59:14かわいくFANBOX宣伝",
-      "rawHash": "00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14354s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f"
-    },
-    {
-      "title": "オープニング目に焼き付けといて",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 14661,
-      "time": "4:04:21",
-      "raw": "4:04:21オープニング目に焼き付けといて",
-      "rawHash": "062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff",
-      "videoId": "GkmXWhgz1QA",
-      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
-      "channelName": "汐音ベリーちゃん Berry Ch",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14661s",
-      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
-      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
-      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists",
-        "conversation_entry"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_unknown_artist_ratio_high",
-        "source_conversation_timeline",
-        "source_many_topic_entries",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
-      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
-      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff"
-    },
-    {
       "title": "おつにょ",
       "artist": "未記載",
       "isNiche": true,
@@ -5539,158 +5059,6 @@
       "reviewId": "review:FlhwC9s1Nk8:4aa61da2d1b34d7d38e8",
       "sourcePath": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json",
       "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
-    },
-    {
-      "title": "～ 待機 ～",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1,
-      "time": "0:00:01",
-      "raw": "0:01 ～ :_mioやったー: 待機 :_mioやったー: ～",
-      "rawHash": "51280010aa23e5a55ef54b1f37fdc2a66030ac2b04018d7f0de0c79f83b6a698",
-      "videoId": "PJ-xgRHO2ZM",
-      "videoTitle": "【#歌枠 #karaoke 】月末にVRCでくそでかライブがあるってマジですか！？【7/15】【#Vtuber #個人勢vtuber 】",
-      "channelName": "水篠澪の魔法channel",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PJ-xgRHO2ZM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJ-xgRHO2ZM&t=1s",
-      "sourceId": "UgwuK-ByMnDi7vWhUIF4AaABAg",
-      "sourceHash": "a597819d39c9f11eff0118c27d41b0c47cc0222a79311d7bacaae005d2820c03",
-      "sourceOrigin": "review:PJ-xgRHO2ZM-a597819d39c9f11eff01.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:PJ-xgRHO2ZM:a597819d39c9f11eff01",
-      "sourcePath": "data/review/sources/PJ-xgRHO2ZM-a597819d39c9f11eff01.json",
-      "reviewLocator": "data/review/sources/PJ-xgRHO2ZM-a597819d39c9f11eff01.json#51280010aa23e5a55ef54b1f37fdc2a66030ac2b04018d7f0de0c79f83b6a698"
-    },
-    {
-      "title": "～ 歌枠start ～",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 221,
-      "time": "0:03:41",
-      "raw": "3:41 ～ :_mioこんみお: 歌枠start :_mioこんみお: ～",
-      "rawHash": "63802c34d3cbf88f0e5129d9c22d81b377b3934889699873e2644e6ff9f7a633",
-      "videoId": "PJ-xgRHO2ZM",
-      "videoTitle": "【#歌枠 #karaoke 】月末にVRCでくそでかライブがあるってマジですか！？【7/15】【#Vtuber #個人勢vtuber 】",
-      "channelName": "水篠澪の魔法channel",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PJ-xgRHO2ZM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJ-xgRHO2ZM&t=221s",
-      "sourceId": "UgwuK-ByMnDi7vWhUIF4AaABAg",
-      "sourceHash": "a597819d39c9f11eff0118c27d41b0c47cc0222a79311d7bacaae005d2820c03",
-      "sourceOrigin": "review:PJ-xgRHO2ZM-a597819d39c9f11eff01.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "activity_title",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:PJ-xgRHO2ZM:a597819d39c9f11eff01",
-      "sourcePath": "data/review/sources/PJ-xgRHO2ZM-a597819d39c9f11eff01.json",
-      "reviewLocator": "data/review/sources/PJ-xgRHO2ZM-a597819d39c9f11eff01.json#63802c34d3cbf88f0e5129d9c22d81b377b3934889699873e2644e6ff9f7a633"
-    },
-    {
-      "title": "ＶＲチャットの中で初のライブイベントに参加出演します",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6031,
-      "time": "1:40:31",
-      "raw": "1:40:31 ＶＲチャットの中で初のライブイベントに参加出演します :_mioKPみお:",
-      "rawHash": "8bb61ea2fcca6c55c1cd43e4ae594f4489014c1c2ac3ee5b129b3863c157c8a3",
-      "videoId": "PJ-xgRHO2ZM",
-      "videoTitle": "【#歌枠 #karaoke 】月末にVRCでくそでかライブがあるってマジですか！？【7/15】【#Vtuber #個人勢vtuber 】",
-      "channelName": "水篠澪の魔法channel",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PJ-xgRHO2ZM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJ-xgRHO2ZM&t=6031s",
-      "sourceId": "UgwuK-ByMnDi7vWhUIF4AaABAg",
-      "sourceHash": "a597819d39c9f11eff0118c27d41b0c47cc0222a79311d7bacaae005d2820c03",
-      "sourceOrigin": "review:PJ-xgRHO2ZM-a597819d39c9f11eff01.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:PJ-xgRHO2ZM:a597819d39c9f11eff01",
-      "sourcePath": "data/review/sources/PJ-xgRHO2ZM-a597819d39c9f11eff01.json",
-      "reviewLocator": "data/review/sources/PJ-xgRHO2ZM-a597819d39c9f11eff01.json#8bb61ea2fcca6c55c1cd43e4ae594f4489014c1c2ac3ee5b129b3863c157c8a3"
-    },
-    {
-      "title": "～ エンディング ～",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 6160,
-      "time": "1:42:40",
-      "raw": "1:42:40 ～ :_mioおつみお: エンディング :_mioおつみお: ～",
-      "rawHash": "f379002a65e69a5c40bbf7a07243800ef32b3ea7488e29f4a75352adf7e35fad",
-      "videoId": "PJ-xgRHO2ZM",
-      "videoTitle": "【#歌枠 #karaoke 】月末にVRCでくそでかライブがあるってマジですか！？【7/15】【#Vtuber #個人勢vtuber 】",
-      "channelName": "水篠澪の魔法channel",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=PJ-xgRHO2ZM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=PJ-xgRHO2ZM&t=6160s",
-      "sourceId": "UgwuK-ByMnDi7vWhUIF4AaABAg",
-      "sourceHash": "a597819d39c9f11eff0118c27d41b0c47cc0222a79311d7bacaae005d2820c03",
-      "sourceOrigin": "review:PJ-xgRHO2ZM-a597819d39c9f11eff01.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "likely_non_song_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:PJ-xgRHO2ZM:a597819d39c9f11eff01",
-      "sourcePath": "data/review/sources/PJ-xgRHO2ZM-a597819d39c9f11eff01.json",
-      "reviewLocator": "data/review/sources/PJ-xgRHO2ZM-a597819d39c9f11eff01.json#f379002a65e69a5c40bbf7a07243800ef32b3ea7488e29f4a75352adf7e35fad"
     },
     {
       "title": "閉会式",

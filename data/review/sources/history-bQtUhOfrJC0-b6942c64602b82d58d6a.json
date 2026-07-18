@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T14:06:16.513Z",
+  "generatedAt": "2026-07-18T19:51:15.140Z",
   "reviewId": "review:bQtUhOfrJC0:b6942c64602b82d58d6a",
   "video": {
     "videoId": "bQtUhOfrJC0",
@@ -15,7 +15,7 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260718T120000Z"
+    "snapshotId": "20260718T180000Z"
   },
   "risk": {
     "riskScore": 44,
@@ -267,16 +267,16 @@
       "rawHash": "8108c824f5223f30490cdb301194d27ccdae519d7f1a1ab1c307b0aa5e65e1b4",
       "sourceId": "selected:bQtUhOfrJC0:b6942c64602b82d5",
       "sourceHash": "b6942c64602b82d58d6a44665b5c115925030afca8abff152918da0b2453fe6e",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -288,16 +288,15 @@
       "rawHash": "2c8aaa1dc6e718b3a7176c7ce33b75180718982cb96b926e44992fec395aa33f",
       "sourceId": "selected:bQtUhOfrJC0:b6942c64602b82d5",
       "sourceHash": "b6942c64602b82d58d6a44665b5c115925030afca8abff152918da0b2453fe6e",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
-        "known_song_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "known_song"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",

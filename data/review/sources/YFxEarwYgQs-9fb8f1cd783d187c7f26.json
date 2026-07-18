@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T14:06:16.513Z",
+  "generatedAt": "2026-07-18T19:51:15.140Z",
   "reviewId": "review:YFxEarwYgQs:9fb8f1cd783d187c7f26",
   "video": {
     "videoId": "YFxEarwYgQs",
@@ -11,16 +11,17 @@
   "source": {
     "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
     "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "～Set List～\r\n 4:12 Love Song探して/ゲーム ドラゴンクエスト2挿入歌(牧野アンナ)\r\n10:13 YOU GET TO BURNING/アニメ 機動戦艦ナデシコOP(松澤由美)\r\n14:43 アイスキャンディー/アニメ かみちゅ!ED(MAKO)\r\n19:28 ようこそジャパリパークへ/アニメ けものフレンズOP(どうぶつビスケッツ×PPP)\r\n25:13 sugar sweet nightmare/アニメ 化物語OP(羽川翼.堀江由衣)\r\n32:12 撲殺天使ドクロちゃん/アニメ 撲殺天使ドクロちゃんOP(ドクロちゃん 千葉紗子）\r\n37:01 HANAJI/アニメ　まりあ†ほりっくOP(小林ゆう)\r\n43:03 エージェント夜を往く/ゲーム THE IDOLM@STER収録曲(菊地真)\r\n47:44 GO MY WAY!!/ゲーム THE IDOLM@STER収録曲(高槻やよい、双海亜美/真美)",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 14,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
+      "niche_unknown_artist",
       "source_multiple_unknown_artists"
     ]
   },
@@ -35,16 +36,15 @@
       "rawHash": "8a38f6866aa4dd06f56b871118863cd508dca2d45461df8fc2c4b891a6185178",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -64,8 +64,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -78,16 +77,15 @@
       "rawHash": "de4acb6fa32c19111f3c7bf49005d8f9f724957b55c19a6a8157d94858eada82",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -107,8 +105,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -129,8 +126,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -138,20 +134,23 @@
       "seconds": 1932,
       "time": "0:32:12",
       "title": "撲殺天使ドクロちゃん",
-      "artist": "アニメ 撲殺天使ドクロちゃんOP(ドクロちゃん 千葉紗子",
+      "artist": "未記載",
       "raw": "32:12 撲殺天使ドクロちゃん/アニメ 撲殺天使ドクロちゃんOP(ドクロちゃん 千葉紗子）",
       "rawHash": "d80a3f82a7dc9d7c07c5f4f4708b108e51b600650aef4e12394f71f0087d4cd4",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "アニメ 撲殺天使ドクロちゃんOP(ドクロちゃん 千葉紗子"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -172,8 +171,7 @@
         "known_song_unknown_artist"
       ],
       "positiveEvidence": [
-        "known_song",
-        "structured_setlist"
+        "known_song"
       ]
     },
     {
@@ -181,19 +179,24 @@
       "seconds": 2583,
       "time": "0:43:03",
       "title": "エージェント夜を往く",
-      "artist": "ゲーム THE IDOLM@STER収録曲(菊地真)",
+      "artist": "未記載",
       "raw": "43:03 エージェント夜を往く/ゲーム THE IDOLM@STER収録曲(菊地真)",
       "rawHash": "2b25acbb5b4a157af3419f75cec6950c7cf5578ccc4f8720454daac398e87bcb",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "isNiche": true,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "ゲーム THE IDOLM@STER収録曲(菊地真)"
+      },
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "parser_corruption"
+      ],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -201,20 +204,23 @@
       "seconds": 2864,
       "time": "0:47:44",
       "title": "GO MY WAY!!",
-      "artist": "ゲーム THE IDOLM@STER収録曲(高槻やよい、双海亜美/真美)",
+      "artist": "未記載",
       "raw": "47:44 GO MY WAY!!/ゲーム THE IDOLM@STER収録曲(高槻やよい、双海亜美/真美)",
       "rawHash": "1dae1934a00f0062b80eaf73383e431676422c505f48f72b604d6e2938b25a7c",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
       "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
-      "replacementSuggestion": null,
-      "riskReasons": [],
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "artist": "ゲーム THE IDOLM@STER収録曲(高槻やよい、双海亜美/真美)"
+      },
+      "riskReasons": [
+        "parser_corruption"
+      ],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     }
   ]
