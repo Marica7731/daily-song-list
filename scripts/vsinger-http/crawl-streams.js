@@ -41,17 +41,20 @@ async function crawlStreams(options = {}) {
   const videos = [...previousVideos];
   const detailQueue = [...previousDetailQueue];
   const pages = Array.isArray(previous.pages) ? [...previous.pages] : [];
+  const previousPageCount = Math.max(Number(previous.pageCount || 0), Number(checkpoint?.pageCount || 0), visitedCursorUrls.size, pages.length);
   const failures = Array.isArray(previous.failures) ? [...previous.failures] : [];
   let nextPageUrl = startUrl;
   let stop = null;
-  let rawRowCount = Number(previous.rawRowCount || pages.reduce((sum, page) => sum + (Number(page.rawRowCount) || 0), 0));
   let duplicateRowCount = Number(previous.duplicateRowCount || 0);
+  let rawRowCount = Math.max(Number(previous.rawRowCount || pages.reduce((sum, page) => sum + (Number(page.rawRowCount) || 0), 0)), previousVideos.length + duplicateRowCount);
   let noProgressPages = 0;
   let cursorLoopDetected = false;
   let noProgressDetected = false;
   let previousHash = pages.at(-1)?.pageHash || "";
   let streamWatermark = stopWatermark || checkpoint?.streamWatermark || previous.streamWatermark || "";
   let runPageCount = 0;
+  let totalPageCount = previousPageCount;
+  const runPages = [];
 
   while (nextPageUrl && runPageCount < maxPages) {
     const key = cursorKey(nextPageUrl);
@@ -74,6 +77,7 @@ async function crawlStreams(options = {}) {
     const parsed = parseStreamsPage(response.body, nextPageUrl);
     rawRowCount += parsed.rawRowCount;
     runPageCount += 1;
+    totalPageCount += 1;
     if (parsed.pageHash === previousHash) {
       stop = stopRecord("same-page-hash-consecutive", { pageHash: parsed.pageHash, pageUrl: nextPageUrl });
       break;
@@ -107,7 +111,7 @@ async function crawlStreams(options = {}) {
       break;
     }
 
-    pages.push({
+    const pageReport = {
       pageUrl: nextPageUrl,
       pageHash: parsed.pageHash,
       rawRowCount: parsed.rawRowCount,
@@ -118,12 +122,14 @@ async function crawlStreams(options = {}) {
       bytes: response.bytes,
       elapsedMs: response.elapsedMs,
       fromCache: response.fromCache,
-    });
+    };
+    pages.push(pageReport);
+    runPages.push(pageReport);
     saveCheckpoint(checkpointPath, {
       kind: "streams",
       updatedAt: new Date().toISOString(),
       nextPageUrl: parsed.nextPageUrl,
-      pageCount: pages.length,
+      pageCount: totalPageCount,
       knownExternalVideoIds: videos.map((video) => video.externalVideoId),
       visitedCursorUrls: [...visitedCursorUrls],
       visitedPageHashes: [...visitedPageHashes],
@@ -138,7 +144,7 @@ async function crawlStreams(options = {}) {
     nextPageUrl = parsed.nextPageUrl;
   }
 
-  if (!stop && runPageCount >= maxPages) stop = stopRecord("max-pages", { maxPages, runPageCount, totalPageCount: pages.length });
+  if (!stop && runPageCount >= maxPages) stop = stopRecord("max-pages", { maxPages, runPageCount, totalPageCount });
 
   const uniqueVideos = dedupeVideos(videos);
   const occurrences = dedupeOccurrences(uniqueVideos.flatMap(occurrenceEntitiesFromVideo));
@@ -151,7 +157,8 @@ async function crawlStreams(options = {}) {
     generatedAt: new Date().toISOString(),
     startUrl,
     stop,
-    pageCount: pages.length,
+    pageCount: totalPageCount,
+    storedPageCount: pages.length,
     rawRowCount,
     uniqueVideoCount: uniqueVideos.length,
     uniqueSetlistSongCount: setlistSongs.length,
@@ -162,7 +169,7 @@ async function crawlStreams(options = {}) {
     noProgressDetected,
     coverageStatus: stop?.reason === "no-next-cursor" && !cursorLoopDetected && !noProgressDetected ? "complete" : cursorLoopDetected ? "cursor-loop" : noProgressDetected ? "no-progress" : "partial",
     streamWatermark,
-    requestStats: requestStatsFromPages(pages),
+    requestStats: combineRequestStats(previous.requestStats, requestStatsFromPages(runPages), previousPageCount),
     pages,
     videos: uniqueVideos,
     songs: setlistSongs,
@@ -171,7 +178,7 @@ async function crawlStreams(options = {}) {
     failures,
   };
 
-  writeRunOutput(outputDir, "crawl", result);
+  writeRunOutput(outputDir, "crawl", streamCrawlReport(result));
   writeJson(path.join(outputDir, "videos.json"), uniqueVideos);
   writeJson(path.join(outputDir, "songs.json"), setlistSongs);
   writeJson(path.join(outputDir, "occurrences.json"), occurrences);
@@ -229,6 +236,39 @@ async function crawlStreams(options = {}) {
   return result;
 }
 
+function combineRequestStats(previousStats, runStats, previousPageCount) {
+  const previousCount = Number(previousStats?.requestCount || 0);
+  const runCount = Number(runStats.requestCount || 0);
+  const requestCount = previousCount + runCount;
+  return {
+    requestCount,
+    averageHtmlBytes: weightedAverage(previousStats?.averageHtmlBytes, previousCount, runStats.averageHtmlBytes, runCount),
+    averageResponseTimeMs: weightedAverage(previousStats?.averageResponseTimeMs, previousCount, runStats.averageResponseTimeMs, runCount),
+    totalBytes: Number(previousStats?.totalBytes || 0) + Number(runStats.totalBytes || 0),
+    coverageStatus: previousCount >= previousPageCount ? "complete" : "partial",
+  };
+}
+
+function weightedAverage(previousAverage, previousCount, runAverage, runCount) {
+  const totalCount = previousCount + runCount;
+  if (!totalCount) return 0;
+  return Math.round((Number(previousAverage || 0) * previousCount + Number(runAverage || 0) * runCount) / totalCount);
+}
+
+function streamCrawlReport(result) {
+  const { videos, songs, occurrences, detailQueue, ...report } = result;
+  return {
+    ...report,
+    outputFiles: {
+      videos: "videos.json",
+      songs: "songs.json",
+      occurrences: "occurrences.json",
+      detailQueue: "detail-queue.json",
+    },
+    detailQueueCount: Array.isArray(detailQueue) ? detailQueue.length : 0,
+  };
+}
+
 if (require.main === module) {
   crawlStreams(parseArgs())
     .then((result) => {
@@ -242,4 +282,5 @@ if (require.main === module) {
 
 module.exports = {
   crawlStreams,
+  streamCrawlReport,
 };

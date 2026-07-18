@@ -166,6 +166,7 @@ test("video detail fetcher keeps cumulative outputs across queue batches", async
   const first = await fetchVideoDetails({ client: mockClient(pages), robots: allowedRobots(), queueItems, "max-videos": 1, "output-dir": dir });
   const second = await fetchVideoDetails({ client: mockClient(pages), robots: allowedRobots(), queueItems, "max-videos": 1, "output-dir": dir });
   const videos = readJson(path.join(dir, "videos.json"));
+  const report = readJson(path.join(dir, "video-details.json"));
   const checkpoint = readJson(path.join(dir, "checkpoint.json"));
 
   assert.equal(first.runFetchedCount, 1);
@@ -176,6 +177,9 @@ test("video detail fetcher keeps cumulative outputs across queue batches", async
   assert.equal(second.occurrenceCount, 6);
   assert.equal(second.remainingQueueCount, 0);
   assert.equal(second.coverageStatus, "complete");
+  assert.equal(report.outputFiles.videos, "videos.json");
+  assert.equal("videos" in report, false);
+  assert.equal("occurrences" in report, false);
   assert.deepEqual(
     videos.map((video) => video.externalVideoId),
     [VIDEO_A, VIDEO_C],
@@ -211,6 +215,7 @@ test("singer-scoped song details parse occurrence history and require owner perm
     /owner-permission/,
   );
 
+  const dir = tempDir("singer-songs");
   const result = await crawlSingerSongs({
     client,
     robots: allowedRobots(),
@@ -219,13 +224,17 @@ test("singer-scoped song details parse occurrence history and require owner perm
     "singer-name": "獅子神レオナ/レオナちゃんねる",
     "max-song-pages": 1,
     "max-song-details": 1,
-    "output-dir": tempDir("singer-songs"),
+    "output-dir": dir,
   });
+  const report = readJson(path.join(dir, "crawl.json"));
 
   assert.equal(result.ownerPermission.enabled, true);
   assert.equal(result.uniqueSongCount, 1);
   assert.equal(result.uniqueVideoCount, 2);
   assert.equal(result.occurrenceCount, 2);
+  assert.equal(report.outputFiles.rawOccurrences, "raw-occurrences.json");
+  assert.equal("songs" in report, false);
+  assert.equal("occurrences" in report, false);
 });
 
 test("singer-scoped crawler resumes current singer from checkpoint cursor", async () => {
@@ -483,11 +492,16 @@ test("stream crawler keeps cumulative outputs across checkpoint resume", async (
   const first = await crawlStreams({ client: mockClient(pages), robots: allowedRobots(), fresh: true, "max-pages": 1, "output-dir": dir });
   const second = await crawlStreams({ client: mockClient(pages), robots: allowedRobots(), "max-pages": 1, "output-dir": dir });
   const videos = readJson(path.join(dir, "videos.json"));
+  const report = readJson(path.join(dir, "crawl.json"));
 
   assert.equal(first.uniqueVideoCount, 1);
   assert.equal(second.pageCount, 2);
   assert.equal(second.uniqueVideoCount, 2);
   assert.equal(second.occurrenceCount, 6);
+  assert.equal(report.detailQueueCount, 0);
+  assert.equal(report.outputFiles.videos, "videos.json");
+  assert.equal("videos" in report, false);
+  assert.equal("occurrences" in report, false);
   assert.deepEqual(
     videos.map((video) => video.externalVideoId),
     [VIDEO_A, VIDEO_C],

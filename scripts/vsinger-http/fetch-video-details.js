@@ -79,7 +79,7 @@ async function fetchVideoDetails(options = {}) {
     processedQueueKeys: [...processedQueueKeys],
   };
 
-  writeJson(path.join(outputDir, "video-details.json"), result);
+  writeJson(path.join(outputDir, "video-details.json"), videoDetailsReport(result));
   writeJson(path.join(outputDir, "videos.json"), uniqueVideos);
   writeJson(path.join(outputDir, "occurrences.json"), occurrences);
   writeJson(path.join(outputDir, "checkpoint.json"), {
@@ -119,6 +119,19 @@ function queueItemKey(item) {
   return item.videoPageUrl || item.externalVideoId || "";
 }
 
+function videoDetailsReport(result) {
+  const { videos, occurrences, ...report } = result;
+  return {
+    ...report,
+    outputFiles: {
+      videos: "videos.json",
+      occurrences: "occurrences.json",
+      checkpoint: "checkpoint.json",
+      syncState: "sync-state.json",
+    },
+  };
+}
+
 if (require.main === module) {
   fetchVideoDetails(parseArgs()).catch((error) => {
     console.error(error.stack || error.message);
@@ -129,4 +142,5 @@ if (require.main === module) {
 module.exports = {
   fetchVideoDetails,
   queueItemKey,
+  videoDetailsReport,
 };

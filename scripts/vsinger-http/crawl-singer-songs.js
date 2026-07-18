@@ -339,7 +339,7 @@ function persistSingerSongsRun({ outputDir, checkpointPath, state, ownerPermissi
     maxSongDetails,
   });
 
-  writeRunOutput(outputDir, "crawl", result);
+  writeRunOutput(outputDir, "crawl", singerSongsReport(result));
   writeJson(path.join(outputDir, "songs.json"), result.songs);
   writeJson(path.join(outputDir, "videos.json"), result.videos);
   writeJson(path.join(outputDir, "occurrences.json"), result.occurrences);
@@ -347,6 +347,21 @@ function persistSingerSongsRun({ outputDir, checkpointPath, state, ownerPermissi
   writeJson(path.join(outputDir, "sync-state.json"), buildSyncState(result));
   saveCheckpoint(checkpointPath, buildCheckpoint(result, currentSinger));
   return result;
+}
+
+function singerSongsReport(result) {
+  const { songs, videos, occurrences, rawOccurrences, ...report } = result;
+  return {
+    ...report,
+    outputFiles: {
+      songs: "songs.json",
+      videos: "videos.json",
+      occurrences: "occurrences.json",
+      rawOccurrences: "raw-occurrences.json",
+      checkpoint: "checkpoint.json",
+      syncState: "sync-state.json",
+    },
+  };
 }
 
 function buildSingerSongsResult({ state, ownerPermission, stop, allSingers, nextSingerIndex, currentSinger, fetchSongDetails, maxSongDetails }) {
@@ -587,5 +602,6 @@ if (require.main === module) {
 module.exports = {
   crawlSingerSongs,
   ownerPermissionFromArgs,
+  singerSongsReport,
   videosFromSingerOccurrences,
 };

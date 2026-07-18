@@ -270,29 +270,37 @@ function requestReportForSongs(crawl) {
 
 function requestReportForStreams(crawl, detailQueueCount) {
   const pages = crawl.pages || [];
+  const pageCount = crawl.pageCount || pages.length;
   return {
     averageHtmlBytes: crawl.requestStats?.averageHtmlBytes || 0,
     averageResponseTimeMs: crawl.requestStats?.averageResponseTimeMs || 0,
-    videosPerPage: pages.length ? Math.round((crawl.rawRowCount || 0) / pages.length) : 0,
+    videosPerPage: pageCount ? Math.round((crawl.rawRowCount || 0) / pageCount) : 0,
     setlistsPerPage: average(pages.map((page) => page.setlistCount || 0)),
-    occurrencesPerPage: average(pages.map((page) => page.occurrenceCount || 0)),
+    occurrencesPerPage: pageCount ? Math.round((crawl.occurrenceCount || 0) / pageCount) : 0,
     cursorStable: !crawl.cursorLoopDetected && !crawl.noProgressDetected,
     detailQueueCount,
   };
 }
 
 function totalRequestStats(payloads) {
-  const pages = payloads.flatMap((payload) => payload.pages || []);
-  if (pages.length) return requestStatsFromPages(pages);
-  return payloads.reduce(
-    (stats, payload) => ({
-      requestCount: stats.requestCount + (payload.requestStats?.requestCount || 0),
-      averageHtmlBytes: 0,
-      averageResponseTimeMs: 0,
-      totalBytes: stats.totalBytes + (payload.requestStats?.totalBytes || 0),
-    }),
-    emptyRequestStats(),
-  );
+  let requestCount = 0;
+  let totalBytes = 0;
+  let htmlBytesWeighted = 0;
+  let responseTimeWeighted = 0;
+  for (const payload of payloads) {
+    const stats = payload.requestStats?.requestCount ? payload.requestStats : requestStatsFromPages(payload.pages || []);
+    const count = Number(stats.requestCount || 0);
+    requestCount += count;
+    totalBytes += Number(stats.totalBytes || 0);
+    htmlBytesWeighted += Number(stats.averageHtmlBytes || 0) * count;
+    responseTimeWeighted += Number(stats.averageResponseTimeMs || 0) * count;
+  }
+  return {
+    requestCount,
+    averageHtmlBytes: requestCount ? Math.round(htmlBytesWeighted / requestCount) : 0,
+    averageResponseTimeMs: requestCount ? Math.round(responseTimeWeighted / requestCount) : 0,
+    totalBytes,
+  };
 }
 
 function buildSyncState({ generatedAt, songsSyncState, streamsSyncState, singerSongsSyncState, songs, videos, coverage }) {

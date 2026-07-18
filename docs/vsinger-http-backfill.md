@@ -169,6 +169,8 @@ The cache stores ETag and Last-Modified metadata, reuses `304 Not Modified`, and
 
 Dry-run and local crawl outputs are written under `artifacts/vsinger-http-backfill/`, which is ignored by Git:
 
+For large runs, `crawl.json` and `video-details.json` are compact reports. Large entity arrays are written only once to the sibling files listed in each report's `outputFiles` field, such as `videos.json`, `songs.json`, `occurrences.json`, `raw-occurrences.json`, and `detail-queue.json`. This keeps resumable stages below Node's single-string JSON limit during full `/streams` and singer-scoped backfills.
+
 - `songs/crawl.json`
 - `songs/songs.json`
 - `songs/checkpoint.json`
