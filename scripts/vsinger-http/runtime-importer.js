@@ -487,4 +487,6 @@ module.exports = {
   mergeVideoItems,
   parseVsingerDateTimestamp,
   shouldIncludeVsingerBackfill,
+  sortVideos,
+  videoBelongsToRange,
 };

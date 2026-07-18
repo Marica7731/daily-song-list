@@ -38,10 +38,15 @@
     "vsinger:fetch-video-details": "node scripts/vsinger-http/fetch-video-details.js",
     "vsinger:build-bundle": "node scripts/vsinger-http/build-backfill-bundle.js",
     "vsinger:run-backfill": "node scripts/vsinger-http/run-backfill-worker.js",
+    "db:build": "python scripts/db/build-runtime-db.py",
+    "db:export-runtime": "node scripts/db/export-runtime-rankings.js",
+    "db:probe": "python scripts/db/query-runtime-db.py",
+    "api:serve": "python server/song_rank_api.py",
     "validate": "node scripts/validate-data.js",
     "validate:core": "node scripts/validate-data.js --core",
     "validate:review": "node scripts/validate-data.js --review",
     "check:published": "node scripts/check-published-runtime.js",
+    "check:published:api": "node scripts/check-published-runtime.js --mode api",
     "verify:local": "node scripts/verify-local-performance.js",
     "screenshots:readme": "node scripts/capture-readme-screenshots.js",
     "check:ui-proof": "node scripts/validate-ui-proof.js",
@@ -49,7 +54,8 @@
     "check": "node scripts/check-js-syntax.js && npm run check:ui-proof && npm run blocklist:validate && npm test && npm run validate && npm run check:budget",
     "serve": "python -m http.server 8080",
     "test:scale": "node --test test/data-architecture.test.js",
-    "test": "node --test"
+    "test": "node --test",
+    "test:db": "node --test test/runtime-db.test.js test/runtime-api.test.js"
   },
   "engines": {
     "node": ">=20"

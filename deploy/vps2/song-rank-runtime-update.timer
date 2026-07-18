@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Song Rank runtime database update periodically
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=10min
+RandomizedDelaySec=90s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=Song Rank SQLite API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/culua/ytb-song-rank
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /opt/culua/ytb-song-rank/server/song_rank_api.py --db /var/lib/culua/ytb-song-rank/song-rank.sqlite --host 127.0.0.1 --port 8765
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

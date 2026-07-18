@@ -20,6 +20,8 @@ const LEGACY_RANGE_IDS = {
 
 const SNAPSHOT_LATEST_PATH = "data/latest.json";
 const UI_META_PATH = "data/ui/meta.json";
+const API_META_PATH = "/api/meta";
+const API_RANKINGS_PATH = "/api/rankings";
 const STATUS_PATH = "data/status.json";
 const SONG_SEARCH_INDEX_PATH = "data/song-search-known-songs.json";
 const SNAPSHOT_CACHE_LIMIT = 5;
@@ -278,6 +280,10 @@ const state = {
     revision: 0,
     lastResult: null,
   },
+  runtimeApi: {
+    available: false,
+    meta: null,
+  },
   loadedResources: [],
   compactDrawerLru: [],
   firstContentMeasured: false,
@@ -420,11 +426,23 @@ async function init() {
   renderInitialSkeleton();
   await yieldToBrowser();
   const initialRange = state.range;
-  const metaPromise = measureAsync("fetch-meta", () => readJson(UI_META_PATH, { cache: "no-cache" }));
+  const apiMetaPromise = measureAsync("fetch-api-meta", () => readJson(API_META_PATH, { cache: "no-cache" })).catch(() => null);
+  const metaPromise = measureAsync("fetch-meta", () => readJson(UI_META_PATH, { cache: "no-cache" })).catch((error) => ({ __error: error }));
   const statusPromise = readJson(STATUS_PATH, { cache: "no-cache" }).catch(() => null);
   const snapshotIndexPromise = readJson("data/snapshots/index.json").catch(() => ({ snapshots: [] }));
-  const meta = await metaPromise;
-  state.runtimeMeta = meta;
+  const apiMeta = await apiMetaPromise;
+  const staticMetaResult = await metaPromise;
+  const staticMeta = staticMetaResult && !staticMetaResult.__error ? staticMetaResult : null;
+  if (isRuntimeApiMeta(apiMeta)) {
+    state.runtimeApi.available = true;
+    state.runtimeApi.meta = apiMeta;
+    state.runtimeMeta = runtimeMetaFromApiMeta(apiMeta, staticMeta);
+  } else if (staticMeta) {
+    state.runtimeMeta = staticMeta;
+  } else {
+    throw staticMetaResult?.__error || new Error("runtime meta missing");
+  }
+  const meta = state.runtimeMeta;
   state.status = mergeRuntimeStatus(meta.status || null, await statusPromise, meta);
   startStatusTicker();
   renderStatus(state.status);
@@ -2107,9 +2125,46 @@ function requestRuntimeMeta(rangeId = state.range) {
   return shards?.request || null;
 }
 
+function isRuntimeApiMeta(payload) {
+  return Boolean(payload && typeof payload === "object" && payload.schemaVersion && payload.meta && payload.counts);
+}
+
+function runtimeMetaFromApiMeta(apiMeta, fallbackMeta = null) {
+  const meta = apiMeta?.meta || {};
+  const builtAt = cleanText(meta.built_at || meta.generated_at || "");
+  const latestGeneratedAt = cleanText(meta.latest_generated_at || fallbackMeta?.generatedAt || builtAt);
+  const latestCapturedAt = cleanText(meta.latest_captured_at || fallbackMeta?.capturedAt || latestGeneratedAt);
+  const dataVersion = cleanText(meta.latest_data_version || meta.data_version || builtAt || fallbackMeta?.dataVersion || "");
+  return {
+    ...(fallbackMeta || {}),
+    schemaVersion: Number(meta.schema_version) || Number(apiMeta?.schemaVersion) || Number(fallbackMeta?.schemaVersion) || 1,
+    generatedAt: latestGeneratedAt,
+    capturedAt: latestCapturedAt,
+    dataCapturedAt: latestCapturedAt,
+    rebuiltDerivedAt: builtAt || cleanText(fallbackMeta?.rebuiltDerivedAt || ""),
+    dataVersion,
+    filterVersion: Number.isInteger(fallbackMeta?.filterVersion) ? fallbackMeta.filterVersion : CURRENT_FILTER_VERSION,
+    nicheAnnotated: fallbackMeta?.nicheAnnotated === true,
+    status: {
+      ...(fallbackMeta?.status || {}),
+      status: "success",
+      capturedAt: latestCapturedAt,
+      dataCapturedAt: latestCapturedAt,
+      generatedAt: latestGeneratedAt,
+      completedAt: builtAt || latestGeneratedAt,
+      rebuiltDerivedAt: builtAt || cleanText(fallbackMeta?.status?.rebuiltDerivedAt || ""),
+    },
+    api: {
+      available: true,
+      counts: apiMeta?.counts || {},
+    },
+  };
+}
+
 function canUseRequestRuntime(rangeId = state.range) {
   if (!isLatestSnapshot()) return false;
   if (state.requestRuntime.disabledRanges.has(canonicalRangeId(rangeId))) return false;
+  if (state.runtimeApi.available) return true;
   const request = requestRuntimeMeta(rangeId);
   return Boolean(request?.summary?.path && request?.views?.songRank);
 }
@@ -3181,6 +3236,13 @@ async function requestViewPage(request) {
   }
 
   const range = canonicalRangeId(request.range);
+  if (state.runtimeApi.available) {
+    const result = await requestApiViewPage(request, range);
+    state.requestRuntime.pageResultCache.set(requestKey, result);
+    if (!request.prefetch) state.page = result.pageInfo.page;
+    return result;
+  }
+
   const requestMeta = requestRuntimeMeta(range);
   if (!requestMeta) throw new Error(`request runtime missing for ${range}`);
   const summary = await loadRequestSummary(range, request.signal);
@@ -3253,6 +3315,8 @@ async function requestViewPage(request) {
   });
   const pageInfo = window.FrontendUtils.paginateItems(entries, { page: request.page, pageSize });
   const records = await loadRequestDetailRecords(pageInfo.visible, request.signal);
+  const resultOccurrenceCount = requestEntriesOccurrenceCount(entries, request.view, manifest.metric || request.rankMetric);
+  const resultVideoCount = requestEntriesVideoCount(entries, request.view, manifest.metric || request.rankMetric);
   const result = buildRequestResult({
     request,
     summary,
@@ -3264,10 +3328,131 @@ async function requestViewPage(request) {
     totalCount: entries.length,
     filteredBaseCount: indexPayload.totalCount ?? manifest.totalCount ?? entries.length,
     filterKey: requestFilterKey(filters),
+    totalOccurrenceCount: resultOccurrenceCount,
+    totalVideoCount: resultVideoCount,
   });
   state.requestRuntime.pageResultCache.set(requestKey, result);
   if (!request.prefetch) state.page = result.pageInfo.page;
   return result;
+}
+
+async function requestApiViewPage(request, range) {
+  const filters = request.filters || {};
+  const pageSize = Number(request.pageSize) || currentPageSize();
+  const apiView = apiViewForRequestView(request.view);
+  const metricName = apiMetricForRequest(request);
+  const params = new URLSearchParams({
+    range,
+    view: apiView,
+    metric: metricName,
+    page: String(Number(request.page) || 1),
+    pageSize: String(pageSize),
+  });
+  const query = cleanText(filters.q || "");
+  if (query) params.set("q", query);
+  if (Number(filters.minCount) > 1 && request.view !== "videos") params.set("minCount", String(Number(filters.minCount)));
+  const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
+    cache: "no-cache",
+    signal: request.signal,
+  });
+  assertApiRankingPayload(payload);
+  const records = hydrateRequestRecords(payload.records, request.view);
+  const entries = records.map((record, index) => apiIndexEntryForRecord(record, request.view, payload.metric || metricName, index));
+  const summary = apiSummaryFromPayload(payload);
+  const manifest = {
+    schemaVersion: 1,
+    kind: "api-view",
+    rangeId: range,
+    view: request.view,
+    apiView,
+    metric: request.view === "songRank" || request.view === "artistRank" ? metricName : "index",
+    scopeKey: "all",
+    pageSize,
+    totalCount: Number(payload.totalCount) || 0,
+    pageCount: Number(payload.pageCount) || 1,
+  };
+  return buildRequestResult({
+    request,
+    summary,
+    manifest,
+    entries,
+    records,
+    bucketEntries: request.view === "songAz" ? entries : null,
+    page: Number(payload.page) || request.page,
+    totalCount: Number(payload.totalCount) || 0,
+    filteredBaseCount: Number(payload.filteredBaseCount ?? payload.totalCount) || 0,
+    filterKey: requestFilterKey(filters),
+    totalOccurrenceCount: Number(payload.totalOccurrenceCount) || 0,
+    totalVideoCount: Number(payload.totalVideoCount) || 0,
+  });
+}
+
+function apiViewForRequestView(view) {
+  if (view === "artistRank") return "artists";
+  if (view === "songAz") return "songIndex";
+  if (view === "videos") return "videos";
+  return "songs";
+}
+
+function apiMetricForRequest(request) {
+  if (request.view === "songRank" || request.view === "artistRank") {
+    return request.rankMetric === "videos" ? "videos" : "occurrences";
+  }
+  return "count";
+}
+
+function assertApiRankingPayload(payload) {
+  if (!payload || typeof payload !== "object" || !Array.isArray(payload.records)) {
+    throw new Error("api ranking payload invalid");
+  }
+}
+
+function apiIndexEntryForRecord(record, view, metricName, index) {
+  const type = view === "artistRank" ? "artist" : view === "videos" ? "video" : "song";
+  const key = record.key || record.videoId || record.detailKey || String(index);
+  return {
+    type: record.type || type,
+    key,
+    detailKey: key,
+    rank: Number(record.rank) || index + 1,
+    isTied: false,
+    isNiche: isNicheRecord(record),
+    rankValue: metricName === "videos" ? Number(record.videoCount) || 0 : Number(record.count) || 0,
+    bucket: view === "songAz" ? songIndexBucket(record) : "",
+    searchText: record.searchText || normalizeSearch([record.title, record.displayArtist, record.artist, record.name, record.channelName].filter(Boolean).join(" ")),
+  };
+}
+
+function apiSummaryFromPayload(payload) {
+  const scope = {
+    itemCount: Number(payload.totalCount) || 0,
+    occurrenceCount: Number(payload.totalOccurrenceCount) || 0,
+    videoCount: Number(payload.totalVideoCount) || 0,
+  };
+  return {
+    schemaVersion: 1,
+    kind: "api-summary",
+    rangeId: payload.rangeId || state.range,
+    scopes: { all: scope },
+  };
+}
+
+function requestEntriesOccurrenceCount(entries, view, metricName) {
+  if (view === "videos") {
+    return entries.reduce((total, entry) => total + (Number(entry.occurrenceCount ?? entry.count ?? entry.rankValue) || 0), 0);
+  }
+  return entries.reduce((total, entry) => {
+    const value = metricName === "videos" ? entry.count : entry.count ?? entry.rankValue;
+    return total + (Number(value) || 0);
+  }, 0);
+}
+
+function requestEntriesVideoCount(entries, view, metricName) {
+  if (view === "videos") return entries.length;
+  return entries.reduce((total, entry) => {
+    const value = metricName === "videos" ? entry.rankValue ?? entry.videoCount : entry.videoCount;
+    return total + (Number(value) || 0);
+  }, 0);
 }
 
 function requestViewRef(requestMeta, view, rankMetric, scopeKey) {
@@ -3362,6 +3547,14 @@ function requestFilterKey(filters = {}) {
 }
 
 async function loadRequestSummary(range, signal) {
+  if (state.runtimeApi.available) {
+    return apiSummaryFromPayload({
+      rangeId: range,
+      totalCount: Number(state.runtimeApi.meta?.counts?.ranking_rows) || 0,
+      totalOccurrenceCount: Number(state.runtimeApi.meta?.counts?.occurrences) || 0,
+      totalVideoCount: Number(state.runtimeApi.meta?.counts?.videos) || 0,
+    });
+  }
   const requestMeta = requestRuntimeMeta(range);
   const path = requestMeta?.summary?.path;
   if (!path) throw new Error(`request summary missing for ${range}`);
@@ -3501,6 +3694,28 @@ function pushSuggestion(target, seen, item) {
 
 async function loadRequestSearchRecords(query, signal) {
   const range = state.range;
+  if (state.runtimeApi.available) {
+    const params = new URLSearchParams({
+      range,
+      view: "songs",
+      metric: "occurrences",
+      page: "1",
+      pageSize: "12",
+      q: cleanText(query),
+    });
+    const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
+      cache: "no-cache",
+      signal,
+    });
+    if (!Array.isArray(payload?.records)) return [];
+    return payload.records.map((record) => ({
+      type: "song",
+      label: record.title || "",
+      value: record.title || "",
+      meta: record.displayArtist || record.artist || "",
+      searchText: record.searchText || normalizeSearch([record.title, record.displayArtist, record.artist].filter(Boolean).join(" ")),
+    }));
+  }
   const requestMeta = requestRuntimeMeta(range);
   const manifestPath = requestMeta?.search?.manifestPath;
   if (!manifestPath) return [];
@@ -3607,7 +3822,20 @@ function hydrateCountMap(values) {
   return map;
 }
 
-function buildRequestResult({ request, summary, manifest, entries, records, bucketEntries = null, page, totalCount, filteredBaseCount, filterKey }) {
+function buildRequestResult({
+  request,
+  summary,
+  manifest,
+  entries,
+  records,
+  bucketEntries = null,
+  page,
+  totalCount,
+  filteredBaseCount,
+  filterKey,
+  totalOccurrenceCount = null,
+  totalVideoCount = null,
+}) {
   const pageSize = Number(request.pageSize) || currentPageSize();
   const pageCount = Math.max(1, Math.ceil(totalCount / pageSize));
   const currentPage = clampPage(page, pageCount);
@@ -3640,6 +3868,8 @@ function buildRequestResult({ request, summary, manifest, entries, records, buck
     pageInfo,
     totalCount,
     filteredBaseCount,
+    totalOccurrenceCount,
+    totalVideoCount,
     pageSize,
   };
 }
@@ -3738,20 +3968,29 @@ function renderRequestedPageResult(result, options = {}) {
 
 function renderRequestSummary(result) {
   const scope = result.summary?.scopes?.[result.scopeKey] || {};
+  const occurrenceCount = summaryMetricValue(result.totalOccurrenceCount, scope.occurrenceCount);
+  const videoCount = summaryMetricValue(result.totalVideoCount, scope.videoCount);
   const metrics = [];
   if (result.view === "artistRank") {
     metrics.push(metric(result.totalCount, "位歌手"));
-    metrics.push(metric(scope.occurrenceCount || 0, "次收录"));
-    metrics.push(metric(scope.videoCount || 0, "个视频"));
+    metrics.push(metric(occurrenceCount, "次收录"));
+    metrics.push(metric(videoCount, "个视频"));
   } else if (result.view === "videos") {
     metrics.push(metric(result.totalCount, "个视频"));
-    metrics.push(metric(scope.occurrenceCount || 0, "个时间戳"));
+    metrics.push(metric(occurrenceCount, "个时间戳"));
   } else {
     metrics.push(metric(result.totalCount, "首歌曲"));
-    metrics.push(metric(scope.occurrenceCount || 0, "次收录"));
-    metrics.push(metric(scope.videoCount || 0, "个视频"));
+    metrics.push(metric(occurrenceCount, "次收录"));
+    metrics.push(metric(videoCount, "个视频"));
   }
   renderSummary(currentGroup(), metrics, requestSummaryNote(result));
+}
+
+function summaryMetricValue(value, fallback) {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric) && numeric >= 0) return numeric;
+  const fallbackNumeric = Number(fallback);
+  return Number.isFinite(fallbackNumeric) && fallbackNumeric >= 0 ? fallbackNumeric : 0;
 }
 
 function requestSummaryNote(result) {
@@ -5737,6 +5976,9 @@ function renderInlineSource(occurrence) {
 }
 
 function sourceDetailPathForRecord(record, occurrences = []) {
+  if (state.runtimeApi.available && record?.sourceDetailKey) {
+    return `/api/sources/${encodeURIComponent(record.sourceDetailKey)}`;
+  }
   const candidates = [
     record?.sourceDetailPath,
     record?.sourceDetail?.path,
@@ -5801,6 +6043,7 @@ async function loadSourceDetailOccurrences(path, key = "") {
 
 function normalizeSourceDetailOccurrences(payload, key = "") {
   if (Array.isArray(payload)) return payload.filter(isOccurrenceLike);
+  if (Array.isArray(payload?.record?.occurrences)) return payload.record.occurrences.filter(isOccurrenceLike);
   if (Array.isArray(payload?.occurrences)) return payload.occurrences.filter(isOccurrenceLike);
   if (Array.isArray(payload?.sourceOccurrences)) return payload.sourceOccurrences.filter(isOccurrenceLike);
   if (Array.isArray(payload?.groups)) return payload.groups.flatMap((group) => group?.occurrences || []).filter(isOccurrenceLike);

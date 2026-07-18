@@ -5,6 +5,7 @@ const DEFAULT_BASE_URL = "https://ytb-song-rank.culua.com/";
 const LARGE_RANGE_FULL_FETCH_LIMIT = positiveInteger(process.env.DAILY_SONG_PUBLISHED_FULL_RANGE_LIMIT_BYTES, 12 * 1024 * 1024);
 const options = parseArgs(process.argv.slice(2));
 const baseUrl = normalizeBaseUrl(options.baseUrl || process.env.DAILY_SONG_PUBLISHED_URL || DEFAULT_BASE_URL);
+const checkMode = options.mode || process.env.DAILY_SONG_PUBLISHED_CHECK_MODE || "static";
 const expectedMeta = loadExpectedMeta(options.expectedMetaPath || process.env.DAILY_SONG_EXPECTED_META || "");
 const errors = [];
 
@@ -15,6 +16,11 @@ main().catch((error) => {
 
 async function main() {
   const checkedAt = new Date().toISOString();
+  if (checkMode === "api") {
+    await checkApiRuntime(checkedAt);
+    return;
+  }
+  if (checkMode !== "static") throw new Error(`unsupported check mode: ${checkMode}`);
   const meta = await fetchJson("data/ui/meta.json");
   assert(meta.schemaVersion === 1, "meta.schemaVersion must be 1");
   assert(isSha256(meta.dataVersion), "meta.dataVersion must be sha256");
@@ -107,6 +113,49 @@ async function main() {
       `7dPages=${meta.ranges["7d"].shards.runtime.pageCount}`,
       `allPages=${meta.ranges["all"].shards.runtime.pageCount}`,
       `expected=${expectedMeta ? "matched" : "not-set"}`,
+    ].join(" "),
+  );
+}
+
+async function checkApiRuntime(checkedAt) {
+  const health = await fetchJson("healthz");
+  assert(health.status === "ok", `healthz status must be ok, got ${health.status || "missing"}`);
+  assert(Number(health.schemaVersion) >= 1, "healthz schemaVersion missing");
+  assert(health.builtAt, "healthz builtAt missing");
+
+  const meta = await fetchJson("api/meta");
+  assert(Number(meta.schemaVersion) >= 1, "api meta schemaVersion missing");
+  assert(Number(meta.counts?.ranking_rows) > 0, "api meta ranking_rows must be positive");
+  assert(Number(meta.counts?.source_occurrences) > 0, "api meta source_occurrences must be positive");
+
+  const rankings = await fetchJson("api/rankings?range=all&view=songs&q=%E5%B0%91%E5%A5%B3%E3%83%AC%E3%82%A4&pageSize=5");
+  assert(rankings.view === "songs", "api rankings view mismatch");
+  assert(Number(rankings.totalCount) > 0, "api rankings totalCount must be positive");
+  assert(Number(rankings.totalOccurrenceCount) > 0, "api rankings totalOccurrenceCount must be positive");
+  assert(Array.isArray(rankings.records) && rankings.records.length > 0, "api rankings records must be non-empty");
+  const sourceKey = rankings.records[0]?.sourceDetailKey || "";
+  assert(sourceKey, "api rankings first sourceDetailKey missing");
+  if (sourceKey) {
+    const source = await fetchJson(`api/sources/${encodeURIComponent(sourceKey)}`);
+    assert(source.found === true, "api source detail must be found");
+    assert(Array.isArray(source.record?.occurrences) && source.record.occurrences.length > 0, "api source detail occurrences must be non-empty");
+  }
+
+  if (errors.length) {
+    for (const error of errors) console.error(`[published-runtime-api] ${error}`);
+    process.exit(1);
+  }
+
+  console.log(
+    [
+      "PUBLISHED_RUNTIME_API_OK",
+      `checkedAt=${checkedAt}`,
+      `baseUrl=${baseUrl}`,
+      `builtAt=${health.builtAt}`,
+      `rankingRows=${meta.counts?.ranking_rows || 0}`,
+      `sourceOccurrences=${meta.counts?.source_occurrences || 0}`,
+      `probeTotal=${rankings.totalCount}`,
+      `probeOccurrences=${rankings.totalOccurrenceCount}`,
     ].join(" "),
   );
 }
@@ -239,6 +288,11 @@ function parseArgs(args) {
     if (arg === "--expected-meta") {
       result.expectedMetaPath = args[index + 1] || "";
       index += 1;
+    } else if (arg === "--mode") {
+      result.mode = args[index + 1] || "";
+      index += 1;
+    } else if (arg === "--api") {
+      result.mode = "api";
     } else if (!result.baseUrl) {
       result.baseUrl = arg;
     }

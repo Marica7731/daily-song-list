@@ -122,16 +122,30 @@ jobs:
 
       - name: Published runtime health check
         if: steps.core.outcome == 'success' && steps.core.outputs.updated == 'true'
+        env:
+          DAILY_SONG_REQUIRE_PUBLISHED_API: ${{ vars.DAILY_SONG_REQUIRE_PUBLISHED_API || '0' }}
         run: |
+          check_published_runtime() {
+            npm run check:published -- https://ytb-song-rank.culua.com/ --expected-meta data/ui/meta.json || return 1
+            if npm run check:published:api -- https://ytb-song-rank.culua.com/; then
+              return 0
+            fi
+            if [ "${DAILY_SONG_REQUIRE_PUBLISHED_API}" = "1" ]; then
+              echo "::error::Published API runtime check failed."
+              return 1
+            fi
+            echo "::warning::Published API runtime check failed or is not cut over yet; static runtime check passed."
+            return 0
+          }
           sleep 300
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            if npm run check:published -- https://ytb-song-rank.culua.com/ --expected-meta data/ui/meta.json; then
+            if check_published_runtime; then
               exit 0
             fi
             echo "Published runtime health check attempt ${attempt} failed; waiting for CDN propagation."
             sleep 60
           done
-          npm run check:published -- https://ytb-song-rank.culua.com/ --expected-meta data/ui/meta.json
+          check_published_runtime
 
       - name: Finish run summary
         if: always()

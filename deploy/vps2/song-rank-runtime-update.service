@@ -1,0 +1,20 @@
+[Unit]
+Description=Update Song Rank runtime database from git data
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=PROJECT_DIR=/opt/culua/ytb-song-rank
+Environment=STATE_DIR=/var/lib/culua/ytb-song-rank
+Environment=LOG_DIR=/var/log/culua/ytb-song-rank
+Environment=BRANCH=main
+ExecStart=/usr/local/bin/song-rank-runtime-update.sh
+StandardOutput=append:/var/log/culua/ytb-song-rank/runtime-update.log
+StandardError=append:/var/log/culua/ytb-song-rank/runtime-update.log
+TimeoutStartSec=45min
+
+[Install]
+WantedBy=multi-user.target

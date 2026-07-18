@@ -333,11 +333,95 @@ function summarizeRuntimeShardSet(shardSet) {
 }
 
 function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
+  const model = buildRequestRuntimeModel(rangePayload, rangeId, options);
+  const { generatedAt, capturedAt, dataVersion, items, occurrences, occurrenceScopes, songScopes, artistScopes, videoScopes, sourceRecords, detailRecords, views } = model;
+  cleanupRequestRuntimeFiles(rangeId);
+
+  const sourceShardSet = writeKeyedRequestShardSet({
+    kind: "request-source-detail",
+    rangeId,
+    dataVersion,
+    generatedAt,
+    capturedAt,
+    baseDir: `data/ui/ranges/${rangeId}/sources`,
+    pageSize: REQUEST_SOURCE_SHARD_SIZE,
+    maxBytes: REQUEST_SOURCE_SHARD_MAX_BYTES,
+    records: sourceRecords,
+    recordName: "records",
+  });
+  const sourcePathByKey = new Map(sourceShardSet.records.map((record) => [record.key, record.path]));
+  for (const recordMap of Object.values(detailRecords)) {
+    for (const record of recordMap.values()) {
+      if (!record.sourceDetailKey) continue;
+      record.sourceDetailPath = sourcePathByKey.get(record.sourceDetailKey) || "";
+    }
+  }
+
+  const detailShardSets = Object.fromEntries(
+    Object.entries(detailRecords).map(([type, recordMap]) => [
+      type,
+      writeKeyedRequestShardSet({
+        kind: `request-${type}-detail`,
+        rangeId,
+        dataVersion,
+        generatedAt,
+        capturedAt,
+        baseDir: `data/ui/ranges/${rangeId}/records/${type}`,
+        pageSize: REQUEST_DETAIL_SHARD_SIZE,
+        maxBytes: REQUEST_DETAIL_SHARD_MAX_BYTES,
+        records: Array.from(recordMap.values()),
+        recordName: "records",
+      }),
+    ]),
+  );
+  applyDetailPathsToViews(views, detailShardSets);
+
+  const summary = writeRequestSummary({
+    rangeId,
+    dataVersion,
+    generatedAt,
+    capturedAt,
+    rangePayload: { ...rangePayload, items },
+    occurrenceScopes,
+    songScopes,
+    artistScopes,
+    videoScopes,
+  });
+  const viewArtifacts = writeRequestViews({
+    rangeId,
+    dataVersion,
+    generatedAt,
+    capturedAt,
+    views,
+    detailRecords,
+  });
+  const search = writeRequestSearch({
+    rangeId,
+    dataVersion,
+    generatedAt,
+    capturedAt,
+    records: collectRequestSearchRecords(detailRecords),
+  });
+
+  return {
+    schemaVersion: RUNTIME_SCHEMA_VERSION,
+    dataVersion,
+    generatedAt,
+    capturedAt,
+    pageSize: REQUEST_PAGE_SIZE,
+    summary: summarizeRequestSummary(summary),
+    views: summarizeRequestViews(viewArtifacts),
+    records: Object.fromEntries(Object.entries(detailShardSets).map(([type, shardSet]) => [type, summarizeRequestShardSet(shardSet)])),
+    sources: summarizeRequestShardSet(sourceShardSet),
+    search: summarizeRequestSearch(search),
+  };
+}
+
+function buildRequestRuntimeModel(rangePayload, rangeId, options = {}) {
   const generatedAt = options.generatedAt || rangePayload.generatedAt || "";
   const capturedAt = options.capturedAt || rangePayload.capturedAt || generatedAt;
   const dataVersion = options.dataVersion || rangePayload.dataVersion || "";
   const items = Array.isArray(rangePayload.items) ? rangePayload.items : [];
-  cleanupRequestRuntimeFiles(rangeId);
   const occurrences = collectRuntimeOccurrences(items);
   const sourceRecords = [];
   const detailRecords = {
@@ -439,83 +523,21 @@ function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
     }));
   }
 
-  const sourceShardSet = writeKeyedRequestShardSet({
-    kind: "request-source-detail",
+  return {
+    schemaVersion: RUNTIME_SCHEMA_VERSION,
     rangeId,
     dataVersion,
     generatedAt,
     capturedAt,
-    baseDir: `data/ui/ranges/${rangeId}/sources`,
-    pageSize: REQUEST_SOURCE_SHARD_SIZE,
-    maxBytes: REQUEST_SOURCE_SHARD_MAX_BYTES,
-    records: sourceRecords,
-    recordName: "records",
-  });
-  const sourcePathByKey = new Map(sourceShardSet.records.map((record) => [record.key, record.path]));
-  for (const recordMap of Object.values(detailRecords)) {
-    for (const record of recordMap.values()) {
-      if (!record.sourceDetailKey) continue;
-      record.sourceDetailPath = sourcePathByKey.get(record.sourceDetailKey) || "";
-    }
-  }
-
-  const detailShardSets = Object.fromEntries(
-    Object.entries(detailRecords).map(([type, recordMap]) => [
-      type,
-      writeKeyedRequestShardSet({
-        kind: `request-${type}-detail`,
-        rangeId,
-        dataVersion,
-        generatedAt,
-        capturedAt,
-        baseDir: `data/ui/ranges/${rangeId}/records/${type}`,
-        pageSize: REQUEST_DETAIL_SHARD_SIZE,
-        maxBytes: REQUEST_DETAIL_SHARD_MAX_BYTES,
-        records: Array.from(recordMap.values()),
-        recordName: "records",
-      }),
-    ]),
-  );
-  applyDetailPathsToViews(views, detailShardSets);
-
-  const summary = writeRequestSummary({
-    rangeId,
-    dataVersion,
-    generatedAt,
-    capturedAt,
-    rangePayload,
+    items,
+    occurrences,
     occurrenceScopes,
     songScopes,
     artistScopes,
     videoScopes,
-  });
-  const viewArtifacts = writeRequestViews({
-    rangeId,
-    dataVersion,
-    generatedAt,
-    capturedAt,
     views,
+    sourceRecords,
     detailRecords,
-  });
-  const search = writeRequestSearch({
-    rangeId,
-    dataVersion,
-    generatedAt,
-    capturedAt,
-    records: collectRequestSearchRecords(detailRecords),
-  });
-
-  return {
-    schemaVersion: RUNTIME_SCHEMA_VERSION,
-    dataVersion,
-    generatedAt,
-    capturedAt,
-    pageSize: REQUEST_PAGE_SIZE,
-    summary: summarizeRequestSummary(summary),
-    views: summarizeRequestViews(viewArtifacts),
-    records: Object.fromEntries(Object.entries(detailShardSets).map(([type, shardSet]) => [type, summarizeRequestShardSet(shardSet)])),
-    sources: summarizeRequestShardSet(sourceShardSet),
-    search: summarizeRequestSearch(search),
   };
 }
 
@@ -1647,6 +1669,7 @@ module.exports = {
   buildClientGroup,
   buildClientSong,
   buildClientVideo,
+  buildRequestRuntimeModel,
   buildRuntimeMeta,
   buildRuntimeRangePayload,
   buildSearchRecords,
