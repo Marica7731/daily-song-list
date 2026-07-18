@@ -9,6 +9,7 @@ DB_PATH="${DB_PATH:-${STATE_DIR}/song-rank.sqlite}"
 LOCK_PATH="${LOCK_PATH:-/run/song-rank-runtime-update.lock}"
 API_HEALTH_URL="${API_HEALTH_URL:-http://127.0.0.1:8765/healthz}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
+BUILD_DB_ON_VPS="${BUILD_DB_ON_VPS:-0}"
 
 mkdir -p "${STATE_DIR}" "${LOG_DIR}"
 exec 9>"${LOCK_PATH}"
@@ -48,17 +49,26 @@ cleanup() {
 trap cleanup EXIT
 
 export NODE_OPTIONS
-python3 scripts/db/build-runtime-db.py --output "${tmp_db}"
-python3 scripts/db/query-runtime-db.py --db "${tmp_db}" --range all --view songs --q "少女レイ" --page-size 5 --summary-only
+if [[ "${BUILD_DB_ON_VPS}" == "1" ]]; then
+  python3 scripts/db/build-runtime-db.py --output "${tmp_db}"
+  python3 scripts/db/query-runtime-db.py --db "${tmp_db}" --range all --view songs --q "少女レイ" --page-size 5 --summary-only
 
-if [[ -f "${DB_PATH}" ]]; then
-  cp -f "${DB_PATH}" "${DB_PATH}.previous"
-fi
-mv -f "${tmp_db}" "${DB_PATH}"
-trap - EXIT
-chown www-data:www-data "${DB_PATH}"
-if [[ -f "${DB_PATH}.previous" ]]; then
-  chown www-data:www-data "${DB_PATH}.previous"
+  if [[ -f "${DB_PATH}" ]]; then
+    cp -f "${DB_PATH}" "${DB_PATH}.previous"
+  fi
+  mv -f "${tmp_db}" "${DB_PATH}"
+  trap - EXIT
+  chown www-data:www-data "${DB_PATH}"
+  if [[ -f "${DB_PATH}.previous" ]]; then
+    chown www-data:www-data "${DB_PATH}.previous"
+  fi
+else
+  rm -f "${tmp_db}"
+  trap - EXIT
+  if [[ ! -f "${DB_PATH}" ]]; then
+    echo "CODEX_RUNTIME_UPDATE_ERROR no-db build-db-on-vps=${BUILD_DB_ON_VPS}"
+    exit 1
+  fi
 fi
 
 systemctl restart song-rank-api
@@ -66,4 +76,4 @@ curl -fsS "${API_HEALTH_URL}" >/dev/null
 
 commit_sha="$(git rev-parse HEAD)"
 db_size="$(stat -c%s "${DB_PATH}")"
-echo "CODEX_RUNTIME_UPDATE_OK commit=${commit_sha} db=${DB_PATH} bytes=${db_size}"
+echo "CODEX_RUNTIME_UPDATE_OK commit=${commit_sha} db=${DB_PATH} bytes=${db_size} buildDbOnVps=${BUILD_DB_ON_VPS}"

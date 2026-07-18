@@ -1,0 +1,149 @@
+name: Deploy SQLite runtime DB
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/deploy-runtime-db.yml"
+      - "assets/**"
+      - "config/**"
+      - "data/latest.json"
+      - "data/external/vsinger-http/backfill/**"
+      - "deploy/vps2/**"
+      - "package.json"
+      - "scripts/db/**"
+      - "scripts/vsinger-http/**"
+      - "server/**"
+      - "test/runtime-api.test.js"
+      - "test/runtime-db.test.js"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-song-list-runtime-db-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    env:
+      VPS2_HOST: "192.255.151.75"
+      VPS2_USER: "root"
+      REMOTE_PROJECT_DIR: "/opt/culua/ytb-song-rank"
+      REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
+      REMOTE_LOG_DIR: "/var/log/culua/ytb-song-rank"
+      REMOTE_DB_PATH: "/var/lib/culua/ytb-song-rank/song-rank.sqlite"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install --no-package-lock
+
+      - name: Build runtime database
+        run: |
+          mkdir -p artifacts/runtime
+          python3 scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
+          python3 scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only
+
+      - name: Write database manifest
+        id: manifest
+        run: |
+          sha256="$(sha256sum artifacts/runtime/song-rank.sqlite | awk '{print $1}')"
+          bytes="$(stat -c%s artifacts/runtime/song-rank.sqlite)"
+          built_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          cat > artifacts/runtime/song-rank.sqlite.manifest.json <<JSON
+          {
+            "commit_sha": "${GITHUB_SHA}",
+            "run_id": "${GITHUB_RUN_ID}",
+            "run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "built_at": "${built_at}",
+            "sha256": "${sha256}",
+            "bytes": ${bytes}
+          }
+          JSON
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
+          echo "bytes=${bytes}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload database artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: song-rank-sqlite-${{ github.sha }}
+          path: |
+            artifacts/runtime/song-rank.sqlite
+            artifacts/runtime/song-rank.sqlite.manifest.json
+          retention-days: 14
+
+      - name: Install sshpass
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          if [ -z "${VPS2_PASSWORD}" ]; then
+            echo "::error::Missing VPS2_PASSWORD secret."
+            exit 1
+          fi
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Prepare VPS2 runtime checkout
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            mkdir -p /opt/culua '${REMOTE_STATE_DIR}' '${REMOTE_LOG_DIR}'
+            apt-get update
+            apt-get install -y git nginx python3 curl ca-certificates
+            if ! command -v node >/dev/null 2>&1 || ! node -e 'process.exit(Number(process.versions.node.split(\".\")[0]) >= 20 ? 0 : 1)'; then
+              curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+              apt-get install -y nodejs
+            fi
+            if [ ! -d '${REMOTE_PROJECT_DIR}/.git' ]; then
+              git clone --filter=blob:none https://github.com/Marica7731/daily-song-list.git '${REMOTE_PROJECT_DIR}'
+            fi
+            cd '${REMOTE_PROJECT_DIR}'
+            test \"\$(git remote get-url origin)\" = 'https://github.com/Marica7731/daily-song-list.git'
+            git fetch origin main --prune
+            git checkout main
+            git pull --ff-only origin main
+            test \"\$(git rev-parse HEAD)\" = '${GITHUB_SHA}'
+            npm install --no-package-lock
+            install -m 0644 deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
+            install -m 0755 deploy/vps2/song-rank-runtime-update.sh /usr/local/bin/song-rank-runtime-update.sh
+            install -m 0755 deploy/vps2/song-rank-db-activate.sh /usr/local/bin/song-rank-db-activate.sh
+            install -m 0644 deploy/vps2/song-rank-runtime-update.service /etc/systemd/system/song-rank-runtime-update.service
+            install -m 0644 deploy/vps2/song-rank-runtime-update.timer /etc/systemd/system/song-rank-runtime-update.timer
+            install -m 0644 deploy/vps2/nginx-staging.conf /etc/nginx/sites-available/song-rank-staging.conf
+            ln -sf /etc/nginx/sites-available/song-rank-staging.conf /etc/nginx/sites-enabled/song-rank-staging.conf
+            nginx -t
+            systemctl daemon-reload
+            systemctl enable song-rank-api
+          "
+
+      - name: Upload and activate database
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          EXPECTED_SHA256: ${{ steps.manifest.outputs.sha256 }}
+        run: |
+          remote_db="${REMOTE_STATE_DIR}/song-rank.sqlite.next.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
+          sshpass -p "${VPS2_PASSWORD}" scp -o StrictHostKeyChecking=no artifacts/runtime/song-rank.sqlite "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
+          sshpass -p "${VPS2_PASSWORD}" scp -o StrictHostKeyChecking=no artifacts/runtime/song-rank.sqlite.manifest.json "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
+          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${remote_db}' /usr/local/bin/song-rank-db-activate.sh
+            systemctl enable --now song-rank-runtime-update.timer
+            systemctl reload nginx
+          "
+
+      - name: Verify VPS2 API
+        run: npm run check:published:api -- http://192.255.151.75/
+

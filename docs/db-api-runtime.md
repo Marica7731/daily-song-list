@@ -148,8 +148,9 @@ GitHub Actions remains the upstream data refresh path:
 
 VPS2 is the runtime deploy target:
 
-- `deploy/vps2/song-rank-runtime-update.timer` runs every 10 minutes.
-- `deploy/vps2/song-rank-runtime-update.sh` pulls `origin/main`, builds SQLite into a temp file, probes `少女レイ`, atomically replaces the DB, restarts `song-rank-api`, and checks `/healthz`.
-- The script emits `CODEX_RUNTIME_UPDATE_OK` only after the API is restarted and healthy.
+- `.github/workflows/deploy-runtime-db.yml` builds SQLite on GitHub's runner and uploads the finished database to VPS2.
+- `deploy/vps2/song-rank-db-activate.sh` verifies the uploaded DB sha256, probes `少女レイ`, atomically replaces the DB, restarts `song-rank-api`, and checks `/healthz`.
+- `deploy/vps2/song-rank-runtime-update.timer` runs every 10 minutes as a light code-sync and health restart path. It does not build SQLite on the 2 GiB VPS unless `BUILD_DB_ON_VPS=1` is explicitly set.
+- The activation script emits `CODEX_RUNTIME_DB_ACTIVATE_OK` only after the API is restarted and healthy.
 
-If VPS2's 2 GiB memory is not enough for future data growth, switch the heavy DB build to GitHub Actions and let VPS2 only download a zipped `song-rank.sqlite` plus manifest, verify sha256, replace the DB, and restart the API.
+VPS2's 2 GiB memory is not enough for the current full builder. Keep heavy DB builds in GitHub Actions or move the service to a larger host before setting `BUILD_DB_ON_VPS=1`.

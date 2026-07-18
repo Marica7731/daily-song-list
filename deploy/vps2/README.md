@@ -27,6 +27,8 @@ chown -R www-data:www-data /var/lib/culua/ytb-song-rank /var/log/culua/ytb-song-
 cp deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
 cp deploy/vps2/song-rank-runtime-update.sh /usr/local/bin/song-rank-runtime-update.sh
 chmod +x /usr/local/bin/song-rank-runtime-update.sh
+cp deploy/vps2/song-rank-db-activate.sh /usr/local/bin/song-rank-db-activate.sh
+chmod +x /usr/local/bin/song-rank-db-activate.sh
 cp deploy/vps2/song-rank-runtime-update.service /etc/systemd/system/song-rank-runtime-update.service
 cp deploy/vps2/song-rank-runtime-update.timer /etc/systemd/system/song-rank-runtime-update.timer
 cp deploy/vps2/nginx-staging.conf /etc/nginx/sites-available/song-rank-staging.conf
@@ -40,26 +42,43 @@ systemctl reload nginx
 
 ## Rebuild and restart
 
-Run this after pushing a new data or API commit when you want an immediate update instead of waiting for the timer:
+VPS2 has 2 GiB memory, so the normal production update path builds SQLite in GitHub Actions and uploads the finished database to VPS2. Run this only to sync code and restart the API against the currently installed database:
 
 ```bash
 /usr/local/bin/song-rank-runtime-update.sh
 ```
 
-The update script:
+The default update script:
 
 - Pulls `origin/main` with `git pull --ff-only`.
-- Builds a new database under `/var/lib/culua/ytb-song-rank/song-rank.sqlite.next.*`.
-- Runs `scripts/db/query-runtime-db.py` against the temp database.
-- Keeps the previous database as `/var/lib/culua/ytb-song-rank/song-rank.sqlite.previous`.
-- Replaces the active database only after a successful build and probe.
+- Installs Node dependencies without creating `package-lock.json`.
 - Restarts `song-rank-api` and checks `http://127.0.0.1:8765/healthz`.
 
-The final stdout marker is `CODEX_RUNTIME_UPDATE_OK`. A lower-level database build success is `CODEX_RUNTIME_DB_BUILD_OK`.
+The final stdout marker is `CODEX_RUNTIME_UPDATE_OK`.
+
+On a larger host, set `BUILD_DB_ON_VPS=1` to build locally before restart:
+
+```bash
+BUILD_DB_ON_VPS=1 /usr/local/bin/song-rank-runtime-update.sh
+```
+
+The DB activation script is used by GitHub Actions after uploading a candidate DB:
+
+```bash
+CANDIDATE_DB=/var/lib/culua/ytb-song-rank/song-rank.sqlite.next \
+EXPECTED_SHA256=<sha256> \
+/usr/local/bin/song-rank-db-activate.sh
+```
+
+It probes `少女レイ`, keeps the previous database as `song-rank.sqlite.previous`, atomically replaces the active database, restarts the API, and emits `CODEX_RUNTIME_DB_ACTIVATE_OK`.
 
 ## Scheduled updates
 
-GitHub Actions remains the source update mechanism. `Update core song-list data` runs hourly and commits refreshed data to `main`. VPS2 then pulls `main` and rebuilds SQLite through `song-rank-runtime-update.timer` every 10 minutes.
+GitHub Actions remains the source update mechanism. `Update core song-list data` runs hourly and commits refreshed data to `main`. `Deploy SQLite runtime DB` then builds SQLite on GitHub's runner and uploads the database to VPS2, where `song-rank-db-activate.sh` atomically replaces the active DB and restarts the API.
+
+Required repository secret:
+
+- `VPS2_PASSWORD`: root SSH password for `192.255.151.75`.
 
 Useful commands:
 
@@ -74,7 +93,7 @@ npm run check:published:api -- http://127.0.0.1/
 
 After production DNS points at VPS2, set the GitHub repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1`. The hourly `update-core.yml` workflow will still update the source data, then verify the public static runtime and the public API. During migration, leave the variable unset or `0` so the static GitHub Pages site can continue passing before the API cutover.
 
-If the 2 GiB VPS cannot complete the builder, move only the DB build to GitHub Actions: have the action upload `song-rank.sqlite` plus a manifest containing `commit_sha`, `run_id`, `built_at`, `sha256`, and `bytes`; then change the VPS2 update script to download, verify sha256, atomically replace the DB, and restart the API. Keep raw source data in git or in the artifact manifest so the database remains reproducible.
+The workflow also uploads a short-lived artifact containing `song-rank.sqlite` and a manifest with `commit_sha`, `run_id`, `built_at`, `sha256`, and `bytes`, so failed deployments can be inspected without rebuilding.
 
 ## Migration checklist
 
