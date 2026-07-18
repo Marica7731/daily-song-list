@@ -2,6 +2,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 
 const DEFAULT_BASE_URL = "https://ytb-song-rank.culua.com/";
+const LARGE_RANGE_FULL_FETCH_LIMIT = positiveInteger(process.env.DAILY_SONG_PUBLISHED_FULL_RANGE_LIMIT_BYTES, 12 * 1024 * 1024);
 const options = parseArgs(process.argv.slice(2));
 const baseUrl = normalizeBaseUrl(options.baseUrl || process.env.DAILY_SONG_PUBLISHED_URL || DEFAULT_BASE_URL);
 const expectedMeta = loadExpectedMeta(options.expectedMetaPath || process.env.DAILY_SONG_EXPECTED_META || "");
@@ -49,12 +50,15 @@ async function main() {
     ["72h", "7d"],
     ["1m", "all"],
   ]) {
-    const alias = await fetchJson(`data/${legacyId}.json`);
-    assert(alias.schemaVersion === 2, `data/${legacyId}.json schemaVersion must be 2`);
-    assert(alias.id === legacyId, `data/${legacyId}.json id mismatch`);
-    assert(alias.aliasOf === canonicalId, `data/${legacyId}.json aliasOf must be ${canonicalId}`);
-    assert(alias.path === `data/${canonicalId}.json`, `data/${legacyId}.json path must point to data/${canonicalId}.json`);
-    assert(Number.isFinite(alias.itemCount) && alias.itemCount > 0, `data/${legacyId}.json itemCount must be non-empty`);
+    const alias = await fetchJson(`data/ui/${legacyId}.json`);
+    const canonicalRange = meta.ranges?.[canonicalId];
+    assert(alias.schemaVersion === 1, `data/ui/${legacyId}.json schemaVersion must be 1`);
+    assert(alias.id === legacyId, `data/ui/${legacyId}.json id mismatch`);
+    assert(alias.aliasOf === canonicalId, `data/ui/${legacyId}.json aliasOf must be ${canonicalId}`);
+    assert(alias.path === canonicalRange?.path, `data/ui/${legacyId}.json path must point to hashed ${canonicalId} runtime`);
+    assert(alias.legacyPath === canonicalRange?.legacyPath, `data/ui/${legacyId}.json legacyPath must point to ${canonicalId} runtime`);
+    assert(alias.dataVersion === meta.dataVersion, `data/ui/${legacyId}.json dataVersion must match meta`);
+    assert(alias.itemCount === canonicalRange?.itemCount, `data/ui/${legacyId}.json itemCount must match ${canonicalId}`);
   }
 
   for (const rangeId of ["7d", "all"]) {
@@ -63,20 +67,21 @@ async function main() {
     assert(rangeMeta?.dataVersion === meta.dataVersion, `range ${rangeId} dataVersion must match meta`);
     assert(isSha256(rangeMeta?.sha256), `range ${rangeId} sha256 missing`);
     assert(new RegExp(`^data/ui/${rangeId}\\.[0-9a-f]{12}\\.json$`, "u").test(rangeMeta?.path || ""), `range ${rangeId} path must be hashed`);
-    const { json, text, contentType, statusCode } = await fetchJsonWithText(rangeMeta.path);
-    assert(statusCode === 200, `range ${rangeId} HTTP status must be 200`);
-    assert(contentType.includes("application/json") || contentType.includes("text/plain"), `range ${rangeId} content-type unexpected: ${contentType}`);
-    assert(sha256Text(text) === rangeMeta.sha256, `range ${rangeId} sha256 mismatch`);
-    assert(json.dataVersion === meta.dataVersion, `range ${rangeId} payload dataVersion mismatch`);
-    assert(json.id === rangeId, `range ${rangeId} id mismatch`);
-    assert(Array.isArray(json.items), `range ${rangeId} items must be array`);
-    assert(json.items.length === rangeMeta.itemCount, `range ${rangeId} itemCount mismatch`);
-    assert(json.items.length > 0, `range ${rangeId} items must be non-empty`);
+    if (Number.isFinite(rangeMeta.bytes) && rangeMeta.bytes > LARGE_RANGE_FULL_FETCH_LIMIT) {
+      await checkReachableJson(rangeMeta.path, `range ${rangeId}`);
+    } else {
+      const { json, text, contentType, statusCode } = await fetchJsonWithText(rangeMeta.path);
+      assert(statusCode === 200, `range ${rangeId} HTTP status must be 200`);
+      assert(isJsonContentType(contentType), `range ${rangeId} content-type unexpected: ${contentType}`);
+      assert(sha256Text(text) === rangeMeta.sha256, `range ${rangeId} sha256 mismatch`);
+      assert(json.dataVersion === meta.dataVersion, `range ${rangeId} payload dataVersion mismatch`);
+      assert(json.id === rangeId, `range ${rangeId} id mismatch`);
+      assert(Array.isArray(json.items), `range ${rangeId} items must be array`);
+      assert(json.items.length === rangeMeta.itemCount, `range ${rangeId} itemCount mismatch`);
+      assert(json.items.length > 0, `range ${rangeId} items must be non-empty`);
+    }
 
-    const canonicalFull = await fetchJson(`data/${rangeId}.json`);
-    assert(canonicalFull.id === rangeId, `data/${rangeId}.json id mismatch`);
-    assert(Array.isArray(canonicalFull.items), `data/${rangeId}.json items must be array`);
-    assert(canonicalFull.items.length === rangeMeta.itemCount, `data/${rangeId}.json itemCount mismatch`);
+    await checkReachableJson(rangeMeta.legacyPath || `data/ui/${rangeId}.json`, null, `data/ui/${rangeId}.json`);
 
     await checkShard(rangeId, "runtime", rangeMeta.shards?.runtime, meta, "runtime-page-manifest", "items");
     await checkShard(rangeId, "sourceDetails", rangeMeta.shards?.sourceDetails, meta, "source-detail-manifest", "sources");
@@ -171,6 +176,21 @@ async function fetchJson(path) {
   return (await fetchJsonWithText(path)).json;
 }
 
+async function checkReachableJson(path, label = path) {
+  const head = await fetchHead(path);
+  assert(head.statusCode === 200, `${label} HTTP status must be 200`);
+  assert(isJsonContentType(head.contentType), `${label} content-type unexpected: ${head.contentType}`);
+}
+
+async function fetchHead(path) {
+  const url = new URL(path, baseUrl);
+  const response = await fetch(url, { method: "HEAD", cache: "no-store" });
+  return {
+    statusCode: response.status,
+    contentType: response.headers.get("content-type") || "",
+  };
+}
+
 async function fetchJsonWithText(path) {
   const url = new URL(path, baseUrl);
   const response = await fetch(url, { cache: "no-store" });
@@ -198,8 +218,18 @@ function isSha256(value) {
   return /^[0-9a-f]{64}$/u.test(String(value || ""));
 }
 
+function isJsonContentType(value) {
+  const contentType = String(value || "");
+  return contentType.includes("application/json") || contentType.includes("text/plain");
+}
+
 function sha256Text(text) {
   return crypto.createHash("sha256").update(text).digest("hex");
+}
+
+function positiveInteger(value, fallback = 1) {
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 function parseArgs(args) {
