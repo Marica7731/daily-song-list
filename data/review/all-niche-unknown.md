@@ -1,14 +1,14 @@
 # 全量小众无歌手人工审核清单
 
-生成时间：2026-07-17T19:48:44.386Z
+生成时间：2026-07-18T03:52:30.837Z
 
-候选总数：2447
-唯一视频数：406
-唯一来源数：488
+候选总数：2460
+唯一视频数：413
+唯一来源数：495
 已确认非歌曲：104
 已确认解析错误：233
 高概率非歌曲：294
-需要人工判断：1815
+需要人工判断：1828
 高概率真实歌曲：1
 
 ## 已确认非歌曲
@@ -425,7 +425,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:09:50](https://www.youtube.com/watch?v=_a3qNvKIFd8&t=590s) | ダイヤモンド愛 | 未記載 | 7d, all, review, snapshot:20260717T170000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/\_a3qNvKIFd8\-4a36c72636de61966fde\.json\#edfbfa3d104ed139a2ce39372974dab69614e8482fc7815250b4d30668e9e3db |
+| [0:09:50](https://www.youtube.com/watch?v=_a3qNvKIFd8&t=590s) | ダイヤモンド愛 | 未記載 | 7d, all, review, snapshot:20260718T030000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/\_a3qNvKIFd8\-4a36c72636de61966fde\.json\#edfbfa3d104ed139a2ce39372974dab69614e8482fc7815250b4d30668e9e3db |
 
 ### 【 \#歌枠┊︎KARAOKE 】ギャップがあるvtuber❤ \#初見さんも大歓迎 \#vtuber \#singing
 - 视频：[9KS1yo\_4NPY](https://www.youtube.com/watch?v=9KS1yo_4NPY)
@@ -544,7 +544,7 @@
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [2:15:35](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8135s) | （2010）GO\! GO\! MANIAC | 未記載 | snapshot:20260712T190000Z | niche_unknown_artist, source_multiple_unknown_artists, parser_corruption, source_unknown_artist_ratio_high | known_artist, structured_setlist | replace_entry | data/review/sources/history\-jT\-l8E9Xsow\-addd6bca4c4f9b4bb19a\.json\#42b953bc08cdd78d7a9c3b60324c0f92a802240dbda9f2ae53929a6b52d7d029 |
-| [2:15:35](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8135s) | 35 （2010）GO\! GO\! MANIAC | 未記載 | all, review, snapshot:20260717T170000Z, snapshot:20260713T120000Z, snapshot:20260712T220000Z | parser_corruption, delimiter_split, niche_unknown_artist, source_multiple_unknown_artists | inferred_artist | replace_entry | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#42b953bc08cdd78d7a9c3b60324c0f92a802240dbda9f2ae53929a6b52d7d029 |
+| [2:15:35](https://www.youtube.com/watch?v=jT-l8E9Xsow&t=8135s) | 35 （2010）GO\! GO\! MANIAC | 未記載 | all, review, snapshot:20260718T030000Z, snapshot:20260713T120000Z, snapshot:20260712T220000Z | parser_corruption, delimiter_split, niche_unknown_artist, source_multiple_unknown_artists | inferred_artist | replace_entry | data/review/sources/jT\-l8E9Xsow\-07eb54c01819ff9e79b4\.json\#42b953bc08cdd78d7a9c3b60324c0f92a802240dbda9f2ae53929a6b52d7d029 |
 
 ### 【アニソン歌枠 第543回】昭和・平成・令和のアニソンのごった煮はいかがですか？Let's sing ANIME music【うさ丸】
 - 视频：[kQVdDhuS2js](https://www.youtube.com/watch?v=kQVdDhuS2js)
@@ -552,7 +552,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:29:00](https://www.youtube.com/watch?v=kQVdDhuS2js&t=1740s) | 夢冒険 | 未記載 | 7d, all, snapshot:20260717T170000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/kQVdDhuS2js\-dbff8ac38f56e8488ef2\.json\#83a0da7d69f60875dbdd9a57f92f0fd8532e750398faec3e0e97c2ef514912a7 |
+| [0:29:00](https://www.youtube.com/watch?v=kQVdDhuS2js&t=1740s) | 夢冒険 | 未記載 | 7d, all, snapshot:20260718T030000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/kQVdDhuS2js\-dbff8ac38f56e8488ef2\.json\#83a0da7d69f60875dbdd9a57f92f0fd8532e750398faec3e0e97c2ef514912a7 |
 
 ### 【歌枠 / KARAOKE】ゆったりまったりいつも通りいろんな曲を歌うぞ～【うりん / JPVtuber】
 - 视频：[tNfKtVb6E7s](https://www.youtube.com/watch?v=tNfKtVb6E7s)
@@ -881,7 +881,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:43:03](https://www.youtube.com/watch?v=YFxEarwYgQs&t=2583s) | エージェント夜を往く | 未記載 | 7d, all, snapshot:20260717T170000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/YFxEarwYgQs\-9fb8f1cd783d187c7f26\.json\#2b25acbb5b4a157af3419f75cec6950c7cf5578ccc4f8720454daac398e87bcb |
+| [0:43:03](https://www.youtube.com/watch?v=YFxEarwYgQs&t=2583s) | エージェント夜を往く | 未記載 | 7d, all, snapshot:20260718T030000Z | parser_corruption, delimiter_split, niche_unknown_artist | inferred_artist | replace_entry | data/review/sources/YFxEarwYgQs\-9fb8f1cd783d187c7f26\.json\#2b25acbb5b4a157af3419f75cec6950c7cf5578ccc4f8720454daac398e87bcb |
 
 ### ☀️朝活歌枠☀️【目指せおはよう50人！】初見さん/ROMさん大歓迎💥≪パレデミア学園 / 灯野ぺけ。≫ \#vtuber \#朝活 \#歌枠
 - 视频：[6s6vcztl98s](https://www.youtube.com/watch?v=6s6vcztl98s)
@@ -1889,6 +1889,14 @@
 
 ## 需要人工判断
 
+### 〚 歌枠 〛歌のリハビリにつきあっちゃくれないか｜ライザ陛下 /Vtuber/初見歓迎
+- 视频：[4q\_FdN\_RDTs](https://www.youtube.com/watch?v=4q_FdN_RDTs)
+- 频道：\-Liza Channel\-
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [2:08:48](https://www.youtube.com/watch?v=4q_FdN_RDTs&t=7728s) | みてみて | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title |  | manual_review | data/review/sources/4q\_FdN\_RDTs\-ef5bbde4bcd021a32a26\.json\#55a5888730ef184e7637e7be91eea77d79977bcb08a3e21457dc54d82cb42c58 |
+
 ### ☾ \#歌枠 \| アコギ ☽今夜をちょっとだけ好きになれる弾き語り⟡\.\*￤澄花 / ぷろぶる
 - 视频：[iwW7H8ULCkI](https://www.youtube.com/watch?v=iwW7H8ULCkI)
 - 频道：\-sumica\-澄花
@@ -2626,14 +2634,14 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:11:15](https://www.youtube.com/watch?v=IKNlomtvxbw&t=675s) | 鼓動 \(Kodou / Heartbeat\)　femme fatale | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#d247df8e1298249c6801f09a561faf026f13901948d703b1122cda6ae5d561c3 |
-| [0:23:25](https://www.youtube.com/watch?v=IKNlomtvxbw&t=1405s) | ルル（Lulu\)　やくしまるえつこ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#8463e5e67ed9ae058c7d06188015d65b47d3516b3bbafb10066c85cf7a4eb131 |
-| [0:47:02](https://www.youtube.com/watch?v=IKNlomtvxbw&t=2822s) | ヴィーナスとジーザス \(Venus to Jesus / Venus and Jesus\)　やくしまるえつこ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#b927f8345366d782b45806457178acbd153d8f49bb29f1aa2a8713e0cc9c5fa2 |
-| [0:50:37](https://www.youtube.com/watch?v=IKNlomtvxbw&t=3037s) | チャイナアドバイス \(China Advice\)　相対性理論 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#bf62df22c38dfba6b71bf2c128df0cbc202d4ccc4f396ec412fde13d4bf6d118 |
-| [1:04:15](https://www.youtube.com/watch?v=IKNlomtvxbw&t=3855s) | 手紙　～拝啓　十五の君へ～ \(Tegami ~ Haikei 15 no kimi he~ / Letter ~ To you becoming 15 ~\) アンジェラ・アキ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#ca78bece0302e0de7636efc73598a9cc6db8b88f2e2ae34c7aeb2c7d3cc3a8fb |
-| [1:16:00](https://www.youtube.com/watch?v=IKNlomtvxbw&t=4560s) | 変わらないもの \(Kawaranai mono / Thing that won't change\)　奥華子 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#b99e56fdb1f7515eae1eab780001e355b4beb4fe0cb40ea7532d65a85d19803f |
-| [1:21:49](https://www.youtube.com/watch?v=IKNlomtvxbw&t=4909s) | YUME日和　（Yume Biyori / Dream Days）島谷ひとみ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#2a8c1cf389a690bc109038392e66353637f62863690cabc4d22a32f3d68aa408 |
-| [1:27:21](https://www.youtube.com/watch?v=IKNlomtvxbw&t=5241s) | ギプス　（Gipps）椎名林檎 | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#fed9063b56ff559892fa524fc6d34927b659bc5361f7ad540eaaf189baad6edc |
+| [0:11:15](https://www.youtube.com/watch?v=IKNlomtvxbw&t=675s) | 鼓動 \(Kodou / Heartbeat\)　femme fatale | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#d247df8e1298249c6801f09a561faf026f13901948d703b1122cda6ae5d561c3 |
+| [0:23:25](https://www.youtube.com/watch?v=IKNlomtvxbw&t=1405s) | ルル（Lulu\)　やくしまるえつこ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#8463e5e67ed9ae058c7d06188015d65b47d3516b3bbafb10066c85cf7a4eb131 |
+| [0:47:02](https://www.youtube.com/watch?v=IKNlomtvxbw&t=2822s) | ヴィーナスとジーザス \(Venus to Jesus / Venus and Jesus\)　やくしまるえつこ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#b927f8345366d782b45806457178acbd153d8f49bb29f1aa2a8713e0cc9c5fa2 |
+| [0:50:37](https://www.youtube.com/watch?v=IKNlomtvxbw&t=3037s) | チャイナアドバイス \(China Advice\)　相対性理論 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#bf62df22c38dfba6b71bf2c128df0cbc202d4ccc4f396ec412fde13d4bf6d118 |
+| [1:04:15](https://www.youtube.com/watch?v=IKNlomtvxbw&t=3855s) | 手紙　～拝啓　十五の君へ～ \(Tegami ~ Haikei 15 no kimi he~ / Letter ~ To you becoming 15 ~\) アンジェラ・アキ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#ca78bece0302e0de7636efc73598a9cc6db8b88f2e2ae34c7aeb2c7d3cc3a8fb |
+| [1:16:00](https://www.youtube.com/watch?v=IKNlomtvxbw&t=4560s) | 変わらないもの \(Kawaranai mono / Thing that won't change\)　奥華子 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#b99e56fdb1f7515eae1eab780001e355b4beb4fe0cb40ea7532d65a85d19803f |
+| [1:21:49](https://www.youtube.com/watch?v=IKNlomtvxbw&t=4909s) | YUME日和　（Yume Biyori / Dream Days）島谷ひとみ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#2a8c1cf389a690bc109038392e66353637f62863690cabc4d22a32f3d68aa408 |
+| [1:27:21](https://www.youtube.com/watch?v=IKNlomtvxbw&t=5241s) | ギプス　（Gipps）椎名林檎 | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/IKNlomtvxbw\-461e357d2c4a6d686fee\.json\#fed9063b56ff559892fa524fc6d34927b659bc5361f7ad540eaaf189baad6edc |
 
 ### 【 歌枠】NO31\.かわいい歌を沢山っ！女の子ですから＞＜💓 ろぼめろでぃ～ RBmelody 🎶 【ホロライブ/ ロボ子さん \#ろぼめろでぃ】
 - 视频：[\-fU2Z8fQs4Q](https://www.youtube.com/watch?v=-fU2Z8fQs4Q)
@@ -2720,6 +2728,14 @@
 | [0:03:04](https://www.youtube.com/watch?v=4CgnNOuQMjw&t=184s) | スカ― | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/4CgnNOuQMjw\-3f1c11673497216e7fee\.json\#a3036abc13bbbceb1fbec808608dfa9535d5ecbacadc6f05ff16f682411fb99f |
 | [0:07:31](https://www.youtube.com/watch?v=4CgnNOuQMjw&t=451s) | スカ― | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/4CgnNOuQMjw\-3f1c11673497216e7fee\.json\#591ff3f74957180ef25cddbd5e6e9b5765c6757be333191ff4d3237af262c7f2 |
 | [0:12:19](https://www.youtube.com/watch?v=4CgnNOuQMjw&t=739s) | スカ― | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/4CgnNOuQMjw\-3f1c11673497216e7fee\.json\#f89a271a700e9eb0cfe95a44516a6df51004a48624a4cda7383b9823620d181a |
+
+### 【 \#歌枠 】5周年ライブまで毎日歌練習\#6【練習配信】 \#vtuber \#浅葱サキ \#バーチャルyoutuber 声優 \#shorts
+- 视频：[9U9pY07JvP4](https://www.youtube.com/watch?v=9U9pY07JvP4)
+- 频道：Saki Ch\. 浅葱サキ
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:19:50](https://www.youtube.com/watch?v=9U9pY07JvP4&t=1190s) | スカ― | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/9U9pY07JvP4\-2d6c8ce7aca9d6a1bed5\.json\#e05833a44b35b4c1d2ab0a5bd990b4916f2ba48a15f5d2415fd29aee7edaf949 |
 
 ### 【 \#歌枠 】5周年ライブまで毎日歌練習\#7【練習配信】 \#vtuber \#浅葱サキ \#バーチャルyoutuber 声優 \#shorts
 - 视频：[\-3iD7lEd7ik](https://www.youtube.com/watch?v=-3iD7lEd7ik)
@@ -2964,7 +2980,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [2:26:46](https://www.youtube.com/watch?v=08CQUlMMcQc&t=8806s) | ヴァイ | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/08CQUlMMcQc\-2e670230d2db6b510c54\.json\#d4fe97d983894bb8e212db709954c4bb6e8e7a5ff4227a2df748911ec27b3d7f |
+| [2:26:46](https://www.youtube.com/watch?v=08CQUlMMcQc&t=8806s) | ヴァイ | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title |  | manual_review | data/review/sources/08CQUlMMcQc\-2e670230d2db6b510c54\.json\#d4fe97d983894bb8e212db709954c4bb6e8e7a5ff4227a2df748911ec27b3d7f |
 
 ### 【歌枠】王が通るぞ【\#あくび・でもんすぺーど】
 - 视频：[xYAgCeSyo2Q](https://www.youtube.com/watch?v=xYAgCeSyo2Q)
@@ -3434,94 +3450,94 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:15:15](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=915s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#85a9f2a0b796f20a4c633d80a669835c3c28affd34cb7f195c2bafc0fa6643e4 |
-| [0:18:00](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1080s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#009d8f8c18b5a8a27d99ecdbea482a874fcb19614c3f536fa63521a6a6b34fbf |
-| [0:20:42](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1242s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#12af86b6aa5408244bd9f24bf0732f422ed437773afb5ea8eed985ea59cb0093 |
-| [0:23:25](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1405s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#08b3dcbfb462afe7569de6cd9674117016a8e099470f8146eec0493dfc0a7118 |
-| [0:26:10](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1570s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#e0a63b413d634c7272cf6a993cdc90c3a077681b04416409a910d02c1f1b3fd9 |
-| [0:30:11](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1811s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#8f2b17df19be0fa833e3642fa8824c05ef900ed0542a9418d0823184c866ff4c |
-| [0:32:53](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1973s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#ad4811ab325bd9f4824f2ede811a9c769e5e0ca88a6e1a4b1354f1dcd45ba3f5 |
-| [0:35:37](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2137s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#70cd47ee69e0e34138bcbf35622d8268fc77a03e72785402be2af10ab248dc61 |
-| [0:38:20](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2300s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f81e19e8040a5df79b16b27f1528e71146ee322efa5d912df66b3f727b7f04e9 |
-| [0:41:04](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2464s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#0813187f10b04be036bdc6355de73cbdd42113f2d834f046b28f0eae09a3e658 |
-| [0:46:42](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2802s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#7fd41a273163f48ae73f4f4330ec27499adc77c745f06a37374988c9258ea841 |
-| [0:49:26](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2966s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#099a7fbdba4119612496f68459ea7b137d17b7bc1a374fef5d0c532fdc3585e0 |
-| [0:52:10](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=3130s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#ee0b24eacdb86a668036f021451b20b9e182db84829c333ce670b7f935a95cb3 |
-| [0:54:52](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=3292s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2ace928bcd2a0f75b714fae81588d52fe7c7b2c1d8335f82956fb0c92d88ecbd |
-| [1:01:17](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=3677s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#ab54cac125c3bdc396b9b8f1a34bc13926110d3ef4b3c6c73028ff971be66f23 |
-| [1:04:00](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=3840s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#7c4c7faa8cc382ecb9fa4fd3080d1a0978202b8dfab386c869a0cf6ee7621712 |
-| [1:06:44](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4004s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#b5fe46de40addb6add776f1fcadfabde37d249f50e459e7d9695e26bb2d72839 |
-| [1:10:03](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4203s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#57dfb1adc32a8e6465c4495381f9a3dafbfd40eb2d248ddd4e7c84428fe91978 |
-| [1:12:47](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4367s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f7c7834ad6ead6d5c625e6bdb75f362a8f04d1b784b78ad92bf181da4d336d36 |
-| [1:16:08](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4568s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a29f9b489928f8e52b7bd9ed42949867aeb7dc14529bf2dc8b472e20235691bf |
-| [1:20:36](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4836s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#d7f35ee84bfd6e71b361e19fbf320c3c14ad60cac7721974d1a19c986da7031b |
-| [1:23:21](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5001s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#3ae458967ba8ff6e1b11a86dba077445f3b9eb95814dfd3cb94b9d5836835111 |
-| [1:26:04](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5164s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#68a2bddc587bd532e80875ce90fee776b862654da85254270e419004d4598d7c |
-| [1:30:08](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5408s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#10c83c974c89471ab4bdee10fdd5cc08b0e0b5ec2822e2dc784899a8bf3b04d0 |
-| [1:36:02](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5762s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#4b8e57e582ccc3206ecfdef2e791d4be0cb2bc111a52867631c9559ea9743d6f |
-| [1:38:50](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5930s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f77010c6bc56fe9319452cece8a74e576b1b3ca6d19c09eda3129fa4ae55c7a7 |
-| [1:41:42](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=6102s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#132671e4ff2908d101586d643466e7c57b7712e817ea61183ea4e5bcd8bb82ff |
-| [1:46:28](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=6388s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#d58a11c8a5547fdd8a20590c520bb1a7ca9f03d7a6fef092c24810f29783be1b |
-| [1:49:24](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=6564s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#bd8c24110c071912b34631f3cd05fccc0f1db6a0128992661f96e5ab74a44a20 |
-| [1:54:04](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=6844s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#99bcbf08c58bf7667c51512773829df79b450efbb5554a57d27ba12822c7899f |
-| [1:56:58](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7018s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#42f317e7565e324f2d81178a83ac0d84a0223bf4ad2bcd98821318c846e79e79 |
-| [1:59:50](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7190s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#be0dacf6a6a5693e76b07d5d250d8d17be45f84db1e2b0553273c2117b5de1c8 |
-| [2:03:15](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7395s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#beba6429eadf40c98f289aadad3b97b4aee4cdf49dde59d6cb2b6c24997c20c2 |
-| [2:06:34](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7594s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c869e4ee6c37d48b909bcf600d5b6e32cd00204c565a981405b45f64dc329f10 |
-| [2:09:48](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7788s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2cfc6a4232fe4815e3c3100748324c0998808192384b42365f98ca85722ea5e2 |
-| [2:12:59](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7979s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#6e484b383596bed7661a02642e6a4a90001e36a367cd57ad1cf18c420d5c1ac9 |
-| [2:19:01](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=8341s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#438b82d86ad90dc9bdb6ed61ce0b7f1b680e892fa0e684b9c45bf2fab267d7bb |
-| [2:21:45](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=8505s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#110451700425867ff32b256fcf5bcdf45df974aac2bb48f3f8aade16b8b65b6b |
-| [2:26:47](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=8807s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f68176918082727b2cba864ce80b1c3f3bb50e2d31a52ebff2741fd1b4f9f90c |
-| [3:18:24](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=11904s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#7a096ab3fd291f120259f943c60abb4444f9cc89858c86f9d325721f14fae75b |
-| [3:25:42](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=12342s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#043f9ef25994b368e1658549f89bdb156a9f5f07a052a6ff7f91c0a779979b68 |
-| [3:28:26](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=12506s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#9ec9b6b133fca64a04038f1811df633bfa4924af3bcef3b26b11858121ebf55c |
-| [3:31:10](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=12670s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#5dc748f05c6ba4c8b3811a7b13196502d09f9dfc59e4fd4f98953bdd37f30304 |
-| [3:33:52](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=12832s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c4440aa9813a26c9c1dffac01791fa3d4119fcbe04654f23090e4a7715e5cf48 |
-| [3:37:01](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=13021s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#3320620ab8b6d7172fca794a4ec2f290cefb7240a9c0a01e67464d2f40afe521 |
-| [3:40:47](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=13247s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#5c4d6695202bca4d15a193b0b0f4ff6e73e18d4bf47024461a024c276d9dc45f |
-| [3:49:51](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=13791s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#39b0dbd3f39b093aacf9695c1ac6dca7355741b1f2c7263088fe31e9a9e7c1ef |
-| [3:53:40](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14020s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#4ddf5665808c71011b0a30e8b12c40f7f01a0bd3b0c779b29d0abe291cfa30f2 |
-| [3:58:12](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14292s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#aff09176073ec8bdd4e44b1a22ee544e30a5d41a87c64db038d79714f15674a0 |
-| [4:01:49](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14509s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#9aa0a50505fb19c1c558787ebba439cda732f57cead0aaf43cf40be4f5dae67f |
-| [4:04:33](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14673s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2c223ac6ed58563854f65f416425830932c29589774ef3aa7000548f85fe7b7a |
-| [4:07:55](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14875s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#86e7772b1541d6815f00cf193a7ff270491efad9a3c0afb970f33804aa1fae2a |
-| [4:10:37](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15037s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#23d6249abea7d3cdc0e654720c42db2ba53116874426f807c17ab944744e65e4 |
-| [4:13:22](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15202s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2d6edc0090ab01fba47b2cd1f0ff0702881613265b0c6d52c5626bfda57ec546 |
-| [4:16:34](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15394s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#98a92279c1b076f3bdfe7c56ef265d0f0b0691c9d9a4b9c33bfbc40b413e8087 |
-| [4:19:16](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15556s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#e20c59cc84ea7e2d40335ba8c34b41c75d1b60eef24391d242ead9bfb51e4b45 |
-| [4:24:34](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15874s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a6b483717b60179892e7edde1fd9b2552d8a1596031201ba8c932a25324a0f76 |
-| [4:27:18](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16038s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#136ec0fc828a41e1479aa90e915808dfc24d50d687a839a9818e24785a0cdef6 |
-| [4:31:44](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16304s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a285053a681a1f3099fc190fbb819f302f24b94043c50d0ec88cce17023a03a1 |
-| [4:36:15](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16575s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#3708e8340287c4a0a1c66b53ae2790e762752e3bef8d7e8988cf8359922d7501 |
-| [4:38:59](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16739s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2ec1c7a949776139210348c943084c9fdcdbf6b919cf5dc96e27bf1bc24e8db5 |
-| [4:41:48](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16908s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#0772b1bdc0033d6f6d38055f17ed131a50a54ee01f3929033d9bddb5e36437fd |
-| [4:45:19](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=17119s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#fe3f3a5cfe553e603774a57365e934fbf2d21f9a82ddb19b0aaf5f5fe4b6e18e |
-| [4:48:02](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=17282s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c0cddc62867c4bc088610e514f6edf7da5c1536b642a01d6d620a9e677065d6a |
-| [4:58:43](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=17923s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#56d3cf041b42527d69b4d48f7c8c252575a3bcbbb92b89445c87350e3c6b5de5 |
-| [5:01:27](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18087s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#96494f449552af2e8e551c13b93806bed4b40786e743ce5d56d1467b19e10cb3 |
-| [5:04:10](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18250s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#fe5fa21235419a17cac659d77d6dac9382ed24f4d6c7123dab25ceb780a1ff7e |
-| [5:06:53](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18413s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#99ef0f938719255286536aef85a48ee10936dc53c85d11fd54bc4f4495525d2a |
-| [5:10:50](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18650s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a7b434f8b2d8d18b691f578afd0527af5fcfdf9caef1ba536b18183baf0c3fd5 |
-| [5:16:36](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18996s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#92f5e0873c5ce14487cbf1fa3a33591b2e43707476df1c95d6016753b97c87ae |
-| [5:19:20](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=19160s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#7ccc4e62d891c269d83c3eccd09b1d0e224576c2d7c995a61f35373e31df9eaf |
-| [5:22:03](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=19323s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#96608643f42900073d94b98ef8853e66520c61e4c2ad308f5413011c46bc5411 |
-| [5:24:46](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=19486s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#d21d04d5132697139a5add60738556678bae5054a0bdc5ece51e30a8aa0b6178 |
-| [5:30:31](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=19831s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f46a17cd3bf12b3cf602c145ce4a0a2451ff7e6cc30493eefb102a772169bc30 |
-| [5:33:24](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20004s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#237cf118e463122f91b5945c56dbad107a80add01114b673bfad45d280f9e51e |
-| [5:36:43](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20203s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#fcab59417be1ca564295e44da82b071f832068eba15fcdcf027f8e0307d45eb0 |
-| [5:39:36](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20376s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#dd052047815ea6639176b25e21a3a9082e3b1bc357e53bd1837a54f559112a2d |
-| [5:43:40](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20620s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a7784539b20e38a4333a93d2e7bc03468c6356a1a144027b86561553ffb92b68 |
-| [5:47:36](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20856s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#8f34b0aa201f3f503967438fa5e200181c335f29e94922ca7211cfb28ac4f7fc |
-| [5:55:19](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=21319s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#627782dc31957435c1dadfd96367489a2c1398c3c56af624bc28cc9ea9b5bc7f |
-| [5:58:34](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=21514s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#6fc6777fda4099ab0fe458e31c3fbde38b2fb88ef8ba648a95f7365f5e45c8ba |
-| [6:02:14](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=21734s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c7352160716530fa8923a7b3be700b8068df38fc190633e12eddecff26ac4aeb |
-| [6:10:28](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=22228s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#e4f2789ffde7c9f55e6270c529685924a7228b4b7b4a1a1bdd87e62b42d01b9a |
-| [6:15:55](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=22555s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c0475098845508d922dd4ab1f8b6af025c26ebace484c1821cc236496b2aaa4a |
-| [6:22:08](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=22928s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#371ac5b8b6c0b62a95663761c1c3ba79659c6363d6301f72312834f589bd21ad |
-| [6:30:40](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=23440s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#e92a546ca8c3fbbfb590014da9fa73622b463023e5472af8e13d21c6602ea0e6 |
-| [6:34:59](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=23699s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#cb821ff9ebdbbafe36d820c511745c49be9973ab5ee915b222a051b02f7645d0 |
-| [6:42:32](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=24152s) | 勝利のマシンロボ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#bcdfd1e724ac00f2a677d5ae6019eeb866fd4c73d367f267c481b61e8333bfeb |
+| [0:15:15](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=915s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#85a9f2a0b796f20a4c633d80a669835c3c28affd34cb7f195c2bafc0fa6643e4 |
+| [0:18:00](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1080s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#009d8f8c18b5a8a27d99ecdbea482a874fcb19614c3f536fa63521a6a6b34fbf |
+| [0:20:42](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1242s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#12af86b6aa5408244bd9f24bf0732f422ed437773afb5ea8eed985ea59cb0093 |
+| [0:23:25](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1405s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#08b3dcbfb462afe7569de6cd9674117016a8e099470f8146eec0493dfc0a7118 |
+| [0:26:10](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1570s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#e0a63b413d634c7272cf6a993cdc90c3a077681b04416409a910d02c1f1b3fd9 |
+| [0:30:11](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1811s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#8f2b17df19be0fa833e3642fa8824c05ef900ed0542a9418d0823184c866ff4c |
+| [0:32:53](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=1973s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#ad4811ab325bd9f4824f2ede811a9c769e5e0ca88a6e1a4b1354f1dcd45ba3f5 |
+| [0:35:37](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2137s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#70cd47ee69e0e34138bcbf35622d8268fc77a03e72785402be2af10ab248dc61 |
+| [0:38:20](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2300s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f81e19e8040a5df79b16b27f1528e71146ee322efa5d912df66b3f727b7f04e9 |
+| [0:41:04](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2464s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#0813187f10b04be036bdc6355de73cbdd42113f2d834f046b28f0eae09a3e658 |
+| [0:46:42](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2802s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#7fd41a273163f48ae73f4f4330ec27499adc77c745f06a37374988c9258ea841 |
+| [0:49:26](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=2966s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#099a7fbdba4119612496f68459ea7b137d17b7bc1a374fef5d0c532fdc3585e0 |
+| [0:52:10](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=3130s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#ee0b24eacdb86a668036f021451b20b9e182db84829c333ce670b7f935a95cb3 |
+| [0:54:52](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=3292s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2ace928bcd2a0f75b714fae81588d52fe7c7b2c1d8335f82956fb0c92d88ecbd |
+| [1:01:17](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=3677s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#ab54cac125c3bdc396b9b8f1a34bc13926110d3ef4b3c6c73028ff971be66f23 |
+| [1:04:00](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=3840s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#7c4c7faa8cc382ecb9fa4fd3080d1a0978202b8dfab386c869a0cf6ee7621712 |
+| [1:06:44](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4004s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#b5fe46de40addb6add776f1fcadfabde37d249f50e459e7d9695e26bb2d72839 |
+| [1:10:03](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4203s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#57dfb1adc32a8e6465c4495381f9a3dafbfd40eb2d248ddd4e7c84428fe91978 |
+| [1:12:47](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4367s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f7c7834ad6ead6d5c625e6bdb75f362a8f04d1b784b78ad92bf181da4d336d36 |
+| [1:16:08](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4568s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a29f9b489928f8e52b7bd9ed42949867aeb7dc14529bf2dc8b472e20235691bf |
+| [1:20:36](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=4836s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#d7f35ee84bfd6e71b361e19fbf320c3c14ad60cac7721974d1a19c986da7031b |
+| [1:23:21](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5001s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#3ae458967ba8ff6e1b11a86dba077445f3b9eb95814dfd3cb94b9d5836835111 |
+| [1:26:04](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5164s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#68a2bddc587bd532e80875ce90fee776b862654da85254270e419004d4598d7c |
+| [1:30:08](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5408s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#10c83c974c89471ab4bdee10fdd5cc08b0e0b5ec2822e2dc784899a8bf3b04d0 |
+| [1:36:02](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5762s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#4b8e57e582ccc3206ecfdef2e791d4be0cb2bc111a52867631c9559ea9743d6f |
+| [1:38:50](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=5930s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f77010c6bc56fe9319452cece8a74e576b1b3ca6d19c09eda3129fa4ae55c7a7 |
+| [1:41:42](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=6102s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#132671e4ff2908d101586d643466e7c57b7712e817ea61183ea4e5bcd8bb82ff |
+| [1:46:28](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=6388s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#d58a11c8a5547fdd8a20590c520bb1a7ca9f03d7a6fef092c24810f29783be1b |
+| [1:49:24](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=6564s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#bd8c24110c071912b34631f3cd05fccc0f1db6a0128992661f96e5ab74a44a20 |
+| [1:54:04](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=6844s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#99bcbf08c58bf7667c51512773829df79b450efbb5554a57d27ba12822c7899f |
+| [1:56:58](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7018s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#42f317e7565e324f2d81178a83ac0d84a0223bf4ad2bcd98821318c846e79e79 |
+| [1:59:50](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7190s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#be0dacf6a6a5693e76b07d5d250d8d17be45f84db1e2b0553273c2117b5de1c8 |
+| [2:03:15](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7395s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#beba6429eadf40c98f289aadad3b97b4aee4cdf49dde59d6cb2b6c24997c20c2 |
+| [2:06:34](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7594s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c869e4ee6c37d48b909bcf600d5b6e32cd00204c565a981405b45f64dc329f10 |
+| [2:09:48](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7788s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2cfc6a4232fe4815e3c3100748324c0998808192384b42365f98ca85722ea5e2 |
+| [2:12:59](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=7979s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#6e484b383596bed7661a02642e6a4a90001e36a367cd57ad1cf18c420d5c1ac9 |
+| [2:19:01](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=8341s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#438b82d86ad90dc9bdb6ed61ce0b7f1b680e892fa0e684b9c45bf2fab267d7bb |
+| [2:21:45](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=8505s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#110451700425867ff32b256fcf5bcdf45df974aac2bb48f3f8aade16b8b65b6b |
+| [2:26:47](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=8807s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f68176918082727b2cba864ce80b1c3f3bb50e2d31a52ebff2741fd1b4f9f90c |
+| [3:18:24](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=11904s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#7a096ab3fd291f120259f943c60abb4444f9cc89858c86f9d325721f14fae75b |
+| [3:25:42](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=12342s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#043f9ef25994b368e1658549f89bdb156a9f5f07a052a6ff7f91c0a779979b68 |
+| [3:28:26](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=12506s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#9ec9b6b133fca64a04038f1811df633bfa4924af3bcef3b26b11858121ebf55c |
+| [3:31:10](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=12670s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#5dc748f05c6ba4c8b3811a7b13196502d09f9dfc59e4fd4f98953bdd37f30304 |
+| [3:33:52](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=12832s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c4440aa9813a26c9c1dffac01791fa3d4119fcbe04654f23090e4a7715e5cf48 |
+| [3:37:01](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=13021s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#3320620ab8b6d7172fca794a4ec2f290cefb7240a9c0a01e67464d2f40afe521 |
+| [3:40:47](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=13247s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#5c4d6695202bca4d15a193b0b0f4ff6e73e18d4bf47024461a024c276d9dc45f |
+| [3:49:51](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=13791s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#39b0dbd3f39b093aacf9695c1ac6dca7355741b1f2c7263088fe31e9a9e7c1ef |
+| [3:53:40](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14020s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#4ddf5665808c71011b0a30e8b12c40f7f01a0bd3b0c779b29d0abe291cfa30f2 |
+| [3:58:12](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14292s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#aff09176073ec8bdd4e44b1a22ee544e30a5d41a87c64db038d79714f15674a0 |
+| [4:01:49](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14509s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#9aa0a50505fb19c1c558787ebba439cda732f57cead0aaf43cf40be4f5dae67f |
+| [4:04:33](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14673s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2c223ac6ed58563854f65f416425830932c29589774ef3aa7000548f85fe7b7a |
+| [4:07:55](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=14875s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#86e7772b1541d6815f00cf193a7ff270491efad9a3c0afb970f33804aa1fae2a |
+| [4:10:37](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15037s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#23d6249abea7d3cdc0e654720c42db2ba53116874426f807c17ab944744e65e4 |
+| [4:13:22](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15202s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2d6edc0090ab01fba47b2cd1f0ff0702881613265b0c6d52c5626bfda57ec546 |
+| [4:16:34](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15394s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#98a92279c1b076f3bdfe7c56ef265d0f0b0691c9d9a4b9c33bfbc40b413e8087 |
+| [4:19:16](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15556s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#e20c59cc84ea7e2d40335ba8c34b41c75d1b60eef24391d242ead9bfb51e4b45 |
+| [4:24:34](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=15874s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a6b483717b60179892e7edde1fd9b2552d8a1596031201ba8c932a25324a0f76 |
+| [4:27:18](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16038s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#136ec0fc828a41e1479aa90e915808dfc24d50d687a839a9818e24785a0cdef6 |
+| [4:31:44](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16304s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a285053a681a1f3099fc190fbb819f302f24b94043c50d0ec88cce17023a03a1 |
+| [4:36:15](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16575s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#3708e8340287c4a0a1c66b53ae2790e762752e3bef8d7e8988cf8359922d7501 |
+| [4:38:59](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16739s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#2ec1c7a949776139210348c943084c9fdcdbf6b919cf5dc96e27bf1bc24e8db5 |
+| [4:41:48](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=16908s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#0772b1bdc0033d6f6d38055f17ed131a50a54ee01f3929033d9bddb5e36437fd |
+| [4:45:19](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=17119s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#fe3f3a5cfe553e603774a57365e934fbf2d21f9a82ddb19b0aaf5f5fe4b6e18e |
+| [4:48:02](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=17282s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c0cddc62867c4bc088610e514f6edf7da5c1536b642a01d6d620a9e677065d6a |
+| [4:58:43](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=17923s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#56d3cf041b42527d69b4d48f7c8c252575a3bcbbb92b89445c87350e3c6b5de5 |
+| [5:01:27](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18087s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#96494f449552af2e8e551c13b93806bed4b40786e743ce5d56d1467b19e10cb3 |
+| [5:04:10](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18250s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#fe5fa21235419a17cac659d77d6dac9382ed24f4d6c7123dab25ceb780a1ff7e |
+| [5:06:53](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18413s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#99ef0f938719255286536aef85a48ee10936dc53c85d11fd54bc4f4495525d2a |
+| [5:10:50](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18650s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a7b434f8b2d8d18b691f578afd0527af5fcfdf9caef1ba536b18183baf0c3fd5 |
+| [5:16:36](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=18996s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#92f5e0873c5ce14487cbf1fa3a33591b2e43707476df1c95d6016753b97c87ae |
+| [5:19:20](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=19160s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#7ccc4e62d891c269d83c3eccd09b1d0e224576c2d7c995a61f35373e31df9eaf |
+| [5:22:03](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=19323s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#96608643f42900073d94b98ef8853e66520c61e4c2ad308f5413011c46bc5411 |
+| [5:24:46](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=19486s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#d21d04d5132697139a5add60738556678bae5054a0bdc5ece51e30a8aa0b6178 |
+| [5:30:31](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=19831s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#f46a17cd3bf12b3cf602c145ce4a0a2451ff7e6cc30493eefb102a772169bc30 |
+| [5:33:24](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20004s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#237cf118e463122f91b5945c56dbad107a80add01114b673bfad45d280f9e51e |
+| [5:36:43](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20203s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#fcab59417be1ca564295e44da82b071f832068eba15fcdcf027f8e0307d45eb0 |
+| [5:39:36](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20376s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#dd052047815ea6639176b25e21a3a9082e3b1bc357e53bd1837a54f559112a2d |
+| [5:43:40](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20620s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#a7784539b20e38a4333a93d2e7bc03468c6356a1a144027b86561553ffb92b68 |
+| [5:47:36](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=20856s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#8f34b0aa201f3f503967438fa5e200181c335f29e94922ca7211cfb28ac4f7fc |
+| [5:55:19](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=21319s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#627782dc31957435c1dadfd96367489a2c1398c3c56af624bc28cc9ea9b5bc7f |
+| [5:58:34](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=21514s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#6fc6777fda4099ab0fe458e31c3fbde38b2fb88ef8ba648a95f7365f5e45c8ba |
+| [6:02:14](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=21734s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c7352160716530fa8923a7b3be700b8068df38fc190633e12eddecff26ac4aeb |
+| [6:10:28](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=22228s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#e4f2789ffde7c9f55e6270c529685924a7228b4b7b4a1a1bdd87e62b42d01b9a |
+| [6:15:55](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=22555s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#c0475098845508d922dd4ab1f8b6af025c26ebace484c1821cc236496b2aaa4a |
+| [6:22:08](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=22928s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#371ac5b8b6c0b62a95663761c1c3ba79659c6363d6301f72312834f589bd21ad |
+| [6:30:40](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=23440s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#e92a546ca8c3fbbfb590014da9fa73622b463023e5472af8e13d21c6602ea0e6 |
+| [6:34:59](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=23699s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#cb821ff9ebdbbafe36d820c511745c49be9973ab5ee915b222a051b02f7645d0 |
+| [6:42:32](https://www.youtube.com/watch?v=bUb_oMOzuf4&t=24152s) | 勝利のマシンロボ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/bUb\_oMOzuf4\-8a02dadd27cb15ad7400\.json\#bcdfd1e724ac00f2a677d5ae6019eeb866fd4c73d367f267c481b61e8333bfeb |
 
 ### 【\#招き猫歌枠リレー】夏のパワーで、福招き！🌺【\#メーレv \#歌枠 \#Vtuber \#KARAOKE】
 - 视频：[o5mN9pPqYoY](https://www.youtube.com/watch?v=o5mN9pPqYoY)
@@ -3776,6 +3792,15 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | [1:11:44](https://www.youtube.com/watch?v=RQdTSKO6UHg&t=4304s) | 遺書 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/RQdTSKO6UHg\-a7f0d11023ba32d98f71\.json\#31fe6ee31e02edfe0140acb8021910c9c35799a18d695447779e20e7dc41c859 |
 | [1:28:56](https://www.youtube.com/watch?v=RQdTSKO6UHg&t=5336s) | ユーモア | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/RQdTSKO6UHg\-a7f0d11023ba32d98f71\.json\#cdf42f426d482aa70629c8fda60ff798679e0e40e7e62a5c21023ba879cc35dc |
+
+### 歌枠 / Karaoke │ ノンストップ歌枠🔥曲間トーク無しで歌いまくる❤️‍🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗
+- 视频：[mOgKRyl0Pjw](https://www.youtube.com/watch?v=mOgKRyl0Pjw)
+- 频道：音羽ララ \(Otohane Lara\) / シアーミュージックV
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:51:29](https://www.youtube.com/watch?v=mOgKRyl0Pjw&t=3089s) | \(の『右肩の蝶』は、歌い方がカッコよくてやはり上手いなぁと思いました | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/mOgKRyl0Pjw\-1c3bfbc4facc1e9892a2\.json\#6476696d564e7e7b1d1ff4351af78276d42536b4e1e972e4eff5ead65a9f3ef5 |
+| [1:30:41](https://www.youtube.com/watch?v=mOgKRyl0Pjw&t=5441s) | の『真夜中のドア〜Stay With Me』はサビの少し声が中に入る所が上手いなぁと思いました | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/mOgKRyl0Pjw\-1c3bfbc4facc1e9892a2\.json\#6b78c09e62b08546c68b2467b4bf67bf669ee42fa4c5de0fbe9739118b0e1daa |
 
 ### 歌枠 / Karaoke │ ボカロ歌枠❤️‍🔥クリアボイスが名曲を歌いまくる🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗
 - 视频：[9HkSnH457VY](https://www.youtube.com/watch?v=9HkSnH457VY)
@@ -4240,6 +4265,16 @@
 | [1:27:05](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=5225s) | カノープス | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#7cd9767512ecf871fa6e1e0c5e08fc8e05df0a8090923459d766a3a356586ee1 |
 | [1:34:08](https://www.youtube.com/watch?v=RHwwiB-dEeo&t=5648s) | Hello Again | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/RHwwiB\-dEeo\-1efe487d42fa2f0bc7d3\.json\#9a228baa0c4f9a836e2fac2d2c9190a52f201425b4743310367d491fe37a39b4 |
 
+### 【歌枠】そこそこ暑い夏夜の練習歌枠～💿🎤✨【歌響レコ/VTuber】
+- 视频：[NUfimgdBOr0](https://www.youtube.com/watch?v=NUfimgdBOr0)
+- 频道：歌響レコ【目指せ歌うま / VTuber】
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:38:01](https://www.youtube.com/watch?v=NUfimgdBOr0&t=2281s) | バッド・ダンス・ホール | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/NUfimgdBOr0\-960544c5593dc1c7e0cf\.json\#a2f5bab986b3462d557a86f646a649e21f8a0a800276d72ded79aabcabf024f1 |
+| [0:43:42](https://www.youtube.com/watch?v=NUfimgdBOr0&t=2622s) | ダンスダンスデカダンス | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/NUfimgdBOr0\-960544c5593dc1c7e0cf\.json\#e1518c36813056c6f55c258cd72cbc21a067b74d008cc59a46bae29c5b0cbf16 |
+| [1:14:12](https://www.youtube.com/watch?v=NUfimgdBOr0&t=4452s) | 孤独のあかつき | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/NUfimgdBOr0\-960544c5593dc1c7e0cf\.json\#76510630b356051e2842353967f0e8768145595534b408d27fe00f2c4d1876a7 |
+
 ### 【\#歌枠】イベント直前！歌枠🎶【\#花咲のばら】
 - 视频：[RScogMzBQ3E](https://www.youtube.com/watch?v=RScogMzBQ3E)
 - 频道：花咲のばら
@@ -4592,7 +4627,7 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [1:07:10](https://www.youtube.com/watch?v=1dFa_GH8eCs&t=4030s) | しわ | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/1dFa\_GH8eCs\-18f1a125a0d4fec1ebfd\.json\#428200fad8fa71e5c3c8af7f3aa0719cd183ab741c9776f94b7b32c1c621ba6f |
+| [1:07:10](https://www.youtube.com/watch?v=1dFa_GH8eCs&t=4030s) | しわ | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/1dFa\_GH8eCs\-18f1a125a0d4fec1ebfd\.json\#428200fad8fa71e5c3c8af7f3aa0719cd183ab741c9776f94b7b32c1c621ba6f |
 
 ### 【 リクエスト歌枠 】初見さんも歓迎、君の為に歌わせてよ singing stream【 新人vtuber/五木つかさ 】
 - 视频：[SgaXqdakVZ8](https://www.youtube.com/watch?v=SgaXqdakVZ8)
@@ -5140,6 +5175,16 @@
 | [1:06:44](https://www.youtube.com/watch?v=i-8JqghUO4w&t=4004s) | 冒険者たち | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/i\-8JqghUO4w\-a89260edf10a857322d3\.json\#fd217e8e2c967e499a069f2d05ba4b7406fd09c29a1399503aa7e9e6530623e2 |
 | [1:31:07](https://www.youtube.com/watch?v=i-8JqghUO4w&t=5467s) | love the world | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/i\-8JqghUO4w\-a89260edf10a857322d3\.json\#5caeb8895b00d7442335463eac98fd1ae892d7b2fae41b37b9f0095d8e94badc |
 
+### 【歌枠】バラード多めなボカロ・アニソンを新人Vtuberがビール飲みながら
+- 视频：[Barf9n7t7ME](https://www.youtube.com/watch?v=Barf9n7t7ME)
+- 频道：星灯優美🌙🦋
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [1:06:10](https://www.youtube.com/watch?v=Barf9n7t7ME&t=3970s) | テーマソング | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/Barf9n7t7ME\-b1bb5e89c6135ed4f2da\.json\#71a24325f8fbd7645bc04c4d027544492d88e2acd5384f35b3f9c709fd7d1b9e |
+| [1:10:17](https://www.youtube.com/watch?v=Barf9n7t7ME&t=4217s) | しゃっちく、しゃっちーく | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/Barf9n7t7ME\-b1bb5e89c6135ed4f2da\.json\#cf7034c7d09fbba9264210fd04b52d115ff4239827186393cf335a8b0ea7a765 |
+| [1:20:36](https://www.youtube.com/watch?v=Barf9n7t7ME&t=4836s) | フライング アナ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/Barf9n7t7ME\-b1bb5e89c6135ed4f2da\.json\#2acb461fc0bcd317531e327994557dc92d57f145f78a23d28821f3d751e01f60 |
+
 ### 【歌枠 / KARAOKE 】チャンネル登録3333人目指し中！歌います！【星白ウル/個人勢Vtuber】
 - 视频：[7H0rD\_HdzkM](https://www.youtube.com/watch?v=7H0rD_HdzkM)
 - 频道：星白ウル / Uru Hoshiro
@@ -5398,16 +5443,25 @@
 | [0:04:12](https://www.youtube.com/watch?v=YFxEarwYgQs&t=252s) | Love Song探して | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/YFxEarwYgQs\-9fb8f1cd783d187c7f26\.json\#8a38f6866aa4dd06f56b871118863cd508dca2d45461df8fc2c4b891a6185178 |
 | [0:14:43](https://www.youtube.com/watch?v=YFxEarwYgQs&t=883s) | アイスキャンディー | 未記載 | 7d, all | niche_unknown_artist |  | manual_review | data/review/sources/YFxEarwYgQs\-9fb8f1cd783d187c7f26\.json\#de4acb6fa32c19111f3c7bf49005d8f9f724957b55c19a6a8157d94858eada82 |
 
+### 【\#耐久歌枠 】🍀初見歓迎🍀高評価50もらえるまで終わらない歌枠 初ライブのセトリ予想してみて \#新人Vtuber 【兎屋ろこみ】\#karaoke
+- 视频：[cKiCR5uznlk](https://www.youtube.com/watch?v=cKiCR5uznlk)
+- 频道：兎屋ろこみ \-Rokomi Usagiya\-
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [0:02:13](https://www.youtube.com/watch?v=cKiCR5uznlk&t=133s) | 声出し | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/cKiCR5uznlk\-56d8cfe9bb93f4502b9e\.json\#e829a2477fef2ec98c74e63fbe87bef0b67598b3cde4474330401c8a262c14d7 |
+| [4:25:47](https://www.youtube.com/watch?v=cKiCR5uznlk&t=15947s) | グリズリーに襲われたら | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/cKiCR5uznlk\-56d8cfe9bb93f4502b9e\.json\#ea169956ee39dde9a572ef959a48b2b531810baf8b6549784c45ea43e15cadd4 |
+
 ### 【朝活/歌枠】リクエストOK❣初見さん歓迎❤【兎彩ゆあ / Vtuber 】
 - 视频：[8PJXYV1Y2lw](https://www.youtube.com/watch?v=8PJXYV1Y2lw)
 - 频道：兎彩ゆあ💎toiroyua
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:49:46](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=2986s) | JP | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#43a01cf8e8fb99b3e0828d733bc62bc39d098c03c9faafd9e761d73fd1691646 |
-| [1:28:45](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=5325s) | M八七 | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#136c281ffc801861b68a8065fc08ff5aa1e431c37188a2af325d5dfd467f5806 |
-| [1:39:16](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=5956s) | I'm a mess | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#c06010fe539a8f11fb2a1344220979de109ef5f504a08bcf1640b392f89f48bc |
-| [1:45:05](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=6305s) | ずぅっといっしょ！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#60c4a43765eb2be87700301988172952e6b6c5904488bceb002265bb0f339ac2 |
+| [0:49:46](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=2986s) | JP | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#43a01cf8e8fb99b3e0828d733bc62bc39d098c03c9faafd9e761d73fd1691646 |
+| [1:28:45](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=5325s) | M八七 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#136c281ffc801861b68a8065fc08ff5aa1e431c37188a2af325d5dfd467f5806 |
+| [1:39:16](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=5956s) | I'm a mess | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#c06010fe539a8f11fb2a1344220979de109ef5f504a08bcf1640b392f89f48bc |
+| [1:45:05](https://www.youtube.com/watch?v=8PJXYV1Y2lw&t=6305s) | ずぅっといっしょ！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/8PJXYV1Y2lw\-37bce559cff893db62cc\.json\#60c4a43765eb2be87700301988172952e6b6c5904488bceb002265bb0f339ac2 |
 
 ### 【\#ぶちかませサマーフェス歌枠リレー】トリじゃー！ぶちかます準備はできてるかああ！！🔥【兎苺むめ / \#歌枠 / vtuber / KARAOKE】
 - 视频：[FSNTqwJE7Hw](https://www.youtube.com/watch?v=FSNTqwJE7Hw)
@@ -5433,12 +5487,12 @@
 
 | 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [0:00:00](https://www.youtube.com/watch?v=6s6vcztl98s&t=0s) | 始まり！ | 未記載 | 7d, all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#760cfd70d55edc60c8183245c5865172155e282a42708c7329dbd18ed816c8b9 |
-| [0:39:13](https://www.youtube.com/watch?v=6s6vcztl98s&t=2353s) | ぺけぺけ祭りじゃぁ！！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#50d61b726a738d85d1f84ae587c34fcdcb414f6e1a75417fdeec8a856a8c5b50 |
-| [1:03:14](https://www.youtube.com/watch?v=6s6vcztl98s&t=3794s) | ラスト3人切実なぺけ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#91d776548b9a36eeb795fda20d48349bf17d44fcb18755b55450d7914b6e0369 |
-| [1:04:18](https://www.youtube.com/watch?v=6s6vcztl98s&t=3858s) | あっあっあっから瞬間センチメンタル | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#71485a5c895da5aab38aaf612fbdb565129df5c62dbeea4036ee7376369137a1 |
-| [1:14:12](https://www.youtube.com/watch?v=6s6vcztl98s&t=4452s) | ラスト！WHITE BREATH | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#bde3ae1866b09f3dd4cf4a9810d905ed242b898595c5fe5a5c1c38c86291cc1d |
-| [1:21:55](https://www.youtube.com/watch?v=6s6vcztl98s&t=4915s) | よーーーーぽん！ | 未記載 | 7d, all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#ddb1650ace1bc6e545c20b785f1611f11ee12c657de5c8402df85eef913ffd19 |
+| [0:00:00](https://www.youtube.com/watch?v=6s6vcztl98s&t=0s) | 始まり！ | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#760cfd70d55edc60c8183245c5865172155e282a42708c7329dbd18ed816c8b9 |
+| [0:39:13](https://www.youtube.com/watch?v=6s6vcztl98s&t=2353s) | ぺけぺけ祭りじゃぁ！！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#50d61b726a738d85d1f84ae587c34fcdcb414f6e1a75417fdeec8a856a8c5b50 |
+| [1:03:14](https://www.youtube.com/watch?v=6s6vcztl98s&t=3794s) | ラスト3人切実なぺけ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#91d776548b9a36eeb795fda20d48349bf17d44fcb18755b55450d7914b6e0369 |
+| [1:04:18](https://www.youtube.com/watch?v=6s6vcztl98s&t=3858s) | あっあっあっから瞬間センチメンタル | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#71485a5c895da5aab38aaf612fbdb565129df5c62dbeea4036ee7376369137a1 |
+| [1:14:12](https://www.youtube.com/watch?v=6s6vcztl98s&t=4452s) | ラスト！WHITE BREATH | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#bde3ae1866b09f3dd4cf4a9810d905ed242b898595c5fe5a5c1c38c86291cc1d |
+| [1:21:55](https://www.youtube.com/watch?v=6s6vcztl98s&t=4915s) | よーーーーぽん！ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/6s6vcztl98s\-642b43ecfb7535fe0dea\.json\#ddb1650ace1bc6e545c20b785f1611f11ee12c657de5c8402df85eef913ffd19 |
 
 ### 【歌枠】明日のライブに向けてテンション上げるぞ～！✨🔥【Re:AcT / 燈明寺かぐら】
 - 视频：[SlXkGknOdr4](https://www.youtube.com/watch?v=SlXkGknOdr4)
@@ -5554,6 +5608,14 @@
 | [0:38:39](https://www.youtube.com/watch?v=uRQJhSnOb-I&t=2319s) | ギター音がもこもこ | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/uRQJhSnOb\-I\-a46d21285888636ea31f\.json\#b84448770d4af901d409a482fbc29aadcce10188f8ef0d7c8e7f64a8e1949527 |
 | [0:41:21](https://www.youtube.com/watch?v=uRQJhSnOb-I&t=2481s) | ヒス失敗 | 未記載 | all, review | niche_unknown_artist, short_unknown_title, source_multiple_unknown_artists |  | manual_review | data/review/sources/uRQJhSnOb\-I\-a46d21285888636ea31f\.json\#5b372c9d3e313e6e5dc0e023a9d51cb258cceef0a497d477c4dc873d78f512e6 |
 | [1:15:14](https://www.youtube.com/watch?v=uRQJhSnOb-I&t=4514s) | VIERにネットミームが伝わらなかった | 未記載 | all, review | niche_unknown_artist, source_multiple_unknown_artists |  | manual_review | data/review/sources/uRQJhSnOb\-I\-a46d21285888636ea31f\.json\#58e777113527b27e6899ed1748feb8b663aba0fdd2283af11712cb48042eb2e4 |
+
+### 【 \#歌枠 スパチャ✖メンギフ✖ 】ガチ久しぶりのお歌を歌う時間よ～\!\!【 \#vtuber / \#shorts 】
+- 视频：[aM\-F06k6Hro](https://www.youtube.com/watch?v=aM-F06k6Hro)
+- 频道：芙はるま\_HARUMA
+
+| 时间 | 标题 | 歌手 | 范围 | 风险原因 | 正面证据 | 建议 | 审核数据 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [2:51:30](https://www.youtube.com/watch?v=aM-F06k6Hro&t=10290s) | 365日のラブストーリー | 未記載 | 7d, all, review | niche_unknown_artist |  | manual_review | data/review/sources/aM\-F06k6Hro\-a88851bf216eba603027\.json\#8d701af431096a53f80887bbd9b2a39dfa8d488f406dceb48f9661b8706f5b7b |
 
 ### 【\#歌枠】初見さん大歓迎！縦型毎週恒例歌枠配信！✨【\#Vsinger】
 - 视频：[hd65D1Yc\-fg](https://www.youtube.com/watch?v=hd65D1Yc-fg)

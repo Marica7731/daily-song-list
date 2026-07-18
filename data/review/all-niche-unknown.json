@@ -1,29 +1,70 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-17T19:48:44.386Z",
+  "generatedAt": "2026-07-18T03:52:30.837Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-17T17:37:38.702Z",
+  "latestGeneratedAt": "2026-07-18T03:32:11.980Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 2447,
-    "uniqueVideos": 406,
-    "uniqueSources": 488,
+    "totalCandidates": 2460,
+    "uniqueVideos": 413,
+    "uniqueSources": 495,
     "confirmedNoiseCount": 104,
     "parserCorruptionCount": 233,
     "likelyNoiseCount": 294,
-    "needsReviewCount": 1815,
+    "needsReviewCount": 1828,
     "likelySongCount": 1,
     "byClassification": {
       "confirmed_noise": 104,
       "parser_corruption": 233,
       "likely_noise": 294,
-      "needs_review": 1815,
+      "needs_review": 1828,
       "likely_song": 1
     }
   },
   "items": [
+    {
+      "title": "みてみて",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 7728,
+      "time": "2:08:48",
+      "raw": "2:08:48 みてみて",
+      "rawHash": "55a5888730ef184e7637e7be91eea77d79977bcb08a3e21457dc54d82cb42c58",
+      "videoId": "4q_FdN_RDTs",
+      "videoTitle": "〚 歌枠 〛歌のリハビリにつきあっちゃくれないか｜ライザ陛下 /Vtuber/初見歓迎",
+      "channelName": "-Liza Channel-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4q_FdN_RDTs",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=4q_FdN_RDTs&t=7728s",
+      "sourceId": "Ugz1uWruOpMXuNNRael4AaABAg",
+      "sourceHash": "ef5bbde4bcd021a32a266b529220c3b87a759c1dce9fb012d2bfa29bb3b24e77",
+      "sourceOrigin": "latest;review:4q_FdN_RDTs-ef5bbde4bcd021a32a26.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:4q_FdN_RDTs:ef5bbde4bcd021a32a26",
+      "sourcePath": "data/review/sources/4q_FdN_RDTs-ef5bbde4bcd021a32a26.json",
+      "reviewLocator": "data/review/sources/4q_FdN_RDTs-ef5bbde4bcd021a32a26.json#55a5888730ef184e7637e7be91eea77d79977bcb08a3e21457dc54d82cb42c58",
+      "repairedTitle": "みてみて",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
     {
       "title": "アパレル店員の真似",
       "artist": "未記載",
@@ -2590,7 +2631,7 @@
         "7d",
         "all",
         "review",
-        "snapshot:20260717T170000Z"
+        "snapshot:20260718T030000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -20970,7 +21011,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -21011,7 +21051,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -21052,7 +21091,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -21093,7 +21131,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -21134,7 +21171,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -21175,7 +21211,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -21216,7 +21251,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -21257,7 +21291,6 @@
       "sourceOrigin": "latest;review:IKNlomtvxbw-461e357d2c4a6d686fee.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -23583,6 +23616,48 @@
       "reviewId": "review:4CgnNOuQMjw:3f1c11673497216e7fee",
       "sourcePath": "data/review/sources/4CgnNOuQMjw-3f1c11673497216e7fee.json",
       "reviewLocator": "data/review/sources/4CgnNOuQMjw-3f1c11673497216e7fee.json#f89a271a700e9eb0cfe95a44516a6df51004a48624a4cda7383b9823620d181a",
+      "repairedTitle": "スカ―",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "スカ―",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1190,
+      "time": "0:19:50",
+      "raw": "19:50　スカ―",
+      "rawHash": "e05833a44b35b4c1d2ab0a5bd990b4916f2ba48a15f5d2415fd29aee7edaf949",
+      "videoId": "9U9pY07JvP4",
+      "videoTitle": "【 #歌枠 】5周年ライブまで毎日歌練習#6【練習配信】 #vtuber #浅葱サキ #バーチャルyoutuber 声優 #shorts",
+      "channelName": "Saki Ch. 浅葱サキ",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=9U9pY07JvP4",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=9U9pY07JvP4&t=1190s",
+      "sourceId": "Ugx0BvLCeT53hjAox0F4AaABAg",
+      "sourceHash": "2d6c8ce7aca9d6a1bed5c1148bb527973567da6e84b0aa6eca79de1b248bfd7b",
+      "sourceOrigin": "latest;review:9U9pY07JvP4-2d6c8ce7aca9d6a1bed5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:9U9pY07JvP4:2d6c8ce7aca9d6a1bed5",
+      "sourcePath": "data/review/sources/9U9pY07JvP4-2d6c8ce7aca9d6a1bed5.json",
+      "reviewLocator": "data/review/sources/9U9pY07JvP4-2d6c8ce7aca9d6a1bed5.json#e05833a44b35b4c1d2ab0a5bd990b4916f2ba48a15f5d2415fd29aee7edaf949",
       "repairedTitle": "スカ―",
       "repairedArtist": "未記載",
       "repairReasons": []
@@ -28697,7 +28772,7 @@
       "ranges": [
         "all",
         "review",
-        "snapshot:20260717T170000Z",
+        "snapshot:20260718T030000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
@@ -29425,18 +29500,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=08CQUlMMcQc&t=8806s",
       "sourceId": "Ugzr3YzRS7UscAXeUiF4AaABAg",
       "sourceHash": "2e670230d2db6b510c545c03d21e1a4e58f3114c7bf790f0489d8fedcc956094",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:08CQUlMMcQc-2e670230d2db6b510c54.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "short_unknown_title"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:08CQUlMMcQc:2e670230d2db6b510c54",
@@ -29848,7 +29925,7 @@
       "ranges": [
         "7d",
         "all",
-        "snapshot:20260717T170000Z"
+        "snapshot:20260718T030000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -37463,7 +37540,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37504,7 +37580,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37545,7 +37620,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37586,7 +37660,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37627,7 +37700,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37668,7 +37740,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37709,7 +37780,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37750,7 +37820,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37791,7 +37860,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37832,7 +37900,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37873,7 +37940,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37914,7 +37980,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37955,7 +38020,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -37996,7 +38060,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38037,7 +38100,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38078,7 +38140,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38119,7 +38180,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38160,7 +38220,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38201,7 +38260,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38242,7 +38300,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38283,7 +38340,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38324,7 +38380,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38365,7 +38420,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38406,7 +38460,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38447,7 +38500,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38488,7 +38540,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38529,7 +38580,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38570,7 +38620,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38611,7 +38660,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38652,7 +38700,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38693,7 +38740,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38734,7 +38780,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38775,7 +38820,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38816,7 +38860,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38857,7 +38900,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38898,7 +38940,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38939,7 +38980,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -38980,7 +39020,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39021,7 +39060,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39062,7 +39100,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39103,7 +39140,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39144,7 +39180,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39185,7 +39220,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39226,7 +39260,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39267,7 +39300,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39308,7 +39340,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39349,7 +39380,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39390,7 +39420,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39431,7 +39460,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39472,7 +39500,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39513,7 +39540,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39554,7 +39580,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39595,7 +39620,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39636,7 +39660,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39677,7 +39700,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39718,7 +39740,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39759,7 +39780,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39800,7 +39820,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39841,7 +39860,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39882,7 +39900,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39923,7 +39940,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -39964,7 +39980,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40005,7 +40020,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40046,7 +40060,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40087,7 +40100,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40128,7 +40140,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40169,7 +40180,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40210,7 +40220,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40251,7 +40260,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40292,7 +40300,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40333,7 +40340,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40374,7 +40380,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40415,7 +40420,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40456,7 +40460,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40497,7 +40500,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40538,7 +40540,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40579,7 +40580,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40620,7 +40620,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40661,7 +40660,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40702,7 +40700,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40743,7 +40740,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40784,7 +40780,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40825,7 +40820,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40866,7 +40860,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40907,7 +40900,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40948,7 +40940,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -40989,7 +40980,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -41030,7 +41020,6 @@
       "sourceOrigin": "latest;review:bUb_oMOzuf4-8a02dadd27cb15ad7400.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -47630,6 +47619,86 @@
       "reviewId": "review:9hgQ0Qbv0iM:100d1340384bfffe6e25",
       "sourcePath": "data/review/sources/history-9hgQ0Qbv0iM-100d1340384bfffe6e25.json",
       "reviewLocator": "data/review/sources/history-9hgQ0Qbv0iM-100d1340384bfffe6e25.json#a0888608f90cccd805228f0ff9e83271e97a8ef9716e8c596c354221a9f71948"
+    },
+    {
+      "title": "(の『右肩の蝶』は、歌い方がカッコよくてやはり上手いなぁと思いました",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3089,
+      "time": "0:51:29",
+      "raw": "51:29(の『右肩の蝶』は、歌い方がカッコよくてやはり上手いなぁと思いました。",
+      "rawHash": "6476696d564e7e7b1d1ff4351af78276d42536b4e1e972e4eff5ead65a9f3ef5",
+      "videoId": "mOgKRyl0Pjw",
+      "videoTitle": "歌枠 / Karaoke │ ノンストップ歌枠🔥曲間トーク無しで歌いまくる❤️‍🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗",
+      "channelName": "音羽ララ (Otohane Lara) / シアーミュージックV",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mOgKRyl0Pjw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mOgKRyl0Pjw&t=3089s",
+      "sourceId": "UgxceTEWIK_2rIXYs854AaABAg",
+      "sourceHash": "1c3bfbc4facc1e9892a20818750a95b423d6fac2f490752f3a48dd837e8336a1",
+      "sourceOrigin": "latest;review:mOgKRyl0Pjw-1c3bfbc4facc1e9892a2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mOgKRyl0Pjw:1c3bfbc4facc1e9892a2",
+      "sourcePath": "data/review/sources/mOgKRyl0Pjw-1c3bfbc4facc1e9892a2.json",
+      "reviewLocator": "data/review/sources/mOgKRyl0Pjw-1c3bfbc4facc1e9892a2.json#6476696d564e7e7b1d1ff4351af78276d42536b4e1e972e4eff5ead65a9f3ef5",
+      "repairedTitle": "(の『右肩の蝶』は、歌い方がカッコよくてやはり上手いなぁと思いました",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "の『真夜中のドア〜Stay With Me』はサビの少し声が中に入る所が上手いなぁと思いました",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 5441,
+      "time": "1:30:41",
+      "raw": "1:30:41の『真夜中のドア〜Stay With Me』はサビの少し声が中に入る所が上手いなぁと思いました。",
+      "rawHash": "6b78c09e62b08546c68b2467b4bf67bf669ee42fa4c5de0fbe9739118b0e1daa",
+      "videoId": "mOgKRyl0Pjw",
+      "videoTitle": "歌枠 / Karaoke │ ノンストップ歌枠🔥曲間トーク無しで歌いまくる❤️‍🔥リクエストもどうぞ🙆‍♀️ Singing Stream 〖 音羽ララ / Vsinger〗",
+      "channelName": "音羽ララ (Otohane Lara) / シアーミュージックV",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mOgKRyl0Pjw",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mOgKRyl0Pjw&t=5441s",
+      "sourceId": "UgxceTEWIK_2rIXYs854AaABAg",
+      "sourceHash": "1c3bfbc4facc1e9892a20818750a95b423d6fac2f490752f3a48dd837e8336a1",
+      "sourceOrigin": "latest;review:mOgKRyl0Pjw-1c3bfbc4facc1e9892a2.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mOgKRyl0Pjw:1c3bfbc4facc1e9892a2",
+      "sourcePath": "data/review/sources/mOgKRyl0Pjw-1c3bfbc4facc1e9892a2.json",
+      "reviewLocator": "data/review/sources/mOgKRyl0Pjw-1c3bfbc4facc1e9892a2.json#6b78c09e62b08546c68b2467b4bf67bf669ee42fa4c5de0fbe9739118b0e1daa",
+      "repairedTitle": "の『真夜中のドア〜Stay With Me』はサビの少し声が中に入る所が上手いなぁと思いました",
+      "repairedArtist": "未記載",
+      "repairReasons": []
     },
     {
       "title": "リンちゃんなう！",
@@ -63167,6 +63236,129 @@
       "repairReasons": []
     },
     {
+      "title": "バッド・ダンス・ホール",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2281,
+      "time": "0:38:01",
+      "raw": "38:01         バッド・ダンス・ホール",
+      "rawHash": "a2f5bab986b3462d557a86f646a649e21f8a0a800276d72ded79aabcabf024f1",
+      "videoId": "NUfimgdBOr0",
+      "videoTitle": "【歌枠】そこそこ暑い夏夜の練習歌枠～💿🎤✨【歌響レコ/VTuber】",
+      "channelName": "歌響レコ【目指せ歌うま / VTuber】",
+      "channelId": "UCyrqxa5EK39gyYwC_OZem1g",
+      "channelHandle": "/@Utahibiki_Reco",
+      "youtubeUrl": "https://www.youtube.com/watch?v=NUfimgdBOr0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=NUfimgdBOr0&t=2281s",
+      "sourceId": "UgwiGFIKK4oXSGF8qvh4AaABAg",
+      "sourceHash": "960544c5593dc1c7e0cf99352623cc532435022866c7858a1f24931199d5c912",
+      "sourceOrigin": "latest;review:NUfimgdBOr0-960544c5593dc1c7e0cf.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:NUfimgdBOr0:960544c5593dc1c7e0cf",
+      "sourcePath": "data/review/sources/NUfimgdBOr0-960544c5593dc1c7e0cf.json",
+      "reviewLocator": "data/review/sources/NUfimgdBOr0-960544c5593dc1c7e0cf.json#a2f5bab986b3462d557a86f646a649e21f8a0a800276d72ded79aabcabf024f1",
+      "repairedTitle": "バッド・ダンス・ホール",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ダンスダンスデカダンス",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2622,
+      "time": "0:43:42",
+      "raw": "43:42         ダンスダンスデカダンス",
+      "rawHash": "e1518c36813056c6f55c258cd72cbc21a067b74d008cc59a46bae29c5b0cbf16",
+      "videoId": "NUfimgdBOr0",
+      "videoTitle": "【歌枠】そこそこ暑い夏夜の練習歌枠～💿🎤✨【歌響レコ/VTuber】",
+      "channelName": "歌響レコ【目指せ歌うま / VTuber】",
+      "channelId": "UCyrqxa5EK39gyYwC_OZem1g",
+      "channelHandle": "/@Utahibiki_Reco",
+      "youtubeUrl": "https://www.youtube.com/watch?v=NUfimgdBOr0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=NUfimgdBOr0&t=2622s",
+      "sourceId": "UgwiGFIKK4oXSGF8qvh4AaABAg",
+      "sourceHash": "960544c5593dc1c7e0cf99352623cc532435022866c7858a1f24931199d5c912",
+      "sourceOrigin": "latest;review:NUfimgdBOr0-960544c5593dc1c7e0cf.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:NUfimgdBOr0:960544c5593dc1c7e0cf",
+      "sourcePath": "data/review/sources/NUfimgdBOr0-960544c5593dc1c7e0cf.json",
+      "reviewLocator": "data/review/sources/NUfimgdBOr0-960544c5593dc1c7e0cf.json#e1518c36813056c6f55c258cd72cbc21a067b74d008cc59a46bae29c5b0cbf16",
+      "repairedTitle": "ダンスダンスデカダンス",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "孤独のあかつき",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4452,
+      "time": "1:14:12",
+      "raw": "1:14:12      孤独のあかつき",
+      "rawHash": "76510630b356051e2842353967f0e8768145595534b408d27fe00f2c4d1876a7",
+      "videoId": "NUfimgdBOr0",
+      "videoTitle": "【歌枠】そこそこ暑い夏夜の練習歌枠～💿🎤✨【歌響レコ/VTuber】",
+      "channelName": "歌響レコ【目指せ歌うま / VTuber】",
+      "channelId": "UCyrqxa5EK39gyYwC_OZem1g",
+      "channelHandle": "/@Utahibiki_Reco",
+      "youtubeUrl": "https://www.youtube.com/watch?v=NUfimgdBOr0",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=NUfimgdBOr0&t=4452s",
+      "sourceId": "UgwiGFIKK4oXSGF8qvh4AaABAg",
+      "sourceHash": "960544c5593dc1c7e0cf99352623cc532435022866c7858a1f24931199d5c912",
+      "sourceOrigin": "latest;review:NUfimgdBOr0-960544c5593dc1c7e0cf.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:NUfimgdBOr0:960544c5593dc1c7e0cf",
+      "sourcePath": "data/review/sources/NUfimgdBOr0-960544c5593dc1c7e0cf.json",
+      "reviewLocator": "data/review/sources/NUfimgdBOr0-960544c5593dc1c7e0cf.json#76510630b356051e2842353967f0e8768145595534b408d27fe00f2c4d1876a7",
+      "repairedTitle": "孤独のあかつき",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "風の行方",
       "artist": "未記載",
       "isNiche": true,
@@ -73880,7 +74072,6 @@
       "sourceOrigin": "latest;review:1dFa_GH8eCs-18f1a125a0d4fec1ebfd.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -86298,6 +86489,129 @@
       "repairReasons": []
     },
     {
+      "title": "テーマソング",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3970,
+      "time": "1:06:10",
+      "raw": "1:06:10 テーマソング",
+      "rawHash": "71a24325f8fbd7645bc04c4d027544492d88e2acd5384f35b3f9c709fd7d1b9e",
+      "videoId": "Barf9n7t7ME",
+      "videoTitle": "【歌枠】バラード多めなボカロ・アニソンを新人Vtuberがビール飲みながら",
+      "channelName": "星灯優美🌙🦋",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Barf9n7t7ME",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Barf9n7t7ME&t=3970s",
+      "sourceId": "Ugy6S7J2bW685Qe-_RB4AaABAg",
+      "sourceHash": "b1bb5e89c6135ed4f2da6d2b6b8f8843e672762586390f7be4a3778664431dbb",
+      "sourceOrigin": "latest;review:Barf9n7t7ME-b1bb5e89c6135ed4f2da.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Barf9n7t7ME:b1bb5e89c6135ed4f2da",
+      "sourcePath": "data/review/sources/Barf9n7t7ME-b1bb5e89c6135ed4f2da.json",
+      "reviewLocator": "data/review/sources/Barf9n7t7ME-b1bb5e89c6135ed4f2da.json#71a24325f8fbd7645bc04c4d027544492d88e2acd5384f35b3f9c709fd7d1b9e",
+      "repairedTitle": "テーマソング",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "しゃっちく、しゃっちーく",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4217,
+      "time": "1:10:17",
+      "raw": "1:10:17 しゃっちく、しゃっちーく",
+      "rawHash": "cf7034c7d09fbba9264210fd04b52d115ff4239827186393cf335a8b0ea7a765",
+      "videoId": "Barf9n7t7ME",
+      "videoTitle": "【歌枠】バラード多めなボカロ・アニソンを新人Vtuberがビール飲みながら",
+      "channelName": "星灯優美🌙🦋",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Barf9n7t7ME",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Barf9n7t7ME&t=4217s",
+      "sourceId": "Ugy6S7J2bW685Qe-_RB4AaABAg",
+      "sourceHash": "b1bb5e89c6135ed4f2da6d2b6b8f8843e672762586390f7be4a3778664431dbb",
+      "sourceOrigin": "latest;review:Barf9n7t7ME-b1bb5e89c6135ed4f2da.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Barf9n7t7ME:b1bb5e89c6135ed4f2da",
+      "sourcePath": "data/review/sources/Barf9n7t7ME-b1bb5e89c6135ed4f2da.json",
+      "reviewLocator": "data/review/sources/Barf9n7t7ME-b1bb5e89c6135ed4f2da.json#cf7034c7d09fbba9264210fd04b52d115ff4239827186393cf335a8b0ea7a765",
+      "repairedTitle": "しゃっちく、しゃっちーく",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "フライング アナ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4836,
+      "time": "1:20:36",
+      "raw": "1:20:36  フライング アナ",
+      "rawHash": "2acb461fc0bcd317531e327994557dc92d57f145f78a23d28821f3d751e01f60",
+      "videoId": "Barf9n7t7ME",
+      "videoTitle": "【歌枠】バラード多めなボカロ・アニソンを新人Vtuberがビール飲みながら",
+      "channelName": "星灯優美🌙🦋",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Barf9n7t7ME",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Barf9n7t7ME&t=4836s",
+      "sourceId": "Ugy6S7J2bW685Qe-_RB4AaABAg",
+      "sourceHash": "b1bb5e89c6135ed4f2da6d2b6b8f8843e672762586390f7be4a3778664431dbb",
+      "sourceOrigin": "latest;review:Barf9n7t7ME-b1bb5e89c6135ed4f2da.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:Barf9n7t7ME:b1bb5e89c6135ed4f2da",
+      "sourcePath": "data/review/sources/Barf9n7t7ME-b1bb5e89c6135ed4f2da.json",
+      "reviewLocator": "data/review/sources/Barf9n7t7ME-b1bb5e89c6135ed4f2da.json#2acb461fc0bcd317531e327994557dc92d57f145f78a23d28821f3d751e01f60",
+      "repairedTitle": "フライング アナ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "TKGの歌",
       "artist": "未記載",
       "isNiche": true,
@@ -92299,7 +92613,7 @@
       "ranges": [
         "7d",
         "all",
-        "snapshot:20260717T170000Z"
+        "snapshot:20260718T030000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -92325,6 +92639,89 @@
       ]
     },
     {
+      "title": "声出し",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 133,
+      "time": "0:02:13",
+      "raw": "2:13 声出し",
+      "rawHash": "e829a2477fef2ec98c74e63fbe87bef0b67598b3cde4474330401c8a262c14d7",
+      "videoId": "cKiCR5uznlk",
+      "videoTitle": "【#耐久歌枠 】🍀初見歓迎🍀高評価50もらえるまで終わらない歌枠 初ライブのセトリ予想してみて #新人Vtuber 【兎屋ろこみ】#karaoke",
+      "channelName": "兎屋ろこみ -Rokomi Usagiya-",
+      "channelId": "UCXBzuaUPXtlqa5TV7MmibBQ",
+      "channelHandle": "/@653_QuQ",
+      "youtubeUrl": "https://www.youtube.com/watch?v=cKiCR5uznlk",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=cKiCR5uznlk&t=133s",
+      "sourceId": "Ugwtx6XzMROL1H70MLt4AaABAg",
+      "sourceHash": "56d8cfe9bb93f4502b9eab7df020b2206883e2d4335ba073b7aa2fc348cb2771",
+      "sourceOrigin": "latest;review:cKiCR5uznlk-56d8cfe9bb93f4502b9e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "short_unknown_title",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:cKiCR5uznlk:56d8cfe9bb93f4502b9e",
+      "sourcePath": "data/review/sources/cKiCR5uznlk-56d8cfe9bb93f4502b9e.json",
+      "reviewLocator": "data/review/sources/cKiCR5uznlk-56d8cfe9bb93f4502b9e.json#e829a2477fef2ec98c74e63fbe87bef0b67598b3cde4474330401c8a262c14d7",
+      "repairedTitle": "声出し",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "グリズリーに襲われたら",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 15947,
+      "time": "4:25:47",
+      "raw": "4:25:47 グリズリーに襲われたら",
+      "rawHash": "ea169956ee39dde9a572ef959a48b2b531810baf8b6549784c45ea43e15cadd4",
+      "videoId": "cKiCR5uznlk",
+      "videoTitle": "【#耐久歌枠 】🍀初見歓迎🍀高評価50もらえるまで終わらない歌枠 初ライブのセトリ予想してみて #新人Vtuber 【兎屋ろこみ】#karaoke",
+      "channelName": "兎屋ろこみ -Rokomi Usagiya-",
+      "channelId": "UCXBzuaUPXtlqa5TV7MmibBQ",
+      "channelHandle": "/@653_QuQ",
+      "youtubeUrl": "https://www.youtube.com/watch?v=cKiCR5uznlk",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=cKiCR5uznlk&t=15947s",
+      "sourceId": "Ugwtx6XzMROL1H70MLt4AaABAg",
+      "sourceHash": "56d8cfe9bb93f4502b9eab7df020b2206883e2d4335ba073b7aa2fc348cb2771",
+      "sourceOrigin": "latest;review:cKiCR5uznlk-56d8cfe9bb93f4502b9e.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:cKiCR5uznlk:56d8cfe9bb93f4502b9e",
+      "sourcePath": "data/review/sources/cKiCR5uznlk-56d8cfe9bb93f4502b9e.json",
+      "reviewLocator": "data/review/sources/cKiCR5uznlk-56d8cfe9bb93f4502b9e.json#ea169956ee39dde9a572ef959a48b2b531810baf8b6549784c45ea43e15cadd4",
+      "repairedTitle": "グリズリーに襲われたら",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "JP",
       "artist": "未記載",
       "isNiche": true,
@@ -92345,7 +92742,6 @@
       "sourceOrigin": "latest;review:8PJXYV1Y2lw-37bce559cff893db62cc.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92387,7 +92783,6 @@
       "sourceOrigin": "latest;review:8PJXYV1Y2lw-37bce559cff893db62cc.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92429,7 +92824,6 @@
       "sourceOrigin": "latest;review:8PJXYV1Y2lw-37bce559cff893db62cc.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92470,7 +92864,6 @@
       "sourceOrigin": "latest;review:8PJXYV1Y2lw-37bce559cff893db62cc.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92674,7 +93067,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92762,7 +93154,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92803,7 +93194,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92892,7 +93282,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92933,7 +93322,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -92974,7 +93362,6 @@
       "sourceOrigin": "latest;review:6s6vcztl98s-642b43ecfb7535fe0dea.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -94560,6 +94947,46 @@
       "sourcePath": "data/review/sources/uRQJhSnOb-I-a46d21285888636ea31f.json",
       "reviewLocator": "data/review/sources/uRQJhSnOb-I-a46d21285888636ea31f.json#58e777113527b27e6899ed1748feb8b663aba0fdd2283af11712cb48042eb2e4",
       "repairedTitle": "VIERにネットミームが伝わらなかった",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "365日のラブストーリー",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 10290,
+      "time": "2:51:30",
+      "raw": "2:51:30 365日のラブストーリー。",
+      "rawHash": "8d701af431096a53f80887bbd9b2a39dfa8d488f406dceb48f9661b8706f5b7b",
+      "videoId": "aM-F06k6Hro",
+      "videoTitle": "【 #歌枠 スパチャ✖メンギフ✖ 】ガチ久しぶりのお歌を歌う時間よ～!!【 #vtuber / #shorts 】",
+      "channelName": "芙はるま_HARUMA",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=aM-F06k6Hro",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=aM-F06k6Hro&t=10290s",
+      "sourceId": "UgySfJ3msM7xsu4JgAJ4AaABAg",
+      "sourceHash": "a88851bf216eba60302750dad8a8daa3141bba1886ec3f5def3fbe49bc3217c4",
+      "sourceOrigin": "latest;review:aM-F06k6Hro-a88851bf216eba603027.json",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all",
+        "review"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:aM-F06k6Hro:a88851bf216eba603027",
+      "sourcePath": "data/review/sources/aM-F06k6Hro-a88851bf216eba603027.json",
+      "reviewLocator": "data/review/sources/aM-F06k6Hro-a88851bf216eba603027.json#8d701af431096a53f80887bbd9b2a39dfa8d488f406dceb48f9661b8706f5b7b",
+      "repairedTitle": "365日のラブストーリー",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
