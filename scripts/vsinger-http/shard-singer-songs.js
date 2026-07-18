@@ -146,9 +146,10 @@ function mergeSingerSongShards(options = {}) {
   }));
 
   const targetCount = targetCountFromArgs(args, shardReports, singers.length);
-  const allShardsComplete = shardReports.every(({ report }) => report.coverageStatus === "complete" && report.detailCoverageStatus === "complete" && !report.currentSinger);
-  const detailCoverageStatus = allShardsComplete && failures.length === 0 ? "complete" : "partial";
-  const coverageStatus = allShardsComplete && singers.length >= targetCount && failures.length === 0 ? "complete" : "partial";
+  const allShardDetailsComplete = shardReports.every(({ report }) => report.detailCoverageStatus === "complete");
+  const allMergedSingersComplete = singers.length >= targetCount && singers.every((report) => report.stop?.reason === "no-next-cursor");
+  const detailCoverageStatus = allShardDetailsComplete && failures.length === 0 ? "complete" : "partial";
+  const coverageStatus = allMergedSingersComplete && detailCoverageStatus === "complete" && failures.length === 0 ? "complete" : "partial";
   const stop = coverageStatus === "complete"
     ? stopRecord("completed-targets", { singerCount: targetCount, mergedShardCount: shardReports.length })
     : stopRecord("merged-shards-partial", { singerCount: singers.length, targetCount, mergedShardCount: shardReports.length });

@@ -340,6 +340,10 @@ test("singer-scoped shard merger dedupes outputs and reports complete coverage",
     youtubeVideoId: "PwEG0NtOoxE",
     seconds: 360,
   });
+  const partialBaseReport = readJson(path.join(shardA, "crawl.json"));
+  partialBaseReport.coverageStatus = "partial";
+  partialBaseReport.stop = { reason: "max-song-pages" };
+  writeJson(path.join(shardA, "crawl.json"), partialBaseReport);
   writeSingerShard(shardB, {
     singerIndex: 1,
     singerId: SINGER_B,
