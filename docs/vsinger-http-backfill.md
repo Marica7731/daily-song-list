@@ -1,0 +1,374 @@
+# VSinger Moment Public HTML Backfill
+
+This pipeline imports VSinger Moment catalog and setlist data from public HTML pages only. It does not call `/api/*`, framework-private loaders, Server Actions, database endpoints, or guessed internal URLs.
+
+Allowed public routes:
+
+- `https://vsinger-moment.jp/robots.txt`
+- `https://vsinger-moment.jp/songs`
+- `https://vsinger-moment.jp/songs?cursor=...`
+- `https://vsinger-moment.jp/streams`
+- `https://vsinger-moment.jp/streams?cursor=...`
+- `https://vsinger-moment.jp/songs/{uuid}`
+- `https://vsinger-moment.jp/videos/{uuid}`
+
+The crawler reads `robots.txt` before production work. If `/songs`, `/streams`, or `/videos` are disallowed, the scripts stop. The default request interval is `1000` ms and is raised automatically when robots declares a larger `Crawl-delay`.
+
+## Singer-Scoped Pages
+
+Public singer pages expose useful links such as `/songs?singerId=...` and `/songs/{uuid}?singerId=...`, and those pages can show per-singer song counts plus per-song occurrence positions. The path form `/singers/{uuid}` is allowed and useful for aggregate singer metadata, but it does not expose the full per-singer song and occurrence table. The full table currently depends on singer-scoped query pages, and the current `robots.txt` explicitly disallows query URLs containing `singerId` and `singerName`:
+
+```text
+Disallow: /*?*singerId=
+Disallow: /*?*singerName=
+```
+
+Do not use singer-scoped query pages for production crawling unless `robots.txt` changes or the site owner gives explicit permission. When explicit owner permission exists, run the singer-scoped crawler with `--owner-permission` or `VSINGER_OWNER_PERMISSION=1`; the run report records this permission gate in `ownerPermission`. Without that flag, the crawler stops before requesting singer query URLs.
+
+The singer profile UI also exposes a CSV download button, but that export is not treated as the full backfill source because it is limited in row count and time range. Use it only as manual comparison evidence, not as the catalog or occurrence authority.
+
+## Commands
+
+Run the public capability probe first:
+
+```bash
+npm run vsinger:probe
+```
+
+Outputs:
+
+- `artifacts/vsinger-http-backfill/probe.json`
+- `artifacts/vsinger-http-backfill/probe.md`
+
+Run small dry runs before full crawl:
+
+```bash
+npm run vsinger:crawl:songs -- --max-pages 10
+npm run vsinger:crawl:streams -- --max-pages 10
+npm run vsinger:crawl:singers -- --max-pages 10
+```
+
+Use `--fresh` when regenerating a report from the first page instead of resuming the saved checkpoint:
+
+```bash
+npm run vsinger:crawl:songs -- --fresh --max-pages 10
+npm run vsinger:crawl:streams -- --fresh --max-pages 10
+npm run vsinger:crawl:singers -- --fresh --max-pages 10
+```
+
+Without `--fresh`, `songs`, `streams`, and `singers` reload their previous JSON outputs and append the next cursor batch. In that mode, `--max-pages` is the number of pages to request in the current invocation; `crawl.json`, `songs.json`, `videos.json`, `singers.json`, and sync state remain cumulative.
+
+Run larger validation batches:
+
+```bash
+npm run vsinger:crawl:songs -- --max-pages 100
+npm run vsinger:crawl:streams -- --max-pages 100
+```
+
+Run full crawls after the 10-page and 100-page reports are stable:
+
+```bash
+npm run vsinger:crawl:songs
+npm run vsinger:crawl:streams
+npm run vsinger:crawl:singers
+```
+
+For daily stream increments, pass an explicit stream date watermark. The historical checkpoint's saved `streamWatermark` is retained as sync metadata but is not used as an automatic stop condition while continuing a cursor crawl.
+
+```bash
+npm run vsinger:crawl:streams -- --fresh --stream-watermark 2026-07-17
+```
+
+Run singer-scoped song and occurrence backfill only after explicit site-owner permission is confirmed:
+
+```bash
+npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --fetch-song-details
+```
+
+For long VPS runs, process singer-scoped pages in resumable batches. Start the first batch with `--fresh`; rerun the same command without `--fresh` to continue from `singer-songs/checkpoint.json`. `--max-singers` is treated as the batch size from the saved `nextSingerIndex`, not as a permanent slice from the start of the singer list. `--max-song-pages` is also per invocation for the current singer, so `--max-song-pages 1 --fetch-song-details` advances one singer-song page and fetches every song detail on that page. For full backfill batches, omit `--max-song-details`; use it only for bounded validation samples.
+
+```bash
+npm run vsinger:crawl:singer-songs -- --fresh --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 1 --max-song-pages 1 --fetch-song-details
+npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 1 --max-song-pages 1 --fetch-song-details
+```
+
+For multi-VPS backfills, shard singer targets into disjoint ranges. Each VPS must use its own `--output-dir`; never point two machines at the same checkpoint directory. The planner writes shard singer files plus ready-to-run command lists:
+
+```bash
+npm run vsinger:shard:singer-songs -- --mode plan --singers-file artifacts/vsinger-http-backfill/singers/singers.json --singer-start-index 190 --singer-end-index 393 --shards 4 --owner-permission-note "site-owner email authorization" --request-interval-ms 1500
+```
+
+Planner outputs:
+
+- `artifacts/vsinger-http-backfill/singer-song-shards/manifest.json`
+- `artifacts/vsinger-http-backfill/singer-song-shards/commands.ps1`
+- `artifacts/vsinger-http-backfill/singer-song-shards/commands.sh`
+- `artifacts/vsinger-http-backfill/singer-song-shards/shard-*.singers.json`
+
+Run one generated command per VPS. By default, each command runs that whole shard to completion. Keep `--fresh` only for the first run of that shard; remove `--fresh` when resuming the same shard output directory. Use a conservative per-node `--request-interval-ms`, because total site load is the sum of all VPS workers even with site-owner permission. Add `--max-singers` or `--max-song-pages` to the planner only when you deliberately want each shard command to process a bounded batch instead of the full shard.
+
+After copying every shard output directory back, merge them into the normal singer-scoped output shape:
+
+```bash
+npm run vsinger:shard:singer-songs -- --mode merge --manifest artifacts/vsinger-http-backfill/singer-song-shards/manifest.json --output-dir artifacts/vsinger-http-backfill/singer-songs-merged
+```
+
+Then build the unified bundle with the merged singer-scoped directory:
+
+```bash
+npm run vsinger:build-bundle -- --songs-dir artifacts/vsinger-http-backfill/songs --streams-dir artifacts/vsinger-http-backfill/streams --video-details-dir artifacts/vsinger-http-backfill/video-details --singer-songs-dir artifacts/vsinger-http-backfill/singer-songs-merged --output-dir data/external/vsinger-http/backfill
+```
+
+The merge step deduplicates songs, videos, and repeated occurrence keys while preserving same-song repeats at different timestamps. It marks the merged singer-scoped coverage as `complete` only when every shard reports `complete`, every shard has complete detail coverage, and the merged singer count reaches the planned target count.
+
+For bounded validation against one singer:
+
+```bash
+npm run vsinger:crawl:singer-songs -- --owner-permission --singer-id f404dd51-2f38-499a-88f7-faf5d897d1ba --singer-name "獅子神レオナ/レオナちゃんねる" --max-song-pages 1 --max-song-details 2
+```
+
+Fetch only queued video details:
+
+```bash
+npm run vsinger:fetch-video-details -- --queue artifacts/vsinger-http-backfill/streams/detail-queue.json
+```
+
+Do not fetch every `/videos/{uuid}` page. The streams crawler writes `detail-queue.json` only for videos that need补漏, such as missing setlists, missing YouTube IDs, missing song links, invalid timestamps, or conflicting public fields. A missing artist name in the list setlist does not by itself force a detail-page request.
+
+For long detail queues, process bounded batches. The fetcher reloads previous `video-details` outputs, skips already processed queue items, and writes `checkpoint.json` plus `sync-state.json`:
+
+```bash
+npm run vsinger:fetch-video-details -- --queue artifacts/vsinger-http-backfill/streams/detail-queue.json --max-videos 100
+npm run vsinger:fetch-video-details -- --queue artifacts/vsinger-http-backfill/streams/detail-queue.json --max-videos 100
+```
+
+Persistent detail-page failures are recorded in `video-details.json.failures` and counted as processed queue items so one bad detail page cannot block later補漏. Retry those failures separately or use MCP for manual補漏.
+
+Build the unified VPS bundle from existing crawl outputs:
+
+```bash
+npm run vsinger:build-bundle -- --songs-dir artifacts/vsinger-http-backfill/songs --streams-dir artifacts/vsinger-http-backfill/streams --video-details-dir artifacts/vsinger-http-backfill/video-details --output-dir data/external/vsinger-http/backfill
+```
+
+This step does not request VSinger Moment. It merges the public songs catalog crawl, stream-list setlists, and queued video-detail補漏 into one normalized bundle with coverage, failures, conflicts, sync state, and a request report.
+
+Run the resumable VPS worker when you want one entry point to advance every stage and write versioned bundles:
+
+```bash
+npm run vsinger:run-backfill -- --song-pages 100 --stream-pages 100 --singer-pages 100 --video-detail-count 100 --bundle-root data/external/vsinger-http/backfill
+```
+
+With site-owner permission, include the singer-scoped stage:
+
+```bash
+npm run vsinger:run-backfill -- --owner-permission --owner-permission-note "site-owner email authorization" --fetch-song-details --singer-count 10 --singer-song-pages 20
+```
+
+The worker writes `worker-run.json` and `worker-state.json` under `artifacts/vsinger-http-backfill/`, keeps a local `worker.lock` by default to avoid two same-host workers, and writes immutable bundles under:
+
+```text
+data/external/vsinger-http/backfill/versions/{timestamp}/
+data/external/vsinger-http/backfill/latest.json
+```
+
+Bundle generation is triggered when there is no prior bundle, `--force-bundle` is set, at least `1000` new songs are present, at least `5000` new occurrences are present, or 60 minutes have elapsed since the previous bundle. These defaults can be changed with `--bundle-song-threshold`, `--bundle-occurrence-threshold`, and `--bundle-interval-minutes`.
+
+## Configuration
+
+- `VSINGER_HTTP_REQUEST_INTERVAL_MS`: default `1000`.
+- `VSINGER_HTTP_USER_AGENT`: override the default crawler user agent.
+- `VSINGER_HTTP_CONNECT_TIMEOUT_MS`: default `15000`.
+- `VSINGER_HTTP_REQUEST_TIMEOUT_MS`: default `30000`.
+
+The default user agent includes the project URL and contact location:
+
+```text
+daily-song-list-vsinger-http-backfill/0.1 (+https://github.com/Marica7731/daily-song-list; contact: github.com/Marica7731)
+```
+
+HTML cache and conditional request metadata are stored in:
+
+```text
+.local-cache/vsinger-http
+```
+
+The cache stores ETag and Last-Modified metadata, reuses `304 Not Modified`, and is intentionally not committed.
+
+## Outputs
+
+Dry-run and local crawl outputs are written under `artifacts/vsinger-http-backfill/`, which is ignored by Git:
+
+For large runs, `crawl.json` and `video-details.json` are compact reports. Large entity arrays are written only once to the sibling files listed in each report's `outputFiles` field, such as `videos.json`, `songs.json`, `occurrences.json`, `raw-occurrences.json`, and `detail-queue.json`. This keeps resumable stages below Node's single-string JSON limit during full `/streams` and singer-scoped backfills.
+
+- `songs/crawl.json`
+- `songs/songs.json`
+- `songs/checkpoint.json`
+- `streams/crawl.json`
+- `streams/videos.json`
+- `streams/songs.json`
+- `streams/occurrences.json`
+- `streams/detail-queue.json`
+- `streams/checkpoint.json`
+- `streams/sync-state.json`
+- `video-details/video-details.json`
+- `video-details/videos.json`
+- `video-details/occurrences.json`
+- `video-details/checkpoint.json`
+- `video-details/sync-state.json`
+- `singers/singers.json`
+- `singer-songs/songs.json`
+- `singer-songs/videos.json`
+- `singer-songs/occurrences.json`
+- `singer-songs/raw-occurrences.json`
+- `singer-songs/checkpoint.json`
+- `singer-songs/sync-state.json`
+- `worker-run.json`
+- `worker-state.json`
+
+For per-stage VPS bundle generation, pass `--write-bundle`:
+
+```bash
+npm run vsinger:crawl:songs -- --write-bundle --bundle-dir data/external/vsinger-http/songs
+npm run vsinger:crawl:streams -- --write-bundle --bundle-dir data/external/vsinger-http/streams
+```
+
+For the unified backfill bundle, prefer `npm run vsinger:build-bundle` after the stage outputs exist. Bundle output is normalized and sharded:
+
+- `manifest.json`
+- `songs-0001.json`, ...
+- `videos-0001.json`, ...
+- `occurrences-0001.json`, ...
+- `coverage.json`
+- `failures.json`
+- `syncState.json`
+- `backfill-report.json`
+- `backfill-report.md`
+
+Large raw HTML is never committed. Raw HTML stays in `.local-cache/vsinger-http`.
+
+## Data Model
+
+Song entities:
+
+- `canonicalSongId`
+- `externalSongId`
+- `displayTitle`
+- `displayArtist`
+- `titleAliases`
+- `artistAliases`
+- `sourceSystem`
+- `sourceUrl`
+- `provenance`
+- `createdAt`
+- `updatedAt`
+
+Video entities:
+
+- `youtubeVideoId`
+- `externalVideoId`
+- `title`
+- `singerName`
+- `streamedAt`
+- `sourceUrl`
+- `verificationStatus`
+
+Occurrence entities:
+
+- `youtubeVideoId`
+- `canonicalSongId`
+- `seconds`
+- `sourceSystem`
+- `externalSongId`
+- `externalVideoId`
+- `verificationStatus`
+- `provenance`
+
+HTTP-imported occurrences use:
+
+```text
+sourceSystem = vsinger_moment_http
+verificationStatus = externally_reported
+```
+
+Only the existing YouTube verification pipeline may upgrade records to `youtube_verified`.
+
+## Deduplication
+
+Video key:
+
+```text
+youtubeVideoId
+```
+
+External song key:
+
+```text
+sourceSystem + externalSongId
+```
+
+Timed occurrence key:
+
+```text
+youtubeVideoId + canonicalSongId + seconds
+```
+
+Fallback occurrence key when no YouTube ID exists:
+
+```text
+externalVideoId + externalSongId + seconds
+```
+
+The pipeline does not dedupe a whole stream by video ID alone, and does not use raw title text as the final song key.
+
+## Cursor Safety
+
+The songs, streams, and singers crawlers persist:
+
+- visited cursor URLs
+- visited page hashes
+- discovered song IDs, video IDs, or singer IDs
+- current cursor checkpoint
+- coverage status
+- cumulative normalized outputs across resumed batches
+
+The singer-scoped crawler persists the same recovery data per current singer:
+
+- `nextSingerIndex`
+- current singer ID, name, page URL, visited URLs, and discovered song IDs
+- cumulative `songs.json`, `videos.json`, `occurrences.json`, and `raw-occurrences.json`
+- permission evidence in `ownerPermission`
+
+The crawler stops on:
+
+- repeated cursor
+- same page hash on consecutive pages
+- five consecutive pages with no new IDs
+- HTTP errors
+- robots disallow
+
+Missing records are not deleted by this pipeline. Downstream full-crawl reconciliation should mark first absence as `not_seen_in_latest_crawl`, and only mark `missing_from_source` after three complete successful crawls without the item.
+
+## MCP Role
+
+MCP remains a supplemental source only:
+
+- crawler gap checks
+- manual song lookup
+- conflict details
+- singer aliases
+- specified songs
+- specified video setlists
+- latest small补漏
+
+MCP must not be used for bulk `get_song` catalog construction.
+
+## Validation
+
+Run:
+
+```bash
+node --test test/vsinger-http.test.js
+npm run check
+```
+
+The dedicated tests cover parser behavior, singer index parsing, owner-permission gating for singer query URLs, cumulative checkpoint resume for songs, streams, singers, video details, and singer-scoped pages, VPS worker orchestration, immutable bundle threshold decisions, cursor query placement, cursor loop detection, no-progress stop, count mismatch, YouTube ID extraction, ETag cache reuse, `429`, `403`, repeated same-song timestamps, and MCP supplement deduplication.
