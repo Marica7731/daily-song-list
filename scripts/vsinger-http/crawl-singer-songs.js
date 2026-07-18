@@ -142,9 +142,10 @@ async function crawlSingleSinger({ client, singer, singerIndex, maxSongPages, ma
   let pageCount = Number(checkpoint?.pageCount || 0);
   let detailPagesFetched = Number(checkpoint?.detailPagesFetched || 0);
   let rawRowCount = Number(checkpoint?.rawRowCount || 0);
+  let runPageCount = 0;
   let stop = null;
 
-  while (nextPageUrl && pageCount < maxSongPages) {
+  while (nextPageUrl && runPageCount < maxSongPages) {
     if (visitedUrls.has(nextPageUrl)) {
       stop = stopRecord("cursor-loop", { nextPageUrl, externalSingerId: singer.externalSingerId });
       break;
@@ -162,6 +163,7 @@ async function crawlSingleSinger({ client, singer, singerIndex, maxSongPages, ma
 
     const parsed = parseSongsPage(response.body, nextPageUrl);
     pageCount += 1;
+    runPageCount += 1;
     rawRowCount += parsed.rawRowCount;
     state.pages.push({
       pageUrl: nextPageUrl,
@@ -212,7 +214,7 @@ async function crawlSingleSinger({ client, singer, singerIndex, maxSongPages, ma
   }
 
   if (!stop && !nextPageUrl) stop = stopRecord("no-next-cursor", { externalSingerId: singer.externalSingerId });
-  if (!stop && pageCount >= maxSongPages) stop = stopRecord("max-song-pages", { maxSongPages, externalSingerId: singer.externalSingerId });
+  if (!stop && runPageCount >= maxSongPages) stop = stopRecord("max-song-pages", { maxSongPages, runPageCount, externalSingerId: singer.externalSingerId });
   const resumeCheckpoint = stop && stop.reason !== "no-next-cursor" ? singerCheckpoint({ singer, singerIndex, nextPageUrl, visitedUrls, discoveredSongIds, pageCount, rawRowCount, detailPagesFetched }) : null;
   return {
     ...singerReport({ singer, stop, pageCount, rawRowCount, discoveredSongIds, detailPagesFetched }),

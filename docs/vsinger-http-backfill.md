@@ -85,11 +85,11 @@ Run singer-scoped song and occurrence backfill only after explicit site-owner pe
 npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --fetch-song-details
 ```
 
-For long VPS runs, process singer-scoped pages in resumable batches. Start the first batch with `--fresh`; rerun the same command without `--fresh` to continue from `singer-songs/checkpoint.json`. `--max-singers` is treated as the batch size from the saved `nextSingerIndex`, not as a permanent slice from the start of the singer list.
+For long VPS runs, process singer-scoped pages in resumable batches. Start the first batch with `--fresh`; rerun the same command without `--fresh` to continue from `singer-songs/checkpoint.json`. `--max-singers` is treated as the batch size from the saved `nextSingerIndex`, not as a permanent slice from the start of the singer list. `--max-song-pages` is also per invocation for the current singer, so `--max-song-pages 1 --fetch-song-details` advances one singer-song page and fetches every song detail on that page. For full backfill batches, omit `--max-song-details`; use it only for bounded validation samples.
 
 ```bash
-npm run vsinger:crawl:singer-songs -- --fresh --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 10 --fetch-song-details
-npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 10 --fetch-song-details
+npm run vsinger:crawl:singer-songs -- --fresh --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 1 --max-song-pages 1 --fetch-song-details
+npm run vsinger:crawl:singer-songs -- --owner-permission --singers-file artifacts/vsinger-http-backfill/singers/singers.json --max-singers 1 --max-song-pages 1 --fetch-song-details
 ```
 
 For bounded validation against one singer:

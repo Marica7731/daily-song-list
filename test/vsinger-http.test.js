@@ -279,7 +279,7 @@ test("singer-scoped crawler resumes current singer from checkpoint cursor", asyn
     "owner-permission": true,
     "singer-id": SINGER_A,
     "singer-name": singerName,
-    "max-song-pages": 2,
+    "max-song-pages": 1,
     "max-song-details": 0,
     "output-dir": dir,
   });
