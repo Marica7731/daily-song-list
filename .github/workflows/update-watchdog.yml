@@ -39,6 +39,7 @@ jobs:
             echo "### Watchdog"
             echo "- triggered: ${{ steps.watchdog.outputs.triggered }}"
             echo "- reason: ${{ steps.watchdog.outputs.reason }}"
+            echo "- meta_url: ${{ steps.watchdog.outputs.meta_url }}"
             echo "- captured_at: ${{ steps.watchdog.outputs.captured_at }}"
             echo "- age_minutes: ${{ steps.watchdog.outputs.age_minutes }}"
           } >> "$GITHUB_STEP_SUMMARY"
