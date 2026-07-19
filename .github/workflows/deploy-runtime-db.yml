@@ -100,12 +100,20 @@ jobs:
           echo "bytes=${bytes}" >> "$GITHUB_OUTPUT"
 
       - name: Upload database artifact
+        if: vars.DAILY_SONG_UPLOAD_DB_ARTIFACT == '1'
         uses: actions/upload-artifact@v4
         with:
           name: song-rank-sqlite-${{ steps.revision.outputs.commit_sha }}
           path: |
             artifacts/runtime/song-rank.sqlite
             artifacts/runtime/song-rank.sqlite.manifest.json
+          retention-days: 14
+
+      - name: Upload database manifest artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: song-rank-sqlite-manifest-${{ steps.revision.outputs.commit_sha }}
+          path: artifacts/runtime/song-rank.sqlite.manifest.json
           retention-days: 14
 
       - name: Verify runtime API artifact
@@ -143,7 +151,7 @@ jobs:
             exit 1
           fi
           sudo apt-get update
-          sudo apt-get install -y sshpass
+          sudo apt-get install -y rsync sshpass
 
       - name: Prepare VPS2 runtime checkout
         env:
@@ -154,7 +162,7 @@ jobs:
             set -Eeuo pipefail
             mkdir -p /opt/culua '${REMOTE_STATE_DIR}' '${REMOTE_LOG_DIR}'
             apt-get update
-            apt-get install -y git nginx python3 curl ca-certificates
+            apt-get install -y git nginx python3 curl ca-certificates rsync
             if ! command -v node >/dev/null 2>&1 || ! node -e 'process.exit(Number(process.versions.node.split(\".\")[0]) >= 20 ? 0 : 1)'; then
               curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
               apt-get install -y nodejs
@@ -193,8 +201,29 @@ jobs:
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "rm -f '${remote_db}' '${remote_db}.manifest.json'" || true
           }
           trap cleanup_remote_candidate ERR
-          sshpass -p "${VPS2_PASSWORD}" scp -o StrictHostKeyChecking=no artifacts/runtime/song-rank.sqlite "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
-          sshpass -p "${VPS2_PASSWORD}" scp -o StrictHostKeyChecking=no artifacts/runtime/song-rank.sqlite.manifest.json "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
+          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            mkdir -p '${REMOTE_STATE_DIR}'
+            rm -f '${remote_db}' '${remote_db}.manifest.json'
+            if [ -f '${REMOTE_DB_PATH}' ]; then
+              cp -f '${REMOTE_DB_PATH}' '${remote_db}'
+            fi
+          "
+          sshpass -p "${VPS2_PASSWORD}" rsync \
+            --inplace \
+            --partial \
+            --compress \
+            --info=stats2 \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            artifacts/runtime/song-rank.sqlite \
+            "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
+          sshpass -p "${VPS2_PASSWORD}" rsync \
+            --inplace \
+            --partial \
+            --compress \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            artifacts/runtime/song-rank.sqlite.manifest.json \
+            "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
           sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${remote_db}' /usr/local/bin/song-rank-db-activate.sh

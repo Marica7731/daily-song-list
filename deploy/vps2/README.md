@@ -14,7 +14,7 @@ All files live under service-specific subdirectories. Do not reuse `/var/www/son
 
 ```bash
 apt-get update
-apt-get install -y git nginx python3 curl ca-certificates
+apt-get install -y git nginx python3 curl ca-certificates rsync
 mkdir -p /opt/culua /var/lib/culua/ytb-song-rank /var/log/culua/ytb-song-rank
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs
@@ -45,7 +45,7 @@ The song-rank nginx site is installed as the port 80 default server. This keeps 
 
 ## Rebuild and restart
 
-VPS2 has 2 GiB memory, so the normal production update path builds SQLite in GitHub Actions and uploads the finished database to VPS2. Run this only to sync code and restart the API against the currently installed database:
+VPS2 has 2 GiB memory, so the normal production update path builds SQLite in GitHub Actions and rsyncs a verified candidate database to VPS2. Run this only to sync code and restart the API against the currently installed database:
 
 ```bash
 /usr/local/bin/song-rank-runtime-update.sh
@@ -65,7 +65,7 @@ On a larger host, set `BUILD_DB_ON_VPS=1` to build locally before restart:
 BUILD_DB_ON_VPS=1 /usr/local/bin/song-rank-runtime-update.sh
 ```
 
-The DB activation script is used by GitHub Actions after uploading a candidate DB:
+The DB activation script is used by GitHub Actions after preparing a candidate DB:
 
 ```bash
 CANDIDATE_DB=/var/lib/culua/ytb-song-rank/song-rank.sqlite.next \
@@ -77,7 +77,7 @@ It probes `少女レイ`, keeps the previous database as `song-rank.sqlite.previ
 
 ## Scheduled updates
 
-GitHub Actions remains the source update mechanism. `Update core song-list data` runs hourly and commits refreshed data to `main`. `Deploy SQLite runtime DB` then builds SQLite on GitHub's runner and uploads the database to VPS2, where `song-rank-db-activate.sh` atomically replaces the active DB and restarts the API.
+GitHub Actions remains the source update mechanism. `Update core song-list data` runs hourly and commits refreshed data to `main`. `Deploy SQLite runtime DB` then builds SQLite on GitHub's runner and rsyncs it to VPS2, where `song-rank-db-activate.sh` atomically replaces the active DB and restarts the API.
 
 Keep `song-rank-runtime-update.timer` installed but disabled on the 2 GiB VPS2 production host. The timer is only a manual fallback for code sync and health restart; enabling it for routine production updates can make the checkout drift from the database built by GitHub Actions.
 
@@ -104,7 +104,9 @@ npm run check:published:api -- http://127.0.0.1/
 
 After production DNS points at VPS2, set the GitHub repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1`. The hourly `update-core.yml` workflow will still update the source data, then verify the public homepage and SQLite API. During migration, leave the variable unset or `0` so the static GitHub Pages site can continue passing before the API cutover.
 
-`Deploy SQLite runtime DB` runs on direct `main` pushes that touch runtime code, source data, VSinger shards, or `data/external/youtube-channel-discovery/accepted/*.json`, and after `Update core song-list data` completes successfully. Each run resolves the latest `origin/main` revision before building, so an hourly data refresh that lands during a deploy will be picked up by the next deploy instead of leaving VPS2 pinned to an older commit. The workflow also uploads a short-lived artifact containing `song-rank.sqlite` and a manifest with `commit_sha`, `run_id`, `built_at`, `sha256`, and `bytes`, so failed deployments can be inspected without rebuilding.
+`Deploy SQLite runtime DB` runs on direct `main` pushes that touch runtime code, source data, VSinger shards, or `data/external/youtube-channel-discovery/accepted/*.json`, and after `Update core song-list data` completes successfully. Each run resolves the latest `origin/main` revision before building, so an hourly data refresh that lands during a deploy will be picked up by the next deploy instead of leaving VPS2 pinned to an older commit.
+
+The publish step copies the current active database to a run-scoped candidate path such as `song-rank.sqlite.next.<run>.<attempt>`, then uses `rsync --inplace --partial --compress` to transfer only changed blocks from the GitHub-built SQLite file. The active database is not touched until the candidate sha256 and query probe pass inside `song-rank-db-activate.sh`. The workflow always uploads the small manifest artifact; set repository variable `DAILY_SONG_UPLOAD_DB_ARTIFACT=1` only when you intentionally need the full `song-rank.sqlite` artifact for inspection.
 
 Failed deploys remove their candidate DB automatically. To clean historical candidates by hand:
 
@@ -129,14 +131,14 @@ curl -fsS http://127.0.0.1:8765/healthz
 The routine update path is:
 
 1. `Update core song-list data` refreshes and commits source/static data to `main`.
-2. `Deploy SQLite runtime DB` is triggered by the successful `workflow_run`, resolves the latest `origin/main`, builds `artifacts/runtime/song-rank.sqlite`, uploads the artifact for 14 days, copies the DB to VPS2, activates it, and verifies staging.
+2. `Deploy SQLite runtime DB` is triggered by the successful `workflow_run`, resolves the latest `origin/main`, builds `artifacts/runtime/song-rank.sqlite`, uploads the manifest artifact for 14 days, rsyncs the candidate DB to VPS2, activates it, and verifies staging.
 3. After production cutover, `Update core song-list data` checks the public homepage and `https://ytb-song-rank.culua.com/` with `npm run check:published:api`.
 
 Troubleshooting map:
 
 - Missing or wrong `VPS2_PASSWORD`: the `Install sshpass` or first SSH step fails before touching VPS2.
 - DB build failure: inspect `Build runtime database`; no remote candidate is uploaded.
-- Local API artifact failure: inspect `Verify runtime API artifact`; the uploaded artifact is not activated.
+- Local API artifact failure: inspect `Verify runtime API artifact`; no remote candidate is activated.
 - Upload or activation failure: inspect `Upload and activate database`; remote candidates named `song-rank.sqlite.next.<run>.<attempt>` are removed on workflow failure.
 - Staging failure: inspect `Verify VPS2 API`, then run `journalctl -u song-rank-api -n 100 --no-pager` and `curl -fsS http://127.0.0.1:8765/healthz` on VPS2.
 - Concurrency cancellation is expected when a newer deploy run starts; the newest successful deploy is authoritative.
@@ -145,7 +147,7 @@ Manual rerun options:
 
 - Re-run the failed GitHub Actions job from the web UI when the source commit is still desired.
 - Use `workflow_dispatch` on `Deploy SQLite runtime DB` to rebuild from current `origin/main`.
-- Download the workflow artifact only for inspection; do not copy it to production by hand unless `song-rank-db-activate.sh` is used with `EXPECTED_SHA256`.
+- Download the workflow artifact only for inspection. By default it contains only the manifest; enable `DAILY_SONG_UPLOAD_DB_ARTIFACT=1` before rerunning only when the full SQLite artifact is needed.
 
 ## Migration checklist
 

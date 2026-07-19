@@ -46,6 +46,8 @@ npm run db:build
 
 Do not regenerate and commit `data/ui`, `data/catalog-segments`, or range JSON shards just to publish a manual補漏 row. The JS runtime exporter overlays accepted increments in memory while building SQLite, so Git only needs the small reviewed JSON and source changes. The normal hourly update path still uses `npm run update:core`.
 
+Deployment also avoids re-uploading the full database artifact by default. `.github/workflows/deploy-runtime-db.yml` builds and validates a complete SQLite file on GitHub Actions, then copies the active VPS2 database to a run-scoped candidate and uses `rsync --inplace --partial --compress` so only changed blocks cross the network. The active DB is replaced only after `song-rank-db-activate.sh` verifies the candidate sha256 and smoke query. Set repository variable `DAILY_SONG_UPLOAD_DB_ARTIFACT=1` only when a full SQLite Actions artifact is needed for inspection.
+
 HTTP endpoints:
 
 - `GET /healthz`
@@ -304,7 +306,7 @@ GitHub Actions remains the upstream data refresh path:
 - `.github/workflows/update-core.yml` runs hourly and updates `data/latest.json`, `data/ui`, catalog files, and `data/status.json`.
 - `.github/workflows/update-watchdog.yml` watches the published freshness and can trigger the core updater.
 - `.github/workflows/update-backfill.yml` prepares backfill inbox bundles; VSinger full HTTP backfill stays behind owner-permission scripts and is not part of routine hourly refresh.
-- `.github/workflows/deploy-runtime-db.yml` runs on direct `main` pushes and after `Update core song-list data` completes successfully. It resolves the latest `origin/main` revision before building SQLite, then uploads the finished database to VPS2.
+- `.github/workflows/deploy-runtime-db.yml` runs on direct `main` pushes and after `Update core song-list data` completes successfully. It resolves the latest `origin/main` revision before building SQLite, then rsyncs the verified candidate database to VPS2 using the current active DB as the delta-transfer basis.
 - After production cuts over to VPS2, set repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1` so `.github/workflows/update-core.yml` verifies the public homepage and SQLite API instead of requiring the old GitHub Pages static JSON paths.
 
 VPS2 is the runtime deploy target:
