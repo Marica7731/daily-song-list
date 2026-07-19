@@ -141,6 +141,36 @@ For bounded validation against one singer:
 npm run vsinger:crawl:singer-songs -- --owner-permission --singer-id f404dd51-2f38-499a-88f7-faf5d897d1ba --singer-name "獅子神レオナ/レオナちゃんねる" --max-song-pages 1 --max-song-details 2
 ```
 
+For current-source singer catalog audits, refresh the public `/singers` list and write the committed catalog/report:
+
+```bash
+npm run vsinger:crawl:singers -- --fresh --output-dir artifacts/vsinger-http-backfill/current-singers --request-interval-ms 1500
+npm run vsinger:audit:singers -- --singers-file artifacts/vsinger-http-backfill/current-singers/singers.json --backfill-dir data/external/vsinger-http/backfill
+```
+
+The audit writes:
+
+- `data/external/vsinger-http/singer-catalog.json`
+- `data/external/vsinger-http/singer-catalog-report.md`
+- `artifacts/vsinger-http-backfill/current-singers/backfill-targets.json`
+
+The target file is compatible with `npm run vsinger:crawl:singer-songs -- --singers-file ...`. The comparison is intentionally conservative because the committed normalized bundle stores `singerName` on videos but not `externalSingerId`; use `missing-by-name` rows first and treat `source-ahead-by-name` as a resumable refresh queue.
+
+For a bounded singer-scoped補漏, crawl each target to an ignored artifact directory with recorded owner permission:
+
+```bash
+npm run vsinger:crawl:singer-songs -- --fresh --owner-permission --owner-permission-note "site-owner email authorization" --singer-id 1c111ebb-446a-459f-9e77-4696fbd611fc --singer-name "ネモ・テルミナス" --fetch-song-details --output-dir artifacts/vsinger-http-backfill/increments/nemo-terminus --request-interval-ms 1500
+npm run vsinger:crawl:singer-songs -- --fresh --owner-permission --owner-permission-note "site-owner email authorization" --singer-id c7d28ae3-520e-4cff-8070-a8c20d6549ca --singer-name "儚牙紺 - Kurage Kon -" --fetch-song-details --output-dir artifacts/vsinger-http-backfill/increments/kurage-kon --request-interval-ms 1500
+```
+
+Then merge complete increment directories into the committed normalized bundle:
+
+```bash
+npm run vsinger:merge:increments -- --increment-dirs "artifacts/vsinger-http-backfill/increments/nemo-terminus;artifacts/vsinger-http-backfill/increments/kurage-kon" --backfill-dir data/external/vsinger-http/backfill --output-dir data/external/vsinger-http/backfill
+```
+
+The increment merge checks that every input crawl is complete, has complete detail coverage, and records owner permission. It rewrites `manifest.json`, shards, `coverage.json`, `syncState.json`, and `backfill-report.*`, while preserving existing raw source rows for future derived cleanup.
+
 Fetch only queued video details:
 
 ```bash

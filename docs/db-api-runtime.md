@@ -123,6 +123,12 @@ Operator fields:
 - `meta.vsinger_*` fields mirror the VSinger manifest counts and are used to diagnose missing raw-source imports.
 - `meta.runtime_ranking_source` should be `runtime-js`; changing this means the API no longer uses the same derived ranking rules as the frontend.
 
+Frontend API-mode behavior:
+
+- When `/api/meta` returns a valid payload, the frontend enters SQLite/API mode and must not request `data/diff/latest-*.json`; those static diff files can resolve to HTML on the VPS/Nginx deployment and produce JSON parse toasts.
+- API mode normalizes `trend` filters to `all`, disables the trend selector, and shows `API模式暂不支持趋势筛选`.
+- The freshness chip uses SQLite `meta.built_at` / `rebuiltDerivedAt` as the staleness baseline. `meta.latest_captured_at` remains source-data provenance and must not trigger the 2-hour stale alert by itself.
+
 `GET /api/rankings`
 
 Supported query parameters:
@@ -186,7 +192,7 @@ Example response shape:
 
 For filtered searches, the summary counters must be filtered counters. Do not fall back to full-site `counts.occurrences`; otherwise a search such as `少女レイ` displays the all-site occurrence total instead of the matched rows.
 
-`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, and the `少女レイ / みきとP` source detail count.
+`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
 
 `GET /api/sources/{sourceDetailKey}`
 
@@ -217,6 +223,17 @@ The `songs` view is the user-facing all-source ranking. For example, `songs?q=�
 
 The `vsingerSongs` view remains a raw-source diagnostic view by VSinger song ID. Search responses include `totalOccurrenceCount` so operators can distinguish an exact source row from title variants matched by a search term.
 
+Singer catalog freshness is tracked separately in `data/external/vsinger-http/singer-catalog.json` and summarized in `data/external/vsinger-http/singer-catalog-report.md`. Generate it from the current public `/singers` listing:
+
+```bash
+npm run vsinger:crawl:singers -- --fresh --output-dir artifacts/vsinger-http-backfill/current-singers --request-interval-ms 1500
+npm run vsinger:audit:singers -- --singers-file artifacts/vsinger-http-backfill/current-singers/singers.json --backfill-dir data/external/vsinger-http/backfill
+```
+
+The audit compares the source singer list to committed VSinger videos by exact `singerName`, because the current normalized bundle does not yet keep `externalSingerId` on `external_videos`. Treat `missing-by-name` as high-confidence補漏 targets. Treat `source-ahead-by-name` as a conservative queue; renamed singers can appear there until refreshed by singerId.
+
+Do not compare a song-search screen directly to a per-singer補漏 count. A search such as `songs?q=儚牙紺` returns global song rows whose `count` values are all-site totals for those songs. Per-singer補漏 is validated through singerId-scoped crawl reports, `videos?q=<singer name>`, and source-detail occurrence rows.
+
 ## Production verification probes
 
 Use these probes after every API, DB builder, deployment, DNS, or Cloudflare change:
@@ -230,8 +247,8 @@ curl -fsS "https://ytb-song-rank.culua.com/api/rankings?range=all&view=songs&q=%
 Current qualitative acceptance points:
 
 - `少女レイ` should return a merged `songs` row whose `title` is `少女レイ`, `displayArtist` includes `みきとP`, `totalOccurrenceCount` is much smaller than full-site `counts.source_occurrences`, and `/api/sources/{sourceDetailKey}` returns the same count as the ranking row.
-- `Muan ch.茨むあん` should be findable in `view=videos`, proving the first added singer is present in the compact runtime.
-- `涼海ネモ` should be findable in `view=videos`, proving the second added singer is present even when the VSinger song page has little or no raw source-table coverage.
+- `ネモ・テルミナス` should be findable in `view=videos`, proving the newly missing-by-name singer has been imported.
+- `儚牙紺 - Kurage Kon -` should be findable in `view=videos`, proving the second newly missing-by-name singer has been imported.
 
 The exact counts change with each hourly refresh. Record the numbers from the command output in release notes or incident notes instead of hard-coding them in docs.
 

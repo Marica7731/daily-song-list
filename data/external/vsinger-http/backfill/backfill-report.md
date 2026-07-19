@@ -1,35 +1,19 @@
-# VSinger Moment HTTP Backfill Report
+# VSinger Moment Increment Merge Report
 
-Generated: 2026-07-18T10:04:38.227Z
+Generated at: 2026-07-19T02:35:40.731Z
 
-## Counts
+## Summary
 
-- Songs: 59347
-- Videos: 63341
-- Occurrences: 523962
-- Conflicts: 5841
+- Songs: 59447 (+100)
+- Videos: 63679 (+338)
+- Occurrences: 525518 (+1556)
 - Failures: 0
 
-## Coverage
+## Increment Inputs
 
-- Overall: complete
-- Songs: count-mismatch (no-next-cursor)
-- Streams: complete (no-next-cursor)
-- Video details: partial
-- Singer-scoped songs: complete
-
-## Request Report
-
-- Total requests: 39276
-- Total HTML bytes: 2586622539
-- Songs average HTML bytes: 117006
-- Streams average HTML bytes: 266304
-- Streams average setlists/page: 14
-- Streams average occurrences/page: 160
-- Singer-scoped occurrence imports: 121890
-
-## Savings
-
-- Avoided bulk MCP get_song requests: 71890
-- Avoided video detail requests by list setlists: 36299
-
+| Directory | Singers | Songs | Videos | Occurrences | Stop |
+| --- | ---: | ---: | ---: | ---: | --- |
+| artifacts/vsinger-http-backfill/increments/nemo-terminus | 1 | 66 | 157 | 750 | completed-targets |
+| artifacts/vsinger-http-backfill/increments/kurage-kon | 1 | 83 | 103 | 467 | completed-targets |
+| artifacts/vsinger-http-backfill/increments/88nia | 1 | 69 | 45 | 161 | completed-targets |
+| artifacts/vsinger-http-backfill/increments/aroma | 1 | 74 | 33 | 178 | completed-targets |

@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "vsinger_moment_http",
-  "generatedAt": "2026-07-18T10:04:38.227Z",
+  "generatedAt": "2026-07-19T02:35:40.731Z",
   "shardSize": 1000,
   "counts": {
-    "songs": 59347,
-    "videos": 63341,
-    "occurrences": 523962,
+    "songs": 59447,
+    "videos": 63679,
+    "occurrences": 525518,
     "conflicts": 5841,
     "failures": 0
   },
@@ -309,8 +309,8 @@
       },
       {
         "file": "songs-0060.json",
-        "count": 347,
-        "sha256": "6615991618287387e9aad87f79c9561bde655e84c2111c22c25b558a6d0e30ec"
+        "count": 447,
+        "sha256": "492aafcab9873916b94560710b21fa486717826fa27f21dcb9aec2f893d3836e"
       }
     ],
     "videos": [
@@ -631,8 +631,8 @@
       },
       {
         "file": "videos-0064.json",
-        "count": 341,
-        "sha256": "a16e17fecadd646700749613c457b99d88ad831ab09208e67b59720231711490"
+        "count": 679,
+        "sha256": "a13e210418a0bbde6093cfe26eff03d11d848b49d0ba43308e07246512ece211"
       }
     ],
     "occurrences": [
@@ -3253,8 +3253,18 @@
       },
       {
         "file": "occurrences-0524.json",
-        "count": 962,
-        "sha256": "b5b87a9a41f750812920cd99ef160494d1f5ae4ff340a659022d00aa4837973b"
+        "count": 1000,
+        "sha256": "3ebf41ed8724b01a4a175fa0bea47118a1568358ee3633c8b06338503ae197b5"
+      },
+      {
+        "file": "occurrences-0525.json",
+        "count": 1000,
+        "sha256": "f05811b4336f671f1c177f80d33a89af7a990ddc4f53476f06c97b95eb1561ba"
+      },
+      {
+        "file": "occurrences-0526.json",
+        "count": 518,
+        "sha256": "2df3b9f129eb6d145465f682f7807ba1de31aef20fa400bdec1f899970acba73"
       }
     ],
     "conflicts": [
@@ -3293,7 +3303,7 @@
       {
         "file": "coverage.json",
         "count": 1,
-        "sha256": "0e4c83f32b7c821f8b80872adf79c078e283c309ab48252276f6fd0e00ffdfc0"
+        "sha256": "5419791506e811702ec0acf7e355afbbf346a401abc9b29c70f4eaa0e88a60ba"
       }
     ],
     "failures": [],
@@ -3301,7 +3311,7 @@
       {
         "file": "syncState.json",
         "count": 1,
-        "sha256": "0be266f817bfc42d88ee902dfcf988badad78efa4b57571092ff98cee9fa9dfd"
+        "sha256": "4b882dfabc000a5d191c8bb49edeca5b58c75ca4ae5710b3931b3998b19f2f5e"
       }
     ]
   }

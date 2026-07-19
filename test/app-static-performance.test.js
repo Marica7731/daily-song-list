@@ -39,8 +39,15 @@ test("runtime range load validates meta-bound payloads and has fallback paths", 
 test("status display separates capture time from derived rebuild time", () => {
   const body = functionBody("function renderStatus");
   assert.match(body, /数据抓取于/u);
+  assert.match(body, /数据库构建于/u);
+  assert.match(body, /源数据采集于/u);
+  assert.match(body, /state\.runtimeApi\.available/u);
+  assert.match(body, /const staleAge = freshnessAt \? Date\.now\(\) - Date\.parse\(freshnessAt\) : 0/u);
+  assert.match(body, /freshnessAt=/u);
   assert.match(body, /页面数据重建于/u);
   assert.doesNotMatch(body, /rebuiltDerivedAt \|\| status\.completedAt/u);
+  assert.match(functionBody("function runtimeMetaFromApiMeta"), /const \{ diffs: _staticDiffs, \.\.\.fallbackRuntimeMeta \} = fallbackMeta \|\| \{\}/u);
+  assert.match(functionBody("function runtimeMetaFromApiMeta"), /\.\.\.fallbackRuntimeMeta/u);
 });
 
 test("home controls remove legacy info buttons and expose hide-unknown toggle", () => {
@@ -162,8 +169,19 @@ test("artist rank song details share inline source model and append remaining so
 
 test("delayed trend diffs update visible badges without rerendering the list for all trend", () => {
   const scheduleBody = functionBody("function scheduleCurrentRankDiffLoad");
+  assert.match(scheduleBody, /state\.runtimeApi\.available/u);
+  assert.match(scheduleBody, /updateQueryAvailability\(\)/u);
   assert.match(scheduleBody, /state\.trend === "all"[\s\S]*updateVisibleTrendBadges\(\)/u);
   assert.match(scheduleBody, /else \{[\s\S]*render\(\{ syncUrl: false \}\)/u);
+
+  const sanitizeBody = functionBody("function sanitizeQueryDraft");
+  assert.match(sanitizeBody, /state\.runtimeApi\.available \? \{ \.\.\.next, trend: "all" \} : next/u);
+  const normalizeBody = functionBody("function normalizeTrendStateForRuntime");
+  assert.match(normalizeBody, /state\.trend = "all"/u);
+  assert.match(normalizeBody, /state\.queryDraft = \{ \.\.\.state\.queryDraft, trend: "all" \}/u);
+  assert.match(functionBody("function updateQueryAvailability"), /API模式暂不支持趋势筛选/u);
+  assert.match(functionBody("async function loadRankDiffForRange"), /if \(state\.runtimeApi\.available\) return false/u);
+  assert.match(functionBody("async function filterRequestIndexEntries"), /!state\.runtimeApi\.available && filters\.trend/u);
 
   const updateBody = functionBody("function updateVisibleTrendBadges");
   assert.match(updateBody, /querySelectorAll\("\.rank-row\[data-trend-mode\]\[data-trend-key\]"\)/u);

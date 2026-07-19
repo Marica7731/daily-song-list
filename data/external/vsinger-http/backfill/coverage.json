@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "vsinger-moment-http-backfill-coverage",
-  "generatedAt": "2026-07-18T10:04:38.227Z",
+  "generatedAt": "2026-07-19T02:35:40.731Z",
   "overallStatus": "complete",
   "stages": {
     "songs": {
@@ -73,10 +73,54 @@
         "mergedShardCount": 6
       },
       "requestStats": {
-        "requestCount": 38535,
-        "averageHtmlBytes": 65692,
-        "averageResponseTimeMs": 343,
-        "totalBytes": 2531438579
+        "requestCount": 39131,
+        "averageHtmlBytes": 65670,
+        "averageResponseTimeMs": 342,
+        "totalBytes": 2569711289
+      },
+      "incrementalRefresh": {
+        "generatedAt": "2026-07-19T02:35:40.731Z",
+        "singerCount": 4,
+        "pageCount": 29,
+        "detailPageCount": 567,
+        "occurrenceCount": 1556,
+        "songDelta": 100,
+        "videoDelta": 338,
+        "occurrenceDelta": 1556,
+        "singers": [
+          {
+            "externalSingerId": "1c111ebb-446a-459f-9e77-4696fbd611fc",
+            "singerName": "ネモ・テルミナス",
+            "pageCount": 7,
+            "uniqueSongCount": 66,
+            "detailPagesFetched": 137,
+            "stopReason": "no-next-cursor"
+          },
+          {
+            "externalSingerId": "c7d28ae3-520e-4cff-8070-a8c20d6549ca",
+            "singerName": "儚牙紺 - Kurage Kon -",
+            "pageCount": 9,
+            "uniqueSongCount": 83,
+            "detailPagesFetched": 174,
+            "stopReason": "no-next-cursor"
+          },
+          {
+            "externalSingerId": "16611f12-cf05-401c-9f24-9d8d46e2ec57",
+            "singerName": "88nia - Nia Hachiya -",
+            "pageCount": 8,
+            "uniqueSongCount": 69,
+            "detailPagesFetched": 160,
+            "stopReason": "no-next-cursor"
+          },
+          {
+            "externalSingerId": "81faf199-2bd9-412e-a0d6-56d4ffc08ebc",
+            "singerName": "Aromaの音楽",
+            "pageCount": 5,
+            "uniqueSongCount": 74,
+            "detailPagesFetched": 96,
+            "stopReason": "no-next-cursor"
+          }
+        ]
       }
     }
   },

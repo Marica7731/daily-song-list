@@ -162,6 +162,8 @@ async function checkApiRuntime(checkedAt) {
     assert(Number(source.record?.count || 0) === Number(firstRecord.count || 0), "api source detail count must match ranking count");
     assert(source.record.occurrences.length === Number(firstRecord.count || 0), "api source detail occurrence length must match ranking count");
   }
+  const nemoVideos = await checkVideoSearchProbe("ネモ・テルミナス", "api/rankings?range=all&view=videos&q=%E3%83%8D%E3%83%A2%E3%83%BB%E3%83%86%E3%83%AB%E3%83%9F%E3%83%8A%E3%82%B9&pageSize=1");
+  const kurageVideos = await checkVideoSearchProbe("儚牙紺 - Kurage Kon -", "api/rankings?range=all&view=videos&q=%E5%84%9A%E7%89%99%E7%B4%BA%20-%20Kurage%20Kon%20-&pageSize=1");
   await checkApiErrorContract();
 
   if (errors.length) {
@@ -181,10 +183,23 @@ async function checkApiRuntime(checkedAt) {
       `sourceOccurrences=${meta.counts?.source_occurrences || 0}`,
       `probeTotal=${rankings.totalCount}`,
       `probeOccurrences=${rankings.totalOccurrenceCount}`,
+      `nemoVideos=${nemoVideos.totalCount}`,
+      `kurageVideos=${kurageVideos.totalCount}`,
       `expectedCommit=${expectedApiCommitSha ? "matched" : "not-set"}`,
       `expectedLatest=${expectedApiLatestSha256 ? "matched" : "not-set"}`,
     ].join(" "),
   );
+}
+
+async function checkVideoSearchProbe(label, path) {
+  const response = await fetchJsonWithText(path);
+  assertApiSuccessHeaders(response, `api videos ${label}`);
+  const payload = response.json;
+  assert(payload.view === "videos", `api videos ${label} view mismatch`);
+  assert(Number(payload.totalCount) > 0, `api videos ${label} totalCount must be positive`);
+  assert(Number(payload.totalOccurrenceCount) > 0, `api videos ${label} totalOccurrenceCount must be positive`);
+  assert(Array.isArray(payload.records) && payload.records.length > 0, `api videos ${label} records must be non-empty`);
+  return payload;
 }
 
 async function checkApiErrorContract() {

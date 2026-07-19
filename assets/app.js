@@ -450,6 +450,7 @@ async function init() {
   state.snapshots = Array.isArray(snapshotIndex.snapshots) ? snapshotIndex.snapshots : [];
   renderSnapshotOptions();
   applyInitialUrlState();
+  normalizeTrendStateForRuntime();
   syncControlsFromState();
   const requestedSnapshotPath = state.currentSnapshotPath;
   if (requestedSnapshotPath === SNAPSHOT_LATEST_PATH && canUseRequestRuntime(state.range)) {
@@ -1180,7 +1181,8 @@ function defaultQueryDraft() {
 }
 
 function sanitizeQueryDraft(draft) {
-  return window.FrontendUtils.sanitizeQueryDraft(draft, queryDraftOptions());
+  const next = window.FrontendUtils.sanitizeQueryDraft(draft, queryDraftOptions());
+  return state.runtimeApi.available ? { ...next, trend: "all" } : next;
 }
 
 function syncQueryControlsFromDraft(draft, options = {}) {
@@ -1397,10 +1399,12 @@ function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromS
   if (els.minCountSelect?.closest(".query-field")) els.minCountSelect.closest(".query-field").hidden = state.view === "videos";
   if (els.trendFilterSelect) {
     const isLatestDraft = draft.snapshotPath === SNAPSHOT_LATEST_PATH;
-    const disabled = !rankView || !isLatestDraft || state.rankDiffLoads.has(state.range) || state.rankDiffs[state.range] === null;
+    const disabled = state.runtimeApi.available || !rankView || !isLatestDraft || state.rankDiffLoads.has(state.range) || state.rankDiffs[state.range] === null;
     els.trendFilterSelect.disabled = disabled;
     if (els.trendFilterHint) {
-      els.trendFilterHint.textContent = !isLatestDraft
+      els.trendFilterHint.textContent = state.runtimeApi.available
+        ? "API模式暂不支持趋势筛选"
+        : !isLatestDraft
         ? "历史快照不支持趋势筛选"
         : state.rankDiffLoads.has(state.range)
           ? "趋势载入中"
@@ -1846,6 +1850,23 @@ function applyInitialUrlState() {
   state.sharedUrlApplied = shouldApplySharedState;
 }
 
+function normalizeTrendStateForRuntime() {
+  if (!state.runtimeApi.available) return false;
+  let changed = false;
+  if (state.trend !== "all") {
+    state.trend = "all";
+    changed = true;
+  }
+  if (state.queryDraft?.trend && state.queryDraft.trend !== "all") {
+    state.queryDraft = { ...state.queryDraft, trend: "all" };
+    changed = true;
+  }
+  if (els.trendFilterSelect && els.trendFilterSelect.value !== "all") {
+    els.trendFilterSelect.value = "all";
+  }
+  return changed;
+}
+
 function syncControlsFromState() {
   setActiveTab(els.rangeTabs, els.rangeTabs.find((tab) => tab.dataset.range === state.range) || els.rangeTabs[0]);
   setActiveTab(els.viewTabs, els.viewTabs.find((tab) => tab.dataset.view === state.view) || els.viewTabs[0]);
@@ -1930,6 +1951,7 @@ async function restoreStateFromUrl() {
   const previousPath = state.currentSnapshotPath;
   const previousListKey = listStateKey();
   applyInitialUrlState();
+  normalizeTrendStateForRuntime();
   syncControlsFromState();
   state.expandedRows.clear();
   if (state.currentSnapshotPath !== previousPath) {
@@ -2135,8 +2157,9 @@ function runtimeMetaFromApiMeta(apiMeta, fallbackMeta = null) {
   const latestGeneratedAt = cleanText(meta.latest_generated_at || fallbackMeta?.generatedAt || builtAt);
   const latestCapturedAt = cleanText(meta.latest_captured_at || fallbackMeta?.capturedAt || latestGeneratedAt);
   const dataVersion = cleanText(meta.latest_data_version || meta.data_version || builtAt || fallbackMeta?.dataVersion || "");
+  const { diffs: _staticDiffs, ...fallbackRuntimeMeta } = fallbackMeta || {};
   return {
-    ...(fallbackMeta || {}),
+    ...fallbackRuntimeMeta,
     schemaVersion: Number(meta.schema_version) || Number(apiMeta?.schemaVersion) || Number(fallbackMeta?.schemaVersion) || 1,
     generatedAt: latestGeneratedAt,
     capturedAt: latestCapturedAt,
@@ -2655,7 +2678,10 @@ async function yieldToBrowser() {
 }
 
 function scheduleCurrentRankDiffLoad() {
-  if (!isLatestSnapshot() || state.view === "videos") return;
+  if (!isLatestSnapshot() || state.view === "videos" || state.runtimeApi.available) {
+    updateQueryAvailability();
+    return;
+  }
   loadRankDiffForRange(state.range)
     .then((loaded) => {
       if (!loaded || !isLatestSnapshot()) return;
@@ -2672,6 +2698,7 @@ function scheduleCurrentRankDiffLoad() {
 }
 
 async function loadRankDiffForRange(rangeId) {
+  if (state.runtimeApi.available) return false;
   rangeId = canonicalRangeId(rangeId);
   if (state.rankDiffs?.[rangeId]) return false;
   if (state.rankDiffLoads.has(rangeId)) return state.rankDiffLoads.get(rangeId);
@@ -2928,9 +2955,18 @@ function renderStatus(status) {
   const attemptedAt = currentStatus.attemptedAt || "";
   const failureStage = cleanText(currentStatus.failureStage || "");
   const rebuiltDerivedAt = currentStatus.rebuiltDerivedAt || state.runtimeMeta?.rebuiltDerivedAt || "";
+  const apiFreshnessAt = state.runtimeApi.available
+    ? rebuiltDerivedAt || completedAt || currentStatus.generatedAt || state.runtimeMeta?.generatedAt || capturedAt
+    : "";
+  const freshnessAt = apiFreshnessAt || capturedAt;
   const parts = [];
   if (currentStatus.status === "success") {
-    parts.push(`数据抓取于 ${formatDate(capturedAt)}`);
+    if (state.runtimeApi.available) {
+      parts.push(`数据库构建于 ${formatDate(freshnessAt)}`);
+      if (capturedAt && capturedAt !== freshnessAt) parts.push(`源数据采集于 ${formatDate(capturedAt)}`);
+    } else {
+      parts.push(`数据抓取于 ${formatDate(capturedAt)}`);
+    }
   } else {
     const failureAt = attemptedAt ? `最近尝试 ${formatDate(attemptedAt)}` : "最近尝试时间不可用";
     parts.push(`最近更新失败${failureStage ? `：${failureStage}` : ""}`);
@@ -2938,7 +2974,7 @@ function renderStatus(status) {
     if (capturedAt) parts.push(`上次成功 ${formatDate(capturedAt)}`);
   }
   if (rebuiltDerivedAt && rebuiltDerivedAt !== capturedAt) parts.push(`页面数据重建于 ${formatDate(rebuiltDerivedAt)}`);
-  const staleAge = capturedAt ? Date.now() - Date.parse(capturedAt) : 0;
+  const staleAge = freshnessAt ? Date.now() - Date.parse(freshnessAt) : 0;
   const alerts = [];
   if (Number.isFinite(staleAge) && staleAge > STATUS_STALE_MS) {
     parts.push(`超过${STATUS_STALE_MINUTES}分钟未更新`);
@@ -2951,7 +2987,7 @@ function renderStatus(status) {
     parts.push("当前使用备用数据");
     alerts.push("精简数据读取失败，当前使用备用数据");
   }
-  const displayAt = capturedAt || rebuiltDerivedAt || attemptedAt;
+  const displayAt = freshnessAt || rebuiltDerivedAt || attemptedAt;
   const statusText = currentStatus.status === "success" ? `${formatTime(displayAt)}更新` : capturedAt ? `上次成功 ${formatDate(capturedAt)}` : "状态异常";
   setStatusSummary({
     text: statusText,
@@ -2965,6 +3001,7 @@ function renderStatus(status) {
       `attemptedAt=${attemptedAt || ""}`,
       `failureStage=${failureStage || ""}`,
       `rebuiltDerivedAt=${rebuiltDerivedAt || ""}`,
+      state.runtimeApi.available ? `freshnessAt=${freshnessAt || ""}` : "",
       `dataVersion=${state.runtimeMeta?.dataVersion || ""}`,
       warning?.primaryError ? `warning=${warning.primaryError}` : "",
     ]
@@ -3592,7 +3629,7 @@ async function filterRequestIndexEntries(entries, options = {}) {
     const minCount = Number(filters.minCount) || 1;
     result = result.filter((entry) => Number(entry.rankValue) >= minCount);
   }
-  if (filters.trend && filters.trend !== "all" && (options.view === "songRank" || options.view === "artistRank")) {
+  if (!state.runtimeApi.available && filters.trend && filters.trend !== "all" && (options.view === "songRank" || options.view === "artistRank")) {
     try {
       await loadRankDiffForRange(state.range);
       const trendMode = options.view === "artistRank" ? "artistRank" : "songRank";

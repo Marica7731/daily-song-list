@@ -1,30 +1,109 @@
 {
   "schemaVersion": 1,
-  "kind": "vsinger-moment-http-backfill-report",
-  "generatedAt": "2026-07-18T10:04:38.227Z",
+  "kind": "vsinger-moment-http-backfill-increment-report",
+  "generatedAt": "2026-07-19T02:35:40.731Z",
   "counts": {
-    "songs": 59347,
-    "videos": 63341,
-    "occurrences": 523962,
+    "songs": 59447,
+    "videos": 63679,
+    "occurrences": 525518,
     "conflicts": 5841,
     "failures": 0
+  },
+  "delta": {
+    "songs": 100,
+    "videos": 338,
+    "occurrences": 1556
   },
   "manifest": {
     "shardSize": 1000,
     "shards": {
       "songs": 60,
       "videos": 64,
-      "occurrences": 524,
+      "occurrences": 526,
       "conflicts": 6,
       "coverage": 1,
       "failures": 0,
       "syncState": 1
     }
   },
+  "increments": [
+    {
+      "dir": "artifacts/vsinger-http-backfill/increments/nemo-terminus",
+      "generatedAt": "2026-07-19T02:22:53.735Z",
+      "singersProcessed": 1,
+      "uniqueSongCount": 66,
+      "uniqueVideoCount": 157,
+      "occurrenceCount": 750,
+      "stopReason": "completed-targets",
+      "singers": [
+        {
+          "externalSingerId": "1c111ebb-446a-459f-9e77-4696fbd611fc",
+          "singerName": "ネモ・テルミナス",
+          "uniqueSongCount": 66,
+          "detailPagesFetched": 137,
+          "stopReason": "no-next-cursor"
+        }
+      ]
+    },
+    {
+      "dir": "artifacts/vsinger-http-backfill/increments/kurage-kon",
+      "generatedAt": "2026-07-19T02:28:24.165Z",
+      "singersProcessed": 1,
+      "uniqueSongCount": 83,
+      "uniqueVideoCount": 103,
+      "occurrenceCount": 467,
+      "stopReason": "completed-targets",
+      "singers": [
+        {
+          "externalSingerId": "c7d28ae3-520e-4cff-8070-a8c20d6549ca",
+          "singerName": "儚牙紺 - Kurage Kon -",
+          "uniqueSongCount": 83,
+          "detailPagesFetched": 174,
+          "stopReason": "no-next-cursor"
+        }
+      ]
+    },
+    {
+      "dir": "artifacts/vsinger-http-backfill/increments/88nia",
+      "generatedAt": "2026-07-19T02:32:50.123Z",
+      "singersProcessed": 1,
+      "uniqueSongCount": 69,
+      "uniqueVideoCount": 45,
+      "occurrenceCount": 161,
+      "stopReason": "completed-targets",
+      "singers": [
+        {
+          "externalSingerId": "16611f12-cf05-401c-9f24-9d8d46e2ec57",
+          "singerName": "88nia - Nia Hachiya -",
+          "uniqueSongCount": 69,
+          "detailPagesFetched": 160,
+          "stopReason": "no-next-cursor"
+        }
+      ]
+    },
+    {
+      "dir": "artifacts/vsinger-http-backfill/increments/aroma",
+      "generatedAt": "2026-07-19T02:35:30.451Z",
+      "singersProcessed": 1,
+      "uniqueSongCount": 74,
+      "uniqueVideoCount": 33,
+      "occurrenceCount": 178,
+      "stopReason": "completed-targets",
+      "singers": [
+        {
+          "externalSingerId": "81faf199-2bd9-412e-a0d6-56d4ffc08ebc",
+          "singerName": "Aromaの音楽",
+          "uniqueSongCount": 74,
+          "detailPagesFetched": 96,
+          "stopReason": "no-next-cursor"
+        }
+      ]
+    }
+  ],
   "coverage": {
     "schemaVersion": 1,
     "kind": "vsinger-moment-http-backfill-coverage",
-    "generatedAt": "2026-07-18T10:04:38.227Z",
+    "generatedAt": "2026-07-19T02:35:40.731Z",
     "overallStatus": "complete",
     "stages": {
       "songs": {
@@ -96,10 +175,54 @@
           "mergedShardCount": 6
         },
         "requestStats": {
-          "requestCount": 38535,
-          "averageHtmlBytes": 65692,
-          "averageResponseTimeMs": 343,
-          "totalBytes": 2531438579
+          "requestCount": 39131,
+          "averageHtmlBytes": 65670,
+          "averageResponseTimeMs": 342,
+          "totalBytes": 2569711289
+        },
+        "incrementalRefresh": {
+          "generatedAt": "2026-07-19T02:35:40.731Z",
+          "singerCount": 4,
+          "pageCount": 29,
+          "detailPageCount": 567,
+          "occurrenceCount": 1556,
+          "songDelta": 100,
+          "videoDelta": 338,
+          "occurrenceDelta": 1556,
+          "singers": [
+            {
+              "externalSingerId": "1c111ebb-446a-459f-9e77-4696fbd611fc",
+              "singerName": "ネモ・テルミナス",
+              "pageCount": 7,
+              "uniqueSongCount": 66,
+              "detailPagesFetched": 137,
+              "stopReason": "no-next-cursor"
+            },
+            {
+              "externalSingerId": "c7d28ae3-520e-4cff-8070-a8c20d6549ca",
+              "singerName": "儚牙紺 - Kurage Kon -",
+              "pageCount": 9,
+              "uniqueSongCount": 83,
+              "detailPagesFetched": 174,
+              "stopReason": "no-next-cursor"
+            },
+            {
+              "externalSingerId": "16611f12-cf05-401c-9f24-9d8d46e2ec57",
+              "singerName": "88nia - Nia Hachiya -",
+              "pageCount": 8,
+              "uniqueSongCount": 69,
+              "detailPagesFetched": 160,
+              "stopReason": "no-next-cursor"
+            },
+            {
+              "externalSingerId": "81faf199-2bd9-412e-a0d6-56d4ffc08ebc",
+              "singerName": "Aromaの音楽",
+              "pageCount": 5,
+              "uniqueSongCount": 74,
+              "detailPagesFetched": 96,
+              "stopReason": "no-next-cursor"
+            }
+          ]
         }
       }
     },
@@ -136,35 +259,5 @@
     },
     "conflictCount": 5841,
     "failureCount": 0
-  },
-  "inputs": {
-    "songs": {
-      "generatedAt": "2026-07-17T22:55:08.138Z",
-      "coverageStatus": "count-mismatch",
-      "stopReason": "no-next-cursor"
-    },
-    "streams": {
-      "generatedAt": "2026-07-18T00:03:39.428Z",
-      "coverageStatus": "complete",
-      "stopReason": "no-next-cursor",
-      "detailQueueCount": 24267
-    },
-    "videoDetails": {
-      "generatedAt": "2026-07-18T00:21:12.632Z",
-      "fetchedCount": 600
-    },
-    "singerSongs": {
-      "generatedAt": "2026-07-18T10:00:20.774Z",
-      "singersProcessed": 393,
-      "uniqueSongCount": 3048,
-      "occurrenceCount": 121890,
-      "ownerPermission": {
-        "enabled": true,
-        "note": "site-owner email authorization",
-        "acceptedAt": "2026-07-18T07:31:52.606Z",
-        "robotsSingerSongsQueryAllowed": false,
-        "mergedShardCount": 6
-      }
-    }
   }
 }
