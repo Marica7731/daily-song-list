@@ -7,6 +7,7 @@ This is the first deployable step away from committing tens of thousands of fron
 - `scripts/db/build-runtime-db.py` builds `artifacts/runtime/song-rank.sqlite` from `data/latest.json`.
 - `scripts/db/export-runtime-rankings.js` reuses the existing frontend/runtime JS merge rules to export derived ranking rows without writing `data/ui` shards.
 - The same builder imports the public VSinger Moment backfill shards into normalized raw `external_*` tables.
+- The builder derives `channel_metadata` from reviewed YouTube channel discovery rows and cached public channel metadata.
 - `scripts/db/query-runtime-db.py` provides smoke-test reads with a completion marker.
 - `server/song_rank_api.py` serves read-only HTTP endpoints for rankings, metadata, health, and source details.
 - The API exposes `view=vtubers` for channel/VTuber rankings; the frontend API-mode tab is `vtuberRank`.
@@ -152,7 +153,7 @@ Supported query parameters:
 
 - `range`: `7d` or `all`; default `all`.
 - `view`: `songs`, `songIndex`, `artists`, `videos`, `vtubers`, or `vsingerSongs`; default `songs`.
-- `metric`: `occurrences`, `count`, or `videos`; `videos` is valid for `songs`, `artists`, and `vtubers`. Non-video metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
+- `metric`: `occurrences`, `count`, `songs`, or `videos`; `videos` is valid for `songs`, `artists`, and `vtubers`, and `songs` is valid for `vtubers`. Non-video/song metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
 - `q`: optional case-insensitive search. The match scope is tab-specific; see below.
 - `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos` and `vtubers`, `minCount` is ignored by the UI/API ranking view.
 - `page`: 1-based page number.
@@ -171,6 +172,7 @@ Response fields:
 - `totalCount`: number of rows after search and filters.
 - `filteredBaseCount`: number of rows before search/min-count filters for the same range/view/metric.
 - `totalOccurrenceCount`: sum of `count` across the filtered rows.
+- `totalSongCount`: sum of `songCount` across filtered rows when available. It is mainly for `view=vtubers&metric=songs`.
 - `totalVideoCount`: sum of `videoCount` across the filtered rows. It remains available for diagnostics and API clients, but the frontend summary does not display it for song, artist, or VTuber rankings because it is not a unique-video count.
 - `pageCount`: total pages for the current filtered query.
 - `records`: display-ready rows; song and artist rows include `sourceDetailKey` when full source details are available.
@@ -182,8 +184,8 @@ Record shapes are intentionally display-ready and may include extra frontend fie
 | `songs` | `rank`, `type`, `title`, `displayArtist`, `count`, `videoCount`, `timestampCount`, `artists`, `channels`, `occurrences` preview, `sourceDetailKey` when full details exist; source-context searches may also include `matchedBySource`, `sourceFilterQuery`, `sourceDetailPath`, `globalRank`, `globalCount`, `globalVideoCount`, `globalTimestampCount` |
 | `songIndex` | `rank`, `type`, `title`, `sortKey`, `count`, `videoCount`, `timestampCount`, `sourceDetailKey` when full details exist; source-context searches use the same contextual fields as `songs` |
 | `artists` | `rank`, `type`, `name`, `count`, `videoCount`, `timestampCount`, `songs` preview, `sourceDetailKey` when full details exist |
-| `videos` | `rank`, `type`, `videoId`, `title`, `channelName`, `count`, `timestampCount`, `publishedTimestamp`, `thumbnailUrl` |
-| `vtubers` | `rank`, `type`, `key`, `name`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `count`, `videoCount`, `timestampCount`, `songs` preview, `occurrences` preview |
+| `videos` | `rank`, `type`, `videoId`, `title`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `avatarUrl`, `sourceUrl`, `knownSourceType`, `isCollected`, `count`, `timestampCount`, `publishedTimestamp`, `publishedAt`, `timeMissingReason`, `thumbnailUrl` |
+| `vtubers` | `rank`, `type`, `key`, `name`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `avatarUrl`, `sourceUrl`, `knownSourceType`, `isCollected`, `count`, `songCount`, `videoCount`, `timestampCount`, `songs` preview, `occurrences` preview |
 | `vsingerSongs` | `rank`, `type`, `title`, `artist`, `singerName`, `count`, `videoCount`, `sourceDetailKey` when full details exist |
 
 Sorting is by stored `rank` ascending for unfiltered requests and for `songIndex`. For `songs` source-context searches, the API re-ranks the filtered result by contextual `count` or `videoCount` so a channel query is ordered by that channel's matching sources instead of the all-site rank.
@@ -244,6 +246,7 @@ Supported ranking views in this first step:
 
 - Raw source tables are append-friendly and auditable: `external_songs`, `external_videos`, and `external_occurrences` keep the VSinger Moment source IDs and occurrence rows.
 - Runtime entity tables are query support data: `videos`, `songs`, and `occurrences` are built from `data/latest.json` after VSinger import is applied.
+- `channel_metadata` is a query-support table keyed by channel ID, handle, or channel URL-derived handle. It stores `channelId`, `handle`, `displayName`, `avatarUrl`, `sourceUrl`, `channelUrl`, `knownSourceType`, and `isCollected` for backend clients.
 - Reviewed YouTube channel補漏 increments are small source-like overlays in `data/external/youtube-channel-discovery/accepted/*.json`; they are merged into the runtime entity build, but are not raw VSinger rows and do not rewrite the committed static JSON runtime.
 - Derived query tables are display-ready: `ranking_rows`, `source_details`, and `source_occurrences` reuse `scripts/vsinger-http/runtime-importer.js`, `scripts/youtube-channel-discovery-runtime.js`, and `assets/ranking-utils.js`, so title variants, song versions, artist aliases, and unknown-artist handling stay consistent with the frontend.
 - `source_details` stores the entity summary and preview; `source_occurrences` stores the full derived source list by `source_key` so large songs do not become multi-megabyte JSON blobs.
@@ -301,7 +304,7 @@ When changing any API field, ranking metric, derived merge rule, or source-detai
 Before merging an API or deploy change, run this minimum contract matrix:
 
 - DB build/probe: `npm run db:build` and `npm run db:probe -- --range all --view songs --q 少女レイ --page-size 5 --summary-only`; for channel補漏, also probe `--view videos --q ノア・ポラリス`.
-- Fast channel補漏 probe: `npm run db:build -- --no-vsinger --output artifacts/runtime/song-rank-youtube-check.sqlite`, then query `songs`, `videos`, and `vtubers` for the imported channel handles. This is only a local YouTube overlay check; production still needs the full DB build.
+- Fast channel補漏 probe: `npm run db:build -- --no-vsinger --output artifacts/runtime/song-rank-youtube-check.sqlite`, then query `songs`, `videos`, and `vtubers` for the imported channel handles. Include `view=vtubers&metric=songs` to verify unique-song sorting. This is only a local YouTube overlay check; production still needs the full DB build.
 - API smoke test: `npm run api:serve`, then `npm run check:published:api -- http://127.0.0.1/`.
 - Frontend fallback check: load the static page without the API or run the normal static `npm run check:published -- <base-url>` path.
 - Deployment check: after GitHub Actions uploads the DB, run `npm run check:published:api -- http://127.0.0.1/` on VPS2 and again against the public domain after DNS cutover.

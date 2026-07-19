@@ -102,6 +102,14 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(vtuberVideoMetric.metric, "videos");
     assert.equal(vtuberVideoMetric.records[0].videoCount, 2);
 
+    const vtuberSongMetric = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&metric=songs&q=Alpha&pageSize=5`);
+    assert.equal(vtuberSongMetric.metric, "songs");
+    assert.equal(vtuberSongMetric.totalSongCount, 3);
+    assert.equal(vtuberSongMetric.records[0].songCount, 3);
+    assert.equal(vtuberSongMetric.records[0].avatarUrl, "https://example.test/alpha-avatar.png");
+    assert.equal(vtuberSongMetric.records[0].isCollected, true);
+    assert.equal(vtuberSongMetric.records[0].knownSourceType, "manual");
+
     const vtuberAliasSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=HanamaeHaru&pageSize=5`);
     assert.equal(vtuberAliasSearch.totalCount, 1);
     assert.equal(vtuberAliasSearch.records[0].name, "Haru Ch. 花前ハル");
@@ -135,6 +143,9 @@ function writeLatestFixture(latestPath) {
               videoId: "video-a",
               title: "Morning Karaoke",
               channelName: "Alpha Ch.",
+              avatarUrl: "https://example.test/alpha-avatar.png",
+              knownSourceType: "manual",
+              isCollected: true,
               publishedTimestamp: 1784419200000,
               publishedText: "2026-07-19",
               songs: [
@@ -150,6 +161,9 @@ function writeLatestFixture(latestPath) {
               videoId: "video-a",
               title: "Morning Karaoke",
               channelName: "Alpha Ch.",
+              avatarUrl: "https://example.test/alpha-avatar.png",
+              knownSourceType: "manual",
+              isCollected: true,
               publishedTimestamp: 1784419200000,
               publishedText: "2026-07-19",
               songs: [

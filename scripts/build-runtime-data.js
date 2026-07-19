@@ -196,6 +196,7 @@ function buildClientGroup(group) {
 }
 
 function buildClientVideo(item) {
+  const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
   const result = {
     videoId: item.videoId || "",
     title: item.title || "",
@@ -203,9 +204,15 @@ function buildClientVideo(item) {
     channelId: item.channelId || "",
     channelHandle: item.channelHandle || "",
     channelUrl: item.channelUrl || item.authorUrl || item.ownerUrl || "",
+    avatarUrl: item.avatarUrl || item.channelAvatarUrl || "",
+    sourceUrl: item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl || "",
+    knownSourceType: item.knownSourceType || knownSourceTypeForVideo(item),
+    isCollected: item.isCollected === true || isCollectedSource(item),
     keyword: item.keyword || "",
     publishedText: item.publishedText || "",
-    publishedTimestamp: finiteTimestamp(item.publishedTimestamp),
+    publishedTimestamp,
+    publishedAt: timestampToIso(publishedTimestamp),
+    timeMissingReason: publishedTimestamp ? "" : timeMissingReasonForVideo(item),
     catalogFirstSeenAt: item.catalogFirstSeenAt || item.firstSeenAt || "",
     catalogLastSeenAt: item.catalogLastSeenAt || item.lastSeenAt || "",
     catalogLastInspectedAt: item.catalogLastInspectedAt || item.lastInspectedAt || "",
@@ -214,6 +221,33 @@ function buildClientVideo(item) {
   };
   if (!result.channelUrl) delete result.channelUrl;
   return result;
+}
+
+function knownSourceTypeForVideo(item) {
+  if (item.knownSourceType) return item.knownSourceType;
+  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  if (sourceGroups.includes("youtube_channel_discovery")) return "youtube_channel_discovery";
+  if (sourceGroups.includes("vsinger-moment")) return "vsinger_moment_http";
+  return item.sourceQuality?.sourceSystem || "";
+}
+
+function isCollectedSource(item) {
+  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  return (
+    sourceGroups.includes("youtube_channel_discovery") ||
+    sourceGroups.includes("vsinger-moment") ||
+    item.sourceQuality?.sourceType === "external" ||
+    item.sourceQuality?.sourceSystem === "vsinger_moment_http"
+  );
+}
+
+function timestampToIso(value) {
+  return value ? new Date(value).toISOString() : "";
+}
+
+function timeMissingReasonForVideo(item) {
+  if (!item?.videoId) return "missing_video_id";
+  return "youtube_published_timestamp_unavailable";
 }
 
 function runtimeThumbnailUrl(item) {
@@ -1333,7 +1367,14 @@ function directChannelRecordKey(item) {
   if (channelId) return channelId;
   const handle = cleanText(item?.channelHandle).replace(/^\/+/, "");
   if (handle) return normalizeSearchText(handle);
+  const urlHandle = handleFromChannelUrl(item?.channelUrl || item?.authorUrl || item?.ownerUrl);
+  if (urlHandle) return normalizeSearchText(urlHandle);
   return "";
+}
+
+function handleFromChannelUrl(value) {
+  const match = String(value || "").match(/youtube\.com\/(@[A-Za-z0-9._-]+)/iu);
+  return match ? match[1] : "";
 }
 
 function channelNameIdentityKey(item) {

@@ -239,6 +239,7 @@ def create_schema(conn: sqlite3.Connection) -> bool:
           artist TEXT NOT NULL DEFAULT '',
           name TEXT NOT NULL DEFAULT '',
           count INTEGER NOT NULL DEFAULT 0,
+          song_count INTEGER NOT NULL DEFAULT 0,
           video_count INTEGER NOT NULL DEFAULT 0,
           timestamp_count INTEGER NOT NULL DEFAULT 0,
           payload_json TEXT NOT NULL,
@@ -246,6 +247,21 @@ def create_schema(conn: sqlite3.Connection) -> bool:
         );
         CREATE INDEX idx_ranking_lookup ON ranking_rows(range_id, view, metric, scope_key, rank);
         CREATE INDEX idx_ranking_detail ON ranking_rows(range_id, view, detail_key);
+
+        CREATE TABLE channel_metadata (
+          channel_key TEXT PRIMARY KEY,
+          channel_id TEXT NOT NULL DEFAULT '',
+          handle TEXT NOT NULL DEFAULT '',
+          display_name TEXT NOT NULL DEFAULT '',
+          avatar_url TEXT NOT NULL DEFAULT '',
+          source_url TEXT NOT NULL DEFAULT '',
+          channel_url TEXT NOT NULL DEFAULT '',
+          known_source_type TEXT NOT NULL DEFAULT '',
+          is_collected INTEGER NOT NULL DEFAULT 0,
+          payload_json TEXT NOT NULL
+        );
+        CREATE INDEX idx_channel_metadata_handle ON channel_metadata(handle);
+        CREATE INDEX idx_channel_metadata_channel_id ON channel_metadata(channel_id);
 
         CREATE TABLE source_details (
           source_key TEXT PRIMARY KEY,
@@ -375,6 +391,7 @@ def ingest_latest_payload(
             video_id = video_key(item)
             all_video_ids.add(video_id)
             upsert_video(conn, video_id, item)
+            upsert_channel_metadata(conn, item)
 
             item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
             valid_songs = [song for song in item_songs if isinstance(song, dict) and clean_text(song.get("title"))]
@@ -523,6 +540,7 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
                         "artist": clean_text(record.get("artist")),
                         "name": clean_text(record.get("name")),
                         "count": int(record.get("count") or 0),
+                        "song_count": int(record.get("songCount") or 0),
                         "video_count": int(record.get("videoCount") or 0),
                         "timestamp_count": int(record.get("timestampCount") or record.get("count") or 0),
                         "payload": record.get("payload") if isinstance(record.get("payload"), dict) else {},
@@ -558,6 +576,7 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
                 if video_id:
                     video_ids.add(video_id)
                 upsert_video(conn, video_id, item)
+                upsert_channel_metadata(conn, item)
                 item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
                 valid_songs = [song for song in item_songs if isinstance(song, dict) and clean_text(song.get("title"))]
                 for song_index, song in enumerate(valid_songs):
@@ -592,6 +611,7 @@ def empty_range_state() -> dict:
 
 
 def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: list[dict]) -> None:
+    published_timestamp = int_or_none(item.get("publishedTimestamp"))
     payload = {
         "type": "video",
         "key": video_id,
@@ -601,8 +621,14 @@ def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: l
         "channelId": clean_text(item.get("channelId")),
         "channelHandle": clean_text(item.get("channelHandle")),
         "channelUrl": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
+        "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
+        "sourceUrl": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
+        "knownSourceType": clean_text(item.get("knownSourceType")) or known_source_type(item),
+        "isCollected": bool(item.get("isCollected")) or is_collected_source(item),
         "keyword": clean_text(item.get("keyword")),
-        "publishedTimestamp": int_or_none(item.get("publishedTimestamp")),
+        "publishedTimestamp": published_timestamp,
+        "publishedAt": timestamp_to_iso(published_timestamp),
+        "timeMissingReason": "" if published_timestamp else time_missing_reason(item),
         "publishedText": clean_text(item.get("publishedText")),
         "durationText": clean_text(item.get("durationText")),
         "thumbnailUrl": clean_text(item.get("thumbnailUrl") or item.get("thumbnail")),
@@ -617,6 +643,7 @@ def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: l
             "artist": "",
             "name": payload["channelName"],
             "count": len(songs),
+            "song_count": len({normalize_key(song.get("title")) for song in songs if clean_text(song.get("title"))}),
             "video_count": 1,
             "timestamp_count": len(songs),
             "payload": payload,
@@ -694,6 +721,10 @@ def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> 
             "channel_id": clean_text(item.get("channelId")),
             "channel_handle": clean_text(item.get("channelHandle")),
             "channel_url": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
+            "avatar_url": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
+            "source_url": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
+            "known_source_type": clean_text(item.get("knownSourceType")) or known_source_type(item),
+            "is_collected": bool(item.get("isCollected")) or is_collected_source(item),
             "count": 0,
             "videos": set(),
             "songs": {},
@@ -702,6 +733,7 @@ def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> 
     record = state["vtubers"][channel_key]
     if video_id:
         record["videos"].add(video_id)
+    merge_channel_record_identity(record, item)
     for song in songs:
         record["count"] += 1
         increment_count(record["songs"], clean_text(song.get("title")))
@@ -717,8 +749,36 @@ def build_ranking_rows(range_id: str, state: dict) -> list[dict]:
     rows.extend(rank_rows_for_artists(range_id, state["artists"].values()))
     rows.extend(rank_rows_for_artists(range_id, state["artists"].values(), metric="videos"))
     rows.extend(rank_rows_for_vtubers(range_id, state["vtubers"].values()))
+    rows.extend(rank_rows_for_vtubers(range_id, state["vtubers"].values(), metric="songs"))
     rows.extend(rank_rows_for_vtubers(range_id, state["vtubers"].values(), metric="videos"))
     return rows
+
+
+def merge_channel_record_identity(record: dict, item: dict) -> None:
+    channel_name = clean_text(item.get("channelName"))
+    channel_id = clean_text(item.get("channelId"))
+    channel_handle = clean_text(item.get("channelHandle"))
+    channel_url = clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"))
+    avatar_url = clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl"))
+    source_url = clean_text(item.get("sourceUrl") or channel_url)
+    source_type = clean_text(item.get("knownSourceType")) or known_source_type(item)
+    if channel_name:
+        record["channel_name"] = record["channel_name"] or channel_name
+        if not record["name"] or record["name"] == "未知频道":
+            record["name"] = channel_name
+    if channel_id:
+        record["channel_id"] = record["channel_id"] or channel_id
+    if channel_handle:
+        record["channel_handle"] = record["channel_handle"] or channel_handle
+    if channel_url:
+        record["channel_url"] = record["channel_url"] or channel_url
+    if avatar_url:
+        record["avatar_url"] = record["avatar_url"] or avatar_url
+    if source_url:
+        record["source_url"] = record["source_url"] or source_url
+    if source_type:
+        record["known_source_type"] = record["known_source_type"] or source_type
+    record["is_collected"] = bool(record.get("is_collected")) or is_collected_source(item)
 
 
 def rank_rows_for_videos(range_id: str, records: list[dict]) -> list[dict]:
@@ -854,7 +914,12 @@ def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list
             "channelId": record["channel_id"],
             "channelHandle": record["channel_handle"],
             "channelUrl": record["channel_url"],
+            "avatarUrl": record.get("avatar_url", ""),
+            "sourceUrl": record.get("source_url", "") or record["channel_url"],
+            "knownSourceType": record.get("known_source_type", ""),
+            "isCollected": bool(record.get("is_collected")),
             "count": record["count"],
+            "songCount": len(record["songs"]),
             "videoCount": len(record["videos"]),
             "timestampCount": record["count"],
             "songs": count_map_to_list(record["songs"]),
@@ -866,6 +931,7 @@ def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list
             "artist": "",
             "name": record["name"],
             "count": record["count"],
+            "song_count": len(record["songs"]),
             "video_count": len(record["videos"]),
             "timestamp_count": record["count"],
             "payload": payload,
@@ -876,6 +942,9 @@ def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list
 
 
 def rank_metric_value(record: dict, metric: str) -> int:
+    if metric == "songs":
+        songs = record.get("songs")
+        return len(songs) if hasattr(songs, "__len__") else int(record.get("song_count") or 0)
     if metric == "videos":
         videos = record.get("videos")
         return len(videos) if hasattr(videos, "__len__") else int(record.get("video_count") or 0)
@@ -895,6 +964,7 @@ def row_payload(range_id: str, view: str, rank: int, record: dict, metric: str =
         "artist": record.get("artist", ""),
         "name": record.get("name", ""),
         "count": int(record.get("count") or 0),
+        "song_count": int(record.get("song_count") or 0),
         "video_count": int(record.get("video_count") or 0),
         "timestamp_count": int(record.get("timestamp_count") or 0),
         "payload": record.get("payload", {}),
@@ -910,9 +980,9 @@ def insert_ranking_row(conn: sqlite3.Connection, row: dict, fts_enabled: bool) -
         """
         INSERT INTO ranking_rows(
           row_id, range_id, view, metric, scope_key, rank, detail_key, title, artist, name,
-          count, video_count, timestamp_count, payload_json, search_text
+          count, song_count, video_count, timestamp_count, payload_json, search_text
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             row["row_id"],
@@ -926,6 +996,7 @@ def insert_ranking_row(conn: sqlite3.Connection, row: dict, fts_enabled: bool) -
             row["artist"],
             row["name"],
             row["count"],
+            row["song_count"],
             row["video_count"],
             row["timestamp_count"],
             dumps_json(row["payload"]),
@@ -1276,6 +1347,54 @@ def upsert_video(conn: sqlite3.Connection, video_id: str, item: dict) -> None:
     )
 
 
+def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
+    channel_key = channel_record_key(item)
+    if not channel_key:
+        return
+    channel_url = clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"))
+    payload = {
+        "channelId": clean_text(item.get("channelId")),
+        "handle": clean_text(item.get("channelHandle")),
+        "displayName": clean_text(item.get("channelName") or item.get("channelHandle") or item.get("channelId")),
+        "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
+        "sourceUrl": clean_text(item.get("sourceUrl") or channel_url),
+        "channelUrl": channel_url,
+        "knownSourceType": clean_text(item.get("knownSourceType")) or known_source_type(item),
+        "isCollected": bool(item.get("isCollected")) or is_collected_source(item),
+    }
+    conn.execute(
+        """
+        INSERT INTO channel_metadata(
+          channel_key, channel_id, handle, display_name, avatar_url, source_url, channel_url,
+          known_source_type, is_collected, payload_json
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(channel_key) DO UPDATE SET
+          channel_id=COALESCE(NULLIF(channel_metadata.channel_id, ''), excluded.channel_id),
+          handle=COALESCE(NULLIF(channel_metadata.handle, ''), excluded.handle),
+          display_name=COALESCE(NULLIF(channel_metadata.display_name, ''), excluded.display_name),
+          avatar_url=COALESCE(NULLIF(channel_metadata.avatar_url, ''), excluded.avatar_url),
+          source_url=COALESCE(NULLIF(channel_metadata.source_url, ''), excluded.source_url),
+          channel_url=COALESCE(NULLIF(channel_metadata.channel_url, ''), excluded.channel_url),
+          known_source_type=COALESCE(NULLIF(channel_metadata.known_source_type, ''), excluded.known_source_type),
+          is_collected=MAX(channel_metadata.is_collected, excluded.is_collected),
+          payload_json=excluded.payload_json
+        """,
+        (
+            channel_key,
+            payload["channelId"],
+            payload["handle"],
+            payload["displayName"],
+            payload["avatarUrl"],
+            payload["sourceUrl"],
+            payload["channelUrl"],
+            payload["knownSourceType"],
+            1 if payload["isCollected"] else 0,
+            dumps_json(payload),
+        ),
+    )
+
+
 def upsert_song(conn: sqlite3.Connection, song_key: str, song: dict) -> None:
     conn.execute(
         """
@@ -1399,6 +1518,7 @@ def source_payload_for_video(item: dict, songs: list[dict]) -> dict:
 
 
 def compact_video(item: dict) -> dict:
+    published_timestamp = int_or_none(item.get("publishedTimestamp"))
     return {
         "videoId": clean_text(item.get("videoId")),
         "title": clean_text(item.get("title")),
@@ -1406,12 +1526,51 @@ def compact_video(item: dict) -> dict:
         "channelId": clean_text(item.get("channelId")),
         "channelHandle": clean_text(item.get("channelHandle")),
         "channelUrl": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
+        "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
+        "sourceUrl": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
+        "knownSourceType": clean_text(item.get("knownSourceType")) or known_source_type(item),
+        "isCollected": bool(item.get("isCollected")) or is_collected_source(item),
         "keyword": clean_text(item.get("keyword")),
-        "publishedTimestamp": int_or_none(item.get("publishedTimestamp")),
+        "publishedTimestamp": published_timestamp,
+        "publishedAt": timestamp_to_iso(published_timestamp),
+        "timeMissingReason": "" if published_timestamp else time_missing_reason(item),
         "publishedText": clean_text(item.get("publishedText")),
         "durationText": clean_text(item.get("durationText")),
         "thumbnailUrl": clean_text(item.get("thumbnailUrl") or item.get("thumbnail")),
     }
+
+
+def known_source_type(item: dict) -> str:
+    source_groups = item.get("sourceGroups") if isinstance(item.get("sourceGroups"), list) else []
+    if "youtube_channel_discovery" in source_groups:
+        return "youtube_channel_discovery"
+    if "vsinger-moment" in source_groups:
+        return "vsinger_moment_http"
+    source_quality = item.get("sourceQuality") if isinstance(item.get("sourceQuality"), dict) else {}
+    return clean_text(source_quality.get("sourceSystem"))
+
+
+def is_collected_source(item: dict) -> bool:
+    source_groups = item.get("sourceGroups") if isinstance(item.get("sourceGroups"), list) else []
+    source_quality = item.get("sourceQuality") if isinstance(item.get("sourceQuality"), dict) else {}
+    return (
+        "youtube_channel_discovery" in source_groups
+        or "vsinger-moment" in source_groups
+        or source_quality.get("sourceType") == "external"
+        or source_quality.get("sourceSystem") == "vsinger_moment_http"
+    )
+
+
+def timestamp_to_iso(value: int | None) -> str:
+    if not value:
+        return ""
+    return dt.datetime.fromtimestamp(value / 1000, tz=dt.timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def time_missing_reason(item: dict) -> str:
+    if not clean_text(item.get("videoId")):
+        return "missing_video_id"
+    return "youtube_published_timestamp_unavailable"
 
 
 def compact_song(song: dict) -> dict:
@@ -1469,8 +1628,22 @@ def channel_record_key(item: dict) -> str:
     channel_handle = clean_text(item.get("channelHandle")).lstrip("/")
     if channel_handle:
         return normalize_key(channel_handle)
+    channel_url_handle = handle_from_channel_url(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")).lstrip("/")
+    if channel_url_handle:
+        return normalize_key(channel_url_handle)
     channel_name = clean_text(item.get("channelName"))
     return normalize_key(channel_name) if channel_name else ""
+
+
+def handle_from_channel_url(value) -> str:
+    text = clean_text(value)
+    marker = "youtube.com/@"
+    lower = text.lower()
+    index = lower.find(marker)
+    if index < 0:
+        return ""
+    handle = text[index + len("youtube.com/") :].split("?", 1)[0].split("#", 1)[0].strip("/")
+    return handle
 
 
 def stable_key(*parts) -> str:

@@ -161,6 +161,7 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
         { type: "artist", view: "artists", records: sortRankRecords(artistRecords, "occurrences"), metric: "count", sourcePrefix: "artist", order: "rank" },
         { type: "artist", view: "artists", records: sortRankRecords(artistRecords, "videos"), metric: "videos", sourcePrefix: "artist", order: "rank" },
         { type: "vtuber", view: "vtubers", records: sortRankRecords(vtuberRecords, "occurrences"), metric: "count", sourcePrefix: "vtuber", order: "rank" },
+        { type: "vtuber", view: "vtubers", records: sortRankRecords(vtuberRecords, "songs"), metric: "songs", sourcePrefix: "vtuber", order: "rank" },
         { type: "vtuber", view: "vtubers", records: sortRankRecords(vtuberRecords, "videos"), metric: "videos", sourcePrefix: "vtuber", order: "rank" },
         { type: "video", view: "videos", records: videoRecords, metric: "count", sourcePrefix: "video", order: "position" },
       ];
@@ -187,6 +188,7 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
             artist: payloadRecord.displayArtist || payloadRecord.artist || "",
             name: payloadRecord.name || payloadRecord.channelName || "",
             count: Number(payloadRecord.count) || 0,
+            songCount: Number(payloadRecord.songCount) || 0,
             videoCount: Number(payloadRecord.videoCount) || 0,
             timestampCount: Number(payloadRecord.timestampCount ?? payloadRecord.count) || 0,
             payload: payloadRecord,
@@ -388,7 +390,12 @@ function buildVtuberRequestItems(items) {
         channelId: RankingUtils.cleanText(item.channelId),
         channelHandle: RankingUtils.cleanText(item.channelHandle),
         channelUrl: RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl),
+        avatarUrl: RankingUtils.cleanText(item.avatarUrl || item.channelAvatarUrl),
+        sourceUrl: RankingUtils.cleanText(item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl),
+        knownSourceType: RankingUtils.cleanText(item.knownSourceType),
+        isCollected: item.isCollected === true || isCollectedSource(item),
         count: 0,
+        songCount: 0,
         videoCount: 0,
         timestampCount: 0,
         videos: new Set(),
@@ -416,6 +423,7 @@ function buildVtuberRequestItems(items) {
   }
   return Array.from(records.values()).map((record) => {
     record.videoCount = record.videos.size;
+    record.songCount = record.songs.size;
     record.aliases = Array.from(record.aliases.values());
     record.searchText = requestRecordSearchText(record, "vtuber");
     return record;
@@ -453,7 +461,14 @@ function directChannelRecordKey(item) {
   if (channelId) return channelId;
   const handle = RankingUtils.cleanText(item.channelHandle).replace(/^\/+/, "");
   if (handle) return normalizeSearchText(handle);
+  const urlHandle = handleFromChannelUrl(item.channelUrl || item.authorUrl || item.ownerUrl);
+  if (urlHandle) return normalizeSearchText(urlHandle);
   return "";
+}
+
+function handleFromChannelUrl(value) {
+  const match = String(value || "").match(/youtube\.com\/(@[A-Za-z0-9._-]+)/iu);
+  return match ? match[1] : "";
 }
 
 function channelNameIdentityKey(item) {
@@ -466,6 +481,9 @@ function mergeChannelRecordIdentity(record, item) {
   const channelId = RankingUtils.cleanText(item.channelId);
   const channelHandle = RankingUtils.cleanText(item.channelHandle);
   const channelUrl = RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
+  const avatarUrl = RankingUtils.cleanText(item.avatarUrl || item.channelAvatarUrl);
+  const sourceUrl = RankingUtils.cleanText(item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl);
+  const knownSourceType = RankingUtils.cleanText(item.knownSourceType || knownSourceTypeForVideo(item));
   if (channelName) {
     record.aliases.add(channelName);
     if (!record.channelName) record.channelName = channelName;
@@ -484,7 +502,28 @@ function mergeChannelRecordIdentity(record, item) {
     record.aliases.add(channelUrl);
     if (!record.channelUrl) record.channelUrl = channelUrl;
   }
+  if (avatarUrl && !record.avatarUrl) record.avatarUrl = avatarUrl;
+  if (sourceUrl && !record.sourceUrl) record.sourceUrl = sourceUrl;
+  if (knownSourceType && !record.knownSourceType) record.knownSourceType = knownSourceType;
+  record.isCollected = record.isCollected === true || isCollectedSource(item);
   for (const alias of knownChannelSearchAliases(channelName)) record.aliases.add(alias);
+}
+
+function knownSourceTypeForVideo(item) {
+  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  if (sourceGroups.includes("youtube_channel_discovery")) return "youtube_channel_discovery";
+  if (sourceGroups.includes("vsinger-moment")) return "vsinger_moment_http";
+  return item.sourceQuality?.sourceSystem || "";
+}
+
+function isCollectedSource(item) {
+  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  return (
+    sourceGroups.includes("youtube_channel_discovery") ||
+    sourceGroups.includes("vsinger-moment") ||
+    item.sourceQuality?.sourceType === "external" ||
+    item.sourceQuality?.sourceSystem === "vsinger_moment_http"
+  );
 }
 
 function knownChannelSearchAliases(channelName) {
@@ -577,8 +616,13 @@ function serializeVtuberRequestRecord(record, options = {}) {
     channelId: record.channelId || "",
     channelHandle: record.channelHandle || "",
     channelUrl: record.channelUrl || "",
+    avatarUrl: record.avatarUrl || "",
+    sourceUrl: record.sourceUrl || record.channelUrl || "",
+    knownSourceType: record.knownSourceType || "",
+    isCollected: record.isCollected === true,
     aliases: Array.isArray(record.aliases) ? record.aliases : [],
     count: Number(record.count) || 0,
+    songCount: Number(record.songCount) || 0,
     videoCount: Number(record.videoCount) || 0,
     timestampCount: Number(record.timestampCount ?? record.count) || 0,
     songs: serializeCountMap(record.songs),
@@ -646,6 +690,7 @@ function buildRequestRanks(records, metric) {
 }
 
 function requestRankValue(record, metric) {
+  if (metric === "songs") return Number(record.songCount) || 0;
   return metric === "videos" ? Number(record.videoCount) || 0 : Number(record.count) || 0;
 }
 
