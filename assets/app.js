@@ -6033,7 +6033,6 @@ function renderRecordContent(title, meta, options) {
     mode = "song",
     record = null,
     occurrences,
-    record = null,
     songGroups = [],
     songCount = songGroups.length,
     songPreview = songGroups.slice(0, 2).map((group) => group.title),
@@ -6060,7 +6059,7 @@ function renderRecordContent(title, meta, options) {
   if (mode === "vtuber") {
     const titleLine = document.createElement("div");
     titleLine.className = "vtuber-title-line";
-    titleLine.append(renderVtuberDisplayImage(record), heading);
+    titleLine.append(heading);
     const collectedBadge = renderVtuberCollectionBadge(record);
     if (collectedBadge) titleLine.append(collectedBadge);
     content.append(titleLine);

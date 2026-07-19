@@ -1253,23 +1253,11 @@ mark {
 
 .vtuber-title-line {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-area: title;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   min-width: 0;
-}
-
-.vtuber-avatar {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: #e4e7ec;
-  object-fit: cover;
-}
-
-.vtuber-avatar-fallback {
-  border-color: rgba(15, 118, 110, 0.22);
 }
 
 .vtuber-title-line .rank-title {
@@ -3037,13 +3025,8 @@ mark {
   }
 
   .vtuber-title-line {
-    grid-template-columns: 34px minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 7px;
-  }
-
-  .vtuber-avatar {
-    width: 34px;
-    height: 34px;
   }
 
   .vtuber-collected-badge {

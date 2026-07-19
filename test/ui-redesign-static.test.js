@@ -83,7 +83,7 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.doesNotMatch(appSource, /function sourceBatchSizeForMode/u);
   assert.match(appSource, /shouldKeepSingleDrawerOpen\(\)/u);
   assert.doesNotMatch(appSource, /SOURCE_EXPAND_CHUNK_SIZE|convertSourceGroupMoreToCollapse|data-toggle-source-groups|function expandSourceVideoGroups/u);
-  assert.match(appSource, /appendSourceGroupRange\(drawer, groups, sourceRenderedGroupCount\(drawer\), visibleCount\)/u);
+  assert.match(appSource, /appendSourceGroupRange\(drawer, groups, 0, visibleCount\)/u);
   assert.match(appSource, /document\.createDocumentFragment\(\)/u);
   assert.doesNotMatch(appSource, /查看更多 \$\{remaining\}个来源/u);
   assert.match(appSource, /dataset\.collapseSource = "true"/u);
@@ -176,8 +176,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(appSource, /FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
   assert.match(appSource, /function renderVtuberCollectionBadge/u);
   assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
-  assert.match(cssSource, /\.vtuber-title-line\s*\{[\s\S]*grid-template-columns: 40px minmax\(0, 1fr\) auto;/u);
-  assert.match(cssSource, /\.vtuber-avatar\s*\{[\s\S]*width: 40px;[\s\S]*height: 40px;/u);
+  assert.match(cssSource, /\.vtuber-title-line\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
+  assert.match(cssSource, /\.vtuber-display-image\s*\{[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
   assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
