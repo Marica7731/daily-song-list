@@ -44,8 +44,18 @@ const RESPONSIVE_BREAKPOINTS = {
   mobileMax: 720,
   tabletMax: 919,
 };
-const LIST_PAGE_SIZE_OPTIONS = [50, 100];
+const LIST_PAGE_SIZE_OPTIONS = [20, 50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
+const LIST_PAGE_SIZE_BY_MODE = {
+  mobile: 20,
+  tablet: 50,
+  desktop: 50,
+};
+const SOURCE_DRAWER_PAGE_SIZE_BY_MODE = {
+  mobile: 10,
+  tablet: 20,
+  desktop: 20,
+};
 const VIDEO_PAGE_SIZE = 24;
 const CURRENT_FILTER_VERSION = 4;
 const RECENT_SEARCHES_KEY = "dailySongList.recentSearches";
@@ -241,7 +251,7 @@ const state = {
   nicheOnly: false,
   hideUnknownArtist: false,
   indexBucket: INDEX_ALL_BUCKET,
-  pageSize: DEFAULT_LIST_PAGE_SIZE,
+  pageSize: defaultListPageSizeForMode(),
   rankMetric: "occurrences",
   trend: "all",
   minCount: 1,
@@ -555,6 +565,13 @@ function bindEvents() {
       const nextPage = Number.parseInt(pageButton.dataset.page || "1", 10);
       setPage(nextPage);
       render({ focusAfterPageChange: true, urlMode: "push" });
+      return;
+    }
+
+    const sourcePageButton = event.target.closest("[data-source-page]");
+    if (sourcePageButton) {
+      event.preventDefault();
+      setSourceDrawerPage(sourcePageButton).catch((error) => showToast(`来源翻页失败：${error.message}`));
       return;
     }
 
@@ -1158,7 +1175,7 @@ function queryIndexKey(draft) {
 function queryDraftOptions(extra = {}) {
   return {
     defaults: {
-      pageSize: DEFAULT_LIST_PAGE_SIZE,
+      pageSize: defaultListPageSizeForMode(),
       snapshotPath: SNAPSHOT_LATEST_PATH,
     },
     validRankMetrics: Object.keys(RANK_METRICS),
@@ -1177,7 +1194,7 @@ function makeQueryDraftFromState() {
 
 function defaultQueryDraft() {
   return window.FrontendUtils.defaultQueryDraft({
-    pageSize: DEFAULT_LIST_PAGE_SIZE,
+    pageSize: defaultListPageSizeForMode(),
     snapshotPath: SNAPSHOT_LATEST_PATH,
   });
 }
@@ -1293,7 +1310,7 @@ function readQueryDraftFromControls() {
     rankMetric: Object.hasOwn(RANK_METRICS, selectedMetric) ? selectedMetric : "occurrences",
     trend: Object.hasOwn(TREND_FILTERS, els.trendFilterSelect?.value) ? els.trendFilterSelect.value : "all",
     minCount: MIN_COUNT_OPTIONS.includes(Number(els.minCountSelect?.value)) ? Number(els.minCountSelect.value) : 1,
-    pageSize: LIST_PAGE_SIZE_OPTIONS.includes(Number(els.queryPageSizeSelect?.value)) ? Number(els.queryPageSizeSelect.value) : DEFAULT_LIST_PAGE_SIZE,
+    pageSize: LIST_PAGE_SIZE_OPTIONS.includes(Number(els.queryPageSizeSelect?.value)) ? Number(els.queryPageSizeSelect.value) : defaultListPageSizeForMode(),
     snapshotPath: els.querySnapshotSelect?.value || SNAPSHOT_LATEST_PATH,
   });
 }
@@ -1784,6 +1801,7 @@ function handleResponsiveResize() {
   const nextMode = getResponsiveMode();
   if (!state.responsiveMode) {
     state.responsiveMode = nextMode;
+    if (!LIST_PAGE_SIZE_OPTIONS.includes(Number(state.pageSize))) state.pageSize = defaultListPageSizeForMode(nextMode);
     return;
   }
   if (nextMode === state.responsiveMode || state.resizeRenderFrame) return;
@@ -1791,6 +1809,12 @@ function handleResponsiveResize() {
     state.resizeRenderFrame = 0;
     const currentMode = getResponsiveMode();
     if (currentMode === state.responsiveMode) return;
+    const previousDefault = defaultListPageSizeForMode(state.responsiveMode);
+    const nextDefault = defaultListPageSizeForMode(currentMode);
+    if (state.view !== "videos" && Number(state.pageSize) === previousDefault) {
+      state.pageSize = nextDefault;
+      resetPagination();
+    }
     state.responsiveMode = currentMode;
     state.expandedRows.clear();
     renderOrSyncUrl({ syncUrl: false });
@@ -1960,7 +1984,7 @@ function defaultUrlState() {
     range: "7d",
     view: "songRank",
     page: 1,
-    pageSize: DEFAULT_LIST_PAGE_SIZE,
+    pageSize: defaultListPageSizeForMode(),
     bucket: INDEX_ALL_BUCKET,
     rankMetric: "occurrences",
     trend: "all",
@@ -2041,7 +2065,8 @@ function setPage(page) {
 
 function currentPageSize() {
   if (state.view === "videos") return VIDEO_PAGE_SIZE;
-  return PAGE_SIZES[state.view] ? state.pageSize : DEFAULT_LIST_PAGE_SIZE;
+  if (PAGE_SIZES[state.view]) return LIST_PAGE_SIZE_OPTIONS.includes(Number(state.pageSize)) ? Number(state.pageSize) : defaultListPageSizeForMode();
+  return defaultListPageSizeForMode();
 }
 
 function pagedSlice(items) {
@@ -5292,6 +5317,14 @@ function getResponsiveMode() {
   return "desktop";
 }
 
+function defaultListPageSizeForMode(mode = getResponsiveMode()) {
+  return window.FrontendUtils.responsiveListPageSize(mode, LIST_PAGE_SIZE_BY_MODE);
+}
+
+function sourceDrawerPageSizeForMode(mode = getResponsiveMode()) {
+  return window.FrontendUtils.responsiveListPageSize(mode, SOURCE_DRAWER_PAGE_SIZE_BY_MODE);
+}
+
 function isCompactRankMode() {
   return getResponsiveMode() !== "desktop";
 }
@@ -6337,6 +6370,18 @@ async function sourceDetailOccurrencesForContainer(container, currentOccurrences
   return merged;
 }
 
+async function sourceDetailPageForContainer(container, currentOccurrences = [], options = {}) {
+  const page = Math.max(1, Math.floor(Number(options.page) || Number(container?.dataset?.sourcePage) || 1));
+  const pageSize = Math.max(1, Math.floor(Number(options.pageSize) || sourceDrawerPageSizeForMode()));
+  const path = cleanText(container?._sourceDetailPath);
+  if (path) {
+    const result = await loadSourceDetailPage(path, cleanText(container?._sourceDetailKey), { page, pageSize });
+    if (result.found === false) throw new Error("来源详情不存在");
+    return result;
+  }
+  return localSourceDetailPage(currentOccurrences, { page, pageSize });
+}
+
 async function loadSourceDetailOccurrences(path, key = "") {
   const cacheKey = key ? `${path}#${key}` : path;
   if (state.sourceDetailCache.has(cacheKey)) return state.sourceDetailCache.get(cacheKey);
@@ -6352,6 +6397,79 @@ async function loadSourceDetailOccurrences(path, key = "") {
     });
   state.sourceDetailLoads.set(cacheKey, load);
   return load;
+}
+
+async function loadSourceDetailPage(path, key = "", options = {}) {
+  const page = Math.max(1, Math.floor(Number(options.page) || 1));
+  const pageSize = Math.max(1, Math.floor(Number(options.pageSize) || sourceDrawerPageSizeForMode()));
+  const requestPath = sourceDetailPagePath(path, page, pageSize);
+  const cacheKey = key ? `page:${requestPath}#${key}` : `page:${requestPath}`;
+  if (state.sourceDetailCache.has(cacheKey)) return state.sourceDetailCache.get(cacheKey);
+  if (state.sourceDetailLoads.has(cacheKey)) return state.sourceDetailLoads.get(cacheKey);
+  const load = readJson(requestPath, { cache: cacheModeForPath(path) })
+    .then((payload) => normalizeSourceDetailPagePayload(payload, key, { page, pageSize }))
+    .then((result) => {
+      state.sourceDetailCache.set(cacheKey, result);
+      return result;
+    })
+    .finally(() => {
+      state.sourceDetailLoads.delete(cacheKey);
+    });
+  state.sourceDetailLoads.set(cacheKey, load);
+  return load;
+}
+
+function sourceDetailPagePath(path, page, pageSize) {
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}page=${encodeURIComponent(String(page))}&pageSize=${encodeURIComponent(String(pageSize))}`;
+}
+
+function normalizeSourceDetailPagePayload(payload, key = "", options = {}) {
+  const occurrences = normalizeSourceDetailOccurrences(payload, key);
+  const hasServerPaging =
+    Number.isFinite(Number(payload?.page)) ||
+    Number.isFinite(Number(payload?.pageSize)) ||
+    Number.isFinite(Number(payload?.totalCount)) ||
+    Number.isFinite(Number(payload?.totalVideoCount));
+  if (!hasServerPaging) return localSourceDetailPage(occurrences, options);
+  const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  const totalVideoCount = Number(payload?.totalVideoCount ?? payload?.record?.videoCount ?? payload?.videoCount);
+  const totalCount = Number.isFinite(totalVideoCount) && totalVideoCount >= groups.length ? totalVideoCount : groups.length;
+  const pageInfo = window.FrontendUtils.sourceDrawerPageModel({
+    page: Number(payload?.page) || options.page || 1,
+    pageSize: Number(payload?.pageSize) || options.pageSize || sourceDrawerPageSizeForMode(),
+    totalCount,
+    visibleCount: groups.length,
+  });
+  return {
+    found: payload?.found !== false,
+    occurrences,
+    groups,
+    pageInfo,
+    totalOccurrenceCount: Number(payload?.totalOccurrenceCount ?? payload?.record?.timestampCount ?? payload?.record?.count) || occurrences.length,
+  };
+}
+
+function localSourceDetailPage(occurrences, options = {}) {
+  const allGroups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  const pageInfo = window.FrontendUtils.paginateItems(allGroups, {
+    page: options.page,
+    pageSize: options.pageSize,
+  });
+  const groups = pageInfo.visible;
+  return {
+    found: true,
+    occurrences: groups.flatMap((group) => group.occurrences || []),
+    completeOccurrences: occurrences || [],
+    groups,
+    pageInfo: window.FrontendUtils.sourceDrawerPageModel({
+      page: pageInfo.page,
+      pageSize: pageInfo.pageSize,
+      totalCount: pageInfo.total,
+      visibleCount: groups.length,
+    }),
+    totalOccurrenceCount: occurrences?.length || 0,
+  };
 }
 
 function normalizeSourceDetailOccurrences(payload, key = "") {
@@ -6390,6 +6508,8 @@ function renderSourceDrawer({ mode, occurrences, copyOccurrences = occurrences, 
   drawer.id = drawerId;
   drawer.dataset.sourceMode = mode;
   drawer.dataset.sourceDeferred = "true";
+  drawer.dataset.sourcePage = "1";
+  drawer.dataset.sourcePageSize = String(sourceDrawerPageSizeForMode());
   drawer.hidden = !isExpanded;
   drawer._getArtistSongGroups = getSongGroups;
   drawer._sourceOccurrences = occurrences || [];
@@ -6405,12 +6525,12 @@ function renderSourceDrawer({ mode, occurrences, copyOccurrences = occurrences, 
   return drawer;
 }
 
-function initializeSourceDrawer(drawer, { mode, occurrences, copyOccurrences = occurrences, songGroups = [] }) {
+function initializeSourceDrawer(drawer, { mode, occurrences, copyOccurrences = occurrences, songGroups = [], sourceGroups = null, sourcePageInfo = null }) {
   if (!drawer || drawer.dataset.sourceDeferred !== "true") return;
   if (mode === "artist" || mode === "vtuber") {
     appendArtistSongGroups(drawer, songGroups);
   } else {
-    appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true, copyOccurrences });
+    appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true, copyOccurrences, groups: sourceGroups, pageInfo: sourcePageInfo });
   }
   delete drawer.dataset.sourceDeferred;
 }
@@ -6422,24 +6542,47 @@ function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] 
 function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   drawer._sourceOccurrences = occurrences;
   drawer._songSourceOccurrences = options.copyOccurrences || drawer._songSourceOccurrences || occurrences;
-  const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  const groups = Array.isArray(options.groups) ? options.groups : window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  clearSourceDrawerPageContent(drawer);
   drawer._sourceGroups = groups;
   if (options.toolbarVariant) drawer.dataset.toolbarVariant = options.toolbarVariant;
+  const pageInfo =
+    options.pageInfo ||
+    window.FrontendUtils.sourceDrawerPageModel({
+      page: Number(drawer.dataset.sourcePage) || 1,
+      pageSize: Number(drawer.dataset.sourcePageSize) || sourceDrawerPageSizeForMode(),
+      totalCount: groups.length,
+      visibleCount: groups.length,
+    });
+  drawer._sourcePageInfo = pageInfo;
+  drawer.dataset.sourcePage = String(pageInfo.page);
+  drawer.dataset.sourcePageSize = String(pageInfo.pageSize);
   const visibleCount = groups.length;
   drawer.dataset.visibleSourceGroups = String(visibleCount);
   const shouldShowToolbar = options.showToolbar !== false;
   if (shouldShowToolbar && !drawer.querySelector(":scope > .source-drawer-toolbar")) {
-    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount: groups.length }));
+    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences, { visibleCount, totalCount: pageInfo.total, pageInfo }));
   } else {
-    updateSourceDrawerCount(drawer, visibleCount, groups.length);
+    updateSourceDrawerCount(drawer, visibleCount, pageInfo.total, pageInfo);
   }
 
-  appendSourceGroupRange(drawer, groups, sourceRenderedGroupCount(drawer), visibleCount);
+  if (groups.length) {
+    appendSourceGroupRange(drawer, groups, 0, visibleCount);
+  } else {
+    showSourceDrawerStatus(drawer, "没有可显示的来源", "empty");
+  }
+  appendSourceDrawerPager(drawer, pageInfo);
   appendMobileSourceCollapse(drawer);
 }
 
 function sourceRenderedGroupCount(drawer) {
   return drawer.querySelectorAll(":scope > .source-video-group").length;
+}
+
+function clearSourceDrawerPageContent(drawer) {
+  for (const node of drawer.querySelectorAll(":scope > .source-video-group, :scope > .source-drawer-pagination, :scope > .source-drawer-status")) {
+    node.remove();
+  }
 }
 
 function appendSourceGroupRange(drawer, groups, start, end) {
@@ -6462,13 +6605,14 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
     ? options.totalCount
     : window.FrontendUtils.groupOccurrencesByVideo(occurrences).length;
   const visibleCount = Number.isFinite(options.visibleCount) ? options.visibleCount : totalCount;
+  const pageInfo = options.pageInfo || null;
   const toolbar = document.createElement("div");
   toolbar.className = "source-drawer-toolbar";
   if (drawer.dataset.toolbarVariant === "artist") toolbar.classList.add("artist-source-toolbar");
 
   const count = document.createElement("span");
   count.className = "source-drawer-count";
-  count.textContent = sourceDrawerCountText(visibleCount, totalCount);
+  count.textContent = sourceDrawerCountText(visibleCount, totalCount, pageInfo);
   toolbar.append(count);
 
   const actions = document.createElement("div");
@@ -6483,15 +6627,69 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
   return toolbar;
 }
 
-function updateSourceDrawerCount(drawer, visibleCount, totalCount) {
+function updateSourceDrawerCount(drawer, visibleCount, totalCount, pageInfo = null) {
   const count = drawer.querySelector(":scope > .source-drawer-toolbar .source-drawer-count");
-  if (count) count.textContent = sourceDrawerCountText(visibleCount, totalCount);
+  if (count) count.textContent = sourceDrawerCountText(visibleCount, totalCount, pageInfo);
 }
 
-function sourceDrawerCountText(visibleCount, totalCount) {
+function sourceDrawerCountText(visibleCount, totalCount, pageInfo = null) {
   const suffix = "个来源";
+  if (pageInfo && pageInfo.pageCount > 1) {
+    const start = pageInfo.total ? pageInfo.startIndex + 1 : 0;
+    return `全部 ${pageInfo.total} ${suffix} · ${start}-${pageInfo.endIndex}`;
+  }
   if (visibleCount < totalCount) return `已显示 ${visibleCount}/${totalCount} ${suffix}`;
   return `全部 ${totalCount} 个来源`;
+}
+
+function appendSourceDrawerPager(drawer, pageInfo) {
+  if (!pageInfo || pageInfo.pageCount <= 1) return;
+  const pager = document.createElement("div");
+  pager.className = "source-drawer-pagination";
+  pager.setAttribute("aria-label", `来源分页，第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
+  pager.append(
+    renderSourcePageButton("上一页", pageInfo.previousPage || 1, !pageInfo.hasPrevious, drawer.id),
+    renderSourcePageSummary(pageInfo),
+    renderSourcePageButton("下一页", pageInfo.nextPage || pageInfo.pageCount, !pageInfo.hasNext, drawer.id),
+  );
+  const anchor = drawer.querySelector(":scope > .source-collapse-bottom") || null;
+  drawer.insertBefore(pager, anchor);
+}
+
+function renderSourcePageSummary(pageInfo) {
+  const summary = document.createElement("span");
+  summary.className = "source-page-summary";
+  summary.textContent = `${pageInfo.page}/${pageInfo.pageCount}`;
+  return summary;
+}
+
+function renderSourcePageButton(label, page, disabled, drawerId) {
+  const button = document.createElement("button");
+  button.className = "source-page-button ui-chip";
+  button.type = "button";
+  button.dataset.sourcePage = String(page);
+  button.setAttribute("aria-controls", drawerId);
+  button.disabled = Boolean(disabled);
+  button.textContent = label;
+  return button;
+}
+
+function showSourceDrawerStatus(drawer, message, kind = "loading") {
+  clearSourceDrawerStatus(drawer);
+  const status = document.createElement("p");
+  status.className = `source-drawer-status source-drawer-status-${kind}`;
+  status.setAttribute("role", kind === "error" ? "alert" : "status");
+  status.textContent = message;
+  const anchor =
+    drawer.querySelector(":scope > .source-drawer-pagination") ||
+    drawer.querySelector(":scope > .source-collapse-bottom") ||
+    null;
+  drawer.insertBefore(status, anchor);
+  return status;
+}
+
+function clearSourceDrawerStatus(drawer) {
+  drawer.querySelector(":scope > .source-drawer-status")?.remove();
 }
 
 function appendMobileSourceCollapse(drawer) {
@@ -6830,6 +7028,12 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
   const buttons = Array.from(row.querySelectorAll("[data-toggle-source]"));
   if (!drawer || !buttons.length) return;
 
+  if (nextExpanded) {
+    drawer.hidden = false;
+    row.classList.add("is-expanded");
+    syncInlineCopyAllButton(row, true);
+  }
+
   if (nextExpanded && drawer.dataset.sourceDeferred === "true") {
     const mode = row.dataset.drawerMode || drawer.dataset.sourceMode || "song";
     const isSongGroupMode = mode === "artist" || mode === "vtuber";
@@ -6838,15 +7042,28 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     if (isSongGroupMode) row._artistSongGroups = songGroups;
     let drawerOccurrences = row._sourceDetailOccurrences || row._sourceOccurrences || [];
     drawer.setAttribute("aria-busy", "true");
+    showSourceDrawerStatus(drawer, "正在加载来源...");
     try {
-      drawerOccurrences = await sourceDetailOccurrencesForContainer(row, drawerOccurrences);
-      row._sourceDetailOccurrences = drawerOccurrences;
+      const pageState = isSongGroupMode
+        ? { occurrences: await sourceDetailOccurrencesForContainer(row, drawerOccurrences), groups: null, pageInfo: null }
+        : await sourceDetailPageForContainer(row, drawerOccurrences, {
+            page: Number(drawer.dataset.sourcePage) || 1,
+            pageSize: sourceDrawerPageSizeForMode(),
+          });
+      const visibleOccurrences = pageState.occurrences;
+      row._sourceDetailOccurrences = pageState.completeOccurrences || drawerOccurrences;
       initializeSourceDrawer(drawer, {
         mode,
-        occurrences: drawerOccurrences,
-        copyOccurrences: drawerOccurrences,
+        occurrences: visibleOccurrences,
+        copyOccurrences: visibleOccurrences,
         songGroups,
+        sourceGroups: pageState.groups,
+        sourcePageInfo: pageState.pageInfo,
       });
+    } catch (error) {
+      clearSourceDrawerPageContent(drawer);
+      showSourceDrawerStatus(drawer, `来源读取失败：${error.message || "未知错误"}`, "error");
+      throw error;
     } finally {
       drawer.setAttribute("aria-busy", "false");
     }
@@ -6895,6 +7112,34 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
 
   if (!nextExpanded && options.keepVisible) {
     window.requestAnimationFrame(() => keepSourceRowVisible(row));
+  }
+}
+
+async function setSourceDrawerPage(button) {
+  const drawer = document.getElementById(button.getAttribute("aria-controls")) || button.closest(".source-drawer");
+  const row = drawer?.closest(".rank-row, .index-row");
+  if (!drawer || !row) return;
+  const page = Math.max(1, Math.floor(Number(button.dataset.sourcePage) || 1));
+  const pageSize = sourceDrawerPageSizeForMode();
+  drawer.dataset.sourcePage = String(page);
+  drawer.dataset.sourcePageSize = String(pageSize);
+  drawer.setAttribute("aria-busy", "true");
+  showSourceDrawerStatus(drawer, "正在加载来源...");
+  try {
+    const pageState = await sourceDetailPageForContainer(row, row._sourceDetailOccurrences || row._sourceOccurrences || [], { page, pageSize });
+    row._sourceDetailOccurrences = pageState.completeOccurrences || row._sourceDetailOccurrences || pageState.occurrences;
+    appendSourceDrawerLinks(drawer, pageState.occurrences, {
+      showToolbar: true,
+      copyOccurrences: pageState.occurrences,
+      groups: pageState.groups,
+      pageInfo: pageState.pageInfo,
+    });
+  } catch (error) {
+    clearSourceDrawerPageContent(drawer);
+    showSourceDrawerStatus(drawer, `来源读取失败：${error.message || "未知错误"}`, "error");
+    throw error;
+  } finally {
+    drawer.setAttribute("aria-busy", "false");
   }
 }
 

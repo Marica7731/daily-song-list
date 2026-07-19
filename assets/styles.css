@@ -1245,7 +1245,9 @@ mark {
 
 .rank-number {
   grid-area: rank;
+  align-self: start;
   min-width: 0;
+  padding-top: 8px;
   color: var(--muted);
   font-size: 17px;
   font-weight: 700;
@@ -1848,12 +1850,12 @@ mark {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: var(--space-2);
+  gap: 6px;
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  margin-top: 6px;
-  padding: 8px 0 0;
+  margin-top: 4px;
+  padding: 6px 0 0;
   border-top: 1px dashed var(--line);
 }
 
@@ -1964,7 +1966,7 @@ mark {
   justify-content: space-between;
   gap: 6px;
   min-width: 0;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
 }
 
 .source-drawer-count {
@@ -2008,6 +2010,59 @@ mark {
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 1.8;
+}
+
+.source-drawer-status {
+  grid-column: 1 / -1;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: 8px 10px;
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.source-drawer-status-error {
+  border-color: #fecaca;
+  background: #fff7f7;
+  color: #b42318;
+}
+
+.source-drawer-pagination {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-top: 2px;
+}
+
+.source-page-summary {
+  min-width: 54px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.source-page-button {
+  min-height: var(--chip-height);
+  border-color: var(--line);
+  background: #ffffff;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.source-page-button:hover:not(:disabled) {
+  background: #f8fafc;
+  color: var(--accent-strong);
+}
+
+.source-page-button:disabled {
+  opacity: 0.45;
 }
 
 .artist-song-more {

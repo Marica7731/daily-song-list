@@ -120,10 +120,12 @@ test("song and index rows inline source previews and expand to full source lists
   assert.match(stripBody, /renderInlineCopySongLinksButton/u);
 });
 
-test("source drawer renders complete source lists without rebuilding old cards", () => {
+test("source drawer renders paged source lists without inserting all cards", () => {
   const appendLinksBody = functionBody("function appendSourceDrawerLinks");
   assert.match(appendLinksBody, /const visibleCount = groups\.length/u);
-  assert.match(appendLinksBody, /appendSourceGroupRange\(drawer, groups, sourceRenderedGroupCount\(drawer\), visibleCount\)/u);
+  assert.match(appendLinksBody, /clearSourceDrawerPageContent\(drawer\)/u);
+  assert.match(appendLinksBody, /appendSourceGroupRange\(drawer, groups, 0, visibleCount\)/u);
+  assert.match(appendLinksBody, /appendSourceDrawerPager\(drawer, pageInfo\)/u);
   assert.doesNotMatch(appendLinksBody, /sourceVisibleGroupCount|syncSourceGroupMoreButton|sourceBatchSizeForMode/u);
 
   const appendRangeBody = functionBody("function appendSourceGroupRange");
@@ -135,10 +137,12 @@ test("source drawer renders complete source lists without rebuilding old cards",
 
   const expandedBody = functionBody("async function setSourceDrawerExpanded");
   assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
-  assert.match(expandedBody, /sourceDetailOccurrencesForContainer\(row, drawerOccurrences\)/u);
+  assert.match(expandedBody, /sourceDetailPageForContainer\(row, drawerOccurrences/u);
+  assert.match(expandedBody, /showSourceDrawerStatus\(drawer, "正在加载来源\.\.\."/u);
   assert.doesNotMatch(expandedBody, /mode !== "artist"/u);
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
   assert.match(functionBody("function sourceDetailOccurrencesForContainer"), /mergeCompleteSourceOccurrences/u);
+  assert.match(functionBody("async function loadSourceDetailPage"), /pageSize/u);
   assert.doesNotMatch(appSource, /function remainingSourceDetailOccurrences/u);
 });
 
