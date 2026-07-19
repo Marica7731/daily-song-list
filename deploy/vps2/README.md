@@ -88,6 +88,12 @@ Required repository secret:
 Useful commands:
 
 ```bash
+systemctl status song-rank-api
+journalctl -u song-rank-api -n 100 --no-pager
+systemctl restart song-rank-api
+ss -ltnp | grep -E ':(80|443|8765) '
+ls -lh /var/lib/culua/ytb-song-rank/song-rank.sqlite*
+cat /var/lib/culua/ytb-song-rank/song-rank.sqlite.manifest.json
 systemctl status song-rank-runtime-update.timer
 systemctl start song-rank-runtime-update.service
 journalctl -u song-rank-runtime-update.service -n 100 --no-pager
@@ -96,7 +102,7 @@ cd /opt/culua/ytb-song-rank
 npm run check:published:api -- http://127.0.0.1/
 ```
 
-After production DNS points at VPS2, set the GitHub repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1`. The hourly `update-core.yml` workflow will still update the source data, then verify the public static runtime and the public API. During migration, leave the variable unset or `0` so the static GitHub Pages site can continue passing before the API cutover.
+After production DNS points at VPS2, set the GitHub repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1`. The hourly `update-core.yml` workflow will still update the source data, then verify the public homepage and SQLite API. During migration, leave the variable unset or `0` so the static GitHub Pages site can continue passing before the API cutover.
 
 `Deploy SQLite runtime DB` runs on direct `main` pushes and after `Update core song-list data` completes successfully. Each run resolves the latest `origin/main` revision before building, so an hourly data refresh that lands during a deploy will be picked up by the next deploy instead of leaving VPS2 pinned to an older commit. The workflow also uploads a short-lived artifact containing `song-rank.sqlite` and a manifest with `commit_sha`, `run_id`, `built_at`, `sha256`, and `bytes`, so failed deployments can be inspected without rebuilding.
 
@@ -107,6 +113,39 @@ find /var/lib/culua/ytb-song-rank -maxdepth 1 -type f \
   \( -name 'song-rank.sqlite.next.*' -o -name 'song-rank.sqlite.next.*.manifest.json' \) \
   -delete
 ```
+
+If a newly activated DB is bad, roll back to the previous active DB kept by the activation script:
+
+```bash
+systemctl stop song-rank-api
+cp /var/lib/culua/ytb-song-rank/song-rank.sqlite /var/lib/culua/ytb-song-rank/song-rank.sqlite.bad.$(date -u +%Y%m%dT%H%M%SZ)
+cp /var/lib/culua/ytb-song-rank/song-rank.sqlite.previous /var/lib/culua/ytb-song-rank/song-rank.sqlite
+systemctl start song-rank-api
+curl -fsS http://127.0.0.1:8765/healthz
+```
+
+## GitHub Actions failure handling
+
+The routine update path is:
+
+1. `Update core song-list data` refreshes and commits source/static data to `main`.
+2. `Deploy SQLite runtime DB` is triggered by the successful `workflow_run`, resolves the latest `origin/main`, builds `artifacts/runtime/song-rank.sqlite`, uploads the artifact for 14 days, copies the DB to VPS2, activates it, and verifies staging.
+3. After production cutover, `Update core song-list data` checks the public homepage and `https://ytb-song-rank.culua.com/` with `npm run check:published:api`.
+
+Troubleshooting map:
+
+- Missing or wrong `VPS2_PASSWORD`: the `Install sshpass` or first SSH step fails before touching VPS2.
+- DB build failure: inspect `Build runtime database`; no remote candidate is uploaded.
+- Local API artifact failure: inspect `Verify runtime API artifact`; the uploaded artifact is not activated.
+- Upload or activation failure: inspect `Upload and activate database`; remote candidates named `song-rank.sqlite.next.<run>.<attempt>` are removed on workflow failure.
+- Staging failure: inspect `Verify VPS2 API`, then run `journalctl -u song-rank-api -n 100 --no-pager` and `curl -fsS http://127.0.0.1:8765/healthz` on VPS2.
+- Concurrency cancellation is expected when a newer deploy run starts; the newest successful deploy is authoritative.
+
+Manual rerun options:
+
+- Re-run the failed GitHub Actions job from the web UI when the source commit is still desired.
+- Use `workflow_dispatch` on `Deploy SQLite runtime DB` to rebuild from current `origin/main`.
+- Download the workflow artifact only for inspection; do not copy it to production by hand unless `song-rank-db-activate.sh` is used with `EXPECTED_SHA256`.
 
 ## Migration checklist
 
@@ -128,3 +167,38 @@ The service has no dependency on the old `culua` VPS paths.
 2. Verify `http://staging-ytb-song-rank.culua.com/healthz`, `/api/meta`, `/api/rankings`, source detail loading, and the frontend.
 3. Only after staging is healthy, change `ytb-song-rank.culua.com` from the GitHub Pages CNAME to an A record pointing to `192.255.151.75`.
 4. In Cloudflare, set the production record to proxied when the origin HTTP route is healthy.
+
+Production verification:
+
+```bash
+curl -fsS https://ytb-song-rank.culua.com/healthz
+npm run check:published:api -- https://ytb-song-rank.culua.com/
+```
+
+Rollback to GitHub Pages:
+
+1. Change `ytb-song-rank.culua.com` back to CNAME `marica7731.github.io`.
+2. Set Cloudflare proxy to DNS-only for that CNAME.
+3. Verify the static site with `npm run check:published -- https://ytb-song-rank.culua.com/`.
+
+Do not cache `/api/*` at Cloudflare. The API already returns short-lived `Cache-Control` headers and the frontend depends on current ranking/source-detail reads.
+
+## Cloudflare HTTPS with sing-box on 443
+
+This VPS already uses `sing-box` on TCP/UDP 443, so nginx is intentionally kept on port 80 and the song-rank API listens only on `127.0.0.1:8765`. Do not make nginx bind 443 unless the existing proxy service is being migrated.
+
+For Cloudflare proxied HTTPS to reach this origin while preserving the existing proxy service, the current host uses the `sing-box` Trojan inbound `fallback` field to forward unauthenticated TLS traffic to local nginx on port 80. The official sing-box Trojan inbound documentation defines `fallback` as fallback server configuration with `server` and `server_port`: https://sing-box.sagernet.org/configuration/inbound/trojan/
+
+Safe change procedure:
+
+```bash
+cp /etc/sing-box/config.json /etc/sing-box/config.json.codex-backup-$(date -u +%Y%m%dT%H%M%SZ)
+# edit only the trojan inbound on listen_port 443:
+# "fallback": { "server": "127.0.0.1", "server_port": 80 }
+/usr/local/bin/sing-box check -c /etc/sing-box/config.json
+systemctl restart sing-box
+systemctl is-active sing-box
+curl -k --resolve ytb-song-rank.culua.com:443:192.255.151.75 https://ytb-song-rank.culua.com/healthz
+```
+
+If the direct-origin HTTPS check fails, restore the timestamped backup, restart `sing-box`, and roll production DNS back to GitHub Pages until the 443 conflict is resolved.

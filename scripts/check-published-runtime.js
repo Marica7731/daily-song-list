@@ -120,12 +120,16 @@ async function main() {
 }
 
 async function checkApiRuntime(checkedAt) {
-  const health = await fetchJson("healthz");
+  const healthResponse = await fetchJsonWithText("healthz");
+  assertApiSuccessHeaders(healthResponse, "healthz");
+  const health = healthResponse.json;
   assert(health.status === "ok", `healthz status must be ok, got ${health.status || "missing"}`);
   assert(Number(health.schemaVersion) >= 1, "healthz schemaVersion missing");
   assert(health.builtAt, "healthz builtAt missing");
 
-  const meta = await fetchJson("api/meta");
+  const metaResponse = await fetchJsonWithText("api/meta");
+  assertApiSuccessHeaders(metaResponse, "api meta");
+  const meta = metaResponse.json;
   assert(Number(meta.schemaVersion) >= 1, "api meta schemaVersion missing");
   assert(Number(meta.counts?.ranking_rows) > 0, "api meta ranking_rows must be positive");
   assert(Number(meta.counts?.source_occurrences) > 0, "api meta source_occurrences must be positive");
@@ -136,18 +140,29 @@ async function checkApiRuntime(checkedAt) {
     assert(meta.meta?.source_latest_sha256 === expectedApiLatestSha256, `api source_latest_sha256 ${meta.meta?.source_latest_sha256 || "missing"} must match expected ${expectedApiLatestSha256}`);
   }
 
-  const rankings = await fetchJson("api/rankings?range=all&view=songs&q=%E5%B0%91%E5%A5%B3%E3%83%AC%E3%82%A4&pageSize=5");
+  const rankingsResponse = await fetchJsonWithText("api/rankings?range=all&view=songs&q=%E5%B0%91%E5%A5%B3%E3%83%AC%E3%82%A4&pageSize=5");
+  assertApiSuccessHeaders(rankingsResponse, "api rankings");
+  const rankings = rankingsResponse.json;
   assert(rankings.view === "songs", "api rankings view mismatch");
   assert(Number(rankings.totalCount) > 0, "api rankings totalCount must be positive");
   assert(Number(rankings.totalOccurrenceCount) > 0, "api rankings totalOccurrenceCount must be positive");
+  assert(Number(rankings.totalOccurrenceCount) < Number(meta.counts?.source_occurrences || 0), "api rankings filtered totalOccurrenceCount must not be full-site source_occurrences");
   assert(Array.isArray(rankings.records) && rankings.records.length > 0, "api rankings records must be non-empty");
-  const sourceKey = rankings.records[0]?.sourceDetailKey || "";
+  const firstRecord = rankings.records[0] || {};
+  assert(firstRecord.title === "少女レイ", `api rankings first title must be 少女レイ, got ${firstRecord.title || "missing"}`);
+  assert(String(firstRecord.displayArtist || firstRecord.artist || "").includes("みきとP"), "api rankings first artist must include みきとP");
+  const sourceKey = firstRecord.sourceDetailKey || "";
   assert(sourceKey, "api rankings first sourceDetailKey missing");
   if (sourceKey) {
-    const source = await fetchJson(`api/sources/${encodeURIComponent(sourceKey)}`);
+    const sourceResponse = await fetchJsonWithText(`api/sources/${encodeURIComponent(sourceKey)}`);
+    assertApiSuccessHeaders(sourceResponse, "api source detail");
+    const source = sourceResponse.json;
     assert(source.found === true, "api source detail must be found");
     assert(Array.isArray(source.record?.occurrences) && source.record.occurrences.length > 0, "api source detail occurrences must be non-empty");
+    assert(Number(source.record?.count || 0) === Number(firstRecord.count || 0), "api source detail count must match ranking count");
+    assert(source.record.occurrences.length === Number(firstRecord.count || 0), "api source detail occurrence length must match ranking count");
   }
+  await checkApiErrorContract();
 
   if (errors.length) {
     for (const error of errors) console.error(`[published-runtime-api] ${error}`);
@@ -170,6 +185,28 @@ async function checkApiRuntime(checkedAt) {
       `expectedLatest=${expectedApiLatestSha256 ? "matched" : "not-set"}`,
     ].join(" "),
   );
+}
+
+async function checkApiErrorContract() {
+  const badRange = await fetchJsonWithTextNoThrow("api/rankings?range=bad");
+  assert(badRange.statusCode === 400, `api bad range status must be 400, got ${badRange.statusCode}`);
+  assertApiErrorHeaders(badRange, "api bad range");
+  assert(badRange.json?.error === "bad_request", `api bad range error must be bad_request, got ${badRange.json?.error || "missing"}`);
+  assert(badRange.json?.message, "api bad range message missing");
+
+  const missingRoute = await fetchJsonWithTextNoThrow("api/nope");
+  assert(missingRoute.statusCode === 404, `api missing route status must be 404, got ${missingRoute.statusCode}`);
+  assertApiErrorHeaders(missingRoute, "api missing route");
+  assert(missingRoute.json?.error === "not_found", `api missing route error must be not_found, got ${missingRoute.json?.error || "missing"}`);
+
+  const missingSource = await fetchJsonWithText("api/sources/codex-missing-source-key");
+  assertApiSuccessHeaders(missingSource, "api missing source");
+  assert(missingSource.json?.found === false, "api missing source must return found=false");
+
+  const emptySource = await fetchJsonWithTextNoThrow("api/sources/");
+  assert(emptySource.statusCode === 400, `api empty source key status must be 400, got ${emptySource.statusCode}`);
+  assertApiErrorHeaders(emptySource, "api empty source key");
+  assert(emptySource.json?.error === "bad_request", `api empty source key error must be bad_request, got ${emptySource.json?.error || "missing"}`);
 }
 
 async function checkRequestRuntime(rangeId, requestMeta, meta) {
@@ -253,15 +290,23 @@ async function fetchHead(path) {
 }
 
 async function fetchJsonWithText(path) {
+  const result = await fetchJsonWithTextNoThrow(path);
+  if (!result.ok) throw new Error(`${path}: HTTP ${result.statusCode}`);
+  return result;
+}
+
+async function fetchJsonWithTextNoThrow(path) {
   const url = new URL(path, baseUrl);
   const response = await fetch(url, { cache: "no-store" });
   const text = await response.text();
-  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
   return {
     json: JSON.parse(text),
     text,
     statusCode: response.status,
     contentType: response.headers.get("content-type") || "",
+    cacheControl: response.headers.get("cache-control") || "",
+    accessControlAllowOrigin: response.headers.get("access-control-allow-origin") || "",
+    ok: response.ok,
   };
 }
 
@@ -282,6 +327,19 @@ function isSha256(value) {
 function isJsonContentType(value) {
   const contentType = String(value || "");
   return contentType.includes("application/json") || contentType.includes("text/plain");
+}
+
+function assertApiSuccessHeaders(response, label) {
+  assert(response.statusCode === 200, `${label} HTTP status must be 200, got ${response.statusCode}`);
+  assert(isJsonContentType(response.contentType), `${label} content-type unexpected: ${response.contentType}`);
+  assert(response.accessControlAllowOrigin === "*", `${label} access-control-allow-origin must be *`);
+  assert(response.cacheControl.includes("public") && response.cacheControl.includes("max-age=30"), `${label} cache-control unexpected: ${response.cacheControl}`);
+}
+
+function assertApiErrorHeaders(response, label) {
+  assert(isJsonContentType(response.contentType), `${label} content-type unexpected: ${response.contentType}`);
+  assert(response.accessControlAllowOrigin === "*", `${label} access-control-allow-origin must be *`);
+  assert(response.cacheControl.includes("no-store"), `${label} cache-control must include no-store, got ${response.cacheControl}`);
 }
 
 function sha256Text(text) {

@@ -55,7 +55,9 @@ npm run check:published:api -- https://ytb-song-rank.culua.com/
 
 ### Endpoint contract
 
-All API endpoints return compact JSON with `Content-Type: application/json; charset=utf-8` and `Access-Control-Allow-Origin: *`. Successful responses use `Cache-Control: public, max-age=30`; error responses use `Cache-Control: no-store`.
+The runtime API contract covers `GET` requests. Non-GET methods are not part of the public contract in this first server and may return the Python stdlib default error page.
+
+All API endpoints return compact JSON with `Content-Type: application/json; charset=utf-8` and `Access-Control-Allow-Origin: *`. Successful JSON responses use `Cache-Control: public, max-age=30`; JSON error responses use `Cache-Control: no-store`.
 
 Common status codes:
 
@@ -63,6 +65,28 @@ Common status codes:
 - `400`: invalid query parameter; body is `{ "error": "bad_request", "message": "..." }`.
 - `404`: unknown route; body is `{ "error": "not_found" }`.
 - `500`: uncaught server error; body is `{ "error": "internal_error", "message": "..." }`.
+
+Boundary behavior:
+
+- Query parameters are parsed with the first value only; repeated parameters ignore later values.
+- Unknown query parameters are ignored.
+- `page` defaults to `1`; values below `1` are clamped to `1`.
+- `pageSize` defaults to `50`; values below `1` are clamped to `1`, values above `200` are clamped to `200`.
+- A page beyond `pageCount` returns `200` with an empty `records` array.
+- `/api/sources/{sourceDetailKey}` returns `200 { "found": false }` for an unknown key. It only returns `400` when the key is empty.
+
+Error examples:
+
+```bash
+curl -i "http://127.0.0.1:8765/api/rankings?range=bad"
+# HTTP 400 {"error":"bad_request","message":"range must be 7d or all"}
+
+curl -i "http://127.0.0.1:8765/api/nope"
+# HTTP 404 {"error":"not_found"}
+
+curl -fsS "http://127.0.0.1:8765/api/sources/codex-missing-source-key"
+# HTTP 200 {"schemaVersion":1,"found":false,"sourceKey":"codex-missing-source-key"}
+```
 
 `GET /healthz`
 
@@ -88,15 +112,26 @@ Common status codes:
 - The frontend uses this endpoint first. If it is reachable, the page uses SQLite/API mode; otherwise GitHub Pages static JSON remains the fallback.
 - `scripts/check-published-runtime.js --mode api` can compare these fields to expected values with `--expected-commit-sha` and `--expected-latest-sha256`.
 
+Operator fields:
+
+- `counts.videos`, `counts.songs`, and `counts.occurrences` describe the current compact song-list data imported from `data/latest.json`.
+- `counts.external_songs`, `counts.external_videos`, and `counts.external_occurrences` describe the raw VSinger Moment HTTP backfill rows retained for audit and reprocessing.
+- `counts.ranking_rows` is the number of display-ready rows across ranges, views, metrics, and scopes.
+- `counts.source_occurrences` is the number of derived source rows available behind `/api/sources/{sourceDetailKey}`.
+- `meta.latest_generated_at`, `meta.latest_captured_at`, and `meta.latest_*` describe the source runtime payload.
+- `meta.vsinger_status` must be `loaded` when the VSinger public HTML backfill was imported.
+- `meta.vsinger_*` fields mirror the VSinger manifest counts and are used to diagnose missing raw-source imports.
+- `meta.runtime_ranking_source` should be `runtime-js`; changing this means the API no longer uses the same derived ranking rules as the frontend.
+
 `GET /api/rankings`
 
 Supported query parameters:
 
 - `range`: `7d` or `all`; default `all`.
 - `view`: `songs`, `songIndex`, `artists`, `videos`, or `vsingerSongs`; default `songs`.
-- `metric`: `occurrences`, `count`, or `videos`; `videos` is only valid for `songs` and `artists`. Non-video metrics are normalized to occurrence counts in the response as `metric: "occurrences"`.
+- `metric`: `occurrences`, `count`, or `videos`; `videos` is only valid for `songs` and `artists`. Non-video metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
 - `q`: optional case-insensitive search against normalized title, artist, channel, and name text.
-- `minCount`: optional minimum count for `songs` and `artists`; interpreted against `metric`.
+- `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos`, `minCount` is ignored because each row is a video row.
 - `page`: 1-based page number.
 - `pageSize`: maximum 200.
 
@@ -108,6 +143,18 @@ Response fields:
 - `totalVideoCount`: sum of `videoCount` across the filtered rows.
 - `pageCount`: total pages for the current filtered query.
 - `records`: display-ready rows; song and artist rows include `sourceDetailKey` when full source details are available.
+
+Record shapes are intentionally display-ready and may include extra frontend fields from `assets/ranking-utils.js`. Treat the following fields as stable:
+
+| View | Stable record fields |
+| --- | --- |
+| `songs` | `rank`, `type`, `title`, `displayArtist`, `count`, `videoCount`, `timestampCount`, `artists`, `channels`, `occurrences` preview, `sourceDetailKey` when full details exist |
+| `songIndex` | `rank`, `type`, `title`, `sortKey`, `count`, `videoCount`, `timestampCount`, `sourceDetailKey` when full details exist |
+| `artists` | `rank`, `type`, `name`, `count`, `videoCount`, `timestampCount`, `songs` preview, `sourceDetailKey` when full details exist |
+| `videos` | `rank`, `type`, `videoId`, `title`, `channelName`, `count`, `timestampCount`, `publishedTimestamp`, `thumbnailUrl` |
+| `vsingerSongs` | `rank`, `type`, `title`, `artist`, `singerName`, `count`, `videoCount`, `sourceDetailKey` when full details exist |
+
+Sorting is by stored `rank` ascending. The database builder creates this order from the derived runtime export; the API does not re-rank rows after search and filters.
 
 Example response shape:
 
@@ -139,6 +186,8 @@ Example response shape:
 
 For filtered searches, the summary counters must be filtered counters. Do not fall back to full-site `counts.occurrences`; otherwise a search such as `少女レイ` displays the all-site occurrence total instead of the matched rows.
 
+`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, and the `少女レイ / みきとP` source detail count.
+
 `GET /api/sources/{sourceDetailKey}`
 
 - Returns `{ found, sourceKey, record }`.
@@ -168,6 +217,24 @@ The `songs` view is the user-facing all-source ranking. For example, `songs?q=�
 
 The `vsingerSongs` view remains a raw-source diagnostic view by VSinger song ID. Search responses include `totalOccurrenceCount` so operators can distinguish an exact source row from title variants matched by a search term.
 
+## Production verification probes
+
+Use these probes after every API, DB builder, deployment, DNS, or Cloudflare change:
+
+```bash
+npm run check:published:api -- https://ytb-song-rank.culua.com/
+curl -fsS https://ytb-song-rank.culua.com/healthz
+curl -fsS "https://ytb-song-rank.culua.com/api/rankings?range=all&view=songs&q=%E5%B0%91%E5%A5%B3%E3%83%AC%E3%82%A4&pageSize=5"
+```
+
+Current qualitative acceptance points:
+
+- `少女レイ` should return a merged `songs` row whose `title` is `少女レイ`, `displayArtist` includes `みきとP`, `totalOccurrenceCount` is much smaller than full-site `counts.source_occurrences`, and `/api/sources/{sourceDetailKey}` returns the same count as the ranking row.
+- `Muan ch.茨むあん` should be findable in `view=videos`, proving the first added singer is present in the compact runtime.
+- `涼海ネモ` should be findable in `view=videos`, proving the second added singer is present even when the VSinger song page has little or no raw source-table coverage.
+
+The exact counts change with each hourly refresh. Record the numbers from the command output in release notes or incident notes instead of hard-coding them in docs.
+
 ## Maintenance contract
 
 When changing any API field, ranking metric, derived merge rule, or source-detail shape, update all of these in the same change:
@@ -178,6 +245,7 @@ When changing any API field, ranking metric, derived merge rule, or source-detai
 - `scripts/db/query-runtime-db.py` for operator probes.
 - `scripts/check-published-runtime.js` so production checks cover the public contract.
 - `test/runtime-db.test.js` and `test/runtime-api.test.js`.
+- This document whenever a route, query parameter, response field, error shape, cache/CORS rule, deployment path, or verification probe changes.
 
 Before merging an API or deploy change, run this minimum contract matrix:
 
@@ -206,7 +274,7 @@ GitHub Actions remains the upstream data refresh path:
 - `.github/workflows/update-watchdog.yml` watches the published freshness and can trigger the core updater.
 - `.github/workflows/update-backfill.yml` prepares backfill inbox bundles; VSinger full HTTP backfill stays behind owner-permission scripts and is not part of routine hourly refresh.
 - `.github/workflows/deploy-runtime-db.yml` runs on direct `main` pushes and after `Update core song-list data` completes successfully. It resolves the latest `origin/main` revision before building SQLite, then uploads the finished database to VPS2.
-- After production cuts over to VPS2, set repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1` so `.github/workflows/update-core.yml` fails if the static runtime is fresh but the public SQLite API is not healthy.
+- After production cuts over to VPS2, set repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1` so `.github/workflows/update-core.yml` verifies the public homepage and SQLite API instead of requiring the old GitHub Pages static JSON paths.
 
 VPS2 is the runtime deploy target:
 

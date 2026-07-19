@@ -126,13 +126,14 @@ jobs:
           DAILY_SONG_REQUIRE_PUBLISHED_API: ${{ vars.DAILY_SONG_REQUIRE_PUBLISHED_API || '0' }}
         run: |
           check_published_runtime() {
+            if [ "${DAILY_SONG_REQUIRE_PUBLISHED_API}" = "1" ]; then
+              curl -fsS https://ytb-song-rank.culua.com/ >/dev/null || return 1
+              npm run check:published:api -- https://ytb-song-rank.culua.com/ || return 1
+              return 0
+            fi
             npm run check:published -- https://ytb-song-rank.culua.com/ --expected-meta data/ui/meta.json || return 1
             if npm run check:published:api -- https://ytb-song-rank.culua.com/; then
               return 0
-            fi
-            if [ "${DAILY_SONG_REQUIRE_PUBLISHED_API}" = "1" ]; then
-              echo "::error::Published API runtime check failed."
-              return 1
             fi
             echo "::warning::Published API runtime check failed or is not cut over yet; static runtime check passed."
             return 0
