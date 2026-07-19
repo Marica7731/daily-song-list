@@ -163,13 +163,6 @@
         </label>
         <div class="query-panel-body">
           <div class="query-discovery-panel">
-            <section class="query-section recent-query-section" id="recentSearchSection">
-              <div class="query-section-heading">
-                <h3>最近搜索</h3>
-                <button class="text-button subtle" id="clearRecentSearchesButton" type="button">清空</button>
-              </div>
-              <div class="recent-query-chips" id="recentSearches"></div>
-            </section>
             <section class="query-section suggestions-section">
               <h3>匹配建议</h3>
               <div class="query-suggestions" id="searchSuggestions"></div>
@@ -223,11 +216,11 @@
                 <option value="100">100</option>
               </select>
             </label>
-            <details class="query-history-section query-context-card">
-              <summary>
-                <span class="query-field-caption">历史快照</span>
+            <section class="query-history-section query-context-card" aria-labelledby="queryHistoryHeading">
+              <div class="query-history-heading">
+                <span class="query-field-caption" id="queryHistoryHeading">历史快照</span>
                 <strong id="querySnapshotSummary">最新数据</strong>
-              </summary>
+              </div>
               <div class="query-history-fields">
                 <label class="query-field query-compact-field">
                   <span class="query-field-caption">快照日期</span>
@@ -238,7 +231,7 @@
                   <select id="querySnapshotSelect"></select>
                 </label>
               </div>
-            </details>
+            </section>
           </section>
         </div>
         <footer class="query-panel-footer">

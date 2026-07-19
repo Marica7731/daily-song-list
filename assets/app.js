@@ -48,7 +48,6 @@ const LIST_PAGE_SIZE_OPTIONS = [50, 100];
 const DEFAULT_LIST_PAGE_SIZE = 50;
 const VIDEO_PAGE_SIZE = 24;
 const CURRENT_FILTER_VERSION = 4;
-const RECENT_SEARCHES_KEY = "dailySongList.recentSearches";
 const RANK_METRICS = {
   occurrences: "收录次数",
   videos: "不同视频数",
@@ -320,9 +319,6 @@ const els = {
   hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
   cancelQueryButton: document.querySelector("#cancelQueryButton"),
   clearQueryButton: document.querySelector("#clearQueryButton"),
-  clearRecentSearchesButton: document.querySelector("#clearRecentSearchesButton"),
-  recentSearches: document.querySelector("#recentSearches"),
-  recentSearchSection: document.querySelector("#recentSearchSection"),
   searchSuggestions: document.querySelector("#searchSuggestions"),
   applyQueryButton: document.querySelector("#applyQueryButton"),
   resetQueryButton: document.querySelector("#resetQueryButton"),
@@ -686,10 +682,6 @@ function bindQueryOverlayEvents() {
     updateQueryDraft({ q: "" }, { sync: "input" });
     if (els.queryInput) els.queryInput.focus();
   });
-  els.clearRecentSearchesButton?.addEventListener("click", () => {
-    writeRecentSearches([]);
-    renderRecentSearches();
-  });
   els.queryInput?.addEventListener("compositionstart", () => {
     state.queryComposing = true;
   });
@@ -714,12 +706,6 @@ function bindQueryOverlayEvents() {
     }
   });
   els.searchSuggestions?.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-search-value]");
-    if (!button) return;
-    updateQueryDraft({ q: button.dataset.searchValue || button.textContent || "" }, { sync: "input" });
-    els.queryInput?.focus();
-  });
-  els.recentSearches?.addEventListener("click", (event) => {
     const button = event.target.closest("[data-search-value]");
     if (!button) return;
     updateQueryDraft({ q: button.dataset.searchValue || button.textContent || "" }, { sync: "input" });
@@ -818,7 +804,6 @@ function isCurrentQueryWork(revision) {
 function hydrateQueryOverlayAfterFirstFrame(revision) {
   if (!isCurrentQueryWork(revision)) return;
   syncQueryPanelFromDraft(state.queryDraft || makeQueryDraftFromState(), { syncMode: "full", forceSnapshot: false });
-  renderRecentSearches();
   scheduleSearchSuggestions({ revision });
   scheduleQueryDraftPreview({ revision });
 }
@@ -859,43 +844,10 @@ function trapModalFocus(event) {
   }
 }
 
-function renderRecentSearches() {
-  if (!els.recentSearches || !els.recentSearchSection) return;
-  const recent = readRecentSearches();
-  els.recentSearchSection.hidden = Boolean(state.queryDraft?.q?.trim()) || !recent.length;
-  els.recentSearches.replaceChildren();
-  for (const item of recent) {
-    const button = document.createElement("button");
-    button.className = "search-chip";
-    button.type = "button";
-    button.dataset.searchValue = item;
-    button.textContent = item;
-    els.recentSearches.append(button);
-  }
-}
-
-function readRecentSearches() {
-  try {
-    const value = JSON.parse(window.localStorage?.getItem(RECENT_SEARCHES_KEY) || "[]");
-    return Array.isArray(value) ? value.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 10) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeRecentSearches(items) {
-  try {
-    window.localStorage?.setItem(RECENT_SEARCHES_KEY, JSON.stringify(items.slice(0, 10)));
-  } catch {
-    // localStorage can be unavailable in restricted browser modes.
-  }
-}
-
 function prepareQuerySearchShell(draft) {
   const hasQuery = Boolean(String(draft?.q || "").trim());
   const suggestionsSection = els.searchSuggestions?.closest(".suggestions-section");
   if (suggestionsSection) suggestionsSection.hidden = !hasQuery;
-  if (els.recentSearchSection) els.recentSearchSection.hidden = hasQuery;
   if (!els.searchSuggestions) return;
   els.searchSuggestions.replaceChildren();
   if (hasQuery) {
@@ -927,7 +879,6 @@ async function renderSearchSuggestions(query, draft = state.queryDraft || makeQu
   const hasQuery = Boolean(String(query || "").trim());
   const suggestionsSection = els.searchSuggestions.closest(".suggestions-section");
   if (suggestionsSection) suggestionsSection.hidden = !hasQuery;
-  if (els.recentSearchSection) els.recentSearchSection.hidden = hasQuery || !readRecentSearches().length;
   els.searchSuggestions.replaceChildren();
   if (!hasQuery) return;
   const suggestions = canUseRequestRuntime(draft.range || state.range)
@@ -1312,7 +1263,6 @@ async function applyQueryDraft() {
   state.expandedRows.clear();
   resetPagination();
   syncControlsFromState();
-  if (draft.q) writeRecentSearches([draft.q, ...readRecentSearches().filter((item) => item !== draft.q)].slice(0, 10));
   if (previousPath !== draft.snapshotPath) {
     await applySnapshotPath(draft.snapshotPath, previousPath, { urlMode: "push" });
     return;
@@ -1630,7 +1580,10 @@ function queryDraftOccurrences(rangeCache, draft) {
   if (state.view === "vtuberRank") {
     return base.filter((occurrence) => vtuberOccurrenceSearchText(occurrence).includes(filterKey));
   }
-  return base.filter((occurrence) => occurrence.searchText.includes(filterKey));
+  if (state.view === "songRank" || state.view === "songAz") {
+    return base.filter((occurrence) => songOccurrenceSearchText(occurrence).includes(filterKey));
+  }
+  return base.filter((occurrence) => occurrenceSearchTextForCurrentView(occurrence).includes(filterKey));
 }
 
 function queryDraftSongRecords(rangeCache, draft, occurrences = queryDraftOccurrences(rangeCache, draft)) {
@@ -4406,6 +4359,7 @@ function shouldHideUnknownForCurrentView() {
 function occurrenceSearchTextForCurrentView(occurrence) {
   if (state.view === "artistRank") return artistOccurrenceSearchText(occurrence);
   if (state.view === "vtuberRank") return vtuberOccurrenceSearchText(occurrence);
+  if (state.view === "songRank" || state.view === "songAz") return songOccurrenceSearchText(occurrence);
   return occurrence?.searchText || "";
 }
 
@@ -5507,6 +5461,11 @@ function knownVtuberSearchAliases(channelName) {
 function artistOccurrenceSearchText(occurrence) {
   const song = occurrence?.song || {};
   return normalizeSearch(song.artist || "");
+}
+
+function songOccurrenceSearchText(occurrence) {
+  const song = occurrence?.song || {};
+  return normalizeSearch([song.title, song.artist].join(" "));
 }
 
 function vtuberOccurrenceSearchText(occurrence) {

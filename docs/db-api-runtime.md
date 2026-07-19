@@ -160,7 +160,7 @@ Supported query parameters:
 
 Search scope contract:
 
-- `songs` and `songIndex` match song identity fields and source context. When a song row is matched by source context, such as channel name or video title, the API derives contextual `count`, `videoCount`, `timestampCount`, and `occurrences` from the matching source rows only. It also keeps `globalRank`, `globalCount`, `globalVideoCount`, and `globalTimestampCount` for diagnostics.
+- `songs` and `songIndex` match song identity fields only: title/work title, display artist, artist aliases, and variant labels that are visible as song identity. Channel names, video titles, video IDs, and hidden source search text must not make an unrelated song row match.
 - `vsingerSongs` matches source song title, artist, and singer fields. It is a raw-source diagnostic view and does not currently run the contextual source-row rewrite used by `songs`.
 - `artists` matches singer/artist identity fields only, such as canonical name and aliases. Song titles, channel names, and video titles must not make an unrelated artist row match.
 - `vtubers` matches channel/VTuber identity fields only, such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields. Song titles and video titles must not make an unrelated VTuber row match.
@@ -179,14 +179,14 @@ Record shapes are intentionally display-ready and may include extra frontend fie
 
 | View | Stable record fields |
 | --- | --- |
-| `songs` | `rank`, `type`, `title`, `displayArtist`, `count`, `videoCount`, `timestampCount`, `artists`, `channels`, `occurrences` preview, `sourceDetailKey` when full details exist; source-context searches may also include `matchedBySource`, `sourceFilterQuery`, `sourceDetailPath`, `globalRank`, `globalCount`, `globalVideoCount`, `globalTimestampCount` |
-| `songIndex` | `rank`, `type`, `title`, `sortKey`, `count`, `videoCount`, `timestampCount`, `sourceDetailKey` when full details exist; source-context searches use the same contextual fields as `songs` |
+| `songs` | `rank`, `type`, `title`, `displayArtist`, `count`, `videoCount`, `timestampCount`, `artists`, `channels`, `occurrences` preview, `sourceDetailKey` when full details exist |
+| `songIndex` | `rank`, `type`, `title`, `sortKey`, `count`, `videoCount`, `timestampCount`, `sourceDetailKey` when full details exist |
 | `artists` | `rank`, `type`, `name`, `count`, `videoCount`, `timestampCount`, `songs` preview, `sourceDetailKey` when full details exist |
 | `videos` | `rank`, `type`, `videoId`, `title`, `channelName`, `count`, `timestampCount`, `publishedTimestamp`, `thumbnailUrl` |
 | `vtubers` | `rank`, `type`, `key`, `name`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `count`, `videoCount`, `timestampCount`, `songs` preview, `occurrences` preview |
 | `vsingerSongs` | `rank`, `type`, `title`, `artist`, `singerName`, `count`, `videoCount`, `sourceDetailKey` when full details exist |
 
-Sorting is by stored `rank` ascending for unfiltered requests and for `songIndex`. For `songs` source-context searches, the API re-ranks the filtered result by contextual `count` or `videoCount` so a channel query is ordered by that channel's matching sources instead of the all-site rank.
+Sorting is by stored `rank` ascending for unfiltered and filtered requests. `songIndex` keeps alphabetical/index order.
 
 Example response shape:
 
@@ -218,9 +218,9 @@ Example response shape:
 
 For filtered searches, the summary counters must be filtered counters. Do not fall back to full-site `counts.occurrences`; otherwise a search such as `少女レイ` displays the all-site occurrence total instead of the matched rows.
 
-For source-context searches, the summary counters must be contextual counters. For example, `songs?q=なれたん` can legitimately return songs that do not contain `なれたん` in the song title or artist, because they were sung in matching `なれたん` source videos. Those rows must display only the matching source preview and matching counts; global counts are exposed separately as `global*` diagnostics.
+Song search must not fall back to hidden source context. For example, `songs?q=なれたん` may return zero rows unless the song title or visible artist identity contains `なれたん`; use `videos` or `vtubers` to find channel补漏 rows.
 
-`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, contextual `なれたん` source previews and filtered source-detail fetches, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
+`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, narrowed `songs?q=なれたん` visible-field behavior, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
 It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` so a deploy cannot pass while the accepted increment is missing from the runtime DB.
 
 `GET /api/sources/{sourceDetailKey}`
@@ -263,7 +263,7 @@ npm run vsinger:audit:singers -- --singers-file artifacts/vsinger-http-backfill/
 
 The audit compares the source singer list to committed VSinger videos by exact `singerName`, because the current normalized bundle does not yet keep `externalSingerId` on `external_videos`. Treat `missing-by-name` as high-confidence補漏 targets. Treat `source-ahead-by-name` as a conservative queue; renamed singers can appear there until refreshed by singerId.
 
-Do not compare a song-search screen directly to a per-singer補漏 count without checking the match type. A source-context search such as `songs?q=儚牙紺` returns song rows derived from matching source occurrences, so the displayed `count` is contextual and the all-site count is in `globalCount`. Per-singer補漏 is still validated through singerId-scoped crawl reports, `videos?q=<singer name>`, `vtubers?q=<channel>`, and filtered source-detail rows.
+Do not compare a song-search screen directly to a per-singer補漏 count. `songs?q=<channel>` is intentionally narrow and may return zero rows when the channel text does not appear in song identity fields. Per-singer補漏 is validated through singerId-scoped crawl reports, `videos?q=<singer name>`, `vtubers?q=<channel>`, and source-detail rows.
 
 ## Production verification probes
 
@@ -281,8 +281,8 @@ Current qualitative acceptance points:
 - `ネモ・テルミナス` should be findable in `view=videos`, proving the newly missing-by-name singer has been imported.
 - `儚牙紺 - Kurage Kon -` should be findable in `view=videos`, proving the second newly missing-by-name singer has been imported.
 - `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` should be findable in `view=videos`, proving reviewed YouTube channel補漏 increments were included in the DB build.
-- Channel补漏 names such as `HanamaeHaru`, `aoineno`, and `fujimiyakotoha` should be checked in `view=videos`, `view=vtubers`, and source-context `view=songs` after their accepted increment is imported. `view=songs` should show songs from matching source rows with contextual counts; `view=artists` should not pass solely because a video title or channel name contains the term.
-- `なれたん` search acceptance should cover contextual search scopes: it must be findable in `view=videos`; `view=songs` should return the songs sung in matching `なれたん` source rows with `matchedBySource: true` and source previews that contain `なれたん`; `view=vtubers` should match only channel/VTuber identity text.
+- Channel补漏 names such as `HanamaeHaru`, `aoineno`, and `fujimiyakotoha` should be checked in `view=videos` and `view=vtubers` after their accepted increment is imported. `view=songs` and `view=artists` should not pass solely because a video title or channel name contains the term.
+- `なれたん` search acceptance should cover narrowed search scopes: it must be findable in `view=videos`; `view=songs` may be empty unless song identity fields contain `なれたん`; `view=vtubers` should match only channel/VTuber identity text.
 
 The exact counts change with each hourly refresh. Record the numbers from the command output in release notes or incident notes instead of hard-coding them in docs.
 

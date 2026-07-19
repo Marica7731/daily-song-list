@@ -659,7 +659,7 @@ function requestRecordSearchText(record, type) {
   if (type === "video") {
     return normalizeSearchText([record.videoId, record.title, record.channelName, record.channelId, record.channelHandle, record.channelUrl, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
   }
-  return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels), ...(record.variantLabels || [])].join(" "));
+  return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...(record.variantLabels || [])].join(" "));
 }
 
 function mapNames(value) {

@@ -139,8 +139,13 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(indexSource, /class="query-sort-field" id="metricFilterGroup"/u);
   assert.match(indexSource, /class="query-field query-compact-field query-context-card page-size-filter"/u);
   assert.match(indexSource, /class="query-history-section query-context-card"/u);
+  assert.match(indexSource, /class="query-history-heading"[\s\S]*id="queryHistoryHeading"[\s\S]*id="querySnapshotSummary"/u);
+  assert.doesNotMatch(indexSource, /recentSearchSection|recentSearches|clearRecentSearchesButton|最近搜索/u);
+  assert.doesNotMatch(appSource, /RECENT_SEARCHES_KEY|readRecentSearches|writeRecentSearches|renderRecentSearches/u);
   assert.match(cssSource, /\.query-form-grid\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*gap: var\(--query-grid-gap\);/u);
   assert.match(cssSource, /\.query-sort-field\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
+  assert.match(cssSource, /\.query-filter-matrix > \.query-compact-field\s*\{[\s\S]*grid-template-columns: 1fr;[\s\S]*align-items: stretch;/u);
+  assert.match(cssSource, /\.query-compact-field\s*\{[\s\S]*grid-template-rows: auto var\(--control-default\);/u);
   assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
   assert.doesNotMatch(cssSource, /grid-template-columns: auto auto;[\s\S]*justify-content: space-between/u);
   assert.doesNotMatch(indexSource, /query-quick-toggles|query-compact-fields|query-context-fields|query-metric-control/u);
@@ -152,6 +157,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.doesNotMatch(cssSource, /\.query-panel\.is-filter-tab \.query-panel-body\s*\{[\s\S]*144px/u);
   assert.match(captureSource, /async function assertQueryHistoryPanelSpacing/u);
   assert.match(captureSource, /query history overlaps footer/u);
+  assert.doesNotMatch(captureSource, /dailySongList\.recentSearches|mobile-query-recent\.png|query-history-section\[open\]/u);
   assert.doesNotMatch(appSource, /function setQueryPanelTab|queryTabButtons|queryTabPanels/u);
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"\. drawer drawer"/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"drawer drawer drawer"/u);
@@ -221,7 +227,7 @@ test("search suggestions highlight safely without assigning untrusted innerHTML"
   assert.match(highlightBody, /document\.createElement\("mark"\)/u);
   assert.match(highlightBody, /mark\.textContent/u);
   assert.doesNotMatch(highlightBody, /innerHTML/u);
-  assert.match(appSource, /RECENT_SEARCHES_KEY/u);
+  assert.doesNotMatch(indexSource, /最近搜索|recentSearch/u);
 });
 
 test("latest runtime uses request pagination instead of loading every page shard", () => {

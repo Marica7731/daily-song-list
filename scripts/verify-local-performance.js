@@ -156,10 +156,7 @@ async function openSnapshotFilters(page) {
   } else {
     await waitForQueryFilterControls(page);
   }
-  await page.locator(".query-history-section").evaluate((section) => {
-    section.open = true;
-  });
-  await page.waitForSelector(".query-history-section[open] #querySnapshotDateSelect", {
+  await page.waitForSelector(".query-history-section #querySnapshotDateSelect", {
     timeout: baseUrl.startsWith("https://") ? 15000 : 5000,
   });
 }

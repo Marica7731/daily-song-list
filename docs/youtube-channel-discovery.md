@@ -154,7 +154,7 @@ Also keep the `なれたん` search acceptance in the same note. It should prove
 
 - `view=videos&q=なれたん` returns the reviewed video/source rows.
 - `view=vtubers&q=なれたん` matches only VTuber/channel identity text.
-- `view=songs&q=なれたん` returns songs from matching `なれたん` source rows. The displayed `count`, `videoCount`, and source previews must be contextual to the matched source rows, while all-site diagnostics remain in `globalCount` and `globalVideoCount`.
+- `view=songs&q=なれたん` does not pass merely because a video title or channel name contains `なれたん`; rows are valid only when the song title or visible artist identity matches.
 - `view=artists&q=なれたん` must not pass merely because the video title or channel name contains `なれたん`; that tab can only match real artist identity text.
 
 Example full-channel pass:
@@ -185,10 +185,10 @@ For fast local validation of YouTube-only補漏 rows, build a temporary DB witho
 
 ```bash
 npm run db:build -- --no-vsinger --output artifacts/runtime/song-rank-youtube-check.sqlite
-python scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank-youtube-check.sqlite --range all --view songs --q なれたん --summary-only
+python scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank-youtube-check.sqlite --range all --view videos --q なれたん --summary-only
 ```
 
-This validates accepted channel increments and contextual search cheaply. It is not a replacement for the production full SQLite build, because `vsingerSongs` and VSinger source tables are intentionally omitted.
+This validates accepted channel increments and narrowed search scopes cheaply. It is not a replacement for the production full SQLite build, because `vsingerSongs` and VSinger source tables are intentionally omitted.
 
 `scripts/db/export-runtime-rankings.js` loads all `data/external/youtube-channel-discovery/accepted/*.json` files by default when `npm run db:build` uses `--ranking-source js`. This keeps manual補漏 commits small: commit the accepted increment, code, and docs only; do not commit generated `data/ui`, `data/catalog-segments`, or range JSON shards for a DB-mode deployment.
 

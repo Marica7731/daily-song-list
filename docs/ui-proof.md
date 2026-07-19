@@ -79,9 +79,9 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 
 ## Mobile Query
 
-| Restrictive filter chips | Recent searches | Search suggestions |
-| --- | --- | --- |
-| ![Mobile restrictive filter chips](assets/screenshots/mobile-active-query-strip.png) | ![Mobile recent searches](assets/screenshots/mobile-query-recent.png) | ![Mobile query suggestions](assets/screenshots/mobile-query-suggestions.png) |
+| Restrictive filter chips | Search suggestions |
+| --- | --- |
+| ![Mobile restrictive filter chips](assets/screenshots/mobile-active-query-strip.png) | ![Mobile query suggestions](assets/screenshots/mobile-query-suggestions.png) |
 
 | Unified filter controls | Snapshot history | Filtered summary |
 | --- | --- | --- |
