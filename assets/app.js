@@ -1,7 +1,7 @@
 const VIEWS = {
   songRank: "歌曲榜",
   artistRank: "歌手榜",
-  vtuberRank: "VTuber",
+  vtuberRank: "VTuber频道",
   songAz: "歌曲索引",
   videos: "视频",
 };
@@ -1393,12 +1393,12 @@ async function applySnapshotPath(path, previousPath, options = {}) {
 function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromState()) {
   const rankView = state.view === "songRank" || state.view === "artistRank";
   const hideUnknownField = els.hideUnknownToggle?.closest(".query-toggle");
-  const videoLikeView = state.view === "videos" || state.view === "vtuberRank";
+  const videoLikeView = state.view === "videos";
   if (els.metricFilterGroup) els.metricFilterGroup.hidden = videoLikeView;
   if (els.displayFilterGroup) els.displayFilterGroup.hidden = state.view === "videos";
   if (hideUnknownField) hideUnknownField.hidden = state.view === "artistRank" || state.view === "vtuberRank";
   if (els.hideUnknownToggle) els.hideUnknownToggle.disabled = state.view === "artistRank" || state.view === "vtuberRank";
-  if (els.trendFilterGroup) els.trendFilterGroup.hidden = state.view === "songAz" || videoLikeView;
+  if (els.trendFilterGroup) els.trendFilterGroup.hidden = state.view === "songAz" || state.view === "vtuberRank" || videoLikeView;
   if (els.minCountSelect?.closest(".query-field")) els.minCountSelect.closest(".query-field").hidden = videoLikeView;
   if (els.trendFilterSelect) {
     const isLatestDraft = draft.snapshotPath === SNAPSHOT_LATEST_PATH;
@@ -1561,7 +1561,7 @@ async function renderQueryDraftPreview(revision = state.queryWorkRevision) {
 
 function queryResultUnit() {
   if (state.view === "artistRank") return "位歌手";
-  if (state.view === "vtuberRank") return "个VTuber";
+  if (state.view === "vtuberRank") return "个频道";
   if (state.view === "videos") return "个视频";
   return "首歌曲";
 }
@@ -1690,7 +1690,6 @@ function queryDraftRankRecords(records, draft, mode) {
 }
 
 function queryDraftRankValue(record, draft) {
-  if (state.view === "vtuberRank") return record.count;
   return draft.rankMetric === "videos" ? record.videoCount || 0 : record.count;
 }
 
@@ -3416,7 +3415,7 @@ async function requestApiViewPage(request, range) {
   });
   const query = cleanText(filters.q || "");
   if (query) params.set("q", query);
-  if (Number(filters.minCount) > 1 && request.view !== "videos" && request.view !== "vtuberRank") params.set("minCount", String(Number(filters.minCount)));
+  if (Number(filters.minCount) > 1 && request.view !== "videos") params.set("minCount", String(Number(filters.minCount)));
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
     cache: "no-cache",
     signal: request.signal,
@@ -3431,7 +3430,7 @@ async function requestApiViewPage(request, range) {
     rangeId: range,
     view: request.view,
     apiView,
-    metric: request.view === "songRank" || request.view === "artistRank" ? metricName : "index",
+    metric: request.view === "songRank" || request.view === "artistRank" || request.view === "vtuberRank" ? metricName : "index",
     scopeKey: "all",
     pageSize,
     totalCount: Number(payload.totalCount) || 0,
@@ -3462,7 +3461,7 @@ function apiViewForRequestView(view) {
 }
 
 function apiMetricForRequest(request) {
-  if (request.view === "songRank" || request.view === "artistRank") {
+  if (request.view === "songRank" || request.view === "artistRank" || request.view === "vtuberRank") {
     return request.rankMetric === "videos" ? "videos" : "occurrences";
   }
   return "count";
@@ -3523,10 +3522,10 @@ function requestEntriesVideoCount(entries, view, metricName) {
 }
 
 function requestViewRef(requestMeta, view, rankMetric, scopeKey) {
-  const metric = view === "songRank" || view === "artistRank" ? rankMetric || "occurrences" : "index";
+  const metric = view === "songRank" || view === "artistRank" || view === "vtuberRank" ? rankMetric || "occurrences" : "index";
   if (view === "songRank") return requestMeta.views?.songRank?.[metric]?.[scopeKey];
   if (view === "artistRank") return requestMeta.views?.artistRank?.[metric]?.[scopeKey];
-  if (view === "vtuberRank") return requestMeta.views?.vtuberRank?.index?.[scopeKey];
+  if (view === "vtuberRank") return requestMeta.views?.vtuberRank?.[metric]?.[scopeKey] || requestMeta.views?.vtuberRank?.index?.[scopeKey];
   if (view === "songAz") return requestMeta.views?.songAz?.index?.[scopeKey];
   if (view === "videos") return requestMeta.views?.videos?.index?.[scopeKey];
   return null;
@@ -3584,7 +3583,7 @@ function requestScopeKey(view = state.view) {
 
 function canUseDirectRequestPage(view, filters = {}) {
   if (normalizeSearch(filters.q)) return false;
-  if (Number(filters.minCount) > 1 && view !== "videos" && view !== "vtuberRank") return false;
+  if (Number(filters.minCount) > 1 && view !== "videos") return false;
   if (filters.trend && filters.trend !== "all" && (view === "songRank" || view === "artistRank")) return false;
   if (view === "songAz" && filters.indexBucket && filters.indexBucket !== INDEX_ALL_BUCKET) return false;
   return true;
@@ -3657,7 +3656,7 @@ async function filterRequestIndexEntries(entries, options = {}) {
   if (options.view === "songAz" && filters.indexBucket && filters.indexBucket !== INDEX_ALL_BUCKET) {
     result = result.filter((entry) => entry.bucket === filters.indexBucket);
   }
-  if (Number(filters.minCount) > 1 && options.view !== "videos" && options.view !== "vtuberRank") {
+  if (Number(filters.minCount) > 1 && options.view !== "videos") {
     const minCount = Number(filters.minCount) || 1;
     result = result.filter((entry) => Number(entry.rankValue) >= minCount);
   }
@@ -3975,9 +3974,9 @@ function renderRequestedPageResult(result, options = {}) {
   if (options.staleError) renderRequestInlineWarning(options.staleError);
   if (!result.records.length) {
     renderEmpty(emptyMessage(
-      result.view === "videos" ? "这个范围还没有时间戳歌曲列表" : result.view === "artistRank" ? "这个范围还没有歌手资料" : result.view === "vtuberRank" ? "这个范围还没有VTuber资料" : result.view === "songAz" ? "这个范围还没有歌曲索引" : "这个范围还没有歌曲",
-      result.view === "videos" ? "没有找到符合条件的视频" : result.view === "artistRank" ? "没有找到符合条件的歌手" : result.view === "vtuberRank" ? "没有找到符合条件的VTuber" : "没有找到符合条件的歌曲",
-      result.view === "videos" ? "没有找到小众歌曲视频" : result.view === "artistRank" ? "没有找到小众歌曲歌手" : result.view === "vtuberRank" ? "没有找到小众歌曲VTuber" : "没有找到小众歌曲",
+      result.view === "videos" ? "这个范围还没有时间戳歌曲列表" : result.view === "artistRank" ? "这个范围还没有歌手资料" : result.view === "vtuberRank" ? "这个范围还没有VTuber频道资料" : result.view === "songAz" ? "这个范围还没有歌曲索引" : "这个范围还没有歌曲",
+      result.view === "videos" ? "没有找到符合条件的视频" : result.view === "artistRank" ? "没有找到符合条件的歌手" : result.view === "vtuberRank" ? "没有找到符合条件的频道" : "没有找到符合条件的歌曲",
+      result.view === "videos" ? "没有找到小众歌曲视频" : result.view === "artistRank" ? "没有找到小众歌曲歌手" : result.view === "vtuberRank" ? "没有找到小众歌曲频道" : "没有找到小众歌曲",
     ), { clearable: Boolean(state.filter) });
     return;
   }
@@ -4071,16 +4070,16 @@ function renderRequestSummary(result) {
   const metrics = [];
   if (result.view === "artistRank") {
     metrics.push(metric(result.totalCount, "位歌手"));
-    metrics.push(metric(occurrenceCount, "歌曲收录"));
+    metrics.push(metric(occurrenceCount, "条歌曲收录"));
   } else if (result.view === "vtuberRank") {
-    metrics.push(metric(result.totalCount, "个VTuber"));
-    metrics.push(metric(occurrenceCount, "歌曲收录"));
+    metrics.push(metric(result.totalCount, "个频道"));
+    metrics.push(metric(occurrenceCount, "条歌曲收录"));
   } else if (result.view === "videos") {
     metrics.push(metric(result.totalCount, "个视频"));
     metrics.push(metric(occurrenceCount, "个时间戳"));
   } else {
     metrics.push(metric(result.totalCount, "首歌曲"));
-    metrics.push(metric(occurrenceCount, "歌曲收录"));
+    metrics.push(metric(occurrenceCount, "条歌曲收录"));
   }
   renderSummary(currentGroup(), metrics, requestSummaryNote(result));
 }
@@ -4095,7 +4094,7 @@ function summaryMetricValue(value, fallback) {
 function requestSummaryNote(result) {
   const parts = [];
   if (result.totalCount !== result.filteredBaseCount) parts.push(`已筛选 ${result.totalCount} / ${result.filteredBaseCount}`);
-  if (state.minCount > 1 && result.view !== "videos" && result.view !== "vtuberRank") parts.push(`最低${state.minCount}${rankCountUnit()}以上`);
+  if (state.minCount > 1 && result.view !== "videos") parts.push(`最低${state.minCount}${rankCountUnit()}以上`);
   if (state.trend !== "all" && (result.view === "songRank" || result.view === "artistRank")) parts.push(`趋势：${TREND_FILTERS[state.trend] || state.trend}`);
   if (state.hideUnknownArtist && result.view !== "artistRank" && result.view !== "vtuberRank") parts.push("已隐藏无歌手");
   return parts.join(" · ");
@@ -4112,7 +4111,7 @@ function renderRequestInlineWarning(error) {
 function requestPageUnit(view) {
   if (view === "videos") return "个视频";
   if (view === "artistRank") return "位歌手";
-  if (view === "vtuberRank") return "个VTuber";
+  if (view === "vtuberRank") return "个频道";
   return "首歌曲";
 }
 
@@ -4201,7 +4200,7 @@ async function prewarmDefaultSorts(cache) {
     cacheRankModel(cache, `artist-rank::${scope}::${filterKey}::${state.rankMetric}`, [...artistRecords].sort(compareRankRecords));
   } else if (state.view === "vtuberRank") {
     const vtuberRecords = state.nicheOnly ? cache.nicheVtuberRecords : cache.allVtuberRecords;
-    cacheRankModel(cache, `vtuber-rank::${scope}::${filterKey}::occurrences`, [...vtuberRecords].sort(compareRankRecords));
+    cacheRankModel(cache, `vtuber-rank::${scope}::${filterKey}::${state.rankMetric}`, [...vtuberRecords].sort(compareRankRecords));
   } else if (state.view === "songAz") {
     const songRecords = selectedSongRecords(cache, { hideUnknownForView });
     cache.sortedRecords.set(`song-az::${scope}::${filterKey}::${state.rankMetric}`, [...songRecords].sort(compareSongAz));
@@ -4445,7 +4444,7 @@ function cacheRankModel(rangeCache, key, records) {
 
 function sortedRecordsKey(type) {
   const hideKey = shouldHideUnknownForCurrentView() ? "hide-unknown" : "show-unknown";
-  const metricKey = state.view === "vtuberRank" ? "occurrences" : state.rankMetric;
+  const metricKey = state.rankMetric;
   return `${type}::${state.nicheOnly ? "niche" : "all"}::${hideKey}::${normalizeSearch(state.filter)}::${metricKey}`;
 }
 
@@ -4463,7 +4462,7 @@ function filteredRankModel(records, mode) {
 }
 
 function filterRecordsByMinCount(records) {
-  if (state.view === "videos" || state.view === "vtuberRank" || state.minCount <= 1) return records;
+  if (state.view === "videos" || state.minCount <= 1) return records;
   return records.filter((record) => rankValue(record) >= state.minCount);
 }
 
@@ -4673,12 +4672,12 @@ function renderVtuberRank(group, rangeCache, selection) {
   setCurrentResultSummary(makeQueryDraftFromState(), records.length);
 
   renderSummary(group, [
-    recordVisibilityMetric(records.length, baseModel.records.length, allVtuberRecords.length, nicheVtuberRecords.length, "个VTuber", "个小众歌曲VTuber"),
+    recordVisibilityMetric(records.length, baseModel.records.length, allVtuberRecords.length, nicheVtuberRecords.length, "个频道", "个小众歌曲频道"),
     occurrenceVisibilityMetric(selection.occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
   ], summaryNote(selection));
 
   if (!records.length) {
-    renderEmpty(emptyMessage("这个范围还没有VTuber资料", "没有找到符合条件的VTuber", "没有找到小众歌曲VTuber"), {
+    renderEmpty(emptyMessage("这个范围还没有VTuber频道资料", "没有找到符合条件的频道", "没有找到小众歌曲频道"), {
       clearable: Boolean(state.filter),
     });
     return;
@@ -4686,7 +4685,7 @@ function renderVtuberRank(group, rangeCache, selection) {
 
   const pageInfo = pagedSlice(records);
   const fragment = document.createDocumentFragment();
-  appendPagination(fragment, { pageInfo, unit: "个VTuber", variant: "top" });
+  appendPagination(fragment, { pageInfo, unit: "个频道", variant: "top" });
   fragment.append(renderRankHeader("vtuber"));
   for (const [index, record] of pageInfo.visible.entries()) {
     fragment.append(
@@ -4700,7 +4699,7 @@ function renderVtuberRank(group, rangeCache, selection) {
         meta: vtuberMeta(record),
         videoCount: record.videoCount,
         count: rankValue(record),
-        countUnit: "次",
+        countUnit: rankCountUnit(),
         occurrences: record.occurrences,
         songCount: record.songs.size,
         songPreview: vtuberSongPreview(record),
@@ -4708,7 +4707,7 @@ function renderVtuberRank(group, rangeCache, selection) {
       }),
     );
   }
-  appendPagination(fragment, { pageInfo, unit: "个VTuber", variant: "bottom" });
+  appendPagination(fragment, { pageInfo, unit: "个频道", variant: "bottom" });
   els.content.append(fragment);
 }
 
@@ -4887,9 +4886,9 @@ function compactSummaryMetrics(metrics) {
         return text
           .replace(/^显示\s+/u, "")
           .replace(/\s*\/\s*[0-9,]+/u, "")
-          .replace(/([0-9,])\s+(首歌曲|首小众歌曲|位歌手|个VTuber|歌曲收录|小众歌曲收录|个视频|个小众视频|个时间戳)/gu, "$1$2");
+          .replace(/([0-9,])\s+(首歌曲|首小众歌曲|位歌手|个频道|个小众歌曲频道|歌曲收录|小众歌曲收录|个视频|个小众视频|个时间戳)/gu, "$1$2");
       }
-      return text.replace(/([0-9,])\s+(首歌曲|位歌手|个VTuber|歌曲收录|个视频|个时间戳)/gu, "$1$2");
+      return text.replace(/([0-9,])\s+(首歌曲|位歌手|个频道|歌曲收录|个视频|个时间戳)/gu, "$1$2");
     });
 }
 
@@ -5396,10 +5395,11 @@ function buildVideoViewItems(items, options = {}) {
 
 function buildVtuberRecords(occurrences) {
   const records = new Map();
+  const identityLookup = buildVtuberIdentityLookup(occurrences);
   for (const occurrence of occurrences || []) {
     const item = occurrence.item || {};
     const song = occurrence.song || {};
-    const key = vtuberRecordKey(item);
+    const key = vtuberRecordKey(item, identityLookup);
     if (!key) continue;
     if (!records.has(key)) {
       records.set(key, {
@@ -5414,9 +5414,11 @@ function buildVtuberRecords(occurrences) {
         videos: new Set(),
         songs: new Map(),
         occurrences: [],
+        aliases: new Set(),
       });
     }
     const record = records.get(key);
+    mergeVtuberRecordIdentity(record, item);
     const videoKey = cleanText(item.videoId) || `${cleanText(item.channelName)}::${cleanText(item.title)}::${cleanText(item.publishedTimestamp)}`;
     if (videoKey) record.videos.add(videoKey);
     record.count += 1;
@@ -5426,18 +5428,80 @@ function buildVtuberRecords(occurrences) {
   return addRecordRuntimeFields(Array.from(records.values()).map((record) => {
     record.videoCount = record.videos.size;
     record.timestampCount = record.count;
+    record.aliases = Array.from(record.aliases.values());
     record.searchText = vtuberRecordSearchText(record);
     return record;
   }));
 }
 
-function vtuberRecordKey(item) {
+function buildVtuberIdentityLookup(occurrences) {
+  const nameToKey = new Map();
+  const ambiguousNames = new Set();
+  for (const occurrence of occurrences || []) {
+    const item = occurrence?.item || {};
+    const nameKey = vtuberNameIdentityKey(item);
+    const directKey = directVtuberRecordKey(item);
+    if (!nameKey || !directKey) continue;
+    const existing = nameToKey.get(nameKey);
+    if (existing && existing !== directKey) {
+      ambiguousNames.add(nameKey);
+      continue;
+    }
+    nameToKey.set(nameKey, directKey);
+  }
+  for (const nameKey of ambiguousNames) nameToKey.delete(nameKey);
+  return { nameToKey };
+}
+
+function vtuberRecordKey(item, identityLookup = null) {
+  const nameKey = vtuberNameIdentityKey(item);
+  if (nameKey && identityLookup?.nameToKey?.has(nameKey)) return identityLookup.nameToKey.get(nameKey);
+  return directVtuberRecordKey(item) || nameKey;
+}
+
+function directVtuberRecordKey(item) {
   const channelId = cleanText(item?.channelId);
   if (channelId) return channelId;
   const handle = cleanText(item?.channelHandle).replace(/^\/+/, "");
   if (handle) return normalizeEntityKey(handle);
+  return "";
+}
+
+function vtuberNameIdentityKey(item) {
   const name = cleanText(item?.channelName);
   return name ? normalizeEntityKey(name) : "";
+}
+
+function mergeVtuberRecordIdentity(record, item) {
+  const channelName = cleanText(item.channelName);
+  const channelId = cleanText(item.channelId);
+  const channelHandle = cleanText(item.channelHandle);
+  const channelUrl = cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
+  if (channelName) {
+    record.aliases.add(channelName);
+    if (!record.channelName) record.channelName = channelName;
+    if (!record.name || record.name === "未知频道") record.name = channelName;
+  }
+  if (channelId) {
+    record.aliases.add(channelId);
+    if (!record.channelId) record.channelId = channelId;
+  }
+  if (channelHandle) {
+    record.aliases.add(channelHandle);
+    record.aliases.add(channelHandle.replace(/^\/?@/u, ""));
+    if (!record.channelHandle) record.channelHandle = channelHandle;
+  }
+  if (channelUrl) {
+    record.aliases.add(channelUrl);
+    if (!record.channelUrl) record.channelUrl = channelUrl;
+  }
+  for (const alias of knownVtuberSearchAliases(channelName)) record.aliases.add(alias);
+}
+
+function knownVtuberSearchAliases(channelName) {
+  const key = normalizeSearch(channelName);
+  if (key === normalizeSearch("Haru Ch. 花前ハル")) return ["HanamaeHaru", "Hanamae Haru", "花前ハル"];
+  return [];
 }
 
 function artistOccurrenceSearchText(occurrence) {
@@ -5447,11 +5511,11 @@ function artistOccurrenceSearchText(occurrence) {
 
 function vtuberOccurrenceSearchText(occurrence) {
   const item = occurrence?.item || {};
-  return normalizeSearch([item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.authorUrl, item.ownerUrl].join(" "));
+  return normalizeSearch([item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.authorUrl, item.ownerUrl, ...knownVtuberSearchAliases(item.channelName)].join(" "));
 }
 
 function vtuberRecordSearchText(record) {
-  return normalizeSearch([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl].join(" "));
+  return normalizeSearch([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, ...(record.aliases || [])].join(" "));
 }
 
 function collectSongOccurrences(items) {
@@ -5560,12 +5624,10 @@ function buildCountFrequencies(records, valueFn = (record) => record.count) {
 }
 
 function rankValue(record) {
-  if (state.view === "vtuberRank") return record.count;
   return state.rankMetric === "videos" ? record.videoCount || 0 : record.count;
 }
 
 function rankCountUnit() {
-  if (state.view === "vtuberRank") return "次";
   return state.rankMetric === "videos" ? "视频" : "次";
 }
 
@@ -5821,7 +5883,7 @@ function renderRankHeader(mode = "song") {
   const header = document.createElement("div");
   header.className = "rank-header";
 
-  const contentLabel = mode === "artist" ? "歌手与曲目" : mode === "vtuber" ? "VTuber与曲目" : "歌曲、歌手与来源";
+  const contentLabel = mode === "artist" ? "歌手与曲目" : mode === "vtuber" ? "VTuber频道与曲目" : "歌曲、歌手与来源";
   const countLabel = mode === "vtuber" ? "收录" : state.rankMetric === "videos" ? "歌曲收录 / 趋势" : "次数 / 趋势";
   for (const label of ["排名", contentLabel, countLabel]) {
     const item = document.createElement("span");
@@ -7264,9 +7326,9 @@ function countRatioMetric(visible, total, label) {
 }
 
 function occurrenceVisibilityMetric(visible, total, nicheTotal) {
-  if (state.filter && state.nicheOnly) return `显示 ${visible} / ${nicheTotal} 小众歌曲收录`;
-  if (state.filter || state.nicheOnly) return `${state.nicheOnly ? "小众" : "显示"} ${visible} / ${total} 歌曲收录`;
-  return `${total} 歌曲收录`;
+  if (state.filter && state.nicheOnly) return `显示 ${visible} / ${nicheTotal} 条小众歌曲收录`;
+  if (state.filter || state.nicheOnly) return `${state.nicheOnly ? "小众" : "显示"} ${visible} / ${total} 条歌曲收录`;
+  return `${total} 条歌曲收录`;
 }
 
 function artistSongPreview(record) {

@@ -14,7 +14,7 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
   assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /class="[^"]*view-mode[^"]*"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
-  assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>VTuber<\/span>/u);
+  assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>频道<\/span>/u);
   assert.match(indexSource, /id="queryDialog"[\s\S]*role="dialog"[\s\S]*aria-labelledby="queryDialogTitle"[\s\S]*搜索与筛选/u);
   assert.match(indexSource, /id="queryInput"[\s\S]*id="searchSuggestions"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
@@ -258,7 +258,7 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /function compactSummaryMetrics/u);
   assert.match(appSource, /function compactSummaryNote/u);
   assert.doesNotMatch(functionBody("function compactSummaryMetrics"), /首结果/u);
-  assert.match(functionBody("function compactSummaryMetrics"), /首歌曲\|首小众歌曲\|位歌手\|个VTuber\|歌曲收录\|小众歌曲收录\|个视频/u);
+  assert.match(functionBody("function compactSummaryMetrics"), /首歌曲\|首小众歌曲\|位歌手\|个频道\|个小众歌曲频道\|歌曲收录\|小众歌曲收录\|个视频/u);
   assert.match(functionBody("function compactSummaryNote"), /已隐藏无歌手/u);
   assert.match(functionBody("function renderActiveQueryStrip"), /if \(items\.length >= 2\)/u);
   assert.match(functionBody("function renderActiveQueryStrip"), /清除全部筛选条件/u);

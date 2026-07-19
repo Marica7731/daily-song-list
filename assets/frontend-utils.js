@@ -1009,7 +1009,7 @@
       const songCount = Math.max(0, Number(options.songCount) || 0);
       return {
         text: isExpanded ? "收起" : `${songCount}首曲目`,
-        ariaLabel: isExpanded ? "收起该VTuber曲目" : `查看该VTuber的 ${songCount} 首歌曲`,
+        ariaLabel: isExpanded ? "收起该频道曲目" : `查看该频道的 ${songCount} 首歌曲`,
       };
     }
 

@@ -371,10 +371,11 @@ function buildVideoRequestItems(items) {
 
 function buildVtuberRequestItems(items) {
   const records = new Map();
+  const identityLookup = buildChannelIdentityLookup(items);
   for (const item of items || []) {
     const scopedSongs = (item.songs || []).filter((song) => RankingUtils.cleanText(song.title));
     if (!scopedSongs.length) continue;
-    const key = channelRecordKey(item);
+    const key = channelRecordKey(item, identityLookup);
     if (!key) continue;
     if (!records.has(key)) {
       records.set(key, {
@@ -391,9 +392,11 @@ function buildVtuberRequestItems(items) {
         videos: new Set(),
         songs: new Map(),
         occurrences: [],
+        aliases: new Set(),
       });
     }
     const record = records.get(key);
+    mergeChannelRecordIdentity(record, item);
     const videoKey = item.videoId || stableRequestKey(`${item.channelName}:${item.title}:${item.publishedTimestamp || ""}`);
     record.videos.add(videoKey);
     for (const song of scopedSongs) {
@@ -411,18 +414,81 @@ function buildVtuberRequestItems(items) {
   }
   return Array.from(records.values()).map((record) => {
     record.videoCount = record.videos.size;
+    record.aliases = Array.from(record.aliases.values());
     record.searchText = requestRecordSearchText(record, "vtuber");
     return record;
   });
 }
 
-function channelRecordKey(item) {
+function buildChannelIdentityLookup(items) {
+  const nameToKey = new Map();
+  const ambiguousNames = new Set();
+  for (const item of items || []) {
+    const scopedSongs = (item.songs || []).filter((song) => RankingUtils.cleanText(song.title));
+    if (!scopedSongs.length) continue;
+    const nameKey = channelNameIdentityKey(item);
+    const directKey = directChannelRecordKey(item);
+    if (!nameKey || !directKey) continue;
+    const existing = nameToKey.get(nameKey);
+    if (existing && existing !== directKey) {
+      ambiguousNames.add(nameKey);
+      continue;
+    }
+    nameToKey.set(nameKey, directKey);
+  }
+  for (const nameKey of ambiguousNames) nameToKey.delete(nameKey);
+  return { nameToKey };
+}
+
+function channelRecordKey(item, identityLookup = null) {
+  const nameKey = channelNameIdentityKey(item);
+  if (nameKey && identityLookup?.nameToKey?.has(nameKey)) return identityLookup.nameToKey.get(nameKey);
+  return directChannelRecordKey(item) || nameKey;
+}
+
+function directChannelRecordKey(item) {
   const channelId = RankingUtils.cleanText(item.channelId);
   if (channelId) return channelId;
   const handle = RankingUtils.cleanText(item.channelHandle).replace(/^\/+/, "");
   if (handle) return normalizeSearchText(handle);
+  return "";
+}
+
+function channelNameIdentityKey(item) {
   const name = RankingUtils.cleanText(item.channelName);
   return name ? normalizeSearchText(name) : "";
+}
+
+function mergeChannelRecordIdentity(record, item) {
+  const channelName = RankingUtils.cleanText(item.channelName);
+  const channelId = RankingUtils.cleanText(item.channelId);
+  const channelHandle = RankingUtils.cleanText(item.channelHandle);
+  const channelUrl = RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
+  if (channelName) {
+    record.aliases.add(channelName);
+    if (!record.channelName) record.channelName = channelName;
+    if (!record.name || record.name === "未知频道") record.name = channelName;
+  }
+  if (channelId) {
+    record.aliases.add(channelId);
+    if (!record.channelId) record.channelId = channelId;
+  }
+  if (channelHandle) {
+    record.aliases.add(channelHandle);
+    record.aliases.add(channelHandle.replace(/^\/?@/u, ""));
+    if (!record.channelHandle) record.channelHandle = channelHandle;
+  }
+  if (channelUrl) {
+    record.aliases.add(channelUrl);
+    if (!record.channelUrl) record.channelUrl = channelUrl;
+  }
+  for (const alias of knownChannelSearchAliases(channelName)) record.aliases.add(alias);
+}
+
+function knownChannelSearchAliases(channelName) {
+  const key = normalizeSearchText(channelName);
+  if (key === normalizeSearchText("Haru Ch. 花前ハル")) return ["HanamaeHaru", "Hanamae Haru", "花前ハル"];
+  return [];
 }
 
 function incrementNamedCount(map, name) {
@@ -509,6 +575,7 @@ function serializeVtuberRequestRecord(record, options = {}) {
     channelId: record.channelId || "",
     channelHandle: record.channelHandle || "",
     channelUrl: record.channelUrl || "",
+    aliases: Array.isArray(record.aliases) ? record.aliases : [],
     count: Number(record.count) || 0,
     videoCount: Number(record.videoCount) || 0,
     timestampCount: Number(record.timestampCount ?? record.count) || 0,
@@ -583,7 +650,7 @@ function requestRecordSearchText(record, type) {
     return normalizeSearchText([record.name, ...(record.aliases || [])].join(" "));
   }
   if (type === "vtuber") {
-    return normalizeSearchText([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl].join(" "));
+    return normalizeSearchText([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, ...(record.aliases || [])].join(" "));
   }
   if (type === "video") {
     return normalizeSearchText([record.videoId, record.title, record.channelName, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));

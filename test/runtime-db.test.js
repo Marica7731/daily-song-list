@@ -61,6 +61,24 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               publishedText: "2026-07-19",
               songs: [{ title: "Song One (Piano Ver.)", artist: "Singer A", seconds: 30, time: "0:30" }],
             },
+            {
+              videoId: "video-c",
+              title: "Late Karaoke",
+              channelName: "Alpha Ch.",
+              channelId: "UC-alpha",
+              channelHandle: "/@alpha_ch",
+              publishedTimestamp: 1784426400000,
+              publishedText: "2026-07-19",
+              songs: [{ title: "Song Three", artist: "Singer C", seconds: 40, time: "0:40" }],
+            },
+            {
+              videoId: "video-d",
+              title: "Midnight Karaoke",
+              channelName: "Haru Ch. 花前ハル",
+              publishedTimestamp: 1784430000000,
+              publishedText: "2026-07-19",
+              songs: [{ title: "Song Four", artist: "Singer D", seconds: 50, time: "0:50" }],
+            },
           ],
         },
       },
@@ -133,8 +151,8 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   );
   assert.match(queryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(queryOutput, /Song One/);
-  assert.match(queryOutput, /"totalCount": 2/);
-  assert.match(queryOutput, /"totalOccurrenceCount": 3/);
+  assert.match(queryOutput, /"totalCount": 4/);
+  assert.match(queryOutput, /"totalOccurrenceCount": 5/);
 
   const mergedQueryOutput = execFileSync(
     PYTHON,
@@ -172,8 +190,8 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(channelSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(channelSongSearchOutput, /"totalCount": 2/);
-  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 2/);
+  assert.match(channelSongSearchOutput, /"totalCount": 3/);
+  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 3/);
   assert.match(channelSongSearchOutput, /"count": 1/);
   assert.match(channelSongSearchOutput, /"globalCount": 2/);
 
@@ -189,13 +207,35 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
       "vtubers",
       "--q",
       "Alpha",
-      "--summary-only",
     ],
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(vtuberQueryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(vtuberQueryOutput, /"totalCount": 1/);
   assert.match(vtuberQueryOutput, /"name": "Alpha Ch\."/);
+  assert.match(vtuberQueryOutput, /"channelId": "UC-alpha"/);
+  assert.match(vtuberQueryOutput, /"count": 3/);
+  assert.match(vtuberQueryOutput, /"videoCount": 2/);
+
+  const vtuberAliasQueryOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--q",
+      "HanamaeHaru",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(vtuberAliasQueryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(vtuberAliasQueryOutput, /"totalCount": 1/);
+  assert.match(vtuberAliasQueryOutput, /"name": "Haru Ch\. 花前ハル"/);
 
   const videoMetricQueryOutput = execFileSync(
     PYTHON,
