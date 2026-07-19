@@ -418,6 +418,7 @@ function applyCurationToVideos(videos, context) {
     replacedEntries: 0,
     ruleDroppedEntries: 0,
     conversationDroppedEntries: 0,
+    nearDuplicateDroppedEntries: 0,
     forceRefreshVideoIds: collectForceRefreshVideoIds(context).size,
   };
   const result = [];
@@ -467,10 +468,100 @@ function applyCurationToVideos(videos, context) {
       }
       songs.push(enriched);
     }
-    if (songs.length) result.push({ ...video, songs });
+    const deduped = dedupeNearDuplicateVideoSongs(songs);
+    stats.nearDuplicateDroppedEntries += deduped.droppedCount;
+    if (deduped.songs.length) result.push({ ...video, songs: deduped.songs });
   }
   result.curationStats = stats;
   return result;
+}
+
+function dedupeNearDuplicateVideoSongs(inputSongs, options = {}) {
+  const windowSeconds = Number.isInteger(options.windowSeconds) ? options.windowSeconds : 30;
+  const kept = [];
+  let droppedCount = 0;
+  for (const song of inputSongs || []) {
+    const existingIndex = kept.findIndex((item) => isNearDuplicateVideoSong(item, song, windowSeconds));
+    if (existingIndex < 0) {
+      kept.push(song);
+      continue;
+    }
+
+    const existing = kept[existingIndex];
+    const preferred = preferNearDuplicateSong(existing, song);
+    const dropped = preferred === existing ? song : existing;
+    kept[existingIndex] = attachNearDuplicateProvenance(preferred, dropped, windowSeconds);
+    droppedCount += 1;
+  }
+  return {
+    songs: kept.sort((a, b) => (a.seconds || 0) - (b.seconds || 0)).map((song, index) => ({ ...song, index: index + 1 })),
+    droppedCount,
+  };
+}
+
+function isNearDuplicateVideoSong(left, right, windowSeconds) {
+  const leftTitle = duplicateTitleKey(left?.title);
+  const rightTitle = duplicateTitleKey(right?.title);
+  if (!leftTitle || leftTitle !== rightTitle) return false;
+  if (Math.abs((Number(left?.seconds) || 0) - (Number(right?.seconds) || 0)) > windowSeconds) return false;
+  const leftArtist = duplicateArtistKey(left?.artist);
+  const rightArtist = duplicateArtistKey(right?.artist);
+  return !leftArtist || !rightArtist || leftArtist === rightArtist;
+}
+
+function preferNearDuplicateSong(left, right) {
+  const scoreDiff = nearDuplicateTrustScore(right) - nearDuplicateTrustScore(left);
+  if (scoreDiff > 0) return right;
+  if (scoreDiff < 0) return left;
+  return (Number(right?.seconds) || 0) < (Number(left?.seconds) || 0) ? right : left;
+}
+
+function nearDuplicateTrustScore(song) {
+  let score = 0;
+  if (song?.forceKept) score += 100;
+  if (!isUnknownArtist(song?.artist)) score += 30;
+  if (song?.rawHash) score += 4;
+  if (song?.sourceId || song?.sourceHash) score += 2;
+  if (String(song?.raw || "").trim()) score += 1;
+  return score;
+}
+
+function attachNearDuplicateProvenance(keptSong, droppedSong, windowSeconds) {
+  const previous = keptSong.nearDuplicateMerge?.dropped || [];
+  return {
+    ...keptSong,
+    nearDuplicateMerge: {
+      windowSeconds,
+      droppedCount: previous.length + 1,
+      reason: "same_video_same_song_within_30_seconds",
+      dropped: [...previous, compactDuplicateSong(droppedSong)],
+    },
+  };
+}
+
+function compactDuplicateSong(song) {
+  return {
+    seconds: Number(song?.seconds) || 0,
+    time: song?.time || secondsToTime(Number(song?.seconds) || 0),
+    title: String(song?.title || ""),
+    artist: String(song?.artist || ""),
+    sourceId: String(song?.sourceId || ""),
+    sourceHash: String(song?.sourceHash || ""),
+    rawHash: String(song?.rawHash || ""),
+  };
+}
+
+function duplicateTitleKey(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLocaleLowerCase()
+    .replace(/[\u{1F300}-\u{1FAFF}\uFE0E\uFE0F]/gu, "")
+    .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’~～!！?？.,，。、:：;；\-—–−_・･/／|｜￤∣丨✦]/gu, "")
+    .trim();
+}
+
+function duplicateArtistKey(value) {
+  return isUnknownArtist(value) ? "" : duplicateTitleKey(value);
 }
 
 function applyReplacement(song, replacement = {}) {

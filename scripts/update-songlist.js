@@ -256,6 +256,7 @@ async function main() {
         manualDroppedEntryCount: curatedMergedVideos.curationStats?.droppedEntries || 0,
         manualReplacedEntryCount: curatedMergedVideos.curationStats?.replacedEntries || 0,
         manualDroppedVideoCount: curatedMergedVideos.curationStats?.droppedVideos || 0,
+        nearDuplicateDroppedEntryCount: curatedMergedVideos.curationStats?.nearDuplicateDroppedEntries || 0,
         forceRefreshVideoCount: forceRefreshVideoIds.size,
       },
       recentBucketLimit: RECENT_BUCKET_LIMIT,

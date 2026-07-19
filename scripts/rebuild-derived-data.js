@@ -58,6 +58,7 @@ function main() {
     stats.manualReplacedEntryCount += curationStats.replacedEntries || 0;
     stats.ruleDroppedEntryCount += curationStats.ruleDroppedEntries || 0;
     stats.conversationDroppedEntryCount += curationStats.conversationDroppedEntries || 0;
+    stats.nearDuplicateDroppedEntryCount += curationStats.nearDuplicateDroppedEntries || 0;
     stats.droppedVideoCount += curationStats.droppedVideos || 0;
 
     const beforeQualityCount = countSongs(curatedItems);
@@ -275,6 +276,7 @@ function createRebuildStats() {
     manualReplacedEntryCount: 0,
     ruleDroppedEntryCount: 0,
     conversationDroppedEntryCount: 0,
+    nearDuplicateDroppedEntryCount: 0,
     qualityDroppedEntryCount: 0,
     droppedVideoCount: 0,
     forceRefreshVideoIds: [],
@@ -288,6 +290,7 @@ function collectAppliedCurationStats(stats, curatedItems) {
   stats.manualReplacedEntryCount += curationStats.replacedEntries || 0;
   stats.ruleDroppedEntryCount += curationStats.ruleDroppedEntries || 0;
   stats.conversationDroppedEntryCount += curationStats.conversationDroppedEntries || 0;
+  stats.nearDuplicateDroppedEntryCount += curationStats.nearDuplicateDroppedEntries || 0;
   stats.droppedVideoCount += curationStats.droppedVideos || 0;
 }
 
@@ -406,6 +409,7 @@ function buildCurationSummary(previous = {}, stats) {
     manualReplacedEntryCount: carryCount(previous.manualReplacedEntryCount, stats.manualReplacedEntryCount),
     ruleDroppedEntryCount: carryCount(previous.ruleDroppedEntryCount, newRuleDropped),
     conversationDroppedEntryCount: carryCount(previous.conversationDroppedEntryCount, stats.conversationDroppedEntryCount),
+    nearDuplicateDroppedEntryCount: carryCount(previous.nearDuplicateDroppedEntryCount, stats.nearDuplicateDroppedEntryCount),
     qualityDroppedEntryCount: carryCount(previous.qualityDroppedEntryCount, stats.qualityDroppedEntryCount),
     manualDroppedVideoCount: carryCount(previous.manualDroppedVideoCount, stats.droppedVideoCount),
     forceRefreshVideoCount: Math.max(numberOrZero(previous.forceRefreshVideoCount), stats.forceRefreshVideoIds.length),

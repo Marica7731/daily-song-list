@@ -92,13 +92,24 @@ test("rejects exact activity marker titles only for unknown artists", () => {
 });
 
 test("keeps exact activity marker title when a known artist is explicit", () => {
-  const songs = parseTimestampSongs(["0:06:44 曲紹介 / Known Artist\n0:10:00 START / Known Artist"]);
+  const songs = parseTimestampSongs([
+    [
+      "0:06:44 曲紹介 / Known Artist",
+      "0:10:00 StaRt / Mrs. GREEN APPLE",
+      "0:11:00 START / レフティーモンスターP feat. Lily",
+      "0:12:00 START / 愛内里菜",
+    ].join("\n"),
+  ]);
 
-  assert.equal(songs.length, 2);
+  assert.equal(songs.length, 4);
   assert.equal(songs[0].title, "曲紹介");
   assert.equal(songs[0].artist, "Known Artist");
-  assert.equal(songs[1].title, "START");
-  assert.equal(songs[1].artist, "Known Artist");
+  assert.equal(songs[1].title, "StaRt");
+  assert.equal(songs[1].artist, "Mrs. GREEN APPLE");
+  assert.equal(songs[2].title, "START");
+  assert.equal(songs[2].artist, "レフティーモンスターP feat. Lily");
+  assert.equal(songs[3].title, "START");
+  assert.equal(songs[3].artist, "愛内里菜");
 });
 
 test("parses split number start end song blocks using start time", () => {
@@ -494,4 +505,34 @@ test("still rejects plain greeting and topic comments", () => {
   ]);
 
   assert.deepEqual(songs, []);
+});
+
+test("rejects user-reviewed section headers and chat reaction dirty rows", () => {
+  const songs = parseTimestampSongs([
+    [
+      "0:00 Set List",
+      "0:01 OP",
+      "0:02 ED",
+      "0:03 END",
+      "0:04 Start",
+      "0:05 曲名",
+      "0:06 ～",
+      "0:07 開始",
+      "0:08 セットリスト",
+      "0:09 セトリ",
+      "0:10 タイムスタンプ",
+      "0:11 HAWAWA",
+      "0:12 BUAAAA",
+      "0:13 AAA TEST TEST",
+      "0:14 天Q天Q~~WO~~~",
+      "0:15 E HO E HO",
+      "0:16 HE HE",
+      "0:17 HOT LIMIT / T.M.Revolution",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["HOT LIMIT"],
+  );
 });

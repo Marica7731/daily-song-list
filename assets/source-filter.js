@@ -124,6 +124,7 @@
     const title = String(song?.title || song?.raw || "").trim();
     const hasArtist = hasKnownArtist(song);
     const artist = String(song?.artist || "").trim();
+    if (isWhitelistedSongEntry(title, artist)) return false;
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
     if (isStrongNonSongActivityText(title)) return true;
     if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
@@ -198,6 +199,7 @@
     if (/^こん[\p{L}\p{N}ー]{2,16}$/iu.test(key)) return true;
     return new Set([
       "この曲について",
+      "曲名",
       "待機",
       "待機画面op",
       "待機画面",
@@ -215,7 +217,14 @@
       "インストカバーmv紹介",
       "予告あれこれ",
       "new",
+      "op",
+      "ed",
+      "end",
       "start",
+      "setlist",
+      "セットリスト",
+      "セトリ",
+      "タイムスタンプ",
       "ご挨拶",
       "youtubeの新機能",
       "告知タイム",
@@ -289,6 +298,8 @@
     const compact = normalizeChatReactionText(text);
     if (!compact) return false;
     if (/^(?:hi)?(?:dq|denq|天q)(?:clap)?$/iu.test(compact)) return true;
+    if (/^(?:天q|dq|denq)+(?:wo+|wou+|ho+|he+|clap)*$/iu.test(compact)) return true;
+    if (/^(?:hawawa|bua{3,}|a{2,}testtest|ehoeho|hehe)$/iu.test(compact)) return true;
     if (/^wa{3,}$/iu.test(compact)) return true;
     return /^(?:hotsmile|kopipe|gola|golacheerskp|kp|ft|alelelele|alelelelele|blessyou|pat|pienface|zoomin|mumumu|otugaugausmile|smile)$/iu.test(compact);
   }
@@ -313,6 +324,24 @@
       value = stripped;
     }
     return value.trim();
+  }
+
+  function isWhitelistedSongEntry(title, artist) {
+    const titleKey = normalizeSongWhitelistText(title);
+    const artistKey = normalizeSongWhitelistText(artist);
+    return (
+      (titleKey === "start" && artistKey === normalizeSongWhitelistText("レフティーモンスターP feat. Lily")) ||
+      (titleKey === "start" && artistKey === normalizeSongWhitelistText("愛内里菜")) ||
+      (titleKey === "start" && artistKey === normalizeSongWhitelistText("Mrs. GREEN APPLE"))
+    );
+  }
+
+  function normalizeSongWhitelistText(text) {
+    return String(text || "")
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’~～!！?？.,，。、:：;；\-—–−_・･/／|｜]+/gu, "")
+      .trim();
   }
 
   function loadRegionalBlocklist(rootObject) {

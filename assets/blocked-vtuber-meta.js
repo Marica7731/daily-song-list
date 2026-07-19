@@ -8,9 +8,9 @@
 })(typeof globalThis !== "undefined" ? globalThis : window, function createBlockedVtuberMeta() {
   return {
     schemaVersion: 1,
-    listVersion: "2026-07-15.2",
-    updatedAt: "2026-07-15T06:11:16+08:00",
-    blocklistHash: "35524374d01c6a46ed5e1b3496e204b0338b43251cb5e20d9a47acbb80d6a945",
-    entryCount: 81
+    listVersion: "2026-07-20.1",
+    updatedAt: "2026-07-20T02:30:00+08:00",
+    blocklistHash: "e1d8918cb0158e278258cb3cc26bc587035a5818ff4bc202f5a52b88f2fb1071",
+    entryCount: 82
   };
 });

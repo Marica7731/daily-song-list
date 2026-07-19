@@ -284,6 +284,50 @@ test("curation drops campaign and announcement rows from production data", () =>
   assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 1);
 });
 
+test("curation folds same-video same-song duplicates within 30 seconds and keeps distant repeats", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "DEDUP000001",
+        songs: [
+          { title: "なんでもないや", artist: "未記載", seconds: 951, time: "0:15:51", raw: "15:51 なんでもないや", rawHash: "raw-1" },
+          { title: "なんでもないや", artist: "RADWIMPS", seconds: 952, time: "0:15:52", raw: "15:52 なんでもないや / RADWIMPS", rawHash: "raw-2" },
+          { title: "なんでもないや", artist: "RADWIMPS", seconds: 1000, time: "0:16:40", raw: "16:40 なんでもないや / RADWIMPS", rawHash: "raw-3" },
+          {
+            title: "secret base ～君がくれたもの～",
+            artist: "ZONE",
+            seconds: 1955,
+            time: "0:32:35",
+            raw: "32:35 secret base ～君がくれたもの～ / ZONE",
+            rawHash: "raw-4",
+          },
+          {
+            title: "secret base～君がくれたもの～",
+            artist: "ZONE",
+            seconds: 1956,
+            time: "0:32:36",
+            raw: "32:36 secret base～君がくれたもの～ / ZONE",
+            rawHash: "raw-5",
+          },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos[0].songs.map((item) => `${item.time} ${item.title} / ${item.artist}`),
+    [
+      "0:15:52 なんでもないや / RADWIMPS",
+      "0:16:40 なんでもないや / RADWIMPS",
+      "0:32:35 secret base ～君がくれたもの～ / ZONE",
+    ],
+  );
+  assert.equal(videos[0].songs[0].nearDuplicateMerge.droppedCount, 1);
+  assert.equal(videos[0].songs[2].nearDuplicateMerge.dropped[0].rawHash, "raw-5");
+  assert.equal(videos.curationStats.nearDuplicateDroppedEntries, 2);
+});
+
 test("curation patch merge dedupes identical records and reports conflicts", () => {
   const baseRecord = { action: "drop_entry", videoId: "AAAAAAAAAAA", sourceId: "source", seconds: 10, rawHash: "raw" };
   const deduped = mergeCurationPatch({ schemaVersion: 1, records: [baseRecord] }, { schemaVersion: 1, records: [baseRecord] });

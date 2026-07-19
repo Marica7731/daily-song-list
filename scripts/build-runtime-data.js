@@ -1475,6 +1475,14 @@ function serializeOccurrence(occurrence, options = {}) {
   };
 }
 
+function incrementCount(map, name) {
+  if (!name) return;
+  const key = normalizeSearchText(name);
+  if (!key) return;
+  if (!map.has(key)) map.set(key, { key, name, count: 0 });
+  map.get(key).count += 1;
+}
+
 function serializeCountMap(value) {
   if (value instanceof Map) {
     return Array.from(value.values()).map((entry) => ({
