@@ -52,14 +52,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: main
+          fetch-depth: 1
 
       - name: Resolve deploy revision
         id: revision
         run: |
-          git fetch origin main --prune
-          git checkout main
-          git pull --ff-only --quiet origin main
+          git fetch --depth=1 origin main --prune
+          git checkout -B main FETCH_HEAD
           commit_sha="$(git rev-parse HEAD)"
           latest_sha256="$(sha256sum data/latest.json | awk '{print $1}')"
           echo "commit_sha=${commit_sha}" >> "$GITHUB_OUTPUT"
