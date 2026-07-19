@@ -190,6 +190,17 @@ test("delayed trend diffs update visible badges without rerendering the list for
   assert.doesNotMatch(updateBody, /els\.content\.replaceChildren|render\(/u);
 });
 
+test("API request summaries hide broad occurrence totals until filtered", () => {
+  const summaryBody = functionBody("function renderRequestSummary");
+  assert.match(summaryBody, /const showOccurrenceMetric = shouldShowRequestOccurrenceMetric\(result\)/u);
+  assert.match(summaryBody, /if \(showOccurrenceMetric\) metrics\.push\(metric\(occurrenceCount, "次收录"\)\)/u);
+  assert.match(summaryBody, /metrics\.push\(metric\(occurrenceCount, "个时间戳"\)\)/u);
+
+  const helperBody = functionBody("function shouldShowRequestOccurrenceMetric");
+  assert.match(helperBody, /if \(result\.view === "videos"\) return true/u);
+  assert.match(helperBody, /state\.filter \|\| state\.nicheOnly \|\| state\.minCount > 1 \|\| state\.trend !== "all" \|\| result\.totalCount !== result\.filteredBaseCount/u);
+});
+
 test("selection builds only the records needed by the current view", () => {
   const selectionBody = functionBody("function currentSelection");
   assert.match(selectionBody, /const key = `\$\{state\.view\}::/u);

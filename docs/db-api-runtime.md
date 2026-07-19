@@ -128,6 +128,7 @@ Frontend API-mode behavior:
 - When `/api/meta` returns a valid payload, the frontend enters SQLite/API mode and must not request `data/diff/latest-*.json`; those static diff files can resolve to HTML on the VPS/Nginx deployment and produce JSON parse toasts.
 - API mode normalizes `trend` filters to `all`, disables the trend selector, and shows `API模式暂不支持趋势筛选`.
 - The freshness chip uses SQLite `meta.built_at` / `rebuiltDerivedAt` as the staleness baseline. `meta.latest_captured_at` remains source-data provenance and must not trigger the 2-hour stale alert by itself.
+- Broad unfiltered API summaries hide the all-site occurrence total because it is an internal source-row aggregate. Search/min-count/niche-filtered summaries still show matched `次收录`, and the video view still shows `个时间戳`.
 
 `GET /api/rankings`
 

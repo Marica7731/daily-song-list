@@ -4007,17 +4007,18 @@ function renderRequestSummary(result) {
   const scope = result.summary?.scopes?.[result.scopeKey] || {};
   const occurrenceCount = summaryMetricValue(result.totalOccurrenceCount, scope.occurrenceCount);
   const videoCount = summaryMetricValue(result.totalVideoCount, scope.videoCount);
+  const showOccurrenceMetric = shouldShowRequestOccurrenceMetric(result);
   const metrics = [];
   if (result.view === "artistRank") {
     metrics.push(metric(result.totalCount, "位歌手"));
-    metrics.push(metric(occurrenceCount, "次收录"));
+    if (showOccurrenceMetric) metrics.push(metric(occurrenceCount, "次收录"));
     metrics.push(metric(videoCount, "个视频"));
   } else if (result.view === "videos") {
     metrics.push(metric(result.totalCount, "个视频"));
     metrics.push(metric(occurrenceCount, "个时间戳"));
   } else {
     metrics.push(metric(result.totalCount, "首歌曲"));
-    metrics.push(metric(occurrenceCount, "次收录"));
+    if (showOccurrenceMetric) metrics.push(metric(occurrenceCount, "次收录"));
     metrics.push(metric(videoCount, "个视频"));
   }
   renderSummary(currentGroup(), metrics, requestSummaryNote(result));
@@ -4028,6 +4029,11 @@ function summaryMetricValue(value, fallback) {
   if (Number.isFinite(numeric) && numeric >= 0) return numeric;
   const fallbackNumeric = Number(fallback);
   return Number.isFinite(fallbackNumeric) && fallbackNumeric >= 0 ? fallbackNumeric : 0;
+}
+
+function shouldShowRequestOccurrenceMetric(result) {
+  if (result.view === "videos") return true;
+  return Boolean(state.filter || state.nicheOnly || state.minCount > 1 || state.trend !== "all" || result.totalCount !== result.filteredBaseCount);
 }
 
 function requestSummaryNote(result) {
