@@ -57,6 +57,7 @@ HTTP endpoints:
 - `GET /api/rankings?range=7d&view=artists&q=花`
 - `GET /api/rankings?range=all&view=vtubers&q=HanamaeHaru&pageSize=5`
 - `GET /api/sources/{sourceDetailKey}`
+- `GET /api/sources/{sourceDetailKey}?page=1&pageSize=20`
 - `GET /api/sources/{sourceDetailKey}?q=なれたん`
 
 Operator smoke tests:
@@ -226,10 +227,11 @@ It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス
 `GET /api/sources/{sourceDetailKey}`
 
 - Returns `{ found, sourceKey, record }`.
-- When `found=true`, `record.occurrences` contains the full source occurrence list sorted by stored position.
+- Without `page` or `pageSize`, `record.occurrences` contains the full source occurrence list sorted by stored position for backward compatibility.
+- With `page` or `pageSize`, the endpoint pages by unique source video in stored position order and returns only that page's occurrence rows. The response also includes `page`, `pageSize`, `pageCount`, `totalCount`, `totalVideoCount`, and `totalOccurrenceCount`.
 - When `found=false`, the response is `{ schemaVersion, found: false, sourceKey }`.
 - The frontend uses this endpoint for "view all sources" in API mode, so large source lists stay out of initial ranking responses.
-- This endpoint is intentionally unpaginated in the first database runtime. Keep it behind an explicit user action, and include a large-source smoke test before raising nginx/API timeouts or changing the response shape.
+- The frontend source drawer requests page size 20 on desktop/tablet and 10 on mobile so opening a song with thousands of sources does not download or insert the full list before first paint.
 
 Supported ranking views in this first step:
 

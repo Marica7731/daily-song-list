@@ -95,6 +95,40 @@
     };
   }
 
+  function responsiveListPageSize(mode = "desktop", options = {}) {
+    const sizes = {
+      mobile: positiveInteger(options.mobile, 20),
+      tablet: positiveInteger(options.tablet, 50),
+      desktop: positiveInteger(options.desktop, 50),
+    };
+    return sizes[mode] || sizes.desktop;
+  }
+
+  function sourceDrawerPageModel(options = {}) {
+    const total = nonNegativeInteger(options.totalCount ?? options.total, 0);
+    const pageSize = positiveInteger(options.pageSize, total || 1);
+    const pageCount = Math.max(1, Math.ceil(total / pageSize));
+    const page = clamp(positiveInteger(options.page, 1), 1, pageCount);
+    const visibleCount = nonNegativeInteger(options.visibleCount, 0);
+    const startIndex = total ? (page - 1) * pageSize : 0;
+    const endIndex = Math.min(total, startIndex + visibleCount);
+    return {
+      page,
+      pageSize,
+      pageCount,
+      total,
+      totalCount: total,
+      visibleCount,
+      startIndex,
+      endIndex,
+      hasPrevious: page > 1,
+      hasNext: page < pageCount,
+      previousPage: page > 1 ? page - 1 : null,
+      nextPage: page < pageCount ? page + 1 : null,
+      currentLabel: `${page}/${pageCount}`,
+    };
+  }
+
   function desktopPageTokens(currentPage, totalPages, options = {}) {
     const total = positiveInteger(totalPages, 1);
     const current = clamp(positiveInteger(currentPage, 1), 1, total);
@@ -1405,6 +1439,8 @@
     normalizeSetlistSongs,
     normalizeSongSearchText,
     paginateItems,
+    responsiveListPageSize,
+    sourceDrawerPageModel,
     desktopPageTokens,
     mobilePageModel,
     mobilePageStepperModel,

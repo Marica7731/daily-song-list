@@ -368,33 +368,115 @@ def count_occurrence_channels(occurrences: list[dict]) -> list[dict]:
 def source_payload(db_path: Path, key: str, query: dict[str, list[str]] | None = None) -> dict:
     if not key:
         raise ValueError("source key is required")
-    q = first(query or {}, "q", "").strip()
+    source_query = query or {}
+    q = first(source_query, "q", "").strip()
+    use_paging = "page" in source_query or "pageSize" in source_query
+    page = max(1, parse_int(first(source_query, "page", "1"), "page"))
+    page_size = min(200, max(1, parse_int(first(source_query, "pageSize", "50"), "pageSize")))
     with connect(db_path) as conn:
         row = conn.execute("SELECT payload_json FROM source_details WHERE source_key = ?", (key,)).fetchone()
-        if q:
-            occurrence_rows = conn.execute(
-                """
-                SELECT payload_json FROM source_occurrences
-                WHERE source_key = ? AND lower(search_text) LIKE ?
-                ORDER BY position
-                """,
-                (key, f"%{q.lower()}%"),
-            ).fetchall()
+        if use_paging:
+            occurrence_rows, total_occurrences, total_videos, page = paged_source_occurrences(conn, key, q, page, page_size)
         else:
-            occurrence_rows = conn.execute(
-                "SELECT payload_json FROM source_occurrences WHERE source_key = ? ORDER BY position",
-                (key,),
-            ).fetchall()
+            occurrence_rows = all_source_occurrences(conn, key, q)
+            total_occurrences = len(occurrence_rows)
+            total_videos = len({
+                occurrence["video_id"]
+                for occurrence in occurrence_rows
+                if occurrence["video_id"]
+            })
     if row is None:
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     record = json.loads(row["payload_json"])
     record["occurrences"] = [json.loads(occurrence["payload_json"]) for occurrence in occurrence_rows]
-    if q:
+    if q or use_paging:
         record["sourceFilterQuery"] = q
-        record["count"] = len(record["occurrences"])
-        record["timestampCount"] = len(record["occurrences"])
-        record["videoCount"] = len({occurrence.get("item", {}).get("videoId") for occurrence in record["occurrences"] if occurrence.get("item", {}).get("videoId")})
-    return {"schemaVersion": 1, "found": True, "sourceKey": key, "record": record}
+        record["count"] = total_occurrences
+        record["timestampCount"] = total_occurrences
+        record["videoCount"] = total_videos
+        record["occurrencePreviewLimited"] = total_occurrences > len(record["occurrences"])
+    payload = {"schemaVersion": 1, "found": True, "sourceKey": key, "record": record}
+    if use_paging:
+        page_count = max(1, (total_videos + page_size - 1) // page_size)
+        payload.update(
+            {
+                "page": page,
+                "pageSize": page_size,
+                "pageCount": page_count,
+                "totalCount": total_videos,
+                "totalVideoCount": total_videos,
+                "totalOccurrenceCount": total_occurrences,
+            }
+        )
+    return payload
+
+
+def all_source_occurrences(conn: sqlite3.Connection, key: str, q: str) -> list[sqlite3.Row]:
+    if q:
+        return conn.execute(
+            """
+            SELECT payload_json, video_id FROM source_occurrences
+            WHERE source_key = ? AND lower(search_text) LIKE ?
+            ORDER BY position
+            """,
+            (key, f"%{q.lower()}%"),
+        ).fetchall()
+    return conn.execute(
+        "SELECT payload_json, video_id FROM source_occurrences WHERE source_key = ? ORDER BY position",
+        (key,),
+    ).fetchall()
+
+
+def paged_source_occurrences(
+    conn: sqlite3.Connection,
+    key: str,
+    q: str,
+    page: int,
+    page_size: int,
+) -> tuple[list[sqlite3.Row], int, int, int]:
+    group_expr = "COALESCE(NULLIF(video_id, ''), 'position:' || position)"
+    where = ["source_key = ?"]
+    params: list[object] = [key]
+    if q:
+        where.append("lower(search_text) LIKE ?")
+        params.append(f"%{q.lower()}%")
+    where_sql = " AND ".join(where)
+    total_occurrences = conn.execute(
+        f"SELECT COUNT(*) AS total_count FROM source_occurrences WHERE {where_sql}",
+        params,
+    ).fetchone()["total_count"]
+    total_videos = conn.execute(
+        f"SELECT COUNT(*) AS total_count FROM (SELECT 1 FROM source_occurrences WHERE {where_sql} GROUP BY {group_expr})",
+        params,
+    ).fetchone()["total_count"]
+    page_count = max(1, (total_videos + page_size - 1) // page_size)
+    page = min(page, page_count)
+    offset = (page - 1) * page_size
+    group_rows = conn.execute(
+        f"""
+        SELECT {group_expr} AS group_key
+        FROM source_occurrences
+        WHERE {where_sql}
+        GROUP BY group_key
+        ORDER BY MIN(position)
+        LIMIT ? OFFSET ?
+        """,
+        [*params, page_size, offset],
+    ).fetchall()
+    group_keys = [row["group_key"] for row in group_rows]
+    if not group_keys:
+        return [], total_occurrences, total_videos, page
+    placeholders = ",".join("?" for _ in group_keys)
+    occurrence_rows = conn.execute(
+        f"""
+        SELECT payload_json, video_id FROM source_occurrences
+        WHERE {where_sql}
+          AND {group_expr} IN ({placeholders})
+        ORDER BY position
+        """,
+        [*params, *group_keys],
+    ).fetchall()
+    return occurrence_rows, total_occurrences, total_videos, page
 
 
 def decode_row(row: sqlite3.Row) -> dict:

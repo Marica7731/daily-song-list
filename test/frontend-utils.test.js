@@ -37,6 +37,7 @@ const {
   normalizeSongSearchText,
   paginateItems,
   parseUrlState,
+  responsiveListPageSize,
   queryTriggerModel,
   rankToggleModel,
   runtimeRangeMeta,
@@ -47,6 +48,7 @@ const {
   sanitizeQueryDraft,
   shouldPrefetchRuntimeRange,
   shouldSkipSourceFilter,
+  sourceDrawerPageModel,
   sourcePresentationModel,
   summaryVideoCountModel,
   trendDisplayModel,
@@ -473,6 +475,31 @@ test("pagination uses pageSize 50 and clamps pages to available bounds", () => {
 
   assert.deepEqual(underrun.visible.slice(0, 3), [1, 2, 3]);
   assert.equal(underrun.page, 1);
+});
+
+test("responsive list and source drawer page models keep UI page-size contracts", () => {
+  assert.equal(responsiveListPageSize("desktop"), 50);
+  assert.equal(responsiveListPageSize("tablet"), 50);
+  assert.equal(responsiveListPageSize("mobile"), 20);
+  assert.equal(responsiveListPageSize("desktop", { desktop: 60, mobile: 12 }), 60);
+  assert.equal(responsiveListPageSize("mobile", { desktop: 60, mobile: 12 }), 12);
+
+  assert.deepEqual(sourceDrawerPageModel({ totalCount: 45, page: 2, pageSize: 20, visibleCount: 20 }), {
+    page: 2,
+    pageSize: 20,
+    pageCount: 3,
+    total: 45,
+    totalCount: 45,
+    visibleCount: 20,
+    startIndex: 20,
+    endIndex: 40,
+    hasPrevious: true,
+    hasNext: true,
+    previousPage: 1,
+    nextPage: 3,
+    currentLabel: "2/3",
+  });
+  assert.equal(sourceDrawerPageModel({ totalCount: 45, page: 9, pageSize: 20, visibleCount: 5 }).page, 3);
 });
 
 test("visible page tokens use non-clickable ellipsis markers", () => {

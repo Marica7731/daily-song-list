@@ -115,6 +115,22 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(source.found, true);
     assert.equal(source.record.title, "Song One");
     assert.equal(source.record.occurrences.length, 2);
+
+    const sourceFirstPage = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}?page=1&pageSize=1`);
+    assert.equal(sourceFirstPage.found, true);
+    assert.equal(sourceFirstPage.page, 1);
+    assert.equal(sourceFirstPage.pageSize, 1);
+    assert.equal(sourceFirstPage.pageCount, 2);
+    assert.equal(sourceFirstPage.totalCount, 2);
+    assert.equal(sourceFirstPage.totalVideoCount, 2);
+    assert.equal(sourceFirstPage.totalOccurrenceCount, 2);
+    assert.equal(sourceFirstPage.record.occurrences.length, 1);
+    assert.equal(sourceFirstPage.record.occurrences[0].item.videoId, "video-a");
+
+    const sourceSecondPage = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}?page=2&pageSize=1`);
+    assert.equal(sourceSecondPage.page, 2);
+    assert.equal(sourceSecondPage.record.occurrences.length, 1);
+    assert.equal(sourceSecondPage.record.occurrences[0].item.videoId, "video-b");
   } finally {
     child.kill();
     await waitForExit(child);
