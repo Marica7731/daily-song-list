@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T19:51:15.140Z",
+  "generatedAt": "2026-07-19T04:14:58.312Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 26538,
-  "unknownArtistCount": 3686,
-  "nicheUnknownArtistCount": 1997,
-  "highRiskEntryCount": 751,
-  "highRiskSourceCount": 24,
+  "totalSongs": 27087,
+  "unknownArtistCount": 3714,
+  "nicheUnknownArtistCount": 1964,
+  "highRiskEntryCount": 745,
+  "highRiskSourceCount": 23,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 1,
+  "ruleDroppedEntryCount": 0,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 2,
-  "parserCorruptionCount": 50,
+  "confirmedNoiseCount": 10,
+  "parserCorruptionCount": 52,
   "likelyNoiseCount": 0,
-  "needsReviewCount": 1991,
-  "likelySongCount": 15553,
+  "needsReviewCount": 1957,
+  "likelySongCount": 15312,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -33,12 +33,12 @@
     },
     {
       "value": "少女レイ",
-      "count": 19,
+      "count": 20,
       "classifications": {
-        "likely_song": 19
+        "likely_song": 20
       },
       "riskReasons": {
-        "known_song_unknown_artist": 19
+        "known_song_unknown_artist": 20
       }
     },
     {
@@ -74,6 +74,16 @@
       }
     },
     {
+      "value": "夜明けと蛍",
+      "count": 11,
+      "classifications": {
+        "likely_song": 11
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 11
+      }
+    },
+    {
       "value": "ロミオとシンデレラ",
       "count": 10,
       "classifications": {
@@ -97,16 +107,6 @@
     },
     {
       "value": "青と夏",
-      "count": 10,
-      "classifications": {
-        "likely_song": 10
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 10
-      }
-    },
-    {
-      "value": "夜明けと蛍",
       "count": 10,
       "classifications": {
         "likely_song": 10
@@ -230,35 +230,31 @@
   ],
   "topRiskChannels": [
     {
-      "value": "汐音ベリーちゃん Berry Ch",
-      "count": 12
-    },
-    {
       "value": "UTANO ch. 白玖ウタノ",
       "count": 11
+    },
+    {
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 10
     },
     {
       "value": "音魂ヒビクHibiku Otodama",
       "count": 8
     },
     {
-      "value": "Kyoka Ch. -響架-",
-      "count": 7
-    },
-    {
-      "value": "ただのかえる【TADANO KAERU】",
-      "count": 7
-    },
-    {
       "value": "羽緒",
       "count": 7
+    },
+    {
+      "value": "Kyoka Ch. -響架-",
+      "count": 6
     },
     {
       "value": "Norn Ch. 氷々樹ノルン",
       "count": 6
     },
     {
-      "value": "菜鳥ひなた / Hinata Natori",
+      "value": "ただのかえる【TADANO KAERU】",
       "count": 6
     },
     {
@@ -307,6 +303,10 @@
     },
     {
       "value": "NEPHLA",
+      "count": 4
+    },
+    {
+      "value": "Poka ch. 泡ノ音ポカ",
       "count": 4
     }
   ],
@@ -388,8 +388,8 @@
       "riskLevel": "high",
       "riskReasons": [
         "source_parser_corruption",
-        "source_multiple_niche_short_titles",
-        "parser_corruption"
+        "parser_corruption",
+        "source_multiple_niche_short_titles"
       ]
     },
     {
@@ -546,20 +546,6 @@
       ]
     },
     {
-      "videoId": "hWv55PnjmEo",
-      "title": "【#弾き語り】1周年カウントダウン！オリ曲歌います！ singing stream - #ミナミイズミ #shorts",
-      "channelName": "ミナミイズミ / IZUMI MINAMI",
-      "riskScore": 78,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
       "videoId": "ZTi1cpRaW8U",
       "title": "† 同接66耐久 #歌枠 † 独立！JOYSOUND解放歌枠 ♪✨〖 闇咲とうか/ karaoke / singing stream 〗",
       "channelName": "闇咲とうか",
@@ -585,10 +571,32 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles"
       ]
+    },
+    {
+      "videoId": "ZSNptWSG6i4",
+      "title": "【 歌枠￤KARAOKE 】1曲だけでも聴いてかない？【ゆそる／ピスパレ】",
+      "channelName": "ゆそる",
+      "riskScore": 77,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "source_multiple_niche_short_titles",
+        "short_unknown_title"
+      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-19T04:14:58.312Z",
+      "totalSongs": 27087,
+      "unknownArtistCount": 3714,
+      "nicheUnknownArtistCount": 1964,
+      "highRiskEntryCount": 745,
+      "highRiskSourceCount": 23
+    },
     {
       "generatedAt": "2026-07-18T19:51:15.140Z",
       "totalSongs": 26538,
@@ -740,14 +748,6 @@
       "nicheUnknownArtistCount": 1533,
       "highRiskEntryCount": 500,
       "highRiskSourceCount": 20
-    },
-    {
-      "generatedAt": "2026-07-15T08:57:01.281Z",
-      "totalSongs": 17524,
-      "unknownArtistCount": 2971,
-      "nicheUnknownArtistCount": 1480,
-      "highRiskEntryCount": 487,
-      "highRiskSourceCount": 19
     }
   ]
 }

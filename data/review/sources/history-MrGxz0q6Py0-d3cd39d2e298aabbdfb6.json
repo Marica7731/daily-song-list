@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T19:51:15.140Z",
+  "generatedAt": "2026-07-19T04:14:58.312Z",
   "reviewId": "review:MrGxz0q6Py0:d3cd39d2e298aabbdfb6",
   "video": {
     "videoId": "MrGxz0q6Py0",
@@ -15,12 +15,13 @@
     "selected": true,
     "sourceTextAvailable": false,
     "sourceText": "",
-    "snapshotId": "20260716T230000Z"
+    "snapshotId": "20260714T190000Z"
   },
   "risk": {
-    "riskScore": 6,
+    "riskScore": 20,
     "riskLevel": "low",
     "riskReasons": [
+      "source_multiple_unknown_artists",
       "niche_unknown_artist"
     ]
   },
@@ -75,14 +76,20 @@
       "rawHash": "afb7beec123d81ff6cadc99dd38784169e01199a3649aebff5f0bc7ab3bf91b3",
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "isNiche": false,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "八月の夜",
+        "artist": "SILENT SIREN"
+      },
       "riskReasons": [
-        "niche_unknown_artist"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song",
+        "known_artist"
+      ]
     },
     {
       "status": "accepted",
@@ -106,6 +113,26 @@
     },
     {
       "status": "accepted",
+      "seconds": 2498,
+      "time": "0:41:38",
+      "title": "ナイショの話 ClariS",
+      "artist": "未記載",
+      "raw": "41:38 ナイショの話 ClariS",
+      "rawHash": "486b31b27a7d518add1f49a1ae839dba1299872a1b27849176b1be95b6d24da6",
+      "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
+      "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "replacementSuggestion": null,
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "positiveEvidence": []
+    },
+    {
+      "status": "accepted",
       "seconds": 2962,
       "time": "0:49:22",
       "title": "Overfly",
@@ -123,6 +150,26 @@
         "known_song",
         "known_artist"
       ]
+    },
+    {
+      "status": "accepted",
+      "seconds": 3540,
+      "time": "0:59:00",
+      "title": "ユメセカイ 戸松遥",
+      "artist": "未記載",
+      "raw": "59:00 ユメセカイ 戸松遥",
+      "rawHash": "9fb08bdbe4adf54c082ff0608fef23be0c67d01e72c1dbda12e91fac2dfe869c",
+      "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
+      "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "replacementSuggestion": null,
+      "riskReasons": [
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
+      ],
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -194,14 +241,20 @@
       "rawHash": "bed992b53d7355ebad055dcc9a8381d6ab82daf126a11cc02b340cfe28f0e199",
       "sourceId": "UgxTXVWnAEKAjib7lE14AaABAg",
       "sourceHash": "d3cd39d2e298aabbdfb642aedb8e3bbee935ed0cd48889897c6d5d928b957b06",
-      "isNiche": true,
-      "classification": "needs_review",
-      "suggestedAction": "manual_review",
-      "replacementSuggestion": null,
+      "isNiche": false,
+      "classification": "parser_corruption",
+      "suggestedAction": "replace_entry",
+      "replacementSuggestion": {
+        "title": "パラソルサイダー",
+        "artist": "ナナホシ管弦楽団"
+      },
       "riskReasons": [
-        "niche_unknown_artist"
+        "parser_corruption"
       ],
-      "positiveEvidence": []
+      "positiveEvidence": [
+        "known_song",
+        "known_artist"
+      ]
     }
   ]
 }

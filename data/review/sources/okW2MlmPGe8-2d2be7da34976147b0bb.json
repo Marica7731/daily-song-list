@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-18T19:51:15.140Z",
+  "generatedAt": "2026-07-19T04:14:58.312Z",
   "reviewId": "review:okW2MlmPGe8:2d2be7da34976147b0bb",
   "video": {
     "videoId": "okW2MlmPGe8",
@@ -11,17 +11,19 @@
   "source": {
     "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
     "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "00. 00:04:08 START\n曲目表 SONGLIST\n-----------------------------------------------------------------------\n01. 00:09:24 福寿草 / ぐにょ\n　⨽ 00:11:20 重唱\n02. 00:22:39 像我這樣的人 / 毛不易\n03. 01:08:16 行星 / 理想混蛋\n04. 01:19:37 I am a broken umbrella / Nem\n05. 01:28:02 沒有我的那個宇宙 / 持修\n06. 01:34:47 晩餐歌 / tuki.\n07. 01:42:48 太陽 / 邱振哲\n08. 01:51:37 星屑の夜空 / 厄倫蒂兒\n09. 02:00:58 你知道星星多重嗎 / 鄭興\n10. 02:08:20 這條小魚在乎 / 王OK & 洪佩瑜\n-----------------------------------------------------------------------",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 10,
+    "riskScore": 30,
     "riskLevel": "low",
     "riskReasons": [
-      "short_unknown_title"
+      "niche_unknown_artist",
+      "short_unknown_title",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -42,8 +44,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -56,16 +57,15 @@
       "rawHash": "3e81fda54cc35fa171bd092700eaeaf40d64e6caadf695cc49602f789094eb37",
       "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
       "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "short_unknown_title"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -77,14 +77,13 @@
       "rawHash": "e2a4db47b20af9f13efb8ee5500e68d68ca929ab542fe365f15f1e1c98f866e7",
       "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
       "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -97,14 +96,13 @@
       "rawHash": "2e93deda6a878d3a5337843283cd35853259668bfafcc619951dcfd91ad036cf",
       "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
       "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -124,8 +122,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -138,14 +135,13 @@
       "rawHash": "63ab25b0ad7bcc4ff4350a1609385bb1c7cddfbdf05ba92b88e6d35213e17970",
       "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
       "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -165,8 +161,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -186,8 +181,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -200,14 +194,13 @@
       "rawHash": "edb923974047143bb8153416c13e746c469fdaba9f22a8accd878df6abde0466",
       "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
       "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -220,14 +213,13 @@
       "rawHash": "b6343a0b7f826529e8d5e6df87fd024fceed727344d5fd28d7267f4dc604878c",
       "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
       "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -240,31 +232,13 @@
       "rawHash": "4b36e54b8348cd177d9d225dfdaf4520e3eaa70caa7c029ecb59446a07ad90e5",
       "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
       "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "obvious_non_song_text",
-      "seconds": 248,
-      "time": "0:04:08",
-      "title": "START",
-      "artist": "",
-      "raw": "00. 00:04:08 START",
-      "rawHash": "eae87d72bf74b88965f0fb1c4194512f3d02956894fcc1cbb0aa90b21fe7cf67",
-      "sourceId": "UgzJRVQgJHXyqS7z1W94AaABAg",
-      "sourceHash": "2d2be7da34976147b0bbdfe4f83ffb7782cea736847b22c35ee10c5d3ffdd0eb",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "obvious_non_song_text"
+        "known_artist"
       ]
     }
   ]
