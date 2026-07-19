@@ -15,6 +15,8 @@ test("source filter removes blocked HK/TW VTuber channels without matching ordin
   assert.equal(isBlockedSource({ channelId: "UCW8G8aeRjbIOlL-Fgms8hEQ", channelName: "Japanese Channel", title: "歌雜 / HKVtuber" }), true);
   assert.equal(isBlockedSource({ channelHandle: "@yukichanch", channelName: "Japanese Channel", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelUrl: "https://www.youtube.com/@rhoda1126", channelName: "Japanese Channel", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelId: "UCD1QOCJIAPsMKMvRSXjLahw", channelName: "Aruma Ch. 薬袋アルマ", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelHandle: "@ArumaCh", channelName: "薬袋アルマ", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "奔跑日記！ / 米亞 MYA" }), false);
   assert.equal(isBlockedSource({ channelName: "Narrator Music", title: "HKVtuber 台湾旅行" }), false);
   assert.equal(isBlockedSongEntry({ title: "DEN Q~~~", artist: "未記載" }), true);
@@ -87,7 +89,18 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "A LELELELE", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "KP", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "ft", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "天Q", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "天Q天Q~~WO~~~", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "HI 天Q~", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "HAWAWA", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "BUAAAA", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "HE HE", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "E HO E HO", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "Set List", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "曲名", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "Known Artist" }), false);
+  assert.equal(isBlockedSongEntry({ title: "START", artist: "レフティーモンスターP feat. Lily" }), false);
+  assert.equal(isBlockedSongEntry({ title: "天Q", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "はじまりはいつも雨", artist: "未記載" }), false);
 
   assert.equal(cleanSongTitleNoise("01| ハートアンドハート"), "ハートアンドハート");

@@ -2,6 +2,8 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const { entryRepairSignals } = require("./entry-repair");
+const { normalizeArtistKey, normalizeSongTitleKey } = require("../assets/ranking-utils");
+const { isBlockedSongEntry } = require("../assets/source-filter");
 
 const ROOT = path.resolve(__dirname, "..");
 const CONFIG_DIR = path.join(ROOT, "config");
@@ -11,6 +13,7 @@ const UNKNOWN_ARTIST_KEYS = new Set(["", "unknown", "n/a", "na", "none", "null",
 const VALID_ACTIONS = new Set(["drop_entry", "replace_entry", "reject_source", "force_refresh", "drop_video", "force_keep"]);
 const ENTRY_ACTIONS = new Set(["drop_entry", "replace_entry", "force_keep"]);
 const SOURCE_ACTIONS = new Set(["reject_source"]);
+const NEAR_DUPLICATE_WINDOW_SECONDS = 30;
 
 function loadCurationContext(options = {}) {
   const nonSongRules = normalizeNonSongRules(readJsonIfExists(options.nonSongRulesPath || NON_SONG_RULES_PATH) || {});
@@ -359,6 +362,9 @@ function classifyEntry(song, options = {}) {
   if (!knownSong && isConversationEntry(song)) {
     return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["conversation_entry"] };
   }
+  if (!knownSong && isBlockedSongEntry(song)) {
+    return { classification: "confirmed_noise", suggestedAction: "drop_entry", riskReasons: ["blocked_song_entry"] };
+  }
   if (unknownArtist && knownSong) {
     return { classification: "likely_song", suggestedAction: "keep", riskReasons: ["known_song_unknown_artist"] };
   }
@@ -418,6 +424,8 @@ function applyCurationToVideos(videos, context) {
     replacedEntries: 0,
     ruleDroppedEntries: 0,
     conversationDroppedEntries: 0,
+    nearDuplicateDroppedEntries: 0,
+    nearDuplicateGroups: 0,
     forceRefreshVideoIds: collectForceRefreshVideoIds(context).size,
   };
   const result = [];
@@ -467,10 +475,125 @@ function applyCurationToVideos(videos, context) {
       }
       songs.push(enriched);
     }
-    if (songs.length) result.push({ ...video, songs });
+    const deduped = dedupeNearDuplicateSongs(songs);
+    stats.nearDuplicateDroppedEntries += deduped.droppedEntries;
+    stats.nearDuplicateGroups += deduped.groups;
+    if (deduped.songs.length) result.push({ ...video, songs: deduped.songs });
   }
   result.curationStats = stats;
   return result;
+}
+
+function dedupeNearDuplicateSongs(songs, options = {}) {
+  const windowSeconds = Number.isInteger(options.windowSeconds) ? options.windowSeconds : NEAR_DUPLICATE_WINDOW_SECONDS;
+  const entries = (songs || []).map((song, order) => ({ song, order }));
+  entries.sort((left, right) => songSeconds(left.song) - songSeconds(right.song) || left.order - right.order);
+
+  const groups = [];
+  for (const entry of entries) {
+    const match = groups.find((group) => isNearDuplicateSong(group.kept.song, entry.song, windowSeconds));
+    if (!match) {
+      groups.push({ kept: entry, duplicates: [] });
+      continue;
+    }
+    if (compareNearDuplicateCandidate(entry.song, match.kept.song) > 0) {
+      match.duplicates.push(match.kept);
+      match.kept = entry;
+    } else {
+      match.duplicates.push(entry);
+    }
+  }
+
+  let droppedEntries = 0;
+  let groupCount = 0;
+  const keptEntries = [];
+  for (const group of groups) {
+    if (group.duplicates.length) {
+      droppedEntries += group.duplicates.length;
+      groupCount += 1;
+      keptEntries.push({
+        ...group.kept,
+        song: attachNearDuplicateProvenance(group.kept.song, group.duplicates.map((entry) => entry.song), windowSeconds),
+      });
+    } else {
+      keptEntries.push(group.kept);
+    }
+  }
+
+  keptEntries.sort((left, right) => left.order - right.order);
+  return {
+    songs: keptEntries.map((entry) => entry.song),
+    droppedEntries,
+    groups: groupCount,
+  };
+}
+
+function isNearDuplicateSong(left, right, windowSeconds = NEAR_DUPLICATE_WINDOW_SECONDS) {
+  const leftSeconds = songSeconds(left);
+  const rightSeconds = songSeconds(right);
+  if (!Number.isFinite(leftSeconds) || !Number.isFinite(rightSeconds)) return false;
+  if (Math.abs(leftSeconds - rightSeconds) > windowSeconds) return false;
+  const leftTitle = normalizeSongTitleKey(left?.title || "");
+  const rightTitle = normalizeSongTitleKey(right?.title || "");
+  if (!leftTitle || leftTitle !== rightTitle) return false;
+  return artistsCompatible(left?.artist, right?.artist);
+}
+
+function artistsCompatible(left, right) {
+  const leftUnknown = isUnknownArtist(left);
+  const rightUnknown = isUnknownArtist(right);
+  if (leftUnknown || rightUnknown) return true;
+  return normalizeArtistKey(left) === normalizeArtistKey(right);
+}
+
+function compareNearDuplicateCandidate(left, right) {
+  const leftScore = nearDuplicateTrustScore(left);
+  const rightScore = nearDuplicateTrustScore(right);
+  if (leftScore !== rightScore) return leftScore - rightScore;
+  return songSeconds(right) - songSeconds(left);
+}
+
+function nearDuplicateTrustScore(song) {
+  let score = 0;
+  if (song?.forceKept) score += 100;
+  if (!isUnknownArtist(song?.artist)) score += 20;
+  if (song?.repair?.knownTitleArtist) score += 12;
+  else if (song?.repair?.knownTitle) score += 6;
+  if (String(song?.artist || "").trim().length > 2) score += 2;
+  if (String(song?.raw || "").trim()) score += 1;
+  return score;
+}
+
+function attachNearDuplicateProvenance(song, duplicates, windowSeconds) {
+  const existing = Array.isArray(song?.dedupe?.duplicates) ? song.dedupe.duplicates : [];
+  return {
+    ...song,
+    dedupe: {
+      ...(song.dedupe || {}),
+      changed: true,
+      reason: "near_duplicate_same_video",
+      windowSeconds,
+      duplicateCount: existing.length + duplicates.length,
+      duplicates: [
+        ...existing,
+        ...duplicates.map((duplicate) => ({
+          title: duplicate.title || "",
+          artist: duplicate.artist || "",
+          time: duplicate.time || "",
+          seconds: Number.isFinite(Number(duplicate.seconds)) ? Number(duplicate.seconds) : null,
+          sourceId: duplicate.sourceId || "",
+          sourceHash: duplicate.sourceHash || "",
+          rawHash: duplicate.rawHash || "",
+          raw: duplicate.raw || "",
+        })),
+      ],
+    },
+  };
+}
+
+function songSeconds(song) {
+  const value = Number(song?.seconds);
+  return Number.isFinite(value) ? value : Number.NaN;
 }
 
 function applyReplacement(song, replacement = {}) {
@@ -637,6 +760,7 @@ module.exports = {
   classifyEntry,
   collectForceRefreshVideoIds,
   createSourceRecord,
+  dedupeNearDuplicateSongs,
   entryRiskReasons,
   hashNormalizedText,
   hasRejectSourceOverride,

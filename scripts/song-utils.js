@@ -470,9 +470,10 @@ function isObviouslyNonSongText(text) {
   const value = stripWeirdLeadingChars(text);
   if (!value) return true;
   if (/^(?:\d+次会|達成[!！]?|歌みたの話)$/u.test(value)) return true;
-  if (/^(開始|结束|終了|end|start|talk|talk[_-]?\d+|mc|雑談|聊天|感想|告知|返场|休息|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|読み開始|ただいま)$/iu.test(value)) {
+  if (/^(開始|结束|終了|end|start|op|ed|opening|ending|intro|outro|set\s*list|setlist|セットリスト|セトリ|タイムスタンプ|曲名|talk|talk[_-]?\d+|mc|雑談|聊天|感想|告知|返场|休息|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|読み開始|ただいま)$/iu.test(value)) {
     return true;
   }
+  if (/^[~〜～]+(?:リアルライブチケット#耐久\s*\d+)?$/iu.test(value)) return true;
   if (/(?:宣伝|告知|お知らせ)\s*$/u.test(value)) return true;
   if (value.startsWith("編集中です")) return true;
   if (/^".+"$/u.test(value)) return true;
@@ -483,9 +484,10 @@ function isObviouslyNonSongTitleCandidate(text) {
   const value = normalizeSectionMarker(text);
   if (!value) return true;
   if (/^(?:\d+次会|達成|歌みたの話)$/u.test(value)) return true;
-  if (/^(配信)?start|starting|op|ed|edtalk|optalk|talk\d*|mc|雑談|告知|お知らせ|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|スタート|アカペラver|はのは[ー〜～]*|読み開始|ただいま$/iu.test(value)) {
+  if (/^(?:(?:配信|stream|karaoke)?start|starting|op|ed|end|opening|ending|intro|outro|setlist|セットリスト|セトリ|タイムスタンプ|曲名|edtalk|optalk|talk\d*|mc|雑談|告知|お知らせ|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|スタート|アカペラver|はのは[ー〜～]*|読み開始|ただいま)$/iu.test(value)) {
     return true;
   }
+  if (/^[~〜～]+(?:リアルライブチケット#耐久\s*\d+)?$/iu.test(value)) return true;
   const raw = String(text || "");
   if (/(?:お疲れ|おつかれ|ありがとう|ありがと|ただいま|待ってて|読み開始|\braid\b|\bthanks?\b)/iu.test(raw)) {
     return true;
@@ -557,11 +559,11 @@ function normalizeSectionMarker(text) {
 function isBadSongField(text) {
   const value = String(text || "").trim();
   if (value === "未記載") return false;
-  if (!value || /^(歌名|歌手|编号|未確定|未确定)$/iu.test(value)) return true;
+  if (!value || /^(歌名|曲名|歌手|原唱|编号|未確定|未确定)$/iu.test(value)) return true;
   if (TIMESTAMP_RE.test(value) && value.match(TIMESTAMP_RE)?.[0] === value) return true;
   if (!/[A-Za-z0-9ぁ-んァ-ヶ一-龯々]/u.test(value)) return true;
   if (/^0\d+[.．]\d+$/u.test(value)) return true;
-  if (/^(talk|mc|雑談|聊天|感想|开场|開始|结束|終了|告知|返场|休息)$/iu.test(value)) return true;
+  if (/^(talk|mc|雑談|聊天|感想|开场|開始|结束|終了|告知|返场|休息|set\s*list|setlist|セットリスト|セトリ|タイムスタンプ)$/iu.test(value)) return true;
   return false;
 }
 
@@ -579,7 +581,20 @@ function dedupeSongs(songs) {
 }
 
 function isNearDuplicateSong(left, right) {
-  return songKey(left.title) === songKey(right.title) && Math.abs(left.seconds - right.seconds) <= 3;
+  return songKey(left.title) === songKey(right.title) && artistsCompatible(left.artist, right.artist) && Math.abs(left.seconds - right.seconds) <= 3;
+}
+
+function artistsCompatible(left, right) {
+  const leftUnknown = isUnknownArtistField(left);
+  const rightUnknown = isUnknownArtistField(right);
+  if (leftUnknown || rightUnknown) return true;
+  return songKey(left) === songKey(right);
+}
+
+function isUnknownArtistField(value) {
+  return new Set(["", "unknown", "n/a", "na", "none", "null", "未記載", "未记载", "不明", "なし", "无", "待补歌手", "待補歌手", "待补", "待補", "-"]).has(
+    String(value || "").trim(),
+  );
 }
 
 function songKey(text) {

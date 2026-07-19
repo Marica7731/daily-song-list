@@ -975,7 +975,13 @@ function song(title, artist = "artist", overrides = {}) {
 }
 
 function repeatedSongs(title, artist, count) {
-  return Array.from({ length: count }, () => song(title, artist));
+  return Array.from({ length: count }, (_, index) => {
+    const seconds = 60 + index * 40;
+    return song(title, artist, {
+      seconds,
+      time: `0:${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`,
+    });
+  });
 }
 
 function rankedItem(videoId, songs) {

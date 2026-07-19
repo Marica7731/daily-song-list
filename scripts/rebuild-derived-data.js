@@ -58,6 +58,8 @@ function main() {
     stats.manualReplacedEntryCount += curationStats.replacedEntries || 0;
     stats.ruleDroppedEntryCount += curationStats.ruleDroppedEntries || 0;
     stats.conversationDroppedEntryCount += curationStats.conversationDroppedEntries || 0;
+    stats.nearDuplicateDroppedEntryCount += curationStats.nearDuplicateDroppedEntries || 0;
+    stats.nearDuplicateGroupCount += curationStats.nearDuplicateGroups || 0;
     stats.droppedVideoCount += curationStats.droppedVideos || 0;
 
     const beforeQualityCount = countSongs(curatedItems);
@@ -149,6 +151,7 @@ function main() {
       `repaired=${stats.repairedEntryCount}`,
       `manualDropped=${stats.manualDroppedEntryCount}`,
       `ruleDropped=${payload.source.curationSummary.ruleDroppedEntryCount}`,
+      `nearDuplicateDropped=${stats.nearDuplicateDroppedEntryCount}`,
       `blockedSources=${blockedSourceAudit.summary().removed}`,
       `forceRefresh=${payload.source.curationSummary.forceRefreshVideoCount}`,
     ].join(" "),
@@ -248,6 +251,7 @@ function rebuildDerivedFromCatalog() {
       `songs=${countSongs(payload.groups.all?.items || [])}`,
       `parsedRaw=${stats.parsedFromRaw}`,
       `blockedSources=${blockedSourceAudit.summary().removed}`,
+      `nearDuplicateDropped=${stats.nearDuplicateDroppedEntryCount}`,
     ].join(" "),
   );
 }
@@ -275,6 +279,8 @@ function createRebuildStats() {
     manualReplacedEntryCount: 0,
     ruleDroppedEntryCount: 0,
     conversationDroppedEntryCount: 0,
+    nearDuplicateDroppedEntryCount: 0,
+    nearDuplicateGroupCount: 0,
     qualityDroppedEntryCount: 0,
     droppedVideoCount: 0,
     forceRefreshVideoIds: [],
@@ -288,6 +294,8 @@ function collectAppliedCurationStats(stats, curatedItems) {
   stats.manualReplacedEntryCount += curationStats.replacedEntries || 0;
   stats.ruleDroppedEntryCount += curationStats.ruleDroppedEntries || 0;
   stats.conversationDroppedEntryCount += curationStats.conversationDroppedEntries || 0;
+  stats.nearDuplicateDroppedEntryCount += curationStats.nearDuplicateDroppedEntries || 0;
+  stats.nearDuplicateGroupCount += curationStats.nearDuplicateGroups || 0;
   stats.droppedVideoCount += curationStats.droppedVideos || 0;
 }
 
@@ -406,6 +414,8 @@ function buildCurationSummary(previous = {}, stats) {
     manualReplacedEntryCount: carryCount(previous.manualReplacedEntryCount, stats.manualReplacedEntryCount),
     ruleDroppedEntryCount: carryCount(previous.ruleDroppedEntryCount, newRuleDropped),
     conversationDroppedEntryCount: carryCount(previous.conversationDroppedEntryCount, stats.conversationDroppedEntryCount),
+    nearDuplicateDroppedEntryCount: carryCount(previous.nearDuplicateDroppedEntryCount, stats.nearDuplicateDroppedEntryCount),
+    nearDuplicateGroupCount: carryCount(previous.nearDuplicateGroupCount, stats.nearDuplicateGroupCount),
     qualityDroppedEntryCount: carryCount(previous.qualityDroppedEntryCount, stats.qualityDroppedEntryCount),
     manualDroppedVideoCount: carryCount(previous.manualDroppedVideoCount, stats.droppedVideoCount),
     forceRefreshVideoCount: Math.max(numberOrZero(previous.forceRefreshVideoCount), stats.forceRefreshVideoIds.length),

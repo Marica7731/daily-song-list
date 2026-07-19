@@ -284,6 +284,72 @@ test("curation drops campaign and announcement rows from production data", () =>
   assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 1);
 });
 
+test("curation folds same-video same-song rows within 30 seconds with provenance", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "DUPLICATE01",
+        selectedSourceId: "UgxSelected",
+        selectedSourceHash: "selectedHash",
+        songs: [
+          { title: "ハロ/ハワユ", artist: "未記載", seconds: 470, time: "0:07:50", raw: "7:50 ハロ/ハワユ", rawHash: "raw-unknown" },
+          { title: "ハロ/ハワユ", artist: "ナノウ", seconds: 471, time: "0:07:51", raw: "7:51 ハロ/ハワユ / ナノウ", rawHash: "raw-known" },
+          { title: "なんでもないや", artist: "RADWIMPS", seconds: 951, time: "0:15:51", raw: "15:51 なんでもないや / RADWIMPS", rawHash: "raw-a" },
+          { title: "なんでもないや", artist: "RADWIMPS", seconds: 952, time: "0:15:52", raw: "15:52 なんでもないや / RADWIMPS", rawHash: "raw-b" },
+          { title: "花に亡霊", artist: "ヨルシカ", seconds: 1671, time: "0:27:51", raw: "27:51 花に亡霊 / ヨルシカ", rawHash: "raw-c" },
+          { title: "花に亡霊", artist: "ヨルシカ", seconds: 1705, time: "0:28:25", raw: "28:25 花に亡霊 / ヨルシカ", rawHash: "raw-d" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos[0].songs.map((item) => `${item.time} ${item.title} / ${item.artist}`),
+    ["0:07:51 ハロ/ハワユ / ナノウ", "0:15:51 なんでもないや / RADWIMPS", "0:27:51 花に亡霊 / ヨルシカ", "0:28:25 花に亡霊 / ヨルシカ"],
+  );
+  assert.equal(videos.curationStats.nearDuplicateDroppedEntries, 2);
+  assert.equal(videos.curationStats.nearDuplicateGroups, 2);
+  assert.equal(videos[0].songs[0].dedupe.reason, "near_duplicate_same_video");
+  assert.equal(videos[0].songs[0].dedupe.windowSeconds, 30);
+  assert.equal(videos[0].songs[0].dedupe.duplicates[0].rawHash, "raw-unknown");
+  assert.equal(videos[0].songs[1].dedupe.duplicates[0].seconds, 952);
+});
+
+test("curation drops dirty chant entries but keeps false-positive song samples", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "TENQDIRTY01",
+        songs: [
+          { title: "天Q", artist: "未記載", seconds: 1, raw: "0:01 天Q" },
+          { title: "天Q天Q~~WO~~~", artist: "未記載", seconds: 2, raw: "0:02 天Q天Q~~WO~~~" },
+          { title: "HAWAWA", artist: "未記載", seconds: 3, raw: "0:03 HAWAWA" },
+          { title: "AAA TEST TEST", artist: "未記載", seconds: 4, raw: "0:04 AAA TEST TEST" },
+          { title: "StaRt", artist: "Mrs. GREEN APPLE", seconds: 10, raw: "0:10 StaRt / Mrs. GREEN APPLE" },
+          { title: "START", artist: "レフティーモンスターP feat. Lily", seconds: 20, raw: "0:20 START / レフティーモンスターP feat. Lily" },
+          { title: "START", artist: "愛内里菜", seconds: 30, raw: "0:30 START / 愛内里菜" },
+          { title: "-ERROR", artist: "niki", seconds: 40, raw: "0:40 -ERROR / niki" },
+          { title: "さらば", artist: "キンモクセイ『あたしンち』初代OP ※", seconds: 50, raw: "0:50 さらば / キンモクセイ『あたしンち』初代OP ※" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos[0].songs.map((item) => `${item.title} / ${item.artist}`),
+    [
+      "StaRt / Mrs. GREEN APPLE",
+      "START / レフティーモンスターP feat. Lily",
+      "START / 愛内里菜",
+      "-ERROR / niki",
+      "さらば / キンモクセイ『あたしンち』初代OP ※",
+    ],
+  );
+  assert.equal(videos.curationStats.ruleDroppedEntries, 4);
+});
+
 test("curation patch merge dedupes identical records and reports conflicts", () => {
   const baseRecord = { action: "drop_entry", videoId: "AAAAAAAAAAA", sourceId: "source", seconds: 10, rawHash: "raw" };
   const deduped = mergeCurationPatch({ schemaVersion: 1, records: [baseRecord] }, { schemaVersion: 1, records: [baseRecord] });

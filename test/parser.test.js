@@ -101,6 +101,69 @@ test("keeps exact activity marker title when a known artist is explicit", () => 
   assert.equal(songs[1].artist, "Known Artist");
 });
 
+test("rejects dirty section labels without matching video or channel text", () => {
+  const dirtySongs = parseTimestampSongs(
+    [
+      "0:00 ED",
+      "0:01 OP",
+      "0:02 END",
+      "0:03 Set List",
+      "0:04 セットリスト",
+      "0:05 セトリ",
+      "0:06 タイムスタンプ",
+      "0:07 曲名",
+      "0:08 ～",
+      "0:09 ～リアルライブチケット#耐久 7",
+      "0:10 Start Stream！",
+      "0:11 配信スタート",
+      "0:12 声入り",
+      "0:13 自己紹介",
+    ].join("\n"),
+  );
+  const cleanSongs = parseTimestampSongs(["0:14 READY STEADY GO / L'Arc-en-Ciel"]);
+
+  assert.deepEqual(dirtySongs, []);
+  assert.deepEqual(cleanSongs.map((song) => `${song.title} / ${song.artist}`), ["READY STEADY GO / L'Arc-en-Ciel"]);
+});
+
+test("keeps START whitelist songs while dropping unknown START markers", () => {
+  const songs = parseTimestampSongs([
+    [
+      "0:01 START",
+      "0:02 Start",
+      "0:03 StaRt / Mrs. GREEN APPLE",
+      "0:04 START / レフティーモンスターP feat. Lily",
+      "0:05 START / 愛内里菜",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => `${song.title} / ${song.artist}`),
+    ["StaRt / Mrs. GREEN APPLE", "START / レフティーモンスターP feat. Lily", "START / 愛内里菜"],
+  );
+});
+
+test("rejects tenQ chant variants from timestamp rows", () => {
+  const songs = parseTimestampSongs([
+    [
+      "0:01 天Q",
+      "0:02 天Q天Q~~WO~~~",
+      "0:03 HI 天Q~",
+      "0:04 DQ~",
+      "0:05 HAWAWA",
+      "0:06 BUAAAA",
+      "0:07 HE HE",
+      "0:08 E HO E HO",
+      "0:09 READY STEADY GO / L'Arc-en-Ciel",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => song.title),
+    ["READY STEADY GO"],
+  );
+});
+
 test("parses split number start end song blocks using start time", () => {
   const songs = parseTimestampSongs([
     [
