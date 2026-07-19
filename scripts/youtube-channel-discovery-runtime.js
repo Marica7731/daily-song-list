@@ -101,6 +101,7 @@ function normalizeRuntimeVideo(video, sourceFile) {
     channelHandle,
     channelUrl,
     avatarUrl: stringValue(video.avatarUrl || video.channelAvatarUrl),
+    thumbnailUrl: stringValue(video.thumbnailUrl),
     sourceUrl: stringValue(video.sourceUrl || channelUrl || sourceUrls.find((url) => /youtube\.com\/(?:@|channel\/)/iu.test(url))),
     knownSourceType: stringValue(video.knownSourceType || SOURCE_GROUP),
     isCollected: video.isCollected === false ? false : true,
@@ -150,6 +151,7 @@ function buildChannelMetadataLookup(channels, videos) {
       channelUrl: stringValue(channel.channelUrl),
       sourceUrl: stringValue(channel.sourceUrl || channel.channelUrl),
       avatarUrl: stringValue(channel.avatarUrl),
+      thumbnailUrl: stringValue(channel.thumbnailUrl || channel.videoThumbnailUrl),
       knownSourceType: stringValue(channel.knownSourceType || SOURCE_GROUP),
       isCollected: channel.isCollected === false ? false : true,
     });
@@ -175,6 +177,7 @@ function metadataFromVideo(video) {
     channelUrl: stringValue(video.channelUrl),
     sourceUrl,
     avatarUrl: stringValue(video.avatarUrl || video.channelAvatarUrl),
+    thumbnailUrl: stringValue(video.thumbnailUrl),
     knownSourceType: stringValue(video.knownSourceType || SOURCE_GROUP),
     isCollected: video.isCollected === false ? false : true,
   };
@@ -199,6 +202,7 @@ function hydrateChannelMetadata(video, lookup) {
         channelHandle: video.channelHandle || metadata.channelHandle || "",
         channelUrl: video.channelUrl || metadata.sourceUrl || metadata.channelUrl || "",
         avatarUrl: video.avatarUrl || metadata.avatarUrl || "",
+        thumbnailUrl: video.thumbnailUrl || metadata.thumbnailUrl || "",
         sourceUrl: video.sourceUrl || metadata.sourceUrl || metadata.channelUrl || "",
         knownSourceType: video.knownSourceType || metadata.knownSourceType || SOURCE_GROUP,
         isCollected: video.isCollected === false ? false : metadata.isCollected !== false,
@@ -223,6 +227,7 @@ function normalizeChannelMetadata(metadata) {
     channelUrl: stringValue(metadata.channelUrl),
     sourceUrl: stringValue(metadata.sourceUrl || metadata.channelUrl),
     avatarUrl: stringValue(metadata.avatarUrl),
+    thumbnailUrl: stringValue(metadata.thumbnailUrl),
     knownSourceType: stringValue(metadata.knownSourceType || SOURCE_GROUP),
     isCollected: metadata.isCollected === false ? false : true,
   };
@@ -237,6 +242,7 @@ function mergeChannelMetadata(existing, incoming) {
     channelUrl: existing.channelUrl || incoming.channelUrl,
     sourceUrl: existing.sourceUrl || incoming.sourceUrl,
     avatarUrl: existing.avatarUrl || incoming.avatarUrl,
+    thumbnailUrl: existing.thumbnailUrl || incoming.thumbnailUrl,
     knownSourceType: existing.knownSourceType || incoming.knownSourceType,
     isCollected: existing.isCollected !== false || incoming.isCollected !== false,
   };

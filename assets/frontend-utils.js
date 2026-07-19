@@ -1071,21 +1071,17 @@
   }
 
   function vtuberAvatarModel(record = {}) {
-    const src = cleanText(firstNonEmpty(
-      record.avatarUrl,
-      record.channelAvatarUrl,
-      record.authorAvatarUrl,
-      record.profileImageUrl,
-      record.thumbnailUrl && record.thumbnailType === "avatar" ? record.thumbnailUrl : "",
-    ));
     const name = cleanText(record.name || record.channelName || record.channelHandle || record.channelId || "VTuber");
-    const key = cleanText(record.channelId || record.channelHandle || record.key || name);
-    const fallback = fallbackAvatarDataUrl(name, key);
+    const media = vtuberDisplayImageModel(record);
     return {
-      src: src || fallback,
-      fallback,
-      alt: `${name} 头像`,
-      hasRemoteAvatar: Boolean(src),
+      src: media.src,
+      fallback: "",
+      alt: `${name} 显示图`,
+      hasRemoteAvatar: media.isRealAvatar,
+      kind: media.kind,
+      isRealAvatar: media.isRealAvatar,
+      isThumbnailFallback: media.isThumbnailFallback,
+      missingDisplayImage: media.missingDisplayImage,
     };
   }
 
@@ -1120,45 +1116,6 @@
       if (text) return text;
     }
     return "";
-  }
-
-  function fallbackAvatarDataUrl(name, key) {
-    const label = avatarInitials(name);
-    const hue = stableHue(key || name);
-    const svg = [
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">`,
-      `<rect width="96" height="96" rx="24" fill="hsl(${hue} 56% 42%)"/>`,
-      `<circle cx="70" cy="24" r="24" fill="hsl(${(hue + 34) % 360} 58% 56%)" opacity=".42"/>`,
-      `<text x="48" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#fff">${escapeSvgText(label)}</text>`,
-      `</svg>`,
-    ].join("");
-    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-  }
-
-  function avatarInitials(name) {
-    const parts = cleanText(name).split(/\s+/u).filter(Boolean);
-    if (!parts.length) return "VT";
-    if (parts.length >= 2 && /^[A-Za-z0-9]/u.test(parts[0]) && /^[A-Za-z0-9]/u.test(parts[1])) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    const chars = Array.from(parts.join(""));
-    return chars.slice(0, 2).join("").toUpperCase();
-  }
-
-  function stableHue(value) {
-    let hash = 0;
-    for (const char of cleanText(value || "VTuber")) hash = (hash * 31 + char.codePointAt(0)) % 360;
-    return hash;
-  }
-
-  function escapeSvgText(value) {
-    return cleanText(value).replace(/[&<>"']/gu, (char) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#39;",
-    })[char]);
   }
 
   function compactSourceToggleModel(options = {}) {
@@ -1494,6 +1451,65 @@
     );
   }
 
+  function vtuberDisplayImageModel(record = {}) {
+    const avatarUrl = realChannelAvatarUrl(record.avatarUrl || record.channelAvatarUrl || record.authorAvatarUrl || record.profileImageUrl);
+    const thumbnailUrl = displayThumbnailUrl(
+      record.thumbnailUrl ||
+        record.videoThumbnail ||
+        record.videoThumbnailUrl ||
+        record.displayThumbnailUrl ||
+        occurrenceThumbnailUrl(record.occurrences),
+    );
+    if (avatarUrl) {
+      return {
+        kind: "realAvatar",
+        src: avatarUrl,
+        isRealAvatar: true,
+        isThumbnailFallback: false,
+        missingDisplayImage: false,
+      };
+    }
+    if (thumbnailUrl) {
+      return {
+        kind: "thumbnailFallback",
+        src: thumbnailUrl,
+        isRealAvatar: false,
+        isThumbnailFallback: true,
+        missingDisplayImage: false,
+      };
+    }
+    return {
+      kind: "missingDisplayImage",
+      src: "",
+      isRealAvatar: false,
+      isThumbnailFallback: false,
+      missingDisplayImage: true,
+    };
+  }
+
+  function realChannelAvatarUrl(value) {
+    const text = cleanText(value);
+    if (/^https:\/\/yt3\.googleusercontent\.com\//iu.test(text) || /^https:\/\/yt[0-9]\.ggpht\.com\//iu.test(text)) return text;
+    if (/^https?:\/\/example\.test\//iu.test(text)) return text;
+    return "";
+  }
+
+  function displayThumbnailUrl(value) {
+    const text = cleanText(value);
+    if (!/^https?:\/\//iu.test(text)) return "";
+    if (/^data:image\//iu.test(text)) return "";
+    return text;
+  }
+
+  function occurrenceThumbnailUrl(occurrences) {
+    for (const occurrence of occurrences || []) {
+      const item = occurrence?.item || {};
+      const url = displayThumbnailUrl(item.thumbnailUrl || item.videoThumbnail || item.videoThumbnailUrl || item.thumbnail);
+      if (url) return url;
+    }
+    return "";
+  }
+
   function cleanText(value) {
     return String(value ?? "").replace(/\s+/g, " ").trim();
   }
@@ -1556,6 +1572,7 @@
     summaryVideoCountModel,
     validateRuntimeRangePayload,
     trendDisplayModel,
+    vtuberDisplayImageModel,
     visiblePageTokens,
     youtubeChannelLink,
     youtubeTimeUrl,

@@ -101,6 +101,13 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(vtuberSearch.records[0].name, "Alpha Ch.");
     assert.equal(vtuberSearch.records[0].count, 3);
 
+    const vtuberWithoutAvatar = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=Beta&pageSize=5`);
+    assert.equal(vtuberWithoutAvatar.totalCount, 1);
+    assert.equal(vtuberWithoutAvatar.records[0].name, "Beta Ch.");
+    assert.equal(vtuberWithoutAvatar.records[0].avatarUrl, "");
+    assert.equal(vtuberWithoutAvatar.records[0].thumbnailUrl, "https://i.ytimg.com/vi/video-b/hqdefault.jpg");
+    assert.doesNotMatch(JSON.stringify(vtuberWithoutAvatar.records[0]), /data:image|fallback-avatar/u);
+
     const vtuberVideoMetric = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&metric=videos&q=Alpha&pageSize=5`);
     assert.equal(vtuberVideoMetric.metric, "videos");
     assert.equal(vtuberVideoMetric.records[0].videoCount, 2);
@@ -163,6 +170,7 @@ function writeLatestFixture(latestPath) {
               title: "Morning Karaoke",
               channelName: "Alpha Ch.",
               avatarUrl: "https://example.test/alpha-avatar.png",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-a/hqdefault.jpg",
               knownSourceType: "manual",
               isCollected: true,
               publishedTimestamp: 1784419200000,
@@ -181,6 +189,7 @@ function writeLatestFixture(latestPath) {
               title: "Morning Karaoke",
               channelName: "Alpha Ch.",
               avatarUrl: "https://example.test/alpha-avatar.png",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-a/hqdefault.jpg",
               knownSourceType: "manual",
               isCollected: true,
               publishedTimestamp: 1784419200000,
@@ -196,6 +205,7 @@ function writeLatestFixture(latestPath) {
               channelName: "Beta Ch.",
               channelHandle: "@beta_ch",
               channelUrl: "https://www.youtube.com/@beta_ch",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-b/hqdefault.jpg",
               publishedTimestamp: 1784422800000,
               publishedText: "2026-07-19",
               songs: [{ title: "Song One", artist: "Singer A", seconds: 30, time: "0:30" }],
@@ -206,6 +216,7 @@ function writeLatestFixture(latestPath) {
               channelName: "Alpha Ch.",
               channelId: "UC-alpha",
               channelHandle: "/@alpha_ch",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-c/hqdefault.jpg",
               publishedTimestamp: 1784426400000,
               publishedText: "2026-07-19",
               songs: [{ title: "Song Three", artist: "Singer C", seconds: 40, time: "0:40" }],
@@ -214,6 +225,7 @@ function writeLatestFixture(latestPath) {
               videoId: "video-d",
               title: "Midnight Karaoke",
               channelName: "Haru Ch. 花前ハル",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-d/hqdefault.jpg",
               publishedTimestamp: 1784430000000,
               publishedText: "2026-07-19",
               songs: [{ title: "Song Four", artist: "Singer D", seconds: 50, time: "0:50" }],

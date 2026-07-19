@@ -1290,6 +1290,15 @@ mark {
   white-space: nowrap;
 }
 
+.rank-row-vtuber .rank-content {
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-areas:
+    "image title"
+    "image subline";
+  column-gap: 10px;
+  align-items: center;
+}
+
 .rank-title {
   display: -webkit-box;
   margin: 0;
@@ -1301,6 +1310,10 @@ mark {
   line-height: 1.25;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+}
+
+.rank-row-vtuber .rank-title {
+  grid-area: title;
 }
 
 .song-badge {
@@ -1328,6 +1341,37 @@ mark {
   font-weight: 500;
   line-height: 1.3;
   white-space: nowrap;
+}
+
+.rank-row-vtuber .rank-subline {
+  grid-area: subline;
+}
+
+.vtuber-display-image {
+  grid-area: image;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  align-self: center;
+  border: 1px solid var(--line);
+  background: #f2f4f7;
+}
+
+.vtuber-display-image-avatar {
+  border-radius: 50%;
+}
+
+.vtuber-display-image-thumbnail {
+  border-radius: var(--radius-thumbnail);
+}
+
+.vtuber-display-image-missing {
+  display: inline-block;
+  border-style: dashed;
+  border-radius: var(--radius-thumbnail);
+  background:
+    linear-gradient(135deg, transparent 46%, #98a2b3 47%, #98a2b3 53%, transparent 54%),
+    #f2f4f7;
 }
 
 .rank-meta-line {
@@ -3006,6 +3050,16 @@ mark {
     min-height: 18px;
     padding-inline: 6px;
     font-size: 10.5px;
+  }
+
+  .rank-row-vtuber .rank-content {
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 8px;
+  }
+
+  .vtuber-display-image {
+    width: 40px;
+    height: 40px;
   }
 
   .rank-subline {

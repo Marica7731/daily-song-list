@@ -17,6 +17,38 @@ The discovery command writes review artifacts only. It does not mutate `data/lat
 
 `data/external/youtube-channel-discovery/channel-metadata.json` is the reviewed low-rate cache for channel identity and avatars. Runtime import uses it, plus richer rows in the accepted increments, to repair rows that only have a YouTube channel URL or handle. For example, accepted rows with `channelUrl=https://www.youtube.com/@kanaruhanon` are mapped to `Hanon Ch. 香鳴ハノン【パレプロ】`, `/@kanaruhanon`, `UCay6Y3oEoiC6ZEE2G0UZu_A`, and the cached avatar without re-fetching the channel during DB builds.
 
+## Channel avatar cache
+
+`avatarUrl` means the real public YouTube channel avatar URL, normally under `https://yt3.googleusercontent.com/...`. Do not store frontend-generated fallback avatars in `channel-metadata.json`, accepted increments, DB tables, or API payloads. `thumbnailUrl` / `videoThumbnailUrl` is the preferred display fallback from the channel's latest available source video and must not be counted as avatar coverage. Runtime/UI display image coverage is reported as `realAvatar`, `thumbnailFallback`, and `missingDisplayImage`; the target is `missingDisplayImage=0`.
+
+The hourly/daily core data path runs the same low-rate public channel-page fetcher before static runtime shards are built:
+
+```bash
+npm run update:core
+```
+
+`update:core` runs `scripts/fetch-channel-avatar-cache.js --daily` after `data/latest.json` is refreshed and before `scripts/build-runtime-data.js`. Existing cache entries are reused; new, missing, or stale parseable channels are fetched sequentially. The default daily cap is 60 fetches, with a 1500 ms delay and 30 day stale window. Tune these with `DAILY_SONG_CHANNEL_AVATAR_MAX_FETCH`, `DAILY_SONG_CHANNEL_AVATAR_DELAY_MS`, and `DAILY_SONG_CHANNEL_AVATAR_STALE_DAYS`.
+
+Refresh or resume the cache manually with the low-rate public channel-page fetcher:
+
+```bash
+npm run youtube:fetch-channel-avatars
+```
+
+The script reads current `data/latest.json` VTuber/runtime channels, existing `channel-metadata.json`, every accepted `data/external/youtube-channel-discovery/accepted/*.json` file, and the built-in priority handle list for current VTuber补漏 work. It requests channels sequentially, keeps existing reliable avatar URLs unless `--refresh` or stale refresh applies, records progress in `artifacts/channel-avatar-cache/checkpoint.json`, and writes `avatarFetchReport` with status counts, skipped reasons, failures, and runtime coverage.
+
+Useful maintenance probes:
+
+```bash
+npm run youtube:fetch-channel-avatars -- --dry-run --delay-ms 0
+npm run youtube:fetch-channel-avatars -- --daily --dry-run --max-fetch 0 --delay-ms 0
+npm run youtube:fetch-channel-avatars -- --max-fetch 60 --delay-ms 1500
+npm run youtube:fetch-channel-avatars -- --priority-handle @example_channel
+npm run youtube:fetch-channel-avatars -- --refresh --priority-handle @example_channel
+```
+
+Treat the run as valid only when it prints `CODEX_CHANNEL_AVATAR_CACHE_OK`. Record the before/after `runtimeRealAvatarBefore`, `runtimeRealAvatarAfter`, `thumbnailFallbackBefore`, `thumbnailFallbackAfter`, `missingDisplayImageBefore`, `missingDisplayImageAfter`, skipped reasons, and the `failed` list in the release or integration note. `--daily` fails when `missingDisplayImageAfter` is non-zero. A `skipped_collected_evidence` status means the script had no fetchable handle/channel URL, hit the batch cap, or was run in `--dry-run`; it is not a fetched avatar.
+
 ## Command
 
 ```bash
@@ -196,7 +228,7 @@ This validates accepted channel increments and narrowed search scopes cheaply. I
 
 `scripts/db/export-runtime-rankings.js` loads all `data/external/youtube-channel-discovery/accepted/*.json` files by default when `npm run db:build` uses `--ranking-source js`. This keeps manual補漏 commits small: commit the accepted increment, code, and docs only; do not commit generated `data/ui`, `data/catalog-segments`, or range JSON shards for a DB-mode deployment.
 
-When a reviewed increment has mixed channel quality, the runtime importer first builds a channel metadata lookup by channel ID, handle, and channel URL-derived handle, then hydrates every video before merging rankings. Backend payloads expose `avatarUrl`, `sourceUrl`, `knownSourceType`, and `isCollected`; VTuber rankings also expose `songCount` and support `metric=songs` for unique-song sorting.
+When a reviewed increment has mixed channel quality, the runtime importer first builds a channel metadata lookup by channel ID, handle, and channel URL-derived handle, then hydrates every video before merging rankings. Backend payloads expose real `avatarUrl`, display-fallback `thumbnailUrl` / `videoThumbnailUrl`, `sourceUrl`, `knownSourceType`, and `isCollected`; VTuber rankings also expose `songCount` and support `metric=songs` for unique-song sorting.
 
 `npm run youtube:import-channel-discovery` still exists as a local static/catalog fallback. It merges accepted `video-details.json` rows into `data/video-catalog.json` and refreshes catalog segments, then `npm run publish:catalog-runtime` rewrites `data/latest.json`, range files, diff files, and compact UI runtime shards. Use that path only when static GitHub Pages output must include the same manual補漏 rows.
 

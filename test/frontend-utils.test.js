@@ -54,8 +54,8 @@ const {
   trendDisplayModel,
   validateRuntimeRangePayload,
   visiblePageTokens,
-  vtuberAvatarModel,
   vtuberCollectionBadgeModel,
+  vtuberDisplayImageModel,
   youtubeChannelLink,
 } = require("../assets/frontend-utils");
 
@@ -216,22 +216,7 @@ test("VTuber channel rank toggle uses unique song count", () => {
   assert.equal(expanded.ariaLabel, "收起该频道曲目");
 });
 
-test("VTuber avatar and collection models tolerate missing backend fields", () => {
-  const remote = vtuberAvatarModel({
-    name: "UTANO ch.",
-    avatarUrl: "https://example.test/avatar.jpg",
-    channelId: "UCutano",
-  });
-  assert.equal(remote.src, "https://example.test/avatar.jpg");
-  assert.equal(remote.hasRemoteAvatar, true);
-  assert.equal(remote.alt, "UTANO ch. 头像");
-  assert.match(remote.fallback, /^data:image\/svg\+xml;charset=utf-8,/u);
-
-  const fallback = vtuberAvatarModel({ name: "月城セシル", channelHandle: "@cecil" });
-  assert.equal(fallback.src, fallback.fallback);
-  assert.equal(fallback.hasRemoteAvatar, false);
-  assert.match(decodeURIComponent(fallback.fallback), /月城/u);
-
+test("VTuber collection badge model tolerates missing backend fields", () => {
   assert.deepEqual(vtuberCollectionBadgeModel({ isCollected: true, knownSourceType: "manual" }), {
     text: "已收录",
     isCollected: true,
@@ -239,6 +224,46 @@ test("VTuber avatar and collection models tolerate missing backend fields", () =
   });
   assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "unknown" }).isCollected, false);
   assert.equal(vtuberCollectionBadgeModel({}).text, "");
+});
+
+test("VTuber display image uses real avatar before thumbnail fallback", () => {
+  const avatar = vtuberDisplayImageModel({
+    avatarUrl: "https://yt3.googleusercontent.com/avatar=s900-c-k-c0x00ffffff-no-rj",
+    thumbnailUrl: "https://i.ytimg.com/vi/abc12345678/hqdefault.jpg",
+  });
+  assert.equal(avatar.kind, "realAvatar");
+  assert.equal(avatar.isRealAvatar, true);
+  assert.equal(avatar.src, "https://yt3.googleusercontent.com/avatar=s900-c-k-c0x00ffffff-no-rj");
+
+  const thumbnail = vtuberDisplayImageModel({
+    avatarUrl: "",
+    thumbnailUrl: "https://i.ytimg.com/vi/abc12345678/hqdefault.jpg",
+  });
+  assert.equal(thumbnail.kind, "thumbnailFallback");
+  assert.equal(thumbnail.isThumbnailFallback, true);
+  assert.equal(thumbnail.src, "https://i.ytimg.com/vi/abc12345678/hqdefault.jpg");
+  assert.equal(thumbnail.isRealAvatar, false);
+
+  const missing = vtuberDisplayImageModel({ avatarUrl: "", thumbnailUrl: "" });
+  assert.equal(missing.kind, "missingDisplayImage");
+  assert.equal(missing.src, "");
+  assert.equal(missing.missingDisplayImage, true);
+});
+
+test("VTuber display image does not treat generated images as avatar coverage", () => {
+  const model = vtuberDisplayImageModel({
+    avatarUrl: "data:image/svg+xml,fallback-avatar",
+    occurrences: [
+      {
+        item: {
+          thumbnailUrl: "https://i.ytimg.com/vi/xyz12345678/hqdefault.jpg",
+        },
+      },
+    ],
+  });
+  assert.equal(model.kind, "thumbnailFallback");
+  assert.equal(model.isRealAvatar, false);
+  assert.equal(model.src, "https://i.ytimg.com/vi/xyz12345678/hqdefault.jpg");
 });
 
 test("song rank toggle uses video and timestamp counts", () => {

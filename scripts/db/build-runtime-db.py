@@ -55,7 +55,10 @@ def main() -> int:
         temp_path.unlink()
 
     try:
-        latest = read_json(args.input)
+        latest = hydrate_payload_channel_metadata(
+            read_json(args.input),
+            (args.youtube_channel_discovery_dir / "channel-metadata.json").resolve(),
+        )
         conn = sqlite3.connect(temp_path)
         conn.execute("PRAGMA journal_mode=OFF")
         conn.execute("PRAGMA synchronous=OFF")
@@ -254,6 +257,7 @@ def create_schema(conn: sqlite3.Connection) -> bool:
           handle TEXT NOT NULL DEFAULT '',
           display_name TEXT NOT NULL DEFAULT '',
           avatar_url TEXT NOT NULL DEFAULT '',
+          thumbnail_url TEXT NOT NULL DEFAULT '',
           source_url TEXT NOT NULL DEFAULT '',
           channel_url TEXT NOT NULL DEFAULT '',
           known_source_type TEXT NOT NULL DEFAULT '',
@@ -722,6 +726,7 @@ def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> 
             "channel_handle": clean_text(item.get("channelHandle")),
             "channel_url": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
             "avatar_url": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
+            "thumbnail_url": vtuber_thumbnail_candidate(item),
             "source_url": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
             "known_source_type": clean_text(item.get("knownSourceType")) or known_source_type(item),
             "is_collected": bool(item.get("isCollected")) or is_collected_source(item),
@@ -760,6 +765,7 @@ def merge_channel_record_identity(record: dict, item: dict) -> None:
     channel_handle = clean_text(item.get("channelHandle"))
     channel_url = clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"))
     avatar_url = clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl"))
+    thumbnail_url = vtuber_thumbnail_candidate(item)
     source_url = clean_text(item.get("sourceUrl") or channel_url)
     source_type = clean_text(item.get("knownSourceType")) or known_source_type(item)
     if channel_name:
@@ -774,11 +780,29 @@ def merge_channel_record_identity(record: dict, item: dict) -> None:
         record["channel_url"] = record["channel_url"] or channel_url
     if avatar_url:
         record["avatar_url"] = record["avatar_url"] or avatar_url
+    if thumbnail_url and should_use_vtuber_thumbnail(record, item):
+        record["thumbnail_url"] = thumbnail_url
     if source_url:
         record["source_url"] = record["source_url"] or source_url
     if source_type:
         record["known_source_type"] = record["known_source_type"] or source_type
     record["is_collected"] = bool(record.get("is_collected")) or is_collected_source(item)
+
+
+def vtuber_thumbnail_candidate(item: dict) -> str:
+    return clean_text(item.get("thumbnailUrl") or item.get("videoThumbnail") or item.get("videoThumbnailUrl") or item.get("thumbnail")) or thumbnail_url_for_video(item)
+
+
+def should_use_vtuber_thumbnail(record: dict, item: dict) -> bool:
+    if not record.get("thumbnail_url"):
+        record["thumbnail_published_timestamp"] = int_or_none(item.get("publishedTimestamp")) or 0
+        return True
+    incoming_timestamp = int_or_none(item.get("publishedTimestamp")) or 0
+    current_timestamp = int(record.get("thumbnail_published_timestamp") or 0)
+    if incoming_timestamp >= current_timestamp:
+        record["thumbnail_published_timestamp"] = incoming_timestamp
+        return True
+    return False
 
 
 def rank_rows_for_videos(range_id: str, records: list[dict]) -> list[dict]:
@@ -903,6 +927,7 @@ def rank_rows_for_artists(range_id: str, records, metric: str = "count") -> list
 
 
 def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list[dict]:
+    validate_vtuber_display_images(records, range_id)
     sorted_records = sorted(records, key=lambda row: (-rank_metric_value(row, metric), normalize_key(row["name"]), row["key"]))
     result = []
     for rank, record in enumerate(sorted_records, start=1):
@@ -915,6 +940,8 @@ def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list
             "channelHandle": record["channel_handle"],
             "channelUrl": record["channel_url"],
             "avatarUrl": record.get("avatar_url", ""),
+            "thumbnailUrl": record.get("thumbnail_url", ""),
+            "videoThumbnailUrl": record.get("thumbnail_url", ""),
             "sourceUrl": record.get("source_url", "") or record["channel_url"],
             "knownSourceType": record.get("known_source_type", ""),
             "isCollected": bool(record.get("is_collected")),
@@ -939,6 +966,17 @@ def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list
         }
         result.append(row_payload(range_id, "vtubers", rank, row, metric=metric))
     return result
+
+
+def validate_vtuber_display_images(records, range_id: str) -> None:
+    missing = [record for record in records if not clean_text(record.get("avatar_url")) and not clean_text(record.get("thumbnail_url"))]
+    if not missing:
+        return
+    sample = ", ".join(
+        " ".join(filter(None, [record.get("channel_handle", ""), record.get("channel_id", ""), record.get("name", "")])) or record.get("key", "")
+        for record in missing[:10]
+    )
+    raise ValueError(f"VTuber display image missing: range={range_id} count={len(missing)} sample={sample}")
 
 
 def rank_metric_value(record: dict, metric: str) -> int:
@@ -1357,6 +1395,7 @@ def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
         "handle": clean_text(item.get("channelHandle")),
         "displayName": clean_text(item.get("channelName") or item.get("channelHandle") or item.get("channelId")),
         "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
+        "thumbnailUrl": vtuber_thumbnail_candidate(item),
         "sourceUrl": clean_text(item.get("sourceUrl") or channel_url),
         "channelUrl": channel_url,
         "knownSourceType": clean_text(item.get("knownSourceType")) or known_source_type(item),
@@ -1365,15 +1404,16 @@ def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
     conn.execute(
         """
         INSERT INTO channel_metadata(
-          channel_key, channel_id, handle, display_name, avatar_url, source_url, channel_url,
+          channel_key, channel_id, handle, display_name, avatar_url, thumbnail_url, source_url, channel_url,
           known_source_type, is_collected, payload_json
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(channel_key) DO UPDATE SET
           channel_id=COALESCE(NULLIF(channel_metadata.channel_id, ''), excluded.channel_id),
           handle=COALESCE(NULLIF(channel_metadata.handle, ''), excluded.handle),
           display_name=COALESCE(NULLIF(channel_metadata.display_name, ''), excluded.display_name),
           avatar_url=COALESCE(NULLIF(channel_metadata.avatar_url, ''), excluded.avatar_url),
+          thumbnail_url=COALESCE(NULLIF(channel_metadata.thumbnail_url, ''), excluded.thumbnail_url),
           source_url=COALESCE(NULLIF(channel_metadata.source_url, ''), excluded.source_url),
           channel_url=COALESCE(NULLIF(channel_metadata.channel_url, ''), excluded.channel_url),
           known_source_type=COALESCE(NULLIF(channel_metadata.known_source_type, ''), excluded.known_source_type),
@@ -1386,6 +1426,7 @@ def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
             payload["handle"],
             payload["displayName"],
             payload["avatarUrl"],
+            payload["thumbnailUrl"],
             payload["sourceUrl"],
             payload["channelUrl"],
             payload["knownSourceType"],
@@ -1644,6 +1685,173 @@ def handle_from_channel_url(value) -> str:
         return ""
     handle = text[index + len("youtube.com/") :].split("?", 1)[0].split("#", 1)[0].strip("/")
     return handle
+
+
+def hydrate_payload_channel_metadata(payload: dict, metadata_path: Path) -> dict:
+    metadata = load_channel_metadata(metadata_path)
+    if not metadata:
+        return payload
+    groups = payload.get("groups") if isinstance(payload.get("groups"), dict) else {}
+    hydrated_groups = {}
+    for group_id, group in groups.items():
+        if not isinstance(group, dict):
+            hydrated_groups[group_id] = group
+            continue
+        items = group.get("items") if isinstance(group.get("items"), list) else []
+        hydrated_groups[group_id] = {
+            **group,
+            "items": [hydrate_item_channel_metadata(item, metadata) if isinstance(item, dict) else item for item in items],
+        }
+    return {
+        **payload,
+        "groups": hydrated_groups,
+        "source": {
+            **(payload.get("source") if isinstance(payload.get("source"), dict) else {}),
+            "channelMetadataCache": {
+                "path": str(metadata_path.relative_to(ROOT)).replace("\\", "/") if metadata_path.is_relative_to(ROOT) else str(metadata_path),
+                "channelCount": len(metadata),
+            },
+        },
+    }
+
+
+def load_channel_metadata(metadata_path: Path) -> dict[str, dict]:
+    if not metadata_path.exists():
+        return {}
+    payload = read_json(metadata_path)
+    channels = payload.get("channels") if isinstance(payload.get("channels"), list) else []
+    lookup: dict[str, dict] = {}
+    for channel in channels:
+        if not isinstance(channel, dict):
+            continue
+        normalized = normalize_channel_metadata(channel)
+        for key in channel_identity_keys(normalized):
+            existing = lookup.get(key)
+            lookup[key] = merge_channel_metadata(existing, normalized)
+    return lookup
+
+
+def hydrate_item_channel_metadata(item: dict, lookup: dict[str, dict]) -> dict:
+    metadata = find_channel_metadata(lookup, normalize_channel_metadata(item))
+    thumbnail_url = clean_text(item.get("thumbnailUrl") or item.get("thumbnail")) or thumbnail_url_for_video(item)
+    if not metadata:
+        return {**item, "thumbnailUrl": thumbnail_url}
+    return {
+        **item,
+        "channelName": clean_text(item.get("channelName")) or metadata.get("displayName", ""),
+        "channelId": clean_text(item.get("channelId")) or metadata.get("channelId", ""),
+        "channelHandle": clean_text(item.get("channelHandle")) or metadata.get("channelHandle", ""),
+        "channelUrl": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")) or metadata.get("channelUrl", "") or metadata.get("sourceUrl", ""),
+        "avatarUrl": real_avatar_url(item.get("avatarUrl") or item.get("channelAvatarUrl")) or metadata.get("avatarUrl", ""),
+        "sourceUrl": clean_text(item.get("sourceUrl")) or metadata.get("sourceUrl", "") or metadata.get("channelUrl", ""),
+        "knownSourceType": clean_text(item.get("knownSourceType")) or metadata.get("knownSourceType", ""),
+        "thumbnailUrl": thumbnail_url or metadata.get("thumbnailUrl", ""),
+    }
+
+
+def normalize_channel_metadata(value: dict) -> dict:
+    channel_id = clean_text(value.get("channelId"))
+    channel_handle = normalize_channel_handle(value.get("handle") or value.get("channelHandle") or value.get("sourceUrl") or value.get("channelUrl"))
+    channel_url = clean_text(value.get("channelUrl") or value.get("authorUrl") or value.get("ownerUrl"))
+    if not channel_url and channel_id:
+        channel_url = f"https://www.youtube.com/channel/{channel_id}"
+    source_url = clean_text(value.get("sourceUrl") or channel_url)
+    if not source_url and channel_handle:
+        source_url = f"https://www.youtube.com/{channel_handle}"
+    return {
+        "displayName": clean_text(value.get("displayName") or value.get("channelName") or value.get("name")),
+        "channelId": channel_id,
+        "channelHandle": channel_handle,
+        "channelUrl": channel_url,
+        "sourceUrl": source_url,
+        "avatarUrl": real_avatar_url(value.get("avatarUrl") or value.get("channelAvatarUrl")),
+        "thumbnailUrl": image_url(value.get("thumbnailUrl") or value.get("videoThumbnailUrl") or value.get("thumbnail")) or thumbnail_url_for_video(value),
+        "knownSourceType": clean_text(value.get("knownSourceType")),
+    }
+
+
+def find_channel_metadata(lookup: dict[str, dict], metadata: dict) -> dict | None:
+    for key in channel_identity_keys(metadata):
+        if key in lookup:
+            return lookup[key]
+    return None
+
+
+def merge_channel_metadata(existing: dict | None, incoming: dict) -> dict:
+    if not existing:
+        return incoming
+    return {
+        "displayName": existing.get("displayName") or incoming.get("displayName", ""),
+        "channelId": existing.get("channelId") or incoming.get("channelId", ""),
+        "channelHandle": existing.get("channelHandle") or incoming.get("channelHandle", ""),
+        "channelUrl": existing.get("channelUrl") or incoming.get("channelUrl", ""),
+        "sourceUrl": existing.get("sourceUrl") or incoming.get("sourceUrl", ""),
+        "avatarUrl": existing.get("avatarUrl") or incoming.get("avatarUrl", ""),
+        "thumbnailUrl": existing.get("thumbnailUrl") or incoming.get("thumbnailUrl", ""),
+        "knownSourceType": existing.get("knownSourceType") or incoming.get("knownSourceType", ""),
+    }
+
+
+def channel_identity_keys(metadata: dict) -> list[str]:
+    keys = [
+        f"id:{metadata.get('channelId')}" if metadata.get("channelId") else "",
+        f"handle:{normalize_key(metadata.get('channelHandle'))}" if metadata.get("channelHandle") else "",
+        f"url:{normalize_channel_url_key(metadata.get('sourceUrl'))}" if metadata.get("sourceUrl") else "",
+        f"url:{normalize_channel_url_key(metadata.get('channelUrl'))}" if metadata.get("channelUrl") else "",
+        f"name:{normalize_key(metadata.get('displayName'))}" if metadata.get("displayName") else "",
+    ]
+    return [key for index, key in enumerate(keys) if key and key not in keys[:index]]
+
+
+def normalize_channel_handle(value) -> str:
+    text = clean_text(value)
+    if not text:
+        return ""
+    marker = "youtube.com/@"
+    lower = text.lower()
+    if marker in lower:
+        handle = text[lower.find(marker) + len("youtube.com/") :].split("?", 1)[0].split("#", 1)[0].strip("/")
+        return f"/{handle}" if handle.startswith("@") else ""
+    if text.startswith("/@"):
+        return text
+    if text.startswith("@"):
+        return f"/{text}"
+    return ""
+
+
+def normalize_channel_url_key(value) -> str:
+    text = clean_text(value).replace("http://www.", "https://www.").replace("http://", "https://")
+    handle = normalize_channel_handle(text)
+    if handle:
+        return normalize_key(handle)
+    marker = "youtube.com/channel/"
+    lower = text.lower()
+    if marker in lower:
+        return f"channel/{text[lower.find(marker) + len(marker):].split('?', 1)[0].split('#', 1)[0].strip('/')}".lower()
+    return normalize_key(text)
+
+
+def thumbnail_url_for_video(item: dict) -> str:
+    video_id = clean_text(item.get("videoId"))
+    if len(video_id) == 11 and all(char.isalnum() or char in "_-" for char in video_id):
+        return f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
+    return ""
+
+
+def image_url(value) -> str:
+    text = clean_text(value)
+    if text.startswith("http://") or text.startswith("https://"):
+        return text
+    return ""
+
+
+def real_avatar_url(value) -> str:
+    text = clean_text(value)
+    if text.startswith("https://yt3.googleusercontent.com/") or (text.startswith("https://yt") and ".ggpht.com/" in text):
+        return text
+    if text.startswith("https://example.test/"):
+        return text
+    return ""
 
 
 def stable_key(*parts) -> str:

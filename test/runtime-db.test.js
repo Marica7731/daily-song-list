@@ -31,6 +31,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               videoId: "video-a",
               title: "Morning Karaoke",
               channelName: "Alpha Ch.",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-a/hqdefault.jpg",
               publishedTimestamp: 1784419200000,
               publishedText: "2026-07-19",
               songs: [
@@ -46,6 +47,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               videoId: "video-a",
               title: "Morning Karaoke",
               channelName: "Alpha Ch.",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-a/hqdefault.jpg",
               publishedTimestamp: 1784419200000,
               publishedText: "2026-07-19",
               songs: [
@@ -59,6 +61,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               channelName: "Beta Ch.",
               channelHandle: "@beta_ch",
               channelUrl: "https://www.youtube.com/@beta_ch",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-b/hqdefault.jpg",
               publishedTimestamp: 1784422800000,
               publishedText: "2026-07-19",
               songs: [{ title: "Song One (Piano Ver.)", artist: "Singer A", seconds: 30, time: "0:30" }],
@@ -69,6 +72,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               channelName: "Alpha Ch.",
               channelId: "UC-alpha",
               channelHandle: "/@alpha_ch",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-c/hqdefault.jpg",
               publishedTimestamp: 1784426400000,
               publishedText: "2026-07-19",
               songs: [{ title: "Song Three", artist: "Singer C", seconds: 40, time: "0:40" }],
@@ -77,6 +81,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               videoId: "video-d",
               title: "Midnight Karaoke",
               channelName: "Haru Ch. 花前ハル",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-d/hqdefault.jpg",
               publishedTimestamp: 1784430000000,
               publishedText: "2026-07-19",
               songs: [{ title: "Song Four", artist: "Singer D", seconds: 50, time: "0:50" }],
@@ -235,6 +240,27 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   assert.match(vtuberQueryOutput, /"channelId": "UC-alpha"/);
   assert.match(vtuberQueryOutput, /"count": 3/);
   assert.match(vtuberQueryOutput, /"videoCount": 2/);
+
+  const vtuberMissingAvatarOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--q",
+      "Beta",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(vtuberMissingAvatarOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(vtuberMissingAvatarOutput, /"name": "Beta Ch\."/);
+  assert.match(vtuberMissingAvatarOutput, /"avatarUrl": ""/);
+  assert.match(vtuberMissingAvatarOutput, /"thumbnailUrl": "https:\/\/i\.ytimg\.com\/vi\/video-b\/hqdefault\.jpg"/);
+  assert.doesNotMatch(vtuberMissingAvatarOutput, /data:image|fallback-avatar/u);
 
   const vtuberAliasQueryOutput = execFileSync(
     PYTHON,

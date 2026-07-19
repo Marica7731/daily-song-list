@@ -20,6 +20,7 @@ Input:
 - `data/latest.json` for the currently published song-list runtime payload.
 - `data/external/vsinger-http/backfill/manifest.json` plus its listed shards, when present.
 - `data/external/youtube-channel-discovery/accepted/*.json` for reviewed single-channel補漏 increments, when present.
+- `data/external/youtube-channel-discovery/channel-metadata.json` for reviewed YouTube channel identity, real public channel `avatarUrl` cache, and latest video `thumbnailUrl` display fallback.
 
 Output:
 
@@ -46,7 +47,7 @@ npm run youtube:export-channel-increment -- --input-dir artifacts/channel-discov
 npm run db:build
 ```
 
-Do not regenerate and commit `data/ui`, `data/catalog-segments`, or range JSON shards just to publish a manual補漏 row. The JS runtime exporter overlays accepted increments in memory while building SQLite, so Git only needs the small reviewed JSON and source changes. The normal hourly update path still uses `npm run update:core`.
+Do not regenerate and commit `data/ui`, `data/catalog-segments`, or range JSON shards just to publish a manual補漏 row. The JS runtime exporter overlays accepted increments and channel metadata in memory while building SQLite, so Git only needs the small reviewed JSON and source/cache changes. The normal hourly update path still uses `npm run update:core`, which refreshes `data/latest.json`, runs `scripts/fetch-channel-avatar-cache.js --daily`, then builds static runtime shards.
 
 Deployment also avoids re-uploading the full database artifact by default. `.github/workflows/deploy-runtime-db.yml` builds and validates a complete SQLite file on GitHub Actions, then copies the active VPS2 database to a run-scoped candidate and uses `rsync --inplace --partial --compress` so only changed blocks cross the network. The active DB is replaced only after `song-rank-db-activate.sh` verifies the candidate sha256 and smoke query. Set repository variable `DAILY_SONG_UPLOAD_DB_ARTIFACT=1` only when a full SQLite Actions artifact is needed for inspection.
 
@@ -167,6 +168,9 @@ Search scope contract:
 - `artists` matches singer/artist identity fields only, such as canonical name and aliases. Song titles, channel names, and video titles must not make an unrelated artist row match.
 - `vtubers` matches channel/VTuber identity fields only, such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields. Song titles and video titles must not make an unrelated VTuber row match.
 - `videos` matches video/source context, including video ID/title, channel identity, and parsed song-list/timestamp text.
+- `avatarUrl` is backend data only when it is a real remote channel/avatar URL from runtime data, accepted discovery metadata, or `channel-metadata.json`. Generated fallback avatars must remain absent from DB/API payloads.
+- `thumbnailUrl` / `videoThumbnailUrl` on `vtubers` records is display fallback only. It is sourced from the channel's latest available video/source thumbnail and is used when `avatarUrl` is empty. It is not counted as avatar coverage.
+- `missingDisplayImage` must stay zero for runtime VTuber records. The daily avatar cache step and static/DB builders fail or report the offending channels when a record has neither real avatar nor video thumbnail.
 
 Response fields:
 
@@ -186,7 +190,7 @@ Record shapes are intentionally display-ready and may include extra frontend fie
 | `songIndex` | `rank`, `type`, `title`, `sortKey`, `count`, `videoCount`, `timestampCount`, `sourceDetailKey` when full details exist |
 | `artists` | `rank`, `type`, `name`, `count`, `videoCount`, `timestampCount`, `songs` preview, `sourceDetailKey` when full details exist |
 | `videos` | `rank`, `type`, `videoId`, `title`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `avatarUrl`, `sourceUrl`, `knownSourceType`, `isCollected`, `count`, `timestampCount`, `publishedTimestamp`, `publishedAt`, `timeMissingReason`, `thumbnailUrl` |
-| `vtubers` | `rank`, `type`, `key`, `name`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `avatarUrl`, `sourceUrl`, `knownSourceType`, `isCollected`, `count`, `songCount`, `videoCount`, `timestampCount`, `songs` preview, `occurrences` preview |
+| `vtubers` | `rank`, `type`, `key`, `name`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `avatarUrl`, `thumbnailUrl`, `videoThumbnailUrl`, `sourceUrl`, `knownSourceType`, `isCollected`, `count`, `songCount`, `videoCount`, `timestampCount`, `songs` preview, `occurrences` preview |
 | `vsingerSongs` | `rank`, `type`, `title`, `artist`, `singerName`, `count`, `videoCount`, `sourceDetailKey` when full details exist |
 
 Sorting is by stored `rank` ascending for unfiltered and filtered requests. `songIndex` keeps alphabetical/index order.
@@ -307,8 +311,9 @@ Before merging an API or deploy change, run this minimum contract matrix:
 
 - DB build/probe: `npm run db:build` and `npm run db:probe -- --range all --view songs --q 少女レイ --page-size 5 --summary-only`; for channel補漏, also probe `--view videos --q ノア・ポラリス`.
 - Fast channel補漏 probe: `npm run db:build -- --no-vsinger --output artifacts/runtime/song-rank-youtube-check.sqlite`, then query `songs`, `videos`, and `vtubers` for the imported channel handles. Include `view=vtubers&metric=songs` to verify unique-song sorting. This is only a local YouTube overlay check; production still needs the full DB build.
+- Avatar/display-image cache probe: `npm run youtube:fetch-channel-avatars -- --daily --dry-run --max-fetch 0 --delay-ms 0`, then `npm run youtube:fetch-channel-avatars -- --max-fetch 60 --delay-ms 1500` when new runtime channels need real channel avatars. Verify `CODEX_CHANNEL_AVATAR_CACHE_OK`, `missingDisplayImageAfter=0`, and ensure failures are reviewed before building SQLite.
 - API smoke test: `npm run api:serve`, then `npm run check:published:api -- http://127.0.0.1/`.
-- Frontend fallback check: load the static page without the API or run the normal static `npm run check:published -- <base-url>` path.
+- Frontend fallback check: VTuber cards/lists use `avatarUrl` first and `thumbnailUrl` / `videoThumbnailUrl` second. No default avatar image should render for normal runtime data; if a missing marker appears, treat it as a data/build failure.
 - Deployment check: after GitHub Actions uploads the DB, run `npm run check:published:api -- http://127.0.0.1/` on VPS2 and again against the public domain after DNS cutover.
 
 ## VPS2 rollout
@@ -327,7 +332,7 @@ See `deploy/vps2/README.md` for the service and nginx commands.
 
 GitHub Actions remains the upstream data refresh path:
 
-- `.github/workflows/update-core.yml` runs hourly and updates `data/latest.json`, `data/ui`, catalog files, and `data/status.json`.
+- `.github/workflows/update-core.yml` runs hourly and updates `data/latest.json`, the incremental YouTube channel avatar cache, `data/ui`, catalog files, and `data/status.json`.
 - `.github/workflows/update-watchdog.yml` watches published freshness and can trigger the core updater. After VPS2 cutover it reads `/api/meta` first and falls back to static `data/ui/meta.json` only when the API is unavailable.
 - `.github/workflows/update-backfill.yml` prepares backfill inbox bundles; VSinger full HTTP backfill stays behind owner-permission scripts and is not part of routine hourly refresh.
 - `.github/workflows/deploy-runtime-db.yml` runs on direct `main` pushes and after `Update core song-list data` completes successfully. It resolves the latest `origin/main` revision before building SQLite, then rsyncs the verified candidate database to VPS2 using the current active DB as the delta-transfer basis.

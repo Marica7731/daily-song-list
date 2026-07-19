@@ -118,6 +118,15 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.doesNotMatch(cssSource, /\.query-trigger\.has-active-query::after/u);
 });
 
+test("VTuber rows render display images without default avatar fallback", () => {
+  assert.match(appSource, /function renderVtuberDisplayImage/u);
+  assert.match(appSource, /window\.FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
+  assert.match(appSource, /vtuber-display-image-thumbnail/u);
+  assert.match(cssSource, /\.vtuber-display-image-thumbnail\s*\{[\s\S]*border-radius: var\(--radius-thumbnail\);/u);
+  assert.doesNotMatch(appSource, /fallback-avatar/u);
+  assert.doesNotMatch(cssSource, /fallback-avatar/u);
+});
+
 test("high-density rank and source rules are encoded in css and browser checks", () => {
   assert.match(cssSource, /--radius-control:\s*8px/u);
   assert.match(cssSource, /--control-compact:\s*36px/u);
@@ -164,7 +173,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"\. drawer drawer"/u);
   assert.match(appSource, /const VIEW_RANK_METRIC_ORDER = \{[\s\S]*vtuberRank: \["occurrences", "songs", "videos"\]/u);
   assert.match(appSource, /function renderVtuberAvatar/u);
-  assert.match(appSource, /FrontendUtils\.vtuberAvatarModel\(record \|\| \{\}\)/u);
+  assert.match(appSource, /FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
   assert.match(appSource, /function renderVtuberCollectionBadge/u);
   assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
   assert.match(cssSource, /\.vtuber-title-line\s*\{[\s\S]*grid-template-columns: 40px minmax\(0, 1fr\) auto;/u);

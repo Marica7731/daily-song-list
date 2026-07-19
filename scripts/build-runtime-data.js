@@ -12,6 +12,7 @@ const {
   canonicalRangeId,
   groupForRange,
 } = require("./range-config");
+const { hydratePayloadWithChannelMetadata, thumbnailUrlForVideo } = require("./channel-metadata-cache");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -39,7 +40,7 @@ if (require.main === module) {
 }
 
 function main() {
-  const payload = augmentPayloadWithVsingerBackfill(readJson(LATEST_PATH));
+  const payload = hydratePayloadWithChannelMetadata(augmentPayloadWithVsingerBackfill(readJson(LATEST_PATH)));
   const baseRangePayloads = Object.fromEntries(RANGES.map((rangeId) => [rangeId, buildRuntimeRangePayload(payload, rangeId)]));
   const dataVersion = computeRuntimeDataVersion(payload, baseRangePayloads);
   const rangePayloads = Object.fromEntries(
@@ -494,6 +495,7 @@ function buildRequestRuntimeModel(rangePayload, rangeId, options = {}) {
     all: buildVtuberRequestItems(items, { nicheOnly: false }),
     niche: buildVtuberRequestItems(items, { nicheOnly: true }),
   };
+  validateVtuberDisplayImages(vtuberScopes, rangeId);
 
   for (const [scopeKey, records] of Object.entries(songScopes)) {
     const occurrenceRecords = sortRankRecords(records, "occurrences");
@@ -603,6 +605,19 @@ function buildRequestRuntimeModel(rangePayload, rangeId, options = {}) {
   };
 }
 
+function validateVtuberDisplayImages(vtuberScopes, rangeId) {
+  for (const [scopeKey, records] of Object.entries(vtuberScopes || {})) {
+    const missing = (records || []).filter((record) => !cleanText(record.avatarUrl) && !cleanText(record.thumbnailUrl || record.videoThumbnailUrl));
+    if (missing.length) {
+      const sample = missing
+        .slice(0, 10)
+        .map((record) => [record.channelHandle, record.channelId, record.name].filter(Boolean).join(" ") || record.key)
+        .join(", ");
+      throw new Error(`VTuber display image missing: range=${rangeId} scope=${scopeKey} count=${missing.length} sample=${sample}`);
+    }
+  }
+}
+
 function buildRequestRecordView(options) {
   const {
     type,
@@ -683,6 +698,14 @@ function compactRequestIndexEntry(record, options = {}) {
     entry.songCount = record.songs?.size || record.songs?.length || 0;
   } else if (type === "vtuber") {
     entry.songCount = record.songs?.size || record.songs?.length || 0;
+    entry.name = record.name || record.channelName || "";
+    entry.channelName = record.channelName || record.name || "";
+    entry.channelId = record.channelId || "";
+    entry.channelHandle = record.channelHandle || "";
+    entry.channelUrl = record.channelUrl || "";
+    entry.avatarUrl = record.avatarUrl || "";
+    entry.thumbnailUrl = record.thumbnailUrl || record.videoThumbnailUrl || "";
+    entry.videoThumbnailUrl = record.videoThumbnailUrl || record.thumbnailUrl || "";
   } else if (type === "video") {
     entry.videoId = record.videoId || "";
     entry.publishedTimestamp = finiteTimestamp(record.publishedTimestamp);
@@ -1301,6 +1324,9 @@ function buildVtuberRequestItems(items, options = {}) {
         channelId: cleanText(item.channelId),
         channelHandle: cleanText(item.channelHandle),
         channelUrl: cleanText(item.channelUrl || item.authorUrl || item.ownerUrl),
+        avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl),
+        thumbnailUrl: vtuberThumbnailCandidate(item),
+        videoThumbnailUrl: vtuberThumbnailCandidate(item),
         count: 0,
         videoCount: 0,
         timestampCount: 0,
@@ -1387,6 +1413,8 @@ function mergeChannelRecordIdentity(record, item) {
   const channelId = cleanText(item.channelId);
   const channelHandle = cleanText(item.channelHandle);
   const channelUrl = cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
+  const avatarUrl = cleanText(item.avatarUrl || item.channelAvatarUrl);
+  const thumbnailUrl = vtuberThumbnailCandidate(item);
   if (channelName) {
     record.aliases.add(channelName);
     if (!record.channelName) record.channelName = channelName;
@@ -1405,7 +1433,30 @@ function mergeChannelRecordIdentity(record, item) {
     record.aliases.add(channelUrl);
     if (!record.channelUrl) record.channelUrl = channelUrl;
   }
+  if (avatarUrl && !record.avatarUrl) record.avatarUrl = avatarUrl;
+  if (thumbnailUrl && shouldUseVtuberThumbnail(record, item)) {
+    record.thumbnailUrl = thumbnailUrl;
+    record.videoThumbnailUrl = thumbnailUrl;
+  }
   for (const alias of knownChannelSearchAliases(channelName)) record.aliases.add(alias);
+}
+
+function vtuberThumbnailCandidate(item) {
+  return cleanText(item.thumbnailUrl || item.videoThumbnail || item.videoThumbnailUrl || item.thumbnail || thumbnailUrlForVideo(item));
+}
+
+function shouldUseVtuberThumbnail(record, item) {
+  if (!record.thumbnailUrl) {
+    record.thumbnailPublishedTimestamp = Number(item.publishedTimestamp) || 0;
+    return true;
+  }
+  const incomingTimestamp = Number(item.publishedTimestamp) || 0;
+  const currentTimestamp = Number(record.thumbnailPublishedTimestamp) || 0;
+  if (incomingTimestamp >= currentTimestamp) {
+    record.thumbnailPublishedTimestamp = incomingTimestamp;
+    return true;
+  }
+  return false;
 }
 
 function knownChannelSearchAliases(channelName) {
@@ -1465,6 +1516,9 @@ function serializeVtuberRequestRecord(record, options = {}) {
     channelId: record.channelId || "",
     channelHandle: record.channelHandle || "",
     channelUrl: record.channelUrl || "",
+    avatarUrl: record.avatarUrl || "",
+    thumbnailUrl: record.thumbnailUrl || record.videoThumbnailUrl || "",
+    videoThumbnailUrl: record.videoThumbnailUrl || record.thumbnailUrl || "",
     aliases: Array.isArray(record.aliases) ? record.aliases : [],
     count: Number(record.count) || 0,
     videoCount: Number(record.videoCount) || 0,

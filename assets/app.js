@@ -5481,6 +5481,10 @@ function buildVtuberRecords(occurrences) {
         channelAvatarUrl: cleanText(item.channelAvatarUrl),
         knownSourceType: cleanText(item.knownSourceType || item.sourceType || item.collectionType),
         isCollected: Boolean(item.isCollected ?? item.collected ?? item.isKnownSource),
+        thumbnailUrl: vtuberThumbnailCandidate(item),
+        videoThumbnailUrl: vtuberThumbnailCandidate(item),
+        displayImageUrl: "",
+        displayImageKind: "",
         count: 0,
         videos: new Set(),
         songs: new Map(),
@@ -5501,6 +5505,9 @@ function buildVtuberRecords(occurrences) {
     record.videoCount = record.videos.size;
     record.timestampCount = record.count;
     record.aliases = Array.from(record.aliases.values());
+    const media = window.FrontendUtils.vtuberDisplayImageModel(record);
+    record.displayImageUrl = media.src;
+    record.displayImageKind = media.kind;
     record.searchText = vtuberRecordSearchText(record);
     return record;
   }));
@@ -5549,6 +5556,8 @@ function mergeVtuberRecordIdentity(record, item) {
   const channelId = cleanText(item.channelId);
   const channelHandle = cleanText(item.channelHandle);
   const channelUrl = cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
+  const avatarUrl = cleanText(item.avatarUrl || item.channelAvatarUrl);
+  const thumbnailUrl = vtuberThumbnailCandidate(item);
   if (channelName) {
     record.aliases.add(channelName);
     if (!record.channelName) record.channelName = channelName;
@@ -5567,7 +5576,33 @@ function mergeVtuberRecordIdentity(record, item) {
     record.aliases.add(channelUrl);
     if (!record.channelUrl) record.channelUrl = channelUrl;
   }
+  if (avatarUrl && !record.avatarUrl) record.avatarUrl = avatarUrl;
+  if (thumbnailUrl && shouldUseVtuberThumbnail(record, item)) {
+    record.thumbnailUrl = thumbnailUrl;
+    record.videoThumbnailUrl = thumbnailUrl;
+  }
   for (const alias of knownVtuberSearchAliases(channelName)) record.aliases.add(alias);
+}
+
+function vtuberThumbnailCandidate(item) {
+  const explicit = cleanText(item.thumbnailUrl || item.videoThumbnail || item.videoThumbnailUrl || item.thumbnail);
+  if (explicit) return explicit;
+  const videoId = cleanText(item.videoId);
+  return /^[A-Za-z0-9_-]{11}$/u.test(videoId) ? `https://i.ytimg.com/vi/${encodeURIComponent(videoId)}/hqdefault.jpg` : "";
+}
+
+function shouldUseVtuberThumbnail(record, item) {
+  if (!record.thumbnailUrl) {
+    record.thumbnailPublishedTimestamp = Number(item.publishedTimestamp) || 0;
+    return true;
+  }
+  const incomingTimestamp = Number(item.publishedTimestamp) || 0;
+  const currentTimestamp = Number(record.thumbnailPublishedTimestamp) || 0;
+  if (incomingTimestamp >= currentTimestamp) {
+    record.thumbnailPublishedTimestamp = incomingTimestamp;
+    return true;
+  }
+  return false;
 }
 
 function knownVtuberSearchAliases(channelName) {
@@ -5841,6 +5876,7 @@ function renderRankRecord({
   row.append(
     renderRecordContent(title, meta, {
       mode,
+      record,
       occurrences: safeOccurrences,
       record,
       songGroups,
@@ -5995,6 +6031,7 @@ function renderRankHeader(mode = "song") {
 function renderRecordContent(title, meta, options) {
   const {
     mode = "song",
+    record = null,
     occurrences,
     record = null,
     songGroups = [],
@@ -6006,8 +6043,13 @@ function renderRecordContent(title, meta, options) {
   const content = document.createElement("div");
   content.className = "rank-content";
 
+  if (mode === "vtuber") {
+    const media = renderVtuberDisplayImage(record || {});
+    if (media) content.append(media);
+  }
+
   const heading = document.createElement(`h${headingLevel}`);
-  heading.className = "rank-title";
+  heading.className = mode === "vtuber" ? "rank-title vtuber-title" : "rank-title";
   heading.append(document.createTextNode(title));
   for (const badgeText of meta.badges || []) {
     const badge = document.createElement("span");
@@ -6018,7 +6060,7 @@ function renderRecordContent(title, meta, options) {
   if (mode === "vtuber") {
     const titleLine = document.createElement("div");
     titleLine.className = "vtuber-title-line";
-    titleLine.append(renderVtuberAvatar(record), heading);
+    titleLine.append(renderVtuberDisplayImage(record), heading);
     const collectedBadge = renderVtuberCollectionBadge(record);
     if (collectedBadge) titleLine.append(collectedBadge);
     content.append(titleLine);
@@ -6042,6 +6084,43 @@ function renderRecordContent(title, meta, options) {
   content.append(subline);
 
   return content;
+}
+
+function renderVtuberDisplayImage(record) {
+  const media = window.FrontendUtils.vtuberDisplayImageModel(record || {});
+  if (!media.src) {
+    const marker = document.createElement("span");
+    marker.className = "vtuber-display-image vtuber-display-image-missing";
+    marker.dataset.displayImageKind = media.kind;
+    marker.setAttribute("aria-hidden", "true");
+    return marker;
+  }
+
+  const img = document.createElement("img");
+  img.className =
+    media.kind === "realAvatar"
+      ? "vtuber-display-image vtuber-display-image-avatar"
+      : "vtuber-display-image vtuber-display-image-thumbnail";
+  img.dataset.displayImageKind = media.kind;
+  img.alt = "";
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.width = 44;
+  img.height = 44;
+  img.src = media.src;
+  img.addEventListener("error", () => {
+    if (media.kind === "realAvatar") {
+      const fallback = window.FrontendUtils.vtuberDisplayImageModel({ ...record, avatarUrl: "" });
+      if (fallback.src) {
+        img.src = fallback.src;
+        img.className = "vtuber-display-image vtuber-display-image-thumbnail";
+        img.dataset.displayImageKind = fallback.kind;
+        return;
+      }
+    }
+    img.replaceWith(renderVtuberDisplayImage({}));
+  });
+  return img;
 }
 
 function appendArtistSubline(metaContainer, { occurrences, songCount, songPreview, videoCount }) {
@@ -6083,21 +6162,7 @@ function appendVtuberSubline(metaContainer, { occurrences, songPreview, videoCou
 }
 
 function renderVtuberAvatar(record) {
-  const model = window.FrontendUtils.vtuberAvatarModel(record || {});
-  const img = document.createElement("img");
-  img.className = model.hasRemoteAvatar ? "vtuber-avatar" : "vtuber-avatar vtuber-avatar-fallback";
-  img.src = model.src;
-  img.alt = model.alt;
-  img.width = 40;
-  img.height = 40;
-  img.loading = "lazy";
-  img.decoding = "async";
-  img.onerror = () => {
-    img.onerror = null;
-    img.classList.add("vtuber-avatar-fallback");
-    img.src = model.fallback;
-  };
-  return img;
+  return renderVtuberDisplayImage(record);
 }
 
 function renderVtuberCollectionBadge(record) {

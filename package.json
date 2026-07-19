@@ -5,7 +5,7 @@
   "description": "Hourly YouTube timestamp song-list snapshots for 7-day and cumulative views.",
   "scripts": {
     "update": "npm run update:core && npm run review:build",
-    "update:core": "node scripts/update-songlist.js && node scripts/apply-song-search-niche.js && node scripts/build-runtime-data.js && npm run validate:core",
+    "update:core": "node scripts/update-songlist.js && node scripts/apply-song-search-niche.js && node scripts/fetch-channel-avatar-cache.js --daily && node scripts/build-runtime-data.js && npm run validate:core",
     "review:build": "node scripts/build-review-queue.js && node scripts/export-dirty-candidates.js && npm run validate:review",
     "rebuild:video-catalog": "node scripts/rebuild-video-catalog.js",
     "rebuild:derived": "node scripts/rebuild-derived-data.js && node scripts/build-review-queue.js && node scripts/export-dirty-candidates.js && node scripts/build-runtime-data.js",
