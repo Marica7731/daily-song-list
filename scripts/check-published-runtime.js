@@ -120,6 +120,7 @@ async function main() {
 }
 
 async function checkApiRuntime(checkedAt) {
+  const staticMetaMode = await checkStaticRuntimeJsonFallback();
   const healthResponse = await fetchJsonWithText("healthz");
   assertApiSuccessHeaders(healthResponse, "healthz");
   const health = healthResponse.json;
@@ -190,10 +191,24 @@ async function checkApiRuntime(checkedAt) {
       `nemoVideos=${nemoVideos.totalCount}`,
       `kurageVideos=${kurageVideos.totalCount}`,
       `channelDiscoveryVideos=${channelDiscoveryProbes.map((probe) => probe.totalCount).join(",")}`,
+      `staticMeta=${staticMetaMode}`,
       `expectedCommit=${expectedApiCommitSha ? "matched" : "not-set"}`,
       `expectedLatest=${expectedApiLatestSha256 ? "matched" : "not-set"}`,
     ].join(" "),
   );
+}
+
+async function checkStaticRuntimeJsonFallback() {
+  const response = await fetchTextNoThrow("data/ui/meta.json");
+  if (response.statusCode === 404) return "missing";
+  assert(response.statusCode === 200, `static data/ui/meta.json must be 200 or 404, got ${response.statusCode}`);
+  assert(isJsonContentType(response.contentType), `static data/ui/meta.json must not be HTML fallback: ${response.contentType}`);
+  try {
+    JSON.parse(response.text);
+  } catch (error) {
+    assert(false, `static data/ui/meta.json must parse as JSON when present: ${error.message}`);
+  }
+  return "json";
 }
 
 async function checkVideoSearchProbe(label, path) {
@@ -316,11 +331,18 @@ async function fetchJsonWithText(path) {
 }
 
 async function fetchJsonWithTextNoThrow(path) {
+  const result = await fetchTextNoThrow(path);
+  return {
+    ...result,
+    json: JSON.parse(result.text),
+  };
+}
+
+async function fetchTextNoThrow(path) {
   const url = new URL(path, baseUrl);
   const response = await fetch(url, { cache: "no-store" });
   const text = await response.text();
   return {
-    json: JSON.parse(text),
     text,
     statusCode: response.status,
     contentType: response.headers.get("content-type") || "",

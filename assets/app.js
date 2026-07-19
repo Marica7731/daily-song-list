@@ -427,20 +427,20 @@ async function init() {
   await yieldToBrowser();
   const initialRange = state.range;
   const apiMetaPromise = measureAsync("fetch-api-meta", () => readJson(API_META_PATH, { cache: "no-cache" })).catch(() => null);
-  const metaPromise = measureAsync("fetch-meta", () => readJson(UI_META_PATH, { cache: "no-cache" })).catch((error) => ({ __error: error }));
   const statusPromise = readJson(STATUS_PATH, { cache: "no-cache" }).catch(() => null);
   const snapshotIndexPromise = readJson("data/snapshots/index.json").catch(() => ({ snapshots: [] }));
   const apiMeta = await apiMetaPromise;
-  const staticMetaResult = await metaPromise;
-  const staticMeta = staticMetaResult && !staticMetaResult.__error ? staticMetaResult : null;
   if (isRuntimeApiMeta(apiMeta)) {
     state.runtimeApi.available = true;
     state.runtimeApi.meta = apiMeta;
-    state.runtimeMeta = runtimeMetaFromApiMeta(apiMeta, staticMeta);
-  } else if (staticMeta) {
-    state.runtimeMeta = staticMeta;
+    state.runtimeMeta = runtimeMetaFromApiMeta(apiMeta);
   } else {
-    throw staticMetaResult?.__error || new Error("runtime meta missing");
+    const staticMetaResult = await measureAsync("fetch-meta", () => readJson(UI_META_PATH, { cache: "no-cache" })).catch((error) => ({ __error: error }));
+    const staticMeta = staticMetaResult && !staticMetaResult.__error ? staticMetaResult : null;
+    if (!staticMeta) {
+      throw staticMetaResult?.__error || new Error("runtime meta missing");
+    }
+    state.runtimeMeta = staticMeta;
   }
   const meta = state.runtimeMeta;
   state.status = mergeRuntimeStatus(meta.status || null, await statusPromise, meta);
