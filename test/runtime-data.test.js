@@ -51,6 +51,7 @@ test("buildClientGroup keeps only runtime video and song fields", () => {
   });
 
   assert.deepEqual(Object.keys(group.items[0]).sort(), [
+    "avatarUrl",
     "catalogFirstSeenAt",
     "catalogLastInspectedAt",
     "catalogLastSeenAt",
@@ -58,16 +59,52 @@ test("buildClientGroup keeps only runtime video and song fields", () => {
     "channelId",
     "channelName",
     "channelUrl",
+    "isCollected",
     "keyword",
+    "knownSourceType",
+    "publishedAt",
     "publishedText",
     "publishedTimestamp",
     "songs",
+    "sourceUrl",
     "thumbnailUrl",
+    "timeMissingReason",
     "title",
     "videoId",
   ]);
   assert.deepEqual(Object.keys(group.items[0].songs[0]).sort(), ["artist", "isNiche", "seconds", "title"]);
   assert.equal(group.items[0].songs[0].seconds, 75);
+});
+
+test("buildClientGroup filters runtime activity markers while preserving START songs", () => {
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "AAAAAAAAAAA",
+        title: "video",
+        channelName: "channel",
+        songs: [
+          { seconds: 1, title: "StaRt", artist: "Mrs. GREEN APPLE", isNiche: false },
+          { seconds: 2, title: "枠Start", artist: "未記載", isNiche: true },
+          { seconds: 3, title: "~ 開始", artist: "未記載", isNiche: true },
+          { seconds: 4, title: "セットリスト", artist: "歌唱開始時間", isNiche: true },
+          { seconds: 5, title: "103期4月度Fes×LIVE 同時視聴開始", artist: "未記載", isNiche: false },
+          { seconds: 6, title: "メズマライザー", artist: "ラグにより途中開始", isNiche: false },
+          { seconds: 7, title: "仮装狂騒曲", artist: "初星学園(ちゃんと歌えるまで耐久開始)", isNiche: false },
+          { seconds: 8, title: "開始　～　春泥棒", artist: "ヨルシカ", isNiche: false },
+          { seconds: 9, title: "閉会式開始", artist: "未記載", isNiche: false },
+          { seconds: 10, title: "開始ツイートしてなーい！", artist: "\"I forgot to tweet that the stream started!\"", isNiche: false },
+        ],
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    group.items[0].songs.map((song) => `${song.title} / ${song.artist}`),
+    ["StaRt / Mrs. GREEN APPLE", "メズマライザー / 未記載", "仮装狂騒曲 / 初星学園", "春泥棒 / ヨルシカ"],
+  );
 });
 
 test("runtime meta uses the expected range and diff paths", () => {

@@ -107,7 +107,7 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 
 | Active query strip | Recent searches | Suggestions |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-active-query-strip.png" alt="Mobile active query strip with search and filters" width="180" /> | <img src="docs/assets/screenshots/mobile-query-recent.png" alt="Mobile search and filter panel with recent searches" width="180" /> | <img src="docs/assets/screenshots/mobile-query-suggestions.png" alt="Mobile search suggestions in query panel" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-active-query-strip.png" alt="Mobile active query strip with search and filters" width="180" /> | <img src="docs/assets/screenshots/mobile-query-history.png" alt="Mobile query panel with stable snapshot history" width="180" /> | <img src="docs/assets/screenshots/mobile-query-suggestions.png" alt="Mobile search suggestions in query panel" width="180" /> |
 
 | Filter controls | Snapshot controls | Bottom navigation |
 | --- | --- | --- |

@@ -3,7 +3,9 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 
 const { matchBlockedSource } = require("../../assets/source-filter");
+const { isActivityMarkerTitle } = require("../curation");
 const { CANONICAL_RANGES, RANGE_TITLES, WEEK_MS, groupForRange } = require("../range-config");
+const { isLikelyNonSongEntry } = require("../song-utils");
 const { SOURCE_SYSTEM } = require("./model");
 
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -111,6 +113,7 @@ function loadVsingerBackfillRuntimeVideos(options = {}) {
       importedSongCount: songs.length,
       importedVideoCount: buildResult.videos.length,
       importedOccurrenceCount: buildResult.occurrenceCount,
+      skippedNonSongOccurrenceCount: buildResult.skippedNonSongOccurrenceCount,
       skippedInvalidVideoCount: buildResult.skippedInvalidVideoCount,
       skippedNoSongsVideoCount: buildResult.skippedNoSongsVideoCount,
       skippedBlockedVideoCount: buildResult.skippedBlockedVideoCount,
@@ -148,6 +151,7 @@ function buildRuntimeVideosFromBundle(bundle) {
   }
 
   const occurrencesByVideoId = new Map();
+  let skippedNonSongOccurrenceCount = 0;
   for (const occurrence of bundle.occurrences || []) {
     const videoId = cleanText(occurrence.youtubeVideoId);
     if (!isValidYouTubeVideoId(videoId)) continue;
@@ -155,6 +159,10 @@ function buildRuntimeVideosFromBundle(bundle) {
     const song = songsByCanonicalId.get(occurrence.canonicalSongId) || songsByExternalId.get(occurrence.externalSongId) || null;
     const runtimeSong = buildRuntimeSong(song, occurrence, seconds);
     if (!runtimeSong.title) continue;
+    if (isLikelyNonSongEntry(runtimeSong) || isExternalActivityMarkerSong(runtimeSong)) {
+      skippedNonSongOccurrenceCount += 1;
+      continue;
+    }
     if (!occurrencesByVideoId.has(videoId)) occurrencesByVideoId.set(videoId, []);
     occurrencesByVideoId.get(videoId).push(runtimeSong);
   }
@@ -212,6 +220,7 @@ function buildRuntimeVideosFromBundle(bundle) {
   return {
     videos: sortVideos(result),
     occurrenceCount: sumSongCount(result),
+    skippedNonSongOccurrenceCount,
     skippedInvalidVideoCount,
     skippedNoSongsVideoCount,
     skippedBlockedVideoCount,
@@ -231,6 +240,16 @@ function buildRuntimeSong(song, occurrence, seconds) {
     sourceHash: occurrence?.provenance?.hash || song?.provenance?.hash || "",
     isNiche: false,
   };
+}
+
+function isExternalActivityMarkerSong(song) {
+  const artist = cleanText(song?.artist);
+  if (artist && !isExternalNoiseArtist(artist)) return false;
+  return isActivityMarkerTitle(song?.title, "");
+}
+
+function isExternalNoiseArtist(value) {
+  return /^(?:-|未記載|未记载|不明|なし|歌唱開始時間)$/u.test(cleanText(value));
 }
 
 function mergeVideoItems(baseItems, importItems) {

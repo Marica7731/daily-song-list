@@ -22,6 +22,8 @@ Input:
 - `data/external/youtube-channel-discovery/accepted/*.json` for reviewed single-channel補漏 increments, when present.
 - `data/external/youtube-channel-discovery/channel-metadata.json` for reviewed YouTube channel identity, real public channel `avatarUrl` cache, and latest video `thumbnailUrl` display fallback.
 
+External補漏 rows pass through the same conservative non-song cleanup before they enter runtime rankings. High-confidence activity markers such as stream starts, setlist headers, timer notes, and sales/opening labels are dropped when the row has no reliable artist identity, while real songs with known artists, including the START whitelist, are preserved. Keep the regression probes for `開始` and `Start` with every manual補漏 batch so later imports do not reintroduce hidden-context song matches.
+
 Output:
 
 - SQLite database at `artifacts/runtime/song-rank.sqlite` by default.

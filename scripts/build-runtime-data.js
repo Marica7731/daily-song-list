@@ -3,6 +3,8 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
 const RankingUtils = require("../assets/ranking-utils");
+const { isActivityMarkerTitle } = require("./curation");
+const { isLikelyNonSongEntry } = require("./song-utils");
 const { augmentPayloadWithVsingerBackfill } = require("./vsinger-http/runtime-importer");
 const {
   CANONICAL_RANGES,
@@ -198,6 +200,7 @@ function buildClientGroup(group) {
 
 function buildClientVideo(item) {
   const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
+  const songs = (item.songs || []).map(buildClientSong).map(cleanRuntimeSong).filter(Boolean);
   const result = {
     videoId: item.videoId || "",
     title: item.title || "",
@@ -218,7 +221,7 @@ function buildClientVideo(item) {
     catalogLastSeenAt: item.catalogLastSeenAt || item.lastSeenAt || "",
     catalogLastInspectedAt: item.catalogLastInspectedAt || item.lastInspectedAt || "",
     thumbnailUrl: runtimeThumbnailUrl(item),
-    songs: (item.songs || []).map(buildClientSong),
+    songs,
   };
   if (!result.channelUrl) delete result.channelUrl;
   return result;
@@ -264,6 +267,70 @@ function buildClientSong(song) {
     artist: song.artist || "",
     isNiche: song.isNiche === true,
   };
+}
+
+function cleanRuntimeSong(song) {
+  const title = cleanRuntimeTitle(song?.title);
+  if (!title) return null;
+  let artist = String(song?.artist || "").trim();
+  if (shouldDropRuntimeSong({ ...song, title, artist })) return null;
+  artist = cleanRuntimeArtist(artist);
+  return {
+    ...song,
+    title,
+    artist,
+  };
+}
+
+function cleanRuntimeTitle(title) {
+  let value = String(title || "").trim();
+  value = value.replace(/^開始\s*[~〜～・･:：\-—–−/／|｜￤∣丨]+\s*/u, "").trim();
+  return value;
+}
+
+function shouldDropRuntimeSong(song) {
+  const artist = cleanRuntimeArtist(song.artist);
+  if (isKnownStartSong(song.title, artist)) return false;
+  if (isLikelyNonSongEntry(song)) return true;
+  if (isActivityMarkerTitle(song.title, artist || "未記載")) return true;
+  if (isRuntimeActivityTitle(song.title, artist)) return true;
+  return false;
+}
+
+function isKnownStartSong(title, artist) {
+  if (normalizeRuntimeMarker(title) !== "start") return false;
+  return Boolean(artist && artist !== "未記載");
+}
+
+function isRuntimeActivityTitle(title, artist) {
+  const value = normalizeRuntimeMarker(title);
+  const unknownArtist = !cleanRuntimeArtist(artist) || cleanRuntimeArtist(artist) === "未記載";
+  if (/^(?:枠)?(?:start|streamstart|karaokestart|配信start|配信スタート|開始|配信開始|本編開始)$/iu.test(value)) return true;
+  if (/^(?:setlist|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)$/iu.test(value)) return true;
+  if (/(?:耐久開始を宣言|開始ツイート|開始前トーク|ツイートしてな|同時視聴開始|閉会式開始)/u.test(value)) return true;
+  if (unknownArtist && /(?:同時視聴開始|復習タイム開始|後編開始|前編開始|謁見開始|閉会式開始|作成時間|セトリ変更|練習開始|耐久開始を宣言|開始$)/u.test(value)) {
+    return true;
+  }
+  return false;
+}
+
+function cleanRuntimeArtist(artist) {
+  let value = String(artist || "").trim();
+  if (!value || value === "未記載") return "未記載";
+  value = value.replace(/\s*[\(（][^()（）]*(?:開始|耐久|途中|ラグ|歌唱時間|歌えるまで)[^()（）]*[\)）]\s*/gu, "").trim();
+  const marker = normalizeRuntimeMarker(value);
+  if (!value || /^(?:未記載|未记载|不明|unknown|なし|-|歌唱開始時間|ラグにより途中開始)$/iu.test(marker)) return "未記載";
+  if (/^(?:開始|配信開始|本編開始|歌唱開始時間|ラグにより途中開始|耐久開始)$/iu.test(marker)) return "未記載";
+  return value;
+}
+
+function normalizeRuntimeMarker(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/[【】[\]「」『』"'“”‘’]/gu, "")
+    .replace(/^[\s~〜～・･:：\-—–−/／|｜￤∣丨]+|[\s~〜～・･:：\-—–−/／|｜￤∣丨]+$/gu, "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
 }
 
 function finiteTimestamp(value) {
@@ -1816,6 +1883,12 @@ function normalizeSearchText(value) {
     .toLocaleLowerCase()
     .replace(/\s+/gu, " ")
     .trim();
+}
+
+function incrementCount(map, name) {
+  if (!name) return;
+  if (!map.has(name)) map.set(name, { name, count: 0 });
+  map.get(name).count += 1;
 }
 
 function cleanText(value) {

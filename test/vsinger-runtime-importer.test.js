@@ -101,6 +101,30 @@ test("VSinger song merge preserves same-song repeats at different timestamps", (
   );
 });
 
+test("VSinger backfill filters non-song setlist markers before runtime import", () => {
+  const dir = writeBackfillBundle({
+    songs: [
+      song("vsinger:song-real", "song-real", "StaRt", "Mrs. GREEN APPLE"),
+      song("vsinger:song-start", "song-start", "配信START", ""),
+      song("vsinger:song-setlist", "song-setlist", "セットリスト", "歌唱開始時間"),
+      song("vsinger:song-begin", "song-begin", "開始", ""),
+    ],
+    videos: [video("PwEG0NtOoxE", "video-a", "2026-07-17")],
+    occurrences: [
+      occurrence("PwEG0NtOoxE", "video-a", "vsinger:song-real", "song-real", 100),
+      occurrence("PwEG0NtOoxE", "video-a", "vsinger:song-start", "song-start", 200),
+      occurrence("PwEG0NtOoxE", "video-a", "vsinger:song-setlist", "song-setlist", 300),
+      occurrence("PwEG0NtOoxE", "video-a", "vsinger:song-begin", "song-begin", 400),
+    ],
+  });
+
+  const result = loadVsingerBackfillRuntimeVideos({ backfillDir: dir });
+
+  assert.deepEqual(result.videos[0].songs.map((item) => item.title), ["StaRt"]);
+  assert.equal(result.summary.importedOccurrenceCount, 1);
+  assert.equal(result.summary.skippedNonSongOccurrenceCount, 3);
+});
+
 function writeBackfillBundle(overrides = {}) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "vsinger-runtime-importer-"));
   const bundle = {
