@@ -54,6 +54,8 @@ const {
   trendDisplayModel,
   validateRuntimeRangePayload,
   visiblePageTokens,
+  vtuberAvatarModel,
+  vtuberCollectionBadgeModel,
   youtubeChannelLink,
 } = require("../assets/frontend-utils");
 
@@ -205,9 +207,38 @@ test("VTuber channel rank toggle uses unique song count", () => {
   assert.equal(collapsed.text, "7首曲目");
   assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌曲");
 
+  const songMetric = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7, rankMetric: "songs", rankCount: 7 });
+  assert.equal(songMetric.text, "曲目");
+  assert.equal(songMetric.ariaLabel, "查看该频道的 7 首歌曲");
+
   const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7 });
   assert.equal(expanded.text, "收起");
   assert.equal(expanded.ariaLabel, "收起该频道曲目");
+});
+
+test("VTuber avatar and collection models tolerate missing backend fields", () => {
+  const remote = vtuberAvatarModel({
+    name: "UTANO ch.",
+    avatarUrl: "https://example.test/avatar.jpg",
+    channelId: "UCutano",
+  });
+  assert.equal(remote.src, "https://example.test/avatar.jpg");
+  assert.equal(remote.hasRemoteAvatar, true);
+  assert.equal(remote.alt, "UTANO ch. 头像");
+  assert.match(remote.fallback, /^data:image\/svg\+xml;charset=utf-8,/u);
+
+  const fallback = vtuberAvatarModel({ name: "月城セシル", channelHandle: "@cecil" });
+  assert.equal(fallback.src, fallback.fallback);
+  assert.equal(fallback.hasRemoteAvatar, false);
+  assert.match(decodeURIComponent(fallback.fallback), /月城/u);
+
+  assert.deepEqual(vtuberCollectionBadgeModel({ isCollected: true, knownSourceType: "manual" }), {
+    text: "已收录",
+    isCollected: true,
+    sourceType: "manual",
+  });
+  assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "unknown" }).isCollected, false);
+  assert.equal(vtuberCollectionBadgeModel({}).text, "");
 });
 
 test("song rank toggle uses video and timestamp counts", () => {
@@ -1244,14 +1275,16 @@ test("url state keeps rank metric and video layout only when relevant", () => {
   const vtuberState = {
     ...metricState,
     view: "vtuberRank",
-    rankMetric: "videos",
+    rankMetric: "songs",
     minCount: 10,
     q: "なれたん",
   };
   assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(vtuberState, options))), {
     view: "vtuberRank",
+    metric: "songs",
     q: "なれたん",
   });
+  assert.equal(parseUrlState("?view=vtuberRank&metric=songs", options).rankMetric, "songs");
 });
 
 test("url state falls back to safe defaults and only accepts configured snapshots", () => {
@@ -1507,6 +1540,7 @@ function urlStateOptions() {
     legacyRangeIds: { "7d": ["72h"], all: ["1m"] },
     validViews: ["songRank", "artistRank", "songAz", "vtuberRank", "videos"],
     validPageSizes: [50, 100, 200],
+    validRankMetrics: ["occurrences", "songs", "videos"],
     latestSnapshotPath: "data/latest.json",
     snapshots: [
       { id: "archive-20260710", path: "data/snapshots/2026-07-10.json" },
@@ -1527,7 +1561,7 @@ function urlStateOptions() {
 
 function queryDraftOptions() {
   return {
-    validRankMetrics: ["occurrences", "videos"],
+    validRankMetrics: ["occurrences", "songs", "videos"],
     validTrendFilters: ["all", "new", "up", "down"],
     validMinCounts: [1, 2, 5, 10],
     validPageSizes: [50, 100],

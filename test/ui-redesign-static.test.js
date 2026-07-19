@@ -137,10 +137,12 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.doesNotMatch(indexSource, /<\/div>\s*<\/div>\s*<footer class="query-panel-footer">/u);
   assert.match(indexSource, /class="query-filter-matrix query-form-grid"/u);
   assert.match(indexSource, /class="query-sort-field" id="metricFilterGroup"/u);
+  assert.match(indexSource, /name="queryMetric" value="songs"/u);
   assert.match(indexSource, /class="query-field query-compact-field query-context-card page-size-filter"/u);
   assert.match(indexSource, /class="query-history-section query-context-card"/u);
   assert.match(cssSource, /\.query-form-grid\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*gap: var\(--query-grid-gap\);/u);
   assert.match(cssSource, /\.query-sort-field\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
+  assert.match(cssSource, /\.query-segmented\s*\{[\s\S]*grid-template-columns: repeat\(auto-fit, minmax\(78px, 1fr\)\);/u);
   assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
   assert.doesNotMatch(cssSource, /grid-template-columns: auto auto;[\s\S]*justify-content: space-between/u);
   assert.doesNotMatch(indexSource, /query-quick-toggles|query-compact-fields|query-context-fields|query-metric-control/u);
@@ -154,6 +156,13 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(captureSource, /query history overlaps footer/u);
   assert.doesNotMatch(appSource, /function setQueryPanelTab|queryTabButtons|queryTabPanels/u);
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"\. drawer drawer"/u);
+  assert.match(appSource, /const VIEW_RANK_METRIC_ORDER = \{[\s\S]*vtuberRank: \["occurrences", "songs", "videos"\]/u);
+  assert.match(appSource, /function renderVtuberAvatar/u);
+  assert.match(appSource, /FrontendUtils\.vtuberAvatarModel\(record \|\| \{\}\)/u);
+  assert.match(appSource, /function renderVtuberCollectionBadge/u);
+  assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
+  assert.match(cssSource, /\.vtuber-title-line\s*\{[\s\S]*grid-template-columns: 40px minmax\(0, 1fr\) auto;/u);
+  assert.match(cssSource, /\.vtuber-avatar\s*\{[\s\S]*width: 40px;[\s\S]*height: 40px;/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);
   assert.match(cssSource, /\.rank-side-trend\[aria-hidden="true"\]\s*\{[\s\S]*display: none;/u);
@@ -214,6 +223,10 @@ test("desktop and tablet contracts use explicit responsive layout", () => {
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) var\(--rank-side-width-tablet\)/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) minmax\(220px, 320px\);/u);
   assert.match(appSource, /mode === "mobile"[\s\S]*variant === "top"[\s\S]*renderMobileTopPagination\(pageInfo\)/u);
+  assert.match(appSource, /function renderPageJumpControl\(pageInfo\)/u);
+  assert.match(appSource, /input\.dataset\.pageInput = "true"/u);
+  assert.match(appSource, /dataPageJumpForm|data-page-jump-form|pageJumpForm/u);
+  assert.match(cssSource, /\.page-jump\s*\{[\s\S]*display: inline-flex;/u);
 });
 
 test("search suggestions highlight safely without assigning untrusted innerHTML", () => {

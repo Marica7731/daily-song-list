@@ -1040,7 +1040,7 @@ mark {
 
 .query-segmented {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
   gap: var(--query-grid-gap);
 }
 
@@ -1275,6 +1275,45 @@ mark {
   min-width: 0;
 }
 
+.vtuber-title-line {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.vtuber-avatar {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #e4e7ec;
+  object-fit: cover;
+}
+
+.vtuber-avatar-fallback {
+  border-color: rgba(15, 118, 110, 0.22);
+}
+
+.vtuber-title-line .rank-title {
+  min-width: 0;
+}
+
+.vtuber-collected-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: var(--radius-pill);
+  padding: 0 7px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .rank-title {
   display: -webkit-box;
   margin: 0;
@@ -1476,6 +1515,7 @@ mark {
   align-content: center;
   gap: 1px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .source-inline-meta {
@@ -1728,6 +1768,40 @@ mark {
   color: var(--ink);
   font: inherit;
   font-weight: 700;
+}
+
+.page-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.page-jump-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--chip-height);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.page-jump input {
+  width: 72px;
+  min-height: var(--chip-height);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: 0 var(--space-2);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+}
+
+.page-jump-button {
+  min-width: 48px;
 }
 
 .pagination-button,
@@ -2556,7 +2630,7 @@ mark {
     "content side"
     "sources sources"
     "drawer drawer";
-  grid-template-columns: minmax(0, 1fr) 64px;
+  grid-template-columns: minmax(0, 1fr) minmax(64px, max-content);
   min-height: 58px;
   align-items: center;
   column-gap: var(--space-3);
@@ -2566,6 +2640,10 @@ mark {
   content-visibility: auto;
   contain-intrinsic-size: auto 58px;
   transition: background-color 140ms ease;
+}
+
+.index-row .rank-side {
+  min-width: 64px;
 }
 
 /* 13. Video grid */
@@ -2578,6 +2656,7 @@ mark {
 
 .video-card {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   align-self: start;
   min-width: 0;
   overflow: hidden;
@@ -2612,6 +2691,7 @@ mark {
 
 .video-body {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: var(--space-2);
   min-width: 0;
   padding: var(--space-3);
@@ -2634,6 +2714,7 @@ mark {
   display: grid;
   justify-items: end;
   gap: var(--space-1);
+  min-width: var(--chip-height);
 }
 
 .video-title {
@@ -2933,6 +3014,22 @@ mark {
 
   .rank-content {
     gap: 3px;
+  }
+
+  .vtuber-title-line {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 7px;
+  }
+
+  .vtuber-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .vtuber-collected-badge {
+    min-height: 18px;
+    padding-inline: 6px;
+    font-size: 10.5px;
   }
 
   .rank-subline {

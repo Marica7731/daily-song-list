@@ -61,7 +61,13 @@ const CURRENT_FILTER_VERSION = 4;
 const RECENT_SEARCHES_KEY = "dailySongList.recentSearches";
 const RANK_METRICS = {
   occurrences: "收录次数",
+  songs: "不同曲目数",
   videos: "不同视频数",
+};
+const VIEW_RANK_METRIC_ORDER = {
+  songRank: ["occurrences", "videos"],
+  artistRank: ["occurrences", "videos"],
+  vtuberRank: ["occurrences", "songs", "videos"],
 };
 const TREND_FILTERS = {
   all: "全部",
@@ -516,7 +522,7 @@ function bindEvents() {
   els.summary?.addEventListener("click", async (event) => {
     const rankMetric = event.target.closest("[data-rank-metric]");
     if (rankMetric) {
-      state.rankMetric = rankMetric.dataset.rankMetric || "occurrences";
+      state.rankMetric = rankMetricForView(state.view, rankMetric.dataset.rankMetric || "occurrences");
       state.expandedRows.clear();
       resetPagination();
       render({ urlMode: "push" });
@@ -638,6 +644,16 @@ function bindEvents() {
     render({ focusAfterPageChange: true, urlMode: "push" });
   });
 
+  els.content.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-page-jump-form]");
+    if (!form) return;
+    event.preventDefault();
+    const input = form.querySelector("[data-page-input]");
+    const page = Number.parseInt(input?.value || "1", 10);
+    setPage(page);
+    render({ focusAfterPageChange: true, urlMode: "push" });
+  });
+
   els.content.addEventListener("click", (event) => {
     const sourceCollapse = event.target.closest("[data-collapse-source]");
     if (sourceCollapse) {
@@ -688,6 +704,7 @@ function switchView(nextView, options = {}) {
   if (!nextView || state.view === nextView) return;
   storeViewPosition();
   state.view = nextView;
+  state.rankMetric = rankMetricForView(nextView, state.rankMetric);
   state.expandedRows.clear();
   resetPagination();
   syncControlsFromState();
@@ -1201,6 +1218,7 @@ function defaultQueryDraft() {
 
 function sanitizeQueryDraft(draft) {
   const next = window.FrontendUtils.sanitizeQueryDraft(draft, queryDraftOptions());
+  next.rankMetric = rankMetricForView(state.view, next.rankMetric);
   return state.runtimeApi.available ? { ...next, trend: "all" } : next;
 }
 
@@ -1307,7 +1325,7 @@ function readQueryDraftFromControls() {
     q: els.queryInput?.value || "",
     nicheOnly: Boolean(els.nicheOnlyToggle?.checked),
     hideUnknownArtist: Boolean(els.hideUnknownToggle?.checked),
-    rankMetric: Object.hasOwn(RANK_METRICS, selectedMetric) ? selectedMetric : "occurrences",
+    rankMetric: rankMetricForView(state.view, selectedMetric),
     trend: Object.hasOwn(TREND_FILTERS, els.trendFilterSelect?.value) ? els.trendFilterSelect.value : "all",
     minCount: MIN_COUNT_OPTIONS.includes(Number(els.minCountSelect?.value)) ? Number(els.minCountSelect.value) : 1,
     pageSize: LIST_PAGE_SIZE_OPTIONS.includes(Number(els.queryPageSizeSelect?.value)) ? Number(els.queryPageSizeSelect.value) : defaultListPageSizeForMode(),
@@ -1412,6 +1430,7 @@ function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromS
   const hideUnknownField = els.hideUnknownToggle?.closest(".query-toggle");
   const videoLikeView = state.view === "videos";
   if (els.metricFilterGroup) els.metricFilterGroup.hidden = videoLikeView;
+  syncQueryMetricOptions();
   if (els.displayFilterGroup) els.displayFilterGroup.hidden = state.view === "videos";
   if (hideUnknownField) hideUnknownField.hidden = state.view === "artistRank" || state.view === "vtuberRank";
   if (els.hideUnknownToggle) els.hideUnknownToggle.disabled = state.view === "artistRank" || state.view === "vtuberRank";
@@ -1432,6 +1451,33 @@ function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromS
             ? "趋势读取失败"
             : "";
     }
+  }
+}
+
+function rankMetricForView(view = state.view, metricName = state.rankMetric) {
+  const allowed = VIEW_RANK_METRIC_ORDER[view] || ["occurrences"];
+  return allowed.includes(metricName) ? metricName : "occurrences";
+}
+
+function rankMetricEntriesForView(view = state.view) {
+  return (VIEW_RANK_METRIC_ORDER[view] || []).map((value) => [value, RANK_METRICS[value]]).filter(([, label]) => label);
+}
+
+function rankMetricButtonText(value) {
+  if (value === "songs") return "按曲目";
+  if (value === "videos") return "按视频";
+  return state.view === "vtuberRank" ? "按歌唱" : "按收录";
+}
+
+function syncQueryMetricOptions() {
+  const allowed = new Set((VIEW_RANK_METRIC_ORDER[state.view] || []).filter((value) => Object.hasOwn(RANK_METRICS, value)));
+  for (const input of document.querySelectorAll("input[name='queryMetric']")) {
+    const label = input.closest("label");
+    const visible = allowed.has(input.value);
+    if (label) label.hidden = !visible;
+    const textNode = label ? Array.from(label.childNodes).find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()) : null;
+    if (textNode) textNode.textContent = rankMetricButtonText(input.value);
+    input.disabled = !visible;
   }
 }
 
@@ -1888,7 +1934,7 @@ function applyInitialUrlState() {
   state.page = parsed.page;
   state.pageSize = parsed.pageSize;
   state.indexBucket = parsed.bucket;
-  state.rankMetric = parsed.rankMetric;
+  state.rankMetric = rankMetricForView(parsed.view, parsed.rankMetric);
   state.trend = parsed.trend;
   state.minCount = parsed.minCount;
   state.videoLayout = parsed.videoLayout;
@@ -3310,7 +3356,7 @@ function requestViewFingerprintFromState() {
   return [
     state.range,
     state.view,
-    state.view === "artistRank" || state.view === "songRank" ? state.rankMetric : "index",
+    state.view === "artistRank" || state.view === "songRank" || state.view === "vtuberRank" ? state.rankMetric : "index",
     requestScopeKey(state.view),
     requestFilterKey(requestFilterState()),
     currentPageSize(),
@@ -3487,6 +3533,7 @@ function apiViewForRequestView(view) {
 
 function apiMetricForRequest(request) {
   if (request.view === "songRank" || request.view === "artistRank" || request.view === "vtuberRank") {
+    if (request.view === "vtuberRank" && request.rankMetric === "songs") return "songs";
     return request.rankMetric === "videos" ? "videos" : "occurrences";
   }
   return "count";
@@ -3508,7 +3555,7 @@ function apiIndexEntryForRecord(record, view, metricName, index) {
     rank: Number(record.rank) || index + 1,
     isTied: false,
     isNiche: isNicheRecord(record),
-    rankValue: metricName === "videos" ? Number(record.videoCount) || 0 : Number(record.count) || 0,
+    rankValue: rankValueForRequestRecord(record, metricName),
     bucket: view === "songAz" ? songIndexBucket(record) : "",
     searchText: record.searchText || normalizeSearch([record.title, record.displayArtist, record.artist, record.name, record.channelName].filter(Boolean).join(" ")),
   };
@@ -3533,7 +3580,7 @@ function requestEntriesOccurrenceCount(entries, view, metricName) {
     return entries.reduce((total, entry) => total + (Number(entry.occurrenceCount ?? entry.count ?? entry.rankValue) || 0), 0);
   }
   return entries.reduce((total, entry) => {
-    const value = metricName === "videos" ? entry.count : entry.count ?? entry.rankValue;
+    const value = metricName === "videos" || metricName === "songs" ? entry.count : entry.count ?? entry.rankValue;
     return total + (Number(value) || 0);
   }, 0);
 }
@@ -3550,7 +3597,9 @@ function requestViewRef(requestMeta, view, rankMetric, scopeKey) {
   const metric = view === "songRank" || view === "artistRank" || view === "vtuberRank" ? rankMetric || "occurrences" : "index";
   if (view === "songRank") return requestMeta.views?.songRank?.[metric]?.[scopeKey];
   if (view === "artistRank") return requestMeta.views?.artistRank?.[metric]?.[scopeKey];
-  if (view === "vtuberRank") return requestMeta.views?.vtuberRank?.[metric]?.[scopeKey] || requestMeta.views?.vtuberRank?.index?.[scopeKey];
+  if (view === "vtuberRank") {
+    return requestMeta.views?.vtuberRank?.[metric]?.[scopeKey] || (metric === "occurrences" ? requestMeta.views?.vtuberRank?.index?.[scopeKey] : null);
+  }
   if (view === "songAz") return requestMeta.views?.songAz?.index?.[scopeKey];
   if (view === "videos") return requestMeta.views?.videos?.index?.[scopeKey];
   return null;
@@ -4065,10 +4114,10 @@ function renderRequestedPageResult(result, options = {}) {
         record,
         meta: vtuberMeta(record),
         videoCount: record.videoCount,
-        count: Number(record.count) || 0,
-        countUnit: "次",
+        count: rankValueForRequestRecord(record, result.metric),
+        countUnit: result.metric === "songs" ? "曲目" : result.metric === "videos" ? "视频" : "次",
         occurrences: record.occurrences,
-        songCount: record.songs.size,
+        songCount: songCountForRecord(record),
         songPreview: vtuberSongPreview(record),
         priorityInlineMedia: index < 8,
       }));
@@ -4141,6 +4190,7 @@ function requestPageUnit(view) {
 }
 
 function rankValueForRequestRecord(record, metricName) {
+  if (metricName === "songs") return songCountForRecord(record);
   return metricName === "videos" ? Number(record.videoCount) || 0 : Number(record.count) || 0;
 }
 
@@ -4481,13 +4531,13 @@ function filteredRankModel(records, mode) {
     ranks: buildCompetitionRanks(trendFiltered),
     countFrequencies: buildCountFrequencies(trendFiltered, rankValue),
     baseCount: records.length,
-    minCountApplied: state.minCount > 1,
+    minCountApplied: mode !== "vtuberRank" && state.minCount > 1,
     trendApplied: state.trend !== "all" && trendFiltered.length !== minFiltered.length,
   };
 }
 
 function filterRecordsByMinCount(records) {
-  if (state.view === "videos" || state.minCount <= 1) return records;
+  if (state.view === "videos" || state.view === "vtuberRank" || state.minCount <= 1) return records;
   return records.filter((record) => rankValue(record) >= state.minCount);
 }
 
@@ -4693,13 +4743,14 @@ function renderVtuberRank(group, rangeCache, selection) {
   const allVtuberRecords = rangeCache.allVtuberRecords;
   const nicheVtuberRecords = rangeCache.nicheVtuberRecords;
   const baseModel = rankingModelForSelection(rangeCache, selection, "vtuber-rank", compareRankRecords);
-  const records = baseModel.records;
+  const filteredModel = filteredRankModel(baseModel.records, "vtuberRank");
+  const { records, ranks, countFrequencies } = filteredModel;
   setCurrentResultSummary(makeQueryDraftFromState(), records.length);
 
   renderSummary(group, [
     recordVisibilityMetric(records.length, baseModel.records.length, allVtuberRecords.length, nicheVtuberRecords.length, "个频道", "个小众歌曲频道"),
     occurrenceVisibilityMetric(selection.occurrences.length, sourceOccurrences.length, rangeCache.nicheOccurrences.length),
-  ], summaryNote(selection));
+  ], summaryNote(selection, filterStatusNote("vtuberRank", filteredModel)));
 
   if (!records.length) {
     renderEmpty(emptyMessage("这个范围还没有VTuber频道资料", "没有找到符合条件的频道", "没有找到小众歌曲频道"), {
@@ -4717,8 +4768,8 @@ function renderVtuberRank(group, rangeCache, selection) {
       renderRankRecord({
         mode: "vtuber",
         key: `vtuber-${record.key}`,
-        rank: baseModel.ranks.get(record.key),
-        isTied: baseModel.countFrequencies.get(rankValue(record)) > 1,
+        rank: ranks.get(record.key),
+        isTied: countFrequencies.get(rankValue(record)) > 1,
         title: record.name,
         record,
         meta: vtuberMeta(record),
@@ -4726,7 +4777,7 @@ function renderVtuberRank(group, rangeCache, selection) {
         count: rankValue(record),
         countUnit: rankCountUnit(),
         occurrences: record.occurrences,
-        songCount: record.songs.size,
+        songCount: songCountForRecord(record),
         songPreview: vtuberSongPreview(record),
         priorityInlineMedia: index < 8,
       }),
@@ -4968,19 +5019,20 @@ function renderSummaryActions() {
   const actions = document.createElement("div");
   actions.className = "summary-actions";
 
-  if (state.view === "songRank" || state.view === "artistRank") {
+  const rankMetricEntries = rankMetricEntriesForView(state.view);
+  if (rankMetricEntries.length > 1) {
     const metricGroup = document.createElement("div");
     metricGroup.className = "summary-segmented";
     metricGroup.setAttribute("role", "group");
     metricGroup.setAttribute("aria-label", "排行口径");
-    for (const [value, label] of Object.entries(RANK_METRICS)) {
+    for (const [value, label] of rankMetricEntries) {
       const button = document.createElement("button");
       const current = state.rankMetric === value;
       button.className = current ? "summary-action is-current" : "summary-action";
       button.type = "button";
       button.dataset.rankMetric = value;
       button.setAttribute("aria-pressed", current ? "true" : "false");
-      button.textContent = value === "occurrences" ? "按收录" : "按视频";
+      button.textContent = rankMetricButtonText(value);
       button.title = label;
       metricGroup.append(button);
     }
@@ -5246,6 +5298,7 @@ function renderPageEllipsisToken(token) {
 }
 
 function renderPageSelectControl(pageInfo, options = {}) {
+  if (!options.compact) return renderPageJumpControl(pageInfo);
   const label = document.createElement("label");
   label.className = options.compact ? "page-select page-select-compact" : "page-select";
   const text = document.createElement("span");
@@ -5262,6 +5315,33 @@ function renderPageSelectControl(pageInfo, options = {}) {
   select.value = String(pageInfo.page);
   label.append(text, select);
   return label;
+}
+
+function renderPageJumpControl(pageInfo) {
+  const form = document.createElement("form");
+  form.className = "page-jump";
+  form.dataset.pageJumpForm = "true";
+
+  const label = document.createElement("label");
+  label.className = "page-jump-label";
+  const text = document.createElement("span");
+  text.textContent = "跳至";
+  const input = document.createElement("input");
+  input.type = "number";
+  input.inputMode = "numeric";
+  input.min = "1";
+  input.max = String(pageInfo.pageCount);
+  input.value = String(pageInfo.page);
+  input.dataset.pageInput = "true";
+  input.setAttribute("aria-label", `输入页码，当前第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
+  label.append(text, input);
+
+  const button = document.createElement("button");
+  button.className = "pagination-button page-jump-button";
+  button.type = "submit";
+  button.textContent = "跳转";
+  form.append(label, button);
+  return form;
 }
 
 function schedulePageChangeFocus() {
@@ -5443,6 +5523,10 @@ function buildVtuberRecords(occurrences) {
         channelId: cleanText(item.channelId),
         channelHandle: cleanText(item.channelHandle),
         channelUrl: cleanText(item.channelUrl || item.authorUrl || item.ownerUrl),
+        avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl),
+        channelAvatarUrl: cleanText(item.channelAvatarUrl),
+        knownSourceType: cleanText(item.knownSourceType || item.sourceType || item.collectionType),
+        isCollected: Boolean(item.isCollected ?? item.collected ?? item.isKnownSource),
         count: 0,
         videos: new Set(),
         songs: new Map(),
@@ -5452,6 +5536,7 @@ function buildVtuberRecords(occurrences) {
     }
     const record = records.get(key);
     mergeVtuberRecordIdentity(record, item);
+    mergeVtuberRecordMetadata(record, item, song);
     const videoKey = cleanText(item.videoId) || `${cleanText(item.channelName)}::${cleanText(item.title)}::${cleanText(item.publishedTimestamp)}`;
     if (videoKey) record.videos.add(videoKey);
     record.count += 1;
@@ -5657,11 +5742,22 @@ function buildCountFrequencies(records, valueFn = (record) => record.count) {
 }
 
 function rankValue(record) {
+  if (state.rankMetric === "songs") return songCountForRecord(record);
   return state.rankMetric === "videos" ? record.videoCount || 0 : record.count;
 }
 
 function rankCountUnit() {
+  if (state.rankMetric === "songs") return "曲目";
   return state.rankMetric === "videos" ? "视频" : "次";
+}
+
+function songCountForRecord(record) {
+  const explicit = Number(record?.songCount ?? record?.uniqueSongCount ?? record?.songsCount);
+  if (Number.isFinite(explicit) && explicit >= 0) return explicit;
+  if (record?.songs instanceof Map) return record.songs.size;
+  if (Array.isArray(record?.songs)) return record.songs.length;
+  const size = Number(record?.songs?.size);
+  return Number.isFinite(size) && size >= 0 ? size : 0;
 }
 
 function compareRankRecords(a, b) {
@@ -5775,7 +5871,7 @@ function renderRankRecord({
   row._artistSongGroups = songGroups.length ? songGroups : null;
   row._getArtistSongGroups = getSongGroups;
   row._artistSongCount = artistSongCount;
-  if (isTied) row.title = "同收录次数共享名次";
+  if (isTied) row.title = `同${rankCountUnit()}共享名次`;
 
   const rankNumber = document.createElement("div");
   rankNumber.className = "rank-number";
@@ -5787,6 +5883,7 @@ function renderRankRecord({
     renderRecordContent(title, meta, {
       mode,
       occurrences: safeOccurrences,
+      record,
       songGroups,
       songCount,
       songPreview,
@@ -5917,7 +6014,16 @@ function renderRankHeader(mode = "song") {
   header.className = "rank-header";
 
   const contentLabel = mode === "artist" ? "歌手与曲目" : mode === "vtuber" ? "VTuber频道与曲目" : "歌曲、歌手与来源";
-  const countLabel = mode === "vtuber" ? "收录" : state.rankMetric === "videos" ? "歌曲收录 / 趋势" : "次数 / 趋势";
+  const countLabel =
+    mode === "vtuber"
+      ? state.rankMetric === "songs"
+        ? "曲目"
+        : state.rankMetric === "videos"
+          ? "视频"
+          : "歌唱次数"
+      : state.rankMetric === "videos"
+        ? "歌曲收录 / 趋势"
+        : "次数 / 趋势";
   for (const label of ["排名", contentLabel, countLabel]) {
     const item = document.createElement("span");
     item.textContent = label;
@@ -5931,6 +6037,7 @@ function renderRecordContent(title, meta, options) {
   const {
     mode = "song",
     occurrences,
+    record = null,
     songGroups = [],
     songCount = songGroups.length,
     songPreview = songGroups.slice(0, 2).map((group) => group.title),
@@ -5949,14 +6056,25 @@ function renderRecordContent(title, meta, options) {
     badge.textContent = badgeText;
     heading.append(" ", badge);
   }
-  content.append(heading);
+  if (mode === "vtuber") {
+    const titleLine = document.createElement("div");
+    titleLine.className = "vtuber-title-line";
+    titleLine.append(renderVtuberAvatar(record), heading);
+    const collectedBadge = renderVtuberCollectionBadge(record);
+    if (collectedBadge) titleLine.append(collectedBadge);
+    content.append(titleLine);
+  } else {
+    content.append(heading);
+  }
 
   const subline = document.createElement("div");
   subline.className = "rank-subline";
   const metaLine = document.createElement("div");
   metaLine.className = "rank-meta-line";
-  if (mode === "artist" || mode === "vtuber") {
+  if (mode === "artist") {
     appendArtistSubline(metaLine, { occurrences, songCount, songPreview, videoCount });
+  } else if (mode === "vtuber") {
+    appendVtuberSubline(metaLine, { occurrences, songPreview, videoCount });
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(metaLine, `${videoCount} 个视频`, "subline-video-count");
@@ -5974,6 +6092,63 @@ function appendArtistSubline(metaContainer, { occurrences, songCount, songPrevie
   if (songCount === 1 && occurrences.length === 1) {
     appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
   }
+}
+
+function mergeVtuberRecordMetadata(record, item, song = {}) {
+  for (const [target, sources] of [
+    ["avatarUrl", [item.avatarUrl, item.channelAvatarUrl, item.authorAvatarUrl, item.profileImageUrl]],
+    ["channelAvatarUrl", [item.channelAvatarUrl, item.avatarUrl]],
+    ["knownSourceType", [item.knownSourceType, item.sourceType, item.collectionType, song.knownSourceType, song.sourceType]],
+  ]) {
+    if (record[target]) continue;
+    const value = sources.map(cleanText).find(Boolean);
+    if (value) record[target] = value;
+  }
+  const badge = window.FrontendUtils.vtuberCollectionBadgeModel({
+    ...item,
+    knownSourceType: record.knownSourceType,
+    isCollected: item.isCollected ?? item.collected ?? item.isKnownSource ?? song.isCollected ?? song.collected,
+  });
+  if (badge.isCollected) {
+    record.isCollected = true;
+    if (!record.knownSourceType && badge.sourceType) record.knownSourceType = badge.sourceType;
+  }
+}
+
+function appendVtuberSubline(metaContainer, { occurrences, songPreview, videoCount }) {
+  appendSublinePart(metaContainer, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
+  appendSublinePart(metaContainer, `${videoCount} 个视频`, "subline-video-count");
+  if (videoCount === 1 && occurrences.length === 1) {
+    appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
+  }
+}
+
+function renderVtuberAvatar(record) {
+  const model = window.FrontendUtils.vtuberAvatarModel(record || {});
+  const img = document.createElement("img");
+  img.className = model.hasRemoteAvatar ? "vtuber-avatar" : "vtuber-avatar vtuber-avatar-fallback";
+  img.src = model.src;
+  img.alt = model.alt;
+  img.width = 40;
+  img.height = 40;
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.onerror = () => {
+    img.onerror = null;
+    img.classList.add("vtuber-avatar-fallback");
+    img.src = model.fallback;
+  };
+  return img;
+}
+
+function renderVtuberCollectionBadge(record) {
+  const model = window.FrontendUtils.vtuberCollectionBadgeModel(record || {});
+  if (!model.isCollected) return null;
+  const badge = document.createElement("span");
+  badge.className = "vtuber-collected-badge";
+  badge.textContent = model.text;
+  if (model.sourceType) badge.title = `收录来源：${model.sourceType}`;
+  return badge;
 }
 
 function appendSublinePart(container, text, className = "") {
@@ -6035,7 +6210,7 @@ function renderSourceToggleButton({
   button.dataset.videoCount = String(videoCount);
   button.dataset.occurrenceCount = String(occurrenceCount || total);
   button.dataset.rankCount = String(rankCount);
-  button.dataset.rankMetric = rankMetric;
+  button.dataset.sourceRankMetric = rankMetric;
   button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
   button.setAttribute("aria-controls", drawerId);
   button.setAttribute("aria-label", model.ariaLabel);
@@ -6076,9 +6251,9 @@ function renderRankSide({
 
   if (mode === "artist" || mode === "vtuber") {
     if (expandable) {
-      side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount }));
+      side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount, rankCount, rankMetric }));
     } else {
-      side.append(renderStaticSideChip(`${songCount}首曲目`));
+      side.append(renderStaticSideChip(mode === "vtuber" && rankMetric === "songs" && rankCount === songCount ? "曲目" : `${songCount}首曲目`));
     }
     return side;
   }
@@ -6266,7 +6441,7 @@ function renderSourceInlineMoreButton({
   button.dataset.videoCount = String(videoCount);
   button.dataset.occurrenceCount = String(occurrenceCount);
   button.dataset.rankCount = String(rankCount);
-  button.dataset.rankMetric = rankMetric;
+  button.dataset.sourceRankMetric = rankMetric;
   button.setAttribute("aria-expanded", isExpanded ? "true" : "false");
   button.setAttribute("aria-controls", drawerId);
   updateSourceInlineMoreButton(button, isExpanded);
@@ -7085,7 +7260,7 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
     const videoCount = Number(button.dataset.videoCount || window.FrontendUtils.groupOccurrencesByVideo(row._sourceOccurrences || []).length);
     const occurrenceCount = Number(button.dataset.occurrenceCount || count);
     const rankCount = Number(button.dataset.rankCount || 0);
-    const rankMetric = button.dataset.rankMetric || "occurrences";
+    const rankMetric = button.dataset.sourceRankMetric || "occurrences";
     const mode = button.dataset.sourceMode || row.dataset.drawerMode || "song";
     const model = window.FrontendUtils.rankToggleModel({
       mode,
@@ -7330,6 +7505,8 @@ function renderVideo(item) {
   title.target = "_blank";
   title.rel = "noreferrer";
   title.textContent = item.title || item.videoId;
+  title.title = `打开视频：${item.title || item.videoId}`;
+  title.setAttribute("aria-label", `打开视频：${item.title || item.videoId}`);
   titleWrap.append(title);
 
   const meta = document.createElement("div");

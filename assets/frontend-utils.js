@@ -301,7 +301,7 @@
     if (page !== defaults.page) params.set("page", String(page));
     if (view !== "videos" && pageSize !== defaults.pageSize) params.set("pageSize", String(pageSize));
     if (view === "songAz" && bucket !== defaults.bucket) params.set("bucket", bucket);
-    if ((view === "songRank" || view === "artistRank") && rankMetric !== defaults.rankMetric) {
+    if ((view === "songRank" || view === "artistRank" || view === "vtuberRank") && rankMetric !== defaults.rankMetric) {
       params.set("metric", rankMetric);
     }
     if (view === "videos" && videoLayout !== defaults.videoLayout) params.set("layout", videoLayout);
@@ -1041,8 +1041,9 @@
     }
     if (mode === "vtuber") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
+      const compactSongMetric = options.rankMetric === "songs" && Number(options.rankCount) === songCount;
       return {
-        text: isExpanded ? "收起" : `${songCount}首曲目`,
+        text: isExpanded ? "收起" : compactSongMetric ? "曲目" : `${songCount}首曲目`,
         ariaLabel: isExpanded ? "收起该频道曲目" : `查看该频道的 ${songCount} 首歌曲`,
       };
     }
@@ -1067,6 +1068,97 @@
       text: model.text,
       ariaLabel,
     };
+  }
+
+  function vtuberAvatarModel(record = {}) {
+    const src = cleanText(firstNonEmpty(
+      record.avatarUrl,
+      record.channelAvatarUrl,
+      record.authorAvatarUrl,
+      record.profileImageUrl,
+      record.thumbnailUrl && record.thumbnailType === "avatar" ? record.thumbnailUrl : "",
+    ));
+    const name = cleanText(record.name || record.channelName || record.channelHandle || record.channelId || "VTuber");
+    const key = cleanText(record.channelId || record.channelHandle || record.key || name);
+    const fallback = fallbackAvatarDataUrl(name, key);
+    return {
+      src: src || fallback,
+      fallback,
+      alt: `${name} 头像`,
+      hasRemoteAvatar: Boolean(src),
+    };
+  }
+
+  function vtuberCollectionBadgeModel(record = {}) {
+    const type = cleanText(firstNonEmpty(
+      record.knownSourceType,
+      record.sourceType,
+      record.collectionType,
+      record.knownSource?.type,
+      record.source?.knownSourceType,
+    )).toLocaleLowerCase();
+    const explicit = record.isCollected ?? record.collected ?? record.isKnownSource ?? record.knownSource?.isCollected;
+    const falseTypes = new Set(["0", "false", "no", "none", "unknown", "uncollected", "not_collected", "not-collected"]);
+    const trueTypes = new Set(["1", "true", "yes", "known", "collected", "library", "song-search", "song_search", "manual", "verified"]);
+    const isCollected =
+      explicit === true ||
+      explicit === 1 ||
+      explicit === "1" ||
+      String(explicit).toLocaleLowerCase() === "true" ||
+      trueTypes.has(type) ||
+      (Boolean(type) && !falseTypes.has(type));
+    return {
+      text: isCollected ? "已收录" : "",
+      isCollected,
+      sourceType: type,
+    };
+  }
+
+  function firstNonEmpty(...values) {
+    for (const value of values) {
+      const text = cleanText(value);
+      if (text) return text;
+    }
+    return "";
+  }
+
+  function fallbackAvatarDataUrl(name, key) {
+    const label = avatarInitials(name);
+    const hue = stableHue(key || name);
+    const svg = [
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">`,
+      `<rect width="96" height="96" rx="24" fill="hsl(${hue} 56% 42%)"/>`,
+      `<circle cx="70" cy="24" r="24" fill="hsl(${(hue + 34) % 360} 58% 56%)" opacity=".42"/>`,
+      `<text x="48" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#fff">${escapeSvgText(label)}</text>`,
+      `</svg>`,
+    ].join("");
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  }
+
+  function avatarInitials(name) {
+    const parts = cleanText(name).split(/\s+/u).filter(Boolean);
+    if (!parts.length) return "VT";
+    if (parts.length >= 2 && /^[A-Za-z0-9]/u.test(parts[0]) && /^[A-Za-z0-9]/u.test(parts[1])) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    const chars = Array.from(parts.join(""));
+    return chars.slice(0, 2).join("").toUpperCase();
+  }
+
+  function stableHue(value) {
+    let hash = 0;
+    for (const char of cleanText(value || "VTuber")) hash = (hash * 31 + char.codePointAt(0)) % 360;
+    return hash;
+  }
+
+  function escapeSvgText(value) {
+    return cleanText(value).replace(/[&<>"']/gu, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    })[char]);
   }
 
   function compactSourceToggleModel(options = {}) {
@@ -1450,6 +1542,8 @@
     makeQueryDraftFromState,
     compactSourceToggleModel,
     rankToggleModel,
+    vtuberAvatarModel,
+    vtuberCollectionBadgeModel,
     runtimeRangeMeta,
     runtimeRangePayloadFromGroup,
     runtimeRangePath,
