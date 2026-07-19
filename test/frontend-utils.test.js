@@ -198,14 +198,14 @@ test("artist rank toggle uses unique song count", () => {
   assert.equal(expanded.ariaLabel, "收起该歌手曲目");
 });
 
-test("VTuber rank toggle uses unique song count", () => {
+test("VTuber channel rank toggle uses unique song count", () => {
   const collapsed = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7 });
   assert.equal(collapsed.text, "7首曲目");
-  assert.equal(collapsed.ariaLabel, "查看该VTuber的 7 首歌曲");
+  assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌曲");
 
   const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7 });
   assert.equal(expanded.text, "收起");
-  assert.equal(expanded.ariaLabel, "收起该VTuber曲目");
+  assert.equal(expanded.ariaLabel, "收起该频道曲目");
 });
 
 test("song rank toggle uses video and timestamp counts", () => {

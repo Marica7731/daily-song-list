@@ -192,10 +192,9 @@ test("delayed trend diffs update visible badges without rerendering the list for
 
 test("API request summaries show entity totals and song collection counts", () => {
   const summaryBody = functionBody("function renderRequestSummary");
-  assert.match(summaryBody, /metrics\.push\(metric\(occurrenceCount, "歌曲收录"\)\)/u);
+  assert.match(summaryBody, /metrics\.push\(metric\(occurrenceCount, "条歌曲收录"\)\)/u);
   assert.match(summaryBody, /metrics\.push\(metric\(occurrenceCount, "个时间戳"\)\)/u);
   assert.doesNotMatch(summaryBody, /metrics\.push\(metric\(videoCount,/u);
-  assert.doesNotMatch(summaryBody, /条歌曲收录/u);
   assert.doesNotMatch(summaryBody, /metrics\.push\(metric\(videoCount, "个视频"\)\)/u);
 });
 

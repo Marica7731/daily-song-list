@@ -50,29 +50,29 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
   });
 
   try {
-    await waitForReady(child);
+    await waitForReady(child, port);
     const health = await fetchJson(`http://127.0.0.1:${port}/healthz`);
     assert.equal(health.status, "ok");
-    assert.equal(health.counts.videos, 2);
+    assert.equal(health.counts.videos, 4);
 
     const meta = await fetchJson(`http://127.0.0.1:${port}/api/meta`);
     assert.equal(meta.meta.source_latest_sha256, sha256File(latestPath));
     assert.equal(meta.meta.latest_generated_at, "2026-07-19T00:00:00.000Z");
 
     const rankings = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&pageSize=5`);
-    assert.equal(rankings.totalCount, 2);
-    assert.equal(rankings.totalOccurrenceCount, 3);
+    assert.equal(rankings.totalCount, 4);
+    assert.equal(rankings.totalOccurrenceCount, 5);
     assert.equal(rankings.records[0].title, "Song One");
     assert.equal(rankings.records[0].count, 2);
 
     const videoMetricRankings = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&metric=videos&pageSize=5`);
     assert.equal(videoMetricRankings.metric, "videos");
-    assert.equal(videoMetricRankings.totalCount, 2);
+    assert.equal(videoMetricRankings.totalCount, 4);
     assert.equal(videoMetricRankings.records[0].title, "Song One");
 
     const channelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&pageSize=5`);
-    assert.equal(channelSongSearch.totalCount, 2);
-    assert.equal(channelSongSearch.totalOccurrenceCount, 2);
+    assert.equal(channelSongSearch.totalCount, 3);
+    assert.equal(channelSongSearch.totalOccurrenceCount, 3);
     assert.equal(channelSongSearch.records[0].title, "Song One");
     assert.equal(channelSongSearch.records[0].count, 1);
     assert.equal(channelSongSearch.records[0].globalCount, 2);
@@ -85,14 +85,24 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(filteredSource.record.occurrences[0].item.channelName, "Alpha Ch.");
 
     const vtubers = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&pageSize=5`);
-    assert.equal(vtubers.totalCount, 2);
+    assert.equal(vtubers.totalCount, 3);
     assert.equal(vtubers.records[0].name, "Alpha Ch.");
-    assert.equal(vtubers.records[0].count, 2);
-    assert.equal(vtubers.records[0].videoCount, 1);
+    assert.equal(vtubers.records[0].channelId, "UC-alpha");
+    assert.equal(vtubers.records[0].count, 3);
+    assert.equal(vtubers.records[0].videoCount, 2);
 
     const vtuberSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=Alpha&pageSize=5`);
     assert.equal(vtuberSearch.totalCount, 1);
     assert.equal(vtuberSearch.records[0].name, "Alpha Ch.");
+    assert.equal(vtuberSearch.records[0].count, 3);
+
+    const vtuberVideoMetric = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&metric=videos&q=Alpha&pageSize=5`);
+    assert.equal(vtuberVideoMetric.metric, "videos");
+    assert.equal(vtuberVideoMetric.records[0].videoCount, 2);
+
+    const vtuberAliasSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=HanamaeHaru&pageSize=5`);
+    assert.equal(vtuberAliasSearch.totalCount, 1);
+    assert.equal(vtuberAliasSearch.records[0].name, "Haru Ch. 花前ハル");
 
     const sourceKey = rankings.records[0].sourceDetailKey;
     const source = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}`);
@@ -149,6 +159,24 @@ function writeLatestFixture(latestPath) {
               publishedText: "2026-07-19",
               songs: [{ title: "Song One", artist: "Singer A", seconds: 30, time: "0:30" }],
             },
+            {
+              videoId: "video-c",
+              title: "Late Karaoke",
+              channelName: "Alpha Ch.",
+              channelId: "UC-alpha",
+              channelHandle: "/@alpha_ch",
+              publishedTimestamp: 1784426400000,
+              publishedText: "2026-07-19",
+              songs: [{ title: "Song Three", artist: "Singer C", seconds: 40, time: "0:40" }],
+            },
+            {
+              videoId: "video-d",
+              title: "Midnight Karaoke",
+              channelName: "Haru Ch. 花前ハル",
+              publishedTimestamp: 1784430000000,
+              publishedText: "2026-07-19",
+              songs: [{ title: "Song Four", artist: "Singer D", seconds: 50, time: "0:50" }],
+            },
           ],
         },
       },
@@ -173,7 +201,7 @@ async function getFreePort() {
   });
 }
 
-async function waitForReady(child) {
+async function waitForReady(child, port) {
   let stdout = "";
   await new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
@@ -191,6 +219,17 @@ async function waitForReady(child) {
       reject(new Error(`API exited before ready with code ${code}. stdout=${stdout}`));
     });
   });
+  const deadline = Date.now() + 3000;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(`http://127.0.0.1:${port}/healthz`);
+      if (response.status === 200) return;
+    } catch {
+      // The readiness line is emitted just before serve_forever starts accepting.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  throw new Error(`API did not accept health checks after ready. stdout=${stdout}`);
 }
 
 async function waitForExit(child) {
