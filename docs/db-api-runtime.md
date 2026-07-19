@@ -307,7 +307,7 @@ GitHub Actions remains the upstream data refresh path:
 - `.github/workflows/update-watchdog.yml` watches the published freshness and can trigger the core updater.
 - `.github/workflows/update-backfill.yml` prepares backfill inbox bundles; VSinger full HTTP backfill stays behind owner-permission scripts and is not part of routine hourly refresh.
 - `.github/workflows/deploy-runtime-db.yml` runs on direct `main` pushes and after `Update core song-list data` completes successfully. It resolves the latest `origin/main` revision before building SQLite, then rsyncs the verified candidate database to VPS2 using the current active DB as the delta-transfer basis.
-- After production cuts over to VPS2, set repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1` so `.github/workflows/update-core.yml` verifies the public homepage and SQLite API instead of requiring the old GitHub Pages static JSON paths.
+- After production cuts over to VPS2, set repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1` so `.github/workflows/update-core.yml` verifies the production SQLite/API contract with `npm run check:published:api` instead of requiring the old GitHub Pages static JSON paths.
 
 VPS2 is the runtime deploy target:
 

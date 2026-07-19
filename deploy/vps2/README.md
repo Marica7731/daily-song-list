@@ -102,7 +102,7 @@ cd /opt/culua/ytb-song-rank
 npm run check:published:api -- http://127.0.0.1/
 ```
 
-After production DNS points at VPS2, set the GitHub repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1`. The hourly `update-core.yml` workflow will still update the source data, then verify the public homepage and SQLite API. During migration, leave the variable unset or `0` so the static GitHub Pages site can continue passing before the API cutover.
+After production DNS points at VPS2, set the GitHub repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1`. The hourly `update-core.yml` workflow will still update the source data, then verify the production SQLite/API contract with `npm run check:published:api`. During migration, leave the variable unset or `0` so the static GitHub Pages site can continue passing before the API cutover.
 
 `Deploy SQLite runtime DB` runs on direct `main` pushes that touch runtime code, source data, VSinger shards, or `data/external/youtube-channel-discovery/accepted/*.json`, and after `Update core song-list data` completes successfully. Each run resolves the latest `origin/main` revision before building, so an hourly data refresh that lands during a deploy will be picked up by the next deploy instead of leaving VPS2 pinned to an older commit.
 

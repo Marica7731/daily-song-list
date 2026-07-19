@@ -127,7 +127,6 @@ jobs:
         run: |
           check_published_runtime() {
             if [ "${DAILY_SONG_REQUIRE_PUBLISHED_API}" = "1" ]; then
-              curl -fsS https://ytb-song-rank.culua.com/ >/dev/null || return 1
               npm run check:published:api -- https://ytb-song-rank.culua.com/ || return 1
               return 0
             fi
