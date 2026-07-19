@@ -2168,6 +2168,7 @@ function searchItemsFromNode(node) {
   if (node.videoRenderer) return [searchItemFromRenderer(node.videoRenderer, "videoRenderer")].filter(Boolean);
   if (node.reelItemRenderer) return [searchItemFromRenderer(node.reelItemRenderer, "reelItemRenderer")].filter(Boolean);
   if (node.shortsLockupViewModel) return [searchItemFromRenderer(node.shortsLockupViewModel, "shortsLockupViewModel")].filter(Boolean);
+  if (node.lockupViewModel) return [searchItemFromLockupViewModel(node.lockupViewModel)].filter(Boolean);
   if (node.richItemRenderer) return richItemRendererSearchItems(node.richItemRenderer);
   const generic = searchItemFromGenericEndpointNode(node);
   return generic ? [generic] : [];
@@ -2200,6 +2201,39 @@ function searchItemFromRenderer(renderer, sourceRendererType) {
     thumbnailUrl: bestThumbnail(renderer.thumbnail || renderer.thumbnailViewModel?.image || renderer.thumbnailViewModel),
     viewText: textFrom(renderer.viewCountText || renderer.shortViewCountText || renderer.viewCountText?.content),
     sourceRendererType,
+  };
+}
+
+function searchItemFromLockupViewModel(renderer) {
+  const videoId = firstValidVideoId(
+    renderer.contentId,
+    renderer.rendererContext?.commandContext?.onTap?.innertubeCommand?.watchEndpoint?.videoId,
+    videoIdFromRenderer(renderer),
+  );
+  if (!isValidVideoId(videoId)) return null;
+  const metadata = renderer.metadata?.lockupMetadataViewModel || {};
+  const metadataTexts = [];
+  collectTextSnippets(metadata.metadata?.contentMetadataViewModel?.metadataRows, metadataTexts);
+  const overlayTexts = [];
+  collectTextSnippets(renderer.contentImage?.thumbnailViewModel?.overlays, overlayTexts);
+  return {
+    videoId,
+    title: textFrom(metadata.title || renderer.title || renderer.accessibilityText),
+    channelName: textFrom(metadata.subtitle || metadata.byline || renderer.ownerText || renderer.channelName),
+    channelId: channelIdFromRenderer(renderer),
+    channelHandle: channelHandleFromRenderer(renderer),
+    publishedText: firstPublishedText(metadataTexts),
+    publishedTimestamp: finiteTimestamp(renderer.publishedTimestamp),
+    durationText: firstDurationText(overlayTexts),
+    statusText: normalizeWhitespace([...new Set([...overlayTexts, ...metadataTexts])].join(" / ")),
+    thumbnailUrl: bestThumbnail(
+      renderer.contentImage?.thumbnailViewModel?.image ||
+        renderer.contentImage?.thumbnailViewModel ||
+        renderer.thumbnailViewModel?.image ||
+        renderer.thumbnailViewModel,
+    ),
+    viewText: firstViewText(metadataTexts),
+    sourceRendererType: "lockupViewModel",
   };
 }
 
@@ -2305,8 +2339,27 @@ function collectTextSnippets(value, target) {
   }
   if (typeof value !== "object") return;
   if (typeof value.simpleText === "string") target.push(value.simpleText);
+  if (typeof value.content === "string") target.push(value.content);
   if (Array.isArray(value.runs)) target.push(value.runs.map((run) => run?.text || "").join(""));
   for (const child of Object.values(value)) collectTextSnippets(child, target);
+}
+
+function firstPublishedText(values) {
+  return normalizeWhitespace(
+    (values || []).find((value) =>
+      /(?:\d+\s*(?:秒|分|時間|日|週間|週|か月|ヶ月|月|年|second|seconds|minute|minutes|min|hour|hours|day|days|week|weeks|month|months|year|years)\s*前|公開予定|配信予定|に公開予定|premiere|scheduled)/iu.test(
+        value,
+      ),
+    ) || "",
+  );
+}
+
+function firstDurationText(values) {
+  return normalizeWhitespace((values || []).find((value) => /\b(?:\d{1,2}:)?\d{1,2}:\d{2}\b/u.test(value)) || "");
+}
+
+function firstViewText(values) {
+  return normalizeWhitespace((values || []).find((value) => /(?:視聴|views?|回(?:再生|視聴))/iu.test(value)) || "");
 }
 
 function isActiveLiveOrUpcomingCandidate(item) {
@@ -2908,7 +2961,7 @@ function textFrom(value) {
 }
 
 function bestThumbnail(thumbnail) {
-  const list = thumbnail?.thumbnails;
+  const list = thumbnail?.thumbnails || thumbnail?.sources;
   if (!Array.isArray(list) || !list.length) return "";
   return [...list].sort((a, b) => (b.width || 0) - (a.width || 0))[0].url || "";
 }

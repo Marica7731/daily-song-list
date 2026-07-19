@@ -130,6 +130,12 @@ def parse_args() -> argparse.Namespace:
         default=Path("data/external/vsinger-http/backfill"),
         help="VSinger Moment backfill directory with manifest.json",
     )
+    parser.add_argument(
+        "--youtube-channel-discovery-dir",
+        type=Path,
+        default=Path("data/external/youtube-channel-discovery"),
+        help="YouTube channel discovery accepted increment directory",
+    )
     parser.add_argument("--output", type=Path, default=Path("artifacts/runtime/song-rank.sqlite"))
     parser.add_argument(
         "--limit-per-range",
@@ -144,6 +150,16 @@ def parse_args() -> argparse.Namespace:
         help="test helper: ingest only the first N shards of each VSinger kind",
     )
     parser.add_argument("--no-vsinger", action="store_true", help="skip VSinger external backfill tables")
+    parser.add_argument(
+        "--no-youtube-channel-discovery",
+        action="store_true",
+        help="skip YouTube channel discovery accepted increments in JS ranking export",
+    )
+    parser.add_argument(
+        "--require-youtube-channel-discovery",
+        action="store_true",
+        help="fail if YouTube channel discovery accepted increments are missing",
+    )
     parser.add_argument(
         "--ranking-source",
         choices=("js", "python"),
@@ -440,6 +456,12 @@ def ingest_js_runtime_export(
             command.append("--require-vsinger")
         if args.allow_partial_vsinger:
             command.append("--allow-partial-vsinger")
+    if args.no_youtube_channel_discovery:
+        command.append("--no-youtube-channel-discovery")
+    elif args.youtube_channel_discovery_dir:
+        command.extend(["--youtube-channel-discovery-dir", str(args.youtube_channel_discovery_dir)])
+        if args.require_youtube_channel_discovery:
+            command.append("--require-youtube-channel-discovery")
 
     completed = subprocess.run(
         command,

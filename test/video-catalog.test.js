@@ -108,7 +108,7 @@ test("video catalog preserves previous songs when a refreshed video loses a stri
     entry.songs.map((item) => item.title),
     ["星間飛行", "KICK BACK"],
   );
-  assert.equal(entry.qualityStatus, "suspicious_regression");
+  assert.equal(entry.qualityStatus, "usable");
   assert.equal(entry.regressionAudit.reason, "incoming_strict_song_subset");
   assert.equal(entry.regressionAudit.previousSongCount, 2);
   assert.equal(entry.regressionAudit.incomingSongCount, 1);
@@ -139,7 +139,7 @@ test("video catalog preserves previous songs when a refreshed video has no usabl
     entry.songs.map((item) => item.title),
     ["星間飛行"],
   );
-  assert.equal(entry.qualityStatus, "suspicious_regression");
+  assert.equal(entry.qualityStatus, "usable");
   assert.equal(entry.regressionAudit.reason, "incoming_empty_song_set");
   assert.equal(entry.regressionAudit.previousSongCount, 1);
   assert.equal(entry.regressionAudit.incomingSongCount, 0);

@@ -24,6 +24,7 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
       "--output",
       dbPath,
       "--no-vsinger",
+      "--no-youtube-channel-discovery",
     ],
     { cwd: ROOT, encoding: "utf8" },
   );

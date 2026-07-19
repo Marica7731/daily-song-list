@@ -1727,7 +1727,7 @@ async function assertFilteredSummaryCopy(page) {
       height: summary?.getBoundingClientRect().height || 0,
     };
   });
-  if (/首结果|[0-9,]+视频/u.test(shape.text) || !/[0-9,]+首歌曲/u.test(shape.text) || !/[0-9,]+个视频/u.test(shape.text)) {
+  if (/首结果|[0-9,]+视频/u.test(shape.text) || !/[0-9,]+首歌曲/u.test(shape.text) || !/[0-9,]+ 条歌曲收录/u.test(shape.text)) {
     throw new Error(`filtered summary copy invalid: ${JSON.stringify(shape)}`);
   }
   if (shape.height > shape.lineHeight * 2.8) throw new Error(`filtered summary too tall: ${JSON.stringify(shape)}`);

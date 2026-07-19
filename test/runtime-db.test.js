@@ -109,6 +109,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
       "--output",
       dbPath,
       "--allow-partial-vsinger",
+      "--no-youtube-channel-discovery",
     ],
     { cwd: ROOT, encoding: "utf8" },
   );
@@ -192,6 +193,88 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   assert.match(vsingerQueryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(vsingerQueryOutput, /VS Song/);
   assert.match(vsingerQueryOutput, /"totalCount": 1/);
+});
+
+test("runtime DB builder merges accepted YouTube channel discovery increments into rankings", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-channel-db-"));
+  const latestPath = path.join(dir, "latest.json");
+  const channelDir = path.join(dir, "youtube-channel-discovery");
+  const acceptedDir = path.join(channelDir, "accepted");
+  const dbPath = path.join(dir, "song-rank.sqlite");
+  fs.mkdirSync(acceptedDir, { recursive: true });
+
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      capturedAt: "2026-07-19T00:00:00.000Z",
+      groups: { "7d": { items: [] }, all: { items: [] } },
+    }),
+    "utf8",
+  );
+  fs.writeFileSync(
+    path.join(acceptedDir, "fixture.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      sourceSystem: "youtube_channel_discovery",
+      generatedAt: "2026-07-19T01:00:00.000Z",
+      videos: [
+        {
+          videoId: "chanvideo01",
+          title: "Channel Overlay Karaoke",
+          url: "https://www.youtube.com/watch?v=chanvideo01",
+          channelName: "Overlay Ch.",
+          channelHandle: "@overlay",
+          publishedTimestamp: 1784332800000,
+          publishedText: "2026-07-18",
+          songs: [
+            { title: "Overlay Song", artist: "Overlay Artist", time: "1:23", seconds: 83 },
+            { title: "Overlay Song", artist: "Overlay Artist", time: "5:00", seconds: 300 },
+          ],
+        },
+      ],
+    }),
+    "utf8",
+  );
+
+  const buildOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+      "--input",
+      latestPath,
+      "--output",
+      dbPath,
+      "--no-vsinger",
+      "--youtube-channel-discovery-dir",
+      channelDir,
+      "--require-youtube-channel-discovery",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+
+  const queryOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "Overlay Song",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(queryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(queryOutput, /Overlay Song/);
+  assert.match(queryOutput, /"totalCount": 1/);
+  assert.match(queryOutput, /"totalOccurrenceCount": 2/);
 });
 
 function sha256Json(value) {

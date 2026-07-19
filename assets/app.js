@@ -4012,14 +4012,14 @@ function renderRequestSummary(result) {
   if (result.view === "artistRank") {
     metrics.push(metric(result.totalCount, "位歌手"));
     if (showOccurrenceMetric) metrics.push(metric(occurrenceCount, "次收录"));
-    metrics.push(metric(videoCount, "个视频"));
+    metrics.push(metric(videoCount, "条歌曲收录"));
   } else if (result.view === "videos") {
     metrics.push(metric(result.totalCount, "个视频"));
     metrics.push(metric(occurrenceCount, "个时间戳"));
   } else {
     metrics.push(metric(result.totalCount, "首歌曲"));
     if (showOccurrenceMetric) metrics.push(metric(occurrenceCount, "次收录"));
-    metrics.push(metric(videoCount, "个视频"));
+    metrics.push(metric(videoCount, "条歌曲收录"));
   }
   renderSummary(currentGroup(), metrics, requestSummaryNote(result));
 }

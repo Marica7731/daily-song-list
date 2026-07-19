@@ -18,6 +18,7 @@ class VsingerHttpError extends Error {
 class VsingerHttpClient {
   constructor(options = {}) {
     this.baseUrl = options.baseUrl || "https://vsinger-moment.jp";
+    this.serviceName = options.serviceName || "VSinger Moment";
     this.cacheDir = options.cacheDir || path.resolve(process.cwd(), ".local-cache", "vsinger-http");
     this.userAgent = options.userAgent || process.env.VSINGER_HTTP_USER_AGENT || DEFAULT_USER_AGENT;
     this.requestIntervalMs = Math.max(0, Number(options.requestIntervalMs ?? process.env.VSINGER_HTTP_REQUEST_INTERVAL_MS ?? 1000));
@@ -87,26 +88,26 @@ class VsingerHttpClient {
       if (response.status === 429) {
         const retryAfter = parseRetryAfter(response.headers.get("retry-after"));
         if (attempt > this.maxRetries) {
-          throw new VsingerHttpError("VSinger Moment returned HTTP 429 after retries.", { status: 429, url, retryAfterMs: retryAfter });
+          throw new VsingerHttpError(`${this.serviceName} returned HTTP 429 after retries.`, { status: 429, url, retryAfterMs: retryAfter });
         }
         await delay(retryAfter || backoffMs(attempt));
         continue;
       }
 
       if (response.status === 403) {
-        throw new VsingerHttpError("VSinger Moment returned HTTP 403; crawler must pause.", { status: 403, url, pauseRequired: true });
+        throw new VsingerHttpError(`${this.serviceName} returned HTTP 403; crawler must pause.`, { status: 403, url, pauseRequired: true });
       }
 
       if (response.status >= 500) {
         if (attempt > this.maxRetries) {
-          throw new VsingerHttpError(`VSinger Moment returned HTTP ${response.status} after retries.`, { status: response.status, url });
+          throw new VsingerHttpError(`${this.serviceName} returned HTTP ${response.status} after retries.`, { status: response.status, url });
         }
         await delay(backoffMs(attempt));
         continue;
       }
 
       if (!response.ok) {
-        throw new VsingerHttpError(`VSinger Moment returned HTTP ${response.status}.`, { status: response.status, url });
+        throw new VsingerHttpError(`${this.serviceName} returned HTTP ${response.status}.`, { status: response.status, url });
       }
 
       const body = await response.text();

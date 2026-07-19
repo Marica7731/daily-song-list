@@ -17,6 +17,7 @@ Input:
 
 - `data/latest.json` for the currently published song-list runtime payload.
 - `data/external/vsinger-http/backfill/manifest.json` plus its listed shards, when present.
+- `data/external/youtube-channel-discovery/accepted/*.json` for reviewed single-channel補漏 increments, when present.
 
 Output:
 
@@ -35,6 +36,15 @@ npm run db:probe -- --range all --view songs --page-size 10 --summary-only
 npm run api:serve
 npm run check:published:api -- https://ytb-song-rank.culua.com/
 ```
+
+After reviewed single-channel discovery imports, export a small accepted increment and rebuild the DB:
+
+```bash
+npm run youtube:export-channel-increment -- --input-dir artifacts/channel-discovery/<channel> --output data/external/youtube-channel-discovery/accepted/<date>-<channel>.json
+npm run db:build
+```
+
+Do not regenerate and commit `data/ui`, `data/catalog-segments`, or range JSON shards just to publish a manual補漏 row. The JS runtime exporter overlays accepted increments in memory while building SQLite, so Git only needs the small reviewed JSON and source changes. The normal hourly update path still uses `npm run update:core`.
 
 HTTP endpoints:
 
@@ -147,7 +157,7 @@ Response fields:
 - `totalCount`: number of rows after search and filters.
 - `filteredBaseCount`: number of rows before search/min-count filters for the same range/view/metric.
 - `totalOccurrenceCount`: sum of `count` across the filtered rows.
-- `totalVideoCount`: sum of `videoCount` across the filtered rows.
+- `totalVideoCount`: sum of `videoCount` across the filtered rows. For song/artist summaries the frontend labels this as `条歌曲收录`, because the same source video can appear under many song rows and this is not a unique video count.
 - `pageCount`: total pages for the current filtered query.
 - `records`: display-ready rows; song and artist rows include `sourceDetailKey` when full source details are available.
 
@@ -194,6 +204,7 @@ Example response shape:
 For filtered searches, the summary counters must be filtered counters. Do not fall back to full-site `counts.occurrences`; otherwise a search such as `少女レイ` displays the all-site occurrence total instead of the matched rows.
 
 `npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
+It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` so a deploy cannot pass while the accepted increment is missing from the runtime DB.
 
 `GET /api/sources/{sourceDetailKey}`
 
@@ -215,7 +226,8 @@ Supported ranking views in this first step:
 
 - Raw source tables are append-friendly and auditable: `external_songs`, `external_videos`, and `external_occurrences` keep the VSinger Moment source IDs and occurrence rows.
 - Runtime entity tables are query support data: `videos`, `songs`, and `occurrences` are built from `data/latest.json` after VSinger import is applied.
-- Derived query tables are display-ready: `ranking_rows`, `source_details`, and `source_occurrences` reuse `scripts/vsinger-http/runtime-importer.js` plus `assets/ranking-utils.js`, so title variants, song versions, artist aliases, and unknown-artist handling stay consistent with the frontend.
+- Reviewed YouTube channel補漏 increments are small source-like overlays in `data/external/youtube-channel-discovery/accepted/*.json`; they are merged into the runtime entity build, but are not raw VSinger rows and do not rewrite the committed static JSON runtime.
+- Derived query tables are display-ready: `ranking_rows`, `source_details`, and `source_occurrences` reuse `scripts/vsinger-http/runtime-importer.js`, `scripts/youtube-channel-discovery-runtime.js`, and `assets/ranking-utils.js`, so title variants, song versions, artist aliases, and unknown-artist handling stay consistent with the frontend.
 - `source_details` stores the entity summary and preview; `source_occurrences` stores the full derived source list by `source_key` so large songs do not become multi-megabyte JSON blobs.
 
 The raw tables are intentionally not overwritten by cleanup decisions. Dirty data handling belongs in derived layers, so future canonical entity work can reprocess the same source rows without fetching the data again.
@@ -250,6 +262,7 @@ Current qualitative acceptance points:
 - `少女レイ` should return a merged `songs` row whose `title` is `少女レイ`, `displayArtist` includes `みきとP`, `totalOccurrenceCount` is much smaller than full-site `counts.source_occurrences`, and `/api/sources/{sourceDetailKey}` returns the same count as the ranking row.
 - `ネモ・テルミナス` should be findable in `view=videos`, proving the newly missing-by-name singer has been imported.
 - `儚牙紺 - Kurage Kon -` should be findable in `view=videos`, proving the second newly missing-by-name singer has been imported.
+- `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` should be findable in `view=videos`, proving reviewed YouTube channel補漏 increments were included in the DB build.
 
 The exact counts change with each hourly refresh. Record the numbers from the command output in release notes or incident notes instead of hard-coding them in docs.
 
@@ -267,7 +280,7 @@ When changing any API field, ranking metric, derived merge rule, or source-detai
 
 Before merging an API or deploy change, run this minimum contract matrix:
 
-- DB build/probe: `npm run db:build` and `npm run db:probe -- --range all --view songs --q 少女レイ --page-size 5 --summary-only`.
+- DB build/probe: `npm run db:build` and `npm run db:probe -- --range all --view songs --q 少女レイ --page-size 5 --summary-only`; for channel補漏, also probe `--view videos --q ノア・ポラリス`.
 - API smoke test: `npm run api:serve`, then `npm run check:published:api -- http://127.0.0.1/`.
 - Frontend fallback check: load the static page without the API or run the normal static `npm run check:published -- <base-url>` path.
 - Deployment check: after GitHub Actions uploads the DB, run `npm run check:published:api -- http://127.0.0.1/` on VPS2 and again against the public domain after DNS cutover.

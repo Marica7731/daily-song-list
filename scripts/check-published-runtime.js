@@ -164,6 +164,10 @@ async function checkApiRuntime(checkedAt) {
   }
   const nemoVideos = await checkVideoSearchProbe("ネモ・テルミナス", "api/rankings?range=all&view=videos&q=%E3%83%8D%E3%83%A2%E3%83%BB%E3%83%86%E3%83%AB%E3%83%9F%E3%83%8A%E3%82%B9&pageSize=1");
   const kurageVideos = await checkVideoSearchProbe("儚牙紺 - Kurage Kon -", "api/rankings?range=all&view=videos&q=%E5%84%9A%E7%89%99%E7%B4%BA%20-%20Kurage%20Kon%20-&pageSize=1");
+  const channelDiscoveryProbes = [];
+  for (const label of ["ノア・ポラリス", "香鳴ハノン", "なれたん", "チョま"]) {
+    channelDiscoveryProbes.push(await checkVideoSearchProbe(label, `api/rankings?range=all&view=videos&q=${encodeURIComponent(label)}&pageSize=1`));
+  }
   await checkApiErrorContract();
 
   if (errors.length) {
@@ -185,6 +189,7 @@ async function checkApiRuntime(checkedAt) {
       `probeOccurrences=${rankings.totalOccurrenceCount}`,
       `nemoVideos=${nemoVideos.totalCount}`,
       `kurageVideos=${kurageVideos.totalCount}`,
+      `channelDiscoveryVideos=${channelDiscoveryProbes.map((probe) => probe.totalCount).join(",")}`,
       `expectedCommit=${expectedApiCommitSha ? "matched" : "not-set"}`,
       `expectedLatest=${expectedApiLatestSha256 ? "matched" : "not-set"}`,
     ].join(" "),

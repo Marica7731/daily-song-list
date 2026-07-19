@@ -30,6 +30,12 @@ if (require.main === module) {
 }
 
 function main() {
+  const args = parseArgs(process.argv.slice(2));
+  if (args["from-catalog"]) {
+    rebuildDerivedFromCatalog();
+    return;
+  }
+
   const latest = readJson(LATEST_PATH);
   if (!latest?.groups) throw new Error("data/latest.json missing groups");
 
@@ -37,24 +43,7 @@ function main() {
   const curationContext = { ...loadCurationContext(), songAliasContext };
   const songSearchIndex = mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
   const songSearchLookup = createSongSearchLookup(songSearchIndex || {});
-  const stats = {
-    inputSongs: 0,
-    parsedFromRaw: 0,
-    fixedTitleCount: 0,
-    fixedArtistCount: 0,
-    fixedSecondsCount: 0,
-    repairedEntryCount: 0,
-    parseRejectedCount: 0,
-    missingRawCount: 0,
-    manualDroppedEntryCount: 0,
-    manualReplacedEntryCount: 0,
-    ruleDroppedEntryCount: 0,
-    conversationDroppedEntryCount: 0,
-    qualityDroppedEntryCount: 0,
-    droppedVideoCount: 0,
-    forceRefreshVideoIds: [],
-    blockedSourceDroppedVideoCount: 0,
-  };
+  const stats = createRebuildStats();
   const blockedSourceAudit = createBlockedSourceAudit();
 
   const rebuiltGroups = {};
@@ -164,6 +153,159 @@ function main() {
       `forceRefresh=${payload.source.curationSummary.forceRefreshVideoCount}`,
     ].join(" "),
   );
+}
+
+function rebuildDerivedFromCatalog() {
+  const latest = readJson(LATEST_PATH);
+  if (!latest?.groups) throw new Error("data/latest.json missing groups");
+
+  const capturedAt = new Date();
+  const capturedAtIso = capturedAt.toISOString();
+  const songAliasContext = loadSongAliasContext();
+  const curationContext = { ...loadCurationContext(), songAliasContext };
+  const songSearchIndex = mergeSupplementalKnownSongs(readJsonIfExists(SONG_SEARCH_INDEX_PATH) || {});
+  const songSearchLookup = createSongSearchLookup(songSearchIndex || {});
+  const stats = createRebuildStats();
+  const blockedSourceAudit = createBlockedSourceAudit();
+  const sourceCatalog = loadVideoCatalog();
+  const sourceVideos = catalogToVideos(sourceCatalog)
+    .map((item) => rebuildVideoItem(item, stats, songSearchLookup, songAliasContext))
+    .filter((item) => item.songs.length);
+  const sourceFilteredItems = filterBlockedVideos(sourceVideos, { audit: blockedSourceAudit });
+  const curatedItems = applyCurationToVideos(sourceFilteredItems, curationContext);
+  collectAppliedCurationStats(stats, curatedItems);
+  const beforeQualityCount = countSongs(curatedItems);
+  const filteredItems = applyGroupQualityFilters({
+    all: {
+      id: "all",
+      title: "累計",
+      items: curatedItems,
+    },
+  }).all.items;
+  stats.qualityDroppedEntryCount += Math.max(0, beforeQualityCount - countSongs(filteredItems || []));
+
+  const catalogRefresh = rebuildVideoCatalogFromVideos(filteredItems || [], capturedAt, {
+    previousCatalog: sourceCatalog,
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
+  });
+  assertNoBlockedVideos(catalogToVideos(catalogRefresh.catalog), "rebuild-derived catalog from catalog");
+
+  let payload = {
+    ...latest,
+    generatedAt: capturedAtIso,
+    capturedAt: capturedAtIso,
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
+    groups: applyGroupQualityFilters(buildGroups(catalogToVideos(catalogRefresh.catalog), capturedAt)),
+    source: {
+      ...(latest.source || {}),
+      rebuiltDerivedAt: capturedAtIso,
+      blocklistVersion: BLOCKLIST_VERSION,
+      blocklistHash: BLOCKLIST_HASH,
+      blockedSourceAudit: blockedSourceAudit.summary(),
+      curationSummary: buildCurationSummary(latest.source?.curationSummary, stats),
+      videoCatalog: buildVideoCatalogSource(catalogRefresh, capturedAt, {}),
+    },
+    blocklistVersion: BLOCKLIST_VERSION,
+    blocklistHash: BLOCKLIST_HASH,
+  };
+  payload = canonicalizePayloadSongAliases(payload, songAliasContext);
+  if (songSearchIndex?.titleKeys?.length || songSearchIndex?.titleArtistKeys?.length) {
+    payload = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(payload, songSearchIndex, songAliasContext), songSearchSourceSummary(songSearchIndex));
+  }
+
+  const canonicalCatalogResult = rebuildVideoCatalogFromVideos(collectUniqueGroupVideos(payload.groups), capturedAt, {
+    previousCatalog: catalogRefresh.catalog,
+    curationVersion: curationContext.version,
+    curationHash: curationContext.hash,
+  });
+  writeVideoCatalog(canonicalCatalogResult.catalog, VIDEO_CATALOG_PATH);
+  payload = {
+    ...payload,
+    groups: applyGroupQualityFilters(buildGroups(catalogToVideos(canonicalCatalogResult.catalog), capturedAt)),
+    source: {
+      ...(payload.source || {}),
+      videoCatalog: buildVideoCatalogSource(canonicalCatalogResult, capturedAt, catalogRefresh.stats),
+    },
+  };
+
+  writeJson(LATEST_PATH, payload);
+  for (const rangeId of RANGES) {
+    if (payload.groups?.[rangeId]) writeJson(path.join(DATA_DIR, `${rangeId}.json`), payload.groups[rangeId]);
+  }
+  writeJson(path.join(DATA_DIR, "72h.json"), legacyAliasManifest("72h", groupForRange(payload.groups, "7d")));
+  writeJson(path.join(DATA_DIR, "1m.json"), legacyAliasManifest("1m", groupForRange(payload.groups, "all")));
+  writeDerivedStatus(payload);
+  writeRankDiffFiles(payload, undefined, curationContext);
+
+  console.log(
+    [
+      "CODEX_REBUILD_DERIVED_FROM_CATALOG_OK",
+      `videos=${payload.source.videoCatalog.catalogVideoCount}`,
+      `all=${payload.groups.all?.items?.length || 0}`,
+      `recent7d=${payload.groups["7d"]?.items?.length || 0}`,
+      `songs=${countSongs(payload.groups.all?.items || [])}`,
+      `parsedRaw=${stats.parsedFromRaw}`,
+      `blockedSources=${blockedSourceAudit.summary().removed}`,
+    ].join(" "),
+  );
+}
+
+function parseArgs(argv) {
+  const args = {};
+  for (const item of argv || []) {
+    if (item === "--from-catalog") args["from-catalog"] = true;
+    else throw new Error(`Unknown argument: ${item}`);
+  }
+  return args;
+}
+
+function createRebuildStats() {
+  return {
+    inputSongs: 0,
+    parsedFromRaw: 0,
+    fixedTitleCount: 0,
+    fixedArtistCount: 0,
+    fixedSecondsCount: 0,
+    repairedEntryCount: 0,
+    parseRejectedCount: 0,
+    missingRawCount: 0,
+    manualDroppedEntryCount: 0,
+    manualReplacedEntryCount: 0,
+    ruleDroppedEntryCount: 0,
+    conversationDroppedEntryCount: 0,
+    qualityDroppedEntryCount: 0,
+    droppedVideoCount: 0,
+    forceRefreshVideoIds: [],
+    blockedSourceDroppedVideoCount: 0,
+  };
+}
+
+function collectAppliedCurationStats(stats, curatedItems) {
+  const curationStats = curatedItems.curationStats || {};
+  stats.manualDroppedEntryCount += curationStats.droppedEntries || 0;
+  stats.manualReplacedEntryCount += curationStats.replacedEntries || 0;
+  stats.ruleDroppedEntryCount += curationStats.ruleDroppedEntries || 0;
+  stats.conversationDroppedEntryCount += curationStats.conversationDroppedEntries || 0;
+  stats.droppedVideoCount += curationStats.droppedVideos || 0;
+}
+
+function buildVideoCatalogSource(catalogResult, capturedAt, previousStats = {}) {
+  const groups = applyGroupQualityFilters(buildGroups(catalogToVideos(catalogResult.catalog), capturedAt));
+  return {
+    ...catalogSummary(catalogResult.catalog, capturedAt),
+    addedVideoCount: catalogResult.stats.addedVideoCount,
+    updatedVideoCount: catalogResult.stats.updatedVideoCount,
+    expiredVideoCount: catalogResult.stats.expiredVideoCount + (previousStats.expiredVideoCount || 0),
+    h72VideoCount: catalogResult.catalog.videos.filter((item) => {
+      const published = Number(item.publishedTimestamp);
+      return Number.isFinite(published) && capturedAt.getTime() - published >= 0 && capturedAt.getTime() - published <= WEEK_MS;
+    }).length,
+    recent7dVideoCount: groups["7d"]?.items?.length || 0,
+    monthVideoCount: catalogResult.stats.catalogVideoCount,
+    allVideoCount: catalogResult.stats.catalogVideoCount,
+  };
 }
 
 function rebuildVideoItem(item, stats, lookup = null, aliasContext = null) {

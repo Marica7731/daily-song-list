@@ -200,7 +200,7 @@ function preservePreviousCatalogEntry(previous, video, nowIso, options, audit) {
     sourceUrls: uniqueValues([...listValues(previous.sourceUrls), ...listValues(video.sourceUrls)]),
     curationVersion: stringValue(options.curationVersion || video.curationVersion || previous.curationVersion),
     curationHash: stringValue(options.curationHash || video.curationHash || previous.curationHash),
-    qualityStatus: "suspicious_regression",
+    qualityStatus: "usable",
     regressionAudit: {
       ...audit,
       incomingSelectedSourceId: stringValue(video.selectedSourceId || video.sourceId),

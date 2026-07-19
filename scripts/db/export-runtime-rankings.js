@@ -10,6 +10,9 @@ const {
   sortVideos,
   videoBelongsToRange,
 } = require("../vsinger-http/runtime-importer");
+const {
+  loadYoutubeChannelDiscoveryRuntimeVideos,
+} = require("../youtube-channel-discovery-runtime");
 const { groupForRange, RANGE_TITLES } = require("../range-config");
 const {
   RANGES,
@@ -29,9 +32,9 @@ function main() {
   try {
     const args = parseArgs(process.argv.slice(2));
     const payload = readJson(args.input);
-    const vsingerImport = loadRuntimeImport(args);
-    const dataVersion = computeExportDataVersion(payload, args, vsingerImport);
-    writeJsonlExport(args.output, payload, vsingerImport, dataVersion, args);
+    const runtimeImports = loadRuntimeImports(args);
+    const dataVersion = computeExportDataVersion(payload, args, runtimeImports);
+    writeJsonlExport(args.output, payload, runtimeImports, dataVersion, args);
   } catch (error) {
     console.error(`CODEX_RUNTIME_RANKINGS_EXPORT_ERROR ${error.name}: ${error.message}`);
     process.exitCode = 1;
@@ -43,11 +46,14 @@ function parseArgs(argv) {
     input: path.join(ROOT, "data", "latest.json"),
     output: "",
     vsingerDir: path.join(ROOT, "data", "external", "vsinger-http", "backfill"),
+    youtubeChannelDiscoveryDir: path.join(ROOT, "data", "external", "youtube-channel-discovery"),
     ranges: [],
     limitPerRange: 0,
     noVsinger: false,
     requireVsinger: false,
     allowPartialVsinger: false,
+    noYoutubeChannelDiscovery: false,
+    requireYoutubeChannelDiscovery: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -55,11 +61,14 @@ function parseArgs(argv) {
     if (name === "--input") args.input = requireValue(argv, ++index, name);
     else if (name === "--output") args.output = requireValue(argv, ++index, name);
     else if (name === "--vsinger-dir") args.vsingerDir = requireValue(argv, ++index, name);
+    else if (name === "--youtube-channel-discovery-dir") args.youtubeChannelDiscoveryDir = requireValue(argv, ++index, name);
     else if (name === "--range") args.ranges.push(...requireValue(argv, ++index, name).split(",").map((value) => value.trim()).filter(Boolean));
     else if (name === "--limit-per-range") args.limitPerRange = positiveInteger(requireValue(argv, ++index, name), 0);
     else if (name === "--no-vsinger") args.noVsinger = true;
     else if (name === "--require-vsinger") args.requireVsinger = true;
     else if (name === "--allow-partial-vsinger") args.allowPartialVsinger = true;
+    else if (name === "--no-youtube-channel-discovery") args.noYoutubeChannelDiscovery = true;
+    else if (name === "--require-youtube-channel-discovery") args.requireYoutubeChannelDiscovery = true;
     else throw new Error(`Unknown argument: ${name}`);
   }
 
@@ -67,6 +76,7 @@ function parseArgs(argv) {
   args.input = path.resolve(args.input);
   args.output = path.resolve(args.output);
   args.vsingerDir = path.resolve(args.vsingerDir);
+  args.youtubeChannelDiscoveryDir = path.resolve(args.youtubeChannelDiscoveryDir);
   args.ranges = args.ranges.length ? args.ranges : RANGES;
   for (const rangeId of args.ranges) {
     if (!RANGES.includes(rangeId)) throw new Error(`Unsupported range: ${rangeId}`);
@@ -80,16 +90,21 @@ function requireValue(argv, index, name) {
   return value;
 }
 
-function loadRuntimeImport(args) {
-  if (args.noVsinger) return null;
-  return loadVsingerBackfillRuntimeVideos({
-    backfillDir: args.vsingerDir,
-    required: args.requireVsinger,
-    allowPartial: args.allowPartialVsinger,
-  });
+function loadRuntimeImports(args) {
+  return {
+    vsinger: args.noVsinger ? null : loadVsingerBackfillRuntimeVideos({
+      backfillDir: args.vsingerDir,
+      required: args.requireVsinger,
+      allowPartial: args.allowPartialVsinger,
+    }),
+    youtubeChannelDiscovery: args.noYoutubeChannelDiscovery ? null : loadYoutubeChannelDiscoveryRuntimeVideos({
+      importDir: args.youtubeChannelDiscoveryDir,
+      required: args.requireYoutubeChannelDiscovery,
+    }),
+  };
 }
 
-function writeJsonlExport(outputPath, payload, vsingerImport, dataVersion, args) {
+function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args) {
   const writer = createJsonlWriter(outputPath);
   let rankingRowCount = 0;
   let sourceDetailCount = 0;
@@ -105,11 +120,12 @@ function writeJsonlExport(outputPath, payload, vsingerImport, dataVersion, args)
       generatedAt: payload.generatedAt || "",
       capturedAt: payload.capturedAt || payload.generatedAt || "",
       ranges: args.ranges,
-      vsingerIncluded: Boolean(vsingerImport),
+      vsingerIncluded: Boolean(runtimeImports.vsinger),
+      youtubeChannelDiscoveryIncluded: Boolean(runtimeImports.youtubeChannelDiscovery),
     });
 
     for (const rangeId of args.ranges) {
-      const rangePayload = buildRangePayload(payload, rangeId, args, vsingerImport);
+      const rangePayload = buildRangePayload(payload, rangeId, args, runtimeImports);
       rangePayload.dataVersion = dataVersion;
       const items = Array.isArray(rangePayload.items) ? rangePayload.items : [];
       const occurrences = collectRuntimeOccurrences(items);
@@ -214,8 +230,8 @@ function writeJsonlExport(outputPath, payload, vsingerImport, dataVersion, args)
   );
 }
 
-function buildRangePayload(payload, rangeId, args, vsingerImport) {
-  if (!vsingerImport) {
+function buildRangePayload(payload, rangeId, args, runtimeImports = {}) {
+  if (!runtimeImports.vsinger && !runtimeImports.youtubeChannelDiscovery) {
     const base = buildRuntimeRangePayload(payload, rangeId);
     return args.limitPerRange > 0 ? { ...base, items: (base.items || []).slice(0, args.limitPerRange) } : base;
   }
@@ -224,9 +240,19 @@ function buildRangePayload(payload, rangeId, args, vsingerImport) {
   const capturedAt = new Date(payload.capturedAt || payload.generatedAt || Date.now());
   const capturedMs = capturedAt.getTime();
   const baseItems = Array.isArray(sourceGroup.items) ? sourceGroup.items : [];
-  const importItems = vsingerImport.videos.filter((item) => videoBelongsToRange(item, rangeId, capturedMs));
+  const importItems = [];
+  if (runtimeImports.youtubeChannelDiscovery) {
+    importItems.push(...runtimeImports.youtubeChannelDiscovery.videos.filter((item) => videoBelongsToRange(item, rangeId, capturedMs)));
+  }
+  if (runtimeImports.vsinger) {
+    importItems.push(...runtimeImports.vsinger.videos.filter((item) => videoBelongsToRange(item, rangeId, capturedMs)));
+  }
   const merged = mergeVideoItems(baseItems, importItems);
-  const generatedAt = latestIso(sourceGroup.generatedAt, vsingerImport.summary.generatedAt) || sourceGroup.generatedAt || payload.generatedAt || "";
+  const generatedAt = latestIso(
+    sourceGroup.generatedAt,
+    runtimeImports.youtubeChannelDiscovery?.summary?.generatedAt,
+    runtimeImports.vsinger?.summary?.generatedAt,
+  ) || sourceGroup.generatedAt || payload.generatedAt || "";
   const group = {
     ...sourceGroup,
     id: rangeId,
@@ -239,7 +265,7 @@ function buildRangePayload(payload, rangeId, args, vsingerImport) {
   return args.limitPerRange > 0 ? { ...rangePayload, items: (rangePayload.items || []).slice(0, args.limitPerRange) } : rangePayload;
 }
 
-function computeExportDataVersion(payload, args, vsingerImport) {
+function computeExportDataVersion(payload, args, runtimeImports = {}) {
   return stableDbKey(JSON.stringify({
     schemaVersion: 1,
     generatedAt: payload.generatedAt || "",
@@ -249,7 +275,8 @@ function computeExportDataVersion(payload, args, vsingerImport) {
     curationHash: payload.curationHash || "",
     ranges: args.ranges,
     limitPerRange: args.limitPerRange,
-    vsinger: vsingerImport?.summary || null,
+    vsinger: runtimeImports.vsinger?.summary || null,
+    youtubeChannelDiscovery: runtimeImports.youtubeChannelDiscovery?.summary || null,
   }));
 }
 

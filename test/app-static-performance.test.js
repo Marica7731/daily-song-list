@@ -195,6 +195,8 @@ test("API request summaries hide broad occurrence totals until filtered", () => 
   assert.match(summaryBody, /const showOccurrenceMetric = shouldShowRequestOccurrenceMetric\(result\)/u);
   assert.match(summaryBody, /if \(showOccurrenceMetric\) metrics\.push\(metric\(occurrenceCount, "次收录"\)\)/u);
   assert.match(summaryBody, /metrics\.push\(metric\(occurrenceCount, "个时间戳"\)\)/u);
+  assert.match(summaryBody, /metrics\.push\(metric\(videoCount, "条歌曲收录"\)\)/u);
+  assert.doesNotMatch(summaryBody, /metrics\.push\(metric\(videoCount, "个视频"\)\)/u);
 
   const helperBody = functionBody("function shouldShowRequestOccurrenceMetric");
   assert.match(helperBody, /if \(result\.view === "videos"\) return true/u);
