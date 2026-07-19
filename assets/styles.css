@@ -817,23 +817,9 @@ svg {
   display: none;
 }
 
-.recent-query-section,
 .suggestions-section {
   padding-top: 0;
   border-top: 0;
-}
-
-.recent-query-chips {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: var(--space-2);
-  max-height: 32px;
-  overflow: auto hidden;
-  scrollbar-width: none;
-}
-
-.recent-query-chips::-webkit-scrollbar {
-  display: none;
 }
 
 .query-suggestions {
@@ -911,18 +897,24 @@ mark {
   display: grid;
   gap: 4px;
   min-width: 0;
+  align-content: start;
   color: var(--muted);
   font-size: 11px;
   font-weight: 600;
 }
 
+.query-compact-field {
+  grid-template-rows: auto var(--control-default);
+}
+
 .query-field select,
 .query-field input:not([type="checkbox"]):not([type="radio"]) {
+  width: 100%;
+  box-sizing: border-box;
   min-height: 34px;
 }
 
-.query-context-card,
-.query-history-section summary {
+.query-context-card {
   display: grid;
   align-items: center;
   min-height: 44px;
@@ -941,42 +933,26 @@ mark {
 
 .query-history-section {
   display: grid;
-  gap: 0;
+  grid-column: 1 / -1;
+  gap: var(--space-2);
   min-width: 0;
 }
 
-.query-history-section summary {
+.query-history-heading {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-2);
-  cursor: pointer;
-  list-style: none;
+  align-items: center;
+  min-width: 0;
 }
 
-.query-history-section summary::after {
-  content: "›";
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1;
-}
-
-.query-history-section[open] summary::after {
-  transform: rotate(90deg);
-}
-
-.query-history-section summary strong {
+.query-history-heading strong {
   min-width: 0;
   color: var(--muted);
   font-size: 11px;
   font-weight: 600;
-}
-
-.query-history-section summary::-webkit-details-marker {
-  display: none;
-}
-
-.query-history-section[open] {
-  grid-column: 1 / -1;
-  gap: var(--space-2);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .query-history-fields {
@@ -4155,7 +4131,7 @@ mark {
     min-height: 32px;
   }
 
-  .query-history-section summary {
+  .query-history-section {
     min-height: 40px;
     border-radius: var(--radius-small);
     padding-inline: 8px;
@@ -4204,12 +4180,9 @@ mark {
     color: var(--muted);
   }
 
-  .query-history-section {
-    grid-template-columns: 104px minmax(0, 1fr);
-  }
-
-  .query-history-section summary {
-    grid-column: 1 / -1;
+  .query-filter-matrix > .query-compact-field {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
   .back-to-top {

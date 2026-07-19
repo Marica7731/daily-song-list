@@ -11,7 +11,6 @@ const args = process.argv.slice(2);
 const baseUrl = args.find((arg) => !arg.startsWith("--")) || "http://127.0.0.1:8080/";
 const outputDir = path.join(process.cwd(), "docs", "assets", "screenshots");
 const workDir = path.join(outputDir, `.tmp-${process.pid}`);
-const recentSearches = ["少女レイ", "HOT LIMIT", "夏祭り"];
 const generatedScreenshots = new Set();
 const screenshotRecords = new Map();
 
@@ -44,9 +43,6 @@ async function newPage(browser, viewport) {
     deviceScaleFactor: 1,
     isMobile: viewport.width <= 720,
   });
-  await page.addInitScript((items) => {
-    window.localStorage.setItem("dailySongList.recentSearches", JSON.stringify(items));
-  }, recentSearches);
   return page;
 }
 
@@ -118,7 +114,7 @@ async function assertNoVisibleClipping(page, label) {
 
 async function assertQueryHistoryPanelSpacing(page, label) {
   const metrics = await page.evaluate(() => {
-    const section = document.querySelector(".query-history-section[open]");
+    const section = document.querySelector(".query-history-section");
     const footer = document.querySelector(".query-panel-footer");
     if (!section || !footer) return null;
     const sectionBox = section.getBoundingClientRect();
@@ -129,7 +125,7 @@ async function assertQueryHistoryPanelSpacing(page, label) {
       footerTop: Math.round(footerBox.top * 10) / 10,
     };
   });
-  if (!metrics) throw new Error(`${label} missing open query history section`);
+  if (!metrics) throw new Error(`${label} missing query history section`);
   if (metrics.gap < -1) {
     throw new Error(`${label} query history overlaps footer: ${JSON.stringify(metrics)}`);
   }
@@ -332,12 +328,7 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
     await assertUnifiedQueryPanel(page, name);
     await sleep(150);
   }
-  if (options.openHistory || options.scrollBottom) {
-    await page.locator(".query-history-section").evaluate((section) => {
-      section.open = true;
-    });
-    await page.waitForSelector(".query-history-section[open] #querySnapshotDateSelect", { timeout: 15_000 });
-  }
+  if (options.openHistory || options.scrollBottom) await page.waitForSelector(".query-history-section #querySnapshotDateSelect", { timeout: 15_000 });
   if (options.scrollBottom) {
     await page.locator(".query-panel-body").evaluate((node) => {
       node.scrollTop = node.scrollHeight;
@@ -1921,7 +1912,6 @@ async function main() {
       scene: "mobile-controls-active",
       selector: ".controls",
     });
-    await captureQueryPanel(browser, mobile, "mobile-query-recent.png");
     await captureQueryPanel(browser, mobile, "mobile-query-suggestions.png", { searchText: "少女レイ" });
     await captureQueryPanel(browser, mobile, "mobile-query-filter.png", { filterTab: true, scene: "mobile-unified-filter-panel" });
     await captureQueryPanel(browser, mobile, "mobile-query-history.png", { openHistory: true, scrollBottom: true });

@@ -40,7 +40,6 @@ const expectedScreenshots = [
   "mobile-bottom-nav-active.png",
   "mobile-active-query-strip.png",
   "mobile-toast-copy-setlist.png",
-  "mobile-query-recent.png",
   "mobile-query-suggestions.png",
   "mobile-query-filter.png",
   "mobile-query-history.png",

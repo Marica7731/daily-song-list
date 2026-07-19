@@ -216,20 +216,23 @@ test("selection builds only the records needed by the current view", () => {
   assert.match(functionBody("function createRangeCacheObject"), /defineLazyVtuberCache\(cache, "niche", nicheOccurrences\)/u);
 });
 
-test("explicit search keeps song source context while artist and VTuber views use scoped search text", () => {
+test("explicit search scopes query text by current view", () => {
   const selectionBody = functionBody("function currentSelection");
   assert.match(selectionBody, /occurrenceSearchTextForCurrentView\(occurrence\)\.includes\(filterKey\)/u);
   assert.doesNotMatch(selectionBody, /baseOccurrences\.filter\(\(occurrence\) => occurrence\.searchText\.includes\(filterKey\)\)/u);
 
   const scopedSearchBody = functionBody("function occurrenceSearchTextForCurrentView");
-  assert.doesNotMatch(scopedSearchBody, /songOccurrenceSearchText/u);
   assert.match(scopedSearchBody, /state\.view === "artistRank"[\s\S]*artistOccurrenceSearchText\(occurrence\)/u);
   assert.match(scopedSearchBody, /state\.view === "vtuberRank"[\s\S]*vtuberOccurrenceSearchText\(occurrence\)/u);
+  assert.match(scopedSearchBody, /state\.view === "songRank" \|\| state\.view === "songAz"[\s\S]*songOccurrenceSearchText\(occurrence\)/u);
   assert.match(scopedSearchBody, /return occurrence\?\.searchText \|\| ""/u);
+  assert.match(functionBody("function queryDraftOccurrences"), /songOccurrenceSearchText\(occurrence\)\.includes\(filterKey\)/u);
 
+  const songScopedSearchBody = functionBody("function songOccurrenceSearchText");
+  assert.match(songScopedSearchBody, /\[song\.title, song\.artist\]/u);
+  assert.doesNotMatch(songScopedSearchBody, /item\.title|item\.channelName|channel/u);
   const collectBody = functionBody("function collectSongOccurrences");
   assert.match(collectBody, /\[item\.videoId, item\.title, item\.channelName, item\.keyword, song\.title, song\.artist\]/u);
-  assert.doesNotMatch(appSource, /function songOccurrenceSearchText/u);
 
   const videoBody = functionBody("function buildVideoViewItems");
   assert.match(videoBody, /const videoMatched = matchesSearch\(\[item\.videoId, item\.title, item\.channelName, item\.keyword\], filter\)/u);

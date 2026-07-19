@@ -192,10 +192,27 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(channelSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(channelSongSearchOutput, /"totalCount": 3/);
-  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 3/);
-  assert.match(channelSongSearchOutput, /"count": 1/);
-  assert.match(channelSongSearchOutput, /"globalCount": 2/);
+  assert.match(channelSongSearchOutput, /"totalCount": 0/);
+  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 0/);
+
+  const videoTitleSongSearchOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songIndex",
+      "--q",
+      "Morning",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(videoTitleSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(videoTitleSongSearchOutput, /"totalCount": 0/);
 
   const vtuberQueryOutput = execFileSync(
     PYTHON,

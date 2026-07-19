@@ -815,7 +815,7 @@ def rank_rows_for_songs(range_id: str, records, view: str, metric: str = "count"
             "video_count": len(record["videos"]),
             "timestamp_count": record["count"],
             "payload": payload,
-            "search_text": search_text(record["title"], record["artist"], *record["channels"].keys()),
+            "search_text": search_text(record["title"], record["artist"]),
             "source_detail": {
                 "source_key": payload["sourceDetailKey"],
                 "entity_type": "song",
@@ -853,7 +853,7 @@ def index_rows_for_songs(range_id: str, records) -> list[dict]:
             "video_count": len(record["videos"]),
             "timestamp_count": record["count"],
             "payload": payload,
-            "search_text": search_text(record["title"], record["artist"], *record["channels"].keys()),
+            "search_text": search_text(record["title"], record["artist"]),
             "source_detail": {
                 "source_key": payload["sourceDetailKey"],
                 "entity_type": "song",
