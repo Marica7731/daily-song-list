@@ -148,13 +148,13 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             base_params,
         ).fetchone()["total_count"]
         totals = conn.execute(
-            f"SELECT COUNT(*) AS total_count, COALESCE(SUM(count), 0) AS total_occurrences, COALESCE(SUM(video_count), 0) AS total_videos FROM ranking_rows WHERE {where_sql}",
+            f"SELECT COUNT(*) AS total_count, COALESCE(SUM(count), 0) AS total_occurrences, COALESCE(SUM(song_count), 0) AS total_songs, COALESCE(SUM(video_count), 0) AS total_videos FROM ranking_rows WHERE {where_sql}",
             params,
         ).fetchone()
         total = totals["total_count"]
         rows = conn.execute(
             f"""
-            SELECT rank, detail_key, title, artist, name, count, video_count, timestamp_count, payload_json
+            SELECT rank, detail_key, title, artist, name, count, song_count, video_count, timestamp_count, payload_json
             FROM ranking_rows
             WHERE {where_sql}
             ORDER BY rank
@@ -166,12 +166,13 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         "schemaVersion": 1,
         "rangeId": range_id,
         "view": view,
-        "metric": "videos" if metric == "videos" else "occurrences",
+        "metric": response_metric(metric),
         "page": max(1, page),
         "pageSize": page_size,
         "totalCount": total,
         "filteredBaseCount": base_total,
         "totalOccurrenceCount": totals["total_occurrences"],
+        "totalSongCount": totals["total_songs"],
         "totalVideoCount": totals["total_videos"],
         "pageCount": (total + page_size - 1) // page_size,
         "records": [decode_row(row) for row in rows],
@@ -185,8 +186,18 @@ def normalize_metric(view: str, metric: str) -> str:
             return "count"
         if metric == "videos":
             return "videos"
-        raise ValueError("metric must be occurrences or videos")
+        if view == "vtubers" and metric == "songs":
+            return "songs"
+        raise ValueError("metric must be occurrences, songs, or videos")
     return "count"
+
+
+def response_metric(metric: str) -> str:
+    if metric == "videos":
+        return "videos"
+    if metric == "songs":
+        return "songs"
+    return "occurrences"
 
 
 def contextual_song_rankings_payload(
@@ -247,6 +258,7 @@ def contextual_song_rankings_payload(
             {source_match_cte}
             SELECT COUNT(*) AS total_count,
                    COALESCE(SUM({occurrence_value}), 0) AS total_occurrences,
+                   COUNT(DISTINCT r.detail_key) AS total_songs,
                    COALESCE(SUM({video_value}), 0) AS total_videos
             FROM ranking_rows r
             LEFT JOIN source_matches sm ON sm.detail_key = r.detail_key
@@ -265,6 +277,7 @@ def contextual_song_rankings_payload(
                    r.artist,
                    r.name,
                    r.count,
+                   r.song_count,
                    r.video_count,
                    r.timestamp_count,
                    r.payload_json,
@@ -290,6 +303,7 @@ def contextual_song_rankings_payload(
         "totalCount": total,
         "filteredBaseCount": base_total,
         "totalOccurrenceCount": totals["total_occurrences"],
+        "totalSongCount": totals["total_songs"],
         "totalVideoCount": totals["total_videos"],
         "pageCount": (total + page_size - 1) // page_size,
         "records": records,
@@ -311,6 +325,7 @@ def decode_contextual_song_row(conn: sqlite3.Connection, row: sqlite3.Row, q: st
     payload = json.loads(row["payload_json"])
     payload.setdefault("key", row["detail_key"])
     payload.setdefault("count", row["count"])
+    payload.setdefault("songCount", row["song_count"])
     payload.setdefault("videoCount", row["video_count"])
     payload.setdefault("timestampCount", row["timestamp_count"])
     payload["globalRank"] = row["global_rank"]
@@ -418,6 +433,7 @@ def table_counts(conn: sqlite3.Connection) -> dict[str, int]:
         "occurrences",
         "ranking_rows",
         "source_occurrences",
+        "channel_metadata",
         "external_songs",
         "external_videos",
         "external_occurrences",

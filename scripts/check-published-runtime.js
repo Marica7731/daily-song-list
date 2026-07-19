@@ -196,6 +196,13 @@ async function checkApiRuntime(checkedAt) {
   assert(naretanVtuber.json.view === "vtubers", "api vtubers naretan view mismatch");
   assert(Number(naretanVtuber.json.totalCount) > 0, "api vtubers naretan totalCount must be positive");
   assert(String(naretanVtuber.json.records?.[0]?.name || "").includes("なれたん"), "api vtubers naretan first row must be なれたん");
+  const hanonSongMetric = await fetchJsonWithText("api/rankings?range=all&view=vtubers&metric=songs&q=%E9%A6%99%E9%B3%B4%E3%83%8F%E3%83%8E%E3%83%B3&pageSize=1");
+  assertApiSuccessHeaders(hanonSongMetric, "api vtubers hanon songs metric");
+  assert(hanonSongMetric.json.metric === "songs", "api vtubers hanon metric must be songs");
+  assert(Number(hanonSongMetric.json.records?.[0]?.songCount || 0) > 0, "api vtubers hanon songCount must be positive");
+  assert(String(hanonSongMetric.json.records?.[0]?.channelHandle || "").includes("@kanaruhanon"), "api vtubers hanon handle must be @kanaruhanon");
+  assert(String(hanonSongMetric.json.records?.[0]?.avatarUrl || "").includes("googleusercontent.com"), "api vtubers hanon avatarUrl must be cached");
+  assert(hanonSongMetric.json.records?.[0]?.isCollected === true, "api vtubers hanon must expose isCollected");
   await checkApiErrorContract();
 
   if (errors.length) {
@@ -220,6 +227,7 @@ async function checkApiRuntime(checkedAt) {
       `channelDiscoveryVideos=${channelDiscoveryProbes.map((probe) => probe.totalCount).join(",")}`,
       `naretanSongResults=${naretanSongSearch.json.totalCount}`,
       `naretanVtuberResults=${naretanVtuber.json.totalCount}`,
+      `hanonSongCount=${hanonSongMetric.json.records?.[0]?.songCount || 0}`,
       `staticMeta=${staticMetaMode}`,
       `expectedCommit=${expectedApiCommitSha ? "matched" : "not-set"}`,
       `expectedLatest=${expectedApiLatestSha256 ? "matched" : "not-set"}`,

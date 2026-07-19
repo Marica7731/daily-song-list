@@ -16,8 +16,8 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   const dbPath = path.join(dir, "song-rank.sqlite");
   fs.mkdirSync(vsingerDir, { recursive: true });
   const vsingerSongs = [{ externalSongId: "s1", canonicalSongId: "vsinger:s1", displayTitle: "VS Song", displayArtist: "VS Artist" }];
-  const vsingerVideos = [{ externalVideoId: "v1", youtubeVideoId: "yt1", title: "VS Live", singerName: "VSinger", streamedAt: "2026-07-18" }];
-  const vsingerOccurrences = [{ externalSongId: "s1", canonicalSongId: "vsinger:s1", externalVideoId: "v1", youtubeVideoId: "yt1", seconds: 123 }];
+  const vsingerVideos = [{ externalVideoId: "v1", youtubeVideoId: "yt123456789", title: "VS Live", singerName: "VSinger", streamedAt: "2026-07-18" }];
+  const vsingerOccurrences = [{ externalSongId: "s1", canonicalSongId: "vsinger:s1", externalVideoId: "v1", youtubeVideoId: "yt123456789", seconds: 123 }];
 
   fs.writeFileSync(
     latestPath,
@@ -153,8 +153,8 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   );
   assert.match(queryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(queryOutput, /Song One/);
-  assert.match(queryOutput, /"totalCount": 4/);
-  assert.match(queryOutput, /"totalOccurrenceCount": 5/);
+  assert.match(queryOutput, /"totalCount": 5/);
+  assert.match(queryOutput, /"totalOccurrenceCount": 6/);
 
   const mergedQueryOutput = execFileSync(
     PYTHON,
@@ -277,6 +277,28 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   assert.match(vsingerQueryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(vsingerQueryOutput, /VS Song/);
   assert.match(vsingerQueryOutput, /"totalCount": 1/);
+
+  const vsingerVtuberOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--q",
+      "VSinger",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(vsingerVtuberOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(vsingerVtuberOutput, /"name": "VSinger"/);
+  assert.match(vsingerVtuberOutput, /"knownSourceType": "vsinger_moment_http"/);
+  assert.match(vsingerVtuberOutput, /"isCollected": true/);
 });
 
 test("runtime DB builder merges accepted YouTube channel discovery increments into rankings", () => {
@@ -304,18 +326,38 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       generatedAt: "2026-07-19T01:00:00.000Z",
       videos: [
         {
-          videoId: "chanvideo01",
-          title: "Channel Overlay Karaoke",
+          videoId: "3sYGvwElb14",
+          title: "Channel Overlay Karaoke #香鳴ハノン",
           url: "https://www.youtube.com/watch?v=chanvideo01",
-          channelName: "Overlay Ch.",
-          channelHandle: "@overlay",
-          channelUrl: "https://www.youtube.com/@overlay",
+          channelName: "",
+          channelId: "",
+          channelHandle: "",
+          channelUrl: "https://www.youtube.com/@kanaruhanon",
           publishedTimestamp: 1784332800000,
           publishedText: "2026-07-18",
           songs: [
             { title: "Overlay Song", artist: "Overlay Artist", time: "1:23", seconds: 83 },
             { title: "Overlay Song", artist: "Overlay Artist", time: "5:00", seconds: 300 },
           ],
+        },
+      ],
+    }),
+    "utf8",
+  );
+  fs.writeFileSync(
+    path.join(channelDir, "channel-metadata.json"),
+    JSON.stringify({
+      schemaVersion: 1,
+      sourceSystem: "youtube_channel_discovery",
+      channels: [
+        {
+          handle: "/@kanaruhanon",
+          displayName: "Hanon Ch. 香鳴ハノン【パレプロ】",
+          channelId: "UCay6Y3oEoiC6ZEE2G0UZu_A",
+          channelUrl: "https://www.youtube.com/channel/UCay6Y3oEoiC6ZEE2G0UZu_A",
+          sourceUrl: "https://www.youtube.com/@kanaruhanon",
+          avatarUrl: "https://yt3.googleusercontent.com/hanon-avatar=s900-c-k-c0x00ffffff-no-rj",
+          knownSourceType: "youtube_channel_discovery",
         },
       ],
     }),
@@ -372,14 +414,15 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "videos",
       "--q",
-      "@overlay",
-      "--summary-only",
+      "3sYGvwElb14",
     ],
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(videoHandleSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(videoHandleSearchOutput, /"totalCount": 1/);
-  assert.match(videoHandleSearchOutput, /Channel Overlay Karaoke/);
+  assert.match(videoHandleSearchOutput, /Hanon Ch\. 香鳴ハノン【パレプロ】/);
+  assert.match(videoHandleSearchOutput, /UCay6Y3oEoiC6ZEE2G0UZu_A/);
+  assert.match(videoHandleSearchOutput, /hanon-avatar/);
 
   const videoUrlSearchOutput = execFileSync(
     PYTHON,
@@ -392,13 +435,36 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "videos",
       "--q",
-      "youtube.com/@overlay",
+      "youtube.com/@kanaruhanon",
       "--summary-only",
     ],
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(videoUrlSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(videoUrlSearchOutput, /"totalCount": 1/);
+
+  const vtuberSongMetricOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--metric",
+      "songs",
+      "--q",
+      "kanaruhanon",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(vtuberSongMetricOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(vtuberSongMetricOutput, /"metric": "songs"/);
+  assert.match(vtuberSongMetricOutput, /"name": "Hanon Ch\. 香鳴ハノン【パレプロ】"/);
+  assert.match(vtuberSongMetricOutput, /"songCount": 1/);
+  assert.match(vtuberSongMetricOutput, /"isCollected": true/);
 });
 
 function sha256Json(value) {

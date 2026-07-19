@@ -7,6 +7,7 @@ const SOURCE_GROUP = "youtube_channel_discovery";
 function loadYoutubeChannelDiscoveryRuntimeVideos(options = {}) {
   const importDir = path.resolve(options.importDir || path.join(__dirname, "..", "data", "external", "youtube-channel-discovery"));
   const acceptedDir = path.join(importDir, "accepted");
+  const channelMetadata = loadChannelMetadata(path.join(importDir, "channel-metadata.json"));
   const required = options.required === true;
   if (!fs.existsSync(acceptedDir)) {
     if (required) throw new Error(`YouTube channel discovery accepted directory not found: ${acceptedDir}`);
@@ -22,6 +23,7 @@ function loadYoutubeChannelDiscoveryRuntimeVideos(options = {}) {
   }
 
   const byVideoId = new Map();
+  const allVideos = [];
   const fileSummaries = [];
   let generatedAt = "";
   for (const file of files) {
@@ -38,6 +40,7 @@ function loadYoutubeChannelDiscoveryRuntimeVideos(options = {}) {
     for (const video of videos) {
       const normalized = normalizeRuntimeVideo(video, file);
       if (!normalized) continue;
+      allVideos.push(normalized);
       usableCount += 1;
       occurrenceCount += normalized.songs.length;
       const existing = byVideoId.get(normalized.videoId);
@@ -54,7 +57,8 @@ function loadYoutubeChannelDiscoveryRuntimeVideos(options = {}) {
     });
   }
 
-  const videos = [...byVideoId.values()];
+  const metadataLookup = buildChannelMetadataLookup(channelMetadata.channels, allVideos);
+  const videos = [...byVideoId.values()].map((video) => hydrateChannelMetadata(video, metadataLookup));
   const summary = {
     sourceSystem: SOURCE_GROUP,
     generatedAt: generatedAt || latestIso(...fileSummaries.map((item) => item.generatedAt)) || "",
@@ -64,6 +68,12 @@ function loadYoutubeChannelDiscoveryRuntimeVideos(options = {}) {
     occurrenceCount: videos.reduce((total, video) => total + (Array.isArray(video.songs) ? video.songs.length : 0), 0),
   };
   return { videos, summary };
+}
+
+function loadChannelMetadata(filePath) {
+  if (!fs.existsSync(filePath)) return { channels: [] };
+  const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  return { channels: Array.isArray(payload.channels) ? payload.channels : [] };
 }
 
 function normalizeRuntimeVideo(video, sourceFile) {
@@ -79,6 +89,8 @@ function normalizeRuntimeVideo(video, sourceFile) {
     ...(Array.isArray(video.sourceUrls) ? video.sourceUrls : []),
     `https://www.youtube.com/watch?v=${videoId}`,
   ]);
+  const channelUrl = stringValue(video.channelUrl || video.discoveryChannelUrl || video.discoveryImport?.discoveryChannelUrl);
+  const channelHandle = normalizeHandle(video.channelHandle) || normalizeHandle(channelUrl) || normalizeHandle(sourceUrls.find((url) => /youtube\.com\/@/iu.test(url)));
   return {
     ...video,
     videoId,
@@ -86,8 +98,12 @@ function normalizeRuntimeVideo(video, sourceFile) {
     url: stringValue(video.url) || `https://www.youtube.com/watch?v=${videoId}`,
     channelName: stringValue(video.channelName),
     channelId: stringValue(video.channelId),
-    channelHandle: stringValue(video.channelHandle),
-    channelUrl: stringValue(video.channelUrl),
+    channelHandle,
+    channelUrl,
+    avatarUrl: stringValue(video.avatarUrl || video.channelAvatarUrl),
+    sourceUrl: stringValue(video.sourceUrl || channelUrl || sourceUrls.find((url) => /youtube\.com\/(?:@|channel\/)/iu.test(url))),
+    knownSourceType: stringValue(video.knownSourceType || SOURCE_GROUP),
+    isCollected: video.isCollected === false ? false : true,
     publishedTimestamp: finiteTimestamp(video.publishedTimestamp),
     publishedText: stringValue(video.publishedText),
     durationText: stringValue(video.durationText),
@@ -122,6 +138,152 @@ function normalizeRuntimeSong(song, index, video) {
     sourceHash: stringValue(song.sourceHash || video.selectedSourceHash),
     isNiche: song.isNiche === true,
   };
+}
+
+function buildChannelMetadataLookup(channels, videos) {
+  const lookup = new Map();
+  for (const channel of channels || []) {
+    addChannelMetadata(lookup, {
+      displayName: stringValue(channel.displayName || channel.channelName || channel.name),
+      channelId: stringValue(channel.channelId),
+      channelHandle: normalizeHandle(channel.handle || channel.channelHandle || channel.sourceUrl || channel.channelUrl),
+      channelUrl: stringValue(channel.channelUrl),
+      sourceUrl: stringValue(channel.sourceUrl || channel.channelUrl),
+      avatarUrl: stringValue(channel.avatarUrl),
+      knownSourceType: stringValue(channel.knownSourceType || SOURCE_GROUP),
+      isCollected: channel.isCollected === false ? false : true,
+    });
+  }
+  for (const video of videos || []) {
+    addChannelMetadata(lookup, metadataFromVideo(video));
+  }
+  return lookup;
+}
+
+function metadataFromVideo(video) {
+  const sourceUrls = Array.isArray(video.sourceUrls) ? video.sourceUrls : [];
+  const sourceUrl = stringValue(
+    video.sourceUrl ||
+      video.channelUrl ||
+      sourceUrls.find((url) => /youtube\.com\/(?:@|channel\/)/iu.test(url)) ||
+      video.discoveryImport?.discoveryChannelUrl,
+  );
+  return {
+    displayName: stringValue(video.channelName),
+    channelId: stringValue(video.channelId),
+    channelHandle: normalizeHandle(video.channelHandle) || normalizeHandle(sourceUrl),
+    channelUrl: stringValue(video.channelUrl),
+    sourceUrl,
+    avatarUrl: stringValue(video.avatarUrl || video.channelAvatarUrl),
+    knownSourceType: stringValue(video.knownSourceType || SOURCE_GROUP),
+    isCollected: video.isCollected === false ? false : true,
+  };
+}
+
+function addChannelMetadata(lookup, metadata) {
+  const keys = channelIdentityKeys(metadata);
+  if (!keys.length) return;
+  const normalized = normalizeChannelMetadata(metadata);
+  for (const key of keys) {
+    lookup.set(key, mergeChannelMetadata(lookup.get(key), normalized));
+  }
+}
+
+function hydrateChannelMetadata(video, lookup) {
+  const metadata = findChannelMetadata(lookup, metadataFromVideo(video));
+  const hydrated = metadata
+    ? {
+        ...video,
+        channelName: video.channelName || metadata.displayName || "",
+        channelId: video.channelId || metadata.channelId || "",
+        channelHandle: video.channelHandle || metadata.channelHandle || "",
+        channelUrl: video.channelUrl || metadata.sourceUrl || metadata.channelUrl || "",
+        avatarUrl: video.avatarUrl || metadata.avatarUrl || "",
+        sourceUrl: video.sourceUrl || metadata.sourceUrl || metadata.channelUrl || "",
+        knownSourceType: video.knownSourceType || metadata.knownSourceType || SOURCE_GROUP,
+        isCollected: video.isCollected === false ? false : metadata.isCollected !== false,
+      }
+    : video;
+  return withTimeMetadata(hydrated);
+}
+
+function findChannelMetadata(lookup, metadata) {
+  for (const key of channelIdentityKeys(metadata)) {
+    const value = lookup.get(key);
+    if (value) return value;
+  }
+  return null;
+}
+
+function normalizeChannelMetadata(metadata) {
+  return {
+    displayName: stringValue(metadata.displayName),
+    channelId: stringValue(metadata.channelId),
+    channelHandle: normalizeHandle(metadata.channelHandle),
+    channelUrl: stringValue(metadata.channelUrl),
+    sourceUrl: stringValue(metadata.sourceUrl || metadata.channelUrl),
+    avatarUrl: stringValue(metadata.avatarUrl),
+    knownSourceType: stringValue(metadata.knownSourceType || SOURCE_GROUP),
+    isCollected: metadata.isCollected === false ? false : true,
+  };
+}
+
+function mergeChannelMetadata(existing, incoming) {
+  if (!existing) return incoming;
+  return {
+    displayName: existing.displayName || incoming.displayName,
+    channelId: existing.channelId || incoming.channelId,
+    channelHandle: existing.channelHandle || incoming.channelHandle,
+    channelUrl: existing.channelUrl || incoming.channelUrl,
+    sourceUrl: existing.sourceUrl || incoming.sourceUrl,
+    avatarUrl: existing.avatarUrl || incoming.avatarUrl,
+    knownSourceType: existing.knownSourceType || incoming.knownSourceType,
+    isCollected: existing.isCollected !== false || incoming.isCollected !== false,
+  };
+}
+
+function channelIdentityKeys(metadata) {
+  return uniqueValues([
+    metadata.channelId && `id:${metadata.channelId}`,
+    metadata.channelHandle && `handle:${normalizeHandle(metadata.channelHandle).toLocaleLowerCase()}`,
+    metadata.sourceUrl && `url:${normalizeChannelUrlKey(metadata.sourceUrl)}`,
+    metadata.channelUrl && `url:${normalizeChannelUrlKey(metadata.channelUrl)}`,
+  ]);
+}
+
+function normalizeHandle(value) {
+  const text = stringValue(value);
+  if (!text) return "";
+  const match = text.match(/(?:youtube\.com\/)?(@[A-Za-z0-9._-]+)/iu);
+  if (match) return `/${match[1]}`;
+  return text.startsWith("@") ? `/${text}` : text.replace(/^\/+(@)/u, "/$1");
+}
+
+function normalizeChannelUrlKey(value) {
+  const text = stringValue(value).replace(/^http:\/\/www\./iu, "https://www.").replace(/^http:\/\//iu, "https://");
+  const handle = normalizeHandle(text);
+  if (handle.startsWith("/@")) return handle.toLocaleLowerCase();
+  const channelId = text.match(/youtube\.com\/channel\/([^/?#]+)/iu)?.[1] || "";
+  return channelId ? `channel/${channelId}`.toLocaleLowerCase() : text.toLocaleLowerCase();
+}
+
+function withTimeMetadata(video) {
+  const publishedTimestamp = finiteTimestamp(video.publishedTimestamp);
+  return {
+    ...video,
+    publishedTimestamp,
+    publishedAt: timestampToIso(publishedTimestamp),
+    timeMissingReason: publishedTimestamp ? "" : timeMissingReason(video),
+  };
+}
+
+function timestampToIso(value) {
+  return value ? new Date(value).toISOString() : "";
+}
+
+function timeMissingReason(video) {
+  if (!video?.videoId) return "missing_video_id";
+  return "youtube_published_timestamp_unavailable";
 }
 
 function isRicherVideo(candidate, existing) {

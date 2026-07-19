@@ -42,6 +42,7 @@ def main() -> int:
                 "pageSize",
                 "totalCount",
                 "totalOccurrenceCount",
+                "totalSongCount",
                 "totalVideoCount",
                 "pageCount",
             )
@@ -59,6 +60,7 @@ def main() -> int:
                     "name",
                     "count",
                     "globalCount",
+                    "songCount",
                     "videoCount",
                     "globalVideoCount",
                     "matchedBySource",
@@ -81,7 +83,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--db", type=Path, default=Path("artifacts/runtime/song-rank.sqlite"))
     parser.add_argument("--range", default="all", choices=("7d", "all"))
     parser.add_argument("--view", default="songs", choices=("songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"))
-    parser.add_argument("--metric", default="occurrences", choices=("occurrences", "videos", "count"))
+    parser.add_argument("--metric", default="occurrences", choices=("occurrences", "videos", "songs", "count"))
     parser.add_argument("--page", type=int, default=1)
     parser.add_argument("--page-size", type=int, default=20)
     parser.add_argument("--q", default="")
@@ -93,6 +95,8 @@ def query_rankings(conn: sqlite3.Connection, range_id: str, view: str, metric: s
     page = max(1, int(page or 1))
     page_size = min(200, max(1, int(page_size or 20)))
     db_metric = "videos" if view in {"songs", "artists", "vtubers"} and metric == "videos" else "count"
+    if view == "vtubers" and metric == "songs":
+        db_metric = "songs"
     if q and view in {"songs", "songIndex"}:
         return query_contextual_songs(conn, range_id, view, db_metric, page, page_size, q)
     where = ["range_id = ?", "view = ?", "metric = ?", "scope_key = 'all'"]
@@ -103,14 +107,14 @@ def query_rankings(conn: sqlite3.Connection, range_id: str, view: str, metric: s
         params.extend(values)
     where_sql = " AND ".join(where)
     totals = conn.execute(
-        f"SELECT COUNT(*) AS total_count, COALESCE(SUM(count), 0) AS total_occurrences, COALESCE(SUM(video_count), 0) AS total_videos FROM ranking_rows WHERE {where_sql}",
+        f"SELECT COUNT(*) AS total_count, COALESCE(SUM(count), 0) AS total_occurrences, COALESCE(SUM(song_count), 0) AS total_songs, COALESCE(SUM(video_count), 0) AS total_videos FROM ranking_rows WHERE {where_sql}",
         params,
     ).fetchone()
     total = totals["total_count"]
     offset = (page - 1) * page_size
     rows = conn.execute(
         f"""
-        SELECT rank, detail_key, title, artist, name, count, video_count, timestamp_count, payload_json
+        SELECT rank, detail_key, title, artist, name, count, song_count, video_count, timestamp_count, payload_json
         FROM ranking_rows
         WHERE {where_sql}
         ORDER BY rank
@@ -122,11 +126,12 @@ def query_rankings(conn: sqlite3.Connection, range_id: str, view: str, metric: s
         "schemaVersion": 1,
         "rangeId": range_id,
         "view": view,
-        "metric": "videos" if db_metric == "videos" else "occurrences",
+        "metric": response_metric(db_metric),
         "page": page,
         "pageSize": page_size,
         "totalCount": total,
         "totalOccurrenceCount": totals["total_occurrences"],
+        "totalSongCount": totals["total_songs"],
         "totalVideoCount": totals["total_videos"],
         "pageCount": (total + page_size - 1) // page_size,
         "records": [decode_row(row) for row in rows],
@@ -179,6 +184,7 @@ def query_contextual_songs(
         {source_match_cte}
         SELECT COUNT(*) AS total_count,
                COALESCE(SUM({occurrence_value}), 0) AS total_occurrences,
+               COUNT(DISTINCT r.detail_key) AS total_songs,
                COALESCE(SUM({video_value}), 0) AS total_videos
         FROM ranking_rows r
         LEFT JOIN source_matches sm ON sm.detail_key = r.detail_key
@@ -198,6 +204,7 @@ def query_contextual_songs(
                r.artist,
                r.name,
                r.count,
+               r.song_count,
                r.video_count,
                r.timestamp_count,
                r.payload_json,
@@ -221,6 +228,7 @@ def query_contextual_songs(
         "pageSize": page_size,
         "totalCount": total,
         "totalOccurrenceCount": totals["total_occurrences"],
+        "totalSongCount": totals["total_songs"],
         "totalVideoCount": totals["total_videos"],
         "pageCount": (total + page_size - 1) // page_size,
         "records": [decode_contextual_song_row(row) for row in rows],
@@ -232,6 +240,7 @@ def decode_row(row: sqlite3.Row) -> dict:
     payload.setdefault("rank", row["rank"])
     payload.setdefault("key", row["detail_key"])
     payload.setdefault("count", row["count"])
+    payload.setdefault("songCount", row["song_count"])
     payload.setdefault("videoCount", row["video_count"])
     payload.setdefault("timestampCount", row["timestamp_count"])
     return payload
@@ -266,6 +275,14 @@ def search_filter_for_view(view: str, query: str) -> tuple[str, list[str]]:
     if view == "vtubers":
         return "(lower(search_text) LIKE ? OR lower(name) LIKE ?)", [needle, needle]
     return "(lower(search_text) LIKE ? OR lower(title) LIKE ? OR lower(name) LIKE ?)", [needle, needle, needle]
+
+
+def response_metric(metric: str) -> str:
+    if metric == "videos":
+        return "videos"
+    if metric == "songs":
+        return "songs"
+    return "occurrences"
 
 
 if __name__ == "__main__":

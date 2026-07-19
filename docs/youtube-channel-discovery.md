@@ -15,6 +15,8 @@ Default title keywords:
 
 The discovery command writes review artifacts only. It does not mutate `data/latest.json`, `data/video-catalog.json`, the VSinger Moment raw tables, or the SQLite runtime database. Reviewed results are normally converted into a small accepted increment under `data/external/youtube-channel-discovery/accepted/`; the SQLite builder merges those increments at build time.
 
+`data/external/youtube-channel-discovery/channel-metadata.json` is the reviewed low-rate cache for channel identity and avatars. Runtime import uses it, plus richer rows in the accepted increments, to repair rows that only have a YouTube channel URL or handle. For example, accepted rows with `channelUrl=https://www.youtube.com/@kanaruhanon` are mapped to `Hanon Ch. 香鳴ハノン【パレプロ】`, `/@kanaruhanon`, `UCay6Y3oEoiC6ZEE2G0UZu_A`, and the cached avatar without re-fetching the channel during DB builds.
+
 ## Command
 
 ```bash
@@ -66,6 +68,7 @@ Raw candidate shape:
   "youtubeUrl": "https://www.youtube.com/watch?v=AAAAAAAAAAA",
   "videoTitle": "歌枠 title",
   "channelName": "Noa Polaris",
+  "avatarUrl": "https://yt3.googleusercontent.com/...",
   "thumbnailUrl": "https://i.ytimg.com/vi/AAAAAAAAAAA/hqdefault.jpg",
   "streamedAt": "2026-07-19T00:00:00.000Z",
   "publishedAt": "2026-07-19T00:00:00.000Z",
@@ -85,6 +88,7 @@ Derived occurrence preview shape:
   "youtubeUrl": "https://www.youtube.com/watch?v=AAAAAAAAAAA&t=754s",
   "videoTitle": "歌枠 title",
   "channelName": "Noa Polaris",
+  "avatarUrl": "https://yt3.googleusercontent.com/...",
   "thumbnailUrl": "https://i.ytimg.com/vi/AAAAAAAAAAA/hqdefault.jpg",
   "publishedAt": "2026-07-19T00:00:00.000Z",
   "seconds": 754,
@@ -191,6 +195,8 @@ python scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank-youtube-c
 This validates accepted channel increments and contextual search cheaply. It is not a replacement for the production full SQLite build, because `vsingerSongs` and VSinger source tables are intentionally omitted.
 
 `scripts/db/export-runtime-rankings.js` loads all `data/external/youtube-channel-discovery/accepted/*.json` files by default when `npm run db:build` uses `--ranking-source js`. This keeps manual補漏 commits small: commit the accepted increment, code, and docs only; do not commit generated `data/ui`, `data/catalog-segments`, or range JSON shards for a DB-mode deployment.
+
+When a reviewed increment has mixed channel quality, the runtime importer first builds a channel metadata lookup by channel ID, handle, and channel URL-derived handle, then hydrates every video before merging rankings. Backend payloads expose `avatarUrl`, `sourceUrl`, `knownSourceType`, and `isCollected`; VTuber rankings also expose `songCount` and support `metric=songs` for unique-song sorting.
 
 `npm run youtube:import-channel-discovery` still exists as a local static/catalog fallback. It merges accepted `video-details.json` rows into `data/video-catalog.json` and refreshes catalog segments, then `npm run publish:catalog-runtime` rewrites `data/latest.json`, range files, diff files, and compact UI runtime shards. Use that path only when static GitHub Pages output must include the same manual補漏 rows.
 
