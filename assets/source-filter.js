@@ -199,6 +199,22 @@
     return new Set([
       "この曲について",
       "待機",
+      "open",
+      "op",
+      "ed",
+      "end",
+      "intro",
+      "outro",
+      "setlist",
+      "セットリスト",
+      "セトリ",
+      "タイムスタンプ",
+      "曲名",
+      "開始",
+      "配信開始",
+      "配信スタート",
+      "待機画面スタート",
+      "startstream",
       "待機画面op",
       "待機画面",
       "歌い終えて",
@@ -288,9 +304,9 @@
   function isChatReactionShoutText(text) {
     const compact = normalizeChatReactionText(text);
     if (!compact) return false;
-    if (/^(?:hi)?(?:dq|denq|天q)(?:clap)?$/iu.test(compact)) return true;
+    if (/^(?:hi)?(?:(?:dq|denq|天q)+)(?:wo+|clap)?$/iu.test(compact)) return true;
     if (/^wa{3,}$/iu.test(compact)) return true;
-    return /^(?:hotsmile|kopipe|gola|golacheerskp|kp|ft|alelelele|alelelelele|blessyou|pat|pienface|zoomin|mumumu|otugaugausmile|smile)$/iu.test(compact);
+    return /^(?:hotsmile|kopipe|gola|golacheerskp|kp|ft|alelelele|alelelelele|blessyou|pat|pienface|zoomin|mumumu|otugaugausmile|smile|hawawa|bua+a+|he+he+|eho+eho+|a+testtest)$/iu.test(compact);
   }
 
   function normalizeChatReactionText(text) {

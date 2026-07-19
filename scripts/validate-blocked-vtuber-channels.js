@@ -59,6 +59,8 @@ function assertMatcherSamples(errors, nodeMatcher, sourceFilterMatcher) {
     ["Rhoda handle", { channelHandle: "@rhoda1126", channelName: "Japanese Channel", title: "歌枠" }],
     ["HK exact id", { channelId: "UCW8G8aeRjbIOlL-Fgms8hEQ", channelName: "Japanese Channel", title: "歌枠" }],
     ["HK exact handle", { channelHandle: "@CheukCat_hkvtuber", channelName: "Japanese Channel", title: "歌枠" }],
+    ["Aruma exact id", { channelId: "UCD1QOCJIAPsMKMvRSXjLahw", channelName: "Aruma Ch. 薬袋アルマ", title: "歌枠" }],
+    ["Aruma handle", { channelHandle: "@ArumaCh", channelName: "Japanese Channel", title: "歌枠" }],
   ];
   for (const [name, sample] of blockedSamples) {
     if (!nodeMatcher(sample)) errors.push(`node blocked sample did not match: ${name}`);
