@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T04:21:30.041Z",
+  "generatedAt": "2026-07-19T09:13:23.570Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-19T00:24:46.338Z",
+  "latestGeneratedAt": "2026-07-19T07:06:56.061Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 134,
-    "uniqueVideos": 39,
-    "uniqueSources": 55,
-    "confirmedNoiseCount": 134,
+    "totalCandidates": 168,
+    "uniqueVideos": 41,
+    "uniqueSources": 61,
+    "confirmedNoiseCount": 168,
     "parserCorruptionCount": 0,
     "likelyNoiseCount": 0,
     "needsReviewCount": 0,
     "likelySongCount": 0,
     "byClassification": {
-      "confirmed_noise": 134,
+      "confirmed_noise": 168,
       "parser_corruption": 0,
       "likely_noise": 0,
       "needs_review": 0,
@@ -350,6 +350,448 @@
       "reviewId": "review:fRvk5uuysyw:86c3fb2d00b56796e548",
       "sourcePath": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json",
       "reviewLocator": "data/review/sources/history-fRvk5uuysyw-86c3fb2d00b56796e548.json#a6114c56ad82fb30c39a1eb577b52ead0d5a23d90c952e142d0915babe542f6a"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 302,
+      "time": "0:05:02",
+      "raw": "5:02 🦌",
+      "rawHash": "6496301763e861488f5dbf78d805772599f69f88d9a0017362b94cc3ae4ab11a",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=302s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#6496301763e861488f5dbf78d805772599f69f88d9a0017362b94cc3ae4ab11a"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2591,
+      "time": "0:43:11",
+      "raw": "🎤43:11",
+      "rawHash": "907265a907e2c26e177efa95e544d37f61e232f45137c3bfdccc98fefbb64bf3",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=2591s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#907265a907e2c26e177efa95e544d37f61e232f45137c3bfdccc98fefbb64bf3"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2800,
+      "time": "0:46:40",
+      "raw": "46:40",
+      "rawHash": "7f5d6d9229d7220c35c8bf3b43c4b190d7b75d2f24c89e765bc6d07b74c75276",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=2800s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#7f5d6d9229d7220c35c8bf3b43c4b190d7b75d2f24c89e765bc6d07b74c75276"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3053,
+      "time": "0:50:53",
+      "raw": "🎤50:53",
+      "rawHash": "7db519cbf03abe7b5c353e3d2d50d21309b5e75444aa75cb307063ef1d4b57b4",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=3053s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#7db519cbf03abe7b5c353e3d2d50d21309b5e75444aa75cb307063ef1d4b57b4"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3311,
+      "time": "0:55:11",
+      "raw": "🎤55:11",
+      "rawHash": "7e198a1f0cf9b49f80ba3eae38f4650bbd309ce6d96b7dd8848352c7c0e89247",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=3311s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#7e198a1f0cf9b49f80ba3eae38f4650bbd309ce6d96b7dd8848352c7c0e89247"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3587,
+      "time": "0:59:47",
+      "raw": "🎤59:47",
+      "rawHash": "9b1f76a2f69c99845227557d95d654d388f6752d2728cdcc08bda557d38eca48",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=3587s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#9b1f76a2f69c99845227557d95d654d388f6752d2728cdcc08bda557d38eca48"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3936,
+      "time": "1:05:36",
+      "raw": "🎤1:05:36",
+      "rawHash": "51c66c176e55c047e2675d1484806c732e5b7b2e2d643695c1310f710a7ab0ce",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=3936s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#51c66c176e55c047e2675d1484806c732e5b7b2e2d643695c1310f710a7ab0ce"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4283,
+      "time": "1:11:23",
+      "raw": "📌1:11:23",
+      "rawHash": "261b864dc6b92509b0f2a359b72f4b1e1f425d5585ece2a5cd0f99024d1cfeba",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=4283s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#261b864dc6b92509b0f2a359b72f4b1e1f425d5585ece2a5cd0f99024d1cfeba"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4425,
+      "time": "1:13:45",
+      "raw": "🎤1:13:45 🎩",
+      "rawHash": "11e854678166041065d6f71da5f226b50f717c9d38747e962e31af7ad1d3af32",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=4425s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#11e854678166041065d6f71da5f226b50f717c9d38747e962e31af7ad1d3af32"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5760,
+      "time": "1:36:00",
+      "raw": "🎤1:36:00 ☘️",
+      "rawHash": "1b7262134dcc22e72c6b189cb99e606a54a4bd1d33e872f3bbecb220bab7d337",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=5760s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#1b7262134dcc22e72c6b189cb99e606a54a4bd1d33e872f3bbecb220bab7d337"
+    },
+    {
+      "title": "",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6010,
+      "time": "1:40:10",
+      "raw": "🎤1:40:10 ☘️",
+      "rawHash": "91e9ea3e58313538d49840169239d6e83a682dc8e7fe49111c924f0e35ce06d1",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=6010s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "review:WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "empty_after_timestamp"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#91e9ea3e58313538d49840169239d6e83a682dc8e7fe49111c924f0e35ce06d1"
+    },
+    {
+      "title": "~🎶ミリオンライブ多めで！歌っていくよっ ∞ 響架",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1320,
+      "time": "0:22:00",
+      "raw": "🏮アイマス縛り☆実写歌枠 ｜毎週金曜22:00~🎶ミリオンライブ多めで！歌っていくよっ ∞ 響架",
+      "rawHash": "e5c1a7e42cfe50ef9371d55d8cc6304324632e13364352b51ba54435234ecf0f",
+      "videoId": "mcPfrWY7pUo",
+      "videoTitle": "🏮 実写 #歌枠 ｜アツい曲よ!!届け!! #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka Ch. -響架-",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=mcPfrWY7pUo",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=mcPfrWY7pUo&t=1320s",
+      "sourceId": "description:mcPfrWY7pUo:e5c1a7e42cfe50ef",
+      "sourceHash": "e5c1a7e42cfe50ef9371d55d8cc6304324632e13364352b51ba54435234ecf0f",
+      "sourceOrigin": "review:mcPfrWY7pUo-e5c1a7e42cfe50ef9371.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "title_only_non_song_candidate"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:mcPfrWY7pUo:e5c1a7e42cfe50ef9371",
+      "sourcePath": "data/review/sources/mcPfrWY7pUo-e5c1a7e42cfe50ef9371.json",
+      "reviewLocator": "data/review/sources/mcPfrWY7pUo-e5c1a7e42cfe50ef9371.json#e5c1a7e42cfe50ef9371d55d8cc6304324632e13364352b51ba54435234ecf0f"
     },
     {
       "title": "終わりのあいさつ",
@@ -946,6 +1388,926 @@
       "reviewId": "review:LIvCuQkMnVE:c545a9f2939f62a3983a",
       "sourcePath": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json",
       "reviewLocator": "data/review/sources/history-LIvCuQkMnVE-c545a9f2939f62a3983a.json#49ace4d8ff76b11cacad06ea1ae3f39f9c749d81c8d547fba4a0525048970f51"
+    },
+    {
+      "title": "配信開始",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 0,
+      "time": "0:00:00",
+      "raw": "00:00:00 配信開始",
+      "rawHash": "434f1deaa9862d8c5174d60be0fa1eab22103cb4f9a69e68c6337b98f527501e",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=0s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#434f1deaa9862d8c5174d60be0fa1eab22103cb4f9a69e68c6337b98f527501e"
+    },
+    {
+      "title": "音入り",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 44,
+      "time": "0:00:44",
+      "raw": "00:00:44 音入り",
+      "rawHash": "bf372b92798dc4483d4984b7439fd83dd88bb602f573ad5426c6b910b1c0d7be",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=44s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_marker_title",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#bf372b92798dc4483d4984b7439fd83dd88bb602f573ad5426c6b910b1c0d7be"
+    },
+    {
+      "title": "初見さん達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 184,
+      "time": "0:03:04",
+      "raw": "00:03:04 初見さん達成",
+      "rawHash": "5029e7f42f2fcc67d6cc30440b4c5d9e92a3b81d0c2e61a7b070f30cab9ec841",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=184s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#5029e7f42f2fcc67d6cc30440b4c5d9e92a3b81d0c2e61a7b070f30cab9ec841"
+    },
+    {
+      "title": "最近悩んでること",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 720,
+      "time": "0:12:00",
+      "raw": "00:12:00 最近悩んでること",
+      "rawHash": "a76764283cab3d02e2fcfe395151dd77b09f076000473701107cebeb104702a4",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=720s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#a76764283cab3d02e2fcfe395151dd77b09f076000473701107cebeb104702a4"
+    },
+    {
+      "title": "配信してる時は楽しみたい",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1242,
+      "time": "0:20:42",
+      "raw": "00:20:42 配信してる時は楽しみたい",
+      "rawHash": "7e138b034818305a536945ab903d7c69c61e64642744216016faf05962387908",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=1242s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#7e138b034818305a536945ab903d7c69c61e64642744216016faf05962387908"
+    },
+    {
+      "title": "大きな目標のために頑張れる事",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1757,
+      "time": "0:29:17",
+      "raw": "00:29:17 大きな目標のために頑張れる事",
+      "rawHash": "ae91c349b34ca7d79cd4a921044d1f99fc1532d06db4fa4073f52f410d74dae8",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=1757s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#ae91c349b34ca7d79cd4a921044d1f99fc1532d06db4fa4073f52f410d74dae8"
+    },
+    {
+      "title": "オレンジスパチャ達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1885,
+      "time": "0:31:25",
+      "raw": "00:31:25 オレンジスパチャ達成",
+      "rawHash": "2f51ded37a8ba19528dcbacc00adba5e209d038aa3621cacc92111cfe9584127",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=1885s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#2f51ded37a8ba19528dcbacc00adba5e209d038aa3621cacc92111cfe9584127"
+    },
+    {
+      "title": "夢はおっきく",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2685,
+      "time": "0:44:45",
+      "raw": "00:44:45 夢はおっきく",
+      "rawHash": "f5b8ab60cb96f1a19b8f409a00aa28a074ddcacbbf37c4801da82bc12e95d0bc",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=2685s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#f5b8ab60cb96f1a19b8f409a00aa28a074ddcacbbf37c4801da82bc12e95d0bc"
+    },
+    {
+      "title": "ねぴんを表すとすれば？",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 2980,
+      "time": "0:49:40",
+      "raw": "00:49:40 ねぴんを表すとすれば？",
+      "rawHash": "154f45cf05c9f14ffd3d155b7b626560273e746467a9d6a60dc882708b632abe",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=2980s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#154f45cf05c9f14ffd3d155b7b626560273e746467a9d6a60dc882708b632abe"
+    },
+    {
+      "title": "初めての人に何してるか伝えたい",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3563,
+      "time": "0:59:23",
+      "raw": "00:59:23 初めての人に何してるか伝えたい",
+      "rawHash": "d9c3431b33605917fa1165bd46d253f6eef5a6701537472440d72ce35b4adc01",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=3563s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#d9c3431b33605917fa1165bd46d253f6eef5a6701537472440d72ce35b4adc01"
+    },
+    {
+      "title": "ジャンルごとに魅力を考えたい",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3890,
+      "time": "1:04:50",
+      "raw": "01:04:50 ジャンルごとに魅力を考えたい",
+      "rawHash": "2816abc11c8df595640fba1c10bf12095ab9f0a4320f702c834c6ff1371d4d56",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=3890s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#2816abc11c8df595640fba1c10bf12095ab9f0a4320f702c834c6ff1371d4d56"
+    },
+    {
+      "title": "ねぴちゃん歌枠の魅力について",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 3930,
+      "time": "1:05:30",
+      "raw": "01:05:30 ねぴちゃん歌枠の魅力について",
+      "rawHash": "0a395abe3b44e9c4ce5f590f9cc03820dd16a665ceadaa18f146fe53582563b9",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=3930s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#0a395abe3b44e9c4ce5f590f9cc03820dd16a665ceadaa18f146fe53582563b9"
+    },
+    {
+      "title": "高評価50達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 4920,
+      "time": "1:22:00",
+      "raw": "01:22:00 高評価50達成",
+      "rawHash": "38430145e07c183c907ea902cb34112e4c4946b45b536aeba5ce878f7e9dbafe",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=4920s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#38430145e07c183c907ea902cb34112e4c4946b45b536aeba5ce878f7e9dbafe"
+    },
+    {
+      "title": "メンシギフト達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5050,
+      "time": "1:24:10",
+      "raw": "01:24:10 メンシギフト達成",
+      "rawHash": "e3ea273b997bda3190d04a4acd9f598cd670363221812ad59c2cab2afc4a2dc8",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=5050s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#e3ea273b997bda3190d04a4acd9f598cd670363221812ad59c2cab2afc4a2dc8"
+    },
+    {
+      "title": "サマータイムレコード",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5325,
+      "time": "1:28:45",
+      "raw": "01:28:45 サマータイムレコード",
+      "rawHash": "7939fc0f61fce8d1082c691d5d9aa6ef292bfa273fca52d7caea4d0043600b13",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=5325s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#7939fc0f61fce8d1082c691d5d9aa6ef292bfa273fca52d7caea4d0043600b13"
+    },
+    {
+      "title": "ピンクスパチャ達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 5632,
+      "time": "1:33:52",
+      "raw": "01:33:52 ピンクスパチャ達成",
+      "rawHash": "0f66cac96d7dff013a04125edaa8a790cc174f124a47c0b4b792b40ff9142cd4",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=5632s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#0f66cac96d7dff013a04125edaa8a790cc174f124a47c0b4b792b40ff9142cd4"
+    },
+    {
+      "title": "リアクションLv30達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6820,
+      "time": "1:53:40",
+      "raw": "01:53:40 リアクションLv30達成",
+      "rawHash": "78ec482bdc50a3cf6920a0c182ae19aa36d4c064313127d99c5dcf7598d7e46d",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=6820s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "activity_title",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#78ec482bdc50a3cf6920a0c182ae19aa36d4c064313127d99c5dcf7598d7e46d"
+    },
+    {
+      "title": "赤スパチャ達成",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6902,
+      "time": "1:55:02",
+      "raw": "01:55:02 赤スパチャ達成",
+      "rawHash": "10ebaaa863b169de0a1606c4c5dfa2da46726dde9ea2685202eae97ee919707b",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=6902s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#10ebaaa863b169de0a1606c4c5dfa2da46726dde9ea2685202eae97ee919707b"
+    },
+    {
+      "title": "ねぴちゃんの苦手なコメント",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8520,
+      "time": "2:22:00",
+      "raw": "02:22:00 ねぴちゃんの苦手なコメント",
+      "rawHash": "90a95ca19fc95ad00aa0db882d0bc8c8995ed651a35783b7661307f42704f90a",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=8520s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#90a95ca19fc95ad00aa0db882d0bc8c8995ed651a35783b7661307f42704f90a"
+    },
+    {
+      "title": "スクワットタイム",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 8979,
+      "time": "2:29:39",
+      "raw": "02:29:39 スクワットタイム",
+      "rawHash": "d0841acf79c04d0f333d33b2e9245df9312e56675f608443f0a94bad766e2bac",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=8979s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#d0841acf79c04d0f333d33b2e9245df9312e56675f608443f0a94bad766e2bac"
+    },
+    {
+      "title": "3周年記念イラスト完全公開",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 9465,
+      "time": "2:37:45",
+      "raw": "02:37:45 3周年記念イラスト完全公開",
+      "rawHash": "536b36a8261fc38e78e37ca7c86f63913fe8a0492e8e452a1ab13c08b0950f0d",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=9465s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "artist_rich_source_title_only_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#536b36a8261fc38e78e37ca7c86f63913fe8a0492e8e452a1ab13c08b0950f0d"
+    },
+    {
+      "title": "全身バージョンも登場！",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 9553,
+      "time": "2:39:13",
+      "raw": "02:39:13 全身バージョンも登場！",
+      "rawHash": "7a44d292e8e878f9276b18e8938e0c44e68a16a53e8ca88b8490c7902fa62b26",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=9553s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#7a44d292e8e878f9276b18e8938e0c44e68a16a53e8ca88b8490c7902fa62b26"
+    },
+    {
+      "title": "ED",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 10122,
+      "time": "2:48:42",
+      "raw": "02:48:42 ED",
+      "rawHash": "81e8f4a3fe2b9a6afe5dc13253d3c5411a9c606071edb7b4a4f3bcc222b263b1",
+      "videoId": "AWzF0ZziA-s",
+      "videoTitle": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=AWzF0ZziA-s&t=10122s",
+      "sourceId": "UgwS4iLKuYeee1NyA3t4AaABAg",
+      "sourceHash": "854999e79ec788fe6a5347a5c1418c3380e3f3bc09b4f0c3a4200043bb444e1c",
+      "sourceOrigin": "review:AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:AWzF0ZziA-s:854999e79ec788fe6a53",
+      "sourcePath": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json",
+      "reviewLocator": "data/review/sources/AWzF0ZziA-s-854999e79ec788fe6a53.json#81e8f4a3fe2b9a6afe5dc13253d3c5411a9c606071edb7b4a4f3bcc222b263b1"
     },
     {
       "title": "曲終わり",
@@ -4116,310 +5478,6 @@
       "reviewLocator": "data/review/sources/history-bQtUhOfrJC0-369ea67228f3b93b75b0.json#94d0460c44ee3fdcf285036380173e529ff34e0b7d7367cf4f480bc63c992425"
     },
     {
-      "title": "待機・配信開始前",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 0,
-      "time": "0:00:00",
-      "raw": "00:00:00 ● 待機・配信開始前",
-      "rawHash": "79966736ab1c6cc62fc03c2de285195d0b0e8f7532e191ba43b0dbc996336632",
-      "videoId": "Gi4zAjaPB7c",
-      "videoTitle": "【 #歌枠 #karaoke 】ノンストップ歌枠 ♪ 最後だけ喋るよ🎙 🍀 初見さんも大歓迎♪",
-      "channelName": "響かさね / Hibiki Kasane",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c&t=0s",
-      "sourceId": "UgxR7foVQwmZ-2i87rN4AaABAg",
-      "sourceHash": "4b882bd89374288a2bfb94c3a458d9a9f92ece314e860ccc9834f5f82d2d740f",
-      "sourceOrigin": "review:Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Gi4zAjaPB7c:4b882bd89374288a2bfb",
-      "sourcePath": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "reviewLocator": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json#79966736ab1c6cc62fc03c2de285195d0b0e8f7532e191ba43b0dbc996336632"
-    },
-    {
-      "title": "歌唱パート前半終了＆換気タイム",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1621,
-      "time": "0:27:01",
-      "raw": "00:27:01 ● 歌唱パート前半終了＆換気タイム",
-      "rawHash": "bf61653697f70ea7533406b1e5c884f8e309c14732202ca440ac71e35d5e8ae6",
-      "videoId": "Gi4zAjaPB7c",
-      "videoTitle": "【 #歌枠 #karaoke 】ノンストップ歌枠 ♪ 最後だけ喋るよ🎙 🍀 初見さんも大歓迎♪",
-      "channelName": "響かさね / Hibiki Kasane",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c&t=1621s",
-      "sourceId": "UgxR7foVQwmZ-2i87rN4AaABAg",
-      "sourceHash": "4b882bd89374288a2bfb94c3a458d9a9f92ece314e860ccc9834f5f82d2d740f",
-      "sourceOrigin": "review:Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Gi4zAjaPB7c:4b882bd89374288a2bfb",
-      "sourcePath": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "reviewLocator": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json#bf61653697f70ea7533406b1e5c884f8e309c14732202ca440ac71e35d5e8ae6"
-    },
-    {
-      "title": "防音室換気タイム終了",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1843,
-      "time": "0:30:43",
-      "raw": "00:30:43 ● 防音室換気タイム終了",
-      "rawHash": "8cfef4f49c19395043df3e1f4477ece6346c1a8cee9af5a37050452042ca1a25",
-      "videoId": "Gi4zAjaPB7c",
-      "videoTitle": "【 #歌枠 #karaoke 】ノンストップ歌枠 ♪ 最後だけ喋るよ🎙 🍀 初見さんも大歓迎♪",
-      "channelName": "響かさね / Hibiki Kasane",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c&t=1843s",
-      "sourceId": "UgxR7foVQwmZ-2i87rN4AaABAg",
-      "sourceHash": "4b882bd89374288a2bfb94c3a458d9a9f92ece314e860ccc9834f5f82d2d740f",
-      "sourceOrigin": "review:Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Gi4zAjaPB7c:4b882bd89374288a2bfb",
-      "sourcePath": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "reviewLocator": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json#8cfef4f49c19395043df3e1f4477ece6346c1a8cee9af5a37050452042ca1a25"
-    },
-    {
-      "title": "忘れじの言の葉",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 1877,
-      "time": "0:31:17",
-      "raw": "00:31:17 06. 忘れじの言の葉",
-      "rawHash": "497262c90033775d1b6fc516c447567d7af9f529d3cd5249c4c7dc9f2240fe0e",
-      "videoId": "Gi4zAjaPB7c",
-      "videoTitle": "【 #歌枠 #karaoke 】ノンストップ歌枠 ♪ 最後だけ喋るよ🎙 🍀 初見さんも大歓迎♪",
-      "channelName": "響かさね / Hibiki Kasane",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c&t=1877s",
-      "sourceId": "UgxR7foVQwmZ-2i87rN4AaABAg",
-      "sourceHash": "4b882bd89374288a2bfb94c3a458d9a9f92ece314e860ccc9834f5f82d2d740f",
-      "sourceOrigin": "review:Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Gi4zAjaPB7c:4b882bd89374288a2bfb",
-      "sourcePath": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "reviewLocator": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json#497262c90033775d1b6fc516c447567d7af9f529d3cd5249c4c7dc9f2240fe0e"
-    },
-    {
-      "title": "Weight of the World 壊レタ世界ノ歌",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 2128,
-      "time": "0:35:28",
-      "raw": "00:35:28 07. Weight of the World 壊レタ世界ノ歌",
-      "rawHash": "d0456e062053f8314735e7aaba40a8c32e1e89229a6e97817d6a2c2eacffff15",
-      "videoId": "Gi4zAjaPB7c",
-      "videoTitle": "【 #歌枠 #karaoke 】ノンストップ歌枠 ♪ 最後だけ喋るよ🎙 🍀 初見さんも大歓迎♪",
-      "channelName": "響かさね / Hibiki Kasane",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c&t=2128s",
-      "sourceId": "UgxR7foVQwmZ-2i87rN4AaABAg",
-      "sourceHash": "4b882bd89374288a2bfb94c3a458d9a9f92ece314e860ccc9834f5f82d2d740f",
-      "sourceOrigin": "review:Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Gi4zAjaPB7c:4b882bd89374288a2bfb",
-      "sourcePath": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "reviewLocator": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json#d0456e062053f8314735e7aaba40a8c32e1e89229a6e97817d6a2c2eacffff15"
-    },
-    {
-      "title": "歌唱パート終了",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4420,
-      "time": "1:13:40",
-      "raw": "01:13:40 ● 歌唱パート終了",
-      "rawHash": "ca94bde4dadf4b756f6a9e95530cac379ffb31204bf2cfadf80f6cbf4b27d7b3",
-      "videoId": "Gi4zAjaPB7c",
-      "videoTitle": "【 #歌枠 #karaoke 】ノンストップ歌枠 ♪ 最後だけ喋るよ🎙 🍀 初見さんも大歓迎♪",
-      "channelName": "響かさね / Hibiki Kasane",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c&t=4420s",
-      "sourceId": "UgxR7foVQwmZ-2i87rN4AaABAg",
-      "sourceHash": "4b882bd89374288a2bfb94c3a458d9a9f92ece314e860ccc9834f5f82d2d740f",
-      "sourceOrigin": "review:Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "artist_rich_source_title_only_entry",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Gi4zAjaPB7c:4b882bd89374288a2bfb",
-      "sourcePath": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "reviewLocator": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json#ca94bde4dadf4b756f6a9e95530cac379ffb31204bf2cfadf80f6cbf4b27d7b3"
-    },
-    {
-      "title": "ちょっとだけ雑談タイム",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4659,
-      "time": "1:17:39",
-      "raw": "01:17:39 ● ちょっとだけ雑談タイム",
-      "rawHash": "a77a89f536fe7afcd7e35caadd56e3f4e9885a3bab4a64feb97042066ce8ad92",
-      "videoId": "Gi4zAjaPB7c",
-      "videoTitle": "【 #歌枠 #karaoke 】ノンストップ歌枠 ♪ 最後だけ喋るよ🎙 🍀 初見さんも大歓迎♪",
-      "channelName": "響かさね / Hibiki Kasane",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c&t=4659s",
-      "sourceId": "UgxR7foVQwmZ-2i87rN4AaABAg",
-      "sourceHash": "4b882bd89374288a2bfb94c3a458d9a9f92ece314e860ccc9834f5f82d2d740f",
-      "sourceOrigin": "review:Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Gi4zAjaPB7c:4b882bd89374288a2bfb",
-      "sourcePath": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "reviewLocator": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json#a77a89f536fe7afcd7e35caadd56e3f4e9885a3bab4a64feb97042066ce8ad92"
-    },
-    {
-      "title": "終わりの挨拶",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 5535,
-      "time": "1:32:15",
-      "raw": "01:32:15 ● 終わりの挨拶:_まったねー::_まったねー::_ねの文字:",
-      "rawHash": "89ceba4dd68c3c523715e68442bf6f3b39d09c24a0b2121fb31edccd5fc16a53",
-      "videoId": "Gi4zAjaPB7c",
-      "videoTitle": "【 #歌枠 #karaoke 】ノンストップ歌枠 ♪ 最後だけ喋るよ🎙 🍀 初見さんも大歓迎♪",
-      "channelName": "響かさね / Hibiki Kasane",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=Gi4zAjaPB7c&t=5535s",
-      "sourceId": "UgxR7foVQwmZ-2i87rN4AaABAg",
-      "sourceHash": "4b882bd89374288a2bfb94c3a458d9a9f92ece314e860ccc9834f5f82d2d740f",
-      "sourceOrigin": "review:Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_many_topic_entries"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_many_topic_entries"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:Gi4zAjaPB7c:4b882bd89374288a2bfb",
-      "sourcePath": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json",
-      "reviewLocator": "data/review/sources/Gi4zAjaPB7c-4b882bd89374288a2bfb.json#89ceba4dd68c3c523715e68442bf6f3b39d09c24a0b2121fb31edccd5fc16a53"
-    },
-    {
       "title": "再開",
       "artist": "未記載",
       "isNiche": true,
@@ -5242,6 +6300,371 @@
       "reviewLocator": "data/review/sources/history-pI-sk5vxg3E-c36865484826660b7d25.json#a55273181c7e9e3c900d751ec6b2e29dfb3a888fa63830144ffb564b046e034e"
     },
     {
+      "title": "メン限配信　超美麗3Dスイカ割りと花火",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 578,
+      "time": "0:09:38",
+      "raw": "0:09:38メン限配信 超美麗3Dスイカ割りと花火",
+      "rawHash": "5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=578s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#5b22360a08f5913b29a7ec163b62023a356429be2473387f8fb6e8b29ec45320"
+    },
+    {
+      "title": "～リアルライブチケット#耐久 7",
+      "artist": "30(木)Vack-ON!!アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "isNiche": false,
+      "isUnknownArtist": false,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～リアルライブチケット#耐久 7/30(木)Vack-ON!!アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:15961b651311723d",
+      "sourceHash": "15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6",
+      "sourceOrigin": "review:GkmXWhgz1QA-15961b651311723dc3ab.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:15961b651311723dc3ab",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-15961b651311723dc3ab.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-15961b651311723dc3ab.json#15961b651311723dc3ab008825a6fcdb0f2ca24c48b45b99c2dfa9862125ddb6"
+    },
+    {
+      "title": "～縦型💙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～縦型💙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "8cf7fb55fd8910d12942e792b0370fd62479d6267ca124a65a1cdbbc6ac00418",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:8cf7fb55fd8910d1",
+      "sourceHash": "8cf7fb55fd8910d12942e792b0370fd62479d6267ca124a65a1cdbbc6ac00418",
+      "sourceOrigin": "review:GkmXWhgz1QA-8cf7fb55fd8910d12942.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:8cf7fb55fd8910d12942",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-8cf7fb55fd8910d12942.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-8cf7fb55fd8910d12942.json#8cf7fb55fd8910d12942e792b0370fd62479d6267ca124a65a1cdbbc6ac00418"
+    },
+    {
+      "title": "～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～眠れないあなたに🌙アコギ弾き語り💭#shorts 【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:c34ca03a358bd9ce",
+      "sourceHash": "c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8",
+      "sourceOrigin": "review:GkmXWhgz1QA-c34ca03a358bd9ce0a30.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:c34ca03a358bd9ce0a30",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-c34ca03a358bd9ce0a30.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-c34ca03a358bd9ce0a30.json#c34ca03a358bd9ce0a30eb83500d714604e3b8c91d80c61edade30c5a10ff9e8"
+    },
+    {
+      "title": "～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 1350,
+      "time": "0:22:30",
+      "raw": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "rawHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=1350s",
+      "sourceId": "description:GkmXWhgz1QA:5d44a7135bb15e6a",
+      "sourceHash": "5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb",
+      "sourceOrigin": "review:GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "activity_title"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:5d44a7135bb15e6a43df",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-5d44a7135bb15e6a43df.json#5d44a7135bb15e6a43df3d155ca7463487ecc23075c08fd2dcdd3fbc9456dbeb"
+    },
+    {
+      "title": "「歌声に　夢の種から　花ひらく」　朝起きてアーカイブ視聴中　ピクミンの～種のうた～　いい♪（",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 6520,
+      "time": "1:48:40",
+      "raw": "「歌声に 夢の種から 花ひらく」 朝起きてアーカイブ視聴中 ピクミンの～種のうた～ いい♪（1:48:40）",
+      "rawHash": "87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=6520s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#87714bb228577e2d8f8c0f80eb2794ce75b575a213c3bbc77cb735de3d11bfdd"
+    },
+    {
+      "title": "同接400人越えてたありがとう",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14300,
+      "time": "3:58:20",
+      "raw": "3:58:20同接400人越えてたありがとう",
+      "rawHash": "8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14300s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "title_only_non_song_candidate",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#8317eb9092ddd04a2437a52c2581a178d2c48e5c7ff624c2c1ba35ff09ff5f19"
+    },
+    {
+      "title": "かわいくFANBOX宣伝",
+      "artist": "",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14354,
+      "time": "3:59:14",
+      "raw": "3:59:14かわいくFANBOX宣伝",
+      "rawHash": "00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14354s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "obvious_non_song_text",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#00a91092bfe85b877771815807632766a3b04e1b10c515166ecfb387b4b5d00f"
+    },
+    {
+      "title": "オープニング目に焼き付けといて",
+      "artist": "未記載",
+      "isNiche": false,
+      "isUnknownArtist": true,
+      "seconds": 14661,
+      "time": "4:04:21",
+      "raw": "4:04:21オープニング目に焼き付けといて",
+      "rawHash": "062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff",
+      "videoId": "GkmXWhgz1QA",
+      "videoTitle": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "channelId": "",
+      "channelHandle": "",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=GkmXWhgz1QA&t=14661s",
+      "sourceId": "UgwoxwqtQ5OLpoYA-PJ4AaABAg",
+      "sourceHash": "e89f03869849eb199695e2b2bd7d1b33e0286060fba17eca154dc7ca64db92a0",
+      "sourceOrigin": "review:GkmXWhgz1QA-e89f03869849eb199695.json",
+      "sourceScope": "current",
+      "ranges": [
+        "review"
+      ],
+      "classification": "confirmed_noise",
+      "suggestedAction": "drop_entry",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
+      ],
+      "riskReasons": [
+        "likely_non_song_entry",
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:GkmXWhgz1QA:e89f03869849eb199695",
+      "sourcePath": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json",
+      "reviewLocator": "data/review/sources/GkmXWhgz1QA-e89f03869849eb199695.json#062c20ddd1efa8ac8b743d21b2c274a0f2d91a30d80db665360f0556b73656ff"
+    },
+    {
       "title": "おつにょ",
       "artist": "未記載",
       "isNiche": true,
@@ -5291,82 +6714,6 @@
       "reviewId": "review:FlhwC9s1Nk8:4aa61da2d1b34d7d38e8",
       "sourcePath": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json",
       "reviewLocator": "data/review/sources/history-FlhwC9s1Nk8-4aa61da2d1b34d7d38e8.json#b9324cc67571ebd0a5b1bb4fcd344d74b2954a5392b2b26b9c2cf5f0881b21da"
-    },
-    {
-      "title": "声入り",
-      "artist": "",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 444,
-      "time": "0:07:24",
-      "raw": "7:24 声入り",
-      "rawHash": "3e328cd6e7a84b313e74c8e23c100ba168df2e639887ca9c47d134b06cde23bb",
-      "videoId": "V9NZwbEcskM",
-      "videoTitle": "【#リクエスト】もしかして3連休の始まり！！？って感じの歌枠♪【#歌枠】#新人VTuber #歌ってみた #VSinger #karaoke #shorts #アニメ #anime",
-      "channelName": "新島らんぷ🧞‍♂️Alajima【緑の顔の人】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=V9NZwbEcskM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=V9NZwbEcskM&t=444s",
-      "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
-      "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "sourceOrigin": "review:V9NZwbEcskM-5ffba4a4de7015bf6742.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "obvious_non_song_text",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:V9NZwbEcskM:5ffba4a4de7015bf6742",
-      "sourcePath": "data/review/sources/V9NZwbEcskM-5ffba4a4de7015bf6742.json",
-      "reviewLocator": "data/review/sources/V9NZwbEcskM-5ffba4a4de7015bf6742.json#3e328cd6e7a84b313e74c8e23c100ba168df2e639887ca9c47d134b06cde23bb"
-    },
-    {
-      "title": "かわいいだけじゃだめですか？",
-      "artist": "未記載",
-      "isNiche": false,
-      "isUnknownArtist": true,
-      "seconds": 4123,
-      "time": "1:08:43",
-      "raw": "1:08:43 かわいいだけじゃだめですか？",
-      "rawHash": "a90b712bfb4c5d030797078ff7f02837c2dfd9c3eb07c7c3c8e826de14099eef",
-      "videoId": "V9NZwbEcskM",
-      "videoTitle": "【#リクエスト】もしかして3連休の始まり！！？って感じの歌枠♪【#歌枠】#新人VTuber #歌ってみた #VSinger #karaoke #shorts #アニメ #anime",
-      "channelName": "新島らんぷ🧞‍♂️Alajima【緑の顔の人】",
-      "channelId": "",
-      "channelHandle": "",
-      "youtubeUrl": "https://www.youtube.com/watch?v=V9NZwbEcskM",
-      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=V9NZwbEcskM&t=4123s",
-      "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
-      "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "sourceOrigin": "review:V9NZwbEcskM-5ffba4a4de7015bf6742.json",
-      "sourceScope": "current",
-      "ranges": [
-        "review"
-      ],
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "positiveEvidence": [],
-      "sourceRiskReasons": [
-        "source_multiple_unknown_artists"
-      ],
-      "riskReasons": [
-        "title_only_non_song_candidate",
-        "source_multiple_unknown_artists"
-      ],
-      "replacementSuggestion": null,
-      "reviewId": "review:V9NZwbEcskM:5ffba4a4de7015bf6742",
-      "sourcePath": "data/review/sources/V9NZwbEcskM-5ffba4a4de7015bf6742.json",
-      "reviewLocator": "data/review/sources/V9NZwbEcskM-5ffba4a4de7015bf6742.json#a90b712bfb4c5d030797078ff7f02837c2dfd9c3eb07c7c3c8e826de14099eef"
     },
     {
       "title": "閉会式",

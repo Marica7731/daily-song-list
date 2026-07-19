@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T04:14:58.312Z",
+  "generatedAt": "2026-07-19T09:07:04.699Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 27087,
-  "unknownArtistCount": 3714,
-  "nicheUnknownArtistCount": 1964,
-  "highRiskEntryCount": 745,
-  "highRiskSourceCount": 23,
+  "totalSongs": 27203,
+  "unknownArtistCount": 3731,
+  "nicheUnknownArtistCount": 1980,
+  "highRiskEntryCount": 770,
+  "highRiskSourceCount": 26,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 0,
+  "ruleDroppedEntryCount": 6,
   "conversationDroppedEntryCount": 0,
   "qualityDroppedEntryCount": 0,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 10,
-  "parserCorruptionCount": 52,
-  "likelyNoiseCount": 0,
+  "confirmedNoiseCount": 44,
+  "parserCorruptionCount": 48,
+  "likelyNoiseCount": 8,
   "needsReviewCount": 1957,
-  "likelySongCount": 15312,
+  "likelySongCount": 15377,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -230,24 +230,24 @@
   ],
   "topRiskChannels": [
     {
-      "value": "UTANO ch. 白玖ウタノ",
-      "count": 11
+      "value": "汐音ベリーちゃん Berry Ch",
+      "count": 15
     },
     {
-      "value": "汐音ベリーちゃん Berry Ch",
-      "count": 10
+      "value": "UTANO ch. 白玖ウタノ",
+      "count": 11
     },
     {
       "value": "音魂ヒビクHibiku Otodama",
       "count": 8
     },
     {
-      "value": "羽緒",
+      "value": "Kyoka Ch. -響架-",
       "count": 7
     },
     {
-      "value": "Kyoka Ch. -響架-",
-      "count": 6
+      "value": "羽緒",
+      "count": 7
     },
     {
       "value": "Norn Ch. 氷々樹ノルン",
@@ -366,6 +366,20 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
         "short_unknown_title"
+      ]
+    },
+    {
+      "videoId": "GkmXWhgz1QA",
+      "title": "22:30～眠れない夜に居場所になるよ🌙アコギ弾き語り💭【#歌枠 /#弾き語り/#Vtuber】【睡眠導入/作業用BGM】Singing Stream",
+      "channelName": "汐音ベリーちゃん Berry Ch",
+      "riskScore": 100,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "source_conversation_timeline",
+        "source_many_topic_entries",
+        "source_multiple_unknown_artists",
+        "conversation_entry"
       ]
     },
     {
@@ -490,6 +504,17 @@
       ]
     },
     {
+      "videoId": "AWzF0ZziA-s",
+      "title": "【歌枠】イラスト公開チャレンジ。┊#karaoke",
+      "channelName": "ねぴん / Nepin ch.",
+      "riskScore": 83,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_activity_marker_ratio_high",
+        "source_many_topic_entries"
+      ]
+    },
+    {
       "videoId": "8rx98ujzukk",
       "title": "【#ピアノ弾き語り 】ジャズっぽい弾き語り練習【 #Vsinger 】Singing while playing the piano to help you sleep.",
       "channelName": "朱の唄 Akane's Lullaby",
@@ -557,38 +582,18 @@
         "niche_unknown_artist",
         "source_multiple_niche_short_titles"
       ]
-    },
-    {
-      "videoId": "4CgnNOuQMjw",
-      "title": "【 #歌枠 】5周年ライブまで毎日歌練習#4【練習配信】 #vtuber #浅葱サキ #バーチャルyoutuber 声優 #shorts",
-      "channelName": "Saki Ch. 浅葱サキ",
-      "riskScore": 77,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "short_unknown_title",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles"
-      ]
-    },
-    {
-      "videoId": "ZSNptWSG6i4",
-      "title": "【 歌枠￤KARAOKE 】1曲だけでも聴いてかない？【ゆそる／ピスパレ】",
-      "channelName": "ゆそる",
-      "riskScore": 77,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_unknown_artist_ratio_high",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists",
-        "source_multiple_niche_short_titles",
-        "short_unknown_title"
-      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-19T09:07:04.699Z",
+      "totalSongs": 27203,
+      "unknownArtistCount": 3731,
+      "nicheUnknownArtistCount": 1980,
+      "highRiskEntryCount": 770,
+      "highRiskSourceCount": 26
+    },
     {
       "generatedAt": "2026-07-19T04:14:58.312Z",
       "totalSongs": 27087,
@@ -740,14 +745,6 @@
       "nicheUnknownArtistCount": 1502,
       "highRiskEntryCount": 497,
       "highRiskSourceCount": 19
-    },
-    {
-      "generatedAt": "2026-07-15T14:23:46.494Z",
-      "totalSongs": 18136,
-      "unknownArtistCount": 2994,
-      "nicheUnknownArtistCount": 1533,
-      "highRiskEntryCount": 500,
-      "highRiskSourceCount": 20
     }
   ]
 }

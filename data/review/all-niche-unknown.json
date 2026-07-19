@@ -1,25 +1,25 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T04:21:30.041Z",
+  "generatedAt": "2026-07-19T09:13:23.570Z",
   "dataSource": "data/latest.json + current review sources + classified historical review sources",
   "reviewSourceDir": "data/review/sources",
-  "latestGeneratedAt": "2026-07-19T00:24:46.338Z",
+  "latestGeneratedAt": "2026-07-19T07:06:56.061Z",
   "curationVersion": "curation-v1:12c32dcbcb07",
   "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
   "counts": {
-    "totalCandidates": 2593,
-    "uniqueVideos": 437,
-    "uniqueSources": 519,
+    "totalCandidates": 2609,
+    "uniqueVideos": 439,
+    "uniqueSources": 521,
     "confirmedNoiseCount": 104,
     "parserCorruptionCount": 234,
     "likelyNoiseCount": 294,
-    "needsReviewCount": 1960,
+    "needsReviewCount": 1976,
     "likelySongCount": 1,
     "byClassification": {
       "confirmed_noise": 104,
       "parser_corruption": 234,
       "likely_noise": 294,
-      "needs_review": 1960,
+      "needs_review": 1976,
       "likely_song": 1
     }
   },
@@ -2663,7 +2663,7 @@
         "7d",
         "all",
         "review",
-        "snapshot:20260719T000000Z"
+        "snapshot:20260719T070000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -14873,6 +14873,45 @@
       "repairReasons": []
     },
     {
+      "title": "ひとつになれないけものたち",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2319,
+      "time": "0:38:39",
+      "raw": "38:39 ひとつになれないけものたち",
+      "rawHash": "b336896f3f368a5a9e1b28484070bdb712c503e23d9495ee2ba55610c031d07a",
+      "videoId": "WeWoipamuu8",
+      "videoTitle": "【お久しぶりの弾き語り】寝落ち・作業用枠｜おためし【#こたつちゃ配信中】",
+      "channelName": "KOTATSU Ch.はる こたつぶとん倶楽部♧",
+      "channelId": "UCvmpT7L9S3iE2bG49AIhJNA",
+      "channelHandle": "/@KOTATSUChHaruKotatsubutonclub",
+      "youtubeUrl": "https://www.youtube.com/watch?v=WeWoipamuu8",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=WeWoipamuu8&t=2319s",
+      "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
+      "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:WeWoipamuu8:e0c31478c6239c3ae4c5",
+      "sourcePath": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json",
+      "reviewLocator": "data/review/sources/WeWoipamuu8-e0c31478c6239c3ae4c5.json#b336896f3f368a5a9e1b28484070bdb712c503e23d9495ee2ba55610c031d07a",
+      "repairedTitle": "ひとつになれないけものたち",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
       "title": "遊び心🫶🎶",
       "artist": "未記載",
       "isNiche": true,
@@ -17423,7 +17462,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17464,7 +17502,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17505,7 +17542,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17546,7 +17582,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17587,7 +17622,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17628,7 +17662,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17669,7 +17702,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17710,7 +17742,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17751,7 +17782,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17792,7 +17822,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17833,7 +17862,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17874,7 +17902,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17915,7 +17942,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17956,7 +17982,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -17997,7 +18022,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -18038,7 +18062,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -18079,7 +18102,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -18120,7 +18142,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -18161,7 +18182,6 @@
       "sourceOrigin": "latest;review:FNs4kpdpWGM-9ef1860f9676617e865c.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -27515,7 +27535,6 @@
       "sourceOrigin": "latest;review:M9-YywmcTJw-6931becf04cedf033b64.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -28659,7 +28678,7 @@
       "ranges": [
         "all",
         "review",
-        "snapshot:20260719T000000Z",
+        "snapshot:20260719T070000Z",
         "snapshot:20260713T120000Z",
         "snapshot:20260712T220000Z"
       ],
@@ -29806,13 +29825,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=kQVdDhuS2js&t=1740s",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "sourceOrigin": "latest;review:kQVdDhuS2js-dbff8ac38f56e8488ef2.json;review:history-kQVdDhuS2js-dbff8ac38f56e8488ef2.json",
+      "sourceOrigin": "latest;review:history-kQVdDhuS2js-dbff8ac38f56e8488ef2.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
         "all",
-        "review",
-        "snapshot:20260719T000000Z"
+        "snapshot:20260719T070000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -29823,8 +29841,7 @@
       "riskReasons": [
         "parser_corruption",
         "delimiter_split",
-        "niche_unknown_artist",
-        "short_unknown_title"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": {
         "artist": "アニメ三銃士"
@@ -29856,20 +29873,18 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=kQVdDhuS2js&t=3085s",
       "sourceId": "Ugxfh_2a_rD0mYvvQih4AaABAg",
       "sourceHash": "dbff8ac38f56e8488ef287a48187438dc27330bfe1f7624ac41b0ac54ed98619",
-      "sourceOrigin": "latest;review:kQVdDhuS2js-dbff8ac38f56e8488ef2.json",
+      "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all",
-        "review"
+        "all"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist",
-        "short_unknown_title"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:kQVdDhuS2js:dbff8ac38f56e8488ef2",
@@ -69522,7 +69537,6 @@
       "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -69563,7 +69577,6 @@
       "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -69604,7 +69617,6 @@
       "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -69645,7 +69657,6 @@
       "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -69686,7 +69697,6 @@
       "sourceOrigin": "latest;review:e0sb-se0lNA-74ecdbffd8572b1e3ae0.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70296,7 +70306,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70337,7 +70346,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70378,7 +70386,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70419,7 +70426,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70460,7 +70466,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70501,7 +70506,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70542,7 +70546,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70583,7 +70586,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70624,7 +70626,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70665,7 +70666,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70706,7 +70706,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70747,7 +70746,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70788,7 +70786,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70829,7 +70826,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70870,7 +70866,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70911,7 +70906,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70952,7 +70946,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -70993,7 +70986,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71034,7 +71026,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71075,7 +71066,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71116,7 +71106,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71157,7 +71146,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71198,7 +71186,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71239,7 +71226,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71280,7 +71266,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71321,7 +71306,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71362,7 +71346,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71403,7 +71386,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71444,7 +71426,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71485,7 +71466,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71526,7 +71506,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71567,7 +71546,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71608,7 +71586,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71697,7 +71674,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71787,7 +71763,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71828,7 +71803,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71869,7 +71843,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71910,7 +71883,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71951,7 +71923,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -71992,7 +71963,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -72033,7 +72003,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -72074,7 +72043,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -72115,7 +72083,6 @@
       "sourceOrigin": "latest;review:ELqKe7RYai0-2e99e8523ec73228dbc1.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -78906,6 +78873,591 @@
       "sourcePath": "data/review/sources/1dFa_GH8eCs-18f1a125a0d4fec1ebfd.json",
       "reviewLocator": "data/review/sources/1dFa_GH8eCs-18f1a125a0d4fec1ebfd.json#428200fad8fa71e5c3c8af7f3aa0719cd183ab741c9776f94b7b32c1c621ba6f",
       "repairedTitle": "しわ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "A night comes!",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 163,
+      "time": "0:02:43",
+      "raw": "2:43 A night comes!",
+      "rawHash": "65d91a7f14b32016769e6949c1355461ee9a6b89ea97fed13eccebb3d9993fe6",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=163s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#65d91a7f14b32016769e6949c1355461ee9a6b89ea97fed13eccebb3d9993fe6",
+      "repairedTitle": "A night comes!",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "情熱のウォブル",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 379,
+      "time": "0:06:19",
+      "raw": "6:19 情熱のウォブル",
+      "rawHash": "83806ffc3ef17fdd46c1333f5e5289eddd47e8ffdec441493cfbf3b512abd5ca",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=379s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#83806ffc3ef17fdd46c1333f5e5289eddd47e8ffdec441493cfbf3b512abd5ca",
+      "repairedTitle": "情熱のウォブル",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ドーナドーナのうた",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1049,
+      "time": "0:17:29",
+      "raw": "17:29 ドーナドーナのうた",
+      "rawHash": "131d11d4f833b260ecb6a480aedfbc032e0ed1eadc7487c02be05d8f656a73ce",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=1049s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#131d11d4f833b260ecb6a480aedfbc032e0ed1eadc7487c02be05d8f656a73ce",
+      "repairedTitle": "ドーナドーナのうた",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "アイを識らない",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1409,
+      "time": "0:23:29",
+      "raw": "23:29 アイを識らない",
+      "rawHash": "3b5e904f67df17de6f66163ef72bb28aee7255f8c7c001e72051e9042dfc372b",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=1409s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#3b5e904f67df17de6f66163ef72bb28aee7255f8c7c001e72051e9042dfc372b",
+      "repairedTitle": "アイを識らない",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "ナツノヒグラフ",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 1679,
+      "time": "0:27:59",
+      "raw": "27:59 ナツノヒグラフ",
+      "rawHash": "46ec5dfb26b4c69c21e79d92d16bf0003dbbef0813c6a0ecc767b820eaec41e2",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=1679s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#46ec5dfb26b4c69c21e79d92d16bf0003dbbef0813c6a0ecc767b820eaec41e2",
+      "repairedTitle": "ナツノヒグラフ",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Alicemagic",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2025,
+      "time": "0:33:45",
+      "raw": "33:45 Alicemagic",
+      "rawHash": "7122b8092c62c5a8bb81abef9b839b187aca4916dbfd68b6e78be02378119de8",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=2025s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#7122b8092c62c5a8bb81abef9b839b187aca4916dbfd68b6e78be02378119de8",
+      "repairedTitle": "Alicemagic",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "raspberry cube",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 2836,
+      "time": "0:47:16",
+      "raw": "47:16 raspberry cube",
+      "rawHash": "1d30b5dacbc07a896903888f316801d248ba7f2754cd5f71d91ff16c1fbf7d7f",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=2836s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#1d30b5dacbc07a896903888f316801d248ba7f2754cd5f71d91ff16c1fbf7d7f",
+      "repairedTitle": "raspberry cube",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "本当の勇気に変わるまで",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3103,
+      "time": "0:51:43",
+      "raw": "51:43 本当の勇気に変わるまで",
+      "rawHash": "438bba6423a72ae79497aa634d03232d6a77ec16b27f34f985a9c17cba9a1c23",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=3103s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#438bba6423a72ae79497aa634d03232d6a77ec16b27f34f985a9c17cba9a1c23",
+      "repairedTitle": "本当の勇気に変わるまで",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "get the regret over",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 3417,
+      "time": "0:56:57",
+      "raw": "56:57 get the regret over",
+      "rawHash": "41b8efadf96bed5054ac771e2fa78566f92bee0bc05d61091d3e237279b01b90",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=3417s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#41b8efadf96bed5054ac771e2fa78566f92bee0bc05d61091d3e237279b01b90",
+      "repairedTitle": "get the regret over",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "恋せよ乙女！",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4069,
+      "time": "1:07:49",
+      "raw": "1:07:49 恋せよ乙女！",
+      "rawHash": "904b2eb6dbe193f06dfc4fc03b97a9a5a3f6dae2bb133c91d0dc32fc6a647a26",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=4069s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#904b2eb6dbe193f06dfc4fc03b97a9a5a3f6dae2bb133c91d0dc32fc6a647a26",
+      "repairedTitle": "恋せよ乙女！",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Light colors",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 4537,
+      "time": "1:15:37",
+      "raw": "1:15:37 Light colors",
+      "rawHash": "c73057fce46bf7e994d1197a18ce4aad5d3198aa50ede09aa6e22aa2766f22ff",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=4537s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#c73057fce46bf7e994d1197a18ce4aad5d3198aa50ede09aa6e22aa2766f22ff",
+      "repairedTitle": "Light colors",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Indigo Star",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 5160,
+      "time": "1:26:00",
+      "raw": "1:26:00 Indigo Star",
+      "rawHash": "51915d6d700b009e23449193dca8621299beea8a0a622221ee8959f80f9c4937",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=5160s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#51915d6d700b009e23449193dca8621299beea8a0a622221ee8959f80f9c4937",
+      "repairedTitle": "Indigo Star",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "夏のファンタジア",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 6251,
+      "time": "1:44:11",
+      "raw": "1:44:11 夏のファンタジア",
+      "rawHash": "cf5de1b5b7dac0ae5b42e17e1bf206d5a42052b0eb29398f8773aae7fe8577d7",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=6251s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#cf5de1b5b7dac0ae5b42e17e1bf206d5a42052b0eb29398f8773aae7fe8577d7",
+      "repairedTitle": "夏のファンタジア",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "Princess Brave",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 6554,
+      "time": "1:49:14",
+      "raw": "1:49:14 Princess Brave",
+      "rawHash": "8a328ef2d4c548ca94c2c07d8d3b751ea1373760d95fc9ecb4bd1a1e9b3364e6",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=6554s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#8a328ef2d4c548ca94c2c07d8d3b751ea1373760d95fc9ecb4bd1a1e9b3364e6",
+      "repairedTitle": "Princess Brave",
+      "repairedArtist": "未記載",
+      "repairReasons": []
+    },
+    {
+      "title": "quantum jump",
+      "artist": "未記載",
+      "isNiche": true,
+      "isUnknownArtist": true,
+      "seconds": 6896,
+      "time": "1:54:56",
+      "raw": "1:54:56 quantum jump",
+      "rawHash": "1e09be2a93e5285010b6bf7cac96cd6d3adfda74f0ed2b514e1cd270e02a2285",
+      "videoId": "brHI4BvIP3k",
+      "videoTitle": "2026年二回目のエロゲソング弾き語り配信",
+      "channelName": "五平モチと美少女ゲーム好きの集い Ch",
+      "channelId": "UC88qhhwdSuwOfPP3Rue7M0A",
+      "channelHandle": "/@%E4%BA%94%E5%B9%B3%E3%83%A2%E3%83%81322",
+      "youtubeUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k",
+      "youtubeTimestampUrl": "https://www.youtube.com/watch?v=brHI4BvIP3k&t=6896s",
+      "sourceId": "UgzfRcGNp4q9Wy0n_fN4AaABAg",
+      "sourceHash": "9ab3bd082aaeb07c55c29f0c211a053bb0ea80f448f34639dd428edb43e89fcd",
+      "sourceOrigin": "latest",
+      "sourceScope": "current",
+      "ranges": [
+        "7d",
+        "all"
+      ],
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
+      "positiveEvidence": [],
+      "sourceRiskReasons": [],
+      "riskReasons": [
+        "niche_unknown_artist"
+      ],
+      "replacementSuggestion": null,
+      "reviewId": "review:brHI4BvIP3k:9ab3bd082aaeb07c55c2",
+      "sourcePath": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json",
+      "reviewLocator": "data/review/sources/brHI4BvIP3k-9ab3bd082aaeb07c55c2.json#1e09be2a93e5285010b6bf7cac96cd6d3adfda74f0ed2b514e1cd270e02a2285",
+      "repairedTitle": "quantum jump",
       "repairedArtist": "未記載",
       "repairReasons": []
     },
@@ -88951,18 +89503,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=V9NZwbEcskM&t=1983s",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:V9NZwbEcskM-5ffba4a4de7015bf6742.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:V9NZwbEcskM:5ffba4a4de7015bf6742",
@@ -88990,18 +89544,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=V9NZwbEcskM&t=3549s",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:V9NZwbEcskM-5ffba4a4de7015bf6742.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:V9NZwbEcskM:5ffba4a4de7015bf6742",
@@ -89029,18 +89585,20 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=V9NZwbEcskM&t=4584s",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "sourceOrigin": "latest",
+      "sourceOrigin": "latest;review:V9NZwbEcskM-5ffba4a4de7015bf6742.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all"
+        "all",
+        "review"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist"
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:V9NZwbEcskM:5ffba4a4de7015bf6742",
@@ -89111,7 +89669,6 @@
       "sourceOrigin": "latest;review:Ws4I7Ns2sd8-4e348cb5898c2a1029ab.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -96755,7 +97312,6 @@
       "sourceOrigin": "latest;review:n6EQoAdmQMA-41fcad7f33d9bde7a4cf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -96797,7 +97353,6 @@
       "sourceOrigin": "latest;review:n6EQoAdmQMA-41fcad7f33d9bde7a4cf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -96838,7 +97393,6 @@
       "sourceOrigin": "latest;review:n6EQoAdmQMA-41fcad7f33d9bde7a4cf.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],
@@ -97519,20 +98073,18 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=252s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all",
-        "review"
+        "all"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:YFxEarwYgQs:9fb8f1cd783d187c7f26",
@@ -97560,20 +98112,18 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=883s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest",
       "sourceScope": "current",
       "ranges": [
         "7d",
-        "all",
-        "review"
+        "all"
       ],
       "classification": "needs_review",
       "suggestedAction": "manual_review",
       "positiveEvidence": [],
       "sourceRiskReasons": [],
       "riskReasons": [
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": null,
       "reviewId": "review:YFxEarwYgQs:9fb8f1cd783d187c7f26",
@@ -97601,13 +98151,12 @@
       "youtubeTimestampUrl": "https://www.youtube.com/watch?v=YFxEarwYgQs&t=2583s",
       "sourceId": "UgwrBzDEVD8fH_fG2M94AaABAg",
       "sourceHash": "9fb8f1cd783d187c7f26875aa4e868d451e5d95d75156970ca00494084fca5b9",
-      "sourceOrigin": "latest;review:YFxEarwYgQs-9fb8f1cd783d187c7f26.json;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
+      "sourceOrigin": "latest;review:history-YFxEarwYgQs-9fb8f1cd783d187c7f26.json",
       "sourceScope": "current",
       "ranges": [
         "7d",
         "all",
-        "review",
-        "snapshot:20260719T000000Z"
+        "snapshot:20260719T070000Z"
       ],
       "classification": "parser_corruption",
       "suggestedAction": "replace_entry",
@@ -97618,8 +98167,7 @@
       "riskReasons": [
         "parser_corruption",
         "delimiter_split",
-        "niche_unknown_artist",
-        "source_multiple_unknown_artists"
+        "niche_unknown_artist"
       ],
       "replacementSuggestion": {
         "artist": "ゲーム THE IDOLM@STER収録曲(菊地真)"
@@ -100043,7 +100591,6 @@
       "sourceOrigin": "latest;review:aM-F06k6Hro-a88851bf216eba603027.json",
       "sourceScope": "current",
       "ranges": [
-        "7d",
         "all",
         "review"
       ],

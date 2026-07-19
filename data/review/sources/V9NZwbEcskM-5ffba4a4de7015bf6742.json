@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T04:14:58.312Z",
+  "generatedAt": "2026-07-19T09:07:04.699Z",
   "reviewId": "review:V9NZwbEcskM:5ffba4a4de7015bf6742",
   "video": {
     "videoId": "V9NZwbEcskM",
@@ -11,17 +11,19 @@
   "source": {
     "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
     "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-    "sourceType": "comment",
+    "sourceType": "selected",
     "selected": true,
-    "sourceTextAvailable": true,
-    "sourceText": "【タイムスタンプ】※敬称略\n\n     7:24  声入り\n\n   16:32  め組のひと／RATS＆STAR\n   33:03  スイヘイリーベ ～魔法の呪文～\n　　　　　／かっきー & アッシュポテト\n   44:39  ドレミファロンド／40mP feat. 初音ミク\n   50:08  偏愛の輪舞曲／GRANRODEO\n   59:09  The Galaxy Express 999\n　　　　　／ゴダイゴ\n1:08:43  かわいいだけじゃだめですか？\n　　　　　／CUTIE STREET\n1:16:24  キンカンのうた  2020\n　　　　　／オーイシマサヨシ\n1:29:58  ジャズ曲(タイトル未定)\n　　　　　／Alajima  🧡オリジナル楽曲\n1:35:33  Snatchaway／SKY-HI\n1:40:17  ファンサ／mona(夏川椎菜)　(ラスソン)\n\n【エンディング曲】  \n1:51:05  とあるVTuberの夜枠／Alajima  \n　　　　　🧡オリジナル楽曲\n\n※ズレ・不備がありましたらお知らせください",
+    "sourceTextAvailable": false,
+    "sourceText": "",
     "snapshotId": ""
   },
   "risk": {
-    "riskScore": 28,
+    "riskScore": 34,
     "riskLevel": "low",
     "riskReasons": [
-      "source_multiple_unknown_artists"
+      "niche_unknown_artist",
+      "source_multiple_unknown_artists",
+      "source_multiple_niche_short_titles"
     ]
   },
   "entries": [
@@ -42,8 +44,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -56,16 +57,15 @@
       "rawHash": "889b4e09e3f8c68373f32da065077e3404a7cc0b882411fbad868049e0c37c07",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -84,8 +84,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -98,14 +97,13 @@
       "rawHash": "68b011ef327220b4a665038afc566a532a6333a589b2ba732b08f32d4851423a",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -118,16 +116,15 @@
       "rawHash": "832927d23877c9fe9013431ea42b13c70da46021893e9f0cf16cfaef7a6018e9",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -139,16 +136,15 @@
       "rawHash": "6b38bfa9f65414b724a5971b29c5113b37bbec1eb8e62e3877b8acb626507eff",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "isNiche": false,
-      "classification": "likely_song",
-      "suggestedAction": "keep",
+      "isNiche": true,
+      "classification": "needs_review",
+      "suggestedAction": "manual_review",
       "replacementSuggestion": null,
       "riskReasons": [
+        "niche_unknown_artist",
         "source_multiple_unknown_artists"
       ],
-      "positiveEvidence": [
-        "structured_setlist"
-      ]
+      "positiveEvidence": []
     },
     {
       "status": "accepted",
@@ -160,14 +156,13 @@
       "rawHash": "7b2d469d53cd5fabea4c10de9f756430d5398509741c8e677fcbfdf38fbcedb4",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -180,14 +175,13 @@
       "rawHash": "9546171ea5385f1af15dc77a3958541aa7a9103975619191b0bdfb1a9b841908",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -207,8 +201,7 @@
       "riskReasons": [],
       "positiveEvidence": [
         "known_song",
-        "known_artist",
-        "structured_setlist"
+        "known_artist"
       ]
     },
     {
@@ -221,48 +214,13 @@
       "rawHash": "b9df239b9d12d051e05d78f9e46b589f5c96c9e5ba2c451cdcd974f70fbb70f0",
       "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
       "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "isNiche": false,
+      "isNiche": true,
       "classification": "likely_song",
       "suggestedAction": "keep",
       "replacementSuggestion": null,
       "riskReasons": [],
       "positiveEvidence": [
-        "known_artist",
-        "structured_setlist"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "obvious_non_song_text",
-      "seconds": 444,
-      "time": "0:07:24",
-      "title": "声入り",
-      "artist": "",
-      "raw": "7:24 声入り",
-      "rawHash": "3e328cd6e7a84b313e74c8e23c100ba168df2e639887ca9c47d134b06cde23bb",
-      "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
-      "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "obvious_non_song_text"
-      ]
-    },
-    {
-      "status": "rejected",
-      "reason": "title_only_non_song_candidate",
-      "seconds": 4123,
-      "time": "1:08:43",
-      "title": "かわいいだけじゃだめですか？",
-      "artist": "未記載",
-      "raw": "1:08:43 かわいいだけじゃだめですか？",
-      "rawHash": "a90b712bfb4c5d030797078ff7f02837c2dfd9c3eb07c7c3c8e826de14099eef",
-      "sourceId": "UgyRKwGj_ynaKFWqgwN4AaABAg",
-      "sourceHash": "5ffba4a4de7015bf67420b2ec225a7e3c80f62b9471550b71a074da3a3d381e0",
-      "classification": "confirmed_noise",
-      "suggestedAction": "drop_entry",
-      "riskReasons": [
-        "title_only_non_song_candidate"
+        "known_artist"
       ]
     }
   ]
