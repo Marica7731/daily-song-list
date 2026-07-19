@@ -334,7 +334,7 @@ function summarizeRuntimeShardSet(shardSet) {
 
 function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
   const model = buildRequestRuntimeModel(rangePayload, rangeId, options);
-  const { generatedAt, capturedAt, dataVersion, items, occurrences, occurrenceScopes, songScopes, artistScopes, videoScopes, sourceRecords, detailRecords, views } = model;
+  const { generatedAt, capturedAt, dataVersion, items, occurrences, occurrenceScopes, songScopes, artistScopes, vtuberScopes, videoScopes, sourceRecords, detailRecords, views } = model;
   cleanupRequestRuntimeFiles(rangeId);
 
   const sourceShardSet = writeKeyedRequestShardSet({
@@ -385,6 +385,7 @@ function writeRequestRuntimeSet(rangePayload, rangeId, options = {}) {
     occurrenceScopes,
     songScopes,
     artistScopes,
+    vtuberScopes,
     videoScopes,
   });
   const viewArtifacts = writeRequestViews({
@@ -427,6 +428,7 @@ function buildRequestRuntimeModel(rangePayload, rangeId, options = {}) {
   const detailRecords = {
     song: new Map(),
     artist: new Map(),
+    vtuber: new Map(),
     video: new Map(),
   };
   const views = {};
@@ -453,6 +455,10 @@ function buildRequestRuntimeModel(rangePayload, rangeId, options = {}) {
     visible: buildVideoRequestItems(items, { nicheOnly: false, hideUnknownArtists: true }),
     niche: buildVideoRequestItems(items, { nicheOnly: true, hideUnknownArtists: false }),
     visibleNiche: buildVideoRequestItems(items, { nicheOnly: true, hideUnknownArtists: true }),
+  };
+  const vtuberScopes = {
+    all: buildVtuberRequestItems(items, { nicheOnly: false }),
+    niche: buildVtuberRequestItems(items, { nicheOnly: true }),
   };
 
   for (const [scopeKey, records] of Object.entries(songScopes)) {
@@ -511,6 +517,18 @@ function buildRequestRuntimeModel(rangePayload, rangeId, options = {}) {
     }));
   }
 
+  for (const [scopeKey, records] of Object.entries(vtuberScopes)) {
+    setNestedView(views, ["vtuberRank", "index", scopeKey], buildRequestRecordView({
+      type: "vtuber",
+      records: sortRankRecords(records, "occurrences"),
+      metric: "occurrences",
+      scopeKey,
+      pageSize: REQUEST_PAGE_SIZE,
+      detailRecords,
+      sourceRecords,
+    }));
+  }
+
   for (const [scopeKey, records] of Object.entries(videoScopes)) {
     setNestedView(views, ["videos", "index", scopeKey], buildRequestRecordView({
       type: "video",
@@ -534,6 +552,7 @@ function buildRequestRuntimeModel(rangePayload, rangeId, options = {}) {
     occurrenceScopes,
     songScopes,
     artistScopes,
+    vtuberScopes,
     videoScopes,
     views,
     sourceRecords,
@@ -587,6 +606,8 @@ function registerRequestDetailRecord({ type, record, scopeKey, detailRecords, so
       occurrences: (record.occurrences || []).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
     });
     recordMap.set(detailKey, serializeArtistRequestRecord(record, { detailKey, sourceDetailKey }));
+  } else if (type === "vtuber") {
+    recordMap.set(detailKey, serializeVtuberRequestRecord(record, { detailKey }));
   } else {
     recordMap.set(detailKey, serializeVideoRequestRecord(record, { detailKey }));
   }
@@ -617,6 +638,8 @@ function compactRequestIndexEntry(record, options = {}) {
     entry.sortKey = record.sortKey || record.title || "";
   } else if (type === "artist") {
     entry.songCount = record.songs?.size || record.songs?.length || 0;
+  } else if (type === "vtuber") {
+    entry.songCount = record.songs?.size || record.songs?.length || 0;
   } else if (type === "video") {
     entry.videoId = record.videoId || "";
     entry.publishedTimestamp = finiteTimestamp(record.publishedTimestamp);
@@ -626,7 +649,7 @@ function compactRequestIndexEntry(record, options = {}) {
 }
 
 function writeRequestSummary(options) {
-  const { rangeId, dataVersion, generatedAt, capturedAt, rangePayload, occurrenceScopes, songScopes, artistScopes, videoScopes } = options;
+  const { rangeId, dataVersion, generatedAt, capturedAt, rangePayload, occurrenceScopes, songScopes, artistScopes, vtuberScopes, videoScopes } = options;
   const summaryPayload = {
     schemaVersion: RUNTIME_SCHEMA_VERSION,
     kind: "request-summary",
@@ -637,10 +660,10 @@ function writeRequestSummary(options) {
     title: rangePayload.title || RANGE_TITLES[rangeId] || rangeId,
     itemCount: Array.isArray(rangePayload.items) ? rangePayload.items.length : 0,
     scopes: {
-      all: requestScopeSummary(occurrenceScopes.all, songScopes.all, artistScopes.all, videoScopes.all),
-      visible: requestScopeSummary(occurrenceScopes.visible, songScopes.visible, artistScopes.all, videoScopes.visible),
-      niche: requestScopeSummary(occurrenceScopes.niche, songScopes.niche, artistScopes.niche, videoScopes.niche),
-      visibleNiche: requestScopeSummary(occurrenceScopes.visibleNiche, songScopes.visibleNiche, artistScopes.niche, videoScopes.visibleNiche),
+      all: requestScopeSummary(occurrenceScopes.all, songScopes.all, artistScopes.all, vtuberScopes.all, videoScopes.all),
+      visible: requestScopeSummary(occurrenceScopes.visible, songScopes.visible, artistScopes.all, vtuberScopes.all, videoScopes.visible),
+      niche: requestScopeSummary(occurrenceScopes.niche, songScopes.niche, artistScopes.niche, vtuberScopes.niche, videoScopes.niche),
+      visibleNiche: requestScopeSummary(occurrenceScopes.visibleNiche, songScopes.visibleNiche, artistScopes.niche, vtuberScopes.niche, videoScopes.visibleNiche),
     },
   };
   const text = stringifyRuntimeJson(summaryPayload);
@@ -654,11 +677,12 @@ function writeRequestSummary(options) {
   };
 }
 
-function requestScopeSummary(occurrences, songRecords, artistResult, videos) {
+function requestScopeSummary(occurrences, songRecords, artistResult, vtuberRecords, videos) {
   return {
     occurrenceCount: occurrences.length,
     songCount: songRecords.length,
     artistCount: artistResult.records?.length || 0,
+    vtuberCount: Array.isArray(vtuberRecords) ? vtuberRecords.length : 0,
     missingArtistCount: artistResult.missingArtistCount || 0,
     videoCount: Array.isArray(videos) ? videos.length : uniqueRuntimeVideoCount(occurrences),
   };
@@ -1185,7 +1209,7 @@ function buildArtistRequestRecords(occurrences) {
 function addRequestRecordFields(records) {
   for (const record of records || []) {
     if (typeof record.videoCount !== "number") record.videoCount = uniqueRuntimeVideoCount(record.occurrences || []);
-    if (!record.searchText) record.searchText = requestRecordSearchText(record, record.name ? "artist" : "song");
+    record.searchText = requestRecordSearchText(record, record.type || (record.name ? "artist" : "song"));
   }
   return records;
 }
@@ -1210,6 +1234,63 @@ function buildVideoRequestItems(items, options = {}) {
     });
   }
   return result;
+}
+
+function buildVtuberRequestItems(items, options = {}) {
+  const nicheOnly = Boolean(options.nicheOnly);
+  const records = new Map();
+  for (const item of items || []) {
+    const scopedSongs = (item.songs || [])
+      .filter((song) => cleanText(song.title))
+      .filter((song) => !nicheOnly || song.isNiche === true);
+    if (!scopedSongs.length) continue;
+    const key = channelRecordKey(item);
+    if (!key) continue;
+    if (!records.has(key)) {
+      records.set(key, {
+        type: "vtuber",
+        key,
+        name: cleanText(item.channelName || item.channelHandle || item.channelId || "未知频道"),
+        channelName: cleanText(item.channelName),
+        channelId: cleanText(item.channelId),
+        channelHandle: cleanText(item.channelHandle),
+        channelUrl: cleanText(item.channelUrl || item.authorUrl || item.ownerUrl),
+        count: 0,
+        videoCount: 0,
+        timestampCount: 0,
+        videos: new Set(),
+        songs: new Map(),
+        occurrences: [],
+      });
+    }
+    const record = records.get(key);
+    const videoKey = item.videoId || stableRequestKey(`${item.channelName}:${item.title}:${item.publishedTimestamp || ""}`);
+    if (videoKey) record.videos.add(videoKey);
+    for (const song of scopedSongs) {
+      record.count += 1;
+      record.timestampCount += 1;
+      incrementCount(record.songs, cleanText(song.title));
+      record.occurrences.push({
+        item,
+        song,
+        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword, song.title, song.artist].join(" ")),
+      });
+    }
+  }
+  return Array.from(records.values()).map((record) => {
+    record.videoCount = record.videos.size;
+    record.searchText = requestRecordSearchText(record, "vtuber");
+    return record;
+  });
+}
+
+function channelRecordKey(item) {
+  const channelId = cleanText(item?.channelId);
+  if (channelId) return channelId;
+  const handle = cleanText(item?.channelHandle).replace(/^\/+/, "");
+  if (handle) return normalizeSearchText(handle);
+  const name = cleanText(item?.channelName);
+  return name ? normalizeSearchText(name) : "";
 }
 
 function serializeSongRequestRecord(record, options = {}) {
@@ -1250,6 +1331,27 @@ function serializeArtistRequestRecord(record, options = {}) {
     sourceDetailKey: options.sourceDetailKey || "",
     sourceDetailPath: "",
     searchText: requestRecordSearchText(record, "artist"),
+  };
+}
+
+function serializeVtuberRequestRecord(record, options = {}) {
+  return {
+    type: "vtuber",
+    detailKey: options.detailKey,
+    key: record.key || "",
+    name: record.name || record.channelName || "",
+    channelName: record.channelName || record.name || "",
+    channelId: record.channelId || "",
+    channelHandle: record.channelHandle || "",
+    channelUrl: record.channelUrl || "",
+    count: Number(record.count) || 0,
+    videoCount: Number(record.videoCount) || 0,
+    timestampCount: Number(record.timestampCount ?? record.count) || 0,
+    songs: serializeCountMap(record.songs),
+    occurrences: (record.occurrences || []).slice(0, REQUEST_PREVIEW_SOURCE_LIMIT).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
+    sourceDetailKey: "",
+    sourceDetailPath: "",
+    searchText: requestRecordSearchText(record, "vtuber"),
   };
 }
 
@@ -1303,14 +1405,16 @@ function serializeCountMap(value) {
 }
 
 function requestRecordSearchText(record, type) {
-  if (record.searchText) return normalizeSearchText(record.searchText);
   if (type === "artist") {
-    return normalizeSearchText([record.name, ...mapNames(record.songs), ...mapNames(record.channels)].join(" "));
+    return normalizeSearchText([record.name, ...(record.aliases || [])].join(" "));
+  }
+  if (type === "vtuber") {
+    return normalizeSearchText([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl].join(" "));
   }
   if (type === "video") {
     return normalizeSearchText([record.videoId, record.title, record.channelName, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
   }
-  return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels)].join(" "));
+  return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels), ...(record.variantLabels || [])].join(" "));
 }
 
 function mapNames(value) {

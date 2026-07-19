@@ -169,6 +169,24 @@ async function checkApiRuntime(checkedAt) {
   for (const label of ["ノア・ポラリス", "香鳴ハノン", "なれたん", "チョま"]) {
     channelDiscoveryProbes.push(await checkVideoSearchProbe(label, `api/rankings?range=all&view=videos&q=${encodeURIComponent(label)}&pageSize=1`));
   }
+  const naretanSongSearch = await fetchJsonWithText("api/rankings?range=all&view=songs&q=%E3%81%AA%E3%82%8C%E3%81%9F%E3%82%93&pageSize=5");
+  assertApiSuccessHeaders(naretanSongSearch, "api songs naretan");
+  assert(naretanSongSearch.json.view === "songs", "api songs naretan view mismatch");
+  assert(Number(naretanSongSearch.json.totalCount) > 0, "api songs naretan totalCount must be positive");
+  for (const record of naretanSongSearch.json.records || []) {
+    assert(record.matchedBySource === true, `api songs naretan row must expose matched source context: ${record.title || record.key || "unknown"}`);
+    assert(Number(record.count || 0) <= Number(record.globalCount || record.count || 0), `api songs naretan row count must not exceed global count: ${record.title || record.key || "unknown"}`);
+    const sourceTexts = (record.occurrences || []).map((occurrence) =>
+      `${occurrence?.searchText || ""} ${occurrence?.item?.title || ""} ${occurrence?.item?.channelName || ""}`.normalize("NFKC").toLocaleLowerCase(),
+    );
+    assert(sourceTexts.length > 0, `api songs naretan row must include matched source preview: ${record.title || record.key || "unknown"}`);
+    assert(sourceTexts.every((text) => text.includes("なれたん")), `api songs naretan row preview must be naretan-scoped: ${record.title || record.key || "unknown"}`);
+  }
+  const naretanVtuber = await fetchJsonWithText("api/rankings?range=all&view=vtubers&q=%E3%81%AA%E3%82%8C%E3%81%9F%E3%82%93&pageSize=1");
+  assertApiSuccessHeaders(naretanVtuber, "api vtubers naretan");
+  assert(naretanVtuber.json.view === "vtubers", "api vtubers naretan view mismatch");
+  assert(Number(naretanVtuber.json.totalCount) > 0, "api vtubers naretan totalCount must be positive");
+  assert(String(naretanVtuber.json.records?.[0]?.name || "").includes("なれたん"), "api vtubers naretan first row must be なれたん");
   await checkApiErrorContract();
 
   if (errors.length) {
@@ -191,6 +209,8 @@ async function checkApiRuntime(checkedAt) {
       `nemoVideos=${nemoVideos.totalCount}`,
       `kurageVideos=${kurageVideos.totalCount}`,
       `channelDiscoveryVideos=${channelDiscoveryProbes.map((probe) => probe.totalCount).join(",")}`,
+      `naretanSongResults=${naretanSongSearch.json.totalCount}`,
+      `naretanVtuberResults=${naretanVtuber.json.totalCount}`,
       `staticMeta=${staticMetaMode}`,
       `expectedCommit=${expectedApiCommitSha ? "matched" : "not-set"}`,
       `expectedLatest=${expectedApiLatestSha256 ? "matched" : "not-set"}`,

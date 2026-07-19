@@ -70,6 +70,30 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(videoMetricRankings.totalCount, 2);
     assert.equal(videoMetricRankings.records[0].title, "Song One");
 
+    const channelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&pageSize=5`);
+    assert.equal(channelSongSearch.totalCount, 2);
+    assert.equal(channelSongSearch.totalOccurrenceCount, 2);
+    assert.equal(channelSongSearch.records[0].title, "Song One");
+    assert.equal(channelSongSearch.records[0].count, 1);
+    assert.equal(channelSongSearch.records[0].globalCount, 2);
+    assert.equal(channelSongSearch.records[0].matchedBySource, true);
+    assert.equal(channelSongSearch.records[0].occurrences.length, 1);
+    assert.equal(channelSongSearch.records[0].occurrences[0].item.channelName, "Alpha Ch.");
+    const filteredSource = await fetchJson(`http://127.0.0.1:${port}${channelSongSearch.records[0].sourceDetailPath}`);
+    assert.equal(filteredSource.found, true);
+    assert.equal(filteredSource.record.occurrences.length, 1);
+    assert.equal(filteredSource.record.occurrences[0].item.channelName, "Alpha Ch.");
+
+    const vtubers = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&pageSize=5`);
+    assert.equal(vtubers.totalCount, 2);
+    assert.equal(vtubers.records[0].name, "Alpha Ch.");
+    assert.equal(vtubers.records[0].count, 2);
+    assert.equal(vtubers.records[0].videoCount, 1);
+
+    const vtuberSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=Alpha&pageSize=5`);
+    assert.equal(vtuberSearch.totalCount, 1);
+    assert.equal(vtuberSearch.records[0].name, "Alpha Ch.");
+
     const sourceKey = rankings.records[0].sourceDetailKey;
     const source = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}`);
     assert.equal(source.found, true);

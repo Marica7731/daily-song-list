@@ -275,7 +275,7 @@
     if (unknownArtistsHiddenForUrl(state, defaults)) params.set("hideUnknown", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
     if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
-    if (view !== "videos" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
+    if (view !== "videos" && view !== "vtuberRank" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
 
     const snapshotParam = snapshotParamForPath(state.snapshotPath, options);
     if (snapshotParam) params.set("snapshot", snapshotParam);
@@ -354,7 +354,7 @@
       const trendLabels = options.trendLabels || {};
       items.push({ key: "trend", label: trendLabels[normalized.trend] || "趋势" });
     }
-    if (view !== "videos" && normalized.minCount > 1) items.push({ key: "minCount", label: `${normalized.minCount}次以上` });
+    if (view !== "videos" && view !== "vtuberRank" && normalized.minCount > 1) items.push({ key: "minCount", label: `${normalized.minCount}次以上` });
     return items;
   }
 
@@ -391,9 +391,9 @@
   }
 
   function filterAppliesToView(key, view = "songRank") {
-    if (key === "hideUnknownArtist") return view !== "artistRank";
+    if (key === "hideUnknownArtist") return view !== "artistRank" && view !== "vtuberRank";
     if (key === "trend") return view === "songRank" || view === "artistRank";
-    if (key === "minCount") return view !== "videos";
+    if (key === "minCount") return view !== "videos" && view !== "vtuberRank";
     return true;
   }
 
@@ -1003,6 +1003,13 @@
       return {
         text: isExpanded ? "收起" : `${songCount}首曲目`,
         ariaLabel: isExpanded ? "收起该歌手曲目" : `查看该歌手的 ${songCount} 首歌曲`,
+      };
+    }
+    if (mode === "vtuber") {
+      const songCount = Math.max(0, Number(options.songCount) || 0);
+      return {
+        text: isExpanded ? "收起" : `${songCount}首曲目`,
+        ariaLabel: isExpanded ? "收起该VTuber曲目" : `查看该VTuber的 ${songCount} 首歌曲`,
       };
     }
 

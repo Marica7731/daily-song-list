@@ -12,8 +12,9 @@ const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "veri
 test("mobile information architecture exposes one query center and a one-row toolbar", () => {
   assert.match(indexSource, /id="queryTrigger"[\s\S]*aria-controls="queryDialog"/u);
   assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
-  assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
-  assert.match(indexSource, /class="bottom-nav-icon-wrap"[\s\S]*data-view="artistRank"[\s\S]*class="bottom-nav-icon-wrap"[\s\S]*data-view="songAz"[\s\S]*class="bottom-nav-icon-wrap"/u);
+  assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="videos"/u);
+  assert.match(indexSource, /class="[^"]*view-mode[^"]*"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
+  assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>VTuber<\/span>/u);
   assert.match(indexSource, /id="queryDialog"[\s\S]*role="dialog"[\s\S]*aria-labelledby="queryDialogTitle"[\s\S]*搜索与筛选/u);
   assert.match(indexSource, /id="queryInput"[\s\S]*id="searchSuggestions"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
@@ -25,8 +26,9 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.doesNotMatch(indexSource, /class="controls-primary"|class="mobile-toolbar-actions"|class="controls-secondary"/u);
   assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*class="query-trigger"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/u);
-  assert.match(cssSource, /\.bottom-nav-icon-wrap\s*\{[\s\S]*width: 34px;[\s\S]*height: 24px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/u);
+  assert.match(cssSource, /\.bottom-nav-icon-wrap\s*\{[\s\S]*width: 32px;[\s\S]*height: 24px;/u);
+  assert.match(cssSource, /\.bottom-nav-icon-wrap svg\s*\{[\s\S]*width: 19px;[\s\S]*height: 19px;/u);
   assert.match(cssSource, /\.bottom-nav-item\.active \.bottom-nav-icon-wrap,[\s\S]*\.bottom-nav-item\[aria-current="page"\] \.bottom-nav-icon-wrap\s*\{[\s\S]*background: var\(--accent-soft\);/u);
   assert.doesNotMatch(cssSource, /@media \(max-width: 620px\)/u);
 });
@@ -256,7 +258,7 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /function compactSummaryMetrics/u);
   assert.match(appSource, /function compactSummaryNote/u);
   assert.doesNotMatch(functionBody("function compactSummaryMetrics"), /首结果/u);
-  assert.match(functionBody("function compactSummaryMetrics"), /首歌曲\|首小众歌曲\|次收录\|次小众收录\|个视频/u);
+  assert.match(functionBody("function compactSummaryMetrics"), /首歌曲\|首小众歌曲\|位歌手\|个VTuber\|歌曲收录\|小众歌曲收录\|个视频/u);
   assert.match(functionBody("function compactSummaryNote"), /已隐藏无歌手/u);
   assert.match(functionBody("function renderActiveQueryStrip"), /if \(items\.length >= 2\)/u);
   assert.match(functionBody("function renderActiveQueryStrip"), /清除全部筛选条件/u);
@@ -272,13 +274,18 @@ test("mobile summary and pagination have compact rules", () => {
   assert.doesNotMatch(appSource, /function renderPageJumpToken|data-page-jump-direction/u);
 });
 
-test("summary video metric uses source payload count instead of hidden-unknown visible count", () => {
+test("rank summaries keep metrics to entity count and song collections", () => {
   const songRankBody = functionBody("function renderSongRank");
+  const artistRankBody = functionBody("function renderArtistRank");
+  const vtuberRankBody = functionBody("function renderVtuberRank");
   const songIndexBody = functionBody("function renderSongIndexView");
-  assert.match(songRankBody, /summaryVideoMetric\(rangeCache, selection\)/u);
+  assert.doesNotMatch(songRankBody, /summaryVideoMetric\(rangeCache, selection\)/u);
+  assert.doesNotMatch(artistRankBody, /metric\(selection\.videoCount, "个视频"\)/u);
+  assert.doesNotMatch(vtuberRankBody, /metric\(selection\.videoCount, "条歌曲收录"\)/u);
   assert.match(songIndexBody, /summaryVideoMetric\(rangeCache, selection\)/u);
   assert.doesNotMatch(songRankBody, /metric\(selection\.videoCount, "个视频"\)/u);
   assert.doesNotMatch(songIndexBody, /metric\(selection\.videoCount, "个视频"\)/u);
+  assert.match(functionBody("function occurrenceVisibilityMetric"), /歌曲收录/u);
   assert.match(appSource, /function summaryVideoCountModel\(rangeCache, selection\)[\s\S]*visibleCount: selection\?\.videoCount,[\s\S]*sourceCount: sourceVideoCountForSummary\(rangeCache\)/u);
   assert.match(appSource, /function sourceVideoCountForSummary\(rangeCache\)[\s\S]*rangeCache\.items\.length/u);
   assert.match(appSource, /function summaryNote\(selection, extra = "", rangeCache = null\)[\s\S]*summaryVideoVisibilityNote\(rangeCache, selection\)/u);

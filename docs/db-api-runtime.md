@@ -9,6 +9,7 @@ This is the first deployable step away from committing tens of thousands of fron
 - The same builder imports the public VSinger Moment backfill shards into normalized raw `external_*` tables.
 - `scripts/db/query-runtime-db.py` provides smoke-test reads with a completion marker.
 - `server/song_rank_api.py` serves read-only HTTP endpoints for rankings, metadata, health, and source details.
+- The API exposes `view=vtubers` for channel/VTuber rankings; the frontend API-mode tab is `vtuberRank`.
 - `deploy/vps2/*` documents the staging service and nginx wiring for VPS2.
 
 ## Builder input and output
@@ -54,7 +55,9 @@ HTTP endpoints:
 - `GET /api/meta`
 - `GET /api/rankings?range=all&view=songs&page=1&pageSize=50`
 - `GET /api/rankings?range=7d&view=artists&q=花`
+- `GET /api/rankings?range=all&view=vtubers&q=HanamaeHaru&pageSize=5`
 - `GET /api/sources/{sourceDetailKey}`
+- `GET /api/sources/{sourceDetailKey}?q=なれたん`
 
 Operator smoke tests:
 
@@ -139,27 +142,36 @@ Frontend API-mode behavior:
 
 - When `/api/meta` returns a valid payload, the frontend enters SQLite/API mode and must not request `data/diff/latest-*.json`; those static diff files can resolve to HTML on the VPS/Nginx deployment and produce JSON parse toasts.
 - API mode normalizes `trend` filters to `all`, disables the trend selector, and shows `API模式暂不支持趋势筛选`.
+- API mode maps the frontend `vtuberRank` tab to `view=vtubers`. Treat it as a channel/VTuber identity ranking, not as another artist ranking.
 - The freshness chip uses SQLite `meta.built_at` / `rebuiltDerivedAt` as the staleness baseline. `meta.latest_captured_at` remains source-data provenance and must not trigger the 2-hour stale alert by itself.
-- Broad unfiltered API summaries hide the all-site occurrence total because it is an internal source-row aggregate. Search/min-count/niche-filtered summaries still show matched `次收录`, and the video view still shows `个时间戳`.
+- Song, artist, and VTuber summaries show two metrics: row count and `歌曲收录`. The frontend intentionally does not show a unique-video metric in those summaries. The video view still shows `个视频` and `个时间戳`.
 
 `GET /api/rankings`
 
 Supported query parameters:
 
 - `range`: `7d` or `all`; default `all`.
-- `view`: `songs`, `songIndex`, `artists`, `videos`, or `vsingerSongs`; default `songs`.
-- `metric`: `occurrences`, `count`, or `videos`; `videos` is only valid for `songs` and `artists`. Non-video metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
-- `q`: optional case-insensitive search against normalized title, artist, channel, and name text.
-- `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos`, `minCount` is ignored because each row is a video row.
+- `view`: `songs`, `songIndex`, `artists`, `videos`, `vtubers`, or `vsingerSongs`; default `songs`.
+- `metric`: `occurrences`, `count`, or `videos`; `videos` is valid for `songs`, `artists`, and `vtubers`. Non-video metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
+- `q`: optional case-insensitive search. The match scope is tab-specific; see below.
+- `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos` and `vtubers`, `minCount` is ignored by the UI/API ranking view.
 - `page`: 1-based page number.
 - `pageSize`: maximum 200.
+
+Search scope contract:
+
+- `songs` and `songIndex` match song identity fields and source context. When a song row is matched by source context, such as channel name or video title, the API derives contextual `count`, `videoCount`, `timestampCount`, and `occurrences` from the matching source rows only. It also keeps `globalRank`, `globalCount`, `globalVideoCount`, and `globalTimestampCount` for diagnostics.
+- `vsingerSongs` matches source song title, artist, and singer fields. It is a raw-source diagnostic view and does not currently run the contextual source-row rewrite used by `songs`.
+- `artists` matches singer/artist identity fields only, such as canonical name and aliases. Song titles, channel names, and video titles must not make an unrelated artist row match.
+- `vtubers` matches channel/VTuber identity fields only, such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields. Song titles and video titles must not make an unrelated VTuber row match.
+- `videos` matches video/source context, including video ID/title, channel identity, and parsed song-list/timestamp text.
 
 Response fields:
 
 - `totalCount`: number of rows after search and filters.
 - `filteredBaseCount`: number of rows before search/min-count filters for the same range/view/metric.
 - `totalOccurrenceCount`: sum of `count` across the filtered rows.
-- `totalVideoCount`: sum of `videoCount` across the filtered rows. For song/artist summaries the frontend labels this as `条歌曲收录`, because the same source video can appear under many song rows and this is not a unique video count.
+- `totalVideoCount`: sum of `videoCount` across the filtered rows. It remains available for diagnostics and API clients, but the frontend summary does not display it for song, artist, or VTuber rankings because it is not a unique-video count.
 - `pageCount`: total pages for the current filtered query.
 - `records`: display-ready rows; song and artist rows include `sourceDetailKey` when full source details are available.
 
@@ -167,13 +179,14 @@ Record shapes are intentionally display-ready and may include extra frontend fie
 
 | View | Stable record fields |
 | --- | --- |
-| `songs` | `rank`, `type`, `title`, `displayArtist`, `count`, `videoCount`, `timestampCount`, `artists`, `channels`, `occurrences` preview, `sourceDetailKey` when full details exist |
-| `songIndex` | `rank`, `type`, `title`, `sortKey`, `count`, `videoCount`, `timestampCount`, `sourceDetailKey` when full details exist |
+| `songs` | `rank`, `type`, `title`, `displayArtist`, `count`, `videoCount`, `timestampCount`, `artists`, `channels`, `occurrences` preview, `sourceDetailKey` when full details exist; source-context searches may also include `matchedBySource`, `sourceFilterQuery`, `sourceDetailPath`, `globalRank`, `globalCount`, `globalVideoCount`, `globalTimestampCount` |
+| `songIndex` | `rank`, `type`, `title`, `sortKey`, `count`, `videoCount`, `timestampCount`, `sourceDetailKey` when full details exist; source-context searches use the same contextual fields as `songs` |
 | `artists` | `rank`, `type`, `name`, `count`, `videoCount`, `timestampCount`, `songs` preview, `sourceDetailKey` when full details exist |
 | `videos` | `rank`, `type`, `videoId`, `title`, `channelName`, `count`, `timestampCount`, `publishedTimestamp`, `thumbnailUrl` |
+| `vtubers` | `rank`, `type`, `key`, `name`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `count`, `videoCount`, `timestampCount`, `songs` preview, `occurrences` preview |
 | `vsingerSongs` | `rank`, `type`, `title`, `artist`, `singerName`, `count`, `videoCount`, `sourceDetailKey` when full details exist |
 
-Sorting is by stored `rank` ascending. The database builder creates this order from the derived runtime export; the API does not re-rank rows after search and filters.
+Sorting is by stored `rank` ascending for unfiltered requests and for `songIndex`. For `songs` source-context searches, the API re-ranks the filtered result by contextual `count` or `videoCount` so a channel query is ordered by that channel's matching sources instead of the all-site rank.
 
 Example response shape:
 
@@ -205,7 +218,9 @@ Example response shape:
 
 For filtered searches, the summary counters must be filtered counters. Do not fall back to full-site `counts.occurrences`; otherwise a search such as `少女レイ` displays the all-site occurrence total instead of the matched rows.
 
-`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
+For source-context searches, the summary counters must be contextual counters. For example, `songs?q=なれたん` can legitimately return songs that do not contain `なれたん` in the song title or artist, because they were sung in matching `なれたん` source videos. Those rows must display only the matching source preview and matching counts; global counts are exposed separately as `global*` diagnostics.
+
+`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, contextual `なれたん` source previews, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
 It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` so a deploy cannot pass while the accepted increment is missing from the runtime DB.
 
 `GET /api/sources/{sourceDetailKey}`
@@ -222,6 +237,7 @@ Supported ranking views in this first step:
 - `songIndex`
 - `artists`
 - `videos`
+- `vtubers` for channel/VTuber occurrence and video rankings; frontend API mode calls this from `vtuberRank`
 - `vsingerSongs` for the full VSinger Moment song occurrence ranking stored in `external_*` tables
 
 ## Data layers
@@ -247,7 +263,7 @@ npm run vsinger:audit:singers -- --singers-file artifacts/vsinger-http-backfill/
 
 The audit compares the source singer list to committed VSinger videos by exact `singerName`, because the current normalized bundle does not yet keep `externalSingerId` on `external_videos`. Treat `missing-by-name` as high-confidence補漏 targets. Treat `source-ahead-by-name` as a conservative queue; renamed singers can appear there until refreshed by singerId.
 
-Do not compare a song-search screen directly to a per-singer補漏 count. A search such as `songs?q=儚牙紺` returns global song rows whose `count` values are all-site totals for those songs. Per-singer補漏 is validated through singerId-scoped crawl reports, `videos?q=<singer name>`, and source-detail occurrence rows.
+Do not compare a song-search screen directly to a per-singer補漏 count without checking the match type. A source-context search such as `songs?q=儚牙紺` returns song rows derived from matching source occurrences, so the displayed `count` is contextual and the all-site count is in `globalCount`. Per-singer補漏 is still validated through singerId-scoped crawl reports, `videos?q=<singer name>`, `vtubers?q=<channel>`, and filtered source-detail rows.
 
 ## Production verification probes
 
@@ -265,6 +281,8 @@ Current qualitative acceptance points:
 - `ネモ・テルミナス` should be findable in `view=videos`, proving the newly missing-by-name singer has been imported.
 - `儚牙紺 - Kurage Kon -` should be findable in `view=videos`, proving the second newly missing-by-name singer has been imported.
 - `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` should be findable in `view=videos`, proving reviewed YouTube channel補漏 increments were included in the DB build.
+- Channel补漏 names such as `HanamaeHaru`, `aoineno`, and `fujimiyakotoha` should be checked in `view=videos`, `view=vtubers`, and source-context `view=songs` after their accepted increment is imported. `view=songs` should show songs from matching source rows with contextual counts; `view=artists` should not pass solely because a video title or channel name contains the term.
+- `なれたん` search acceptance should cover contextual search scopes: it must be findable in `view=videos`; `view=songs` should return the songs sung in matching `なれたん` source rows with `matchedBySource: true` and source previews that contain `なれたん`; `view=vtubers` should match only channel/VTuber identity text.
 
 The exact counts change with each hourly refresh. Record the numbers from the command output in release notes or incident notes instead of hard-coding them in docs.
 

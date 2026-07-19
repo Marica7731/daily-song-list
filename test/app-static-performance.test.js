@@ -107,7 +107,7 @@ test("song and index rows inline source previews and expand to full source lists
   assert.doesNotMatch(contentBody, /sourcePresentationModel\(occurrences/u);
 
   const sideBody = functionBody("function renderRankSide");
-  assert.match(sideBody, /if \(mode === "artist"\)/u);
+  assert.match(sideBody, /if \(mode === "artist" \|\| mode === "vtuber"\)/u);
   assert.match(sideBody, /renderSourceToggleButton/u);
   assert.match(sideBody, /return side/u);
   assert.doesNotMatch(sideBody, /renderSingleSourceCopyIconButton/u);
@@ -190,17 +190,13 @@ test("delayed trend diffs update visible badges without rerendering the list for
   assert.doesNotMatch(updateBody, /els\.content\.replaceChildren|render\(/u);
 });
 
-test("API request summaries hide broad occurrence totals until filtered", () => {
+test("API request summaries show entity totals and song collection counts", () => {
   const summaryBody = functionBody("function renderRequestSummary");
-  assert.match(summaryBody, /const showOccurrenceMetric = shouldShowRequestOccurrenceMetric\(result\)/u);
-  assert.match(summaryBody, /if \(showOccurrenceMetric\) metrics\.push\(metric\(occurrenceCount, "次收录"\)\)/u);
+  assert.match(summaryBody, /metrics\.push\(metric\(occurrenceCount, "歌曲收录"\)\)/u);
   assert.match(summaryBody, /metrics\.push\(metric\(occurrenceCount, "个时间戳"\)\)/u);
-  assert.match(summaryBody, /metrics\.push\(metric\(videoCount, "条歌曲收录"\)\)/u);
+  assert.doesNotMatch(summaryBody, /metrics\.push\(metric\(videoCount,/u);
+  assert.doesNotMatch(summaryBody, /条歌曲收录/u);
   assert.doesNotMatch(summaryBody, /metrics\.push\(metric\(videoCount, "个视频"\)\)/u);
-
-  const helperBody = functionBody("function shouldShowRequestOccurrenceMetric");
-  assert.match(helperBody, /if \(result\.view === "videos"\) return true/u);
-  assert.match(helperBody, /state\.filter \|\| state\.nicheOnly \|\| state\.minCount > 1 \|\| state\.trend !== "all" \|\| result\.totalCount !== result\.filteredBaseCount/u);
 });
 
 test("selection builds only the records needed by the current view", () => {
@@ -212,15 +208,25 @@ test("selection builds only the records needed by the current view", () => {
   const prewarmBody = functionBody("async function prewarmDefaultSorts");
   assert.match(prewarmBody, /if \(state\.view === "videos"\) return/u);
   assert.ok(prewarmBody.indexOf('state.view === "artistRank"') < prewarmBody.indexOf("selectedSongRecords"));
+  assert.match(prewarmBody, /state\.view === "vtuberRank"[\s\S]*cache\.nicheVtuberRecords[\s\S]*cache\.allVtuberRecords/u);
+  assert.match(functionBody("function createRangeCacheObject"), /defineLazyVtuberCache\(cache, "all", occurrences\)/u);
+  assert.match(functionBody("function createRangeCacheObject"), /defineLazyVtuberCache\(cache, "niche", nicheOccurrences\)/u);
 });
 
-test("explicit search stays intersected with hidden unknown-artist filtering", () => {
+test("explicit search keeps song source context while artist and VTuber views use scoped search text", () => {
   const selectionBody = functionBody("function currentSelection");
-  assert.match(selectionBody, /const occurrences = baseOccurrences\.filter\(\(occurrence\) => occurrence\.searchText\.includes\(filterKey\)\)/u);
-  assert.doesNotMatch(selectionBody, /searchBaseOccurrences/u);
+  assert.match(selectionBody, /occurrenceSearchTextForCurrentView\(occurrence\)\.includes\(filterKey\)/u);
+  assert.doesNotMatch(selectionBody, /baseOccurrences\.filter\(\(occurrence\) => occurrence\.searchText\.includes\(filterKey\)\)/u);
+
+  const scopedSearchBody = functionBody("function occurrenceSearchTextForCurrentView");
+  assert.doesNotMatch(scopedSearchBody, /songOccurrenceSearchText/u);
+  assert.match(scopedSearchBody, /state\.view === "artistRank"[\s\S]*artistOccurrenceSearchText\(occurrence\)/u);
+  assert.match(scopedSearchBody, /state\.view === "vtuberRank"[\s\S]*vtuberOccurrenceSearchText\(occurrence\)/u);
+  assert.match(scopedSearchBody, /return occurrence\?\.searchText \|\| ""/u);
 
   const collectBody = functionBody("function collectSongOccurrences");
   assert.match(collectBody, /\[item\.videoId, item\.title, item\.channelName, item\.keyword, song\.title, song\.artist\]/u);
+  assert.doesNotMatch(appSource, /function songOccurrenceSearchText/u);
 
   const videoBody = functionBody("function buildVideoViewItems");
   assert.match(videoBody, /const videoMatched = matchesSearch\(\[item\.videoId, item\.title, item\.channelName, item\.keyword\], filter\)/u);

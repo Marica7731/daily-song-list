@@ -153,7 +153,49 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(mergedQueryOutput, /"count": 2/);
-  assert.doesNotMatch(mergedQueryOutput, /Piano Ver/);
+  assert.match(mergedQueryOutput, /"totalCount": 1/);
+
+  const channelSongSearchOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "Alpha",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(channelSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(channelSongSearchOutput, /"totalCount": 2/);
+  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 2/);
+  assert.match(channelSongSearchOutput, /"count": 1/);
+  assert.match(channelSongSearchOutput, /"globalCount": 2/);
+
+  const vtuberQueryOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--q",
+      "Alpha",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(vtuberQueryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(vtuberQueryOutput, /"totalCount": 1/);
+  assert.match(vtuberQueryOutput, /"name": "Alpha Ch\."/);
 
   const videoMetricQueryOutput = execFileSync(
     PYTHON,
