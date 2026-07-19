@@ -3117,7 +3117,7 @@ mark {
     left: 0;
     z-index: 60;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     min-height: calc(52px + env(safe-area-inset-bottom));
     padding: 3px 8px calc(3px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);
@@ -3144,7 +3144,7 @@ mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
+    width: 32px;
     height: 24px;
     border-radius: var(--radius-control);
     background: transparent;
@@ -3152,8 +3152,8 @@ mark {
   }
 
   .bottom-nav-icon-wrap svg {
-    width: 20px;
-    height: 20px;
+    width: 19px;
+    height: 19px;
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;

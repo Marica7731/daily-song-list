@@ -198,6 +198,16 @@ test("artist rank toggle uses unique song count", () => {
   assert.equal(expanded.ariaLabel, "收起该歌手曲目");
 });
 
+test("VTuber rank toggle uses unique song count", () => {
+  const collapsed = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7 });
+  assert.equal(collapsed.text, "7首曲目");
+  assert.equal(collapsed.ariaLabel, "查看该VTuber的 7 首歌曲");
+
+  const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7 });
+  assert.equal(expanded.text, "收起");
+  assert.equal(expanded.ariaLabel, "收起该VTuber曲目");
+});
+
 test("song rank toggle uses video and timestamp counts", () => {
   const multiVideo = rankToggleModel({ mode: "song", isExpanded: false, videoCount: 3, occurrenceCount: 8 });
   assert.equal(multiVideo.text, "3个来源");
@@ -934,6 +944,13 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
     activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ", nicheOnly: true, minCount: 2 }, { ...options, view: "songRank" }),
     3,
   );
+  assert.deepEqual(
+    activeQueryConditionItems(
+      { ...defaultQueryDraft(), q: "なれたん", hideUnknownArtist: true, minCount: 10 },
+      { ...options, view: "vtuberRank" },
+    ).map((item) => [item.key, item.label]),
+    [["q", "なれたん"]],
+  );
 
   assert.deepEqual(queryTriggerModel(defaultQueryDraft(), { ...options, view: "songRank", mode: "mobile" }), {
     count: 0,
@@ -958,6 +975,19 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
   assert.equal(
     queryTriggerModel({ ...defaultQueryDraft(), hideUnknownArtist: true }, { ...options, view: "songRank" }).visibleCountText,
     "1",
+  );
+  assert.deepEqual(
+    queryTriggerModel(
+      { ...defaultQueryDraft(), q: "なれたん", hideUnknownArtist: true, minCount: 10 },
+      { ...options, view: "vtuberRank", mode: "mobile" },
+    ),
+    {
+      count: 1,
+      labels: ["なれたん"],
+      hasActive: true,
+      visibleCountText: "",
+      ariaLabel: "打开搜索与筛选，当前有 1 个筛选条件：なれたん",
+    },
   );
 });
 
@@ -1183,6 +1213,18 @@ test("url state keeps rank metric and video layout only when relevant", () => {
     layout: "compact",
   });
   assert.equal(parseUrlState("?view=videos&layout=compact", options).videoLayout, "compact");
+
+  const vtuberState = {
+    ...metricState,
+    view: "vtuberRank",
+    rankMetric: "videos",
+    minCount: 10,
+    q: "なれたん",
+  };
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(vtuberState, options))), {
+    view: "vtuberRank",
+    q: "なれたん",
+  });
 });
 
 test("url state falls back to safe defaults and only accepts configured snapshots", () => {
@@ -1436,7 +1478,7 @@ function urlStateOptions() {
     validRanges: ["7d", "all"],
     rangeAliases: { "72h": "7d", "1m": "all" },
     legacyRangeIds: { "7d": ["72h"], all: ["1m"] },
-    validViews: ["songRank", "artistRank", "songAz", "videos"],
+    validViews: ["songRank", "artistRank", "songAz", "vtuberRank", "videos"],
     validPageSizes: [50, 100, 200],
     latestSnapshotPath: "data/latest.json",
     snapshots: [

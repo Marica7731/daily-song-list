@@ -153,19 +153,22 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
       const artistResult = RankingUtils.buildArtistRecords(occurrences);
       const artistRecords = addRequestRecordFields(artistResult.records || []);
       const videoRecords = buildVideoRequestItems(items);
+      const vtuberRecords = buildVtuberRequestItems(items);
       const specs = [
         { type: "song", view: "songs", records: sortRankRecords(songRecords, "occurrences"), metric: "count", sourcePrefix: "song", order: "rank" },
         { type: "song", view: "songs", records: sortRankRecords(songRecords, "videos"), metric: "videos", sourcePrefix: "song", order: "rank" },
         { type: "song", view: "songIndex", records: [...songRecords].sort(compareSongAzRecords), metric: "count", sourcePrefix: "song", order: "position" },
         { type: "artist", view: "artists", records: sortRankRecords(artistRecords, "occurrences"), metric: "count", sourcePrefix: "artist", order: "rank" },
         { type: "artist", view: "artists", records: sortRankRecords(artistRecords, "videos"), metric: "videos", sourcePrefix: "artist", order: "rank" },
+        { type: "vtuber", view: "vtubers", records: sortRankRecords(vtuberRecords, "occurrences"), metric: "count", sourcePrefix: "vtuber", order: "rank" },
+        { type: "vtuber", view: "vtubers", records: sortRankRecords(vtuberRecords, "videos"), metric: "videos", sourcePrefix: "vtuber", order: "rank" },
         { type: "video", view: "videos", records: videoRecords, metric: "count", sourcePrefix: "video", order: "position" },
       ];
 
       for (const spec of specs) {
         const ranks = buildRequestRanks(spec.records, spec.metric);
         spec.records.forEach((record, index) => {
-          const sourceDetailKey = spec.type === "video" ? "" : stableRequestKey(`${rangeId}:${spec.sourcePrefix}:all:${record.key || record.videoId || ""}`);
+          const sourceDetailKey = spec.type === "video" || spec.type === "vtuber" ? "" : stableRequestKey(`${rangeId}:${spec.sourcePrefix}:all:${record.key || record.videoId || ""}`);
           const payloadRecord = serializeRecord(spec.type, record, {
             detailKey: `all:${record.key || record.videoId || ""}`,
             sourceDetailKey,
@@ -329,6 +332,7 @@ function serializeSourceOccurrence(occurrence) {
 function serializeRecord(type, record, options = {}) {
   if (type === "song") return serializeSongRequestRecord(record, options);
   if (type === "artist") return serializeArtistRequestRecord(record, options);
+  if (type === "vtuber") return serializeVtuberRequestRecord(record, options);
   return serializeVideoRequestRecord(record, options);
 }
 
@@ -365,10 +369,74 @@ function buildVideoRequestItems(items) {
   return result;
 }
 
+function buildVtuberRequestItems(items) {
+  const records = new Map();
+  for (const item of items || []) {
+    const scopedSongs = (item.songs || []).filter((song) => RankingUtils.cleanText(song.title));
+    if (!scopedSongs.length) continue;
+    const key = channelRecordKey(item);
+    if (!key) continue;
+    if (!records.has(key)) {
+      records.set(key, {
+        type: "vtuber",
+        key,
+        name: RankingUtils.cleanText(item.channelName || item.channelHandle || item.channelId || "未知频道"),
+        channelName: RankingUtils.cleanText(item.channelName),
+        channelId: RankingUtils.cleanText(item.channelId),
+        channelHandle: RankingUtils.cleanText(item.channelHandle),
+        channelUrl: RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl),
+        count: 0,
+        videoCount: 0,
+        timestampCount: 0,
+        videos: new Set(),
+        songs: new Map(),
+        occurrences: [],
+      });
+    }
+    const record = records.get(key);
+    const videoKey = item.videoId || stableRequestKey(`${item.channelName}:${item.title}:${item.publishedTimestamp || ""}`);
+    record.videos.add(videoKey);
+    for (const song of scopedSongs) {
+      record.count += 1;
+      record.timestampCount += 1;
+      incrementNamedCount(record.songs, RankingUtils.cleanText(song.title));
+      if (record.occurrences.length < REQUEST_PREVIEW_SOURCE_LIMIT) {
+        record.occurrences.push({
+          item,
+          song,
+          searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword, song.title, song.artist].join(" ")),
+        });
+      }
+    }
+  }
+  return Array.from(records.values()).map((record) => {
+    record.videoCount = record.videos.size;
+    record.searchText = requestRecordSearchText(record, "vtuber");
+    return record;
+  });
+}
+
+function channelRecordKey(item) {
+  const channelId = RankingUtils.cleanText(item.channelId);
+  if (channelId) return channelId;
+  const handle = RankingUtils.cleanText(item.channelHandle).replace(/^\/+/, "");
+  if (handle) return normalizeSearchText(handle);
+  const name = RankingUtils.cleanText(item.channelName);
+  return name ? normalizeSearchText(name) : "";
+}
+
+function incrementNamedCount(map, name) {
+  const cleanName = RankingUtils.cleanText(name);
+  const key = normalizeSearchText(cleanName);
+  if (!key) return;
+  if (!map.has(key)) map.set(key, { key, name: cleanName, count: 0 });
+  map.get(key).count += 1;
+}
+
 function addRequestRecordFields(records) {
   for (const record of records || []) {
     if (typeof record.videoCount !== "number") record.videoCount = uniqueRuntimeVideoCount(record.occurrences || []);
-    if (!record.searchText) record.searchText = requestRecordSearchText(record, record.name ? "artist" : "song");
+    if (!record.searchText) record.searchText = requestRecordSearchText(record, record.type || (record.name ? "artist" : "song"));
   }
   return records;
 }
@@ -427,6 +495,28 @@ function serializeVideoRequestRecord(record, options = {}) {
     videoCount: 1,
     timestampCount: Number(record.count) || (Array.isArray(record.songs) ? record.songs.length : 0),
     searchText: requestRecordSearchText(record, "video"),
+  };
+}
+
+function serializeVtuberRequestRecord(record, options = {}) {
+  const occurrences = record.occurrences || [];
+  return {
+    type: "vtuber",
+    detailKey: options.detailKey || "",
+    key: record.key || "",
+    name: record.name || record.channelName || "",
+    channelName: record.channelName || record.name || "",
+    channelId: record.channelId || "",
+    channelHandle: record.channelHandle || "",
+    channelUrl: record.channelUrl || "",
+    count: Number(record.count) || 0,
+    videoCount: Number(record.videoCount) || 0,
+    timestampCount: Number(record.timestampCount ?? record.count) || 0,
+    songs: serializeCountMap(record.songs),
+    occurrences: occurrences.slice(0, REQUEST_PREVIEW_SOURCE_LIMIT).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
+    sourceDetailKey: "",
+    sourceDetailPath: "",
+    searchText: requestRecordSearchText(record, "vtuber"),
   };
 }
 
@@ -489,14 +579,16 @@ function requestRankValue(record, metric) {
 }
 
 function requestRecordSearchText(record, type) {
-  if (record.searchText) return normalizeSearchText(record.searchText);
   if (type === "artist") {
-    return normalizeSearchText([record.name, ...mapNames(record.songs), ...mapNames(record.channels)].join(" "));
+    return normalizeSearchText([record.name, ...(record.aliases || [])].join(" "));
+  }
+  if (type === "vtuber") {
+    return normalizeSearchText([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl].join(" "));
   }
   if (type === "video") {
     return normalizeSearchText([record.videoId, record.title, record.channelName, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
   }
-  return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels)].join(" "));
+  return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels), ...(record.variantLabels || [])].join(" "));
 }
 
 function mapNames(value) {

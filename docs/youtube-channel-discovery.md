@@ -113,6 +113,44 @@ Run one channel at a time. After each channel:
 3. If the channel has a different title or timestamp style, add parser/cleanup tests before running the next channel.
 4. Keep accepted output under `artifacts/channel-discovery/<channel>/` until a separate import step converts reviewed occurrences into project data.
 
+## Three-channel補漏 acceptance record
+
+For the HanamaeHaru / aoineno / fujimiyakotoha補漏 pass, keep a before-and-after ledger in the release note, incident note, or PR body. Do not infer these numbers from local JSON alone: baseline and after-import values must come from the same API target, with query time, base URL, commit SHA, and `meta.source_latest_sha256` recorded.
+
+For each channel, record:
+
+- Baseline before import: `view=videos` and `view=vtubers` API search totals, summary counters, and top returned records.
+- Discovery result: output directory, final `CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK` marker, `manifest.generatedAt`, `requestStats.totalElapsedMs`, `candidateCount`, `usableVideoCount`, and `occurrenceCount`.
+- Accepted increment: accepted JSON path and `CODEX_CHANNEL_DISCOVERY_INCREMENT_OK` read/accepted/skipped/occurrence counts.
+- After import: the same `view=videos` and `view=vtubers` API searches after the accepted increment is in the SQLite build, including total deltas from baseline and representative top records.
+
+Use this table shape for the three channels:
+
+| Channel | Baseline API result | Discovery elapsed / candidates / usable videos / occurrences | Accepted increment result | After-import API result |
+| --- | --- | --- | --- | --- |
+| `HanamaeHaru` | `view=videos`, `view=vtubers`: totals and top rows before import | `requestStats.totalElapsedMs`, `candidateCount`, `usableVideoCount`, `occurrenceCount` | accepted file plus export marker counts | same API queries after import, with deltas |
+| `aoineno` | `view=videos`, `view=vtubers`: totals and top rows before import | `requestStats.totalElapsedMs`, `candidateCount`, `usableVideoCount`, `occurrenceCount` | accepted file plus export marker counts | same API queries after import, with deltas |
+| `fujimiyakotoha` | `view=videos`, `view=vtubers`: totals and top rows before import | `requestStats.totalElapsedMs`, `candidateCount`, `usableVideoCount`, `occurrenceCount` | accepted file plus export marker counts | same API queries after import, with deltas |
+
+Minimum API probes for the ledger:
+
+```bash
+curl -fsS "$BASE/api/meta"
+curl -fsS "$BASE/api/rankings?range=all&view=videos&q=HanamaeHaru&pageSize=5"
+curl -fsS "$BASE/api/rankings?range=all&view=vtubers&q=HanamaeHaru&pageSize=5"
+curl -fsS "$BASE/api/rankings?range=all&view=videos&q=aoineno&pageSize=5"
+curl -fsS "$BASE/api/rankings?range=all&view=vtubers&q=aoineno&pageSize=5"
+curl -fsS "$BASE/api/rankings?range=all&view=videos&q=fujimiyakotoha&pageSize=5"
+curl -fsS "$BASE/api/rankings?range=all&view=vtubers&q=fujimiyakotoha&pageSize=5"
+```
+
+Also keep the `なれたん` search acceptance in the same note. It should prove that the channel補漏 is present and that narrowed search scopes are respected:
+
+- `view=videos&q=なれたん` returns the reviewed video/source rows.
+- `view=vtubers&q=なれたん` matches only VTuber/channel identity text.
+- `view=songs&q=なれたん` returns songs from matching `なれたん` source rows. The displayed `count`, `videoCount`, and source previews must be contextual to the matched source rows, while all-site diagnostics remain in `globalCount` and `globalVideoCount`.
+- `view=artists&q=なれたん` must not pass merely because the video title or channel name contains `なれたん`; that tab can only match real artist identity text.
+
 Example four-channel pass:
 
 ```bash

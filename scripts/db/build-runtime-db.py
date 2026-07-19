@@ -265,10 +265,12 @@ def create_schema(conn: sqlite3.Connection) -> bool:
           channel_name TEXT NOT NULL DEFAULT '',
           published_timestamp INTEGER,
           seconds INTEGER,
+          search_text TEXT NOT NULL DEFAULT '',
           payload_json TEXT NOT NULL,
           PRIMARY KEY (source_key, position)
         );
         CREATE INDEX idx_source_occurrences_lookup ON source_occurrences(source_key, position);
+        CREATE INDEX idx_source_occurrences_range ON source_occurrences(range_id, source_key);
 
         CREATE TABLE external_songs (
           source_system TEXT NOT NULL,
@@ -377,6 +379,7 @@ def ingest_latest_payload(
             item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
             valid_songs = [song for song in item_songs if isinstance(song, dict) and clean_text(song.get("title"))]
             record_video(range_state, range_id, video_id, item, valid_songs)
+            record_vtuber(range_state, video_id, item, valid_songs)
             source_key = stable_key("source-video", range_id, video_id)
             insert_source_detail(conn, source_key, range_id, "video", video_id, source_payload_for_video(item, valid_songs))
 
@@ -585,7 +588,7 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
 
 
 def empty_range_state() -> dict:
-    return {"videos": [], "songs": {}, "artists": {}}
+    return {"videos": [], "songs": {}, "artists": {}, "vtubers": {}}
 
 
 def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: list[dict]) -> None:
@@ -674,6 +677,32 @@ def record_artist(state: dict, range_id: str, video_id: str, item: dict, song: d
     append_preview_occurrence(record["occurrences"], item, song, video_id)
 
 
+def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> None:
+    channel_key = channel_record_key(item)
+    if not channel_key:
+        return
+    if channel_key not in state["vtubers"]:
+        state["vtubers"][channel_key] = {
+            "key": channel_key,
+            "name": clean_text(item.get("channelName") or item.get("channelHandle") or item.get("channelId") or "未知频道"),
+            "channel_name": clean_text(item.get("channelName")),
+            "channel_id": clean_text(item.get("channelId")),
+            "channel_handle": clean_text(item.get("channelHandle")),
+            "channel_url": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
+            "count": 0,
+            "videos": set(),
+            "songs": {},
+            "occurrences": [],
+        }
+    record = state["vtubers"][channel_key]
+    if video_id:
+        record["videos"].add(video_id)
+    for song in songs:
+        record["count"] += 1
+        increment_count(record["songs"], clean_text(song.get("title")))
+        append_preview_occurrence(record["occurrences"], item, song, video_id)
+
+
 def build_ranking_rows(range_id: str, state: dict) -> list[dict]:
     rows: list[dict] = []
     rows.extend(rank_rows_for_videos(range_id, state["videos"]))
@@ -682,6 +711,8 @@ def build_ranking_rows(range_id: str, state: dict) -> list[dict]:
     rows.extend(index_rows_for_songs(range_id, state["songs"].values()))
     rows.extend(rank_rows_for_artists(range_id, state["artists"].values()))
     rows.extend(rank_rows_for_artists(range_id, state["artists"].values(), metric="videos"))
+    rows.extend(rank_rows_for_vtubers(range_id, state["vtubers"].values()))
+    rows.extend(rank_rows_for_vtubers(range_id, state["vtubers"].values(), metric="videos"))
     return rows
 
 
@@ -794,7 +825,7 @@ def rank_rows_for_artists(range_id: str, records, metric: str = "count") -> list
             "video_count": len(record["videos"]),
             "timestamp_count": record["count"],
             "payload": payload,
-            "search_text": search_text(record["name"], *record["songs"].keys(), *record["channels"].keys()),
+            "search_text": search_text(record["name"]),
             "source_detail": {
                 "source_key": payload["sourceDetailKey"],
                 "entity_type": "artist",
@@ -803,6 +834,39 @@ def rank_rows_for_artists(range_id: str, records, metric: str = "count") -> list
             },
         }
         result.append(row_payload(range_id, "artists", rank, row, metric=metric))
+    return result
+
+
+def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list[dict]:
+    sorted_records = sorted(records, key=lambda row: (-rank_metric_value(row, metric), normalize_key(row["name"]), row["key"]))
+    result = []
+    for rank, record in enumerate(sorted_records, start=1):
+        payload = {
+            "type": "vtuber",
+            "key": record["key"],
+            "name": record["name"],
+            "channelName": record["channel_name"],
+            "channelId": record["channel_id"],
+            "channelHandle": record["channel_handle"],
+            "channelUrl": record["channel_url"],
+            "count": record["count"],
+            "videoCount": len(record["videos"]),
+            "timestampCount": record["count"],
+            "songs": count_map_to_list(record["songs"]),
+            "occurrences": record["occurrences"],
+        }
+        row = {
+            "key": record["key"],
+            "title": "",
+            "artist": "",
+            "name": record["name"],
+            "count": record["count"],
+            "video_count": len(record["videos"]),
+            "timestamp_count": record["count"],
+            "payload": payload,
+            "search_text": search_text(record["name"], record["channel_name"], record["channel_id"], record["channel_handle"], record["channel_url"]),
+        }
+        result.append(row_payload(range_id, "vtubers", rank, row, metric=metric))
     return result
 
 
@@ -1273,12 +1337,23 @@ def insert_source_detail(conn: sqlite3.Connection, source_key: str, range_id: st
 def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id: str, position: int, payload: dict) -> None:
     item = payload.get("item") if isinstance(payload.get("item"), dict) else {}
     song = payload.get("song") if isinstance(payload.get("song"), dict) else {}
+    occurrence_search_text = clean_text(payload.get("searchText")) or search_text(
+        item.get("videoId"),
+        item.get("title"),
+        item.get("channelName"),
+        item.get("channelId"),
+        item.get("channelHandle"),
+        item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"),
+        item.get("keyword"),
+        song.get("title"),
+        song.get("artist"),
+    )
     conn.execute(
         """
         INSERT OR REPLACE INTO source_occurrences(
-          source_key, range_id, position, video_id, title, channel_name, published_timestamp, seconds, payload_json
+          source_key, range_id, position, video_id, title, channel_name, published_timestamp, seconds, search_text, payload_json
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             source_key,
@@ -1289,6 +1364,7 @@ def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id
             clean_text(item.get("channelName")),
             int_or_none(item.get("publishedTimestamp")),
             int_or_none(song.get("seconds")),
+            occurrence_search_text,
             dumps_json(payload),
         ),
     )
@@ -1379,6 +1455,17 @@ def song_record_key(song: dict) -> str:
     if source_key:
         return source_key
     return stable_key("song", normalize_key(song.get("title")), normalize_key(song.get("artist")))
+
+
+def channel_record_key(item: dict) -> str:
+    channel_id = clean_text(item.get("channelId"))
+    if channel_id:
+        return channel_id
+    channel_handle = clean_text(item.get("channelHandle")).lstrip("/")
+    if channel_handle:
+        return normalize_key(channel_handle)
+    channel_name = clean_text(item.get("channelName"))
+    return normalize_key(channel_name) if channel_name else ""
 
 
 def stable_key(*parts) -> str:
