@@ -39,7 +39,20 @@ if [[ -f "${CANDIDATE_DB}.manifest.json" ]]; then
 fi
 
 systemctl restart song-rank-api
-curl -fsS "${API_HEALTH_URL}" >/dev/null
+health_ok=0
+for attempt in {1..30}; do
+  if curl -fsS "${API_HEALTH_URL}" >/dev/null; then
+    health_ok=1
+    break
+  fi
+  sleep 1
+done
+if [[ "${health_ok}" != "1" ]]; then
+  systemctl status song-rank-api --no-pager -l || true
+  journalctl -u song-rank-api -n 80 --no-pager || true
+  echo "CODEX_RUNTIME_DB_ACTIVATE_ERROR api-health-timeout url=${API_HEALTH_URL}"
+  exit 1
+fi
 
 commit_sha="$(git rev-parse HEAD)"
 db_size="$(stat -c%s "${DB_PATH}")"

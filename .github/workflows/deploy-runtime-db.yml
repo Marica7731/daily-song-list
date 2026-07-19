@@ -169,10 +169,12 @@ jobs:
             install -m 0644 deploy/vps2/song-rank-runtime-update.service /etc/systemd/system/song-rank-runtime-update.service
             install -m 0644 deploy/vps2/song-rank-runtime-update.timer /etc/systemd/system/song-rank-runtime-update.timer
             install -m 0644 deploy/vps2/nginx-staging.conf /etc/nginx/sites-available/song-rank-staging.conf
+            rm -f /etc/nginx/sites-enabled/default
             ln -sf /etc/nginx/sites-available/song-rank-staging.conf /etc/nginx/sites-enabled/song-rank-staging.conf
             nginx -t
             systemctl daemon-reload
             systemctl enable song-rank-api
+            systemctl reload nginx || systemctl restart nginx
           "
 
       - name: Upload and activate database

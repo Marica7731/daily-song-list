@@ -30,6 +30,7 @@ chmod +x /usr/local/bin/song-rank-db-activate.sh
 cp deploy/vps2/song-rank-runtime-update.service /etc/systemd/system/song-rank-runtime-update.service
 cp deploy/vps2/song-rank-runtime-update.timer /etc/systemd/system/song-rank-runtime-update.timer
 cp deploy/vps2/nginx-staging.conf /etc/nginx/sites-available/song-rank-staging.conf
+rm -f /etc/nginx/sites-enabled/default
 ln -sf /etc/nginx/sites-available/song-rank-staging.conf /etc/nginx/sites-enabled/song-rank-staging.conf
 nginx -t
 systemctl daemon-reload
@@ -39,6 +40,8 @@ systemctl reload nginx
 ```
 
 Do not build the SQLite database during VPS2 bootstrap. The 2 GiB host is expected to receive the first `song-rank.sqlite` from GitHub Actions, and `song-rank-db-activate.sh` will start `song-rank-api` after the uploaded database passes verification.
+
+The song-rank nginx site is installed as the port 80 default server. This keeps direct IP checks, staging DNS, and production DNS on the same route during cutover.
 
 ## Rebuild and restart
 
