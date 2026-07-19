@@ -1188,7 +1188,7 @@ function collectRuntimeOccurrences(items) {
       occurrences.push({
         item,
         song,
-        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword, song.title, song.artist].join(" ")),
+        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
       });
     }
   }
@@ -1239,7 +1239,9 @@ function buildVideoRequestItems(items, options = {}) {
       count: scopedSongs.length,
       videoCount: 1,
       key: item.videoId || stableRequestKey(`${item.channelName}:${item.title}`),
-      searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword, ...scopedSongs.flatMap((song) => [song.title, song.artist])].join(" ")),
+      searchText: normalizeSearchText(
+        [item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, ...scopedSongs.flatMap((song) => [song.title, song.artist])].join(" "),
+      ),
     });
   }
   return result;
@@ -1285,7 +1287,7 @@ function buildVtuberRequestItems(items, options = {}) {
       record.occurrences.push({
         item,
         song,
-        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword, song.title, song.artist].join(" ")),
+        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
       });
     }
   }
@@ -1467,7 +1469,9 @@ function serializeOccurrence(occurrence, options = {}) {
   return {
     item: serializedItem,
     song: buildClientSong(occurrence.song || {}),
-    searchText: occurrence.searchText || normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
+    searchText:
+      occurrence.searchText ||
+      normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
   };
 }
 
@@ -1491,7 +1495,7 @@ function requestRecordSearchText(record, type) {
     return normalizeSearchText([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, ...(record.aliases || [])].join(" "));
   }
   if (type === "video") {
-    return normalizeSearchText([record.videoId, record.title, record.channelName, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
+    return normalizeSearchText([record.videoId, record.title, record.channelName, record.channelId, record.channelHandle, record.channelUrl, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
   }
   return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels), ...(record.variantLabels || [])].join(" "));
 }
@@ -1694,7 +1698,7 @@ function buildSearchRecords(items) {
       title: item.title || "",
       channelName: item.channelName || "",
       keyword: item.keyword || "",
-      searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword].join(" ")),
+      searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword].join(" ")),
     });
     for (const song of item.songs || []) {
       records.push({
@@ -1704,7 +1708,7 @@ function buildSearchRecords(items) {
         title: song.title || "",
         artist: song.artist || "",
         isNiche: song.isNiche === true,
-        searchText: normalizeSearchText([item.videoId, song.title, song.artist, item.title, item.channelName].join(" ")),
+        searchText: normalizeSearchText([item.videoId, song.title, song.artist, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl].join(" ")),
       });
     }
   }

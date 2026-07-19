@@ -68,6 +68,7 @@ test("filters common non-song timestamp sections", () => {
       "0:10:02 自己紹介",
       "0:48:10 MaiR→七海うらら",
       "0:02:44 ・ スタート",
+      "0:03:22 枠Start",
       "0:09:56　魔法／tayori",
     ].join("\n"),
   ]);
@@ -91,11 +92,13 @@ test("rejects exact activity marker titles only for unknown artists", () => {
 });
 
 test("keeps exact activity marker title when a known artist is explicit", () => {
-  const songs = parseTimestampSongs(["0:06:44 曲紹介 / Known Artist"]);
+  const songs = parseTimestampSongs(["0:06:44 曲紹介 / Known Artist\n0:10:00 START / Known Artist"]);
 
-  assert.equal(songs.length, 1);
+  assert.equal(songs.length, 2);
   assert.equal(songs[0].title, "曲紹介");
   assert.equal(songs[0].artist, "Known Artist");
+  assert.equal(songs[1].title, "START");
+  assert.equal(songs[1].artist, "Known Artist");
 });
 
 test("parses split number start end song blocks using start time", () => {

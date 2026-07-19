@@ -220,7 +220,7 @@ For filtered searches, the summary counters must be filtered counters. Do not fa
 
 For source-context searches, the summary counters must be contextual counters. For example, `songs?q=なれたん` can legitimately return songs that do not contain `なれたん` in the song title or artist, because they were sung in matching `なれたん` source videos. Those rows must display only the matching source preview and matching counts; global counts are exposed separately as `global*` diagnostics.
 
-`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, contextual `なれたん` source previews, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
+`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, contextual `なれたん` source previews and filtered source-detail fetches, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
 It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` so a deploy cannot pass while the accepted increment is missing from the runtime DB.
 
 `GET /api/sources/{sourceDetailKey}`
@@ -301,6 +301,7 @@ When changing any API field, ranking metric, derived merge rule, or source-detai
 Before merging an API or deploy change, run this minimum contract matrix:
 
 - DB build/probe: `npm run db:build` and `npm run db:probe -- --range all --view songs --q 少女レイ --page-size 5 --summary-only`; for channel補漏, also probe `--view videos --q ノア・ポラリス`.
+- Fast channel補漏 probe: `npm run db:build -- --no-vsinger --output artifacts/runtime/song-rank-youtube-check.sqlite`, then query `songs`, `videos`, and `vtubers` for the imported channel handles. This is only a local YouTube overlay check; production still needs the full DB build.
 - API smoke test: `npm run api:serve`, then `npm run check:published:api -- http://127.0.0.1/`.
 - Frontend fallback check: load the static page without the API or run the normal static `npm run check:published -- <base-url>` path.
 - Deployment check: after GitHub Actions uploads the DB, run `npm run check:published:api -- http://127.0.0.1/` on VPS2 and again against the public domain after DNS cutover.

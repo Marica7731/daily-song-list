@@ -113,9 +113,11 @@ Run one channel at a time. After each channel:
 3. If the channel has a different title or timestamp style, add parser/cleanup tests before running the next channel.
 4. Keep accepted output under `artifacts/channel-discovery/<channel>/` until a separate import step converts reviewed occurrences into project data.
 
-## Three-channel補漏 acceptance record
+## Reviewed channel補漏 acceptance record
 
-For the HanamaeHaru / aoineno / fujimiyakotoha補漏 pass, keep a before-and-after ledger in the release note, incident note, or PR body. Do not infer these numbers from local JSON alone: baseline and after-import values must come from the same API target, with query time, base URL, commit SHA, and `meta.source_latest_sha256` recorded.
+For reviewed channel補漏 passes, keep a before-and-after ledger in the release note, incident note, or PR body. Do not infer these numbers from local JSON alone: baseline and after-import values must come from the same API target, with query time, base URL, commit SHA, and `meta.source_latest_sha256` recorded.
+
+The 2026-07-19 full補漏 pass uses one accepted increment per channel for these sources: `HanamaeHaru`, `aoineno`, `fujimiyakotoha`, `noa_polaris`, `kanaruhanon`, `naraetanV`, and `ChomaChannel`. Treat earlier capped smoke runs such as `--max-inspect 25` as diagnostics only; full production補漏 should run until the channel pages report `reachedEnd=true` or until an explicit incident note explains why a cap was used.
 
 For each channel, record:
 
@@ -124,13 +126,17 @@ For each channel, record:
 - Accepted increment: accepted JSON path and `CODEX_CHANNEL_DISCOVERY_INCREMENT_OK` read/accepted/skipped/occurrence counts.
 - After import: the same `view=videos` and `view=vtubers` API searches after the accepted increment is in the SQLite build, including total deltas from baseline and representative top records.
 
-Use this table shape for the three channels:
+Use this table shape for each reviewed channel:
 
 | Channel | Baseline API result | Discovery elapsed / candidates / usable videos / occurrences | Accepted increment result | After-import API result |
 | --- | --- | --- | --- | --- |
 | `HanamaeHaru` | `view=videos`, `view=vtubers`: totals and top rows before import | `requestStats.totalElapsedMs`, `candidateCount`, `usableVideoCount`, `occurrenceCount` | accepted file plus export marker counts | same API queries after import, with deltas |
 | `aoineno` | `view=videos`, `view=vtubers`: totals and top rows before import | `requestStats.totalElapsedMs`, `candidateCount`, `usableVideoCount`, `occurrenceCount` | accepted file plus export marker counts | same API queries after import, with deltas |
 | `fujimiyakotoha` | `view=videos`, `view=vtubers`: totals and top rows before import | `requestStats.totalElapsedMs`, `candidateCount`, `usableVideoCount`, `occurrenceCount` | accepted file plus export marker counts | same API queries after import, with deltas |
+| `noa_polaris` | same API probes; baseline should note any previous partial import | same discovery manifest fields | accepted file plus skipped-regression count | same API queries after import, with deltas |
+| `kanaruhanon` | same API probes; baseline should note any previous partial import | same discovery manifest fields | accepted file plus skipped-regression count | same API queries after import, with deltas |
+| `naraetanV` | same API probes; baseline should note any previous partial import | same discovery manifest fields | accepted file plus skipped-regression count | same API queries after import, with deltas |
+| `ChomaChannel` | same API probes; baseline should note any previous partial import | same discovery manifest fields | accepted file plus skipped-regression count | same API queries after import, with deltas |
 
 Minimum API probes for the ledger:
 
@@ -151,13 +157,13 @@ Also keep the `なれたん` search acceptance in the same note. It should prove
 - `view=songs&q=なれたん` returns songs from matching `なれたん` source rows. The displayed `count`, `videoCount`, and source previews must be contextual to the matched source rows, while all-site diagnostics remain in `globalCount` and `globalVideoCount`.
 - `view=artists&q=なれたん` must not pass merely because the video title or channel name contains `なれたん`; that tab can only match real artist identity text.
 
-Example four-channel pass:
+Example full-channel pass:
 
 ```bash
-npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@noa_polaris --singer-name "Noa Polaris" --output-dir artifacts/channel-discovery/noa_polaris --max-channel-pages 3 --max-candidates 120 --max-inspect 25 --request-interval-ms 2500 --request-jitter-ms 1000
-npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@kanaruhanon --singer-name "香鳴ハノン" --output-dir artifacts/channel-discovery/kanaruhanon --max-channel-pages 3 --max-candidates 120 --max-inspect 25 --request-interval-ms 2500 --request-jitter-ms 1000
-npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@naraetanV --singer-name "奈羅花" --output-dir artifacts/channel-discovery/naraetanV --max-channel-pages 3 --max-candidates 120 --max-inspect 25 --request-interval-ms 2500 --request-jitter-ms 1000
-npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@ChomaChannel --singer-name "Choma" --output-dir artifacts/channel-discovery/ChomaChannel --max-channel-pages 3 --max-candidates 120 --max-inspect 25 --request-interval-ms 2500 --request-jitter-ms 1000
+npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@noa_polaris --singer-name "Noa Polaris" --output-dir artifacts/channel-discovery/noa_polaris --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3000 --request-jitter-ms 1500
+npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@kanaruhanon --singer-name "香鳴ハノン" --output-dir artifacts/channel-discovery/kanaruhanon --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3000 --request-jitter-ms 1500
+npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@naraetanV --singer-name "奈羅花" --output-dir artifacts/channel-discovery/naraetanV --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3000 --request-jitter-ms 1500
+npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@ChomaChannel --singer-name "Choma" --output-dir artifacts/channel-discovery/ChomaChannel --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3000 --request-jitter-ms 1500
 ```
 
 ## Accepted increment
@@ -174,6 +180,15 @@ npm run check:published:api -- http://127.0.0.1/
 ```
 
 Multiple channel output folders can be passed by repeating `--input-dir`. The export command prints `CODEX_CHANNEL_DISCOVERY_INCREMENT_OK` with read, accepted, skipped-regression, and occurrence counts. It is idempotent by `videoId`; if a previously cataloged video has a richer song list than the channel discovery result, the increment skips that duplicate instead of replacing the catalog entry.
+
+For fast local validation of YouTube-only補漏 rows, build a temporary DB without VSinger raw tables:
+
+```bash
+npm run db:build -- --no-vsinger --output artifacts/runtime/song-rank-youtube-check.sqlite
+python scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank-youtube-check.sqlite --range all --view songs --q なれたん --summary-only
+```
+
+This validates accepted channel increments and contextual search cheaply. It is not a replacement for the production full SQLite build, because `vsingerSongs` and VSinger source tables are intentionally omitted.
 
 `scripts/db/export-runtime-rankings.js` loads all `data/external/youtube-channel-discovery/accepted/*.json` files by default when `npm run db:build` uses `--ranking-source js`. This keeps manual補漏 commits small: commit the accepted increment, code, and docs only; do not commit generated `data/ui`, `data/catalog-segments`, or range JSON shards for a DB-mode deployment.
 

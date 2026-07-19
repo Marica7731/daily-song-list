@@ -116,7 +116,7 @@ async function runChannelDiscovery(options, deps) {
     const inspectable = candidates.filter((candidate) => !completed.has(candidate.videoId)).slice(0, options.maxInspect);
     for (const candidate of inspectable) {
       await maybeDelay(options.requestIntervalMs);
-      const result = await deps.inspectVideoSongList(candidate);
+      const result = await inspectVideoSongListWithRetry(candidate, deps, options);
       if (result?.detail) {
         details.push(enrichDetail(result.detail, candidate, options.singerName));
         completed.add(candidate.videoId);
@@ -193,6 +193,21 @@ async function runChannelDiscovery(options, deps) {
   });
 
   return { manifest, rawVideos, details, occurrences, audits };
+}
+
+async function inspectVideoSongListWithRetry(candidate, deps, options) {
+  const attempts = Math.max(1, Number(options.inspectMaxAttempts) || 3);
+  let lastError = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await deps.inspectVideoSongList(candidate);
+    } catch (error) {
+      lastError = error;
+      if (!isRetriableRequestError(error) || attempt === attempts) throw error;
+      await maybeDelay(Math.max(250, Number(options.requestIntervalMs) || 0) * (attempt + 1) + randomJitterMs(options.requestJitterMs));
+    }
+  }
+  throw lastError || new Error(`inspect failed for ${candidate.videoId || candidate.title || "candidate"}`);
 }
 
 async function fetchChannelPageWithContinuations(pageUrl, options, deps) {
@@ -282,31 +297,53 @@ function channelMetadataFromInitialData(data) {
   return { title: "", channelId: "", channelUrl: "", handleUrl: "", thumbnailUrl: "" };
 }
 
-async function fetchBrowseContinuation({ apiKey, clientVersion, continuation, fetchImpl = fetch, requestIntervalMs = 0, userAgent = "" }) {
-  await maybeDelay(requestIntervalMs);
-  const response = await fetchImpl(`https://www.youtube.com/youtubei/v1/browse?prettyPrint=false&key=${encodeURIComponent(apiKey)}`, {
-    method: "POST",
-    headers: {
-      "user-agent":
-        userAgent ||
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
-      "accept-language": "ja,en-US;q=0.8,en;q=0.6",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      context: {
-        client: {
-          clientName: "WEB",
-          clientVersion: clientVersion || DEFAULT_CLIENT_VERSION,
-          hl: "ja",
-          gl: "JP",
+async function fetchBrowseContinuation({ apiKey, clientVersion, continuation, fetchImpl = fetch, requestIntervalMs = 0, userAgent = "", maxAttempts = 3 }) {
+  let lastError = null;
+  const attempts = Math.max(1, Number(maxAttempts) || 1);
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    await maybeDelay(attempt === 1 ? requestIntervalMs : Math.max(250, requestIntervalMs) * attempt);
+    let response = null;
+    try {
+      response = await fetchImpl(`https://www.youtube.com/youtubei/v1/browse?prettyPrint=false&key=${encodeURIComponent(apiKey)}`, {
+        method: "POST",
+        headers: {
+          "user-agent":
+            userAgent ||
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+          "accept-language": "ja,en-US;q=0.8,en;q=0.6",
+          "content-type": "application/json",
         },
-      },
-      continuation,
-    }),
-  });
-  if (!response.ok) throw new Error(`youtubei browse continuation HTTP ${response.status}`);
-  return response.json();
+        body: JSON.stringify({
+          context: {
+            client: {
+              clientName: "WEB",
+              clientVersion: clientVersion || DEFAULT_CLIENT_VERSION,
+              hl: "ja",
+              gl: "JP",
+            },
+          },
+          continuation,
+        }),
+      });
+    } catch (error) {
+      lastError = error;
+      continue;
+    }
+    if (response.ok) return response.json();
+    lastError = new Error(`youtubei browse continuation HTTP ${response.status}`);
+    if (!isRetriableContinuationStatus(response.status) || attempt === attempts) throw lastError;
+  }
+  throw lastError || new Error("youtubei browse continuation failed");
+}
+
+function isRetriableContinuationStatus(status) {
+  const code = Number(status);
+  return code === 429 || (code >= 500 && code < 600);
+}
+
+function isRetriableRequestError(error) {
+  const message = String(error?.message || error || "");
+  return /(?:HTTP\s+(?:429|5\d\d)|fetch failed|ECONNRESET|ETIMEDOUT|ECONNREFUSED|UND_ERR|timeout|network)/iu.test(message);
 }
 
 function findBrowseContinuation(data) {

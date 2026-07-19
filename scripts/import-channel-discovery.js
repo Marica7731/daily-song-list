@@ -9,6 +9,7 @@ const {
   writeCatalogSegments,
   writeVideoCatalog,
 } = require("./video-catalog");
+const { isLikelyNonSongEntry, normalizeParsedSong } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
 const SOURCE_GROUP = "youtube_channel_discovery";
@@ -122,7 +123,7 @@ function readDiscoveryVideos(inputDirs) {
         stats.skippedInvalidVideoId += 1;
         continue;
       }
-      const songs = Array.isArray(detail.songs) ? detail.songs.filter((song) => song?.title) : [];
+      const songs = Array.isArray(detail.songs) ? detail.songs.map(normalizeParsedSong).filter(isImportableSong) : [];
       if (!songs.length) {
         stats.skippedNoSongs += 1;
         continue;
@@ -193,6 +194,7 @@ function normalizeImportedVideo(detail, inputDir, songs) {
     channelName: stringValue(detail.channelName),
     channelId: stringValue(detail.channelId),
     channelHandle: stringValue(detail.channelHandle),
+    channelUrl: stringValue(detail.channelUrl || detail.discoveryChannelUrl),
     publishedTimestamp: finiteTimestamp(detail.publishedTimestamp),
     sourceGroups: uniqueValues([SOURCE_GROUP, ...listValues(detail.sourceGroups), detail.sourceGroup]),
     sourceUrls: uniqueValues([
@@ -219,12 +221,25 @@ function normalizeImportedVideo(detail, inputDir, songs) {
     qualityStatus: "usable",
     discoveryImport: {
       sourceGroup: SOURCE_GROUP,
-      inputDir,
+      inputDir: projectRelativePath(inputDir),
       discoverySingerName: stringValue(detail.discoverySingerName),
       discoveryChannelUrl: stringValue(detail.discoveryChannelUrl),
       matchedKeywords: listValues(detail.matchedKeywords).map((value) => stringValue(value)).filter(Boolean),
     },
   };
+}
+
+function isImportableSong(song) {
+  return Boolean(song?.title) && !isLikelyNonSongEntry(song);
+}
+
+function projectRelativePath(value) {
+  const absolutePath = path.resolve(ROOT, String(value || ""));
+  const relativePath = path.relative(ROOT, absolutePath);
+  if (relativePath && !relativePath.startsWith("..") && !path.isAbsolute(relativePath)) {
+    return relativePath.replace(/\\/gu, "/");
+  }
+  return absolutePath.replace(/\\/gu, "/");
 }
 
 function finiteTimestamp(value) {
@@ -266,7 +281,9 @@ module.exports = {
   SOURCE_GROUP,
   filterNonRegressiveImports,
   inputDirsFromArgs,
+  isImportableSong,
   isStrictSongSubset,
   normalizeImportedVideo,
+  projectRelativePath,
   readDiscoveryVideos,
 };

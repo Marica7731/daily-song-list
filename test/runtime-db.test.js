@@ -57,6 +57,8 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               videoId: "video-b",
               title: "Night Karaoke",
               channelName: "Beta Ch.",
+              channelHandle: "@beta_ch",
+              channelUrl: "https://www.youtube.com/@beta_ch",
               publishedTimestamp: 1784422800000,
               publishedText: "2026-07-19",
               songs: [{ title: "Song One (Piano Ver.)", artist: "Singer A", seconds: 30, time: "0:30" }],
@@ -307,6 +309,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
           url: "https://www.youtube.com/watch?v=chanvideo01",
           channelName: "Overlay Ch.",
           channelHandle: "@overlay",
+          channelUrl: "https://www.youtube.com/@overlay",
           publishedTimestamp: 1784332800000,
           publishedText: "2026-07-18",
           songs: [
@@ -357,6 +360,45 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(queryOutput, /Overlay Song/);
   assert.match(queryOutput, /"totalCount": 1/);
   assert.match(queryOutput, /"totalOccurrenceCount": 2/);
+
+  const videoHandleSearchOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "videos",
+      "--q",
+      "@overlay",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(videoHandleSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(videoHandleSearchOutput, /"totalCount": 1/);
+  assert.match(videoHandleSearchOutput, /Channel Overlay Karaoke/);
+
+  const videoUrlSearchOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "videos",
+      "--q",
+      "youtube.com/@overlay",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(videoUrlSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(videoUrlSearchOutput, /"totalCount": 1/);
 });
 
 function sha256Json(value) {

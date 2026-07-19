@@ -79,8 +79,10 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(channelSongSearch.records[0].matchedBySource, true);
     assert.equal(channelSongSearch.records[0].occurrences.length, 1);
     assert.equal(channelSongSearch.records[0].occurrences[0].item.channelName, "Alpha Ch.");
+    assert.match(channelSongSearch.records[0].sourceDetailPath, /[?&]q=Alpha/u);
     const filteredSource = await fetchJson(`http://127.0.0.1:${port}${channelSongSearch.records[0].sourceDetailPath}`);
     assert.equal(filteredSource.found, true);
+    assert.equal(filteredSource.record.count, channelSongSearch.records[0].count);
     assert.equal(filteredSource.record.occurrences.length, 1);
     assert.equal(filteredSource.record.occurrences[0].item.channelName, "Alpha Ch.");
 
@@ -103,6 +105,10 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     const vtuberAliasSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=HanamaeHaru&pageSize=5`);
     assert.equal(vtuberAliasSearch.totalCount, 1);
     assert.equal(vtuberAliasSearch.records[0].name, "Haru Ch. 花前ハル");
+
+    const videoHandleSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=beta_ch&pageSize=5`);
+    assert.equal(videoHandleSearch.totalCount, 1);
+    assert.equal(videoHandleSearch.records[0].title, "Night Karaoke");
 
     const sourceKey = rankings.records[0].sourceDetailKey;
     const source = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}`);
@@ -155,6 +161,8 @@ function writeLatestFixture(latestPath) {
               videoId: "video-b",
               title: "Night Karaoke",
               channelName: "Beta Ch.",
+              channelHandle: "@beta_ch",
+              channelUrl: "https://www.youtube.com/@beta_ch",
               publishedTimestamp: 1784422800000,
               publishedText: "2026-07-19",
               songs: [{ title: "Song One", artist: "Singer A", seconds: 30, time: "0:30" }],

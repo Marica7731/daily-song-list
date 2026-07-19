@@ -125,10 +125,22 @@ test("runChannelDiscovery writes raw videos, parsed details, occurrences, and re
       return { status: 200, body: pages[url], bytes: Buffer.byteLength(pages[url]), fromCache: false };
     },
   };
+  let continuationRequests = 0;
   const fetchImpl = async (url) => {
     assert.match(url, /youtubei\/v1\/browse/u);
+    continuationRequests += 1;
+    if (continuationRequests === 1) {
+      return {
+        ok: false,
+        status: 500,
+        async json() {
+          throw new Error("unexpected json read for failed continuation");
+        },
+      };
+    }
     return {
       ok: true,
+      status: 200,
       async json() {
         return channelData({ videos: [videoRenderer("CCCCCCCCCCC", "弾き語り セットリスト", "4 日前")] });
       },
@@ -188,6 +200,7 @@ test("runChannelDiscovery writes raw videos, parsed details, occurrences, and re
   assert.equal(result.manifest.candidateCount, 3);
   assert.equal(result.manifest.usableVideoCount, 2);
   assert.equal(result.manifest.occurrenceCount, 2);
+  assert.equal(continuationRequests, 2);
   assert.equal(result.rawVideos[0].sourceSystem, "youtube_channel_discovery");
   assert.equal(result.occurrences[0].sourceSystem, "youtube_channel_discovery");
   assert.equal(result.occurrences[0].verificationStatus, "youtube_discovered");
@@ -195,6 +208,64 @@ test("runChannelDiscovery writes raw videos, parsed details, occurrences, and re
   assert.equal(fs.existsSync(path.join(dir, "raw-videos.json")), true);
   assert.equal(fs.existsSync(path.join(dir, "occurrences.json")), true);
   assert.match(fs.readFileSync(path.join(dir, "report.md"), "utf8"), /Occurrences: 2/u);
+});
+
+test("channel discovery retries transient video detail failures", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-retry-test-"));
+  const firstUrl = "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1";
+  const client = {
+    metrics: { requestCount: 1 },
+    async getText(url) {
+      assert.equal(url, firstUrl);
+      return {
+        status: 200,
+        body: youtubeHtml({
+          initialData: channelData({
+            videos: [videoRenderer("AAAAAAAAAAA", "【歌枠】夜のうた", "2 日前")],
+          }),
+        }),
+        bytes: 10,
+        fromCache: false,
+      };
+    },
+  };
+  let inspectCalls = 0;
+  const inspectVideoSongList = async (candidate) => {
+    inspectCalls += 1;
+    if (inspectCalls === 1) throw new Error("https://www.youtube.com/watch?v=AAAAAAAAAAA HTTP 429");
+    return {
+      detail: {
+        videoId: candidate.videoId,
+        title: candidate.title,
+        channelName: "Noa Polaris",
+        songs: [{ time: "1:00", seconds: 60, title: "Retry Song", artist: "Retry Artist", raw: "1:00 Retry Song / Retry Artist" }],
+      },
+      audit: { videoId: candidate.videoId, result: "selected" },
+    };
+  };
+
+  const result = await runChannelDiscovery(
+    {
+      channelUrl: "https://www.youtube.com/@noa_polaris",
+      singerName: "Noa Polaris",
+      outputDir: dir,
+      cacheDir: path.join(dir, "cache"),
+      keywords: ["歌"],
+      tabs: ["streams"],
+      maxChannelPages: 1,
+      maxCandidates: 10,
+      maxInspect: 1,
+      requestIntervalMs: 0,
+      requestJitterMs: 0,
+      fresh: true,
+      candidateOnly: false,
+    },
+    { client, extractSearchItems, inspectVideoSongList },
+  );
+
+  assert.equal(inspectCalls, 2);
+  assert.equal(result.manifest.usableVideoCount, 1);
+  assert.equal(result.manifest.occurrenceCount, 1);
 });
 
 test("raw and occurrence records carry fields needed by the review/import pipeline", () => {

@@ -181,6 +181,15 @@ async function checkApiRuntime(checkedAt) {
     );
     assert(sourceTexts.length > 0, `api songs naretan row must include matched source preview: ${record.title || record.key || "unknown"}`);
     assert(sourceTexts.every((text) => text.includes("なれたん")), `api songs naretan row preview must be naretan-scoped: ${record.title || record.key || "unknown"}`);
+    assert(String(record.sourceDetailPath || "").includes("q=%E3%81%AA%E3%82%8C%E3%81%9F%E3%82%93"), `api songs naretan row sourceDetailPath must preserve query: ${record.title || record.key || "unknown"}`);
+    const detail = await fetchJsonWithText(record.sourceDetailPath);
+    assertApiSuccessHeaders(detail, `api songs naretan detail ${record.title || record.key || "unknown"}`);
+    assert(Number(detail.json.record?.count || 0) === Number(record.count || 0), `api songs naretan detail count must match row count: ${record.title || record.key || "unknown"}`);
+    const detailTexts = (detail.json.record?.occurrences || []).map((occurrence) =>
+      `${occurrence?.searchText || ""} ${occurrence?.item?.title || ""} ${occurrence?.item?.channelName || ""}`.normalize("NFKC").toLocaleLowerCase(),
+    );
+    assert(detailTexts.length === Number(record.count || 0), `api songs naretan detail occurrences must match row count: ${record.title || record.key || "unknown"}`);
+    assert(detailTexts.every((text) => text.includes("なれたん")), `api songs naretan detail must be naretan-scoped: ${record.title || record.key || "unknown"}`);
   }
   const naretanVtuber = await fetchJsonWithText("api/rankings?range=all&view=vtubers&q=%E3%81%AA%E3%82%8C%E3%81%9F%E3%82%93&pageSize=1");
   assertApiSuccessHeaders(naretanVtuber, "api vtubers naretan");

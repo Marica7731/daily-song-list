@@ -39,6 +39,13 @@ test("channel discovery import reads usable details and preserves provenance", (
         matchedKeywords: ["歌"],
         songs: [
           {
+            time: "00:30",
+            seconds: 30,
+            title: "枠Start",
+            artist: "未記載",
+            raw: "0:30 枠Start",
+          },
+          {
             time: "12:34",
             seconds: 754,
             title: "少女レイ",
@@ -66,6 +73,7 @@ test("channel discovery import reads usable details and preserves provenance", (
   assert.equal(videos[0].sourceGroups.includes("youtube_channel_discovery"), true);
   assert.equal(videos[0].sourceUrls.includes("https://www.youtube.com/@noa_polaris/streams"), true);
   assert.equal(videos[0].sourceUrls.includes("https://www.youtube.com/watch?v=AAAAAAAAAAA"), true);
+  assert.deepEqual(videos[0].songs.map((song) => song.title), ["少女レイ"]);
   assert.equal(videos[0].songs[0].sourceId, "comment:1");
 });
 
@@ -86,6 +94,20 @@ test("normalizeImportedVideo maps detail song fields into catalog-ready videos",
   assert.equal(video.songs[0].index, 1);
   assert.equal(video.songs[0].isNiche, true);
   assert.equal(video.qualityStatus, "usable");
+});
+
+test("normalizeImportedVideo stores repository-relative discovery input paths", () => {
+  const inputDir = path.resolve("artifacts/channel-discovery/noa_polaris");
+  const video = normalizeImportedVideo(
+    {
+      videoId: "DDDDDDDDDDD",
+      title: "歌枠",
+      songs: [{ seconds: 1, title: "Song", artist: "Artist" }],
+    },
+    inputDir,
+    [{ seconds: 1, title: "Song", artist: "Artist" }],
+  );
+  assert.equal(video.discoveryImport.inputDir, "artifacts/channel-discovery/noa_polaris");
 });
 
 test("import skips duplicate videos that would replace a richer existing song list", () => {

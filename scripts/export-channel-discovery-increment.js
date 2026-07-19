@@ -6,6 +6,7 @@ const { loadVideoCatalog } = require("./video-catalog");
 const {
   filterNonRegressiveImports,
   inputDirsFromArgs,
+  projectRelativePath,
   readDiscoveryVideos,
   SOURCE_GROUP,
 } = require("./import-channel-discovery");
@@ -34,7 +35,7 @@ async function main() {
     sourceSystem: SOURCE_GROUP,
     kind: "youtube-channel-discovery-increment",
     generatedAt,
-    inputs,
+    inputs: inputs.map((input) => projectRelativePath(input)),
     readStats: { ...readStats, ...safeImport.stats },
     videoCount: acceptedVideos.length,
     occurrenceCount: acceptedVideos.reduce((total, video) => total + (Array.isArray(video.songs) ? video.songs.length : 0), 0),
