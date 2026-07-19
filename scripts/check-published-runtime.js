@@ -7,6 +7,8 @@ const options = parseArgs(process.argv.slice(2));
 const baseUrl = normalizeBaseUrl(options.baseUrl || process.env.DAILY_SONG_PUBLISHED_URL || DEFAULT_BASE_URL);
 const checkMode = options.mode || process.env.DAILY_SONG_PUBLISHED_CHECK_MODE || "static";
 const expectedMeta = loadExpectedMeta(options.expectedMetaPath || process.env.DAILY_SONG_EXPECTED_META || "");
+const expectedApiCommitSha = options.expectedCommitSha || process.env.DAILY_SONG_EXPECTED_COMMIT_SHA || "";
+const expectedApiLatestSha256 = options.expectedLatestSha256 || process.env.DAILY_SONG_EXPECTED_LATEST_SHA256 || "";
 const errors = [];
 
 main().catch((error) => {
@@ -127,6 +129,12 @@ async function checkApiRuntime(checkedAt) {
   assert(Number(meta.schemaVersion) >= 1, "api meta schemaVersion missing");
   assert(Number(meta.counts?.ranking_rows) > 0, "api meta ranking_rows must be positive");
   assert(Number(meta.counts?.source_occurrences) > 0, "api meta source_occurrences must be positive");
+  if (expectedApiCommitSha) {
+    assert(meta.meta?.source_commit_sha === expectedApiCommitSha, `api source_commit_sha ${meta.meta?.source_commit_sha || "missing"} must match expected ${expectedApiCommitSha}`);
+  }
+  if (expectedApiLatestSha256) {
+    assert(meta.meta?.source_latest_sha256 === expectedApiLatestSha256, `api source_latest_sha256 ${meta.meta?.source_latest_sha256 || "missing"} must match expected ${expectedApiLatestSha256}`);
+  }
 
   const rankings = await fetchJson("api/rankings?range=all&view=songs&q=%E5%B0%91%E5%A5%B3%E3%83%AC%E3%82%A4&pageSize=5");
   assert(rankings.view === "songs", "api rankings view mismatch");
@@ -152,10 +160,14 @@ async function checkApiRuntime(checkedAt) {
       `checkedAt=${checkedAt}`,
       `baseUrl=${baseUrl}`,
       `builtAt=${health.builtAt}`,
+      `sourceCommit=${meta.meta?.source_commit_sha || "unknown"}`,
+      `sourceLatestSha256=${meta.meta?.source_latest_sha256 || "unknown"}`,
       `rankingRows=${meta.counts?.ranking_rows || 0}`,
       `sourceOccurrences=${meta.counts?.source_occurrences || 0}`,
       `probeTotal=${rankings.totalCount}`,
       `probeOccurrences=${rankings.totalOccurrenceCount}`,
+      `expectedCommit=${expectedApiCommitSha ? "matched" : "not-set"}`,
+      `expectedLatest=${expectedApiLatestSha256 ? "matched" : "not-set"}`,
     ].join(" "),
   );
 }
@@ -293,6 +305,12 @@ function parseArgs(args) {
       index += 1;
     } else if (arg === "--api") {
       result.mode = "api";
+    } else if (arg === "--expected-commit-sha") {
+      result.expectedCommitSha = args[index + 1] || "";
+      index += 1;
+    } else if (arg === "--expected-latest-sha256") {
+      result.expectedLatestSha256 = args[index + 1] || "";
+      index += 1;
     } else if (!result.baseUrl) {
       result.baseUrl = arg;
     }

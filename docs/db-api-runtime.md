@@ -55,15 +55,38 @@ npm run check:published:api -- https://ytb-song-rank.culua.com/
 
 ### Endpoint contract
 
+All API endpoints return compact JSON with `Content-Type: application/json; charset=utf-8` and `Access-Control-Allow-Origin: *`. Successful responses use `Cache-Control: public, max-age=30`; error responses use `Cache-Control: no-store`.
+
+Common status codes:
+
+- `200`: request succeeded.
+- `400`: invalid query parameter; body is `{ "error": "bad_request", "message": "..." }`.
+- `404`: unknown route; body is `{ "error": "not_found" }`.
+- `500`: uncaught server error; body is `{ "error": "internal_error", "message": "..." }`.
+
 `GET /healthz`
 
 - Returns `status`, `schemaVersion`, `builtAt`, `latestGeneratedAt`, and table `counts`.
 - Use this for systemd/nginx/Cloudflare cutover checks.
+- Example response:
+
+```json
+{
+  "status": "ok",
+  "schemaVersion": 1,
+  "builtAt": "2026-07-19T00:00:00Z",
+  "latestGeneratedAt": "2026-07-19T00:00:00.000Z",
+  "counts": { "ranking_rows": 1, "source_occurrences": 1 }
+}
+```
 
 `GET /api/meta`
 
 - Returns `{ schemaVersion, meta, counts }`.
+- `meta.source_commit_sha` is the git commit used when building SQLite.
+- `meta.source_latest_sha256` is the sha256 of the `data/latest.json` consumed by the builder.
 - The frontend uses this endpoint first. If it is reachable, the page uses SQLite/API mode; otherwise GitHub Pages static JSON remains the fallback.
+- `scripts/check-published-runtime.js --mode api` can compare these fields to expected values with `--expected-commit-sha` and `--expected-latest-sha256`.
 
 `GET /api/rankings`
 
@@ -71,7 +94,7 @@ Supported query parameters:
 
 - `range`: `7d` or `all`; default `all`.
 - `view`: `songs`, `songIndex`, `artists`, `videos`, or `vsingerSongs`; default `songs`.
-- `metric`: `occurrences` or `videos` for `songs` and `artists`; ignored as `count` for the other views.
+- `metric`: `occurrences`, `count`, or `videos`; `videos` is only valid for `songs` and `artists`. Non-video metrics are normalized to occurrence counts in the response as `metric: "occurrences"`.
 - `q`: optional case-insensitive search against normalized title, artist, channel, and name text.
 - `minCount`: optional minimum count for `songs` and `artists`; interpreted against `metric`.
 - `page`: 1-based page number.
@@ -83,7 +106,36 @@ Response fields:
 - `filteredBaseCount`: number of rows before search/min-count filters for the same range/view/metric.
 - `totalOccurrenceCount`: sum of `count` across the filtered rows.
 - `totalVideoCount`: sum of `videoCount` across the filtered rows.
+- `pageCount`: total pages for the current filtered query.
 - `records`: display-ready rows; song and artist rows include `sourceDetailKey` when full source details are available.
+
+Example response shape:
+
+```json
+{
+  "schemaVersion": 1,
+  "rangeId": "all",
+  "view": "songs",
+  "metric": "occurrences",
+  "page": 1,
+  "pageSize": 5,
+  "totalCount": 1,
+  "filteredBaseCount": 1,
+  "totalOccurrenceCount": 1,
+  "totalVideoCount": 1,
+  "pageCount": 1,
+  "records": [
+    {
+      "rank": 1,
+      "title": "少女レイ",
+      "displayArtist": "みきとP",
+      "count": 1,
+      "videoCount": 1,
+      "sourceDetailKey": "example"
+    }
+  ]
+}
+```
 
 For filtered searches, the summary counters must be filtered counters. Do not fall back to full-site `counts.occurrences`; otherwise a search such as `少女レイ` displays the all-site occurrence total instead of the matched rows.
 
@@ -91,7 +143,9 @@ For filtered searches, the summary counters must be filtered counters. Do not fa
 
 - Returns `{ found, sourceKey, record }`.
 - When `found=true`, `record.occurrences` contains the full source occurrence list sorted by stored position.
+- When `found=false`, the response is `{ schemaVersion, found: false, sourceKey }`.
 - The frontend uses this endpoint for "view all sources" in API mode, so large source lists stay out of initial ranking responses.
+- This endpoint is intentionally unpaginated in the first database runtime. Keep it behind an explicit user action, and include a large-source smoke test before raising nginx/API timeouts or changing the response shape.
 
 Supported ranking views in this first step:
 
@@ -110,7 +164,7 @@ Supported ranking views in this first step:
 
 The raw tables are intentionally not overwritten by cleanup decisions. Dirty data handling belongs in derived layers, so future canonical entity work can reprocess the same source rows without fetching the data again.
 
-The `songs` view is the user-facing all-source ranking. For example, after the 2026-07-19 VSinger import, `songs?q=少女レイ` returns the frontend-equivalent merged row: `少女レイ / みきとP` with `count=2145` and `videoCount=1997`.
+The `songs` view is the user-facing all-source ranking. For example, `songs?q=少女レイ` should return the frontend-equivalent merged row for `少女レイ / みきとP`; the exact `count` and `videoCount` change as source data refreshes, so use `npm run check:published:api` or `scripts/db/query-runtime-db.py` for the current numbers.
 
 The `vsingerSongs` view remains a raw-source diagnostic view by VSinger song ID. Search responses include `totalOccurrenceCount` so operators can distinguish an exact source row from title variants matched by a search term.
 
@@ -124,6 +178,13 @@ When changing any API field, ranking metric, derived merge rule, or source-detai
 - `scripts/db/query-runtime-db.py` for operator probes.
 - `scripts/check-published-runtime.js` so production checks cover the public contract.
 - `test/runtime-db.test.js` and `test/runtime-api.test.js`.
+
+Before merging an API or deploy change, run this minimum contract matrix:
+
+- DB build/probe: `npm run db:build` and `npm run db:probe -- --range all --view songs --q 少女レイ --page-size 5 --summary-only`.
+- API smoke test: `npm run api:serve`, then `npm run check:published:api -- http://127.0.0.1/`.
+- Frontend fallback check: load the static page without the API or run the normal static `npm run check:published -- <base-url>` path.
+- Deployment check: after GitHub Actions uploads the DB, run `npm run check:published:api -- http://127.0.0.1/` on VPS2 and again against the public domain after DNS cutover.
 
 ## VPS2 rollout
 
@@ -144,13 +205,13 @@ GitHub Actions remains the upstream data refresh path:
 - `.github/workflows/update-core.yml` runs hourly and updates `data/latest.json`, `data/ui`, catalog files, and `data/status.json`.
 - `.github/workflows/update-watchdog.yml` watches the published freshness and can trigger the core updater.
 - `.github/workflows/update-backfill.yml` prepares backfill inbox bundles; VSinger full HTTP backfill stays behind owner-permission scripts and is not part of routine hourly refresh.
+- `.github/workflows/deploy-runtime-db.yml` runs on direct `main` pushes and after `Update core song-list data` completes successfully. It resolves the latest `origin/main` revision before building SQLite, then uploads the finished database to VPS2.
 - After production cuts over to VPS2, set repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1` so `.github/workflows/update-core.yml` fails if the static runtime is fresh but the public SQLite API is not healthy.
 
 VPS2 is the runtime deploy target:
 
-- `.github/workflows/deploy-runtime-db.yml` builds SQLite on GitHub's runner and uploads the finished database to VPS2.
 - `deploy/vps2/song-rank-db-activate.sh` verifies the uploaded DB sha256, probes `少女レイ`, atomically replaces the DB, restarts `song-rank-api`, and checks `/healthz`.
-- `deploy/vps2/song-rank-runtime-update.timer` runs every 10 minutes as a light code-sync and health restart path. It does not build SQLite on the 2 GiB VPS unless `BUILD_DB_ON_VPS=1` is explicitly set.
+- `deploy/vps2/song-rank-runtime-update.timer` is installed but disabled on the 2 GiB production host. It is only a manual fallback for code sync and health restart, and it does not build SQLite unless `BUILD_DB_ON_VPS=1` is explicitly set.
 - The activation script emits `CODEX_RUNTIME_DB_ACTIVATE_OK` only after the API is restarted and healthy.
 
-VPS2's 2 GiB memory is not enough for the current full builder. Keep heavy DB builds in GitHub Actions or move the service to a larger host before setting `BUILD_DB_ON_VPS=1`.
+VPS2's 2 GiB memory is not enough for the current full builder. Keep heavy DB builds in GitHub Actions or move the service to a larger host before setting `BUILD_DB_ON_VPS=1`; do not enable local scheduled DB builds on this host.

@@ -1,6 +1,11 @@
 name: Deploy SQLite runtime DB
 
 on:
+  workflow_run:
+    workflows:
+      - "Update core song-list data"
+    types:
+      - completed
   push:
     branches:
       - main
@@ -24,10 +29,11 @@ permissions:
 
 concurrency:
   group: daily-song-list-runtime-db-deploy
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 80
     env:
@@ -40,6 +46,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve deploy revision
+        id: revision
+        run: |
+          git fetch origin main --prune
+          git checkout main
+          git pull --ff-only --quiet origin main
+          commit_sha="$(git rev-parse HEAD)"
+          latest_sha256="$(sha256sum data/latest.json | awk '{print $1}')"
+          echo "commit_sha=${commit_sha}" >> "$GITHUB_OUTPUT"
+          echo "latest_sha256=${latest_sha256}" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -63,11 +82,12 @@ jobs:
           built_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           cat > artifacts/runtime/song-rank.sqlite.manifest.json <<JSON
           {
-            "commit_sha": "${GITHUB_SHA}",
+            "commit_sha": "${{ steps.revision.outputs.commit_sha }}",
             "run_id": "${GITHUB_RUN_ID}",
             "run_attempt": "${GITHUB_RUN_ATTEMPT}",
             "built_at": "${built_at}",
             "sha256": "${sha256}",
+            "source_latest_sha256": "${{ steps.revision.outputs.latest_sha256 }}",
             "bytes": ${bytes}
           }
           JSON
@@ -77,11 +97,37 @@ jobs:
       - name: Upload database artifact
         uses: actions/upload-artifact@v4
         with:
-          name: song-rank-sqlite-${{ github.sha }}
+          name: song-rank-sqlite-${{ steps.revision.outputs.commit_sha }}
           path: |
             artifacts/runtime/song-rank.sqlite
             artifacts/runtime/song-rank.sqlite.manifest.json
           retention-days: 14
+
+      - name: Verify runtime API artifact
+        env:
+          DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
+          DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+        run: |
+          python3 server/song_rank_api.py --db artifacts/runtime/song-rank.sqlite --host 127.0.0.1 --port 8765 > artifacts/runtime/api-smoke.log 2>&1 &
+          api_pid="$!"
+          cleanup() {
+            kill "${api_pid}" >/dev/null 2>&1 || true
+            wait "${api_pid}" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/healthz >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "${ready}" != "1" ]; then
+            cat artifacts/runtime/api-smoke.log
+            exit 1
+          fi
+          npm run check:published:api -- http://127.0.0.1:8765/
 
       - name: Install sshpass
         env:
@@ -97,6 +143,7 @@ jobs:
       - name: Prepare VPS2 runtime checkout
         env:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
           sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
@@ -112,11 +159,10 @@ jobs:
             fi
             cd '${REMOTE_PROJECT_DIR}'
             test \"\$(git remote get-url origin)\" = 'https://github.com/Marica7731/daily-song-list.git'
-            git fetch origin main --prune
+            git fetch --quiet origin main --prune
             git checkout main
-            git pull --ff-only origin main
-            test \"\$(git rev-parse HEAD)\" = '${GITHUB_SHA}'
-            npm install --no-package-lock
+            git merge --ff-only --quiet '${DEPLOY_SHA}'
+            test \"\$(git rev-parse HEAD)\" = '${DEPLOY_SHA}'
             install -m 0644 deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
             install -m 0755 deploy/vps2/song-rank-runtime-update.sh /usr/local/bin/song-rank-runtime-update.sh
             install -m 0755 deploy/vps2/song-rank-db-activate.sh /usr/local/bin/song-rank-db-activate.sh
@@ -134,16 +180,24 @@ jobs:
           VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           EXPECTED_SHA256: ${{ steps.manifest.outputs.sha256 }}
         run: |
+          set -Eeuo pipefail
           remote_db="${REMOTE_STATE_DIR}/song-rank.sqlite.next.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
+          cleanup_remote_candidate() {
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "rm -f '${remote_db}' '${remote_db}.manifest.json'" || true
+          }
+          trap cleanup_remote_candidate ERR
           sshpass -p "${VPS2_PASSWORD}" scp -o StrictHostKeyChecking=no artifacts/runtime/song-rank.sqlite "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
           sshpass -p "${VPS2_PASSWORD}" scp -o StrictHostKeyChecking=no artifacts/runtime/song-rank.sqlite.manifest.json "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
           sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${remote_db}' /usr/local/bin/song-rank-db-activate.sh
-            systemctl enable --now song-rank-runtime-update.timer
+            systemctl disable --now song-rank-runtime-update.timer || true
             systemctl reload nginx
           "
+          trap - ERR
 
       - name: Verify VPS2 API
-        run: npm run check:published:api -- http://192.255.151.75/
-
+        env:
+          DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
+          DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
+        run: npm run check:published:api -- http://staging-ytb-song-rank.culua.com/

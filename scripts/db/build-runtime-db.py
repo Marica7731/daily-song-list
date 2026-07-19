@@ -65,6 +65,10 @@ def main() -> int:
         write_meta(conn, "builder", "scripts/db/build-runtime-db.py")
         write_meta(conn, "built_at", utc_now())
         write_meta(conn, "source_latest_json", str(args.input))
+        write_meta(conn, "source_latest_sha256", sha256_file(args.input))
+        source_commit_sha = git_commit_sha()
+        if source_commit_sha:
+            write_meta(conn, "source_commit_sha", source_commit_sha)
         if latest.get("generatedAt"):
             write_meta(conn, "latest_generated_at", str(latest.get("generatedAt")))
         if latest.get("capturedAt"):
@@ -301,6 +305,29 @@ def write_meta(conn: sqlite3.Connection, key: str, value: str) -> None:
         "INSERT INTO meta(key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
         (key, value),
     )
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def git_commit_sha() -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return ""
+    return completed.stdout.strip()
 
 
 def ingest_latest_payload(

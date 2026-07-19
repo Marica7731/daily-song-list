@@ -21,8 +21,6 @@ apt-get install -y nodejs
 git clone https://github.com/Marica7731/daily-song-list.git /opt/culua/ytb-song-rank
 cd /opt/culua/ytb-song-rank
 git checkout main
-npm install --no-package-lock
-python3 scripts/db/build-runtime-db.py --output /var/lib/culua/ytb-song-rank/song-rank.sqlite
 chown -R www-data:www-data /var/lib/culua/ytb-song-rank /var/log/culua/ytb-song-rank
 cp deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
 cp deploy/vps2/song-rank-runtime-update.sh /usr/local/bin/song-rank-runtime-update.sh
@@ -35,10 +33,12 @@ cp deploy/vps2/nginx-staging.conf /etc/nginx/sites-available/song-rank-staging.c
 ln -sf /etc/nginx/sites-available/song-rank-staging.conf /etc/nginx/sites-enabled/song-rank-staging.conf
 nginx -t
 systemctl daemon-reload
-systemctl enable --now song-rank-api
-systemctl enable --now song-rank-runtime-update.timer
+systemctl enable song-rank-api
+systemctl disable --now song-rank-runtime-update.timer
 systemctl reload nginx
 ```
+
+Do not build the SQLite database during VPS2 bootstrap. The 2 GiB host is expected to receive the first `song-rank.sqlite` from GitHub Actions, and `song-rank-db-activate.sh` will start `song-rank-api` after the uploaded database passes verification.
 
 ## Rebuild and restart
 
@@ -76,6 +76,8 @@ It probes `少女レイ`, keeps the previous database as `song-rank.sqlite.previ
 
 GitHub Actions remains the source update mechanism. `Update core song-list data` runs hourly and commits refreshed data to `main`. `Deploy SQLite runtime DB` then builds SQLite on GitHub's runner and uploads the database to VPS2, where `song-rank-db-activate.sh` atomically replaces the active DB and restarts the API.
 
+Keep `song-rank-runtime-update.timer` installed but disabled on the 2 GiB VPS2 production host. The timer is only a manual fallback for code sync and health restart; enabling it for routine production updates can make the checkout drift from the database built by GitHub Actions.
+
 Required repository secret:
 
 - `VPS2_PASSWORD`: root SSH password for `192.255.151.75`.
@@ -93,7 +95,15 @@ npm run check:published:api -- http://127.0.0.1/
 
 After production DNS points at VPS2, set the GitHub repository variable `DAILY_SONG_REQUIRE_PUBLISHED_API=1`. The hourly `update-core.yml` workflow will still update the source data, then verify the public static runtime and the public API. During migration, leave the variable unset or `0` so the static GitHub Pages site can continue passing before the API cutover.
 
-The workflow also uploads a short-lived artifact containing `song-rank.sqlite` and a manifest with `commit_sha`, `run_id`, `built_at`, `sha256`, and `bytes`, so failed deployments can be inspected without rebuilding.
+`Deploy SQLite runtime DB` runs on direct `main` pushes and after `Update core song-list data` completes successfully. Each run resolves the latest `origin/main` revision before building, so an hourly data refresh that lands during a deploy will be picked up by the next deploy instead of leaving VPS2 pinned to an older commit. The workflow also uploads a short-lived artifact containing `song-rank.sqlite` and a manifest with `commit_sha`, `run_id`, `built_at`, `sha256`, and `bytes`, so failed deployments can be inspected without rebuilding.
+
+Failed deploys remove their candidate DB automatically. To clean historical candidates by hand:
+
+```bash
+find /var/lib/culua/ytb-song-rank -maxdepth 1 -type f \
+  \( -name 'song-rank.sqlite.next.*' -o -name 'song-rank.sqlite.next.*.manifest.json' \) \
+  -delete
+```
 
 ## Migration checklist
 

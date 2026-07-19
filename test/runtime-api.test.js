@@ -1,4 +1,5 @@
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 const { execFileSync, spawn } = require("node:child_process");
 const fs = require("node:fs");
 const net = require("node:net");
@@ -52,6 +53,10 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     const health = await fetchJson(`http://127.0.0.1:${port}/healthz`);
     assert.equal(health.status, "ok");
     assert.equal(health.counts.videos, 2);
+
+    const meta = await fetchJson(`http://127.0.0.1:${port}/api/meta`);
+    assert.equal(meta.meta.source_latest_sha256, sha256File(latestPath));
+    assert.equal(meta.meta.latest_generated_at, "2026-07-19T00:00:00.000Z");
 
     const rankings = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&pageSize=5`);
     assert.equal(rankings.totalCount, 2);
@@ -125,6 +130,10 @@ function writeLatestFixture(latestPath) {
     }),
     "utf8",
   );
+}
+
+function sha256File(filePath) {
+  return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
 async function getFreePort() {
