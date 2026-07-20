@@ -166,6 +166,7 @@
       increment(record.channels, clean(occurrence?.item?.channelName));
     }
 
+    mergePartialArtistRankingVariants(records);
     const finalizedRecords = Array.from(records.values()).map((record) => finalizeArtistRecord(record, normalizeArtist));
     return { records: finalizedRecords, missingArtistCount };
   }
@@ -196,6 +197,7 @@
     }
     mergeKanaRomajiArtistVariants(recordsByKey);
     mergeLikelyArtistTypoVariants(recordsByKey);
+    mergePartialSameTitleArtistVariants(recordsByKey);
   }
 
   function mergeKanaRomajiArtistVariants(recordsByKey) {
@@ -254,6 +256,118 @@
     }
     if (matches.length !== 1) return null;
     return matches[0];
+  }
+
+  function mergePartialSameTitleArtistVariants(recordsByKey) {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
+      for (const record of records) {
+        if (recordsByKey.get(record.artistKey) !== record) continue;
+        const target = selectPartialArtistTarget(record, recordsByKey, { requireSharedSong: false });
+        if (!target) continue;
+        const [winner, loser] = compareRecordDominance(target, record) <= 0 ? [target, record] : [record, target];
+        if (winner === loser) continue;
+        mergeRecord(winner, loser);
+        recordsByKey.delete(loser.artistKey);
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  function mergePartialArtistRankingVariants(recordsByKey) {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
+      for (const record of records) {
+        if (recordsByKey.get(record.key) !== record) continue;
+        const target = selectPartialArtistTarget(record, recordsByKey, { requireSharedSong: true });
+        if (!target) continue;
+        const [winner, loser] = compareRecordDominance(target, record) <= 0 ? [target, record] : [record, target];
+        if (winner === loser) continue;
+        mergeArtistRankRecord(winner, loser);
+        recordsByKey.delete(loser.key);
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  function selectPartialArtistTarget(record, recordsByKey, options = {}) {
+    const matches = [];
+    for (const candidate of recordsByKey.values()) {
+      if (candidate === record) continue;
+      if (options.requireSharedSong && !artistRecordsShareSong(record, candidate)) continue;
+      if (partialArtistIdentityMatch(record, candidate)) matches.push(candidate);
+    }
+    if (matches.length !== 1) return null;
+    return matches[0];
+  }
+
+  function partialArtistIdentityMatch(a, b) {
+    const aNames = partialArtistRecordNames(a);
+    const bNames = partialArtistRecordNames(b);
+    for (const left of aNames) {
+      for (const right of bNames) {
+        if (isConservativePartialArtistNameMatch(left, right)) return true;
+      }
+    }
+    return false;
+  }
+
+  function isConservativePartialArtistNameMatch(left, right) {
+    if (hasArtistIdentityAnnotation(left) || hasArtistIdentityAnnotation(right)) return false;
+    const leftKey = normalizeArtistKey(left);
+    const rightKey = normalizeArtistKey(right);
+    if (!leftKey || !rightKey || leftKey === rightKey) return false;
+    const [shortName, longName, shortKey, longKey] =
+      leftKey.length <= rightKey.length ? [left, right, leftKey, rightKey] : [right, left, rightKey, leftKey];
+    if (!isSafePartialArtistKey(shortKey, longKey)) return false;
+    return hasSafePartialArtistBoundary(shortName, longName) || hasSafeCjkPartialArtistSuffix(shortName, longName);
+  }
+
+  function isSafePartialArtistKey(shortKey, longKey) {
+    if (shortKey.length < 4) return false;
+    if (longKey.length / shortKey.length > 3.2) return false;
+    if (!longKey.startsWith(shortKey) && !longKey.endsWith(shortKey)) return false;
+    if (new Set(["artist", "official", "channel", "vocal", "cover", "music"]).has(shortKey)) return false;
+    return true;
+  }
+
+  function hasSafePartialArtistBoundary(shortName, longName) {
+    const shortText = cleanText(shortName).normalize("NFKC");
+    const longText = cleanText(longName).normalize("NFKC");
+    if (!shortText || !longText || shortText === longText) return false;
+    if (/[\/／&＆+＋、,，]/u.test(longText)) return false;
+    const boundary = String.raw`[\s\u3000._・･\-ー–—]+`;
+    return new RegExp(`(?:^|${boundary})${escapeRegExp(shortText)}(?:$|${boundary})`, "iu").test(longText);
+  }
+
+  function hasSafeCjkPartialArtistSuffix(shortName, longName) {
+    const shortText = cleanText(shortName).normalize("NFKC");
+    const longText = cleanText(longName).normalize("NFKC");
+    if (!shortText || !longText || shortText === longText) return false;
+    if (!/[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(shortText)) return false;
+    if (Array.from(shortText).length < 4) return false;
+    return longText.startsWith(shortText) || longText.endsWith(shortText);
+  }
+
+  function partialArtistRecordNames(record) {
+    const names = artistRecordNames(record);
+    for (const entry of record.aliasCounts?.values?.() || []) {
+      if (entry?.name) names.push(entry.name);
+    }
+    if (record.name) names.push(record.name);
+    return uniqueStrings(names);
+  }
+
+  function artistRecordsShareSong(a, b) {
+    const aKeys = new Set(countMapNames(a.songs).map(normalizeSongTitleKey).filter(Boolean));
+    if (!aKeys.size) return false;
+    return countMapNames(b.songs).some((name) => aKeys.has(normalizeSongTitleKey(name)));
   }
 
   function hasAnyArtistIdentityAnnotation(record) {
@@ -366,6 +480,14 @@
     mergeCountMap(target.artists, source.artists);
     mergeCountMap(target.channels, source.channels);
     mergeCountMap(target.variantLabelCounts, source.variantLabelCounts || new Map());
+  }
+
+  function mergeArtistRankRecord(target, source) {
+    target.count += source.count;
+    target.occurrences.push(...source.occurrences);
+    mergeCountMap(target.songs, source.songs);
+    mergeCountMap(target.channels, source.channels);
+    mergeCountMap(target.aliasCounts, source.aliasCounts);
   }
 
   function mergeCountMap(target, source) {
@@ -686,6 +808,10 @@
     return Array.from(map?.values?.() || []).sort((a, b) => b.count - a.count || compareValues(a.name, b.name));
   }
 
+  function countMapNames(map) {
+    return Array.from(map?.values?.() || []).map((entry) => entry?.name || entry?.title || "").filter(Boolean);
+  }
+
   function stripLeadingTitleListMarker(value) {
     let result = String(value ?? "");
     for (let index = 0; index < 4; index += 1) {
@@ -864,6 +990,10 @@
       result.push(value);
     }
     return result;
+  }
+
+  function escapeRegExp(value) {
+    return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
   const KANA_DIGRAPHS = {

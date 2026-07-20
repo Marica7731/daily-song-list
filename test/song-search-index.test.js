@@ -7,6 +7,8 @@ const {
   fetchSongSearchIndex,
   mergeSupplementalKnownSongs,
   parseSongSearchDataFile,
+  refreshSongSearchIndex,
+  shouldUseCachedSongSearchIndex,
 } = require("../scripts/song-search-index");
 const { createSongAliasContext } = require("../scripts/song-aliases");
 
@@ -222,6 +224,54 @@ test("fetches manifest files with fallback and skips missing files", async () =>
   assert.equal(index.skippedFileCount, 1);
   assert.equal(index.skippedFiles[0].file, "missing.js");
   assert.equal(index.titleKeys.includes("knownsong"), true);
+});
+
+test("reuses a fresh song-search index cache for daily niche refresh cadence", async () => {
+  const previousIndex = buildSongSearchIndex([{ title: "Cached Song", artist: "Cached Artist" }], {
+    generatedAt: "2026-07-20T00:00:00.000Z",
+    files: ["cached.js"],
+  });
+  let fetched = false;
+
+  const index = await refreshSongSearchIndex({
+    previousIndex,
+    now: new Date("2026-07-20T12:00:00.000Z"),
+    fetchImpl: async () => {
+      fetched = true;
+      throw new Error("network should not be used for fresh cache");
+    },
+  });
+
+  assert.equal(fetched, false);
+  assert.equal(index.titleKeys.includes("cachedsong"), true);
+  assert.equal(shouldUseCachedSongSearchIndex(previousIndex, new Date("2026-07-20T23:59:00.000Z")), true);
+  assert.equal(shouldUseCachedSongSearchIndex(previousIndex, new Date("2026-07-21T00:01:00.000Z")), false);
+});
+
+test("force refresh bypasses the daily song-search index cache", async () => {
+  const previousIndex = buildSongSearchIndex([{ title: "Cached Song", artist: "Cached Artist" }], {
+    generatedAt: "2026-07-20T00:00:00.000Z",
+    files: ["cached.js"],
+  });
+  const index = await refreshSongSearchIndex({
+    previousIndex,
+    force: true,
+    now: new Date("2026-07-20T12:00:00.000Z"),
+    fetchImpl: async (url) => {
+      if (url.endsWith("/data/index.json")) return jsonResponse({ files: ["fresh.js"] });
+      if (url.endsWith("/data/fresh.js")) {
+        return textResponse(`
+          window.SONG_DATA = window.SONG_DATA || [];
+          window.SONG_DATA.push({"title":"Fresh Song","artist":"Fresh Artist"});
+        `);
+      }
+      return { ok: false, status: 404 };
+    },
+    concurrency: 1,
+  });
+
+  assert.equal(index.titleKeys.includes("freshsong"), true);
+  assert.equal(index.titleKeys.includes("cachedsong"), false);
 });
 
 function jsonResponse(value) {

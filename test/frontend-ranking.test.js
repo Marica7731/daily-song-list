@@ -59,6 +59,26 @@ test("merges same-title kana and romaji artist identities conservatively", () =>
   for (const record of records) assert.equal(record.count, 2);
 });
 
+test("merges same-title partial artist identities only with safe evidence", () => {
+  const records = buildSongRecords([
+    occurrence("Stellar Stellar", "Hoshimachi Suisei", "A"),
+    occurrence("Stellar Stellar", "Suisei", "B"),
+    occurrence("ビビデバ", "星街すいせい", "C"),
+    occurrence("ビビデバ", "すいせい", "D"),
+    occurrence("Song A", "Ado", "E"),
+    occurrence("Song A", "Kado", "F"),
+    occurrence("Song B", "YOASOBI", "G"),
+    occurrence("Song B", "Ayase / YOASOBI", "H"),
+  ]);
+
+  const stellar = records.find((record) => record.title === "Stellar Stellar");
+  const bibideba = records.find((record) => record.title === "ビビデバ");
+  assert.equal(stellar.count, 2);
+  assert.equal(bibideba.count, 2);
+  assert.equal(records.filter((record) => record.title === "Song A").length, 2);
+  assert.equal(records.filter((record) => record.title === "Song B").length, 2);
+});
+
 test("does not merge kana romaji identities across different titles or identity annotations", () => {
   const records = buildSongRecords([
     occurrence("Song A", "ヨルシカ", "A"),
@@ -349,6 +369,28 @@ test("artist ranking does not merge feat identity into the base artist", () => {
     records.map((record) => record.name).sort(),
     ["40mP", "40mP feat.初音ミク"].sort(),
   );
+});
+
+test("artist ranking merges partial names only when songs overlap", () => {
+  const { records } = buildArtistRecords([
+    occurrence("Stellar Stellar", "Hoshimachi Suisei", "A"),
+    occurrence("Stellar Stellar", "Suisei", "B"),
+    occurrence("ビビデバ", "星街すいせい", "C"),
+    occurrence("ビビデバ", "すいせい", "D"),
+    occurrence("Song A", "Ado", "E"),
+    occurrence("Song A", "Kado", "F"),
+    occurrence("Song C", "Nanashi Mumei", "G"),
+    occurrence("Song D", "Mumei", "H"),
+  ]);
+
+  const latinPartial = records.find((record) => record.aliases.some((alias) => alias.name === "Hoshimachi Suisei"));
+  const cjkPartial = records.find((record) => record.aliases.some((alias) => alias.name === "星街すいせい"));
+  assert.equal(latinPartial.count, 2);
+  assert.equal(cjkPartial.count, 2);
+  assert.equal(records.some((record) => record.name === "Ado"), true);
+  assert.equal(records.some((record) => record.name === "Kado"), true);
+  assert.equal(records.some((record) => record.name === "Nanashi Mumei"), true);
+  assert.equal(records.some((record) => record.name === "Mumei"), true);
 });
 
 test("buildArtistSongGroups groups occurrences by song", () => {

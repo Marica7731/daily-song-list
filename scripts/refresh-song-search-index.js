@@ -13,7 +13,7 @@ if (require.main === module) {
 }
 
 async function main() {
-  const index = await refreshSongSearchIndex({ previousIndex: readJsonIfExists(OUTPUT_PATH) });
+  const index = await refreshSongSearchIndex({ previousIndex: readJsonIfExists(OUTPUT_PATH), force: true });
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(index, null, 2)}\n`, "utf8");
   console.log(

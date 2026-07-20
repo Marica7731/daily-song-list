@@ -52,6 +52,20 @@ name.
 normal data update flow applies the library-outside annotation after the YouTube
 update step.
 
+Hourly core updates reuse a fresh `data/song-search-known-songs.json` cache for
+24 hours by default, controlled by `DAILY_SONG_SEARCH_REFRESH_MAX_AGE_HOURS`.
+This keeps the public `小众` labels aligned with the continuously changing
+song-search library on a roughly daily cadence without refetching every hourly
+YouTube update. Use `npm run refresh:song-search` or set
+`DAILY_SONG_SEARCH_FORCE_REFRESH=1` when an immediate song-search resync is
+needed.
+
+Artist dedupe also uses conservative partial-name evidence. A partial artist
+merge is allowed only when the longer and shorter names have a safe boundary or
+CJK/kana suffix/prefix match, avoid explicit identity annotations such as
+`feat.` or `CV`, and have unique supporting evidence. Artist-rank merges also
+require the two artist spellings to share at least one normalized song title.
+
 ## Frontend Behavior
 
 - `assets/app.js` reads compact latest runtime data from `data/ui/meta.json`

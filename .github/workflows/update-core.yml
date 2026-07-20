@@ -57,6 +57,7 @@ jobs:
       DAILY_SONG_CHANNEL_AVATAR_MAX_FETCH: "60"
       DAILY_SONG_CHANNEL_AVATAR_DELAY_MS: "1500"
       DAILY_SONG_CHANNEL_AVATAR_STALE_DAYS: "30"
+      DAILY_SONG_SEARCH_REFRESH_MAX_AGE_HOURS: "24"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

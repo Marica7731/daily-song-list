@@ -24,7 +24,7 @@ if (require.main === module) {
 
 async function main() {
   const previousIndex = readJsonIfExists(SONG_SEARCH_INDEX_PATH);
-  const songSearchIndex = await refreshSongSearchIndex({ previousIndex });
+  const songSearchIndex = await refreshSongSearchIndex({ previousIndex, force: isTruthyEnv(process.env.DAILY_SONG_SEARCH_FORCE_REFRESH) });
   const songAliasContext = loadSongAliasContext();
   const summary = songSearchSourceSummary(songSearchIndex);
   writeJson(SONG_SEARCH_INDEX_PATH, songSearchIndex);
@@ -98,4 +98,8 @@ function readJsonIfExists(filePath) {
 function writeJson(filePath, value) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+function isTruthyEnv(value) {
+  return /^(?:1|true|yes|on)$/iu.test(String(value || "").trim());
 }

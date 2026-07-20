@@ -17,10 +17,14 @@ const RAW_SOURCE_INDEX_URL = `${RAW_BASE_URL}/data/index.json`;
 const SOURCE_WORKFLOW_URL = `https://github.com/${SOURCE_REPOSITORY}/actions/workflows/update.yml`;
 const SUPPLEMENTAL_KNOWN_SONGS_PATH = path.join(ROOT, "config", "song-search-known-overrides.json");
 const DEFAULT_CONCURRENCY = 4;
+const DEFAULT_REFRESH_MAX_AGE_HOURS = 24;
 
 async function refreshSongSearchIndex(options = {}) {
   const previousIndex = options.previousIndex || null;
   const now = options.now || new Date();
+  if (!options.force && shouldUseCachedSongSearchIndex(previousIndex, now, options)) {
+    return mergeSupplementalKnownSongs(previousIndex, options.supplementalKnownSongs);
+  }
   try {
     return mergeSupplementalKnownSongs(await fetchSongSearchIndex(options), options.supplementalKnownSongs);
   } catch (error) {
@@ -37,6 +41,17 @@ async function refreshSongSearchIndex(options = {}) {
       refreshError: error.message,
     }), options.supplementalKnownSongs);
   }
+}
+
+function shouldUseCachedSongSearchIndex(index, now = new Date(), options = {}) {
+  if (!isSongSearchIndexAvailable(index)) return false;
+  const maxAgeHours = refreshMaxAgeHours(options);
+  if (maxAgeHours <= 0) return false;
+  const refreshedMs = Date.parse(index.refreshedAt || index.generatedAt || "");
+  const nowMs = now instanceof Date ? now.getTime() : Date.parse(now);
+  if (!Number.isFinite(refreshedMs) || !Number.isFinite(nowMs)) return false;
+  const ageMs = nowMs - refreshedMs;
+  return ageMs >= 0 && ageMs < maxAgeHours * 60 * 60 * 1000;
 }
 
 async function fetchSongSearchIndex(options = {}) {
@@ -393,6 +408,14 @@ function positiveInteger(value, fallback = 1) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function refreshMaxAgeHours(options = {}) {
+  const value = options.refreshMaxAgeHours ?? process.env.DAILY_SONG_SEARCH_REFRESH_MAX_AGE_HOURS;
+  if (value == null || value === "") return DEFAULT_REFRESH_MAX_AGE_HOURS;
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return DEFAULT_REFRESH_MAX_AGE_HOURS;
+  return parsed;
+}
+
 function headers() {
   return {
     "user-agent": "daily-song-list song-search-index",
@@ -413,5 +436,6 @@ module.exports = {
   mergeSupplementalKnownSongs,
   parseSongSearchDataFile,
   refreshSongSearchIndex,
+  shouldUseCachedSongSearchIndex,
   songSearchSourceSummary,
 };
