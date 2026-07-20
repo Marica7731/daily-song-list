@@ -10,6 +10,7 @@ const {
   BLOCKLIST_HASH,
   normalizeSongEntry,
 } = require("../assets/source-filter");
+const { isLikelyNonSongEntry } = require("../scripts/song-utils");
 
 test("source filter removes blocked HK/TW VTuber channels without matching ordinary song titles", () => {
   assert.equal(isBlockedSource({ channelId: "UCW8G8aeRjbIOlL-Fgms8hEQ", channelName: "Japanese Channel", title: "歌雜 / HKVtuber" }), true);
@@ -158,6 +159,15 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   });
 
   assert.equal(isBlockedSongEntry({ title: "閉会式", artist: "待补歌手" }), true);
+
+  assert.equal(isLikelyNonSongEntry({ title: "END", artist: "unknown" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "Opening Talk", artist: "未記載" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "Ending Talk", artist: "unknown" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "本編終了", artist: "未記載" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO" }), false);
+  assert.equal(isLikelyNonSongEntry({ title: "Pretender", artist: "Official髭男dism" }), false);
+  assert.equal(isLikelyNonSongEntry({ title: "spending", artist: "Known Artist" }), false);
+  assert.equal(isLikelyNonSongEntry({ title: "Ending", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "閉会式も見てください", artist: "待补歌手" }), true);
   assert.equal(isBlockedSongEntry({ title: "1を手で表現した", artist: "待补歌手" }), true);
   assert.equal(isBlockedSongEntry({ title: "2周年記念お写真公開！", artist: "待补歌手" }), true);

@@ -1489,14 +1489,8 @@
     ]
       .map(realChannelAvatarUrl)
       .find((url) => url && !excluded.has(url)) || "";
-    const thumbnailUrl = displayThumbnailUrl(
-      record.thumbnailUrl ||
-        record.videoThumbnail ||
-        record.videoThumbnailUrl ||
-        record.displayThumbnailUrl ||
-        occurrenceThumbnailUrl(record.occurrences) ||
-        youtubeThumbnailFromVideoId(record.videoId || occurrenceVideoId(record.occurrences)),
-    );
+    const thumbnailUrl = displayThumbnailUrl(recordThumbnailUrl(record) || occurrenceThumbnailUrl(record.occurrences)) ||
+      youtubeThumbnailFromVideoId(recordVideoId(record) || occurrenceVideoId(record.occurrences));
     if (avatarUrl) {
       return {
         kind: "realAvatar",
@@ -1541,7 +1535,7 @@
   function occurrenceThumbnailUrl(occurrences) {
     for (const occurrence of occurrences || []) {
       const item = occurrence?.item || {};
-      const url = displayThumbnailUrl(item.thumbnailUrl || item.videoThumbnail || item.videoThumbnailUrl || item.thumbnail);
+      const url = displayThumbnailUrl(recordThumbnailUrl(occurrence) || recordThumbnailUrl(item) || recordThumbnailUrl(occurrence?.source));
       if (url) return url;
     }
     return "";
@@ -1549,10 +1543,33 @@
 
   function occurrenceVideoId(occurrences) {
     for (const occurrence of occurrences || []) {
-      const id = youtubeVideoId(occurrence?.item?.videoId || occurrence?.videoId);
+      const id = youtubeVideoId(recordVideoId(occurrence) || recordVideoId(occurrence?.item) || recordVideoId(occurrence?.source));
       if (id) return id;
     }
     return "";
+  }
+
+  function recordThumbnailUrl(record = {}) {
+    return firstNonEmpty(
+      record.thumbnailUrl,
+      record.videoThumbnail,
+      record.videoThumbnailUrl,
+      record.displayThumbnailUrl,
+      record.thumbnail,
+      record.source?.thumbnailUrl,
+      record.source?.videoThumbnailUrl,
+      record.source?.thumbnail,
+    );
+  }
+
+  function recordVideoId(record = {}) {
+    return firstNonEmpty(
+      record.videoId,
+      record.youtubeVideoId,
+      record.video?.videoId,
+      record.source?.videoId,
+      record.source?.youtubeVideoId,
+    );
   }
 
   function youtubeThumbnailFromVideoId(value) {

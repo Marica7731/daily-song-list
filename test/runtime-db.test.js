@@ -423,6 +423,14 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
           songs: [
             { title: "Overlay Song", artist: "Overlay Artist", time: "1:23", seconds: 83 },
             { title: "Overlay Song", artist: "Overlay Artist", time: "5:00", seconds: 300 },
+            { title: "END", artist: "unknown", time: "6:00", seconds: 360 },
+            { title: "Opening Talk", artist: "未記載", time: "7:00", seconds: 420 },
+            { title: "Ending Talk", artist: "unknown", time: "8:00", seconds: 480 },
+            { title: "本編終了", artist: "未記載", time: "9:00", seconds: 540 },
+            { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", time: "10:00", seconds: 600 },
+            { title: "Pretender", artist: "Official髭男dism", time: "11:00", seconds: 660 },
+            { title: "spending", artist: "Known Artist", time: "12:00", seconds: 720 },
+            { title: "Opening", artist: "Known Artist", time: "13:00", seconds: 780 },
           ],
         },
       ],
@@ -488,6 +496,50 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(queryOutput, /"totalCount": 1/);
   assert.match(queryOutput, /"totalOccurrenceCount": 2/);
 
+  const dirtySongOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\"",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(dirtySongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(dirtySongOutput, /"totalCount": 0/);
+
+  const safeSongOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"ENDLESS STORY\" OR Pretender OR spending OR Opening",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(safeSongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(safeSongOutput, /"totalCount": 4/);
+
   const videoHandleSearchOutput = execFileSync(
     PYTHON,
     [
@@ -548,9 +600,20 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(vtuberSongMetricOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(vtuberSongMetricOutput, /"metric": "songs"/);
   assert.match(vtuberSongMetricOutput, /"name": "Hanon Ch\. 香鳴ハノン【パレプロ】"/);
-  assert.match(vtuberSongMetricOutput, /"songCount": 1/);
+  assert.match(vtuberSongMetricOutput, /"songCount": 5/);
   assert.match(vtuberSongMetricOutput, /"isCollected": true/);
+  const vtuberSongMetricPayload = parseDbQueryOutput(vtuberSongMetricOutput);
+  assert.deepEqual(
+    vtuberSongMetricPayload.records[0].songs.map((song) => song.name),
+    ["Overlay Song", "ENDLESS STORY", "Pretender", "spending", "Opening"],
+  );
 });
+
+function parseDbQueryOutput(output) {
+  const markerIndex = output.lastIndexOf("\nCODEX_RUNTIME_DB_QUERY_OK");
+  assert.notEqual(markerIndex, -1, output);
+  return JSON.parse(output.slice(0, markerIndex));
+}
 
 function sha256Json(value) {
   return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");

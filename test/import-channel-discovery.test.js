@@ -30,6 +30,7 @@ test("channel discovery import reads usable details and preserves provenance", (
         channelName: "Noa",
         channelId: "UC_NOA",
         channelHandle: "/@noa_polaris",
+        thumbnailUrl: "https://example.test/noa-thumb.jpg",
         publishedTimestamp: Date.parse("2026-07-18T00:00:00Z"),
         discoverySourceUrls: ["https://www.youtube.com/@noa_polaris/streams"],
         discoverySingerName: "Noa",
@@ -75,6 +76,7 @@ test("channel discovery import reads usable details and preserves provenance", (
   assert.equal(videos[0].sourceUrls.includes("https://www.youtube.com/watch?v=AAAAAAAAAAA"), true);
   assert.deepEqual(videos[0].songs.map((song) => song.title), ["少女レイ"]);
   assert.equal(videos[0].songs[0].sourceId, "comment:1");
+  assert.equal(videos[0].thumbnailUrl, "https://example.test/noa-thumb.jpg");
 });
 
 test("normalizeImportedVideo maps detail song fields into catalog-ready videos", () => {
@@ -90,6 +92,7 @@ test("normalizeImportedVideo maps detail song fields into catalog-ready videos",
     [{ seconds: 1, title: "Song", artist: "Artist", isNiche: true }],
   );
   assert.equal(video.videoId, "CCCCCCCCCCC");
+  assert.equal(video.thumbnailUrl, "https://i.ytimg.com/vi/CCCCCCCCCCC/hqdefault.jpg");
   assert.deepEqual(video.sourceGroups.sort(), ["month", "youtube_channel_discovery"]);
   assert.equal(video.songs[0].index, 1);
   assert.equal(video.songs[0].isNiche, true);

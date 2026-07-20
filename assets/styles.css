@@ -770,6 +770,23 @@ svg {
   padding-right: 42px;
 }
 
+.query-search-section input[type="search"] {
+  -webkit-appearance: none;
+  appearance: textfield;
+}
+
+.query-search-section input[type="search"]::-webkit-search-cancel-button,
+.query-search-section input[type="search"]::-webkit-search-decoration,
+.query-search-section input[type="search"]::-webkit-search-results-button,
+.query-search-section input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
 .query-search-section input:focus,
 .query-search-section input:focus-visible {
   border-color: var(--accent);
@@ -784,7 +801,7 @@ svg {
 
 .clear-query-button {
   position: absolute;
-  top: 50%;
+  top: calc(10px + 19px);
   right: 17px;
   transform: translateY(-50%);
 }
@@ -1983,6 +2000,7 @@ mark {
 .artist-song-title-wrap {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
   min-width: 0;
 }
@@ -2001,6 +2019,17 @@ mark {
 
 .artist-song-title:hover {
   color: var(--accent-strong);
+}
+
+.artist-song-artist {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .artist-song-count {
@@ -3392,6 +3421,16 @@ mark {
     padding: 0;
   }
 
+  .summary.summary--compact {
+    grid-template-areas:
+      "main actions"
+      "note note";
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 6px;
+    row-gap: 2px;
+  }
+
   .summary-main {
     display: flex;
     align-items: baseline;
@@ -3400,6 +3439,10 @@ mark {
     row-gap: 2px;
     overflow: visible;
     line-height: 16px;
+  }
+
+  .summary.summary--compact .summary-main {
+    row-gap: 1px;
   }
 
   .summary-title {
@@ -3411,6 +3454,8 @@ mark {
 
   .summary-actions {
     display: flex;
+    justify-self: end;
+    align-self: start;
     max-width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
@@ -4141,7 +4186,7 @@ mark {
   }
 
   .clear-query-button {
-    top: 50%;
+    top: calc(8px + 18px);
     right: 13px;
   }
 

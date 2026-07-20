@@ -285,9 +285,25 @@ test("query overlay opens before suggestions and result preview work", () => {
   const suggestionBody = functionBody("function renderSearchSuggestions");
   assert.ok(suggestionBody.indexOf("if (!hasQuery) return") < suggestionBody.indexOf("buildSearchSuggestions"));
   assert.match(appSource, /const QUERY_SUGGESTION_SCAN_LIMIT = 360;/u);
+  const shellBody = functionBody("function prepareQueryPreviewShell");
+  assert.match(shellBody, /els\.queryResultPreview\.textContent = "计算中"/u);
+  assert.match(shellBody, /els\.applyQueryButton\.disabled = true;[\s\S]*els\.applyQueryButton\.textContent = "正在计算"/u);
+  const previewBody = functionBody("async function renderQueryDraftPreview");
+  assert.match(previewBody, /resolveQueryDraftResultCount\(draft, \{ signal: options\.signal \}\)/u);
+  assert.doesNotMatch(previewBody, /const count = queryDraftResultCount\(draft\)/u);
+  const resolveBody = functionBody("async function resolveQueryDraftResultCount");
+  assert.match(resolveBody, /canUseRequestRuntime\(state\.range\)[\s\S]*requestQueryDraftResultCount\(draft, options\)/u);
+  const requestCountBody = functionBody("async function requestQueryDraftResultCount");
+  assert.match(requestCountBody, /requestViewPage\(\{[\s\S]*filters: requestFilterStateFromDraft\(draft\),[\s\S]*prefetch: true,[\s\S]*signal: options\.signal/u);
+  assert.match(requestCountBody, /setCurrentResultSummary\(draft, result\.totalCount\);[\s\S]*return result\.totalCount;/u);
+  const draftFilterBody = functionBody("function requestFilterStateFromDraft");
+  assert.match(draftFilterBody, /q: draft\.q \|\| ""/u);
+  assert.match(draftFilterBody, /searchScope: draft\.searchScope \|\| "all"/u);
+  assert.match(draftFilterBody, /hideUnknownArtist: queryDraftHideUnknownForView\(draft\)/u);
   const countBody = functionBody("function queryDraftResultCount");
   assert.doesNotMatch(countBody, /buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
   assert.match(countBody, /queryResultCountCache/u);
+  assert.match(functionBody("function queryResultCountKey"), /draft\.searchScope \|\| "all"/u);
   assert.match(functionBody("function createRangeCacheObject"), /queryIndexes:[\s\S]*queryIndexLoads:[\s\S]*queryResultCountCache:/u);
 });
 

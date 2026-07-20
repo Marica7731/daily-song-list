@@ -21,6 +21,7 @@ const {
   buildClientVideo,
   buildRuntimeRangePayload,
 } = require("../build-runtime-data");
+const { isLikelyNonSongEntry } = require("../song-utils");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
@@ -130,7 +131,7 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
     for (const rangeId of args.ranges) {
       const rangePayload = buildRangePayload(payload, rangeId, args, runtimeImports);
       rangePayload.dataVersion = dataVersion;
-      const items = Array.isArray(rangePayload.items) ? rangePayload.items : [];
+      const items = Array.isArray(rangePayload.items) ? rangePayload.items.map(withRuntimeScopedSongs) : [];
       const occurrences = collectRuntimeOccurrences(items);
       const writtenSourceKeys = new Set();
       writer.write({
@@ -344,8 +345,7 @@ function serializeRecord(type, record, options = {}) {
 function collectRuntimeOccurrences(items) {
   const occurrences = [];
   for (const item of items || []) {
-    for (const song of item.songs || []) {
-      if (!RankingUtils.cleanText(song.title)) continue;
+    for (const song of runtimeScopedSongs(item.songs)) {
       occurrences.push({
         item,
         song,
@@ -359,7 +359,7 @@ function collectRuntimeOccurrences(items) {
 function buildVideoRequestItems(items) {
   const result = [];
   for (const item of items || []) {
-    const scopedSongs = (item.songs || []).filter((song) => RankingUtils.cleanText(song.title));
+    const scopedSongs = runtimeScopedSongs(item.songs);
     if (!scopedSongs.length) continue;
     result.push({
       ...item,
@@ -380,7 +380,7 @@ function buildVtuberRequestItems(items) {
   const records = new Map();
   const identityLookup = buildChannelIdentityLookup(items);
   for (const item of items || []) {
-    const scopedSongs = (item.songs || []).filter((song) => RankingUtils.cleanText(song.title));
+    const scopedSongs = runtimeScopedSongs(item.songs);
     if (!scopedSongs.length) continue;
     const key = channelRecordKey(item, identityLookup);
     if (!key) continue;
@@ -451,7 +451,7 @@ function buildChannelIdentityLookup(items) {
   const nameToKey = new Map();
   const ambiguousNames = new Set();
   for (const item of items || []) {
-    const scopedSongs = (item.songs || []).filter((song) => RankingUtils.cleanText(song.title));
+    const scopedSongs = runtimeScopedSongs(item.songs);
     if (!scopedSongs.length) continue;
     const nameKey = channelNameIdentityKey(item);
     const directKey = directChannelRecordKey(item);
@@ -465,6 +465,22 @@ function buildChannelIdentityLookup(items) {
   }
   for (const nameKey of ambiguousNames) nameToKey.delete(nameKey);
   return { nameToKey };
+}
+
+function withRuntimeScopedSongs(item) {
+  if (!item || typeof item !== "object") return item;
+  return {
+    ...item,
+    songs: runtimeScopedSongs(item.songs),
+  };
+}
+
+function runtimeScopedSongs(songs) {
+  return (Array.isArray(songs) ? songs : []).filter((song) => {
+    if (!song || typeof song !== "object") return false;
+    if (!RankingUtils.cleanText(song.title)) return false;
+    return !isLikelyNonSongEntry(song);
+  });
 }
 
 function channelRecordKey(item, identityLookup = null) {

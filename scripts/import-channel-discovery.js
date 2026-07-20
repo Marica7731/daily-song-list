@@ -202,6 +202,7 @@ function normalizeImportedVideo(detail, inputDir, songs, channelFallback = {}) {
     channelHandle: stringValue(detail.channelHandle || channelFallback.channelHandle || handleFromUrl(channelUrl)),
     channelUrl,
     publishedTimestamp: finiteTimestamp(detail.publishedTimestamp),
+    thumbnailUrl: stringValue(detail.thumbnailUrl) || thumbnailUrlForVideoId(videoId),
     sourceGroups: uniqueValues([SOURCE_GROUP, ...listValues(detail.sourceGroups), detail.sourceGroup]),
     sourceUrls: uniqueValues([
       ...listValues(detail.sourceUrls),
@@ -307,6 +308,11 @@ function handleFromUrl(value) {
   } catch {
     return "";
   }
+}
+
+function thumbnailUrlForVideoId(videoId) {
+  const id = stringValue(videoId);
+  return /^[A-Za-z0-9_-]{11}$/u.test(id) ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : "";
 }
 
 function writeJson(filePath, payload) {

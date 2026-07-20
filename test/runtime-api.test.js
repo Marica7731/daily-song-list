@@ -139,9 +139,17 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(vtuberSongMetric.metric, "songs");
     assert.equal(vtuberSongMetric.totalSongCount, 3);
     assert.equal(vtuberSongMetric.records[0].songCount, 3);
+    assert.deepEqual(
+      vtuberSongMetric.records[0].songs.map((song) => song.name),
+      ["Song One", "Song Two", "Song Three"],
+    );
     assert.equal(vtuberSongMetric.records[0].avatarUrl, "https://example.test/alpha-avatar.png");
     assert.equal(vtuberSongMetric.records[0].isCollected, true);
     assert.equal(vtuberSongMetric.records[0].knownSourceType, "manual");
+
+    const dirtySongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=%22Opening%20Talk%22%20OR%20%22Ending%20Talk%22%20OR%20END%20OR%20%22%E6%9C%AC%E7%B7%A8%E7%B5%82%E4%BA%86%22&searchScope=title&pageSize=5`);
+    assert.equal(dirtySongSearch.totalCount, 0);
+    assert.equal(dirtySongSearch.totalOccurrenceCount, 0);
 
     const vtuberAliasSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=HanamaeHaru&pageSize=5`);
     assert.equal(vtuberAliasSearch.totalCount, 1);
@@ -201,6 +209,8 @@ function writeLatestFixture(latestPath) {
               songs: [
                 { title: "Song One", artist: "Singer A", seconds: 10, time: "0:10", isNiche: true },
                 { title: "Song Two", artist: "Singer B", seconds: 20, time: "0:20" },
+                { title: "Opening Talk", artist: "unknown", seconds: 21, time: "0:21" },
+                { title: "Ending Talk", artist: "未記載", seconds: 22, time: "0:22" },
               ],
             },
           ],
@@ -220,6 +230,8 @@ function writeLatestFixture(latestPath) {
               songs: [
                 { title: "Song One", artist: "Singer A", seconds: 10, time: "0:10", isNiche: true },
                 { title: "Song Two", artist: "Singer B", seconds: 20, time: "0:20" },
+                { title: "Opening Talk", artist: "unknown", seconds: 21, time: "0:21" },
+                { title: "Ending Talk", artist: "未記載", seconds: 22, time: "0:22" },
               ],
             },
             {
@@ -242,7 +254,11 @@ function writeLatestFixture(latestPath) {
               thumbnailUrl: "https://i.ytimg.com/vi/video-c/hqdefault.jpg",
               publishedTimestamp: 1784426400000,
               publishedText: "2026-07-19",
-              songs: [{ title: "Song Three", artist: "Singer C", seconds: 40, time: "0:40" }],
+              songs: [
+                { title: "Song Three", artist: "Singer C", seconds: 40, time: "0:40" },
+                { title: "END", artist: "unknown", seconds: 41, time: "0:41" },
+                { title: "本編終了", artist: "未記載", seconds: 42, time: "0:42" },
+              ],
             },
             {
               videoId: "video-d",

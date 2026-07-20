@@ -43,7 +43,37 @@ async function newPage(browser, viewport) {
     deviceScaleFactor: 1,
     isMobile: viewport.width <= 720,
   });
+  await installProofImageFallbacks(page);
   return page;
+}
+
+async function installProofImageFallbacks(page) {
+  await page.route("https://i.ytimg.com/**", async (route) => {
+    const url = new URL(route.request().url());
+    const videoId = url.pathname.split("/").filter(Boolean)[1] || "video";
+    await route.fulfill({
+      status: 200,
+      contentType: "image/svg+xml",
+      body: proofThumbnailSvg(videoId),
+    });
+  });
+}
+
+function proofThumbnailSvg(label) {
+  const safeLabel = String(label || "video").replace(/[&<>"']/gu, "");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180">
+    <defs>
+      <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0" stop-color="#1f6f8b"/>
+        <stop offset="0.55" stop-color="#2f9e8f"/>
+        <stop offset="1" stop-color="#f2b84b"/>
+      </linearGradient>
+    </defs>
+    <rect width="320" height="180" fill="url(#g)"/>
+    <rect x="116" y="58" width="88" height="64" rx="12" fill="rgba(255,255,255,0.88)"/>
+    <path d="M151 73l37 17-37 17z" fill="#1f2933"/>
+    <text x="18" y="158" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="white">${safeLabel}</text>
+  </svg>`;
 }
 
 async function waitForApp(page) {
@@ -297,7 +327,7 @@ function recordScreenshot(name, file, options = {}) {
 
 async function openPage(browser, viewport, params, name, options = {}) {
   const page = await newPage(browser, viewport);
-  await page.goto(appUrl(params), { waitUntil: "networkidle" });
+  await page.goto(appUrl(params), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   await warmVisiblePriorityImages(page);
   if (params?.view === "videos") await assertVideoThumbVisible(page, name);
@@ -308,7 +338,7 @@ async function openPage(browser, viewport, params, name, options = {}) {
 
 async function captureQueryPanel(browser, viewport, name, options = {}) {
   const page = await newPage(browser, viewport);
-  await page.goto(appUrl(options.params || {}), { waitUntil: "networkidle" });
+  await page.goto(appUrl(options.params || {}), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   const openedAt = await page.evaluate(() => performance.now());
   await page.click("#queryTrigger");
@@ -396,7 +426,7 @@ async function assertUnifiedQueryPanel(page, name) {
 
 async function captureExpandedSource(browser, viewport, params, name) {
   const page = await newPage(browser, viewport);
-  await page.goto(appUrl(params), { waitUntil: "networkidle" });
+  await page.goto(appUrl(params), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   const toggle = page.locator("[data-toggle-source]").first();
   await toggle.click();
@@ -421,7 +451,7 @@ async function findSourceCase(browser, viewport, kind) {
   try {
     for (let pageNumber = 1; pageNumber <= 25; pageNumber += 1) {
       const params = { page: pageNumber, pageSize: 50 };
-      await page.goto(appUrl(params), { waitUntil: "networkidle" });
+      await page.goto(appUrl(params), { waitUntil: "domcontentloaded" });
       await waitForApp(page);
       const match = await page.evaluate((targetKind) => {
         const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)"));
@@ -445,7 +475,7 @@ async function findSourceCase(browser, viewport, kind) {
 async function captureSourceCase(browser, viewport, kind, name, options = {}) {
   const found = await findSourceCase(browser, viewport, kind);
   const page = await newPage(browser, viewport);
-  await page.goto(appUrl(found.params), { waitUntil: "networkidle" });
+  await page.goto(appUrl(found.params), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   const row = page.locator(".rank-row:not(.skeleton-row)").nth(found.rowIndex);
   await row.evaluate((node) => node.scrollIntoView({ block: "center", inline: "nearest" }));
@@ -493,14 +523,14 @@ async function captureSourceCase(browser, viewport, kind, name, options = {}) {
 
 async function captureSongIndexPage(browser, viewport, target, name) {
   const page = await newPage(browser, viewport);
-  await page.goto(appUrl({ view: "songAz" }), { waitUntil: "networkidle" });
+  await page.goto(appUrl({ view: "songAz" }), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   const pageCount = await page.evaluate(() => {
     const select = document.querySelector(".pagination-top [data-page-select], .pagination-bottom [data-page-select]");
     return select ? select.options.length : 1;
   });
   const nextPage = target === "last" ? pageCount : Math.max(1, Math.ceil(pageCount / 2));
-  await page.goto(appUrl({ view: "songAz", page: nextPage }), { waitUntil: "networkidle" });
+  await page.goto(appUrl({ view: "songAz", page: nextPage }), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   await warmVisiblePriorityImages(page);
   await assertSongIndexToolbarSpacing(page, name);
@@ -510,7 +540,7 @@ async function captureSongIndexPage(browser, viewport, target, name) {
 
 async function captureExpandedVideo(browser, viewport, name, options = {}) {
   const page = await newPage(browser, viewport);
-  await page.goto(appUrl({ view: "videos" }), { waitUntil: "networkidle" });
+  await page.goto(appUrl({ view: "videos" }), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   await assertVideoThumbVisible(page, name);
   const more = page.locator(".video-more:not(.video-more-top)").first();
@@ -574,7 +604,7 @@ async function assertExpandedVideoBottomVisible(page, label) {
 
 async function captureElementFromPage(browser, viewport, params, selector, name, options = {}) {
   const page = await newPage(browser, viewport);
-  await page.goto(appUrl(params), { waitUntil: "networkidle" });
+  await page.goto(appUrl(params), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   const locator = page.locator(selector).first();
   await locator.waitFor({ state: "visible", timeout: 15_000 });
@@ -591,7 +621,7 @@ async function captureElementFromPage(browser, viewport, params, selector, name,
 
 async function captureToastCase(browser, viewport, name) {
   const page = await newPage(browser, viewport);
-  await page.goto(appUrl({}), { waitUntil: "networkidle" });
+  await page.goto(appUrl({}), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   await page.evaluate(() => {
     const toast = document.querySelector("#toast");
@@ -933,9 +963,10 @@ async function assertExpandedSourceVisible(page, row, label) {
       repeatedInlineVideoIds: groups.map((group) => group.videoId).filter((id) => inlineVideoIds.includes(id)),
     };
   });
+  const expectedVisibleGroups = Math.min(shape.viewportWidth <= 720 ? 10 : 20, shape.videoCount);
   if (
     shape.buttonExpanded !== "true" ||
-    shape.groups.length !== shape.videoCount ||
+    shape.groups.length !== expectedVisibleGroups ||
     shape.sourceGroupMore !== 0 ||
     shape.inlineCollapseCount !== 1 ||
     shape.toolbarCollapseCount !== 1 ||
@@ -1072,7 +1103,7 @@ async function captureFixtureSourceCase(browser, viewport, caseName, name) {
         </main>
       </body>
     </html>`,
-    { waitUntil: "networkidle" },
+    { waitUntil: "domcontentloaded" },
   );
   if (caseName === "extraTimes" && name.includes("extra")) {
     await page.locator("[data-toggle-source-times]").first().evaluate((button) => {
@@ -1253,7 +1284,7 @@ async function captureRangeFixtureCase(browser, viewport, rangeId, name) {
         </main>
       </body>
     </html>`,
-    { waitUntil: "networkidle" },
+    { waitUntil: "domcontentloaded" },
   );
   await assertRangeFixtureProof(page, rangeId, name);
   await saveElement(page, page.locator(".proof-range-fixture").first(), name, {
@@ -1358,7 +1389,7 @@ async function captureDataIndexFixtureCase(browser, viewport, kind, name) {
         </main>
       </body>
     </html>`,
-    { waitUntil: "networkidle" },
+    { waitUntil: "domcontentloaded" },
   );
   await assertDataIndexFixtureProof(page, kind, name);
   await saveElement(page, page.locator(".proof-data-index-fixture").first(), name, {
@@ -1471,7 +1502,7 @@ async function captureTrendFixtureCase(browser, viewport, caseName, name) {
         </main>
       </body>
     </html>`,
-    { waitUntil: "networkidle" },
+    { waitUntil: "domcontentloaded" },
   );
   await assertTrendFixtureProof(page, proof, name);
   await saveElement(page, page.locator(".proof-trend-fixture").first(), name, {
@@ -1561,7 +1592,7 @@ async function captureIdentityMergeFixtureCase(browser, viewport, name) {
         </main>
       </body>
     </html>`,
-    { waitUntil: "networkidle" },
+    { waitUntil: "domcontentloaded" },
   );
   await assertIdentityMergeFixtureProof(page, name);
   await saveElement(page, page.locator(".proof-identity-fixture").first(), name, {
@@ -1628,7 +1659,7 @@ async function captureAllSummaryFixtureCase(browser, viewport, name) {
         <main class="layout">${allSummaryFixtureHtml()}</main>
       </body>
     </html>`,
-    { waitUntil: "networkidle" },
+    { waitUntil: "domcontentloaded" },
   );
   await assertAllSummaryFixtureProof(page, name);
   await saveElement(page, page.locator(".proof-all-summary-fixture").first(), name, {
@@ -1684,7 +1715,7 @@ async function captureDiagnosticFixtureCase(browser, viewport, kind, name) {
         <main class="layout">${diagnosticFixtureHtml(kind)}</main>
       </body>
     </html>`,
-    { waitUntil: "networkidle" },
+    { waitUntil: "domcontentloaded" },
   );
   await assertDiagnosticFixtureProof(page, kind, name);
   await saveElement(page, page.locator(".proof-diagnostic-fixture").first(), name, {

@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import sqlite3
 import subprocess
 import sys
@@ -399,7 +400,7 @@ def ingest_latest_payload(
             upsert_channel_metadata(conn, item)
 
             item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
-            valid_songs = [song for song in item_songs if isinstance(song, dict) and clean_text(song.get("title"))]
+            valid_songs = runtime_scoped_songs(item_songs)
             record_video(range_state, range_id, video_id, item, valid_songs)
             record_vtuber(range_state, video_id, item, valid_songs)
             source_key = stable_key("source-video", range_id, video_id)
@@ -590,7 +591,7 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
                 upsert_video(conn, video_id, item)
                 upsert_channel_metadata(conn, item)
                 item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
-                valid_songs = [song for song in item_songs if isinstance(song, dict) and clean_text(song.get("title"))]
+                valid_songs = runtime_scoped_songs(item_songs)
                 for song_index, song in enumerate(valid_songs):
                     song_key = song_record_key(song)
                     song_keys.add(song_key)
@@ -1636,6 +1637,59 @@ def is_collected_source(item: dict) -> bool:
         or source_quality.get("sourceType") == "external"
         or source_quality.get("sourceSystem") == "vsinger_moment_http"
     )
+
+
+def runtime_scoped_songs(songs) -> list[dict]:
+    if not isinstance(songs, list):
+        return []
+    return [song for song in songs if isinstance(song, dict) and clean_text(song.get("title")) and not is_likely_runtime_non_song_entry(song)]
+
+
+def is_likely_runtime_non_song_entry(song: dict) -> bool:
+    title = clean_text(song.get("title"))
+    artist = clean_text(song.get("artist"))
+    raw = clean_text(song.get("raw"))
+    if not title:
+        return True
+    unknown_artist = is_unknown_artist(artist)
+    if unknown_artist and is_standalone_non_song_marker(title):
+        return True
+    combined = f"{title} {raw}"
+    if unknown_artist and re.search(r"(?:set\s*list|setlist|timestamp|timestamps|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)", combined, re.IGNORECASE):
+        return True
+    return False
+
+
+def is_standalone_non_song_marker(value) -> bool:
+    marker = normalize_standalone_marker(value)
+    if not marker:
+        return False
+    if re.fullmatch(r"(?:op|ed|end|opening|ending|openingtalk|endingtalk|streamstart|streamend|streamended|karaokestart|karaokeend)", marker, re.IGNORECASE):
+        return True
+    if re.fullmatch(r"(?:setlist|timestamp|timestamps)", marker, re.IGNORECASE):
+        return True
+    return marker in {
+        "本編開始",
+        "本編終了",
+        "全曲終了",
+        "配信開始",
+        "配信終了",
+        "開始",
+        "終了",
+        "セットリスト",
+        "セトリ",
+        "タイムスタンプ",
+        "曲名",
+        "歌唱開始時間",
+    }
+
+
+def normalize_standalone_marker(value) -> str:
+    text = unicodedata.normalize("NFKC", clean_text(value))
+    text = re.sub(r"[【】\[\]「」『』\"'“”‘’]", "", text)
+    text = re.sub(r"^[\s~〜～・･:：\-—–−/／|｜￤∣丨]+|[\s~〜～・･:：\-—–−/／|｜￤∣丨]+$", "", text)
+    text = re.sub(r"[\s~〜～・･:：\-—–−/／|｜￤∣丨]+", "", text)
+    return text.strip()
 
 
 def timestamp_to_iso(value: int | None) -> str:

@@ -561,7 +561,7 @@
   }
 
   function normalizeArtistKey(value) {
-    return cleanText(value)
+    return normalizeArtistIdentityText(value)
       .normalize("NFKC")
       .toLocaleLowerCase()
       .replace(/[’‘]/g, "'")
@@ -570,7 +570,7 @@
   }
 
   function normalizeSongTitleKey(value) {
-    return stripLeadingTitleListMarker(cleanText(value))
+    return normalizeJapaneseMonthWords(stripLeadingTitleListMarker(cleanText(value)))
       .normalize("NFKC")
       .toLocaleLowerCase()
       .replace(/[’‘]/g, "'")
@@ -603,6 +603,10 @@
     const separated = text.match(/^(.+?)\s*(?:[-ー–—|｜:：/／])\s*(.{1,80})\s*$/u);
     if (separated && isWhitelistedSongVariant(separated[2])) {
       return { workTitle: separated[1].trim(), variantLabel: cleanVariantLabel(separated[2]), variantKind: "version" };
+    }
+    const spacedVariant = text.match(/^(.+?)\s+(.{1,80})\s*$/u);
+    if (spacedVariant && isWhitelistedSongVariant(spacedVariant[2])) {
+      return { workTitle: spacedVariant[1].trim(), variantLabel: cleanVariantLabel(spacedVariant[2]), variantKind: "version" };
     }
     const trailingListIndex = text.match(/^(.+?)\s+(?:[#＃]?\d{1,3}\s*(?:曲目|曲|番目))\s*$/u);
     if (trailingListIndex) {
@@ -666,8 +670,9 @@
     if (entries.length <= 1) return true;
     const dominant = entries[0];
     const total = entries.reduce((sum, entry) => sum + entry.count, 0);
-    if (dominant.count / total < 0.75) return false;
     const dominantKey = normalizeArtistKey(dominant.name);
+    if (dominantKey && entries.every((entry) => normalizeArtistKey(entry.name) === dominantKey)) return true;
+    if (dominant.count / total < 0.75) return false;
     return entries.slice(1).every((entry) => isDisplayArtistAliasOf(entry.name, dominant.name) || isLikelyArtistKeyTypo(normalizeArtistKey(entry.name), dominantKey));
   }
 
@@ -688,6 +693,7 @@
         .replace(/^\s*[╟├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼▶▷►▸▹>|・･●○◆◇■□♪♫♬♩♡♥◎★☆\uFE0F\u2600-\u27BF\u{1F300}-\u{1FAFF}⁅⁆]+/u, "")
         .replace(/^\s*[＊*]\s*(?=(?:[#＃]?\d{1,3}[.．](?![0-9０-９])|[#＃]?\d{1,3}[)）、:：]|[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]))/u, "")
         .replace(/^\s*[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]\s*/u, "")
+        .replace(/^\s*(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})\s*(?:曲目|曲|番目)\s*(?:[.．。、,,:：)）\]\-|｜/／]+|\s+)/u, "")
         .replace(
           /^\s*(?:(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[\s。、,,:：)）\]\-|｜/／]+|(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[.．](?![0-9０-９])\s*)/u,
           "",
@@ -698,8 +704,54 @@
     return result;
   }
 
+  function normalizeJapaneseMonthWords(value) {
+    const monthDigits = {
+      一: "1",
+      二: "2",
+      三: "3",
+      四: "4",
+      五: "5",
+      六: "6",
+      七: "7",
+      八: "8",
+      九: "9",
+      十: "10",
+      十一: "11",
+      十二: "12",
+    };
+    return String(value ?? "").replace(/(十一|十二|十|[一二三四五六七八九])月/gu, (match, month) => `${monthDigits[month] || month}月`);
+  }
+
+  function normalizeArtistIdentityText(value) {
+    let text = cleanText(value).normalize("NFKC");
+    for (let index = 0; index < 4; index += 1) {
+      const next = text
+        .replace(/^[\s/／|｜￤∣丨┊┋・･:：\-—–−]+/u, "")
+        .replace(/[\s/／|｜￤∣丨┊┋・･:：\-—–−]+$/u, "")
+        .replace(/\s*(?:様|さん|氏)\s*$/u, "")
+        .replace(/[\s/／|｜￤∣丨┊┋・･:：\-—–−]+$/u, "");
+      if (next === text) break;
+      text = next;
+    }
+    const duplicate = stripDuplicateArtistParenthetical(text);
+    return duplicate || text;
+  }
+
+  function stripDuplicateArtistParenthetical(value) {
+    const match = String(value).match(/^(.*?)\s*[(（［\[【「『]([^()（）\[\]［］【】「」『』]{1,100})[)）］\]】」』]\s*$/u);
+    if (!match) return "";
+    const base = match[1].trim();
+    const annotation = match[2].trim();
+    if (!base || !annotation || hasArtistIdentityAnnotation(annotation)) return "";
+    const normalizedBase = base.toLocaleLowerCase().replace(/[^\p{Letter}\p{Number}]+/gu, "");
+    const normalizedAnnotation = annotation.toLocaleLowerCase().replace(/[^\p{Letter}\p{Number}]+/gu, "");
+    if (normalizedBase && normalizedBase === normalizedAnnotation) return base;
+    if (/^[\p{Script=Latin}\p{Number}\s'’‘\-ー–—.]+$/u.test(annotation) && annotation.trim().split(/\s+/u).length >= 4) return base;
+    return "";
+  }
+
   function artistBaseKeys(value, normalizeArtist, options = {}) {
-    const text = cleanText(value).normalize("NFKC");
+    const text = normalizeArtistIdentityText(value);
     const preserveIdentityAnnotations = options.preserveIdentityAnnotations === true;
     const workBase = stripArtistBeforeWorkAnnotation(text);
     const brokenBracketBase = stripArtistBeforeBrokenBracket(text);

@@ -279,6 +279,11 @@ test("VTuber display image falls back from failed avatar to thumbnail or videoId
     occurrences: [{ item: { videoId: "xyz12345678" } }],
   });
   assert.equal(occurrenceDerived.src, "https://i.ytimg.com/vi/xyz12345678/hqdefault.jpg");
+
+  const sourceDerived = vtuberDisplayImageModel({
+    source: { youtubeVideoId: "src12345678" },
+  });
+  assert.equal(sourceDerived.src, "https://i.ytimg.com/vi/src12345678/hqdefault.jpg");
 });
 
 test("VTuber display image does not treat generated images as avatar coverage", () => {

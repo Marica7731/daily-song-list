@@ -1848,6 +1848,7 @@ function buildSourceDetailRecords(items) {
     keyword: item.keyword || "",
     keywords: listValues(item.keywords),
     keywordKeys: listValues(item.keywordKeys),
+    thumbnailUrl: runtimeThumbnailUrl(item),
     publishedText: item.publishedText || "",
     publishedTimestamp: Number.isFinite(item.publishedTimestamp) ? item.publishedTimestamp : null,
     durationText: item.durationText || "",

@@ -287,6 +287,7 @@ test("source detail and search records split heavy runtime fields out of page pa
       keywords: ["歌枠", "弾き語り"],
       keywordKeys: ["utawaku"],
       publishedText: "1 hour ago",
+      thumbnailUrl: "https://example.test/source-thumb.jpg",
       publishedTimestamp: Date.parse("2026-07-12T14:00:00Z"),
       durationText: "1:00:00",
       sourceGroups: ["today"],
@@ -303,6 +304,7 @@ test("source detail and search records split heavy runtime fields out of page pa
   const search = buildSearchRecords(items);
 
   assert.equal(details[0].videoId, "AAAAAAAAAAA");
+  assert.equal(details[0].thumbnailUrl, "https://i.ytimg.com/vi/AAAAAAAAAAA/hqdefault.jpg");
   assert.deepEqual(details[0].keywords, ["歌枠", "弾き語り"]);
   assert.equal(details[0].songCount, 2);
   assert.equal(search.length, 3);

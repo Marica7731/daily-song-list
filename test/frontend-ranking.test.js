@@ -137,6 +137,26 @@ test("song work title key only strips whitelisted variants and list markers", ()
   assert.equal(extractSongVariant("Song - Remix").variantLabel, "");
 });
 
+test("merges month spelling, list markers, safe variants, and decorated artist aliases", () => {
+  const records = buildSongRecords([
+    occurrence("とても素敵な六月でした", "Eight", "A"),
+    occurrence("とても素敵な6月でした", "Eight(Eight)", "B"),
+    occurrence("12曲目 とても素敵な六月でした Piano Ver", "Eight 様┊", "C"),
+    occurrence("とても素敵な6月でした アカペラ", "Eight(Totemo Suteki na Rokugatsu deshita)", "D"),
+  ]);
+
+  assert.equal(normalizeSongTitleKey("とても素敵な六月でした"), normalizeSongTitleKey("とても素敵な6月でした"));
+  assert.equal(songWorkTitleKey("12曲目 とても素敵な六月でした Piano Ver"), songWorkTitleKey("とても素敵な6月でした"));
+  assert.equal(records.length, 1);
+  assert.equal(records[0].count, 4);
+  assert.equal(records[0].displayArtist, "Eight");
+  assert.deepEqual(
+    records[0].occurrences.map(({ item }) => item.videoId),
+    ["A", "B", "C", "D"],
+  );
+  assert.deepEqual(new Set(records[0].variantLabels), new Set(["Piano Ver", "アカペラ"]));
+});
+
 test("merges no-space feat annotations into an existing base artist", () => {
   const records = buildSongRecords([
     occurrence("からくりピエロ", "40mP", "A"),

@@ -321,6 +321,7 @@ const state = {
   overlayTrigger: null,
   queryDraft: null,
   queryPreviewTimer: 0,
+  queryPreviewController: null,
   querySuggestionTimer: 0,
   queryWorkRevision: 0,
   queryComposing: false,
@@ -830,6 +831,7 @@ function closeOverlay(kind) {
   state.queryDraft = null;
   window.clearTimeout(state.queryPreviewTimer);
   state.queryPreviewTimer = 0;
+  abortQueryPreviewWork();
   window.clearTimeout(state.querySuggestionTimer);
   state.querySuggestionTimer = 0;
   state.queryComposing = false;
@@ -1542,25 +1544,41 @@ function clearQueryCondition(key) {
 
 function scheduleQueryDraftPreview(options = {}) {
   window.clearTimeout(state.queryPreviewTimer);
+  abortQueryPreviewWork();
   const draft = sanitizeQueryDraft(state.queryDraft || makeQueryDraftFromState());
   const revision = options.revision || advanceQueryWorkRevision();
   prepareQueryPreviewShell(draft);
+  const controller = new AbortController();
+  state.queryPreviewController = controller;
   const delay = Number.isFinite(options.delay) ? options.delay : options.immediate ? 0 : SEARCH_DEBOUNCE_MS;
   state.queryPreviewTimer = window.setTimeout(() => {
-    renderQueryDraftPreview(revision).catch((error) => {
+    renderQueryDraftPreview(revision, { signal: controller.signal }).catch((error) => {
+      if (error?.name === "AbortError") return;
       if (isCurrentQueryWork(revision)) {
         if (els.queryResultPreview) els.queryResultPreview.textContent = "计算失败";
-        if (els.applyQueryButton) els.applyQueryButton.textContent = "应用查询";
+        if (els.applyQueryButton) {
+          els.applyQueryButton.disabled = false;
+          els.applyQueryButton.textContent = "应用查询";
+        }
       }
       console.warn("query preview failed", error);
+    }).finally(() => {
+      if (state.queryPreviewController === controller) state.queryPreviewController = null;
     });
   }, delay);
+}
+
+function abortQueryPreviewWork() {
+  if (!state.queryPreviewController) return;
+  state.queryPreviewController.abort();
+  state.queryPreviewController = null;
 }
 
 function prepareQueryPreviewShell(draft) {
   if (!els.queryResultPreview || !els.applyQueryButton) return;
   if (draft.snapshotPath !== state.currentSnapshotPath) {
     els.queryResultPreview.textContent = "将载入快照";
+    els.applyQueryButton.disabled = false;
     els.applyQueryButton.textContent = "应用并载入快照";
     return;
   }
@@ -1568,26 +1586,31 @@ function prepareQueryPreviewShell(draft) {
   if (cached !== null) {
     const unit = queryResultUnit();
     els.queryResultPreview.textContent = `${cached} ${unit}`;
+    els.applyQueryButton.disabled = false;
     els.applyQueryButton.textContent = `查看 ${cached} ${unit}`;
     return;
   }
   els.queryResultPreview.textContent = "计算中";
-  els.applyQueryButton.textContent = "查看结果";
+  els.applyQueryButton.disabled = true;
+  els.applyQueryButton.textContent = "正在计算";
 }
 
-async function renderQueryDraftPreview(revision = state.queryWorkRevision) {
+async function renderQueryDraftPreview(revision = state.queryWorkRevision, options = {}) {
   const draft = sanitizeQueryDraft(state.queryDraft || readQueryDraftFromControls());
   if (!els.queryResultPreview || !els.applyQueryButton || !isCurrentQueryWork(revision)) return;
   if (draft.snapshotPath !== state.currentSnapshotPath) {
     els.queryResultPreview.textContent = "将载入快照";
+    els.applyQueryButton.disabled = false;
     els.applyQueryButton.textContent = "应用并载入快照";
     return;
   }
   await yieldToBrowser();
   if (!isCurrentQueryWork(revision)) return;
-  const count = queryDraftResultCount(draft);
+  const count = await resolveQueryDraftResultCount(draft, { signal: options.signal });
+  if (!isCurrentQueryWork(revision)) return;
   const unit = queryResultUnit();
   els.queryResultPreview.textContent = `${count} ${unit}`;
+  els.applyQueryButton.disabled = false;
   els.applyQueryButton.textContent = `查看 ${count} ${unit}`;
 }
 
@@ -1635,6 +1658,28 @@ function queryDraftResultCount(draft) {
   count = queryDraftRankRecords(songRecords, draft, "songRank").length;
   rangeCache.queryResultCountCache.set(cacheKey, count);
   return count;
+}
+
+async function resolveQueryDraftResultCount(draft, options = {}) {
+  const cachedCurrent = currentResultCountForDraft(draft);
+  if (cachedCurrent !== null) return cachedCurrent;
+  if (canUseRequestRuntime(state.range)) return requestQueryDraftResultCount(draft, options);
+  return queryDraftResultCount(draft);
+}
+
+async function requestQueryDraftResultCount(draft, options = {}) {
+  const result = await requestViewPage({
+    range: state.range,
+    view: state.view,
+    rankMetric: draft.rankMetric,
+    filters: requestFilterStateFromDraft(draft),
+    page: 1,
+    pageSize: draft.pageSize || currentPageSize(),
+    prefetch: true,
+    signal: options.signal,
+  });
+  setCurrentResultSummary(draft, result.totalCount);
+  return result.totalCount;
 }
 
 function queryDraftBaseOccurrences(rangeCache, draft) {
@@ -1745,6 +1790,7 @@ function queryResultCountKey(draft) {
     draft.nicheOnly ? "niche" : "all",
     queryDraftHideUnknownForView(draft) ? "hide-unknown" : "show-unknown",
     normalizeSearch(draft.q),
+    draft.searchScope || "all",
     draft.rankMetric,
     draft.trend,
     trendState,
@@ -3323,6 +3369,18 @@ function requestFilterState() {
   };
 }
 
+function requestFilterStateFromDraft(draft) {
+  return {
+    q: draft.q || "",
+    searchScope: draft.searchScope || "all",
+    nicheOnly: draft.nicheOnly,
+    hideUnknownArtist: queryDraftHideUnknownForView(draft),
+    minCount: draft.minCount,
+    trend: draft.trend,
+    indexBucket: state.indexBucket,
+  };
+}
+
 function requestViewFingerprint(result) {
   return [
     result?.range,
@@ -4765,6 +4823,7 @@ function renderVtuberRank(group, rangeCache, selection) {
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
         songPreview: vtuberSongPreview(record),
+        getSongGroups: () => getArtistSongGroups(record),
         priorityInlineMedia: index < 8,
       }),
     );
@@ -4877,6 +4936,7 @@ function videoItemsForRange(rangeCache, options = {}) {
 
 function renderSummary(group, metrics, note = "") {
   els.summary.replaceChildren();
+  els.summary.classList.toggle("summary--compact", hasSummaryFilterContext());
 
   const main = document.createElement("div");
   main.className = "summary-main";
@@ -4938,8 +4998,12 @@ function renderSummary(group, metrics, note = "") {
   if (actions.childElementCount) els.summary.append(actions);
 }
 
+function hasSummaryFilterContext() {
+  return Boolean(state.filter || state.nicheOnly || shouldHideUnknownForCurrentView() || state.minCount > 1 || state.trend !== "all");
+}
+
 function compactSummaryMetrics(metrics) {
-  const hasSearchOrFilter = Boolean(state.filter || state.nicheOnly || shouldHideUnknownForCurrentView() || state.minCount > 1 || state.trend !== "all");
+  const hasSearchOrFilter = hasSummaryFilterContext();
   return metrics
     .filter(Boolean)
     .map((part) => {
@@ -6778,7 +6842,7 @@ function renderSourceDrawer({ mode, occurrences, copyOccurrences = occurrences, 
 function initializeSourceDrawer(drawer, { mode, occurrences, copyOccurrences = occurrences, songGroups = [], sourceGroups = null, sourcePageInfo = null }) {
   if (!drawer || drawer.dataset.sourceDeferred !== "true") return;
   if (mode === "artist" || mode === "vtuber") {
-    appendArtistSongGroups(drawer, songGroups);
+    appendArtistSongGroups(drawer, completeSongGroupsForDrawer(occurrences, songGroups));
   } else {
     appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true, copyOccurrences, groups: sourceGroups, pageInfo: sourcePageInfo });
   }
@@ -7129,11 +7193,22 @@ function renderLinkListIcon() {
 }
 
 function appendArtistSongGroups(drawer, songGroups) {
+  clearSourceDrawerStatus(drawer);
   drawer._artistSongGroups = songGroups;
   const visibleCount = artistVisibleSongCount(drawer, songGroups.length);
   appendArtistSongGroupRange(drawer, songGroups, artistRenderedSongCount(drawer), visibleCount);
-  syncArtistSongMoreButton(drawer, visibleCount, songGroups.length);
+  if (artistRenderedSongCount(drawer) > 0) {
+    syncArtistSongMoreButton(drawer, visibleCount, songGroups.length);
+  } else {
+    syncArtistSongMoreButton(drawer, songGroups.length, songGroups.length);
+    showSourceDrawerStatus(drawer, "没有可显示的曲目", "empty");
+  }
   appendMobileSourceCollapse(drawer);
+}
+
+function completeSongGroupsForDrawer(occurrences, fallbackGroups = []) {
+  const completeGroups = buildArtistSongGroups(filterDisplaySongOccurrences(occurrences || []));
+  return completeGroups.length ? completeGroups : fallbackGroups || [];
 }
 
 function artistRenderedSongCount(drawer) {
@@ -7199,6 +7274,13 @@ function renderArtistSongGroup(group) {
     badge.textContent = "小众";
     titleWrap.append(badge);
   }
+  const artistLabel = artistLabelForSongGroup(group);
+  if (artistLabel) {
+    const artist = document.createElement("span");
+    artist.className = "artist-song-artist";
+    artist.textContent = artistLabel;
+    titleWrap.append(artist);
+  }
   header.append(titleWrap);
 
   const meta = document.createElement("div");
@@ -7206,7 +7288,7 @@ function renderArtistSongGroup(group) {
 
   const count = document.createElement("span");
   count.className = "artist-song-count";
-  count.textContent = `${group.count}次`;
+  count.textContent = artistSongCountLabel(group);
   meta.append(count);
 
   const sources = document.createElement("div");
@@ -7214,6 +7296,8 @@ function renderArtistSongGroup(group) {
   sources.id = `artist-song-sources-${makeDomId(`${group.key}-${firstOccurrence.item.videoId}`)}`;
   sources.dataset.sourceMode = "artist-song";
   sources.dataset.sourceDeferred = "true";
+  sources.dataset.sourcePage = "1";
+  sources.dataset.sourcePageSize = String(sourceDrawerPageSizeForMode());
   sources.hidden = true;
   section._artistSongSources = sources;
 
@@ -7243,6 +7327,27 @@ function renderArtistSongGroup(group) {
   );
   if (sourcePresentation.canExpand) section.append(sources);
   return section;
+}
+
+function artistLabelForSongGroup(group) {
+  const counts = new Map();
+  for (const occurrence of group?.occurrences || []) {
+    const name = cleanText(occurrence?.song?.artist);
+    if (!name) continue;
+    counts.set(name, (counts.get(name) || 0) + 1);
+  }
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || compareValues(a[0], b[0]))
+    .slice(0, 2)
+    .map(([name]) => name)
+    .join("、");
+}
+
+function artistSongCountLabel(group) {
+  const count = Math.max(0, Number(group?.count) || 0);
+  const videoCount = Math.max(0, Number(group?.videoCount) || uniqueVideoCount(group?.occurrences || []));
+  if (videoCount > 0 && videoCount !== count) return `${count}次 · ${videoCount}来源`;
+  return `${count}次`;
 }
 
 function hydrateArtistSongGroup(group) {
@@ -7328,7 +7433,11 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
             pageSize: sourceDrawerPageSizeForMode(),
           });
       const visibleOccurrences = pageState.occurrences;
-      row._sourceDetailOccurrences = pageState.completeOccurrences || drawerOccurrences;
+      row._sourceDetailOccurrences = pageState.completeOccurrences || visibleOccurrences || drawerOccurrences;
+      if (isSongGroupMode) {
+        songGroups = completeSongGroupsForDrawer(visibleOccurrences, songGroups);
+        row._artistSongGroups = songGroups;
+      }
       clearSourceDrawerStatus(drawer);
       initializeSourceDrawer(drawer, {
         mode,
@@ -7397,6 +7506,7 @@ async function setSourceDrawerPage(button) {
   const drawer = document.getElementById(button.getAttribute("aria-controls")) || button.closest(".source-drawer");
   const row = drawer?.closest(".rank-row, .index-row");
   if (!drawer || !row) return;
+  const sourceContainer = drawer.dataset.sourceMode === "artist-song" ? drawer : row;
   const page = Math.max(1, Math.floor(Number(button.dataset.sourcePage) || 1));
   const pageSize = sourceDrawerPageSizeForMode();
   drawer.dataset.sourcePage = String(page);
@@ -7404,11 +7514,11 @@ async function setSourceDrawerPage(button) {
   drawer.setAttribute("aria-busy", "true");
   showSourceDrawerStatus(drawer, "正在加载来源...");
   try {
-    const pageState = await sourceDetailPageForContainer(row, row._sourceDetailOccurrences || row._sourceOccurrences || [], { page, pageSize });
-    row._sourceDetailOccurrences = pageState.completeOccurrences || row._sourceDetailOccurrences || pageState.occurrences;
+    const pageState = await sourceDetailPageForContainer(sourceContainer, sourceContainer._sourceDetailOccurrences || sourceContainer._sourceOccurrences || [], { page, pageSize });
+    sourceContainer._sourceDetailOccurrences = pageState.completeOccurrences || sourceContainer._sourceDetailOccurrences || pageState.occurrences;
     appendSourceDrawerLinks(drawer, pageState.occurrences, {
       showToolbar: true,
-      copyOccurrences: pageState.occurrences,
+      copyOccurrences: sourceContainer._songSourceOccurrences || pageState.occurrences,
       groups: pageState.groups,
       pageInfo: pageState.pageInfo,
     });
@@ -7513,11 +7623,19 @@ async function toggleArtistSongSource(button) {
   const nextExpanded = sources.hidden;
   if (nextExpanded && isCompactRankMode()) closeSiblingArtistSongSources(section);
   if (nextExpanded && sources.dataset.sourceDeferred === "true") {
-    const sourceOccurrences = await sourceDetailOccurrencesForContainer(sources, sources._sourceOccurrences || []);
-    sources._sourceOccurrences = sourceOccurrences;
-    appendSourceDrawerLinks(sources, sourceOccurrences, {
+    const pageSize = sourceDrawerPageSizeForMode();
+    sources.dataset.sourcePage = sources.dataset.sourcePage || "1";
+    sources.dataset.sourcePageSize = String(pageSize);
+    const pageState = await sourceDetailPageForContainer(sources, sources._sourceOccurrences || [], {
+      page: Number(sources.dataset.sourcePage) || 1,
+      pageSize,
+    });
+    sources._sourceDetailOccurrences = pageState.completeOccurrences || sources._sourceOccurrences || pageState.occurrences;
+    appendSourceDrawerLinks(sources, pageState.occurrences, {
       copyOccurrences: sources._songSourceOccurrences || sources._sourceOccurrences || [],
       showToolbar: false,
+      groups: pageState.groups,
+      pageInfo: pageState.pageInfo,
     });
     delete sources.dataset.sourceDeferred;
   }
@@ -8116,8 +8234,18 @@ function videoThumbnailCandidates(item, options = {}) {
   const videoId = item.videoId ? encodeURIComponent(item.videoId) : "";
   const mqdefault = videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : "";
   const hqdefault = videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "";
-  const preferred = options.preferCompact ? [mqdefault, item.thumbnailUrl, hqdefault] : [item.thumbnailUrl, mqdefault, hqdefault];
-  return uniqueStrings([...preferred, placeholderThumbnail()]);
+  const explicit = [
+    item.thumbnailUrl,
+    item.videoThumbnailUrl,
+    item.videoThumbnail,
+    item.displayThumbnailUrl,
+    item.thumbnail,
+    item.source?.thumbnailUrl,
+    item.source?.videoThumbnailUrl,
+    item.source?.thumbnail,
+  ];
+  const preferred = options.preferCompact ? [mqdefault, ...explicit, hqdefault] : [...explicit, hqdefault, mqdefault];
+  return uniqueStrings(preferred.map(cleanText));
 }
 
 function createThumbnailImage(item, className, optionsOrWidth = {}, height = 90) {
@@ -8135,10 +8263,20 @@ function createThumbnailImage(item, className, optionsOrWidth = {}, height = 90)
   img.height = resolvedHeight;
   const thumbnailCandidates = videoThumbnailCandidates(item || {}, options);
   let thumbnailIndex = 0;
-  img.src = thumbnailCandidates[thumbnailIndex] || placeholderThumbnail();
+  if (!thumbnailCandidates.length) {
+    img.hidden = true;
+    img.dataset.thumbnailMissing = "true";
+    return img;
+  }
+  img.src = thumbnailCandidates[thumbnailIndex];
   img.addEventListener("error", () => {
     thumbnailIndex += 1;
-    if (thumbnailIndex < thumbnailCandidates.length) img.src = thumbnailCandidates[thumbnailIndex];
+    if (thumbnailIndex < thumbnailCandidates.length) {
+      img.src = thumbnailCandidates[thumbnailIndex];
+      return;
+    }
+    img.hidden = true;
+    img.dataset.thumbnailMissing = "true";
   });
   return img;
 }

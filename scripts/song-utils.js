@@ -117,11 +117,12 @@ function isLikelyNonSongEntry(song) {
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "");
   const combined = `${title} ${raw}`;
-  const hasArtist = Boolean(artist && artist !== "未記載");
+  const hasArtist = !isUnknownArtistField(artist);
 
   if (isCustomEmojiOnlyText(title)) return true;
   if (/^0\d+[.．]\d+(?:\s*[\/／].*)?$/u.test(title)) return true;
   if (isBlockedSongEntry({ title, artist, raw })) return true;
+  if (!hasArtist && isStandaloneNonSongMarker(title)) return true;
   if (!hasArtist && isChatReactionShoutText(title)) return true;
   if (isReactionActivityEntry(title, artist, raw)) return true;
   if (isCommentaryNonSongEntry(title, artist, raw)) return true;
@@ -161,8 +162,26 @@ function isLikelyNonSongEntry(song) {
   return false;
 }
 
+function isStandaloneNonSongMarker(text) {
+  const value = normalizeStandaloneMarker(text);
+  if (!value) return false;
+  if (/^(?:op|ed|end|opening|ending|openingtalk|endingtalk|streamstart|streamend|streamended|karaokestart|karaokeend)$/iu.test(value)) return true;
+  if (/^(?:setlist|timestamp|timestamps)$/iu.test(value)) return true;
+  if (/^(?:本編開始|本編終了|全曲終了|配信開始|配信終了|開始|終了|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)$/u.test(value)) return true;
+  return false;
+}
+
+function normalizeStandaloneMarker(text) {
+  return String(text || "")
+    .normalize("NFKC")
+    .replace(/[【】[\]「」『』"'“”‘’]/gu, "")
+    .replace(/^[\s~〜～・･:：\-—–−/／|｜￤∣丨]+|[\s~〜～・･:：\-—–−/／|｜￤∣丨]+$/gu, "")
+    .replace(/[\s~〜～・･:：\-—–−/／|｜￤∣丨]+/gu, "")
+    .trim();
+}
+
 function isCommentaryNonSongEntry(title, artist, raw) {
-  const hasArtist = Boolean(artist && artist !== "未記載");
+  const hasArtist = !isUnknownArtistField(artist);
   const titleIsCommentary = isCommentaryNonSongText(title);
   if (isNaraetanSelfReference(`${title || ""} ${artist || ""} ${raw || ""}`) && !isKnownSongSafeFromCommentary(title, artist)) return true;
   if (!hasArtist && (titleIsCommentary || isCommentaryNonSongText(raw) || isNaraetanSelfReference(title) || isTopicLikeBilingualCommentary(title, artist, raw))) return true;

@@ -24,6 +24,11 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>频道<\/span>/u);
   assert.match(indexSource, /id="queryDialog"[\s\S]*role="dialog"[\s\S]*aria-labelledby="queryDialogTitle"[\s\S]*搜索与筛选/u);
   assert.match(indexSource, /id="queryInput"[\s\S]*id="searchSuggestions"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
+  assert.match(indexSource, /id="queryInput" type="search"[\s\S]*id="clearQueryButton"/u);
+  assert.match(cssSource, /\.query-search-section input\[type="search"\]\s*\{[\s\S]*-webkit-appearance: none;[\s\S]*appearance: textfield;/u);
+  assert.match(cssSource, /\.query-search-section input\[type="search"\]::-webkit-search-cancel-button,[\s\S]*\.query-search-section input\[type="search"\]::-webkit-search-decoration,[\s\S]*\.query-search-section input\[type="search"\]::-webkit-search-results-button,[\s\S]*\.query-search-section input\[type="search"\]::-webkit-search-results-decoration\s*\{[\s\S]*display: none;[\s\S]*width: 0;[\s\S]*height: 0;/u);
+  assert.match(cssSource, /\.clear-query-button\s*\{[\s\S]*top: calc\(10px \+ 19px\);[\s\S]*right: 17px;[\s\S]*transform: translateY\(-50%\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.clear-query-button\s*\{[\s\S]*top: calc\(8px \+ 18px\);[\s\S]*right: 13px;/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
   assert.match(indexSource, /id="activeQueryStrip"/u);
@@ -77,6 +82,9 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(appSource, /className = "source-time-extra-toggle"/u);
   assert.match(appSource, /function renderCopySetlistIconButton/u);
   assert.match(appSource, /function createThumbnailImage/u);
+  assert.match(appSource, /item\.videoThumbnailUrl/u);
+  assert.match(appSource, /img\.hidden = true/u);
+  assert.doesNotMatch(appSource, /return uniqueStrings\(\[\.\.\.preferred, placeholderThumbnail\(\)\]\)/u);
   assert.doesNotMatch(appSource, /maxresdefault/u);
   assert.match(appSource, /const RESPONSIVE_BREAKPOINTS = \{[\s\S]*mobileMax: 720,[\s\S]*tabletMax: 919/u);
   assert.match(appSource, /const SOURCE_INLINE_LIMITS = \{[\s\S]*mobile: 2,[\s\S]*tablet: 3,[\s\S]*desktop: 3/u);
@@ -326,6 +334,24 @@ test("rank summaries keep metrics to entity count and song collections", () => {
   assert.match(appSource, /function summaryVideoCountModel\(rangeCache, selection\)[\s\S]*visibleCount: selection\?\.videoCount,[\s\S]*sourceCount: sourceVideoCountForSummary\(rangeCache\)/u);
   assert.match(appSource, /function sourceVideoCountForSummary\(rangeCache\)[\s\S]*rangeCache\.items\.length/u);
   assert.match(appSource, /function summaryNote\(selection, extra = "", rangeCache = null\)[\s\S]*summaryVideoVisibilityNote\(rangeCache, selection\)/u);
+});
+
+test("VTuber channel expansion renders paged song groups before source pages", () => {
+  const vtuberRankBody = functionBody("function renderVtuberRank");
+  const songSourceBody = functionBody("async function toggleArtistSongSource");
+  const sourcePageBody = functionBody("async function setSourceDrawerPage");
+  const songGroupBody = functionBody("function renderArtistSongGroup");
+  assert.match(vtuberRankBody, /getSongGroups: \(\) => getArtistSongGroups\(record\)/u);
+  assert.match(appSource, /function renderRequestedPageResult[\s\S]*mode: "vtuber"[\s\S]*getSongGroups: \(\) => getArtistSongGroups\(record\)/u);
+  assert.match(appSource, /function completeSongGroupsForDrawer\(occurrences, fallbackGroups = \[\]\)[\s\S]*buildArtistSongGroups\(filterDisplaySongOccurrences\(occurrences \|\| \[\]\)\)/u);
+  assert.match(appSource, /async function setSourceDrawerExpanded[\s\S]*songGroups = completeSongGroupsForDrawer\(visibleOccurrences, songGroups\)/u);
+  assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
+  assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
+  assert.match(songSourceBody, /sourceDetailPageForContainer\(sources, sources\._sourceOccurrences \|\| \[\]/u);
+  assert.match(songSourceBody, /groups: pageState\.groups,[\s\S]*pageInfo: pageState\.pageInfo/u);
+  assert.match(sourcePageBody, /drawer\.dataset\.sourceMode === "artist-song" \? drawer : row/u);
+  assert.match(sourcePageBody, /sourceDetailPageForContainer\(sourceContainer, sourceContainer\._sourceDetailOccurrences \|\| sourceContainer\._sourceOccurrences \|\| \[\]/u);
+  assert.match(cssSource, /\.artist-song-artist\s*\{[\s\S]*text-overflow: ellipsis;[\s\S]*white-space: nowrap;/u);
 });
 
 function functionBody(signature) {
