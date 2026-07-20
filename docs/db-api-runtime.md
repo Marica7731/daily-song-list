@@ -160,18 +160,21 @@ Supported query parameters:
 - `range`: `7d` or `all`; default `all`.
 - `view`: `songs`, `songIndex`, `artists`, `videos`, `vtubers`, or `vsingerSongs`; default `songs`.
 - `metric`: `occurrences`, `count`, `songs`, or `videos`; `videos` is valid for `songs`, `artists`, and `vtubers`, and `songs` is valid for `vtubers`. Non-video/song metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
-- `q`: optional case-insensitive search. The match scope is tab-specific; see below.
+- `q`: optional case-insensitive search. Terms match as continuous substrings, with whitespace/`AND`/`+`/`与`/`和` as AND and `OR`/`|`/`或` as OR group separators. Quote a phrase to keep spaces inside one term.
+- `searchScope`: optional field selector. `all` is the default and searches the row's full prepared search text. `song`, `title`, `artist`, `channel`, `video`, `source`, and `entity` narrow the fields when operators need to distinguish song identity from channel/source context. `searchField` is accepted as a backward-compatible alias.
 - `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos` and `vtubers`, `minCount` is ignored by the UI/API ranking view.
 - `page`: 1-based page number.
 - `pageSize`: maximum 200.
 
 Search scope contract:
 
-- `songs` and `songIndex` match song identity fields only: title/work title, display artist, artist aliases, and variant labels that are visible as song identity. Channel names, video titles, video IDs, and hidden source search text must not make an unrelated song row match.
-- `vsingerSongs` matches source song title, artist, and singer fields. It is a raw-source diagnostic view and does not currently run the contextual source-row rewrite used by `songs`.
-- `artists` matches singer/artist identity fields only, such as canonical name and aliases. Song titles, channel names, and video titles must not make an unrelated artist row match.
-- `vtubers` matches channel/VTuber identity fields only, such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields. Song titles and video titles must not make an unrelated VTuber row match.
-- `videos` matches video/source context, including video ID/title, channel identity, and parsed song-list/timestamp text.
+- Default `searchScope=all` is intentionally broad for every ranking view, so `songs?q=なれたん` can find songs through channel/source evidence when that evidence is present in the row. It must still match the complete continuous query term; partial character reordering and wildcard expansion are not allowed.
+- `searchScope=song` narrows `songs` and `songIndex` to song identity fields: title/work title, display artist, artist aliases, and variant labels that are visible as song identity.
+- `searchScope=artist` narrows to singer/artist identity fields.
+- `searchScope=channel` narrows to channel/VTuber identity fields such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields.
+- `searchScope=video` narrows to video ID/title and video-level context.
+- `searchScope=source` narrows to parsed source/timestamp context.
+- `searchScope=entity` searches the visible primary entity text for the selected view.
 - `avatarUrl` is backend data only when it is a real remote channel/avatar URL from runtime data, accepted discovery metadata, or `channel-metadata.json`. Generated fallback avatars must remain absent from DB/API payloads.
 - `thumbnailUrl` / `videoThumbnailUrl` on `vtubers` records is display fallback only. It is sourced from the channel's latest available video/source thumbnail and is used when `avatarUrl` is empty. It is not counted as avatar coverage.
 - `missingDisplayImage` must stay zero for runtime VTuber records. The daily avatar cache step and static/DB builders fail or report the offending channels when a record has neither real avatar nor video thumbnail.
@@ -229,9 +232,9 @@ Example response shape:
 
 For filtered searches, the summary counters must be filtered counters. Do not fall back to full-site `counts.occurrences`; otherwise a search such as `少女レイ` displays the all-site occurrence total instead of the matched rows.
 
-Song search must not fall back to hidden source context. For example, `songs?q=なれたん` may return zero rows unless the song title or visible artist identity contains `なれたん`; use `videos` or `vtubers` to find channel补漏 rows.
+Default song search is all-field search. For example, `songs?q=なれたん` may return rows where `なれたん` is present in channel/source evidence, while `songs?q=なれたん&searchScope=song` is valid only when the visible song identity fields contain the term. Both modes must reject self-reference/commentary noise such as polls, setlist headers, and "songs I can sing" rows.
 
-`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, narrowed `songs?q=なれたん` visible-field behavior, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
+`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, default all-field `songs?q=なれたん`, narrowed `songs?q=なれたん&searchScope=song`, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
 It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` so a deploy cannot pass while the accepted increment is missing from the runtime DB.
 
 `GET /api/sources/{sourceDetailKey}`
@@ -276,7 +279,7 @@ npm run vsinger:audit:singers -- --singers-file artifacts/vsinger-http-backfill/
 
 The audit compares the source singer list to committed VSinger videos by exact `singerName`, because the current normalized bundle does not yet keep `externalSingerId` on `external_videos`. Treat `missing-by-name` as high-confidence補漏 targets. Treat `source-ahead-by-name` as a conservative queue; renamed singers can appear there until refreshed by singerId.
 
-Do not compare a song-search screen directly to a per-singer補漏 count. `songs?q=<channel>` is intentionally narrow and may return zero rows when the channel text does not appear in song identity fields. Per-singer補漏 is validated through singerId-scoped crawl reports, `videos?q=<singer name>`, `vtubers?q=<channel>`, and source-detail rows.
+Do not compare a default song-search screen directly to a per-singer補漏 count. `songs?q=<channel>` uses all-field row search and can include channel/source evidence; `songs?q=<channel>&searchScope=song` is the narrowed visible song-identity check. Per-singer補漏 is validated through singerId-scoped crawl reports, `videos?q=<singer name>`, `vtubers?q=<channel>`, and source-detail rows.
 
 ## Production verification probes
 
@@ -294,8 +297,8 @@ Current qualitative acceptance points:
 - `ネモ・テルミナス` should be findable in `view=videos`, proving the newly missing-by-name singer has been imported.
 - `儚牙紺 - Kurage Kon -` should be findable in `view=videos`, proving the second newly missing-by-name singer has been imported.
 - `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` should be findable in `view=videos`, proving reviewed YouTube channel補漏 increments were included in the DB build.
-- Channel补漏 names such as `HanamaeHaru`, `aoineno`, and `fujimiyakotoha` should be checked in `view=videos` and `view=vtubers` after their accepted increment is imported. `view=songs` and `view=artists` should not pass solely because a video title or channel name contains the term.
-- `なれたん` search acceptance should cover narrowed search scopes: it must be findable in `view=videos`; `view=songs` may be empty unless song identity fields contain `なれたん`; `view=vtubers` should match only channel/VTuber identity text.
+- Channel补漏 names such as `HanamaeHaru`, `aoineno`, and `fujimiyakotoha` should be checked in `view=videos` and `view=vtubers` after their accepted increment is imported. Use `searchScope=song`, `searchScope=artist`, or `searchScope=channel` when the acceptance needs to prove a specific field family rather than default all-field search.
+- `なれたん` search acceptance should cover both search modes: default `view=songs&q=なれたん` must match the complete continuous term somewhere in the row and must not show self-reference/commentary noise; `view=songs&q=なれたん&searchScope=song` is the narrowed song-identity probe; `view=videos` and `view=vtubers` prove channel/source presence.
 
 The exact counts change with each hourly refresh. Record the numbers from the command output in release notes or incident notes instead of hard-coding them in docs.
 

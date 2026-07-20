@@ -186,12 +186,13 @@ curl -fsS "$BASE/api/rankings?range=all&view=videos&q=fujimiyakotoha&pageSize=5"
 curl -fsS "$BASE/api/rankings?range=all&view=vtubers&q=fujimiyakotoha&pageSize=5"
 ```
 
-Also keep the `なれたん` search acceptance in the same note. It should prove that the channel補漏 is present and that narrowed search scopes are respected:
+Also keep the `なれたん` search acceptance in the same note. It should prove that the channel補漏 is present and that default all-field search plus narrowed search scopes are respected:
 
 - `view=videos&q=なれたん` returns the reviewed video/source rows.
-- `view=vtubers&q=なれたん` matches only VTuber/channel identity text.
-- `view=songs&q=なれたん` does not pass merely because a video title or channel name contains `なれたん`; rows are valid only when the song title or visible artist identity matches.
-- `view=artists&q=なれたん` must not pass merely because the video title or channel name contains `なれたん`; that tab can only match real artist identity text.
+- `view=vtubers&q=なれたん&searchScope=channel` matches VTuber/channel identity text.
+- `view=songs&q=なれたん` uses default `searchScope=all`, so rows are valid when the complete continuous term is present in song, channel, video, or source evidence. It must still reject self-reference/commentary noise.
+- `view=songs&q=なれたん&searchScope=song` narrows to visible song identity fields.
+- `view=artists&q=なれたん&searchScope=artist` must not pass merely because the video title or channel name contains `なれたん`; that probe can only match real artist identity text.
 
 Example full-channel pass:
 
