@@ -572,6 +572,21 @@ test("channel link uses handle, channelId, and search fallback", () => {
     youtubeChannelLink({ channelUrl: "https://www.youtube.com/@DirectHandle", channelName: "Direct Channel" }).href,
     "https://www.youtube.com/@DirectHandle",
   );
+  assert.equal(
+    youtubeChannelLink({ sourceUrl: "https://www.youtube.com/@SourceHandle/streams", channelName: "Source Channel" }).href,
+    "https://www.youtube.com/@SourceHandle/streams",
+  );
+  assert.equal(
+    youtubeChannelLink({
+      sourceUrls: ["https://www.youtube.com/watch?v=abc12345678", "https://www.youtube.com/channel/UCSourceChannel"],
+      channelName: "Source Array Channel",
+    }).href,
+    "https://www.youtube.com/channel/UCSourceChannel",
+  );
+  assert.equal(
+    youtubeChannelLink({ sourceUrl: "https://www.youtube.com/watch?v=abc12345678", channelName: "Watch Only" }).isFallbackSearch,
+    true,
+  );
   assert.deepEqual(youtubeChannelLink({ channelName: "Search Channel" }), {
     href: "https://www.youtube.com/results?search_query=Search%20Channel",
     isFallbackSearch: true,

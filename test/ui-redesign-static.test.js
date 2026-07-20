@@ -192,6 +192,9 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(appSource, /FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
   assert.match(appSource, /function renderVtuberChannelTextLink/u);
   assert.match(appSource, /wrapVtuberChannelLink\(media, record \|\| \{\}, "vtuber-display-link"\)/u);
+  assert.match(appSource, /function vtuberChannelUrlCandidate/u);
+  assert.match(appSource, /function vtuberChannelUrlCandidate[\s\S]*item\.sourceUrl/u);
+  assert.match(appSource, /function vtuberChannelUrlCandidate[\s\S]*item\.sourceUrls/u);
   assert.match(appSource, /function renderVtuberCollectionBadge/u);
   assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
   const vtuberTitleLineBlock = cssBlock(".vtuber-title-line");
@@ -209,6 +212,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.rank-expand::after\s*\{[\s\S]*border-right: 1\.5px solid currentcolor;[\s\S]*transform: translateY\(-1px\) rotate\(45deg\);/u);
   assert.match(cssSource, /\.rank-expand\[aria-expanded="true"\]::after\s*\{[\s\S]*rotate\(225deg\)/u);
   assert.match(cssSource, /\.source-copy-icon\s*\{[\s\S]*width: var\(--chip-icon-size\);[\s\S]*padding: 0;/u);
+  assert.match(appSource, /function renderSourceVideoGroup[\s\S]*channel\.setAttribute\("aria-label", channelLink\.isFallbackSearch/u);
+  assert.match(appSource, /function renderSourceVideoGroup[\s\S]*channel\.title = channelLink\.isFallbackSearch/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 56px;[\s\S]*height: 32px;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 48px;[\s\S]*height: 27px;/u);
   assert.doesNotMatch(cssSource, /\.source-copy-icon span|ui-chip-icon-label/u);

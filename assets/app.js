@@ -5528,7 +5528,8 @@ function buildVtuberRecords(occurrences) {
         channelName: cleanText(item.channelName),
         channelId: cleanText(item.channelId),
         channelHandle: cleanText(item.channelHandle),
-        channelUrl: cleanText(item.channelUrl || item.authorUrl || item.ownerUrl),
+        channelUrl: vtuberChannelUrlCandidate(item),
+        sourceUrl: cleanText(item.sourceUrl),
         avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl),
         channelAvatarUrl: cleanText(item.channelAvatarUrl),
         knownSourceType: cleanText(item.knownSourceType || item.sourceType || item.collectionType),
@@ -5596,7 +5597,7 @@ function vtuberRecordKey(item, identityLookup = null) {
 function directVtuberRecordKey(item) {
   const channelId = cleanText(item?.channelId);
   if (channelId) return channelId;
-  const handle = cleanText(item?.channelHandle).replace(/^\/+/, "");
+  const handle = cleanText(item?.channelHandle).replace(/^\/+/, "") || vtuberHandleFromChannelUrl(vtuberChannelUrlCandidate(item));
   if (handle) return normalizeEntityKey(handle);
   return "";
 }
@@ -5616,7 +5617,8 @@ function mergeVtuberRecordIdentity(record, item) {
   const channelName = cleanText(item.channelName);
   const channelId = cleanText(item.channelId);
   const channelHandle = cleanText(item.channelHandle);
-  const channelUrl = cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
+  const channelUrl = vtuberChannelUrlCandidate(item);
+  const sourceUrl = cleanText(item.sourceUrl);
   const avatarUrl = cleanText(item.avatarUrl || item.channelAvatarUrl);
   const thumbnailUrl = vtuberThumbnailCandidate(item);
   if (channelName) {
@@ -5636,6 +5638,10 @@ function mergeVtuberRecordIdentity(record, item) {
   if (channelUrl) {
     record.aliases.add(channelUrl);
     if (!record.channelUrl) record.channelUrl = channelUrl;
+  }
+  if (sourceUrl) {
+    record.aliases.add(sourceUrl);
+    if (!record.sourceUrl) record.sourceUrl = sourceUrl;
   }
   if (avatarUrl && !record.avatarUrl) record.avatarUrl = avatarUrl;
   if (thumbnailUrl && shouldUseVtuberThumbnail(record, item)) {
@@ -5666,6 +5672,28 @@ function shouldUseVtuberThumbnail(record, item) {
   return false;
 }
 
+function vtuberChannelUrlCandidate(item = {}) {
+  const values = [
+    item.channelUrl,
+    item.authorUrl,
+    item.ownerUrl,
+    item.sourceUrl,
+    ...(Array.isArray(item.sourceUrls) ? item.sourceUrls : []),
+  ];
+  return values.map(cleanText).find(isYoutubeChannelUrl) || "";
+}
+
+function isYoutubeChannelUrl(value) {
+  const text = cleanText(value);
+  return /^https?:\/\/(www\.)?youtube\.com\/(?:@|channel\/|c\/|user\/)/iu.test(text);
+}
+
+function vtuberHandleFromChannelUrl(value) {
+  const text = cleanText(value);
+  const match = text.match(/youtube\.com\/(@[^/?#]+)/iu);
+  return match ? match[1] : "";
+}
+
 function knownVtuberSearchAliases(channelName) {
   const key = normalizeSearch(channelName);
   if (key === normalizeSearch("Haru Ch. 花前ハル")) return ["HanamaeHaru", "Hanamae Haru", "花前ハル"];
@@ -5690,11 +5718,21 @@ function songOccurrenceSearchText(occurrence, searchFields = DEFAULT_SEARCH_FIEL
 
 function vtuberOccurrenceSearchText(occurrence) {
   const item = occurrence?.item || {};
-  return normalizeSearch([item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.authorUrl, item.ownerUrl, ...knownVtuberSearchAliases(item.channelName)].join(" "));
+  return normalizeSearch([
+    item.channelName,
+    item.channelId,
+    item.channelHandle,
+    item.channelUrl,
+    item.authorUrl,
+    item.ownerUrl,
+    item.sourceUrl,
+    ...(Array.isArray(item.sourceUrls) ? item.sourceUrls : []),
+    ...knownVtuberSearchAliases(item.channelName),
+  ].join(" "));
 }
 
 function vtuberRecordSearchText(record) {
-  return normalizeSearch([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, ...(record.aliases || [])].join(" "));
+  return normalizeSearch([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, record.sourceUrl, ...(record.aliases || [])].join(" "));
 }
 
 function collectSongOccurrences(items) {
@@ -7127,6 +7165,8 @@ function renderSourceVideoGroup(group, options = {}) {
   channel.target = "_blank";
   channel.rel = "noreferrer";
   channel.textContent = group.channelName || "未知频道";
+  channel.setAttribute("aria-label", channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`);
+  channel.title = channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`;
   identity.append(channel);
   topline.append(identity);
   main.append(topline);

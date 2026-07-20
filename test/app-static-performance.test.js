@@ -199,6 +199,8 @@ test("VTuber ranking does not create standalone records from collaboration chann
   assert.match(keyBody, /const directKey = directVtuberRecordKey\(item\)/u);
   assert.match(keyBody, /if \(directKey\) return directKey/u);
   assert.match(keyBody, /if \(isCompositeChannelName\(item\?\.channelName\)\) return ""/u);
+  assert.match(functionBody("function directVtuberRecordKey"), /vtuberHandleFromChannelUrl\(vtuberChannelUrlCandidate\(item\)\)/u);
+  assert.match(functionBody("function mergeVtuberRecordIdentity"), /const sourceUrl = cleanText\(item\.sourceUrl\)/u);
   assert.match(functionBody("function isCompositeChannelName"), /(?:ch\\\.\?|channel|ちゃんねる|チャンネル)/u);
 });
 

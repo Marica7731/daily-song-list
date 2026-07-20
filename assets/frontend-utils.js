@@ -978,7 +978,7 @@
       identity.channelName = preferredChannelName(identity.channelName, name);
       identity.channelId ||= cleanText(item.channelId);
       identity.channelHandle ||= cleanText(item.channelHandle);
-      identity.channelUrl ||= cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
+      identity.channelUrl ||= youtubeChannelSourceUrl(item);
       identity.avatarUrl ||= cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl);
       identity.channelAvatarUrl ||= cleanText(item.channelAvatarUrl || item.avatarUrl);
       lookup.set(nameKey, identity);
@@ -995,7 +995,7 @@
       channelName: preferredChannelName(name, identity.channelName),
       channelId: cleanText(item.channelId) || identity.channelId,
       channelHandle: cleanText(item.channelHandle) || identity.channelHandle,
-      channelUrl: cleanText(item.channelUrl || item.authorUrl || item.ownerUrl) || identity.channelUrl,
+      channelUrl: youtubeChannelSourceUrl(item) || identity.channelUrl,
       avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl) || identity.avatarUrl,
       channelAvatarUrl: cleanText(item.channelAvatarUrl || item.avatarUrl) || identity.channelAvatarUrl,
     };
@@ -1396,7 +1396,7 @@
       };
     }
 
-    const directUrl = youtubeChannelDirectUrl(item.channelUrl || item.authorUrl || item.ownerUrl);
+    const directUrl = youtubeChannelSourceUrl(item);
     if (directUrl) {
       return { href: directUrl, isFallbackSearch: false };
     }
@@ -1422,6 +1422,21 @@
     if (value.startsWith("@")) return `https://www.youtube.com/${value}`;
     if (value.startsWith("channel/") || value.startsWith("c/") || value.startsWith("user/")) {
       return `https://www.youtube.com/${value}`;
+    }
+    return "";
+  }
+
+  function youtubeChannelSourceUrl(item = {}) {
+    const values = [
+      item.channelUrl,
+      item.authorUrl,
+      item.ownerUrl,
+      item.sourceUrl,
+      ...(Array.isArray(item.sourceUrls) ? item.sourceUrls : []),
+    ];
+    for (const value of values) {
+      const directUrl = youtubeChannelDirectUrl(value);
+      if (directUrl) return directUrl;
     }
     return "";
   }
