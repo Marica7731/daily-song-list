@@ -113,8 +113,60 @@ The next batch is intentionally queued for later source-backfill commits. The in
 - `https://www.youtube.com/@ROMANY_io`
 - `https://www.youtube.com/@nanashi_77shi`
 
+## Completed second wave
+
+Second wave was completed as an additional local commit on top of `90b9bcbe`. It still only covers the 16 requested URLs below; it is not a full-site channel refresh. Online skipped evidence was refreshed from `https://ytb-song-rank.culua.com/api/meta` and `/api/rankings` at `2026-07-20T02:06:53Z`. The production source at that time was `6afbad99b37b0ef2b11b679a7b4b315d98d37964`, built at `2026-07-19T23:49:16Z`.
+
+- Accepted increment: `data/external/youtube-channel-discovery/accepted/2026-07-20-source-backfill-wave2.json`
+- Increment totals: 7 discovery input dirs, 490 video details read, 490 accepted videos, 5,706 accepted occurrences, 0 duplicate video IDs, 0 regression skips.
+- Time coverage in accepted increment: video `publishedTimestamp` 490/490; occurrence `time` or `seconds` 5,706/5,706.
+- `origin/main` advanced again during this work to `fb0c33083be6f8cef88acbcc167c679f2148e40f`; this branch was intentionally not rebased, to avoid rewriting the first-wave commit already handed to the integration session.
+
+| Source | Status | Evidence |
+| --- | --- | --- |
+| `https://www.youtube.com/@MikuroKotonoha/streams` | imported | candidates 214; inspected 214; accepted videos 111; accepted occurrences 1,160; unique songs 538; raw publishedAt 214/214; detail publishedTimestamp 111/111; occurrence time 1,160/1,160; reachedEnd true |
+| `https://www.youtube.com/@nemgorochan` | skipped | already online: videos 2; occurrences 37; top video `sRPWlpO0jJw`; sample publishedTimestamp 2/2 |
+| `https://www.youtube.com/@Chihiro_Ichiniwa` | imported | candidates 11; inspected 11; accepted videos 5; accepted occurrences 106; unique songs 101; raw publishedAt 11/11; detail publishedTimestamp 5/5; occurrence time 106/106; reachedEnd true |
+| `https://www.youtube.com/@kohigashihitona` | skipped | already online: videos 2; occurrences 19; top video `vrFBDN3YWY0`; sample publishedTimestamp 2/2 |
+| `https://www.youtube.com/@TsumugiCarla` | skipped | already online: videos 1; occurrences 9; top video `Sq2UU4dhsxU`; sample publishedTimestamp 1/1 |
+| `https://www.youtube.com/@Himawari_Hachiya` | imported | candidates 273; inspected 273; accepted videos 147; accepted occurrences 2,284; unique songs 982; raw publishedAt 273/273; detail publishedTimestamp 147/147; occurrence time 2,284/2,284; reachedEnd true |
+| `https://www.youtube.com/@HONKTHEHORN_OFFICIAL` | skipped | already online: videos 3; occurrences 44; top video `0WM72sIq1ss`; sample publishedTimestamp 2/2 |
+| `https://www.youtube.com/@Mei-Mei2024` | skipped | already online: videos 1; occurrences 19; top video `fA4Xbt4gab4`; sample publishedTimestamp 1/1 |
+| `https://www.youtube.com/@itk_tks` | skipped | already online: videos 4; occurrences 50; top video `L9Qgz6Z_dDg`; sample publishedTimestamp 2/2 |
+| `https://www.youtube.com/@KugaTamaki` | imported | candidates 65; inspected 65; accepted videos 10; accepted occurrences 95; unique songs 93; raw publishedAt 65/65; detail publishedTimestamp 10/10; occurrence time 95/95; reachedEnd true |
+| `https://www.youtube.com/@UnoRabi` | imported | candidates 42; inspected 42; accepted videos 15; accepted occurrences 142; unique songs 128; raw publishedAt 42/42; detail publishedTimestamp 15/15; occurrence time 142/142; reachedEnd true |
+| `https://www.youtube.com/@delutaya` | skipped | already online: videos 4; occurrences 47; top video `_mlISsDUfag`; sample publishedTimestamp 2/2 |
+| `https://www.youtube.com/@akari0415` | skipped | already online: videos 1; occurrences 10; top video `6tRCG16yNlw`; sample publishedTimestamp 1/1 |
+| `https://www.youtube.com/@silk_mayui` | imported | candidates 174; inspected 174; accepted videos 119; accepted occurrences 1,033; unique songs 535; raw publishedAt 174/174; detail publishedTimestamp 119/119; occurrence time 1,033/1,033; reachedEnd true |
+| `https://www.youtube.com/@ROMANY_io` | imported | candidates 171; inspected 171; accepted videos 83; accepted occurrences 886; unique songs 392; raw publishedAt 171/171; detail publishedTimestamp 83/83; occurrence time 886/886; reachedEnd true |
+| `https://www.youtube.com/@nanashi_77shi` | skipped | already online: videos 2; occurrences 32; top video `ozRRqexN8lA`; sample publishedTimestamp 2/2 |
+
+Second-wave YouTube-only DB before/after builds:
+
+| Metric | Before wave2 | After wave2 | Delta |
+| --- | ---: | ---: | ---: |
+| Videos | 3,732 | 4,217 | +485 |
+| Songs | 21,298 | 22,414 | +1,116 |
+| Occurrences | 69,305 | 74,966 | +5,661 |
+| Source occurrences | 132,412 | 143,520 | +11,108 |
+
+Second-wave final commands:
+
+```powershell
+npm run youtube:export-channel-increment -- --input-dir artifacts/channel-discovery/2026-07-20-remote-wave2/vps3/MikuroKotonoha --input-dir artifacts/channel-discovery/2026-07-20-source-backfill-wave2/Chihiro_Ichiniwa --input-dir artifacts/channel-discovery/2026-07-20-remote-wave2/vps5/Himawari_Hachiya --input-dir artifacts/channel-discovery/2026-07-20-source-backfill-wave2/KugaTamaki --input-dir artifacts/channel-discovery/2026-07-20-source-backfill-wave2/UnoRabi --input-dir artifacts/channel-discovery/2026-07-20-source-backfill-wave2/silk_mayui --input-dir artifacts/channel-discovery/2026-07-20-source-backfill-wave2/ROMANY_io --output data/external/youtube-channel-discovery/accepted/2026-07-20-source-backfill-wave2.json
+npm run db:build -- --no-vsinger --youtube-channel-discovery-dir artifacts/channel-discovery/youtube-discovery-before-wave2 --output artifacts/runtime/song-rank-youtube-before-wave2.sqlite
+npm run db:build -- --no-vsinger --output artifacts/runtime/song-rank-youtube-after-wave2.sqlite
+```
+
+Second-wave VPS usage:
+
+| Host | Role | Cleanup evidence |
+| --- | --- | --- |
+| VPS3 `142.91.109.81` | `MikuroKotonoha`; duplicate `silk_mayui` run was stopped after local completion | removed `/opt/ytb-song-rank-source-backfill-wave2-20260720`; final `df -h`: `/dev/sda1 99G 24G 76G 24% /`; `REMOTE_CLEANUP_OK` |
+| VPS5 `134.195.91.5` | `Himawari_Hachiya`; duplicate `ROMANY_io` run was stopped after local completion | removed `/opt/ytb-song-rank-source-backfill-wave2-20260720`; final `df -h`: `/dev/vda1 10G 2.4G 7.1G 26% /`; `REMOTE_CLEANUP_OK` |
+
 ## Merge notes
 
-- `origin/main` advanced to `6afbad99b37b0ef2b11b679a7b4b315d98d37964` after this branch was started. This branch keeps a small surface by adding a separate handoff doc and one accepted increment JSON instead of editing generated review data.
+- `origin/main` advanced to `fb0c33083be6f8cef88acbcc167c679f2148e40f` after this branch was started. This branch keeps a small surface by adding separate accepted increment JSON files and a handoff doc instead of editing generated review data.
 - Do not commit `artifacts/channel-discovery/**`, `artifacts/runtime/**`, remote raw caches, credentials, or temporary helper scripts.
 - This branch has not been pushed and has not been deployed. The accepted JSON will affect production only after the integration session merges, rebuilds, and deploys.
