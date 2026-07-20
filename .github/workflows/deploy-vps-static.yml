@@ -24,6 +24,13 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            .github/workflows/deploy-vps-static.yml
+            index.html
+            assets
+            .nojekyll
+            CNAME
 
       - name: Resolve deploy revision
         id: revision
