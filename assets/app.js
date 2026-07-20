@@ -1405,7 +1405,7 @@ function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromS
   if (els.displayFilterGroup) els.displayFilterGroup.hidden = state.view === "videos";
   if (hideUnknownField) hideUnknownField.hidden = state.view === "artistRank" || state.view === "vtuberRank";
   if (els.hideUnknownToggle) els.hideUnknownToggle.disabled = state.view === "artistRank" || state.view === "vtuberRank";
-  if (els.trendFilterGroup) els.trendFilterGroup.hidden = state.view === "songAz" || state.view === "vtuberRank" || videoLikeView;
+  if (els.trendFilterGroup) els.trendFilterGroup.hidden = state.runtimeApi.available || state.view === "songAz" || state.view === "vtuberRank" || videoLikeView;
   if (els.minCountSelect?.closest(".query-field")) els.minCountSelect.closest(".query-field").hidden = videoLikeView;
   if (els.trendFilterSelect) {
     const isLatestDraft = draft.snapshotPath === SNAPSHOT_LATEST_PATH;
@@ -1413,7 +1413,7 @@ function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromS
     els.trendFilterSelect.disabled = disabled;
     if (els.trendFilterHint) {
       els.trendFilterHint.textContent = state.runtimeApi.available
-        ? "API模式暂不支持趋势筛选"
+        ? ""
         : !isLatestDraft
         ? "历史快照不支持趋势筛选"
         : state.rankDiffLoads.has(state.range)
@@ -1546,26 +1546,8 @@ function scheduleQueryDraftPreview(options = {}) {
   window.clearTimeout(state.queryPreviewTimer);
   abortQueryPreviewWork();
   const draft = sanitizeQueryDraft(state.queryDraft || makeQueryDraftFromState());
-  const revision = options.revision || advanceQueryWorkRevision();
+  options.revision || advanceQueryWorkRevision();
   prepareQueryPreviewShell(draft);
-  const controller = new AbortController();
-  state.queryPreviewController = controller;
-  const delay = Number.isFinite(options.delay) ? options.delay : options.immediate ? 0 : SEARCH_DEBOUNCE_MS;
-  state.queryPreviewTimer = window.setTimeout(() => {
-    renderQueryDraftPreview(revision, { signal: controller.signal }).catch((error) => {
-      if (error?.name === "AbortError") return;
-      if (isCurrentQueryWork(revision)) {
-        if (els.queryResultPreview) els.queryResultPreview.textContent = "计算失败";
-        if (els.applyQueryButton) {
-          els.applyQueryButton.disabled = false;
-          els.applyQueryButton.textContent = "应用查询";
-        }
-      }
-      console.warn("query preview failed", error);
-    }).finally(() => {
-      if (state.queryPreviewController === controller) state.queryPreviewController = null;
-    });
-  }, delay);
 }
 
 function abortQueryPreviewWork() {
@@ -1584,15 +1566,14 @@ function prepareQueryPreviewShell(draft) {
   }
   const cached = currentResultCountForDraft(draft);
   if (cached !== null) {
-    const unit = queryResultUnit();
-    els.queryResultPreview.textContent = `${cached} ${unit}`;
+    els.queryResultPreview.textContent = "可查看结果";
     els.applyQueryButton.disabled = false;
-    els.applyQueryButton.textContent = `查看 ${cached} ${unit}`;
+    els.applyQueryButton.textContent = "查看结果";
     return;
   }
-  els.queryResultPreview.textContent = "计算中";
-  els.applyQueryButton.disabled = true;
-  els.applyQueryButton.textContent = "正在计算";
+  els.queryResultPreview.textContent = "可查看结果";
+  els.applyQueryButton.disabled = false;
+  els.applyQueryButton.textContent = "查看结果";
 }
 
 async function renderQueryDraftPreview(revision = state.queryWorkRevision, options = {}) {
@@ -1606,12 +1587,9 @@ async function renderQueryDraftPreview(revision = state.queryWorkRevision, optio
   }
   await yieldToBrowser();
   if (!isCurrentQueryWork(revision)) return;
-  const count = await resolveQueryDraftResultCount(draft, { signal: options.signal });
-  if (!isCurrentQueryWork(revision)) return;
-  const unit = queryResultUnit();
-  els.queryResultPreview.textContent = `${count} ${unit}`;
+  els.queryResultPreview.textContent = "可查看结果";
   els.applyQueryButton.disabled = false;
-  els.applyQueryButton.textContent = `查看 ${count} ${unit}`;
+  els.applyQueryButton.textContent = "查看结果";
 }
 
 function queryResultUnit() {

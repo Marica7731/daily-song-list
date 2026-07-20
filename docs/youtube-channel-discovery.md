@@ -192,7 +192,7 @@ Also keep the `なれたん` search acceptance in the same note. It should prove
 
 - `view=videos&q=なれたん` returns the reviewed video/source rows.
 - `view=vtubers&q=なれたん&searchScope=channel` matches VTuber/channel identity text.
-- `view=songs&q=なれたん` uses default `searchScope=all`, so rows are valid when the complete continuous term is present in song, channel, video, or source evidence. It must still reject self-reference/commentary noise.
+- `view=songs&q=なれたん` uses the default song-identity search and must not pass merely because the term is present in channel, video, or source evidence. Use `searchScope=channel`, `video`, or `source` for those diagnostics.
 - `view=songs&q=なれたん&searchScope=song` narrows to visible song identity fields.
 - `view=artists&q=なれたん&searchScope=artist` must not pass merely because the video title or channel name contains `なれたん`; that probe can only match real artist identity text.
 

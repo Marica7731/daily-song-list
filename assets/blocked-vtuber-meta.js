@@ -10,7 +10,7 @@
     schemaVersion: 1,
     listVersion: "2026-07-15.2+local.2026-07-20.1",
     updatedAt: "2026-07-20T00:00:00+08:00",
-    blocklistHash: "6f06c551f4a3f0e6a89f1cd657b424eaab20d9a29dde53669d751bf1cf81d092",
+    blocklistHash: "4eeceebedef8d8124a864a7e8d2f4c998783644d1a268937a1d1d80b0c742e31",
     entryCount: 82
   };
 });

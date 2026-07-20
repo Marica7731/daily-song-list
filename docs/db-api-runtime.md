@@ -148,7 +148,7 @@ Operator fields:
 Frontend API-mode behavior:
 
 - When `/api/meta` returns a valid payload, the frontend enters SQLite/API mode and must not request `data/diff/latest-*.json`; those static diff files can resolve to HTML on the VPS/Nginx deployment and produce JSON parse toasts.
-- API mode normalizes `trend` filters to `all`, disables the trend selector, and shows `API模式暂不支持趋势筛选`.
+- API mode normalizes `trend` filters to `all` and hides the trend selector entirely. Do not show the stale `API模式暂不支持趋势筛选` helper text in the query dialog.
 - API mode maps the frontend `vtuberRank` tab to `view=vtubers`. Treat it as a channel/VTuber identity ranking, not as another artist ranking.
 - The freshness chip uses SQLite `meta.built_at` / `rebuiltDerivedAt` as the staleness baseline. `meta.latest_captured_at` remains source-data provenance and must not trigger the 2-hour stale alert by itself.
 - Song, artist, and VTuber summaries show two metrics: row count and `歌曲收录`. The frontend intentionally does not show a unique-video metric in those summaries. The video view still shows `个视频` and `个时间戳`.
@@ -161,14 +161,14 @@ Supported query parameters:
 - `view`: `songs`, `songIndex`, `artists`, `videos`, `vtubers`, or `vsingerSongs`; default `songs`.
 - `metric`: `occurrences`, `count`, `songs`, or `videos`; `videos` is valid for `songs`, `artists`, and `vtubers`, and `songs` is valid for `vtubers`. Non-video/song metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
 - `q`: optional case-insensitive search. Terms match as continuous substrings, with whitespace/`AND`/`+`/`与`/`和` as AND and `OR`/`|`/`或` as OR group separators. Quote a phrase to keep spaces inside one term.
-- `searchScope`: optional field selector. `all` is the default and searches the row's full prepared search text. `song`, `title`, `artist`, `channel`, `video`, `source`, and `entity` narrow the fields when operators need to distinguish song identity from channel/source context. `searchField` is accepted as a backward-compatible alias.
+- `searchScope`: optional field selector. `all` is the default; for song-like ranking views it searches visible song identity fields only, while `channel`, `video`, and `source` must be selected explicitly when operators need source-context matches. `song`, `title`, `artist`, `channel`, `video`, `source`, and `entity` narrow the fields. `searchField` is accepted as a backward-compatible alias.
 - `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos` and `vtubers`, `minCount` is ignored by the UI/API ranking view.
 - `page`: 1-based page number.
 - `pageSize`: maximum 200.
 
 Search scope contract:
 
-- Default `searchScope=all` is intentionally broad for every ranking view, so `songs?q=なれたん` can find songs through channel/source evidence when that evidence is present in the row. It must still match the complete continuous query term; partial character reordering and wildcard expansion are not allowed.
+- Default `searchScope=all` for `songs`, `songIndex`, `artists`, and `vsingerSongs` is intentionally identity-focused: a query must match visible song/artist/entity fields, not merely a channel name, video title, or parsed source note. Use `searchScope=channel`, `video`, or `source` when that broader evidence is required. All scopes still match complete continuous query terms; partial character reordering and wildcard expansion are not allowed.
 - `searchScope=song` narrows `songs` and `songIndex` to song identity fields: title/work title, display artist, artist aliases, and variant labels that are visible as song identity.
 - `searchScope=artist` narrows to singer/artist identity fields.
 - `searchScope=channel` narrows to channel/VTuber identity fields such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields.
@@ -232,7 +232,7 @@ Example response shape:
 
 For filtered searches, the summary counters must be filtered counters. Do not fall back to full-site `counts.occurrences`; otherwise a search such as `少女レイ` displays the all-site occurrence total instead of the matched rows.
 
-Default song search is all-field search. For example, `songs?q=なれたん` may return rows where `なれたん` is present in channel/source evidence, while `songs?q=なれたん&searchScope=song` is valid only when the visible song identity fields contain the term. Both modes must reject self-reference/commentary noise such as polls, setlist headers, and "songs I can sing" rows.
+Default song search is song-identity search. For example, `songs?q=なれたん` must not return rows solely because `なれたん` is present in channel/source/video evidence; use `songs?q=なれたん&searchScope=channel` or `searchScope=source` for that broader diagnostic. All modes must reject self-reference/commentary noise such as polls, setlist headers, and "songs I can sing" rows.
 
 When an aggregate ranking row matches through source/channel/video evidence, the API returns only matching source previews and reports `count`, `timestampCount`, and `videoCount` for the matched subset. The original all-site values remain available as `globalCount`, `globalTimestampCount`, and `globalVideoCount`. This keeps a query such as `songs?q=なれたん` from showing unrelated top source previews or all-site play counts for a song that only has a few matching `なれたん` sources.
 
@@ -281,7 +281,7 @@ npm run vsinger:audit:singers -- --singers-file artifacts/vsinger-http-backfill/
 
 The audit compares the source singer list to committed VSinger videos by exact `singerName`, because the current normalized bundle does not yet keep `externalSingerId` on `external_videos`. Treat `missing-by-name` as high-confidence補漏 targets. Treat `source-ahead-by-name` as a conservative queue; renamed singers can appear there until refreshed by singerId.
 
-Do not compare a default song-search screen directly to a per-singer補漏 count. `songs?q=<channel>` uses all-field row search and can include channel/source evidence; `songs?q=<channel>&searchScope=song` is the narrowed visible song-identity check. Per-singer補漏 is validated through singerId-scoped crawl reports, `videos?q=<singer name>`, `vtubers?q=<channel>`, and source-detail rows.
+Do not compare a default song-search screen directly to a per-singer補漏 count. `songs?q=<channel>` uses song-identity search and should not pass merely because a channel/source field matches; use `songs?q=<channel>&searchScope=channel` or `searchScope=source` only for explicit diagnostics. Per-singer補漏 is validated through singerId-scoped crawl reports, `videos?q=<singer name>`, `vtubers?q=<channel>`, and source-detail rows.
 
 ## Production verification probes
 

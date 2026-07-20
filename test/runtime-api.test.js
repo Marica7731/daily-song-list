@@ -75,19 +75,31 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(songTitleSearch.totalOccurrenceCount, 2);
     assert.equal(songTitleSearch.records[0].title, "Song One");
     assert.equal(songTitleSearch.records[0].count, 2);
-    assert.equal(songTitleSearch.records[0].matchedBySource, true);
-    assert.equal(songTitleSearch.records[0].globalCount, 2);
+    assert.equal(songTitleSearch.records[0].matchedBySource, undefined);
+    assert.equal(songTitleSearch.records[0].globalCount, undefined);
 
     const channelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&pageSize=5`);
     assert.equal(channelSongSearch.searchScope, "all");
-    assert.equal(channelSongSearch.totalCount, 3);
-    assert.equal(channelSongSearch.totalOccurrenceCount, 3);
-    assert.deepEqual(channelSongSearch.records.map((record) => record.title), ["Song One", "Song Three", "Song Two"]);
-    assert.equal(channelSongSearch.records[0].count, 1);
-    assert.equal(channelSongSearch.records[0].globalCount, 2);
-    assert.equal(channelSongSearch.records[0].matchedBySource, true);
-    assert.equal(channelSongSearch.records[0].occurrences.length, 1);
-    assert.equal(channelSongSearch.records[0].occurrences[0].item.channelName, "Alpha Ch.");
+    assert.equal(channelSongSearch.totalCount, 0);
+    assert.equal(channelSongSearch.totalOccurrenceCount, 0);
+    assert.deepEqual(channelSongSearch.records, []);
+
+    const scopedChannelSourceSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchScope=channel&pageSize=5`);
+    assert.equal(scopedChannelSourceSongSearch.searchScope, "channel");
+    assert.equal(scopedChannelSourceSongSearch.totalCount, 3);
+    assert.equal(scopedChannelSourceSongSearch.totalOccurrenceCount, 3);
+    assert.deepEqual(scopedChannelSourceSongSearch.records.map((record) => record.title), ["Song One", "Song Three", "Song Two"]);
+    assert.equal(scopedChannelSourceSongSearch.records[0].count, 1);
+    assert.equal(scopedChannelSourceSongSearch.records[0].globalCount, 2);
+    assert.equal(scopedChannelSourceSongSearch.records[0].matchedBySource, true);
+    assert.equal(scopedChannelSourceSongSearch.records[0].occurrences.length, 1);
+    assert.equal(scopedChannelSourceSongSearch.records[0].occurrences[0].item.channelName, "Alpha Ch.");
+
+    const scopedAllSourceSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchScope=source&pageSize=5`);
+    assert.equal(scopedAllSourceSongSearch.searchScope, "source");
+    assert.equal(scopedAllSourceSongSearch.totalCount, 3);
+    assert.equal(scopedAllSourceSongSearch.totalOccurrenceCount, 3);
+    assert.deepEqual(scopedAllSourceSongSearch.records.map((record) => record.title), ["Song One", "Song Three", "Song Two"]);
 
     const scopedChannelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchScope=song&pageSize=5`);
     assert.equal(scopedChannelSongSearch.searchScope, "song");
@@ -95,7 +107,7 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(scopedChannelSongSearch.totalOccurrenceCount, 0);
     assert.deepEqual(scopedChannelSongSearch.records, []);
 
-    const andSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha%20AND%20Three&pageSize=5`);
+    const andSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Song%20AND%20Three&pageSize=5`);
     assert.equal(andSongSearch.totalCount, 1);
     assert.equal(andSongSearch.records[0].title, "Song Three");
 
@@ -107,10 +119,16 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(escapedWildcardSearch.totalCount, 0);
 
     const videoTitleSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Morning&pageSize=5`);
-    assert.equal(videoTitleSongSearch.totalCount, 2);
+    assert.equal(videoTitleSongSearch.totalCount, 0);
+
+    const scopedVideoTitleSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Morning&searchScope=video&pageSize=5`);
+    assert.equal(scopedVideoTitleSongSearch.totalCount, 2);
 
     const channelSongIndexSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songIndex&q=Alpha&pageSize=5`);
-    assert.equal(channelSongIndexSearch.totalCount, 3);
+    assert.equal(channelSongIndexSearch.totalCount, 0);
+
+    const scopedChannelSongIndexSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songIndex&q=Alpha&searchScope=channel&pageSize=5`);
+    assert.equal(scopedChannelSongIndexSearch.totalCount, 3);
 
     const vtubers = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&pageSize=5`);
     assert.equal(vtubers.totalCount, 3);

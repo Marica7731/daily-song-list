@@ -205,7 +205,9 @@ test("delayed trend diffs update visible badges without rerendering the list for
   const normalizeBody = functionBody("function normalizeTrendStateForRuntime");
   assert.match(normalizeBody, /state\.trend = "all"/u);
   assert.match(normalizeBody, /state\.queryDraft = \{ \.\.\.state\.queryDraft, trend: "all" \}/u);
-  assert.match(functionBody("function updateQueryAvailability"), /API模式暂不支持趋势筛选/u);
+  const availabilityBody = functionBody("function updateQueryAvailability");
+  assert.match(availabilityBody, /els\.trendFilterGroup\.hidden = state\.runtimeApi\.available/u);
+  assert.doesNotMatch(availabilityBody, /API模式暂不支持趋势筛选/u);
   assert.match(functionBody("async function loadRankDiffForRange"), /if \(state\.runtimeApi\.available\) return false/u);
   assert.match(functionBody("async function filterRequestIndexEntries"), /!state\.runtimeApi\.available && filters\.trend/u);
 
@@ -286,10 +288,11 @@ test("query overlay opens before suggestions and result preview work", () => {
   assert.ok(suggestionBody.indexOf("if (!hasQuery) return") < suggestionBody.indexOf("buildSearchSuggestions"));
   assert.match(appSource, /const QUERY_SUGGESTION_SCAN_LIMIT = 360;/u);
   const shellBody = functionBody("function prepareQueryPreviewShell");
-  assert.match(shellBody, /els\.queryResultPreview\.textContent = "计算中"/u);
-  assert.match(shellBody, /els\.applyQueryButton\.disabled = true;[\s\S]*els\.applyQueryButton\.textContent = "正在计算"/u);
+  assert.match(shellBody, /els\.queryResultPreview\.textContent = "可查看结果"/u);
+  assert.match(shellBody, /els\.applyQueryButton\.disabled = false;[\s\S]*els\.applyQueryButton\.textContent = "查看结果"/u);
+  assert.doesNotMatch(shellBody, /正在计算|查看 \$\{cached\}/u);
   const previewBody = functionBody("async function renderQueryDraftPreview");
-  assert.match(previewBody, /resolveQueryDraftResultCount\(draft, \{ signal: options\.signal \}\)/u);
+  assert.doesNotMatch(previewBody, /resolveQueryDraftResultCount\(draft/u);
   assert.doesNotMatch(previewBody, /const count = queryDraftResultCount\(draft\)/u);
   const resolveBody = functionBody("async function resolveQueryDraftResultCount");
   assert.match(resolveBody, /canUseRequestRuntime\(state\.range\)[\s\S]*requestQueryDraftResultCount\(draft, options\)/u);

@@ -163,16 +163,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             """,
             [*params, page_size, offset],
         ).fetchall()
-        records = [
-            decode_all_field_matched_row(conn, row, q, range_id)
-            if q and search_scope == "all" and view in {"songs", "songIndex", "artists", "vsingerSongs"} and row["detail_key"]
-            else decode_row(row)
-            for row in rows
-        ]
-        if q and search_scope == "all" and view in {"songs", "songIndex", "artists", "vsingerSongs"} and total <= page_size:
-            totals = dict(totals)
-            totals["total_occurrences"] = sum(int(record.get("count") or 0) for record in records)
-            totals["total_videos"] = sum(int(record.get("videoCount") or 0) for record in records)
+        records = [decode_row(row) for row in rows]
     return {
         "schemaVersion": 1,
         "rangeId": range_id,
@@ -471,6 +462,8 @@ def search_fields_for_view(view: str, scope: str) -> list[str]:
         "video": ["lower(search_text)", "lower(title)"],
         "source": ["lower(search_text)"],
     }[scope]
+    if scope == "all" and view in {"songs", "songIndex", "artists", "vsingerSongs"}:
+        candidates = ["lower(title)", "lower(artist)", "lower(name)"]
     if view == "artists" and scope in {"song", "title"}:
         candidates = ["lower(name)"]
     if view == "vtubers" and scope in {"song", "title", "artist"}:
