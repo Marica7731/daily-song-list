@@ -77,7 +77,7 @@ jobs:
             echo "::error::could not resolve expected app asset from index.html"
             exit 1
           fi
-          body="$(curl -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/index.html?probe=${EXPECTED_SHA}")"
+          body="$(curl -A 'Mozilla/5.0' -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/index.html?probe=${EXPECTED_SHA}")"
           if ! grep -q "${expected_app}" <<< "${body}"; then
             echo "::error::deployed index does not reference expected app asset"
             exit 1

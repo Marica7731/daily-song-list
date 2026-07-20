@@ -56,6 +56,19 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            assets
+            config
+            data/latest.json
+            data/status.json
+            data/external
+            deploy
+            package.json
+            scripts
+            server
+            test/runtime-api.test.js
+            test/runtime-db.test.js
 
       - name: Resolve deploy revision
         id: revision
