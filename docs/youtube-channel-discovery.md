@@ -162,6 +162,8 @@ For each channel, record:
 - Accepted increment: accepted JSON path and `CODEX_CHANNEL_DISCOVERY_INCREMENT_OK` read/accepted/skipped/occurrence counts.
 - After import: the same `view=videos` and `view=vtubers` API searches after the accepted increment is in the SQLite build, including total deltas from baseline and representative top records.
 
+Do not mark a requested source as skipped just because the current online API already has a few videos or occurrences. A source can be skipped only when there is explicit coverage evidence from the VSinger Moment backfill or from a manually reviewed import that is complete for that source. The skip note must name that evidence and its coverage; online API samples such as `videos=2` or `occurrences=32` are insufficient and should trigger a channel discovery rerun instead.
+
 Use this table shape for each reviewed channel:
 
 | Channel | Baseline API result | Discovery elapsed / candidates / usable videos / occurrences | Accepted increment result | After-import API result |

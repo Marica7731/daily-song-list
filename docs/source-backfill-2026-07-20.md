@@ -2,6 +2,8 @@
 
 This run is a scoped YouTube source backfill, not a full refresh of every channel on the site. The completed wave covers the 14 originally requested sources plus the user-added `Tamamachi_Pue` and `asuyumekanae`, 16 sources total. A later 16-source batch is recorded at the end of this document as queued follow-up work.
 
+Skipped-source correction: the earlier wave tables used online API samples as skipped evidence for some channels. That is not a valid skipped standard. A requested source is skipped only when VSinger Moment already covers it or when a manually reviewed import is complete and verifiable for that source. Online API rows with a small `videoCount` or `occurrenceCount` are not enough; those sources must be rerun through channel discovery.
+
 ## Branch and inputs
 
 - Clone: `D:\Projects\daily_song_list_worker_source_backfill_20260720`
@@ -45,6 +47,24 @@ Online skipped evidence was refreshed from `https://ytb-song-rank.culua.com/api/
 | `https://www.youtube.com/@HoshiHo_HsH` | skipped | already online: videos 2; occurrences 65; top video `3EqUkBPOVrY`; sample publishedTimestamp 2/2 |
 | `https://www.youtube.com/@Tamamachi_Pue` | imported | candidates 58; inspected 58; accepted videos 40; accepted occurrences 452; unique songs 360; raw publishedAt 58/58; detail publishedTimestamp 40/40; occurrence time 452/452; reachedEnd true |
 | `https://www.youtube.com/@asuyumekanae` | imported | sharded across local, VPS3, and VPS5. candidates 456; inspected 445; shard usable videos 282 before duplicate removal; accepted videos 188; accepted occurrences 3,660; unique songs 1,374; raw publishedAt 456/456; detail publishedTimestamp 282/282; occurrence time 3,660/3,660; reachedEnd true |
+
+## Skipped-source rerun batch 1
+
+Batch 1 corrects six first-wave rows that were previously marked skipped from weak online API evidence. All six were rerun locally in `D:\Projects\daily_song_list_worker_skipped_source_rerun_20260720` on branch `codex/skipped-source-rerun-20260720`; no VPS was used for this batch.
+
+- Accepted increment: `data/external/youtube-channel-discovery/accepted/2026-07-20-skipped-source-rerun-batch1.json`
+- Increment totals: 6 discovery input dirs, 555 video details read, 555 accepted videos, 8,039 accepted occurrences, 0 duplicate video IDs, 0 regression skips.
+- Time coverage in accepted increment: video `publishedTimestamp` 555/555; occurrence `time` or `seconds` 8,039/8,039.
+- Superseded skipped evidence: the old `already online` rows for the six sources below should be ignored after this batch.
+
+| Source | Status | Evidence |
+| --- | --- | --- |
+| `https://www.youtube.com/@karakurinne` | imported | candidates 24; inspected 24; accepted videos 22; accepted occurrences 224; unique songs 200; raw publishedAt 24/24; detail publishedTimestamp 22/22; occurrence time 224/224; reachedEnd true |
+| `https://www.youtube.com/@Otokado_Ruki` | imported | candidates 227; inspected 227; accepted videos 179; accepted occurrences 1,933; unique songs 769; raw publishedAt 227/227; detail publishedTimestamp 179/179; occurrence time 1,933/1,933; reachedEnd true |
+| `https://www.youtube.com/@itk_tks` | imported | candidates 319; inspected 319; accepted videos 281; accepted occurrences 4,619; unique songs 701; raw publishedAt 319/319; detail publishedTimestamp 281/281; occurrence time 4,619/4,619; reachedEnd true |
+| `https://www.youtube.com/@Stratia113` | imported | candidates 19; inspected 19; accepted videos 19; accepted occurrences 144; unique songs 141; raw publishedAt 19/19; detail publishedTimestamp 19/19; occurrence time 144/144; reachedEnd true |
+| `https://www.youtube.com/@perucia_ten` | imported | candidates 8; inspected 8; accepted videos 7; accepted occurrences 82; unique songs 78; raw publishedAt 8/8; detail publishedTimestamp 7/7; occurrence time 82/82; reachedEnd true |
+| `https://www.youtube.com/@HoshiHo_HsH` | imported | candidates 59; inspected 59; accepted videos 47; accepted occurrences 1,037; unique songs 864; raw publishedAt 59/59; detail publishedTimestamp 47/47; occurrence time 1,037/1,037; reachedEnd true |
 
 ## Runtime DB verification
 
