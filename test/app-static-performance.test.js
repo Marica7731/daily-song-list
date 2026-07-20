@@ -166,9 +166,18 @@ test("artist rank song details share inline source model and append remaining so
   assert.match(toggleSourceBody, /closeSiblingArtistSongSources\(section\)/u);
 
   const toggleLimitBody = functionBody("function toggleArtistSongLimit");
-  assert.match(toggleLimitBody, /const nextVisible = Math\.min\(songGroups\.length, current \+ ARTIST_SONG_GROUP_BATCH_SIZE\)/u);
+  assert.match(toggleLimitBody, /const nextVisible = Math\.min\(songGroups\.length, current \+ artistSongBatchSize\(drawer\)\)/u);
   assert.match(toggleLimitBody, /appendArtistSongGroupRange\(drawer, songGroups, current, nextVisible\)/u);
   assert.doesNotMatch(toggleLimitBody, /replaceChildren/u);
+});
+
+test("VTuber song details use smaller first render and filter dirty preview titles", () => {
+  assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 12;/u);
+  assert.match(functionBody("function artistSongInitialLimit"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_INITIAL_LIMIT/u);
+  assert.match(functionBody("function artistSongBatchSize"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_BATCH_SIZE/u);
+  assert.match(functionBody("function vtuberSongPreview"), /cleanVtuberSongEntries\(sortedCountEntries\(record\.songs\)\)/u);
+  assert.match(functionBody("function isDirtyVtuberPreviewTitle"), /op\|ed\|end\|opening\|ending/u);
 });
 
 test("delayed trend diffs update visible badges without rerendering the list for all trend", () => {

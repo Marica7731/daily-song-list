@@ -31,6 +31,8 @@ const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
 const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
+const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;
+const VTUBER_SONG_GROUP_BATCH_SIZE = 12;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
 const SOURCE_INLINE_LIMITS = {
   mobile: 2,
@@ -5784,7 +5786,7 @@ function artistMeta(record) {
 }
 
 function vtuberMeta(record) {
-  const songs = sortedCountEntries(record.songs);
+  const songs = cleanVtuberSongEntries(sortedCountEntries(record.songs));
   return {
     primary: songs.length ? songs.slice(0, 3).map(formatCountEntry).join("、") : `${record.songs.size} 首歌曲`,
     missingPrimary: false,
@@ -7090,10 +7092,19 @@ function artistRenderedSongCount(drawer) {
 
 function artistVisibleSongCount(drawer, total) {
   const parsed = Number.parseInt(drawer.dataset.visibleArtistSongs || "", 10);
-  const requested = Number.isFinite(parsed) && parsed > 0 ? parsed : ARTIST_SONG_GROUP_INITIAL_LIMIT;
-  const visibleCount = Math.min(total, Math.max(ARTIST_SONG_GROUP_INITIAL_LIMIT, requested));
+  const initialLimit = artistSongInitialLimit(drawer);
+  const requested = Number.isFinite(parsed) && parsed > 0 ? parsed : initialLimit;
+  const visibleCount = Math.min(total, Math.max(initialLimit, requested));
   drawer.dataset.visibleArtistSongs = String(visibleCount);
   return visibleCount;
+}
+
+function artistSongInitialLimit(drawer) {
+  return drawer?.dataset?.sourceMode === "vtuber" ? VTUBER_SONG_GROUP_INITIAL_LIMIT : ARTIST_SONG_GROUP_INITIAL_LIMIT;
+}
+
+function artistSongBatchSize(drawer) {
+  return drawer?.dataset?.sourceMode === "vtuber" ? VTUBER_SONG_GROUP_BATCH_SIZE : ARTIST_SONG_GROUP_BATCH_SIZE;
 }
 
 function appendArtistSongGroupRange(drawer, songGroups, start, end) {
@@ -7188,7 +7199,7 @@ function syncArtistSongMoreButton(drawer, visibleCount, totalCount) {
     return null;
   }
   const remaining = totalCount - visibleCount;
-  const batch = Math.min(ARTIST_SONG_GROUP_BATCH_SIZE, remaining);
+  const batch = Math.min(artistSongBatchSize(drawer), remaining);
   if (!more) {
     more = document.createElement("button");
     more.className = "artist-song-more";
@@ -7418,7 +7429,7 @@ function toggleArtistSongLimit(row) {
   const songGroups = row._artistSongGroups || row._getArtistSongGroups?.() || [];
   row._artistSongGroups = songGroups;
   const current = artistRenderedSongCount(drawer);
-  const nextVisible = Math.min(songGroups.length, current + ARTIST_SONG_GROUP_BATCH_SIZE);
+  const nextVisible = Math.min(songGroups.length, current + artistSongBatchSize(drawer));
   drawer.dataset.visibleArtistSongs = String(nextVisible);
   const firstNewGroup = appendArtistSongGroupRange(drawer, songGroups, current, nextVisible);
   syncArtistSongMoreButton(drawer, nextVisible, songGroups.length);
@@ -7783,7 +7794,21 @@ function artistSongPreview(record) {
 }
 
 function vtuberSongPreview(record) {
-  return artistSongPreview(record);
+  return cleanVtuberSongEntries(sortedCountEntries(record.songs))
+    .slice(0, 2)
+    .map((entry) => entry.name);
+}
+
+function cleanVtuberSongEntries(entries) {
+  return (entries || []).filter((entry) => !isDirtyVtuberPreviewTitle(entry?.name));
+}
+
+function isDirtyVtuberPreviewTitle(value) {
+  const normalized = String(value || "")
+    .trim()
+    .toLocaleLowerCase();
+  if (!normalized) return true;
+  return /^(?:op|ed|end|opening|ending|オープニング|エンディング|エンドカード|intro|outro|start|starting|開始|歌唱開始|歌唱開始時間|終了|セットリスト|セトリ|タイムスタンプ|曲名)(?:[\s,，、.．:：;；!！?？\-ー_・･/／\\|｜（）()［\]\[\]【】「」『』].*)?$/iu.test(normalized);
 }
 
 function getArtistSongGroups(record) {

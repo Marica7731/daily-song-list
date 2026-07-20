@@ -1252,12 +1252,8 @@ mark {
 }
 
 .vtuber-title-line {
-  display: grid;
   grid-area: title;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
+  display: contents;
 }
 
 .vtuber-title-line .rank-title {
@@ -1265,6 +1261,8 @@ mark {
 }
 
 .vtuber-collected-badge {
+  grid-area: badge;
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   min-height: 20px;
@@ -1282,8 +1280,10 @@ mark {
   grid-template-columns: 44px minmax(0, 1fr);
   grid-template-areas:
     "image title"
+    "image badge"
     "image subline";
   column-gap: 10px;
+  row-gap: 2px;
   align-items: center;
 }
 
@@ -3029,13 +3029,10 @@ mark {
   }
 
   .vtuber-title-line {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 3px;
-    align-items: start;
+    display: contents;
   }
 
   .vtuber-collected-badge {
-    justify-self: start;
     min-height: 18px;
     padding-inline: 6px;
     font-size: 10.5px;
@@ -3043,7 +3040,13 @@ mark {
 
   .rank-row-vtuber .rank-content {
     grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-areas:
+      "image title"
+      "image badge"
+      "image subline";
     column-gap: 7px;
+    row-gap: 2px;
+    align-items: center;
   }
 
   .vtuber-display-image {
@@ -4235,6 +4238,7 @@ mark {
   .rank-row-vtuber .rank-content {
     grid-template-columns: 34px minmax(0, 1fr);
     column-gap: 6px;
+    row-gap: 2px;
   }
 
   .vtuber-display-image {

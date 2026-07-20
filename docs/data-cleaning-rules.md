@@ -18,7 +18,7 @@ Rules in this document apply to parsed song fields: `title`, `artist`, `raw`, an
 
 Unknown-artist section labels are rejected by parser and curation rules:
 
-- Exact or normalized labels: `ED`, `OP`, `END`, `Start`, `START`, `Opening`, `opening`, `Ending`, `ending`, `Intro`, `Outro`, `open`, `OPEN`, `Set List`, `Setlist`, `セットリスト`, `セトリ`, `タイムスタンプ`, `曲名`.
+- Exact or normalized labels: `ED`, `OP`, `END`, `Start`, `START`, `Opening`, `opening`, `Ending`, `ending`, `オープニング`, `エンディング`, `エンドカード`, `Intro`, `Outro`, `open`, `OPEN`, `Set List`, `Setlist`, `セットリスト`, `セトリ`, `タイムスタンプ`, `曲名`.
 - Stream lifecycle labels: `開始`, `歌唱開始`, `歌唱開始時間`, `歌唱開始時刻`, `配信開始`, `配信スタート`, `待機画面スタート`, `Start Stream`.
 - Section-marker rows with descriptor fields are rejected when both sides are non-song metadata, for example `セットリスト / 歌唱開始時間` and `ED / お遊戯あり`.
 - Activity markers already in the rule file remain scoped to unknown-artist rows: `自己紹介`, `声入り`, `挨拶`, `スパチャ読み`, and related rows.

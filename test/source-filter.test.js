@@ -68,6 +68,9 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "曲終わり", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "opening", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "END", artist: "エンドカード" }), true);
+  assert.equal(isBlockedSongEntry({ title: "オープニング", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "エンディング", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "歌唱開始時間", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "セットリスト", artist: "歌唱開始時間" }), true);
   assert.equal(isBlockedSongEntry({ title: "セトリ", artist: "Set List♬" }), true);
