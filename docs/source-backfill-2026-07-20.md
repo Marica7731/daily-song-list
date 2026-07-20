@@ -66,6 +66,26 @@ Batch 1 corrects six first-wave rows that were previously marked skipped from we
 | `https://www.youtube.com/@perucia_ten` | imported | candidates 8; inspected 8; accepted videos 7; accepted occurrences 82; unique songs 78; raw publishedAt 8/8; detail publishedTimestamp 7/7; occurrence time 82/82; reachedEnd true |
 | `https://www.youtube.com/@HoshiHo_HsH` | imported | candidates 59; inspected 59; accepted videos 47; accepted occurrences 1,037; unique songs 864; raw publishedAt 59/59; detail publishedTimestamp 47/47; occurrence time 1,037/1,037; reachedEnd true |
 
+## Skipped-source rerun batch 2
+
+Batch 2 continues the skipped-source correction with complete local manifests for five more sources. `delutaya` hit `TypeError: fetch failed` during watch-page inspection and is intentionally not included in this accepted increment. `akari0415` and `nanashi_77shi` were not started in this batch.
+
+- Accepted increment: `data/external/youtube-channel-discovery/accepted/2026-07-20-skipped-source-rerun-batch2.json`
+- Increment totals: 5 discovery input dirs, 539 usable video details read, 537 accepted videos, 4,824 accepted occurrences, 2 regression skips.
+- Time coverage in accepted increment: video `publishedTimestamp` 537/537; occurrence `time` or `seconds` 4,824/4,824.
+- Regression skips: 2 videos were skipped because existing catalog data had richer song lists than the refreshed discovery result.
+
+| Source | Status | Evidence |
+| --- | --- | --- |
+| `https://www.youtube.com/@nemgorochan` | imported | manifest candidates 402; inspected 402; usable videos 167; manifest occurrences 1,681; accepted videos 167; accepted occurrences 1,679; unique songs 795; accepted publishedTimestamp 167/167; accepted occurrence time 1,679/1,679; reachedEnd true |
+| `https://www.youtube.com/@kohigashihitona` | imported | manifest candidates 199; inspected 199; usable videos 185; manifest occurrences 1,738; accepted videos 184; accepted occurrences 1,728; unique songs 851; accepted publishedTimestamp 184/184; accepted occurrence time 1,728/1,728; reachedEnd true |
+| `https://www.youtube.com/@TsumugiCarla` | imported | manifest candidates 193; inspected 193; usable videos 140; accepted videos 140; accepted occurrences 1,126; unique songs 322; accepted publishedTimestamp 140/140; accepted occurrence time 1,126/1,126; reachedEnd true |
+| `https://www.youtube.com/@HONKTHEHORN_OFFICIAL` | imported | manifest candidates 22; inspected 22; usable videos 17; accepted videos 17; accepted occurrences 164; unique songs 132; accepted publishedTimestamp 17/17; accepted occurrence time 164/164; reachedEnd true |
+| `https://www.youtube.com/@Mei-Mei2024` | imported | manifest candidates 90; inspected 90; usable videos 30; manifest occurrences 129; accepted videos 29; accepted occurrences 127; unique songs 114; accepted publishedTimestamp 29/29; accepted occurrence time 127/127; reachedEnd true |
+| `https://www.youtube.com/@delutaya` | pending | checkpoint exists; latest run stopped at `TypeError: fetch failed`; not exported and not counted as imported |
+| `https://www.youtube.com/@akari0415` | pending | not started in this skipped-source rerun branch |
+| `https://www.youtube.com/@nanashi_77shi` | pending | not started in this skipped-source rerun branch |
+
 ## Runtime DB verification
 
 The before/after DBs are YouTube-only builds with `--no-vsinger`.
