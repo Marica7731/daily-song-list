@@ -86,6 +86,21 @@ Batch 2 continues the skipped-source correction with complete local manifests fo
 | `https://www.youtube.com/@akari0415` | pending | not started in this skipped-source rerun branch |
 | `https://www.youtube.com/@nanashi_77shi` | pending | not started in this skipped-source rerun branch |
 
+## Skipped-source rerun batch 3
+
+Batch 3 resolves the remaining three skipped-source rerun gaps. Local YouTube requests failed for these channels with `fetch failed`, so the discovery pass was run on non-culua, non-rainyun `vps-jp` and the completed artifacts were copied back into the local clone before exporting the increment.
+
+- Accepted increment: `data/external/youtube-channel-discovery/accepted/2026-07-20-skipped-source-rerun-batch3.json`
+- Increment totals: 3 discovery input dirs, 157 usable video details read, 156 accepted videos, 1,689 accepted occurrences, 1 regression skip.
+- Time coverage in accepted increment: video `publishedTimestamp` 156/156; occurrence `time` or `seconds` 1,689/1,689.
+- VPS cleanup: `vps-jp` removed `/opt/ytb-song-rank-skipped-source-rerun-20260720-vpsjp`, `/tmp/run_remote_skipped_source_final_vpsjp.sh`, and `/tmp/skipped-source-rerun-final-vpsjp.tar.gz`; cleanup marker `REMOTE_CLEANUP_OK`; final `df -h /`: `/dev/sda1 99G 16G 83G 17% /`.
+
+| Source | Status | Evidence |
+| --- | --- | --- |
+| `https://www.youtube.com/@delutaya` | imported | manifest candidates 105; inspected 105; usable videos 101; manifest occurrences 1,125; accepted videos 100; accepted occurrences 1,118; unique songs 592; accepted publishedTimestamp 100/100; accepted occurrence time 1,118/1,118; reachedEnd true |
+| `https://www.youtube.com/@akari0415` | imported | manifest candidates 56; inspected 56; accepted videos 20; accepted occurrences 91; unique songs 89; accepted publishedTimestamp 20/20; accepted occurrence time 91/91; reachedEnd true |
+| `https://www.youtube.com/@nanashi_77shi` | imported | manifest candidates 47; inspected 47; usable videos 36; accepted videos 36; accepted occurrences 480; unique songs 382; accepted publishedTimestamp 36/36; accepted occurrence time 480/480; reachedEnd true |
+
 ## Runtime DB verification
 
 The before/after DBs are YouTube-only builds with `--no-vsinger`.
