@@ -595,11 +595,18 @@
     for (const titleArtistKey of keys.titleArtistKeys) {
       if (lookup.titleArtistKeys.has(titleArtistKey)) return true;
     }
+    if (isMomentOnlySongSearchCandidate(song, keys)) return false;
     for (const titleKey of keys.titleKeys) {
       if (lookup.titleKeys.has(titleKey)) return true;
       if (lookup.combinedTitleArtistKeys?.has(titleKey)) return true;
     }
     return false;
+  }
+
+  function isMomentOnlySongSearchCandidate(song, keys) {
+    if (keys.titleArtistKeys.size > 0) return false;
+    if (!isUnknownArtistKey(normalizeSongSearchText(song?.artist))) return false;
+    return [...keys.titleKeys].some((titleKey) => titleKey === "moment");
   }
 
   function songSearchKeys(song) {
@@ -963,13 +970,16 @@
     const rows = [];
     const seen = new Set();
     for (const group of groupOccurrencesByVideo(occurrences)) {
-      const item = group.item || group.occurrences?.[0]?.item || {};
-      const videoId = cleanText(item.videoId || group.videoId);
-      const seconds = validSeconds(group.firstSeconds);
-      if (!videoId || seconds === null || seen.has(videoId)) continue;
-      seen.add(videoId);
-      const channelName = cleanText(item.channelName || group.channelName) || "未知频道";
-      rows.push(`${channelName} https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${Math.floor(seconds)}s`);
+      for (const occurrence of group.occurrences || []) {
+        const item = occurrence.item || group.item || {};
+        const videoId = cleanText(item.videoId || group.videoId);
+        const seconds = validSeconds(occurrence.song?.seconds);
+        const key = `${videoId}::${seconds}`;
+        if (!videoId || seconds === null || seen.has(key)) continue;
+        seen.add(key);
+        const channelName = cleanText(item.channelName || group.channelName) || "未知频道";
+        rows.push(`${channelName} https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${Math.floor(seconds)}s`);
+      }
     }
     return rows.join("\n");
   }
@@ -1007,9 +1017,13 @@
     }
     if (mode === "vtuber") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
+      const occurrenceCount = Math.max(0, Number(options.occurrenceCount ?? options.total) || 0);
+      const videoCount = Math.max(0, Number(options.videoCount) || 0);
       return {
-        text: isExpanded ? "收起" : `${songCount}首曲目`,
-        ariaLabel: isExpanded ? "收起该频道曲目" : `查看该频道的 ${songCount} 首歌曲`,
+        text: isExpanded ? `收起 · ${occurrenceCount}次歌唱 / ${songCount}首歌 / ${videoCount}个视频` : `${songCount}首歌`,
+        ariaLabel: isExpanded
+          ? `收起该频道曲目，当前频道共 ${occurrenceCount} 次歌唱、${songCount} 首歌、${videoCount} 个视频`
+          : `查看该频道的 ${songCount} 首歌`,
       };
     }
 

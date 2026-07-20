@@ -1881,15 +1881,32 @@ mark {
 
 .artist-song-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
   gap: var(--space-2);
   align-items: center;
   min-width: 0;
 }
 
+.artist-song-thumb {
+  display: block;
+  width: 72px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-thumbnail);
+  background: #e4e7ec;
+}
+
+.artist-song-thumb-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .artist-song-title-wrap {
-  display: inline-flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, max-content) auto;
+  align-items: baseline;
   gap: var(--space-2);
   min-width: 0;
 }
@@ -1924,6 +1941,43 @@ mark {
   justify-content: flex-end;
   gap: var(--space-2);
   min-width: 0;
+}
+
+.artist-song-artist,
+.artist-song-video-count {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .artist-song-header {
+    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-areas:
+      "thumb title"
+      "thumb meta";
+    align-items: center;
+    gap: 4px 8px;
+  }
+
+  .artist-song-thumb {
+    grid-area: thumb;
+    width: 64px;
+  }
+
+  .artist-song-title-wrap {
+    grid-area: title;
+  }
+
+  .artist-song-summary-actions {
+    grid-area: meta;
+    justify-content: flex-start;
+    gap: 6px;
+  }
 }
 
 .artist-song-source-toggle {

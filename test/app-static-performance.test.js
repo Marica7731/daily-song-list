@@ -123,6 +123,7 @@ test("song and index rows inline source previews and expand to full source lists
 test("source drawer renders complete source lists without rebuilding old cards", () => {
   const appendLinksBody = functionBody("function appendSourceDrawerLinks");
   assert.match(appendLinksBody, /const visibleCount = groups\.length/u);
+  assert.match(appendLinksBody, /attachSetlistItemsToSourceGroups\(groups, drawer\._setlistOccurrences\)/u);
   assert.match(appendLinksBody, /appendSourceGroupRange\(drawer, groups, sourceRenderedGroupCount\(drawer\), visibleCount\)/u);
   assert.doesNotMatch(appendLinksBody, /sourceVisibleGroupCount|syncSourceGroupMoreButton|sourceBatchSizeForMode/u);
 
@@ -140,6 +141,15 @@ test("source drawer renders complete source lists without rebuilding old cards",
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
   assert.match(functionBody("function sourceDetailOccurrencesForContainer"), /mergeCompleteSourceOccurrences/u);
   assert.doesNotMatch(appSource, /function remainingSourceDetailOccurrences/u);
+});
+
+test("copy setlist buttons use all available songs for the same video id", () => {
+  assert.match(appSource, /function buildSetlistItemsByVideo\(occurrences\)/u);
+  assert.match(appSource, /const videoId = cleanText\(item\.videoId\)/u);
+  assert.match(appSource, /target\.songs\.push\(normalizedSong\)/u);
+  assert.match(appSource, /normalizeSetlistSongsForItem\(item\.songs\)/u);
+  assert.match(functionBody("function renderSourceVideoGroup"), /renderCopySetlistIconButton\(group\.setlistItem \|\| videoItem\)/u);
+  assert.match(functionBody("function renderSourceInlineGroup"), /renderCopySetlistButton\(group\.setlistItem \|\| item/u);
 });
 
 test("artist rank song details share inline source model and append remaining songs in batches", () => {

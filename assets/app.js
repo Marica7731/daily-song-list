@@ -544,6 +544,8 @@ function bindEvents() {
       return;
     }
 
+    if (event.target.closest("a[href]")) return;
+
     const clear = event.target.closest("[data-clear-search]");
     if (clear) {
       applyQueryPatch({ q: "" }, { focusTrigger: true });
@@ -622,6 +624,8 @@ function bindEvents() {
   });
 
   els.content.addEventListener("click", (event) => {
+    if (event.target.closest("a[href]")) return;
+
     const sourceCollapse = event.target.closest("[data-collapse-source]");
     if (sourceCollapse) {
       event.preventDefault();
@@ -4045,6 +4049,7 @@ function renderRequestedPageResult(result, options = {}) {
         occurrences: record.occurrences,
         songCount: record.songs.size,
         songPreview: vtuberSongPreview(record),
+        getSongGroups: () => getVtuberSongGroups(record),
         priorityInlineMedia: index < 8,
       }));
     }
@@ -4703,6 +4708,7 @@ function renderVtuberRank(group, rangeCache, selection) {
         occurrences: record.occurrences,
         songCount: record.songs.size,
         songPreview: vtuberSongPreview(record),
+        getSongGroups: () => getVtuberSongGroups(record),
         priorityInlineMedia: index < 8,
       }),
     );
@@ -6043,7 +6049,7 @@ function renderRankSide({
 
   if (mode === "artist" || mode === "vtuber") {
     if (expandable) {
-      side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount }));
+      side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: count, videoCount }));
     } else {
       side.append(renderStaticSideChip(`${songCount}首曲目`));
     }
@@ -6206,7 +6212,7 @@ function renderSourceInlineGroup(group, options = {}) {
   main.append(meta);
   wrapper.append(main);
 
-  wrapper.append(renderCopySetlistButton(item, "复制歌单", "source-inline-copy source-copy-icon ui-chip ui-chip-icon"));
+  wrapper.append(renderCopySetlistButton(group.setlistItem || item, "复制歌单", "source-inline-copy source-copy-icon ui-chip ui-chip-icon"));
   if (extraTimesNode) wrapper.append(extraTimesNode);
   wrapper.title = [firstOccurrence ? formatSeconds(firstSeconds) : "", group.channelName || "未知频道", group.title || item.title || videoId].filter(Boolean).join(" · ");
   wrapper.setAttribute("aria-label", wrapper.title);
@@ -6394,6 +6400,7 @@ function renderSourceDrawer({ mode, occurrences, copyOccurrences = occurrences, 
   drawer._getArtistSongGroups = getSongGroups;
   drawer._sourceOccurrences = occurrences || [];
   drawer._songSourceOccurrences = copyOccurrences || occurrences || [];
+  drawer._setlistOccurrences = copyOccurrences || occurrences || [];
   if (isExpanded) {
     initializeSourceDrawer(drawer, {
       mode,
@@ -6422,7 +6429,9 @@ function appendSourceDrawerContent(drawer, { mode, occurrences, songGroups = [] 
 function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
   drawer._sourceOccurrences = occurrences;
   drawer._songSourceOccurrences = options.copyOccurrences || drawer._songSourceOccurrences || occurrences;
+  drawer._setlistOccurrences = options.setlistOccurrences || drawer._setlistOccurrences || drawer._songSourceOccurrences || occurrences;
   const groups = window.FrontendUtils.groupOccurrencesByVideo(occurrences);
+  attachSetlistItemsToSourceGroups(groups, drawer._setlistOccurrences);
   drawer._sourceGroups = groups;
   if (options.toolbarVariant) drawer.dataset.toolbarVariant = options.toolbarVariant;
   const visibleCount = groups.length;
@@ -6436,6 +6445,49 @@ function appendSourceDrawerLinks(drawer, occurrences, options = {}) {
 
   appendSourceGroupRange(drawer, groups, sourceRenderedGroupCount(drawer), visibleCount);
   appendMobileSourceCollapse(drawer);
+}
+
+function attachSetlistItemsToSourceGroups(groups, setlistOccurrences) {
+  const setlistByVideo = buildSetlistItemsByVideo(setlistOccurrences);
+  for (const group of groups || []) {
+    const videoId = cleanText(group.videoId || group.item?.videoId);
+    if (videoId && setlistByVideo.has(videoId)) group.setlistItem = setlistByVideo.get(videoId);
+  }
+}
+
+function buildSetlistItemsByVideo(occurrences) {
+  const byVideo = new Map();
+  for (const occurrence of occurrences || []) {
+    const item = occurrence?.item || {};
+    const song = occurrence?.song || {};
+    const videoId = cleanText(item.videoId);
+    if (!videoId || !cleanText(song.title)) continue;
+    if (!byVideo.has(videoId)) {
+      byVideo.set(videoId, {
+        ...item,
+        songs: [],
+        _allSongs: [],
+      });
+    }
+    const target = byVideo.get(videoId);
+    const normalizedSong = {
+      ...song,
+      seconds: Number(song.seconds) || 0,
+    };
+    target.songs.push(normalizedSong);
+    target._allSongs.push(normalizedSong);
+  }
+  for (const item of byVideo.values()) {
+    item.songs = normalizeSetlistSongsForItem(item.songs);
+    item._allSongs = item.songs;
+  }
+  return byVideo;
+}
+
+function normalizeSetlistSongsForItem(songs) {
+  return window.FrontendUtils.normalizeSetlistSongs(songs, {
+    isUnknownArtistName: window.RankingUtils.isUnknownArtistName,
+  });
 }
 
 function sourceRenderedGroupCount(drawer) {
@@ -6598,7 +6650,7 @@ function renderSourceVideoGroup(group, options = {}) {
   main.append(extra);
   section.append(main);
 
-  section.append(renderCopySetlistIconButton(videoItem));
+  section.append(renderCopySetlistIconButton(group.setlistItem || videoItem));
   return section;
 }
 
@@ -6722,15 +6774,35 @@ function renderArtistSongGroup(group) {
   header.className = "artist-song-header";
 
   const firstOccurrence = group.occurrences[0];
+  const latestOccurrence = group.latestOccurrence || firstOccurrence;
+  if (latestOccurrence?.item?.videoId) {
+    const thumb = document.createElement("a");
+    thumb.className = "artist-song-thumb source-link";
+    thumb.href = youtubeTimeUrl(latestOccurrence.item.videoId, latestOccurrence.song?.seconds || 0);
+    thumb.target = "_blank";
+    thumb.rel = "noreferrer";
+    thumb.setAttribute("aria-label", `打开最新来源：${group.title}`);
+    thumb.append(
+      createThumbnailImage(latestOccurrence.item, "artist-song-thumb-image", {
+        preferCompact: true,
+        width: 72,
+        height: 40,
+      }),
+    );
+    header.append(thumb);
+  }
+
   const titleWrap = document.createElement("div");
   titleWrap.className = "artist-song-title-wrap";
   const title = document.createElement("a");
   title.className = "artist-song-title";
-  title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
-  title.target = "_blank";
-  title.rel = "noreferrer";
+  if (firstOccurrence) {
+    title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
+    title.target = "_blank";
+    title.rel = "noreferrer";
+  }
   title.textContent = group.title;
-  title.setAttribute("aria-label", `打开歌曲首次来源：${group.title}`);
+  title.setAttribute("aria-label", firstOccurrence ? `打开歌曲首次来源：${group.title}` : `展开歌曲来源：${group.title}`);
   titleWrap.append(title);
 
   if (group.isNiche) {
@@ -6744,27 +6816,46 @@ function renderArtistSongGroup(group) {
   const meta = document.createElement("div");
   meta.className = "artist-song-summary-actions";
 
+  if (group.artistSummary) {
+    const artist = document.createElement("span");
+    artist.className = "artist-song-artist";
+    artist.textContent = group.artistSummary;
+    meta.append(artist);
+  }
+
   const count = document.createElement("span");
   count.className = "artist-song-count";
-  count.textContent = `${group.count}次`;
+  count.textContent = `${group.count}次演唱`;
   meta.append(count);
+
+  if (group.videoCount) {
+    const videoCount = document.createElement("span");
+    videoCount.className = "artist-song-video-count";
+    videoCount.textContent = `${group.videoCount}个视频`;
+    meta.append(videoCount);
+  }
 
   const sources = document.createElement("div");
   sources.className = "artist-song-sources";
-  sources.id = `artist-song-sources-${makeDomId(`${group.key}-${firstOccurrence.item.videoId}`)}`;
+  sources.id = `artist-song-sources-${makeDomId(`${group.key}-${firstOccurrence?.item?.videoId || "deferred"}`)}`;
   sources.dataset.sourceMode = "artist-song";
   sources.dataset.sourceDeferred = "true";
+  if (group.sourceIncomplete) sources.dataset.sourceIncomplete = "true";
   sources.hidden = true;
   section._artistSongSources = sources;
+  const setlistOccurrences = group.setlistOccurrences || group.occurrences;
 
   const sourcePresentation = window.FrontendUtils.sourcePresentationModel(group.occurrences, {
     expanded: false,
     inlineLimit: sourceInlineLimitForMode(),
-    totalVideoCount: group.videoCount,
-    hasExternalDetails: Boolean(sourceDetailPathForRecord(group, group.occurrences)),
+    totalVideoCount: Math.max(Number(group.videoCount) || 0, group.sourceIncomplete ? 1 : 0),
+    hasExternalDetails: Boolean(sourceDetailPathForRecord(group, group.occurrences)) || Boolean(group.sourceIncomplete),
   });
+  attachSetlistItemsToSourceGroups(sourcePresentation.inlineGroups, setlistOccurrences);
   sources._sourceOccurrences = group.occurrences;
   sources._songSourceOccurrences = group.occurrences;
+  sources._setlistOccurrences = setlistOccurrences;
+  if (group.sourceIncomplete) sources._sourceResolver = () => loadVtuberSongSources(group);
   sources._sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
 
   meta.append(renderCopySongLinksIconButton(group.occurrences));
@@ -6990,10 +7081,17 @@ async function toggleArtistSongSource(button) {
   const nextExpanded = sources.hidden;
   if (nextExpanded && isCompactRankMode()) closeSiblingArtistSongSources(section);
   if (nextExpanded && sources.dataset.sourceDeferred === "true") {
-    const sourceOccurrences = await sourceDetailOccurrencesForContainer(sources, sources._sourceOccurrences || []);
+    let sourceOccurrences = await sourceDetailOccurrencesForContainer(sources, sources._sourceOccurrences || []);
+    if (sources._sourceResolver && (sources.dataset.sourceIncomplete === "true" || !sourceOccurrences.length)) {
+      sourceOccurrences = await sources._sourceResolver(sourceOccurrences);
+      sources._songSourceOccurrences = sourceOccurrences;
+      sources._setlistOccurrences = sourceOccurrences;
+      delete sources.dataset.sourceIncomplete;
+    }
     sources._sourceOccurrences = sourceOccurrences;
     appendSourceDrawerLinks(sources, sourceOccurrences, {
       copyOccurrences: sources._songSourceOccurrences || sources._sourceOccurrences || [],
+      setlistOccurrences: sources._setlistOccurrences || sources._songSourceOccurrences || sources._sourceOccurrences || [],
       showToolbar: false,
     });
     delete sources.dataset.sourceDeferred;
@@ -7346,6 +7444,99 @@ function getArtistSongGroups(record) {
   return record._songGroups;
 }
 
+function getVtuberSongGroups(record) {
+  if (!record._songGroups) {
+    const setlistOccurrences = record.occurrences || [];
+    const previewGroups = new Map(buildArtistSongGroups(setlistOccurrences).map((group) => [group.key, group]));
+    const songEntries = sortedCountEntries(record.songs);
+    const groups = songEntries.length
+      ? songEntries.map((entry) => {
+          const previewGroup = previewGroups.get(entry.key);
+          return {
+            key: entry.key,
+            title: entry.name,
+            count: entry.count,
+            isNiche: previewGroup?.isNiche || false,
+            occurrences: previewGroup?.occurrences || [],
+          };
+        })
+      : Array.from(previewGroups.values());
+    record._songGroups = groups.map((group) => enrichVtuberSongGroup(group, setlistOccurrences, record));
+  }
+  return record._songGroups;
+}
+
+function enrichVtuberSongGroup(group, setlistOccurrences, record) {
+  const latestOccurrence = latestOccurrenceByVideoDate(group.occurrences);
+  return {
+    ...group,
+    artistSummary: artistSummaryForOccurrences(group.occurrences),
+    videoCount: uniqueVideoCount(group.occurrences),
+    latestOccurrence,
+    setlistOccurrences,
+    sourceIncomplete: group.occurrences.length < group.count,
+    vtuberRecord: record,
+  };
+}
+
+function artistSummaryForOccurrences(occurrences) {
+  const artists = new Map();
+  for (const { song } of occurrences || []) incrementCount(artists, cleanText(song?.artist));
+  return sortedCountEntries(artists).slice(0, 2).map(formatCountEntry).join("、");
+}
+
+async function loadVtuberSongSources(group) {
+  if (!state.runtimeApi.available || !group?.title) return group.occurrences || [];
+  const params = new URLSearchParams({
+    range: canonicalRangeId(state.range),
+    view: "songs",
+    page: "1",
+    pageSize: "10",
+    q: group.title,
+  });
+  const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, { cache: "no-cache" });
+  const records = Array.isArray(payload?.records) ? payload.records : [];
+  const titleKey = normalizeEntityKey(group.title);
+  const record = records.find((candidate) => normalizeEntityKey(candidate?.title) === titleKey) || records[0];
+  if (!record) return group.occurrences || [];
+  let occurrences = hydrateOccurrences(record.occurrences);
+  const detailPath = sourceDetailPathForRecord(record, occurrences);
+  if (detailPath) {
+    const detailOccurrences = await loadSourceDetailOccurrences(detailPath, cleanText(record.sourceDetailKey));
+    occurrences = window.FrontendUtils.mergeCompleteSourceOccurrences(detailOccurrences, occurrences);
+  }
+  const scoped = occurrences.filter((occurrence) => vtuberOccurrenceMatchesRecord(occurrence, group.vtuberRecord));
+  return scoped.length ? scoped : group.occurrences || [];
+}
+
+function vtuberOccurrenceMatchesRecord(occurrence, record) {
+  const item = occurrence?.item || {};
+  const channelId = cleanText(item.channelId);
+  if (channelId && record?.channelId && channelId === cleanText(record.channelId)) return true;
+  const itemHandle = cleanText(item.channelHandle).replace(/^\/+/, "");
+  const recordHandle = cleanText(record?.channelHandle).replace(/^\/+/, "");
+  if (itemHandle && recordHandle && normalizeEntityKey(itemHandle) === normalizeEntityKey(recordHandle)) return true;
+  const itemName = normalizeEntityKey(item.channelName);
+  if (!itemName) return false;
+  const aliases = [record?.name, record?.channelName, ...(record?.aliases || [])].map(normalizeEntityKey).filter(Boolean);
+  return aliases.includes(itemName);
+}
+
+function latestOccurrenceByVideoDate(occurrences) {
+  return [...(occurrences || [])].sort((a, b) => occurrencePublishedValue(b) - occurrencePublishedValue(a))[0] || null;
+}
+
+function occurrencePublishedValue(occurrence) {
+  const item = occurrence?.item || {};
+  for (const value of [item.publishedTimestamp, item.publishedAt, item.publishedTime, item.catalogFirstSeenAt, item.firstSeenAt]) {
+    const numeric = Number(value);
+    if (Number.isFinite(numeric) && numeric > 0) return numeric;
+    const parsed = Date.parse(String(value || ""));
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return 0;
+}
+
 function trendForRecord(mode, record) {
   return trendForKey(mode, record?.key);
 }
@@ -7394,21 +7585,36 @@ async function copySongSourceLinks(occurrences) {
 
 async function copySongSourceLinksFromButton(button) {
   const group = button.closest(".artist-song-group");
-  const container =
-    button.closest(".rank-row, .index-row, .artist-song-sources") ||
+  const groupSources =
     group?._artistSongSources ||
-    group?.querySelector(".artist-song-sources");
+    group?.querySelector(".artist-song-sources") ||
+    null;
+  const container =
+    button.closest(".artist-song-sources") ||
+    groupSources ||
+    button.closest(".rank-row, .index-row");
   let occurrences =
-    button._sourceOccurrences ||
-    container?._sourceDetailOccurrences ||
-    container?._sourceOccurrences ||
-    container?._songSourceOccurrences ||
+    nonEmptyOccurrences(button._sourceOccurrences) ||
+    nonEmptyOccurrences(container?._sourceDetailOccurrences) ||
+    nonEmptyOccurrences(container?._sourceOccurrences) ||
+    nonEmptyOccurrences(container?._songSourceOccurrences) ||
     [];
   if (container) {
     occurrences = await sourceDetailOccurrencesForContainer(container, occurrences);
+    if (container._sourceResolver && (container.dataset.sourceIncomplete === "true" || !occurrences.length)) {
+      occurrences = await container._sourceResolver(occurrences);
+      container._sourceOccurrences = occurrences;
+      container._songSourceOccurrences = occurrences;
+      container._setlistOccurrences = occurrences;
+      delete container.dataset.sourceIncomplete;
+    }
   }
   button._sourceOccurrences = occurrences || [];
   await copySongSourceLinks(button._sourceOccurrences);
+}
+
+function nonEmptyOccurrences(occurrences) {
+  return Array.isArray(occurrences) && occurrences.length ? occurrences : null;
 }
 
 async function writeClipboardText(text) {

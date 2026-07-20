@@ -88,6 +88,7 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.doesNotMatch(appSource, /查看更多 \$\{remaining\}个来源/u);
   assert.match(appSource, /dataset\.collapseSource = "true"/u);
   assert.match(appSource, /dataset\.copySongLinks = "true"/u);
+  assert.match(appSource, /if \(event\.target\.closest\("a\[href\]"\)\) return/u);
   assert.match(appSource, /buildSongSourceLinksText\(occurrences\)/u);
   assert.match(appSource, /className = "source-drawer-toolbar"/u);
   assert.match(appSource, /renderSourceCollapseButton\(drawer\.id, drawer\.dataset\.sourceMode \|\| "song", "source-collapse-top ui-chip"\)/u);
@@ -116,6 +117,24 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row::before\s*\{[\s\S]*display: none;/u);
   assert.match(cssSource, /\.query-count\[hidden\]\s*\{[\s\S]*display: none;/u);
   assert.doesNotMatch(cssSource, /\.query-trigger\.has-active-query::after/u);
+});
+
+test("VTuber channel drawer renders complete paged song groups with source metadata", () => {
+  assert.match(appSource, /function getVtuberSongGroups\(record\)/u);
+  assert.match(appSource, /getSongGroups: \(\) => getVtuberSongGroups\(record\)/u);
+  assert.match(appSource, /function enrichVtuberSongGroup\(group, setlistOccurrences, record\)/u);
+  assert.match(appSource, /artistSummary: artistSummaryForOccurrences\(group\.occurrences\)/u);
+  assert.match(appSource, /videoCount: uniqueVideoCount\(group\.occurrences\)/u);
+  assert.match(appSource, /latestOccurrenceByVideoDate\(group\.occurrences\)/u);
+  assert.match(appSource, /className = "artist-song-thumb source-link"/u);
+  assert.match(appSource, /className = "artist-song-artist"/u);
+  assert.match(appSource, /className = "artist-song-video-count"/u);
+  assert.match(appSource, /count\.textContent = `\$\{group\.count\}次演唱`/u);
+  assert.match(appSource, /sources\._setlistOccurrences = setlistOccurrences/u);
+  assert.match(appSource, /sources\._sourceResolver = \(\) => loadVtuberSongSources\(group\)/u);
+  assert.match(appSource, /setlistOccurrences: sources\._setlistOccurrences/u);
+  assert.match(cssSource, /\.artist-song-header\s*\{[\s\S]*grid-template-columns: 72px minmax\(0, 1fr\) auto;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-header\s*\{[\s\S]*grid-template-areas:[\s\S]*"thumb title"[\s\S]*"thumb meta"/u);
 });
 
 test("high-density rank and source rules are encoded in css and browser checks", () => {

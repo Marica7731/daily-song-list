@@ -200,12 +200,12 @@ test("artist rank toggle uses unique song count", () => {
 
 test("VTuber channel rank toggle uses unique song count", () => {
   const collapsed = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7 });
-  assert.equal(collapsed.text, "7首曲目");
-  assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌曲");
+  assert.equal(collapsed.text, "7首歌");
+  assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌");
 
-  const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7 });
-  assert.equal(expanded.text, "收起");
-  assert.equal(expanded.ariaLabel, "收起该频道曲目");
+  const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7, occurrenceCount: 9138, videoCount: 432 });
+  assert.equal(expanded.text, "收起 · 9138次歌唱 / 7首歌 / 432个视频");
+  assert.equal(expanded.ariaLabel, "收起该频道曲目，当前频道共 9138 次歌唱、7 首歌、432 个视频");
 });
 
 test("song rank toggle uses video and timestamp counts", () => {
@@ -377,7 +377,7 @@ test("builds whole-video setlist text from original songs", () => {
   );
 });
 
-test("builds same-song source link text from unique source videos", () => {
+test("builds same-song source link text from every unique timestamp", () => {
   const links = buildSongSourceLinksText([
     occurrence("VideoA", "羽海乃ゆき", { seconds: 75, title: "song" }),
     occurrence("VideoA", "Channel A", { seconds: 180, title: "song" }),
@@ -394,6 +394,7 @@ test("builds same-song source link text from unique source videos", () => {
     links,
     [
       "羽海乃ゆき https://www.youtube.com/watch?v=VideoA&t=75s",
+      "Channel A https://www.youtube.com/watch?v=VideoA&t=180s",
       "こは太郎 https://www.youtube.com/watch?v=VideoB&t=12s",
       "未知频道 https://www.youtube.com/watch?v=VideoC&t=9s",
       "中文频道 https://www.youtube.com/watch?v=VideoD&t=120s",
@@ -403,7 +404,7 @@ test("builds same-song source link text from unique source videos", () => {
   assert.match(links, /&t=\d+s/u);
   assert.doesNotMatch(links, /No Time Channel|VideoF/u);
   assert.doesNotMatch(links, /^\d+\.|^- |\[[^\]]+\]\(/um);
-  assert.equal(links.split("\n").length, 5);
+  assert.equal(links.split("\n").length, 6);
   assert.equal(new Set(links.split("\n").map((line) => line.match(/watch\?v=([^&\s]+)&t=(\d+)s/u)?.[1])).size, 5);
   assert.equal(links.endsWith("\n"), false);
 });
@@ -1407,6 +1408,16 @@ test("song-search lookup annotates and filters niche songs", () => {
     ).map(({ song }) => song.title),
     ["rare song"],
   );
+});
+
+test("song-search lookup does not treat Moment-only unknown artist as collected", () => {
+  const lookup = createSongSearchLookup({
+    titleKeys: [normalizeSongSearchText("Moment")],
+    titleArtistKeys: [normalizeSongSearchText("Moment") + "::" + normalizeSongSearchText("KOKIA")],
+  });
+
+  assert.equal(isSongSearchKnown(song("Moment", "未記載"), lookup), false);
+  assert.equal(isSongSearchKnown(song("Moment", "KOKIA"), lookup), true);
 });
 
 test("song-search lookup tolerates list markers and artist text leaked into titles", () => {
