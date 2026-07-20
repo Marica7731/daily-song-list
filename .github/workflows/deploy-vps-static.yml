@@ -69,6 +69,7 @@ jobs:
 
       - name: Verify deployed index
         env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           EXPECTED_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
           set -Eeuo pipefail
@@ -77,8 +78,23 @@ jobs:
             echo "::error::could not resolve expected app asset from index.html"
             exit 1
           fi
-          body="$(curl -A 'Mozilla/5.0' -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/index.html?probe=${EXPECTED_SHA}")"
-          if ! grep -q "${expected_app}" <<< "${body}"; then
-            echo "::error::deployed index does not reference expected app asset"
+          remote_app="$(
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              cd '${REMOTE_PROJECT_DIR}'
+              test \"\$(git rev-parse HEAD)\" = '${EXPECTED_SHA}'
+              grep -o 'assets/app.js?v=[^\"]*' index.html | head -1
+            "
+          )"
+          if [ "${remote_app}" != "${expected_app}" ]; then
+            echo "::error::VPS checkout references ${remote_app}, expected ${expected_app}"
             exit 1
+          fi
+          if body="$(curl -A 'Mozilla/5.0' -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/index.html?probe=${EXPECTED_SHA}")"; then
+            if ! grep -q "${expected_app}" <<< "${body}"; then
+              echo "::error::public index does not reference expected app asset"
+              exit 1
+            fi
+          else
+            echo "::warning::public index probe failed from GitHub runner; VPS checkout verification passed"
           fi
