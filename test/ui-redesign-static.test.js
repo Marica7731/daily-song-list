@@ -17,19 +17,17 @@ function cssBlock(selector) {
 }
 
 test("mobile information architecture exposes one query center and a one-row toolbar", () => {
-  assert.match(indexSource, /id="queryTrigger"[\s\S]*aria-controls="queryDialog"/u);
+  assert.match(indexSource, /id="querySearchForm"[\s\S]*id="queryInput"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"/u);
   assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
   assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /class="[^"]*view-mode[^"]*"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>频道<\/span>/u);
-  assert.match(indexSource, /id="queryDialog"[\s\S]*role="dialog"[\s\S]*aria-labelledby="queryDialogTitle"[\s\S]*搜索与筛选/u);
-  assert.match(indexSource, /id="queryInput"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
+  assert.match(indexSource, /class="query-field-menu-panel"[\s\S]*name="searchField" value="channel"[\s\S]*name="searchField" value="video"[\s\S]*全不选时搜索全部字段/u);
   assert.doesNotMatch(indexSource, /id="searchSuggestions"/u);
   assert.match(indexSource, /id="queryInput" type="search"[\s\S]*id="clearQueryButton"/u);
-  assert.match(cssSource, /\.query-search-section input\[type="search"\]\s*\{[\s\S]*-webkit-appearance: none;[\s\S]*appearance: textfield;/u);
-  assert.match(cssSource, /\.query-search-section input\[type="search"\]::-webkit-search-cancel-button,[\s\S]*\.query-search-section input\[type="search"\]::-webkit-search-decoration,[\s\S]*\.query-search-section input\[type="search"\]::-webkit-search-results-button,[\s\S]*\.query-search-section input\[type="search"\]::-webkit-search-results-decoration\s*\{[\s\S]*display: none;[\s\S]*width: 0;[\s\S]*height: 0;/u);
-  assert.match(cssSource, /\.clear-query-button\s*\{[\s\S]*top: calc\(10px \+ 19px\);[\s\S]*right: 17px;[\s\S]*transform: translateY\(-50%\);/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.clear-query-button\s*\{[\s\S]*top: calc\(8px \+ 18px\);[\s\S]*right: 13px;/u);
+  assert.match(cssSource, /\.query-search-form input\[type="search"\]\s*\{[\s\S]*-webkit-appearance: none;[\s\S]*appearance: textfield;/u);
+  assert.match(cssSource, /\.query-search-form input\[type="search"\]::-webkit-search-cancel-button,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-decoration,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-results-button,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-results-decoration\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /\.query-search-form \.clear-query-button\s*\{[\s\S]*position: static;[\s\S]*width: 28px;[\s\S]*height: 28px;/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
   assert.match(indexSource, /id="activeQueryStrip"/u);
@@ -37,7 +35,7 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /id="status" hidden aria-hidden="true"/u);
   assert.doesNotMatch(indexSource, /class="topbar"|class="topbar-inner"|<h1>Daily Song List<\/h1>|歌曲时间戳排行/u);
   assert.doesNotMatch(indexSource, /class="controls-primary"|class="mobile-toolbar-actions"|class="controls-secondary"/u);
-  assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*class="query-trigger"/u);
+  assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*id="querySearchForm"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/u);
   assert.match(cssSource, /\.bottom-nav-icon-wrap\s*\{[\s\S]*width: 32px;[\s\S]*height: 24px;/u);
@@ -156,16 +154,11 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
   assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: 34px;[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=|id="querySearchPanel"|id="queryFilterPanel"/u);
-  assert.match(indexSource, /class="[^"]*query-search-scope-field[^"]*"[\s\S]*class="[^"]*query-filter-matrix[^"]*"/u);
-  assert.match(indexSource, /id="querySnapshotSummary"/u);
+  assert.match(indexSource, /class="query-field-menu-panel"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"[\s\S]*name="searchField" value="channel"[\s\S]*name="searchField" value="video"/u);
+  assert.match(cssSource, /\.query-field-menu-panel label\.is-selected\s*\{[\s\S]*background: var\(--accent-soft\);/u);
   assert.match(indexSource, /<\/div>\s*<footer class="query-panel-footer">/u);
   assert.doesNotMatch(indexSource, /<\/div>\s*<\/div>\s*<footer class="query-panel-footer">/u);
-  assert.match(indexSource, /class="query-filter-matrix query-form-grid"/u);
-  assert.match(indexSource, /class="query-sort-field" id="metricFilterGroup"/u);
-  assert.match(indexSource, /name="queryMetric" value="songs"/u);
-  assert.match(indexSource, /class="query-field query-compact-field query-context-card page-size-filter"/u);
-  assert.match(indexSource, /class="query-history-section query-context-card"/u);
-  assert.match(indexSource, /class="query-history-heading"[\s\S]*id="queryHistoryHeading"[\s\S]*id="querySnapshotSummary"/u);
+  assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=/u);
   assert.doesNotMatch(indexSource, /recentSearchSection|recentSearches|clearRecentSearchesButton|最近搜索/u);
   assert.doesNotMatch(appSource, /RECENT_SEARCHES_KEY|readRecentSearches|writeRecentSearches|renderRecentSearches/u);
   assert.match(cssSource, /\.query-form-grid\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*gap: var\(--query-grid-gap\);/u);
@@ -353,8 +346,8 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   const songGroupBody = functionBody("function renderArtistSongGroup");
   assert.match(vtuberRankBody, /getSongGroups: \(\) => getArtistSongGroups\(record\)/u);
   assert.match(appSource, /function renderRequestedPageResult[\s\S]*mode: "vtuber"[\s\S]*getSongGroups: \(\) => getArtistSongGroups\(record\)/u);
-  assert.match(appSource, /function completeSongGroupsForDrawer\(occurrences, fallbackGroups = \[\]\)[\s\S]*buildArtistSongGroups\(filterDisplaySongOccurrences\(occurrences \|\| \[\]\)\)/u);
-  assert.match(appSource, /async function setSourceDrawerExpanded[\s\S]*songGroups = completeSongGroupsForDrawer\(visibleOccurrences, songGroups\)/u);
+  assert.match(appSource, /function completeSongGroupsForDrawer\(occurrences, fallbackGroups = \[\], mode = ""\)[\s\S]*buildArtistSongGroups\(filterDisplaySongOccurrences\(occurrences \|\| \[\]\)\)[\s\S]*mode === "vtuber"[\s\S]*completeGroups\.length < fallbackGroups\.length/u);
+  assert.match(appSource, /async function setSourceDrawerExpanded[\s\S]*songGroups = completeSongGroupsForDrawer\(visibleOccurrences, songGroups, mode\)/u);
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
   assert.match(songSourceBody, /sourceDetailPageForContainer\(sources, sources\._sourceOccurrences \|\| \[\]/u);

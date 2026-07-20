@@ -185,9 +185,9 @@ test("artist rank song details share inline source model and append remaining so
   assert.match(functionBody("function renderRequestedPageResult"), /result\.view === "vtuberRank"[\s\S]*getSongGroups: \(\) => getArtistSongGroups\(record\)/u);
 });
 
-test("VTuber song details use smaller first render and filter dirty preview titles", () => {
-  assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;/u);
-  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 6;/u);
+test("VTuber song details use bounded progressive render and filter dirty preview titles", () => {
+  assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = 40;/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 40;/u);
   assert.match(functionBody("function artistSongInitialLimit"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_INITIAL_LIMIT/u);
   assert.match(functionBody("function artistSongBatchSize"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_BATCH_SIZE/u);
   assert.match(functionBody("function vtuberSongPreview"), /sortedDisplaySongEntries\(record\.songs\)/u);
@@ -264,7 +264,7 @@ test("explicit search scopes query text by current view", () => {
   assert.match(functionBody("function queryDraftOccurrences"), /songOccurrenceSearchText\(occurrence, draft\.searchFields\)\.includes\(filterKey\)/u);
 
   const songScopedSearchBody = functionBody("function songOccurrenceSearchText");
-  assert.match(songScopedSearchBody, /if \(!fields\.length\) return normalizeSearch\(\[item\.videoId, item\.title, item\.channelName, item\.keyword, song\.title, song\.artist\]/u);
+  assert.match(songScopedSearchBody, /item\.videoId,[\s\S]*item\.title,[\s\S]*item\.channelName,[\s\S]*item\.channelHandle,[\s\S]*item\.channelId,[\s\S]*item\.keyword,[\s\S]*song\.title,[\s\S]*song\.artist/u);
   assert.match(songScopedSearchBody, /if \(fields\.includes\("title"\)\) parts\.push\(song\.title\)/u);
   assert.match(songScopedSearchBody, /if \(fields\.includes\("artist"\)\) parts\.push\(song\.artist\)/u);
   const collectBody = functionBody("function collectSongOccurrences");

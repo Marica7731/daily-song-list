@@ -31,8 +31,8 @@ const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
 const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
-const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;
-const VTUBER_SONG_GROUP_BATCH_SIZE = 6;
+const VTUBER_SONG_GROUP_INITIAL_LIMIT = 40;
+const VTUBER_SONG_GROUP_BATCH_SIZE = 40;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
 const SOURCE_INLINE_LIMITS = {
   mobile: 2,
@@ -77,6 +77,8 @@ const SEARCH_SCOPES = {
 const SEARCH_FIELDS = {
   title: "歌名",
   artist: "歌手",
+  channel: "频道",
+  video: "视频",
 };
 const DEFAULT_SEARCH_FIELDS = ["title", "artist"];
 const VIEW_RANK_METRIC_ORDER = {
@@ -343,6 +345,7 @@ const els = {
   activeQueryStrip: document.querySelector("#activeQueryStrip"),
   summary: document.querySelector("#summary"),
   content: document.querySelector("#videoList"),
+  querySearchForm: document.querySelector("#querySearchForm"),
   queryTrigger: document.querySelector("#queryTrigger"),
   queryTriggerText: document.querySelector("#queryTriggerText"),
   queryCountBadge: document.querySelector("#queryCountBadge"),
@@ -558,6 +561,12 @@ function bindEvents() {
   });
 
   els.content.addEventListener("click", (event) => {
+    const link = event.target.closest("a[href]");
+    const explicitAction = event.target.closest(
+      "button, [data-copy-setlist], [data-copy-song-links], [data-clear-search], [data-page], [data-source-page], [data-page-size], [data-index-bucket], [data-toggle-artist-songs], [data-toggle-video-songs], [data-toggle-source]",
+    );
+    if (link && (!explicitAction || !link.contains(explicitAction))) return;
+
     const copySetlist = event.target.closest("[data-copy-setlist]");
     if (copySetlist) {
       event.preventDefault();
@@ -727,6 +736,10 @@ function switchView(nextView, options = {}) {
 }
 
 function bindQueryOverlayEvents() {
+  els.querySearchForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
+  });
   els.queryTrigger?.addEventListener("click", () => openQueryOverlay(els.queryTrigger));
   els.cancelQueryButton?.addEventListener("click", () => closeOverlay("query"));
   els.queryDialog?.querySelector("[data-close-overlay='query']")?.addEventListener("click", () => closeOverlay("query"));
@@ -771,7 +784,8 @@ function bindQueryOverlayEvents() {
   }
   for (const element of els.searchFieldToggles) {
     element.addEventListener("change", () => {
-      setQueryDraft(readQueryDraftFromControls(), { sync: "controls" });
+      setQueryDraft(readQueryDraftFromControls(), { sync: "controls", schedule: false });
+      applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
     });
   }
   document.querySelectorAll("input[name='queryMetric']").forEach((input) => {
@@ -1150,8 +1164,11 @@ function syncQueryInputValue(draft) {
 function syncQueryToggleValues(draft) {
   if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = Boolean(draft.nicheOnly);
   if (els.hideUnknownToggle) els.hideUnknownToggle.checked = Boolean(draft.hideUnknownArtist);
+  const selectedFields = draft.searchFields || DEFAULT_SEARCH_FIELDS;
   for (const input of els.searchFieldToggles) {
-    input.checked = (draft.searchFields || DEFAULT_SEARCH_FIELDS).includes(input.value);
+    input.checked = selectedFields.includes(input.value);
+    const label = input.closest("label");
+    if (label) label.classList.toggle("is-selected", input.checked);
   }
   for (const input of document.querySelectorAll("input[name='queryMetric']")) {
     input.checked = input.value === draft.rankMetric;
@@ -1237,7 +1254,8 @@ function readQueryDraftFromControls() {
 }
 
 function readSearchFieldsFromControls() {
-  return els.searchFieldToggles
+  const root = els.querySearchForm || document;
+  return Array.from(root.querySelectorAll("input[name='searchField']"))
     .filter((input) => input.checked && Object.hasOwn(SEARCH_FIELDS, input.value))
     .map((input) => input.value);
 }
@@ -3460,8 +3478,8 @@ async function requestApiViewPage(request, range) {
   if (query && filters.searchScope && filters.searchScope !== "all") {
     params.set("searchScope", filters.searchScope);
   } else if (query) {
-    const searchFields = filters.searchFields || DEFAULT_SEARCH_FIELDS;
-    if (searchFields.length) params.set("searchFields", searchFields.join(","));
+    const searchFields = Array.isArray(filters.searchFields) ? filters.searchFields : DEFAULT_SEARCH_FIELDS;
+    params.set("searchFields", searchFields.length ? searchFields.join(",") : "all");
   }
   if (Number(filters.minCount) > 1 && request.view !== "videos") params.set("minCount", String(Number(filters.minCount)));
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
@@ -3769,11 +3787,13 @@ async function loadRequestSearchCandidates(query, filters = {}, signal) {
 
 function requestSearchRecordMatchesFields(record, filters = {}) {
   if (filters.searchScope && filters.searchScope !== "all") return true;
-  const fields = filters.searchFields || DEFAULT_SEARCH_FIELDS;
+  const fields = Array.isArray(filters.searchFields) ? filters.searchFields : DEFAULT_SEARCH_FIELDS;
   if (!fields.length) return true;
   if (record.type === "song") return fields.includes("title");
   if (record.type === "artist") return fields.includes("artist");
-  return false;
+  if (record.type === "vtuber" || record.type === "channel") return fields.includes("channel");
+  if (record.type === "video") return fields.includes("video");
+  return fields.includes("channel") || fields.includes("video");
 }
 
 function searchUsesAllFields(filters = {}) {
@@ -4112,7 +4132,7 @@ function renderRequestedPageResult(result, options = {}) {
         meta: vtuberMeta(record),
         videoCount: record.videoCount,
         count: rankValueForRequestRecord(record, result.metric),
-        countUnit: result.metric === "songs" ? "曲目" : result.metric === "videos" ? "视频" : "次",
+        countUnit: result.metric === "songs" ? "首歌" : result.metric === "videos" ? "视频" : "次歌唱",
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
         songPreview: vtuberSongPreview(record),
@@ -4774,7 +4794,7 @@ function renderVtuberRank(group, rangeCache, selection) {
         meta: vtuberMeta(record),
         videoCount: record.videoCount,
         count: rankValue(record),
-        countUnit: rankCountUnit(),
+        countUnit: state.rankMetric === "songs" ? "首歌" : state.rankMetric === "videos" ? "视频" : "次歌唱",
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
         songPreview: vtuberSongPreview(record),
@@ -5708,11 +5728,24 @@ function artistOccurrenceSearchText(occurrence) {
 function songOccurrenceSearchText(occurrence, searchFields = DEFAULT_SEARCH_FIELDS) {
   const song = occurrence?.song || {};
   const item = occurrence?.item || {};
-  const fields = searchFields || DEFAULT_SEARCH_FIELDS;
-  if (!fields.length) return normalizeSearch([item.videoId, item.title, item.channelName, item.keyword, song.title, song.artist].join(" "));
+  const fields = Array.isArray(searchFields) ? searchFields : DEFAULT_SEARCH_FIELDS;
+  if (!fields.length) {
+    return normalizeSearch([
+      item.videoId,
+      item.title,
+      item.channelName,
+      item.channelHandle,
+      item.channelId,
+      item.keyword,
+      song.title,
+      song.artist,
+    ].join(" "));
+  }
   const parts = [];
   if (fields.includes("title")) parts.push(song.title);
   if (fields.includes("artist")) parts.push(song.artist);
+  if (fields.includes("channel")) parts.push(item.channelName, item.channelHandle, item.channelId, item.channelUrl, item.authorUrl, item.ownerUrl);
+  if (fields.includes("video")) parts.push(item.videoId, item.title);
   return normalizeSearch(parts.join(" "));
 }
 
@@ -6462,7 +6495,7 @@ function renderRankSide({
     if (expandable) {
       side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount, rankCount, rankMetric }));
     } else {
-      side.append(renderStaticSideChip(mode === "vtuber" && (isCompactRankMode() || (rankMetric === "songs" && rankCount === songCount)) ? "曲目" : `${songCount}首曲目`));
+      side.append(renderStaticSideChip(mode === "vtuber" ? `${songCount}首歌` : `${songCount}首曲目`));
     }
     return side;
   }
@@ -6862,23 +6895,44 @@ function localSourceDetailPage(occurrences, options = {}) {
 }
 
 function normalizeSourceDetailOccurrences(payload, key = "") {
-  if (Array.isArray(payload)) return payload.filter(isOccurrenceLike);
-  if (Array.isArray(payload?.record?.occurrences)) return payload.record.occurrences.filter(isOccurrenceLike);
-  if (Array.isArray(payload?.occurrences)) return payload.occurrences.filter(isOccurrenceLike);
-  if (Array.isArray(payload?.sourceOccurrences)) return payload.sourceOccurrences.filter(isOccurrenceLike);
-  if (Array.isArray(payload?.groups)) return payload.groups.flatMap((group) => group?.occurrences || []).filter(isOccurrenceLike);
+  if (Array.isArray(payload)) return normalizeSourceOccurrences(payload);
+  if (Array.isArray(payload?.record?.occurrences)) return normalizeSourceOccurrences(payload.record.occurrences);
+  if (Array.isArray(payload?.occurrences)) return normalizeSourceOccurrences(payload.occurrences);
+  if (Array.isArray(payload?.sourceOccurrences)) return normalizeSourceOccurrences(payload.sourceOccurrences);
+  if (Array.isArray(payload?.groups)) return normalizeSourceOccurrences(payload.groups.flatMap((group) => group?.occurrences || []));
   if (Array.isArray(payload?.items)) return collectSongOccurrences(payload.items);
   if (Array.isArray(payload?.sources)) return collectSongOccurrences(payload.sources);
   if (Array.isArray(payload?.records)) {
     const matched = key ? payload.records.find((record) => record?.key === key) : null;
     const source = matched || (payload.records.length === 1 ? payload.records[0] : null);
-    return (source?.occurrences || []).filter(isOccurrenceLike);
+    return normalizeSourceOccurrences(source?.occurrences || []);
   }
   return [];
 }
 
 function isOccurrenceLike(value) {
-  return Boolean(value?.item && value?.song);
+  return Boolean(value?.song && (value?.item || value?.videoId || value?.title || value?.channelName));
+}
+
+function normalizeSourceOccurrences(values) {
+  return (values || []).filter(isOccurrenceLike).map(normalizeSourceOccurrence);
+}
+
+function normalizeSourceOccurrence(value) {
+  if (value?.item) return value;
+  return {
+    item: {
+      videoId: cleanText(value?.videoId),
+      title: cleanText(value?.title || value?.videoTitle),
+      channelName: cleanText(value?.channelName),
+      channelId: cleanText(value?.channelId),
+      channelHandle: cleanText(value?.channelHandle),
+      channelUrl: cleanText(value?.channelUrl),
+      thumbnailUrl: cleanText(value?.thumbnailUrl || value?.videoThumbnailUrl || value?.thumbnail),
+      publishedTimestamp: Number(value?.publishedTimestamp) || 0,
+    },
+    song: value?.song || {},
+  };
 }
 
 function appendSublineNode(container, node) {
@@ -6917,7 +6971,7 @@ function renderSourceDrawer({ mode, occurrences, copyOccurrences = occurrences, 
 function initializeSourceDrawer(drawer, { mode, occurrences, copyOccurrences = occurrences, songGroups = [], sourceGroups = null, sourcePageInfo = null }) {
   if (!drawer || drawer.dataset.sourceDeferred !== "true") return;
   if (mode === "artist" || mode === "vtuber") {
-    appendArtistSongGroups(drawer, completeSongGroupsForDrawer(occurrences, songGroups));
+    appendArtistSongGroups(drawer, completeSongGroupsForDrawer(occurrences, songGroups, mode));
   } else {
     appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true, copyOccurrences, groups: sourceGroups, pageInfo: sourcePageInfo });
   }
@@ -7116,7 +7170,7 @@ function renderSourceVideoGroup(group, options = {}) {
 
   const firstOccurrence = group.occurrences[0];
   const videoItem = group.item || firstOccurrence?.item || {};
-  const setlistItem = window.FrontendUtils.sourceGroupSetlistItem(videoItem, group);
+  const setlistItem = window.FrontendUtils.sourceGroupSetlistItem(hydrateSetlistVideoItem(videoItem, group), group);
   const videoId = videoItem.videoId || group.videoId || "";
   const firstSeconds = firstOccurrence?.song?.seconds || 0;
 
@@ -7210,6 +7264,36 @@ function renderSourceTimestampLink(occurrence, className = "source-link source-t
   return link;
 }
 
+function hydrateSetlistVideoItem(videoItem = {}, group = {}) {
+  const videoId = cleanText(videoItem.videoId || group.videoId);
+  const known = videoId ? findVideoItemById(videoId) : null;
+  const knownSongs = Array.isArray(known?._allSongs) ? known._allSongs : Array.isArray(known?.songs) ? known.songs : [];
+  if (knownSongs.length) {
+    return {
+      ...known,
+      ...videoItem,
+      songs: knownSongs,
+      _allSongs: knownSongs,
+    };
+  }
+  return videoItem;
+}
+
+function findVideoItemById(videoId) {
+  const target = cleanText(videoId);
+  if (!target) return null;
+  const stack = Array.isArray(state.payload?.items) ? [...state.payload.items] : [];
+  while (stack.length) {
+    const item = stack.pop();
+    if (!item || typeof item !== "object") continue;
+    if (cleanText(item.videoId) === target) return item;
+    if (Array.isArray(item.items)) stack.push(...item.items);
+    if (Array.isArray(item.videos)) stack.push(...item.videos);
+    if (Array.isArray(item.sources)) stack.push(...item.sources);
+  }
+  return null;
+}
+
 function renderCopySetlistButton(item, label = "复制歌单", className = "copy-setlist-button") {
   const button = document.createElement("button");
   button.className = className;
@@ -7284,8 +7368,11 @@ function appendArtistSongGroups(drawer, songGroups) {
   appendMobileSourceCollapse(drawer);
 }
 
-function completeSongGroupsForDrawer(occurrences, fallbackGroups = []) {
+function completeSongGroupsForDrawer(occurrences, fallbackGroups = [], mode = "") {
   const completeGroups = buildArtistSongGroups(filterDisplaySongOccurrences(occurrences || []));
+  if (mode === "vtuber" && fallbackGroups?.length && completeGroups.length < fallbackGroups.length) {
+    return fallbackGroups;
+  }
   return completeGroups.length ? completeGroups : fallbackGroups || [];
 }
 
@@ -7513,7 +7600,7 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
       const visibleOccurrences = pageState.occurrences;
       row._sourceDetailOccurrences = pageState.completeOccurrences || visibleOccurrences || drawerOccurrences;
       if (isSongGroupMode) {
-        songGroups = completeSongGroupsForDrawer(visibleOccurrences, songGroups);
+        songGroups = completeSongGroupsForDrawer(visibleOccurrences, songGroups, mode);
         row._artistSongGroups = songGroups;
       }
       clearSourceDrawerStatus(drawer);

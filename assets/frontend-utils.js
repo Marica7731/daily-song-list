@@ -254,6 +254,7 @@
     const videoLayout = params.get("layout");
     const trend = params.get("trend");
     const searchScope = params.get("searchScope") || params.get("searchField");
+    const searchFieldsParam = params.get("searchFields");
     const validTrendFilters = new Set(options.validTrendFilters || ["all", "new", "up", "down"]);
     const validMinCounts = new Set((options.validMinCounts || [1, 2, 5, 10]).map(Number));
 
@@ -269,7 +270,10 @@
       ...parseUnknownArtistUrlState(params, defaults),
       q: params.has("q") ? String(params.get("q") || "").slice(0, 200) : defaults.q || "",
       searchScope: validSearchScopes.has(searchScope) ? searchScope : defaults.searchScope || "all",
-      searchFields: searchFieldsForScope(validSearchScopes.has(searchScope) ? searchScope : "", defaults),
+      searchFields:
+        searchFieldsParam !== null
+          ? sanitizeSearchFields(searchFieldsParam, [])
+          : searchFieldsForScope(validSearchScopes.has(searchScope) ? searchScope : "", defaults),
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
       trend: validTrendFilters.has(trend) ? trend : defaults.trend || "all",
       minCount: validMinCounts.has(parsedMinCount) ? parsedMinCount : positiveInteger(defaults.minCount, 1),
@@ -472,6 +476,8 @@
     const labels = {
       title: "歌名",
       artist: "歌手",
+      channel: "频道",
+      video: "视频",
       ...(options.searchFieldLabels || {}),
     };
     return labels[field] || field;
@@ -488,7 +494,8 @@
     const result = [];
     for (const field of source) {
       const normalized = cleanText(field).toLocaleLowerCase();
-      if ((normalized === "title" || normalized === "artist") && !result.includes(normalized)) result.push(normalized);
+      if (["all", "any", "*"].includes(normalized)) return [];
+      if (["title", "artist", "channel", "video"].includes(normalized) && !result.includes(normalized)) result.push(normalized);
     }
     return result;
   }
@@ -496,6 +503,8 @@
   function searchFieldsForScope(scope, defaults = {}) {
     if (scope === "title") return ["title"];
     if (scope === "artist") return ["artist"];
+    if (scope === "channel") return ["channel"];
+    if (scope === "video") return ["video"];
     if (scope === "song") return ["title", "artist"];
     return sanitizeSearchFields(defaults.searchFields, defaults.searchFields || ["title", "artist"]);
   }
@@ -1201,10 +1210,9 @@
     }
     if (mode === "vtuber") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
-      const compactSongMetric = options.rankMetric === "songs" && Number(options.rankCount) === songCount;
       return {
-        text: isExpanded ? "收起" : (options.compact || compactSongMetric) ? "曲目" : `${songCount}首曲目`,
-        ariaLabel: isExpanded ? "收起该频道曲目" : `查看该频道的 ${songCount} 首歌曲`,
+        text: isExpanded ? "收起" : `${songCount}首歌`,
+        ariaLabel: isExpanded ? "收起该频道歌曲" : `查看该频道的 ${songCount} 首歌曲`,
       };
     }
 

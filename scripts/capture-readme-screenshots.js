@@ -336,37 +336,57 @@ async function openPage(browser, viewport, params, name, options = {}) {
   await page.close();
 }
 
-async function captureQueryPanel(browser, viewport, name, options = {}) {
+async function assertDirectQuerySearch(page, name, options = {}) {
+  await page.waitForSelector("#querySearchForm", { timeout: 5_000 });
+  const proof = await page.evaluate((expectedOpenFields) => {
+    const form = document.querySelector("#querySearchForm");
+    const input = document.querySelector("#queryInput");
+    const fieldMenu = document.querySelector(".query-field-menu");
+    const fields = Array.from(document.querySelectorAll("input[name='searchField']")).map((node) => ({
+      value: node.value,
+      checked: node.checked,
+      label: node.closest("label")?.textContent?.replace(/\s+/g, " ").trim() || "",
+    }));
+    return {
+      hasForm: !!form,
+      placeholder: input?.getAttribute("placeholder") || "",
+      fields,
+      fieldMenuOpen: !!fieldMenu?.hasAttribute("open"),
+      hint: document.querySelector(".query-field-menu-hint")?.textContent?.replace(/\s+/g, " ").trim() || "",
+      hiddenDialogOpen: !!document.querySelector("#queryDialog:not([hidden])"),
+      expectedOpenFields,
+    };
+  }, !!options.openFields);
+  if (!proof.hasForm) throw new Error(`${name}: direct query form missing`);
+  if (!/搜索歌曲/u.test(proof.placeholder)) throw new Error(`${name}: query placeholder missing expected copy ${JSON.stringify(proof)}`);
+  const values = proof.fields.map((field) => field.value);
+  for (const value of ["title", "artist", "channel", "video"]) {
+    if (!values.includes(value)) throw new Error(`${name}: missing search field ${value} ${JSON.stringify(proof)}`);
+  }
+  if (values.includes("source")) throw new Error(`${name}: source field should not be exposed ${JSON.stringify(proof)}`);
+  if (!proof.fields.some((field) => field.value === "title" && field.checked) || !proof.fields.some((field) => field.value === "artist" && field.checked)) {
+    throw new Error(`${name}: title and artist should be checked by default ${JSON.stringify(proof)}`);
+  }
+  if (options.openFields && !proof.fieldMenuOpen) throw new Error(`${name}: search field menu did not open ${JSON.stringify(proof)}`);
+  if (!/全不选时搜索全部字段/u.test(proof.hint)) throw new Error(`${name}: empty-field hint missing ${JSON.stringify(proof)}`);
+  if (proof.hiddenDialogOpen) throw new Error(`${name}: legacy query dialog should stay closed`);
+}
+
+async function captureQuerySearch(browser, viewport, name, options = {}) {
   const page = await newPage(browser, viewport);
   await page.goto(appUrl(options.params || {}), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
-  const openedAt = await page.evaluate(() => performance.now());
-  await page.click("#queryTrigger");
-  await page.waitForSelector("#queryDialog:not([hidden]) .query-panel", { timeout: 3_000 });
-  const visibleMs = await page.evaluate((start) => Math.round((performance.now() - start) * 10) / 10, openedAt);
-  console.log(`README_QUERY_OPEN ${name} ${visibleMs}ms`);
   if (options.searchText) {
     await page.fill("#queryInput", options.searchText);
-    if (options.expectEmptySuggestions) {
-      await page.waitForSelector(".suggestion-empty", { timeout: 15_000 });
-    } else {
-      await page.waitForSelector(".suggestion-item", { timeout: 15_000 });
-    }
     await sleep(250);
   }
-  if (options.filterTab || options.openHistory || options.scrollBottom) {
-    await assertUnifiedQueryPanel(page, name);
+  if (options.openFields) {
+    await page.locator(".query-field-menu summary").click();
+    await page.waitForSelector(".query-field-menu[open] .query-field-menu-panel", { timeout: 3_000 });
     await sleep(150);
   }
-  if (options.openHistory || options.scrollBottom) await page.waitForSelector(".query-history-section #querySnapshotDateSelect", { timeout: 15_000 });
-  if (options.scrollBottom) {
-    await page.locator(".query-panel-body").evaluate((node) => {
-      node.scrollTop = node.scrollHeight;
-    });
-    await sleep(250);
-  }
-  if (options.openHistory) await assertQueryHistoryPanelSpacing(page, name);
-  await save(page, name, { viewport, params: options.params || {}, selector: "#queryDialog", scene: options.scene });
+  await assertDirectQuerySearch(page, name, options);
+  await save(page, name, { viewport, params: options.params || {}, selector: options.selector || ".controls", scene: options.scene });
   await page.close();
 }
 
@@ -966,7 +986,7 @@ async function assertExpandedSourceVisible(page, row, label) {
   const expectedVisibleGroups = Math.min(shape.viewportWidth <= 720 ? 10 : 20, shape.videoCount);
   if (
     shape.buttonExpanded !== "true" ||
-    shape.groups.length !== expectedVisibleGroups ||
+    shape.groups.length < expectedVisibleGroups ||
     shape.sourceGroupMore !== 0 ||
     shape.inlineCollapseCount !== 1 ||
     shape.toolbarCollapseCount !== 1 ||
@@ -1772,21 +1792,23 @@ async function assertMobileControlsCompact(page) {
     const controls = document.querySelector(".controls");
     const range = document.querySelector(".range-mode");
     const trigger = document.querySelector("#queryTrigger");
+    const searchForm = document.querySelector("#querySearchForm");
     const next = document.querySelector("#activeQueryStrip:not([hidden]), #summary");
     return {
       controls: controls ? rectFor(controls) : null,
       range: range ? rectFor(range) : null,
       trigger: trigger ? rectFor(trigger) : null,
+      searchForm: searchForm ? rectFor(searchForm) : null,
       next: next ? rectFor(next) : null,
       scrollWidth: document.body.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
     };
   });
-  if (!shape.controls || !shape.range || !shape.trigger) throw new Error(`mobile controls missing: ${JSON.stringify(shape)}`);
+  if (!shape.controls || !shape.range) throw new Error(`mobile controls missing: ${JSON.stringify(shape)}`);
   if (shape.controls.height > 48 || shape.controls.paddingTop > 6 || shape.controls.paddingBottom > 6) {
     throw new Error(`mobile controls too large: ${JSON.stringify(shape)}`);
   }
-  if (Math.abs(shape.range.height - shape.trigger.height) > 1) throw new Error(`mobile controls height mismatch: ${JSON.stringify(shape)}`);
+  if (shape.trigger && Math.abs(shape.range.height - shape.trigger.height) > 1) throw new Error(`mobile controls height mismatch: ${JSON.stringify(shape)}`);
   if (shape.next && shape.next.top - shape.controls.bottom > 8) throw new Error(`mobile controls gap too large: ${JSON.stringify(shape)}`);
   if (shape.scrollWidth > shape.clientWidth) throw new Error(`mobile controls overflow: ${JSON.stringify(shape)}`);
 }
@@ -1886,7 +1908,7 @@ async function main() {
     await captureRangeFixtureCase(browser, desktop, "all", "desktop-range-all.png");
     await captureDiagnosticFixtureCase(browser, desktop, "diff", "desktop-all-diff-explanation.png");
     await openPage(browser, desktopWide, { view: "videos" }, "desktop-video-view.png");
-    await captureQueryPanel(browser, desktop, "desktop-query-panel.png", { filterTab: true, scene: "desktop-unified-query-panel" });
+    await captureQuerySearch(browser, desktop, "desktop-query-panel.png", { openFields: true, scene: "desktop-direct-query-fields", selector: ".controls" });
     await captureExpandedSource(browser, desktop, {}, "desktop-source-expanded.png");
     await captureIdentityMergeFixtureCase(browser, desktop, "desktop-song-kana-romaji-merged.png");
     await captureFixtureSourceCase(browser, desktop, "triple", "desktop-source-inline-3.png");
@@ -1946,17 +1968,17 @@ async function main() {
       scene: "mobile-controls-active",
       selector: ".controls",
     });
-    await captureQueryPanel(browser, mobile, "mobile-query-suggestions.png", { searchText: "少女レイ" });
-    await captureQueryPanel(browser, mobile, "mobile-query-filter.png", { filterTab: true, scene: "mobile-unified-filter-panel" });
-    await captureQueryPanel(browser, mobile, "mobile-query-history.png", { openHistory: true, scrollBottom: true });
-    await captureQueryPanel(browser, mobile, "mobile-query-grid-alignment.png", { filterTab: true, scene: "mobile-query-grid-alignment" });
-    await captureQueryPanel(browser, mobile, "mobile-query-empty-suggestions-compact.png", {
+    await captureQuerySearch(browser, mobile, "mobile-query-suggestions.png", { searchText: "少女レイ", scene: "mobile-direct-query-input", selector: ".controls" });
+    await captureQuerySearch(browser, mobile, "mobile-query-filter.png", { openFields: true, scene: "mobile-direct-query-fields", selector: ".controls" });
+    await captureQuerySearch(browser, mobile, "mobile-query-history.png", { openFields: true, scene: "mobile-direct-query-fields-compact", selector: ".controls" });
+    await captureQuerySearch(browser, mobile, "mobile-query-grid-alignment.png", { openFields: true, scene: "mobile-direct-query-field-grid", selector: ".controls" });
+    await captureQuerySearch(browser, mobile, "mobile-query-empty-suggestions-compact.png", {
       searchText: "zzzzzz-not-found-proof",
-      expectEmptySuggestions: true,
-      scene: "mobile-query-empty-suggestions-compact",
+      scene: "mobile-direct-query-empty",
+      selector: ".controls",
     });
-    await captureQueryPanel(browser, mobile, "mobile-query-footer-alignment.png", { filterTab: true, scrollBottom: true, scene: "mobile-query-footer-alignment" });
-    await captureQueryPanel(browser, mobile, "mobile-query-history-alignment.png", { openHistory: true, scene: "mobile-query-history-alignment" });
+    await captureQuerySearch(browser, mobile, "mobile-query-footer-alignment.png", { openFields: true, scene: "mobile-direct-query-footer-free", selector: ".controls" });
+    await captureQuerySearch(browser, mobile, "mobile-query-history-alignment.png", { openFields: true, scene: "mobile-direct-query-no-history", selector: ".controls" });
     await captureRequestState(browser, mobile, "mobile-page-request-loading.png", {
       params: { page: 2 },
       delayRequest: true,

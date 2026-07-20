@@ -110,6 +110,11 @@ test("VSinger song merge filters legacy commentary rows while keeping reviewed r
       { seconds: 4, title: "星座になれたら", artist: "結束バンド" },
       { seconds: 5, title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO" },
       { seconds: 6, title: "楽しみにしてろよ!", artist: "練習後のなれたんを" },
+      { seconds: 9, title: "初めて日本の病院に行ってきました", artist: "I Went to a Japanese Hospital for the First Time" },
+      { seconds: 10, title: "音楽停止（クリックミス）", artist: "Music stops (accidental click)" },
+      { seconds: 11, title: "食あたり", artist: "Food Poisoning" },
+      { seconds: 12, title: "晩餐歌", artist: "tuki." },
+      { seconds: 13, title: "花になって", artist: "緑黄色社会" },
     ],
     [
       { seconds: 7, title: "アンケート (なれたんを家族に例えると)", artist: "Poll: If Narae-tan was family" },
@@ -119,7 +124,13 @@ test("VSinger song merge filters legacy commentary rows while keeping reviewed r
 
   assert.deepEqual(
     songs.map((song) => `${song.title} / ${song.artist}`),
-    ["星座になれたら / 結束バンド", "ENDLESS STORY / REIRA starring YUNA ITO", "Opening / Known Artist"],
+    [
+      "星座になれたら / 結束バンド",
+      "ENDLESS STORY / REIRA starring YUNA ITO",
+      "Opening / Known Artist",
+      "晩餐歌 / tuki.",
+      "花になって / 緑黄色社会",
+    ],
   );
 });
 

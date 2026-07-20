@@ -752,7 +752,7 @@ def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> 
     merge_channel_record_identity(record, item)
     for song in songs:
         record["count"] += 1
-        increment_count(record["songs"], clean_text(song.get("title")))
+        increment_vtuber_song_count(record["songs"], song)
         append_preview_occurrence(record["occurrences"], item, song, video_id)
 
 
@@ -1694,6 +1694,8 @@ def is_likely_runtime_non_song_entry(song: dict, source: dict | None = None) -> 
         return True
     if is_runtime_confirmed_dirty_title(title, raw):
         return True
+    if is_runtime_topic_like_bilingual_commentary(title, artist, raw):
+        return True
     unknown_artist = is_unknown_artist(artist)
     if unknown_artist and is_channel_scoped_unknown_artist_dirty_song(source):
         return True
@@ -1809,6 +1811,76 @@ def is_runtime_commentary_noise(title, raw) -> bool:
     return False
 
 
+def is_runtime_topic_like_bilingual_commentary(title, artist, raw) -> bool:
+    title_text = clean_text(title)
+    artist_text = clean_text(artist)
+    raw_text = clean_text(raw)
+    if not title_text or not artist_text:
+        return False
+    if is_known_song_safe_from_runtime_commentary(title_text, artist_text):
+        return False
+    if has_structured_song_number(raw_text) and not is_runtime_commentary_noise(title_text, raw_text):
+        return False
+    if not contains_japanese(title_text) or contains_japanese(artist_text):
+        return False
+    if not is_english_gloss_like_text(artist_text):
+        return False
+    if is_runtime_commentary_noise(title_text, raw_text) or is_runtime_sentence_like_title(title_text):
+        return True
+    return bool(re.search(r"(?:op|ed|opening|ending|雑談|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ)", title_text, re.IGNORECASE))
+
+
+def is_known_song_safe_from_runtime_commentary(title, artist) -> bool:
+    title_text = clean_text(title)
+    artist_text = clean_text(artist)
+    if "星座になれたら" in title_text:
+        return True
+    return bool(re.fullmatch(r"(?:ENDLESS STORY|Never Ending Story|Opening|Ending)", title_text, re.IGNORECASE) and artist_text and not is_unknown_artist(artist_text))
+
+
+def has_structured_song_number(raw) -> bool:
+    value = re.sub(r"^\s*(?:[\[【(（]\s*)?\d{1,2}:\d{2}(?::\d{2})?\s*(?:[\]】)）])?\s*", "", clean_text(raw))
+    return bool(re.search(r"(?:^|[\s　])#?\d{1,3}\s*[.)．、）:：]", value) or re.search(r"(?:^|[\s　])#\d{1,3}\s+", value))
+
+
+def is_runtime_sentence_like_title(text) -> bool:
+    value = clean_text(text)
+    if not value:
+        return False
+    if len(value) >= 18 and re.search(r"(?:だった|でした|です|ます|して|した|する|され|たい|ない|ある|いる|なる|なった|くる|行く|来る|思う|忘れ|信じ|疑う|食べ|飲み|寝て|痛い|怖い|楽しい|辛い|欲しい|ください|お願い|かな|ですね|ですよ|だよ|なの|のか|のは|とは|って|コメ|コメント)", value):
+        return True
+    return bool(re.fullmatch(r"[^/／|｜]{1,40}[?？]", value) and re.search(r"(?:なれたん|人|何|どこ|いる|する|です|ます|なの|のか)", value))
+
+
+def is_english_gloss_like_text(text) -> bool:
+    value = unicodedata.normalize("NFKC", clean_text(text))
+    if not value or contains_japanese(value) or not re.search(r"[A-Za-z]", value):
+        return False
+    if not re.fullmatch(r"[A-Za-z0-9 .,:'’\"“”&+_\-/!?~()[\]#]+", value):
+        return False
+    words = re.findall(r"[A-Za-z][A-Za-z'’]*", value)
+    if not words or len(words) > 18:
+        return False
+    if is_runtime_sentence_like_credit(value):
+        return True
+    if re.search(r"[?？]$", value) or re.search(r"\([^)]{3,80}\)", value):
+        return True
+    return bool(re.search(r"\b(?:about|accidental|accented|ad|alcohol|anime|attack|ballad|carbonated|catchy|click|commercial|differences?|difficult|dream|drink(?:ing)?|food|hospital|introduced?|introducing|japanese|korean|marks?|music|parents?|picture|poisoning|poll|popular|pronunciation|recommendations?|recently|rice|risks?|salon|song|songs|souvenirs?|stops?|tea|temptation|traditional|vowel|watched)\b", value, re.IGNORECASE))
+
+
+def is_runtime_sentence_like_credit(text) -> bool:
+    value = clean_text(text)
+    if not value or is_unknown_artist(value):
+        return False
+    if re.match(r"(?:Recommended|Poll:|Are you trying|I envy|I(?:’|'|)ll pretend|Older Sister|Younger Sister|.+\?)\b", value, re.IGNORECASE):
+        return True
+    return bool(len(value) >= 24 and re.search(r"\s", value) and re.search(r"\b(?:i|you|we|my|your|the|a|an|to|that|this|was|were|is|are|be|being|been|have|has|had|do|does|did|can|can't|cannot|will|want|trying|because|with|from|about|people|song|comment|viewers|family|friend|reason|recommended|pretend|believe|forgot)\b", value, re.IGNORECASE))
+
+
+def contains_japanese(text) -> bool:
+    return bool(re.search(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]", clean_text(text)))
+
+
 def normalize_runtime_commentary_text(value) -> str:
     text = unicodedata.normalize("NFKC", clean_text(value))
     text = re.sub(r"[:：]_[^\s　:：]+[:：]?", "", text)
@@ -1888,11 +1960,106 @@ def compact_song(song: dict) -> dict:
 
 
 def count_map_to_list(value: dict[str, int]) -> list[dict]:
-    return [
-        {"name": name, "count": count}
-        for name, count in sorted(value.items(), key=lambda item: (-item[1], normalize_key(item[0])))
-        if name
-    ]
+    records = []
+    for name, count in value.items():
+        if isinstance(count, dict):
+            records.append({"name": clean_text(count.get("name") or name), "count": int(count.get("count") or 0)})
+        elif name:
+            records.append({"name": name, "count": int(count or 0)})
+    return [record for record in sorted(records, key=lambda item: (-item["count"], normalize_key(item["name"]))) if record["name"]]
+
+
+def increment_vtuber_song_count(target: dict[str, dict], song: dict) -> None:
+    title = vtuber_canonical_song_title(song.get("title"))
+    key = vtuber_song_identity_key(title)
+    if not key or not title:
+        return
+    if key not in target:
+        target[key] = {"name": title, "count": 0}
+    target[key]["count"] += 1
+
+
+def vtuber_canonical_song_title(value) -> str:
+    title = clean_text(value)
+    if not title:
+        return ""
+    for _ in range(4):
+        next_title = unicodedata.normalize("NFKC", title)
+        next_title = re.sub(r"^\s*[#＃]?\d{1,4}\s*[\U00002600-\U000027BF\U0001F300-\U0001FAFF\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□]+", "", next_title)
+        next_title = re.sub(r"^\s*[＊*]?\s*(?:[#＃]?\d{1,4}|[０-９]{1,4})\s*(?:曲目|曲|番目)?\s*[.)．。、,,:：)）\]\-|｜/／]+\s*", "", next_title)
+        next_title = next_title.strip()
+        if next_title == title:
+            break
+        title = next_title
+    title = strip_trailing_latin_gloss(title)
+    title = normalize_song_work_title(title)
+    return strip_trailing_latin_gloss(title)
+
+
+def normalize_song_work_title(value) -> str:
+    text = strip_leading_title_list_marker(clean_text(value))
+    if not text:
+        return ""
+    bracket = re.match(r"^(.+?)\s*[(（［\[【「『]\s*([^()（）\[\]［］【】「」『』]{1,80})\s*[)）］\]】」』]\s*$", text)
+    if bracket and is_whitelisted_song_variant(bracket.group(2)):
+        return bracket.group(1).strip()
+    separated = re.match(r"^(.+?)\s*(?:[-ー–—|｜:：/／])\s*(.{1,80})\s*$", text)
+    if separated and is_whitelisted_song_variant(separated.group(2)):
+        return separated.group(1).strip()
+    spaced = re.match(r"^(.+?)\s+(.{1,80})\s*$", text)
+    if spaced and is_whitelisted_song_variant(spaced.group(2)):
+        return spaced.group(1).strip()
+    trailing_index = re.match(r"^(.+?)\s+(?:[#＃]?\d{1,3}\s*(?:曲目|曲|番目))\s*$", text)
+    if trailing_index:
+        return trailing_index.group(1).strip()
+    return text
+
+
+def strip_leading_title_list_marker(value) -> str:
+    result = clean_text(value)
+    for _ in range(4):
+        next_value = re.sub(r"^\s*[╟├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼▶▷►▸▹>|・･●○◆◇■□♪♫♬♩♡♥◎★☆\uFE0F\U00002600-\U000027BF\U0001F300-\U0001FAFF⁅⁆]+", "", result)
+        next_value = re.sub(r"^\s*[＊*]\s*(?=(?:[#＃]?\d{1,3}[.．](?![0-9０-９])|[#＃]?\d{1,3}[)）、:：]|[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]))", "", next_value)
+        next_value = re.sub(r"^\s*[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]\s*", "", next_value)
+        next_value = re.sub(r"^\s*(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})\s*(?:曲目|曲|番目)\s*(?:[.．。、,,:：)）\]\-|｜/／]+|\s+)", "", next_value)
+        next_value = re.sub(r"^\s*(?:(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[\s。、,,:：)）\]\-|｜/／]+|(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[.．](?![0-9０-９])\s*)", "", next_value)
+        if next_value == result:
+            break
+        result = next_value
+    return result.strip()
+
+
+def is_whitelisted_song_variant(value) -> bool:
+    text = clean_text(value).lstrip(" :：-ー–—|｜/／").strip()
+    return bool(
+        re.match(
+            r"^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella|acappella|アカペラ|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更)$",
+            text,
+            re.IGNORECASE,
+        )
+    )
+
+
+def strip_trailing_latin_gloss(value) -> str:
+    text = unicodedata.normalize("NFKC", clean_text(value))
+    if not text:
+        return ""
+    separated = re.match(r"^(.+?)\s+(?:[-–—])\s+([A-Za-z][A-Za-z0-9 .,'’\"“”&+_/!?()[\]-]{1,80})$", text)
+    if separated and vtuber_contains_japanese(separated.group(1)):
+        return separated.group(1).strip()
+    bracketed = re.match(r"^(.+?)\s*[(（［\[]\s*([A-Za-z][A-Za-z0-9 .,'’\"“”&+_/!?()[\]-]{1,80})\s*[)）］\]]$", text)
+    if bracketed and vtuber_contains_japanese(bracketed.group(1)):
+        return bracketed.group(1).strip()
+    return text
+
+
+def vtuber_song_identity_key(value) -> str:
+    text = unicodedata.normalize("NFKC", clean_text(value)).lower()
+    return "".join(ch for ch in text if unicodedata.category(ch)[0] in {"L", "N"})
+
+
+def vtuber_contains_japanese(value) -> bool:
+    return bool(re.search(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]", clean_text(value)))
 
 
 def increment_count(target: dict[str, int], value: str) -> None:

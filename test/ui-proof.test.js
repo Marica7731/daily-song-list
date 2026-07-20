@@ -72,8 +72,8 @@ test("UI proof contracts pin new fixture scenes and proof docs", () => {
   assert.equal(screenshotContracts["mobile-source-new-to-old.png"].scene, "fixture-newToOld");
   assert.equal(screenshotContracts["desktop-partition-pagination.png"].scene, "fixture-partition-pagination");
   assert.equal(screenshotContracts["desktop-search-snapshot-index.png"].scene, "fixture-search-snapshot-index");
-  assert.equal(screenshotContracts["desktop-query-panel.png"].scene, "desktop-unified-query-panel");
-  assert.equal(screenshotContracts["mobile-query-filter.png"].scene, "mobile-unified-filter-panel");
+  assert.equal(screenshotContracts["desktop-query-panel.png"].scene, "desktop-direct-query-fields");
+  assert.equal(screenshotContracts["mobile-query-filter.png"].scene, "mobile-direct-query-fields");
   assert.deepEqual(screenshotContracts["mobile-active-query-strip.png"].params, {
     q: "少女レイ",
     hideUnknown: 1,

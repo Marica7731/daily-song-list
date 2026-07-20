@@ -158,7 +158,8 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
       const artistResult = RankingUtils.buildArtistRecords(occurrences);
       const artistRecords = addRequestRecordFields(artistResult.records || []);
       const videoRecords = buildVideoRequestItems(items);
-      const vtuberRecords = buildVtuberRequestItems(items);
+      const vtuberSongIdentityLookup = buildVtuberSongIdentityLookup(songRecords);
+      const vtuberRecords = buildVtuberRequestItems(items, vtuberSongIdentityLookup);
       const specs = [
         { type: "song", view: "songs", records: sortRankRecords(songRecords, "occurrences"), metric: "count", sourcePrefix: "song", order: "rank" },
         { type: "song", view: "songs", records: sortRankRecords(songRecords, "videos"), metric: "videos", sourcePrefix: "song", order: "rank" },
@@ -377,7 +378,7 @@ function buildVideoRequestItems(items) {
   return result;
 }
 
-function buildVtuberRequestItems(items) {
+function buildVtuberRequestItems(items, songIdentityLookup = null) {
   const records = new Map();
   const identityLookup = buildChannelIdentityLookup(items);
   for (const item of items || []) {
@@ -417,7 +418,7 @@ function buildVtuberRequestItems(items) {
     for (const song of scopedSongs) {
       record.count += 1;
       record.timestampCount += 1;
-      incrementNamedCount(record.songs, RankingUtils.cleanText(song.title));
+      incrementVtuberSongCount(record.songs, song, songIdentityLookup);
       if (record.occurrences.length < REQUEST_PREVIEW_SOURCE_LIMIT) {
         record.occurrences.push({
           item,
@@ -625,6 +626,64 @@ function knownChannelSearchAliases(channelName) {
   const key = normalizeSearchText(channelName);
   if (key === normalizeSearchText("Haru Ch. 花前ハル")) return ["HanamaeHaru", "Hanamae Haru", "花前ハル"];
   return [];
+}
+
+function buildVtuberSongIdentityLookup(songRecords) {
+  const lookup = new WeakMap();
+  for (const record of songRecords || []) {
+    const identityKey = RankingUtils.cleanText(record.canonicalWorkTitleKey || record.titleKey || RankingUtils.songWorkTitleKey(record.title));
+    const displayTitle = vtuberCanonicalSongTitle(record.workTitle || record.title) || record.workTitle || record.title || "";
+    if (!identityKey) continue;
+    for (const occurrence of record.occurrences || []) {
+      if (occurrence?.song && typeof occurrence.song === "object") {
+        lookup.set(occurrence.song, {
+          key: identityKey,
+          name: displayTitle,
+        });
+      }
+    }
+  }
+  return lookup;
+}
+
+function incrementVtuberSongCount(map, song, songIdentityLookup = null) {
+  const lookupIdentity = song && typeof song === "object" ? songIdentityLookup?.get(song) : null;
+  const fallbackTitle = vtuberCanonicalSongTitle(song?.title);
+  const key = RankingUtils.songWorkTitleKey(fallbackTitle || song?.title) || lookupIdentity?.key;
+  const name = fallbackTitle || lookupIdentity?.name || RankingUtils.cleanText(song?.title);
+  if (!key || !name) return;
+  if (!map.has(key)) map.set(key, { key, name, count: 0 });
+  const entry = map.get(key);
+  entry.count += 1;
+  const canonicalName = vtuberCanonicalSongTitle(entry.name) || entry.name;
+  if (canonicalName && canonicalName !== entry.name) entry.name = canonicalName;
+}
+
+function vtuberCanonicalSongTitle(value) {
+  let title = RankingUtils.cleanText(value);
+  if (!title) return "";
+  for (let index = 0; index < 4; index += 1) {
+    const next = title
+      .normalize("NFKC")
+      .replace(/^\s*[#＃]?\d{1,4}\s*[\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□]+/u, "")
+      .replace(/^\s*[＊*]?\s*(?:[#＃]?\d{1,4}|[０-９]{1,4})\s*(?:曲目|曲|番目)?\s*[.)．。、,,:：)）\]\-|｜/／]+\s*/u, "")
+      .trim();
+    if (next === title) break;
+    title = next;
+  }
+  title = stripTrailingLatinGloss(title);
+  const work = RankingUtils.normalizeSongWorkTitle(title).workTitle || title;
+  return stripTrailingLatinGloss(work);
+}
+
+function stripTrailingLatinGloss(value) {
+  const text = RankingUtils.cleanText(value).normalize("NFKC");
+  if (!text) return "";
+  const separated = text.match(/^(.+?)\s+(?:[-–—])\s+([A-Za-z][A-Za-z0-9 .,'’"“”&+_/!?()[\]-]{1,80})$/u);
+  if (separated && /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(separated[1])) return separated[1].trim();
+  const bracketed = text.match(/^(.+?)\s*[(（［\[]\s*([A-Za-z][A-Za-z0-9 .,'’"“”&+_/!?()[\]-]{1,80})\s*[)）］\]]$/u);
+  if (bracketed && /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(bracketed[1])) return bracketed[1].trim();
+  return text;
 }
 
 function incrementNamedCount(map, name) {

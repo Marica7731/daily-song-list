@@ -443,6 +443,8 @@ def normalize_search_fields(value: str) -> list[str] | None:
     text = value.strip()
     if not text:
         return None
+    if text.lower() in {"all", "any", "*"}:
+        return []
     result: list[str] = []
     for raw_field in re.split(r"[,| ]+", text):
         field = raw_field.strip().lower().replace("_", "-")
@@ -455,9 +457,16 @@ def normalize_search_fields(value: str) -> list[str] | None:
             "artist": "artist",
             "artists": "artist",
             "singer": "artist",
+            "channel": "channel",
+            "channels": "channel",
+            "vtuber": "channel",
+            "video": "video",
+            "videos": "video",
+            "source": "source",
+            "sources": "source",
         }
         if field not in aliases:
-            raise ValueError("searchFields must contain title and/or artist")
+            raise ValueError("searchFields must contain title, artist, channel, video, or source")
         normalized = aliases[field]
         if normalized not in result:
             result.append(normalized)
@@ -467,12 +476,22 @@ def normalize_search_fields(value: str) -> list[str] | None:
 def search_scope_from_fields(fields: list[str] | None) -> str:
     if fields is None:
         return "all"
+    if not fields:
+        return "source"
     if fields == ["title"]:
         return "title"
     if fields == ["artist"]:
         return "artist"
+    if fields == ["channel"]:
+        return "channel"
+    if fields == ["video"]:
+        return "video"
+    if fields == ["source"]:
+        return "source"
     if set(fields) == {"title", "artist"}:
         return "song"
+    if any(field in {"channel", "video", "source"} for field in fields):
+        return "source"
     return "all"
 
 

@@ -135,9 +135,9 @@ const screenshotContracts = {
     viewport: { width: 1440, height: 900 },
   },
   "desktop-query-panel.png": {
-    scene: "desktop-unified-query-panel",
+    scene: "desktop-direct-query-fields",
     params: {},
-    selector: "#queryDialog",
+    selector: ".controls",
     viewport: { width: 1440, height: 900 },
   },
   "mobile-summary-baseline.png": {
@@ -220,32 +220,34 @@ const screenshotContracts = {
     viewport: { width: 1440, height: 900 },
   },
   "mobile-query-filter.png": {
-    scene: "mobile-unified-filter-panel",
+    scene: "mobile-direct-query-fields",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: ".controls",
   },
   "mobile-query-history.png": {
+    scene: "mobile-direct-query-fields-compact",
     viewport: { width: 390, height: 844 },
+    selector: ".controls",
   },
   "mobile-query-grid-alignment.png": {
-    scene: "mobile-query-grid-alignment",
+    scene: "mobile-direct-query-field-grid",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: ".controls",
   },
   "mobile-query-empty-suggestions-compact.png": {
-    scene: "mobile-query-empty-suggestions-compact",
+    scene: "mobile-direct-query-empty",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: ".controls",
   },
   "mobile-query-footer-alignment.png": {
-    scene: "mobile-query-footer-alignment",
+    scene: "mobile-direct-query-footer-free",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: ".controls",
   },
   "mobile-query-history-alignment.png": {
-    scene: "mobile-query-history-alignment",
+    scene: "mobile-direct-query-no-history",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: ".controls",
   },
   "mobile-page-request-loading.png": {
     scene: "mobile-page-request-loading",

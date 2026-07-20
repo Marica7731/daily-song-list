@@ -427,6 +427,37 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
                 { title: "なれたん", artist: "未記載", time: "0:01", seconds: 1 },
                 { title: "【雑談】リクエスト確認", artist: "未記載", time: "0:02", seconds: 2 },
                 { title: "星座になれたら", artist: "結束バンド", time: "0:03", seconds: 3 },
+                {
+                  title: "初めて日本の病院に行ってきました",
+                  artist: "I Went to a Japanese Hospital for the First Time",
+                  raw: "00:06:50 初めて日本の病院に行ってきました / I Went to a Japanese Hospital for the First Time",
+                  time: "0:04",
+                  seconds: 4,
+                },
+                {
+                  title: "音楽停止（クリックミス）",
+                  artist: "Music stops (accidental click)",
+                  raw: "01:43:25 音楽停止（クリックミス） / Music stops (accidental click)",
+                  time: "0:05",
+                  seconds: 5,
+                },
+                { title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / tuki.", time: "0:06", seconds: 6 },
+              ],
+            },
+            {
+              videoId: "flower00123",
+              title: "Flower variants karaoke",
+              channelName: "Flower Ch.",
+              channelHandle: "@flower_v",
+              channelUrl: "https://www.youtube.com/@flower_v",
+              knownSourceType: "manual",
+              thumbnailUrl: "https://i.ytimg.com/vi/flower00123/hqdefault.jpg",
+              publishedTimestamp: 1784337000000,
+              publishedText: "2026-07-18",
+              songs: [
+                { title: "花になって", artist: "緑黄色社会", time: "1:00", seconds: 60 },
+                { title: "花になって - Be a flower", artist: "未記載", time: "2:00", seconds: 120 },
+                { title: "52😎花になって", artist: "未記載", time: "3:00", seconds: 180 },
               ],
             },
           ],
@@ -551,7 +582,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\"",
+      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止",
       "--search-scope",
       "title",
       "--page-size",
@@ -573,7 +604,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "START OR 星座になれたら",
+      "START OR 星座になれたら OR 晩餐歌",
       "--search-scope",
       "title",
       "--page-size",
@@ -582,7 +613,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(retainedMomentSongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(retainedMomentSongOutput, /"totalCount": 2/);
+  assert.match(retainedMomentSongOutput, /"totalCount": 3/);
 
   const safeSongOutput = execFileSync(
     PYTHON,
@@ -673,6 +704,88 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     vtuberSongMetricPayload.records[0].songs.map((song) => song.name),
     ["Overlay Song", "ENDLESS STORY", "Pretender", "spending", "Opening"],
   );
+
+  const flowerVtuberSongMetricOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--metric",
+      "songs",
+      "--q",
+      "Flower",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(flowerVtuberSongMetricOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const flowerVtuberSongMetricPayload = parseDbQueryOutput(flowerVtuberSongMetricOutput);
+  assert.equal(flowerVtuberSongMetricPayload.records[0].songCount, 1);
+  assert.deepEqual(flowerVtuberSongMetricPayload.records[0].songs, [{ key: "花になって", name: "花になって", count: 3 }]);
+
+  const momentOnlyVtuberOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--q",
+      "IsakiRiona",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(momentOnlyVtuberOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(momentOnlyVtuberOutput, /"knownSourceType": "vsinger_moment_http"/);
+  assert.match(momentOnlyVtuberOutput, /"isCollected": false/);
+
+  const dbPathPython = path.join(dir, "song-rank-python.sqlite");
+  const pythonBuildOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+      "--input",
+      latestPath,
+      "--output",
+      dbPathPython,
+      "--no-vsinger",
+      "--youtube-channel-discovery-dir",
+      channelDir,
+      "--require-youtube-channel-discovery",
+      "--ranking-source",
+      "python",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(pythonBuildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+  const pythonFlowerVtuberSongMetricOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPathPython,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--metric",
+      "songs",
+      "--q",
+      "Flower",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(pythonFlowerVtuberSongMetricOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const pythonFlowerVtuberSongMetricPayload = parseDbQueryOutput(pythonFlowerVtuberSongMetricOutput);
+  assert.equal(pythonFlowerVtuberSongMetricPayload.records[0].songCount, 1);
+  assert.deepEqual(pythonFlowerVtuberSongMetricPayload.records[0].songs, [{ name: "花になって", count: 3 }]);
 
   const compositeVtuberOutput = execFileSync(
     PYTHON,

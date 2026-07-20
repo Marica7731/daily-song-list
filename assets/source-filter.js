@@ -428,10 +428,31 @@
     const combined = `${titleText} ${artistText} ${rawText}`;
     if (isKnownSongSafeFromCommentary(titleText, artistText)) return false;
     if (hasStructuredSongNumber(rawText) && !isCommentaryNoiseText(titleText)) return false;
+    if (isJapaneseTopicTitleWithEnglishGloss(titleText, artistText)) return true;
     if (/(?:話|理由|コメント|コメ|リクエスト|アンケート|おすすめ|おススメ|喉|のど|配信|動画|練習|噛|食べ|飲み|旅行|友達|家族|姉|妹|幼馴染|指|身長|リップ|フリ|視聴者|収益化|チャンネル|スーパー|キーボード|アレルギー|リスナー|歌声|サビ|歌詞)/u.test(combined)) {
       return isTopicLikeTitle(titleText) || isSentenceLikeTitle(titleText) || isSentenceLikeCredit(artistText) || isCommentaryNoiseText(titleText) || isCommentaryNoiseText(artistText);
     }
     return isSentenceLikeTitle(titleText) && isSentenceLikeCredit(artistText);
+  }
+
+  function isJapaneseTopicTitleWithEnglishGloss(title, artist) {
+    const titleText = String(title || "").trim();
+    const artistText = String(artist || "").trim();
+    if (!titleText || !artistText || !containsJapanese(titleText) || containsJapanese(artistText)) return false;
+    if (!isEnglishGlossLikeText(artistText)) return false;
+    if (isCommentaryNoiseText(titleText) || isTopicLikeTitle(titleText) || isSentenceLikeTitle(titleText)) return true;
+    return /(?:op|ed|opening|ending|雑談|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ)/iu.test(titleText);
+  }
+
+  function isEnglishGlossLikeText(text) {
+    const value = String(text || "").normalize("NFKC").trim();
+    if (!value || containsJapanese(value) || !/[A-Za-z]/.test(value)) return false;
+    if (!/^[A-Za-z0-9 .,:'’"“”&+_\-/!?~()[\]#]+$/u.test(value)) return false;
+    const words = value.match(/[A-Za-z][A-Za-z'’]*/gu) || [];
+    if (!words.length || words.length > 18) return false;
+    if (isSentenceLikeCredit(value)) return true;
+    if (/[?？]$/.test(value) || /\([^)]{3,80}\)/u.test(value)) return true;
+    return /\b(?:about|accidental|accented|ad|alcohol|anime|attack|ballad|carbonated|catchy|click|commercial|differences?|difficult|dream|drink(?:ing)?|food|hospital|introduced?|introducing|japanese|korean|marks?|music|parents?|picture|poisoning|poll|popular|pronunciation|recommendations?|recently|rice|risks?|salon|song|songs|souvenirs?|stops?|tea|temptation|traditional|vowel|watched)\b/iu.test(value);
   }
 
   function isKnownSongSafeFromCommentary(title, artist) {
@@ -444,6 +465,10 @@
 
   function isNaraetanSelfReference(text) {
     return /なれたん/u.test(String(text || ""));
+  }
+
+  function containsJapanese(text) {
+    return /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/u.test(text || "");
   }
 
   function hasStructuredSongNumber(raw) {

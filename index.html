@@ -20,7 +20,7 @@
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles.css?v=h0320c195efff" />
+    <link rel="stylesheet" href="assets/styles.css?v=hefc9549513b5" />
   </head>
   <body>
     <main class="layout">
@@ -48,16 +48,33 @@
             <button class="tab" type="button" data-view="videos" aria-pressed="false">视频</button>
           </div>
 
-          <button class="query-trigger" id="queryTrigger" type="button" aria-haspopup="dialog" aria-controls="queryDialog">
+          <form class="query-trigger query-search-form" id="querySearchForm" role="search">
             <svg class="query-trigger-icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" />
             </svg>
-            <span class="query-trigger-text" id="queryTriggerText">搜索歌曲、歌手、VTuber或视频</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 6h16M7 12h10M10 18h4" />
-            </svg>
-            <span class="query-count" id="queryCountBadge" hidden></span>
-          </button>
+            <label class="sr-only" for="queryInput">搜索歌曲、歌手、VTuber或视频</label>
+            <input id="queryInput" type="search" autocomplete="off" placeholder="搜索歌曲、歌手、VTuber或视频" />
+            <button class="icon-button clear-query-button" id="clearQueryButton" type="button" aria-label="清空搜索词">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 6 12 12M18 6 6 18" />
+              </svg>
+            </button>
+            <details class="query-field-menu">
+              <summary class="query-field-menu-trigger" aria-label="选择搜索字段">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 6h16M7 12h10M10 18h4" />
+                </svg>
+                <span class="query-count" id="queryCountBadge" hidden></span>
+              </summary>
+              <div class="query-field-menu-panel" role="group" aria-label="搜索字段">
+                <label><input type="checkbox" name="searchField" value="title" checked />歌名</label>
+                <label><input type="checkbox" name="searchField" value="artist" checked />歌手</label>
+                <label><input type="checkbox" name="searchField" value="channel" />频道</label>
+                <label><input type="checkbox" name="searchField" value="video" />视频</label>
+                <small class="query-field-menu-hint">全不选时搜索全部字段</small>
+              </div>
+            </details>
+          </form>
         </div>
       </section>
 
@@ -152,22 +169,6 @@
             </svg>
           </button>
         </header>
-        <label class="query-search-section">
-          <span class="sr-only">搜索歌曲、歌手、频道或视频</span>
-          <input id="queryInput" type="search" autocomplete="off" placeholder="搜索歌曲、歌手、频道或视频" />
-          <button class="icon-button clear-query-button" id="clearQueryButton" type="button" aria-label="清空搜索词">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m6 6 12 12M18 6 6 18" />
-            </svg>
-          </button>
-        </label>
-        <div class="query-field query-compact-field query-search-scope-field" title="搜索字段范围">
-          <span class="query-field-caption">字段</span>
-          <span class="query-segmented" role="group" aria-label="搜索字段范围">
-            <label><input id="searchFieldTitleToggle" type="checkbox" name="searchField" value="title" checked />歌名</label>
-            <label><input id="searchFieldArtistToggle" type="checkbox" name="searchField" value="artist" checked />歌手</label>
-          </span>
-        </div>
         <div class="query-panel-body">
           <section class="query-filter-matrix query-form-grid" aria-label="搜索筛选条件">
             <label class="query-toggle" title="未匹配到 song-search 已知曲库，仅表示曲库未收录，不代表播放量或知名度低。">
@@ -249,9 +250,9 @@
     </button>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="assets/blocked-vtuber-meta.js?v=h0320c195efff" defer></script>
-    <script src="assets/frontend-utils.js?v=h0320c195efff" defer></script>
-    <script src="assets/ranking-utils.js?v=h0320c195efff" defer></script>
-    <script src="assets/app.js?v=h0320c195efff" defer></script>
+    <script src="assets/blocked-vtuber-meta.js?v=hefc9549513b5" defer></script>
+    <script src="assets/frontend-utils.js?v=hefc9549513b5" defer></script>
+    <script src="assets/ranking-utils.js?v=hefc9549513b5" defer></script>
+    <script src="assets/app.js?v=hefc9549513b5" defer></script>
   </body>
 </html>

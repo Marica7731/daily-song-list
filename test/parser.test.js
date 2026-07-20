@@ -72,12 +72,30 @@ test("rejects naretan commentary and request timestamps while keeping real song 
       "0:09 ENDLESS STORY / REIRA starring YUNA ITO",
       "0:10 Opening / Known Artist",
       "0:11 楽しみにしてろよ! / 練習後のなれたんを",
+      "0:12 初めて日本の病院に行ってきました / I Went to a Japanese Hospital for the First Time",
+      "0:13 韓国のちゃんぽん / Korean Jjamppong",
+      "0:14 音楽停止（クリックミス） / Music stops (accidental click)",
+      "0:15 FとPの発音 / Pronunciation of F and P",
+      "0:16 食あたり / Food Poisoning",
+      "0:17 お茶を飲みながら逆立ち / Handstand While Drinking Tea",
+      "0:18 晩餐歌 / tuki.",
+      "0:19 花になって / 緑黄色社会",
+      "0:20 晴る / ヨルシカ",
+      "0:21 START / レフティーモンスターP feat. Lily",
     ].join("\n"),
   ]);
 
   assert.deepEqual(
     songs.map((song) => `${song.title} / ${song.artist}`),
-    ["星座になれたら / 結束バンド", "ENDLESS STORY / REIRA starring YUNA ITO", "Opening / Known Artist"],
+    [
+      "星座になれたら / 結束バンド",
+      "ENDLESS STORY / REIRA starring YUNA ITO",
+      "Opening / Known Artist",
+      "晩餐歌 / tuki",
+      "花になって / 緑黄色社会",
+      "晴る / ヨルシカ",
+      "START / レフティーモンスターP feat. Lily",
+    ],
   );
 });
 

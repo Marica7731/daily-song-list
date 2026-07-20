@@ -134,7 +134,17 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "【さぁ】「さぁだけにSURFACE」", artist: "なれたんギャグ" }), true);
   assert.equal(isBlockedSongEntry({ title: "【雑談】リクエスト確認", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "（去年のなれたん）譲り合い精神がないの？", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "初めて日本の病院に行ってきました", artist: "I Went to a Japanese Hospital for the First Time" }), true);
+  assert.equal(isBlockedSongEntry({ title: "韓国のちゃんぽん", artist: "Korean Jjamppong" }), true);
+  assert.equal(isBlockedSongEntry({ title: "音楽停止（クリックミス）", artist: "Music stops (accidental click)" }), true);
+  assert.equal(isBlockedSongEntry({ title: "FとPの発音", artist: "Pronunciation of F and P" }), true);
+  assert.equal(isBlockedSongEntry({ title: "食あたり", artist: "Food Poisoning" }), true);
+  assert.equal(isBlockedSongEntry({ title: "お茶を飲みながら逆立ち", artist: "Handstand While Drinking Tea" }), true);
+  assert.equal(isBlockedSongEntry({ title: "おすすめの曲紹介", artist: "Song Recommendations" }), true);
   assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
+  assert.equal(isBlockedSongEntry({ title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / Bansanka (tuki.)" }), false);
+  assert.equal(isBlockedSongEntry({ title: "花になって", artist: "緑黄色社会" }), false);
+  assert.equal(isBlockedSongEntry({ title: "晴る", artist: "ヨルシカ" }), false);
 
   assert.equal(cleanSongTitleNoise("01| ハートアンドハート"), "ハートアンドハート");
   assert.equal(cleanSongTitleNoise("8.32"), "8.32");
