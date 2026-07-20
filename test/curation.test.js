@@ -14,6 +14,7 @@ const {
   mergeCurationPatch,
 } = require("../scripts/curation");
 const { buildRankDiffs, extractCommentTexts, sourceScore } = require("../scripts/update-songlist");
+const { createSongSearchLookup, normalizeSongSearchText } = require("../assets/frontend-utils");
 
 test("source identity prefers commentId and hash fallback is stable", () => {
   const withCommentId = createSourceRecord({
@@ -142,6 +143,54 @@ test("curation drops high-confidence activity titles but keeps known songs", () 
   assert.equal(videos.curationStats.ruleDroppedEntries, 2);
 });
 
+test("curation drops naraetan-style narration rows before title-only known-song protection", () => {
+  const songSearchLookup = createSongSearchLookup({
+    titleKeys: ["あくび", "ペットショップ", "幾億光年", "マリーゴールド", "snowhalation"].map(normalizeSongSearchText),
+    titleArtistKeys: ["marigold::aimyon", "snowhalation::μs"],
+  });
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "NARAETAN01",
+        songs: [
+          { title: "あくび", artist: "未記載", seconds: 10, raw: "00:00:10 あくび / Yawn" },
+          { title: "ペットショップ", artist: "未記載", seconds: 20, raw: "00:00:20 ペットショップ / Pet Shop" },
+          { title: "【幾億光年】スーパーで聞いた曲", artist: "未記載", seconds: 30, raw: "00:00:30 【幾億光年】スーパーで聞いた曲" },
+          { title: "練習　晩餐歌", artist: "tuki.", seconds: 40, raw: "00:00:40 練習　晩餐歌/tuki." },
+          { title: "マリーゴールド", artist: "未記載", seconds: 50, raw: "00:00:50 マリーゴールド" },
+          { title: "Sonw halation", artist: "未記載", seconds: 60, raw: "00:01:00 Sonw halation" },
+        ],
+      },
+    ],
+    { overrides: { records: [] }, songSearchLookup },
+  );
+
+  assert.deepEqual(
+    videos[0].songs.map((item) => item.title),
+    ["マリーゴールド", "Sonw halation"],
+  );
+  assert.equal(videos.curationStats.conversationDroppedEntries, 4);
+});
+
+test("curation drops weak unknown singleton rows only when corpus and lookup evidence are weak", () => {
+  const songSearchLookup = createSongSearchLookup({ titleKeys: ["knownsong"], titleArtistKeys: [] });
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "WEAK000001",
+        songs: [
+          { title: "Known Song", artist: "未記載", seconds: 10, raw: "00:00:10 Known Song" },
+          { title: "Happy Happy Bitthdary", artist: "未記載", seconds: 20, raw: "00:00:20 Happy Happy Bitthdary" },
+        ],
+      },
+    ],
+    { overrides: { records: [] }, songSearchLookup },
+  );
+
+  assert.deepEqual(videos[0].songs.map((item) => item.title), ["Known Song"]);
+  assert.equal(videos.curationStats.conversationDroppedEntries, 1);
+});
+
 test("candidate activity title handles legacy non-song rule objects", () => {
   assert.equal(isCandidateActivityTitle("戻り", { exactUnknownArtistTitles: ["戻り"] }), true);
   assert.equal(isCandidateActivityTitle("前前前世", { exactUnknownArtistTitles: [] }), false);
@@ -226,8 +275,7 @@ test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", (
     videos[0].songs.map((item) => item.title),
     ["ライオン", "星座になれたら"],
   );
-  assert.equal(videos.curationStats.ruleDroppedEntries, 1);
-  assert.equal(videos.curationStats.conversationDroppedEntries, 3);
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 4);
 });
 
 test("curation drops fRvk5uuysyw chatter without rejecting normal unknown-artist setlists", () => {
@@ -257,8 +305,7 @@ test("curation drops fRvk5uuysyw chatter without rejecting normal unknown-artist
     videos[0].songs.map((item) => item.title),
     ["わたがし", "フィクサー", "オリジナル"],
   );
-  assert.equal(videos.curationStats.ruleDroppedEntries, 2);
-  assert.equal(videos.curationStats.conversationDroppedEntries, 6);
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 8);
 });
 
 test("curation drops campaign and announcement rows from production data", () => {

@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const { isSongSearchKnown, normalizeSongSearchText } = require("../assets/frontend-utils");
 const { entryRepairSignals } = require("./entry-repair");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -300,6 +301,9 @@ function isConversationEntry(song) {
 function isStrongNonSongActivityText(value) {
   const text = String(value || "").normalize("NFKC").replace(/[\s\u3000]+/gu, "").replace(/[!！?？。．.]+$/gu, "");
   if (!text) return false;
+  if (/^(?:YoutubePremium|AFK|awayfromkeyboard|take\d+|テイク\d+)$/iu.test(text)) return true;
+  if (/^(?:練習|practice).{2,}$/iu.test(text)) return true;
+  if (/^(?:コメ|コメント)[「『"“].+[」』"”]$/u.test(text)) return true;
   if (/^(?:閉会式|閉会|開会式)(?:も?(?:見てください|みてください|見てね|みてね))?$/u.test(text)) return true;
   if (/^\d+を手で表現した$/u.test(text)) return true;
   if (/(?:周年記念)?(?:お)?写真公開/u.test(text)) return true;
@@ -311,7 +315,43 @@ function isStrongNonSongActivityText(value) {
   if (/(?:免許の適正性|声がサイレン|楽しそう|触れれる|褒め合って体にいい|難しい曲を挑戦|花火大会.*行きたい|すぐ会えるよって意味で歌いたい|謝罪会見|改めて謝罪|ばいちょろり.*終了|マリパのわさび事件)/u.test(text)) {
     return true;
   }
+  if (/(?:リスナー同士の結婚報告|なかったことにしよう|とてもくやしい|リクエストできる歌のリスト|妻を迎えに行かないと|久しぶりに来てまた食べ物の話|夏を感じる曲|喉が痛い|歌声禁斷症勢|譲り合い精神|突然3Dモデルがバグった|燃え尽きて消えた|包囲されたちびたん|会社をクビに|ガイドメロディが大きい|曲が増えた理由|飽きるまでずっと繰り返し|疑われちゃう可能性|ミニストップ行けよ|ビックリした|プレゼントが届きました|歌っている途中)/u.test(text)) {
+    return true;
+  }
+  if (/(?:食べ物|食べる|飲む|飲酒|お酒|ビール|ハイボール|喉|病院|薬|体調|風邪|咳|くしゃみ|あくび|欠伸)/u.test(text) && /(?:話|痛い|行く|行け|届|した|する|です|ます|ちゃう|[?？])/.test(text)) {
+    return true;
+  }
   return false;
+}
+
+function isWeakUnknownSingletonNonSong(song, occurrenceStats = {}) {
+  if (!isUnknownArtist(song?.artist)) return false;
+  if (!isCorpusSingleton(occurrenceStats)) return false;
+  const title = String(song?.title || "").normalize("NFKC").trim();
+  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  const compact = normalizeConversationText(`${title} ${raw}`);
+  if (!title || normalizeSongSearchText(title).length <= 1) return false;
+  if (isStrongNonSongActivityText(title) || isStrongNonSongActivityText(raw)) return true;
+  if (isTranslationOnlyExplanationRow(title, raw)) return true;
+  if (/(?:でした|です|ます|ました|してる|している|したい|しよう|しない|できる|いけない|ちゃう|だった|だよ|だね|なの|かな|かも|理由|途中|可能性|報告|説明|紹介|翻訳|ヒント|問題|どこ|誰|なに|何|どう|なぜ|なんで|[?？])$/u.test(title)) {
+    return true;
+  }
+  if (/(?:コメ|コメント|リスナー|配信|曲紹介|曲説明|曲リスト|歌のリスト|アンケート|質問|喉|病院|食べ物|飲み物|飲酒|行動|移動|帰宅|プレゼント|YouTubePremium|AFK|awayfromkeyboard|take\d+)/iu.test(compact)) {
+    return true;
+  }
+  return false;
+}
+
+function isCorpusSingleton(occurrenceStats = {}) {
+  return (occurrenceStats.titleArtistCount || 0) === 1 && (occurrenceStats.titleCount || 0) === 1;
+}
+
+function isTranslationOnlyExplanationRow(title, raw) {
+  const rawText = String(raw || "");
+  if (!/[\/／]\s*[A-Za-z][A-Za-z0-9'’(),\-\s]{8,}$/u.test(rawText)) return false;
+  const titleText = String(title || "");
+  if (/^[A-Za-z0-9'’(),\-\s]+$/u.test(titleText)) return false;
+  return /(?:した|して|する|です|ます|だった|でした|理由|途中|可能性|報告|届きました|痛い|大きい|消えた|バグった|行け|食べ|飲み|喉|曲|歌|リスナー|なれたん|ちびたん|[?？])/.test(titleText);
 }
 
 function normalizeConversationText(text) {
@@ -342,7 +382,13 @@ function isParserCorruptionEntry(song) {
 }
 
 function classifyEntry(song, options = {}) {
-  const knownSong = options.knownSong === true || (typeof options.knownSongMatcher === "function" && options.knownSongMatcher(song));
+  if (isHardNonSongNarrationEntry(song, options.songSearchLookup)) {
+    return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["hard_non_song_narration"] };
+  }
+  const knownSong =
+    options.knownSong === true ||
+    (typeof options.knownSongMatcher === "function" && options.knownSongMatcher(song)) ||
+    isKnownSongByLookup(song, options.songSearchLookup);
   const unknownArtist = isUnknownArtist(song?.artist);
   const signals = song?.curationSignals || entryRepairSignals(song);
   if (!knownSong && signals?.suppressLikelySong) {
@@ -358,6 +404,19 @@ function classifyEntry(song, options = {}) {
   }
   if (!knownSong && isConversationEntry(song)) {
     return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["conversation_entry"] };
+  }
+  if (!knownSong && isWeakUnknownSingletonNonSong(song, options.occurrenceStats)) {
+    return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["weak_unknown_singleton_non_song"] };
+  }
+  if (
+    unknownArtist &&
+    !knownSong &&
+    options.songSearchLookup?.available &&
+    isCorpusSingleton(options.occurrenceStats) &&
+    !hasReliableRawArtistCredit(song) &&
+    !hasNearKnownTitleMatch(song?.title, options.songSearchLookup)
+  ) {
+    return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["weak_unknown_singleton_low_similarity"] };
   }
   if (unknownArtist && knownSong) {
     return { classification: "likely_song", suggestedAction: "keep", riskReasons: ["known_song_unknown_artist"] };
@@ -412,12 +471,14 @@ function applyCurationToSources(sources, context, candidate = {}) {
 
 function applyCurationToVideos(videos, context) {
   const overrides = context?.overrides?.records || [];
+  const corpusStats = buildCorpusSongStats(context?.corpusVideos || videos);
   const stats = {
     droppedVideos: 0,
     droppedEntries: 0,
     replacedEntries: 0,
     ruleDroppedEntries: 0,
     conversationDroppedEntries: 0,
+    mixedSourceDroppedEntries: 0,
     nearDuplicateDroppedEntries: 0,
     forceRefreshVideoIds: collectForceRefreshVideoIds(context).size,
   };
@@ -451,7 +512,11 @@ function applyCurationToVideos(videos, context) {
         stats.droppedEntries += 1;
         continue;
       }
-      const classification = classifyEntry(enriched, { rules: context?.nonSongRules });
+      const classification = classifyEntry(enriched, {
+        rules: context?.nonSongRules,
+        songSearchLookup: context?.songSearchLookup,
+        occurrenceStats: corpusSongStatsFor(corpusStats, enriched),
+      });
       if (classification.suggestedAction === "drop_entry" && classification.classification === "confirmed_noise") {
         stats.ruleDroppedEntries += 1;
         continue;
@@ -468,7 +533,9 @@ function applyCurationToVideos(videos, context) {
       }
       songs.push(enriched);
     }
-    const deduped = dedupeNearDuplicateVideoSongs(songs);
+    const mixedSourceFilter = filterArtistRichSingletonUnknownSongs(songs, corpusStats);
+    stats.mixedSourceDroppedEntries += mixedSourceFilter.droppedCount;
+    const deduped = dedupeNearDuplicateVideoSongs(mixedSourceFilter.songs);
     stats.nearDuplicateDroppedEntries += deduped.droppedCount;
     if (deduped.songs.length) result.push({ ...video, songs: deduped.songs });
   }
@@ -497,6 +564,54 @@ function dedupeNearDuplicateVideoSongs(inputSongs, options = {}) {
     songs: kept.sort((a, b) => (a.seconds || 0) - (b.seconds || 0)).map((song, index) => ({ ...song, index: index + 1 })),
     droppedCount,
   };
+}
+
+function filterArtistRichSingletonUnknownSongs(inputSongs, corpusStats) {
+  const songs = Array.isArray(inputSongs) ? inputSongs : [];
+  const artistCount = songs.filter((song) => !isUnknownArtist(song?.artist)).length;
+  const unknownCount = songs.length - artistCount;
+  const artistRatio = songs.length ? artistCount / songs.length : 0;
+  if (artistCount < 5 || unknownCount < 2 || artistRatio < 0.35) return { songs, droppedCount: 0 };
+
+  const kept = [];
+  let droppedCount = 0;
+  for (const song of songs) {
+    const occurrenceStats = corpusSongStatsFor(corpusStats, song);
+    if (
+      isUnknownArtist(song?.artist) &&
+      occurrenceStats.titleCount === 1 &&
+      occurrenceStats.titleArtistCount === 1 &&
+      !hasReliableRawArtistCredit(song)
+    ) {
+      droppedCount += 1;
+      continue;
+    }
+    kept.push(song);
+  }
+  return { songs: kept, droppedCount };
+}
+
+function hasReliableRawArtistCredit(song) {
+  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  const title = String(song?.title || "").normalize("NFKC").trim();
+  if (!raw || !title || isStrongNonSongActivityText(title) || isTranslationOnlyExplanationRow(title, raw)) return false;
+  const escapedTitle = escapeRegExp(title).replace(/\s+/gu, "\\s*");
+  const pattern = new RegExp(`${escapedTitle}\\s*[\\/／|｜￤∣丨]\\s*([^\\n]{2,80})`, "iu");
+  const match = raw.match(pattern);
+  const artist = match ? cleanRawArtistCredit(match[1]) : "";
+  if (!artist || isUnknownArtist(artist)) return false;
+  if (/(?:です|ます|でした|だった|して|する|したい|しよう|ください|理由|途中|可能性|報告|説明|紹介|コメント|リスナー|喉|病院|食べ物|飲み物|プレゼント|届きました)$/iu.test(artist)) {
+    return false;
+  }
+  return /[\p{Letter}\p{Number}一-龯ぁ-んァ-ヶ]/u.test(artist);
+}
+
+function cleanRawArtistCredit(value) {
+  return String(value || "")
+    .replace(/\s+(?:19|20)\d{2}(?:[\/／.-]\d{1,2})?.*$/u, "")
+    .replace(/\s*(?:[:：]_[^\s　:：]+[:：]?|🆕|←\s*NEW!?|NEW!)+\s*$/giu, "")
+    .replace(/[」』】)\]）]+$/u, "")
+    .trim();
 }
 
 function isNearDuplicateVideoSong(left, right, windowSeconds) {
@@ -562,6 +677,10 @@ function duplicateTitleKey(value) {
 
 function duplicateArtistKey(value) {
   return isUnknownArtist(value) ? "" : duplicateTitleKey(value);
+}
+
+function escapeRegExp(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 function applyReplacement(song, replacement = {}) {
@@ -630,6 +749,153 @@ function collectForceRefreshVideoIds(context) {
 
 function hasRejectSourceOverride(context, videoId) {
   return (context?.overrides?.records || []).some((record) => record.action === "reject_source" && record.videoId === videoId);
+}
+
+function buildCorpusSongStats(videos) {
+  const titleCounts = new Map();
+  const titleArtistCounts = new Map();
+  for (const video of videos || []) {
+    for (const song of video.songs || []) {
+      const titleKey = normalizeSongSearchText(song?.title);
+      const artistKey = isUnknownArtist(song?.artist) ? "" : normalizeSongSearchText(song?.artist);
+      if (!titleKey) continue;
+      titleCounts.set(titleKey, (titleCounts.get(titleKey) || 0) + 1);
+      const titleArtistKey = `${titleKey}::${artistKey}`;
+      titleArtistCounts.set(titleArtistKey, (titleArtistCounts.get(titleArtistKey) || 0) + 1);
+    }
+  }
+  return { titleCounts, titleArtistCounts };
+}
+
+function corpusSongStatsFor(stats, song) {
+  const titleKey = normalizeSongSearchText(song?.title);
+  const artistKey = isUnknownArtist(song?.artist) ? "" : normalizeSongSearchText(song?.artist);
+  return {
+    titleCount: titleKey ? stats.titleCounts.get(titleKey) || 0 : 0,
+    titleArtistCount: titleKey ? stats.titleArtistCounts.get(`${titleKey}::${artistKey}`) || 0 : 0,
+  };
+}
+
+function isKnownSongByLookup(song, lookup) {
+  return Boolean(lookup?.available && isSongSearchKnown(song, lookup));
+}
+
+function isExactTitleArtistKnownByLookup(song, lookup) {
+  if (!lookup?.available) return false;
+  const titleKey = normalizeSongSearchText(song?.title);
+  const artistKey = normalizeSongSearchText(song?.artist);
+  return Boolean(titleKey && artistKey && !isUnknownArtist(song?.artist) && lookup.titleArtistKeys.has(`${titleKey}::${artistKey}`));
+}
+
+function isHardNonSongNarrationEntry(song, lookup) {
+  const title = String(song?.title || "").normalize("NFKC").trim();
+  const artist = String(song?.artist || "").normalize("NFKC").trim();
+  const raw = String(song?.raw || "").normalize("NFKC").trim();
+  if (!title) return false;
+  if (isSongListNumberedRaw(raw)) return false;
+  if (isExactTitleArtistKnownByLookup(song, lookup)) return false;
+  if (isStrongNonSongActivityText(title) || isStrongNonSongActivityText(raw)) return true;
+  if (hasEmbeddedSongTitleWithNarration(title, artist)) return true;
+  if (hasLikelyTranslationCredit(title, artist, raw)) return true;
+  return false;
+}
+
+function isSongListNumberedRaw(raw) {
+  const text = String(raw || "").normalize("NFKC").trim();
+  return /(?:^|[\s　])(?:[#＃]\s*\d{1,3}\b|M\d{1,3}[.．]?|[①-⑳])/.test(text);
+}
+
+function hasEmbeddedSongTitleWithNarration(title, artist) {
+  const text = `${title} ${artist}`.normalize("NFKC");
+  if (!/[【「『].+[】」』]/u.test(text)) return false;
+  return /(?:スーパーで聞いた曲|聞いた曲|歌ってみたかった|聞こえた|流れてた|の曲|という曲)/u.test(text);
+}
+
+function hasLikelyTranslationCredit(title, artist, raw) {
+  const titleText = String(title || "").normalize("NFKC").trim();
+  const rawText = String(raw || "").normalize("NFKC").trim();
+  if (!/[\/／]\s*\S/u.test(rawText)) return false;
+  const artistText = isUnknownArtist(artist) ? extractRawSlashCredit(titleText, rawText) : String(artist || "").normalize("NFKC").trim();
+  if (!artistText || isUnknownArtist(artistText)) return false;
+  const japaneseTitle = /[一-龯ぁ-んァ-ヶ]/u.test(titleText);
+  const latinArtist = /[A-Za-z]/u.test(artistText);
+  if (/[一-龯ぁ-んァ-ヶ]/u.test(artistText)) return false;
+  if (!japaneseTitle || !latinArtist) return false;
+  const wordCount = artistText.split(/\s+/u).filter(Boolean).length;
+  if (/^(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did|My)\b/u.test(artistText)) return true;
+  if (wordCount >= 4) return true;
+  if (/(?:\b(?:Story|Stream|Comment|Chat|Song List|Guide Melody|Practice|Hospital|Food|Drink|Throat|Birthday|Surprised|Yawn|Yawning)\b)/iu.test(artistText)) return true;
+  if (/(?:feat\.?|ft\.?|with|&|×|x)\s*[\p{Letter}\p{Number}]/iu.test(artistText)) return false;
+  if (/^(?:LiSA|Aimer|Ado|YOASOBI|Yorushika|supercell|HoneyWorks|RADWIMPS|KOKIA|Lia|eill|doriko|DECO\*27|EasyPop|MIMI|Mao|ChouCho|See-Saw|Whiteberry|GARNET CROW|Mrs\. GREEN APPLE|Official髭男dism|UNISON SQUARE GARDEN|BUMP OF CHICKEN|Every Little Thing|CHiCO with HoneyWorks|Goose house|Kenshi Yonezu|NICO Touches the Walls|THE ORAL CIGARETTES|GARNiDELiA|Yunomi & nicamoq|DAOKO×米津玄師|Novelbright|FRUITS ZIPPER|CUTIE STREET|MONGOL800|MAISONdes|ALI PROJECT|Galileo Galilei|KANA-BOON|LAST ALLIANCE|AiScReam|Islet feat\.倚水|All at once|SunSet Swish)$/u.test(artistText)) {
+    return false;
+  }
+  const compactTitle = normalizeConversationText(titleText);
+  const compactArtist = normalizeConversationText(artistText);
+  if (/^(?:Yawn|Yawning|Surprised|Nothing happened|Pet Shop|exhausted|My left arm is getting way too excited)$/iu.test(artistText)) return true;
+  if (/(?:\b(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were)\b|[?？]|!|％|\d+%|\(|\))/u.test(artistText)) return true;
+  if (compactArtist.length >= 8 && compactTitle.length >= 3 && compactArtist.includes(compactTitle)) return true;
+  return false;
+}
+
+function extractRawSlashCredit(title, raw) {
+  const titleText = String(title || "").normalize("NFKC").trim();
+  const rawText = String(raw || "").normalize("NFKC").trim();
+  if (!titleText || !rawText) return "";
+  if (!rawText.includes(titleText)) return "";
+  const match = rawText.match(/[\/／]\s*([^\/／\n]{1,120})$/u);
+  return match ? cleanRawArtistCredit(match[1]) : "";
+}
+
+function hasNearKnownTitleMatch(title, lookup) {
+  if (!lookup?.available) return false;
+  const titleKey = normalizeSongSearchText(title);
+  if (!titleKey || titleKey.length < 5) return false;
+  if (lookup.titleKeys.has(titleKey)) return true;
+  const candidates = titleKeysByLength(lookup);
+  const minLength = Math.max(5, titleKey.length - 1);
+  const maxLength = titleKey.length + 1;
+  let checked = 0;
+  for (let length = minLength; length <= maxLength; length += 1) {
+    for (const candidate of candidates.get(length) || []) {
+      checked += 1;
+      if (checked > 2500) return false;
+      const limit = titleKey.length >= 8 ? 2 : 1;
+      if (boundedEditDistance(titleKey, candidate, limit) <= limit) return true;
+    }
+  }
+  return false;
+}
+
+function titleKeysByLength(lookup) {
+  if (lookup._titleKeysByLength) return lookup._titleKeysByLength;
+  const byLength = new Map();
+  for (const key of lookup.titleKeys || []) {
+    const length = String(key || "").length;
+    if (!byLength.has(length)) byLength.set(length, []);
+    byLength.get(length).push(key);
+  }
+  lookup._titleKeysByLength = byLength;
+  return byLength;
+}
+
+function boundedEditDistance(left, right, maxDistance) {
+  const a = String(left || "");
+  const b = String(right || "");
+  if (Math.abs(a.length - b.length) > maxDistance) return maxDistance + 1;
+  let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= a.length; i += 1) {
+    const current = [i];
+    let rowBest = current[0];
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      const value = Math.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost);
+      current[j] = value;
+      rowBest = Math.min(rowBest, value);
+    }
+    if (rowBest > maxDistance) return maxDistance + 1;
+    previous = current;
+  }
+  return previous[b.length];
 }
 
 function entryRiskReasons({ song, knownSongMatcher, sourceStats = {} }) {

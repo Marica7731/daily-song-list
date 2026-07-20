@@ -154,10 +154,58 @@ function isLikelyNonSongEntry(song) {
   if (!hasArtist && /^.{0,4}(実は|ほら|悲報|どうすか|めっちゃいい|新しいこと|良い音|魅惑の腰|別の意味で|フラグ立て|まさか今|ここから|いつもより|苦しうない).{0,8}$/iu.test(title)) {
     return true;
   }
+  if ((!hasArtist || isLikelyTranslationArtist(artist, title, raw)) && isDirtyNarrationText(title, raw)) {
+    return true;
+  }
   if (hasArtist && /^(咳払い|くしゃみ|雑談|告知|宣伝|休憩)$/iu.test(artist)) {
     return true;
   }
   return false;
+}
+
+function isDirtyNarrationText(title, raw) {
+  const text = compactSignalText(`${title} ${raw}`);
+  if (!text) return false;
+  if (/^(?:YoutubePremium|AFK|awayfromkeyboard|take\d+|テイク\d+)$/iu.test(compactSignalText(title))) return true;
+  if (/^(?:コメ|コメント)[「『"“].+[」』"”]$/u.test(compactSignalText(title))) return true;
+  if (/(?:リスナー同士の結婚報告|なかったことにしよう|とてもくやしい|リクエストできる歌のリスト|妻を迎えに行かないと|久しぶりに来てまた食べ物の話|夏を感じる曲|喉が痛い|歌声禁斷症勢|譲り合い精神|突然3Dモデルがバグった|燃え尽きて消えた|包囲されたちびたん|会社をクビに|ガイドメロディが大きい|曲が増えた理由|飽きるまでずっと繰り返し|疑われちゃう可能性|ミニストップ行けよ|ビックリした|プレゼントが届きました|歌っている途中)/u.test(text)) {
+    return true;
+  }
+  if (/(?:食べ物|食べる|飲む|飲酒|お酒|ビール|ハイボール|喉|病院|薬|体調|風邪|咳|くしゃみ|あくび|欠伸)/u.test(text) && /(?:話|痛い|行く|行け|届|した|する|です|ます|ちゃう|[?？])/.test(text)) {
+    return true;
+  }
+  if (/(?:でした|です|ます|ました|してる|している|したい|しよう|しない|できる|いけない|ちゃう|だった|だよ|だね|なの|かな|かも|理由|途中|可能性|報告|説明|紹介|翻訳|ヒント|問題|どこ|誰|なに|何|どう|なぜ|なんで|[?？])$/u.test(String(title || "").normalize("NFKC").trim())) {
+    return true;
+  }
+  return false;
+}
+
+function isLikelyTranslationArtist(artist, title, raw) {
+  const artistText = String(artist || "").normalize("NFKC").trim();
+  const titleText = String(title || "").normalize("NFKC").trim();
+  const rawText = String(raw || "").normalize("NFKC");
+  if (!artistText || artistText.length < 8 || !/[A-Za-z]/u.test(artistText)) return false;
+  if (!/[一-龯ぁ-んァ-ヶ]/u.test(titleText)) return false;
+  if (/[一-龯ぁ-んァ-ヶ]/u.test(artistText)) return false;
+  if (!/[\/／]\s*[A-Za-z]/u.test(rawText)) return false;
+  if (!isEnglishExplanationCredit(artistText)) return false;
+  return /(?:した|して|する|です|ます|だった|でした|理由|途中|可能性|報告|届きました|痛い|大きい|消えた|バグった|行け|食べ|飲み|喉|曲|歌|リスナー|なれたん|ちびたん|[?？])/.test(titleText);
+}
+
+function isEnglishExplanationCredit(value) {
+  const text = String(value || "").normalize("NFKC").trim();
+  const wordCount = text.split(/\s+/u).filter(Boolean).length;
+  if (/^(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did|My)\b/u.test(text)) return true;
+  if (wordCount >= 4) return true;
+  return /\b(?:Story|Stream|Comment|Chat|Song List|Guide Melody|Practice|Hospital|Food|Drink|Throat|Birthday|Surprised|Yawn|Yawning|Recommendations)\b/iu.test(text);
+}
+
+function compactSignalText(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/[\s\u3000]+/gu, "")
+    .replace(/[!！?？。．.]+$/gu, "")
+    .trim();
 }
 
 function isReactionActivityEntry(title, artist, raw) {

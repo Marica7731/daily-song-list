@@ -707,10 +707,14 @@ test("rank diffs compare current ranks and counts to previous snapshot", () => {
     "1m": [],
   });
 
-  const diff = buildRankDiffs(current, {
-    entry: { id: "20260711T120000Z", path: "data/snapshots/20260711T120000Z.json" },
-    payload: previous,
-  })["7d"];
+  const diff = buildRankDiffs(
+    current,
+    {
+      entry: { id: "20260711T120000Z", path: "data/snapshots/20260711T120000Z.json" },
+      payload: previous,
+    },
+    { songAliasContext: createSongAliasContext({ schemaVersion: 1, records: [] }) },
+  )["7d"];
 
   assert.equal(diff.previous.snapshotId, "20260711T120000Z");
   assertRankDiff(diff.songRank, "Beta", {
@@ -975,7 +979,12 @@ function song(title, artist = "artist", overrides = {}) {
 }
 
 function repeatedSongs(title, artist, count) {
-  return Array.from({ length: count }, () => song(title, artist));
+  return Array.from({ length: count }, (_, index) =>
+    song(title, artist, {
+      seconds: 60 + index * 60,
+      time: `0:${String(index + 1).padStart(2, "0")}:00`,
+    }),
+  );
 }
 
 function rankedItem(videoId, songs) {

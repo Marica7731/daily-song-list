@@ -7,6 +7,7 @@ const test = require("node:test");
 const {
   filterNonRegressiveImports,
   inputDirsFromArgs,
+  isImportableSong,
   isStrictSongSubset,
   normalizeImportedVideo,
   readDiscoveryVideos,
@@ -75,6 +76,19 @@ test("channel discovery import reads usable details and preserves provenance", (
   assert.equal(videos[0].sourceUrls.includes("https://www.youtube.com/watch?v=AAAAAAAAAAA"), true);
   assert.deepEqual(videos[0].songs.map((song) => song.title), ["少女レイ"]);
   assert.equal(videos[0].songs[0].sourceId, "comment:1");
+});
+
+test("channel discovery import filters narration, translation, and action rows", () => {
+  assert.equal(
+    isImportableSong({
+      title: "ガイドメロディのあるカラオケで歌いなおします",
+      artist: "I’ll Re-sing It with Guide Melody Karaoke",
+      raw: "2:13:14 ガイドメロディのあるカラオケで歌いなおします / I’ll Re-sing It with Guide Melody Karaoke",
+    }),
+    false,
+  );
+  assert.equal(isImportableSong({ title: "喉が痛い", artist: "未記載", raw: "0:10 喉が痛い" }), false);
+  assert.equal(isImportableSong({ title: "晩餐歌", artist: "tuki.", raw: "0:20 晩餐歌 / tuki." }), true);
 });
 
 test("normalizeImportedVideo maps detail song fields into catalog-ready videos", () => {
