@@ -13,6 +13,8 @@ on:
       - ".github/workflows/deploy-runtime-db.yml"
       - "assets/**"
       - "config/**"
+      - "index.html"
+      - "data/status.json"
       - "data/latest.json"
       - "data/external/vsinger-http/backfill/**"
       - "data/external/youtube-channel-discovery/**"
