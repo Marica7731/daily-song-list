@@ -91,6 +91,7 @@ function summarizeItems(items) {
     videoCount: (items || []).length,
     songCount: songs.length,
     dirtyKeywordRows: songs.filter(isDirtyKeywordRow).length,
+    dirtyKeywordBreakdown: dirtyKeywordBreakdown(songs),
     tenQRows: songs.filter((song) => isTenQTitle(song.title)).length,
     startUnknownRows: songs.filter((song) => isStartTitle(song.title) && isUnknownArtist(song.artist)).length,
     startWhitelistRows: songs.filter(isStartWhitelistSong).length,
@@ -103,10 +104,38 @@ function isDirtyKeywordRow(song) {
   const fields = [song?.title, song?.artist].map((value) => normalizeDirtyField(value));
   return fields.some((value) => {
     if (!value) return false;
-    if (/^(?:ed|op|end|start|opening|ending|intro|outro|open|setlist|セットリスト|セトリ|タイムスタンプ|曲名|開始|配信開始|配信スタート|待機画面スタート|声入り|自己紹介|挨拶)$/iu.test(value)) return true;
+    if (/^(?:ed|op|end|start|opening|ending|intro|outro|open|setlist|セットリスト|セトリ|タイムスタンプ|曲名|開始|歌唱開始|歌唱開始時間|歌唱開始時刻|配信開始|配信スタート|待機画面スタート|声入り|自己紹介|挨拶)$/iu.test(value)) return true;
     if (/^[~〜～]+(?:リアルライブチケット#耐久\s*\d+)?$/iu.test(value)) return true;
     return isTenQTitle(value);
   });
+}
+
+function dirtyKeywordBreakdown(songs) {
+  const counts = {};
+  for (const song of songs || []) {
+    for (const field of [song?.title, song?.artist]) {
+      const key = dirtyKeywordKey(field);
+      if (!key) continue;
+      counts[key] = (counts[key] || 0) + 1;
+    }
+  }
+  return Object.fromEntries(Object.entries(counts).sort((left, right) => left[0].localeCompare(right[0])));
+}
+
+function dirtyKeywordKey(value) {
+  const normalized = normalizeDirtyField(value);
+  if (!normalized) return "";
+  if (isTenQTitle(normalized)) return "tenQ";
+  if (/^[~〜～]+(?:リアルライブチケット#耐久\s*\d+)?$/iu.test(normalized)) return "wave_marker";
+  const compact = normalized.replace(/[\s\u3000]+/gu, "").toLocaleLowerCase();
+  if (/^setlist$/iu.test(compact)) return "setlist";
+  if (/^(?:start|配信スタート|待機画面スタート)$/iu.test(compact)) return "start";
+  if (/^(?:open|opening)$/iu.test(compact)) return "opening";
+  if (/^(?:end|ending)$/iu.test(compact)) return "ending";
+  if (/^(?:op|ed|intro|outro)$/iu.test(compact)) return compact;
+  if (/^(?:開始|歌唱開始|歌唱開始時間|歌唱開始時刻|配信開始)$/u.test(compact)) return "start_japanese";
+  if (/^(?:セットリスト|セトリ|タイムスタンプ|曲名|声入り|自己紹介|挨拶)$/u.test(compact)) return compact;
+  return "";
 }
 
 function normalizeDirtyField(value) {
@@ -146,6 +175,11 @@ function runPositiveChecks() {
     { title: "天Q天Q~~WO~~~", artist: "未記載" },
     { title: "Set List", artist: "未記載" },
     { title: "Start", artist: "未記載" },
+    { title: "opening", artist: "未記載" },
+    { title: "END", artist: "未記載" },
+    { title: "歌唱開始時間", artist: "未記載" },
+    { title: "セットリスト", artist: "歌唱開始時間" },
+    { title: "ED", artist: "お遊戯あり" },
   ];
   const passed = [];
   const failed = [];
@@ -167,6 +201,9 @@ function runFalsePositiveChecks() {
     { title: "さらば", artist: "キンモクセイ『あたしンち』初代OP ※" },
     { title: "READY STEADY GO", artist: "L'Arc-en-Ciel" },
     { title: "タッチ", artist: "岩崎良美" },
+    { title: "Opening", artist: "Known Artist" },
+    { title: "Open Your Eyes", artist: "Guano Apes" },
+    { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO" },
   ];
   const curated = applyCurationToVideos(
     [

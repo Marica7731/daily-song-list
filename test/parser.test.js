@@ -118,12 +118,27 @@ test("rejects dirty section labels without matching video or channel text", () =
       "0:11 配信スタート",
       "0:12 声入り",
       "0:13 自己紹介",
+      "0:14 opening",
+      "0:15 ending",
+      "0:16 歌唱開始時間",
+      "0:17 セットリスト / 歌唱開始時間",
+      "0:18 ED / お遊戯あり",
     ].join("\n"),
   );
-  const cleanSongs = parseTimestampSongs(["0:14 READY STEADY GO / L'Arc-en-Ciel"]);
+  const cleanSongs = parseTimestampSongs([
+    [
+      "0:19 READY STEADY GO / L'Arc-en-Ciel",
+      "0:20 Open Your Eyes / Guano Apes",
+      "0:21 ENDLESS STORY / REIRA starring YUNA ITO",
+    ].join("\n"),
+  ]);
 
   assert.deepEqual(dirtySongs, []);
-  assert.deepEqual(cleanSongs.map((song) => `${song.title} / ${song.artist}`), ["READY STEADY GO / L'Arc-en-Ciel"]);
+  assert.deepEqual(cleanSongs.map((song) => `${song.title} / ${song.artist}`), [
+    "READY STEADY GO / L'Arc-en-Ciel",
+    "Open Your Eyes / Guano Apes",
+    "ENDLESS STORY / REIRA starring YUNA ITO",
+  ]);
 });
 
 test("keeps START whitelist songs while dropping unknown START markers", () => {

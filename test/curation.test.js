@@ -326,11 +326,16 @@ test("curation drops dirty chant entries but keeps false-positive song samples",
           { title: "天Q天Q~~WO~~~", artist: "未記載", seconds: 2, raw: "0:02 天Q天Q~~WO~~~" },
           { title: "HAWAWA", artist: "未記載", seconds: 3, raw: "0:03 HAWAWA" },
           { title: "AAA TEST TEST", artist: "未記載", seconds: 4, raw: "0:04 AAA TEST TEST" },
+          { title: "opening", artist: "未記載", seconds: 5, raw: "0:05 opening" },
+          { title: "セットリスト", artist: "歌唱開始時間", seconds: 6, raw: "0:06 セットリスト / 歌唱開始時間" },
+          { title: "ED", artist: "お遊戯あり", seconds: 7, raw: "0:07 ED / お遊戯あり" },
           { title: "StaRt", artist: "Mrs. GREEN APPLE", seconds: 10, raw: "0:10 StaRt / Mrs. GREEN APPLE" },
           { title: "START", artist: "レフティーモンスターP feat. Lily", seconds: 20, raw: "0:20 START / レフティーモンスターP feat. Lily" },
           { title: "START", artist: "愛内里菜", seconds: 30, raw: "0:30 START / 愛内里菜" },
           { title: "-ERROR", artist: "niki", seconds: 40, raw: "0:40 -ERROR / niki" },
           { title: "さらば", artist: "キンモクセイ『あたしンち』初代OP ※", seconds: 50, raw: "0:50 さらば / キンモクセイ『あたしンち』初代OP ※" },
+          { title: "Open Your Eyes", artist: "Guano Apes", seconds: 60, raw: "1:00 Open Your Eyes / Guano Apes" },
+          { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", seconds: 70, raw: "1:10 ENDLESS STORY / REIRA starring YUNA ITO" },
         ],
       },
     ],
@@ -345,9 +350,11 @@ test("curation drops dirty chant entries but keeps false-positive song samples",
       "START / 愛内里菜",
       "-ERROR / niki",
       "さらば / キンモクセイ『あたしンち』初代OP ※",
+      "Open Your Eyes / Guano Apes",
+      "ENDLESS STORY / REIRA starring YUNA ITO",
     ],
   );
-  assert.equal(videos.curationStats.ruleDroppedEntries, 4);
+  assert.equal(videos.curationStats.ruleDroppedEntries, 7);
 });
 
 test("curation patch merge dedupes identical records and reports conflicts", () => {

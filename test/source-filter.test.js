@@ -67,6 +67,11 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "1個目！", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "曲終わり", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "opening", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "歌唱開始時間", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "セットリスト", artist: "歌唱開始時間" }), true);
+  assert.equal(isBlockedSongEntry({ title: "セトリ", artist: "Set List♬" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ED", artist: "お遊戯あり" }), true);
   assert.equal(isBlockedSongEntry({ title: "1on1&同期は", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "本日のサムネ", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "チューニング", artist: "未記載" }), true);
@@ -99,6 +104,9 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "Set List", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "曲名", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "Known Artist" }), false);
+  assert.equal(isBlockedSongEntry({ title: "Opening", artist: "Known Artist" }), false);
+  assert.equal(isBlockedSongEntry({ title: "Open Your Eyes", artist: "Guano Apes" }), false);
+  assert.equal(isBlockedSongEntry({ title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO" }), false);
   assert.equal(isBlockedSongEntry({ title: "START", artist: "レフティーモンスターP feat. Lily" }), false);
   assert.equal(isBlockedSongEntry({ title: "天Q", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "はじまりはいつも雨", artist: "未記載" }), false);

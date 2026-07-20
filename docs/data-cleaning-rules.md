@@ -18,8 +18,9 @@ Rules in this document apply to parsed song fields: `title`, `artist`, `raw`, an
 
 Unknown-artist section labels are rejected by parser and curation rules:
 
-- Exact or normalized labels: `ED`, `OP`, `END`, `Start`, `START`, `Opening`, `Ending`, `Intro`, `Outro`, `open`, `Set List`, `Setlist`, `セットリスト`, `セトリ`, `タイムスタンプ`, `曲名`.
-- Stream lifecycle labels: `開始`, `配信開始`, `配信スタート`, `待機画面スタート`, `Start Stream`.
+- Exact or normalized labels: `ED`, `OP`, `END`, `Start`, `START`, `Opening`, `opening`, `Ending`, `ending`, `Intro`, `Outro`, `open`, `OPEN`, `Set List`, `Setlist`, `セットリスト`, `セトリ`, `タイムスタンプ`, `曲名`.
+- Stream lifecycle labels: `開始`, `歌唱開始`, `歌唱開始時間`, `歌唱開始時刻`, `配信開始`, `配信スタート`, `待機画面スタート`, `Start Stream`.
+- Section-marker rows with descriptor fields are rejected when both sides are non-song metadata, for example `セットリスト / 歌唱開始時間` and `ED / お遊戯あり`.
 - Activity markers already in the rule file remain scoped to unknown-artist rows: `自己紹介`, `声入り`, `挨拶`, `スパチャ読み`, and related rows.
 - Standalone wave separators and event fragments: `～`, `～リアルライブチケット#耐久 7`.
 - Chant/reaction rows from the `天Q` screenshot: `天Q`, `HI 天Q~`, `天Q天Q~~WO~~~`, `DQ~`, `HAWAWA`, `BUAAAA`, `HE HE`, `E HO E HO`, `AAA TEST TEST`, plus existing `KOPIPE`, `KP`, `A LELELELE`.
@@ -32,7 +33,7 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - `START / レフティーモンスターP feat. Lily`
 - `START / 愛内里菜`
 
-If future review finds another real `START` song, add a false-positive sample or known-song override before broadening cleanup.
+If future review finds another real `START`, `Opening`, `Ending`, or `END` song, add a false-positive sample or known-song override before broadening cleanup.
 
 ## Near-Duplicate Folding
 
@@ -73,15 +74,17 @@ The script fetches the current online `data/latest.json`, applies local blocklis
 
 Latest audit in this branch:
 
+- query time: `2026-07-20T09:47:40.224Z`
 - source generated/captured: `2026-07-19T14:08:56.115Z`
 - group: `all`
 - videos: `1815 -> 1813`
-- songs: `27878 -> 27830`
+- songs: `27878 -> 27819`
 - blocked videos: `2`
-- curation rule drops: `5`
+- curation rule drops: `16`
 - near-duplicate folded entries: `9` across `9` groups
+- dirty keyword rows: `22 -> 9`; remaining matches are reviewed `START` rows retained by guardrails.
 - `天Q` rows in the current online snapshot: `0 -> 0`; local positive checks still verify `天Q` variants are dropped.
 - START whitelist rows retained: `5 -> 5`
-- false-positive checks retained: 8 samples, including `-ERROR / niki`, `-OZONE-`, `READY STEADY GO / L'Arc-en-Ciel`, and the three START whitelist rows.
+- false-positive checks retained: 11 samples, including `-ERROR / niki`, `-OZONE-`, `READY STEADY GO / L'Arc-en-Ciel`, `Open Your Eyes / Guano Apes`, `ENDLESS STORY / REIRA starring YUNA ITO`, and the three START whitelist rows.
 
 Remaining dirty-keyword audit hits include reviewed false positives such as `StaRt` variants and artist/work metadata containing `OP`/`Start`; do not turn these into broad contains-based drops.

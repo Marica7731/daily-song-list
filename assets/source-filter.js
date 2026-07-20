@@ -125,6 +125,7 @@
     const hasArtist = hasKnownArtist(song);
     const artist = String(song?.artist || "").trim();
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
+    if (isNonSongMarkerWithDescriptor(title, artist)) return true;
     if (isStrongNonSongActivityText(title)) return true;
     if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
@@ -200,6 +201,7 @@
       "この曲について",
       "待機",
       "open",
+      "opening",
       "op",
       "ed",
       "end",
@@ -211,6 +213,9 @@
       "タイムスタンプ",
       "曲名",
       "開始",
+      "歌唱開始",
+      "歌唱開始時間",
+      "歌唱開始時刻",
       "配信開始",
       "配信スタート",
       "待機画面スタート",
@@ -250,6 +255,53 @@
     ]).has(key);
   }
 
+  function isNonSongMarkerWithDescriptor(title, artist) {
+    const titleIsMarker = isNonSongNoiseTitle(title) || isSectionMarkerKey(title);
+    if (!titleIsMarker) return false;
+    return isNonSongDescriptorField(artist);
+  }
+
+  function isSectionMarkerKey(text) {
+    const key = normalizeNoiseTitleKey(text);
+    return new Set([
+      "open",
+      "opening",
+      "op",
+      "ed",
+      "end",
+      "ending",
+      "intro",
+      "outro",
+      "start",
+      "setlist",
+      "セットリスト",
+      "セトリ",
+      "タイムスタンプ",
+      "曲名",
+      "開始",
+      "歌唱開始",
+      "歌唱開始時間",
+      "歌唱開始時刻",
+      "配信開始",
+      "配信スタート",
+      "待機画面スタート",
+      "startstream",
+      "自己紹介",
+      "ご挨拶",
+      "挨拶",
+    ]).has(key);
+  }
+
+  function isNonSongDescriptorField(text) {
+    const key = normalizeNoiseTitleKey(text);
+    if (!key) return true;
+    if (isSectionMarkerKey(text)) return true;
+    if (/^(?:歌唱|歌|曲)?開始(?:時間|時刻)?$/iu.test(key)) return true;
+    if (/^(?:歌唱|初手|声|音|お遊戯|おゆうぎ)(?:あり|有り)$/iu.test(key)) return true;
+    if (/^(?:順番は)?じゃんけんで$/iu.test(key)) return true;
+    return false;
+  }
+
   function isStrongNonSongActivityText(text) {
     const value = stripCustomEmojiAliases(text)
       .normalize("NFKC")
@@ -275,7 +327,7 @@
     return stripCustomEmojiAliases(text)
       .normalize("NFKC")
       .toLocaleLowerCase()
-      .replace(/[\u{1F300}-\u{1FAFF}\uFE0E\uFE0F]/gu, "")
+      .replace(/[\u{1F300}-\u{1FAFF}\uFE0E\uFE0F♪♫♬♩]/gu, "")
       .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’~～!！?？.,，。、:：;；\-—–−_・･/／|｜]+/gu, "")
       .trim();
   }
