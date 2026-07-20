@@ -71,6 +71,7 @@ jobs:
       - name: Record run start
         id: runmeta
         run: |
+          echo "started_epoch=$(date -u +%s)" >> "$GITHUB_OUTPUT"
           echo "started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
           {
             echo "### Core update"
@@ -79,6 +80,11 @@ jobs:
             echo "- started_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "- mode: $DAILY_SONG_UPDATE_MODE"
             echo "- reason: ${{ inputs.reason || github.event_name }}"
+            echo "- release_runbook: docs/release-runbook.md"
+            echo "- fast_path: search_limit=$DAILY_SONG_SEARCH_LIMIT, video_limit=$DAILY_SONG_VIDEO_LIMIT, video_concurrency=$DAILY_SONG_VIDEO_CONCURRENCY"
+            echo "- recent_refresh: recent_bucket_limit=$DAILY_SONG_RECENT_BUCKET_LIMIT, month_refresh_limit=$DAILY_SONG_MONTH_REFRESH_LIMIT, recent_window_days=$DAILY_SONG_RECENT_WINDOW_DAYS"
+            echo "- snapshots: mygit_today=$DAILY_SONG_MYGIT_TODAY_SNAPSHOTS, snapshot_days=$DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS, retention_days=$DAILY_SONG_SNAPSHOT_RETENTION_DAYS"
+            echo "- youtube_backoff: delay_ms=$DAILY_SONG_REQUEST_DELAY_MS, jitter_ms=$DAILY_SONG_REQUEST_JITTER_MS, max_429=$DAILY_SONG_MAX_429_ERRORS"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Sync latest main before generating data
@@ -98,6 +104,13 @@ jobs:
           DAILY_SONG_FAILURE_MESSAGE: "Core scheduled update failed; previous latest data kept."
           DAILY_SONG_FAILURE_OUTCOME: ${{ steps.core.outcome }}
         run: |
+          {
+            echo "### Core failure handling"
+            echo "- failed_stage: update compact runtime data"
+            echo "- outcome: $DAILY_SONG_FAILURE_OUTCOME"
+            echo "- action: restored generated data and wrote data/status.json failure marker"
+            echo "- next_triage: check network/429 budget first, then parser/import errors; do not rerun with aggressive fetch budgets without a failure note"
+          } >> "$GITHUB_STEP_SUMMARY"
           git restore --worktree -- data/latest.json data/7d.json data/all.json data/72h.json data/1m.json data/audit.json data/inspection-cache.json data/video-catalog.json data/song-search-known-songs.json data/snapshots data/diff data/ui data/catalog-segments
           git clean -fd -- data/snapshots data/diff data/ui data/catalog-segments
           npm run mark:failure
@@ -153,11 +166,19 @@ jobs:
       - name: Finish run summary
         if: always()
         run: |
+          started="${{ steps.runmeta.outputs.started_epoch }}"
+          now="$(date -u +%s)"
+          elapsed="unknown"
+          if [ -n "$started" ]; then
+            elapsed="$((now - started))s"
+          fi
           {
             echo "- completed_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- elapsed: $elapsed"
             echo "- core_outcome: ${{ steps.core.outcome }}"
             echo "- skipped: ${{ steps.core.outputs.skipped }}"
             echo "- updated: ${{ steps.core.outputs.updated }}"
+            echo "- handoff: if updated=true, Deploy SQLite runtime DB should rebuild DB on GitHub Actions and VPS2 should only activate/check the candidate DB"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Fail when core update failed

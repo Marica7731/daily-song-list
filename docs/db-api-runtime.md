@@ -161,20 +161,22 @@ Supported query parameters:
 - `view`: `songs`, `songIndex`, `artists`, `videos`, `vtubers`, or `vsingerSongs`; default `songs`.
 - `metric`: `occurrences`, `count`, `songs`, or `videos`; `videos` is valid for `songs`, `artists`, and `vtubers`, and `songs` is valid for `vtubers`. Non-video/song metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
 - `q`: optional case-insensitive search. Terms match as continuous substrings, with whitespace/`AND`/`+`/`与`/`和` as AND and `OR`/`|`/`或` as OR group separators. Quote a phrase to keep spaces inside one term.
-- `searchScope`: optional field selector. `all` is the default; for song-like ranking views it searches visible song identity fields only, while `channel`, `video`, and `source` must be selected explicitly when operators need source-context matches. `song`, `title`, `artist`, `channel`, `video`, `source`, and `entity` narrow the fields. `searchField` is accepted as a backward-compatible alias.
+- `searchScope`: optional legacy field selector. `all` is the default; for song-like ranking views it searches visible song identity fields only, while `channel`, `video`, and `source` must be selected explicitly when operators need source-context matches. `song`, `title`, `artist`, `channel`, `video`, `source`, and `entity` narrow the fields. `searchField` is accepted as a backward-compatible alias.
+- `searchFields`: optional comma-separated user-facing song field selector for the frontend search panel. Supported values are `title` and `artist`; `searchFields=title,artist` maps to `searchScope=song`, `searchFields=title` maps to `title`, `searchFields=artist` maps to `artist`, and an omitted or empty field list means all/default fields. The frontend does not persist this selector in shared URLs.
 - `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos` and `vtubers`, `minCount` is ignored by the UI/API ranking view.
 - `page`: 1-based page number.
 - `pageSize`: maximum 200.
 
 Search scope contract:
 
-- Default `searchScope=all` for `songs`, `songIndex`, `artists`, and `vsingerSongs` is intentionally identity-focused: a query must match visible song/artist/entity fields, not merely a channel name, video title, or parsed source note. Use `searchScope=channel`, `video`, or `source` when that broader evidence is required. All scopes still match complete continuous query terms; partial character reordering and wildcard expansion are not allowed.
+- Default `searchScope=all` for `songs`, `songIndex`, `artists`, and `vsingerSongs` is intentionally identity-focused: a query must match visible song/artist/entity fields, not merely a channel name, video title, or parsed source note. The user-facing song search normally sends `searchFields=title,artist` so `歌名` and `歌手` can be removed independently as chips; removing both fields falls back to all/default fields. Use `searchScope=channel`, `video`, or `source` when broader source evidence is required. All scopes still match complete continuous query terms; partial character reordering and wildcard expansion are not allowed.
 - `searchScope=song` narrows `songs` and `songIndex` to song identity fields: title/work title, display artist, artist aliases, and variant labels that are visible as song identity.
 - `searchScope=artist` narrows to singer/artist identity fields.
 - `searchScope=channel` narrows to channel/VTuber identity fields such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields.
 - `searchScope=video` narrows to video ID/title and video-level context.
 - `searchScope=source` narrows to parsed source/timestamp context.
 - `searchScope=entity` searches the visible primary entity text for the selected view.
+- When `q` is present, ranking rows are ordered by the filtered metric (`count` or `videoCount`) descending with global `rank` as tie-breaker. The returned `rank` field remains the original all-site rank for display.
 - `avatarUrl` is backend data only when it is a real remote channel/avatar URL from runtime data, accepted discovery metadata, or `channel-metadata.json`. Generated fallback avatars must remain absent from DB/API payloads.
 - `thumbnailUrl` / `videoThumbnailUrl` on `vtubers` records is display fallback only. It is sourced from the channel's latest available video/source thumbnail and is used when `avatarUrl` is empty. It is not counted as avatar coverage.
 - `missingDisplayImage` must stay zero for runtime VTuber records. The daily avatar cache step and static/DB builders fail or report the offending channels when a record has neither real avatar nor video thumbnail.
@@ -236,7 +238,7 @@ Default song search is song-identity search. For example, `songs?q=なれたん`
 
 When an aggregate ranking row matches through source/channel/video evidence, the API returns only matching source previews and reports `count`, `timestampCount`, and `videoCount` for the matched subset. The original all-site values remain available as `globalCount`, `globalTimestampCount`, and `globalVideoCount`. This keeps a query such as `songs?q=なれたん` from showing unrelated top source previews or all-site play counts for a song that only has a few matching `なれたん` sources.
 
-`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, default all-field `songs?q=なれたん`, narrowed `songs?q=なれたん&searchScope=song`, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
+`npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, default song-identity `songs?q=なれたん`, narrowed `songs?q=なれたん&searchScope=song`, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
 It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` so a deploy cannot pass while the accepted increment is missing from the runtime DB.
 
 `GET /api/sources/{sourceDetailKey}`
@@ -300,7 +302,7 @@ Current qualitative acceptance points:
 - `儚牙紺 - Kurage Kon -` should be findable in `view=videos`, proving the second newly missing-by-name singer has been imported.
 - `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` should be findable in `view=videos`, proving reviewed YouTube channel補漏 increments were included in the DB build.
 - Channel补漏 names such as `HanamaeHaru`, `aoineno`, and `fujimiyakotoha` should be checked in `view=videos` and `view=vtubers` after their accepted increment is imported. Use `searchScope=song`, `searchScope=artist`, or `searchScope=channel` when the acceptance needs to prove a specific field family rather than default all-field search.
-- `なれたん` search acceptance should cover both search modes: default `view=songs&q=なれたん` must match the complete continuous term somewhere in the row and must not show self-reference/commentary noise; `view=songs&q=なれたん&searchScope=song` is the narrowed song-identity probe; `view=videos` and `view=vtubers` prove channel/source presence.
+- `なれたん` search acceptance should cover both search modes: default `view=songs&q=なれたん` is song-identity search and may legitimately return zero when no visible song/artist field contains the term; any returned row must match visible song fields and must not show self-reference/commentary noise. `view=songs&q=なれたん&searchScope=channel|source`, `view=videos`, and `view=vtubers` prove channel/source presence.
 
 The exact counts change with each hourly refresh. Record the numbers from the command output in release notes or incident notes instead of hard-coding them in docs.
 
@@ -376,7 +378,7 @@ Failure pattern:
 
 - Runs `29749201929` and `29751194001` failed in `Verify runtime API artifact` after about 5 minutes.
 - Those failures did not activate any candidate database on VPS2; production stayed on the previous successful `source_commit_sha`.
-- The root cause was a broad all-field aggregate search over `source_occurrences` during the API smoke probe. Keep default `searchScope=all` on the fast row-filter path unless the DB has an indexed/FTS-backed way to aggregate every matching source row.
+- The root cause was a broad all-field aggregate search over `source_occurrences` during the API smoke probe. Default song search now stays on visible song identity fields; channel/source diagnostics must use explicit `searchScope=channel` or `searchScope=source`.
 - If this step fails, fix the API query path and rerun deploy. Do not retry upload or touch VPS2 manually, because the candidate was never activated.
 
 Operational notes:

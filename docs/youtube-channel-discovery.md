@@ -162,7 +162,7 @@ For each channel, record:
 - Accepted increment: accepted JSON path and `CODEX_CHANNEL_DISCOVERY_INCREMENT_OK` read/accepted/skipped/occurrence counts.
 - After import: the same `view=videos` and `view=vtubers` API searches after the accepted increment is in the SQLite build, including total deltas from baseline and representative top records.
 
-Do not mark a requested source as skipped just because the current online API already has a few videos or occurrences. A source can be skipped only when there is explicit coverage evidence from the VSinger Moment backfill or from a manually reviewed import that is complete for that source. The skip note must name that evidence and its coverage; online API samples such as `videos=2` or `occurrences=32` are insufficient and should trigger a channel discovery rerun instead.
+Do not mark a requested source as skipped just because the current online API already has a few videos or occurrences. A source can be skipped only when there is explicit coverage evidence from a reviewed YouTube channel discovery/import pass that is complete for that source. VSinger Moment hits, old Moment backfill presence, and online API samples such as `videos=2` or `occurrences=32` are insufficient and should trigger a channel discovery rerun instead. The skip note must name the reviewed evidence, coverage window, and query time.
 
 Use this table shape for each reviewed channel:
 
@@ -230,6 +230,8 @@ python scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank-youtube-c
 This validates accepted channel increments and narrowed search scopes cheaply. It is not a replacement for the production full SQLite build, because `vsingerSongs` and VSinger source tables are intentionally omitted.
 
 `scripts/db/export-runtime-rankings.js` loads all `data/external/youtube-channel-discovery/accepted/*.json` files by default when `npm run db:build` uses `--ranking-source js`. This keeps manual補漏 commits small: commit the accepted increment, code, and docs only; do not commit generated `data/ui`, `data/catalog-segments`, or range JSON shards for a DB-mode deployment.
+
+For GitHub Actions handoff, prefer the same slim commit shape: accepted increments plus reviewed channel metadata only. Do not include `data/review/sources/**`, local `artifacts/channel-discovery/**`, runtime `data/ui/**` shards, or regenerated review queues in a release commit unless the release explicitly documents a static-runtime fallback.
 
 When a reviewed increment has mixed channel quality, the runtime importer first builds a channel metadata lookup by channel ID, handle, and channel URL-derived handle, then hydrates every video before merging rankings. Backend payloads expose real `avatarUrl`, display-fallback `thumbnailUrl` / `videoThumbnailUrl`, `sourceUrl`, `knownSourceType`, and `isCollected`; VTuber rankings also expose `songCount` and support `metric=songs` for unique-song sorting.
 

@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-19T19:59:42.116Z",
-  "curationVersion": "curation-v1:12c32dcbcb07",
-  "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3",
-  "totalSongs": 27878,
-  "unknownArtistCount": 3763,
-  "nicheUnknownArtistCount": 1993,
-  "highRiskEntryCount": 760,
-  "highRiskSourceCount": 24,
+  "generatedAt": "2026-07-20T18:27:19.294Z",
+  "curationVersion": "curation-v1:58cdd403b896",
+  "curationHash": "58cdd403b896c35bba79ec63017d8188716c3aff15d75d36dc8c07421b7c7b03",
+  "totalSongs": 27768,
+  "unknownArtistCount": 3720,
+  "nicheUnknownArtistCount": 1966,
+  "highRiskEntryCount": 756,
+  "highRiskSourceCount": 23,
   "manualDroppedEntryCount": 0,
   "manualRejectedSourceCount": 0,
-  "ruleDroppedEntryCount": 2,
-  "conversationDroppedEntryCount": 0,
-  "qualityDroppedEntryCount": 0,
+  "ruleDroppedEntryCount": 38,
+  "conversationDroppedEntryCount": 3,
+  "qualityDroppedEntryCount": 3,
   "forceRefreshVideoCount": 0,
-  "confirmedNoiseCount": 43,
-  "parserCorruptionCount": 52,
+  "confirmedNoiseCount": 44,
+  "parserCorruptionCount": 46,
   "likelyNoiseCount": 2,
-  "needsReviewCount": 1983,
-  "likelySongCount": 15765,
+  "needsReviewCount": 1949,
+  "likelySongCount": 15586,
   "topRiskTitles": [
     {
       "value": "勝利のマシンロボ",
@@ -94,16 +94,6 @@
       }
     },
     {
-      "value": "花に亡霊",
-      "count": 10,
-      "classifications": {
-        "likely_song": 10
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 10
-      }
-    },
-    {
       "value": "結束",
       "count": 10,
       "classifications": {
@@ -127,6 +117,16 @@
     },
     {
       "value": "ray",
+      "count": 9,
+      "classifications": {
+        "likely_song": 9
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 9
+      }
+    },
+    {
+      "value": "花に亡霊",
       "count": 9,
       "classifications": {
         "likely_song": 9
@@ -168,16 +168,6 @@
       }
     },
     {
-      "value": "君の知らない物語",
-      "count": 8,
-      "classifications": {
-        "likely_song": 8
-      },
-      "riskReasons": {
-        "known_song_unknown_artist": 8
-      }
-    },
-    {
       "value": "ヴィラン",
       "count": 7,
       "classifications": {
@@ -209,6 +199,16 @@
     },
     {
       "value": "怪獣の花唄",
+      "count": 7,
+      "classifications": {
+        "likely_song": 7
+      },
+      "riskReasons": {
+        "known_song_unknown_artist": 7
+      }
+    },
+    {
+      "value": "君の知らない物語",
       "count": 7,
       "classifications": {
         "likely_song": 7
@@ -262,10 +262,6 @@
       "count": 6
     },
     {
-      "value": "苺咲べりぃ / Maisaki Berry",
-      "count": 6
-    },
-    {
       "value": "Ellise Ch.",
       "count": 5
     },
@@ -299,6 +295,10 @@
     },
     {
       "value": "芽森ひより",
+      "count": 5
+    },
+    {
+      "value": "苺咲べりぃ / Maisaki Berry",
       "count": 5
     },
     {
@@ -366,18 +366,6 @@
         "source_multiple_unknown_artists",
         "source_multiple_niche_short_titles",
         "short_unknown_title"
-      ]
-    },
-    {
-      "videoId": "3HsBNG-zTjo",
-      "title": "【#アニソン歌枠 #らんちぅ寿希】おたよりは来るのか！？君の眠気を極熱ヴォイスで吹っ飛ばす【#Vtuber #KARAOKE】",
-      "channelName": "らんちぅ寿希Live",
-      "riskScore": 94,
-      "riskLevel": "high",
-      "riskReasons": [
-        "source_many_activity_entries",
-        "source_multiple_niche_short_titles",
-        "activity_marker_title"
       ]
     },
     {
@@ -585,10 +573,32 @@
         "source_multiple_niche_short_titles",
         "short_unknown_title"
       ]
+    },
+    {
+      "videoId": "zAqcZDpOM1Q",
+      "title": "【雑＆歌枠】どでかいお知らせあります！！！！！！ハニカムステーション！-204【HACHI 】",
+      "channelName": "HACHI",
+      "riskScore": 76,
+      "riskLevel": "high",
+      "riskReasons": [
+        "source_unknown_artist_ratio_high",
+        "niche_unknown_artist",
+        "source_multiple_unknown_artists",
+        "short_unknown_title",
+        "source_multiple_niche_short_titles"
+      ]
     }
   ],
   "newUnseenPatterns": [],
   "history": [
+    {
+      "generatedAt": "2026-07-20T18:27:19.294Z",
+      "totalSongs": 27768,
+      "unknownArtistCount": 3720,
+      "nicheUnknownArtistCount": 1966,
+      "highRiskEntryCount": 756,
+      "highRiskSourceCount": 23
+    },
     {
       "generatedAt": "2026-07-19T19:59:42.116Z",
       "totalSongs": 27878,
@@ -740,14 +750,6 @@
       "nicheUnknownArtistCount": 1568,
       "highRiskEntryCount": 496,
       "highRiskSourceCount": 20
-    },
-    {
-      "generatedAt": "2026-07-16T03:49:38.843Z",
-      "totalSongs": 19239,
-      "unknownArtistCount": 3037,
-      "nicheUnknownArtistCount": 1518,
-      "highRiskEntryCount": 487,
-      "highRiskSourceCount": 18
     }
   ]
 }

@@ -48,6 +48,7 @@ const {
   sanitizeQueryDraft,
   shouldPrefetchRuntimeRange,
   shouldSkipSourceFilter,
+  sourceGroupSetlistItem,
   sourceDrawerPageModel,
   sourcePresentationModel,
   summaryVideoCountModel,
@@ -225,6 +226,13 @@ test("VTuber collection badge model tolerates missing backend fields", () => {
     isCollected: true,
     sourceType: "manual",
   });
+  assert.deepEqual(vtuberCollectionBadgeModel({ isCollected: true, knownSourceType: "vsinger_moment_http" }), {
+    text: "",
+    isCollected: false,
+    sourceType: "vsinger_moment_http",
+  });
+  assert.equal(vtuberCollectionBadgeModel({ sourceGroups: ["vsinger-moment"], isCollected: true }).isCollected, false);
+  assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "youtube_channel_discovery" }).isCollected, true);
   assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "unknown" }).isCollected, false);
   assert.equal(vtuberCollectionBadgeModel({}).text, "");
 });
@@ -439,6 +447,28 @@ test("groups source occurrences by publish time, first seen, then video id", () 
   );
 });
 
+test("groups source occurrences hydrate missing channel identity from same named channel", () => {
+  const groups = groupOccurrencesByVideo([
+    occurrence("53zVElX6V7c", "小東ひとな / Hitona Kohigashi", { seconds: 1951 }, {
+      channelId: "UCV2m2UifDGr3ebjSnDv5rUA",
+      channelHandle: "/@kohigashihitona",
+      channelUrl: "https://www.youtube.com/@kohigashihitona",
+    }),
+    occurrence("4sJoay9RMcM", "小東ひとな / Hitona Kohigashi", { seconds: 3173 }, {
+      channelId: "",
+      channelHandle: "",
+      channelUrl: "",
+    }),
+  ]);
+
+  const missingMetadataGroup = groups.find((group) => group.videoId === "4sJoay9RMcM");
+
+  assert.equal(missingMetadataGroup.channelName, "小東ひとな / Hitona Kohigashi");
+  assert.equal(missingMetadataGroup.item.channelId, "UCV2m2UifDGr3ebjSnDv5rUA");
+  assert.equal(missingMetadataGroup.item.channelHandle, "/@kohigashihitona");
+  assert.equal(youtubeChannelLink(missingMetadataGroup.item).href, "https://www.youtube.com/@kohigashihitona");
+});
+
 test("builds whole-video setlist text from original songs", () => {
   const item = {
     _allSongs: [
@@ -468,6 +498,25 @@ test("builds whole-video setlist text from original songs", () => {
   assert.equal(
     buildSetlistText(item, { isUnknownArtistName: (value) => value === "待补歌手" }),
     ["00:12 01. Opening", "05:52 02. KING - Kanaria", "05:53 03. KING - Kanaria", "1:10:00 04. Long Song"].join("\n"),
+  );
+});
+
+test("builds whole-video setlist text from source group occurrences when item is clipped", () => {
+  const group = groupOccurrencesByVideo([
+    occurrence("53zVElX6V7c", "小東ひとな / Hitona Kohigashi", { seconds: 1951, title: "First", artist: "A" }),
+    occurrence("53zVElX6V7c", "小東ひとな / Hitona Kohigashi", { seconds: 3173, title: "Second", artist: "B" }),
+    occurrence("53zVElX6V7c", "小東ひとな / Hitona Kohigashi", { seconds: 4200, title: "Third", artist: "C" }),
+  ])[0];
+  const clippedItem = {
+    ...group.item,
+    songs: [{ seconds: 1951, title: "First", artist: "A" }],
+  };
+
+  const setlistItem = sourceGroupSetlistItem(clippedItem, group);
+
+  assert.equal(
+    buildSetlistText(setlistItem),
+    ["32:31 01. First - A", "52:53 02. Second - B", "1:10:00 03. Third - C"].join("\n"),
   );
 });
 
@@ -896,6 +945,26 @@ test("source detail merge preserves complete source lists without duplicating pr
   );
 });
 
+test("source presentation keeps expand action when preview count is incomplete", () => {
+  const model = sourcePresentationModel(
+    [
+      occurrence("PreviewA0001", "Channel A", { seconds: 12, title: "Song A" }),
+      occurrence("PreviewB0001", "Channel B", { seconds: 30, title: "Song A" }),
+    ],
+    {
+      inlineLimit: 3,
+      totalVideoCount: 2,
+      hasExternalDetails: true,
+      occurrencePreviewLimited: true,
+    },
+  );
+
+  assert.equal(model.canExpand, true);
+  assert.equal(model.detailCountKnown, false);
+  assert.equal(model.collapsedLabel, "查看全部来源");
+  assert.equal(model.collapsedAriaLabel, "查看该歌曲的全部来源");
+});
+
 test("url state parses and serializes range, view, page, pageSize, bucket, outside, q, and snapshot", () => {
   const options = urlStateOptions();
   const parsed = parseUrlState(
@@ -916,6 +985,7 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     showUnknown: true,
     q: "First Good-Bye",
     searchScope: "all",
+    searchFields: ["title", "artist"],
     snapshotPath: "data/snapshots/2026-07-10.json",
     trend: "all",
     minCount: 1,
@@ -957,6 +1027,7 @@ test("url state parses trend, minCount, and legacy shared marker", () => {
       hideUnknown: false,
       q: "",
       searchScope: "all",
+      searchFields: ["title", "artist"],
       snapshotPath: "data/latest.json",
       trend: "up",
       minCount: 5,
@@ -1024,6 +1095,7 @@ test("query draft derives search and every filter field from applied state", () 
     pageSize: 100,
     snapshotPath: "data/latest.json",
     searchScope: "all",
+    searchFields: ["title", "artist"],
   });
   assert.deepEqual(defaultQueryDraft({ pageSize: 100, snapshotPath: "data/snapshots/2026-07-10.json" }), {
     q: "",
@@ -1035,6 +1107,7 @@ test("query draft derives search and every filter field from applied state", () 
     pageSize: 100,
     snapshotPath: "data/snapshots/2026-07-10.json",
     searchScope: "all",
+    searchFields: ["title", "artist"],
   });
 });
 
@@ -1055,24 +1128,24 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
   );
 
   assert.equal(snapshotDraft.trend, "all");
-  assert.equal(activeQueryConditionCount(snapshotDraft, { ...options, view: "songRank" }), 3);
-  assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 3);
-  assert.equal(activeQueryConditionCount({ ...snapshotDraft, rankMetric: "videos", minCount: 10 }, { ...options, view: "videos" }), 2);
-  assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 3);
+  assert.equal(activeQueryConditionCount(snapshotDraft, { ...options, view: "songRank" }), 5);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 5);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, rankMetric: "videos", minCount: 10 }, { ...options, view: "videos" }), 4);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 5);
   assert.equal(activeQueryConditionCount(defaultQueryDraft(), { ...options, view: "songRank" }), 0);
   assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), hideUnknownArtist: true }, { ...options, view: "songRank" }), 1);
   assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), hideUnknownArtist: true }, { ...options, view: "artistRank" }), 0);
-  assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ" }, { ...options, view: "songRank" }), 1);
+  assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ" }, { ...options, view: "songRank" }), 3);
   assert.equal(
     activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ", nicheOnly: true, minCount: 2 }, { ...options, view: "songRank" }),
-    3,
+    5,
   );
   assert.deepEqual(
     activeQueryConditionItems(
       { ...defaultQueryDraft(), q: "なれたん", hideUnknownArtist: true, minCount: 10 },
       { ...options, view: "vtuberRank" },
     ).map((item) => [item.key, item.label]),
-    [["q", "なれたん"]],
+    [["q", "なれたん"], ["searchField:title", "歌名"], ["searchField:artist", "歌手"]],
   );
 
   assert.deepEqual(queryTriggerModel(defaultQueryDraft(), { ...options, view: "songRank", mode: "mobile" }), {
@@ -1088,11 +1161,11 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
       { ...options, view: "songRank", mode: "mobile" },
     ),
     {
-      count: 3,
-      labels: ["少女レイ", "只看小众", "2次以上"],
+      count: 5,
+      labels: ["少女レイ", "歌名", "歌手", "只看小众", "2次以上"],
       hasActive: true,
       visibleCountText: "",
-      ariaLabel: "打开搜索与筛选，当前有 3 个筛选条件：少女レイ、只看小众、2次以上",
+      ariaLabel: "打开搜索与筛选，当前有 5 个筛选条件：少女レイ、歌名、歌手、只看小众、2次以上",
     },
   );
   assert.equal(
@@ -1105,11 +1178,11 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
       { ...options, view: "vtuberRank", mode: "mobile" },
     ),
     {
-      count: 1,
-      labels: ["なれたん"],
+      count: 3,
+      labels: ["なれたん", "歌名", "歌手"],
       hasActive: true,
       visibleCountText: "",
-      ariaLabel: "打开搜索与筛选，当前有 1 个筛选条件：なれたん",
+      ariaLabel: "打开搜索与筛选，当前有 3 个筛选条件：なれたん、歌名、歌手",
     },
   );
 });
@@ -1134,18 +1207,22 @@ test("restrictive filter helpers clear only real narrowing conditions", () => {
     items.map((item) => [item.key, item.label]),
     [
       ["q", "Proof Filter"],
+      ["searchField:title", "歌名"],
+      ["searchField:artist", "歌手"],
       ["nicheOnly", "只看小众"],
       ["hideUnknownArtist", "隐藏无歌手"],
       ["minCount", "5次以上"],
     ],
   );
-  assert.deepEqual(filterEffectModel(normalized, { ...options, view: "songRank" }).count, 4);
+  assert.deepEqual(filterEffectModel(normalized, { ...options, view: "songRank" }).count, 6);
 
   assert.equal(clearRestrictiveFilter(normalized, "hideUnknownArtist", options).hideUnknownArtist, false);
   assert.equal(clearRestrictiveFilter(normalized, "q", options).q, "");
+  assert.deepEqual(clearRestrictiveFilter(normalized, "searchField:title", options).searchFields, ["artist"]);
 
   const cleared = clearAllRestrictiveFilters(normalized, options);
   assert.equal(cleared.q, "");
+  assert.deepEqual(cleared.searchFields, ["title", "artist"]);
   assert.equal(cleared.nicheOnly, false);
   assert.equal(cleared.hideUnknownArtist, false);
   assert.equal(cleared.trend, "all");

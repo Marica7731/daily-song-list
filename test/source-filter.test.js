@@ -7,6 +7,7 @@ const {
   isBlockedSongEntry,
   filterPayloadBlockedSources,
   isBlockedSource,
+  isChannelScopedUnknownArtistDirtySong,
   BLOCKLIST_HASH,
   normalizeSongEntry,
 } = require("../assets/source-filter");
@@ -263,6 +264,49 @@ test("source filter drops title-only rows only inside artist-rich mixed lists", 
     ["タッチ", "ラムのラブソング"],
   );
   assert.equal(filtered.source.clientFilteredBlockedSongCount, 3);
+});
+
+test("source filter drops only unknown-artist rows from Riona channel", () => {
+  const rionaSource = {
+    videoId: "ZEAgcWCnkwQ",
+    channelName: "Riona Ch. 響咲リオナ - FLOW GLOW",
+    channelUrl: "https://www.youtube.com/@IsakiRiona",
+  };
+  assert.equal(isChannelScopedUnknownArtistDirtySong({ title: "花に亡霊", artist: "未記載" }, rionaSource), true);
+  assert.equal(isChannelScopedUnknownArtistDirtySong({ title: "花に亡霊", artist: "ヨルシカ" }, rionaSource), false);
+  assert.equal(isChannelScopedUnknownArtistDirtySong({ title: "花に亡霊", artist: "未記載" }, { channelName: "Other Channel" }), false);
+
+  const payload = {
+    source: { name: "fixture" },
+    groups: {
+      "72h": {
+        items: [
+          {
+            ...rionaSource,
+            title: "Riona karaoke",
+            songs: [
+              { title: "花に亡霊", artist: "未記載", seconds: 145, time: "0:02:25" },
+              { title: "自己肯定感がドンドン上がってる", artist: "未記載", seconds: 3362, time: "0:56:02" },
+              { title: "花に亡霊", artist: "ヨルシカ", seconds: 4000, time: "1:06:40" },
+            ],
+          },
+          {
+            videoId: "SAFE0000001",
+            channelName: "Other Channel",
+            title: "Other karaoke",
+            songs: [{ title: "花に亡霊", artist: "未記載", seconds: 145, time: "0:02:25" }],
+          },
+        ],
+      },
+    },
+  };
+
+  const filtered = filterPayloadBlockedSources(payload);
+  assert.deepEqual(
+    filtered.groups["72h"].items.flatMap((item) => item.songs.map((song) => `${item.videoId}:${song.title} / ${song.artist}`)),
+    ["ZEAgcWCnkwQ:花に亡霊 / ヨルシカ", "SAFE0000001:花に亡霊 / 未記載"],
+  );
+  assert.equal(filtered.source.clientFilteredBlockedSongCount, 2);
 });
 
 function video(videoId, channelName, title) {

@@ -119,14 +119,16 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
     page_size = min(200, max(1, parse_int(first(query, "pageSize", "50"), "pageSize")))
     q = first(query, "q", "").strip()
     search_scope = normalize_search_scope(first(query, "searchScope", first(query, "searchField", "all")))
+    search_fields = normalize_search_fields(first(query, "searchFields", ""))
+    effective_search_scope = search_scope_from_fields(search_fields) if search_fields is not None and search_scope == "all" else search_scope
     metric = normalize_metric(view, first(query, "metric", "count"))
     min_count = max(1, parse_int(first(query, "minCount", "1"), "minCount"))
     if range_id not in {"7d", "all"}:
         raise ValueError("range must be 7d or all")
     if view not in {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}:
         raise ValueError("view must be songs, songIndex, artists, videos, vtubers, or vsingerSongs")
-    if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and search_scope in {"source", "video", "channel"}:
-        return source_matched_rankings_payload(db_path, range_id, view, metric, q, search_scope, page, page_size, min_count)
+    if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and effective_search_scope in {"source", "video", "channel"}:
+        return source_matched_rankings_payload(db_path, range_id, view, metric, q, effective_search_scope, page, page_size, min_count, search_fields)
     base_where = ["range_id = ?", "view = ?", "metric = ?", "scope_key = 'all'"]
     base_params: list[object] = [range_id, view, metric]
     where = list(base_where)
@@ -136,7 +138,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         where.append(f"{column} >= ?")
         params.append(min_count)
     if q:
-        clause, values = search_filter_for_view(view, q, search_scope)
+        clause, values = search_filter_for_view(view, q, effective_search_scope)
         where.append(clause)
         params.extend(values)
     where_sql = " AND ".join(where)
@@ -153,12 +155,13 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             params,
         ).fetchone()
         total = totals["total_count"]
+        order_sql = f"{'video_count' if metric == 'videos' else 'count'} DESC, rank ASC" if q else "rank"
         rows = conn.execute(
             f"""
             SELECT rank, detail_key, title, artist, name, count, song_count, video_count, timestamp_count, payload_json
             FROM ranking_rows
             WHERE {where_sql}
-            ORDER BY rank
+            ORDER BY {order_sql}
             LIMIT ? OFFSET ?
             """,
             [*params, page_size, offset],
@@ -169,7 +172,8 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         "rangeId": range_id,
         "view": view,
         "metric": response_metric(metric),
-        "searchScope": search_scope,
+        "searchScope": effective_search_scope,
+        "searchFields": search_fields if search_fields is not None else search_fields_for_scope(effective_search_scope),
         "page": max(1, page),
         "pageSize": page_size,
         "totalCount": total,
@@ -192,6 +196,7 @@ def source_matched_rankings_payload(
     page: int,
     page_size: int,
     min_count: int,
+    search_fields: list[str] | None = None,
 ) -> dict:
     base_where = ["r.range_id = ?", "r.view = ?", "r.metric = ?", "r.scope_key = 'all'", "r.detail_key != ''"]
     base_params: list[object] = [range_id, view, metric]
@@ -268,6 +273,7 @@ def source_matched_rankings_payload(
         "view": view,
         "metric": response_metric(metric),
         "searchScope": search_scope,
+        "searchFields": search_fields if search_fields is not None else search_fields_for_scope(search_scope),
         "page": max(1, page),
         "pageSize": page_size,
         "totalCount": total,
@@ -429,6 +435,55 @@ def normalize_search_scope(scope: str) -> str:
     if value not in aliases:
         raise ValueError("searchScope must be all, song, entity, title, artist, channel, video, or source")
     return aliases[value]
+
+
+def normalize_search_fields(value: str) -> list[str] | None:
+    if value is None:
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    result: list[str] = []
+    for raw_field in re.split(r"[,| ]+", text):
+        field = raw_field.strip().lower().replace("_", "-")
+        if not field:
+            continue
+        aliases = {
+            "title": "title",
+            "song": "title",
+            "name": "title",
+            "artist": "artist",
+            "artists": "artist",
+            "singer": "artist",
+        }
+        if field not in aliases:
+            raise ValueError("searchFields must contain title and/or artist")
+        normalized = aliases[field]
+        if normalized not in result:
+            result.append(normalized)
+    return result
+
+
+def search_scope_from_fields(fields: list[str] | None) -> str:
+    if fields is None:
+        return "all"
+    if fields == ["title"]:
+        return "title"
+    if fields == ["artist"]:
+        return "artist"
+    if set(fields) == {"title", "artist"}:
+        return "song"
+    return "all"
+
+
+def search_fields_for_scope(scope: str) -> list[str]:
+    if scope == "title":
+        return ["title"]
+    if scope == "artist":
+        return ["artist"]
+    if scope == "song":
+        return ["title", "artist"]
+    return []
 
 
 def search_filter_for_view(view: str, query: str, scope: str = "all") -> tuple[str, list[str]]:

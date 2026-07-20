@@ -269,6 +269,7 @@
       ...parseUnknownArtistUrlState(params, defaults),
       q: params.has("q") ? String(params.get("q") || "").slice(0, 200) : defaults.q || "",
       searchScope: validSearchScopes.has(searchScope) ? searchScope : defaults.searchScope || "all",
+      searchFields: searchFieldsForScope(validSearchScopes.has(searchScope) ? searchScope : "", defaults),
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
       trend: validTrendFilters.has(trend) ? trend : defaults.trend || "all",
       minCount: validMinCounts.has(parsedMinCount) ? parsedMinCount : positiveInteger(defaults.minCount, 1),
@@ -332,6 +333,7 @@
       trend: "all",
       minCount: 1,
       searchScope: defaults.searchScope || "all",
+      searchFields: sanitizeSearchFields(defaults.searchFields, defaults.searchFields || ["title", "artist"]),
       pageSize: positiveInteger(defaults.pageSize, 50),
       snapshotPath: defaults.snapshotPath || "data/latest.json",
       ...defaults,
@@ -347,6 +349,7 @@
         hideUnknownArtist: unknownArtistsHiddenForDraft(source, defaults),
         rankMetric: source.rankMetric,
         searchScope: source.searchScope,
+        searchFields: source.searchFields,
         trend: source.trend,
         minCount: source.minCount,
         pageSize: source.pageSize,
@@ -374,6 +377,7 @@
       hideUnknownArtist: typeof draft.hideUnknownArtist === "boolean" ? draft.hideUnknownArtist : defaults.hideUnknownArtist,
       rankMetric: validRankMetrics.has(draft.rankMetric) ? draft.rankMetric : defaults.rankMetric,
       searchScope: validSearchScopes.has(draft.searchScope) ? draft.searchScope : defaults.searchScope,
+      searchFields: sanitizeSearchFields(draft.searchFields, defaults.searchFields || ["title", "artist"]),
       trend: validTrendFilters.has(draft.trend) ? draft.trend : defaults.trend,
       minCount: validMinCounts.has(minCount) ? minCount : defaults.minCount,
       pageSize: validPageSizes.has(pageSize) ? pageSize : defaults.pageSize,
@@ -392,6 +396,9 @@
     const view = options.view || "songRank";
     const items = [];
     if (normalized.q) items.push({ key: "q", label: normalized.q, fullLabel: normalized.q });
+    for (const field of activeSearchFieldsForChips(normalized, options)) {
+      items.push({ key: `searchField:${field}`, label: searchFieldLabel(field, options) });
+    }
     if (normalized.q && normalized.searchScope !== "all") items.push({ key: "searchScope", label: searchScopeLabel(normalized.searchScope, options) });
     if (normalized.nicheOnly) items.push({ key: "nicheOnly", label: "只看小众" });
     if (normalized.hideUnknownArtist && filterAppliesToView("hideUnknownArtist", view)) items.push({ key: "hideUnknownArtist", label: "隐藏无歌手" });
@@ -407,6 +414,7 @@
     const normalized = sanitizeQueryDraft(draft, options);
     if (key === "q") return { ...normalized, q: "" };
     if (key === "searchScope") return { ...normalized, searchScope: "all" };
+    if (key.startsWith("searchField:")) return { ...normalized, searchFields: normalized.searchFields.filter((field) => field !== key.slice("searchField:".length)) };
     if (key === "nicheOnly") return { ...normalized, nicheOnly: false };
     if (key === "hideUnknownArtist") return { ...normalized, hideUnknownArtist: false };
     if (key === "trend") return { ...normalized, trend: "all" };
@@ -421,6 +429,7 @@
       ...normalized,
       q: "",
       searchScope: "all",
+      searchFields: sanitizeSearchFields(options.defaults?.searchFields, ["title", "artist"]),
       nicheOnly: false,
       hideUnknownArtist: false,
       trend: "all",
@@ -457,6 +466,44 @@
       ...(options.searchScopeLabels || {}),
     };
     return labels[scope] || labels.all;
+  }
+
+  function searchFieldLabel(field, options = {}) {
+    const labels = {
+      title: "歌名",
+      artist: "歌手",
+      ...(options.searchFieldLabels || {}),
+    };
+    return labels[field] || field;
+  }
+
+  function sanitizeSearchFields(value, fallback = ["title", "artist"]) {
+    const source = Array.isArray(value)
+      ? value
+      : typeof value === "string"
+        ? value.split(",")
+        : Array.isArray(fallback)
+          ? fallback
+          : [];
+    const result = [];
+    for (const field of source) {
+      const normalized = cleanText(field).toLocaleLowerCase();
+      if ((normalized === "title" || normalized === "artist") && !result.includes(normalized)) result.push(normalized);
+    }
+    return result;
+  }
+
+  function searchFieldsForScope(scope, defaults = {}) {
+    if (scope === "title") return ["title"];
+    if (scope === "artist") return ["artist"];
+    if (scope === "song") return ["title", "artist"];
+    return sanitizeSearchFields(defaults.searchFields, defaults.searchFields || ["title", "artist"]);
+  }
+
+  function activeSearchFieldsForChips(draft, options = {}) {
+    const normalized = sanitizeQueryDraft(draft, options);
+    if (!normalized.q || normalized.searchScope !== "all") return [];
+    return normalized.searchFields || [];
   }
 
   function queryTriggerModel(draft = {}, options = {}) {
@@ -818,6 +865,8 @@
     const inlineLimit = positiveInteger(options.inlineLimit, 3);
     const expanded = Boolean(options.expanded);
     const totalVideoCount = nonNegativeInteger(options.totalVideoCount ?? options.videoCount, groups.length);
+    const detailCountKnown = options.detailCountKnown !== false;
+    const hasUncountedExternalDetails = Boolean(options.hasExternalDetails && options.occurrencePreviewLimited && totalVideoCount <= groups.length);
     const videoCount = Math.max(groups.length, totalVideoCount);
     const occurrenceCount = groups.reduce((sum, group) => sum + (group.occurrences?.length || 0), 0);
     const previewGroups = expanded ? [] : groups.slice(0, Math.min(inlineLimit, groups.length));
@@ -825,7 +874,7 @@
     const hiddenGroups = videoCount > inlineLimit ? groups.slice(inlineLimit) : [];
     const allGroups = expanded ? groups : [];
     const externalDetailCount = Math.max(0, videoCount - previewGroups.length - hiddenGroups.length);
-    const canExpand = hiddenGroups.length > 0 || (Boolean(options.hasExternalDetails) && externalDetailCount > 0);
+    const canExpand = hiddenGroups.length > 0 || hasUncountedExternalDetails || (Boolean(options.hasExternalDetails) && externalDetailCount > 0);
     const mode = videoCount === 0 ? "none" : canExpand ? (expanded ? "expanded" : "collapsed") : "inline";
     const remainingCount = Math.max(0, videoCount - previewGroups.length);
 
@@ -833,6 +882,7 @@
       mode,
       videoCount,
       occurrenceCount,
+      detailCountKnown: detailCountKnown && !hasUncountedExternalDetails,
       inlineLimit,
       previewGroups,
       allGroups,
@@ -846,7 +896,11 @@
       hasMore: canExpand && !expanded,
       canExpand,
       collapsedLabel: canExpand ? "查看全部来源" : "",
-      collapsedAriaLabel: canExpand ? `查看该歌曲的全部 ${videoCount} 个来源` : "",
+      collapsedAriaLabel: canExpand
+        ? detailCountKnown && !hasUncountedExternalDetails
+          ? `查看该歌曲的全部 ${videoCount} 个来源`
+          : "查看该歌曲的全部来源"
+        : "",
       expandedLabel: "收起来源",
       expandedAriaLabel: "收起来源",
       showCopyAll: videoCount > 1 && !canExpand,
@@ -859,10 +913,12 @@
   }
 
   function groupOccurrencesByVideo(occurrences) {
+    const sourceOccurrences = Array.isArray(occurrences) ? occurrences : [];
+    const channelIdentityLookup = buildChannelIdentityLookup(sourceOccurrences);
     const groups = new Map();
-    for (const occurrence of occurrences || []) {
+    for (let occurrence of sourceOccurrences) {
       if (!occurrence) continue;
-      const item = occurrence.item || {};
+      const item = hydrateSourceItemChannelIdentity(occurrence.item || {}, channelIdentityLookup);
       const key = cleanText(item.videoId) || `${cleanText(item.channelName)}::${cleanText(item.title)}` || "unknown";
       if (!groups.has(key)) {
         groups.set(key, {
@@ -877,6 +933,9 @@
           firstSeconds: Number.POSITIVE_INFINITY,
           occurrenceCount: 0,
         });
+      }
+      if (item !== occurrence.item) {
+        occurrence = { ...occurrence, item };
       }
       const group = groups.get(key);
       group.occurrences.push(occurrence);
@@ -899,6 +958,66 @@
           compareValues(a.title, b.title)
         );
       });
+  }
+
+  function buildChannelIdentityLookup(occurrences) {
+    const lookup = new Map();
+    for (const occurrence of occurrences || []) {
+      const item = occurrence?.item || {};
+      const name = cleanText(item.channelName);
+      const nameKey = normalizeSearch(name);
+      if (!nameKey) continue;
+      const identity = lookup.get(nameKey) || {
+        channelName: "",
+        channelId: "",
+        channelHandle: "",
+        channelUrl: "",
+        avatarUrl: "",
+        channelAvatarUrl: "",
+      };
+      identity.channelName = preferredChannelName(identity.channelName, name);
+      identity.channelId ||= cleanText(item.channelId);
+      identity.channelHandle ||= cleanText(item.channelHandle);
+      identity.channelUrl ||= cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
+      identity.avatarUrl ||= cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl);
+      identity.channelAvatarUrl ||= cleanText(item.channelAvatarUrl || item.avatarUrl);
+      lookup.set(nameKey, identity);
+    }
+    return lookup;
+  }
+
+  function hydrateSourceItemChannelIdentity(item, lookup) {
+    const name = cleanText(item.channelName);
+    const identity = lookup?.get?.(normalizeSearch(name));
+    if (!identity) return item;
+    const next = {
+      ...item,
+      channelName: preferredChannelName(name, identity.channelName),
+      channelId: cleanText(item.channelId) || identity.channelId,
+      channelHandle: cleanText(item.channelHandle) || identity.channelHandle,
+      channelUrl: cleanText(item.channelUrl || item.authorUrl || item.ownerUrl) || identity.channelUrl,
+      avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl) || identity.avatarUrl,
+      channelAvatarUrl: cleanText(item.channelAvatarUrl || item.avatarUrl) || identity.channelAvatarUrl,
+    };
+    return next.channelName === item.channelName &&
+      next.channelId === item.channelId &&
+      next.channelHandle === item.channelHandle &&
+      next.channelUrl === item.channelUrl &&
+      next.avatarUrl === item.avatarUrl &&
+      next.channelAvatarUrl === item.channelAvatarUrl
+      ? item
+      : next;
+  }
+
+  function preferredChannelName(current, candidate) {
+    const currentText = cleanText(current);
+    const candidateText = cleanText(candidate);
+    if (!currentText) return candidateText;
+    if (!candidateText) return currentText;
+    if (candidateText.length > currentText.length && normalizeSearch(candidateText).includes(normalizeSearch(currentText))) {
+      return candidateText;
+    }
+    return currentText;
   }
 
   function mergeCompleteSourceOccurrences(detailOccurrences = [], previewOccurrences = []) {
@@ -1021,6 +1140,19 @@
       .join("\n");
   }
 
+  function sourceGroupSetlistItem(item = {}, group = {}) {
+    const sourceItem = item && typeof item === "object" ? item : {};
+    const occurrenceSongs = (group?.occurrences || []).map((occurrence) => occurrence?.song).filter(Boolean);
+    const allSongs = Array.isArray(sourceItem._allSongs) ? sourceItem._allSongs : [];
+    const itemSongs = Array.isArray(sourceItem.songs) ? sourceItem.songs : [];
+    const songs = [allSongs, itemSongs, occurrenceSongs].sort((a, b) => b.length - a.length)[0] || [];
+    return {
+      ...sourceItem,
+      songs,
+      _allSongs: songs,
+    };
+  }
+
   function buildSongSourceLinksText(occurrences) {
     const rows = [];
     const seen = new Set();
@@ -1121,21 +1253,35 @@
       record.knownSource?.type,
       record.source?.knownSourceType,
     )).toLocaleLowerCase();
+    if (isMomentSourceType(type, record)) {
+      return {
+        text: "",
+        isCollected: false,
+        sourceType: type,
+      };
+    }
     const explicit = record.isCollected ?? record.collected ?? record.isKnownSource ?? record.knownSource?.isCollected;
     const falseTypes = new Set(["0", "false", "no", "none", "unknown", "uncollected", "not_collected", "not-collected"]);
-    const trueTypes = new Set(["1", "true", "yes", "known", "collected", "library", "song-search", "song_search", "manual", "verified"]);
+    const trueTypes = new Set(["1", "true", "yes", "known", "collected", "library", "song-search", "song_search", "manual", "verified", "youtube_channel_discovery"]);
     const isCollected =
       explicit === true ||
       explicit === 1 ||
       explicit === "1" ||
       String(explicit).toLocaleLowerCase() === "true" ||
-      trueTypes.has(type) ||
-      (Boolean(type) && !falseTypes.has(type));
+      trueTypes.has(type);
     return {
       text: isCollected ? "已收录" : "",
       isCollected,
       sourceType: type,
     };
+  }
+
+  function isMomentSourceType(type, record = {}) {
+    if (type === "vsinger_moment_http" || type === "vsinger-moment" || type === "moment") return true;
+    const groups = Array.isArray(record.sourceGroups) ? record.sourceGroups : [];
+    if (groups.map((group) => cleanText(group).toLocaleLowerCase()).includes("vsinger-moment")) return true;
+    const sourceSystem = cleanText(record.sourceQuality?.sourceSystem || record.source?.sourceSystem).toLocaleLowerCase();
+    return sourceSystem === "vsinger_moment_http";
   }
 
   function firstNonEmpty(...values) {
@@ -1153,8 +1299,10 @@
     const occurrenceCount = Math.max(0, Number(options.occurrenceCount) || 0);
     const rankCount = Math.max(0, Number(options.rankCount) || 0);
     const rankMetric = options.rankMetric || "occurrences";
+    const detailCountKnown = options.detailCountKnown !== false;
 
     if (!videoCount && !occurrenceCount) return { text: "无来源", kind: "none" };
+    if (!detailCountKnown) return { text: "来源", kind: "source" };
     if (videoCount <= 1 && occurrenceCount > 1) return { text: `${occurrenceCount}个时间点`, kind: "time" };
     if (videoCount > 1 && rankMetric !== "videos" && videoCount !== rankCount) return { text: `${videoCount}个来源`, kind: "source" };
     return { text: "来源", kind: "source" };
@@ -1592,6 +1740,7 @@
   return {
     annotatePayloadWithNiche,
     buildSetlistText,
+    sourceGroupSetlistItem,
     buildSongSourceLinksText,
     buildIndexBucketModel,
     buildInlineSourceModel,

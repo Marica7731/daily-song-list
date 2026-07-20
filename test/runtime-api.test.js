@@ -78,6 +78,22 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(songTitleSearch.records[0].matchedBySource, undefined);
     assert.equal(songTitleSearch.records[0].globalCount, undefined);
 
+    const songFieldSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Singer&searchFields=title,artist&pageSize=5`);
+    assert.equal(songFieldSearch.searchScope, "song");
+    assert.deepEqual(songFieldSearch.searchFields, ["title", "artist"]);
+    assert.deepEqual(songFieldSearch.records.map((record) => record.title), ["Song One", "Song Four", "Song Three", "Song Two"]);
+    assert.deepEqual(songFieldSearch.records.map((record) => record.count), [2, 1, 1, 1]);
+
+    const artistOnlyFieldSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Singer%20A&searchFields=artist&pageSize=5`);
+    assert.equal(artistOnlyFieldSearch.searchScope, "artist");
+    assert.deepEqual(artistOnlyFieldSearch.searchFields, ["artist"]);
+    assert.deepEqual(artistOnlyFieldSearch.records.map((record) => record.title), ["Song One"]);
+
+    const titleOnlyFieldSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Singer%20A&searchFields=title&pageSize=5`);
+    assert.equal(titleOnlyFieldSearch.searchScope, "title");
+    assert.deepEqual(titleOnlyFieldSearch.searchFields, ["title"]);
+    assert.equal(titleOnlyFieldSearch.totalCount, 0);
+
     const channelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&pageSize=5`);
     assert.equal(channelSongSearch.searchScope, "all");
     assert.equal(channelSongSearch.totalCount, 0);

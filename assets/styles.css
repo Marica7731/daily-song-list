@@ -1367,6 +1367,22 @@ mark {
   background: #f2f4f7;
 }
 
+.vtuber-display-link {
+  grid-area: image;
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-self: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.vtuber-display-link:focus-visible {
+  border-radius: 50%;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .vtuber-display-image-avatar {
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px rgba(16, 24, 40, 0.04);
@@ -1381,6 +1397,17 @@ mark {
 .vtuber-display-image-missing {
   display: inline-block;
   visibility: hidden;
+}
+
+.vtuber-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.vtuber-title-link:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .rank-meta-line {
@@ -1458,7 +1485,7 @@ mark {
 .source-inline-strip {
   grid-area: sources;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 92px;
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
@@ -1492,15 +1519,13 @@ mark {
   display: contents;
 }
 
-.source-inline-strip[data-source-video-count="1"] .source-inline-preview-list {
-  grid-template-columns: minmax(0, 1fr);
-}
-
 .source-inline-actions {
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-1);
+  width: 100%;
   min-width: 0;
 }
 
@@ -3649,6 +3674,10 @@ mark {
     grid-template-columns: minmax(0, 1fr);
     gap: 4px;
     width: 100%;
+  }
+
+  .source-inline-strip[data-source-video-count="1"] .source-inline-preview-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .source-inline-tail {

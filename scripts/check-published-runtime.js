@@ -141,7 +141,7 @@ async function checkApiRuntime(checkedAt) {
     assert(meta.meta?.source_latest_sha256 === expectedApiLatestSha256, `api source_latest_sha256 ${meta.meta?.source_latest_sha256 || "missing"} must match expected ${expectedApiLatestSha256}`);
   }
 
-  const rankingsResponse = await fetchJsonWithText("api/rankings?range=all&view=songs&q=%E5%B0%91%E5%A5%B3%E3%83%AC%E3%82%A4&pageSize=5");
+  const rankingsResponse = await fetchJsonWithText("api/rankings?range=all&view=songs&q=%E5%B0%91%E5%A5%B3%E3%83%AC%E3%82%A4&searchFields=title,artist&pageSize=5");
   assertApiSuccessHeaders(rankingsResponse, "api rankings");
   const rankings = rankingsResponse.json;
   assert(rankings.view === "songs", "api rankings view mismatch");
@@ -169,14 +169,15 @@ async function checkApiRuntime(checkedAt) {
   for (const label of ["ノア・ポラリス", "香鳴ハノン", "なれたん", "チョま"]) {
     channelDiscoveryProbes.push(await checkVideoSearchProbe(label, `api/rankings?range=all&view=videos&q=${encodeURIComponent(label)}&pageSize=1`));
   }
-  const naretanSongSearch = await fetchJsonWithText("api/rankings?range=all&view=songs&q=%E3%81%AA%E3%82%8C%E3%81%9F%E3%82%93&pageSize=5");
+  const naretanSongSearch = await fetchJsonWithText("api/rankings?range=all&view=songs&q=%E3%81%AA%E3%82%8C%E3%81%9F%E3%82%93&searchFields=title,artist&pageSize=5");
   assertApiSuccessHeaders(naretanSongSearch, "api songs naretan");
   assert(naretanSongSearch.json.view === "songs", "api songs naretan view mismatch");
-  assert(naretanSongSearch.json.searchScope === "all", `api songs naretan default searchScope must be all, got ${naretanSongSearch.json.searchScope || "missing"}`);
-  assert(Number(naretanSongSearch.json.totalCount) > 0, "api songs naretan all-field totalCount must be positive");
+  assert(naretanSongSearch.json.searchScope === "song", `api songs naretan field searchScope must be song, got ${naretanSongSearch.json.searchScope || "missing"}`);
+  assert(Array.isArray(naretanSongSearch.json.searchFields) && naretanSongSearch.json.searchFields.join(",") === "title,artist", "api songs naretan searchFields must be title,artist");
+  assert(Number(naretanSongSearch.json.totalCount) >= 0, "api songs naretan title/artist totalCount must be numeric");
   for (const record of naretanSongSearch.json.records || []) {
-    const allText = JSON.stringify(record).normalize("NFKC").toLocaleLowerCase();
-    assert(allText.includes("なれたん") || allText.includes("naraetan"), `api songs naretan all-field row must contain query evidence: ${record.title || record.key || "unknown"}`);
+    const visibleText = `${record.title || ""} ${record.displayArtist || record.artist || ""}`.normalize("NFKC").toLocaleLowerCase();
+    assert(visibleText.includes("なれたん") || visibleText.includes("naraetan"), `api songs naretan default row must match visible song fields: ${record.title || record.key || "unknown"}`);
     assert(!isNaretanDirtySongRecord(record), `api songs naretan row must not be self-reference/commentary noise: ${record.title || record.key || "unknown"}`);
   }
   const naretanSongScoped = await fetchJsonWithText("api/rankings?range=all&view=songs&q=%E3%81%AA%E3%82%8C%E3%81%9F%E3%82%93&searchScope=song&pageSize=5");

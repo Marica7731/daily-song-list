@@ -383,7 +383,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   assert.match(vsingerVtuberOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(vsingerVtuberOutput, /"name": "VSinger"/);
   assert.match(vsingerVtuberOutput, /"knownSourceType": "vsinger_moment_http"/);
-  assert.match(vsingerVtuberOutput, /"isCollected": true/);
+  assert.match(vsingerVtuberOutput, /"isCollected": false/);
 });
 
 test("runtime DB builder merges accepted YouTube channel discovery increments into rankings", () => {
@@ -432,6 +432,18 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
             { title: "spending", artist: "Known Artist", time: "12:00", seconds: 720 },
             { title: "Opening", artist: "Known Artist", time: "13:00", seconds: 780 },
           ],
+        },
+        {
+          videoId: "collab00123",
+          title: "Collaboration Karaoke",
+          channelName: "CHIYURU ch.三日月ちゆる、Hanon Ch. 香鳴ハノン【パレプロ】",
+          channelId: "",
+          channelHandle: "",
+          channelUrl: "",
+          thumbnailUrl: "https://i.ytimg.com/vi/collab00123/hqdefault.jpg",
+          publishedTimestamp: 1784336400000,
+          publishedText: "2026-07-18",
+          songs: [{ title: "Collaboration Song", artist: "Singer", time: "1:00", seconds: 60 }],
         },
       ],
     }),
@@ -607,6 +619,25 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     vtuberSongMetricPayload.records[0].songs.map((song) => song.name),
     ["Overlay Song", "ENDLESS STORY", "Pretender", "spending", "Opening"],
   );
+
+  const compositeVtuberOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--q",
+      "三日月ちゆる",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(compositeVtuberOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(compositeVtuberOutput, /"totalCount": 0/);
 });
 
 function parseDbQueryOutput(output) {

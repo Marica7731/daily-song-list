@@ -53,7 +53,7 @@
           for (let index = 0; index < normalizedItemSongs.length; index += 1) {
             const song = (item.songs || [])[index];
             const normalizedSong = normalizedItemSongs[index];
-            if (isBlockedSongEntry(normalizedSong)) {
+            if (isBlockedSongEntry(normalizedSong, item)) {
               removedSongs += 1;
               continue;
             }
@@ -120,10 +120,11 @@
     return value;
   }
 
-  function isBlockedSongEntry(song) {
+  function isBlockedSongEntry(song, source = {}) {
     const title = String(song?.title || song?.raw || "").trim();
     const hasArtist = hasKnownArtist(song);
     const artist = String(song?.artist || "").trim();
+    if (isChannelScopedUnknownArtistDirtySong(song, source)) return true;
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
     if (isNonSongMarkerWithDescriptor(title, artist)) return true;
     if (isStrongNonSongActivityText(title)) return true;
@@ -131,6 +132,19 @@
     if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
     return !hasArtist && isChatReactionShoutText(title);
+  }
+
+  function isChannelScopedUnknownArtistDirtySong(song, source = {}) {
+    return !hasKnownArtist(song) && isRionaChannelSource(source);
+  }
+
+  function isRionaChannelSource(source = {}) {
+    const handleValues = uniqueStrings([source.channelHandle, source.handle, source.ownerHandle, ...channelUrlValues(source)]);
+    if (handleValues.some((value) => normalizeHandle(value) === "isakiriona")) return true;
+    const channelUrlMatch = channelUrlValues(source).some((value) => normalizeChannelUrl(value) === "@isakiriona");
+    if (channelUrlMatch) return true;
+    const channelName = normalizeMatcherText(source.channelName || source.ownerText || source.longBylineText || source.shortBylineText || "");
+    return channelName.includes("響咲リオナ") || /^riona ch\./iu.test(channelName);
   }
 
   function isNumericIndexFragmentEntry(title, artist, raw) {
@@ -659,6 +673,7 @@
     isArtistRichMixedSongList,
     isBlockedSongEntry,
     isBlockedSource,
+    isChannelScopedUnknownArtistDirtySong,
     isChatReactionShoutText,
     matchBlockedSource,
     normalizeSongEntry,

@@ -31,10 +31,26 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Record run start
+        id: runmeta
+        run: |
+          echo "started_epoch=$(date -u +%s)" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Backfill inbox bundle"
+            echo "- run_id: $GITHUB_RUN_ID"
+            echo "- run_attempt: $GITHUB_RUN_ATTEMPT"
+            echo "- started_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- release_runbook: docs/release-runbook.md"
+            echo "- target: $DAILY_SONG_MONTH_BACKFILL_TARGET"
+            echo "- snapshot_days: $DAILY_SONG_MYGIT_TODAY_SNAPSHOT_DAYS"
+            echo "- note: prepares immutable data/backfill-inbox only; full DB/runtime rebuild belongs in deploy workflow or larger runners"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Sync latest main
         run: git pull --ff-only origin main
 
       - name: Prepare immutable backfill bundle
+        id: backfill
         run: node scripts/run-backfill-update.js
 
       - name: Commit backfill bundle
@@ -47,5 +63,28 @@ jobs:
             exit 0
           fi
           git commit -m "chore: prepare backfill inbox bundle"
-          git pull --rebase origin main
-          git push
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Failed to push backfill bundle after retries."
+          exit 1
+
+      - name: Finish run summary
+        if: always()
+        run: |
+          started="${{ steps.runmeta.outputs.started_epoch }}"
+          now="$(date -u +%s)"
+          elapsed="unknown"
+          if [ -n "$started" ]; then
+            elapsed="$((now - started))s"
+          fi
+          {
+            echo "- completed_at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- elapsed: $elapsed"
+            echo "- backfill_outcome: ${{ steps.backfill.outcome }}"
+            echo "- failure_hint: if this fails, record whether the failure was sync, prepare bundle, commit/rebase, or push before rerunning"
+          } >> "$GITHUB_STEP_SUMMARY"

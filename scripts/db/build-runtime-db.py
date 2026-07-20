@@ -637,7 +637,7 @@ def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: l
         "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
         "sourceUrl": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
         "knownSourceType": clean_text(item.get("knownSourceType")) or known_source_type(item),
-        "isCollected": bool(item.get("isCollected")) or is_collected_source(item),
+        "isCollected": is_collected_source(item),
         "keyword": clean_text(item.get("keyword")),
         "publishedTimestamp": published_timestamp,
         "publishedAt": timestamp_to_iso(published_timestamp),
@@ -738,7 +738,7 @@ def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> 
             "thumbnail_url": vtuber_thumbnail_candidate(item),
             "source_url": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
             "known_source_type": clean_text(item.get("knownSourceType")) or known_source_type(item),
-            "is_collected": bool(item.get("isCollected")) or is_collected_source(item),
+            "is_collected": is_collected_source(item),
             "count": 0,
             "videos": set(),
             "songs": {},
@@ -793,8 +793,8 @@ def merge_channel_record_identity(record: dict, item: dict) -> None:
         record["thumbnail_url"] = thumbnail_url
     if source_url:
         record["source_url"] = record["source_url"] or source_url
-    if source_type:
-        record["known_source_type"] = record["known_source_type"] or source_type
+    if should_replace_known_source_type(record.get("known_source_type"), source_type):
+        record["known_source_type"] = source_type
     record["is_collected"] = bool(record.get("is_collected")) or is_collected_source(item)
 
 
@@ -1418,7 +1418,7 @@ def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
         "sourceUrl": clean_text(item.get("sourceUrl") or channel_url),
         "channelUrl": channel_url,
         "knownSourceType": clean_text(item.get("knownSourceType")) or known_source_type(item),
-        "isCollected": bool(item.get("isCollected")) or is_collected_source(item),
+        "isCollected": is_collected_source(item),
     }
     conn.execute(
         """
@@ -1435,7 +1435,12 @@ def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
           thumbnail_url=COALESCE(NULLIF(channel_metadata.thumbnail_url, ''), excluded.thumbnail_url),
           source_url=COALESCE(NULLIF(channel_metadata.source_url, ''), excluded.source_url),
           channel_url=COALESCE(NULLIF(channel_metadata.channel_url, ''), excluded.channel_url),
-          known_source_type=COALESCE(NULLIF(channel_metadata.known_source_type, ''), excluded.known_source_type),
+          known_source_type=CASE
+            WHEN channel_metadata.known_source_type IN ('vsinger_moment_http', 'vsinger-moment', 'moment')
+             AND excluded.known_source_type NOT IN ('', 'vsinger_moment_http', 'vsinger-moment', 'moment')
+            THEN excluded.known_source_type
+            ELSE COALESCE(NULLIF(channel_metadata.known_source_type, ''), excluded.known_source_type)
+          END,
           is_collected=MAX(channel_metadata.is_collected, excluded.is_collected),
           payload_json=excluded.payload_json
         """,
@@ -1607,7 +1612,7 @@ def compact_video(item: dict) -> dict:
         "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
         "sourceUrl": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
         "knownSourceType": clean_text(item.get("knownSourceType")) or known_source_type(item),
-        "isCollected": bool(item.get("isCollected")) or is_collected_source(item),
+        "isCollected": is_collected_source(item),
         "keyword": clean_text(item.get("keyword")),
         "publishedTimestamp": published_timestamp,
         "publishedAt": timestamp_to_iso(published_timestamp),
@@ -1628,14 +1633,48 @@ def known_source_type(item: dict) -> str:
     return clean_text(source_quality.get("sourceSystem"))
 
 
+def should_replace_known_source_type(current, incoming) -> bool:
+    incoming_type = clean_text(incoming)
+    if not incoming_type:
+        return False
+    current_type = clean_text(current)
+    if not current_type:
+        return True
+    return is_moment_source_type(current_type) and not is_moment_source_type(incoming_type)
+
+
+def is_moment_source_type(value) -> bool:
+    return clean_text(value).lower() in {"vsinger_moment_http", "vsinger-moment", "moment"}
+
+
 def is_collected_source(item: dict) -> bool:
     source_groups = item.get("sourceGroups") if isinstance(item.get("sourceGroups"), list) else []
     source_quality = item.get("sourceQuality") if isinstance(item.get("sourceQuality"), dict) else {}
+    if is_moment_source(item):
+        return False
+    explicit = item.get("isCollected")
+    if explicit is True or explicit == 1 or clean_text(explicit).lower() == "true":
+        return True
+    known_type = clean_text(item.get("knownSourceType") or known_source_type(item)).lower()
+    true_types = {"manual", "verified", "song-search", "song_search", "youtube_channel_discovery"}
     return (
         "youtube_channel_discovery" in source_groups
-        or "vsinger-moment" in source_groups
-        or source_quality.get("sourceType") == "external"
-        or source_quality.get("sourceSystem") == "vsinger_moment_http"
+        or known_type in true_types
+        or (
+            source_quality.get("sourceType") == "external"
+            and clean_text(source_quality.get("sourceSystem")).lower() != "vsinger_moment_http"
+        )
+    )
+
+
+def is_moment_source(item: dict) -> bool:
+    source_groups = item.get("sourceGroups") if isinstance(item.get("sourceGroups"), list) else []
+    source_quality = item.get("sourceQuality") if isinstance(item.get("sourceQuality"), dict) else {}
+    known_type = clean_text(item.get("knownSourceType") or source_quality.get("sourceSystem")).lower()
+    return (
+        "vsinger-moment" in source_groups
+        or is_moment_source_type(known_type)
+        or clean_text(source_quality.get("sourceSystem")).lower() == "vsinger_moment_http"
     )
 
 
@@ -1763,7 +1802,18 @@ def channel_record_key(item: dict) -> str:
     if channel_url_handle:
         return normalize_key(channel_url_handle)
     channel_name = clean_text(item.get("channelName"))
+    if is_composite_channel_name(channel_name):
+        return ""
     return normalize_key(channel_name) if channel_name else ""
+
+
+def is_composite_channel_name(value: str) -> bool:
+    text = clean_text(value)
+    if not text:
+        return False
+    has_separator = re.search(r"(?:、|，|,|\s+\+\s+|\s+×\s+)", text)
+    has_channel_marker = re.search(r"(?:ch\.?|channel|ちゃんねる|チャンネル)", text, re.IGNORECASE)
+    return bool(has_separator and has_channel_marker)
 
 
 def handle_from_channel_url(value) -> str:

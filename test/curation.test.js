@@ -314,6 +314,35 @@ test("curation drops campaign and announcement rows from production data", () =>
   assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 1);
 });
 
+test("curation drops Riona unknown-artist rows while keeping explicit artists", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "ZEAgcWCnkwQ",
+        channelName: "Riona Ch. 響咲リオナ - FLOW GLOW",
+        channelHandle: "@IsakiRiona",
+        songs: [
+          { title: "花に亡霊", artist: "未記載", seconds: 145, raw: "2:25 花に亡霊" },
+          { title: "自己肯定感がドンドン上がってる", artist: "未記載", seconds: 3362, raw: "56:02 自己肯定感がドンドン上がってる" },
+          { title: "花に亡霊", artist: "ヨルシカ", seconds: 4000, raw: "1:06:40 花に亡霊 / ヨルシカ" },
+        ],
+      },
+      {
+        videoId: "SAFE0000001",
+        channelName: "Other Karaoke Channel",
+        songs: [{ title: "花に亡霊", artist: "未記載", seconds: 145, raw: "2:25 花に亡霊" }],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos.flatMap((item) => item.songs.map((song) => `${item.videoId}:${song.title} / ${song.artist}`)),
+    ["ZEAgcWCnkwQ:花に亡霊 / ヨルシカ", "SAFE0000001:花に亡霊 / 未記載"],
+  );
+  assert.equal(videos.curationStats.ruleDroppedEntries, 2);
+});
+
 test("curation folds same-video same-song rows within 30 seconds with provenance", () => {
   const videos = applyCurationToVideos(
     [

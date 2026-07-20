@@ -4,6 +4,8 @@ Target host: `192.255.151.75`.
 
 This deployment keeps the static frontend and the SQLite API on the same VPS. It serves `staging-ytb-song-rank.culua.com` first, then `ytb-song-rank.culua.com` after Cloudflare cutover.
 
+For release lane selection, slim commits, failure recording, and 2 GiB VPS guidance, see `docs/release-runbook.md`.
+
 All files live under service-specific subdirectories. Do not reuse `/var/www/song-search` or another existing project path:
 
 - `/opt/culua/ytb-song-rank` for the git checkout and static frontend.
@@ -39,7 +41,7 @@ systemctl disable --now song-rank-runtime-update.timer
 systemctl reload nginx
 ```
 
-Do not build the SQLite database during VPS2 bootstrap. The 2 GiB host is expected to receive the first `song-rank.sqlite` from GitHub Actions, and `song-rank-db-activate.sh` will start `song-rank-api` after the uploaded database passes verification.
+Do not build the SQLite database during VPS2 bootstrap. The 2 GiB host is expected to receive the first `song-rank.sqlite` from GitHub Actions, and `song-rank-db-activate.sh` will start `song-rank-api` after the uploaded database passes verification. If the first DB is missing, fix or rerun the GitHub Actions deploy instead of starting a full local build on VPS2.
 
 The song-rank nginx site is installed as the port 80 default server. This keeps direct IP checks, staging DNS, and production DNS on the same route during cutover.
 
@@ -80,6 +82,8 @@ It probes `少女レイ`, keeps the previous database as `song-rank.sqlite.previ
 GitHub Actions remains the source update mechanism. `Update core song-list data` runs hourly and commits refreshed data to `main`. `Deploy SQLite runtime DB` then builds SQLite on GitHub's runner and rsyncs it to VPS2, where `song-rank-db-activate.sh` atomically replaces the active DB and restarts the API.
 
 Keep `song-rank-runtime-update.timer` installed but disabled on the 2 GiB VPS2 production host. The timer is only a manual fallback for code sync and health restart; enabling it for routine production updates can make the checkout drift from the database built by GitHub Actions.
+
+Do not run full `npm run db:build`, full `npm run update:core`, runtime shard generation, or bulk YouTube backfill on the 2 GiB production VPS2. Use GitHub Actions or a larger temporary machine for those jobs, then let VPS2 run activation, health checks, and small smoke queries.
 
 Required repository secret:
 

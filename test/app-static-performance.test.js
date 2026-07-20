@@ -137,6 +137,7 @@ test("source drawer renders paged source lists without inserting all cards", () 
 
   const expandedBody = functionBody("async function setSourceDrawerExpanded");
   assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
+  assert.match(expandedBody, /let songGroups =/u);
   assert.match(expandedBody, /sourceDetailPageForContainer\(row, drawerOccurrences/u);
   assert.match(expandedBody, /showSourceDrawerStatus\(drawer, "正在加载来源\.\.\."/u);
   assert.match(expandedBody, /clearSourceDrawerStatus\(drawer\);[\s\S]*initializeSourceDrawer/u);
@@ -191,6 +192,14 @@ test("VTuber song details use smaller first render and filter dirty preview titl
   assert.match(functionBody("function artistSongBatchSize"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_BATCH_SIZE/u);
   assert.match(functionBody("function vtuberSongPreview"), /sortedDisplaySongEntries\(record\.songs\)/u);
   assert.match(functionBody("function shouldShowSongGroupTitle"), /op\|ed\|end\|start\|opening\|ending/u);
+});
+
+test("VTuber ranking does not create standalone records from collaboration channel names", () => {
+  const keyBody = functionBody("function vtuberRecordKey");
+  assert.match(keyBody, /const directKey = directVtuberRecordKey\(item\)/u);
+  assert.match(keyBody, /if \(directKey\) return directKey/u);
+  assert.match(keyBody, /if \(isCompositeChannelName\(item\?\.channelName\)\) return ""/u);
+  assert.match(functionBody("function isCompositeChannelName"), /(?:ch\\\.\?|channel|ちゃんねる|チャンネル)/u);
 });
 
 test("delayed trend diffs update visible badges without rerendering the list for all trend", () => {
@@ -250,11 +259,12 @@ test("explicit search scopes query text by current view", () => {
   assert.match(scopedSearchBody, /state\.view === "vtuberRank"[\s\S]*vtuberOccurrenceSearchText\(occurrence\)/u);
   assert.match(scopedSearchBody, /state\.view === "songRank" \|\| state\.view === "songAz"[\s\S]*songOccurrenceSearchText\(occurrence\)/u);
   assert.match(scopedSearchBody, /return occurrence\?\.searchText \|\| ""/u);
-  assert.match(functionBody("function queryDraftOccurrences"), /songOccurrenceSearchText\(occurrence\)\.includes\(filterKey\)/u);
+  assert.match(functionBody("function queryDraftOccurrences"), /songOccurrenceSearchText\(occurrence, draft\.searchFields\)\.includes\(filterKey\)/u);
 
   const songScopedSearchBody = functionBody("function songOccurrenceSearchText");
-  assert.match(songScopedSearchBody, /\[song\.title, song\.artist\]/u);
-  assert.doesNotMatch(songScopedSearchBody, /item\.title|item\.channelName|channel/u);
+  assert.match(songScopedSearchBody, /if \(!fields\.length\) return normalizeSearch\(\[item\.videoId, item\.title, item\.channelName, item\.keyword, song\.title, song\.artist\]/u);
+  assert.match(songScopedSearchBody, /if \(fields\.includes\("title"\)\) parts\.push\(song\.title\)/u);
+  assert.match(songScopedSearchBody, /if \(fields\.includes\("artist"\)\) parts\.push\(song\.artist\)/u);
   const collectBody = functionBody("function collectSongOccurrences");
   assert.match(collectBody, /\[item\.videoId, item\.title, item\.channelName, item\.keyword, song\.title, song\.artist\]/u);
 
@@ -284,9 +294,9 @@ test("query overlay opens before suggestions and result preview work", () => {
   assert.match(bindBody, /event\.isComposing \|\| state\.queryComposing/u);
   assert.match(bindBody, /updateQueryDraft\(\{ q: els\.queryInput\.value \}, \{[\s\S]*sync: "input"/u);
 
-  const suggestionBody = functionBody("function renderSearchSuggestions");
-  assert.ok(suggestionBody.indexOf("if (!hasQuery) return") < suggestionBody.indexOf("buildSearchSuggestions"));
-  assert.match(appSource, /const QUERY_SUGGESTION_SCAN_LIMIT = 360;/u);
+  assert.doesNotMatch(functionBody("function bindQueryOverlayEvents"), /searchSuggestions/u);
+  assert.doesNotMatch(functionBody("function hydrateQueryOverlayAfterFirstFrame"), /scheduleSearchSuggestions/u);
+  assert.doesNotMatch(appSource, /id="searchSuggestions"|function renderSearchSuggestions|scheduleSearchSuggestions/u);
   const shellBody = functionBody("function prepareQueryPreviewShell");
   assert.match(shellBody, /els\.queryResultPreview\.textContent = "可查看结果"/u);
   assert.match(shellBody, /els\.applyQueryButton\.disabled = false;[\s\S]*els\.applyQueryButton\.textContent = "查看结果"/u);
@@ -302,11 +312,13 @@ test("query overlay opens before suggestions and result preview work", () => {
   const draftFilterBody = functionBody("function requestFilterStateFromDraft");
   assert.match(draftFilterBody, /q: draft\.q \|\| ""/u);
   assert.match(draftFilterBody, /searchScope: draft\.searchScope \|\| "all"/u);
+  assert.match(draftFilterBody, /searchFields: draft\.searchFields \|\| DEFAULT_SEARCH_FIELDS/u);
   assert.match(draftFilterBody, /hideUnknownArtist: queryDraftHideUnknownForView\(draft\)/u);
   const countBody = functionBody("function queryDraftResultCount");
   assert.doesNotMatch(countBody, /buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
   assert.match(countBody, /queryResultCountCache/u);
   assert.match(functionBody("function queryResultCountKey"), /draft\.searchScope \|\| "all"/u);
+  assert.match(functionBody("function queryResultCountKey"), /normalizedSearchFieldKey\(draft\.searchFields \|\| DEFAULT_SEARCH_FIELDS\)/u);
   assert.match(functionBody("function createRangeCacheObject"), /queryIndexes:[\s\S]*queryIndexLoads:[\s\S]*queryResultCountCache:/u);
 });
 

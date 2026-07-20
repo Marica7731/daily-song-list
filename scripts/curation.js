@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { entryRepairSignals } = require("./entry-repair");
 const { normalizeArtistKey, normalizeSongTitleKey } = require("../assets/ranking-utils");
-const { isBlockedSongEntry } = require("../assets/source-filter");
+const { isBlockedSongEntry, isChannelScopedUnknownArtistDirtySong } = require("../assets/source-filter");
 
 const ROOT = path.resolve(__dirname, "..");
 const CONFIG_DIR = path.join(ROOT, "config");
@@ -363,6 +363,9 @@ function classifyEntry(song, options = {}) {
   const knownSong = options.knownSong === true || (typeof options.knownSongMatcher === "function" && options.knownSongMatcher(song));
   const unknownArtist = isUnknownArtist(song?.artist);
   const signals = song?.curationSignals || entryRepairSignals(song);
+  if (isChannelScopedUnknownArtistDirtySong(song, options.video)) {
+    return { classification: "confirmed_noise", suggestedAction: "drop_entry", riskReasons: ["channel_scoped_unknown_artist_dirty_source"] };
+  }
   if (!knownSong && signals?.suppressLikelySong) {
     const reasons = signals.reasons?.length ? signals.reasons : ["non_song_signal"];
     const classification = reasons.some((reason) => reason === "custom_emoji_only" || reason === "reaction_text_only") ? "likely_noise" : "confirmed_noise";
@@ -377,7 +380,7 @@ function classifyEntry(song, options = {}) {
   if (!knownSong && isConversationEntry(song)) {
     return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["conversation_entry"] };
   }
-  if (!knownSong && isBlockedSongEntry(song)) {
+  if (!knownSong && isBlockedSongEntry(song, options.video)) {
     return { classification: "confirmed_noise", suggestedAction: "drop_entry", riskReasons: ["blocked_song_entry"] };
   }
   if (unknownArtist && knownSong) {
@@ -473,7 +476,7 @@ function applyCurationToVideos(videos, context) {
         stats.droppedEntries += 1;
         continue;
       }
-      const classification = classifyEntry(enriched, { rules: context?.nonSongRules });
+      const classification = classifyEntry(enriched, { rules: context?.nonSongRules, video });
       if (classification.suggestedAction === "drop_entry" && classification.classification === "confirmed_noise") {
         stats.ruleDroppedEntries += 1;
         continue;

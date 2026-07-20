@@ -398,7 +398,7 @@ function buildVtuberRequestItems(items) {
         videoThumbnailUrl: vtuberThumbnailCandidate(item),
         sourceUrl: RankingUtils.cleanText(item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl),
         knownSourceType: RankingUtils.cleanText(item.knownSourceType),
-        isCollected: item.isCollected === true || isCollectedSource(item),
+        isCollected: isCollectedSource(item),
         count: 0,
         songCount: 0,
         videoCount: 0,
@@ -486,7 +486,10 @@ function runtimeScopedSongs(songs) {
 function channelRecordKey(item, identityLookup = null) {
   const nameKey = channelNameIdentityKey(item);
   if (nameKey && identityLookup?.nameToKey?.has(nameKey)) return identityLookup.nameToKey.get(nameKey);
-  return directChannelRecordKey(item) || nameKey;
+  const directKey = directChannelRecordKey(item);
+  if (directKey) return directKey;
+  if (isCompositeChannelName(item?.channelName)) return "";
+  return nameKey;
 }
 
 function directChannelRecordKey(item) {
@@ -507,6 +510,12 @@ function handleFromChannelUrl(value) {
 function channelNameIdentityKey(item) {
   const name = RankingUtils.cleanText(item.channelName);
   return name ? normalizeSearchText(name) : "";
+}
+
+function isCompositeChannelName(value) {
+  const text = RankingUtils.cleanText(value);
+  if (!text) return false;
+  return /(?:、|，|,|\s+\+\s+|\s+×\s+)/u.test(text) && /(?:ch\.?|channel|ちゃんねる|チャンネル)/iu.test(text);
 }
 
 function mergeChannelRecordIdentity(record, item) {
@@ -542,7 +551,7 @@ function mergeChannelRecordIdentity(record, item) {
     record.videoThumbnailUrl = thumbnailUrl;
   }
   if (sourceUrl && !record.sourceUrl) record.sourceUrl = sourceUrl;
-  if (knownSourceType && !record.knownSourceType) record.knownSourceType = knownSourceType;
+  if (shouldReplaceKnownSourceType(record.knownSourceType, knownSourceType)) record.knownSourceType = knownSourceType;
   record.isCollected = record.isCollected === true || isCollectedSource(item);
   for (const alias of knownChannelSearchAliases(channelName)) record.aliases.add(alias);
 }
@@ -572,13 +581,41 @@ function knownSourceTypeForVideo(item) {
   return item.sourceQuality?.sourceSystem || "";
 }
 
+function shouldReplaceKnownSourceType(current, incoming) {
+  const nextType = RankingUtils.cleanText(incoming);
+  if (!nextType) return false;
+  const currentType = RankingUtils.cleanText(current);
+  if (!currentType) return true;
+  return isMomentSourceType(currentType) && !isMomentSourceType(nextType);
+}
+
+function isMomentSourceType(value) {
+  const type = RankingUtils.cleanText(value).toLocaleLowerCase();
+  return type === "vsinger_moment_http" || type === "vsinger-moment" || type === "moment";
+}
+
 function isCollectedSource(item) {
   const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  if (isMomentSource(item)) return false;
+  const explicit = item.isCollected;
+  if (explicit === true || explicit === 1 || String(explicit).toLocaleLowerCase() === "true") return true;
+  const knownType = RankingUtils.cleanText(item.knownSourceType || knownSourceTypeForVideo(item)).toLocaleLowerCase();
+  const trueTypes = new Set(["manual", "verified", "song-search", "song_search", "youtube_channel_discovery"]);
   return (
     sourceGroups.includes("youtube_channel_discovery") ||
+    trueTypes.has(knownType) ||
+    (item.sourceQuality?.sourceType === "external" && RankingUtils.cleanText(item.sourceQuality?.sourceSystem).toLocaleLowerCase() !== "vsinger_moment_http")
+  );
+}
+
+function isMomentSource(item) {
+  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  const sourceSystem = RankingUtils.cleanText(item.sourceQuality?.sourceSystem).toLocaleLowerCase();
+  const knownType = RankingUtils.cleanText(item.knownSourceType || sourceSystem).toLocaleLowerCase();
+  return (
     sourceGroups.includes("vsinger-moment") ||
-    item.sourceQuality?.sourceType === "external" ||
-    item.sourceQuality?.sourceSystem === "vsinger_moment_http"
+    sourceSystem === "vsinger_moment_http" ||
+    isMomentSourceType(knownType)
   );
 }
 
