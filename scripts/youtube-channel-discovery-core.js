@@ -1,8 +1,7 @@
+const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const { setTimeout: delay } = require("node:timers/promises");
-
-const { hashNormalizedText } = require("./curation");
 
 const SOURCE_SYSTEM = "youtube_channel_discovery";
 const DEFAULT_KEYWORDS = ["LIVE", "歌", "弾き語", "リレー"];
@@ -73,6 +72,8 @@ function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
     maxInspect: positiveInteger(args["max-inspect"], defaults.maxInspect ?? 20, "--max-inspect"),
     requestIntervalMs,
     requestJitterMs: positiveInteger(args["request-jitter-ms"], defaults.requestJitterMs ?? 1000, "--request-jitter-ms"),
+    inspectShardIndex: positiveInteger(args["inspect-shard-index"], defaults.inspectShardIndex ?? 0, "--inspect-shard-index"),
+    inspectShardCount: positiveInteger(args["inspect-shard-count"], defaults.inspectShardCount ?? 1, "--inspect-shard-count"),
     fresh: args.fresh === true || args.fresh === "1" || args.fresh === "true",
     candidateOnly: args["candidate-only"] === true || args["candidate-only"] === "1" || args["candidate-only"] === "true",
   };
@@ -113,7 +114,11 @@ async function runChannelDiscovery(options, deps) {
   let inspectedCount = 0;
 
   if (!options.candidateOnly && options.maxInspect > 0) {
-    const inspectable = candidates.filter((candidate) => !completed.has(candidate.videoId)).slice(0, options.maxInspect);
+    validateInspectShardOptions(options);
+    const inspectable = candidates
+      .filter((candidate, index) => isCandidateInInspectShard(index, options))
+      .filter((candidate) => !completed.has(candidate.videoId))
+      .slice(0, options.maxInspect);
     for (const candidate of inspectable) {
       await maybeDelay(options.requestIntervalMs);
       const result = await inspectVideoSongListWithRetry(candidate, deps, options);
@@ -155,6 +160,8 @@ async function runChannelDiscovery(options, deps) {
     maxChannelPages: options.maxChannelPages,
     maxCandidates: options.maxCandidates,
     maxInspect: options.maxInspect,
+    inspectShardIndex: options.inspectShardIndex || 0,
+    inspectShardCount: options.inspectShardCount || 1,
     candidateOnly: options.candidateOnly,
     candidateCount: rawVideos.length,
     inspectedInLatestRun: inspectedCount,
@@ -193,6 +200,20 @@ async function runChannelDiscovery(options, deps) {
   });
 
   return { manifest, rawVideos, details, occurrences, audits };
+}
+
+function validateInspectShardOptions(options) {
+  const shardCount = positiveInteger(options.inspectShardCount, 1, "--inspect-shard-count") || 1;
+  const shardIndex = positiveInteger(options.inspectShardIndex, 0, "--inspect-shard-index");
+  if (shardCount < 1) throw new Error("--inspect-shard-count must be at least 1");
+  if (shardIndex >= shardCount) throw new Error("--inspect-shard-index must be less than --inspect-shard-count");
+}
+
+function isCandidateInInspectShard(index, options) {
+  const shardCount = Number(options.inspectShardCount) || 1;
+  if (shardCount <= 1) return true;
+  const shardIndex = Number(options.inspectShardIndex) || 0;
+  return index % shardCount === shardIndex;
 }
 
 async function inspectVideoSongListWithRetry(candidate, deps, options) {
@@ -262,11 +283,12 @@ async function fetchChannelPageWithContinuations(pageUrl, options, deps) {
 
 function addCandidateItems(target, data, extractSearchItems, options, pageUrl) {
   const channel = channelMetadataFromInitialData(data);
+  const optionHandle = handleFromUrl(options.channelUrl);
   const extracted = extractSearchItems(data).map((item) => ({
     ...item,
-    channelName: item.channelName || channel.title,
+    channelName: item.channelName || channel.title || options.singerName || "",
     channelId: item.channelId || channel.channelId,
-    channelHandle: item.channelHandle || handleFromUrl(channel.handleUrl),
+    channelHandle: item.channelHandle || handleFromUrl(channel.handleUrl) || optionHandle,
     discoverySourceUrl: pageUrl,
     channelUrl: normalizeChannelUrl(options.channelUrl),
     singerName: options.singerName || "",
@@ -329,7 +351,15 @@ async function fetchBrowseContinuation({ apiKey, clientVersion, continuation, fe
       lastError = error;
       continue;
     }
-    if (response.ok) return response.json();
+    if (response.ok) {
+      try {
+        return await response.json();
+      } catch (error) {
+        lastError = error;
+        if (attempt === attempts) throw lastError;
+        continue;
+      }
+    }
     lastError = new Error(`youtubei browse continuation HTTP ${response.status}`);
     if (!isRetriableContinuationStatus(response.status) || attempt === attempts) throw lastError;
   }
@@ -343,7 +373,7 @@ function isRetriableContinuationStatus(status) {
 
 function isRetriableRequestError(error) {
   const message = String(error?.message || error || "");
-  return /(?:HTTP\s+(?:429|5\d\d)|fetch failed|ECONNRESET|ETIMEDOUT|ECONNREFUSED|UND_ERR|timeout|network)/iu.test(message);
+  return /(?:HTTP\s+(?:429|5\d\d)|fetch failed|ECONNRESET|ETIMEDOUT|ECONNREFUSED|UND_ERR|terminated|timeout|network)/iu.test(message);
 }
 
 function findBrowseContinuation(data) {
@@ -447,7 +477,8 @@ function bestSourceUrl(value) {
 function handleFromUrl(value) {
   try {
     const url = new URL(value);
-    return url.pathname.startsWith("/@") ? url.pathname : "";
+    const [handle] = url.pathname.split("/").filter(Boolean);
+    return handle?.startsWith("@") ? `/${handle}` : "";
   } catch {
     return "";
   }
@@ -457,6 +488,9 @@ function enrichDetail(detail, candidate, singerName = "") {
   return {
     ...detail,
     sourceSystem: SOURCE_SYSTEM,
+    channelName: detail.channelName || candidate.channelName || candidate.singerName || "",
+    channelId: detail.channelId || candidate.channelId || "",
+    channelHandle: detail.channelHandle || candidate.channelHandle || handleFromUrl(candidate.channelUrl),
     discoverySingerName: singerName || candidate.singerName || "",
     discoveryChannelUrl: candidate.channelUrl || "",
     discoverySourceUrls: candidate.sourceUrls || [candidate.discoverySourceUrl].filter(Boolean),
@@ -701,6 +735,20 @@ function normalizeDigits(text) {
 
 function normalizeText(value) {
   return String(value || "").replace(/\u00a0/gu, " ").replace(/\s+/gu, " ").trim();
+}
+
+function normalizeSourceText(text) {
+  return String(text || "")
+    .replace(/\r\n/gu, "\n")
+    .replace(/\r/gu, "\n")
+    .replace(/\u00a0/gu, " ")
+    .replace(/\u200b/gu, "")
+    .replace(/[ \t]+/gu, " ")
+    .trim();
+}
+
+function hashNormalizedText(text) {
+  return crypto.createHash("sha256").update(normalizeSourceText(text), "utf8").digest("hex");
 }
 
 function uniqueStrings(values) {

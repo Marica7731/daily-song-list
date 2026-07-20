@@ -102,6 +102,7 @@ function inputDirsFromArgs(args) {
 function readDiscoveryVideos(inputDirs) {
   const videos = [];
   const seen = new Set();
+  const detailEntries = [];
   const stats = {
     inputDirs: inputDirs.length,
     videoDetails: 0,
@@ -117,26 +118,30 @@ function readDiscoveryVideos(inputDirs) {
     const details = JSON.parse(fs.readFileSync(filePath, "utf8"));
     if (!Array.isArray(details)) throw new Error(`video-details.json must be an array: ${filePath}`);
     for (const detail of details) {
-      stats.videoDetails += 1;
-      const videoId = String(detail?.videoId || "").trim();
-      if (!/^[A-Za-z0-9_-]{11}$/u.test(videoId)) {
-        stats.skippedInvalidVideoId += 1;
-        continue;
-      }
-      const songs = Array.isArray(detail.songs) ? detail.songs.map(normalizeParsedSong).filter(isImportableSong) : [];
-      if (!songs.length) {
-        stats.skippedNoSongs += 1;
-        continue;
-      }
-      if (seen.has(videoId)) {
-        stats.duplicateVideoIds += 1;
-        continue;
-      }
-      seen.add(videoId);
-      videos.push(normalizeImportedVideo(detail, inputDir, songs));
-      stats.usableVideos += 1;
-      stats.songs += songs.length;
+      detailEntries.push({ detail, inputDir });
     }
+  }
+  const channelFallbacks = collectChannelFallbacks(detailEntries);
+  for (const { detail, inputDir } of detailEntries) {
+    stats.videoDetails += 1;
+    const videoId = String(detail?.videoId || "").trim();
+    if (!/^[A-Za-z0-9_-]{11}$/u.test(videoId)) {
+      stats.skippedInvalidVideoId += 1;
+      continue;
+    }
+    const songs = Array.isArray(detail.songs) ? detail.songs.map(normalizeParsedSong).filter(isImportableSong) : [];
+    if (!songs.length) {
+      stats.skippedNoSongs += 1;
+      continue;
+    }
+    if (seen.has(videoId)) {
+      stats.duplicateVideoIds += 1;
+      continue;
+    }
+    seen.add(videoId);
+    videos.push(normalizeImportedVideo(detail, inputDir, songs, channelFallbacks.get(channelKeyFromDetail(detail))));
+    stats.usableVideos += 1;
+    stats.songs += songs.length;
   }
   return { videos, stats };
 }
@@ -186,15 +191,16 @@ function normalizeIdentity(value) {
   return stringValue(value).normalize("NFKC").toLocaleLowerCase().replace(/\s+/gu, " ").trim();
 }
 
-function normalizeImportedVideo(detail, inputDir, songs) {
+function normalizeImportedVideo(detail, inputDir, songs, channelFallback = {}) {
   const videoId = String(detail.videoId || "").trim();
+  const channelUrl = stringValue(detail.channelUrl || detail.discoveryChannelUrl || channelFallback.channelUrl);
   return {
     videoId,
     title: stringValue(detail.title),
-    channelName: stringValue(detail.channelName),
-    channelId: stringValue(detail.channelId),
-    channelHandle: stringValue(detail.channelHandle),
-    channelUrl: stringValue(detail.channelUrl || detail.discoveryChannelUrl),
+    channelName: stringValue(detail.channelName || channelFallback.channelName || detail.discoverySingerName),
+    channelId: stringValue(detail.channelId || channelFallback.channelId),
+    channelHandle: stringValue(detail.channelHandle || channelFallback.channelHandle || handleFromUrl(channelUrl)),
+    channelUrl,
     publishedTimestamp: finiteTimestamp(detail.publishedTimestamp),
     sourceGroups: uniqueValues([SOURCE_GROUP, ...listValues(detail.sourceGroups), detail.sourceGroup]),
     sourceUrls: uniqueValues([
@@ -259,6 +265,48 @@ function uniqueValues(values) {
 
 function stringValue(value) {
   return String(value || "").trim();
+}
+
+function collectChannelFallbacks(detailEntries) {
+  const fallbacks = new Map();
+  for (const { detail } of detailEntries) {
+    const key = channelKeyFromDetail(detail);
+    if (!key) continue;
+    const current = fallbacks.get(key) || { channelName: "", channelId: "", channelHandle: "", channelUrl: "" };
+    const candidate = {
+      channelName: stringValue(detail.channelName),
+      channelId: stringValue(detail.channelId),
+      channelHandle: stringValue(detail.channelHandle || handleFromUrl(detail.channelUrl || detail.discoveryChannelUrl)),
+      channelUrl: stringValue(detail.channelUrl || detail.discoveryChannelUrl),
+    };
+    fallbacks.set(key, {
+      channelName: preferredValue(current.channelName, candidate.channelName, Boolean(candidate.channelId)),
+      channelId: current.channelId || candidate.channelId,
+      channelHandle: current.channelHandle || candidate.channelHandle,
+      channelUrl: current.channelUrl || candidate.channelUrl,
+    });
+  }
+  return fallbacks;
+}
+
+function preferredValue(current, candidate, preferCandidate) {
+  if (!candidate) return current;
+  if (!current || preferCandidate) return candidate;
+  return current;
+}
+
+function channelKeyFromDetail(detail) {
+  return stringValue(detail?.channelHandle || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl) || detail?.channelId);
+}
+
+function handleFromUrl(value) {
+  try {
+    const url = new URL(String(value || ""));
+    const [handle] = url.pathname.split("/").filter(Boolean);
+    return handle?.startsWith("@") ? `/${handle}` : "";
+  } catch {
+    return "";
+  }
 }
 
 function writeJson(filePath, payload) {

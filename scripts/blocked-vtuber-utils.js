@@ -4,6 +4,7 @@ const path = require("node:path");
 
 const ROOT_DIR = path.resolve(__dirname, "..");
 const DEFAULT_BLOCKLIST_PATH = path.join(ROOT_DIR, "config", "blocked-vtuber-channels.json");
+const DEFAULT_LOCAL_BLOCKLIST_PATH = path.join(ROOT_DIR, "config", "blocked-vtuber-local-channels.json");
 const DEFAULT_GENERATED_ASSET_PATH = path.join(ROOT_DIR, "assets", "blocked-vtuber-channels.js");
 const DEFAULT_GENERATED_META_ASSET_PATH = path.join(ROOT_DIR, "assets", "blocked-vtuber-meta.js");
 const VALID_REGIONS = new Set(["TW", "HK", "LEGACY_REVIEW"]);
@@ -30,6 +31,37 @@ const DANGEROUS_BROAD_TERMS = new Set(
 
 function loadBlocklist(filePath = DEFAULT_BLOCKLIST_PATH) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function loadEffectiveBlocklist(filePath = DEFAULT_BLOCKLIST_PATH, localPath = DEFAULT_LOCAL_BLOCKLIST_PATH) {
+  const base = loadBlocklist(filePath);
+  if (!fs.existsSync(localPath)) return base;
+  return mergeBlocklists(base, loadBlocklist(localPath));
+}
+
+function mergeBlocklists(base, local) {
+  const entries = [];
+  const seenIds = new Set();
+  for (const entry of [...(base.entries || []), ...(local.entries || [])]) {
+    if (!entry?.id || seenIds.has(entry.id)) continue;
+    seenIds.add(entry.id);
+    entries.push(entry);
+  }
+  return {
+    schemaVersion: base.schemaVersion,
+    listVersion: local?.listVersion ? `${base.listVersion}+local.${local.listVersion}` : base.listVersion,
+    updatedAt: latestTimestamp(base.updatedAt, local?.updatedAt),
+    entries,
+  };
+}
+
+function latestTimestamp(left, right) {
+  if (!right) return left;
+  const leftTime = Date.parse(left || "");
+  const rightTime = Date.parse(right || "");
+  if (!Number.isFinite(leftTime)) return right;
+  if (!Number.isFinite(rightTime)) return left;
+  return rightTime > leftTime ? right : left;
 }
 
 function canonicalizeBlocklist(blocklist) {
@@ -313,6 +345,7 @@ function uniqueSorted(values) {
 
 module.exports = {
   DEFAULT_BLOCKLIST_PATH,
+  DEFAULT_LOCAL_BLOCKLIST_PATH,
   DEFAULT_GENERATED_ASSET_PATH,
   DEFAULT_GENERATED_META_ASSET_PATH,
   VALID_REGIONS,
@@ -320,6 +353,7 @@ module.exports = {
   canonicalizeBlocklist,
   createBlockedSourceMatcher,
   loadBlocklist,
+  loadEffectiveBlocklist,
   normalizeChannelUrl,
   normalizeHandle,
   stableJson,

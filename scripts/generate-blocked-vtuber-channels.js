@@ -8,7 +8,7 @@ const {
   DEFAULT_GENERATED_META_ASSET_PATH,
   blocklistHash,
   canonicalizeBlocklist,
-  loadBlocklist,
+  loadEffectiveBlocklist,
   stableJson,
   validateBlocklist,
 } = require("./blocked-vtuber-utils");
@@ -19,7 +19,7 @@ function main() {
   const sourcePath = path.resolve(ROOT_DIR, parseArg("--source") || DEFAULT_BLOCKLIST_PATH);
   const outPath = path.resolve(ROOT_DIR, parseArg("--out") || DEFAULT_GENERATED_ASSET_PATH);
   const metaOutPath = path.resolve(ROOT_DIR, parseArg("--meta-out") || DEFAULT_GENERATED_META_ASSET_PATH);
-  const blocklist = loadBlocklist(sourcePath);
+  const blocklist = loadEffectiveBlocklist(sourcePath);
   const validation = validateBlocklist(blocklist);
   if (!validation.ok) fail(validation.errors.join("\n"));
   const canonical = canonicalizeBlocklist(blocklist);

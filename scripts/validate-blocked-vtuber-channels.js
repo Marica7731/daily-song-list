@@ -8,7 +8,7 @@ const {
   DEFAULT_GENERATED_META_ASSET_PATH,
   blocklistHash,
   createBlockedSourceMatcher,
-  loadBlocklist,
+  loadEffectiveBlocklist,
   validateBlocklist,
 } = require("./blocked-vtuber-utils");
 const { BLOCKED_REGIONAL_VTUBER_CHANNELS, BLOCKLIST_HASH, matchBlockedSource } = require("../assets/source-filter");
@@ -17,7 +17,7 @@ const ROOT_DIR = path.resolve(__dirname, "..");
 const INDEX_PATH = path.join(ROOT_DIR, "index.html");
 
 function main() {
-  const blocklist = loadBlocklist(DEFAULT_BLOCKLIST_PATH);
+  const blocklist = loadEffectiveBlocklist(DEFAULT_BLOCKLIST_PATH);
   const errors = validateBlocklist(blocklist, { requireGeneratedAsset: true, assetPath: DEFAULT_GENERATED_ASSET_PATH }).errors;
   const hash = blocklistHash(blocklist);
 

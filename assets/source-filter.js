@@ -333,8 +333,8 @@
 
   function loadRegionalBlocklist(rootObject) {
     if (typeof module === "object" && module.exports && typeof require === "function") {
-      const data = require("../config/blocked-vtuber-channels.json");
-      const { blocklistHash } = require("../scripts/blocked-vtuber-utils");
+      const { blocklistHash, loadEffectiveBlocklist } = require("../scripts/blocked-vtuber-utils");
+      const data = loadEffectiveBlocklist();
       return {
         data,
         version: data.listVersion || "",

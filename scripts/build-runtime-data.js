@@ -194,13 +194,14 @@ function buildClientGroup(group) {
     title: group.title || group.id || "",
     generatedAt: group.generatedAt || "",
     updatedAt: group.updatedAt || "",
-    items: (group.items || []).map(buildClientVideo),
+    items: (group.items || []).map(buildClientVideo).filter(Boolean),
   };
 }
 
 function buildClientVideo(item) {
   const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
   const songs = (item.songs || []).map(buildClientSong).map(cleanRuntimeSong).filter(Boolean);
+  if (songs.length === 0) return null;
   const result = {
     videoId: item.videoId || "",
     title: item.title || "",
@@ -307,6 +308,9 @@ function isRuntimeActivityTitle(title, artist) {
   const unknownArtist = !cleanRuntimeArtist(artist) || cleanRuntimeArtist(artist) === "未記載";
   if (/^(?:枠)?(?:start|streamstart|karaokestart|配信start|配信スタート|開始|配信開始|本編開始)$/iu.test(value)) return true;
   if (/^(?:setlist|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)$/iu.test(value)) return true;
+  if (/(?:setlist|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)/iu.test(value)) {
+    return true;
+  }
   if (/(?:耐久開始を宣言|開始ツイート|開始前トーク|ツイートしてな|同時視聴開始|閉会式開始)/u.test(value)) return true;
   if (unknownArtist && /(?:同時視聴開始|復習タイム開始|後編開始|前編開始|謁見開始|閉会式開始|作成時間|セトリ変更|練習開始|耐久開始を宣言|開始$)/u.test(value)) {
     return true;

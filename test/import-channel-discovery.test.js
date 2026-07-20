@@ -96,6 +96,41 @@ test("normalizeImportedVideo maps detail song fields into catalog-ready videos",
   assert.equal(video.qualityStatus, "usable");
 });
 
+test("channel discovery import backfills channel metadata within an input batch", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-import-fallback-"));
+  fs.writeFileSync(
+    path.join(dir, "video-details.json"),
+    JSON.stringify([
+      {
+        videoId: "EEEEEEEEEEE",
+        title: "歌枠 1",
+        channelName: "Real Channel",
+        channelId: "UC_REAL",
+        channelHandle: "/@real_handle",
+        discoveryChannelUrl: "https://www.youtube.com/@real_handle/streams",
+        songs: [{ time: "1:00", seconds: 60, title: "Song A", artist: "Artist" }],
+      },
+      {
+        videoId: "FFFFFFFFFFF",
+        title: "歌枠 2",
+        discoverySingerName: "Fallback Name",
+        discoveryChannelUrl: "https://www.youtube.com/@real_handle/streams",
+        songs: [{ time: "2:00", seconds: 120, title: "Song B", artist: "Artist" }],
+      },
+    ]),
+    "utf8",
+  );
+
+  const { videos } = readDiscoveryVideos([dir]);
+  assert.deepEqual(
+    videos.map((video) => [video.videoId, video.channelName, video.channelId, video.channelHandle]),
+    [
+      ["EEEEEEEEEEE", "Real Channel", "UC_REAL", "/@real_handle"],
+      ["FFFFFFFFFFF", "Real Channel", "UC_REAL", "/@real_handle"],
+    ],
+  );
+});
+
 test("normalizeImportedVideo stores repository-relative discovery input paths", () => {
   const inputDir = path.resolve("artifacts/channel-discovery/noa_polaris");
   const video = normalizeImportedVideo(

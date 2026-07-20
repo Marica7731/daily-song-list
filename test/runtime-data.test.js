@@ -107,6 +107,29 @@ test("buildClientGroup filters runtime activity markers while preserving START s
   );
 });
 
+test("buildClientGroup drops videos after all songs are filtered", () => {
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "AAAAAAAAAAA",
+        title: "video",
+        channelName: "channel",
+        songs: [
+          { seconds: 1, title: "セットリスト", artist: "歌唱開始時間", isNiche: true },
+          { seconds: 2, title: "セットリスト（歌唱開始時間）", artist: "未記載", isNiche: true },
+          { seconds: 3, title: "本日のセトリはこちら", artist: "未記載", isNiche: true },
+          { seconds: 4, title: "セトリ開示タイム", artist: "チラ見ユラ", isNiche: true },
+          { seconds: 5, title: "~ 開始", artist: "未記載", isNiche: true },
+        ],
+      },
+    ],
+  });
+
+  assert.equal(group.items.length, 0);
+});
+
 test("runtime meta uses the expected range and diff paths", () => {
   const rangePayloads = {
     "72h": { id: "72h", generatedAt: "2026-07-12T15:00:00Z", items: [{ videoId: "AAAAAAAAAAA" }], nicheAnnotated: true },

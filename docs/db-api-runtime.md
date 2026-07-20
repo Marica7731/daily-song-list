@@ -53,6 +53,8 @@ Do not regenerate and commit `data/ui`, `data/catalog-segments`, or range JSON s
 
 Deployment also avoids re-uploading the full database artifact by default. `.github/workflows/deploy-runtime-db.yml` builds and validates a complete SQLite file on GitHub Actions, then copies the active VPS2 database to a run-scoped candidate and uses `rsync --inplace --partial --compress` so only changed blocks cross the network. The active DB is replaced only after `song-rank-db-activate.sh` verifies the candidate sha256 and smoke query. Set repository variable `DAILY_SONG_UPLOAD_DB_ARTIFACT=1` only when a full SQLite Actions artifact is needed for inspection.
 
+The regional VTuber blocklist keeps `config/blocked-vtuber-channels.json` as the canonical `Marica7731/mygit` mirror checked by CI. Repository-specific additions such as urgent source exclusions live in `config/blocked-vtuber-local-channels.json`; `npm run blocklist:generate`, backend Node imports, and `npm run blocklist:validate` use the merged effective list.
+
 HTTP endpoints:
 
 - `GET /healthz`

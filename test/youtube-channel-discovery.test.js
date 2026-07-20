@@ -268,6 +268,72 @@ test("channel discovery retries transient video detail failures", async () => {
   assert.equal(result.manifest.occurrenceCount, 1);
 });
 
+test("channel discovery can inspect a deterministic candidate shard", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-shard-test-"));
+  const firstUrl = "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1";
+  const client = {
+    metrics: { requestCount: 1 },
+    async getText(url) {
+      assert.equal(url, firstUrl);
+      return {
+        status: 200,
+        body: youtubeHtml({
+          initialData: channelData({
+            videos: [
+              videoRenderer("AAAAAAAAAAA", "歌枠 A", "1 日前"),
+              videoRenderer("BBBBBBBBBBB", "歌枠 B", "2 日前"),
+              videoRenderer("CCCCCCCCCCC", "歌枠 C", "3 日前"),
+              videoRenderer("DDDDDDDDDDD", "歌枠 D", "4 日前"),
+            ],
+          }),
+        }),
+        bytes: 10,
+        fromCache: false,
+      };
+    },
+  };
+  const inspected = [];
+  const inspectVideoSongList = async (candidate) => {
+    inspected.push(candidate.videoId);
+    return {
+      detail: {
+        videoId: candidate.videoId,
+        title: candidate.title,
+        channelName: "Noa Polaris",
+        publishedTimestamp: candidate.publishedTimestamp,
+        songs: [{ time: "1:00", seconds: 60, title: `Song ${candidate.videoId[0]}`, artist: "Artist", raw: "1:00 Song / Artist" }],
+      },
+      audit: { videoId: candidate.videoId, result: "selected" },
+    };
+  };
+
+  const result = await runChannelDiscovery(
+    {
+      channelUrl: "https://www.youtube.com/@noa_polaris",
+      singerName: "Noa Polaris",
+      outputDir: dir,
+      cacheDir: path.join(dir, "cache"),
+      keywords: ["歌"],
+      tabs: ["streams"],
+      maxChannelPages: 1,
+      maxCandidates: 10,
+      maxInspect: 10,
+      inspectShardIndex: 1,
+      inspectShardCount: 2,
+      requestIntervalMs: 0,
+      requestJitterMs: 0,
+      fresh: true,
+      candidateOnly: false,
+    },
+    { client, extractSearchItems, inspectVideoSongList },
+  );
+
+  assert.deepEqual(inspected, ["BBBBBBBBBBB", "DDDDDDDDDDD"]);
+  assert.equal(result.manifest.inspectShardIndex, 1);
+  assert.equal(result.manifest.inspectShardCount, 2);
+  assert.equal(result.manifest.usableVideoCount, 2);
+});
+
 test("raw and occurrence records carry fields needed by the review/import pipeline", () => {
   const raw = rawVideoCandidate({
     channelUrl: "https://www.youtube.com/@kanaruhanon",
