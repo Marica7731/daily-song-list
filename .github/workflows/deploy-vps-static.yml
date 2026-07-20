@@ -1,0 +1,77 @@
+name: Deploy VPS static files
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-song-list-vps-static-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VPS2_HOST: "192.255.151.75"
+      VPS2_USER: "root"
+      REMOTE_PROJECT_DIR: "/opt/culua/ytb-song-rank"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Resolve deploy revision
+        id: revision
+        run: |
+          git fetch --depth=1 origin main --prune
+          git checkout -B main FETCH_HEAD
+          commit_sha="$(git rev-parse HEAD)"
+          echo "commit_sha=${commit_sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Install sshpass
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+        run: |
+          if [ -z "${VPS2_PASSWORD}" ]; then
+            echo "::error::Missing VPS2_PASSWORD secret."
+            exit 1
+          fi
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Fast-forward VPS checkout
+        env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
+          DEPLOY_SHA: ${{ steps.revision.outputs.commit_sha }}
+        run: |
+          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            cd '${REMOTE_PROJECT_DIR}'
+            git fetch --quiet origin main --prune
+            git checkout main
+            git merge --ff-only --quiet '${DEPLOY_SHA}'
+            test \"\$(git rev-parse HEAD)\" = '${DEPLOY_SHA}'
+            nginx -t
+            systemctl reload nginx
+          "
+
+      - name: Verify deployed index
+        env:
+          EXPECTED_SHA: ${{ steps.revision.outputs.commit_sha }}
+        run: |
+          set -Eeuo pipefail
+          expected_app="$(grep -o 'assets/app.js?v=[^"]*' index.html | head -1)"
+          if [ -z "${expected_app}" ]; then
+            echo "::error::could not resolve expected app asset from index.html"
+            exit 1
+          fi
+          body="$(curl -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/index.html?probe=${EXPECTED_SHA}")"
+          if ! grep -q "${expected_app}" <<< "${body}"; then
+            echo "::error::deployed index does not reference expected app asset"
+            exit 1
+          fi
