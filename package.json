@@ -26,6 +26,7 @@
     "diagnose:song-identities": "node scripts/diagnose-song-identities.js",
     "youtube:discover-channel": "node scripts/youtube-channel-discovery.js",
     "youtube:import-channel-discovery": "node scripts/import-channel-discovery.js",
+    "youtube:clean-channel-discovery": "node scripts/clean-channel-discovery-accepted.js",
     "youtube:export-channel-increment": "node scripts/export-channel-discovery-increment.js",
     "youtube:fetch-channel-avatars": "node scripts/fetch-channel-avatar-cache.js",
     "migrate:song-identities": "node scripts/diagnose-song-identities.js",

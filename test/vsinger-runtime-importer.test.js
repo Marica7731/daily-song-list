@@ -101,6 +101,28 @@ test("VSinger song merge preserves same-song repeats at different timestamps", (
   );
 });
 
+test("VSinger song merge filters legacy commentary rows while keeping reviewed real songs", () => {
+  const songs = mergeSongItems(
+    [
+      { seconds: 1, title: "なれたんに褒められたいハネダン達", artist: "Hanedans Who Want Praise from Naretan" },
+      { seconds: 2, title: "去年のなれたんは譲り合い精神がないの？", artist: "未記載" },
+      { seconds: 3, title: "END", artist: "エンドカード" },
+      { seconds: 4, title: "星座になれたら", artist: "結束バンド" },
+      { seconds: 5, title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO" },
+      { seconds: 6, title: "楽しみにしてろよ!", artist: "練習後のなれたんを" },
+    ],
+    [
+      { seconds: 7, title: "アンケート (なれたんを家族に例えると)", artist: "Poll: If Narae-tan was family" },
+      { seconds: 8, title: "Opening", artist: "Known Artist" },
+    ],
+  );
+
+  assert.deepEqual(
+    songs.map((song) => `${song.title} / ${song.artist}`),
+    ["星座になれたら / 結束バンド", "ENDLESS STORY / REIRA starring YUNA ITO", "Opening / Known Artist"],
+  );
+});
+
 test("VSinger backfill filters non-song setlist markers before runtime import", () => {
   const dir = writeBackfillBundle({
     songs: [

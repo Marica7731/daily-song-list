@@ -778,6 +778,10 @@ svg {
   box-shadow: none;
 }
 
+.query-search-scope-field {
+  padding: 8px 16px 0;
+}
+
 .clear-query-button {
   position: absolute;
   top: 50%;
@@ -4128,6 +4132,10 @@ mark {
     padding-top: 8px;
   }
 
+  .query-search-scope-field {
+    padding: 6px 12px 0;
+  }
+
   .query-search-section input {
     min-height: 36px;
   }
@@ -4138,6 +4146,7 @@ mark {
   }
 
   .query-search-section,
+  .query-search-scope-field,
   .query-panel-body {
     padding-inline: 12px;
   }

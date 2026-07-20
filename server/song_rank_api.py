@@ -8,6 +8,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
+import re
 import sqlite3
 import sys
 from urllib.parse import parse_qs, unquote, urlparse
@@ -117,6 +118,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
     page = parse_int(first(query, "page", "1"), "page")
     page_size = min(200, max(1, parse_int(first(query, "pageSize", "50"), "pageSize")))
     q = first(query, "q", "").strip()
+    search_scope = normalize_search_scope(first(query, "searchScope", first(query, "searchField", "all")))
     metric = normalize_metric(view, first(query, "metric", "count"))
     min_count = max(1, parse_int(first(query, "minCount", "1"), "minCount"))
     if range_id not in {"7d", "all"}:
@@ -132,7 +134,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         where.append(f"{column} >= ?")
         params.append(min_count)
     if q:
-        clause, values = search_filter_for_view(view, q)
+        clause, values = search_filter_for_view(view, q, search_scope)
         where.append(clause)
         params.extend(values)
     where_sql = " AND ".join(where)
@@ -164,6 +166,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         "rangeId": range_id,
         "view": view,
         "metric": response_metric(metric),
+        "searchScope": search_scope,
         "page": max(1, page),
         "pageSize": page_size,
         "totalCount": total,
@@ -197,17 +200,98 @@ def response_metric(metric: str) -> str:
     return "occurrences"
 
 
-def search_filter_for_view(view: str, query: str) -> tuple[str, list[str]]:
-    needle = f"%{query.lower()}%"
-    if view in {"songs", "songIndex"}:
-        return "(lower(title) LIKE ? OR lower(artist) LIKE ?)", [needle, needle]
-    if view == "vsingerSongs":
-        return "(lower(search_text) LIKE ? OR lower(title) LIKE ? OR lower(artist) LIKE ?)", [needle, needle, needle]
-    if view == "artists":
-        return "(lower(search_text) LIKE ? OR lower(name) LIKE ?)", [needle, needle]
-    if view == "vtubers":
-        return "(lower(search_text) LIKE ? OR lower(name) LIKE ?)", [needle, needle]
-    return "(lower(search_text) LIKE ? OR lower(title) LIKE ? OR lower(name) LIKE ?)", [needle, needle, needle]
+def normalize_search_scope(scope: str) -> str:
+    value = (scope or "all").strip().lower().replace("_", "-")
+    aliases = {
+        "": "all",
+        "all": "all",
+        "any": "all",
+        "full": "all",
+        "song": "song",
+        "songs": "song",
+        "entity": "entity",
+        "title": "title",
+        "artist": "artist",
+        "artists": "artist",
+        "singer": "artist",
+        "channel": "channel",
+        "channels": "channel",
+        "vtuber": "channel",
+        "video": "video",
+        "videos": "video",
+        "source": "source",
+        "sources": "source",
+    }
+    if value not in aliases:
+        raise ValueError("searchScope must be all, song, entity, title, artist, channel, video, or source")
+    return aliases[value]
+
+
+def search_filter_for_view(view: str, query: str, scope: str = "all") -> tuple[str, list[str]]:
+    groups = parse_search_groups(query)
+    if not groups:
+        return "1 = 1", []
+    fields = search_fields_for_view(view, scope)
+    values: list[str] = []
+    or_clauses = []
+    for group in groups:
+        and_clauses = []
+        for term in group:
+            like = like_pattern(term)
+            and_clauses.append("(" + " OR ".join(f"{field} LIKE ? ESCAPE '\\'" for field in fields) + ")")
+            values.extend([like] * len(fields))
+        if and_clauses:
+            or_clauses.append("(" + " AND ".join(and_clauses) + ")")
+    if not or_clauses:
+        return "1 = 1", []
+    return "(" + " OR ".join(or_clauses) + ")", values
+
+
+def search_fields_for_view(view: str, scope: str) -> list[str]:
+    candidates = {
+        "all": ["lower(search_text)", "lower(title)", "lower(artist)", "lower(name)"],
+        "entity": ["lower(title)", "lower(artist)", "lower(name)"],
+        "song": ["lower(title)", "lower(artist)"],
+        "title": ["lower(title)"],
+        "artist": ["lower(artist)", "lower(name)"],
+        "channel": ["lower(search_text)", "lower(name)"],
+        "video": ["lower(search_text)", "lower(title)"],
+        "source": ["lower(search_text)"],
+    }[scope]
+    if view == "artists" and scope in {"song", "title"}:
+        candidates = ["lower(name)"]
+    if view == "vtubers" and scope in {"song", "title", "artist"}:
+        candidates = ["lower(name)"]
+    result = []
+    for field in candidates:
+        if field not in result:
+            result.append(field)
+    return result
+
+
+def parse_search_groups(query: str) -> list[list[str]]:
+    tokens = []
+    for match in re.finditer(r'"([^"]+)"|\'([^\']+)\'|(\S+)', query or ""):
+        token = next((part for part in match.groups() if part is not None), "").strip()
+        if token:
+            tokens.append(token)
+    groups: list[list[str]] = [[]]
+    for token in tokens:
+        upper = token.upper()
+        if upper in {"OR", "|", "或"}:
+            if groups[-1]:
+                groups.append([])
+            continue
+        if upper in {"AND", "+", "与", "和"}:
+            continue
+        groups[-1].append(token[:80])
+    return [group[:12] for group in groups if group]
+
+
+def like_pattern(term: str) -> str:
+    value = (term or "").strip().lower()
+    value = value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{value}%"
 
 
 def source_payload(db_path: Path, key: str, query: dict[str, list[str]] | None = None) -> dict:

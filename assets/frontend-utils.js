@@ -243,6 +243,7 @@
     const validPageSizes = new Set((options.validPageSizes || []).map(Number));
     const validRankMetrics = new Set(options.validRankMetrics || ["occurrences", "videos"]);
     const validVideoLayouts = new Set(options.validVideoLayouts || ["cards", "compact"]);
+    const validSearchScopes = new Set(options.validSearchScopes || ["all", "song", "entity", "title", "artist", "channel", "video", "source"]);
     const fallbackRange = normalizeRangeId(defaults.range || firstSetValue(validRanges) || "", options);
     const fallbackView = defaults.view || firstSetValue(validViews) || "";
     const fallbackPageSize = positiveInteger(defaults.pageSize, 50);
@@ -252,6 +253,7 @@
     const rankMetric = params.get("metric");
     const videoLayout = params.get("layout");
     const trend = params.get("trend");
+    const searchScope = params.get("searchScope") || params.get("searchField");
     const validTrendFilters = new Set(options.validTrendFilters || ["all", "new", "up", "down"]);
     const validMinCounts = new Set((options.validMinCounts || [1, 2, 5, 10]).map(Number));
 
@@ -266,6 +268,7 @@
       outside: parseBooleanParam(params.get("outside") ?? params.get("libraryOutside"), Boolean(defaults.outside)),
       ...parseUnknownArtistUrlState(params, defaults),
       q: params.has("q") ? String(params.get("q") || "").slice(0, 200) : defaults.q || "",
+      searchScope: validSearchScopes.has(searchScope) ? searchScope : defaults.searchScope || "all",
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
       trend: validTrendFilters.has(trend) ? trend : defaults.trend || "all",
       minCount: validMinCounts.has(parsedMinCount) ? parsedMinCount : positiveInteger(defaults.minCount, 1),
@@ -284,6 +287,7 @@
       videoLayout: "cards",
       trend: "all",
       minCount: 1,
+      searchScope: "all",
       ...(options.defaults || {}),
     };
     const range = normalizeRangeId(state.range || defaults.range, options);
@@ -295,6 +299,7 @@
     const videoLayout = state.videoLayout || defaults.videoLayout;
     const trend = state.trend || defaults.trend;
     const minCount = positiveInteger(state.minCount, defaults.minCount);
+    const searchScope = state.searchScope || defaults.searchScope || "all";
 
     if (range !== defaults.range) params.set("range", range);
     if (view !== defaults.view) params.set("view", view);
@@ -308,6 +313,7 @@
     if (state.outside) params.set("outside", "1");
     if (unknownArtistsHiddenForUrl(state, defaults)) params.set("hideUnknown", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
+    if (state.q && searchScope !== (defaults.searchScope || "all")) params.set("searchScope", searchScope);
     if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
     if (view !== "videos" && view !== "vtuberRank" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
 
@@ -325,6 +331,7 @@
       rankMetric: "occurrences",
       trend: "all",
       minCount: 1,
+      searchScope: defaults.searchScope || "all",
       pageSize: positiveInteger(defaults.pageSize, 50),
       snapshotPath: defaults.snapshotPath || "data/latest.json",
       ...defaults,
@@ -339,6 +346,7 @@
         nicheOnly: Boolean(source.nicheOnly ?? source.outside),
         hideUnknownArtist: unknownArtistsHiddenForDraft(source, defaults),
         rankMetric: source.rankMetric,
+        searchScope: source.searchScope,
         trend: source.trend,
         minCount: source.minCount,
         pageSize: source.pageSize,
@@ -352,6 +360,7 @@
     const defaults = defaultQueryDraft(options.defaults || {});
     const validRankMetrics = new Set(options.validRankMetrics || ["occurrences", "videos"]);
     const validTrendFilters = new Set(options.validTrendFilters || ["all", "new", "up", "down"]);
+    const validSearchScopes = new Set(options.validSearchScopes || ["all", "song", "entity", "title", "artist", "channel", "video", "source"]);
     const validMinCounts = new Set((options.validMinCounts || [1, 2, 5, 10]).map(Number));
     const validPageSizes = new Set((options.validPageSizes || [50, 100]).map(Number));
     const latestSnapshotPath = options.latestSnapshotPath || defaults.snapshotPath || "data/latest.json";
@@ -364,6 +373,7 @@
       nicheOnly: Boolean(draft.nicheOnly),
       hideUnknownArtist: typeof draft.hideUnknownArtist === "boolean" ? draft.hideUnknownArtist : defaults.hideUnknownArtist,
       rankMetric: validRankMetrics.has(draft.rankMetric) ? draft.rankMetric : defaults.rankMetric,
+      searchScope: validSearchScopes.has(draft.searchScope) ? draft.searchScope : defaults.searchScope,
       trend: validTrendFilters.has(draft.trend) ? draft.trend : defaults.trend,
       minCount: validMinCounts.has(minCount) ? minCount : defaults.minCount,
       pageSize: validPageSizes.has(pageSize) ? pageSize : defaults.pageSize,
@@ -382,6 +392,7 @@
     const view = options.view || "songRank";
     const items = [];
     if (normalized.q) items.push({ key: "q", label: normalized.q, fullLabel: normalized.q });
+    if (normalized.q && normalized.searchScope !== "all") items.push({ key: "searchScope", label: searchScopeLabel(normalized.searchScope, options) });
     if (normalized.nicheOnly) items.push({ key: "nicheOnly", label: "只看小众" });
     if (normalized.hideUnknownArtist && filterAppliesToView("hideUnknownArtist", view)) items.push({ key: "hideUnknownArtist", label: "隐藏无歌手" });
     if ((view === "songRank" || view === "artistRank") && normalized.trend !== "all") {
@@ -395,6 +406,7 @@
   function clearRestrictiveFilter(draft = {}, key, options = {}) {
     const normalized = sanitizeQueryDraft(draft, options);
     if (key === "q") return { ...normalized, q: "" };
+    if (key === "searchScope") return { ...normalized, searchScope: "all" };
     if (key === "nicheOnly") return { ...normalized, nicheOnly: false };
     if (key === "hideUnknownArtist") return { ...normalized, hideUnknownArtist: false };
     if (key === "trend") return { ...normalized, trend: "all" };
@@ -408,6 +420,7 @@
     return {
       ...normalized,
       q: "",
+      searchScope: "all",
       nicheOnly: false,
       hideUnknownArtist: false,
       trend: "all",
@@ -429,6 +442,21 @@
     if (key === "trend") return view === "songRank" || view === "artistRank";
     if (key === "minCount") return view !== "videos" && view !== "vtuberRank";
     return true;
+  }
+
+  function searchScopeLabel(scope, options = {}) {
+    const labels = {
+      all: "全部字段",
+      song: "歌曲/歌手",
+      entity: "主字段",
+      title: "标题",
+      artist: "歌手",
+      channel: "频道",
+      video: "视频",
+      source: "来源",
+      ...(options.searchScopeLabels || {}),
+    };
+    return labels[scope] || labels.all;
   }
 
   function queryTriggerModel(draft = {}, options = {}) {
@@ -1578,6 +1606,7 @@
     normalizeSongSearchText,
     paginateItems,
     responsiveListPageSize,
+    searchScopeLabel,
     sourceDrawerPageModel,
     desktopPageTokens,
     mobilePageModel,

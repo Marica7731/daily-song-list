@@ -910,6 +910,7 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     hideUnknown: false,
     showUnknown: true,
     q: "First Good-Bye",
+    searchScope: "all",
     snapshotPath: "data/snapshots/2026-07-10.json",
     trend: "all",
     minCount: 1,
@@ -950,6 +951,7 @@ test("url state parses trend, minCount, and legacy shared marker", () => {
       outside: false,
       hideUnknown: false,
       q: "",
+      searchScope: "all",
       snapshotPath: "data/latest.json",
       trend: "up",
       minCount: 5,
@@ -1016,6 +1018,7 @@ test("query draft derives search and every filter field from applied state", () 
     minCount: 5,
     pageSize: 100,
     snapshotPath: "data/latest.json",
+    searchScope: "all",
   });
   assert.deepEqual(defaultQueryDraft({ pageSize: 100, snapshotPath: "data/snapshots/2026-07-10.json" }), {
     q: "",
@@ -1026,6 +1029,7 @@ test("query draft derives search and every filter field from applied state", () 
     minCount: 1,
     pageSize: 100,
     snapshotPath: "data/snapshots/2026-07-10.json",
+    searchScope: "all",
   });
 });
 

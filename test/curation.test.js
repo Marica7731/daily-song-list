@@ -194,6 +194,36 @@ test("curation drops announcement and action rows from current dirty samples", (
   assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 6);
 });
 
+test("curation drops naretan commentary rows while keeping explicit known songs", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "NARETAN0001",
+        songs: [
+          { title: "コメ「なれたんかわいい」", artist: "未記載", seconds: 1, raw: "0:01 コメ「なれたんかわいい」" },
+          { title: "アンケート結果", artist: "未記載", seconds: 2, raw: "0:02 アンケート結果" },
+          { title: "喉が痛い", artist: "未記載", seconds: 3, raw: "0:03 喉が痛い" },
+          { title: "配信について", artist: "未記載", seconds: 4, raw: "0:04 配信について" },
+          { title: "リクエストください", artist: "未記載", seconds: 5, raw: "0:05 リクエストください" },
+          { title: "コメント欄", artist: "未記載", seconds: 6, raw: "0:06 コメント欄" },
+          { title: "なれたん自己紹介", artist: "未記載", seconds: 7, raw: "0:07 なれたん自己紹介" },
+          { title: "星座になれたら", artist: "結束バンド", seconds: 8, raw: "0:08 星座になれたら / 結束バンド" },
+          { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", seconds: 9, raw: "0:09 ENDLESS STORY / REIRA starring YUNA ITO" },
+          { title: "Opening", artist: "Known Artist", seconds: 10, raw: "0:10 Opening / Known Artist" },
+          { title: "楽しみにしてろよ!", artist: "練習後のなれたんを", seconds: 11, raw: "0:11 楽しみにしてろよ! / 練習後のなれたんを" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos[0].songs.map((item) => `${item.title} / ${item.artist}`),
+    ["星座になれたら / 結束バンド", "ENDLESS STORY / REIRA starring YUNA ITO", "Opening / Known Artist"],
+  );
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 8);
+});
+
 test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", () => {
   const videos = applyCurationToVideos(
     [

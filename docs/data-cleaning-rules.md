@@ -6,6 +6,8 @@ This branch only changes data cleanup, curation, duplicate folding, tests, and b
 
 Rules in this document apply to parsed song fields: `title`, `artist`, `raw`, and selected source provenance. They must not drop a row because a channel name or video title contains words such as `OP`, `ED`, `Start`, or `Set List`.
 
+`youtube-channel-discovery` accepted JSON files are also cleaned before release with `node scripts\clean-channel-discovery-accepted.js --write`. The runtime DB importer applies the same non-song predicate again when merging base `data/latest.json` rows with external imports, so stale generated JSON cannot reintroduce already-known chat/comment rows during deploy-time DB rebuilds.
+
 ## Reviewed Inputs
 
 - `D:\Download\剪贴板图片 (17).jpg`, `(19).jpg`: song index screenshots with section-marker titles such as `ED`, `OP`, `Start`, `曲名`, `セットリスト`, and similar rows.
@@ -24,6 +26,7 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - Activity markers already in the rule file remain scoped to unknown-artist rows: `自己紹介`, `声入り`, `挨拶`, `スパチャ読み`, and related rows.
 - Standalone wave separators and event fragments: `～`, `～リアルライブチケット#耐久 7`.
 - Chant/reaction rows from the `天Q` screenshot: `天Q`, `HI 天Q~`, `天Q天Q~~WO~~~`, `DQ~`, `HAWAWA`, `BUAAAA`, `HE HE`, `E HO E HO`, `AAA TEST TEST`, plus existing `KOPIPE`, `KP`, `A LELELELE`.
+- Commentary/request/poll rows whose song title or raw text self-references `なれたん` are rejected unless they match a reviewed true-song guardrail. Examples include `なれたんに褒められたいハネダン達`, `去年のなれたん...`, and `アンケート (なれたんを家族に例えると)`.
 
 ## START Guardrail
 

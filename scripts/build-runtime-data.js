@@ -1663,13 +1663,22 @@ function requestRecordSearchText(record, type) {
   if (type === "video") {
     return normalizeSearchText([record.videoId, record.title, record.channelName, record.channelId, record.channelHandle, record.channelUrl, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
   }
-  return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels), ...(record.variantLabels || [])].join(" "));
+  return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels), ...(record.variantLabels || []), ...occurrenceSearchParts(record.occurrences)].join(" "));
 }
 
 function mapNames(value) {
   if (value instanceof Map) return Array.from(value.values()).map((entry) => entry.name || entry.title || "");
   if (Array.isArray(value)) return value.map((entry) => entry.name || entry.title || "");
+  if (value && typeof value === "object") return Object.values(value).map((entry) => entry?.name || entry?.title || entry || "");
   return [];
+}
+
+function occurrenceSearchParts(occurrences) {
+  return (occurrences || []).flatMap((occurrence) => {
+    const item = occurrence.item || {};
+    const song = occurrence.song || {};
+    return [item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist];
+  });
 }
 
 function sortRankRecords(records, metric) {

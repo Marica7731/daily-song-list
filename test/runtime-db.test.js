@@ -197,8 +197,50 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(channelSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(channelSongSearchOutput, /"totalCount": 0/);
-  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 0/);
+  assert.match(channelSongSearchOutput, /"totalCount": 3/);
+  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 4/);
+
+  const scopedChannelSongSearchOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "Alpha",
+      "--search-scope",
+      "song",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(scopedChannelSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(scopedChannelSongSearchOutput, /"searchScope": "song"/);
+  assert.match(scopedChannelSongSearchOutput, /"totalCount": 0/);
+
+  const andSongSearchOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "Alpha AND Three",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(andSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(andSongSearchOutput, /"title": "Song Three"/);
+  assert.match(andSongSearchOutput, /"totalCount": 1/);
 
   const videoTitleSongSearchOutput = execFileSync(
     PYTHON,
@@ -217,7 +259,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(videoTitleSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(videoTitleSongSearchOutput, /"totalCount": 0/);
+  assert.match(videoTitleSongSearchOutput, /"totalCount": 2/);
 
   const vtuberQueryOutput = execFileSync(
     PYTHON,

@@ -9,11 +9,11 @@
   "readStats": {
     "inputDirs": 1,
     "videoDetails": 56,
-    "usableVideos": 56,
+    "usableVideos": 55,
     "skippedNoSongs": 0,
     "skippedInvalidVideoId": 0,
     "duplicateVideoIds": 0,
-    "songs": 642,
+    "songs": 641,
     "skippedExistingRegressions": 1,
     "skippedExistingRegressionVideoIds": [
       "VmLgly38CwY"
@@ -9531,5 +9531,15 @@
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
     }
-  ]
+  ],
+  "cleaningSummary": {
+    "generatedAt": "2026-07-20T11:47:30.367Z",
+    "cleaner": "scripts/clean-channel-discovery-accepted.js",
+    "videosBefore": 55,
+    "videosAfter": 55,
+    "songsBefore": 641,
+    "songsAfter": 641,
+    "droppedVideos": 0,
+    "droppedSongs": 0
+  }
 }

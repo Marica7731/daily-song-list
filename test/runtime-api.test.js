@@ -79,15 +79,33 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(songTitleSearch.records[0].globalCount, undefined);
 
     const channelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&pageSize=5`);
-    assert.equal(channelSongSearch.totalCount, 0);
-    assert.equal(channelSongSearch.totalOccurrenceCount, 0);
-    assert.deepEqual(channelSongSearch.records, []);
+    assert.equal(channelSongSearch.searchScope, "all");
+    assert.equal(channelSongSearch.totalCount, 3);
+    assert.equal(channelSongSearch.totalOccurrenceCount, 4);
+    assert.deepEqual(channelSongSearch.records.map((record) => record.title), ["Song One", "Song Three", "Song Two"]);
+
+    const scopedChannelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchScope=song&pageSize=5`);
+    assert.equal(scopedChannelSongSearch.searchScope, "song");
+    assert.equal(scopedChannelSongSearch.totalCount, 0);
+    assert.equal(scopedChannelSongSearch.totalOccurrenceCount, 0);
+    assert.deepEqual(scopedChannelSongSearch.records, []);
+
+    const andSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha%20AND%20Three&pageSize=5`);
+    assert.equal(andSongSearch.totalCount, 1);
+    assert.equal(andSongSearch.records[0].title, "Song Three");
+
+    const orSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Song%20Two%20OR%20Song%20Four&pageSize=5`);
+    assert.equal(orSongSearch.totalCount, 2);
+    assert.deepEqual(orSongSearch.records.map((record) => record.title), ["Song Four", "Song Two"]);
+
+    const escapedWildcardSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=%25&pageSize=5`);
+    assert.equal(escapedWildcardSearch.totalCount, 0);
 
     const videoTitleSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Morning&pageSize=5`);
-    assert.equal(videoTitleSongSearch.totalCount, 0);
+    assert.equal(videoTitleSongSearch.totalCount, 2);
 
     const channelSongIndexSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songIndex&q=Alpha&pageSize=5`);
-    assert.equal(channelSongIndexSearch.totalCount, 0);
+    assert.equal(channelSongIndexSearch.totalCount, 3);
 
     const vtubers = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&pageSize=5`);
     assert.equal(vtubers.totalCount, 3);

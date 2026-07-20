@@ -127,6 +127,7 @@
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
     if (isNonSongMarkerWithDescriptor(title, artist)) return true;
     if (isStrongNonSongActivityText(title)) return true;
+    if (isCommentaryNoiseEntry(title, artist, song?.raw)) return true;
     if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
     return !hasArtist && isChatReactionShoutText(title);
@@ -326,6 +327,85 @@
       return true;
     }
     return false;
+  }
+
+  function isCommentaryNoiseEntry(title, artist, raw) {
+    const hasArtist = Boolean(artist && !isUnknownArtist(artist));
+    const titleIsNoise = isCommentaryNoiseText(title);
+    if (isNaraetanSelfReference(`${title || ""} ${artist || ""} ${raw || ""}`) && !isKnownSongSafeFromCommentary(title, artist)) return true;
+    if (!hasArtist && (titleIsNoise || isCommentaryNoiseText(raw) || isNaraetanSelfReference(title) || isTopicLikeBilingualCommentary(title, artist, raw))) return true;
+    if (titleIsNoise && (isNonSongDescriptorField(artist) || isCommentaryNoiseText(artist) || isSentenceLikeCredit(artist))) return true;
+    if (isNaraetanSelfReference(title) && !hasStructuredSongNumber(raw)) return true;
+    if (isTopicLikeBilingualCommentary(title, artist, raw)) return true;
+    return false;
+  }
+
+  function isCommentaryNoiseText(text) {
+    const value = stripCustomEmojiAliases(text)
+      .normalize("NFKC")
+      .replace(/[\s\u3000]+/gu, "")
+      .replace(/[!！?？。．.]+$/gu, "")
+      .trim();
+    if (!value) return false;
+    if (/^(?:コメ|コメント|米)[「『"].{1,80}[」』"]$/iu.test(value)) return true;
+    if (/^(?:アンケート|投票)(?:結果|タイム|中|する|して|お願いします|お願い)?(?:[（(].{1,80}[）)])?$/u.test(value)) return true;
+    if (/^(?:リクエスト|リク)(?:募集|確認|受付|タイム|ください|下さい|募集中|受付中|ok|OK)?$/iu.test(value)) return true;
+    if (/^(?:コメント|コメ)(?:読み|欄|確認|返信|返し|して|ください|下さい|募集中|歓迎)$/iu.test(value)) return true;
+    if (/^(?:配信|歌枠)(?:開始|終了|予定|告知|中|について|ありがとう|お疲れさま?|おつかれさま?)$/iu.test(value)) return true;
+    if (/喉(?:が|は)?(?:痛い|いたい|不調|治らない|やられた|終わった)|のど(?:が|は)?(?:痛い|いたい|不調)|喉の調子(?:が|は)?/iu.test(value)) return true;
+    if (/^(?:なれたん|naraetan)(?:は|が|の|も|って|です|だよ|である|自称|説明|自己紹介|について).{0,60}$/iu.test(value)) return true;
+    return false;
+  }
+
+  function isTopicLikeBilingualCommentary(title, artist, raw) {
+    const titleText = String(title || "").trim();
+    const artistText = String(artist || "").trim();
+    const rawText = String(raw || "");
+    const combined = `${titleText} ${artistText} ${rawText}`;
+    if (isKnownSongSafeFromCommentary(titleText, artistText)) return false;
+    if (hasStructuredSongNumber(rawText) && !isCommentaryNoiseText(titleText)) return false;
+    if (/(?:話|理由|コメント|コメ|リクエスト|アンケート|おすすめ|おススメ|喉|のど|配信|動画|練習|噛|食べ|飲み|旅行|友達|家族|姉|妹|幼馴染|指|身長|リップ|フリ|視聴者|収益化|チャンネル|スーパー|キーボード|アレルギー|リスナー|歌声|サビ|歌詞)/u.test(combined)) {
+      return isTopicLikeTitle(titleText) || isSentenceLikeTitle(titleText) || isSentenceLikeCredit(artistText) || isCommentaryNoiseText(titleText) || isCommentaryNoiseText(artistText);
+    }
+    return isSentenceLikeTitle(titleText) && isSentenceLikeCredit(artistText);
+  }
+
+  function isKnownSongSafeFromCommentary(title, artist) {
+    const titleText = String(title || "").trim();
+    const artistText = String(artist || "").trim();
+    if (/星座になれたら/u.test(titleText)) return true;
+    if (/^(?:ENDLESS STORY|Never Ending Story|Opening|Ending)$/iu.test(titleText) && artistText && !isUnknownArtist(artistText)) return true;
+    return false;
+  }
+
+  function isNaraetanSelfReference(text) {
+    return /なれたん/u.test(String(text || ""));
+  }
+
+  function hasStructuredSongNumber(raw) {
+    const value = String(raw || "").replace(/^\s*(?:[\[【(（]\s*)?\d{1,2}:\d{2}(?::\d{2})?\s*(?:[\]】)）])?\s*/u, "");
+    return /(?:^|[\s　])#?\d{1,3}\s*[.)．、）:：]/u.test(value) || /(?:^|[\s　])#\d{1,3}\s+/u.test(value);
+  }
+
+  function isSentenceLikeTitle(text) {
+    const value = String(text || "").trim();
+    if (!value) return false;
+    if (value.length >= 18 && /(?:だった|でした|です|ます|して|した|する|され|たい|ない|ある|いる|なる|なった|くる|行く|来る|思う|忘れ|信じ|疑う|食べ|飲み|寝て|痛い|怖い|楽しい|辛い|欲しい|ください|お願い|かな|ですね|ですよ|だよ|なの|のか|のは|とは|って|コメ|コメント)/u.test(value)) return true;
+    return /^(?:[^/／|｜]{1,40})(?:\?|？)$/u.test(value) && /(?:なれたん|人|何|どこ|いる|する|です|ます|なの|のか)/u.test(value);
+  }
+
+  function isTopicLikeTitle(text) {
+    const value = String(text || "").trim();
+    if (!value) return false;
+    return /(?:おすすめ.*(?:集|紹介)|曲紹介|歌うフリ|(?:姉|妹|幼馴染).*(?:or|または)|指が細い|身長が低い|家族に例える)/iu.test(value);
+  }
+
+  function isSentenceLikeCredit(text) {
+    const value = String(text || "").trim();
+    if (!value || isUnknownArtist(value)) return false;
+    if (/^(?:Recommended|Poll:|Are you trying|I envy|I(?:’|'|)ll pretend|Older Sister|Younger Sister|.+\?)\b/iu.test(value)) return true;
+    if (value.length >= 24 && /\s/u.test(value) && /\b(?:i|you|we|my|your|the|a|an|to|that|this|was|were|is|are|be|being|been|have|has|had|do|does|did|can|can't|cannot|will|want|trying|because|with|from|about|people|song|comment|viewers|family|friend|reason|recommended|pretend|believe|forgot)\b/iu.test(value)) return true;
+    return value.length >= 18 && /(?:だった|でした|です|ます|して|した|する|され|たい|ない|ある|いる|なる|なった|くる|行く|来る|思う|忘れ|信じ|疑う|食べ|飲み|痛い|怖い|欲しい|ください|お願い|ですね|ですよ|だよ|なの|のか|のは|とは|って)/u.test(value);
   }
 
   function normalizeNoiseTitleKey(text) {

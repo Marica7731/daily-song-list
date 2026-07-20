@@ -58,6 +58,29 @@ test("rejects timestamped regular comment sentences", () => {
   assert.deepEqual(songs, []);
 });
 
+test("rejects naretan commentary and request timestamps while keeping real song rows", () => {
+  const songs = parseTimestampSongs([
+    [
+      "0:01 コメ「なれたんかわいい」",
+      "0:02 アンケート結果",
+      "0:03 喉が痛い",
+      "0:04 配信について",
+      "0:05 リクエストください",
+      "0:06 コメント欄",
+      "0:07 なれたん自己紹介",
+      "0:08 星座になれたら / 結束バンド",
+      "0:09 ENDLESS STORY / REIRA starring YUNA ITO",
+      "0:10 Opening / Known Artist",
+      "0:11 楽しみにしてろよ! / 練習後のなれたんを",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => `${song.title} / ${song.artist}`),
+    ["星座になれたら / 結束バンド", "ENDLESS STORY / REIRA starring YUNA ITO", "Opening / Known Artist"],
+  );
+});
+
 test("filters common non-song timestamp sections", () => {
   const songs = parseTimestampSongs([
     [
@@ -397,6 +420,25 @@ test("keeps song titles that contain greeting-like words", () => {
 
   assert.equal(songs.length, 1);
   assert.equal(songs[0].title, "金曜日のおはよう");
+});
+
+test("rejects conversational pseudo songs from bilingual timestamp rows", () => {
+  const songs = parseTimestampSongs([
+    [
+      "01:06:40 #03 星座になれたら / 結束バンド",
+      "01:20:43 おすすめリップクリーム集 / Recommended Lip Balms",
+      "02:49:57 姉 or 妹 or 幼馴染 / Older Sister, Younger Sister, or Childhood Friend?",
+      "03:02:18 おすすめの曲紹介 / Song Recommendations",
+      "01:44:27 指が細い人が羨ましい / I Envy People with Slender Fingers",
+      "00:56:26 歌うフリをするね / I’ll Pretend to Sing",
+      "03:23:23 #18 ENDLESS STORY / REIRA starring YUNA ITO",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => `${song.title} / ${song.artist}`),
+    ["星座になれたら / 結束バンド", "ENDLESS STORY / REIRA starring YUNA ITO"],
+  );
 });
 
 test("keeps emoji performer markers without treating them as song titles", () => {

@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const { isLikelyNonSongEntry, normalizeParsedSong } = require("./song-utils");
 
 const SOURCE_GROUP = "youtube_channel_discovery";
 
@@ -124,17 +125,19 @@ function normalizeRuntimeVideo(video, sourceFile) {
 }
 
 function normalizeRuntimeSong(song, index, video) {
-  const title = stringValue(song?.title);
+  const normalized = normalizeParsedSong(song || {});
+  if (!normalized.title || isLikelyNonSongEntry(normalized)) return null;
+  const title = stringValue(normalized.title);
   if (!title) return null;
   return {
     ...song,
     index: Number.isFinite(Number(song.index)) && Number(song.index) > 0 ? Number(song.index) : index + 1,
-    time: stringValue(song.time),
-    seconds: Math.max(0, Number(song.seconds) || 0),
+    time: stringValue(normalized.time),
+    seconds: Math.max(0, Number(normalized.seconds) || 0),
     title,
-    artist: stringValue(song.artist),
-    raw: stringValue(song.raw),
-    rawHash: stringValue(song.rawHash),
+    artist: stringValue(normalized.artist),
+    raw: stringValue(normalized.raw),
+    rawHash: stringValue(normalized.rawHash || song.rawHash),
     sourceId: stringValue(song.sourceId || video.selectedSourceId),
     sourceHash: stringValue(song.sourceHash || video.selectedSourceHash),
     isNiche: song.isNiche === true,

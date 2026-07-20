@@ -13,12 +13,12 @@
     "skippedNoSongs": 0,
     "skippedInvalidVideoId": 0,
     "duplicateVideoIds": 0,
-    "songs": 1263,
+    "songs": 1261,
     "skippedExistingRegressions": 0,
     "skippedExistingRegressionVideoIds": []
   },
   "videoCount": 87,
-  "occurrenceCount": 1263,
+  "occurrenceCount": 1261,
   "videos": [
     {
       "videoId": "qVH5wgx1g5g",
@@ -10368,18 +10368,6 @@
           "sourceId": "UgwW_h_OrdUAfEl4gmF4AaABAg",
           "sourceHash": "2bbc4f13e0475d8607b3b303b154ff3e4e91239bfa177740107ffdbb2010c9e0",
           "isNiche": false
-        },
-        {
-          "index": 10,
-          "time": "0:56:26",
-          "seconds": 3386,
-          "title": "エンドカード",
-          "artist": "未記載",
-          "raw": "56:26 エンドカード",
-          "rawHash": "047db70aa381c10d172df05d5a9453535a9e95536514ee6e7ab7afd5e5a3143d",
-          "sourceId": "UgwW_h_OrdUAfEl4gmF4AaABAg",
-          "sourceHash": "2bbc4f13e0475d8607b3b303b154ff3e4e91239bfa177740107ffdbb2010c9e0",
-          "isNiche": false
         }
       ],
       "lastInspectedAt": "2026-07-19T15:35:19.848Z",
@@ -10587,18 +10575,6 @@
           "artist": "Junky",
           "raw": "41:31 Happy Halloween / Junky",
           "rawHash": "8784a6ff8baa108fbe3048871a3faaf738d8a1788ed829c33b4d3ac992a787fe",
-          "sourceId": "UgyoWhOxnfrGcsyrc6h4AaABAg",
-          "sourceHash": "e82308a481e3e7c4d89465b70dd909fe06fc8d2a7076decb71e6983165168da9",
-          "isNiche": false
-        },
-        {
-          "index": 10,
-          "time": "0:49:58",
-          "seconds": 2998,
-          "title": "エンドカード",
-          "artist": "未記載",
-          "raw": "49:58 エンドカード",
-          "rawHash": "36461ff4ecf3950e0740d9ff988dcd7fdc60bb5c876ec04903e9f3555d857596",
           "sourceId": "UgyoWhOxnfrGcsyrc6h4AaABAg",
           "sourceHash": "e82308a481e3e7c4d89465b70dd909fe06fc8d2a7076decb71e6983165168da9",
           "isNiche": false
@@ -18053,5 +18029,15 @@
       "curationVersion": "curation-v1:12c32dcbcb07",
       "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
     }
-  ]
+  ],
+  "cleaningSummary": {
+    "generatedAt": "2026-07-20T11:47:30.415Z",
+    "cleaner": "scripts/clean-channel-discovery-accepted.js",
+    "videosBefore": 87,
+    "videosAfter": 87,
+    "songsBefore": 1261,
+    "songsAfter": 1261,
+    "droppedVideos": 0,
+    "droppedSongs": 0
+  }
 }

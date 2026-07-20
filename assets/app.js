@@ -65,6 +65,15 @@ const RANK_METRICS = {
   songs: "不同曲目数",
   videos: "不同视频数",
 };
+const SEARCH_SCOPES = {
+  all: "全部字段",
+  song: "歌曲/歌手",
+  title: "标题",
+  artist: "歌手",
+  channel: "频道",
+  video: "视频",
+  source: "来源",
+};
 const VIEW_RANK_METRIC_ORDER = {
   songRank: ["occurrences", "videos"],
   artistRank: ["occurrences", "videos"],
@@ -255,6 +264,7 @@ const state = {
   range: "7d",
   view: "songRank",
   filter: "",
+  searchScope: "all",
   nicheOnly: false,
   hideUnknownArtist: false,
   indexBucket: INDEX_ALL_BUCKET,
@@ -333,6 +343,7 @@ const els = {
   queryDialog: document.querySelector("#queryDialog"),
   queryPanel: document.querySelector("#queryDialog .query-panel"),
   queryInput: document.querySelector("#queryInput"),
+  searchScopeSelect: document.querySelector("#searchScopeSelect"),
   nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
   hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
   cancelQueryButton: document.querySelector("#cancelQueryButton"),
@@ -750,6 +761,7 @@ function bindQueryOverlayEvents() {
   for (const element of [
     els.nicheOnlyToggle,
     els.hideUnknownToggle,
+    els.searchScopeSelect,
     els.trendFilterSelect,
     els.minCountSelect,
     els.queryPageSizeSelect,
@@ -1149,6 +1161,7 @@ function queryDraftOptions(extra = {}) {
       snapshotPath: SNAPSHOT_LATEST_PATH,
     },
     validRankMetrics: Object.keys(RANK_METRICS),
+    validSearchScopes: Object.keys(SEARCH_SCOPES),
     validTrendFilters: Object.keys(TREND_FILTERS),
     validMinCounts: MIN_COUNT_OPTIONS,
     validPageSizes: LIST_PAGE_SIZE_OPTIONS,
@@ -1211,6 +1224,7 @@ function syncQueryToggleValues(draft) {
 }
 
 function syncQuerySelectValues(draft) {
+  if (els.searchScopeSelect) els.searchScopeSelect.value = draft.searchScope || "all";
   if (els.trendFilterSelect) els.trendFilterSelect.value = draft.trend;
   if (els.minCountSelect) els.minCountSelect.value = String(draft.minCount);
   if (els.queryPageSizeSelect) els.queryPageSizeSelect.value = String(draft.pageSize);
@@ -1276,6 +1290,7 @@ function readQueryDraftFromControls() {
   const selectedMetric = document.querySelector("input[name='queryMetric']:checked")?.value || "occurrences";
   return sanitizeQueryDraft({
     q: els.queryInput?.value || "",
+    searchScope: Object.hasOwn(SEARCH_SCOPES, els.searchScopeSelect?.value) ? els.searchScopeSelect.value : "all",
     nicheOnly: Boolean(els.nicheOnlyToggle?.checked),
     hideUnknownArtist: Boolean(els.hideUnknownToggle?.checked),
     rankMetric: rankMetricForView(state.view, selectedMetric),
@@ -1291,6 +1306,7 @@ async function applyQueryDraft() {
   const previousPath = state.currentSnapshotPath;
   closeOverlay("query");
   state.filter = draft.q;
+  state.searchScope = draft.searchScope;
   state.nicheOnly = draft.nicheOnly;
   state.hideUnknownArtist = draft.hideUnknownArtist;
   state.rankMetric = draft.rankMetric;
@@ -1344,6 +1360,7 @@ function applyQueryPatch(patch, options = {}) {
   });
   const previousPath = state.currentSnapshotPath;
   state.filter = draft.q;
+  state.searchScope = draft.searchScope;
   state.nicheOnly = draft.nicheOnly;
   state.hideUnknownArtist = draft.hideUnknownArtist;
   state.rankMetric = draft.rankMetric;
@@ -1844,9 +1861,11 @@ function applyInitialUrlState() {
     "outside",
     "libraryOutside",
     "hideUnknown",
-    "showUnknown",
-    "q",
-    "snapshot",
+      "showUnknown",
+      "q",
+      "searchScope",
+      "searchField",
+      "snapshot",
     "trend",
     "minCount",
   ];
@@ -1865,6 +1884,7 @@ function applyInitialUrlState() {
       nicheOnly: defaults.outside,
       hideUnknownArtist: defaults.hideUnknown,
       filter: defaults.q,
+      searchScope: defaults.searchScope,
       currentSnapshotPath: SNAPSHOT_LATEST_PATH,
     });
     state.sharedUrlApplied = false;
@@ -1877,6 +1897,7 @@ function applyInitialUrlState() {
     validViews: Object.keys(VIEWS),
     validPageSizes: LIST_PAGE_SIZE_OPTIONS,
     validRankMetrics: Object.keys(RANK_METRICS),
+    validSearchScopes: Object.keys(SEARCH_SCOPES),
     validVideoLayouts: Object.keys(VIDEO_LAYOUTS),
     validTrendFilters: Object.keys(TREND_FILTERS),
     validMinCounts: MIN_COUNT_OPTIONS,
@@ -1896,6 +1917,7 @@ function applyInitialUrlState() {
   state.nicheOnly = parsed.outside;
   state.hideUnknownArtist = parsed.hideUnknown;
   state.filter = parsed.q;
+  state.searchScope = parsed.searchScope;
   state.currentSnapshotPath = parsed.snapshotPath;
   state.sharedUrlApplied = shouldApplySharedState;
 }
@@ -1923,6 +1945,7 @@ function syncControlsFromState() {
   syncBottomNavFromState();
   if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = state.nicheOnly;
   if (els.hideUnknownToggle) els.hideUnknownToggle.checked = state.hideUnknownArtist;
+  if (els.searchScopeSelect) els.searchScopeSelect.value = state.searchScope || "all";
   syncSnapshotControlsFromState();
   syncQueryTriggerState();
   renderActiveQueryStrip();
@@ -1942,6 +1965,7 @@ function syncUrlState(urlMode = "replace") {
       outside: state.nicheOnly,
       hideUnknown: state.hideUnknownArtist,
       q: state.filter,
+      searchScope: state.searchScope,
       snapshotPath: state.currentSnapshotPath,
       trend: state.trend,
       minCount: state.minCount,
@@ -1994,6 +2018,7 @@ function defaultUrlState() {
     outside: false,
     hideUnknown: false,
     q: "",
+    searchScope: "all",
   };
 }
 
@@ -2052,6 +2077,7 @@ function listStateKey() {
     state.nicheOnly ? "outside" : "inside",
     state.hideUnknownArtist ? "hide" : "show",
     state.filter,
+    state.searchScope,
   ].join("::");
 }
 
@@ -3288,6 +3314,7 @@ async function renderRequestedRuntime(options = {}) {
 function requestFilterState() {
   return {
     q: state.filter || "",
+    searchScope: state.searchScope || "all",
     nicheOnly: state.nicheOnly,
     hideUnknownArtist: shouldHideUnknownForCurrentView(),
     minCount: state.minCount,
@@ -3441,6 +3468,7 @@ async function requestApiViewPage(request, range) {
   });
   const query = cleanText(filters.q || "");
   if (query) params.set("q", query);
+  if (query && filters.searchScope && filters.searchScope !== "all") params.set("searchScope", filters.searchScope);
   if (Number(filters.minCount) > 1 && request.view !== "videos") params.set("minCount", String(Number(filters.minCount)));
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
     cache: "no-cache",
@@ -3635,6 +3663,7 @@ function buildRequestPageKey(request) {
 function requestFilterKey(filters = {}) {
   return [
     normalizeSearch(filters.q || ""),
+    filters.searchScope || "all",
     filters.nicheOnly ? "niche" : "all",
     filters.hideUnknownArtist ? "hide" : "show",
     filters.trend || "all",

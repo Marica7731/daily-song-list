@@ -839,7 +839,12 @@ def rank_rows_for_songs(range_id: str, records, view: str, metric: str = "count"
             "video_count": len(record["videos"]),
             "timestamp_count": record["count"],
             "payload": payload,
-            "search_text": search_text(record["title"], record["artist"]),
+            "search_text": search_text(
+                record["title"],
+                record["artist"],
+                *record["channels"].keys(),
+                *occurrence_preview_search_parts(record["occurrences"]),
+            ),
             "source_detail": {
                 "source_key": payload["sourceDetailKey"],
                 "entity_type": "song",
@@ -877,7 +882,12 @@ def index_rows_for_songs(range_id: str, records) -> list[dict]:
             "video_count": len(record["videos"]),
             "timestamp_count": record["count"],
             "payload": payload,
-            "search_text": search_text(record["title"], record["artist"]),
+            "search_text": search_text(
+                record["title"],
+                record["artist"],
+                *record["channels"].keys(),
+                *occurrence_preview_search_parts(record["occurrences"]),
+            ),
             "source_detail": {
                 "source_key": payload["sourceDetailKey"],
                 "entity_type": "song",
@@ -1549,6 +1559,16 @@ def append_preview_occurrence(preview: list[dict], item: dict, song: dict, video
             "song": compact_song(song),
         }
     )
+
+
+def occurrence_preview_search_parts(occurrences: list[dict]):
+    for occurrence in occurrences or []:
+        yield occurrence.get("videoId")
+        yield occurrence.get("title")
+        yield occurrence.get("channelName")
+        song = occurrence.get("song") if isinstance(occurrence.get("song"), dict) else {}
+        yield song.get("title")
+        yield song.get("artist")
 
 
 def source_payload_for_video(item: dict, songs: list[dict]) -> dict:

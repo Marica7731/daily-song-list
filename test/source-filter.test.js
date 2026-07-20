@@ -106,13 +106,30 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "E HO E HO", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "Set List", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "曲名", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "コメ「なれたんかわいい」", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "アンケート結果", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "喉が痛い", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "配信について", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "リクエストください", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "コメント欄", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "なれたん自己紹介", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "喉が痛い", artist: "配信について" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "Opening", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "Open Your Eyes", artist: "Guano Apes" }), false);
   assert.equal(isBlockedSongEntry({ title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO" }), false);
+  assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
   assert.equal(isBlockedSongEntry({ title: "START", artist: "レフティーモンスターP feat. Lily" }), false);
   assert.equal(isBlockedSongEntry({ title: "天Q", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "はじまりはいつも雨", artist: "未記載" }), false);
+  assert.equal(isBlockedSongEntry({ title: "コメ「残り96曲ですね?」", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "アンケート (なれたんを家族に例えると)", artist: "Poll: If Narae-tan was family" }), true);
+  assert.equal(isBlockedSongEntry({ title: "（去年のなれたん）譲り合い精神がないの？", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "なれたんに褒められたいハネダン達", artist: "Hanedans Who Want Praise from Naretan" }), true);
+  assert.equal(isBlockedSongEntry({ title: "なれたんの身長が低いって言いたいの?", artist: "Are you trying to say Narae-tan is short?" }), true);
+  assert.equal(isBlockedSongEntry({ title: "楽しみにしてろよ!", artist: "練習後のなれたんを" }), true);
+  assert.equal(isBlockedSongEntry({ title: "【さぁ】「さぁだけにSURFACE」", artist: "なれたんギャグ" }), true);
+  assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
 
   assert.equal(cleanSongTitleNoise("01| ハートアンドハート"), "ハートアンドハート");
   assert.equal(cleanSongTitleNoise("8.32"), "8.32");
@@ -169,7 +186,10 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
               { title: "Tunami(PON)", artist: "未記載", seconds: 1739, time: "0:28:59" },
               { title: "再開", artist: "待补歌手", seconds: 1975, time: "0:32:55" },
               { title: "8", artist: "29(土) ワンマンライブ開催！＆クラファン開催中！(追加ゴール)", seconds: 2000, time: "0:33:20" },
+              { title: "コメ「喉が痛い」", artist: "未記載", seconds: 2100, time: "0:35:00" },
+              { title: "リクエスト受付中", artist: "未記載", seconds: 2110, time: "0:35:10" },
               { title: "02| キュートなキューたい", artist: "CUTIE STREET", seconds: 1361, time: "0:22:41" },
+              { title: "Opening", artist: "Known Artist", seconds: 2120, time: "0:35:20" },
             ],
           },
         ],
@@ -181,8 +201,9 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
 
   assert.deepEqual(filtered.groups["72h"].items[0].songs, [
     { title: "キュートなキューたい", artist: "CUTIE STREET", seconds: 1361, time: "0:22:41" },
+    { title: "Opening", artist: "Known Artist", seconds: 2120, time: "0:35:20" },
   ]);
-  assert.equal(filtered.source.clientFilteredBlockedSongCount, 7);
+  assert.equal(filtered.source.clientFilteredBlockedSongCount, 9);
   assert.equal(filtered.source.clientNormalizedSongCount, 1);
 });
 

@@ -289,15 +289,30 @@ function isConversationEntry(song) {
   if (!value) return false;
   if (isStrongNonSongActivityText(value) || isStrongNonSongActivityText(raw) || isStrongNonSongActivityText(`${title} ${artist}`)) return true;
   if (!isUnknownArtist(artist)) return false;
+  if (isCommentaryNoiseConversationText(value) || isCommentaryNoiseConversationText(raw)) return true;
   if (isEmojiOrReactionOnly(title)) return true;
   if (/^(?:や|やー|やあ|やほ|やっほ|わあ|あ|え|お|ん|うん|はい|ええ)[…~〜～!！?？。.\s]*$/iu.test(value)) return true;
   if (/^「.+」$/u.test(value) || /「.+」/u.test(raw)) return true;
   if (/[?？]$/u.test(value)) return true;
   if (/(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう|気がする|したい|したいな|してほしい|してください|してあげる|ちゃうね|なんで|かな|かも|だよ|だね|なの|か)$/iu.test(value)) return true;
-  if (/(?:背景を変える|横に置く|食べる|飲む|お名前呼び|配信告知|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|告知|登録|コメント|ギフト|リクエスト|メンバー|キャンペーン|アルバム発売記念)/iu.test(value)) return true;
+  if (/(?:背景を変える|横に置く|食べる|飲む|お名前呼び|配信告知|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|告知|登録|コメント|ギフト|リクエスト|メンバー|キャンペーン|アルバム発売記念|おすすめ.*(?:集|紹介)|曲紹介|歌うフリ|姉|妹|幼馴染|指が細い|身長が低い|家族に例える)/iu.test(value)) return true;
   if (/(?:クッキング|ケーキ|テーマは|浮かれて|よっこいしょ|歌声|地声|バラード|透明感|触れれる|楽しそう|褒め合って|適正性|サイレン|プロポーズ|結婚|苗字|謝罪|わさび事件|始まりました|終了|さんとの|発売記念|開催)/iu.test(value)) return true;
   if (/[\u{1F300}-\u{1FAFF}]/u.test(title) && title.length <= 18) return true;
   return /(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます)/iu.test(raw);
+}
+
+function isCommentaryNoiseConversationText(text) {
+  const value = normalizeConversationText(text).replace(/[!！?？。．.]+$/gu, "");
+  if (!value) return false;
+  if (/^(?:コメ|コメント|米)[「『"].{1,80}[」』"]$/iu.test(value)) return true;
+  if (/^(?:アンケート|投票)(?:結果|タイム|中|する|して|お願いします|お願い)?(?:[（(].{1,80}[）)])?$/u.test(value)) return true;
+  if (/^(?:リクエスト|リク)(?:募集|確認|受付|タイム|ください|下さい|募集中|受付中|ok|OK)?$/iu.test(value)) return true;
+  if (/^(?:コメント|コメ)(?:読み|欄|確認|返信|返し|して|ください|下さい|募集中|歓迎)$/iu.test(value)) return true;
+  if (/^(?:配信|歌枠)(?:開始|終了|予定|告知|中|について|ありがとう|お疲れさま?|おつかれさま?)$/iu.test(value)) return true;
+  if (/喉(?:が|は)?(?:痛い|いたい|不調|治らない|やられた|終わった)|のど(?:が|は)?(?:痛い|いたい|不調)|喉の調子(?:が|は)?/iu.test(value)) return true;
+  if (/^(?:なれたん|naraetan)(?:は|が|の|も|って|です|だよ|である|自称|説明|自己紹介|について).{0,60}$/iu.test(value)) return true;
+  if (/なれたん/u.test(value)) return true;
+  return false;
 }
 
 function isStrongNonSongActivityText(value) {

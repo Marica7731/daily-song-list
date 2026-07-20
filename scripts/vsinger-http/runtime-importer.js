@@ -308,6 +308,7 @@ function mergeSongItems(baseSongs, importedSongs) {
   for (const song of [...(baseSongs || []), ...(importedSongs || [])]) {
     const normalized = normalizeSong(song);
     if (!normalized.title) continue;
+    if (isLikelyNonSongEntry(normalized) || isExternalActivityMarkerSong(normalized)) continue;
     const key = songMergeKey(normalized);
     const existing = byKey.get(key);
     if (!existing) {
