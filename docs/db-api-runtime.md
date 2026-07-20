@@ -354,3 +354,33 @@ VPS2 is the runtime deploy target:
 - The activation script emits `CODEX_RUNTIME_DB_ACTIVATE_OK` only after the API is restarted and healthy.
 
 VPS2's 2 GiB memory is not enough for the current full builder. Keep heavy DB builds in GitHub Actions or move the service to a larger host before setting `BUILD_DB_ON_VPS=1`; do not enable local scheduled DB builds on this host.
+
+## 2026-07-20 release notes
+
+Use the public API as the authority for whether source/data changes are online. A successful push or a green local test is not enough; verify:
+
+```bash
+curl -fsS "https://ytb-song-rank.culua.com/api/meta?probe=release-check"
+npm run check:published:api -- https://ytb-song-rank.culua.com/
+```
+
+On 2026-07-20, production reported `source_commit_sha=19f35511bce858c195b102df5f59966a8040e9c3`, which includes the three source补跑 commits ending at `11646d70`, plus the default search hotfix. The deployed runtime counts were `videos=43872`, `songs=63924`, `occurrences=606400`, `ranking_rows=287661`, and `source_occurrences=908633`.
+
+Successful deploy pattern:
+
+- `Deploy SQLite runtime DB` run `29747764975` deployed the third source补跑 commit `11646d70` in 18m08s.
+- `Deploy SQLite runtime DB` run `29752870596` deployed search hotfix commit `19f35511` in 15m52s.
+- In the successful hotfix run, `Build runtime database` took 12m56s, `Verify runtime API artifact` took 4s, `Upload and activate database` took 1m41s, and `Verify VPS2 API` took 9s.
+
+Failure pattern:
+
+- Runs `29749201929` and `29751194001` failed in `Verify runtime API artifact` after about 5 minutes.
+- Those failures did not activate any candidate database on VPS2; production stayed on the previous successful `source_commit_sha`.
+- The root cause was a broad all-field aggregate search over `source_occurrences` during the API smoke probe. Keep default `searchScope=all` on the fast row-filter path unless the DB has an indexed/FTS-backed way to aggregate every matching source row.
+- If this step fails, fix the API query path and rerun deploy. Do not retry upload or touch VPS2 manually, because the candidate was never activated.
+
+Operational notes:
+
+- `Check code` workflow failures are separate from the runtime DB deploy. They still need follow-up, but they do not prove production is stale when `Deploy SQLite runtime DB` is green and `/api/meta.source_commit_sha` matches the intended commit.
+- `workflow_run` deploys may be skipped or cancelled by concurrency when a newer push deploy starts. The newest successful `Deploy SQLite runtime DB` and the public `/api/meta.source_commit_sha` are authoritative.
+- Source补跑 status should be checked through accepted increment commits, runtime build counts, and live probes such as `view=videos&q=nanashi_77shi`, not by whether static `data/ui` shards were committed.
