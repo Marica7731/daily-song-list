@@ -234,6 +234,8 @@ For filtered searches, the summary counters must be filtered counters. Do not fa
 
 Default song search is all-field search. For example, `songs?q=なれたん` may return rows where `なれたん` is present in channel/source evidence, while `songs?q=なれたん&searchScope=song` is valid only when the visible song identity fields contain the term. Both modes must reject self-reference/commentary noise such as polls, setlist headers, and "songs I can sing" rows.
 
+When an aggregate ranking row matches through source/channel/video evidence, the API returns only matching source previews and reports `count`, `timestampCount`, and `videoCount` for the matched subset. The original all-site values remain available as `globalCount`, `globalTimestampCount`, and `globalVideoCount`. This keeps a query such as `songs?q=なれたん` from showing unrelated top source previews or all-site play counts for a song that only has a few matching `なれたん` sources.
+
 `npm run check:published:api` verifies the public contract for headers, bad-request and missing-route JSON errors, missing source details, filtered counters, the `少女レイ / みきとP` source detail count, default all-field `songs?q=なれたん`, narrowed `songs?q=なれたん&searchScope=song`, and the VSinger video-search probes for `ネモ・テルミナス` and `儚牙紺 - Kurage Kon -`.
 It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス`, `香鳴ハノン`, `なれたん`, and `チョま` so a deploy cannot pass while the accepted increment is missing from the runtime DB.
 

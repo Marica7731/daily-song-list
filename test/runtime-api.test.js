@@ -75,14 +75,19 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(songTitleSearch.totalOccurrenceCount, 2);
     assert.equal(songTitleSearch.records[0].title, "Song One");
     assert.equal(songTitleSearch.records[0].count, 2);
-    assert.equal(songTitleSearch.records[0].matchedBySource, undefined);
-    assert.equal(songTitleSearch.records[0].globalCount, undefined);
+    assert.equal(songTitleSearch.records[0].matchedBySource, true);
+    assert.equal(songTitleSearch.records[0].globalCount, 2);
 
     const channelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&pageSize=5`);
     assert.equal(channelSongSearch.searchScope, "all");
     assert.equal(channelSongSearch.totalCount, 3);
-    assert.equal(channelSongSearch.totalOccurrenceCount, 4);
+    assert.equal(channelSongSearch.totalOccurrenceCount, 3);
     assert.deepEqual(channelSongSearch.records.map((record) => record.title), ["Song One", "Song Three", "Song Two"]);
+    assert.equal(channelSongSearch.records[0].count, 1);
+    assert.equal(channelSongSearch.records[0].globalCount, 2);
+    assert.equal(channelSongSearch.records[0].matchedBySource, true);
+    assert.equal(channelSongSearch.records[0].occurrences.length, 1);
+    assert.equal(channelSongSearch.records[0].occurrences[0].item.channelName, "Alpha Ch.");
 
     const scopedChannelSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchScope=song&pageSize=5`);
     assert.equal(scopedChannelSongSearch.searchScope, "song");

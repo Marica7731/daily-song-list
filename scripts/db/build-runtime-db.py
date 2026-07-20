@@ -380,6 +380,7 @@ def ingest_latest_payload(
     all_song_keys: set[str] = set()
     all_occurrence_ids: set[str] = set()
     ranking_row_count = 0
+    source_occurrence_count = 0
 
     for range_id in CANONICAL_RANGES:
         group = group_for_range(groups, range_id)
@@ -437,6 +438,12 @@ def ingest_latest_payload(
                         source_detail["entity_key"],
                         source_detail["payload"],
                     )
+                    source_occurrence_count += insert_source_occurrences_for_detail(
+                        conn,
+                        source_detail["source_key"],
+                        range_id,
+                        source_detail["payload"],
+                    )
                 insert_ranking_row(conn, row, fts_enabled)
             ranking_row_count += len(ranking_rows)
             write_meta(conn, f"range_{range_id}_ranking_rows", str(len(ranking_rows)))
@@ -446,6 +453,7 @@ def ingest_latest_payload(
         "songs": len(all_song_keys),
         "occurrences": len(all_occurrence_ids),
         "ranking_rows": ranking_row_count,
+        "source_occurrences": source_occurrence_count,
         "fts_enabled": 1 if fts_enabled else 0,
     }
 
@@ -1507,6 +1515,14 @@ def insert_source_detail(conn: sqlite3.Connection, source_key: str, range_id: st
         """,
         (source_key, range_id, entity_type, entity_key, dumps_json(payload)),
     )
+
+
+def insert_source_occurrences_for_detail(conn: sqlite3.Connection, source_key: str, range_id: str, payload: dict) -> int:
+    occurrences = payload.get("occurrences") if isinstance(payload.get("occurrences"), list) else []
+    for position, occurrence in enumerate(occurrences):
+        if isinstance(occurrence, dict):
+            insert_source_occurrence(conn, source_key, range_id, position, occurrence)
+    return len(occurrences)
 
 
 def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id: str, position: int, payload: dict) -> None:
