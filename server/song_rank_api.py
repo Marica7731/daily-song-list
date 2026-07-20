@@ -163,6 +163,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             """,
             [*params, page_size, offset],
         ).fetchall()
+        records = [decode_row(row) for row in rows]
     return {
         "schemaVersion": 1,
         "rangeId": range_id,
@@ -177,7 +178,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         "totalSongCount": totals["total_songs"],
         "totalVideoCount": totals["total_videos"],
         "pageCount": (total + page_size - 1) // page_size,
-        "records": [decode_row(row) for row in rows],
+        "records": records,
     }
 
 
@@ -195,8 +196,13 @@ def source_matched_rankings_payload(
     base_where = ["r.range_id = ?", "r.view = ?", "r.metric = ?", "r.scope_key = 'all'", "r.detail_key != ''"]
     base_params: list[object] = [range_id, view, metric]
     source_clause, source_values = source_occurrence_filter(q, search_scope)
-    matched_where = [*base_where, source_clause]
-    matched_params = [*base_params, *source_values]
+    candidate_where = list(base_where)
+    candidate_params = list(base_params)
+    if search_scope == "all":
+        candidate_clause, candidate_values = search_filter_for_view(view, q, "all")
+        candidate_where.append(candidate_clause)
+        candidate_params.extend(candidate_values)
+    matched_params = [*candidate_params, *source_values]
     having = ""
     if min_count > 1 and view not in {"videos", "vtubers"}:
         having = "HAVING matched_videos >= ?" if metric == "videos" else "HAVING matched_count >= ?"
@@ -209,14 +215,18 @@ def source_matched_rankings_payload(
           COUNT(*) AS matched_count,
           COUNT(DISTINCT COALESCE(NULLIF(so.video_id, ''), 'position:' || so.position)) AS matched_videos,
           MIN(so.position) AS first_match_position
-        FROM ranking_rows r
+        FROM (
+          SELECT *
+          FROM ranking_rows r
+          WHERE {" AND ".join(candidate_where)}
+        ) r
         JOIN source_details sd
           ON sd.range_id = r.range_id
          AND sd.entity_key = r.detail_key
         JOIN source_occurrences so
           ON so.range_id = r.range_id
          AND so.source_key = sd.source_key
-        WHERE {" AND ".join(matched_where)}
+        WHERE {source_clause}
         GROUP BY r.row_id
         {having}
     """
@@ -311,7 +321,6 @@ def decode_source_matched_row(conn: sqlite3.Connection, row: sqlite3.Row, query:
     record["occurrences"] = [json.loads(occurrence["payload_json"]) for occurrence in matched_occurrences]
     record["occurrencePreviewLimited"] = matched_count > len(record["occurrences"])
     return record
-
 
 def matched_source_occurrences(
     conn: sqlite3.Connection,
