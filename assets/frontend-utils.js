@@ -433,7 +433,7 @@
       ...normalized,
       q: "",
       searchScope: "all",
-      searchFields: sanitizeSearchFields(options.defaults?.searchFields, ["title", "artist"]),
+      searchFields: [],
       nicheOnly: false,
       hideUnknownArtist: false,
       trend: "all",
@@ -1168,11 +1168,17 @@
     for (const group of groupOccurrencesByVideo(occurrences)) {
       const item = group.item || group.occurrences?.[0]?.item || {};
       const videoId = cleanText(item.videoId || group.videoId);
-      const seconds = validSeconds(group.firstSeconds);
-      if (!videoId || seconds === null || seen.has(videoId)) continue;
-      seen.add(videoId);
-      const channelName = cleanText(item.channelName || group.channelName) || "未知频道";
-      rows.push(`${channelName} https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${Math.floor(seconds)}s`);
+      if (!videoId) continue;
+      for (const occurrence of group.occurrences || []) {
+        const occurrenceItem = occurrence?.item || item;
+        const seconds = validSeconds(occurrence?.song?.seconds);
+        if (seconds === null) continue;
+        const key = `${videoId}:${Math.floor(seconds)}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const channelName = cleanText(occurrenceItem.channelName || item.channelName || group.channelName) || "未知频道";
+        rows.push(`${channelName} https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&t=${Math.floor(seconds)}s`);
+      }
     }
     return rows.join("\n");
   }
@@ -1210,8 +1216,18 @@
     }
     if (mode === "vtuber") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
+      const occurrenceCount = Math.max(0, Number(options.rankCount || options.occurrenceCount) || 0);
+      const videoCount = Math.max(0, Number(options.videoCount) || 0);
+      const expandedText = [
+        "收起",
+        occurrenceCount ? `${occurrenceCount}次歌唱` : "",
+        songCount ? `${songCount}首歌` : "",
+        videoCount ? `${videoCount}个视频` : "",
+      ]
+        .filter(Boolean)
+        .join(" · ");
       return {
-        text: isExpanded ? "收起" : `${songCount}首歌`,
+        text: isExpanded ? expandedText : `${songCount}首歌`,
         ariaLabel: isExpanded ? "收起该频道歌曲" : `查看该频道的 ${songCount} 首歌曲`,
       };
     }

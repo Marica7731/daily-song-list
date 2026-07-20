@@ -212,8 +212,8 @@ test("VTuber channel rank toggle uses unique song count", () => {
   assert.equal(songMetric.text, "7首歌");
   assert.equal(songMetric.ariaLabel, "查看该频道的 7 首歌曲");
 
-  const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7 });
-  assert.equal(expanded.text, "收起");
+  const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7, rankCount: 21, videoCount: 4 });
+  assert.equal(expanded.text, "收起 · 21次歌唱 · 7首歌 · 4个视频");
   assert.equal(expanded.ariaLabel, "收起该频道歌曲");
 
   const compact = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 123, compact: true });
@@ -537,6 +537,7 @@ test("builds same-song source link text from unique source videos", () => {
     links,
     [
       "羽海乃ゆき https://www.youtube.com/watch?v=VideoA&t=75s",
+      "Channel A https://www.youtube.com/watch?v=VideoA&t=180s",
       "こは太郎 https://www.youtube.com/watch?v=VideoB&t=12s",
       "未知频道 https://www.youtube.com/watch?v=VideoC&t=9s",
       "中文频道 https://www.youtube.com/watch?v=VideoD&t=120s",
@@ -546,8 +547,8 @@ test("builds same-song source link text from unique source videos", () => {
   assert.match(links, /&t=\d+s/u);
   assert.doesNotMatch(links, /No Time Channel|VideoF/u);
   assert.doesNotMatch(links, /^\d+\.|^- |\[[^\]]+\]\(/um);
-  assert.equal(links.split("\n").length, 5);
-  assert.equal(new Set(links.split("\n").map((line) => line.match(/watch\?v=([^&\s]+)&t=(\d+)s/u)?.[1])).size, 5);
+  assert.equal(links.split("\n").length, 6);
+  assert.equal(new Set(links.split("\n").map((line) => line.match(/watch\?v=([^&\s]+)&t=(\d+)s/u)?.[0])).size, 6);
   assert.equal(links.endsWith("\n"), false);
 });
 
@@ -1237,7 +1238,7 @@ test("restrictive filter helpers clear only real narrowing conditions", () => {
 
   const cleared = clearAllRestrictiveFilters(normalized, options);
   assert.equal(cleared.q, "");
-  assert.deepEqual(cleared.searchFields, ["title", "artist"]);
+  assert.deepEqual(cleared.searchFields, []);
   assert.equal(cleared.nicheOnly, false);
   assert.equal(cleared.hideUnknownArtist, false);
   assert.equal(cleared.trend, "all");

@@ -344,8 +344,8 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   const songSourceBody = functionBody("async function toggleArtistSongSource");
   const sourcePageBody = functionBody("async function setSourceDrawerPage");
   const songGroupBody = functionBody("function renderArtistSongGroup");
-  assert.match(vtuberRankBody, /getSongGroups: \(\) => getArtistSongGroups\(record\)/u);
-  assert.match(appSource, /function renderRequestedPageResult[\s\S]*mode: "vtuber"[\s\S]*getSongGroups: \(\) => getArtistSongGroups\(record\)/u);
+  assert.match(vtuberRankBody, /getSongGroups: \(\) => getVtuberSongGroups\(record\)/u);
+  assert.match(appSource, /function renderRequestedPageResult[\s\S]*mode: "vtuber"[\s\S]*getSongGroups: \(\) => getVtuberSongGroups\(record\)/u);
   assert.match(appSource, /function completeSongGroupsForDrawer\(occurrences, fallbackGroups = \[\], mode = ""\)[\s\S]*buildArtistSongGroups\(filterDisplaySongOccurrences\(occurrences \|\| \[\]\)\)[\s\S]*mode === "vtuber"[\s\S]*completeGroups\.length < fallbackGroups\.length/u);
   assert.match(appSource, /async function setSourceDrawerExpanded[\s\S]*songGroups = completeSongGroupsForDrawer\(visibleOccurrences, songGroups, mode\)/u);
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);

@@ -477,7 +477,7 @@ def search_scope_from_fields(fields: list[str] | None) -> str:
     if fields is None:
         return "all"
     if not fields:
-        return "source"
+        return "all"
     if fields == ["title"]:
         return "title"
     if fields == ["artist"]:
