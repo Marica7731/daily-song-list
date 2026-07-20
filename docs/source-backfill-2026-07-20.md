@@ -167,6 +167,60 @@ Second-wave VPS usage:
 
 ## Merge notes
 
-- `origin/main` advanced to `fb0c33083be6f8cef88acbcc167c679f2148e40f` after this branch was started. This branch keeps a small surface by adding separate accepted increment JSON files and a handoff doc instead of editing generated review data.
+- `origin/main` advanced to `f053651dfae375ab6f5595dfe322174abfa8d32d` after this branch was started. This branch keeps a small surface by adding separate accepted increment JSON files and a handoff doc instead of editing generated review data.
 - Do not commit `artifacts/channel-discovery/**`, `artifacts/runtime/**`, remote raw caches, credentials, or temporary helper scripts.
 - This branch has not been pushed and has not been deployed. The accepted JSON will affect production only after the integration session merges, rebuilds, and deploys.
+
+## Completed low-count skipped-source gapfix
+
+The integration check found that `https://www.youtube.com/@nanashi_77shi` had been skipped in wave 2 with only 2 online videos and 32 occurrences. That is not sufficient evidence for a complete source. I re-audited the same class of previously requested skipped sources whose online count was only 1-5 videos, without running a full-site 1000+ channel refresh.
+
+Online evidence was refreshed from `https://ytb-song-rank.culua.com/api/meta` and `/api/rankings` at `2026-07-20T09:30:11Z`. Production source at that time was `62d895bfd1f06d2a0552006f53ad0ef9e0f9a865`, built at `2026-07-20T08:55:31Z`. Candidate-only probing then showed all 14 low-count skipped sources had complete channel pagination (`reachedEnd true`) and more candidate videos than the tiny online footprint, so all 14 were imported in this gapfix batch.
+
+- Accepted increment: `data/external/youtube-channel-discovery/accepted/2026-07-20-source-backfill-gapfix.json`
+- Increment totals: 18 discovery input dirs, 1,235 video details read, 1,204 usable videos, 1,202 accepted videos, 14,229 accepted occurrences, 31 duplicate video IDs deduped across shards, 2 existing-regression videos skipped (`bpL4I37EU_0`, `fA4Xbt4gab4`).
+- Time coverage in accepted increment: video `publishedTimestamp` 1,202/1,202; occurrence `time` or `seconds` 14,229/14,229.
+- Batch status: imported 14, skipped 0, failed 0, pending 0.
+
+| Source | Status | Evidence |
+| --- | --- | --- |
+| `https://www.youtube.com/@karakurinne` | imported | candidates 25; inspected 25; accepted videos 23; accepted occurrences 228; unique songs 200; raw publishedAt 25/25; detail publishedTimestamp 23/23; occurrence time 228/228; reachedEnd true |
+| `https://www.youtube.com/@Otokado_Ruki` | imported | candidates 227; inspected 227; accepted videos 173; accepted occurrences 1,911; unique songs 769; raw publishedAt 227/227; detail publishedTimestamp 173/173; occurrence time 1,911/1,911; reachedEnd true |
+| `https://www.youtube.com/@itk_tks` | imported | sharded across local, VPS3, and VPS5. candidates 319; inspected 319; accepted videos 281; accepted occurrences 4,616; unique songs 699; raw publishedAt 319/319; detail publishedTimestamp 281/281; occurrence time 4,616/4,616; reachedEnd true |
+| `https://www.youtube.com/@Stratia113` | imported | candidates 20; inspected 20; accepted videos 20; accepted occurrences 148; unique songs 144; raw publishedAt 20/20; detail publishedTimestamp 20/20; occurrence time 148/148; reachedEnd true |
+| `https://www.youtube.com/@perucia_ten` | imported | candidates 8; inspected 8; accepted videos 7; accepted occurrences 82; unique songs 78; raw publishedAt 8/8; detail publishedTimestamp 7/7; occurrence time 82/82; reachedEnd true |
+| `https://www.youtube.com/@HoshiHo_HsH` | imported | candidates 59; inspected 59; accepted videos 48; accepted occurrences 1,038; unique songs 865; raw publishedAt 59/59; detail publishedTimestamp 48/48; occurrence time 1,038/1,038; reachedEnd true |
+| `https://www.youtube.com/@nemgorochan` | imported | sharded across local, VPS3, and VPS5. candidates 402; inspected 401; accepted videos 125; accepted occurrences 1,327; unique songs 667; raw publishedAt 402/402; detail publishedTimestamp 125/125; occurrence time 1,327/1,327; reachedEnd true |
+| `https://www.youtube.com/@kohigashihitona` | imported | candidates 198; inspected 198; accepted videos 183; accepted occurrences 1,726; unique songs 851; raw publishedAt 198/198; detail publishedTimestamp 183/183; occurrence time 1,726/1,726; reachedEnd true |
+| `https://www.youtube.com/@TsumugiCarla` | imported | candidates 193; inspected 193; accepted videos 135; accepted occurrences 1,116; unique songs 320; raw publishedAt 193/193; detail publishedTimestamp 135/135; occurrence time 1,116/1,116; reachedEnd true |
+| `https://www.youtube.com/@HONKTHEHORN_OFFICIAL` | imported | candidates 22; inspected 22; accepted videos 17; accepted occurrences 164; unique songs 132; raw publishedAt 22/22; detail publishedTimestamp 17/17; occurrence time 164/164; reachedEnd true |
+| `https://www.youtube.com/@Mei-Mei2024` | imported | candidates 90; inspected 90; accepted videos 30; accepted occurrences 130; unique songs 117; raw publishedAt 90/90; detail publishedTimestamp 30/30; occurrence time 130/130; reachedEnd true |
+| `https://www.youtube.com/@delutaya` | imported | candidates 106; inspected 106; accepted videos 101; accepted occurrences 1,143; unique songs 615; raw publishedAt 106/106; detail publishedTimestamp 101/101; occurrence time 1,143/1,143; reachedEnd true |
+| `https://www.youtube.com/@akari0415` | imported | candidates 74; inspected 74; accepted videos 23; accepted occurrences 120; unique songs 118; raw publishedAt 74/74; detail publishedTimestamp 23/23; occurrence time 120/120; reachedEnd true |
+| `https://www.youtube.com/@nanashi_77shi` | imported | candidates 47; inspected 47; accepted videos 36; accepted occurrences 480; unique songs 382; raw publishedAt 47/47; detail publishedTimestamp 36/36; occurrence time 480/480; reachedEnd true. After-gapfix DB probe returned videos view 36 videos / 480 occurrences and vtubers view 1 row / 36 videos / 480 occurrences. |
+
+Gapfix YouTube-only DB before/after builds:
+
+| Metric | Before gapfix | After gapfix | Delta |
+| --- | ---: | ---: | ---: |
+| Videos | 4,217 | 5,382 | +1,165 |
+| Songs | 22,414 | 25,312 | +2,898 |
+| Occurrences | 74,966 | 88,750 | +13,784 |
+| Source occurrences | 143,520 | 170,570 | +27,050 |
+
+Gapfix commands:
+
+```powershell
+npm run youtube:export-channel-increment -- artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\nemgorochan-shard2 artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\itk_tks-shard2 artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\nanashi_77shi artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\akari0415 artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\Mei-Mei2024 artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\HoshiHo_HsH artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\karakurinne artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\HONKTHEHORN_OFFICIAL artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\Stratia113 artifacts\channel-discovery\2026-07-20-source-backfill-gapfix\perucia_ten artifacts\channel-discovery\2026-07-20-remote-gapfix\vps3\nemgorochan-shard0 artifacts\channel-discovery\2026-07-20-remote-gapfix\vps3\itk_tks-shard0 artifacts\channel-discovery\2026-07-20-remote-gapfix\vps3\Otokado_Ruki artifacts\channel-discovery\2026-07-20-remote-gapfix\vps3\kohigashihitona artifacts\channel-discovery\2026-07-20-remote-gapfix\vps5\nemgorochan-shard1 artifacts\channel-discovery\2026-07-20-remote-gapfix\vps5\itk_tks-shard1 artifacts\channel-discovery\2026-07-20-remote-gapfix\vps5\TsumugiCarla artifacts\channel-discovery\2026-07-20-remote-gapfix\vps5\delutaya -- --output data\external\youtube-channel-discovery\accepted\2026-07-20-source-backfill-gapfix.json
+npm run db:build -- --no-vsinger --youtube-channel-discovery-dir artifacts\channel-discovery\youtube-discovery-before-gapfix --output artifacts\runtime\song-rank-youtube-before-gapfix.sqlite
+npm run db:build -- --no-vsinger --output artifacts\runtime\song-rank-youtube-after-gapfix.sqlite
+npm run db:probe -- --db artifacts\runtime\song-rank-youtube-after-gapfix.sqlite --range all --view videos --q nanashi_77shi --page-size 5
+npm run db:probe -- --db artifacts\runtime\song-rank-youtube-after-gapfix.sqlite --range all --view vtubers --q nanashi_77shi --page-size 5
+```
+
+Gapfix VPS usage:
+
+| Host | Role | Cleanup evidence |
+| --- | --- | --- |
+| VPS3 `142.91.109.81` | `nemgorochan` shard 0, `itk_tks` shard 0, `Otokado_Ruki`, `kohigashihitona` | removed `/opt/ytb-song-rank-source-backfill-gapfix-20260720`; final `df -h`: `/dev/sda1 99G 15G 84G 16% /`; `REMOTE_CLEANUP_OK` |
+| VPS5 `134.195.91.5` | `nemgorochan` shard 1, `itk_tks` shard 1, `TsumugiCarla`, `delutaya` | removed `/opt/ytb-song-rank-source-backfill-gapfix-20260720`; final `df -h`: `/dev/vda1 10G 2.5G 7.1G 26% /`; `REMOTE_CLEANUP_OK` |
