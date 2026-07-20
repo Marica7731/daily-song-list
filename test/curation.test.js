@@ -11,6 +11,7 @@ const {
   isCandidateActivityTitle,
   isConversationEntry,
   isParserCorruptionEntry,
+  loadCurationContext,
   mergeCurationPatch,
 } = require("../scripts/curation");
 const { buildRankDiffs, extractCommentTexts, sourceScore } = require("../scripts/update-songlist");
@@ -341,6 +342,51 @@ test("curation drops Riona unknown-artist rows while keeping explicit artists", 
     ["ZEAgcWCnkwQ:花に亡霊 / ヨルシカ", "SAFE0000001:花に亡霊 / 未記載"],
   );
   assert.equal(videos.curationStats.ruleDroppedEntries, 2);
+});
+
+test("curation covers user-confirmed dirty source samples without broad START drops", () => {
+  const curated = applyCurationToVideos(
+    [
+      {
+        videoId: "ZEAgcWCnkwQ",
+        channelName: "Riona Ch. 響咲リオナ - FLOW GLOW",
+        channelHandle: "@IsakiRiona",
+        songs: [
+          { title: "自己肯定感がドンドン上がってる", artist: "未記載", seconds: 3362, raw: "56:02 自己肯定感がドンドン上がってる" },
+          { title: "START", artist: "愛内里菜", seconds: 4000, raw: "1:06:40 START / 愛内里菜" },
+        ],
+      },
+      {
+        videoId: "NARETANCHAT",
+        channelName: "Naretan Ch. なれたん",
+        channelHandle: "@naretan",
+        songs: [
+          { title: "なれたん", artist: "未記載", seconds: 1, raw: "0:01 なれたん" },
+          { title: "【雑談】リクエスト確認", artist: "未記載", seconds: 2, raw: "0:02 【雑談】リクエスト確認" },
+          { title: "星座になれたら", artist: "結束バンド", seconds: 3, raw: "0:03 星座になれたら / 結束バンド" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    curated.flatMap((item) => item.songs.map((song) => `${item.videoId}:${song.title} / ${song.artist}`)),
+    ["ZEAgcWCnkwQ:START / 愛内里菜", "NARETANCHAT:星座になれたら / 結束バンド"],
+  );
+  assert.equal(curated.curationStats.ruleDroppedEntries + curated.curationStats.conversationDroppedEntries, 3);
+
+  const twDirty = applyCurationToVideos(
+    [
+      {
+        videoId: "okW2MlmPGe8",
+        songs: [{ title: "台V脏数据", artist: "未記載", seconds: 6697, raw: "1:51:37 台V脏数据" }],
+      },
+    ],
+    loadCurationContext(),
+  );
+  assert.equal(twDirty.length, 0);
+  assert.equal(twDirty.curationStats.droppedVideos, 1);
 });
 
 test("curation folds same-video same-song rows within 30 seconds with provenance", () => {

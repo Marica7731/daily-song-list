@@ -399,7 +399,39 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     JSON.stringify({
       generatedAt: "2026-07-19T00:00:00.000Z",
       capturedAt: "2026-07-19T00:00:00.000Z",
-      groups: { "7d": { items: [] }, all: { items: [] } },
+      groups: {
+        "7d": { items: [] },
+        all: {
+          items: [
+            {
+              videoId: "ZEAgcWCnkwQ",
+              title: "Riona karaoke",
+              channelName: "Riona Ch. 響咲リオナ - FLOW GLOW",
+              channelHandle: "@IsakiRiona",
+              channelUrl: "https://www.youtube.com/@IsakiRiona",
+              knownSourceType: "vsinger_moment_http",
+              sourceGroups: ["vsinger-moment"],
+              songs: [
+                { title: "自己肯定感がドンドン上がってる", artist: "未記載", time: "56:02", seconds: 3362 },
+                { title: "START", artist: "愛内里菜", time: "1:06:40", seconds: 4000 },
+              ],
+            },
+            {
+              videoId: "naretan0001",
+              title: "Naretan chat source",
+              channelName: "Naretan Ch. なれたん",
+              channelHandle: "@naretan",
+              knownSourceType: "vsinger_moment_http",
+              sourceGroups: ["vsinger-moment"],
+              songs: [
+                { title: "なれたん", artist: "未記載", time: "0:01", seconds: 1 },
+                { title: "【雑談】リクエスト確認", artist: "未記載", time: "0:02", seconds: 2 },
+                { title: "星座になれたら", artist: "結束バンド", time: "0:03", seconds: 3 },
+              ],
+            },
+          ],
+        },
+      },
     }),
     "utf8",
   );
@@ -519,7 +551,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\"",
+      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\"",
       "--search-scope",
       "title",
       "--page-size",
@@ -529,6 +561,28 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   );
   assert.match(dirtySongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(dirtySongOutput, /"totalCount": 0/);
+
+  const retainedMomentSongOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "START OR 星座になれたら",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(retainedMomentSongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(retainedMomentSongOutput, /"totalCount": 2/);
 
   const safeSongOutput = execFileSync(
     PYTHON,

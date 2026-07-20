@@ -6,7 +6,7 @@ This branch only changes data cleanup, curation, duplicate folding, tests, and b
 
 Rules in this document apply to parsed song fields: `title`, `artist`, `raw`, and selected source provenance. They must not drop a row because a channel name or video title contains words such as `OP`, `ED`, `Start`, or `Set List`.
 
-`youtube-channel-discovery` accepted JSON files are also cleaned before release with `node scripts\clean-channel-discovery-accepted.js --write`. The runtime DB importer applies the same non-song predicate again when merging base `data/latest.json` rows with external imports, so stale generated JSON cannot reintroduce already-known chat/comment rows during deploy-time DB rebuilds.
+`youtube-channel-discovery` accepted JSON files are also cleaned before release with `node scripts\clean-channel-discovery-accepted.js --write`. The JS runtime ranking exporter and Python runtime DB fallback both apply source-aware non-song predicates again when merging base `data/latest.json` rows with external imports, so stale generated JSON, VSinger Moment rows, and scanned source rows cannot reintroduce already-known chat/comment rows during deploy-time DB rebuilds.
 
 ## Reviewed Inputs
 
@@ -15,6 +15,7 @@ Rules in this document apply to parsed song fields: `title`, `artist`, `raw`, an
 - `D:\Download\剪贴板图片 (21).jpg`: chant/noise rows such as `天Q`, `天Q天Q~~WO~~~`, `HAWAWA`, `BUAAAA`, `HE HE`, `E HO E HO`, and `AAA TEST TEST`.
 - `D:\Download\剪贴板文本 (50).txt`, `(51).txt`: song index page snapshots. False-positive samples include real titles and artist/work metadata such as `-ERROR / niki`, `-OZONE-`, and `さらば / キンモクセイ『あたしンち』初代OP ※`.
 - Online check: `https://ytb-song-rank.culua.com/data/latest.json`, queried by `node scripts/audit-data-quality-cleanup.js`.
+- User-confirmed dirty samples: `ZEAgcWCnkwQ` self-esteem/chat row, `okW2MlmPGe8&t=6697s` regional VTuber row, no-artist Riona rows, and high-volume `なれたん` chat/comment rows.
 
 ## High-Confidence Drops
 
@@ -27,6 +28,9 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - Standalone wave separators and event fragments: `～`, `～リアルライブチケット#耐久 7`.
 - Chant/reaction rows from the `天Q` screenshot: `天Q`, `HI 天Q~`, `天Q天Q~~WO~~~`, `DQ~`, `HAWAWA`, `BUAAAA`, `HE HE`, `E HO E HO`, `AAA TEST TEST`, plus existing `KOPIPE`, `KP`, `A LELELELE`.
 - Commentary/request/poll rows whose song title or raw text self-references `なれたん` are rejected unless they match a reviewed true-song guardrail. Examples include `なれたんに褒められたいハネダン達`, `去年のなれたん...`, and `アンケート (なれたんを家族に例えると)`.
+- Unknown-artist rows whose title is the channel or streamer identity are rejected with source context, for example `なれたん` in `Naretan Ch. なれたん`.
+- Riona source rows without a reliable artist are rejected by channel scope, while explicit-artist songs on the same channel are retained.
+- Bracketed commentary notes such as `【雑談】リクエスト確認` and `（去年のなれたん）...` are rejected as non-song rows.
 
 ## START Guardrail
 
@@ -77,17 +81,18 @@ The script fetches the current online `data/latest.json`, applies local blocklis
 
 Latest audit in this branch:
 
-- query time: `2026-07-20T09:47:40.224Z`
+- query time: `2026-07-20T20:22:52.122Z`
 - source generated/captured: `2026-07-19T14:08:56.115Z`
 - group: `all`
-- videos: `1815 -> 1813`
-- songs: `27878 -> 27819`
-- blocked videos: `2`
-- curation rule drops: `16`
+- videos: `1810 -> 1810`
+- songs: `27768 -> 27756`
+- blocked videos: `0`
+- curation rule drops: `3`
 - near-duplicate folded entries: `9` across `9` groups
-- dirty keyword rows: `22 -> 9`; remaining matches are reviewed `START` rows retained by guardrails.
+- dirty keyword rows: `9 -> 9`; remaining matches are reviewed `START` rows retained by guardrails.
 - `天Q` rows in the current online snapshot: `0 -> 0`; local positive checks still verify `天Q` variants are dropped.
 - START whitelist rows retained: `5 -> 5`
+- positive checks dropped: 13 samples, including `ZEAgcWCnkwQ`, `okW2MlmPGe8&t=6697s`, no-artist Riona, `なれたん`, section labels, and chant rows.
 - false-positive checks retained: 11 samples, including `-ERROR / niki`, `-OZONE-`, `READY STEADY GO / L'Arc-en-Ciel`, `Open Your Eyes / Guano Apes`, `ENDLESS STORY / REIRA starring YUNA ITO`, and the three START whitelist rows.
 
 Remaining dirty-keyword audit hits include reviewed false positives such as `StaRt` variants and artist/work metadata containing `OP`/`Start`; do not turn these into broad contains-based drops.

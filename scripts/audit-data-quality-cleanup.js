@@ -180,14 +180,24 @@ function runPositiveChecks() {
     { title: "歌唱開始時間", artist: "未記載" },
     { title: "セットリスト", artist: "歌唱開始時間" },
     { title: "ED", artist: "お遊戯あり" },
+    { title: "【雑談】リクエスト確認", artist: "未記載" },
+    { title: "なれたん", artist: "未記載", source: { channelName: "Naretan Ch. なれたん", channelHandle: "@naretan" } },
+    { title: "自己肯定感がドンドン上がってる", artist: "未記載", source: { videoId: "ZEAgcWCnkwQ", channelName: "Riona Ch. 響咲リオナ - FLOW GLOW", channelHandle: "@IsakiRiona" } },
   ];
   const passed = [];
   const failed = [];
   for (const sample of samples) {
-    const curated = applyCurationToVideos([{ videoId: "POSITIVE", songs: [{ ...sample, seconds: 1, raw: `0:01 ${sample.title}` }] }], { overrides: { records: [] } });
+    const source = sample.source || {};
+    const curated = applyCurationToVideos([{ videoId: source.videoId || "POSITIVE", ...source, songs: [{ ...sample, seconds: 1, raw: `0:01 ${sample.title}` }] }], { overrides: { records: [] } });
     if (!curated.length) passed.push(displaySong(sample));
     else failed.push(displaySong(sample));
   }
+  const twDirty = applyCurationToVideos(
+    [{ videoId: "okW2MlmPGe8", songs: [{ title: "台V脏数据", artist: "未記載", seconds: 6697, raw: "1:51:37 台V脏数据" }] }],
+    loadCurationContext(),
+  );
+  if (!twDirty.length) passed.push("okW2MlmPGe8&t=6697s / drop_video");
+  else failed.push("okW2MlmPGe8&t=6697s / drop_video");
   return { passed, failed };
 }
 

@@ -125,9 +125,11 @@
     const hasArtist = hasKnownArtist(song);
     const artist = String(song?.artist || "").trim();
     if (isChannelScopedUnknownArtistDirtySong(song, source)) return true;
+    if (!hasArtist && isSelfReferentialChannelTitle(title, source)) return true;
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
     if (isNonSongMarkerWithDescriptor(title, artist)) return true;
     if (isStrongNonSongActivityText(title)) return true;
+    if (!hasArtist && isBracketedCommentaryNote(title)) return true;
     if (isCommentaryNoiseEntry(title, artist, song?.raw)) return true;
     if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
@@ -145,6 +147,34 @@
     if (channelUrlMatch) return true;
     const channelName = normalizeMatcherText(source.channelName || source.ownerText || source.longBylineText || source.shortBylineText || "");
     return channelName.includes("響咲リオナ") || /^riona ch\./iu.test(channelName);
+  }
+
+  function isSelfReferentialChannelTitle(title, source = {}) {
+    const titleKey = normalizeChannelIdentityTitle(title);
+    if (!titleKey || titleKey.length < 3) return false;
+    const channelCandidates = uniqueStrings([
+      source.channelName,
+      source.ownerText,
+      source.longBylineText,
+      source.shortBylineText,
+      source.authorName,
+      source.authorText,
+    ]).map(normalizeChannelIdentityTitle);
+    if (channelCandidates.some((value) => value && (value === titleKey || value.includes(titleKey)))) return true;
+    const handleCandidates = uniqueStrings([source.channelHandle, source.handle, source.ownerHandle, ...channelUrlValues(source)])
+      .map(normalizeHandle)
+      .filter(Boolean);
+    return handleCandidates.some((value) => value === titleKey || value.replace(/ch(?:annel)?$/iu, "") === titleKey);
+  }
+
+  function normalizeChannelIdentityTitle(value) {
+    return stripCustomEmojiAliases(value)
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .replace(/(?:ch\.?|channel|チャンネル|公式|official|歌枠|karaoke|cover|vtuber|live|配信)$/giu, "")
+      .replace(/[\u{1F300}-\u{1FAFF}\uFE0E\uFE0F♪♫♬♩]/gu, "")
+      .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’~～!！?？.,，。、:：;；\-—–−_・･/／|｜@]+/gu, "")
+      .trim();
   }
 
   function isNumericIndexFragmentEntry(title, artist, raw) {
@@ -369,6 +399,26 @@
     if (/喉(?:が|は)?(?:痛い|いたい|不調|治らない|やられた|終わった)|のど(?:が|は)?(?:痛い|いたい|不調)|喉の調子(?:が|は)?/iu.test(value)) return true;
     if (/^(?:なれたん|naraetan)(?:は|が|の|も|って|です|だよ|である|自称|説明|自己紹介|について).{0,60}$/iu.test(value)) return true;
     return false;
+  }
+
+  function isBracketedCommentaryNote(text) {
+    const value = stripCustomEmojiAliases(text).normalize("NFKC").trim();
+    if (!value) return false;
+    const full = value.match(/^[\[【(（「『]\s*([^\[\]()（）【】「」『』]{1,80})\s*[\]】)）」』]$/u);
+    if (full && isCommentaryNoteText(full[1])) return true;
+    const leading = value.match(/^[\[【(（「『]\s*([^\[\]()（）【】「」『』]{1,80})\s*[\]】)）」』]\s*(.{0,80})$/u);
+    if (!leading) return false;
+    return isCommentaryNoteText(leading[1]) || isCommentaryNoteText(leading[2]);
+  }
+
+  function isCommentaryNoteText(text) {
+    const value = String(text || "")
+      .normalize("NFKC")
+      .replace(/[\s\u3000]+/gu, "")
+      .replace(/[!！?？。．.]+$/gu, "")
+      .trim();
+    if (!value) return false;
+    return /(?:雑談|聊天|说明|説明|告知|コメント|コメ|アンケート|リクエスト|配信|歌枠|喉|のど|自己紹介|なれたん|去年|練習|家族|姉|妹|幼馴染|身長|指|チャンネル|登録|スパチャ|メンシ|スクショ|写真|サムネ)/iu.test(value);
   }
 
   function isTopicLikeBilingualCommentary(title, artist, raw) {
@@ -675,6 +725,7 @@
     isBlockedSource,
     isChannelScopedUnknownArtistDirtySong,
     isChatReactionShoutText,
+    isSelfReferentialChannelTitle,
     matchBlockedSource,
     normalizeSongEntry,
     normalizeMatcherText,

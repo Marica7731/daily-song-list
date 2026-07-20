@@ -400,7 +400,7 @@ def ingest_latest_payload(
             upsert_channel_metadata(conn, item)
 
             item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
-            valid_songs = runtime_scoped_songs(item_songs)
+            valid_songs = runtime_scoped_songs(item_songs, item)
             record_video(range_state, range_id, video_id, item, valid_songs)
             record_vtuber(range_state, video_id, item, valid_songs)
             source_key = stable_key("source-video", range_id, video_id)
@@ -591,7 +591,7 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
                 upsert_video(conn, video_id, item)
                 upsert_channel_metadata(conn, item)
                 item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
-                valid_songs = runtime_scoped_songs(item_songs)
+                valid_songs = runtime_scoped_songs(item_songs, item)
                 for song_index, song in enumerate(valid_songs):
                     song_key = song_record_key(song)
                     song_keys.add(song_key)
@@ -676,6 +676,8 @@ def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: l
 
 
 def record_song(state: dict, range_id: str, video_id: str, item: dict, song_key: str, song: dict) -> None:
+    if is_likely_runtime_non_song_entry(song, item):
+        return
     title = clean_text(song.get("title"))
     artist = clean_text(song.get("artist"))
     if song_key not in state["songs"]:
@@ -1678,25 +1680,156 @@ def is_moment_source(item: dict) -> bool:
     )
 
 
-def runtime_scoped_songs(songs) -> list[dict]:
+def runtime_scoped_songs(songs, source: dict | None = None) -> list[dict]:
     if not isinstance(songs, list):
         return []
-    return [song for song in songs if isinstance(song, dict) and clean_text(song.get("title")) and not is_likely_runtime_non_song_entry(song)]
+    return [song for song in songs if isinstance(song, dict) and clean_text(song.get("title")) and not is_likely_runtime_non_song_entry(song, source)]
 
 
-def is_likely_runtime_non_song_entry(song: dict) -> bool:
+def is_likely_runtime_non_song_entry(song: dict, source: dict | None = None) -> bool:
     title = clean_text(song.get("title"))
     artist = clean_text(song.get("artist"))
     raw = clean_text(song.get("raw"))
     if not title:
         return True
+    if is_runtime_confirmed_dirty_title(title, raw):
+        return True
     unknown_artist = is_unknown_artist(artist)
+    if unknown_artist and is_channel_scoped_unknown_artist_dirty_song(source):
+        return True
+    if unknown_artist and is_source_self_reference_title(title, source):
+        return True
     if unknown_artist and is_standalone_non_song_marker(title):
         return True
     combined = f"{title} {raw}"
     if unknown_artist and re.search(r"(?:set\s*list|setlist|timestamp|timestamps|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)", combined, re.IGNORECASE):
         return True
+    if unknown_artist and is_runtime_commentary_noise(title, raw):
+        return True
+    if unknown_artist and is_bracketed_runtime_commentary_note(title):
+        return True
     return False
+
+
+def is_runtime_confirmed_dirty_title(title, raw) -> bool:
+    title_text = normalize_runtime_commentary_text(title)
+    combined = normalize_runtime_commentary_text(f"{title} {raw}")
+    if not title_text:
+        return True
+    if is_bracketed_runtime_commentary_note(title):
+        return True
+    if re.search(r"(?:自己肯定感|なれたん|naraetan)", combined, re.IGNORECASE):
+        return True
+    return bool(re.search(r"^(?:雑談|聊天|说明|説明|コメント|コメ|アンケート|投票|リクエスト)(?:確認|募集|受付|結果|タイム|ください|下さい|中|する|して|お願いします|お願い)?$", title_text, re.IGNORECASE))
+
+
+def is_channel_scoped_unknown_artist_dirty_song(source: dict | None) -> bool:
+    if not isinstance(source, dict):
+        return False
+    handle_values = [
+        source.get("channelHandle"),
+        source.get("handle"),
+        source.get("ownerHandle"),
+        source.get("channelUrl"),
+        source.get("authorUrl"),
+        source.get("ownerUrl"),
+    ]
+    if any(normalize_handle(value) == "isakiriona" for value in handle_values):
+        return True
+    channel_name = normalize_key(
+        clean_text(source.get("channelName"))
+        or clean_text(source.get("ownerText"))
+        or clean_text(source.get("longBylineText"))
+        or clean_text(source.get("shortBylineText"))
+    )
+    return "響咲リオナ" in channel_name or channel_name.startswith("riona ch.")
+
+
+def is_source_self_reference_title(title, source: dict | None) -> bool:
+    if not isinstance(source, dict):
+        return False
+    title_key = normalize_channel_identity_title(title)
+    if len(title_key) < 3:
+        return False
+    channel_candidates = [
+        source.get("channelName"),
+        source.get("ownerText"),
+        source.get("longBylineText"),
+        source.get("shortBylineText"),
+        source.get("authorName"),
+        source.get("authorText"),
+    ]
+    for value in channel_candidates:
+        candidate = normalize_channel_identity_title(value)
+        if candidate and (candidate == title_key or title_key in candidate):
+            return True
+    handle_candidates = [
+        source.get("channelHandle"),
+        source.get("handle"),
+        source.get("ownerHandle"),
+        source.get("channelUrl"),
+        source.get("authorUrl"),
+        source.get("ownerUrl"),
+    ]
+    for value in handle_candidates:
+        handle = normalize_handle(value)
+        if handle and (handle == title_key or re.sub(r"ch(?:annel)?$", "", handle, flags=re.IGNORECASE) == title_key):
+            return True
+    return False
+
+
+def normalize_handle(value) -> str:
+    text = clean_text(value)
+    text = re.sub(r"^https?://(?:www\.)?youtube\.com/", "", text, flags=re.IGNORECASE)
+    text = text.lstrip("/").split("?")[0].split("#")[0].split("/")[0].lstrip("@").strip()
+    return text.lower() if re.fullmatch(r"[A-Za-z0-9._-]+", text) else ""
+
+
+def normalize_channel_identity_title(value) -> str:
+    text = unicodedata.normalize("NFKC", clean_text(value)).lower()
+    text = re.sub(r"(?:ch\.?|channel|チャンネル|公式|official|歌枠|karaoke|cover|vtuber|live|配信)$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"[\U0001F300-\U0001FAFF\uFE0E\uFE0F♪♫♬♩]", "", text)
+    text = re.sub(r"[\s\u3000\[\]【】()（）「」『』\"'“”‘’~～!！?？.,，。、:：;；\-—–−_・･/／|｜@]+", "", text)
+    return text.strip()
+
+
+def is_runtime_commentary_noise(title, raw) -> bool:
+    combined = normalize_runtime_commentary_text(f"{title} {raw}")
+    title_text = normalize_runtime_commentary_text(title)
+    if not title_text:
+        return False
+    if re.search(r"(?:雑談|聊天|说明|説明|コメント|コメ|アンケート|投票|リクエスト|配信|歌枠|喉|のど|自己紹介|お知らせ|告知|自己肯定感)", title_text, re.IGNORECASE):
+        return True
+    if re.search(r"(?:なれたん|naraetan)", combined, re.IGNORECASE):
+        return True
+    if re.search(r"(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう|気がする|したい|してください|なんで|かな|かも|だよ|だね|なの|か)$", title_text, re.IGNORECASE):
+        return True
+    if re.search(r"(?:背景を変える|食べる|飲む|お名前呼び|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|登録|ギフト|曲紹介|歌うフリ|姉|妹|幼馴染|指が細い|身長が低い|家族に例える)", combined, re.IGNORECASE):
+        return True
+    return False
+
+
+def normalize_runtime_commentary_text(value) -> str:
+    text = unicodedata.normalize("NFKC", clean_text(value))
+    text = re.sub(r"[:：]_[^\s　:：]+[:：]?", "", text)
+    text = re.sub(r"[\u200b-\u200f\u202a-\u202e\ufe0e\ufe0f]", "", text)
+    text = re.sub(r"\s+", "", text)
+    text = re.sub(r"[!！?？。．.]+$", "", text)
+    return text.strip()
+
+
+def is_bracketed_runtime_commentary_note(value) -> bool:
+    text = unicodedata.normalize("NFKC", clean_text(value)).strip()
+    match = re.fullmatch(r"[\[【(（「『]\s*([^\[\]()（）【】「」『』]{1,80})\s*[\]】)）」』]", text)
+    if match and is_runtime_commentary_note_text(match.group(1)):
+        return True
+    match = re.match(r"^[\[【(（「『]\s*([^\[\]()（）【】「」『』]{1,80})\s*[\]】)）」』]\s*(.{0,80})$", text)
+    return bool(match and (is_runtime_commentary_note_text(match.group(1)) or is_runtime_commentary_note_text(match.group(2))))
+
+
+def is_runtime_commentary_note_text(value) -> bool:
+    text = normalize_runtime_commentary_text(value)
+    return bool(text and re.search(r"(?:雑談|聊天|说明|説明|告知|コメント|コメ|アンケート|リクエスト|配信|歌枠|喉|のど|自己紹介|なれたん|去年|練習|家族|姉|妹|幼馴染|身長|指|チャンネル|登録|スパチャ|メンシ|スクショ|写真|サムネ)", text, re.IGNORECASE))
 
 
 def is_standalone_non_song_marker(value) -> bool:

@@ -22,6 +22,7 @@ const {
   buildRuntimeRangePayload,
 } = require("../build-runtime-data");
 const { isLikelyNonSongEntry } = require("../song-utils");
+const { isBlockedSongEntry } = require("../../assets/source-filter");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
@@ -345,7 +346,7 @@ function serializeRecord(type, record, options = {}) {
 function collectRuntimeOccurrences(items) {
   const occurrences = [];
   for (const item of items || []) {
-    for (const song of runtimeScopedSongs(item.songs)) {
+    for (const song of runtimeScopedSongs(item.songs, item)) {
       occurrences.push({
         item,
         song,
@@ -359,7 +360,7 @@ function collectRuntimeOccurrences(items) {
 function buildVideoRequestItems(items) {
   const result = [];
   for (const item of items || []) {
-    const scopedSongs = runtimeScopedSongs(item.songs);
+    const scopedSongs = runtimeScopedSongs(item.songs, item);
     if (!scopedSongs.length) continue;
     result.push({
       ...item,
@@ -380,7 +381,7 @@ function buildVtuberRequestItems(items) {
   const records = new Map();
   const identityLookup = buildChannelIdentityLookup(items);
   for (const item of items || []) {
-    const scopedSongs = runtimeScopedSongs(item.songs);
+    const scopedSongs = runtimeScopedSongs(item.songs, item);
     if (!scopedSongs.length) continue;
     const key = channelRecordKey(item, identityLookup);
     if (!key) continue;
@@ -451,7 +452,7 @@ function buildChannelIdentityLookup(items) {
   const nameToKey = new Map();
   const ambiguousNames = new Set();
   for (const item of items || []) {
-    const scopedSongs = runtimeScopedSongs(item.songs);
+    const scopedSongs = runtimeScopedSongs(item.songs, item);
     if (!scopedSongs.length) continue;
     const nameKey = channelNameIdentityKey(item);
     const directKey = directChannelRecordKey(item);
@@ -471,14 +472,15 @@ function withRuntimeScopedSongs(item) {
   if (!item || typeof item !== "object") return item;
   return {
     ...item,
-    songs: runtimeScopedSongs(item.songs),
+    songs: runtimeScopedSongs(item.songs, item),
   };
 }
 
-function runtimeScopedSongs(songs) {
+function runtimeScopedSongs(songs, source = {}) {
   return (Array.isArray(songs) ? songs : []).filter((song) => {
     if (!song || typeof song !== "object") return false;
     if (!RankingUtils.cleanText(song.title)) return false;
+    if (isBlockedSongEntry(song, source)) return false;
     return !isLikelyNonSongEntry(song);
   });
 }

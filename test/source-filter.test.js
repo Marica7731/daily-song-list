@@ -8,6 +8,7 @@ const {
   filterPayloadBlockedSources,
   isBlockedSource,
   isChannelScopedUnknownArtistDirtySong,
+  isSelfReferentialChannelTitle,
   BLOCKLIST_HASH,
   normalizeSongEntry,
 } = require("../assets/source-filter");
@@ -131,6 +132,8 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "なれたんの身長が低いって言いたいの?", artist: "Are you trying to say Narae-tan is short?" }), true);
   assert.equal(isBlockedSongEntry({ title: "楽しみにしてろよ!", artist: "練習後のなれたんを" }), true);
   assert.equal(isBlockedSongEntry({ title: "【さぁ】「さぁだけにSURFACE」", artist: "なれたんギャグ" }), true);
+  assert.equal(isBlockedSongEntry({ title: "【雑談】リクエスト確認", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "（去年のなれたん）譲り合い精神がないの？", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
 
   assert.equal(cleanSongTitleNoise("01| ハートアンドハート"), "ハートアンドハート");
@@ -307,6 +310,21 @@ test("source filter drops only unknown-artist rows from Riona channel", () => {
     ["ZEAgcWCnkwQ:花に亡霊 / ヨルシカ", "SAFE0000001:花に亡霊 / 未記載"],
   );
   assert.equal(filtered.source.clientFilteredBlockedSongCount, 2);
+});
+
+test("source filter drops unknown-artist self references without blocking real songs", () => {
+  const source = {
+    videoId: "SELFREF0001",
+    channelName: "Naretan Ch. なれたん",
+    channelHandle: "@naretan",
+  };
+
+  assert.equal(isSelfReferentialChannelTitle("なれたん", source), true);
+  assert.equal(isSelfReferentialChannelTitle("Naretan", source), true);
+  assert.equal(isBlockedSongEntry({ title: "なれたん", artist: "未記載" }, source), true);
+  assert.equal(isBlockedSongEntry({ title: "Naretan", artist: "未記載" }, source), true);
+  assert.equal(isBlockedSongEntry({ title: "Naretan", artist: "Known Artist" }, source), false);
+  assert.equal(isBlockedSongEntry({ title: "START", artist: "愛内里菜" }, source), false);
 });
 
 function video(videoId, channelName, title) {
