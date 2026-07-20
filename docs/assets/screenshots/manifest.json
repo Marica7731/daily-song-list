@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "kind": "daily-song-list-ui-proof",
-  "generatedAt": "2026-07-19T22:08:41.199Z",
+  "generatedAt": "2026-07-20T09:50:59.830Z",
   "generatedBy": "scripts/capture-readme-screenshots.js",
-  "baseUrl": "http://127.0.0.1:8080/",
-  "proofInputHash": "026f5f9168bbf5fe13620c99bc0de72ae5e6372379bbbf9a9521ddcbaa8d98dd",
-  "uiSourceFingerprint": "026f5f9168bbf5fe13620c99bc0de72ae5e6372379bbbf9a9521ddcbaa8d98dd",
+  "baseUrl": "http://127.0.0.1:8092/",
+  "proofInputHash": "d5e782effd518e47b013c8a474aa99bd604399616ccfe3a568689961aac2bffd",
+  "uiSourceFingerprint": "d5e782effd518e47b013c8a474aa99bd604399616ccfe3a568689961aac2bffd",
   "proofInputs": [
     {
       "path": "index.html",
@@ -13,31 +13,31 @@
     },
     {
       "path": "assets/app.js",
-      "sha256": "27ceaee83e53421db0c23a9554dd8a389692f54749d03c674ae1563c3061968f"
+      "sha256": "7e0d4f53e30bbec7b1203d6048584cb4182dc3f49ba64e46c1c43efaadc2ab2a"
     },
     {
       "path": "assets/styles.css",
-      "sha256": "7447d29ae27a901300ab26d8dc15089f139b33d3799c4e96bce8c43ec9000016"
+      "sha256": "ef732ebb5d8ce67fa45c87f7d47850d6fe1c238d88fec660e901b68de4f8a6cc"
     },
     {
       "path": "assets/frontend-utils.js",
-      "sha256": "f629c7b50b0ebf83bf1843eed6518b4a243d4a0c0be4b1f4a2038b6270ae0382"
+      "sha256": "120be91fdd713865afa05b6ebcc7ad98d98234cb34ee9b56deec06f822ec9445"
     },
     {
       "path": "README.md",
-      "sha256": "a311a8e8a83acda4bb5b778048fc0178f7b9ec337d01b2a3bc040919bbf9fbfa"
+      "sha256": "a5fffc819bb3c09c54c2ebc0399cf54c23e504821fc034654b3a8b20c5e2b3a2"
     },
     {
       "path": "docs/ui-spec.md",
-      "sha256": "51bb15d6b6d20d098e3d84a649a01961b0d0ac16ee8e44ba2d5dcebb4cfa2614"
+      "sha256": "fa8658c1fe737ba8fa235cf27078a9eeba59aba58f3836ff90fee3eb9f356de7"
     },
     {
       "path": "docs/ui-proof.md",
-      "sha256": "42972111f12f4501ba5d168f037d8bb570c426920314b68498d5065c638e9fab"
+      "sha256": "7c935841b2a04ee1b7e7770612c461c137f40ff53a0cff86988ec562b5aee2c1"
     },
     {
       "path": "scripts/capture-readme-screenshots.js",
-      "sha256": "bef1d3061d93a3fe1a487edb22aab0648080ccf230a3dfbdba29d9cbc4b31b11"
+      "sha256": "612493d07d4fae2409db6173fdad12d95bbedbb7cbef1780cc4fde3aa4002448"
     },
     {
       "path": "scripts/validate-ui-proof.js",
@@ -45,7 +45,7 @@
     },
     {
       "path": "scripts/ui-proof-config.js",
-      "sha256": "cdf02a56a52a3169610d91593fd76ab7d72aa0281897b046049da66f14213bfe"
+      "sha256": "3137ce892d16ce7187783162c862e41f7d8153f0bf34cacdee82e0beddc05234"
     },
     {
       "path": "test/fixtures/ui-proof-runtime.json",
@@ -53,7 +53,7 @@
     },
     {
       "path": "test/ui-proof-fixtures.test.js",
-      "sha256": "d7c54a68aab650fe64b3c5c41df7f1f83b817f25fd098b254c41987c63faad66"
+      "sha256": "4100e71b56a88c3003e7a0ffeaafc30d0160b5b995fa0984ffc3a60986671af6"
     },
     {
       "path": "docs/data-architecture.md",
@@ -119,6 +119,22 @@
       "height": 900,
       "size": 88845,
       "sha256": "3a99b0a2e5a446bd1ec1d1b0f5500e9894f1ed16282f0518b16977a6ee062686"
+    },
+    {
+      "path": "docs/assets/screenshots/desktop-vtuber-rank.png",
+      "scene": "desktop-vtuber-rank",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "urlParams": {
+        "view": "vtuberRank"
+      },
+      "selector": "page",
+      "width": 1440,
+      "height": 900,
+      "size": 77691,
+      "sha256": "68c318718435da4dc0980791ceca4fe056b1aebbd6df08b292a8968db1b485bc"
     },
     {
       "path": "docs/assets/screenshots/desktop-song-index.png",
@@ -531,6 +547,38 @@
       "height": 844,
       "size": 58368,
       "sha256": "b98c4f7355950a65dd48acef5ee9acf2b34e85978825d0fa518e087ba1bfea45"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-vtuber-rank.png",
+      "scene": "mobile-vtuber-rank",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "urlParams": {
+        "view": "vtuberRank"
+      },
+      "selector": "page",
+      "width": 390,
+      "height": 844,
+      "size": 51922,
+      "sha256": "c83c3a5322825c71dab1984f715f7f83221578a919a1a463dc9b34e3b59e0190"
+    },
+    {
+      "path": "docs/assets/screenshots/mobile-vtuber-rank-320.png",
+      "scene": "mobile-vtuber-rank-320",
+      "viewport": {
+        "width": 320,
+        "height": 700
+      },
+      "urlParams": {
+        "view": "vtuberRank"
+      },
+      "selector": "page",
+      "width": 320,
+      "height": 700,
+      "size": 43990,
+      "sha256": "f7dd66d2374d656de652a22aba6ed967c681226274e31f97347e01618a6d6330"
     },
     {
       "path": "docs/assets/screenshots/mobile-song-index.png",

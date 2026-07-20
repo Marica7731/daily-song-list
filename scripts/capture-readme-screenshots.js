@@ -1849,6 +1849,7 @@ async function main() {
       scene: "desktop-all-range-song-rank",
     });
     await openPage(browser, desktop, { view: "artistRank" }, "desktop-artist-rank.png");
+    await openPage(browser, desktop, { view: "vtuberRank" }, "desktop-vtuber-rank.png");
     await openPage(browser, desktop, { view: "songAz" }, "desktop-song-index.png");
     await captureRangeFixtureCase(browser, desktop, "7d", "desktop-range-7d.png");
     await captureRangeFixtureCase(browser, desktop, "all", "desktop-range-all.png");
@@ -1877,6 +1878,8 @@ async function main() {
     await captureIdentityMergeFixtureCase(browser, mobile, "mobile-song-kana-romaji-merged.png");
     await captureDiagnosticFixtureCase(browser, mobile, "video", "mobile-video-diagnostic-result.png");
     await openPage(browser, mobile, { view: "artistRank" }, "mobile-artist-rank.png");
+    await openPage(browser, mobile, { view: "vtuberRank" }, "mobile-vtuber-rank.png");
+    await openPage(browser, { width: 320, height: 700 }, { view: "vtuberRank" }, "mobile-vtuber-rank-320.png");
     await openPage(browser, mobile, { view: "songAz" }, "mobile-song-index.png");
     await captureSongIndexPage(browser, mobile, "middle", "mobile-song-index-middle-page.png");
     await captureSongIndexPage(browser, mobile, "last", "mobile-song-index-last-page.png");

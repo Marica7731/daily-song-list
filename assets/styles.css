@@ -1347,19 +1347,18 @@ mark {
 
 .vtuber-display-image-avatar {
   border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(16, 24, 40, 0.04);
 }
 
 .vtuber-display-image-thumbnail {
   border-radius: var(--radius-thumbnail);
+  border-color: rgba(102, 112, 133, 0.24);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
 }
 
 .vtuber-display-image-missing {
   display: inline-block;
-  border-style: dashed;
-  border-radius: var(--radius-thumbnail);
-  background:
-    linear-gradient(135deg, transparent 46%, #98a2b3 47%, #98a2b3 53%, transparent 54%),
-    #f2f4f7;
+  visibility: hidden;
 }
 
 .rank-meta-line {
@@ -1638,8 +1637,10 @@ mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
   min-height: 22px;
   padding: 0;
+  overflow: hidden;
   background: transparent;
   color: var(--muted);
   font-size: 12.5px;
@@ -1689,10 +1690,13 @@ mark {
   justify-content: center;
   gap: 4px;
   flex: 0 0 auto;
+  max-width: 100%;
   min-width: 0;
   min-height: var(--chip-height);
   padding: 0 var(--chip-padding-x);
+  overflow: hidden;
   line-height: 1;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -3025,24 +3029,30 @@ mark {
   }
 
   .vtuber-title-line {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 7px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+    align-items: start;
   }
 
   .vtuber-collected-badge {
+    justify-self: start;
     min-height: 18px;
     padding-inline: 6px;
     font-size: 10.5px;
   }
 
   .rank-row-vtuber .rank-content {
-    grid-template-columns: 40px minmax(0, 1fr);
-    column-gap: 8px;
+    grid-template-columns: 38px minmax(0, 1fr);
+    column-gap: 7px;
   }
 
   .vtuber-display-image {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .rank-row-vtuber .rank-title {
+    -webkit-line-clamp: 2;
   }
 
   .rank-subline {
@@ -3107,9 +3117,9 @@ mark {
   .rank-expand {
     min-width: 0;
     min-height: var(--chip-height);
-    padding: 0 var(--chip-padding-x);
+    padding: 0 6px;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
   }
 
@@ -3356,6 +3366,7 @@ mark {
     display: grid;
     grid-template-areas:
       "main"
+      "actions"
       "note";
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-1);
@@ -3383,7 +3394,27 @@ mark {
   }
 
   .summary-actions {
+    display: flex;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .summary-actions::-webkit-scrollbar {
     display: none;
+  }
+
+  .summary-segmented {
+    width: max-content;
+    max-width: 100%;
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .summary-action {
+    min-height: 26px;
+    padding: 0 8px;
+    font-size: 11.5px;
   }
 
   .summary-metrics {
@@ -4197,6 +4228,29 @@ mark {
 }
 
 @media (max-width: 340px) {
+  :root {
+    --rank-side-width-mobile: 58px;
+  }
+
+  .rank-row-vtuber .rank-content {
+    grid-template-columns: 34px minmax(0, 1fr);
+    column-gap: 6px;
+  }
+
+  .vtuber-display-image {
+    width: 34px;
+    height: 34px;
+  }
+
+  .rank-row-vtuber .rank-title {
+    font-size: 14.5px;
+  }
+
+  .rank-count,
+  .rank-expand {
+    font-size: 11px;
+  }
+
   .source-inline-item {
     grid-template-columns: 48px minmax(0, 1fr) 26px;
   }

@@ -1043,7 +1043,7 @@
       const songCount = Math.max(0, Number(options.songCount) || 0);
       const compactSongMetric = options.rankMetric === "songs" && Number(options.rankCount) === songCount;
       return {
-        text: isExpanded ? "收起" : compactSongMetric ? "曲目" : `${songCount}首曲目`,
+        text: isExpanded ? "收起" : (options.compact || compactSongMetric) ? "曲目" : `${songCount}首曲目`,
         ariaLabel: isExpanded ? "收起该频道曲目" : `查看该频道的 ${songCount} 首歌曲`,
       };
     }
@@ -1451,14 +1451,23 @@
     );
   }
 
-  function vtuberDisplayImageModel(record = {}) {
-    const avatarUrl = realChannelAvatarUrl(record.avatarUrl || record.channelAvatarUrl || record.authorAvatarUrl || record.profileImageUrl);
+  function vtuberDisplayImageModel(record = {}, options = {}) {
+    const excluded = new Set((options.excludeAvatarUrls || []).map(cleanText).filter(Boolean));
+    const avatarUrl = [
+      record.avatarUrl,
+      record.channelAvatarUrl,
+      record.authorAvatarUrl,
+      record.profileImageUrl,
+    ]
+      .map(realChannelAvatarUrl)
+      .find((url) => url && !excluded.has(url)) || "";
     const thumbnailUrl = displayThumbnailUrl(
       record.thumbnailUrl ||
         record.videoThumbnail ||
         record.videoThumbnailUrl ||
         record.displayThumbnailUrl ||
-        occurrenceThumbnailUrl(record.occurrences),
+        occurrenceThumbnailUrl(record.occurrences) ||
+        youtubeThumbnailFromVideoId(record.videoId || occurrenceVideoId(record.occurrences)),
     );
     if (avatarUrl) {
       return {
@@ -1508,6 +1517,27 @@
       if (url) return url;
     }
     return "";
+  }
+
+  function occurrenceVideoId(occurrences) {
+    for (const occurrence of occurrences || []) {
+      const id = youtubeVideoId(occurrence?.item?.videoId || occurrence?.videoId);
+      if (id) return id;
+    }
+    return "";
+  }
+
+  function youtubeThumbnailFromVideoId(value) {
+    const id = youtubeVideoId(value);
+    return id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : "";
+  }
+
+  function youtubeVideoId(value) {
+    const text = cleanText(value);
+    const direct = text.match(/^[A-Za-z0-9_-]{11}$/u);
+    if (direct) return direct[0];
+    const match = text.match(/(?:v=|\/vi\/|youtu\.be\/|\/shorts\/|\/embed\/)([A-Za-z0-9_-]{11})/u);
+    return match ? match[1] : "";
   }
 
   function cleanText(value) {

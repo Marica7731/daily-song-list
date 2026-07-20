@@ -4,6 +4,7 @@ const expectedScreenshots = [
   "desktop-song-rank.png",
   "desktop-monthly-song-rank.png",
   "desktop-artist-rank.png",
+  "desktop-vtuber-rank.png",
   "desktop-song-index.png",
   "desktop-range-7d.png",
   "desktop-range-all.png",
@@ -30,6 +31,8 @@ const expectedScreenshots = [
   "mobile-song-kana-romaji-merged.png",
   "mobile-video-diagnostic-result.png",
   "mobile-artist-rank.png",
+  "mobile-vtuber-rank.png",
+  "mobile-vtuber-rank-320.png",
   "mobile-song-index.png",
   "mobile-song-index-middle-page.png",
   "mobile-song-index-last-page.png",
@@ -95,6 +98,10 @@ const screenshotContracts = {
   },
   "desktop-artist-rank.png": {
     params: { view: "artistRank" },
+    viewport: { width: 1440, height: 900 },
+  },
+  "desktop-vtuber-rank.png": {
+    params: { view: "vtuberRank" },
     viewport: { width: 1440, height: 900 },
   },
   "desktop-song-index.png": {
@@ -168,6 +175,14 @@ const screenshotContracts = {
     scene: "fixture-video-diagnostic",
     params: { fixture: "video-diagnostic" },
     viewport: { width: 390, height: 844 },
+  },
+  "mobile-vtuber-rank.png": {
+    params: { view: "vtuberRank" },
+    viewport: { width: 390, height: 844 },
+  },
+  "mobile-vtuber-rank-320.png": {
+    params: { view: "vtuberRank" },
+    viewport: { width: 320, height: 700 },
   },
   "mobile-source-inline-2.png": {
     scene: "fixture-double",
@@ -286,6 +301,7 @@ const proofCoverage = {
   dataIndexFixtures: ["desktop-partition-pagination.png", "desktop-search-snapshot-index.png"],
   diagnostics: ["mobile-video-diagnostic-result.png", "desktop-all-diff-explanation.png"],
   identityFixtures: ["mobile-song-kana-romaji-merged.png", "desktop-song-kana-romaji-merged.png"],
+  vtuberFixtures: ["desktop-vtuber-rank.png", "mobile-vtuber-rank.png", "mobile-vtuber-rank-320.png"],
   trendFixtures: ["mobile-trend-count-increase.png", "mobile-trend-rank-only-down.png", "mobile-trend-corrected-decrease.png"],
   filterFixtures: ["mobile-query-filter.png", "mobile-query-grid-alignment.png", "mobile-active-query-strip.png", "desktop-query-panel.png"],
 };

@@ -278,7 +278,7 @@ test("range cache song records are lazy getters", () => {
 
 test("mobile summary and pagination have compact rules", () => {
   assert.doesNotMatch(appSource, /summary-range/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: flex;[\s\S]*overflow-x: auto;/u);
   assert.match(cssSource, /\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main actions"[\s\S]*"note note"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main"[\s\S]*"note"/u);
   assert.match(cssSource, /\.summary-actions\s*\{[\s\S]*grid-area: actions;[\s\S]*margin-left: 0;/u);

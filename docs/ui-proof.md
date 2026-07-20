@@ -17,9 +17,9 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | --- | --- | --- |
 | ![Desktop song ranking](assets/screenshots/desktop-song-rank.png) | ![Desktop all range ranking through legacy 1m URL](assets/screenshots/desktop-monthly-song-rank.png) | ![Desktop artist ranking](assets/screenshots/desktop-artist-rank.png) |
 
-| Song index | Video tab |
-| --- | --- |
-| ![Desktop song index](assets/screenshots/desktop-song-index.png) | ![Desktop video tab](assets/screenshots/desktop-video-view.png) |
+| Song index | VTuber channels | Video tab |
+| --- | --- | --- |
+| ![Desktop song index](assets/screenshots/desktop-song-index.png) | ![Desktop VTuber channel ranking](assets/screenshots/desktop-vtuber-rank.png) | ![Desktop video tab](assets/screenshots/desktop-video-view.png) |
 
 | Summary baseline |
 | --- |
@@ -49,9 +49,13 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 
 ## Mobile Main Views
 
-| Song ranking | Artist ranking | Song index |
+| Song ranking | Artist ranking | VTuber channels |
 | --- | --- | --- |
-| ![Mobile song ranking](assets/screenshots/mobile-song-rank.png) | ![Mobile artist ranking](assets/screenshots/mobile-artist-rank.png) | ![Mobile song index](assets/screenshots/mobile-song-index.png) |
+| ![Mobile song ranking](assets/screenshots/mobile-song-rank.png) | ![Mobile artist ranking](assets/screenshots/mobile-artist-rank.png) | ![Mobile VTuber channel ranking](assets/screenshots/mobile-vtuber-rank.png) |
+
+| VTuber 320px | Song index |
+| --- | --- |
+| ![Mobile 320px VTuber channel ranking](assets/screenshots/mobile-vtuber-rank-320.png) | ![Mobile song index](assets/screenshots/mobile-song-index.png) |
 
 | Summary baseline | Toast |
 | --- | --- |

@@ -214,6 +214,9 @@ test("VTuber channel rank toggle uses unique song count", () => {
   const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7 });
   assert.equal(expanded.text, "收起");
   assert.equal(expanded.ariaLabel, "收起该频道曲目");
+
+  const compact = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 123, compact: true });
+  assert.equal(compact.text, "曲目");
 });
 
 test("VTuber collection badge model tolerates missing backend fields", () => {
@@ -248,6 +251,34 @@ test("VTuber display image uses real avatar before thumbnail fallback", () => {
   assert.equal(missing.kind, "missingDisplayImage");
   assert.equal(missing.src, "");
   assert.equal(missing.missingDisplayImage, true);
+});
+
+test("VTuber display image falls back from failed avatar to thumbnail or videoId", () => {
+  const brokenAvatar = "https://yt3.googleusercontent.com/broken-avatar=s900-c-k-c0x00ffffff-no-rj";
+  const thumbnail = vtuberDisplayImageModel(
+    {
+      avatarUrl: brokenAvatar,
+      channelAvatarUrl: brokenAvatar,
+      authorAvatarUrl: brokenAvatar,
+      thumbnailUrl: "https://i.ytimg.com/vi/fallback001/hqdefault.jpg",
+    },
+    { excludeAvatarUrls: [brokenAvatar] },
+  );
+  assert.equal(thumbnail.kind, "thumbnailFallback");
+  assert.equal(thumbnail.src, "https://i.ytimg.com/vi/fallback001/hqdefault.jpg");
+  assert.equal(thumbnail.isRealAvatar, false);
+
+  const derived = vtuberDisplayImageModel({
+    avatarUrl: "",
+    videoId: "abc12345678",
+  });
+  assert.equal(derived.kind, "thumbnailFallback");
+  assert.equal(derived.src, "https://i.ytimg.com/vi/abc12345678/hqdefault.jpg");
+
+  const occurrenceDerived = vtuberDisplayImageModel({
+    occurrences: [{ item: { videoId: "xyz12345678" } }],
+  });
+  assert.equal(occurrenceDerived.src, "https://i.ytimg.com/vi/xyz12345678/hqdefault.jpg");
 });
 
 test("VTuber display image does not treat generated images as avatar coverage", () => {
@@ -1310,6 +1341,12 @@ test("url state keeps rank metric and video layout only when relevant", () => {
     q: "なれたん",
   });
   assert.equal(parseUrlState("?view=vtuberRank&metric=songs", options).rankMetric, "songs");
+
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState({ ...vtuberState, rankMetric: "videos", q: "" }, options))), {
+    view: "vtuberRank",
+    metric: "videos",
+  });
+  assert.equal(parseUrlState("?view=vtuberRank&metric=videos", options).rankMetric, "videos");
 });
 
 test("url state falls back to safe defaults and only accepts configured snapshots", () => {

@@ -6109,7 +6109,7 @@ function renderVtuberDisplayImage(record) {
   img.src = media.src;
   img.addEventListener("error", () => {
     if (media.kind === "realAvatar") {
-      const fallback = window.FrontendUtils.vtuberDisplayImageModel({ ...record, avatarUrl: "" });
+      const fallback = window.FrontendUtils.vtuberDisplayImageModel(record || {}, { excludeAvatarUrls: [media.src] });
       if (fallback.src) {
         img.src = fallback.src;
         img.className = "vtuber-display-image vtuber-display-image-thumbnail";
@@ -6276,7 +6276,7 @@ function renderRankSide({
     if (expandable) {
       side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount, rankCount, rankMetric }));
     } else {
-      side.append(renderStaticSideChip(mode === "vtuber" && rankMetric === "songs" && rankCount === songCount ? "曲目" : `${songCount}首曲目`));
+      side.append(renderStaticSideChip(mode === "vtuber" && (isCompactRankMode() || (rankMetric === "songs" && rankCount === songCount)) ? "曲目" : `${songCount}首曲目`));
     }
     return side;
   }

@@ -23,9 +23,9 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- | --- | --- |
 | <img src="docs/assets/screenshots/desktop-song-rank.png" alt="Desktop song ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-monthly-song-rank.png" alt="Desktop all range ranking through legacy 1m URL" width="320" /> | <img src="docs/assets/screenshots/desktop-artist-rank.png" alt="Desktop artist ranking" width="320" /> |
 
-| Song index | Video tab |
-| --- | --- |
-| <img src="docs/assets/screenshots/desktop-song-index.png" alt="Desktop song index" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
+| Song index | VTuber channels | Video tab |
+| --- | --- | --- |
+| <img src="docs/assets/screenshots/desktop-song-index.png" alt="Desktop song index" width="320" /> | <img src="docs/assets/screenshots/desktop-vtuber-rank.png" alt="Desktop VTuber channel ranking" width="320" /> | <img src="docs/assets/screenshots/desktop-video-view.png" alt="Desktop video tab" width="320" /> |
 
 | Summary baseline |
 | --- |
@@ -53,9 +53,13 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 
 ### Mobile H5
 
-| Song ranking | Artist ranking | Song index |
+| Song ranking | Artist ranking | VTuber channels |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-song-rank.png" alt="Mobile song ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-artist-rank.png" alt="Mobile artist ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-song-index.png" alt="Mobile song index" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-song-rank.png" alt="Mobile song ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-artist-rank.png" alt="Mobile artist ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-vtuber-rank.png" alt="Mobile VTuber channel ranking" width="180" /> |
+
+| VTuber 320px | Song index |
+| --- | --- |
+| <img src="docs/assets/screenshots/mobile-vtuber-rank-320.png" alt="Mobile 320px VTuber channel ranking" width="180" /> | <img src="docs/assets/screenshots/mobile-song-index.png" alt="Mobile song index" width="180" /> |
 
 | Summary baseline | Copy toast |
 | --- | --- |
