@@ -9,6 +9,13 @@ const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "u
 const captureSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "capture-readme-screenshots.js"), "utf8");
 const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-local-performance.js"), "utf8");
 
+function cssBlock(selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const match = cssSource.match(new RegExp(`${escaped}\\s*\\{[^}]*\\}`, "u"));
+  assert.ok(match, `CSS block not found: ${selector}`);
+  return match[0];
+}
+
 test("mobile information architecture exposes one query center and a one-row toolbar", () => {
   assert.match(indexSource, /id="queryTrigger"[\s\S]*aria-controls="queryDialog"/u);
   assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
@@ -176,7 +183,9 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(appSource, /FrontendUtils\.vtuberDisplayImageModel\(record \|\| \{\}\)/u);
   assert.match(appSource, /function renderVtuberCollectionBadge/u);
   assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
-  assert.match(cssSource, /\.vtuber-title-line\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
+  const vtuberTitleLineBlock = cssBlock(".vtuber-title-line");
+  assert.match(vtuberTitleLineBlock, /display: contents;/u);
+  assert.doesNotMatch(vtuberTitleLineBlock, /grid-template-columns/u);
   assert.match(cssSource, /\.vtuber-display-image\s*\{[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"drawer drawer drawer"/u);
   assert.match(cssSource, /\.rank-side-top\s*\{[\s\S]*display: inline-flex;[\s\S]*justify-content: flex-end;/u);

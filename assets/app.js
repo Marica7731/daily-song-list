@@ -32,7 +32,7 @@ const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
 const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;
-const VTUBER_SONG_GROUP_BATCH_SIZE = 12;
+const VTUBER_SONG_GROUP_BATCH_SIZE = 6;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
 const SOURCE_INLINE_LIMITS = {
   mobile: 2,
@@ -4074,6 +4074,7 @@ function renderRequestedPageResult(result, options = {}) {
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
         songPreview: vtuberSongPreview(record),
+        getSongGroups: () => getArtistSongGroups(record),
         priorityInlineMedia: index < 8,
       }));
     }
@@ -5778,7 +5779,7 @@ function songMeta(record) {
 }
 
 function artistMeta(record) {
-  const songs = sortedCountEntries(record.songs);
+  const songs = sortedDisplaySongEntries(record.songs);
   return {
     primary: songs.length ? songs.slice(0, 3).map(formatCountEntry).join("、") : `${record.songs.size} 首歌曲`,
     missingPrimary: false,
@@ -5786,7 +5787,7 @@ function artistMeta(record) {
 }
 
 function vtuberMeta(record) {
-  const songs = cleanVtuberSongEntries(sortedCountEntries(record.songs));
+  const songs = sortedDisplaySongEntries(record.songs);
   return {
     primary: songs.length ? songs.slice(0, 3).map(formatCountEntry).join("、") : `${record.songs.size} 首歌曲`,
     missingPrimary: false,
@@ -5794,7 +5795,27 @@ function vtuberMeta(record) {
 }
 
 function sortedCountEntries(map) {
-  return Array.from(map.values()).sort(compareCountRecords);
+  return Array.from(map?.values?.() || []).sort(compareCountRecords);
+}
+
+function sortedDisplaySongEntries(map) {
+  return sortedCountEntries(map).filter((entry) => shouldShowSongGroupTitle(entry.name));
+}
+
+function shouldShowSongGroupTitle(title) {
+  const text = cleanText(title);
+  if (!text) return false;
+  if (/エンドカード|end\s*card|endcard|オープニング|エンディング/u.test(text)) return false;
+  const compactText = text.replace(/[\s._:：・･\/\\\-ー—–~〜～!！?？()[\]【】「」『』"'“”‘’]+/gu, "");
+  if (/^(op|ed|end|start|opening|ending|intro|outro|setlist|endcard|オープニング|エンド|エンディング|アウトロ|エンドカード|開始|終了|おわり|終わり|セットリスト|セトリ|タイムスタンプ|曲名)$/iu.test(compactText)) return false;
+  if (/^(op|ed|end|start|opening|ending|intro|outro|オープニング|エンド|エンディング|アウトロ)[0-9０-９]*$/iu.test(compactText)) return false;
+  if (/エンドカード|endcard/iu.test(compactText)) return false;
+  const normalized = normalizeSearch(text).replace(/[\s._:：・･\/\\\-ー—–~〜～!！?？()[\]【】「」『』"'“”‘’]+/gu, "");
+  if (!normalized) return false;
+  if (/^(op|ed|end|start|opening|ending|intro|outro|setlist|endcard|おーぷにんぐ|えんど|えんでぃんぐ|あうとろ|えんどかーど|開始|終了|おわり|終わり|せっとりすと|せとり|たいむすたんぷ|曲名)$/iu.test(normalized)) return false;
+  if (/^(op|ed|end|start|opening|ending|intro|outro|おーぷにんぐ|えんど|えんでぃんぐ|あうとろ)[0-9０-９]*$/iu.test(normalized)) return false;
+  if (/えんどかーど|えんどかど|endcard/iu.test(normalized)) return false;
+  return true;
 }
 
 function formatCountEntry(entry) {
@@ -6062,8 +6083,6 @@ function renderRecordContent(title, meta, options) {
     const titleLine = document.createElement("div");
     titleLine.className = "vtuber-title-line";
     titleLine.append(heading);
-    const collectedBadge = renderVtuberCollectionBadge(record);
-    if (collectedBadge) titleLine.append(collectedBadge);
     content.append(titleLine);
   } else {
     content.append(heading);
@@ -6076,6 +6095,8 @@ function renderRecordContent(title, meta, options) {
   if (mode === "artist") {
     appendArtistSubline(metaLine, { occurrences, songCount, songPreview, videoCount });
   } else if (mode === "vtuber") {
+    const collectedBadge = renderVtuberCollectionBadge(record);
+    if (collectedBadge) metaLine.append(collectedBadge);
     appendVtuberSubline(metaLine, { occurrences, songPreview, videoCount });
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
@@ -7114,6 +7135,7 @@ function appendArtistSongGroupRange(drawer, songGroups, start, end) {
   let firstAppended = null;
   for (const group of songGroups.slice(safeStart, safeEnd)) {
     const node = renderArtistSongGroup(group);
+    if (!node) continue;
     if (!firstAppended) firstAppended = node;
     fragment.append(node);
   }
@@ -7122,6 +7144,8 @@ function appendArtistSongGroupRange(drawer, songGroups, start, end) {
 }
 
 function renderArtistSongGroup(group) {
+  hydrateArtistSongGroup(group);
+  if (!group.occurrences?.length) return null;
   const section = document.createElement("section");
   section.className = "artist-song-group";
 
@@ -7190,6 +7214,21 @@ function renderArtistSongGroup(group) {
   );
   if (sourcePresentation.canExpand) section.append(sources);
   return section;
+}
+
+function hydrateArtistSongGroup(group) {
+  if (Array.isArray(group.occurrences)) {
+    group.occurrences = filterDisplaySongOccurrences(group.occurrences);
+    group.videoCount = group.videoCount || uniqueVideoCount(group.occurrences);
+    return group;
+  }
+  const record = group._record || {};
+  const key = group.key || normalizeEntityKey(group.title);
+  const occurrences = filterDisplaySongOccurrences(record.occurrences || []).filter((occurrence) => normalizeEntityKey(occurrence?.song?.title) === key);
+  group.occurrences = occurrences;
+  group.videoCount = uniqueVideoCount(occurrences);
+  group.isNiche = occurrences.length > 0 && occurrences.every(({ song }) => window.FrontendUtils.isNicheSong(song));
+  return group;
 }
 
 function syncArtistSongMoreButton(drawer, visibleCount, totalCount) {
@@ -7261,6 +7300,7 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
           });
       const visibleOccurrences = pageState.occurrences;
       row._sourceDetailOccurrences = pageState.completeOccurrences || drawerOccurrences;
+      clearSourceDrawerStatus(drawer);
       initializeSourceDrawer(drawer, {
         mode,
         occurrences: visibleOccurrences,
@@ -7788,32 +7828,38 @@ function occurrenceVisibilityMetric(visible, total, nicheTotal) {
 }
 
 function artistSongPreview(record) {
-  return sortedCountEntries(record.songs)
+  return sortedDisplaySongEntries(record.songs)
     .slice(0, 2)
     .map((entry) => entry.name);
 }
 
 function vtuberSongPreview(record) {
-  return cleanVtuberSongEntries(sortedCountEntries(record.songs))
+  return sortedDisplaySongEntries(record.songs)
     .slice(0, 2)
     .map((entry) => entry.name);
 }
 
-function cleanVtuberSongEntries(entries) {
-  return (entries || []).filter((entry) => !isDirtyVtuberPreviewTitle(entry?.name));
-}
-
-function isDirtyVtuberPreviewTitle(value) {
-  const normalized = String(value || "")
-    .trim()
-    .toLocaleLowerCase();
-  if (!normalized) return true;
-  return /^(?:op|ed|end|opening|ending|オープニング|エンディング|エンドカード|intro|outro|start|starting|開始|歌唱開始|歌唱開始時間|終了|セットリスト|セトリ|タイムスタンプ|曲名)(?:[\s,，、.．:：;；!！?？\-ー_・･/／\\|｜（）()［\]\[\]【】「」『』].*)?$/iu.test(normalized);
-}
-
 function getArtistSongGroups(record) {
-  if (!record._songGroups) record._songGroups = buildArtistSongGroups(record.occurrences);
+  if (!record._songGroups) record._songGroups = lightweightSongGroupsForRecord(record);
   return record._songGroups;
+}
+
+function lightweightSongGroupsForRecord(record) {
+  const entries = record?.songs instanceof Map ? sortedDisplaySongEntries(record.songs) : [];
+  if (!entries.length) return buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []));
+  return entries.map((entry) => ({
+    key: entry.key || normalizeEntityKey(entry.name),
+    title: entry.name,
+    count: entry.count,
+    isNiche: false,
+    occurrences: null,
+    videoCount: 0,
+    _record: record,
+  }));
+}
+
+function filterDisplaySongOccurrences(occurrences) {
+  return (occurrences || []).filter((occurrence) => shouldShowSongGroupTitle(occurrence?.song?.title));
 }
 
 function trendForRecord(mode, record) {

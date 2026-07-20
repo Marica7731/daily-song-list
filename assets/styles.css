@@ -1264,6 +1264,7 @@ mark {
   grid-area: badge;
   justify-self: start;
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   min-height: 20px;
   border: 1px solid rgba(15, 118, 110, 0.18);
@@ -3077,6 +3078,14 @@ mark {
     gap: var(--space-1);
     overflow: hidden;
     white-space: nowrap;
+  }
+
+  .rank-row-vtuber .rank-meta-line {
+    align-items: center;
+  }
+
+  .rank-row-vtuber .artist-song-preview {
+    flex: 1 1 auto;
   }
 
   .rank-meta-line .meta-separator:has(+ .subline-video-count) {

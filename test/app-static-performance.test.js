@@ -139,6 +139,7 @@ test("source drawer renders paged source lists without inserting all cards", () 
   assert.match(expandedBody, /drawer\.dataset\.sourceDeferred === "true"/u);
   assert.match(expandedBody, /sourceDetailPageForContainer\(row, drawerOccurrences/u);
   assert.match(expandedBody, /showSourceDrawerStatus\(drawer, "正在加载来源\.\.\."/u);
+  assert.match(expandedBody, /clearSourceDrawerStatus\(drawer\);[\s\S]*initializeSourceDrawer/u);
   assert.doesNotMatch(expandedBody, /mode !== "artist"/u);
   assert.doesNotMatch(expandedBody, /replaceChildren|isCompactRankMode\(\)[\s\S]*appendSourceDrawerLinks/u);
   assert.match(functionBody("function sourceDetailOccurrencesForContainer"), /mergeCompleteSourceOccurrences/u);
@@ -169,15 +170,27 @@ test("artist rank song details share inline source model and append remaining so
   assert.match(toggleLimitBody, /const nextVisible = Math\.min\(songGroups\.length, current \+ artistSongBatchSize\(drawer\)\)/u);
   assert.match(toggleLimitBody, /appendArtistSongGroupRange\(drawer, songGroups, current, nextVisible\)/u);
   assert.doesNotMatch(toggleLimitBody, /replaceChildren/u);
+
+  assert.match(appSource, /const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8/u);
+  assert.match(appSource, /const ARTIST_SONG_GROUP_BATCH_SIZE = 8/u);
+  assert.match(appSource, /function lightweightSongGroupsForRecord\(record\)/u);
+  assert.match(appSource, /function hydrateArtistSongGroup\(group\)/u);
+  assert.match(appSource, /function shouldShowSongGroupTitle\(title\)/u);
+  assert.match(functionBody("function shouldShowSongGroupTitle"), /エンドカード\|endcard/u);
+  assert.match(functionBody("function shouldShowSongGroupTitle"), /えんどかーど/u);
+  assert.match(functionBody("function shouldShowSongGroupTitle"), /endcard/u);
+  assert.match(functionBody("function getArtistSongGroups"), /lightweightSongGroupsForRecord\(record\)/u);
+  assert.doesNotMatch(functionBody("function getArtistSongGroups"), /buildArtistSongGroups\(record\.occurrences\)/u);
+  assert.match(functionBody("function renderRequestedPageResult"), /result\.view === "vtuberRank"[\s\S]*getSongGroups: \(\) => getArtistSongGroups\(record\)/u);
 });
 
 test("VTuber song details use smaller first render and filter dirty preview titles", () => {
   assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;/u);
-  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 12;/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 6;/u);
   assert.match(functionBody("function artistSongInitialLimit"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_INITIAL_LIMIT/u);
   assert.match(functionBody("function artistSongBatchSize"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_BATCH_SIZE/u);
-  assert.match(functionBody("function vtuberSongPreview"), /cleanVtuberSongEntries\(sortedCountEntries\(record\.songs\)\)/u);
-  assert.match(functionBody("function isDirtyVtuberPreviewTitle"), /op\|ed\|end\|opening\|ending/u);
+  assert.match(functionBody("function vtuberSongPreview"), /sortedDisplaySongEntries\(record\.songs\)/u);
+  assert.match(functionBody("function shouldShowSongGroupTitle"), /op\|ed\|end\|start\|opening\|ending/u);
 });
 
 test("delayed trend diffs update visible badges without rerendering the list for all trend", () => {
