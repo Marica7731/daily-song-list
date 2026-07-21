@@ -7748,6 +7748,7 @@ function artistLabelForSongGroup(group) {
 function artistSongCountLabel(group) {
   const count = Math.max(0, Number(group?.count) || 0);
   const videoCount = Math.max(0, Number(group?.videoCount) || uniqueVideoCount(group?.occurrences || []));
+  if (group?.sourceMode === "vtuber") return `${count}次`;
   const unit = group?.sourceMode === "vtuber" ? "次歌唱" : "次";
   if (videoCount > 0 && videoCount !== count) return `${count}${unit} · ${videoCount}来源`;
   return `${count}${unit}`;
