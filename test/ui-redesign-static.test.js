@@ -16,6 +16,13 @@ function cssBlock(selector) {
   return match[0];
 }
 
+function lastCssBlock(selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  const matches = [...cssSource.matchAll(new RegExp(`${escaped}\\s*\\{[^}]*\\}`, "gu"))];
+  assert.ok(matches.length, `CSS block not found: ${selector}`);
+  return matches[matches.length - 1][0];
+}
+
 test("mobile information architecture exposes one query center and a one-row toolbar", () => {
   assert.match(indexSource, /id="querySearchForm"[\s\S]*id="queryInput"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"/u);
   assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
@@ -228,8 +235,10 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.source-copy-icon\s*\{[\s\S]*width: var\(--chip-icon-size\);[\s\S]*padding: 0;/u);
   assert.match(appSource, /function renderSourceVideoGroup[\s\S]*channel\.setAttribute\("aria-label", channelLink\.isFallbackSearch/u);
   assert.match(appSource, /function renderSourceVideoGroup[\s\S]*channel\.title = channelLink\.isFallbackSearch/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 56px;[\s\S]*height: 32px;/u);
-  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 48px;[\s\S]*height: 27px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 44px;[\s\S]*height: 25px;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 40px;[\s\S]*height: 23px;/u);
+  assert.match(lastCssBlock(".source-inline-item"), /grid-template-columns:\s*40px minmax\(0,\s*1fr\) 24px;/u);
+  assert.match(lastCssBlock(".source-inline-strip .source-inline-thumb.source-link"), /width:\s*40px;[\s\S]*height:\s*23px;/u);
   assert.doesNotMatch(cssSource, /\.source-copy-icon span|ui-chip-icon-label/u);
   assert.match(cssSource, /\.trend-badge\s*\{[\s\S]*min-height: 20px;[\s\S]*font-size: 10\.5px;[\s\S]*white-space: nowrap;/u);
   assert.match(cssSource, /\.trend-up,[\s\S]*\.trend-increase,[\s\S]*\.trend-new/u);
@@ -379,11 +388,16 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(appSource, /function filterOccurrencesForSongKey\(occurrences = \[\], songKey = "", songTitle = ""\)[\s\S]*songMatchKeys\(songKey, songTitle\)/u);
   assert.match(appSource, /function songMatchKeys\([\s\S]*window\.RankingUtils\?\.songWorkTitleKey\?\.\(text\)/u);
   assert.match(functionBody("function hydrateArtistSongGroup"), /filterOccurrencesForSongKey\(filterDisplaySongOccurrences\(record\.occurrences \|\| \[\]\), key, group\.title\)/u);
-  assert.match(appSource, /function appendVtuberSubline\(metaContainer, \{ occurrences, songCount, songPreview, videoCount \}\)[\s\S]*`\$\{songCount\} 首歌`/u);
+  const vtuberSublineStart = appSource.indexOf("function appendVtuberSubline");
+  const vtuberSublineEnd = appSource.indexOf("function renderVtuberAvatar", vtuberSublineStart);
+  const vtuberSublineBody = appSource.slice(vtuberSublineStart, vtuberSublineEnd);
+  assert.match(vtuberSublineBody, /songPreview \|\| \[\]\)\.slice\(0, 2\)\.join\("、"\)/u);
+  assert.doesNotMatch(vtuberSublineBody, /`\$\{songCount\} 首歌`|`\$\{videoCount\} 个视频`/u);
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
   assert.match(songGroupBody, /group\.sourceMode === "vtuber" \? vtuberSongGroupMetaLabel\(group\) : artistSongCountLabel\(group\)/u);
-  assert.match(songGroupBody, /if \(sourcePresentation\.canExpand\) \{[\s\S]*renderArtistSongSourceToggleButton\(sourcePresentation, sources\.id, group\)/u);
+  assert.match(songGroupBody, /if \(sourcePresentation\.canExpand && group\.sourceMode !== "vtuber"\) \{[\s\S]*renderArtistSongSourceToggleButton\(sourcePresentation, sources\.id, group\)/u);
+  assert.match(songGroupBody, /if \(hasOccurrences && group\.sourceMode !== "vtuber"\) \{[\s\S]*renderCopySongLinksIconButton\(group\.occurrences\)/u);
   assert.match(songGroupBody, /if \(group\.sourceMode !== "vtuber"\) \{[\s\S]*renderSourceInlineStrip\(sourcePresentation/u);
   assert.match(appSource, /function vtuberSongGroupMetaLabel\(group\)[\s\S]*`\$\{count\}次 · \$\{videoCount\}视频`/u);
   assert.doesNotMatch(appSource, /来源明细待重建/u);
@@ -391,11 +405,12 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.doesNotMatch(requestedPageBody.match(/result\.view === "vtuberRank"[\s\S]*?\}\);[\s\S]*?\}/u)?.[0] || "", /次歌唱/u);
   assert.match(songSourceBody, /sourceDetailPageForContainer\(sources, sources\._sourceOccurrences \|\| \[\]/u);
   assert.match(songSourceBody, /groups: pageState\.groups,[\s\S]*pageInfo: pageState\.pageInfo/u);
+  assert.match(sourcePageBody, /if \(drawer\.dataset\.sourceMode === "vtuber"\) \{[\s\S]*appendPagedVtuberSongGroups\(drawer, songGroups\)/u);
   assert.match(sourcePageBody, /drawer\.dataset\.sourceMode === "artist-song" \? drawer : row/u);
   assert.match(sourcePageBody, /sourceDetailPageForContainer\(sourceContainer, sourceContainer\._sourceDetailOccurrences \|\| sourceContainer\._sourceOccurrences \|\| \[\]/u);
   assert.match(cssSource, /\.artist-song-artist\s*\{[\s\S]*text-overflow: ellipsis;[\s\S]*white-space: nowrap;/u);
   assert.doesNotMatch(cssSource, /\.artist-song-group-vtuber \.source-inline-strip/u);
-  assert.match(songGroupBody, /if \(sourcePresentation\.canExpand\) section\.append\(sources\)/u);
+  assert.match(songGroupBody, /if \(sourcePresentation\.canExpand && group\.sourceMode !== "vtuber"\) section\.append\(sources\)/u);
 });
 
 function functionBody(signature) {

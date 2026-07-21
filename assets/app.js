@@ -31,8 +31,8 @@ const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
 const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
-const VTUBER_SONG_GROUP_INITIAL_LIMIT = 39;
-const VTUBER_SONG_GROUP_BATCH_SIZE = 39;
+const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;
+const VTUBER_SONG_GROUP_BATCH_SIZE = 12;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 3;
 const SOURCE_TIMESTAMP_DEDUP_WINDOW_SECONDS = 30;
 const SOURCE_INLINE_LIMITS = {
@@ -6464,8 +6464,6 @@ function isMomentKnownSourceType(value) {
 
 function appendVtuberSubline(metaContainer, { occurrences, songCount, songPreview, videoCount }) {
   appendSublinePart(metaContainer, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
-  appendSublinePart(metaContainer, `${songCount} 首歌`, "subline-song-count");
-  appendSublinePart(metaContainer, `${videoCount} 个视频`, "subline-video-count");
   if (videoCount === 1 && occurrences.length === 1) {
     appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
   }
@@ -7151,7 +7149,9 @@ function renderSourceDrawer({ mode, occurrences, copyOccurrences = occurrences, 
 
 function initializeSourceDrawer(drawer, { mode, occurrences, copyOccurrences = occurrences, songGroups = [], sourceGroups = null, sourcePageInfo = null }) {
   if (!drawer || drawer.dataset.sourceDeferred !== "true") return;
-  if (mode === "artist" || mode === "vtuber") {
+  if (mode === "vtuber") {
+    appendPagedVtuberSongGroups(drawer, completeSongGroupsForDrawer(occurrences, songGroups, mode));
+  } else if (mode === "artist") {
     appendArtistSongGroups(drawer, completeSongGroupsForDrawer(occurrences, songGroups, mode));
   } else {
     appendSourceDrawerLinks(drawer, occurrences, { showToolbar: true, copyOccurrences, groups: sourceGroups, pageInfo: sourcePageInfo });
@@ -7238,17 +7238,19 @@ function renderSourceDrawerToolbar(drawer, occurrences, options = {}) {
   count.className = "source-drawer-count";
   count.textContent =
     drawer.dataset.sourceMode === "artist" || drawer.dataset.sourceMode === "vtuber"
-      ? artistSongDrawerCountText(visibleCount, totalCount)
+      ? artistSongDrawerCountText(visibleCount, totalCount, pageInfo)
       : sourceDrawerCountText(visibleCount, totalCount, pageInfo);
   toolbar.append(count);
 
   const actions = document.createElement("div");
   actions.className = "source-drawer-actions";
-  const copyAll = renderCopySongLinksButton(occurrences);
-  copyAll.title = "复制全部链接";
-  copyAll.textContent = "";
-  copyAll.append(renderLinkListIcon());
-  actions.append(copyAll);
+  if (drawer.dataset.sourceMode !== "vtuber") {
+    const copyAll = renderCopySongLinksButton(occurrences);
+    copyAll.title = "复制全部链接";
+    copyAll.textContent = "";
+    copyAll.append(renderLinkListIcon());
+    actions.append(copyAll);
+  }
   actions.append(renderSourceCollapseButton(drawer.id, drawer.dataset.sourceMode || "song", "source-collapse-top ui-chip"));
   toolbar.append(actions);
   return toolbar;
@@ -7259,7 +7261,7 @@ function updateSourceDrawerCount(drawer, visibleCount, totalCount, pageInfo = nu
   if (count) {
     count.textContent =
       drawer.dataset.sourceMode === "artist" || drawer.dataset.sourceMode === "vtuber"
-        ? artistSongDrawerCountText(visibleCount, totalCount)
+        ? artistSongDrawerCountText(visibleCount, totalCount, pageInfo)
         : sourceDrawerCountText(visibleCount, totalCount, pageInfo);
   }
 }
@@ -7274,7 +7276,11 @@ function sourceDrawerCountText(visibleCount, totalCount, pageInfo = null) {
   return `全部 ${totalCount} 个来源`;
 }
 
-function artistSongDrawerCountText(visibleCount, totalCount) {
+function artistSongDrawerCountText(visibleCount, totalCount, pageInfo = null) {
+  if (pageInfo && pageInfo.pageCount > 1) {
+    const start = pageInfo.total ? pageInfo.startIndex + 1 : 0;
+    return `全部 ${pageInfo.total} 首歌 · ${start}-${pageInfo.endIndex}`;
+  }
   if (visibleCount < totalCount) return `已显示 ${visibleCount}/${totalCount} 首歌`;
   return `全部 ${totalCount} 首歌`;
 }
@@ -7283,7 +7289,8 @@ function appendSourceDrawerPager(drawer, pageInfo) {
   if (!pageInfo || pageInfo.pageCount <= 1) return;
   const pager = document.createElement("div");
   pager.className = "source-drawer-pagination";
-  pager.setAttribute("aria-label", `来源分页，第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
+  const isSongGroupMode = drawer.dataset.sourceMode === "artist" || drawer.dataset.sourceMode === "vtuber";
+  pager.setAttribute("aria-label", `${isSongGroupMode ? "曲目" : "来源"}分页，第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
   pager.append(
     renderSourcePageButton("上一页", pageInfo.previousPage || 1, !pageInfo.hasPrevious, drawer.id),
     renderSourcePageSummary(pageInfo),
@@ -7598,6 +7605,10 @@ function renderLinkListIcon() {
 }
 
 function appendArtistSongGroups(drawer, songGroups) {
+  if (drawer?.dataset?.sourceMode === "vtuber") {
+    appendPagedVtuberSongGroups(drawer, songGroups);
+    return;
+  }
   clearSourceDrawerStatus(drawer);
   drawer._artistSongGroups = songGroups;
   const visibleCount = artistVisibleSongCount(drawer, songGroups.length);
@@ -7614,6 +7625,40 @@ function appendArtistSongGroups(drawer, songGroups) {
     showSourceDrawerStatus(drawer, "没有可显示的曲目", "empty");
   }
   appendMobileSourceCollapse(drawer);
+}
+
+function appendPagedVtuberSongGroups(drawer, songGroups) {
+  clearVtuberSongPageContent(drawer);
+  const safeGroups = Array.isArray(songGroups) ? songGroups : [];
+  drawer._artistSongGroups = safeGroups;
+  const pageSize = vtuberSongGroupPageSizeForMode();
+  const pageInfo = window.FrontendUtils.sourceDrawerPageModel({
+    page: Number(drawer.dataset.sourcePage) || 1,
+    pageSize,
+    totalCount: safeGroups.length,
+    visibleCount: Math.min(pageSize, safeGroups.length),
+  });
+  drawer.dataset.sourcePage = String(pageInfo.page);
+  drawer.dataset.sourcePageSize = String(pageInfo.pageSize);
+  drawer._artistSongPageInfo = pageInfo;
+  if (!drawer.querySelector(":scope > .source-drawer-toolbar")) {
+    drawer.append(renderSourceDrawerToolbar(drawer, drawer._songSourceOccurrences || [], { visibleCount: pageInfo.visibleCount, totalCount: safeGroups.length, pageInfo }));
+  } else {
+    updateSourceDrawerCount(drawer, pageInfo.visibleCount, safeGroups.length, pageInfo);
+  }
+  appendArtistSongGroupRange(drawer, safeGroups, pageInfo.startIndex, pageInfo.endIndex);
+  if (artistRenderedSongCount(drawer) > 0) {
+    appendSourceDrawerPager(drawer, pageInfo);
+  } else {
+    showSourceDrawerStatus(drawer, "没有可显示的曲目", "empty");
+  }
+  appendMobileSourceCollapse(drawer);
+}
+
+function clearVtuberSongPageContent(drawer) {
+  for (const node of drawer.querySelectorAll(":scope > .artist-song-group, :scope > .artist-song-more, :scope > .source-drawer-pagination, :scope > .source-drawer-status")) {
+    node.remove();
+  }
 }
 
 function completeSongGroupsForDrawer(occurrences, fallbackGroups = [], mode = "") {
@@ -7696,6 +7741,10 @@ function artistSongInitialLimit(drawer) {
 
 function artistSongBatchSize(drawer) {
   return drawer?.dataset?.sourceMode === "vtuber" ? VTUBER_SONG_GROUP_BATCH_SIZE : ARTIST_SONG_GROUP_BATCH_SIZE;
+}
+
+function vtuberSongGroupPageSizeForMode() {
+  return VTUBER_SONG_GROUP_INITIAL_LIMIT;
 }
 
 function appendArtistSongGroupRange(drawer, songGroups, start, end) {
@@ -7821,10 +7870,10 @@ function renderArtistSongGroup(group) {
   sources._sourceSongKey = sourceSongKeyForGroup(group);
   sources._sourceSongTitle = group.title;
 
-  if (sourcePresentation.canExpand) {
+  if (sourcePresentation.canExpand && group.sourceMode !== "vtuber") {
     meta.append(renderArtistSongSourceToggleButton(sourcePresentation, sources.id, group));
   }
-  if (hasOccurrences) {
+  if (hasOccurrences && group.sourceMode !== "vtuber") {
     meta.append(renderCopySongLinksIconButton(group.occurrences));
   }
   header.append(meta);
@@ -7842,7 +7891,7 @@ function renderArtistSongGroup(group) {
       }),
     );
   }
-  if (sourcePresentation.canExpand) section.append(sources);
+  if (sourcePresentation.canExpand && group.sourceMode !== "vtuber") section.append(sources);
   return section;
 }
 
@@ -8042,8 +8091,16 @@ async function setSourceDrawerPage(button) {
   const drawer = document.getElementById(button.getAttribute("aria-controls")) || button.closest(".source-drawer");
   const row = drawer?.closest(".rank-row, .index-row");
   if (!drawer || !row) return;
-  const sourceContainer = drawer.dataset.sourceMode === "artist-song" ? drawer : row;
   const page = Math.max(1, Math.floor(Number(button.dataset.sourcePage) || 1));
+  if (drawer.dataset.sourceMode === "vtuber") {
+    drawer.dataset.sourcePage = String(page);
+    const songGroups = row._artistSongGroups || (typeof row._getArtistSongGroups === "function" ? row._getArtistSongGroups() : []);
+    row._artistSongGroups = songGroups;
+    appendPagedVtuberSongGroups(drawer, songGroups);
+    window.requestAnimationFrame(() => focusWithoutScrolling(drawer.querySelector(":scope > .artist-song-group") || drawer));
+    return;
+  }
+  const sourceContainer = drawer.dataset.sourceMode === "artist-song" ? drawer : row;
   const pageSize = sourceDrawerPageSizeForMode();
   drawer.dataset.sourcePage = String(page);
   drawer.dataset.sourcePageSize = String(pageSize);

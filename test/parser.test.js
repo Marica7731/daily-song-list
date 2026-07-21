@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { isLikelyNonSongEntry, parseTimestampSongs, timeToSeconds } = require("../scripts/song-utils");
+const { cleanArtistMetadata, isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist, parseTimestampSongs, timeToSeconds } = require("../scripts/song-utils");
 
 test("parses timestamp before song index without truncating minutes", () => {
   const songs = parseTimestampSongs([
@@ -85,6 +85,12 @@ test("rejects naretan commentary and request timestamps while keeping real song 
       "0:22 なれコールアンケート",
       "0:23 Never Ending Story / Limahl",
       "0:24 START:DASH!! / μ's",
+      "0:25 くしゃみ / Sneeze",
+      "0:26 助かる",
+      "0:27 ガチ恋距離助かる",
+      "0:28 そして花になる ここすき",
+      "0:29 ED / うっかり",
+      "0:30 END / Cパート / 5月生写真チラ見せ",
     ].join("\n"),
   ]);
 
@@ -224,6 +230,35 @@ test("keeps START whitelist songs while dropping unknown START markers", () => {
     songs.map((song) => `${song.title} / ${song.artist}`),
     ["StaRt / Mrs. GREEN APPLE", "START / レフティーモンスターP feat. Lily", "START / 愛内里菜", "START:DASH!! / μ's"],
   );
+});
+
+test("normalizes Noa Polaris scoped Aimer Start artist noise only", () => {
+  const noaSource = { channelName: "ノア・ポラリス -Noa Polaris-", channelHandle: "/@noa_polaris" };
+
+  assert.equal(normalizeSourceAwareArtist({ title: "Brave Shine", artist: "Aimer Start" }, noaSource).artist, "Aimer");
+  assert.equal(normalizeSourceAwareArtist({ title: "Brave Shine", artist: "Aimer／スター" }, { candidate: noaSource }).artist, "Aimer");
+  assert.equal(normalizeSourceAwareArtist({ title: "Brave Shine", artist: "Aimer - スタート" }, { candidate: { channelName: "Noa Polaris" } }).artist, "Aimer");
+});
+
+test("normalizes reviewed artist metadata suffixes without dropping songs", () => {
+  assert.equal(cleanArtistMetadata("Le Couple (EN:The Song of Sunshine/Le Couple)"), "Le Couple");
+  assert.equal(cleanArtistMetadata("BUMP OF CHICKEN (EN:Song of the Wheels/BUMP OF CHICKEN)"), "BUMP OF CHICKEN");
+  assert.equal(cleanArtistMetadata("Ringo Shiina ※Be Careful of Volume"), "Ringo Shiina");
+  assert.equal(cleanArtistMetadata("Yui (同接200人突破おめでとうございます)"), "Yui");
+  assert.deepEqual(normalizeParsedSong({ title: "CHE.R.RY", artist: "Yui (同接200人突破おめでとうございます)" }), {
+    title: "CHE.R.RY",
+    artist: "Yui",
+  });
+});
+
+test("keeps non Noa Aimer Start and unrelated Noa artists intact", () => {
+  const noaSource = { channelName: "Noa Polaris", channelHandle: "/@noa_polaris" };
+
+  assert.equal(normalizeSourceAwareArtist({ title: "Brave Shine", artist: "Aimer Start" }, { channelName: "Other Channel" }).artist, "Aimer Start");
+  assert.equal(normalizeSourceAwareArtist({ title: "DAYBREAK FRONTLINE", artist: "Orangestar" }, noaSource).artist, "Orangestar");
+  assert.equal(normalizeSourceAwareArtist({ title: "START", artist: "レフティーモンスターP feat. Lily" }, noaSource).artist, "レフティーモンスターP feat. Lily");
+  assert.equal(normalizeSourceAwareArtist({ title: "Song", artist: "AimerStart" }, noaSource).artist, "AimerStart");
+  assert.equal(normalizeSourceAwareArtist({ title: "Song", artist: "Aimer feat. Star" }, noaSource).artist, "Aimer feat. Star");
 });
 
 test("rejects tenQ chant variants from timestamp rows", () => {
@@ -623,14 +658,15 @@ test("keeps song titles that merely contain dirty marker words", () => {
       "60曲目 3:58:12 勝利のマシンロボ/マシンロボクロノスの大逆襲OP(特別ゲスト ケンリュウ)",
       "13:16 ・睡蓮花",
       "2:30:22 「Song for...／HY」",
+      "2:31:00 Feeling Heart(ワンコーラス) / 中司雅美",
     ].join("\n"),
   ]);
 
   assert.deepEqual(
     songs.map((song) => song.title),
-    ["睡蓮花", "はじまりはいつも雨", "「Song for...／HY」", "（2012）ルミナス", "勝利のマシンロボ"],
+    ["睡蓮花", "はじまりはいつも雨", "「Song for...／HY」", "Feeling Heart(ワンコーラス)", "（2012）ルミナス", "勝利のマシンロボ"],
   );
-  assert.equal(songs.length, 5);
+  assert.equal(songs.length, 6);
 });
 
 test("cleans ordinal prefixes while keeping real song rows", () => {

@@ -122,6 +122,15 @@ Latest audit in this branch:
 
 Remaining dirty-keyword audit hits include reviewed false positives such as `StaRt` variants and artist/work metadata containing `OP`/`Start`; do not turn these into broad contains-based drops.
 
+2026-07-22 hotfix note:
+
+- Current production VTuber ranking must be queried from `https://ytb-song-rank.culua.com/api/rankings?range=all&view=vtubers&metric=songs&pageSize=20` before prioritizing cleanup. A stale local SQLite artifact still showed Naraetan at `2629` songs, while production returned `2070` songs at the start of this pass.
+- The cleanup additions are intentionally narrow: request/chat/topic rows such as `曲のリクエスト`, `KICKBACKという曲の歌い方について`, `劇場版コナンについて`, `本編終了`, `同接100人達成`, and unknown-artist stream BGM notes are dropped.
+- Keep the false-positive guards for real songs such as `StaRt`, `START!! True dreams`, `Never Ending Story`, `プレイバック Part2`, and `新時代 (ウタ from ONE PIECE FILM RED)`.
+- Keep list-level cleanup shared between import and runtime paths. `SourceFilter.dropSameSecondTranslatedAliasSongs()` is used by the client payload filter, `scripts/db/export-runtime-rankings.js`, and `scripts/clean-channel-discovery-accepted.js`. It only removes Latin/English duplicates when the same source video list contains at least two same-second CJK+Latin pairs, which indicates a bilingual timestamp list; single mixed pairs are left for reviewed aliases.
+- Current local cleancheck DB threshold audit (`songCount > 1000 OR occurrences > 5000`) still finds four channels after batch-1 cleanup: Naraetan `1461/4248`, Hanon `1195/6468`, 明日夢かなえ `1056/3665`, and Noa `1030/4695`. Same-second CJK/Latin duplicates were originally concentrated in Naraetan (`842` groups); after the shared list-level pass only one reviewed single-pair source remains, for example `ぴゅあぴゅあはーと / 放課後ティータイム` versus `Pure Pure Heart / Houkago Tea Time`. Residual `ワンコーラス` entries are kept as real song version notes; high-confidence reaction/comment rows such as `くしゃみ`, `助かる`, `ガチ恋距離助かる`, and `ここすき` are dropped in both import and runtime paths.
+- Artist metadata stripping belongs in `scripts/song-utils.js` so import and runtime rebuilds agree. Reviewed suffixes include `(EN:...)`, `※Be Careful of Volume`, `※音源一時停止有`, and `(同接200人突破おめでとうございます)`. These suffixes are removed from the artist field, not treated as song aliases.
+
 For accepted JSON impact checks, run:
 
 ```powershell
@@ -132,8 +141,8 @@ The script reads `data/external/youtube-channel-discovery/accepted/*.json` plus 
 
 Latest local accepted impact audit in this branch:
 
-- query time: `2026-07-21T11:11:27.936Z`
-- Naraetan accepted source: `2026-07-19-naraetanV-full.json`; songs `5715 -> 5266`; unique normalized titles `2576 -> 2147`; dirty candidates `445 -> 0`.
-- KanaruHanon accepted source: `2026-07-19-kanaruhanon-full.json`; songs `6701 -> 6503`; unique normalized titles `1299 -> 1250`; dirty candidates `183 -> 0`.
+- query time: `2026-07-21T20:39:06.517Z`
+- Naraetan accepted source: `2026-07-19-naraetanV-full.json`; songs `5715 -> 5195`; unique normalized titles `2576 -> 2080`; dirty candidates `516 -> 0`.
+- KanaruHanon accepted source: `2026-07-19-kanaruhanon-full.json`; songs `6701 -> 6486`; unique normalized titles `1299 -> 1236`; dirty candidates `200 -> 0`.
 - IsakiRiona runtime fallback: songs `38 -> 38`; unique normalized titles `19 -> 19`; dirty candidates `0 -> 0`.
 - Guardrails retained: `START:DASH!! / μ's`, `ENDLESS STORY / REIRA starring YUNA ITO`, and `Never Ending Story / Limahl`.

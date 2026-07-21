@@ -21,8 +21,9 @@ const {
   buildClientVideo,
   buildRuntimeRangePayload,
 } = require("../build-runtime-data");
-const { isLikelyNonSongEntry } = require("../song-utils");
-const { isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../../assets/source-filter");
+const { canonicalizeSongIdentity, loadSongAliasContext } = require("../song-aliases");
+const { isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist } = require("../song-utils");
+const { dropSameSecondTranslatedAliasSongs, isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../../assets/source-filter");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
@@ -58,11 +59,15 @@ function main() {
       vsingerVideos: runtimeImports.vsinger?.videos?.length || 0,
       youtubeVideos: runtimeImports.youtubeChannelDiscovery?.videos?.length || 0,
     });
+    const songAliasContext = loadSongAliasContext();
+    if (songAliasContext.errors?.length) {
+      throw new Error(`song alias config invalid: ${songAliasContext.errors.join("; ")}`);
+    }
     logPhase("data_version_start");
-    const dataVersion = computeExportDataVersion(payload, args, runtimeImports);
+    const dataVersion = computeExportDataVersion(payload, args, runtimeImports, songAliasContext);
     logPhase("data_version_ok", { dataVersion });
     logPhase("write_start", { output: args.output, ranges: args.ranges.join(",") });
-    writeJsonlExport(args.output, payload, runtimeImports, dataVersion, args);
+    writeJsonlExport(args.output, payload, runtimeImports, dataVersion, args, songAliasContext);
   } catch (error) {
     console.error(`CODEX_RUNTIME_RANKINGS_EXPORT_ERROR ${error.name}: ${error.message}`);
     process.exitCode = 1;
@@ -140,7 +145,7 @@ function loadRuntimeImports(args) {
   };
 }
 
-function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args) {
+function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args, songAliasContext = null) {
   const writer = createJsonlWriter(outputPath);
   let rankingRowCount = 0;
   let sourceDetailCount = 0;
@@ -158,13 +163,20 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
       ranges: args.ranges,
       vsingerIncluded: Boolean(runtimeImports.vsinger),
       youtubeChannelDiscoveryIncluded: Boolean(runtimeImports.youtubeChannelDiscovery),
+      songAliases: songAliasContext
+        ? {
+            schemaVersion: songAliasContext.schemaVersion,
+            aliasVersion: songAliasContext.aliasVersion,
+            recordCount: songAliasContext.records.length,
+          }
+        : null,
     });
 
     for (const rangeId of args.ranges) {
       logPhase("range_start", { range: rangeId });
       const rangePayload = buildRangePayload(payload, rangeId, args, runtimeImports);
       rangePayload.dataVersion = dataVersion;
-      const baseItems = Array.isArray(rangePayload.items) ? rangePayload.items.map((item) => withRuntimeScopedSongs(item, null)) : [];
+      const baseItems = Array.isArray(rangePayload.items) ? rangePayload.items.map((item) => withRuntimeScopedSongs(item, null, songAliasContext)) : [];
       logPhase("range_items_ready", { range: rangeId, items: baseItems.length });
       const titleStats = buildRuntimeTitleStats(baseItems);
       logPhase("range_title_stats_ready", { range: rangeId, titles: titleStats.size });
@@ -343,7 +355,7 @@ function buildRangePayload(payload, rangeId, args, runtimeImports = {}) {
   return args.limitPerRange > 0 ? { ...rangePayload, items: (rangePayload.items || []).slice(0, args.limitPerRange) } : rangePayload;
 }
 
-function computeExportDataVersion(payload, args, runtimeImports = {}) {
+function computeExportDataVersion(payload, args, runtimeImports = {}, songAliasContext = null) {
   return stableDbKey(JSON.stringify({
     schemaVersion: 1,
     generatedAt: payload.generatedAt || "",
@@ -355,6 +367,12 @@ function computeExportDataVersion(payload, args, runtimeImports = {}) {
     limitPerRange: args.limitPerRange,
     vsinger: runtimeImports.vsinger?.summary || null,
     youtubeChannelDiscovery: runtimeImports.youtubeChannelDiscovery?.summary || null,
+    songAliases: songAliasContext
+      ? {
+          aliasVersion: songAliasContext.aliasVersion,
+          recordCount: songAliasContext.records.length,
+        }
+      : null,
   }));
 }
 
@@ -542,22 +560,47 @@ function buildChannelIdentityLookup(items) {
   return { nameToKey };
 }
 
-function withRuntimeScopedSongs(item, titleStats = null) {
+function withRuntimeScopedSongs(item, titleStats = null, aliasContext = null) {
   if (!item || typeof item !== "object") return item;
   return {
     ...item,
-    songs: runtimeScopedSongs(item.songs, item, titleStats),
+    songs: runtimeScopedSongs(item.songs, item, titleStats, aliasContext),
   };
 }
 
-function runtimeScopedSongs(songs, source = {}, titleStats = null) {
-  return (Array.isArray(songs) ? songs : []).filter((song) => {
-    if (!song || typeof song !== "object") return false;
-    if (!RankingUtils.cleanText(song.title)) return false;
-    if (isBlockedSongEntry(song, source)) return false;
-    if (titleStats && isSingletonPseudoSongEntry(song, titleStats)) return false;
-    return !isLikelyNonSongEntry(song);
-  });
+function runtimeScopedSongs(songs, source = {}, titleStats = null, aliasContext = null) {
+  const scoped = [];
+  for (const song of Array.isArray(songs) ? songs : []) {
+    if (!song || typeof song !== "object") continue;
+    const normalizedSong = normalizeSourceAwareArtist(normalizeParsedSong(song), source);
+    if (!RankingUtils.cleanText(normalizedSong.title)) continue;
+    if (isBlockedSongEntry(normalizedSong, source)) continue;
+    if (titleStats && isSingletonPseudoSongEntry(normalizedSong, titleStats)) continue;
+    if (isLikelyNonSongEntry(normalizedSong, source)) continue;
+    scoped.push(normalizedSong);
+  }
+  const deduped = dropSameSecondTranslatedAliasSongs(scoped);
+  const canonicalized = aliasContext ? deduped.map((song) => canonicalizeSongIdentity(song, aliasContext)) : deduped;
+  return dedupeCanonicalSameSecondSongs(canonicalized);
+}
+
+function dedupeCanonicalSameSecondSongs(songs) {
+  const result = [];
+  const seen = new Set();
+  for (const song of Array.isArray(songs) ? songs : []) {
+    const seconds = Number(song?.seconds);
+    const key = Number.isFinite(seconds)
+      ? [
+          Math.trunc(seconds),
+          RankingUtils.songWorkTitleKey(song?.canonicalTitle || song?.title),
+          RankingUtils.normalizeArtistKey(song?.canonicalArtist || song?.artist),
+        ].join("\u0001")
+      : "";
+    if (key && seen.has(key)) continue;
+    if (key) seen.add(key);
+    result.push(song);
+  }
+  return result;
 }
 
 function buildRuntimeTitleStats(items) {

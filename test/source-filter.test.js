@@ -1,8 +1,12 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const test = require("node:test");
 
 const {
   cleanSongTitleNoise,
+  dropSameSecondTranslatedAliasSongs,
   isArtistRichMixedSongList,
   isBlockedSongEntry,
   filterPayloadBlockedSources,
@@ -14,6 +18,7 @@ const {
   normalizeSongEntry,
 } = require("../assets/source-filter");
 const { isLikelyNonSongEntry } = require("../scripts/song-utils");
+const { cleanAcceptedFile } = require("../scripts/clean-channel-discovery-accepted");
 
 test("source filter removes blocked HK/TW VTuber channels without matching ordinary song titles", () => {
   assert.equal(isBlockedSource({ channelId: "UCW8G8aeRjbIOlL-Fgms8hEQ", channelName: "Japanese Channel", title: "歌雜 / HKVtuber" }), true);
@@ -113,6 +118,61 @@ test("source filter singleton pseudo-song helper uses title text for daily chatt
   );
 });
 
+test("source filter drops same-second translated aliases only for bilingual source lists", () => {
+  const songs = [
+    { title: "ピースサイン", artist: "米津玄師", seconds: 741 },
+    { title: "Peace Sign", artist: "Kenshi Yonezu", seconds: 741 },
+    { title: "マリーゴールド", artist: "あいみょん", seconds: 1392 },
+    { title: "Marigold", artist: "Aimyon", seconds: 1392 },
+    { title: "Hello", artist: "Adele", seconds: 2000 },
+  ];
+
+  assert.deepEqual(
+    dropSameSecondTranslatedAliasSongs(songs).map((song) => song.title),
+    ["ピースサイン", "マリーゴールド", "Hello"],
+  );
+  assert.deepEqual(
+    dropSameSecondTranslatedAliasSongs([
+      { title: "オレンジ", artist: "7!!", seconds: 3043 },
+      { title: "Orange", artist: "7!!", seconds: 3043 },
+      { title: "Hello", artist: "Adele", seconds: 3300 },
+    ]).map((song) => song.title),
+    ["オレンジ", "Orange", "Hello"],
+  );
+});
+
+test("accepted channel-discovery cleaner applies source-aware Noa rules", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "accepted-clean-source-"));
+  const filePath = path.join(dir, "accepted.json");
+  fs.writeFileSync(
+    filePath,
+    `${JSON.stringify(
+      {
+        videos: [
+          {
+            videoId: "NOAPOLARIS1",
+            title: "Noa Karaoke",
+            channelName: "ノア・ポラリス -Noa Polaris-",
+            channelHandle: "/@noa_polaris",
+            songs: [
+              { title: "自己紹介", artist: "Aimer", seconds: 1, time: "0:01" },
+              { title: "Brave Shine", artist: "Aimer Start", seconds: 2, time: "0:02" },
+            ],
+          },
+        ],
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
+  const result = cleanAcceptedFile(filePath, { write: true });
+  const cleaned = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  assert.equal(result.songsBefore, 2);
+  assert.equal(result.songsAfter, 1);
+  assert.deepEqual(cleaned.videos[0].songs.map((song) => `${song.title} / ${song.artist}`), ["Brave Shine / Aimer"]);
+});
+
 test("source filter removes section markers and cleans ordinal song prefixes", () => {
   assert.equal(isBlockedSongEntry({ title: "この曲について", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "待機", artist: "待补歌手" }), true);
@@ -128,6 +188,13 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "セットリスト", artist: "歌唱開始時間" }), true);
   assert.equal(isBlockedSongEntry({ title: "セトリ", artist: "Set List♬" }), true);
   assert.equal(isBlockedSongEntry({ title: "ED", artist: "お遊戯あり" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ED", artist: "うっかり" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ED", artist: "ちょっと待てぃ" }), true);
+  assert.equal(isBlockedSongEntry({ title: "END", artist: "Cパート / 5月生写真チラ見せ" }), true);
+  assert.equal(isBlockedSongEntry({ title: "くしゃみ", artist: "Sneeze" }), true);
+  assert.equal(isBlockedSongEntry({ title: "助かる", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ガチ恋距離助かる", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "そして花になる ここすき", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "1on1&同期は", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "本日のサムネ", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "チューニング", artist: "未記載" }), true);
@@ -173,6 +240,67 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "歌詞考察", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "なれたん自己紹介", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "喉が痛い", artist: "配信について" }), true);
+  assert.equal(isBlockedSongEntry({ title: "曲のリクエスト", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "曲のリクエスト", artist: "かくれんぼ" }), true);
+  assert.equal(isBlockedSongEntry({ title: "「楓」という曲の歌い方について", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "KICKBACKという曲の歌い方について", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "新しい衣装について", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "劇場版コナンについて", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "パレプロについて", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "パレプロについて", artist: "てんりちゃん初めまして" }), true);
+  assert.equal(isBlockedSongEntry({ title: "今日のリレーメンバーについて", artist: "前半" }), true);
+  assert.equal(isBlockedSongEntry({ title: "白玖ウタノさんについてお話し", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "のあち枠配信画面/モールスについて", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "実は Part1 がありました", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "お知らせその1", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "お知らせその2", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "嬉しいお知らせがあることのお知らせ", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "嬉しいお知らせ", artist: "Good news" }), true);
+  assert.equal(isBlockedSongEntry({ title: "悲しいお知らせ", artist: "Sad News" }), true);
+  assert.equal(isBlockedSongEntry({ title: "本編終了！", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "同接100人達成🎉", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "同接150人突破", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "同接250人達成おめでとう!", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "∟1:56:11 同接200人達成！", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "BGM切り忘れにやっときづいたわたし", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "a.m. Jazz BGM【気分が整う朝ジャズ】", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "新しいBGM", artist: "New Background Music" }), true);
+  assert.equal(isBlockedSongEntry({ title: "BGM変更", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "お知らせタイム", artist: "Announcement time" }), true);
+  assert.equal(isBlockedSongEntry({ title: "明日の配信のお知らせ", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "縦型配信の機能", artist: "Vertical streaming features" }), true);
+  assert.equal(isBlockedSongEntry({ title: "配信前のアクシデント", artist: "Pre-stream accident" }), true);
+  assert.equal(isBlockedSongEntry({ title: "配信前のアクシデントの原因", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "配信前のアクシデントの原因", artist: "Cause pre-stream accident" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ハノメシ、Hanon Ch.コミュニティは帰るべき場所", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "明日夢かなえ入場", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "曲入り前の解説", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "チューニング入ります", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "居酒屋で聞いて知った曲", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "なれコール Part4", artist: "Narae-Encore Part 4" }), true);
+  assert.equal(isBlockedSongEntry({ title: "なれコール", artist: "Narae Encore" }, { channelName: "なれたん Naraetan Ch.", channelHandle: "/@naraetanV" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ダブルなれコール", artist: "Double Nara encore" }, { channelName: "なれたん Naraetan Ch.", channelHandle: "/@naraetanV" }), true);
+  assert.equal(isBlockedSongEntry({ title: "アルコール", artist: "なれコール" }, { channelName: "なれたん Naraetan Ch.", channelHandle: "/@naraetanV" }), true);
+  assert.equal(isBlockedSongEntry({ title: "無料で聞けるなれコールPart2", artist: "Free NaraEncore Part 2" }), true);
+  assert.equal(isBlockedSongEntry({ title: "なれコールで10曲歌ったら面白いよね", artist: "It would be funny to sing 10 songs just from Narae Encore, right?" }), true);
+  assert.equal(isBlockedSongEntry({ title: "なれコールはパスでもいいよ", artist: "Should I don’t nara-encore?" }), true);
+  assert.equal(isBlockedSongEntry({ title: "【チームみらい第一回党大会】記者会見ライブ配信┃ 2026年7月18日", artist: "土" }), true);
+  assert.equal(isBlockedSongEntry({ title: "EndingPart", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "本日の目標", artist: "24694人スタート" }), true);
+  assert.equal(isBlockedSongEntry({ title: "Live2D新衣装お披露目 サムネ公開", artist: "※新衣装成分2%含む" }), true);
+  assert.equal(isBlockedSongEntry({ title: "OPトーク", artist: "背景/星空" }), true);
+  assert.equal(isBlockedSongEntry({ title: "待機OPstart", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "雑談 / 気温の変化と家の間取りの話", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ラモンちゃんのスーパーチャット", artist: "Lamon-chan's superchat" }), true);
+  assert.equal(isBlockedSongEntry({ title: "スーパーチャットは腐る", artist: "Super Chats can expire" }), true);
+  assert.equal(isBlockedSongEntry({ title: "Superchat", artist: "Membership readings and chatting Start□" }), true);
+  assert.equal(isBlockedSongEntry({ title: "read super chat", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "(Purple Superchat!)", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "(Comments Ranking!)", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: 'comment "Lamonchan also sing this song in encore today too."', artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "despite not understanding most of it was adorable! Also huge props to the one who actually translated my comment for her at", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "Right before signing off, a 'roadside station' comment leaves Sora", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "i come back to this sometimes and i fall in love again every time, it's so soothing and beautiful, you will always be my oshi kanae", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "Opening", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "Open Your Eyes", artist: "Guano Apes" }), false);
@@ -182,6 +310,15 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "おつかれさまの国", artist: "斉藤和義" }), false);
   assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
   assert.equal(isBlockedSongEntry({ title: "START", artist: "レフティーモンスターP feat. Lily" }), false);
+  assert.equal(isBlockedSongEntry({ title: "StaRt", artist: "Mrs. GREEN APPLE" }), false);
+  assert.equal(isBlockedSongEntry({ title: "START!! True dreams", artist: "Liella!" }), false);
+  assert.equal(isBlockedSongEntry({ title: "Feeling Heart(ワンコーラス)", artist: "中司雅美" }), false);
+  assert.equal(isBlockedSongEntry({ title: "プレイバック Part2", artist: "山口百恵" }), false);
+  assert.equal(isBlockedSongEntry({ title: "新時代 (ウタ from ONE PIECE FILM RED)", artist: "Ado" }), false);
+  assert.equal(isBlockedSongEntry({ title: "Happiness on the Table", artist: "Hanon" }), false);
+  assert.equal(isBlockedSongEntry({ title: "M@STERPIECE", artist: "765PRO ALLSTARS" }), false);
+  assert.equal(isBlockedSongEntry({ title: "ダイアモンド クレバス", artist: "シェリル・ノーム starring May'n" }), false);
+  assert.equal(isBlockedSongEntry({ title: "Comment te dire adieu", artist: "Françoise Hardy" }), false);
   assert.equal(isBlockedSongEntry({ title: "天Q", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "はじまりはいつも雨", artist: "未記載" }), false);
   assert.equal(isBlockedSongEntry({ title: "コメ「残り96曲ですね?」", artist: "未記載" }), true);
@@ -239,6 +376,15 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "カンニングタイムPart2", artist: "未記載", raw: "00:40:00 カンニングタイムPart2" }), true);
   assert.equal(isBlockedSongEntry({ title: "END", artist: "Cパート", raw: "0:31:24 END / Cパート" }), true);
   assert.equal(isBlockedSongEntry({ title: "エンドカード", artist: "Cパート", raw: "2:24:02 エンドカード(Cパート" }), true);
+  assert.equal(isBlockedSongEntry({ title: "Baby Noa Polaris)", artist: "未記載" }, { channelName: "ノア・ポラリス -Noa Polaris-", channelHandle: "/@noa_polaris" }), true);
+  assert.equal(
+    isBlockedSongEntry({ title: "Noah’s Ark デジタルフラワースタンドのお礼", artist: "未記載" }, { channelName: "Noa Polaris", channelHandle: "/@noa_polaris" }),
+    true,
+  );
+  assert.equal(isBlockedSongEntry({ title: "トークパート①", artist: "自己紹介" }, { channelName: "Noa Polaris" }), true);
+  assert.equal(isBlockedSongEntry({ title: "自己紹介", artist: "トークパート①" }, { channelHandle: "/@noa_polaris" }), true);
+  assert.equal(isBlockedSongEntry({ title: "自己紹介", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "自己紹介", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
   assert.equal(isBlockedSongEntry({ title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / Bansanka (tuki.)" }), false);
   assert.equal(isBlockedSongEntry({ title: "花になって", artist: "緑黄色社会" }), false);
@@ -281,6 +427,16 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isLikelyNonSongEntry({ title: "spending", artist: "Known Artist" }), false);
   assert.equal(isLikelyNonSongEntry({ title: "Ending", artist: "Known Artist" }), false);
   assert.equal(isLikelyNonSongEntry({ title: "セトリは概要欄です", artist: "Setlist is in the description", raw: "01. セトリは概要欄です / Setlist is in the description" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "新しいBGM", artist: "New Background Music", raw: "01:00 新しいBGM / New Background Music" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "お知らせタイム", artist: "Announcement time", raw: "01:00 お知らせタイム / Announcement time" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "ハノメシ、Hanon Ch.コミュニティは帰るべき場所", artist: "未記載" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "トークパート①", artist: "自己紹介" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "自己紹介", artist: "未記載" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "自己紹介", artist: "Known Artist" }), false);
+  assert.equal(isLikelyNonSongEntry({ title: "自己紹介", artist: "Aimer" }, { channelName: "Noa Polaris" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "OPトーク", artist: "背景/星空" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "待機OPstart", artist: "未記載" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "雑談 / 買ったお米に虫が湧いた話", artist: "未記載" }), true);
   assert.equal(isLikelyNonSongEntry({ title: "START", artist: "愛内里菜", raw: "0:11 START / 愛内里菜" }), false);
   assert.equal(isLikelyNonSongEntry({ title: "Opening", artist: "Known Artist", raw: "0:12 Opening / Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "閉会式も見てください", artist: "待补歌手" }), true);

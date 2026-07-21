@@ -211,8 +211,8 @@ test("artist rank song details share inline source model and append remaining so
 });
 
 test("VTuber song details use bounded progressive render and filter dirty preview titles", () => {
-  assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = 39;/u);
-  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 39;/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 12;/u);
   assert.match(functionBody("function artistSongInitialLimit"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_INITIAL_LIMIT/u);
   assert.match(functionBody("function artistSongBatchSize"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_BATCH_SIZE/u);
   assert.match(functionBody("function vtuberSongPreview"), /sortedDisplaySongEntries\(record\.songs\)/u);

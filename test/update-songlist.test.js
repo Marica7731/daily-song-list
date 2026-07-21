@@ -9,6 +9,7 @@ process.env.DAILY_SONG_MONTH_BACKFILL_RECENT_BUCKET_LIMIT = "1";
 process.env.DAILY_SONG_429_COOLDOWN_MS = "9000";
 
 const {
+  applyGroupQualityFilters,
   buildGroups,
   buildRankDiffs,
   collectCarryForwardVideos,
@@ -895,6 +896,31 @@ test("candidate selection and final merge filter blacklisted videos", () => {
     merged.map((item) => item.videoId),
     ["BBBBBBBBBBB"],
   );
+});
+
+test("group quality filters apply source-aware Noa cleanup", () => {
+  const filtered = applyGroupQualityFilters({
+    all: {
+      items: [
+        {
+          ...video("NOAPOLARIS1", 1, ["today"], {
+            channelName: "ノア・ポラリス -Noa Polaris-",
+            channelHandle: "/@noa_polaris",
+          }),
+          songs: [
+            song("自己紹介", "Aimer"),
+            song("Brave Shine", "Aimer Start", { seconds: 120, time: "0:02:00" }),
+            song("LAST STARDUST", "Aimer", { seconds: 180, time: "0:03:00" }),
+          ],
+        },
+      ],
+    },
+  });
+
+  assert.deepEqual(filtered.all.items[0].songs.map((item) => `${item.title} / ${item.artist}`), [
+    "Brave Shine / Aimer",
+    "LAST STARDUST / Aimer",
+  ]);
 });
 
 test("Retry-After parsing supports seconds and HTTP dates", () => {

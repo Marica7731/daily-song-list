@@ -298,6 +298,7 @@ async function assertUiShape(page, viewport, range) {
       height: node.getBoundingClientRect().height,
     }));
     const bottomSelect = rect(".pagination-bottom .page-select");
+    const bottomPageSize = rect(".pagination-bottom .page-size-control");
     const bottomControls = Array.from(document.querySelectorAll(".pagination-bottom .pagination-button")).map((node) => ({
       text: node.textContent || "",
       ariaLabel: node.getAttribute("aria-label") || "",
@@ -435,6 +436,7 @@ async function assertUiShape(page, viewport, range) {
       topPageSize,
       topControls,
       bottomSelect,
+      bottomPageSize,
       bottomControls,
       filterBadges,
       queryTrigger: queryTriggerShape,
@@ -540,7 +542,9 @@ async function assertUiShape(page, viewport, range) {
     if (!result.firstRow || result.firstRow.bottom > viewport[1]) throw new Error(`first tablet row is not visible ${JSON.stringify(result)}`);
     if (!result.firstTitle || result.firstTitle.fontSize < 14) throw new Error(`first tablet title invalid ${JSON.stringify(result.firstTitle)}`);
   } else if (viewport[0] >= 1024) {
-    if (result.topSelect || !result.bottomSelect) throw new Error(`desktop pagination scope invalid ${JSON.stringify(result)}`);
+    if (result.topSelect || result.topPageSize || (!result.bottomSelect && !result.bottomPageSize)) {
+      throw new Error(`desktop pagination scope invalid ${JSON.stringify(result)}`);
+    }
     if (!result.firstRow || !result.firstTitle) throw new Error(`desktop first row missing ${JSON.stringify(result)}`);
     if (result.firstTitle.top < (result.topPagination?.bottom || 0) - 1) throw new Error(`desktop first title is covered ${JSON.stringify(result)}`);
     if (result.firstTitle.fontSize < 14) throw new Error(`desktop first title font too small ${JSON.stringify(result.firstTitle)}`);
@@ -2201,6 +2205,126 @@ async function compactSourceDrawerFlow(browser) {
   }
 }
 
+async function vtuberDrawerFlow(browser) {
+  for (const scenario of [
+    { label: "mobile", viewport: [390, 844] },
+    { label: "desktop", viewport: [1366, 768] },
+  ]) {
+    const viewport = scenario.viewport;
+    const { context, page, errors } = await newPage(browser, viewport);
+    const requests = [];
+    page.on("request", (request) => requests.push(requestPath(request.url())));
+    const url = new URL(baseUrl);
+    url.searchParams.set("view", "vtuberRank");
+    url.searchParams.set("metric", "songs");
+    url.searchParams.set("pageSize", "100");
+    await page.goto(url.toString(), { waitUntil: "domcontentloaded" });
+    await waitForRows(page, errors, requests);
+    await page.waitForLoadState("networkidle", { timeout: baseUrl.startsWith("https://") ? 10000 : 3000 }).catch(() => {});
+    await page.waitForTimeout(baseUrl.startsWith("https://") ? 500 : 100);
+
+    const rows = page.locator(".rank-row-vtuber:not(.skeleton-row):has([data-toggle-source])");
+    const count = await rows.count();
+    if (count < 1) throw new Error("no expandable vtuber rows found");
+
+    const row = rows.first();
+    const button = row.locator("[data-toggle-source]").first();
+    const beforeExpanded = await button.getAttribute("aria-expanded");
+    if (beforeExpanded !== "false") throw new Error(`vtuber toggle initial aria-expanded expected false, got ${beforeExpanded}`);
+    await button.click();
+    await page.waitForSelector(".rank-row-vtuber.is-expanded .source-drawer:not([hidden]) .artist-song-group-vtuber", { timeout: 15000 });
+    const afterExpanded = await button.getAttribute("aria-expanded");
+    if (afterExpanded !== "true") throw new Error(`vtuber toggle opened aria-expanded expected true, got ${afterExpanded}`);
+
+    const shape = await row.evaluate((node) => {
+      const visible = (target) => {
+        const style = getComputedStyle(target);
+        const box = target.getBoundingClientRect();
+        return !target.hidden && style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
+      };
+      const rectFor = (target) => {
+        const box = target.getBoundingClientRect();
+        return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height };
+      };
+      const drawer = node.querySelector(".source-drawer:not([hidden])");
+      const groups = Array.from(drawer?.querySelectorAll(".artist-song-group-vtuber") || []).filter(visible).map((group) => ({
+        ...rectFor(group),
+        title: group.querySelector(".artist-song-title")?.textContent?.trim() || "",
+        href: group.querySelector(".artist-song-title")?.getAttribute("href") || "",
+        countText: group.querySelector(".artist-song-count")?.textContent?.trim() || "",
+        thumbVisible: Boolean(group.querySelector(".artist-song-thumb img")),
+      }));
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        drawer: drawer ? rectFor(drawer) : null,
+        groupCount: groups.length,
+        groups,
+        toolbarCollapseButtons: drawer?.querySelectorAll(".source-drawer-toolbar [data-collapse-source]").length || 0,
+        bottomCollapseButtons: drawer?.querySelectorAll(".source-collapse-bottom[data-collapse-source]").length || 0,
+        countText: drawer?.querySelector(".source-drawer-count")?.textContent?.trim() || "",
+        copyAllButtons: drawer?.querySelectorAll("[data-copy-song-links]").length || 0,
+        sourceVideoGroups: drawer?.querySelectorAll(".source-video-group").length || 0,
+        nestedSourceToggles: drawer?.querySelectorAll("[data-toggle-artist-song-source]").length || 0,
+        pagerButtons: drawer?.querySelectorAll(".source-drawer-pagination [data-source-page]").length || 0,
+        pagerText: drawer?.querySelector(".source-page-summary")?.textContent?.trim() || "",
+      };
+    });
+    if (!shape.drawer || shape.groupCount < 1) throw new Error(`${scenario.label} vtuber drawer missing groups ${JSON.stringify(shape)}`);
+    if (shape.scrollWidth > shape.viewportWidth + 1) throw new Error(`${scenario.label} vtuber drawer caused horizontal overflow ${JSON.stringify(shape)}`);
+    if (shape.groupCount > 4) throw new Error(`${scenario.label} vtuber drawer should page initial groups at 4 ${JSON.stringify(shape)}`);
+    if (shape.copyAllButtons !== 0) throw new Error(`${scenario.label} vtuber drawer should not expose copy-all source links ${JSON.stringify(shape)}`);
+    if (shape.sourceVideoGroups !== 0 || shape.nestedSourceToggles !== 0) {
+      throw new Error(`${scenario.label} vtuber drawer should render song cards without nested source drawers ${JSON.stringify(shape)}`);
+    }
+    if (shape.toolbarCollapseButtons !== 1) throw new Error(`${scenario.label} vtuber drawer should expose one toolbar collapse action ${JSON.stringify(shape)}`);
+    if (!/^全部 \d+ 首歌(?: · \d+-\d+)?$/u.test(shape.countText)) throw new Error(`${scenario.label} vtuber drawer count text invalid ${JSON.stringify(shape)}`);
+    if (shape.groups.some((group) => group.width > shape.drawer.width + 1 || group.left < shape.drawer.left - 1 || group.right > shape.drawer.right + 1)) {
+      throw new Error(`${scenario.label} vtuber song group shifted out of drawer ${JSON.stringify(shape)}`);
+    }
+    if (shape.groups.some((group) => !group.title || !/^\d+次$/u.test(group.countText) || !group.thumbVisible || !group.href)) {
+      throw new Error(`${scenario.label} vtuber song group content invalid ${JSON.stringify(shape)}`);
+    }
+
+    if (shape.pagerButtons > 0) {
+      const firstTitles = await row.locator(".artist-song-group-vtuber .artist-song-title").evaluateAll((nodes) => nodes.map((node) => node.textContent?.trim() || ""));
+      const nextButton = row.locator(".source-drawer-pagination [data-source-page]").filter({ hasText: "下一页" });
+      if ((await nextButton.count()) !== 1) throw new Error(`${scenario.label} vtuber drawer missing next page button ${JSON.stringify(shape)}`);
+      await nextButton.click();
+      await page.waitForFunction(
+        (titles) => {
+          const visibleTitles = Array.from(document.querySelectorAll(".rank-row-vtuber.is-expanded .artist-song-group-vtuber .artist-song-title")).map((node) =>
+            node.textContent?.trim() || "",
+          );
+          return visibleTitles.length > 0 && visibleTitles.join("\n") !== titles.join("\n");
+        },
+        firstTitles,
+        { timeout: 15000 },
+      );
+      const pageTwo = await row.evaluate((node) => ({
+        countText: node.querySelector(".source-drawer-count")?.textContent?.trim() || "",
+        groupCount: node.querySelectorAll(".artist-song-group-vtuber").length,
+        copyAllButtons: node.querySelectorAll(".source-drawer:not([hidden]) [data-copy-song-links]").length,
+        sourceVideoGroups: node.querySelectorAll(".source-drawer:not([hidden]) .source-video-group").length,
+        scrollWidth: document.documentElement.scrollWidth,
+        viewportWidth: document.documentElement.clientWidth,
+      }));
+      if (!/ · 5-\d+$/u.test(pageTwo.countText) || pageTwo.groupCount < 1 || pageTwo.groupCount > 4) {
+        throw new Error(`${scenario.label} vtuber drawer page two invalid ${JSON.stringify(pageTwo)}`);
+      }
+      if (pageTwo.copyAllButtons !== 0 || pageTwo.sourceVideoGroups !== 0) throw new Error(`${scenario.label} vtuber page two source controls leaked ${JSON.stringify(pageTwo)}`);
+      if (pageTwo.scrollWidth > pageTwo.viewportWidth + 1) throw new Error(`${scenario.label} vtuber page two overflow ${JSON.stringify(pageTwo)}`);
+    }
+
+    const screenshotPath = shotPath(`vtuber-drawer-${viewport.join("x")}.png`);
+    await page.screenshot({ path: screenshotPath, fullPage: false });
+    const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
+    await context.close();
+    if (errors.length || unhandled) throw new Error(`${scenario.label} vtuber drawer errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `${scenario.label}-vtuber-drawer-${viewport.join("x")}`, requests: [...new Set(requests)], screenshotPath });
+  }
+}
+
 async function countVisibleInRow(row, selector) {
   return row.locator(selector).evaluateAll((nodes) =>
     nodes.filter((node) => {
@@ -2529,6 +2653,7 @@ function runtimeRequestPattern(range) {
     await mobileCopyAllLinksFlow(browser);
     await mobileVideoCardGeometry(browser);
     await compactSourceDrawerFlow(browser);
+    await vtuberDrawerFlow(browser);
     await monthlyFallbackScenarios(browser);
     await prefetchGuards(browser);
     await review404Scenario(browser);

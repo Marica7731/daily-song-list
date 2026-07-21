@@ -51,7 +51,7 @@ const {
   riskScoreFromReasons,
   sourceRiskReasons,
 } = require("./curation");
-const { isLikelyNonSongEntry, isTimestampCandidateText, normalizeParsedSong, parseTimestampSongs } = require("./song-utils");
+const { isLikelyNonSongEntry, isTimestampCandidateText, normalizeParsedSong, normalizeSourceAwareArtist, parseTimestampSongs } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(ROOT, "data");
@@ -871,11 +871,12 @@ function upsertCarriedVideo(videos, item, sourceGroups, from) {
 function normalizeCarryForwardItem(item, sourceGroups, from) {
   if (!isValidVideoId(item?.videoId)) return null;
   const originalSongs = item.songs || [];
+  const sourceContext = { candidate: item, sourceRecord: item, source: item };
   const normalizedSongs = originalSongs
     .map(normalizeParsedSong)
-    .map((song) => repairParsedEntry(song))
+    .map((song) => normalizeSourceAwareArtist(repairParsedEntry(song), sourceContext))
     .filter(isValidSong)
-    .filter((song) => !isLikelyNonSongEntry(song))
+    .filter((song) => !isLikelyNonSongEntry(song, sourceContext))
     .filter((song) => !isActivityMarkerTitle(song.title, song.artist));
   const { songs } = filterArtistRichMixedSourceSongs(normalizedSongs);
   if (!songs.length) return null;
@@ -1319,6 +1320,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   const sourceHash = sourceRecord.sourceHash || hashNormalizedText(sourceText);
   const lookup = curationContext.songSearchLookup || null;
   const aliasContext = curationContext.songAliasContext || loadSongAliasContext();
+  const sourceContext = { candidate, sourceRecord };
   const identifiedSongs = songs
     .map((song) => ({
       ...song,
@@ -1327,7 +1329,7 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
       sourceType,
       rawHash: hashNormalizedText(song.raw || `${song.time || ""} ${song.title || ""}`),
     }))
-    .map((song) => canonicalizeSongIdentity(repairParsedEntry(song, lookup), aliasContext));
+    .map((song) => canonicalizeSongIdentity(normalizeSourceAwareArtist(repairParsedEntry(song, lookup), sourceContext), aliasContext));
   const preSource = {
     sourceId,
     sourceHash,
@@ -1338,12 +1340,12 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   const curatedSources = applyCurationToSources([preSource], curationContext, candidate);
   const curatedSongs = curatedSources[0]?.songs || [];
   const manuallyRejectedSource = !curatedSources.length && identifiedSongs.length > 0;
-  const likelySongEntries = curatedSongs.filter((song) => song.forceKept || !isLikelyNonSongEntry(song));
+  const likelySongEntries = curatedSongs.filter((song) => song.forceKept || !isLikelyNonSongEntry(song, sourceContext));
   const curatedByRawHash = new Map(curatedSongs.map((song) => [song.rawHash, song]));
   const additionallyRejected = identifiedSongs
     .filter((song) => {
       const curated = curatedByRawHash.get(song.rawHash);
-      return !curated || (!curated.forceKept && isLikelyNonSongEntry(song));
+      return !curated || (!curated.forceKept && isLikelyNonSongEntry(song, sourceContext));
     })
     .map((song) =>
       compactRejectedEntry({
@@ -1357,14 +1359,14 @@ function buildSongSource(songs, rejectedEntries, sourceRecord, candidate, curati
   const mixedSourceFilter = filterArtistRichMixedSourceSongs(likelySongEntries);
   const cleaned = mixedSourceFilter.songs;
   const allRejectedEntries = [...rejectedEntries, ...additionallyRejected, ...mixedSourceFilter.rejectedEntries];
-  const stats = sourceStats(cleaned, songs, allRejectedEntries, sourceText, sourceType);
+  const stats = sourceStats(cleaned, songs, allRejectedEntries, sourceText, sourceType, sourceContext);
   stats.sourceId = sourceId;
   stats.sourceHash = sourceHash;
   const riskReasons = sourceRiskReasons({ songs: cleaned, stats });
   stats.riskReasons = riskReasons;
   stats.riskScore = riskScoreFromReasons(riskReasons, stats);
   stats.riskLevel = riskLevel(stats.riskScore);
-  stats.singleSongIdentification = singleSongIdentification(stats, candidate, cleaned, sourceText);
+  stats.singleSongIdentification = singleSongIdentification(stats, candidate, cleaned, sourceText, sourceContext);
   const rejectedReason = manuallyRejectedSource ? "manual_reject_source" : rejectedSongSourceReason(stats, candidate);
   const sourceTextIsNeeded = stats.riskScore > 0 || Boolean(rejectedReason) || stats.sourceType === "video_title" || Boolean(stats.singleSongIdentification);
   return {
@@ -1441,11 +1443,11 @@ function filterArtistRichMixedSourceSongs(songs) {
   return { songs: kept, rejectedEntries };
 }
 
-function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType) {
+function sourceStats(cleaned, original, rejectedEntries, sourceText, sourceType, sourceContext = {}) {
   const rawCount = original.length + rejectedEntries.length;
   const topicCount =
-    original.filter((song) => isTopicLikeEntry(song)).length +
-    rejectedEntries.filter((entry) => isTopicLikeEntry(entry)).length;
+    original.filter((song) => isTopicLikeEntry(song, sourceContext)).length +
+    rejectedEntries.filter((entry) => isTopicLikeEntry(entry, sourceContext)).length;
   const sentenceLikeCount = original.filter((song) => isSentenceLikeNoArtistEntry(song)).length;
   const artistCount = cleaned.filter((song) => isUsableArtist(song.artist)).length;
   const unknownArtistCount = cleaned.filter((song) => isUnknownArtist(song.artist)).length;
@@ -1524,11 +1526,11 @@ function rejectedSongSourceReason(stats, candidate) {
   return "";
 }
 
-function singleSongIdentification(stats, candidate, songs, sourceText) {
+function singleSongIdentification(stats, candidate, songs, sourceText, sourceContext = {}) {
   if (stats.keptCount !== 1 || !Array.isArray(songs) || songs.length !== 1) return null;
   const song = songs[0];
   const title = normalizeWhitespace(song.title || "");
-  if (!title || isLikelyNonSongEntry(song) || isCandidateActivityTitle(title, song.artist) || isConversationEntry(song)) return null;
+  if (!title || isLikelyNonSongEntry(song, sourceContext) || isCandidateActivityTitle(title, song.artist) || isConversationEntry(song)) return null;
   const titleCue = /(?:歌ってみた|歌いました|cover|covered|カバー|弾き語り|歌枠|karaoke|shorts?|short|歌唱|singing|song)/iu.test(
     `${candidate.title || ""} ${sourceText || ""}`,
   );
@@ -1665,9 +1667,9 @@ function isKnownNoArtistSongListTheme(candidate) {
   );
 }
 
-function isTopicLikeEntry(song) {
+function isTopicLikeEntry(song, sourceContext = {}) {
   return (
-    isLikelyNonSongEntry(song) ||
+    isLikelyNonSongEntry(song, sourceContext) ||
     /(?:曲始まり|お話|話$|話①|話②|スケジュール|おすすめ|コメント|チャット|ギフト|設定|手癖|腰|良い音|到着|お土産|先生|予想|コンディション|休暇中|気圧|体調|動画|映画|クリップ|バランス|スパチャ読み|読み開始|告知|開始|終了|高評価|ch登録|チャンネル登録|登録者(?:数)?|視聴者|OBS)/iu.test(
       `${song.title || ""} ${song.raw || song.line || ""}`,
     )
@@ -1858,18 +1860,24 @@ function applyGroupQualityFilters(groups) {
       {
         ...group,
         items: group.items
-          .map((item) => ({
-            ...item,
-            songs: (item.songs || [])
-              .map(normalizeParsedSong)
-              .filter((song) => !isLikelyNonSongEntry(song))
-              .filter((song) => !isActivityMarkerTitle(song.title, song.artist))
-              .filter((song) => !isConversationEntry(song)),
-          }))
+          .map((item) => applyItemSongQualityFilters(item))
           .filter((item) => !isLowQualitySelectedItem(item)),
       },
     ]),
   );
+}
+
+function applyItemSongQualityFilters(item) {
+  const sourceContext = { candidate: item, sourceRecord: item, source: item };
+  return {
+    ...item,
+    songs: (item.songs || [])
+      .map(normalizeParsedSong)
+      .map((song) => normalizeSourceAwareArtist(song, sourceContext))
+      .filter((song) => !isLikelyNonSongEntry(song, sourceContext))
+      .filter((song) => !isActivityMarkerTitle(song.title, song.artist))
+      .filter((song) => !isConversationEntry(song)),
+  };
 }
 
 function writeRankDiffFiles(payload, previousSnapshot = readPreviousSuccessfulSnapshot(payload), curationContext = null) {

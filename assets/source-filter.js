@@ -64,7 +64,9 @@
             if (normalizedSong !== song) normalizedSongs += 1;
             songs.push(normalizedSong);
           }
-          if (songs.length) items.push({ ...item, songs });
+          const dedupedSongs = dropSameSecondTranslatedAliasSongs(songs);
+          removedSongs += songs.length - dedupedSongs.length;
+          if (dedupedSongs.length) items.push({ ...item, songs: dedupedSongs });
         }
         return [groupId, { ...group, items }];
       }),
@@ -92,6 +94,55 @@
     const title = cleanSongTitleNoise(song.title);
     if (title === song.title) return song;
     return { ...song, title };
+  }
+
+  function dropSameSecondTranslatedAliasSongs(songs) {
+    if (!Array.isArray(songs) || songs.length < 2) return Array.isArray(songs) ? songs : [];
+    const groups = new Map();
+    songs.forEach((song, index) => {
+      const key = sameSecondGroupKey(song);
+      if (!key) return;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push({ song, index });
+    });
+    const mixedGroups = Array.from(groups.values())
+      .map((rows) => ({
+        rows,
+        cjkRows: rows.filter(({ song }) => isCjkSongTitle(song?.title)),
+        latinRows: rows.filter(({ song }) => isLatinOnlySongTitle(song?.title)),
+      }))
+      .filter((group) => group.cjkRows.length && group.latinRows.length);
+    if (mixedGroups.length < 2) return songs;
+
+    const dropIndexes = new Set();
+    for (const group of mixedGroups) {
+      if (!group.cjkRows.some(({ song }) => hasKnownArtist(song))) continue;
+      for (const { song, index } of group.latinRows) {
+        if (isSameSecondTranslatedLatinAlias(song, group.cjkRows)) dropIndexes.add(index);
+      }
+    }
+    return dropIndexes.size ? songs.filter((_, index) => !dropIndexes.has(index)) : songs;
+  }
+
+  function sameSecondGroupKey(song) {
+    const seconds = Number(song?.seconds);
+    if (!Number.isFinite(seconds)) return "";
+    return String(Math.trunc(seconds));
+  }
+
+  function isSameSecondTranslatedLatinAlias(song, cjkRows) {
+    if (!isLatinOnlySongTitle(song?.title)) return false;
+    if (hasKnownArtist(song)) return cjkRows.some(({ song: cjkSong }) => hasKnownArtist(cjkSong));
+    return true;
+  }
+
+  function isCjkSongTitle(value) {
+    return /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/u.test(normalizeWhitespace(value));
+  }
+
+  function isLatinOnlySongTitle(value) {
+    const text = normalizeWhitespace(value);
+    return /[A-Za-z]/u.test(text) && !isCjkSongTitle(text);
   }
 
   function cleanSongTitleNoise(text) {
@@ -126,12 +177,16 @@
     const artist = String(song?.artist || "").trim();
     if (isChannelScopedUnknownArtistDirtySong(song, source)) return true;
     if (isKisakiSourceDirtySong(song, source)) return true;
+    if (isNoaPolarisSourceDirtySong(song, source)) return true;
+    if (isSuperchatCommentaryEntry(title, artist)) return true;
+    if (isShortReactionPseudoSongTitle(title, artist)) return true;
     if (!hasArtist && isSelfReferentialChannelTitle(title, source)) return true;
+    if (!hasArtist && isSelfIntroductionMarker(title)) return true;
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
     if (isNonSongMarkerWithDescriptor(title, artist)) return true;
     if (isStrongNonSongActivityText(title)) return true;
     if (!hasArtist && isBracketedCommentaryNote(title)) return true;
-    if (isCommentaryNoiseEntry(title, artist, song?.raw)) return true;
+    if (isCommentaryNoiseEntry(title, artist, song?.raw, source)) return true;
     if (isExplanatoryEnglishGlossArtist(title, artist, song?.raw) && !hasSongListOrdinal(song?.raw)) return true;
     if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
     if (!hasArtist && isConversationalPseudoSongTitle(title, song?.raw)) return true;
@@ -204,6 +259,36 @@
     return channelName.includes("妃玖") || /\bkisaki\b/iu.test(channelName);
   }
 
+  function isNoaPolarisSourceDirtySong(song, source = {}) {
+    if (!isNoaPolarisSource(source)) return false;
+    const title = String(song?.title || song?.raw || "").normalize("NFKC").trim();
+    const artist = String(song?.artist || "").normalize("NFKC").trim();
+    const combined = `${title} ${artist} ${song?.raw || ""}`;
+    if (/^(?:Play|Talk)\s*Part\s*\d+$/iu.test(title)) return true;
+    if (/^トークパート[①-⑳\d]*$/u.test(title) || /^トークパート[①-⑳\d]*$/u.test(artist)) return true;
+    if (/^自己紹介(?:込み)?$/u.test(title) || /^自己紹介(?:込み)?$/u.test(artist)) return true;
+    return /(?:Baby\s+Noa\s+Polaris|Noah[’']?s\s+Ark.*デジタルフラワースタンドのお礼)/iu.test(combined);
+  }
+
+  function isNoaPolarisSource(source = {}) {
+    const values = uniqueStrings([
+      source.channelName,
+      source.ownerText,
+      source.longBylineText,
+      source.shortBylineText,
+      source.authorName,
+      source.authorText,
+      source.channelHandle,
+      source.handle,
+      source.ownerHandle,
+      ...channelUrlValues(source),
+    ]);
+    return values.some((value) => {
+      const text = String(value || "").normalize("NFKC").trim();
+      return /(?:^|[^A-Za-z0-9])Noa\s*Polaris(?:[^A-Za-z0-9]|$)/iu.test(text) || /@noa[._-]?polaris(?:\b|[/?#])/iu.test(text) || /ノア[\s\u3000・･.\-ー]*ポラリス/u.test(text);
+    });
+  }
+
   function isSelfReferentialChannelTitle(title, source = {}) {
     const titleKey = normalizeChannelIdentityTitle(title);
     if (!titleKey || titleKey.length < 3) return false;
@@ -269,12 +354,33 @@
   }
 
   function isStrongNonSongMarker(text) {
+    const rawText = String(text || "").normalize("NFKC").trim();
+    if (/^雑談\s*[\/／|｜]\s*\S/u.test(rawText)) return true;
+    const key = normalizeNoiseTitleKey(text);
+    if (/^トークパート\d*$/u.test(key)) return true;
     return new Set([
       "曲導入",
-    ]).has(normalizeNoiseTitleKey(text));
+      "曲入り前の解説",
+      "チューニング入ります",
+      "opトーク",
+      "待機opstart",
+    ]).has(key);
+  }
+
+  function isSelfIntroductionMarker(text) {
+    return /^(?:自己紹介|自己紹介込み)$/u.test(normalizeNoiseTitleKey(text));
+  }
+
+  function isShortReactionPseudoSongTitle(title, artist) {
+    const key = normalizeNoiseTitleKey(title);
+    if (/^(?:くしゃみ|助かる|たすかる|がち恋距離助かる|ガチ恋距離助かる)$/iu.test(key)) return true;
+    if (/ここすき$/u.test(key) && isUnknownArtist(artist)) return true;
+    return false;
   }
 
   function isNonSongNoiseTitle(text) {
+    const rawText = String(text || "").normalize("NFKC").trim();
+    if (/^雑談\s*[\/／|｜]\s*\S/u.test(rawText)) return true;
     const rawCompact = stripCustomEmojiAliases(text)
       .normalize("NFKC")
       .toLocaleLowerCase()
@@ -288,10 +394,19 @@
     if (/^(?:本日の)?目標[:：]?.*(?:目指|達成|人|名)/u.test(key)) return true;
     if (isStrongNonSongActivityText(text)) return true;
     if (/チャンネル登録者?\d*(?:人|名)?達成/u.test(key)) return true;
+    if (/^同接\d+(?:人|名)達成$/u.test(key)) return true;
+    if (/^同接\d+(?:人|名)(?:突破|達成おめでとう)$/u.test(key)) return true;
     if (/^(?:今晩の)?メニューと配信時間/u.test(key)) return true;
     if (/^(?:朝食|配信の食事事情|心音asmr|ギターの話|お声も起きてきた|告知とed|joysound|音楽停止|ペットショップ)$/iu.test(key)) return true;
     if (/(?:フルート|クラリネット|生演奏|ライブ|live|piano streaming|ピアノ演奏|edテーマ|メンシ|こそこそ話)/iu.test(key)) return true;
     if (/^(?:雑談タイム|新しいop画面|op画面|edトーク|休憩雑談タイム|カンニングタイム(?:part\d+)?)$/iu.test(key)) return true;
+    if (/^(?:本編終了|曲のリクエスト|お知らせその\d+|嬉しいお知らせがあることのお知らせ)$/u.test(key)) return true;
+    if (/^(?:お知らせタイム|大事なお知らせ|嬉しいお知らせ|悲しいお知らせ|明日の配信のお知らせ)$/u.test(key)) return true;
+    if (/^(?:新しいbgm|bgm変更|縦型配信の機能|配信前のアクシデント(?:の原因)?|明日夢かなえ入場|居酒屋で聞いて知った曲)$/iu.test(key)) return true;
+    if (/^(?:実はpart\d+がありました|bgm切り忘れにやっときづいたわたし)$/iu.test(key)) return true;
+    if (/^(?:endingpart|openingpart|oppart|edpart|opトーク|待機opstart|本日の目標|なれコール|ダブルなれコール)$/iu.test(key)) return true;
+    if (/新衣装お披露目.*サムネ公開/u.test(key)) return true;
+    if (/^(?:a\.?m\.?|p\.?m\.?)jazzbgm/iu.test(key)) return true;
     if (/^(?:afk|afkawayfromkeyboard|awayfromkeyboard)$/iu.test(key)) return true;
     if (/^(?:\d+時間じゃ足りない|平均配信時間\d+時間|喉の調子が|のどおぢ|だいぶ慣れてきた|ストリームモンスター|どう見てもロ)$/iu.test(key)) {
       return true;
@@ -364,6 +479,25 @@
     ]).has(key);
   }
 
+  function isSuperchatCommentaryEntry(title, artist) {
+    const titleKey = normalizeNoiseTitleKey(title);
+    const artistKey = normalizeNoiseTitleKey(artist);
+    const unknownArtist = isUnknownArtist(artist);
+    if (/^(?:superchat|readsuperchat|purplesuperchat|commentsranking)$/iu.test(titleKey)) {
+      return unknownArtist || /(?:membershipreadings?|membershipreading|chatting|chat|スパチャ|superchat)/iu.test(artistKey);
+    }
+    if (/^(?:ラモンちゃんのスーパーチャット|スーパーチャットは腐る)$/u.test(titleKey)) return true;
+    if (unknownArtist && /^comment\s*["“]/iu.test(String(title || "").trim())) return true;
+    return unknownArtist && isEnglishCommentarySentenceTitle(title);
+  }
+
+  function isEnglishCommentarySentenceTitle(text) {
+    const value = String(text || "").normalize("NFKC").trim();
+    const wordCount = value.split(/\s+/u).filter(Boolean).length;
+    if (value.length >= 48 && /\bcomment\b/iu.test(value) && /\b(?:actually|translated|adorable|roadside|leaves|signing|before|after|props)\b/iu.test(value)) return true;
+    return value.length >= 80 && wordCount >= 12 && /\b(?:i|you|my|oshi|every time|soothing|beautiful)\b/iu.test(value);
+  }
+
   function isNonSongMarkerWithDescriptor(title, artist) {
     const titleIsMarker = isNonSongNoiseTitle(title) || isSectionMarkerKey(title);
     if (!titleIsMarker) return false;
@@ -412,6 +546,8 @@
     if (/^(?:歌唱|歌|曲)?開始(?:時間|時刻)?$/iu.test(key)) return true;
     if (/^(?:歌唱|初手|声|音|お遊戯|おゆうぎ)(?:あり|有り)$/iu.test(key)) return true;
     if (/^(?:cパート|cpart|エンドカード|おかえり|音量注意|最後\d*秒音量注意)$/iu.test(key)) return true;
+    if (/^(?:うっかり|ちょっと待てぃ|ミュート|生写真チラ見せ)$/iu.test(key)) return true;
+    if (/(?:cパート|cpart|ミュート|生写真|チラ見せ)/iu.test(key)) return true;
     if (/^(?:順番は)?じゃんけんで$/iu.test(key)) return true;
     return false;
   }
@@ -436,6 +572,16 @@
       .replace(/[!！?？。．.]+$/gu, "")
       .trim();
     if (!value) return false;
+    if (/^(?:本編終了|曲のリクエスト|嬉しいお知らせ|悲しいお知らせ|お知らせタイム|大事なお知らせ|明日の配信のお知らせ|嬉しいお知らせがあることのお知らせ|本日の目標)$/u.test(value)) return true;
+    if (/^お知らせその\d+$/u.test(value)) return true;
+    if (/^(?:新しいBGM|BGM変更|縦型配信の機能|配信前のアクシデント(?:の原因)?|明日夢かなえ入場|居酒屋で聞いて知った曲)$/iu.test(value)) return true;
+    if (/^(?:実はPart\d+がありました|BGM切り忘れにやっときづいたわたし)$/iu.test(value)) return true;
+    if (/^(?:a\.?m\.?|p\.?m\.?)JazzBGM/iu.test(value)) return true;
+    if (/^(?:[∟└├])?\d{1,2}:\d{2}(?::\d{2})?同接\d+(?:人|名)(?:達成|突破|達成おめでとう)$/u.test(value)) return true;
+    if (/^(?:パレプロ|今日のリレーメンバー)(?:について|についてお話し?)$/u.test(value)) return true;
+    if (/^(?:なれコール|ダブルなれコール|なれコールPart\d+|無料で聞けるなれコールPart\d+|なれコールで\d+曲歌ったら面白いよね|なれコールはパスでもいいよ)$/iu.test(value)) return true;
+    if (/新衣装お披露目.*サムネ公開/u.test(value)) return true;
+    if (/記者会見ライブ配信/u.test(value) && /(?:党大会|チームみらい|20\d{2}年\d{1,2}月\d{1,2}日)/u.test(value)) return true;
     if (/^(?:閉会式|閉会|開会式)(?:も?(?:見てください|みてください|見てね|みてね))?$/u.test(value)) return true;
     if (/^\d+を手で表現した$/u.test(value)) return true;
     if (/(?:周年記念)?(?:お)?写真公開/u.test(value)) return true;
@@ -450,9 +596,10 @@
     return false;
   }
 
-  function isCommentaryNoiseEntry(title, artist, raw) {
+  function isCommentaryNoiseEntry(title, artist, raw, source = {}) {
     const hasArtist = Boolean(artist && !isUnknownArtist(artist));
     const titleIsNoise = isCommentaryNoiseText(title);
+    if (isNaraetanSource(source) && isNaraetanEncoreReference(`${title || ""} ${artist || ""} ${raw || ""}`)) return true;
     if (isNaraetanSelfReference(`${title || ""} ${artist || ""} ${raw || ""}`) && !isKnownSongSafeFromCommentary(title, artist)) return true;
     if (!hasArtist && (titleIsNoise || isCommentaryNoiseText(raw) || isNaraetanSelfReference(title) || isTopicLikeBilingualCommentary(title, artist, raw))) return true;
     if (titleIsNoise && (isNonSongDescriptorField(artist) || isCommentaryNoiseText(artist) || isSentenceLikeCredit(artist))) return true;
@@ -471,8 +618,12 @@
     if (/^(?:コメ|コメント|米)[「『"].{1,80}[」』"]$/iu.test(value)) return true;
     if (/^(?:アンケート|投票)(?:結果|タイム|中|する|して|お願いします|お願い)?(?:[（(].{1,80}[）)])?$/u.test(value)) return true;
     if (/^(?:リクエスト|リク)(?:募集|確認|受付|タイム|ください|下さい|募集中|受付中|ok|OK)?$/iu.test(value)) return true;
+    if (/^(?:曲の)?(?:リクエスト|リク)(?:募集|確認|受付|タイム|ください|下さい|募集中|受付中|ok|OK)$/iu.test(value)) return true;
     if (/^(?:コメント|コメ)(?:読み|欄|確認|返信|返し|して|ください|下さい|募集中|歓迎)$/iu.test(value)) return true;
     if (/^(?:配信|歌枠)(?:開始|終了|予定|告知|中|について|ありがとう|お疲れさま?|おつかれさま?)$/iu.test(value)) return true;
+    if (/(?:という曲の歌い方|曲の歌い方)について$/u.test(value)) return true;
+    if (/^(?:新しい衣装|劇場版コナン|パレプロ|のあち枠配信画面[\/／]?モールス|白玖ウタノさん)(?:について|についてお話し)$/u.test(value)) return true;
+    if (/コミュニティは帰るべき場所/u.test(value)) return true;
     if (/(?:セトリ|セットリスト|タイムスタンプ|概要欄|説明欄|曲名|歌手|アーティスト).{0,24}(?:です|ます|ください|下さい|お願い|教えて|確認|修正|追加|更新|まとめ|整理|不明|未記載|わからない|分からない)/iu.test(value)) return true;
     if (/(?:初見|はじめまして).{0,20}(?:いらっしゃい|歓迎|ようこそ)/iu.test(value)) return true;
     if (/(?:なれコール)?アンケート|歌詞考察|曲紹介(?:タイム)?/u.test(value)) return true;
@@ -521,7 +672,7 @@
     if (!titleText || !artistText || !containsJapanese(titleText) || containsJapanese(artistText)) return false;
     if (!isEnglishGlossLikeText(artistText)) return false;
     if (isCommentaryNoiseText(titleText) || isTopicLikeTitle(titleText) || isSentenceLikeTitle(titleText)) return true;
-    return /(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ|体調|歯磨き|うがい|買い物|職場|謝|絵文字|プレゼント|踏んで|海遊館|大阪の話|衣装|髪型|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|料理|メニュー|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|joysound|セトリ|セットリスト|タイムスタンプ|概要欄|説明欄|曲名|歌手|アーティスト|初見|はじめまして|いらっしゃい|歓迎|決まって|教えて|お願い|開始|終了)/iu.test(titleText);
+    return /(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|お知らせ|告知|bgm|コメント|コメ|コミュニティ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ|体調|歯磨き|うがい|買い物|職場|謝|絵文字|プレゼント|踏んで|海遊館|大阪の話|衣装|髪型|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|料理|メニュー|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|joysound|セトリ|セットリスト|タイムスタンプ|概要欄|説明欄|曲名|歌手|アーティスト|初見|はじめまして|いらっしゃい|歓迎|決まって|教えて|お願い|開始|終了)/iu.test(titleText);
   }
 
   function isEnglishGlossLikeText(text) {
@@ -532,7 +683,7 @@
     if (!words.length || words.length > 18) return false;
     if (isSentenceLikeCredit(value)) return true;
     if (/[?？]$/.test(value) || /\([^)]{3,80}\)/u.test(value)) return true;
-    return /\b(?:about|accidental|accented|ad|alcohol|all-you-can-eat|anime|apartment|apolog(?:y|ize)|atmosphere|attack|ballad|body|brush(?:ing)?|bugging|burger|carbonated|catchy|cheating|chili|click|commercial|cooking|copyright|count|dance|decided|description|descriptions?|differences?|difficult|dream|drink(?:ing)?|emoji|emojis|filefish|first-time|food|gift|greeting|guinea|hairstyle|heart|hello|hospital|introduced?|introducing|japanese|kfc|korean|korea|label|learned|luck|marks?|microphone|money|move forward|music|muted|newly|oil|outfits?|pain relief|parents?|patches|pet|picture|please|poisoning|poll|popular|pronunciation|quiz|rechecking|recommendations?|recently|request|rice|rinsing|risks?|rolled|sake|salon|setlist|shop|song|songs|souvenirs?|spring|stops?|swiss|tea|temptation|timestamps?|traditional|vowel|watched|welcome|workplace)\b/iu.test(value);
+    return /\b(?:about|accidental|accented|ad|alcohol|all-you-can-eat|announcement|anime|apartment|apolog(?:y|ize)|atmosphere|attack|background|ballad|body|brush(?:ing)?|bugging|burger|carbonated|catchy|cheating|chili|click|commercial|community|cooking|copyright|count|dance|decided|description|descriptions?|differences?|difficult|dream|drink(?:ing)?|emoji|emojis|filefish|first-time|food|gift|greeting|guinea|hairstyle|heart|hello|hospital|introduced?|introducing|japanese|kfc|korean|korea|label|learned|luck|marks?|microphone|money|move forward|music|muted|newly|oil|outfits?|pain relief|parents?|patches|pet|picture|please|poisoning|poll|popular|pronunciation|quiz|rechecking|recommendations?|recently|request|rice|rinsing|risks?|rolled|sake|salon|setlist|shop|song|songs|souvenirs?|spring|stops?|swiss|tea|temptation|timestamps?|traditional|vowel|watched|welcome|workplace)\b/iu.test(value);
   }
 
   function isExplanatoryEnglishGlossArtist(title, artist, raw) {
@@ -544,7 +695,7 @@
     if (/^(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did)\b/u.test(artistText)) {
       return true;
     }
-    return /\b(?:about|accidental|all-you-can-eat|anime|apartment|apolog(?:y|ize)|atmosphere|blossoms?|body|broadcasting|brush(?:ing)?|bugging|burger|celebrit(?:y|ies)|chat|cheating|chili|club|comment|conan|cooking|copyright|count|dance|decided|description|descriptions?|detective|drink(?:ing)?|emoji|emojis|ending songs?|famous|favorite|filefish|first-time|food|gift|greeting|guide|guinea|hair|hairstyle|heart|hello|hospital|how to|imitating|information|kfc|korea|label|learned|luck|memories|menu|microphone|mind of its own|money|move forward|muted|new outfit|newly|oil|opening|organizing|outfits?|pain relief|park|patches|personal|pet|phones?|please|poisoning|quiz|quotes?|rechecking|recommendations?|request|rinsing|rolled|sake|setlist|shop|song list|spring|stocked|surprised|swiss|take a look|throat|thoughts?|timestamps?|watching|welcome|workplace)\b/iu.test(artistText);
+    return /\b(?:about|accidental|all-you-can-eat|announcement|anime|apartment|apolog(?:y|ize)|atmosphere|background|blossoms?|body|broadcasting|brush(?:ing)?|bugging|burger|celebrit(?:y|ies)|chat|cheating|chili|club|comment|community|conan|cooking|copyright|count|dance|decided|description|descriptions?|detective|drink(?:ing)?|emoji|emojis|ending songs?|famous|favorite|filefish|first-time|food|gift|greeting|guide|guinea|hair|hairstyle|heart|hello|hospital|how to|imitating|information|kfc|korea|label|learned|luck|memories|menu|microphone|mind of its own|money|move forward|muted|new outfit|newly|oil|opening|organizing|outfits?|pain relief|park|patches|personal|pet|phones?|please|poisoning|quiz|quotes?|rechecking|recommendations?|request|rinsing|rolled|sake|setlist|shop|song list|spring|stocked|surprised|swiss|take a look|throat|thoughts?|timestamps?|watching|welcome|workplace)\b/iu.test(artistText);
   }
 
   function isKnownEnglishArtistName(artist) {
@@ -621,7 +772,27 @@
   }
 
   function isNaraetanSelfReference(text) {
-    return /なれたん/u.test(String(text || ""));
+    return /(?:なれたん|naraetan)/iu.test(String(text || ""));
+  }
+
+  function isNaraetanEncoreReference(text) {
+    return /(?:なれコール|narae[\s_-]*encore)/iu.test(String(text || ""));
+  }
+
+  function isNaraetanSource(source = {}) {
+    const values = uniqueStrings([
+      source.channelName,
+      source.ownerText,
+      source.longBylineText,
+      source.shortBylineText,
+      source.authorName,
+      source.authorText,
+      source.channelHandle,
+      source.handle,
+      source.ownerHandle,
+      ...channelUrlValues(source),
+    ]);
+    return values.some((value) => /(?:なれたん|naraetan|@naraetanv)/iu.test(String(value || "").normalize("NFKC")));
   }
 
   function containsJapanese(text) {
@@ -909,6 +1080,7 @@
     BLOCKLIST_HASH,
     BLOCKLIST_VERSION,
     createBlockedSourceAudit,
+    dropSameSecondTranslatedAliasSongs,
     filterBlockedVideos,
     filterPayloadBlockedSources,
     isArtistRichMixedSongList,

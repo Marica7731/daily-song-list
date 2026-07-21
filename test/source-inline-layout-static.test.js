@@ -23,10 +23,11 @@ test("desktop source preview cards keep consistent rails across one, two, and ma
   assert.match(actionBlock, /width:\s*100%;/u);
 });
 
-test("mobile source preview remains a full-width single column", () => {
+test("mobile source preview uses compact two-column cards while single source remains full width", () => {
   const mobileSource = cssSource.slice(cssSource.indexOf("@media (max-width: 720px)"));
 
   assert.match(mobileSource, /\.source-inline-strip\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\);/u);
-  assert.match(mobileSource, /\.source-inline-preview-list\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\);/u);
+  assert.match(mobileSource, /\.source-inline-preview-list\s*\{[\s\S]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/u);
   assert.match(mobileSource, /\.source-inline-strip\[data-source-video-count="1"\]\s+\.source-inline-preview-list\s*\{[\s\S]*grid-template-columns:\s*minmax\(0,\s*1fr\);/u);
+  assert.match(mobileSource, /\.source-inline-item\s*\{[\s\S]*grid-template-columns:\s*44px minmax\(0,\s*1fr\) 24px;/u);
 });

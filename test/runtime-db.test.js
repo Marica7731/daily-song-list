@@ -481,6 +481,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
                 { title: "なれコールアンケート", artist: "未記載", raw: "01:44:00 なれコールアンケート", time: "0:06", seconds: 6 },
                 { title: "食あたり", artist: "Food Poisoning", raw: "01:44:10 食あたり / Food Poisoning", time: "0:07", seconds: 7 },
                 { title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / tuki.", time: "0:08", seconds: 8 },
+                { title: "晩餐歌 (Bansanka)", artist: "tuki.", raw: "1:05:22 晩餐歌 (Bansanka) / tuki.", time: "0:08:30", seconds: 510 },
                 { title: "上野公園の桜", artist: "Cherry Blossoms at Ueno Park", raw: "0:09 上野公園の桜 / Cherry Blossoms at Ueno Park", time: "0:09", seconds: 9 },
                 { title: "ホログラム", artist: "NICO Touches the Walls", raw: "0:10 ホログラム / NICO Touches the Walls", time: "0:10", seconds: 10 },
                 {
@@ -795,6 +796,32 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(retainedMomentSongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(retainedMomentSongOutput, /"totalCount": 4/);
 
+  const songAliasOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "晩餐歌",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(songAliasOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const songAliasPayload = parseDbQueryOutput(songAliasOutput);
+  assert.equal(songAliasPayload.totalCount, 1);
+  assert.equal(songAliasPayload.records[0].title, "晩餐歌");
+  assert.equal(songAliasPayload.records[0].displayArtist, "tuki.");
+  assert.equal(songAliasPayload.records[0].timestampCount, 2);
+
   const retainedEnglishArtistOutput = execFileSync(
     PYTHON,
     [
@@ -1059,6 +1086,111 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   );
   assert.match(compositeVtuberOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(compositeVtuberOutput, /"totalCount": 0/);
+});
+
+test("runtime DB builder drops same-second translated alias rows from bilingual source lists", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-db-translated-"));
+  const latestPath = path.join(dir, "latest.json");
+  const dbPath = path.join(dir, "song-rank.sqlite");
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-22T00:00:00.000Z",
+      capturedAt: "2026-07-22T00:00:00.000Z",
+      groups: {
+        all: {
+          items: [
+            {
+              videoId: "video-translated",
+              title: "Bilingual Karaoke",
+              channelName: "Alias Ch.",
+              thumbnailUrl: "https://i.ytimg.com/vi/video-translated/hqdefault.jpg",
+              publishedTimestamp: 1784678400000,
+              publishedText: "2026-07-22",
+              songs: [
+                { title: "ピースサイン", artist: "米津玄師", seconds: 741, time: "12:21" },
+                { title: "Peace Sign", artist: "Kenshi Yonezu", seconds: 741, time: "12:21" },
+                { title: "マリーゴールド", artist: "あいみょん", seconds: 1392, time: "23:12" },
+                { title: "Marigold", artist: "Aimyon", seconds: 1392, time: "23:12" },
+                { title: "晩餐歌", artist: "tuki.", seconds: 2400, time: "40:00" },
+                { title: "Bansanka", artist: "tuki.", seconds: 2400, time: "40:00" },
+                { title: "Hello", artist: "Adele", seconds: 2000, time: "33:20" },
+              ],
+            },
+          ],
+        },
+      },
+    }),
+    "utf8",
+  );
+
+  const buildOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+      "--input",
+      latestPath,
+      "--output",
+      dbPath,
+      "--no-vsinger",
+      "--no-youtube-channel-discovery",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+
+  const songOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"ピースサイン\" OR \"Peace Sign\" OR \"マリーゴールド\" OR Marigold OR 晩餐歌 OR Bansanka OR Hello",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(songOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const songPayload = parseDbQueryOutput(songOutput);
+  assert.deepEqual(
+    songPayload.records.map((record) => record.title).sort(),
+    ["Hello", "ピースサイン", "マリーゴールド", "晩餐歌"].sort(),
+  );
+  assert.equal(songPayload.records.find((record) => record.title === "Hello")?.displayArtist, "Adele");
+  assert.equal(songPayload.records.find((record) => record.title === "晩餐歌")?.timestampCount, 1);
+
+  const vtuberOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "vtubers",
+      "--metric",
+      "songs",
+      "--q",
+      "Alias",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(vtuberOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const vtuberPayload = parseDbQueryOutput(vtuberOutput);
+  assert.equal(vtuberPayload.records[0].songCount, 4);
+  assert.deepEqual(
+    vtuberPayload.records[0].songs.map((song) => song.name).sort(),
+    ["Hello", "ピースサイン", "マリーゴールド", "晩餐歌"].sort(),
+  );
 });
 
 function parseDbQueryOutput(output) {

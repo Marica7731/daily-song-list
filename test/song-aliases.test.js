@@ -78,6 +78,44 @@ test("canonicalizes reviewed page title variants without merging different songs
   assert.equal(canonicalizeSongIdentity({ title: "晴るる", artist: "あたらよ" }, context).title, "晴るる");
 });
 
+test("canonicalizes high-confidence romanized and translated title aliases", () => {
+  const context = createSongAliasContext({
+    schemaVersion: 1,
+    records: [
+      {
+        artist: "tuki.",
+        canonicalTitle: "晩餐歌",
+        aliases: ["Bansanka"],
+        reason: "verified_same_song",
+      },
+      {
+        artist: "YOASOBI",
+        canonicalTitle: "アイドル",
+        aliases: ["Idol"],
+        reason: "verified_same_song",
+      },
+      {
+        artist: "Omoinotake",
+        canonicalTitle: "幾億光年",
+        aliases: ["Ikuoku Konen", "Billions of Light Years"],
+        reason: "verified_same_song",
+      },
+      {
+        artist: "TWO-MIX",
+        canonicalTitle: "WHITE REFLECTION",
+        aliases: ["White feflection"],
+        reason: "verified_same_song",
+      },
+    ],
+  });
+
+  assert.equal(canonicalizeSongIdentity({ title: "Bansanka", artist: "tuki." }, context).title, "晩餐歌");
+  assert.equal(canonicalizeSongIdentity({ title: "Idol", artist: "YOASOBI" }, context).title, "アイドル");
+  assert.equal(canonicalizeSongIdentity({ title: "Billions of Light Years", artist: "Omoinotake" }, context).title, "幾億光年");
+  assert.equal(canonicalizeSongIdentity({ title: "White feflection", artist: "TWO-MIX" }, context).title, "WHITE REFLECTION");
+  assert.equal(canonicalizeSongIdentity({ title: "Idol", artist: "BTS" }, context).title, "Idol");
+});
+
 test("canonicalizes aliases across payload groups and exposes alias summary", () => {
   const payload = canonicalizePayloadSongAliases(
     {

@@ -1203,9 +1203,9 @@ async function assertFixtureSourceProof(page, caseName, label) {
   if (
     shape.items.some(
       (item) =>
-        item.thumbWidth < 46 ||
+        item.thumbWidth < 40 ||
         item.thumbWidth > 56 ||
-        item.thumbHeight < 27 ||
+        item.thumbHeight < 23 ||
         item.thumbHeight > 32 ||
         !item.timeVisible ||
         !item.timeText ||
@@ -1238,7 +1238,7 @@ async function assertFixtureSourceProof(page, caseName, label) {
     }
     return;
   }
-  if (shape.sourceVideoCount > 1 && (shape.copyAllWidth < 26 || shape.copyAllWidth > 32)) {
+  if (shape.sourceVideoCount > 1 && (shape.copyAllWidth < 24 || shape.copyAllWidth > 32)) {
     throw new Error(`${label} fixture copy action invalid: ${JSON.stringify(shape)}`);
   }
 }

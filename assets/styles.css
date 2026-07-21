@@ -2168,6 +2168,18 @@ mark {
   gap: var(--space-2);
 }
 
+.artist-song-drawer[data-source-mode="vtuber"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.artist-song-drawer[data-source-mode="vtuber"] .source-drawer-toolbar,
+.artist-song-drawer[data-source-mode="vtuber"] .source-drawer-pagination,
+.artist-song-drawer[data-source-mode="vtuber"] .source-collapse-bottom,
+.artist-song-drawer[data-source-mode="vtuber"] .source-drawer-status {
+  grid-column: 1 / -1;
+}
+
 .artist-song-group {
   display: grid;
   gap: var(--space-2);
@@ -2274,19 +2286,53 @@ mark {
 
 .artist-song-group-vtuber {
   gap: 6px;
+  min-height: 0;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: #f8fafc;
 }
 
 .artist-song-group-vtuber .artist-song-header {
-  grid-template-columns: 72px minmax(0, 1fr) auto;
-  grid-template-areas: "thumb title actions";
+  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-areas:
+    "thumb title"
+    "thumb actions";
+  gap: 4px 6px;
+  align-items: start;
+}
+
+.artist-song-group-vtuber:last-child {
+  padding: 6px;
+  border: 1px solid var(--line);
 }
 
 .artist-song-group-vtuber .artist-song-title {
-  font-size: 13.5px;
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 1.25;
+  white-space: normal;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.artist-song-group-vtuber .artist-song-thumb {
+  width: 56px;
+}
+
+.artist-song-group-vtuber .artist-song-artist {
+  font-size: 11px;
 }
 
 .artist-song-group-vtuber .artist-song-summary-actions {
-  gap: 6px;
+  justify-self: start;
+  gap: 4px;
+}
+
+.artist-song-group-vtuber .artist-song-count {
+  justify-self: start;
+  font-size: 11px;
 }
 
 .artist-song-source-toggle {
@@ -3632,6 +3678,14 @@ mark {
     height: 16px;
   }
 
+  .query-field-menu-panel {
+    right: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+    width: min(320px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+  }
+
   .query-search-form .query-count {
     display: inline-grid;
     min-width: 10px;
@@ -3970,7 +4024,7 @@ mark {
 
   .source-inline-preview-list {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4px;
     width: 100%;
   }
@@ -4010,16 +4064,16 @@ mark {
   }
 
   .source-inline-item {
-    grid-template-columns: 56px minmax(0, 1fr) 26px;
-    min-height: 38px;
+    grid-template-columns: 44px minmax(0, 1fr) 24px;
+    min-height: 32px;
     padding: 2px 2px 2px 2px;
   }
 
   .source-inline-strip .source-inline-thumb.source-link {
-    width: 56px;
-    height: 32px;
-    min-height: 32px;
-    max-height: 32px;
+    width: 44px;
+    height: 25px;
+    min-height: 25px;
+    max-height: 25px;
     padding: 0;
   }
 
@@ -4058,19 +4112,19 @@ mark {
 
   .source-inline-copy,
   .source-inline-copy-all {
-    flex-basis: 26px;
-    width: 26px;
-    min-width: 26px;
-    height: 26px;
-    min-height: 26px;
+    flex-basis: 24px;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
   }
 
   .source-inline-strip .source-inline-copy,
   .source-inline-strip .source-inline-copy-all {
-    width: 26px;
-    min-width: 26px;
-    height: 26px;
-    min-height: 26px;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
   }
 
   .source-inline-copy-all {
@@ -4319,34 +4373,39 @@ mark {
     border-top: 1px solid var(--line);
   }
 
+  .artist-song-drawer[data-source-mode="vtuber"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+
   .artist-song-group-vtuber {
-    gap: 8px;
-    padding: 9px 0 10px;
+    gap: 4px;
+    padding: 6px;
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: 48px minmax(0, 1fr);
     grid-template-areas:
       "thumb title"
       "thumb actions";
     align-items: start;
-    gap: 4px 8px;
+    gap: 3px 5px;
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
-    width: 72px;
+    width: 48px;
     align-self: start;
   }
 
   .artist-song-group-vtuber .artist-song-title-wrap {
-    min-height: 40px;
+    min-height: 0;
     justify-content: center;
   }
 
   .artist-song-group-vtuber .artist-song-title {
     display: -webkit-box;
-    font-size: 14px;
-    line-height: 1.28;
+    font-size: 12px;
+    line-height: 1.25;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     white-space: normal;
@@ -4354,14 +4413,14 @@ mark {
 
   .artist-song-group-vtuber .artist-song-artist {
     display: block;
-    font-size: 11.5px;
+    font-size: 10.5px;
   }
 
   .artist-song-group-vtuber .artist-song-summary-actions {
     align-self: start;
     justify-self: start;
     justify-content: flex-start;
-    gap: 4px 8px;
+    gap: 3px;
     max-width: 100%;
   }
 
@@ -4372,7 +4431,7 @@ mark {
     border-radius: 0;
     background: transparent;
     color: var(--muted);
-    font-size: 11.5px;
+    font-size: 10.5px;
     font-weight: 700;
     line-height: 1.2;
   }
@@ -4708,14 +4767,14 @@ mark {
   }
 
   .source-inline-item {
-    grid-template-columns: 48px minmax(0, 1fr) 26px;
+    grid-template-columns: 40px minmax(0, 1fr) 24px;
   }
 
   .source-inline-strip .source-inline-thumb.source-link {
-    width: 48px;
-    height: 27px;
-    min-height: 27px;
-    max-height: 27px;
+    width: 40px;
+    height: 23px;
+    min-height: 23px;
+    max-height: 23px;
     padding: 0;
   }
 
@@ -4732,18 +4791,18 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 58px minmax(0, 1fr);
+    grid-template-columns: 44px minmax(0, 1fr);
     grid-template-areas:
       "thumb title"
       "thumb actions";
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
-    width: 58px;
+    width: 44px;
   }
 
   .artist-song-group-vtuber .artist-song-title {
-    font-size: 13px;
+    font-size: 11.5px;
   }
 }
 
@@ -4786,15 +4845,15 @@ mark {
   }
 
   .source-inline-item {
-    grid-template-columns: 48px minmax(28px, 1fr) 26px;
+    grid-template-columns: 40px minmax(0, 1fr) 24px;
     gap: 3px;
   }
 
   .source-inline-strip .source-inline-thumb.source-link {
-    width: 48px;
-    height: 27px;
-    min-height: 27px;
-    max-height: 27px;
+    width: 40px;
+    height: 23px;
+    min-height: 23px;
+    max-height: 23px;
     padding: 0;
   }
 
@@ -4803,13 +4862,13 @@ mark {
   }
 
   .source-inline-extra-times {
-    padding-left: 50px;
+    padding-left: 42px;
   }
 
   .source-copy-icon {
-    width: 28px;
-    min-width: 28px;
-    min-height: 28px;
+    width: 24px;
+    min-width: 24px;
+    min-height: 24px;
     padding: 0;
   }
 }
