@@ -1,0 +1,96 @@
+{
+  "videoCount": 34,
+  "occurrenceCount": 356,
+  "uniqueSongCount": 313,
+  "publishedTimestampCoverage": "34/34",
+  "occurrenceTimeCoverage": "356/356",
+  "occurrenceSecondsCoverage": "356/356",
+  "channels": {
+    "/@toamall": {
+      "acceptedVideos": 9,
+      "acceptedOccurrences": 104,
+      "uniqueSongs": 90,
+      "publishedTimestampPresent": 9,
+      "occurrenceTimePresent": 104,
+      "occurrenceSecondsPresent": 104
+    },
+    "/@UzakiLarme": {
+      "acceptedVideos": 23,
+      "acceptedOccurrences": 238,
+      "uniqueSongs": 213,
+      "publishedTimestampPresent": 23,
+      "occurrenceTimePresent": 238,
+      "occurrenceSecondsPresent": 238
+    },
+    "/@AmakusaAroma": {
+      "acceptedVideos": 2,
+      "acceptedOccurrences": 14,
+      "uniqueSongs": 14,
+      "publishedTimestampPresent": 2,
+      "occurrenceTimePresent": 14,
+      "occurrenceSecondsPresent": 14
+    }
+  },
+  "dirtyAudit": {
+    "droppedVideoCount": 2,
+    "droppedOccurrenceCount": 2,
+    "dropped": [
+      {
+        "videoId": "PmLtmUhaaRI",
+        "channelHandle": "/@UzakiLarme",
+        "title": "【まったり作業配信】Live2D！顔面整形する！",
+        "occurrences": 1,
+        "hits": [
+          "live_en"
+        ],
+        "reason": "only parsed occurrence is an unrelated Santo Rosário / Live Ao vivo description row, not a song timestamp"
+      },
+      {
+        "videoId": "dR4X1YyethI",
+        "channelHandle": "/@UzakiLarme",
+        "title": "【耐久歌枠】チャンネル登録者600人目指して歌います！！リターンズ【卯咲らるむ / #新人Vtuber 】",
+        "occurrences": 1,
+        "hits": [
+          "live_en"
+        ],
+        "reason": "only parsed occurrence is an unrelated Santo Rosário / Live Ao vivo description row, not a song timestamp"
+      }
+    ],
+    "suspiciousCount": 3,
+    "suspicious": [
+      {
+        "videoId": "N_OB0DZ7XT0",
+        "channelHandle": "/@UzakiLarme",
+        "title": "【誕生日】新衣装お披露目！Live2Dアップデート！オリ曲披露も？！",
+        "occurrences": 1,
+        "hits": [
+          "live_en"
+        ]
+      },
+      {
+        "videoId": "UGwI0nAxxnE",
+        "channelHandle": "/@UzakiLarme",
+        "title": "【 #歌枠 】1周年記念ライブ！！",
+        "occurrences": 26,
+        "hits": [
+          "live_ja"
+        ]
+      },
+      {
+        "videoId": "GuwgMywMoLU",
+        "channelHandle": "/@UzakiLarme",
+        "title": "【 #歌枠 】ホロライブしばり歌枠♪【卯咲らるむ / #新人Vtuber 】",
+        "occurrences": 20,
+        "hits": [
+          "live_en",
+          "live_ja"
+        ]
+      }
+    ],
+    "termHitCounts": {
+      "live_en": 2,
+      "live_ja": 2
+    },
+    "note": "Broad live/live terms are audited manually and are not applied blindly."
+  }
+}

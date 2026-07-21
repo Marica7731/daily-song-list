@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-21T19:33:27.747Z",
+  "channelUrl": "https://www.youtube.com/@UzakiLarme/streams",
+  "singerName": "UzakiLarme",
+  "keywords": [
+    "フルート",
+    "生演奏",
+    "live",
+    "ライブ",
+    "クラリネット",
+    "piano streaming",
+    "ピアノ演奏",
+    "歌",
+    "歌枠",
+    "弾き語",
+    "karaoke",
+    "歌ってみた",
+    "3D Live"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@UzakiLarme/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/@UzakiLarme/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 100,
+  "maxCandidates": 0,
+  "maxInspect": 1000,
+  "inspectShardIndex": 0,
+  "inspectShardCount": 1,
+  "candidateOnly": false,
+  "candidateCount": 69,
+  "inspectedInLatestRun": 69,
+  "usableVideoCount": 25,
+  "occurrenceCount": 240,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@UzakiLarme/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 10,
+      "rawItemCount": 280,
+      "candidateCount": 63,
+      "continuationRounds": 9,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1177557
+    },
+    {
+      "pageUrl": "https://www.youtube.com/@UzakiLarme/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 27,
+      "candidateCount": 6,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1115218
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2292775,
+    "totalElapsedMs": 373,
+    "statuses": {
+      "200": 2
+    }
+  }
+}
