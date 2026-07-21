@@ -31,18 +31,49 @@ if (require.main === module) {
   main();
 }
 
+function logPhase(phase, fields = {}) {
+  const suffix = Object.entries(fields)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(" ");
+  console.log(`CODEX_RUNTIME_RANKINGS_EXPORT_PHASE phase=${phase}${suffix ? ` ${suffix}` : ""}`);
+}
+
 function main() {
   try {
     const args = parseArgs(process.argv.slice(2));
+    logPhase("payload_load_start", { input: args.input });
     const payload = hydratePayloadWithChannelMetadata(readJson(args.input), {
       metadataPath: path.join(args.youtubeChannelDiscoveryDir, "channel-metadata.json"),
     });
+    logPhase("payload_load_ok", {
+      inputBytes: fileSize(args.input),
+      groups: Object.keys(payload.groups || {}).length,
+    });
+    logPhase("runtime_imports_start", {
+      vsinger: args.noVsinger ? "disabled" : args.vsingerDir,
+      youtubeChannelDiscovery: args.noYoutubeChannelDiscovery ? "disabled" : args.youtubeChannelDiscoveryDir,
+    });
     const runtimeImports = loadRuntimeImports(args);
+    logPhase("runtime_imports_ok", {
+      vsingerVideos: runtimeImports.vsinger?.videos?.length || 0,
+      youtubeVideos: runtimeImports.youtubeChannelDiscovery?.videos?.length || 0,
+    });
+    logPhase("data_version_start");
     const dataVersion = computeExportDataVersion(payload, args, runtimeImports);
+    logPhase("data_version_ok", { dataVersion });
+    logPhase("write_start", { output: args.output, ranges: args.ranges.join(",") });
     writeJsonlExport(args.output, payload, runtimeImports, dataVersion, args);
   } catch (error) {
     console.error(`CODEX_RUNTIME_RANKINGS_EXPORT_ERROR ${error.name}: ${error.message}`);
     process.exitCode = 1;
+  }
+}
+
+function fileSize(filePath) {
+  try {
+    return fs.statSync(filePath).size;
+  } catch {
+    return 0;
   }
 }
 
@@ -130,12 +161,16 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
     });
 
     for (const rangeId of args.ranges) {
+      logPhase("range_start", { range: rangeId });
       const rangePayload = buildRangePayload(payload, rangeId, args, runtimeImports);
       rangePayload.dataVersion = dataVersion;
       const baseItems = Array.isArray(rangePayload.items) ? rangePayload.items.map((item) => withRuntimeScopedSongs(item, null)) : [];
+      logPhase("range_items_ready", { range: rangeId, items: baseItems.length });
       const titleStats = buildRuntimeTitleStats(baseItems);
+      logPhase("range_title_stats_ready", { range: rangeId, titles: titleStats.size });
       const items = baseItems.map((item) => withRuntimeScopedSongs(item, titleStats));
       const occurrences = collectRuntimeOccurrences(items);
+      logPhase("range_occurrences_ready", { range: rangeId, occurrences: occurrences.length });
       const writtenSourceKeys = new Set();
       writer.write({
         kind: "range",
@@ -156,12 +191,27 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
         runtimeVideoCount += 1;
       });
 
+      logPhase("song_records_start", { range: rangeId, occurrences: occurrences.length });
       const songRecords = addRequestRecordFields(RankingUtils.buildSongRecords(occurrences));
+      logPhase("song_records_ok", { range: rangeId, records: songRecords.length });
+      logPhase("artist_records_start", { range: rangeId, occurrences: occurrences.length });
       const artistResult = RankingUtils.buildArtistRecords(occurrences);
       const artistRecords = addRequestRecordFields(artistResult.records || []);
+      logPhase("artist_records_ok", { range: rangeId, records: artistRecords.length });
+      logPhase("video_records_start", { range: rangeId, items: items.length });
       const videoRecords = buildVideoRequestItems(items);
+      logPhase("video_records_ok", { range: rangeId, records: videoRecords.length });
+      logPhase("vtuber_records_start", { range: rangeId, items: items.length });
       const vtuberSongIdentityLookup = buildVtuberSongIdentityLookup(songRecords);
       const vtuberRecords = buildVtuberRequestItems(items, vtuberSongIdentityLookup);
+      logPhase("vtuber_records_ok", { range: rangeId, records: vtuberRecords.length });
+      logPhase("range_records_ready", {
+        range: rangeId,
+        songs: songRecords.length,
+        artists: artistRecords.length,
+        videos: videoRecords.length,
+        vtubers: vtuberRecords.length,
+      });
       const specs = [
         { type: "song", view: "songs", records: sortRankRecords(songRecords, "occurrences"), metric: "count", sourcePrefix: "song", order: "rank" },
         { type: "song", view: "songs", records: sortRankRecords(songRecords, "videos"), metric: "videos", sourcePrefix: "song", order: "rank" },
@@ -175,6 +225,7 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
       ];
 
       for (const spec of specs) {
+        logPhase("spec_start", { range: rangeId, view: spec.view, metric: spec.metric, records: spec.records.length });
         const ranks = buildRequestRanks(spec.records, spec.metric);
         spec.records.forEach((record, index) => {
           const sourceDetailKey = spec.type === "video" ? "" : stableRequestKey(`${rangeId}:${spec.sourcePrefix}:all:${record.key || record.videoId || ""}`);
@@ -232,8 +283,22 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
             sourceDetailCount += 1;
           }
         });
+        logPhase("spec_done", {
+          range: rangeId,
+          view: spec.view,
+          metric: spec.metric,
+          rankingRows: rankingRowCount,
+          sourceDetails: sourceDetailCount,
+          sourceOccurrences: sourceOccurrenceCount,
+        });
       }
       if (typeof global.gc === "function") global.gc();
+      logPhase("range_done", {
+        range: rangeId,
+        rankingRows: rankingRowCount,
+        sourceDetails: sourceDetailCount,
+        sourceOccurrences: sourceOccurrenceCount,
+      });
     }
   } finally {
     writer.close();

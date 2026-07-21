@@ -13,6 +13,15 @@ const DEFAULT_BACKFILL_DIR = path.join(ROOT, "data", "external", "vsinger-http",
 const SOURCE_GROUP = "vsinger-moment";
 const SOURCE_GROUP_LABEL = "VSinger Moment";
 const DISABLE_VALUES = new Set(["0", "false", "no", "off"]);
+const PROGRESS_INTERVAL = positiveInteger(process.env.CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS_INTERVAL, 50);
+
+function logImportPhase(phase, fields = {}) {
+  if (!process.env.CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS) return;
+  const suffix = Object.entries(fields)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(" ");
+  console.log(`CODEX_VSINGER_RUNTIME_IMPORT_PHASE phase=${phase}${suffix ? ` ${suffix}` : ""}`);
+}
 
 function augmentPayloadWithVsingerBackfill(payload, options = {}) {
   if (!payload || typeof payload !== "object") return payload;
@@ -90,17 +99,31 @@ function loadVsingerBackfillRuntimeVideos(options = {}) {
   }
 
   const manifest = readJson(manifestPath);
+  logImportPhase("manifest_loaded", {
+    songs: manifest?.counts?.songs || 0,
+    videos: manifest?.counts?.videos || 0,
+    occurrences: manifest?.counts?.occurrences || 0,
+  });
   const coverage = readManifestObjectShard(backfillDir, manifest, "coverage");
+  logImportPhase("coverage_loaded");
   assertCompleteBackfill(manifest, coverage, options);
 
   const songs = readManifestArrayShards(backfillDir, manifest, "songs");
+  logImportPhase("songs_loaded", { count: songs.length });
   const videos = readManifestArrayShards(backfillDir, manifest, "videos");
+  logImportPhase("videos_loaded", { count: videos.length });
   const occurrences = readManifestArrayShards(backfillDir, manifest, "occurrences");
+  logImportPhase("occurrences_loaded", { count: occurrences.length });
   assertManifestCount(manifest, "songs", songs.length);
   assertManifestCount(manifest, "videos", videos.length);
   assertManifestCount(manifest, "occurrences", occurrences.length);
 
+  logImportPhase("runtime_build_start");
   const buildResult = buildRuntimeVideosFromBundle({ songs, videos, occurrences, manifest, coverage });
+  logImportPhase("runtime_build_ok", {
+    videos: buildResult.videos.length,
+    occurrences: buildResult.occurrenceCount,
+  });
   return {
     videos: buildResult.videos,
     summary: {
@@ -143,16 +166,22 @@ function assertCompleteBackfill(manifest, coverage, options = {}) {
 }
 
 function buildRuntimeVideosFromBundle(bundle) {
+  logImportPhase("song_index_start", { songs: (bundle.songs || []).length });
   const songsByCanonicalId = new Map();
   const songsByExternalId = new Map();
-  for (const song of bundle.songs || []) {
+  for (const [index, song] of (bundle.songs || []).entries()) {
     if (song.canonicalSongId) songsByCanonicalId.set(song.canonicalSongId, song);
     if (song.externalSongId) songsByExternalId.set(song.externalSongId, song);
+    if (PROGRESS_INTERVAL > 0 && (index + 1) % PROGRESS_INTERVAL === 0) {
+      logImportPhase("song_index_progress", { done: index + 1 });
+    }
   }
+  logImportPhase("song_index_ok", { canonical: songsByCanonicalId.size, external: songsByExternalId.size });
 
   const occurrencesByVideoId = new Map();
   let skippedNonSongOccurrenceCount = 0;
-  for (const occurrence of bundle.occurrences || []) {
+  logImportPhase("occurrence_group_start", { occurrences: (bundle.occurrences || []).length });
+  for (const [index, occurrence] of (bundle.occurrences || []).entries()) {
     const videoId = cleanText(occurrence.youtubeVideoId);
     if (!isValidYouTubeVideoId(videoId)) continue;
     const seconds = normalizeSeconds(occurrence.seconds);
@@ -165,14 +194,26 @@ function buildRuntimeVideosFromBundle(bundle) {
     }
     if (!occurrencesByVideoId.has(videoId)) occurrencesByVideoId.set(videoId, []);
     occurrencesByVideoId.get(videoId).push(runtimeSong);
+    if (PROGRESS_INTERVAL > 0 && (index + 1) % PROGRESS_INTERVAL === 0) {
+      logImportPhase("occurrence_group_progress", {
+        done: index + 1,
+        videos: occurrencesByVideoId.size,
+        skippedNonSongs: skippedNonSongOccurrenceCount,
+      });
+    }
   }
+  logImportPhase("occurrence_group_ok", {
+    videos: occurrencesByVideoId.size,
+    skippedNonSongs: skippedNonSongOccurrenceCount,
+  });
 
   let skippedInvalidVideoCount = 0;
   let skippedNoSongsVideoCount = 0;
   let skippedBlockedVideoCount = 0;
   const result = [];
   const seenVideoIds = new Set();
-  for (const video of bundle.videos || []) {
+  logImportPhase("video_build_start", { videos: (bundle.videos || []).length });
+  for (const [index, video] of (bundle.videos || []).entries()) {
     const videoId = cleanText(video.youtubeVideoId);
     if (!isValidYouTubeVideoId(videoId)) {
       skippedInvalidVideoCount += 1;
@@ -215,8 +256,16 @@ function buildRuntimeVideosFromBundle(bundle) {
       continue;
     }
     result.push(runtimeVideo);
+    if (PROGRESS_INTERVAL > 0 && (index + 1) % PROGRESS_INTERVAL === 0) {
+      logImportPhase("video_build_progress", {
+        done: index + 1,
+        result: result.length,
+        skippedNoSongs: skippedNoSongsVideoCount,
+      });
+    }
   }
 
+  logImportPhase("video_sort_start", { videos: result.length });
   return {
     videos: sortVideos(result),
     occurrenceCount: sumSongCount(result),
@@ -378,8 +427,9 @@ function readManifestObjectShard(backfillDir, manifest, key) {
 
 function readManifestShards(backfillDir, manifest, key) {
   const shards = manifest?.shards?.[key] || [];
+  logImportPhase("shards_start", { key, shards: shards.length });
   const values = [];
-  for (const shard of shards) {
+  for (const [index, shard] of shards.entries()) {
     const filePath = path.join(backfillDir, shard.file || "");
     const value = readJson(filePath);
     if (sha256Json(value) !== shard.sha256) {
@@ -389,7 +439,11 @@ function readManifestShards(backfillDir, manifest, key) {
       throw new Error(`VSinger ${key} shard count mismatch: ${shard.file}`);
     }
     values.push(value);
+    if (PROGRESS_INTERVAL > 0 && (index + 1) % PROGRESS_INTERVAL === 0) {
+      logImportPhase("shards_progress", { key, done: index + 1, total: shards.length });
+    }
   }
+  logImportPhase("shards_ok", { key, shards: values.length });
   return values;
 }
 
@@ -464,6 +518,11 @@ function compareValues(a, b) {
 
 function uniqueValues(values) {
   return Array.from(new Set((values || []).filter(Boolean).map(String)));
+}
+
+function positiveInteger(value, fallback = 0) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? Math.floor(number) : fallback;
 }
 
 function latestIso(...values) {

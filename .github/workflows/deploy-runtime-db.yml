@@ -85,6 +85,9 @@ jobs:
         run: npm install --no-package-lock
 
       - name: Build runtime database
+        env:
+          CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS: "1"
+          CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS_INTERVAL: "5000"
         run: |
           mkdir -p artifacts/runtime
           python3 -u scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
