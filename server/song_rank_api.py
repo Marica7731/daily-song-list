@@ -617,7 +617,7 @@ def source_occurrence_filter(query: str, scope: str, search_fields: list[str] | 
 
 def source_occurrence_search_fields(scope: str, search_fields: list[str] | None = None) -> list[str]:
     if search_fields == []:
-        return ["lower(so.channel_name)", "lower(so.title)", "lower(so.video_id)"]
+        return ["lower(so.search_text)"]
     requested = set(search_fields or [])
     if requested:
         fields: list[str] = []

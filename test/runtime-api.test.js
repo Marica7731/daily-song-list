@@ -118,6 +118,12 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(allFieldSongSearch.records[0].occurrences[0].item.thumbnailUrl, "https://i.ytimg.com/vi/video-a/hqdefault.jpg");
     assert.equal(allFieldSongSearch.records[0].channels[0].name, "Alpha Ch.");
 
+    const allFieldArtistSourceSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Singer%20A&searchFields=all&pageSize=5`);
+    assert.equal(allFieldArtistSourceSearch.searchScope, "all");
+    assert.deepEqual(allFieldArtistSourceSearch.searchFields, []);
+    assert.equal(allFieldArtistSourceSearch.totalCount, 1);
+    assert.equal(allFieldArtistSourceSearch.records[0].title, "Song One");
+
     const scopedChannelSourceSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchScope=channel&pageSize=5`);
     assert.equal(scopedChannelSourceSongSearch.searchScope, "channel");
     assert.equal(scopedChannelSourceSongSearch.totalCount, 3);

@@ -302,7 +302,7 @@
 
   function selectPartialArtistTarget(record, recordsByKey, options = {}) {
     const matches = [];
-    for (const candidate of recordsByKey.values()) {
+    for (const candidate of partialArtistCandidates(record, recordsByKey, options)) {
       if (candidate === record) continue;
       if (options.requireSharedSong && !artistRecordsShareSong(record, candidate, options)) continue;
       if (partialArtistIdentityMatch(record, candidate, options)) matches.push(candidate);
@@ -372,12 +372,14 @@
     return {
       partialNames: new WeakMap(),
       songKeys: new WeakMap(),
+      songIndexState: { index: null },
     };
   }
 
   function invalidatePartialArtistMergeCache(caches, record) {
     caches?.partialNames?.delete?.(record);
     caches?.songKeys?.delete?.(record);
+    if (caches?.songIndexState) caches.songIndexState.index = null;
   }
 
   function partialArtistRecordNamesCached(record, options = {}) {
@@ -400,6 +402,32 @@
       cache.set(record, keys);
     }
     return keys;
+  }
+
+  function partialArtistCandidates(record, recordsByKey, options = {}) {
+    if (!options.requireSharedSong) return recordsByKey.values();
+    const index = partialArtistSongIndex(recordsByKey, options);
+    const candidates = new Set();
+    for (const songKey of artistSongKeySetCached(record, options)) {
+      for (const candidate of index.get(songKey) || []) {
+        if (recordsByKey.get(candidate.key) === candidate) candidates.add(candidate);
+      }
+    }
+    return candidates.values();
+  }
+
+  function partialArtistSongIndex(recordsByKey, options = {}) {
+    const state = options.songIndexState;
+    if (state?.index) return state.index;
+    const index = new Map();
+    for (const record of recordsByKey.values()) {
+      for (const songKey of artistSongKeySetCached(record, options)) {
+        if (!index.has(songKey)) index.set(songKey, new Set());
+        index.get(songKey).add(record);
+      }
+    }
+    if (state) state.index = index;
+    return index;
   }
 
   function artistRecordsShareSong(a, b, options = {}) {
