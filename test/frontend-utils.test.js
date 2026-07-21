@@ -1020,6 +1020,18 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     snapshot: "archive-20260710",
   });
   assert.deepEqual(parseUrlState(serialized, options), parsed);
+
+  const allFieldSerialized = serializeUrlState({ ...parsed, view: "songRank", searchFields: [] }, options);
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(allFieldSerialized)), {
+    range: "all",
+    page: "3",
+    pageSize: "100",
+    outside: "1",
+    q: "First Good-Bye",
+    searchFields: "all",
+    snapshot: "archive-20260710",
+  });
+  assert.deepEqual(parseUrlState(allFieldSerialized, options).searchFields, []);
 });
 
 test("url state parses trend, minCount, and legacy shared marker", () => {

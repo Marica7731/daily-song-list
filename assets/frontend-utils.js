@@ -319,6 +319,12 @@
     if (unknownArtistsHiddenForUrl(state, defaults)) params.set("hideUnknown", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
     if (state.q && searchScope !== (defaults.searchScope || "all")) params.set("searchScope", searchScope);
+    const searchFields = sanitizeSearchFields(state.searchFields, defaults.searchFields || ["title", "artist"]);
+    const defaultSearchFields = sanitizeSearchFields(defaults.searchFields, ["title", "artist"]);
+    const fieldsDiffer = searchFields.join(",") !== defaultSearchFields.join(",");
+    if (state.q && searchScope === (defaults.searchScope || "all") && fieldsDiffer) {
+      params.set("searchFields", searchFields.length ? searchFields.join(",") : "all");
+    }
     if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
     if (view !== "videos" && view !== "vtuberRank" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
 
