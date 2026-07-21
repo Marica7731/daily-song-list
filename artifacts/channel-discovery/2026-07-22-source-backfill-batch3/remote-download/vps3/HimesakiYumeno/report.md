@@ -1,0 +1,111 @@
+# YouTube channel discovery report
+
+- Generated: 2026-07-21T20:24:51.337Z
+- Channel: https://www.youtube.com/@HimesakiYumeno
+- Singer: HimesakiYumeno
+- Keywords: フルート, 生演奏, live, ライブ, クラリネット, piano streaming, ピアノ演奏, 歌, 歌枠, 弾き語, karaoke, 歌ってみた, 3D Live
+- Candidates: 81
+- Usable videos: 52
+- Occurrences: 698
+
+## Candidate videos
+
+- MvsEz9Cx4UQ 【 #歌枠 】太陽サンサン日曜日！お昼から元気いっぱい歌いますわょ～～～🌞✨【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- GlNoBV2h68M 【 #歌枠 】土曜の夜だから、姫の夜更かしに付き合ってくれる…？💓 - Find Me!! -【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- uUyrGga8JZ8 【 #しゅわ夏歌枠リレー 】涼やかな歌声で、夏のトキメキとエモをお届けしますゎ🫧✨【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- 5d3h72cdOcs 【 #歌枠 】㊗‼JOYSOUNDカラオケ解禁‼‼‼【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- MkvLxcb3Ihk 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- r4TGr00JprE 【 お知らせあり 】㊗デビュー5ヵ月記念配信🎉🎉🎉🎉🎉歌って喋って、楽しいひとときを🪄🌸【 新人VTuber / #姫咲ゆめの 】 (歌)
+- NrPW0OgVPHM 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- Nxi1aAde1bg 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- NYvJGaa9JeE 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- LgToMWQzpG8 【 #歌枠 】初見さん大歓迎✨初披露のカバー曲をお届けしますゎ！🎤🎵あなたの知ってる曲はあるかな？【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- MhkGP0UfXvE 【 #耐久 | #歌枠 】チャンネル登録者5000人達成するまで終われません！！！【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- yHn2CSxUkqI 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- u3P17BjlgaM 【 #歌枠 】1時間限定！見つけたあなたはラッキー🌟 - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- 31fyIoOzz9c 【 #歌枠 】あなたのランチタイムにお邪魔しま～～～す！#shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- h-r4Ets88uY 【 #歌枠 】カラオケで盛り上がるセトリはこれだーーー！！！【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- KtvbhF9qz6s 【 #歌枠 】ホッとひと息☕ランチタイム歌枠🍽️ #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- hyKq_UXg_DY 【 #歌枠 】みんなのお昼ご飯をちょっとずつもらって、最強のランチが食べたいですゎ👑🍽️#shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- 3Z5jYsKGva0 【 #歌枠 】雨音と楽しむ、しっとり癒される歌枠 #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- 3x8PZe7g-0U 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- Ux356EeaUD8 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- Xq_hGA95FUI 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- S0tvSBqff_A 【 #歌枠 】見つけて！- Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- oAgRktyWeAc 【 #歌枠 】見つけて♡ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- JIykU5p9VBk 【 #歌枠 】見つけて♡ - Find Me! -【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- fxVKzpb4Wtw 【 #歌枠 】自分、本気です！歌います！！歌わせてください！！！【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- 7T7zdSZuQTg 【 #歌枠 】初見さん大歓迎！アニソン縛りでガンガン歌いますゎ～～～❤️‍🔥【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- IFEATENILvU 【 #歌枠 】初見さん大歓迎🌟お昼休みに歌声チャージ👑✨ランチタイム歌枠🍽️ #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- AVEQBoLaJyQ 【 #歌枠 】姫と夜更かし…💓 - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- K3AgJzvS2cU 【 #歌枠 】姫と夜更かし…💓 - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- _AJt4-m_ces 【 #歌枠 】眠る前に、1曲聴いてくれませんか？？💓✨ #shorts 【 新人VTuber / #姫咲ゆめの 】 (歌, 歌枠)
+- ... 51 more
+
+## Parsed videos
+
+- GlNoBV2h68M 【 #歌枠 】土曜の夜だから、姫の夜更かしに付き合ってくれる…？💓 - Find Me!! -【 新人VTuber / #姫咲ゆめの 】 songs=1
+- uUyrGga8JZ8 【 #しゅわ夏歌枠リレー 】涼やかな歌声で、夏のトキメキとエモをお届けしますゎ🫧✨【 新人VTuber / #姫咲ゆめの 】 songs=4
+- 5d3h72cdOcs 【 #歌枠 】㊗‼JOYSOUNDカラオケ解禁‼‼‼【 新人VTuber / #姫咲ゆめの 】 songs=20
+- MkvLxcb3Ihk 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=8
+- Nxi1aAde1bg 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=19
+- NYvJGaa9JeE 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=24
+- LgToMWQzpG8 【 #歌枠 】初見さん大歓迎✨初披露のカバー曲をお届けしますゎ！🎤🎵あなたの知ってる曲はあるかな？【 新人VTuber / #姫咲ゆめの 】 songs=8
+- MhkGP0UfXvE 【 #耐久 | #歌枠 】チャンネル登録者5000人達成するまで終われません！！！【 新人VTuber / #姫咲ゆめの 】 songs=22
+- yHn2CSxUkqI 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=19
+- u3P17BjlgaM 【 #歌枠 】1時間限定！見つけたあなたはラッキー🌟 - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=8
+- h-r4Ets88uY 【 #歌枠 】カラオケで盛り上がるセトリはこれだーーー！！！【 新人VTuber / #姫咲ゆめの 】 songs=18
+- hyKq_UXg_DY 【 #歌枠 】みんなのお昼ご飯をちょっとずつもらって、最強のランチが食べたいですゎ👑🍽️#shorts 【 新人VTuber / #姫咲ゆめの 】 songs=9
+- 3Z5jYsKGva0 【 #歌枠 】雨音と楽しむ、しっとり癒される歌枠 #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=10
+- 3x8PZe7g-0U 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=19
+- Xq_hGA95FUI 【 #歌枠 】見つけて！ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=25
+- S0tvSBqff_A 【 #歌枠 】見つけて！- Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=21
+- oAgRktyWeAc 【 #歌枠 】見つけて♡ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=23
+- JIykU5p9VBk 【 #歌枠 】見つけて♡ - Find Me! -【 新人VTuber / #姫咲ゆめの 】 songs=16
+- 7T7zdSZuQTg 【 #歌枠 】初見さん大歓迎！アニソン縛りでガンガン歌いますゎ～～～❤️‍🔥【 新人VTuber / #姫咲ゆめの 】 songs=19
+- AVEQBoLaJyQ 【 #歌枠 】姫と夜更かし…💓 - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=14
+- K3AgJzvS2cU 【 #歌枠 】姫と夜更かし…💓 - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=14
+- _AJt4-m_ces 【 #歌枠 】眠る前に、1曲聴いてくれませんか？？💓✨ #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=18
+- Nze0a_rbCwg 【 #歌枠 | #耐久 】デビュー4ヶ月記念日に、チャンネル登録者4000人を達成したい！！！！【 新人VTuber / #姫咲ゆめの 】 songs=16
+- h_ckddThKok 【 #推ススメ新人Vtuber歌枠リレー vol.3 】あなたの推しになりたい！変幻自在の新人プリンセス🪄🌸【 新人VTuber / #姫咲ゆめの 】 songs=4
+- 3f7WT-_ZKCc 【 #歌枠 】1曲聴いていってください🌙 #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=14
+- J_zeOiiaGW4 【 #歌枠 】一曲聴いてみませんか？ - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=9
+- OjjiTpoxQqI 【 #歌枠 】見つけて👀✨同接100人で、新しく覚えた最新ヒットソングをお披露目しますゎ～～～！ #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=19
+- SLaneA-vxKk 【 #歌枠 】初見さん大歓迎！肉の日なので、お肉を焼きながら歌います‼🥩 【 新人VTuber / #姫咲ゆめの 】 songs=12
+- vRXpxSn-dL4 【 #歌枠 】初見さん大歓迎！眠る前に1曲いかが？💓 - Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=16
+- jYx0IxUd6b8 【 #歌枠 】姫と夜更かし🩵- Find Me! - #shorts 【 新人VTuber / #姫咲ゆめの 】 songs=17
+- ... 22 more
+
+## Occurrence sample
+
+- GlNoBV2h68M 2:24:07 アカペラにっこり^^調査隊のテーマ可愛すぎた /
+- uUyrGga8JZ8 0:01:12 星降る海 / Aqu3ra ＆ 月見ヤチヨ
+- uUyrGga8JZ8 0:09:06 うたかた花火 / supercell
+- uUyrGga8JZ8 0:15:11 BLUE / エルセとさめのぽき
+- uUyrGga8JZ8 0:24:33 青いプロローグ / 姫咲ゆめの
+- 5d3h72cdOcs 0:11:47 君は恋人 / オーイシマサヨシ
+- 5d3h72cdOcs 0:18:57 星降る海 / Aqu3ra，月見ヤチヨ (cv.早見沙織)
+- 5d3h72cdOcs 0:30:50 サヨナラから始まる物語 / 星見プロダクション
+- 5d3h72cdOcs 0:38:55 IDOLY PRIDE / 星見プロダクション
+- 5d3h72cdOcs 0:50:10 メランコリーキッチン / 米津玄師
+- 5d3h72cdOcs 0:55:56 眼福 / 米津玄師
+- 5d3h72cdOcs 1:05:12 アンビリーバーズ / 米津玄師
+- 5d3h72cdOcs 1:15:08 Border=Border / TenTwenty
+- 5d3h72cdOcs 1:19:18 アカシ / TenTwenty
+- 5d3h72cdOcs 1:26:35 君の瞳に恋してない / UNISON SQUARE GARDEN
+- 5d3h72cdOcs 1:30:51 きみのもとへ / UNISON SQUARE GARDEN
+- 5d3h72cdOcs 1:37:40 プロポーズ / 内緒のピアス
+- 5d3h72cdOcs 1:43:03 ド屑 / なきそ
+- 5d3h72cdOcs 1:48:13 ヒトガタ / HIMEHINA
+- 5d3h72cdOcs 1:53:09 V / HIMEHINA
+- 5d3h72cdOcs 1:58:21 炉心融解 / iroha(sasaki) feat.鏡音リン
+- 5d3h72cdOcs 2:04:47 こちら、幸福安心委員会です / うたたP feat.初音ミク
+- 5d3h72cdOcs 2:11:23 とくべチュ、して / =LOVE
+- 5d3h72cdOcs 2:16:44 青春”サブリミナル” / =LOVE
+- 5d3h72cdOcs 2:22:53 恋のヒメヒメぺったんこ / 姫野湖鳥 (cv.田村ゆかり)
+- MkvLxcb3Ihk 0:10:25 小さきもの / 林明日香
+- MkvLxcb3Ihk 0:17:59 君の知らない物語 / supercell
+- MkvLxcb3Ihk 0:24:38 ray / BUMP OF CHICKEN
+- MkvLxcb3Ihk 0:30:58 星が瞬くこんな夜に / supercell
+- MkvLxcb3Ihk 0:38:21 星座になれたら / 結束バンド
+- ... 668 more
