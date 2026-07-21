@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-worker-summary",
+  "batchId": "2026-07-22-source-backfill-batch4",
+  "generatedAt": "2026-07-22T04:47:54+08:00",
+  "scope": "batch4 worker-only YouTube channel discovery attempts; no accepted increment export, no DB build, no commit, no push, no deploy",
+  "repository": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+  "branch": "codex/source-backfill-20260720-v2",
+  "previousLocalCommit": "ec164a2b",
+  "outputRoot": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4",
+  "discoveryCommand": {
+    "script": "npm run youtube:discover-channel",
+    "maxChannelPages": 100,
+    "maxCandidates": 0,
+    "maxInspect": 1000,
+    "requestIntervalMs": 3000,
+    "requestJitterMs": 1500,
+    "perChannelTimeoutSeconds": 1200,
+    "keywords": [
+      "LIVE",
+      "歌",
+      "弾き語",
+      "リレー",
+      "フルート",
+      "生演奏",
+      "live",
+      "ライブ",
+      "クラリネット",
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "auditNote": "Broad live/ライブ terms were used only to discover or flag candidates in raw outputs; no dirty-audit deletion or accepted increment export was performed."
+  },
+  "networkProbe": {
+    "checkedAt": "2026-07-22T04:47:54+08:00",
+    "powershellInvokeWebRequestHead": {
+      "url": "https://www.youtube.com",
+      "statusCode": 200
+    },
+    "nodeFetch": {
+      "url": "https://www.youtube.com",
+      "status": "failed",
+      "causeCode": "ECONNRESET",
+      "causeMessage": "read ECONNRESET"
+    }
+  },
+  "statusCounts": {
+    "imported": 0,
+    "failed": 5,
+    "pending": 0
+  },
+  "excludedByRequest": [
+    "arale_yumemita",
+    "UCrF92dEkXiTtexol0yg4Gmw",
+    "KAMIKUMONONOA",
+    "KOKONEch_uv"
+  ],
+  "sources": [
+    {
+      "handle": "Kamisatoniina",
+      "url": "https://www.youtube.com/@Kamisatoniina",
+      "status": "failed",
+      "imported": false,
+      "candidateCount": 0,
+      "inspected": 0,
+      "usableVideos": 0,
+      "occurrences": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "elapsedSeconds": 11,
+      "timeout": false,
+      "failure": "Node fetch failed before channel candidate discovery: Request failed for https://www.youtube.com/@Kamisatoniina/streams?hl=ja&persist_hl=1: fetch failed",
+      "manifest": null,
+      "checkpoint": null
+    },
+    {
+      "handle": "KohanaLam",
+      "url": "https://www.youtube.com/@KohanaLam/streams",
+      "status": "failed",
+      "imported": false,
+      "candidateCount": 0,
+      "inspected": 0,
+      "usableVideos": 0,
+      "occurrences": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "elapsedSeconds": 12,
+      "timeout": false,
+      "failure": "Node fetch failed before channel candidate discovery: Request failed for https://www.youtube.com/@KohanaLam/streams?hl=ja&persist_hl=1: fetch failed",
+      "manifest": null,
+      "checkpoint": null
+    },
+    {
+      "handle": "sakisakatsumugi",
+      "url": "https://www.youtube.com/@sakisakatsumugi",
+      "status": "failed",
+      "imported": false,
+      "candidateCount": 0,
+      "inspected": 0,
+      "usableVideos": 0,
+      "occurrences": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "elapsedSeconds": 12,
+      "timeout": false,
+      "failure": "Node fetch failed before channel candidate discovery: Request failed for https://www.youtube.com/@sakisakatsumugi/streams?hl=ja&persist_hl=1: fetch failed",
+      "manifest": null,
+      "checkpoint": null
+    },
+    {
+      "handle": "SoraOtoha",
+      "url": "https://www.youtube.com/@SoraOtoha",
+      "status": "failed",
+      "imported": false,
+      "candidateCount": 0,
+      "inspected": 0,
+      "usableVideos": 0,
+      "occurrences": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "elapsedSeconds": 12,
+      "timeout": false,
+      "failure": "Node fetch failed before channel candidate discovery: Request failed for https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1: fetch failed",
+      "manifest": null,
+      "checkpoint": null
+    },
+    {
+      "handle": "rayray_429",
+      "url": "https://www.youtube.com/@rayray_429",
+      "status": "failed",
+      "imported": false,
+      "candidateCount": 0,
+      "inspected": 0,
+      "usableVideos": 0,
+      "occurrences": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "elapsedSeconds": 12,
+      "timeout": false,
+      "failure": "Node fetch failed before channel candidate discovery: Request failed for https://www.youtube.com/@rayray_429/streams?hl=ja&persist_hl=1: fetch failed",
+      "manifest": null,
+      "checkpoint": null
+    }
+  ]
+}

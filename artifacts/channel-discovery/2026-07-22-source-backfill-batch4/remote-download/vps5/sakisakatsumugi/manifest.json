@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-21T21:08:17.325Z",
+  "channelUrl": "https://www.youtube.com/@sakisakatsumugi",
+  "singerName": "sakisakatsumugi",
+  "keywords": [
+    "フルート",
+    "生演奏",
+    "live",
+    "ライブ",
+    "クラリネット",
+    "piano streaming",
+    "ピアノ演奏",
+    "歌",
+    "歌枠",
+    "弾き語",
+    "karaoke",
+    "歌ってみた",
+    "3D Live"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@sakisakatsumugi/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/@sakisakatsumugi/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 100,
+  "maxCandidates": 0,
+  "maxInspect": 1000,
+  "inspectShardIndex": 0,
+  "inspectShardCount": 1,
+  "candidateOnly": false,
+  "candidateCount": 21,
+  "inspectedInLatestRun": 21,
+  "usableVideoCount": 19,
+  "occurrenceCount": 223,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@sakisakatsumugi/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 56,
+      "candidateCount": 19,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1178040
+    },
+    {
+      "pageUrl": "https://www.youtube.com/@sakisakatsumugi/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 6,
+      "candidateCount": 2,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 848054
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2026094,
+    "totalElapsedMs": 466,
+    "statuses": {
+      "200": 2
+    }
+  }
+}
