@@ -79,6 +79,39 @@ test("merges same-title partial artist identities only with safe evidence", () =
   assert.equal(records.filter((record) => record.title === "Song B").length, 2);
 });
 
+test("merges curated same-title artist aliases with canonical display names", () => {
+  const records = buildSongRecords([
+    occurrence("Calc Alias Song", "Calc", "A"),
+    occurrence("Calc Alias Song", "Calc.", "B"),
+    occurrence("No Logic", "ジミーサムP", "C"),
+    occurrence("No Logic", "OneRoom", "D"),
+    occurrence("Different OneRoom Song", "OneRoom", "E"),
+  ]);
+
+  const calc = records.find((record) => record.title === "Calc Alias Song");
+  const noLogic = records.find((record) => record.title === "No Logic");
+  assert.equal(calc.count, 2);
+  assert.equal(calc.displayArtist, "Calc.");
+  assert.equal(calc.artistIdentityKey, "calc");
+  assert.equal(noLogic.count, 2);
+  assert.equal(noLogic.displayArtist, "ジミーサムP");
+  assert.equal(records.find((record) => record.title === "Different OneRoom Song").displayArtist, "ジミーサムP");
+});
+
+test("artist ranking merges curated aliases only with shared-song evidence", () => {
+  const { records } = buildArtistRecords([
+    occurrence("No Logic", "ジミーサムP", "A"),
+    occurrence("No Logic", "OneRoom", "B"),
+    occurrence("Separate Song", "OneRoom", "C"),
+    occurrence("Other Song", "Different Alias", "D"),
+  ]);
+
+  const jimmy = records.find((record) => record.name === "ジミーサムP");
+  assert.equal(jimmy.count, 3);
+  assert.deepEqual(new Set(jimmy.aliases.map((alias) => alias.name)), new Set(["ジミーサムP", "OneRoom"]));
+  assert.equal(records.some((record) => record.name === "Different Alias"), true);
+});
+
 test("does not merge kana romaji identities across different titles or identity annotations", () => {
   const records = buildSongRecords([
     occurrence("Song A", "ヨルシカ", "A"),

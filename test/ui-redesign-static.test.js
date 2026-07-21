@@ -204,7 +204,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(functionBody("function getVtuberSongGroups"), /lightweightSongGroupsForRecord\(record\)/u);
   assert.match(functionBody("function getVtuberSongGroups"), /mergeVtuberSongGroupsForDrawer\(occurrenceGroups, fallbackGroups\)/u);
   assert.match(functionBody("function sourceDetailPathForRecord"), /record\?\._record \|\| \{\}/u);
-  assert.match(appSource, /async function sourceDetailPageForContainer[\s\S]*filterOccurrencesForSongKey\(loaded, songKey\)/u);
+  assert.match(appSource, /async function sourceDetailPageForContainer[\s\S]*filterOccurrencesForSongKey\(loaded, songKey, songTitle\)/u);
   assert.match(functionBody("function renderArtistSongGroup"), /sources\._sourceSongKey = group\.key \|\| normalizeEntityKey\(group\.title\)/u);
   assert.match(appSource, /function renderVtuberCollectionBadge/u);
   assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
@@ -373,6 +373,9 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(appSource, /function completeSongGroupsForDrawer\(occurrences, fallbackGroups = \[\], mode = ""\)[\s\S]*mode === "vtuber"[\s\S]*mergeVtuberSongGroupsForDrawer\(completeGroups, fallbackGroups\)/u);
   assert.match(appSource, /function mergeVtuberSongGroupsForDrawer\(completeGroups = \[\], fallbackGroups = \[\]\)[\s\S]*sortVtuberSongGroups/u);
   assert.match(appSource, /async function setSourceDrawerExpanded[\s\S]*songGroups = completeSongGroupsForDrawer\(row\._sourceDetailOccurrences \|\| visibleOccurrences, songGroups, mode\)/u);
+  assert.match(appSource, /function filterOccurrencesForSongKey\(occurrences = \[\], songKey = "", songTitle = ""\)[\s\S]*songMatchKeys\(songKey, songTitle\)/u);
+  assert.match(appSource, /function songMatchKeys\([\s\S]*window\.RankingUtils\?\.songWorkTitleKey\?\.\(text\)/u);
+  assert.match(functionBody("function hydrateArtistSongGroup"), /filterOccurrencesForSongKey\(filterDisplaySongOccurrences\(record\.occurrences \|\| \[\]\), key, group\.title\)/u);
   assert.match(appSource, /function appendVtuberSubline\(metaContainer, \{ occurrences, songCount, songPreview, videoCount \}\)[\s\S]*`\$\{songCount\} 首歌`/u);
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);

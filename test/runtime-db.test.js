@@ -53,6 +53,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               songs: [
                 { title: "Song One", artist: "Singer A", seconds: 10, time: "0:10", isNiche: true },
                 { title: "Song Two", artist: "Singer B", seconds: 20, time: "0:20" },
+                { title: "Calc Alias Song", artist: "Calc", seconds: 25, time: "0:25" },
               ],
             },
             {
@@ -64,7 +65,10 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               thumbnailUrl: "https://i.ytimg.com/vi/video-b/hqdefault.jpg",
               publishedTimestamp: 1784422800000,
               publishedText: "2026-07-19",
-              songs: [{ title: "Song One (Piano Ver.)", artist: "Singer A", seconds: 30, time: "0:30" }],
+              songs: [
+                { title: "Song One (Piano Ver.)", artist: "Singer A", seconds: 30, time: "0:30" },
+                { title: "Calc Alias Song", artist: "Calc.", seconds: 35, time: "0:35" },
+              ],
             },
             {
               videoId: "video-c",
@@ -75,7 +79,10 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               thumbnailUrl: "https://i.ytimg.com/vi/video-c/hqdefault.jpg",
               publishedTimestamp: 1784426400000,
               publishedText: "2026-07-19",
-              songs: [{ title: "Song Three", artist: "Singer C", seconds: 40, time: "0:40" }],
+              songs: [
+                { title: "Song Three", artist: "Singer C", seconds: 40, time: "0:40" },
+                { title: "No Logic", artist: "ジミーサムP", seconds: 45, time: "0:45" },
+              ],
             },
             {
               videoId: "video-d",
@@ -84,7 +91,10 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
               thumbnailUrl: "https://i.ytimg.com/vi/video-d/hqdefault.jpg",
               publishedTimestamp: 1784430000000,
               publishedText: "2026-07-19",
-              songs: [{ title: "Song Four", artist: "Singer D", seconds: 50, time: "0:50" }],
+              songs: [
+                { title: "Song Four", artist: "Singer D", seconds: 50, time: "0:50" },
+                { title: "No Logic", artist: "OneRoom", seconds: 55, time: "0:55" },
+              ],
             },
           ],
         },
@@ -182,8 +192,8 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   );
   assert.match(queryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(queryOutput, /Song One/);
-  assert.match(queryOutput, /"totalCount": 5/);
-  assert.match(queryOutput, /"totalOccurrenceCount": 6/);
+  assert.match(queryOutput, /"totalCount": 7/);
+  assert.match(queryOutput, /"totalOccurrenceCount": 10/);
 
   const mergedQueryOutput = execFileSync(
     PYTHON,
@@ -221,8 +231,8 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(channelSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(channelSongSearchOutput, /"totalCount": 3/);
-  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 4/);
+  assert.match(channelSongSearchOutput, /"totalCount": 5/);
+  assert.match(channelSongSearchOutput, /"totalOccurrenceCount": 8/);
 
   const scopedChannelSongSearchOutput = execFileSync(
     PYTHON,
@@ -283,7 +293,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(videoTitleSongSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(videoTitleSongSearchOutput, /"totalCount": 2/);
+  assert.match(videoTitleSongSearchOutput, /"totalCount": 3/);
 
   const vtuberQueryOutput = execFileSync(
     PYTHON,
@@ -304,7 +314,7 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   assert.match(vtuberQueryOutput, /"totalCount": 1/);
   assert.match(vtuberQueryOutput, /"name": "Alpha Ch\."/);
   assert.match(vtuberQueryOutput, /"channelId": "UC-alpha"/);
-  assert.match(vtuberQueryOutput, /"count": 3/);
+  assert.match(vtuberQueryOutput, /"count": 5/);
   assert.match(vtuberQueryOutput, /"videoCount": 2/);
 
   const vtuberMissingAvatarOutput = execFileSync(
@@ -439,6 +449,8 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
               songs: [
                 { title: "自己肯定感がドンドン上がってる", artist: "未記載", time: "56:02", seconds: 3362 },
                 { title: "START", artist: "愛内里菜", time: "1:06:40", seconds: 4000 },
+                { title: "Calc Alias Song", artist: "Calc", time: "1:07:00", seconds: 4020 },
+                { title: "No Logic", artist: "ジミーサムP", time: "1:08:00", seconds: 4080 },
               ],
             },
             {
@@ -562,6 +574,22 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
                   time: "0:23",
                   seconds: 23,
                 },
+                {
+                  title: "セトリは概要欄です",
+                  artist: "Setlist is in the description",
+                  raw: "00:43:00 01. セトリは概要欄です / Setlist is in the description",
+                  time: "0:24",
+                  seconds: 24,
+                },
+                {
+                  title: "初見さんいらっしゃい",
+                  artist: "Welcome first-time viewers",
+                  raw: "00:43:10 初見さんいらっしゃい / Welcome first-time viewers",
+                  time: "0:25",
+                  seconds: 25,
+                },
+                { title: "Calc Alias Song", artist: "Calc.", raw: "00:44:00 Calc Alias Song / Calc.", time: "0:26", seconds: 26 },
+                { title: "No Logic", artist: "OneRoom", raw: "00:45:00 No Logic / OneRoom", time: "0:27", seconds: 27 },
               ],
             },
             {
@@ -610,6 +638,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
             { title: "Opening Talk", artist: "未記載", time: "7:00", seconds: 420 },
             { title: "Ending Talk", artist: "unknown", time: "8:00", seconds: 480 },
             { title: "本編終了", artist: "未記載", time: "9:00", seconds: 540 },
+            { title: "曲名教えてください", artist: "未記載", raw: "9:30 曲名教えてください", time: "9:30", seconds: 570 },
             { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", time: "10:00", seconds: 600 },
             { title: "Never Ending Story", artist: "Limahl", time: "10:30", seconds: 630 },
             { title: "START:DASH!!", artist: "μ's", time: "10:45", seconds: 645 },
@@ -693,6 +722,35 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(queryOutput, /"totalCount": 1/);
   assert.match(queryOutput, /"totalOccurrenceCount": 2/);
 
+  const artistAliasOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"Calc Alias Song\" OR \"No Logic\"",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(artistAliasOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const artistAliasPayload = parseDbQueryOutput(artistAliasOutput);
+  const calcAlias = artistAliasPayload.records.find((record) => record.title === "Calc Alias Song");
+  const noLogicAlias = artistAliasPayload.records.find((record) => record.title === "No Logic");
+  assert.equal(artistAliasPayload.totalCount, 2);
+  assert.equal(calcAlias.displayArtist, "Calc.");
+  assert.equal(calcAlias.timestampCount, 2);
+  assert.equal(noLogicAlias.displayArtist, "ジミーサムP");
+  assert.equal(noLogicAlias.timestampCount, 2);
+
   const dirtySongOutput = execFileSync(
     PYTHON,
     [
@@ -704,7 +762,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり OR 上野公園の桜 OR 今日の衣装と髪型 OR 韓国の職場の雰囲気 OR 恋ダンスをするネンドウ君 OR 缶をマイクに OR あなたのお金を数えましょう OR 著作権の問題でミュートされています OR AFK OR ペットショップ OR ドンキホーテのラー油 OR ケンタッキーとバーガーキング OR 切り抜き酒のラベル OR 春が嫌いな人 OR カンニング",
+      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり OR 上野公園の桜 OR 今日の衣装と髪型 OR 韓国の職場の雰囲気 OR 恋ダンスをするネンドウ君 OR 缶をマイクに OR あなたのお金を数えましょう OR 著作権の問題でミュートされています OR AFK OR ペットショップ OR ドンキホーテのラー油 OR ケンタッキーとバーガーキング OR 切り抜き酒のラベル OR 春が嫌いな人 OR カンニング OR セトリは概要欄です OR 初見さんいらっしゃい OR 曲名教えてください",
       "--search-scope",
       "title",
       "--page-size",
@@ -910,6 +968,35 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(pythonBuildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+  const pythonArtistAliasOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPathPython,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"Calc Alias Song\" OR \"No Logic\"",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(pythonArtistAliasOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const pythonArtistAliasPayload = parseDbQueryOutput(pythonArtistAliasOutput);
+  const pythonCalcAlias = pythonArtistAliasPayload.records.find((record) => record.title === "Calc Alias Song");
+  const pythonNoLogicAlias = pythonArtistAliasPayload.records.find((record) => record.title === "No Logic");
+  assert.equal(pythonArtistAliasPayload.totalCount, 2);
+  assert.equal(pythonCalcAlias.displayArtist, "Calc.");
+  assert.equal(pythonCalcAlias.timestampCount, 2);
+  assert.equal(pythonNoLogicAlias.displayArtist, "ジミーサムP");
+  assert.equal(pythonNoLogicAlias.timestampCount, 2);
+
   const pythonDirtySongOutput = execFileSync(
     PYTHON,
     [

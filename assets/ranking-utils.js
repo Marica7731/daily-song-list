@@ -22,6 +22,11 @@
     "待補",
     "-",
   ]);
+  const CURATED_ARTIST_ALIAS_GROUPS = [
+    { canonical: "Calc.", aliases: ["Calc"] },
+    { canonical: "ジミーサムP", aliases: ["ジミーサム", "OneRoom"] },
+  ];
+  let curatedArtistAliasLookup = null;
 
   function buildSongRecords(occurrences, options = {}) {
     const clean = options.cleanText || cleanText;
@@ -167,6 +172,7 @@
     }
 
     mergePartialArtistRankingVariants(records);
+    mergeCuratedArtistRankingAliases(records);
     const finalizedRecords = Array.from(records.values()).map((record) => finalizeArtistRecord(record, normalizeArtist));
     return { records: finalizedRecords, missingArtistCount };
   }
@@ -196,8 +202,41 @@
       recordsByKey.delete(record.artistKey);
     }
     mergeKanaRomajiArtistVariants(recordsByKey);
+    mergeCuratedSameTitleArtistAliases(recordsByKey);
     mergeLikelyArtistTypoVariants(recordsByKey);
     mergePartialSameTitleArtistVariants(recordsByKey);
+  }
+
+  function mergeCuratedSameTitleArtistAliases(recordsByKey) {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
+      for (const record of records) {
+        if (recordsByKey.get(record.artistKey) !== record) continue;
+        const target = selectCuratedArtistAliasTarget(record, recordsByKey);
+        if (!target) continue;
+        const winner = selectCuratedArtistAliasWinner([target, record]);
+        const loser = winner === target ? record : target;
+        if (winner === loser) continue;
+        mergeRecord(winner, loser);
+        recordsByKey.delete(loser.artistKey);
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  function selectCuratedArtistAliasTarget(record, recordsByKey) {
+    const recordKey = curatedArtistAliasRecordKey(record);
+    if (!recordKey) return null;
+    const matches = [];
+    for (const candidate of recordsByKey.values()) {
+      if (candidate === record) continue;
+      if (curatedArtistAliasRecordKey(candidate) === recordKey) matches.push(candidate);
+    }
+    if (matches.length !== 1) return null;
+    return matches[0];
   }
 
   function mergeKanaRomajiArtistVariants(recordsByKey) {
@@ -298,6 +337,40 @@
         break;
       }
     }
+  }
+
+  function mergeCuratedArtistRankingAliases(recordsByKey) {
+    let changed = true;
+    const caches = createPartialArtistMergeCaches();
+    while (changed) {
+      changed = false;
+      const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
+      for (const record of records) {
+        if (recordsByKey.get(record.key) !== record) continue;
+        const target = selectCuratedArtistRankingAliasTarget(record, recordsByKey, caches);
+        if (!target) continue;
+        const winner = selectCuratedArtistAliasWinner([target, record]);
+        const loser = winner === target ? record : target;
+        if (winner === loser) continue;
+        mergeArtistRankRecord(winner, loser);
+        invalidatePartialArtistMergeCache(caches, winner);
+        recordsByKey.delete(loser.key);
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  function selectCuratedArtistRankingAliasTarget(record, recordsByKey, options = {}) {
+    const recordKey = curatedArtistAliasRecordKey(record);
+    if (!recordKey) return null;
+    const matches = [];
+    for (const candidate of partialArtistCandidates(record, recordsByKey, { requireSharedSong: true, ...options })) {
+      if (candidate === record) continue;
+      if (curatedArtistAliasRecordKey(candidate) === recordKey) matches.push(candidate);
+    }
+    if (matches.length !== 1) return null;
+    return matches[0];
   }
 
   function selectPartialArtistTarget(record, recordsByKey, options = {}) {
@@ -497,6 +570,69 @@
     return uniqueStrings(names);
   }
 
+  function selectCuratedArtistAliasWinner(records) {
+    return [...records].sort((a, b) =>
+      curatedArtistCanonicalPresenceScore(b) - curatedArtistCanonicalPresenceScore(a) || compareRecordDominance(a, b),
+    )[0];
+  }
+
+  function curatedArtistCanonicalPresenceScore(record) {
+    const canonical = curatedArtistCanonicalNameForRecord(record);
+    if (!canonical) return 0;
+    return partialArtistRecordNames(record).some((name) => normalizeArtistKey(name) === normalizeArtistKey(canonical)) ? 1 : 0;
+  }
+
+  function curatedArtistAliasRecordKey(record) {
+    const keys = new Set();
+    for (const name of partialArtistRecordNames(record)) {
+      const key = curatedArtistAliasKey(name);
+      if (key) keys.add(key);
+    }
+    return keys.size === 1 ? Array.from(keys)[0] : "";
+  }
+
+  function curatedArtistCanonicalNameForRecord(record) {
+    return curatedArtistCanonicalNameForNames(partialArtistRecordNames(record));
+  }
+
+  function curatedArtistCanonicalNameForEntries(entries) {
+    return curatedArtistCanonicalNameForNames((entries || []).map((entry) => entry?.name || ""));
+  }
+
+  function curatedArtistCanonicalNameForNames(names) {
+    const canonicals = new Map();
+    for (const name of names || []) {
+      const entry = curatedArtistAliasEntry(name);
+      if (entry) canonicals.set(entry.canonicalKey, entry.canonical);
+    }
+    return canonicals.size === 1 ? Array.from(canonicals.values())[0] : "";
+  }
+
+  function curatedArtistAliasKey(value) {
+    const key = normalizeArtistKey(value);
+    return curatedArtistAliasLookupMap().get(key)?.canonicalKey || "";
+  }
+
+  function curatedArtistAliasEntry(value) {
+    const key = normalizeArtistKey(value);
+    return curatedArtistAliasLookupMap().get(key) || null;
+  }
+
+  function curatedArtistAliasLookupMap() {
+    if (curatedArtistAliasLookup) return curatedArtistAliasLookup;
+    curatedArtistAliasLookup = new Map();
+    for (const group of CURATED_ARTIST_ALIAS_GROUPS) {
+      const canonical = cleanText(group.canonical);
+      const canonicalKey = normalizeArtistKey(canonical);
+      if (!canonical || !canonicalKey) continue;
+      for (const name of [canonical, ...(group.aliases || [])]) {
+        const key = normalizeArtistKey(name);
+        if (key) curatedArtistAliasLookup.set(key, { canonical, canonicalKey });
+      }
+    }
+    return curatedArtistAliasLookup;
+  }
+
   function kanaNameMatchesLatinName(kanaName, latinName) {
     const romanizedValues = kanaRomajiKeys(kanaName);
     if (!romanizedValues.length) return false;
@@ -638,6 +774,8 @@
       }))
       .sort(compareArtistAlias);
     if (aliases[0]) record.name = aliases[0].name;
+    const curatedCanonical = curatedArtistCanonicalNameForRecord(record);
+    if (curatedCanonical) record.name = curatedCanonical;
     record.aliases = aliases;
     delete record.aliasCounts;
     return record;
@@ -854,7 +992,8 @@
   function selectDisplayArtist(record) {
     const entries = sortedCountEntries(record.artists);
     if (!entries.length) return "";
-    if (entries.length === 1 || shouldCollapseArtistAliases(entries)) return entries[0].name;
+    const curatedCanonical = curatedArtistCanonicalNameForEntries(entries);
+    if (entries.length === 1 || shouldCollapseArtistAliases(entries)) return curatedCanonical || entries[0].name;
     return entries.slice(0, 2).map((entry) => (entry.count > 1 ? `${entry.name} (${entry.count})` : entry.name)).join("、");
   }
 
@@ -863,6 +1002,8 @@
     const dominant = entries[0];
     const total = entries.reduce((sum, entry) => sum + entry.count, 0);
     const dominantKey = normalizeArtistKey(dominant.name);
+    const curatedCanonical = curatedArtistCanonicalNameForEntries(entries);
+    if (curatedCanonical && entries.every((entry) => curatedArtistAliasKey(entry.name) === normalizeArtistKey(curatedCanonical))) return true;
     if (dominantKey && entries.every((entry) => normalizeArtistKey(entry.name) === dominantKey)) return true;
     if (dominant.count / total < 0.75) return false;
     return entries.slice(1).every((entry) => isDisplayArtistAliasOf(entry.name, dominant.name) || isLikelyArtistKeyTypo(normalizeArtistKey(entry.name), dominantKey));

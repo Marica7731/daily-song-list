@@ -38,6 +38,11 @@ UNKNOWN_ARTISTS = {
     "待補",
     "-",
 }
+CURATED_ARTIST_ALIAS_GROUPS = (
+    {"canonical": "Calc.", "aliases": ("Calc",)},
+    {"canonical": "ジミーサムP", "aliases": ("ジミーサム", "OneRoom")},
+)
+CURATED_ARTIST_ALIAS_LOOKUP: dict[str, dict[str, str]] | None = None
 
 
 def configure_stdio() -> None:
@@ -751,7 +756,7 @@ def record_song(state: dict, range_id: str, video_id: str, item: dict, song_key:
     if is_likely_runtime_non_song_entry(song, item):
         return
     title = clean_text(song.get("title"))
-    artist = clean_text(song.get("artist"))
+    artist = canonical_artist_display_name(song.get("artist")) or clean_text(song.get("artist"))
     if song_key not in state["songs"]:
         state["songs"][song_key] = {
             "key": song_key,
@@ -775,13 +780,14 @@ def record_artist(state: dict, range_id: str, video_id: str, item: dict, song: d
     artist = clean_text(song.get("artist"))
     if is_unknown_artist(artist):
         return
-    artist_key = normalize_key(artist)
+    artist_key = canonical_artist_key(artist)
     if not artist_key:
         return
+    artist_name = canonical_artist_display_name(artist) or artist
     if artist_key not in state["artists"]:
         state["artists"][artist_key] = {
             "key": artist_key,
-            "name": artist,
+            "name": artist_name,
             "count": 0,
             "videos": set(),
             "songs": {},
@@ -1964,6 +1970,10 @@ def is_runtime_commentary_noise(title, raw) -> bool:
         return False
     if re.search(r"(?:雑談|聊天|说明|説明|コメント|コメ|アンケート|投票|リクエスト|配信|歌枠|喉|のど|自己紹介|お知らせ|告知|自己肯定感|OP画面|EDトーク|休憩[&＆]?雑談タイム|カンニングタイム)", title_text, re.IGNORECASE):
         return True
+    if re.search(r"(?:セトリ|セットリスト|タイムスタンプ|概要欄|説明欄|曲名|歌手|アーティスト).{0,24}(?:です|ます|ください|下さい|お願い|教えて|確認|修正|追加|更新|まとめ|整理|不明|未記載|わからない|分からない)", title_text, re.IGNORECASE):
+        return True
+    if re.search(r"(?:初見|はじめまして).{0,20}(?:いらっしゃい|歓迎|ようこそ)", title_text, re.IGNORECASE):
+        return True
     if re.search(r"(?:なれコール)?アンケート|歌詞考察|曲紹介(?:タイム)?", title_text, re.IGNORECASE):
         return True
     if re.search(r"(?:なれたん|naraetan)", combined, re.IGNORECASE):
@@ -2029,7 +2039,7 @@ def is_runtime_explanatory_english_gloss_artist(title, artist, raw) -> bool:
         return False
     if re.match(r"(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did)\b", artist_text):
         return True
-    return bool(re.search(r"\b(?:about|accidental|anime|apartment|apolog(?:y|ize)|atmosphere|blossoms?|body|broadcasting|brush(?:ing)?|bugging|burger|celebrit(?:y|ies)|chat|cheating|chili|club|comment|conan|cooking|copyright|count|dance|detective|drink(?:ing)?|ending songs?|famous|favorite|filefish|food|gift|guide|guinea|hair|hairstyle|heart|hospital|how to|imitating|information|kfc|korea|label|learned|luck|memories|menu|microphone|mind of its own|money|muted|new outfit|newly|oil|opening|organizing|outfits?|park|personal|pet|phones?|poisoning|quiz|quotes?|rechecking|recommendations?|rolled|sake|shop|song list|spring|stocked|surprised|swiss|take a look|throat|thoughts?|watching|welcome|workplace)\b", artist_text, re.IGNORECASE))
+    return bool(re.search(r"\b(?:about|accidental|anime|apartment|apolog(?:y|ize)|atmosphere|blossoms?|body|broadcasting|brush(?:ing)?|bugging|burger|celebrit(?:y|ies)|chat|cheating|chili|club|comment|conan|cooking|copyright|count|dance|decided|description|descriptions?|detective|drink(?:ing)?|ending songs?|famous|favorite|filefish|first-time|food|gift|greeting|guide|guinea|hair|hairstyle|heart|hello|hospital|how to|imitating|information|kfc|korea|label|learned|luck|memories|menu|microphone|mind of its own|money|muted|new outfit|newly|oil|opening|organizing|outfits?|park|personal|pet|phones?|please|poisoning|quiz|quotes?|rechecking|recommendations?|request|rolled|sake|setlist|shop|song list|spring|stocked|surprised|swiss|take a look|throat|thoughts?|timestamps?|watching|welcome|workplace)\b", artist_text, re.IGNORECASE))
 
 
 def is_runtime_singleton_daily_topic_text(title, raw) -> bool:
@@ -2040,7 +2050,7 @@ def is_runtime_singleton_daily_topic_text(title, raw) -> bool:
         return True
     if re.fullmatch(r"(?:たすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|本編終了|歌パート終了|練習パート|復習タイム開始)", value, re.IGNORECASE):
         return True
-    return bool(re.search(r"(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|髪型|スマホ|配信を見る|体調|病院|飲み|食べ|料理|メニュー|誕生日|自分へのプレゼント|プレゼント選び|プレゼント|写真|歯磨き|うがい|買い物|職場|お菓子|ものまね|謝罪|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|ネタバレ|途中からリベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|大阪の話|海遊館|歌みた|歌ってみた|こだわりポイント|ペットショップ|ラー油|ケンタッキー|バーガーキング|酒のラベル|春が嫌い|カンニング|再確認|覚えてきた曲|ごらんください|ご覧ください|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い|joysound|音楽停止|fanart|outfit|hairstyle|gift|photo|quiz|shopping|stream|teeth|rinsing|apolog|apartment|atmosphere|body|bug|bugging|cooking|copyright|count|dance|filefish|heart|luck|microphone|model|money|muted|emoji|guinea|korea|rolled|sake|spring|swiss|welcome|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)", value, re.IGNORECASE))
+    return bool(re.search(r"(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|髪型|スマホ|配信を見る|体調|病院|飲み|食べ|料理|メニュー|誕生日|自分へのプレゼント|プレゼント選び|プレゼント|写真|歯磨き|うがい|買い物|職場|お菓子|ものまね|謝罪|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|ネタバレ|途中からリベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|大阪の話|海遊館|歌みた|歌ってみた|こだわりポイント|ペットショップ|ラー油|ケンタッキー|バーガーキング|酒のラベル|春が嫌い|カンニング|再確認|覚えてきた曲|ごらんください|ご覧ください|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い|joysound|音楽停止|セトリ|セットリスト|タイムスタンプ|概要欄|説明欄|曲名|歌手|アーティスト|初見|はじめまして|いらっしゃい|歓迎|決まって|教えて|お願い|fanart|outfit|hairstyle|gift|photo|quiz|shopping|stream|teeth|rinsing|apolog|apartment|atmosphere|body|bug|bugging|cooking|copyright|count|dance|description|filefish|first-time|heart|hello|luck|microphone|model|money|muted|emoji|guinea|korea|request|rolled|sake|setlist|spring|swiss|timestamps?|welcome|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)", value, re.IGNORECASE))
 
 
 def has_runtime_song_title_latin_gloss(title) -> bool:
@@ -2060,15 +2070,22 @@ def is_runtime_topic_like_bilingual_commentary(title, artist, raw) -> bool:
         return False
     if is_known_song_safe_from_runtime_commentary(title_text, artist_text):
         return False
-    if has_structured_song_number(raw_text) and not is_runtime_commentary_noise(title_text, raw_text):
-        return False
     if not contains_japanese(title_text) or contains_japanese(artist_text):
         return False
     if not is_english_gloss_like_text(artist_text):
         return False
-    if is_runtime_commentary_noise(title_text, raw_text) or is_runtime_sentence_like_title(title_text):
-        return True
-    return bool(re.search(r"(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ|体調|歯磨き|うがい|買い物|職場|謝|絵文字|プレゼント|踏んで|海遊館|大阪の話|衣装|髪型|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|料理|メニュー|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|joysound)", title_text, re.IGNORECASE))
+    strong_topic = bool(
+        is_runtime_commentary_noise(title_text, raw_text)
+        or is_runtime_sentence_like_title(title_text)
+        or re.search(
+            r"(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ|体調|歯磨き|うがい|買い物|職場|謝|絵文字|プレゼント|踏んで|海遊館|大阪の話|衣装|髪型|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|料理|メニュー|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|joysound|セトリ|セットリスト|タイムスタンプ|概要欄|説明欄|曲名|歌手|アーティスト|初見|はじめまして|いらっしゃい|歓迎|決まって|教えて|お願い|開始|終了)",
+            title_text,
+            re.IGNORECASE,
+        )
+    )
+    if has_structured_song_number(raw_text) and not strong_topic:
+        return False
+    return strong_topic
 
 
 def is_known_song_safe_from_runtime_commentary(title, artist) -> bool:
@@ -2108,7 +2125,7 @@ def is_english_gloss_like_text(text) -> bool:
         return True
     if re.search(r"[?？]$", value) or re.search(r"\([^)]{3,80}\)", value):
         return True
-    return bool(re.search(r"\b(?:about|accidental|accented|ad|alcohol|anime|apartment|atmosphere|attack|ballad|body|bugging|burger|carbonated|catchy|cheating|chili|click|commercial|cooking|copyright|count|dance|differences?|difficult|dream|drink(?:ing)?|filefish|food|gift|guinea|hairstyle|heart|hospital|introduced?|introducing|japanese|kfc|korean|korea|label|learned|luck|marks?|microphone|money|music|muted|newly|oil|outfits?|parents?|pet|picture|poisoning|poll|popular|pronunciation|quiz|rechecking|recommendations?|recently|rice|risks?|rolled|sake|salon|shop|song|songs|souvenirs?|spring|stops?|swiss|tea|temptation|traditional|vowel|watched|welcome|workplace)\b", value, re.IGNORECASE))
+    return bool(re.search(r"\b(?:about|accidental|accented|ad|alcohol|anime|apartment|atmosphere|attack|ballad|body|bugging|burger|carbonated|catchy|cheating|chili|click|commercial|cooking|copyright|count|dance|decided|description|descriptions?|differences?|difficult|dream|drink(?:ing)?|filefish|first-time|food|gift|greeting|guinea|hairstyle|heart|hello|hospital|introduced?|introducing|japanese|kfc|korean|korea|label|learned|luck|marks?|microphone|money|music|muted|newly|oil|outfits?|parents?|pet|picture|please|poisoning|poll|popular|pronunciation|quiz|rechecking|recommendations?|recently|request|rice|risks?|rolled|sake|salon|setlist|shop|song|songs|souvenirs?|spring|stops?|swiss|tea|temptation|timestamps?|traditional|vowel|watched|welcome|workplace)\b", value, re.IGNORECASE))
 
 
 def is_runtime_sentence_like_credit(text) -> bool:
@@ -2337,7 +2354,7 @@ def song_record_key(song: dict) -> str:
     source_key = clean_text(song.get("key") or song.get("canonicalSongId"))
     if source_key:
         return source_key
-    return stable_key("song", normalize_key(song.get("title")), normalize_key(song.get("artist")))
+    return stable_key("song", normalize_key(song.get("title")), canonical_artist_key(song.get("artist")))
 
 
 def channel_record_key(item: dict) -> str:
@@ -2550,6 +2567,43 @@ def stable_key(*parts) -> str:
 
 def search_text(*parts) -> str:
     return " ".join(filter(None, (normalize_key(part) for part in parts)))
+
+
+def canonical_artist_key(value) -> str:
+    artist_key = normalize_artist_identity_key(value)
+    return curated_artist_alias_entry(value).get("canonicalKey", artist_key)
+
+
+def canonical_artist_display_name(value) -> str:
+    return curated_artist_alias_entry(value).get("canonical", "")
+
+
+def curated_artist_alias_entry(value) -> dict[str, str]:
+    key = normalize_artist_identity_key(value)
+    return curated_artist_alias_lookup().get(key, {})
+
+
+def curated_artist_alias_lookup() -> dict[str, dict[str, str]]:
+    global CURATED_ARTIST_ALIAS_LOOKUP
+    if CURATED_ARTIST_ALIAS_LOOKUP is not None:
+        return CURATED_ARTIST_ALIAS_LOOKUP
+    lookup: dict[str, dict[str, str]] = {}
+    for group in CURATED_ARTIST_ALIAS_GROUPS:
+        canonical = clean_text(group.get("canonical"))
+        canonical_key = normalize_artist_identity_key(canonical)
+        if not canonical or not canonical_key:
+            continue
+        for name in (canonical, *group.get("aliases", ())):
+            key = normalize_artist_identity_key(name)
+            if key:
+                lookup[key] = {"canonical": canonical, "canonicalKey": canonical_key}
+    CURATED_ARTIST_ALIAS_LOOKUP = lookup
+    return lookup
+
+
+def normalize_artist_identity_key(value) -> str:
+    text = unicodedata.normalize("NFKC", clean_text(value)).lower()
+    return "".join(char for char in text if unicodedata.category(char)[0] in ("L", "N"))
 
 
 def is_unknown_artist(value) -> bool:

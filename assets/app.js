@@ -6936,9 +6936,10 @@ async function sourceDetailPageForContainer(container, currentOccurrences = [], 
   const pageSize = Math.max(1, Math.floor(Number(options.pageSize) || sourceDrawerPageSizeForMode()));
   const path = cleanText(container?._sourceDetailPath);
   const songKey = cleanText(container?._sourceSongKey);
-  if (path && songKey) {
+  const songTitle = cleanText(container?._sourceSongTitle);
+  if (path && (songKey || songTitle)) {
     const loaded = await sourceDetailOccurrencesForContainer(container, currentOccurrences);
-    return localSourceDetailPage(filterOccurrencesForSongKey(loaded, songKey), { page, pageSize });
+    return localSourceDetailPage(filterOccurrencesForSongKey(loaded, songKey, songTitle), { page, pageSize });
   }
   if (path) {
     const result = await loadSourceDetailPage(path, cleanText(container?._sourceDetailKey), { page, pageSize });
@@ -6948,10 +6949,33 @@ async function sourceDetailPageForContainer(container, currentOccurrences = [], 
   return localSourceDetailPage(currentOccurrences, { page, pageSize });
 }
 
-function filterOccurrencesForSongKey(occurrences = [], songKey = "") {
-  const key = cleanText(songKey);
-  if (!key) return occurrences || [];
-  return (occurrences || []).filter((occurrence) => normalizeEntityKey(occurrence?.song?.title) === key);
+function filterOccurrencesForSongKey(occurrences = [], songKey = "", songTitle = "") {
+  const keys = songMatchKeys(songKey, songTitle);
+  if (!keys.size) return occurrences || [];
+  return (occurrences || []).filter((occurrence) => occurrenceSongMatchesAnyKey(occurrence, keys));
+}
+
+function songMatchKeys(...values) {
+  const keys = new Set();
+  for (const value of values) {
+    const text = cleanText(value);
+    if (!text) continue;
+    keys.add(normalizeEntityKey(text));
+    const workKey = window.RankingUtils?.songWorkTitleKey?.(text);
+    if (workKey) keys.add(workKey);
+  }
+  return keys;
+}
+
+function occurrenceSongMatchesAnyKey(occurrence, keys) {
+  if (!keys?.size) return true;
+  return Array.from(songMatchKeys(
+    occurrence?.song?.key,
+    occurrence?.song?.title,
+    occurrence?.song?.workTitle,
+    occurrence?.song?.canonicalTitle,
+    occurrence?.song?.displayTitle,
+  )).some((key) => keys.has(key));
 }
 
 async function loadSourceDetailOccurrences(path, key = "") {
@@ -7750,6 +7774,7 @@ function renderArtistSongGroup(group) {
   sources._sourceDetailPath = sourceDetailPath;
   sources._sourceDetailKey = cleanText(group._record?.sourceDetailKey || "");
   sources._sourceSongKey = group.key || normalizeEntityKey(group.title);
+  sources._sourceSongTitle = group.title;
 
   if (hasOccurrences) {
     meta.append(renderCopySongLinksIconButton(group.occurrences));
@@ -7838,7 +7863,7 @@ function hydrateArtistSongGroup(group) {
   }
   const record = group._record || {};
   const key = group.key || normalizeEntityKey(group.title);
-  const occurrences = filterDisplaySongOccurrences(record.occurrences || []).filter((occurrence) => normalizeEntityKey(occurrence?.song?.title) === key);
+  const occurrences = filterOccurrencesForSongKey(filterDisplaySongOccurrences(record.occurrences || []), key, group.title);
   group.occurrences = occurrences;
   group.videoCount = uniqueVideoCount(occurrences);
   group.isNiche = occurrences.length > 0 && occurrences.every(({ song }) => window.FrontendUtils.isNicheSong(song));

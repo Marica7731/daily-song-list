@@ -228,6 +228,10 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "切り抜き酒のラベル", artist: "Clip-Style Sake Label", raw: "02:07:56 切り抜き酒のラベル / Clip-Style Sake Label" }), true);
   assert.equal(isBlockedSongEntry({ title: "春が嫌いな人", artist: "People Who Hate Spring", raw: "00:18:38 春が嫌いな人 / People Who Hate Spring" }), true);
   assert.equal(isBlockedSongEntry({ title: "カンニング（新しく覚えてきた曲を再確認）", artist: "Cheating (Rechecking a Newly Learned Song)", raw: "00:42:54 カンニング（新しく覚えてきた曲を再確認） / Cheating (Rechecking a Newly Learned Song)" }), true);
+  assert.equal(isBlockedSongEntry({ title: "セトリは概要欄です", artist: "Setlist is in the description", raw: "01. セトリは概要欄です / Setlist is in the description" }), true);
+  assert.equal(isBlockedSongEntry({ title: "初見さんいらっしゃい", artist: "Welcome first-time viewers", raw: "00:12:00 初見さんいらっしゃい / Welcome first-time viewers" }), true);
+  assert.equal(isBlockedSongEntry({ title: "次の曲はまだ決まってない", artist: "The next song has not been decided", raw: "00:13:00 次の曲はまだ決まってない / The next song has not been decided" }), true);
+  assert.equal(isBlockedSongEntry({ title: "曲名教えてください", artist: "未記載", raw: "00:14:00 曲名教えてください" }), true);
   assert.equal(isBlockedSongEntry({ title: "雑談タイム!", artist: "未記載", raw: "01:00:00 雑談タイム!" }), true);
   assert.equal(isBlockedSongEntry({ title: "新しいOP画面", artist: "未記載", raw: "00:02:10 新しいOP画面" }), true);
   assert.equal(isBlockedSongEntry({ title: "EDトーク", artist: "未記載", raw: "02:00:00 EDトーク" }), true);
@@ -276,6 +280,9 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isLikelyNonSongEntry({ title: "Pretender", artist: "Official髭男dism" }), false);
   assert.equal(isLikelyNonSongEntry({ title: "spending", artist: "Known Artist" }), false);
   assert.equal(isLikelyNonSongEntry({ title: "Ending", artist: "Known Artist" }), false);
+  assert.equal(isLikelyNonSongEntry({ title: "セトリは概要欄です", artist: "Setlist is in the description", raw: "01. セトリは概要欄です / Setlist is in the description" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "START", artist: "愛内里菜", raw: "0:11 START / 愛内里菜" }), false);
+  assert.equal(isLikelyNonSongEntry({ title: "Opening", artist: "Known Artist", raw: "0:12 Opening / Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "閉会式も見てください", artist: "待补歌手" }), true);
   assert.equal(isBlockedSongEntry({ title: "1を手で表現した", artist: "待补歌手" }), true);
   assert.equal(isBlockedSongEntry({ title: "2周年記念お写真公開！", artist: "待补歌手" }), true);

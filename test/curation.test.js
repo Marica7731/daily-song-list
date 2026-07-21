@@ -247,6 +247,8 @@ test("curation drops global conversational pseudo-song rows from multiple channe
         songs: [
           { title: "おつはのちゅっちゅる〜！", artist: "未記載", seconds: 3, raw: "1:01:14 おつはのちゅっちゅる〜！" },
           { title: "次のバトンは香鳴ハノンちゃん", artist: "未記載", seconds: 4, raw: "00:24:24 次のバトンは香鳴ハノンちゃん" },
+          { title: "セトリは概要欄です", artist: "Setlist is in the description", seconds: 6, raw: "01. セトリは概要欄です / Setlist is in the description" },
+          { title: "曲名教えてください", artist: "未記載", seconds: 7, raw: "00:25:00 曲名教えてください" },
           { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", seconds: 5, raw: "0:05 ENDLESS STORY / REIRA starring YUNA ITO" },
         ],
       },
@@ -258,7 +260,7 @@ test("curation drops global conversational pseudo-song rows from multiple channe
     videos.flatMap((item) => item.songs.map((song) => `${item.videoId}:${song.title} / ${song.artist}`)),
     ["NARAETAN002:START:DASH!! / μ's", "HANON000001:ENDLESS STORY / REIRA starring YUNA ITO"],
   );
-  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 3);
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 5);
 });
 
 test("curation drops singleton topic/gloss pseudo songs while keeping reliable English artists", () => {
