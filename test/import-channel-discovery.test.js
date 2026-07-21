@@ -10,8 +10,10 @@ const {
   isImportableSong,
   isStrictSongSubset,
   normalizeImportedVideo,
+  projectRelativePath,
   readDiscoveryVideos,
 } = require("../scripts/import-channel-discovery");
+const { buildInputSummaries } = require("../scripts/export-channel-discovery-increment");
 
 test("input dirs accept repeated CLI values and positional fallback", () => {
   const first = path.resolve("artifacts/channel-discovery/a");
@@ -31,7 +33,11 @@ test("channel discovery import reads usable details and preserves provenance", (
         channelName: "Noa",
         channelId: "UC_NOA",
         channelHandle: "/@noa_polaris",
+        channelAvatarUrl: "https://yt3.ggpht.com/noa=s240",
         publishedTimestamp: Date.parse("2026-07-18T00:00:00Z"),
+        publishedText: "2026-07-18",
+        durationText: "1:23:45",
+        thumbnailUrl: "https://example.test/noa-thumb.jpg",
         discoverySourceUrls: ["https://www.youtube.com/@noa_polaris/streams"],
         discoverySingerName: "Noa",
         discoveryChannelUrl: "https://www.youtube.com/@noa_polaris",
@@ -71,9 +77,17 @@ test("channel discovery import reads usable details and preserves provenance", (
   assert.equal(stats.skippedNoSongs, 1);
   assert.equal(stats.skippedInvalidVideoId, 1);
   assert.equal(stats.songs, 1);
+  assert.equal(stats.videosWithPublishedTimestamp, 1);
+  assert.equal(stats.videosWithThumbnail, 1);
+  assert.equal(stats.songsWithTimestamp, 1);
+  assert.equal(stats.inputSummaries[0].usableVideos, 1);
   assert.equal(videos[0].sourceGroups.includes("youtube_channel_discovery"), true);
   assert.equal(videos[0].sourceUrls.includes("https://www.youtube.com/@noa_polaris/streams"), true);
   assert.equal(videos[0].sourceUrls.includes("https://www.youtube.com/watch?v=AAAAAAAAAAA"), true);
+  assert.equal(videos[0].thumbnailUrl, "https://example.test/noa-thumb.jpg");
+  assert.equal(videos[0].channelAvatarUrl, "https://yt3.ggpht.com/noa=s240");
+  assert.equal(videos[0].publishedText, "2026-07-18");
+  assert.equal(videos[0].durationText, "1:23:45");
   assert.deepEqual(videos[0].songs.map((song) => song.title), ["少女レイ"]);
   assert.equal(videos[0].songs[0].sourceId, "comment:1");
 });
@@ -96,6 +110,7 @@ test("normalizeImportedVideo maps detail song fields into catalog-ready videos",
     {
       videoId: "CCCCCCCCCCC",
       title: "弾き語り",
+      thumbnailUrl: "",
       sourceGroups: ["month"],
       sourceUrls: ["https://example.test/source"],
       songs: [{ seconds: 1, title: "Song", artist: "Artist", isNiche: true }],
@@ -105,6 +120,7 @@ test("normalizeImportedVideo maps detail song fields into catalog-ready videos",
   );
   assert.equal(video.videoId, "CCCCCCCCCCC");
   assert.deepEqual(video.sourceGroups.sort(), ["month", "youtube_channel_discovery"]);
+  assert.equal(video.thumbnailUrl, "https://i.ytimg.com/vi/CCCCCCCCCCC/hqdefault.jpg");
   assert.equal(video.songs[0].index, 1);
   assert.equal(video.songs[0].isNiche, true);
   assert.equal(video.qualityStatus, "usable");
@@ -156,4 +172,63 @@ test("import skips duplicate videos that would replace a richer existing song li
   assert.deepEqual(result.videos.map((video) => video.videoId), ["BBBBBBBBBBB"]);
   assert.equal(result.stats.skippedExistingRegressions, 1);
   assert.deepEqual(result.stats.skippedExistingRegressionVideoIds, ["AAAAAAAAAAA"]);
+});
+
+test("channel discovery export summaries include per-input counts, coverage, and failure reasons", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-export-summary-"));
+  fs.writeFileSync(
+    path.join(dir, "manifest.json"),
+    JSON.stringify({
+      channelUrl: "https://www.youtube.com/@overlay",
+      singerName: "Overlay",
+      generatedAt: "2026-07-19T01:00:00Z",
+      candidateCount: 3,
+      inspectedInLatestRun: 2,
+      occurrenceCount: 1,
+    }),
+    "utf8",
+  );
+  fs.writeFileSync(
+    path.join(dir, "audits.json"),
+    JSON.stringify([
+      { videoId: "AAAAAAAAAAA", result: "selected" },
+      { videoId: "BBBBBBBBBBB", result: "no_usable_song_source" },
+      { videoId: "CCCCCCCCCCC", result: "fetch_error" },
+    ]),
+    "utf8",
+  );
+  fs.writeFileSync(path.join(dir, "raw-videos.json"), JSON.stringify([{ youtubeVideoId: "AAAAAAAAAAA" }]), "utf8");
+  const inputDir = projectRelativePath(dir);
+  const acceptedVideo = {
+    videoId: "AAAAAAAAAAA",
+    publishedTimestamp: Date.parse("2026-07-18T00:00:00Z"),
+    thumbnailUrl: "https://example.test/thumb.jpg",
+    discoveryImport: { inputDir },
+    songs: [{ seconds: 83, title: "Overlay Song", artist: "Overlay Artist" }],
+  };
+  const summaries = buildInputSummaries(
+    [dir],
+    {
+      inputSummaries: [
+        {
+          inputDir,
+          usableVideos: 1,
+          skippedNoSongs: 1,
+          skippedInvalidVideoId: 0,
+          duplicateVideoIds: 0,
+        },
+      ],
+    },
+    [acceptedVideo],
+    [acceptedVideo],
+    { stats: { skippedExistingRegressionVideoIds: [] } },
+  );
+
+  assert.equal(summaries.length, 1);
+  assert.equal(summaries[0].imported, 1);
+  assert.equal(summaries[0].skipped, 1);
+  assert.equal(summaries[0].failed, 2);
+  assert.deepEqual(summaries[0].failedReasons, { fetch_error: 1, no_usable_song_source: 1 });
+  assert.equal(summaries[0].increments.occurrences, 1);
+  assert.equal(summaries[0].coverage.acceptedVideos.thumbnailUrl.covered, 1);
 });

@@ -110,33 +110,62 @@ function readDiscoveryVideos(inputDirs) {
     skippedInvalidVideoId: 0,
     duplicateVideoIds: 0,
     songs: 0,
+    videosWithPublishedTimestamp: 0,
+    videosWithThumbnail: 0,
+    songsWithTimestamp: 0,
+    inputSummaries: [],
   };
   for (const inputDir of inputDirs) {
     const filePath = path.join(inputDir, "video-details.json");
     if (!fs.existsSync(filePath)) throw new Error(`video-details.json not found: ${filePath}`);
     const details = JSON.parse(fs.readFileSync(filePath, "utf8"));
     if (!Array.isArray(details)) throw new Error(`video-details.json must be an array: ${filePath}`);
+    const inputStats = {
+      inputDir: projectRelativePath(inputDir),
+      videoDetails: 0,
+      usableVideos: 0,
+      skippedNoSongs: 0,
+      skippedInvalidVideoId: 0,
+      duplicateVideoIds: 0,
+      songs: 0,
+      videosWithPublishedTimestamp: 0,
+      videosWithThumbnail: 0,
+      songsWithTimestamp: 0,
+    };
     for (const detail of details) {
       stats.videoDetails += 1;
+      inputStats.videoDetails += 1;
       const videoId = String(detail?.videoId || "").trim();
       if (!/^[A-Za-z0-9_-]{11}$/u.test(videoId)) {
         stats.skippedInvalidVideoId += 1;
+        inputStats.skippedInvalidVideoId += 1;
         continue;
       }
       const songs = Array.isArray(detail.songs) ? detail.songs.map(normalizeParsedSong).filter(isImportableSong) : [];
       if (!songs.length) {
         stats.skippedNoSongs += 1;
+        inputStats.skippedNoSongs += 1;
         continue;
       }
       if (seen.has(videoId)) {
         stats.duplicateVideoIds += 1;
+        inputStats.duplicateVideoIds += 1;
         continue;
       }
       seen.add(videoId);
       videos.push(normalizeImportedVideo(detail, inputDir, songs));
       stats.usableVideos += 1;
       stats.songs += songs.length;
+      stats.videosWithPublishedTimestamp += finiteTimestamp(detail.publishedTimestamp) ? 1 : 0;
+      stats.videosWithThumbnail += stringValue(detail.thumbnailUrl) || fallbackThumbnailUrl(videoId) ? 1 : 0;
+      stats.songsWithTimestamp += songs.filter((song) => Number.isFinite(Number(song.seconds))).length;
+      inputStats.usableVideos += 1;
+      inputStats.songs += songs.length;
+      inputStats.videosWithPublishedTimestamp += finiteTimestamp(detail.publishedTimestamp) ? 1 : 0;
+      inputStats.videosWithThumbnail += stringValue(detail.thumbnailUrl) || fallbackThumbnailUrl(videoId) ? 1 : 0;
+      inputStats.songsWithTimestamp += songs.filter((song) => Number.isFinite(Number(song.seconds))).length;
     }
+    stats.inputSummaries.push(inputStats);
   }
   return { videos, stats };
 }
@@ -195,7 +224,12 @@ function normalizeImportedVideo(detail, inputDir, songs) {
     channelId: stringValue(detail.channelId),
     channelHandle: stringValue(detail.channelHandle),
     channelUrl: stringValue(detail.channelUrl || detail.discoveryChannelUrl),
+    channelAvatarUrl: stringValue(detail.channelAvatarUrl || detail.channelThumbnailUrl),
+    channelThumbnailUrl: stringValue(detail.channelThumbnailUrl || detail.channelAvatarUrl),
     publishedTimestamp: finiteTimestamp(detail.publishedTimestamp),
+    publishedText: stringValue(detail.publishedText),
+    durationText: stringValue(detail.durationText),
+    thumbnailUrl: stringValue(detail.thumbnailUrl) || fallbackThumbnailUrl(videoId),
     sourceGroups: uniqueValues([SOURCE_GROUP, ...listValues(detail.sourceGroups), detail.sourceGroup]),
     sourceUrls: uniqueValues([
       ...listValues(detail.sourceUrls),
@@ -227,6 +261,10 @@ function normalizeImportedVideo(detail, inputDir, songs) {
       matchedKeywords: listValues(detail.matchedKeywords).map((value) => stringValue(value)).filter(Boolean),
     },
   };
+}
+
+function fallbackThumbnailUrl(videoId) {
+  return /^[A-Za-z0-9_-]{11}$/u.test(String(videoId || "")) ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "";
 }
 
 function isImportableSong(song) {
@@ -286,4 +324,5 @@ module.exports = {
   normalizeImportedVideo,
   projectRelativePath,
   readDiscoveryVideos,
+  fallbackThumbnailUrl,
 };

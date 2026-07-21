@@ -25,6 +25,7 @@
     "diagnose:song-dedup": "node scripts/diagnose-song-dedup.js",
     "diagnose:song-identities": "node scripts/diagnose-song-identities.js",
     "youtube:discover-channel": "node scripts/youtube-channel-discovery.js",
+    "youtube:backfill-channel-batch": "node scripts/run-youtube-channel-backfill-batch.js",
     "youtube:import-channel-discovery": "node scripts/import-channel-discovery.js",
     "youtube:export-channel-increment": "node scripts/export-channel-discovery-increment.js",
     "migrate:song-identities": "node scripts/diagnose-song-identities.js",

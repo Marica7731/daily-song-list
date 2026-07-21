@@ -310,8 +310,10 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
           channelName: "Overlay Ch.",
           channelHandle: "@overlay",
           channelUrl: "https://www.youtube.com/@overlay",
+          channelAvatarUrl: "https://yt3.ggpht.com/overlay=s240",
           publishedTimestamp: 1784332800000,
           publishedText: "2026-07-18",
+          thumbnailUrl: "https://example.test/overlay-thumb.jpg",
           songs: [
             { title: "Overlay Song", artist: "Overlay Artist", time: "1:23", seconds: 83 },
             { title: "Overlay Song", artist: "Overlay Artist", time: "5:00", seconds: 300 },
@@ -373,13 +375,13 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "videos",
       "--q",
       "@overlay",
-      "--summary-only",
     ],
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(videoHandleSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(videoHandleSearchOutput, /"totalCount": 1/);
   assert.match(videoHandleSearchOutput, /Channel Overlay Karaoke/);
+  assert.match(videoHandleSearchOutput, /"thumbnailUrl": "https:\/\/example\.test\/overlay-thumb\.jpg"/);
 
   const videoUrlSearchOutput = execFileSync(
     PYTHON,

@@ -142,6 +142,7 @@ async function runChannelDiscovery(options, deps) {
 
   const occurrences = details.flatMap((detail) => occurrenceRecordsFromDetail(detail, options.singerName));
   const generatedAt = new Date().toISOString();
+  const coverage = summarizeDiscoveryCoverage(rawVideos, details, occurrences);
   const manifest = {
     schemaVersion: 1,
     kind: "youtube-channel-discovery",
@@ -160,6 +161,7 @@ async function runChannelDiscovery(options, deps) {
     inspectedInLatestRun: inspectedCount,
     usableVideoCount: details.length,
     occurrenceCount: occurrences.length,
+    coverage,
     pageSummaries,
     outputs: {
       rawVideos: "raw-videos.json",
@@ -267,6 +269,8 @@ function addCandidateItems(target, data, extractSearchItems, options, pageUrl) {
     channelName: item.channelName || channel.title,
     channelId: item.channelId || channel.channelId,
     channelHandle: item.channelHandle || handleFromUrl(channel.handleUrl),
+    channelAvatarUrl: item.channelAvatarUrl || channel.thumbnailUrl || "",
+    channelThumbnailUrl: item.channelThumbnailUrl || channel.thumbnailUrl || "",
     discoverySourceUrl: pageUrl,
     channelUrl: normalizeChannelUrl(options.channelUrl),
     singerName: options.singerName || "",
@@ -390,6 +394,8 @@ function mergeDiscoveryCandidate(target, item, context) {
     discoverySourceUrl: item.discoverySourceUrl || context.discoverySourceUrl,
     fetchedAt: context.fetchedAt,
     thumbnailUrl: item.thumbnailUrl || (item.videoId ? `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg` : ""),
+    channelAvatarUrl: item.channelAvatarUrl || item.channelThumbnailUrl || "",
+    channelThumbnailUrl: item.channelThumbnailUrl || item.channelAvatarUrl || "",
   };
   const existing = target.get(candidate.videoId);
   if (!existing) {
@@ -401,7 +407,17 @@ function mergeDiscoveryCandidate(target, item, context) {
   existing.sourceGroups = uniqueStrings([...(existing.sourceGroups || []), ...(candidate.sourceGroups || [])]);
   existing.sourceUrls = uniqueStrings([...(existing.sourceUrls || []), ...(candidate.sourceUrls || [])]);
   if (!existing.publishedTimestamp && candidate.publishedTimestamp) existing.publishedTimestamp = candidate.publishedTimestamp;
-  for (const key of ["publishedText", "durationText", "thumbnailUrl", "viewText", "channelName", "channelId", "channelHandle"]) {
+  for (const key of [
+    "publishedText",
+    "durationText",
+    "thumbnailUrl",
+    "viewText",
+    "channelName",
+    "channelId",
+    "channelHandle",
+    "channelAvatarUrl",
+    "channelThumbnailUrl",
+  ]) {
     if (!existing[key] && candidate[key]) existing[key] = candidate[key];
   }
 }
@@ -416,6 +432,8 @@ function rawVideoCandidate(candidate, singerName = "") {
     youtubeUrl: `https://www.youtube.com/watch?v=${candidate.videoId}`,
     videoTitle: candidate.title || "",
     channelName: candidate.channelName || "",
+    channelAvatarUrl: candidate.channelAvatarUrl || candidate.channelThumbnailUrl || "",
+    channelThumbnailUrl: candidate.channelThumbnailUrl || candidate.channelAvatarUrl || "",
     thumbnailUrl: candidate.thumbnailUrl || `https://i.ytimg.com/vi/${candidate.videoId}/hqdefault.jpg`,
     streamedAt: timestampToIso(candidate.publishedTimestamp),
     publishedAt: timestampToIso(candidate.publishedTimestamp),
@@ -463,6 +481,8 @@ function enrichDetail(detail, candidate, singerName = "") {
     matchedKeywords: candidate.matchedKeywords || [],
     publishedTimestamp: detail.publishedTimestamp || candidate.publishedTimestamp || null,
     thumbnailUrl: detail.thumbnailUrl || candidate.thumbnailUrl || `https://i.ytimg.com/vi/${candidate.videoId}/hqdefault.jpg`,
+    channelAvatarUrl: detail.channelAvatarUrl || candidate.channelAvatarUrl || candidate.channelThumbnailUrl || "",
+    channelThumbnailUrl: detail.channelThumbnailUrl || detail.channelAvatarUrl || candidate.channelThumbnailUrl || candidate.channelAvatarUrl || "",
   };
 }
 
@@ -476,6 +496,8 @@ function occurrenceRecordsFromDetail(detail, singerName = "") {
     youtubeUrl: `https://www.youtube.com/watch?v=${detail.videoId}&t=${Number(song.seconds) || 0}s`,
     videoTitle: detail.title || "",
     channelName: detail.channelName || "",
+    channelAvatarUrl: detail.channelAvatarUrl || detail.channelThumbnailUrl || "",
+    channelThumbnailUrl: detail.channelThumbnailUrl || detail.channelAvatarUrl || "",
     thumbnailUrl: detail.thumbnailUrl || `https://i.ytimg.com/vi/${detail.videoId}/hqdefault.jpg`,
     streamedAt: timestampToIso(detail.publishedTimestamp),
     publishedAt: timestampToIso(detail.publishedTimestamp),
@@ -509,6 +531,10 @@ function reportMarkdown(manifest, rawVideos, details, occurrences) {
     `- Candidates: ${manifest.candidateCount}`,
     `- Usable videos: ${manifest.usableVideoCount}`,
     `- Occurrences: ${manifest.occurrenceCount}`,
+    `- Video time coverage: ${formatRatio(manifest.coverage?.videoDetails?.publishedTimestamp)}`,
+    `- Video thumbnail coverage: ${formatRatio(manifest.coverage?.videoDetails?.thumbnailUrl)}`,
+    `- Occurrence time coverage: ${formatRatio(manifest.coverage?.occurrences?.seconds)}`,
+    `- Occurrence thumbnail coverage: ${formatRatio(manifest.coverage?.occurrences?.thumbnailUrl)}`,
     "",
     "## Candidate videos",
     "",
@@ -529,6 +555,64 @@ function reportMarkdown(manifest, rawVideos, details, occurrences) {
   if (occurrences.length > 30) lines.push(`- ... ${occurrences.length - 30} more`);
   lines.push("");
   return `${lines.join("\n")}\n`;
+}
+
+function summarizeDiscoveryCoverage(rawVideos, details, occurrences) {
+  const latestVideoThumbnail =
+    firstNonEmpty(details.map((detail) => detail.thumbnailUrl)) || firstNonEmpty(rawVideos.map((video) => video.thumbnailUrl));
+  const channelAvatarUrl =
+    firstNonEmpty(details.map((detail) => detail.channelAvatarUrl || detail.channelThumbnailUrl)) ||
+    firstNonEmpty(rawVideos.map((video) => video.channelAvatarUrl || video.channelThumbnailUrl)) ||
+    latestVideoThumbnail ||
+    "";
+  return {
+    rawVideos: {
+      thumbnailUrl: ratioSummary(rawVideos, (video) => video.thumbnailUrl),
+      publishedTimestamp: ratioSummary(rawVideos, (video) => video.publishedAt || video.streamedAt),
+      channelAvatarUrl: ratioSummary(rawVideos, (video) => video.channelAvatarUrl || video.channelThumbnailUrl),
+    },
+    videoDetails: {
+      thumbnailUrl: ratioSummary(details, (detail) => detail.thumbnailUrl),
+      publishedTimestamp: ratioSummary(details, (detail) => detail.publishedTimestamp),
+      channelAvatarUrl: ratioSummary(details, (detail) => detail.channelAvatarUrl || detail.channelThumbnailUrl),
+    },
+    occurrences: {
+      thumbnailUrl: ratioSummary(occurrences, (occurrence) => occurrence.thumbnailUrl),
+      publishedAt: ratioSummary(occurrences, (occurrence) => occurrence.publishedAt),
+      seconds: ratioSummary(occurrences, (occurrence) => Number.isFinite(Number(occurrence.seconds))),
+    },
+    channelAvatarUrl,
+    latestVideoThumbnailUrl: latestVideoThumbnail,
+  };
+}
+
+function ratioSummary(items, hasValue) {
+  const total = Array.isArray(items) ? items.length : 0;
+  const covered = (items || []).filter((item) => {
+    const value = hasValue(item);
+    return typeof value === "boolean" ? value : Boolean(value);
+  }).length;
+  return {
+    covered,
+    total,
+    ratio: total ? roundNumber(covered / total, 4) : null,
+  };
+}
+
+function formatRatio(summary) {
+  if (!summary || !summary.total) return "0/0";
+  const percent = Math.round((summary.ratio || 0) * 1000) / 10;
+  return `${summary.covered}/${summary.total} (${percent}%)`;
+}
+
+function firstNonEmpty(values) {
+  return (values || []).find((value) => String(value || "").trim()) || "";
+}
+
+function roundNumber(value, digits = 2) {
+  if (!Number.isFinite(value)) return null;
+  const scale = 10 ** digits;
+  return Math.round(value * scale) / scale;
 }
 
 function channelTabUrls(channelUrl, tabs = DEFAULT_TABS) {

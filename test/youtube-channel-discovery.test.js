@@ -200,8 +200,13 @@ test("runChannelDiscovery writes raw videos, parsed details, occurrences, and re
   assert.equal(result.manifest.candidateCount, 3);
   assert.equal(result.manifest.usableVideoCount, 2);
   assert.equal(result.manifest.occurrenceCount, 2);
+  assert.equal(result.manifest.coverage.rawVideos.thumbnailUrl.covered, 3);
+  assert.equal(result.manifest.coverage.videoDetails.thumbnailUrl.covered, 2);
+  assert.equal(result.manifest.coverage.occurrences.seconds.covered, 2);
+  assert.equal(result.manifest.coverage.channelAvatarUrl, "https://yt3.ggpht.com/noa=s240");
   assert.equal(continuationRequests, 2);
   assert.equal(result.rawVideos[0].sourceSystem, "youtube_channel_discovery");
+  assert.equal(result.rawVideos[0].channelAvatarUrl, "https://yt3.ggpht.com/noa=s240");
   assert.equal(result.occurrences[0].sourceSystem, "youtube_channel_discovery");
   assert.equal(result.occurrences[0].verificationStatus, "youtube_discovered");
   assert.equal(fs.existsSync(path.join(dir, "manifest.json")), true);
@@ -275,6 +280,7 @@ test("raw and occurrence records carry fields needed by the review/import pipeli
     videoId: "DDDDDDDDDDD",
     title: "歌リレー",
     channelName: "Hanon",
+    channelAvatarUrl: "https://yt3.ggpht.com/hanon=s240",
     thumbnailUrl: "https://example.test/thumb.jpg",
     publishedTimestamp: Date.parse("2026-07-18T00:00:00Z"),
     matchedKeywords: ["歌", "リレー"],
@@ -287,6 +293,7 @@ test("raw and occurrence records carry fields needed by the review/import pipeli
       title: "歌リレー",
       channelName: "Hanon",
       channelId: "UC_HANON",
+      channelAvatarUrl: "https://yt3.ggpht.com/hanon=s240",
       discoveryChannelUrl: "https://www.youtube.com/@kanaruhanon",
       discoverySingerName: "Hanon",
       thumbnailUrl: "https://example.test/thumb.jpg",
@@ -301,11 +308,13 @@ test("raw and occurrence records carry fields needed by the review/import pipeli
 
   assert.equal(raw.youtubeVideoId, "DDDDDDDDDDD");
   assert.equal(raw.youtubeUrl, "https://www.youtube.com/watch?v=DDDDDDDDDDD");
+  assert.equal(raw.channelAvatarUrl, "https://yt3.ggpht.com/hanon=s240");
   assert.equal(raw.publishedAt, "2026-07-18T00:00:00.000Z");
   assert.equal(raw.rawHash.length, 64);
   assert.equal(occurrences.length, 1);
   assert.equal(occurrences[0].youtubeUrl, "https://www.youtube.com/watch?v=DDDDDDDDDDD&t=3723s");
   assert.equal(occurrences[0].timestampText, "1:02:03");
+  assert.equal(occurrences[0].channelAvatarUrl, "https://yt3.ggpht.com/hanon=s240");
   assert.equal(occurrences[0].cleanedTitle, "花に亡霊");
   assert.equal(occurrences[0].provenance.kind, "comment_or_description_timestamp");
 });
@@ -324,6 +333,19 @@ function youtubeHtml({ initialData }) {
 
 function channelData({ videos, continuation = "" }) {
   return {
+    metadata: {
+      channelMetadataRenderer: {
+        title: "Noa Polaris",
+        externalId: "UC_NOA",
+        ownerUrls: ["https://www.youtube.com/@noa_polaris"],
+        avatar: {
+          thumbnails: [
+            { url: "https://yt3.ggpht.com/noa=s88", width: 88 },
+            { url: "https://yt3.ggpht.com/noa=s240", width: 240 },
+          ],
+        },
+      },
+    },
     contents: {
       twoColumnBrowseResultsRenderer: {
         tabs: [

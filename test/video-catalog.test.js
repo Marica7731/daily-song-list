@@ -75,6 +75,68 @@ test("video catalog merge preserves firstSeenAt while replacing refreshed songs"
   assert.equal(catalogToVideos(result.catalog)[0].songs[0].index, 1);
 });
 
+test("video catalog preserves thumbnail and channel image metadata", () => {
+  const result = rebuildVideoCatalogFromVideos(
+    [
+      {
+        ...video("AAAAAAAAAAA", 1, "fresh song"),
+        channelUrl: "https://www.youtube.com/@channel",
+        channelAvatarUrl: "https://yt3.ggpht.com/channel=s240",
+        thumbnailUrl: "https://example.test/video-thumb.jpg",
+        publishedText: "2026-07-13",
+        durationText: "1:23:45",
+      },
+    ],
+    NOW,
+  );
+  const [entry] = result.catalog.videos;
+  const [runtimeVideo] = catalogToVideos(result.catalog);
+
+  assert.equal(entry.thumbnailUrl, "https://example.test/video-thumb.jpg");
+  assert.equal(entry.channelAvatarUrl, "https://yt3.ggpht.com/channel=s240");
+  assert.equal(entry.channelUrl, "https://www.youtube.com/@channel");
+  assert.equal(runtimeVideo.thumbnailUrl, "https://example.test/video-thumb.jpg");
+  assert.equal(runtimeVideo.channelAvatarUrl, "https://yt3.ggpht.com/channel=s240");
+  assert.equal(runtimeVideo.publishedText, "2026-07-13");
+  assert.equal(runtimeVideo.durationText, "1:23:45");
+});
+
+test("video catalog keeps previous thumbnail when a refreshed video regresses", () => {
+  const previous = {
+    ...createEmptyVideoCatalog("2026-07-12T00:00:00Z"),
+    videos: [
+      {
+        ...video("AAAAAAAAAAA", 2, "old song"),
+        thumbnailUrl: "https://example.test/old-thumb.jpg",
+        channelAvatarUrl: "https://yt3.ggpht.com/old=s240",
+        firstSeenAt: "2026-07-12T01:00:00Z",
+        lastSeenAt: "2026-07-12T01:00:00Z",
+        lastInspectedAt: "2026-07-12T01:00:00Z",
+        songs: [songAt("星間飛行", 950), songAt("KICK BACK", 1166)],
+        curationVersion: "curation-v1:old",
+        qualityStatus: "usable",
+      },
+    ],
+  };
+
+  const result = mergeVideosIntoCatalog(
+    previous,
+    [
+      {
+        ...video("AAAAAAAAAAA", 1, "星間飛行"),
+        thumbnailUrl: "",
+        songs: [songAt("星間飛行", 950)],
+      },
+    ],
+    NOW,
+  );
+  const [entry] = result.catalog.videos;
+
+  assert.equal(entry.thumbnailUrl, "https://example.test/old-thumb.jpg");
+  assert.equal(entry.channelAvatarUrl, "https://yt3.ggpht.com/old=s240");
+  assert.equal(entry.regressionAudit.reason, "incoming_strict_song_subset");
+});
+
 test("video catalog preserves previous songs when a refreshed video loses a strict subset", () => {
   const previous = {
     ...createEmptyVideoCatalog("2026-07-12T00:00:00Z"),

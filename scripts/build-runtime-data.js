@@ -218,8 +218,9 @@ function buildClientVideo(item) {
 
 function runtimeThumbnailUrl(item) {
   const videoId = item.videoId || "";
+  if (item.thumbnailUrl) return item.thumbnailUrl;
   if (/^[A-Za-z0-9_-]{11}$/.test(videoId)) return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-  return item.thumbnailUrl || "";
+  return "";
 }
 
 function buildClientSong(song) {
@@ -1684,6 +1685,7 @@ function buildSourceDetailRecords(items) {
     publishedText: item.publishedText || "",
     publishedTimestamp: Number.isFinite(item.publishedTimestamp) ? item.publishedTimestamp : null,
     durationText: item.durationText || "",
+    thumbnailUrl: runtimeThumbnailUrl(item),
     sourceGroups: listValues(item.sourceGroups),
     sourceUrls: listValues(item.sourceUrls),
     selectedSourceId: item.selectedSourceId || item.sourceId || "",

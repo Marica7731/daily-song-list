@@ -122,6 +122,8 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
       ranges: args.ranges,
       vsingerIncluded: Boolean(runtimeImports.vsinger),
       youtubeChannelDiscoveryIncluded: Boolean(runtimeImports.youtubeChannelDiscovery),
+      vsingerSummary: runtimeImports.vsinger?.summary || null,
+      youtubeChannelDiscoverySummary: runtimeImports.youtubeChannelDiscovery?.summary || null,
     });
 
     for (const rangeId of args.ranges) {

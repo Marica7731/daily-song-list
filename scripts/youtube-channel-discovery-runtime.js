@@ -88,10 +88,12 @@ function normalizeRuntimeVideo(video, sourceFile) {
     channelId: stringValue(video.channelId),
     channelHandle: stringValue(video.channelHandle),
     channelUrl: stringValue(video.channelUrl),
+    channelAvatarUrl: stringValue(video.channelAvatarUrl || video.channelThumbnailUrl),
+    channelThumbnailUrl: stringValue(video.channelThumbnailUrl || video.channelAvatarUrl),
     publishedTimestamp: finiteTimestamp(video.publishedTimestamp),
     publishedText: stringValue(video.publishedText),
     durationText: stringValue(video.durationText),
-    thumbnailUrl: stringValue(video.thumbnailUrl),
+    thumbnailUrl: stringValue(video.thumbnailUrl) || fallbackThumbnailUrl(videoId),
     sourceGroups: uniqueValues([SOURCE_GROUP, ...(Array.isArray(video.sourceGroups) ? video.sourceGroups : [])]),
     sourceUrls,
     selectedSourceId: stringValue(video.selectedSourceId),
@@ -104,6 +106,10 @@ function normalizeRuntimeVideo(video, sourceFile) {
       acceptedFile: sourceFile,
     },
   };
+}
+
+function fallbackThumbnailUrl(videoId) {
+  return /^[A-Za-z0-9_-]{11}$/u.test(String(videoId || "")) ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "";
 }
 
 function normalizeRuntimeSong(song, index, video) {

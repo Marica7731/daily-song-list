@@ -42,6 +42,65 @@ npm run youtube:discover-channel -- \
 
 Resume by rerunning the same command without `--fresh`. The checkpoint is `checkpoint.json` inside the output directory. Use `--fresh` only when the previous checkpoint should be ignored.
 
+## Bounded batch rescan
+
+For multi-channel補漏, use the batch runner instead of one long shell command. It runs channels sequentially, writes a resumable `batch-manifest.json` after each channel, keeps per-channel logs, enforces a timeout per channel, records a disk snapshot, and can export the accepted increment at the end.
+
+Target list:
+
+```bash
+config/youtube-channel-backfill-targets.json
+```
+
+Default bounded run:
+
+```bash
+npm run youtube:backfill-channel-batch -- \
+  --output-root artifacts/channel-discovery/source-rescan \
+  --accepted-output data/external/youtube-channel-discovery/accepted/2026-07-22-source-rescan.json \
+  --max-channel-pages 100 \
+  --max-candidates 0 \
+  --max-inspect 1000 \
+  --request-interval-ms 3000 \
+  --request-jitter-ms 1500 \
+  --per-channel-timeout-ms 1200000 \
+  --batch-size 1
+```
+
+Resume by rerunning the same command without `--fresh`; completed channels in `batch-manifest.json` are skipped. Use `--target <slug-or-url>` for a single channel smoke or retry, and `--rerun-completed` only when a completed output should be regenerated. Use `--no-export` when only discovery artifacts are wanted.
+
+The current source-rescan target set covers:
+
+- `NishizonoChigusa`
+- `NekoyashikiMiku`
+- `HaNaTaN_MUSiC`
+- `isshiki-izu`
+- `tenbin173`
+- `Nijyuna714`
+- `Nijyuuu7`
+- `y_ha_ag_y`
+- `monicoch`
+- `RirisyaMusic`
+- `KumahachiEma`
+- `88nia88`
+- `AoiFuu5`
+- `963Noah`
+- `suzu_kmkg`
+- `UCTbEua7o1f8I7EMBQlLjTpQ`
+- `YutoMuchiko`
+- `Robocosan`
+- `pannomimimi`
+
+For `RirisyaMusic`, do not treat VSinger Moment rows as proof that YouTube discovery is complete. A channel is accepted only after its own discovery output has a completed marker, non-empty `video-details.json` when matching videos exist, and the exported increment records the channel in `inputSummaries`.
+
+Mac build machine runner example:
+
+```bash
+ssh be@192.168.1.13
+source ~/.daily-song-list-build-env && cd ~/daily-song-list
+npm run youtube:backfill-channel-batch -- --output-root artifacts/channel-discovery/source-rescan --accepted-output data/external/youtube-channel-discovery/accepted/2026-07-22-source-rescan.json --per-channel-timeout-ms 1200000
+```
+
 ## Output
 
 Each run writes:
@@ -53,6 +112,8 @@ Each run writes:
 - `audits.json`: selected/no-usable/fetch-error source audit details from `fetchVideoSongList`.
 - `report.md`: operator-readable summary and samples.
 - `checkpoint.json`: resumable inspection state.
+
+`manifest.json` also includes coverage counters for video time fields, video thumbnails, occurrence timestamps, and occurrence thumbnails. `channelAvatarUrl` is stored when YouTube exposes it; if no avatar is available, use the latest video thumbnail as display fallback rather than inventing a channel image.
 
 Raw candidate shape:
 
@@ -181,6 +242,18 @@ npm run check:published:api -- http://127.0.0.1/
 
 Multiple channel output folders can be passed by repeating `--input-dir`. The export command prints `CODEX_CHANNEL_DISCOVERY_INCREMENT_OK` with read, accepted, skipped-regression, and occurrence counts. It is idempotent by `videoId`; if a previously cataloged video has a richer song list than the channel discovery result, the increment skips that duplicate instead of replacing the catalog entry.
 
+Accepted increment payloads include `inputSummaries[]`. For each channel, check:
+
+- `imported`, `skipped`, `failed`
+- `increments.videos`, `increments.songs`, `increments.occurrences`
+- `coverage.acceptedVideos.publishedTimestamp`
+- `coverage.acceptedVideos.thumbnailUrl`
+- `coverage.acceptedOccurrences.seconds`
+- `failedReasons` and `skippedReasons`
+- `missingThumbnailVideoIds` must be empty for accepted videos
+
+These counts are based on YouTube discovery artifacts and catalog regression protection. VSinger Moment rows do not mark a channel as imported.
+
 For fast local validation of YouTube-only補漏 rows, build a temporary DB without VSinger raw tables:
 
 ```bash
@@ -209,9 +282,12 @@ Local checks:
 ```bash
 node --test test/youtube-channel-discovery.test.js
 node --test test/import-channel-discovery.test.js
+node --test test/youtube-channel-backfill-batch.test.js
 node --test test/runtime-db.test.js
+node --test test/video-catalog.test.js
 node --check scripts/youtube-channel-discovery.js
 node --check scripts/youtube-channel-discovery-core.js
+node --check scripts/run-youtube-channel-backfill-batch.js
 node --check scripts/import-channel-discovery.js
 node --check scripts/export-channel-discovery-increment.js
 node --check scripts/youtube-channel-discovery-runtime.js
