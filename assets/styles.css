@@ -2490,6 +2490,15 @@ mark {
   flex: 1 1 auto;
 }
 
+.source-video-times {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  max-width: 100%;
+}
+
 .source-time-primary,
 .source-time-extra-toggle,
 .source-time-extra {

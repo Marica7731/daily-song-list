@@ -31,9 +31,10 @@ const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
 const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
-const VTUBER_SONG_GROUP_INITIAL_LIMIT = 40;
-const VTUBER_SONG_GROUP_BATCH_SIZE = 40;
-const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
+const VTUBER_SONG_GROUP_INITIAL_LIMIT = 39;
+const VTUBER_SONG_GROUP_BATCH_SIZE = 39;
+const SOURCE_TIMESTAMP_INITIAL_LIMIT = 3;
+const SOURCE_TIMESTAMP_DEDUP_WINDOW_SECONDS = 30;
 const SOURCE_INLINE_LIMITS = {
   mobile: 2,
   tablet: 3,
@@ -626,7 +627,7 @@ function bindEvents() {
     const artistMore = event.target.closest("[data-toggle-artist-songs]");
     if (artistMore) {
       event.preventDefault();
-      toggleArtistSongLimit(artistMore.closest(".rank-row"));
+      toggleArtistSongLimit(artistMore);
       return;
     }
 
@@ -740,7 +741,10 @@ function switchView(nextView, options = {}) {
 
 function handleContentLinkNavigation(event, link) {
   if (!link || event.defaultPrevented || !isSourceOrVideoContentLink(link)) return false;
-  return false;
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+  event.preventDefault();
+  window.location.href = link.href;
+  return true;
 }
 
 function isSourceOrVideoContentLink(link) {
@@ -6697,7 +6701,8 @@ function renderSourceInlineStrip(model, options = {}) {
 function renderSourceInlineGroup(group, options = {}) {
   const item = group.item || group.occurrences?.[0]?.item || {};
   const setlistItem = window.FrontendUtils.sourceGroupSetlistItem(hydrateSetlistVideoItem(item, group), group);
-  const firstOccurrence = group.occurrences?.[0];
+  const displayOccurrences = uniqueSourceTimeOccurrences(group.occurrences || []);
+  const firstOccurrence = displayOccurrences[0] || group.occurrences?.[0];
   const videoId = item.videoId || group.videoId || "";
   const firstSeconds = firstOccurrence?.song?.seconds ?? group.firstSeconds ?? 0;
   const wrapper = document.createElement("span");
@@ -6721,7 +6726,8 @@ function renderSourceInlineGroup(group, options = {}) {
   );
   wrapper.append(thumb);
 
-  const extraTimes = (group.occurrences || []).slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
+  const visibleTimes = displayOccurrences.slice(0, SOURCE_TIMESTAMP_INITIAL_LIMIT);
+  const extraTimes = displayOccurrences.slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
   let extraTimesNode = null;
   let extraTimeButton = null;
   const main = document.createElement("span");
@@ -6764,8 +6770,8 @@ function renderSourceInlineGroup(group, options = {}) {
 
   const meta = document.createElement("span");
   meta.className = "source-inline-meta";
-  if (firstOccurrence) {
-    meta.append(renderSourceTimestampLink(firstOccurrence, "source-inline-time"));
+  if (visibleTimes.length) {
+    for (const occurrence of visibleTimes) meta.append(renderSourceTimestampLink(occurrence, "source-inline-time"));
   } else {
     const time = document.createElement("a");
     time.className = "source-link source-inline-time";
@@ -7356,7 +7362,8 @@ function renderSourceVideoGroup(group, options = {}) {
   const section = document.createElement("section");
   section.className = "source-video-group";
 
-  const firstOccurrence = group.occurrences[0];
+  const displayOccurrences = uniqueSourceTimeOccurrences(group.occurrences || []);
+  const firstOccurrence = displayOccurrences[0] || group.occurrences[0];
   const videoItem = group.item || firstOccurrence?.item || {};
   const setlistItem = window.FrontendUtils.sourceGroupSetlistItem(hydrateSetlistVideoItem(videoItem, group), group);
   const videoId = videoItem.videoId || group.videoId || "";
@@ -7384,8 +7391,13 @@ function renderSourceVideoGroup(group, options = {}) {
 
   const identity = document.createElement("div");
   identity.className = "source-video-identity";
-  if (firstOccurrence) identity.append(renderSourceTimestampLink(firstOccurrence, "source-time-primary"));
-  const extraTimes = group.occurrences.slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
+  const visibleTimes = displayOccurrences.slice(0, SOURCE_TIMESTAMP_INITIAL_LIMIT);
+  const extraTimes = displayOccurrences.slice(SOURCE_TIMESTAMP_INITIAL_LIMIT);
+  const times = document.createElement("div");
+  times.className = "source-video-times";
+  visibleTimes.forEach((occurrence, index) => {
+    times.append(renderSourceTimestampLink(occurrence, index === 0 ? "source-time-primary" : "source-time-extra"));
+  });
   let extraTimesId = "";
   if (extraTimes.length) {
     extraTimesId = `source-extra-times-${makeDomId(`${videoId}-${firstSeconds}-${group.channelName || ""}`)}`;
@@ -7397,8 +7409,9 @@ function renderSourceVideoGroup(group, options = {}) {
     more.setAttribute("aria-controls", extraTimesId);
     more.setAttribute("aria-label", `显示其余 ${extraTimes.length} 个时间点`);
     more.textContent = `+${extraTimes.length}`;
-    identity.append(more);
+    times.append(more);
   }
+  if (times.childNodes.length) identity.append(times);
 
   const channelLink = window.FrontendUtils.youtubeChannelLink({ ...videoItem, channelName: group.channelName });
   const channel = document.createElement("a");
@@ -7432,6 +7445,22 @@ function renderSourceVideoGroup(group, options = {}) {
 
   section.append(renderCopySetlistIconButton(setlistItem));
   return section;
+}
+
+function uniqueSourceTimeOccurrences(occurrences = []) {
+  const unique = [];
+  for (const occurrence of occurrences || []) {
+    const videoId = cleanText(occurrence?.item?.videoId) || cleanText(occurrence?.item?.title);
+    const seconds = Math.max(0, Number(occurrence?.song?.seconds) || 0);
+    const duplicate = unique.some((accepted) => {
+      const acceptedVideoId = cleanText(accepted?.item?.videoId) || cleanText(accepted?.item?.title);
+      const acceptedSeconds = Math.max(0, Number(accepted?.song?.seconds) || 0);
+      return acceptedVideoId === videoId && Math.abs(acceptedSeconds - seconds) <= SOURCE_TIMESTAMP_DEDUP_WINDOW_SECONDS;
+    });
+    if (duplicate) continue;
+    unique.push(occurrence);
+  }
+  return unique;
 }
 
 function renderSourceTimestampLink(occurrence, className = "source-link source-time-link") {
@@ -7539,6 +7568,19 @@ function renderCopySongLinksIconButton(occurrences) {
   const button = renderCopySongLinksButton(occurrences, "", "artist-song-copy source-copy-icon ui-chip");
   button.title = "复制全部链接";
   button.append(renderLinkListIcon());
+  return button;
+}
+
+function renderArtistSongSourceToggleButton(sourcePresentation, sourcesId, group) {
+  const button = document.createElement("button");
+  button.className = "artist-song-source-toggle";
+  button.type = "button";
+  button.dataset.toggleArtistSongSource = "true";
+  button.dataset.sourceVideoCount = String(sourcePresentation?.videoCount || group?.videoCount || 0);
+  button.dataset.occurrenceCount = String(sourcePresentation?.occurrenceCount || group?.count || 0);
+  button.setAttribute("aria-controls", sourcesId);
+  button.setAttribute("aria-expanded", "false");
+  updateArtistSongSourceButton(button, false);
   return button;
 }
 
@@ -7779,6 +7821,9 @@ function renderArtistSongGroup(group) {
   sources._sourceSongKey = sourceSongKeyForGroup(group);
   sources._sourceSongTitle = group.title;
 
+  if (sourcePresentation.canExpand) {
+    meta.append(renderArtistSongSourceToggleButton(sourcePresentation, sources.id, group));
+  }
   if (hasOccurrences) {
     meta.append(renderCopySongLinksIconButton(group.occurrences));
   }
@@ -7797,7 +7842,7 @@ function renderArtistSongGroup(group) {
       }),
     );
   }
-  if (group.sourceMode !== "vtuber" && sourcePresentation.canExpand) section.append(sources);
+  if (sourcePresentation.canExpand) section.append(sources);
   return section;
 }
 
@@ -8092,10 +8137,11 @@ function keepSourceRowVisible(row) {
   if (rect.top < topLimit || rect.bottom > bottomLimit) scrollToElement(row);
 }
 
-function toggleArtistSongLimit(row) {
-  if (!row) return;
-  const drawer = row.querySelector(".artist-song-drawer");
+function toggleArtistSongLimit(target) {
+  const drawer = target?.closest?.(".artist-song-drawer") || target?.querySelector?.(".artist-song-drawer");
   if (!drawer) return;
+  const row = drawer.closest(".rank-row, .index-row");
+  if (!row) return;
   const songGroups = row._artistSongGroups || row._getArtistSongGroups?.() || [];
   row._artistSongGroups = songGroups;
   const current = artistRenderedSongCount(drawer);
@@ -8617,7 +8663,7 @@ async function copyVideoSetlist(item, options = {}) {
     return;
   }
   await writeClipboardText(text);
-  const count = text.split("\n").filter(Boolean).length;
+  const count = Math.max(0, text.split("\n").filter(Boolean).length - (cleanText(fullItem?.videoId) ? 1 : 0));
   if (fullItem._setlistResolution === "visible") {
     showToast(`已复制可见同场歌单 · ${count}首（来源详情不足）`);
     return;
@@ -8628,15 +8674,14 @@ async function copyVideoSetlist(item, options = {}) {
 function buildSetlistLinkText(item, options = {}) {
   const songs = window.FrontendUtils.normalizeSetlistSongs(item?._allSongs || item?.songs || [], options);
   const videoId = cleanText(item?.videoId);
-  return songs
+  const videoUrl = videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}` : "";
+  const rows = songs
     .map((song, index) => {
       const ordinal = String(index + 1).padStart(2, "0");
       const base = `${window.FrontendUtils.formatSetlistTime(song.seconds)} ${ordinal}. ${song.title}`;
-      const label = song.artist ? `${base} - ${song.artist}` : base;
-      const url = videoId ? youtubeTimeUrl(videoId, song.seconds) : "";
-      return [label, url].filter(Boolean).join(" ");
-    })
-    .join("\n");
+      return song.artist ? `${base} - ${song.artist}` : base;
+    });
+  return [videoUrl, ...rows].filter(Boolean).join("\n");
 }
 
 async function resolveFullVideoSetlistItem(item, options = {}) {

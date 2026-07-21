@@ -180,7 +180,8 @@ test("artist rank song details share inline source model and append remaining so
   assert.match(renderArtistBody, /renderSourceInlineStrip\(sourcePresentation/u);
   assert.match(renderArtistBody, /sources\.dataset\.sourceDeferred = "true"/u);
   assert.match(renderArtistBody, /sources\._sourceOccurrences = group\.occurrences/u);
-  assert.match(renderArtistBody, /group\.sourceMode === "vtuber"[\s\S]*dataset\.toggleArtistSongSource = "true"/u);
+  assert.match(renderArtistBody, /renderArtistSongSourceToggleButton\(sourcePresentation, sources\.id, group\)/u);
+  assert.match(functionBody("function renderArtistSongSourceToggleButton"), /button\.dataset\.toggleArtistSongSource = "true"/u);
   assert.match(renderArtistBody, /renderCopySongLinksIconButton\(group\.occurrences\)/u);
 
   const toggleSourceBody = functionBody("function toggleArtistSongSource");
@@ -190,13 +191,15 @@ test("artist rank song details share inline source model and append remaining so
   assert.match(toggleSourceBody, /closeSiblingArtistSongSources\(section\)/u);
 
   const toggleLimitBody = functionBody("function toggleArtistSongLimit");
+  assert.match(toggleLimitBody, /target\?\.closest\?\.\("\.artist-song-drawer"\)/u);
+  assert.match(toggleLimitBody, /drawer\.closest\("\.rank-row, \.index-row"\)/u);
   assert.match(toggleLimitBody, /const nextVisible = Math\.min\(songGroups\.length, current \+ artistSongBatchSize\(drawer\)\)/u);
   assert.match(toggleLimitBody, /appendArtistSongGroupRange\(drawer, songGroups, current, nextVisible\)/u);
   assert.doesNotMatch(toggleLimitBody, /replaceChildren/u);
 
   assert.match(appSource, /const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8/u);
   assert.match(appSource, /const ARTIST_SONG_GROUP_BATCH_SIZE = 8/u);
-  assert.match(appSource, /function lightweightSongGroupsForRecord\(record\)/u);
+  assert.match(appSource, /function lightweightSongGroupsForRecord\(record, options = \{\}\)/u);
   assert.match(appSource, /function hydrateArtistSongGroup\(group\)/u);
   assert.match(appSource, /function shouldShowSongGroupTitle\(title\)/u);
   assert.match(functionBody("function shouldShowSongGroupTitle"), /エンドカード\|endcard/u);
@@ -208,8 +211,8 @@ test("artist rank song details share inline source model and append remaining so
 });
 
 test("VTuber song details use bounded progressive render and filter dirty preview titles", () => {
-  assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = 40;/u);
-  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 40;/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_INITIAL_LIMIT = 39;/u);
+  assert.match(appSource, /const VTUBER_SONG_GROUP_BATCH_SIZE = 39;/u);
   assert.match(functionBody("function artistSongInitialLimit"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_INITIAL_LIMIT/u);
   assert.match(functionBody("function artistSongBatchSize"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_BATCH_SIZE/u);
   assert.match(functionBody("function vtuberSongPreview"), /sortedDisplaySongEntries\(record\.songs\)/u);
@@ -389,8 +392,10 @@ test("top filter chips and search box avoid duplicate clear controls and empty c
 test("source and video links handle plain left clicks without stealing modified clicks", () => {
   const handlerBody = functionBody("function handleContentLinkNavigation");
   assert.match(handlerBody, /isSourceOrVideoContentLink\(link\)/u);
-  assert.match(handlerBody, /return false/u);
-  assert.doesNotMatch(handlerBody, /preventDefault|window\.open|location\.assign/u);
+  assert.match(handlerBody, /event\.button !== 0 \|\| event\.metaKey \|\| event\.ctrlKey \|\| event\.shiftKey \|\| event\.altKey/u);
+  assert.match(handlerBody, /event\.preventDefault\(\)/u);
+  assert.match(handlerBody, /window\.location\.href = link\.href/u);
+  assert.doesNotMatch(handlerBody, /window\.open|location\.assign/u);
   assert.match(functionBody("function isSourceOrVideoContentLink"), /source-inline-strip, \.source-drawer, \.inline-source, \.video-card/u);
   assert.match(functionBody("function bindEvents"), /if \(link && handleContentLinkNavigation\(event, link\)\) return/u);
 });
@@ -403,7 +408,9 @@ test("copy setlist resolves same-video songs and emits timestamp link rows", () 
 
   const textBody = functionBody("function buildSetlistLinkText");
   assert.match(textBody, /normalizeSetlistSongs/u);
-  assert.match(textBody, /youtubeTimeUrl\(videoId, song\.seconds\)/u);
+  assert.match(textBody, /https:\/\/www\.youtube\.com\/watch\?v=\$\{encodeURIComponent\(videoId\)\}/u);
+  assert.match(textBody, /\[videoUrl, \.\.\.rows\]\.filter\(Boolean\)\.join\("\\n"\)/u);
+  assert.doesNotMatch(textBody, /youtubeTimeUrl\(videoId, song\.seconds\)/u);
 
   const resolveBody = functionBody("async function resolveFullVideoSetlistItem");
   assert.match(resolveBody, /resolveVisibleVideoSetlistItem\(item, videoId, options\)/u);

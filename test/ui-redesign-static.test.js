@@ -79,12 +79,14 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.doesNotMatch(appSource, /DETAIL_BATCH_SIZE|data-open-detail|function renderDetailSources|openDetail\(/u);
   assert.match(appSource, /toggleSourceDrawer\(sourceToggle\.closest\("\.rank-row, \.index-row"\)\)/u);
   assert.match(appSource, /FrontendUtils\.groupOccurrencesByVideo\(occurrences\)/u);
-  assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1/u);
+  assert.match(appSource, /const SOURCE_TIMESTAMP_INITIAL_LIMIT = 3/u);
   assert.match(appSource, /className = "source-video-thumb-link"/u);
   assert.match(appSource, /className = "source-inline-thumb source-link"/u);
   assert.match(appSource, /thumb\.tabIndex = -1/u);
   assert.match(appSource, /className = "source-inline-meta"/u);
-  assert.match(appSource, /renderSourceTimestampLink\(firstOccurrence, "source-inline-time"\)/u);
+  assert.match(appSource, /for \(const occurrence of visibleTimes\) meta\.append\(renderSourceTimestampLink\(occurrence, "source-inline-time"\)\)/u);
+  assert.match(appSource, /function uniqueSourceTimeOccurrences/u);
+  assert.match(appSource, /SOURCE_TIMESTAMP_DEDUP_WINDOW_SECONDS/u);
   assert.doesNotMatch(appSource, /className = "source-inline-time-overlay"/u);
   assert.match(appSource, /createThumbnailImage\(\{ \.\.\.item, videoId, thumbnailUrl: item\.thumbnailUrl \|\| group\.thumbnailUrl \}, "source-inline-thumb-image"[\s\S]*preferCompact: true/u);
   assert.match(appSource, /priorityMedia: priorityInlineMedia/u);
@@ -381,7 +383,7 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
   assert.match(songGroupBody, /group\.sourceMode === "vtuber" \? vtuberSongGroupMetaLabel\(group\) : artistSongCountLabel\(group\)/u);
-  assert.doesNotMatch(songGroupBody, /group\.sourceMode === "vtuber" && sourcePresentation\.canExpand[\s\S]*sourceToggle\.dataset\.toggleArtistSongSource = "true"/u);
+  assert.match(songGroupBody, /if \(sourcePresentation\.canExpand\) \{[\s\S]*renderArtistSongSourceToggleButton\(sourcePresentation, sources\.id, group\)/u);
   assert.match(songGroupBody, /if \(group\.sourceMode !== "vtuber"\) \{[\s\S]*renderSourceInlineStrip\(sourcePresentation/u);
   assert.match(appSource, /function vtuberSongGroupMetaLabel\(group\)[\s\S]*`\$\{count\}次 · \$\{videoCount\}视频`/u);
   assert.doesNotMatch(appSource, /来源明细待重建/u);
@@ -393,7 +395,7 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(sourcePageBody, /sourceDetailPageForContainer\(sourceContainer, sourceContainer\._sourceDetailOccurrences \|\| sourceContainer\._sourceOccurrences \|\| \[\]/u);
   assert.match(cssSource, /\.artist-song-artist\s*\{[\s\S]*text-overflow: ellipsis;[\s\S]*white-space: nowrap;/u);
   assert.doesNotMatch(cssSource, /\.artist-song-group-vtuber \.source-inline-strip/u);
-  assert.match(songGroupBody, /if \(group\.sourceMode !== "vtuber" && sourcePresentation\.canExpand\) section\.append\(sources\)/u);
+  assert.match(songGroupBody, /if \(sourcePresentation\.canExpand\) section\.append\(sources\)/u);
 });
 
 function functionBody(signature) {
