@@ -125,6 +125,7 @@
     const hasArtist = hasKnownArtist(song);
     const artist = String(song?.artist || "").trim();
     if (isChannelScopedUnknownArtistDirtySong(song, source)) return true;
+    if (isKisakiSourceDirtySong(song, source)) return true;
     if (!hasArtist && isSelfReferentialChannelTitle(title, source)) return true;
     if (isStrongNonSongMarker(title) || isStrongNonSongMarker(artist)) return true;
     if (isNonSongMarkerWithDescriptor(title, artist)) return true;
@@ -173,6 +174,34 @@
     if (channelUrlMatch) return true;
     const channelName = normalizeMatcherText(source.channelName || source.ownerText || source.longBylineText || source.shortBylineText || "");
     return channelName.includes("響咲リオナ") || /^riona ch\./iu.test(channelName);
+  }
+
+  function isKisakiSourceDirtySong(song, source = {}) {
+    if (!isKisakiChannelSource(source)) return false;
+    const title = String(song?.title || song?.raw || "").normalize("NFKC").trim();
+    const artist = String(song?.artist || "").normalize("NFKC").trim();
+    const combined = `${title} ${artist} ${song?.raw || ""}`;
+    if (/^(?:あなたへ贈る歌)$/u.test(title)) return true;
+    return /(?:こそこそ話|メンシが取れてる|就寝させない爆音EDテーマ|悲しい.{0,4}事情)/u.test(combined);
+  }
+
+  function isKisakiChannelSource(source = {}) {
+    const handleValues = uniqueStrings([source.channelHandle, source.handle, source.ownerHandle, ...channelUrlValues(source)]);
+    if (handleValues.some((value) => {
+      const decoded = decodeURIComponentSafe(value).normalize("NFKC").trim();
+      const handle = decoded
+        .replace(/^https?:\/\/(?:www\.)?youtube\.com\//iu, "")
+        .replace(/^\/+/u, "")
+        .split(/[/?#]/u)[0]
+        .replace(/^@/u, "")
+        .trim()
+        .toLocaleLowerCase();
+      return handle === "妃玖-kisaki" || handle === "妃玖kisaki" || handle === "kisaki";
+    })) {
+      return true;
+    }
+    const channelName = normalizeMatcherText(source.channelName || source.ownerText || source.longBylineText || source.shortBylineText || "");
+    return channelName.includes("妃玖") || /\bkisaki\b/iu.test(channelName);
   }
 
   function isSelfReferentialChannelTitle(title, source = {}) {
@@ -261,6 +290,7 @@
     if (/チャンネル登録者?\d*(?:人|名)?達成/u.test(key)) return true;
     if (/^(?:今晩の)?メニューと配信時間/u.test(key)) return true;
     if (/^(?:朝食|配信の食事事情|心音asmr|ギターの話|お声も起きてきた|告知とed|joysound|音楽停止|ペットショップ)$/iu.test(key)) return true;
+    if (/(?:フルート|クラリネット|生演奏|ライブ|live|piano streaming|ピアノ演奏|edテーマ|メンシ|こそこそ話)/iu.test(key)) return true;
     if (/^(?:雑談タイム|新しいop画面|op画面|edトーク|休憩雑談タイム|カンニングタイム(?:part\d+)?)$/iu.test(key)) return true;
     if (/^(?:afk|afkawayfromkeyboard|awayfromkeyboard)$/iu.test(key)) return true;
     if (/^(?:\d+時間じゃ足りない|平均配信時間\d+時間|喉の調子が|のどおぢ|だいぶ慣れてきた|ストリームモンスター|どう見てもロ)$/iu.test(key)) {
@@ -783,6 +813,15 @@
       .replace(/^@/u, "")
       .trim();
     return /^[A-Za-z0-9._-]+$/u.test(cleaned) ? cleaned.toLocaleLowerCase() : "";
+  }
+
+  function decodeURIComponentSafe(value) {
+    const text = String(value || "");
+    try {
+      return decodeURIComponent(text);
+    } catch (_error) {
+      return text;
+    }
   }
 
   function normalizeChannelUrl(value) {

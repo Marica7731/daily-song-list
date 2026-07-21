@@ -57,12 +57,23 @@ test("canonicalizes reviewed page title variants without merging different songs
         aliases: ["晩餐歌 (Bansanka)", "『晩餐歌』Tuki"],
         reason: "verified_same_song",
       },
+      {
+        artist: "初星学園",
+        canonicalTitle: "自己肯定感爆上げ↑↑しゅきしゅきソング",
+        aliases: ["53🎤 自己肯定感爆上げ↑↑しゅきしゅきソング", "自己肯定感爆上げしゅきしゅきソング"],
+        reason: "verified_same_song",
+      },
     ],
   });
 
   assert.equal(canonicalizeSongIdentity({ title: "晴る [Sunny]", artist: "ヨルシカ" }, context).title, "晴る");
   assert.equal(canonicalizeSongIdentity({ title: "花になって - Be a flower", artist: "緑黄色社会" }, context).title, "花になって");
   assert.equal(canonicalizeSongIdentity({ title: "晩餐歌 (Bansanka)", artist: "tuki." }, context).title, "晩餐歌");
+  assert.equal(
+    canonicalizeSongIdentity({ title: "53🎤 自己肯定感爆上げ↑↑しゅきしゅきソング", artist: "初星学園" }, context).title,
+    "自己肯定感爆上げ↑↑しゅきしゅきソング",
+  );
+  assert.equal(canonicalizeSongIdentity({ title: "自己肯定感販売所", artist: "みたにみく" }, context).title, "自己肯定感販売所");
   assert.equal(canonicalizeSongIdentity({ title: "雨晴るる", artist: "ヨルシカ" }, context).title, "雨晴るる");
   assert.equal(canonicalizeSongIdentity({ title: "晴るる", artist: "あたらよ" }, context).title, "晴るる");
 });

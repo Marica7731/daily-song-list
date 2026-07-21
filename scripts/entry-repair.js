@@ -231,6 +231,7 @@ function cleanSafeTitleCandidate(value) {
   text = stripCustomEmojiAliases(text);
   text = text
     .replace(/^[\s\u3000\u200b-\u200f\u202a-\u202e\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F│┃┏┗┣┳┻━─┬┴┌┐┘┤┼├└╟╠╚╔╩╦╬╞╰╭╮╯꒱⁅⁆]+/u, "")
+    .replace(/^[#＃]?\d{1,3}\s*[\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F]+\s*/u, "")
     .replace(/^(?:【\s*(?:セットリスト|セトリ|リクエスト)\s*】|\[\s*(?:set\s*list|request)\s*\])\s*/iu, "")
     .replace(
       /^(?:未記載|未记载|待补歌手|待補歌手|待补|待補)\s+(?=(?:[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]|[mｍ]?\d{1,3}[.．]|[#＃]?\d{1,3}\s*[≫»>]|[#＃]?\d{1,3}\s*[)）、:：]))/iu,

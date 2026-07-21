@@ -189,6 +189,10 @@ test("song work title key only strips whitelisted variants and list markers", ()
   assert.equal(songWorkTitleKey("Calc"), songWorkTitleKey("Calc."));
   assert.equal(songWorkTitleKey("Calc. (Calc.)"), songWorkTitleKey("Calc."));
   assert.equal(songWorkTitleKey("Calc. (Eng Ver.)"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("Calc. English version"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("Calc. 英文版"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("Calc. アカペラ版"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("Calc. 阿卡贝拉版"), songWorkTitleKey("Calc."));
   assert.equal(songWorkTitleKey("Calc.-Riano Ver-"), songWorkTitleKey("Calc."));
   assert.notEqual(songWorkTitleKey("前前前世 Remix"), songWorkTitleKey("前前前世"));
   assert.notEqual(songWorkTitleKey("前前前世 -Night Drive"), songWorkTitleKey("前前前世"));
@@ -205,13 +209,15 @@ test("merges Calc title punctuation, list markers, and safe version labels", () 
     occurrence("Calc. (Eng Ver.)", "ジミーサムP", "E"),
     occurrence("Calc. (Calc.)", "ジミーサムP", "F"),
     occurrence("Calc.-Riano Ver-", "ジミーサムP", "G"),
+    occurrence("Calc. 英文版", "ジミーサムP", "H"),
+    occurrence("Calc. アカペラ版", "ジミーサムP", "I"),
   ]);
 
   assert.equal(records.length, 1);
   assert.equal(records[0].title, "Calc.");
   assert.equal(records[0].displayArtist, "ジミーサムP");
-  assert.equal(records[0].count, 7);
-  assert.deepEqual(new Set(records[0].occurrences.map(({ item }) => item.videoId)), new Set(["A", "B", "C", "D", "E", "F", "G"]));
+  assert.equal(records[0].count, 9);
+  assert.deepEqual(new Set(records[0].occurrences.map(({ item }) => item.videoId)), new Set(["A", "B", "C", "D", "E", "F", "G", "H", "I"]));
 });
 
 test("merges month spelling, list markers, safe variants, and decorated artist aliases", () => {

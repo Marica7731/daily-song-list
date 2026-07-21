@@ -2312,7 +2312,7 @@ def is_safe_song_variant(work_title, value, allow_repeated_title=False) -> bool:
         return True
     return bool(
         re.match(
-            r"^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella|acappella|アカペラ|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|english\s*(?:ver\.?|version)?|eng\s*(?:ver\.?|version)?|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更|[A-Za-z][A-Za-z0-9 .'’_-]{0,40}\s+ver\.?)$",
+            r"^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella\s*(?:ver\.?|version|版)?|acappella\s*(?:ver\.?|version|版)?|アカペラ\s*(?:ver\.?|version|版)?|阿卡贝拉\s*(?:ver\.?|version|版)?|清唱(?:版)?|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|english\s*(?:ver\.?|version|版)?|eng\s*(?:ver\.?|version|版)?|英語\s*(?:ver\.?|version|版)?|英文\s*(?:ver\.?|version|版)?|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更|[A-Za-z][A-Za-z0-9 .'’_-]{0,40}\s+ver\.?)$",
             text,
             re.IGNORECASE,
         )

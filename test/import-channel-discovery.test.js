@@ -5,6 +5,7 @@ const path = require("node:path");
 const test = require("node:test");
 
 const {
+  auditDiscoverySongs,
   filterNonRegressiveImports,
   inputDirsFromArgs,
   isStrictSongSubset,
@@ -77,6 +78,113 @@ test("channel discovery import reads usable details and preserves provenance", (
   assert.deepEqual(videos[0].songs.map((song) => song.title), ["少女レイ"]);
   assert.equal(videos[0].songs[0].sourceId, "comment:1");
   assert.equal(videos[0].thumbnailUrl, "https://example.test/noa-thumb.jpg");
+});
+
+test("channel discovery import audits dirty source rows before accepting songs", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-import-audit-"));
+  fs.writeFileSync(
+    path.join(dir, "video-details.json"),
+    JSON.stringify([
+      discoveryDetail({
+        videoId: "NARAE000001",
+        channelName: "なれたん Naraetan Ch.",
+        channelHandle: "/@naraetanV",
+        discoveryChannelUrl: "https://www.youtube.com/@naraetanV",
+        songs: [
+          song("0:01", "曲名教えてください", "未記載", "0:01 曲名教えてください"),
+          song("0:02", "缶をマイクに", "Using a Can as a Microphone", "0:02 缶をマイクに / Using a Can as a Microphone"),
+          song("0:03", "START", "未記載", "0:03 START"),
+          song("0:04", "START", "愛内里菜", "0:04 START / 愛内里菜"),
+          song("0:05", "START:DASH!!", "μ's", "0:05 START:DASH!! / μ's"),
+        ],
+      }),
+      discoveryDetail({
+        videoId: "HANON000001",
+        channelName: "Hanon Ch. 香鳴ハノン【パレプロ】",
+        channelHandle: "/@kanaruhanon",
+        discoveryChannelUrl: "https://www.youtube.com/@kanaruhanon",
+        songs: [
+          song("0:11", "おつはのちゅっちゅる〜！", "未記載", "0:11 おつはのちゅっちゅる〜！"),
+          song("0:12", "次のバトンは香鳴ハノンちゃん", "未記載", "0:12 次のバトンは香鳴ハノンちゃん"),
+          song("0:13", "ENDLESS STORY", "REIRA starring YUNA ITO", "0:13 ENDLESS STORY / REIRA starring YUNA ITO"),
+        ],
+      }),
+      discoveryDetail({
+        videoId: "PANNO000001",
+        channelName: "パン野実々美 / Panno Mimimi",
+        channelHandle: "/@pannomimimi",
+        discoveryChannelUrl: "https://www.youtube.com/@pannomimimi",
+        songs: [
+          song("0:21", "公開した音声の正体", "The identity of the released audio", "0:21 公開した音声の正体 / The identity of the released audio"),
+          song("0:22", "『公開メモ』", "未記載", "0:22 『公開メモ』"),
+          song("0:23", "花に亡霊", "ヨルシカ", "0:23 花に亡霊 / ヨルシカ"),
+        ],
+      }),
+      discoveryDetail({
+        videoId: "KISAKI00001",
+        title: "フルート生演奏 live source audit fixture",
+        channelName: "Kisaki",
+        channelHandle: "/@kisaki",
+        discoveryChannelUrl: "https://www.youtube.com/@kisaki",
+        songs: [
+          song("0:31", "あなたへ贈る歌", "erica", "0:31 あなたへ贈る歌 / erica"),
+          song("0:32", "ちるえも、こそこそ話", "就寝させない爆音EDテーマ", "0:32 ちるえも、こそこそ話 / 就寝させない爆音EDテーマ"),
+          song("0:33", "メンシが取れてる、、、悲しい", "の事情", "0:33 メンシが取れてる、、、悲しい / の事情"),
+        ],
+      }),
+    ]),
+    "utf8",
+  );
+
+  const { videos, stats } = readDiscoveryVideos([dir]);
+
+  assert.deepEqual(
+    videos.flatMap((video) => video.songs.map((item) => `${video.channelHandle}:${item.title} / ${item.artist}`)),
+    [
+      "/@naraetanV:START / 愛内里菜",
+      "/@naraetanV:START:DASH!! / μ's",
+      "/@kanaruhanon:ENDLESS STORY / REIRA starring YUNA ITO",
+      "/@pannomimimi:花に亡霊 / ヨルシカ",
+    ],
+  );
+  assert.equal(videos.some((video) => video.channelHandle === "/@kisaki"), false);
+  assert.equal(stats.rawSongs, 14);
+  assert.equal(stats.acceptedSongs, 4);
+  assert.equal(stats.droppedSongs, 9);
+  assert.equal(stats.suspiciousSongs, 1);
+  assert.equal(stats.importAudit.dropped.some((entry) => entry.reason === "song_request_instruction" && entry.channel.handle === "/@naraetanV"), true);
+  assert.equal(stats.importAudit.dropped.some((entry) => entry.reason === "likely_non_song_entry" && entry.channel.handle === "/@pannomimimi"), true);
+  assert.deepEqual(
+    stats.importAudit.dropped
+      .filter((entry) => entry.channel.handle === "/@kisaki")
+      .map((entry) => `${entry.reason}:${entry.title} / ${entry.artist}`),
+    [
+      "excluded_source_context:あなたへ贈る歌 / erica",
+      "excluded_source_context:ちるえも、こそこそ話 / 就寝させない爆音EDテーマ",
+      "excluded_source_context:メンシが取れてる、、、悲しい / の事情",
+    ],
+  );
+  assert.deepEqual(Object.keys(stats.importAudit.suspicious[0]).filter((key) => ["channel", "video", "sourceText", "title", "artist", "reason"].includes(key)), [
+    "channel",
+    "video",
+    "sourceText",
+    "title",
+    "artist",
+    "reason",
+  ]);
+  assert.equal(stats.importAudit.suspicious[0].channel.handle, "/@pannomimimi");
+
+  const directAudit = auditDiscoverySongs(
+    discoveryDetail({
+      videoId: "DIRECT00001",
+      channelName: "direct",
+      channelHandle: "/@direct",
+      discoveryChannelUrl: "https://www.youtube.com/@direct",
+      songs: [song("0:01", "Opening", "Known Artist", "0:01 Opening / Known Artist"), song("0:02", "Opening", "未記載", "0:02 Opening")],
+    }),
+  );
+  assert.deepEqual(directAudit.accepted.map((item) => `${item.title} / ${item.artist}`), ["Opening / Known Artist"]);
+  assert.equal(directAudit.dropped.length + directAudit.suspicious.length, 1);
 });
 
 test("normalizeImportedVideo maps detail song fields into catalog-ready videos", () => {
@@ -181,3 +289,30 @@ test("import skips duplicate videos that would replace a richer existing song li
   assert.equal(result.stats.skippedExistingRegressions, 1);
   assert.deepEqual(result.stats.skippedExistingRegressionVideoIds, ["AAAAAAAAAAA"]);
 });
+
+function discoveryDetail({ videoId, title = "歌枠 source audit fixture", channelName, channelHandle, discoveryChannelUrl, songs }) {
+  return {
+    videoId,
+    title,
+    channelName,
+    channelHandle,
+    discoveryChannelUrl,
+    selectedSourceId: `comment:${videoId}`,
+    selectedSourceHash: `hash:${videoId}`,
+    songs,
+  };
+}
+
+function song(time, title, artist, raw) {
+  return {
+    time,
+    seconds: time
+      .split(":")
+      .map((part) => Number.parseInt(part, 10))
+      .reduce((total, part) => total * 60 + part, 0),
+    title,
+    artist,
+    raw,
+    rawHash: `raw:${raw}`,
+  };
+}

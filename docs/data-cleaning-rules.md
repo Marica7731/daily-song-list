@@ -35,6 +35,8 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - Unknown-artist conversational rows are rejected across channels, including greetings and wrap-up chants like `おつはのちゅっちゅる〜！`, generic `雑談`/`聊天`/`挨拶` labels, and person-reference chatter such as `次のバトンは香鳴ハノンちゃん`.
 - Singleton pseudo-song rows are rejected only with source-count context. The curation layer, JS runtime ranking exporter, and Python DB fallback compute normalized title source counts, then drop rows where the normalized title appears in one source, the artist is unknown or is an English explanatory gloss, and the title/raw text looks like daily chatter, stream notes, topic labels, or explanation text. Rows with an English explanatory gloss and no song-list ordinal are also rejected before singleton scoring because these are usually translated chapter headings, for example `上野公園の桜 / Cherry Blossoms at Ueno Park`. Reliable English artist names remain guarded, for example `ホログラム / NICO Touches the Walls`, `元彼氏として / My Hair is Bad`, and `明日への扉 / I WiSH`.
 - `vsinger_moment_http` / `vsinger-moment` / `moment` provenance is not an `isCollected` source. Only manual, verified, song-search, and accepted `youtube_channel_discovery` rows set the collected flag.
+- Accepted YouTube channel discovery rows are audited before import. The importer drops high-confidence non-song rows and reports `rawSongs`, `acceptedSongs`, `droppedSongs`, `suspiciousSongs`, and `importAudit` so source additions do not silently reintroduce known dirty patterns.
+- Instrument and background-stream source rows are rejected when the unknown-artist row is an activity/format marker, including `フルート`, `クラリネット`, `生演奏`, `live`, `ライブ`, and the exact phrases `piano streaming` and `ピアノ演奏`. Do not broaden this to standalone `piano` or `ピアノ`; those can be real song titles or artist metadata.
 
 ## High-Confidence Artist Completion
 
@@ -43,9 +45,17 @@ Unknown-artist rows may be repaired only when the normalized title exactly match
 Current reviewed examples include:
 
 - `熱異常` -> `いよわ`; checked against the local song-search index (`熱異常::いよわfeat足立レイ`), YouTube result query `熱異常 いよわ YouTube`, and Apple Music query `熱異常 いよわ Apple Music`.
+- `自己肯定感販売所` -> `みたにみく`; kept separate from the `自己肯定感爆上げ↑↑しゅきしゅきソング` aliases.
+- `自己肯定感爆上げ↑↑しゅきしゅきソング` -> `初星学園`; numbered/decorated variants such as `53🎤 自己肯定感爆上げ↑↑しゅきしゅきソング` are cleaned and merged into this reviewed title.
 - Frequent current unknown-artist rows with song-search title-artist matches and platform confirmation, including `少女レイ / みきとP`, `IRIS OUT / 米津玄師`, `HOT LIMIT / T.M.Revolution`, `Bling-Bang-Bang-Born / Creepy Nuts`, `怪獣の花唄 / Vaundy`, `天体観測 / BUMP OF CHICKEN`, `新宝島 / サカナクション`, `鬼ノ宴 / 友成空`, and `魂のルフラン / 高橋洋子`.
 
 Do not add a title to `known-song-artist-overrides.json` merely because song-search has a title-only match. Keep it as `待补歌手` when the title maps to multiple plausible artists, appears only once, lacks platform evidence, or looks like commentary, an English explanatory gloss, a chapter heading, translation text, or stream activity. Those rows should be reviewed through curation/non-song rules instead of artist completion.
+
+## Reviewed Same-Song Variants
+
+Safe arrangement/version suffixes can be merged into the base work when the title body and artist identity are compatible. This currently covers English/Eng/英文/英語 versions and a cappella variants written as `a cappella`, `acappella`, `アカペラ`, `阿卡贝拉`, or `清唱`. These rules are mirrored in the JS frontend/runtime helpers and the Python runtime DB builder.
+
+`自己肯定感販売所` is explicitly not an alias of `自己肯定感爆上げ↑↑しゅきしゅきソング`.
 
 ## START Guardrail
 

@@ -9,7 +9,7 @@ const {
   writeCatalogSegments,
   writeVideoCatalog,
 } = require("./video-catalog");
-const { isLikelyNonSongEntry, normalizeParsedSong } = require("./song-utils");
+const { auditParsedSongForImport, isLikelyNonSongEntry } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
 const SOURCE_GROUP = "youtube_channel_discovery";
@@ -36,12 +36,14 @@ async function main() {
   const beforeVideoIds = new Set(before.videos.map((entry) => entry.videoId));
   const candidateVideoIds = new Set(videos.map((video) => video.videoId));
   const importedVideoIds = new Set(importedVideos.map((video) => video.videoId));
+  const { importAudit, ...readStatsForReport } = readStats;
   const report = {
     schemaVersion: 1,
     kind: "youtube-channel-discovery-import",
     generatedAt: startedAt,
     inputs,
-    readStats: { ...readStats, ...safeImport.stats },
+    readStats: { ...readStatsForReport, ...safeImport.stats },
+    importAudit,
     catalogStats: update.stats,
     segmentStats,
     candidateVideoIds: [...candidateVideoIds].sort(),
@@ -59,6 +61,8 @@ async function main() {
       `importedVideos=${importedVideos.length}`,
       `skippedRegressions=${safeImport.stats.skippedExistingRegressions}`,
       `songs=${readStats.songs}`,
+      `auditDropped=${readStats.droppedSongs}`,
+      `auditSuspicious=${readStats.suspiciousSongs}`,
       `catalogBefore=${before.videos.length}`,
       `catalogAfter=${update.catalog.videos.length}`,
       `added=${update.stats.addedVideoCount}`,
@@ -111,6 +115,16 @@ function readDiscoveryVideos(inputDirs) {
     skippedInvalidVideoId: 0,
     duplicateVideoIds: 0,
     songs: 0,
+    rawSongs: 0,
+    acceptedSongs: 0,
+    droppedSongs: 0,
+    suspiciousSongs: 0,
+    skippedAllSongsRejected: 0,
+    importAudit: {
+      schemaVersion: 1,
+      dropped: [],
+      suspicious: [],
+    },
   };
   for (const inputDir of inputDirs) {
     const filePath = path.join(inputDir, "video-details.json");
@@ -129,9 +143,17 @@ function readDiscoveryVideos(inputDirs) {
       stats.skippedInvalidVideoId += 1;
       continue;
     }
-    const songs = Array.isArray(detail.songs) ? detail.songs.map(normalizeParsedSong).filter(isImportableSong) : [];
+    const auditedSongs = auditDiscoverySongs(detail);
+    stats.rawSongs += auditedSongs.rawCount;
+    stats.acceptedSongs += auditedSongs.accepted.length;
+    stats.droppedSongs += auditedSongs.dropped.length;
+    stats.suspiciousSongs += auditedSongs.suspicious.length;
+    stats.importAudit.dropped.push(...auditedSongs.dropped);
+    stats.importAudit.suspicious.push(...auditedSongs.suspicious);
+    const songs = auditedSongs.accepted;
     if (!songs.length) {
-      stats.skippedNoSongs += 1;
+      if (auditedSongs.rawCount) stats.skippedAllSongsRejected += 1;
+      else stats.skippedNoSongs += 1;
       continue;
     }
     if (seen.has(videoId)) {
@@ -144,6 +166,61 @@ function readDiscoveryVideos(inputDirs) {
     stats.songs += songs.length;
   }
   return { videos, stats };
+}
+
+function auditDiscoverySongs(detail) {
+  const accepted = [];
+  const dropped = [];
+  const suspicious = [];
+  const rawSongs = Array.isArray(detail?.songs) ? detail.songs : [];
+  const source = sourceContextFromDetail(detail);
+  for (const rawSong of rawSongs) {
+    const audit = auditParsedSongForImport(rawSong, source);
+    if (audit.action === "accept" && isImportableSong(audit.song, source)) {
+      accepted.push(audit.song);
+      continue;
+    }
+    const record = importAuditRecord(detail, rawSong, audit);
+    if (audit.action === "suspicious") suspicious.push(record);
+    else dropped.push(record);
+  }
+  return { accepted, dropped, suspicious, rawCount: rawSongs.length };
+}
+
+function importAuditRecord(detail, rawSong, audit) {
+  const song = audit.song || rawSong || {};
+  return {
+    channel: {
+      name: stringValue(detail?.channelName || detail?.discoverySingerName),
+      id: stringValue(detail?.channelId),
+      handle: stringValue(detail?.channelHandle || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl)),
+      url: stringValue(detail?.channelUrl || detail?.discoveryChannelUrl),
+    },
+    video: {
+      id: stringValue(detail?.videoId),
+      title: stringValue(detail?.title),
+    },
+    sourceText: stringValue(song.raw || rawSong?.raw || song.title || rawSong?.title),
+    title: stringValue(song.title || rawSong?.title),
+    artist: stringValue(song.artist || rawSong?.artist),
+    reason: stringValue(audit.reason || "not_importable"),
+    action: audit.action === "suspicious" ? "suspicious" : "drop",
+    time: stringValue(song.time || rawSong?.time),
+    seconds: Math.max(0, Number(song.seconds ?? rawSong?.seconds) || 0),
+    sourceId: stringValue(song.sourceId || rawSong?.sourceId || detail?.selectedSourceId || detail?.sourceQuality?.sourceId),
+    sourceHash: stringValue(song.sourceHash || rawSong?.sourceHash || detail?.selectedSourceHash || detail?.sourceQuality?.sourceHash),
+  };
+}
+
+function sourceContextFromDetail(detail) {
+  return {
+    videoId: stringValue(detail?.videoId),
+    title: stringValue(detail?.title),
+    channelName: stringValue(detail?.channelName || detail?.discoverySingerName),
+    channelId: stringValue(detail?.channelId),
+    channelHandle: stringValue(detail?.channelHandle || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl)),
+    channelUrl: stringValue(detail?.channelUrl || detail?.discoveryChannelUrl),
+  };
 }
 
 function filterNonRegressiveImports(catalog, videos) {
@@ -236,8 +313,8 @@ function normalizeImportedVideo(detail, inputDir, songs, channelFallback = {}) {
   };
 }
 
-function isImportableSong(song) {
-  return Boolean(song?.title) && !isLikelyNonSongEntry(song);
+function isImportableSong(song, source = {}) {
+  return Boolean(song?.title) && !isLikelyNonSongEntry(song, source);
 }
 
 function projectRelativePath(value) {
@@ -337,6 +414,7 @@ module.exports = {
   inputDirsFromArgs,
   isImportableSong,
   isStrictSongSubset,
+  auditDiscoverySongs,
   normalizeImportedVideo,
   projectRelativePath,
   readDiscoveryVideos,

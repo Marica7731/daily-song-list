@@ -439,6 +439,48 @@ test("source filter drops unknown-artist self references without blocking real s
   assert.equal(isBlockedSongEntry({ title: "START", artist: "愛内里菜" }, source), false);
 });
 
+test("source filter applies import noise rules without blocking similar real songs", () => {
+  const kisakiSource = {
+    videoId: "KISAKI00001",
+    channelName: "妃玖 - kisaki",
+    channelHandle: "/@%E5%A6%83%E7%8E%96-kisaki",
+    channelUrl: "https://www.youtube.com/@%E5%A6%83%E7%8E%96-kisaki",
+  };
+
+  assert.equal(isBlockedSongEntry({ title: "あなたへ贈る歌", artist: "erica" }, kisakiSource), true);
+  assert.equal(
+    isBlockedSongEntry(
+      {
+        title: "ちるえも、こそこそ話",
+        artist: "就寝させない爆音EDテーマ",
+        raw: "0:32 ちるえも、こそこそ話 / 就寝させない爆音EDテーマ",
+      },
+      kisakiSource,
+    ),
+    true,
+  );
+  assert.equal(
+    isBlockedSongEntry(
+      {
+        title: "メンシが取れてる、、、悲しい",
+        artist: "の事情",
+        raw: "0:33 メンシが取れてる、、、悲しい / の事情",
+      },
+      kisakiSource,
+    ),
+    true,
+  );
+  assert.equal(isBlockedSongEntry({ title: "あなたへ贈る歌", artist: "erica" }, { channelName: "Other Channel" }), false);
+  assert.equal(isBlockedSongEntry({ title: "piano streaming", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "ピアノ演奏", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "クラリネット", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "フルート", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "生演奏", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "Piano Man", artist: "Billy Joel" }), false);
+  assert.equal(isBlockedSongEntry({ title: "ピアノ", artist: "Known Artist" }), false);
+  assert.equal(isBlockedSongEntry({ title: "START", artist: "愛内里菜" }), false);
+});
+
 function video(videoId, channelName, title) {
   return {
     videoId,

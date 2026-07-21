@@ -112,7 +112,68 @@ function rejectTimestampLine(onReject, reason, payload) {
   });
 }
 
-function isLikelyNonSongEntry(song) {
+function auditParsedSongForImport(song, source = {}) {
+  const normalized = normalizeParsedSong(song);
+  const title = String(normalized?.title || "").trim();
+  const artist = String(normalized?.artist || "").trim();
+  const raw = String(normalized?.raw || song?.raw || "");
+  if (!title) return importAuditResult("drop", "missing_title", normalized);
+  if (isExcludedImportSourceContext(source)) return importAuditResult("drop", "excluded_source_context", normalized);
+  if (isBadSongField(title)) return importAuditResult("drop", "bad_title_field", normalized);
+  if (artist && artist !== "未記載" && isBadSongField(artist)) return importAuditResult("drop", "bad_artist_field", normalized);
+  if (hasResidualTimestampInSongFields(title, artist)) return importAuditResult("drop", "residual_timestamp", normalized);
+  if (isSongRequestInstructionEntry(title, artist, raw)) return importAuditResult("drop", "song_request_instruction", normalized);
+  if (isSuspiciousImportSongEntry(title, artist, raw)) return importAuditResult("suspicious", "suspicious_import_song_entry", normalized);
+  if (isLikelyNonSongEntry(normalized, source)) return importAuditResult("drop", "likely_non_song_entry", normalized);
+  return importAuditResult("accept", "", normalized);
+}
+
+function importAuditResult(action, reason, song) {
+  return { action, reason, song };
+}
+
+function hasResidualTimestampInSongFields(title, artist) {
+  return [title, artist].some((value) => {
+    const text = String(value || "").trim();
+    if (!text) return false;
+    const match = text.match(TIMESTAMP_RE);
+    return Boolean(match && (match[0] === text || /(?:^|[\s\u3000[(（［【])\d{1,2}:\d{2}/u.test(text)));
+  });
+}
+
+function isSongRequestInstructionEntry(title, artist, raw) {
+  const text = compactSignalText(`${title || ""}${artist || ""}${raw || ""}`);
+  if (!text) return false;
+  return /(?:曲名|歌名|歌手|アーティスト|原曲|原唱|セトリ|セットリスト|タイムスタンプ|概要欄|説明欄).{0,28}(?:教えて|ください|下さい|お願い|求む|募集|受付|確認|修正|追加|更新|まとめ|整理|不明|未記載|わからない|分からない|どこ|誰|です|ます)/iu.test(text);
+}
+
+function isSuspiciousImportSongEntry(title, artist, raw) {
+  const hasArtist = !isUnknownArtistField(artist);
+  const text = `${title || ""} ${artist || ""} ${raw || ""}`.normalize("NFKC");
+  if (/^\s*(?:[\[【(（]\s*)?\d{1,3}(?:\s*[\]】)）])?\s*$/u.test(title) && /[一-龯ぁ-んァ-ヶA-Za-z]/u.test(artist)) return true;
+  if (!hasArtist && /[「『《〈].{1,80}[」』》〉]/u.test(title) && /(?:説明|紹介|感想|告知|雑談|コメント|リクエスト|公開|正体)/u.test(text)) return true;
+  return false;
+}
+
+function isExcludedImportSourceContext(source = {}) {
+  const text = [
+    source.title,
+    source.videoTitle,
+    source.channelName,
+    source.channelHandle,
+    source.channelUrl,
+    source.sourceText,
+    source.discoverySourceText,
+  ]
+    .map((value) => String(value || "").normalize("NFKC"))
+    .join(" ");
+  if (!text.trim()) return false;
+  if (/(?:フルート|クラリネット|生演奏|piano streaming|ピアノ演奏)/iu.test(text)) return true;
+  if (/(?:\blive\b|ライブ)/iu.test(text) && /(?:演奏|instrumental|performance|session|concert|recital)/iu.test(text)) return true;
+  return false;
+}
+
+function isLikelyNonSongEntry(song, source = {}) {
   const title = String(song?.title || "").trim();
   const artist = String(song?.artist || "").trim();
   const raw = String(song?.raw || "");
@@ -121,7 +182,7 @@ function isLikelyNonSongEntry(song) {
 
   if (isCustomEmojiOnlyText(title)) return true;
   if (/^0\d+[.．]\d+(?:\s*[\/／].*)?$/u.test(title)) return true;
-  if (isBlockedSongEntry({ title, artist, raw })) return true;
+  if (isBlockedSongEntry({ title, artist, raw }, source)) return true;
   if (!hasArtist && isStandaloneNonSongMarker(title)) return true;
   if (!hasArtist && isChatReactionShoutText(title)) return true;
   if (isReactionActivityEntry(title, artist, raw)) return true;
@@ -144,6 +205,9 @@ function isLikelyNonSongEntry(song) {
   if (!hasArtist && /(?:お話|話$|話①|話②|話題|裏話|スケジュール|おすすめ|コメント|チャット|ギフト|設定|手癖|腰|良い音|到着|ただいま|お土産|先生|予想|コンディション|休暇中|気圧|体調|配信|動画|映画|クリップ|バランス|読み|頑張|ありがとう|お疲れ|おつかれ)/iu.test(combined)) {
     return true;
   }
+  if (!hasArtist && /(?:説明|自己紹介|告知|お知らせ|公開|正体|マイク|音声|音入り|声入り|曲名|歌手|アーティスト|リクエスト|セトリ|セットリスト|概要欄|説明欄)/iu.test(combined)) {
+    return true;
+  }
   if (
     !hasArtist &&
     /^(?:おはよう|おはようございます|こんにちは|こんばんは)[^\n]{0,28}(?:です|だよ|でーす)[!！。.\s]*$/iu.test(title)
@@ -162,7 +226,14 @@ function isLikelyNonSongEntry(song) {
   if (hasArtist && /^(咳払い|くしゃみ|雑談|告知|宣伝|休憩)$/iu.test(artist)) {
     return true;
   }
+  if (hasArtist && isNarrationDescriptorArtist(artist) && isDirtyNarrationText(title, raw)) {
+    return true;
+  }
   return false;
+}
+
+function isNarrationDescriptorArtist(artist) {
+  return /(?:事情|テーマ|EDテーマ|OPテーマ|トーク|話|雑談|告知|宣伝|説明|紹介)$/iu.test(String(artist || "").normalize("NFKC").trim());
 }
 
 function isDirtyNarrationText(title, raw) {
@@ -177,6 +248,7 @@ function isDirtyNarrationText(title, raw) {
   if (/(?:食べ物|食べる|飲む|飲酒|料理|メニュー|お酒|ビール|ハイボール|喉|病院|薬|体調|風邪|咳|くしゃみ|あくび|欠伸|衣装|髪型|職場|クイズ|ダンス|巻き舌|雰囲気|アパート|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|ペットショップ|ラー油|ケンタッキー|バーガーキング|酒のラベル|春が嫌い|カンニング|再確認|覚えてきた曲|ごらんください|ご覧ください|JOYSOUND|音楽停止)/iu.test(text) && /(?:話|痛い|行く|行け|届|した|する|です|ます|ちゃう|嫌い|[?？])/.test(text)) {
     return true;
   }
+  if (/(?:メンシ|メンバーシップ|こそこそ話|爆音EDテーマ|就寝させない|取れてる|悲しい|事情)/iu.test(text)) return true;
   return /(?:でした|です|ます|ました|してる|している|したい|しよう|しない|できる|いけない|ちゃう|だった|だよ|だね|なの|かな|かも|理由|途中|可能性|報告|説明|紹介|翻訳|ヒント|問題|どこ|誰|なに|何|どう|なぜ|なんで|[?？])$/u.test(titleText);
 }
 
@@ -880,6 +952,7 @@ function isSpace(ch) {
 
 module.exports = {
   TIMESTAMP_RE,
+  auditParsedSongForImport,
   isTimestampCandidateText,
   isLikelyNonSongEntry,
   normalizeCommentText,

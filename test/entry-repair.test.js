@@ -178,6 +178,20 @@ test("fills high-confidence unknown artists from reviewed title metadata only", 
     artist: "待补歌手",
     raw: "1:20 花になっての話",
   });
+  const mitani = repairParsedEntry({
+    time: "0:01:30",
+    seconds: 90,
+    title: "自己肯定感販売所",
+    artist: "待补歌手",
+    raw: "1:30 自己肯定感販売所",
+  });
+  const selfEsteem = repairParsedEntry({
+    time: "0:01:40",
+    seconds: 100,
+    title: "53🎤 自己肯定感爆上げ↑↑しゅきしゅきソング",
+    artist: "待补歌手",
+    raw: "1:40 53🎤 自己肯定感爆上げ↑↑しゅきしゅきソング",
+  });
 
   assert.equal(heat.artist, "いよわ");
   assert.equal(heat.repair.changed, true);
@@ -190,6 +204,9 @@ test("fills high-confidence unknown artists from reviewed title metadata only", 
   assert.equal(bansanka.artist, "tuki.");
   assert.equal(flower.artist, "緑黄色社会");
   assert.equal(flowerCommentary.artist, "待补歌手");
+  assert.equal(mitani.artist, "みたにみく");
+  assert.equal(selfEsteem.title, "自己肯定感爆上げ↑↑しゅきしゅきソング");
+  assert.equal(selfEsteem.artist, "初星学園");
 });
 
 test("validates high-confidence artist override config conflicts", () => {
