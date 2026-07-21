@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-21T23:09:45.819Z",
+  "channelUrl": "https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2",
+  "singerName": "Dia",
+  "keywords": [
+    "フルート",
+    "生演奏",
+    "live",
+    "ライブ",
+    "クラリネット",
+    "piano streaming",
+    "ピアノ演奏",
+    "歌",
+    "歌枠",
+    "弾き語",
+    "karaoke",
+    "歌ってみた",
+    "3D Live"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 100,
+  "maxCandidates": 0,
+  "maxInspect": 1000,
+  "inspectShardIndex": 0,
+  "inspectShardCount": 1,
+  "candidateOnly": false,
+  "candidateCount": 27,
+  "inspectedInLatestRun": 27,
+  "usableVideoCount": 20,
+  "occurrenceCount": 370,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 33,
+      "candidateCount": 27,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1147512
+    },
+    {
+      "pageUrl": "https://www.youtube.com/@Dia-%E3%83%87%E3%82%A3%E3%82%A2/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 11,
+      "candidateCount": 0,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 899066
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2046578,
+    "totalElapsedMs": 322,
+    "statuses": {
+      "200": 2
+    }
+  }
+}

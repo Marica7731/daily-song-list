@@ -1,0 +1,15 @@
+{
+  "handle": "kisaki",
+  "url": "https://www.youtube.com/@%E5%A6%83%E7%8E%96-kisaki",
+  "status": "pending",
+  "reason": "stopped after three batch8 channels completed to keep this as a small-batch commit; continue in a later unique batch",
+  "candidateCount": 34,
+  "inspectedInLatestRun": 27,
+  "detailCount": 14,
+  "completedVideoIds": 14,
+  "updatedAt": "2026-07-21T23:15:04.689Z",
+  "remoteStop": {
+    "exitCode": 0,
+    "stdout": "host=vps5\nrunner_pid=297078\nrunner_pgid=297078\n297284 bash -c set -eu; echo host=vps5; if [ -f '/opt/ytb-song-rank-source-backfill-20260722-batch8-small-vps5/repo/runner.pid' ]; then pid=$(cat '/opt/ytb-song-rank-source-backfill-20260722-batch8-small-vps5/repo/runner.pid'); else pid=; fi; echo runner_pid=$pid; if [ -n \"$pid\" ]; then pgid=$(ps -p \"$pid\" -o pgid= | tr -d ' ' || true); echo runner_pgid=$pgid; if [ -n \"$pgid\" ]; then kill -- -\"$pgid\" 2>/dev/null || true; fi; sleep 2; if ps -p \"$pid\" >/dev/null 2>&1; then kill -TERM \"$pid\" 2>/dev/null || true; fi; sleep 2; if ps -p \"$pid\" >/dev/null 2>&1; then kill -KILL \"$pid\" 2>/dev/null || true; fi; fi; pgrep -af '/opt/ytb-song-rank-source-backfill-20260722-batch8-small-vps5/repo|youtube-channel-discovery|remote_batch_runner' || true; df -h /; echo CODEX_REMOTE_BATCH8_STOP_OK\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/vda1        10G  3.1G  6.5G  32% /\nCODEX_REMOTE_BATCH8_STOP_OK\n"
+  }
+}
