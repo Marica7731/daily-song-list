@@ -3548,8 +3548,8 @@ mark {
   }
 
   .controls-inner {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-1);
+    grid-template-columns: minmax(108px, 0.85fr) minmax(0, 1.4fr);
+    gap: 4px;
     width: 100%;
   }
 
@@ -3564,14 +3564,14 @@ mark {
   }
 
   .range-mode.segmented {
-    min-height: 34px;
+    min-height: 36px;
     padding: 2px;
   }
 
   .range-mode .tab {
     flex: 1 1 0;
     min-width: 0;
-    min-height: 28px;
+    min-height: 30px;
     padding: 0 6px;
     font-size: 12px;
   }
@@ -3593,8 +3593,8 @@ mark {
     place-items: center;
     width: 100%;
     min-width: 0;
-    height: 32px;
-    min-height: 32px;
+    height: 36px;
+    min-height: 36px;
     padding: 0 6px;
     gap: 4px;
   }
@@ -3612,9 +3612,9 @@ mark {
   }
 
   .query-search-form input {
-    height: 30px;
+    height: 34px;
     font-size: 13px;
-    line-height: 30px;
+    line-height: 34px;
   }
 
   .query-search-form .query-field-summary svg {
@@ -3625,11 +3625,13 @@ mark {
 
   .query-search-form .query-count {
     display: inline-grid;
-    min-width: 11px;
-    height: 11px;
+    min-width: 10px;
+    height: 10px;
     padding: 0 3px;
     font-size: 8px;
-    line-height: 11px;
+    line-height: 10px;
+    top: 1px;
+    right: 1px;
   }
 
   .query-trigger:not(.query-search-form) svg:not(.query-trigger-icon),
