@@ -32,6 +32,7 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - Riona source rows without a reliable artist are rejected by channel scope, while explicit-artist songs on the same channel are retained.
 - Bracketed commentary notes such as `【雑談】リクエスト確認` and `（去年のなれたん）...` are rejected as non-song rows.
 - Unknown-artist conversational rows are rejected across channels, including greetings and wrap-up chants like `おつはのちゅっちゅる〜！`, generic `雑談`/`聊天`/`挨拶` labels, and person-reference chatter such as `次のバトンは香鳴ハノンちゃん`.
+- Singleton pseudo-song rows are rejected only with source-count context. The curation layer, JS runtime ranking exporter, and Python DB fallback compute normalized title source counts, then drop rows where the normalized title appears in one source, the artist is unknown or is an English explanatory gloss, and the title/raw text looks like daily chatter, stream notes, topic labels, or explanation text. Reliable English artist names remain guarded, for example `ホログラム / NICO Touches the Walls` and `明日への扉 / I WiSH`.
 - `vsinger_moment_http` / `vsinger-moment` / `moment` provenance is not an `isCollected` source. Only manual, verified, song-search, and accepted `youtube_channel_discovery` rows set the collected flag.
 
 ## START Guardrail
@@ -98,3 +99,11 @@ Latest audit in this branch:
 - false-positive checks retained: 11 samples, including `-ERROR / niki`, `-OZONE-`, `READY STEADY GO / L'Arc-en-Ciel`, `Open Your Eyes / Guano Apes`, `ENDLESS STORY / REIRA starring YUNA ITO`, and the three START whitelist rows.
 
 Remaining dirty-keyword audit hits include reviewed false positives such as `StaRt` variants and artist/work metadata containing `OP`/`Start`; do not turn these into broad contains-based drops.
+
+For accepted JSON impact checks, run:
+
+```powershell
+node scripts\audit-accepted-cleaning-impact.js
+```
+
+The script reads `data/external/youtube-channel-discovery/accepted/*.json` plus local runtime JSON, reports before/after counts for Naraetan, KanaruHanon, and IsakiRiona, and prints `CODEX_ACCEPTED_CLEANING_IMPACT_OK`. It also verifies `START:DASH!!`, `ENDLESS STORY`, and `Never Ending Story` remain kept.
