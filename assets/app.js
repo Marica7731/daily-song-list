@@ -4209,7 +4209,7 @@ function renderRequestedPageResult(result, options = {}) {
         meta: vtuberMeta(record),
         videoCount: record.videoCount,
         count: rankValueForRequestRecord(record, result.metric),
-        countUnit: result.metric === "songs" ? "首歌" : result.metric === "videos" ? "视频" : "次歌唱",
+        countUnit: result.metric === "songs" ? "首歌" : result.metric === "videos" ? "视频" : "次",
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
         songGroups,
@@ -4874,7 +4874,7 @@ function renderVtuberRank(group, rangeCache, selection) {
         meta: vtuberMeta(record),
         videoCount: record.videoCount,
         count: rankValue(record),
-        countUnit: state.rankMetric === "songs" ? "首歌" : state.rankMetric === "videos" ? "视频" : "次歌唱",
+        countUnit: state.rankMetric === "songs" ? "首歌" : state.rankMetric === "videos" ? "视频" : "次",
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
         songGroups,
@@ -7683,9 +7683,10 @@ function renderArtistSongGroup(group) {
 
   const count = document.createElement("span");
   count.className = "artist-song-count";
-  count.textContent = artistSongCountLabel(group);
+  count.textContent =
+    group.sourceMode === "vtuber" ? vtuberSongGroupMetaLabel(group) : artistSongCountLabel(group);
   meta.append(count);
-  if (group.videoCount > 0) {
+  if (group.sourceMode !== "vtuber" && group.videoCount > 0) {
     const videoCount = document.createElement("span");
     videoCount.className = "artist-song-video-count";
     videoCount.textContent = `${group.videoCount}个视频`;
@@ -7752,6 +7753,14 @@ function artistSongCountLabel(group) {
   const unit = group?.sourceMode === "vtuber" ? "次歌唱" : "次";
   if (videoCount > 0 && videoCount !== count) return `${count}${unit} · ${videoCount}来源`;
   return `${count}${unit}`;
+}
+
+function vtuberSongGroupMetaLabel(group) {
+  const count = Math.max(0, Number(group?.count) || 0);
+  const videoCount = Math.max(0, Number(group?.videoCount) || uniqueVideoCount(group?.occurrences || []));
+  if (videoCount > 0 && videoCount !== count) return `${count}次 · ${videoCount}视频`;
+  if (videoCount > 0) return `${count}次`;
+  return `${count}次`;
 }
 
 function hydrateArtistSongGroup(group) {

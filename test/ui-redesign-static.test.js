@@ -371,6 +371,10 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(appSource, /function appendVtuberSubline\(metaContainer, \{ occurrences, songCount, songPreview, videoCount \}\)[\s\S]*`\$\{songCount\} 首歌`/u);
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
+  assert.match(songGroupBody, /group\.sourceMode === "vtuber" \? vtuberSongGroupMetaLabel\(group\) : artistSongCountLabel\(group\)/u);
+  assert.match(appSource, /function vtuberSongGroupMetaLabel\(group\)[\s\S]*`\$\{count\}次 · \$\{videoCount\}视频`/u);
+  assert.doesNotMatch(vtuberRankBody, /次歌唱/u);
+  assert.doesNotMatch(requestedPageBody.match(/result\.view === "vtuberRank"[\s\S]*?\}\);[\s\S]*?\}/u)?.[0] || "", /次歌唱/u);
   assert.match(songSourceBody, /sourceDetailPageForContainer\(sources, sources\._sourceOccurrences \|\| \[\]/u);
   assert.match(songSourceBody, /groups: pageState\.groups,[\s\S]*pageInfo: pageState\.pageInfo/u);
   assert.match(sourcePageBody, /drawer\.dataset\.sourceMode === "artist-song" \? drawer : row/u);
