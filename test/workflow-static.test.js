@@ -19,7 +19,7 @@ test("core, review, and code checks use separate workflow files and concurrency 
   assert.match(core, /cancel-in-progress:\s*false/u);
   assert.doesNotMatch(core, /cron:\s*"37 \* \* \* \*"/u);
   assert.match(core, /timeout-minutes:\s*100/u);
-  assert.match(core, /timeout-minutes:\s*50/u);
+  assert.match(core, /timeout-minutes:\s*90/u);
   assert.match(core, /DAILY_SONG_UPDATE_MODE:\s*\$\{\{ inputs\.mode \|\| 'fast' \}\}/u);
   assert.match(core, /DAILY_SONG_MONTH_BACKFILL_TARGET:\s*"0"/u);
   assert.match(core, /git pull --ff-only origin main/u);
