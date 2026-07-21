@@ -425,6 +425,7 @@ def ingest_latest_payload(
         if limit_per_range > 0:
             items = items[:limit_per_range]
         write_meta(conn, f"range_{range_id}_item_count", str(len(items)))
+        title_stats = build_runtime_title_stats(items)
 
         range_state = empty_range_state()
         for item_index, item in enumerate(items):
@@ -436,7 +437,7 @@ def ingest_latest_payload(
             upsert_channel_metadata(conn, item)
 
             item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
-            valid_songs = runtime_scoped_songs(item_songs, item)
+            valid_songs = runtime_scoped_songs(item_songs, item, title_stats)
             record_video(range_state, range_id, video_id, item, valid_songs)
             record_vtuber(range_state, video_id, item, valid_songs)
             source_key = stable_key("source-video", range_id, video_id)
@@ -1793,13 +1794,13 @@ def is_moment_source(item: dict) -> bool:
     )
 
 
-def runtime_scoped_songs(songs, source: dict | None = None) -> list[dict]:
+def runtime_scoped_songs(songs, source: dict | None = None, title_stats: dict | None = None) -> list[dict]:
     if not isinstance(songs, list):
         return []
-    return [song for song in songs if isinstance(song, dict) and clean_text(song.get("title")) and not is_likely_runtime_non_song_entry(song, source)]
+    return [song for song in songs if isinstance(song, dict) and clean_text(song.get("title")) and not is_likely_runtime_non_song_entry(song, source, title_stats)]
 
 
-def is_likely_runtime_non_song_entry(song: dict, source: dict | None = None) -> bool:
+def is_likely_runtime_non_song_entry(song: dict, source: dict | None = None, title_stats: dict | None = None) -> bool:
     title = clean_text(song.get("title"))
     artist = clean_text(song.get("artist"))
     raw = clean_text(song.get("raw"))
@@ -1823,7 +1824,34 @@ def is_likely_runtime_non_song_entry(song: dict, source: dict | None = None) -> 
         return True
     if unknown_artist and is_bracketed_runtime_commentary_note(title):
         return True
+    if title_stats and is_runtime_singleton_pseudo_song(title, artist, raw, title_stats):
+        return True
     return False
+
+
+def build_runtime_title_stats(items: list[dict]) -> dict[str, dict[str, int]]:
+    records: dict[str, dict[str, object]] = {}
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        source_key = clean_text(item.get("videoId") or item.get("selectedSourceId") or item.get("sourceId") or item.get("title"))
+        songs = item.get("songs") if isinstance(item.get("songs"), list) else []
+        for song in songs:
+            if not isinstance(song, dict) or not clean_text(song.get("title")):
+                continue
+            if is_likely_runtime_non_song_entry(song, item, None):
+                continue
+            key = normalize_singleton_title_key(song.get("title"))
+            if not key:
+                continue
+            if key not in records:
+                records[key] = {"rows": 0, "sources": set()}
+            records[key]["rows"] = int(records[key]["rows"]) + 1
+            records[key]["sources"].add(source_key or f"{key}:{records[key]['rows']}")  # type: ignore[index, union-attr]
+    return {
+        key: {"rows": int(record["rows"]), "sourceCount": len(record["sources"])}  # type: ignore[arg-type]
+        for key, record in records.items()
+    }
 
 
 def is_runtime_confirmed_dirty_title(title, raw) -> bool:
@@ -1944,6 +1972,65 @@ def is_runtime_conversational_pseudo_song(title, raw) -> bool:
     return False
 
 
+def is_runtime_singleton_pseudo_song(title, artist, raw, title_stats: dict | None) -> bool:
+    title_text = clean_text(title)
+    artist_text = clean_text(artist)
+    raw_text = clean_text(raw)
+    if not title_text or is_known_song_safe_from_runtime_commentary(title_text, artist_text):
+        return False
+    stats = title_stats.get(normalize_singleton_title_key(title_text)) if isinstance(title_stats, dict) else None
+    if not isinstance(stats, dict) or int(stats.get("sourceCount") or stats.get("sources") or stats.get("count") or 0) != 1:
+        return False
+
+    unknown_artist = is_unknown_artist(artist_text)
+    english_gloss_artist = is_runtime_explanatory_english_gloss_artist(title_text, artist_text, raw_text)
+    if not unknown_artist and not english_gloss_artist:
+        return False
+    daily_topic = is_runtime_singleton_daily_topic_text(title_text, raw_text)
+    if unknown_artist and has_runtime_song_title_latin_gloss(title_text) and not daily_topic and not is_runtime_commentary_noise(title_text, raw_text):
+        return False
+    if unknown_artist and (
+        is_runtime_conversational_pseudo_song(title_text, raw_text)
+        or is_runtime_commentary_noise(title_text, raw_text)
+        or is_runtime_sentence_like_title(title_text)
+        or daily_topic
+    ):
+        return True
+    return bool(english_gloss_artist and (daily_topic or is_runtime_sentence_like_title(title_text) or is_runtime_sentence_like_credit(artist_text)))
+
+
+def is_runtime_explanatory_english_gloss_artist(title, artist, raw) -> bool:
+    title_text = unicodedata.normalize("NFKC", clean_text(title))
+    artist_text = unicodedata.normalize("NFKC", clean_text(artist))
+    if not title_text or not artist_text or is_unknown_artist(artist_text):
+        return False
+    if not contains_japanese(title_text) or contains_japanese(artist_text) or not re.search(r"[A-Za-z]", artist_text):
+        return False
+    if re.match(r"(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did)\b", artist_text):
+        return True
+    return bool(re.search(r"\b(?:about|accidental|anime|blossoms?|broadcasting|celebrit(?:y|ies)|chat|club|comment|conan|detective|drink(?:ing)?|ending songs?|famous|favorite|food|guide|hair|hospital|how to|imitating|information|memories|menu|mind of its own|new outfit|opening|organizing|park|personal|phones?|poisoning|quotes?|recommendations?|song list|stocked|surprised|throat|thoughts?|watching)\b", artist_text, re.IGNORECASE))
+
+
+def is_runtime_singleton_daily_topic_text(title, raw) -> bool:
+    value = normalize_runtime_commentary_text(f"{title} {raw}")
+    if not value:
+        return False
+    if re.fullmatch(r"by[A-Za-z0-9 .,'’\"“”&+_\-!?~～#＃♯♭★☆♪♫♡♥◎・･=×∞]+", clean_text(title), re.IGNORECASE):
+        return True
+    if re.fullmatch(r"(?:たすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|本編終了|歌パート終了|練習パート|復習タイム開始)", value, re.IGNORECASE):
+        return True
+    return bool(re.search(r"(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|スマホ|配信を見る|体調|病院|飲み|食べ|誕生日|自分へのプレゼント|プレゼント選び|ネタバレ|途中からリベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い)", value, re.IGNORECASE))
+
+
+def has_runtime_song_title_latin_gloss(title) -> bool:
+    value = unicodedata.normalize("NFKC", clean_text(title))
+    if not contains_japanese(value) or not re.search(r"[A-Za-z]", value):
+        return False
+    if re.fullmatch(r".+?\s+[-–—]\s+[A-Za-z][A-Za-z0-9 .,'’\"“”&+_/!?()[\]-]{1,80}", value):
+        return True
+    return bool(re.fullmatch(r".+?\s*[(（［\[]\s*[A-Za-z][A-Za-z0-9 .,'’\"“”&+_/!?()[\]-]{1,80}\s*[)）］\]]", value))
+
+
 def is_runtime_topic_like_bilingual_commentary(title, artist, raw) -> bool:
     title_text = clean_text(title)
     artist_text = clean_text(artist)
@@ -2022,6 +2109,12 @@ def normalize_runtime_commentary_text(value) -> str:
     text = re.sub(r"[\u200b-\u200f\u202a-\u202e\ufe0e\ufe0f]", "", text)
     text = re.sub(r"\s+", "", text)
     text = re.sub(r"[!！?？。．.]+$", "", text)
+    return text.strip()
+
+
+def normalize_singleton_title_key(value) -> str:
+    text = unicodedata.normalize("NFKC", clean_text(value)).lower()
+    text = re.sub(r"[\s\u3000\[\]【】()（）「」『』\"'“”‘’・･,，.。:：;；!！?？~～\-—–−_/／|｜￤∣丨✦♪♫♬♩]+", "", text)
     return text.strip()
 
 

@@ -261,6 +261,41 @@ test("curation drops global conversational pseudo-song rows from multiple channe
   assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 3);
 });
 
+test("curation drops singleton topic/gloss pseudo songs while keeping reliable English artists", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "NARAETAN003",
+        channelName: "なれたん Naraetan Ch.",
+        channelHandle: "/@naraetanV",
+        songs: [
+          { title: "上野公園の桜", artist: "Cherry Blossoms at Ueno Park", seconds: 1, raw: "0:01 上野公園の桜 / Cherry Blossoms at Ueno Park" },
+          { title: "歌リストの整理", artist: "Organizing My Song List", seconds: 2, raw: "0:02 歌リストの整理 / Organizing My Song List" },
+          { title: "この曲（Lovely Fruit）はMVの制服がとても可愛い", artist: "未記載", seconds: 3, raw: "0:03 この曲（Lovely Fruit）はMVの制服がとても可愛い" },
+          { title: "ホログラム", artist: "NICO Touches the Walls", seconds: 4, raw: "0:04 ホログラム / NICO Touches the Walls" },
+          { title: "元彼氏として", artist: "My Hair is Bad", seconds: 5, raw: "0:05 元彼氏として / My Hair is Bad" },
+        ],
+      },
+      {
+        videoId: "HANON000002",
+        channelName: "Hanon Ch. 香鳴ハノン【パレプロ】",
+        channelHandle: "/@kanaruhanon",
+        songs: [
+          { title: "次の出番は白雪みしろちゃん", artist: "未記載", seconds: 6, raw: "0:06 次の出番は白雪みしろちゃん" },
+          { title: "明日への扉", artist: "I WiSH", seconds: 7, raw: "0:07 明日への扉 / I WiSH" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos.flatMap((item) => item.songs.map((song) => `${song.title} / ${song.artist}`)),
+    ["ホログラム / NICO Touches the Walls", "元彼氏として / My Hair is Bad", "明日への扉 / I WiSH"],
+  );
+  assert.equal(videos.curationStats.conversationDroppedEntries, 4);
+});
+
 test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", () => {
   const videos = applyCurationToVideos(
     [

@@ -137,6 +137,27 @@
     return !hasArtist && isChatReactionShoutText(title);
   }
 
+  function isSingletonPseudoSongEntry(song, titleStats = null) {
+    const title = String(song?.title || song?.raw || "").trim();
+    const artist = String(song?.artist || "").trim();
+    const raw = String(song?.raw || "");
+    if (!title || isKnownSongSafeFromCommentary(title, artist)) return false;
+
+    const stats = titleStats ? titleStatsForSong(titleStats, title) : null;
+    if (!stats || Number(stats.sourceCount || stats.sources || stats.count || 0) !== 1) return false;
+
+    const unknownArtist = !hasKnownArtist(song);
+    const englishGlossArtist = isExplanatoryEnglishGlossArtist(title, artist, raw);
+    if (!unknownArtist && !englishGlossArtist) return false;
+
+    const dailyTopic = isSingletonDailyTopicText(title, raw);
+    if (unknownArtist && hasSongTitleLatinGloss(title) && !dailyTopic && !isCommentaryNoiseText(title)) return false;
+    if (unknownArtist && (isConversationalPseudoSongTitle(title, raw) || isCommentaryNoiseText(title) || isSentenceLikeTitle(title) || dailyTopic)) {
+      return true;
+    }
+    return englishGlossArtist && (dailyTopic || isSentenceLikeTitle(title) || isSentenceLikeCredit(artist));
+  }
+
   function isChannelScopedUnknownArtistDirtySong(song, source = {}) {
     return !hasKnownArtist(song) && isRionaChannelSource(source);
   }
@@ -474,6 +495,47 @@
     return /\b(?:about|accidental|accented|ad|alcohol|anime|attack|ballad|carbonated|catchy|click|commercial|differences?|difficult|dream|drink(?:ing)?|food|hospital|introduced?|introducing|japanese|korean|marks?|music|parents?|picture|poisoning|poll|popular|pronunciation|recommendations?|recently|rice|risks?|salon|song|songs|souvenirs?|stops?|tea|temptation|traditional|vowel|watched)\b/iu.test(value);
   }
 
+  function isExplanatoryEnglishGlossArtist(title, artist, raw) {
+    const titleText = String(title || "").normalize("NFKC").trim();
+    const artistText = String(artist || "").normalize("NFKC").trim();
+    if (!titleText || !artistText || isUnknownArtist(artistText)) return false;
+    if (!containsJapanese(titleText) || containsJapanese(artistText) || !/[A-Za-z]/u.test(artistText)) return false;
+    if (/^(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did)\b/u.test(artistText)) {
+      return true;
+    }
+    return /\b(?:about|accidental|anime|blossoms?|broadcasting|celebrit(?:y|ies)|chat|club|comment|conan|detective|drink(?:ing)?|ending songs?|famous|favorite|food|guide|hair|hospital|how to|imitating|information|memories|menu|mind of its own|new outfit|opening|organizing|park|personal|phones?|poisoning|quotes?|recommendations?|song list|stocked|surprised|throat|thoughts?|watching)\b/iu.test(artistText);
+  }
+
+  function isSingletonDailyTopicText(title, raw) {
+    const value = normalizeNoiseTitleKey(`${title || ""} ${raw || ""}`);
+    if (!value) return false;
+    if (/^(?:by[a-z0-9 .,'’"“”&+_\-!?~～#＃♯♭★☆♪♫♡♥◎・･=×∞]+)$/iu.test(String(title || "").normalize("NFKC").trim())) return true;
+    if (/^(?:たすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|本編終了|歌パート終了|練習パート|復習タイム開始)$/iu.test(value)) return true;
+    return /(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|スマホ|配信を見る|体調|病院|飲み|食べ|誕生日|自分へのプレゼント|プレゼント選び|ネタバレ|途中からリベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い)/iu.test(value);
+  }
+
+  function hasSongTitleLatinGloss(title) {
+    const value = String(title || "").normalize("NFKC").trim();
+    if (!containsJapanese(value) || !/[A-Za-z]/u.test(value)) return false;
+    if (/^.+?\s+[-–—]\s+[A-Za-z][A-Za-z0-9 .,'’"“”&+_/!?()[\]-]{1,80}$/u.test(value)) return true;
+    return /^.+?\s*[(（［\[]\s*[A-Za-z][A-Za-z0-9 .,'’"“”&+_/!?()[\]-]{1,80}\s*[)）］\]]$/u.test(value);
+  }
+
+  function titleStatsForSong(stats, title) {
+    const key = normalizeSingletonTitleKey(title);
+    if (!key) return null;
+    if (typeof stats.get === "function") return stats.get(key) || null;
+    return stats[key] || null;
+  }
+
+  function normalizeSingletonTitleKey(value) {
+    return String(value || "")
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’・･,，.。:：;；!！?？~～\-—–−_/／|｜￤∣丨✦♪♫♬♩]+/gu, "")
+      .trim();
+  }
+
   function isKnownSongSafeFromCommentary(title, artist) {
     const titleText = String(title || "").trim();
     const artistText = String(artist || "").trim();
@@ -770,6 +832,7 @@
     isBlockedSource,
     isChannelScopedUnknownArtistDirtySong,
     isChatReactionShoutText,
+    isSingletonPseudoSongEntry,
     isSelfReferentialChannelTitle,
     matchBlockedSource,
     normalizeSongEntry,

@@ -8,6 +8,7 @@ const {
   filterPayloadBlockedSources,
   isBlockedSource,
   isChannelScopedUnknownArtistDirtySong,
+  isSingletonPseudoSongEntry,
   isSelfReferentialChannelTitle,
   BLOCKLIST_HASH,
   normalizeSongEntry,
@@ -61,6 +62,33 @@ test("source filter removes blocked HK/TW VTuber channels without matching ordin
   assert.equal(filtered.source.clientFilteredBlockedSongCount, 2);
   assert.equal(filtered.blocklistHash, BLOCKLIST_HASH);
   assert.equal(payload.groups["72h"].items.length, 2);
+});
+
+test("source filter singleton pseudo-song helper uses source-count context", () => {
+  const singletonStats = new Map([["上野公園の桜", { sourceCount: 1 }]]);
+  const repeatedStats = new Map([["上野公園の桜", { sourceCount: 2 }]]);
+
+  assert.equal(
+    isSingletonPseudoSongEntry(
+      { title: "上野公園の桜", artist: "Cherry Blossoms at Ueno Park", raw: "0:01 上野公園の桜 / Cherry Blossoms at Ueno Park" },
+      singletonStats,
+    ),
+    true,
+  );
+  assert.equal(
+    isSingletonPseudoSongEntry(
+      { title: "上野公園の桜", artist: "Cherry Blossoms at Ueno Park", raw: "0:01 上野公園の桜 / Cherry Blossoms at Ueno Park" },
+      repeatedStats,
+    ),
+    false,
+  );
+  assert.equal(
+    isSingletonPseudoSongEntry(
+      { title: "ホログラム", artist: "NICO Touches the Walls", raw: "0:01 ホログラム / NICO Touches the Walls" },
+      new Map([["ホログラム", { sourceCount: 1 }]]),
+    ),
+    false,
+  );
 });
 
 test("source filter removes section markers and cleans ordinal song prefixes", () => {

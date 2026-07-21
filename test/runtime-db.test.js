@@ -445,6 +445,8 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
                 { title: "なれコールアンケート", artist: "未記載", raw: "01:44:00 なれコールアンケート", time: "0:06", seconds: 6 },
                 { title: "食あたり", artist: "Food Poisoning", raw: "01:44:10 食あたり / Food Poisoning", time: "0:07", seconds: 7 },
                 { title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / tuki.", time: "0:08", seconds: 8 },
+                { title: "上野公園の桜", artist: "Cherry Blossoms at Ueno Park", raw: "0:09 上野公園の桜 / Cherry Blossoms at Ueno Park", time: "0:09", seconds: 9 },
+                { title: "ホログラム", artist: "NICO Touches the Walls", raw: "0:10 ホログラム / NICO Touches the Walls", time: "0:10", seconds: 10 },
               ],
             },
             {
@@ -587,7 +589,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり",
+      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり OR 上野公園の桜",
       "--search-scope",
       "title",
       "--page-size",
@@ -619,6 +621,29 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   );
   assert.match(retainedMomentSongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(retainedMomentSongOutput, /"totalCount": 4/);
+
+  const retainedEnglishArtistOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "ホログラム",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(retainedEnglishArtistOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(retainedEnglishArtistOutput, /NICO Touches the Walls/);
+  assert.match(retainedEnglishArtistOutput, /"totalCount": 1/);
 
   const safeSongOutput = execFileSync(
     PYTHON,

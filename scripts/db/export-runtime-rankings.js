@@ -22,7 +22,7 @@ const {
   buildRuntimeRangePayload,
 } = require("../build-runtime-data");
 const { isLikelyNonSongEntry } = require("../song-utils");
-const { isBlockedSongEntry } = require("../../assets/source-filter");
+const { isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../../assets/source-filter");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
@@ -132,7 +132,9 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
     for (const rangeId of args.ranges) {
       const rangePayload = buildRangePayload(payload, rangeId, args, runtimeImports);
       rangePayload.dataVersion = dataVersion;
-      const items = Array.isArray(rangePayload.items) ? rangePayload.items.map(withRuntimeScopedSongs) : [];
+      const baseItems = Array.isArray(rangePayload.items) ? rangePayload.items.map((item) => withRuntimeScopedSongs(item, null)) : [];
+      const titleStats = buildRuntimeTitleStats(baseItems);
+      const items = baseItems.map((item) => withRuntimeScopedSongs(item, titleStats));
       const occurrences = collectRuntimeOccurrences(items);
       const writtenSourceKeys = new Set();
       writer.write({
@@ -475,21 +477,50 @@ function buildChannelIdentityLookup(items) {
   return { nameToKey };
 }
 
-function withRuntimeScopedSongs(item) {
+function withRuntimeScopedSongs(item, titleStats = null) {
   if (!item || typeof item !== "object") return item;
   return {
     ...item,
-    songs: runtimeScopedSongs(item.songs, item),
+    songs: runtimeScopedSongs(item.songs, item, titleStats),
   };
 }
 
-function runtimeScopedSongs(songs, source = {}) {
+function runtimeScopedSongs(songs, source = {}, titleStats = null) {
   return (Array.isArray(songs) ? songs : []).filter((song) => {
     if (!song || typeof song !== "object") return false;
     if (!RankingUtils.cleanText(song.title)) return false;
     if (isBlockedSongEntry(song, source)) return false;
+    if (titleStats && isSingletonPseudoSongEntry(song, titleStats)) return false;
     return !isLikelyNonSongEntry(song);
   });
+}
+
+function buildRuntimeTitleStats(items) {
+  const records = new Map();
+  for (const item of items || []) {
+    const sourceKey = RankingUtils.cleanText(item?.videoId || item?.selectedSourceId || item?.sourceId || item?.title);
+    for (const song of Array.isArray(item?.songs) ? item.songs : []) {
+      const key = singletonTitleKey(song?.title);
+      if (!key) continue;
+      if (!records.has(key)) records.set(key, { rows: 0, sources: new Set() });
+      const record = records.get(key);
+      record.rows += 1;
+      record.sources.add(sourceKey || `${key}:${record.rows}`);
+    }
+  }
+  for (const record of records.values()) {
+    record.sourceCount = record.sources.size;
+    delete record.sources;
+  }
+  return records;
+}
+
+function singletonTitleKey(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLocaleLowerCase()
+    .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’・･,，.。:：;；!！?？~～\-—–−_/／|｜￤∣丨✦♪♫♬♩]+/gu, "")
+    .trim();
 }
 
 function channelRecordKey(item, identityLookup = null) {

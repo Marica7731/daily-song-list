@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { entryRepairSignals } = require("./entry-repair");
 const { normalizeArtistKey, normalizeSongTitleKey } = require("../assets/ranking-utils");
-const { isBlockedSongEntry, isChannelScopedUnknownArtistDirtySong } = require("../assets/source-filter");
+const { isBlockedSongEntry, isChannelScopedUnknownArtistDirtySong, isSingletonPseudoSongEntry } = require("../assets/source-filter");
 
 const ROOT = path.resolve(__dirname, "..");
 const CONFIG_DIR = path.join(ROOT, "config");
@@ -394,6 +394,9 @@ function classifyEntry(song, options = {}) {
   if (!knownSong && isBlockedSongEntry(song, options.video)) {
     return { classification: "confirmed_noise", suggestedAction: "drop_entry", riskReasons: ["blocked_song_entry"] };
   }
+  if (!knownSong && isSingletonPseudoSongEntry(song, options.titleStats)) {
+    return { classification: "likely_noise", suggestedAction: "drop_entry", riskReasons: ["singleton_pseudo_song_entry"] };
+  }
   if (unknownArtist && knownSong) {
     return { classification: "likely_song", suggestedAction: "keep", riskReasons: ["known_song_unknown_artist"] };
   }
@@ -447,6 +450,7 @@ function applyCurationToSources(sources, context, candidate = {}) {
 
 function applyCurationToVideos(videos, context) {
   const overrides = context?.overrides?.records || [];
+  const titleStats = context?.titleStats || buildTitleOccurrenceStats(videos);
   const stats = {
     droppedVideos: 0,
     droppedEntries: 0,
@@ -487,7 +491,7 @@ function applyCurationToVideos(videos, context) {
         stats.droppedEntries += 1;
         continue;
       }
-      const classification = classifyEntry(enriched, { rules: context?.nonSongRules, video });
+      const classification = classifyEntry(enriched, { rules: context?.nonSongRules, video, titleStats });
       if (classification.suggestedAction === "drop_entry" && classification.classification === "confirmed_noise") {
         stats.ruleDroppedEntries += 1;
         continue;
@@ -511,6 +515,34 @@ function applyCurationToVideos(videos, context) {
   }
   result.curationStats = stats;
   return result;
+}
+
+function buildTitleOccurrenceStats(videos) {
+  const records = new Map();
+  for (const video of videos || []) {
+    const videoKey = String(video?.videoId || video?.selectedSourceId || video?.sourceId || video?.title || "").trim();
+    for (const song of Array.isArray(video?.songs) ? video.songs : []) {
+      const key = normalizeSingletonTitleKey(song?.title || "");
+      if (!key) continue;
+      if (!records.has(key)) records.set(key, { rows: 0, sources: new Set() });
+      const record = records.get(key);
+      record.rows += 1;
+      record.sources.add(videoKey || `${key}:${record.rows}`);
+    }
+  }
+  for (const record of records.values()) {
+    record.sourceCount = record.sources.size;
+    delete record.sources;
+  }
+  return records;
+}
+
+function normalizeSingletonTitleKey(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLocaleLowerCase()
+    .replace(/[\s\u3000[\]【】()（）「」『』"'“”‘’・･,，.。:：;；!！?？~～\-—–−_/／|｜￤∣丨✦♪♫♬♩]+/gu, "")
+    .trim();
 }
 
 function dedupeNearDuplicateSongs(songs, options = {}) {
@@ -786,6 +818,7 @@ module.exports = {
   VALID_ACTIONS,
   applyCurationToSources,
   applyCurationToVideos,
+  buildTitleOccurrenceStats,
   classifyEntry,
   collectForceRefreshVideoIds,
   createSourceRecord,
