@@ -54,7 +54,7 @@ test("URL state and query draft are wired while visible share actions are remove
   assert.match(appSource, /function makeQueryDraftFromState/u);
   assert.match(appSource, /function applyQueryDraft/u);
   assert.match(appSource, /function readQueryDraftFromControls[\s\S]*q: els\.queryInput\?\.value/u);
-  assert.match(appSource, /FrontendUtils\.activeQueryConditionCount/u);
+  assert.match(appSource, /FrontendUtils\.activeQueryConditionItems/u);
   assert.match(appSource, /urlParams\.get\("shared"\) === "1"/u);
   assert.doesNotMatch(appSource, /URL state is intentionally read-only/u);
   assert.match(appSource, /FrontendUtils\.serializeUrlState/u);
@@ -347,8 +347,9 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   const songGroupBody = functionBody("function renderArtistSongGroup");
   assert.match(vtuberRankBody, /getSongGroups: \(\) => getVtuberSongGroups\(record\)/u);
   assert.match(appSource, /function renderRequestedPageResult[\s\S]*mode: "vtuber"[\s\S]*getSongGroups: \(\) => getVtuberSongGroups\(record\)/u);
-  assert.match(appSource, /function completeSongGroupsForDrawer\(occurrences, fallbackGroups = \[\], mode = ""\)[\s\S]*buildArtistSongGroups\(filterDisplaySongOccurrences\(occurrences \|\| \[\]\)\)[\s\S]*mode === "vtuber"[\s\S]*completeGroups\.length < fallbackGroups\.length/u);
-  assert.match(appSource, /async function setSourceDrawerExpanded[\s\S]*songGroups = completeSongGroupsForDrawer\(visibleOccurrences, songGroups, mode\)/u);
+  assert.match(appSource, /function completeSongGroupsForDrawer\(occurrences, fallbackGroups = \[\], mode = ""\)[\s\S]*mode === "vtuber"[\s\S]*mergeVtuberSongGroupsForDrawer\(completeGroups, fallbackGroups\)/u);
+  assert.match(appSource, /function mergeVtuberSongGroupsForDrawer\(completeGroups = \[\], fallbackGroups = \[\]\)[\s\S]*sortVtuberSongGroups/u);
+  assert.match(appSource, /async function setSourceDrawerExpanded[\s\S]*songGroups = completeSongGroupsForDrawer\(row\._sourceDetailOccurrences \|\| visibleOccurrences, songGroups, mode\)/u);
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
   assert.match(songSourceBody, /sourceDetailPageForContainer\(sources, sources\._sourceOccurrences \|\| \[\]/u);

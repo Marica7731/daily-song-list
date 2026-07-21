@@ -70,6 +70,17 @@ test("initial URL state accepts ordinary query params without shared marker", ()
   assert.match(body, /state\.sharedUrlApplied = shouldApplySharedState/u);
 });
 
+test("hotfix search controls use explicit apply and hide legacy filters", () => {
+  const bindBody = functionBody("function bindQueryOverlayEvents");
+  assert.match(bindBody, /querySubmitButton\?\.addEventListener\("click"/u);
+  assert.match(bindBody, /focusWithoutScrolling\(els\.queryInput\)/u);
+  assert.match(bindBody, /setQueryDraft\(readQueryDraftFromControls\(\), \{ sync: "controls", schedule: false \}\)/u);
+  assert.doesNotMatch(bindBody, /setQueryDraft\(readQueryDraftFromControls\(\), \{ sync: "controls", schedule: false \}\);\s*applyQueryDraft/u);
+  assert.match(functionBody("function sanitizeQueryDraft"), /next\.trend = "all"[\s\S]*next\.minCount = 1[\s\S]*next\.snapshotPath = SNAPSHOT_LATEST_PATH/u);
+  assert.match(functionBody("function updateQueryAvailability"), /displayFilterGroup\) els\.displayFilterGroup\.hidden = true/u);
+  assert.match(functionBody("function updateQueryAvailability"), /queryHistorySection\) els\.queryHistorySection\.hidden = true/u);
+});
+
 test("monthly range copy describes all-range catalog semantics", () => {
   assert.doesNotMatch(indexSource, /来自 YouTube 月度搜索筛选/u);
   assert.match(indexSource, /累计全量；YouTube 月度搜索和历史快照用于补充发现视频。/u);
@@ -81,6 +92,13 @@ test("record videoCount is used for rank values and row rendering", () => {
   assert.match(functionBody("function rankValue"), /record\.videoCount/u);
   assert.doesNotMatch(functionBody("function rankValue"), /uniqueVideoCount/u);
   assert.match(appSource, /videoCount:\s*record\.videoCount/u);
+});
+
+test("VTuber collected badge requires trusted non-moment source", () => {
+  assert.match(functionBody("function renderVtuberCollectionBadge"), /!model\.isCollected \|\| !isTrustedVtuberCollectionSource\(record, model\)/u);
+  assert.match(functionBody("function isTrustedVtuberCollectionSource"), /isMomentKnownSourceType\(type\)/u);
+  assert.match(functionBody("function isTrustedVtuberCollectionSource"), /youtube_channel_discovery/u);
+  assert.match(functionBody("function mergeVtuberRecordMetadata"), /badge\.isCollected && isTrustedVtuberCollectionSource\(item, badge\)/u);
 });
 
 test("song and index rows inline source previews and expand to full source lists", () => {
@@ -216,12 +234,12 @@ test("delayed trend diffs update visible badges without rerendering the list for
   assert.match(scheduleBody, /else \{[\s\S]*render\(\{ syncUrl: false \}\)/u);
 
   const sanitizeBody = functionBody("function sanitizeQueryDraft");
-  assert.match(sanitizeBody, /state\.runtimeApi\.available \? \{ \.\.\.next, trend: "all" \} : next/u);
+  assert.match(sanitizeBody, /next\.trend = "all"[\s\S]*next\.minCount = 1[\s\S]*next\.snapshotPath = SNAPSHOT_LATEST_PATH/u);
   const normalizeBody = functionBody("function normalizeTrendStateForRuntime");
   assert.match(normalizeBody, /state\.trend = "all"/u);
   assert.match(normalizeBody, /state\.queryDraft = \{ \.\.\.state\.queryDraft, trend: "all" \}/u);
   const availabilityBody = functionBody("function updateQueryAvailability");
-  assert.match(availabilityBody, /els\.trendFilterGroup\.hidden = apiMode/u);
+  assert.match(availabilityBody, /els\.trendFilterGroup\.hidden = true/u);
   assert.doesNotMatch(availabilityBody, /API模式暂不支持趋势筛选/u);
   assert.match(functionBody("async function loadRankDiffForRange"), /if \(state\.runtimeApi\.available\) return false/u);
   assert.match(functionBody("async function filterRequestIndexEntries"), /!state\.runtimeApi\.available && filters\.trend/u);
@@ -337,13 +355,14 @@ test("top search stays directly usable on mobile and only focuses empty icon sub
   assert.doesNotMatch(bindBody, /els\.querySearchForm\?\.addEventListener\("click"[\s\S]*openQueryOverlay/u);
 });
 
-test("API mode hides unsupported query filters while preserving field toggles", () => {
+test("query UI hides legacy filters while preserving field toggles", () => {
   const availabilityBody = functionBody("function updateQueryAvailability");
-  assert.match(availabilityBody, /const apiMode = Boolean\(state\.runtimeApi\.available\)/u);
-  assert.match(availabilityBody, /els\.displayFilterGroup\.hidden = apiMode \|\| state\.view === "videos"/u);
-  assert.match(availabilityBody, /els\.trendFilterGroup\.hidden = apiMode/u);
-  assert.match(availabilityBody, /els\.minCountFilterGroup\.hidden = apiMode \|\| videoLikeView/u);
-  assert.match(availabilityBody, /els\.queryHistorySection\.hidden = apiMode/u);
+  assert.match(availabilityBody, /els\.displayFilterGroup\.hidden = true/u);
+  assert.match(availabilityBody, /els\.trendFilterGroup\.hidden = true/u);
+  assert.match(availabilityBody, /els\.minCountFilterGroup\.hidden = true/u);
+  assert.match(availabilityBody, /els\.queryHistorySection\.hidden = true/u);
+  assert.match(availabilityBody, /els\.trendFilterSelect\.value = "all"/u);
+  assert.match(availabilityBody, /els\.minCountSelect\.value = "1"/u);
   assert.match(functionBody("function activeFilterCount"), /return activeQueryItems\(makeQueryDraftFromState\(\)\)\.length/u);
   assert.match(functionBody("function activeQueryItems"), /if \(!state\.runtimeApi\.available\) return items/u);
   assert.match(functionBody("function activeQueryItems"), /item\.key !== "trend" && item\.key !== "minCount"/u);
@@ -355,20 +374,20 @@ test("API mode hides unsupported query filters while preserving field toggles", 
 test("top filter chips and search box avoid duplicate clear controls and empty columns", () => {
   assert.match(functionBody("function syncQueryClearButton"), /els\.querySearchForm\?\.classList\.toggle\("has-query-text", hasQuery\)/u);
   assert.match(stylesSource, /\.query-search-form \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) auto;/u);
-  assert.match(stylesSource, /\.query-search-form\.has-query-text \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) auto auto;/u);
+  assert.match(stylesSource, /\.query-search-form\.has-query-text \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) 28px auto;/u);
   assert.match(stylesSource, /\.query-search-form input\[type="search"\]::-ms-clear/u);
   assert.match(stylesSource, /\.active-query-chip-close \{[\s\S]*flex: 0 0 auto;/u);
-  assert.match(stylesSource, /\.query-count \{[\s\S]*height: 14px;/u);
+  assert.match(stylesSource, /\.query-count \{[\s\S]*height: 12px;/u);
+  assert.match(stylesSource, /\.query-search-form \.query-count\[hidden\] \{[\s\S]*display: none;/u);
   assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-form\.query-trigger \{[\s\S]*grid-template-columns: 24px minmax\(0, 1fr\) 24px;/u);
   assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-form\.query-trigger\.has-query-text \{[\s\S]*grid-template-columns: 24px minmax\(0, 1fr\) 24px 24px;/u);
 });
 
 test("source and video links handle plain left clicks without stealing modified clicks", () => {
   const handlerBody = functionBody("function handleContentLinkNavigation");
-  assert.match(handlerBody, /event\.button !== 0/u);
-  assert.match(handlerBody, /event\.metaKey \|\| event\.ctrlKey \|\| event\.shiftKey \|\| event\.altKey/u);
   assert.match(handlerBody, /isSourceOrVideoContentLink\(link\)/u);
-  assert.match(handlerBody, /window\.open\(link\.href, "_blank", "noopener,noreferrer"\)/u);
+  assert.match(handlerBody, /return false/u);
+  assert.doesNotMatch(handlerBody, /preventDefault|window\.open|location\.assign/u);
   assert.match(functionBody("function isSourceOrVideoContentLink"), /source-inline-strip, \.source-drawer, \.inline-source, \.video-card/u);
   assert.match(functionBody("function bindEvents"), /if \(link && handleContentLinkNavigation\(event, link\)\) return/u);
 });
