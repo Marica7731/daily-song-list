@@ -35,8 +35,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: daily-song-list-runtime-db-deploy
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && format('daily-song-list-runtime-db-skip-{0}', github.run_id) || 'daily-song-list-runtime-db-deploy' }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
 
 jobs:
   deploy:
