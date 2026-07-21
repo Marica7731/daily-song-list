@@ -74,6 +74,28 @@
 8. 每日快照 workflow 保留保守抓取预算和顺序视频抓取；优化优先做 summary、缓存、重试和失败定位，不把预算调到激进值。
 9. backfill inbox 只提交不可变 bundle；不要顺手提交 `data/ui/**`、`data/review/sources/**` 或本地 review queue。
 
+## DB 构建优化方向
+
+当前慢点不是 SQLite 单条 insert/update，而是完整发布链路每次都会全量读取 `data/latest.json`、所有 accepted 来源、VSinger/Moment 外部表，重新清洗、归并、排序、生成来源明细、写 FTS、`VACUUM`，再上传整库候选文件并切换。6 小时级别甚至更久时，优先处理构建流程，不要先把线上读库迁走。
+
+短期：
+
+1. UI/API 热修保持分钟级静态发布，不触发 `Deploy SQLite runtime DB`。
+2. 来源抓取按 accepted manifest 分批合并；谁先有完整 manifest 谁先发，未完成频道不阻塞。
+3. DB workflow 增加阶段耗时输出和长阶段心跳，超过阈值时能知道卡在读取、来源合并、排行构建、FTS、`VACUUM`、上传还是激活。
+
+中期：
+
+1. 增加增量构建模式：下载上一次已发布 SQLite 或 artifact，读取本批 accepted increment，只重算受影响 channel/song/source detail，再校验并原子切换。
+2. 给 `source_occurrences` 的搜索需求单独建索引或 FTS 表，避免线上 API 为全字段搜索扫描 90 万级来源明细。
+3. 将构建输出拆成可复用中间产物，例如 normalized occurrences、ranking rows、source detail shards；无变化的阶段直接复用。
+
+长期：
+
+1. 可以评估 DuckDB 作为离线构建引擎，用于批量 JSON/Parquet 读取、join、group by 和去重，最后仍导出 SQLite 给线上 API 服务。
+2. PostgreSQL 适合真正在线 insert/update、并发写入和索引维护，但需要持续运维、备份、迁移和更高内存，不作为当前 2 GiB VPS 的第一选择。
+3. 无论换 DuckDB 还是 PostgreSQL，如果流程仍然全量重算和整库发布，耗时不会根本消失；必须先把发布模型从全量改成增量。
+
 ## GitHub Actions handoff
 
 - `Update core song-list data` 是高频轻量入口，目标是刷新 compact/runtime source 数据并把关键运行参数写入 step summary。
