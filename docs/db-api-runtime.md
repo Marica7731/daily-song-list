@@ -150,7 +150,7 @@ Frontend API-mode behavior:
 - When `/api/meta` returns a valid payload, the frontend enters SQLite/API mode and must not request `data/diff/latest-*.json`; those static diff files can resolve to HTML on the VPS/Nginx deployment and produce JSON parse toasts.
 - API mode normalizes `trend` filters to `all` and hides the trend selector entirely. Do not show the stale `API模式暂不支持趋势筛选` helper text in the query dialog.
 - API mode maps the frontend `vtuberRank` tab to `view=vtubers`. Treat it as a channel/VTuber identity ranking, not as another artist ranking.
-- The freshness chip uses SQLite `meta.built_at` / `rebuiltDerivedAt` as the staleness baseline. `meta.latest_captured_at` remains source-data provenance and must not trigger the 2-hour stale alert by itself.
+- The freshness chip uses SQLite `meta.built_at` / `rebuiltDerivedAt` as the display timestamp. `meta.latest_captured_at` remains source-data provenance. The frontend must not show an age-based 2-hour stale alert; only real update failures or runtime fallback warnings should surface as alerts.
 - Song, artist, and VTuber summaries show two metrics: row count and `歌曲收录`. The frontend intentionally does not show a unique-video metric in those summaries. The video view still shows `个视频` and `个时间戳`.
 
 `GET /api/rankings`

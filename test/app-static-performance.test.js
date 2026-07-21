@@ -42,7 +42,8 @@ test("status display separates capture time from derived rebuild time", () => {
   assert.match(body, /数据库构建于/u);
   assert.match(body, /源数据采集于/u);
   assert.match(body, /state\.runtimeApi\.available/u);
-  assert.match(body, /const staleAge = freshnessAt \? Date\.now\(\) - Date\.parse\(freshnessAt\) : 0/u);
+  assert.doesNotMatch(body, /STATUS_STALE/u);
+  assert.doesNotMatch(body, /超过\$\{STATUS_STALE_MINUTES\}分钟未更新/u);
   assert.match(body, /freshnessAt=/u);
   assert.match(body, /页面数据重建于/u);
   assert.doesNotMatch(body, /rebuiltDerivedAt \|\| status\.completedAt/u);

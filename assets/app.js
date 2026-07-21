@@ -106,8 +106,6 @@ const PAGE_SIZES = {
 };
 const INDEX_ALL_BUCKET = "全部";
 const DISPLAY_TIME_ZONE = "Asia/Shanghai";
-const STATUS_STALE_MINUTES = 120;
-const STATUS_STALE_MS = STATUS_STALE_MINUTES * 60 * 1000;
 const DEBUG_MODE = new URLSearchParams(window.location.search).get("debug") === "1";
 
 const KANA_BUCKETS = [
@@ -3047,12 +3045,8 @@ function renderStatus(status) {
     if (capturedAt) parts.push(`上次成功 ${formatDate(capturedAt)}`);
   }
   if (rebuiltDerivedAt && rebuiltDerivedAt !== capturedAt) parts.push(`页面数据重建于 ${formatDate(rebuiltDerivedAt)}`);
-  const staleAge = freshnessAt ? Date.now() - Date.parse(freshnessAt) : 0;
   const alerts = [];
-  if (Number.isFinite(staleAge) && staleAge > STATUS_STALE_MS) {
-    parts.push(`超过${STATUS_STALE_MINUTES}分钟未更新`);
-    alerts.push(currentStatus.status === "success" ? `数据已超过${staleThresholdLabel()}未更新` : `最近更新失败${failureStage ? `：${failureStage}` : ""}，当前数据来自 ${formatDate(capturedAt)}`);
-  } else if (currentStatus.status !== "success") {
+  if (currentStatus.status !== "success") {
     alerts.push(`最近更新失败${failureStage ? `：${failureStage}` : ""}，当前数据来自 ${formatDate(capturedAt)}`);
   }
   const warning = state.runtimeWarnings.get(state.range);
@@ -3129,11 +3123,6 @@ function renderStatusAlerts(messages) {
     item.textContent = message;
     els.statusAlerts.append(item);
   }
-}
-
-function staleThresholdLabel() {
-  if (STATUS_STALE_MINUTES % 60 === 0) return `${STATUS_STALE_MINUTES / 60}小时`;
-  return `${STATUS_STALE_MINUTES}分钟`;
 }
 
 function mergeRuntimeStatus(metaStatus, statusFile, meta) {
