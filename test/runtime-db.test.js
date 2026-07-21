@@ -139,7 +139,31 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+  assert.match(buildOutput, /vsingerSourceDetails=1/);
+  assert.match(buildOutput, /vsingerSourceOccurrences=1/);
   assert.ok(fs.existsSync(dbPath));
+
+  const sqliteProbePath = path.join(dir, "sqlite-source-probe.py");
+  fs.writeFileSync(
+    sqliteProbePath,
+    [
+      "import json",
+      "import sqlite3",
+      "import sys",
+      "conn = sqlite3.connect(sys.argv[1])",
+      "out = {}",
+      "out['vsinger_source_details'] = conn.execute(\"SELECT COUNT(*) FROM source_details WHERE entity_type = 'vsingerSong'\").fetchone()[0]",
+      "out['vsinger_source_occurrences'] = conn.execute(\"SELECT COUNT(*) FROM source_occurrences WHERE source_key IN (SELECT source_key FROM source_details WHERE entity_type = 'vsingerSong')\").fetchone()[0]",
+      "conn.close()",
+      "print(json.dumps(out, ensure_ascii=False))",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  const sqliteProbeOutput = execFileSync(PYTHON, [sqliteProbePath, dbPath], { cwd: ROOT, encoding: "utf8" });
+  const sqliteProbe = JSON.parse(sqliteProbeOutput);
+  assert.equal(sqliteProbe.vsinger_source_details, 1);
+  assert.equal(sqliteProbe.vsinger_source_occurrences, 1);
 
   const queryOutput = execFileSync(
     PYTHON,

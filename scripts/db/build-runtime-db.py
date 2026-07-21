@@ -118,6 +118,8 @@ def main() -> int:
             videos=vsinger_counts["videos"],
             occurrences=vsinger_counts["occurrences"],
             rankingRows=vsinger_counts["ranking_rows"],
+            sourceDetails=vsinger_counts.get("source_details", 0),
+            sourceOccurrences=vsinger_counts.get("source_occurrences", 0),
         )
         for key, value in latest_counts.items():
             write_meta(conn, f"latest_{key}", str(value))
@@ -156,6 +158,8 @@ def main() -> int:
         f"vsingerVideos={vsinger_counts['videos']} "
         f"vsingerOccurrences={vsinger_counts['occurrences']} "
         f"vsingerRankingRows={vsinger_counts['ranking_rows']} "
+        f"vsingerSourceDetails={vsinger_counts.get('source_details', 0)} "
+        f"vsingerSourceOccurrences={vsinger_counts.get('source_occurrences', 0)} "
         f"fts={'enabled' if latest_counts['fts_enabled'] else 'disabled'}"
     )
     return 0
@@ -1225,6 +1229,8 @@ def ingest_vsinger_backfill(
             if expected_count is not None and expected_count != counts[kind]:
                 raise ValueError(f"VSinger {kind} count mismatch: {counts[kind]} != {expected_count}")
     ranking_rows = build_external_song_ranking_rows(source_system, song_stats)
+    source_detail_count = 0
+    source_occurrence_count = 0
     for row in ranking_rows:
         source_detail = row.get("source_detail")
         if source_detail:
@@ -1236,14 +1242,25 @@ def ingest_vsinger_backfill(
                 source_detail["entity_key"],
                 source_detail["payload"],
             )
+            source_detail_count += 1
+            source_occurrence_count += insert_source_occurrences_for_detail(
+                conn,
+                source_detail["source_key"],
+                row["range_id"],
+                source_detail["payload"],
+            )
         insert_ranking_row(conn, row, fts_enabled)
     counts["ranking_rows"] = len(ranking_rows)
+    counts["source_details"] = source_detail_count
+    counts["source_occurrences"] = source_occurrence_count
     write_meta(conn, "vsinger_ranking_rows", str(len(ranking_rows)))
+    write_meta(conn, "vsinger_source_details", str(source_detail_count))
+    write_meta(conn, "vsinger_source_occurrences", str(source_occurrence_count))
     return counts
 
 
 def empty_external_counts() -> dict[str, int]:
-    return {"songs": 0, "videos": 0, "occurrences": 0, "ranking_rows": 0}
+    return {"songs": 0, "videos": 0, "occurrences": 0, "ranking_rows": 0, "source_details": 0, "source_occurrences": 0}
 
 
 def remember_external_song(row: dict, by_external: dict[str, dict], by_canonical: dict[str, dict]) -> None:
