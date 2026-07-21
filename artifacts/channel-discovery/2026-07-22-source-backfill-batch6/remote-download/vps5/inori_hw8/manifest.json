@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-21T22:01:51.601Z",
+  "channelUrl": "https://www.youtube.com/@inori_hw8",
+  "singerName": "inori_hw8",
+  "keywords": [
+    "フルート",
+    "生演奏",
+    "live",
+    "ライブ",
+    "クラリネット",
+    "piano streaming",
+    "ピアノ演奏",
+    "歌",
+    "歌枠",
+    "弾き語",
+    "karaoke",
+    "歌ってみた",
+    "3D Live"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@inori_hw8/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/@inori_hw8/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 100,
+  "maxCandidates": 0,
+  "maxInspect": 1000,
+  "inspectShardIndex": 0,
+  "inspectShardCount": 1,
+  "candidateOnly": false,
+  "candidateCount": 30,
+  "inspectedInLatestRun": 30,
+  "usableVideoCount": 26,
+  "occurrenceCount": 313,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@inori_hw8/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 6,
+      "rawItemCount": 156,
+      "candidateCount": 30,
+      "continuationRounds": 5,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1168036
+    },
+    {
+      "pageUrl": "https://www.youtube.com/@inori_hw8/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 15,
+      "candidateCount": 0,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 954979
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2123015,
+    "totalElapsedMs": 257,
+    "statuses": {
+      "200": 2
+    }
+  }
+}
