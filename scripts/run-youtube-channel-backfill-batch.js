@@ -105,6 +105,7 @@ function parseArgs(argv) {
     else if (name === "--max-channel-pages") raw.maxChannelPages = positiveInteger(requireValue(argv, ++index, name), 100);
     else if (name === "--max-candidates") raw.maxCandidates = nonNegativeInteger(requireValue(argv, ++index, name), 0);
     else if (name === "--max-inspect") raw.maxInspect = nonNegativeInteger(requireValue(argv, ++index, name), 1000);
+    else if (name === "--inspect-max-attempts") raw.inspectMaxAttempts = positiveInteger(requireValue(argv, ++index, name), 3);
     else if (name === "--request-interval-ms") raw.requestIntervalMs = nonNegativeInteger(requireValue(argv, ++index, name), 3000);
     else if (name === "--request-jitter-ms") raw.requestJitterMs = nonNegativeInteger(requireValue(argv, ++index, name), 1500);
     else if (name === "--per-channel-timeout-ms") raw.perChannelTimeoutMs = positiveInteger(requireValue(argv, ++index, name), 20 * 60 * 1000);
@@ -130,6 +131,7 @@ function parseArgs(argv) {
     maxChannelPages: raw.maxChannelPages ?? 100,
     maxCandidates: raw.maxCandidates ?? 0,
     maxInspect: raw.maxInspect ?? 1000,
+    inspectMaxAttempts: raw.inspectMaxAttempts ?? 3,
     requestIntervalMs: raw.requestIntervalMs ?? 3000,
     requestJitterMs: raw.requestJitterMs ?? 1500,
     perChannelTimeoutMs: raw.perChannelTimeoutMs ?? 20 * 60 * 1000,
@@ -247,6 +249,8 @@ function discoveryArgs(target, args, outputDir) {
     String(args.maxCandidates),
     "--max-inspect",
     String(args.maxInspect),
+    "--inspect-max-attempts",
+    String(args.inspectMaxAttempts),
     "--request-interval-ms",
     String(args.requestIntervalMs),
     "--request-jitter-ms",
@@ -413,6 +417,7 @@ function manifestOptions(args) {
     maxChannelPages: args.maxChannelPages,
     maxCandidates: args.maxCandidates,
     maxInspect: args.maxInspect,
+    inspectMaxAttempts: args.inspectMaxAttempts,
     requestIntervalMs: args.requestIntervalMs,
     requestJitterMs: args.requestJitterMs,
     perChannelTimeoutMs: args.perChannelTimeoutMs,

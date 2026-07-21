@@ -53,6 +53,7 @@ npm run youtube:discover-channel -- \
   --output-dir artifacts/channel-discovery/pannomimimi \
   --max-candidates 20 \
   --max-inspect 5 \
+  --inspect-max-attempts 1 \
   --yt-dlp-path yt-dlp \
   --yt-dlp-comment-limit 80 \
   --yt-dlp-timeout-ms 90000
@@ -122,6 +123,7 @@ npm run youtube:backfill-channel-batch -- \
   --request-interval-ms 3000 \
   --request-jitter-ms 1500 \
   --per-channel-timeout-ms 1200000 \
+  --inspect-max-attempts 1 \
   --yt-dlp-timeout-ms 90000 \
   --batch-size 1
 ```

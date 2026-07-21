@@ -21,6 +21,8 @@ test("batch runner parses bounded options", () => {
     "3",
     "--max-inspect",
     "4",
+    "--inspect-max-attempts",
+    "1",
     "--per-channel-timeout-ms",
     "60000",
     "--audit-exceptions",
@@ -32,6 +34,7 @@ test("batch runner parses bounded options", () => {
   assert.equal(args.maxChannelPages, 2);
   assert.equal(args.maxCandidates, 3);
   assert.equal(args.maxInspect, 4);
+  assert.equal(args.inspectMaxAttempts, 1);
   assert.equal(args.perChannelTimeoutMs, 60000);
   assert.ok(args.auditExceptionsPath.endsWith(path.join("config", "youtube-channel-import-audit-exceptions.json")));
   assert.equal(args.noExport, true);
@@ -43,7 +46,7 @@ test("batch runner selects targets by slug or URL and builds discovery args", ()
     { slug: "KumahachiEma", channelUrl: "https://www.youtube.com/@KumahachiEma/streams", singerName: "Kumahachi", tabs: ["streams"] },
   ];
   const selected = selectTargets(targets, ["https://www.youtube.com/@KumahachiEma/streams"]);
-  const args = parseArgs(["--max-channel-pages", "1", "--max-candidates", "0", "--max-inspect", "2", "--candidate-only"]);
+  const args = parseArgs(["--max-channel-pages", "1", "--max-candidates", "0", "--max-inspect", "2", "--inspect-max-attempts", "1", "--candidate-only"]);
   const commandArgs = discoveryArgs(selected[0], args, path.resolve("artifacts/channel-discovery/source-rescan/KumahachiEma"));
 
   assert.equal(selected.length, 1);
@@ -53,6 +56,7 @@ test("batch runner selects targets by slug or URL and builds discovery args", ()
   assert.ok(commandArgs.includes("--tab"));
   assert.ok(commandArgs.includes("streams"));
   assert.ok(commandArgs.includes("--candidate-only"));
+  assert.equal(commandArgs[commandArgs.indexOf("--inspect-max-attempts") + 1], "1");
 });
 
 test("batch runner summaries and safe clean guard stay bounded", () => {
