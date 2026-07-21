@@ -131,8 +131,10 @@
     if (isStrongNonSongActivityText(title)) return true;
     if (!hasArtist && isBracketedCommentaryNote(title)) return true;
     if (isCommentaryNoiseEntry(title, artist, song?.raw)) return true;
+    if (isExplanatoryEnglishGlossArtist(title, artist, song?.raw) && !hasSongListOrdinal(song?.raw)) return true;
     if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
     if (!hasArtist && isConversationalPseudoSongTitle(title, song?.raw)) return true;
+    if (!hasArtist && !hasSongListOrdinal(song?.raw) && !hasSongTitleLatinGloss(title) && isLooseSingletonChapterText(title, artist, song?.raw)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
     return !hasArtist && isChatReactionShoutText(title);
   }
@@ -155,7 +157,9 @@
     if (unknownArtist && (isConversationalPseudoSongTitle(title, raw) || isCommentaryNoiseText(title) || isSentenceLikeTitle(title) || dailyTopic)) {
       return true;
     }
-    return englishGlossArtist && (dailyTopic || isSentenceLikeTitle(title) || isSentenceLikeCredit(artist));
+    if (unknownArtist && !hasSongListOrdinal(raw) && isLooseSingletonChapterText(title, artist, raw)) return true;
+    if (englishGlossArtist && !hasSongListOrdinal(raw)) return true;
+    return englishGlossArtist && (dailyTopic || isSentenceLikeTitle(title) || isSentenceLikeCredit(artist) || (!hasSongListOrdinal(raw) && isLooseSingletonChapterText(title, artist, raw)));
   }
 
   function isChannelScopedUnknownArtistDirtySong(song, source = {}) {
@@ -346,6 +350,7 @@
       "オープニング",
       "エンディング",
       "エンドカード",
+      "cパート",
       "intro",
       "outro",
       "start",
@@ -374,6 +379,7 @@
     if (isSectionMarkerKey(text)) return true;
     if (/^(?:歌唱|歌|曲)?開始(?:時間|時刻)?$/iu.test(key)) return true;
     if (/^(?:歌唱|初手|声|音|お遊戯|おゆうぎ)(?:あり|有り)$/iu.test(key)) return true;
+    if (/^(?:cパート|cpart|エンドカード|おかえり|音量注意|最後\d*秒音量注意)$/iu.test(key)) return true;
     if (/^(?:順番は)?じゃんけんで$/iu.test(key)) return true;
     return false;
   }
@@ -500,10 +506,24 @@
     const artistText = String(artist || "").normalize("NFKC").trim();
     if (!titleText || !artistText || isUnknownArtist(artistText)) return false;
     if (!containsJapanese(titleText) || containsJapanese(artistText) || !/[A-Za-z]/u.test(artistText)) return false;
+    if (isKnownEnglishArtistName(artistText)) return false;
     if (/^(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did)\b/u.test(artistText)) {
       return true;
     }
     return /\b(?:about|accidental|anime|blossoms?|broadcasting|celebrit(?:y|ies)|chat|club|comment|conan|detective|drink(?:ing)?|ending songs?|famous|favorite|food|guide|hair|hospital|how to|imitating|information|memories|menu|mind of its own|new outfit|opening|organizing|park|personal|phones?|poisoning|quotes?|recommendations?|song list|stocked|surprised|throat|thoughts?|watching)\b/iu.test(artistText);
+  }
+
+  function isKnownEnglishArtistName(artist) {
+    const key = normalizeMatcherText(artist).replace(/[’']/gu, "'");
+    return new Set([
+      "asian kung-fu generation",
+      "chico with honeyworks",
+      "every little thing",
+      "i wish",
+      "my hair is bad",
+      "my little lover",
+      "nico touches the walls",
+    ]).has(key);
   }
 
   function isSingletonDailyTopicText(title, raw) {
@@ -511,7 +531,26 @@
     if (!value) return false;
     if (/^(?:by[a-z0-9 .,'’"“”&+_\-!?~～#＃♯♭★☆♪♫♡♥◎・･=×∞]+)$/iu.test(String(title || "").normalize("NFKC").trim())) return true;
     if (/^(?:たすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|本編終了|歌パート終了|練習パート|復習タイム開始)$/iu.test(value)) return true;
-    return /(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|スマホ|配信を見る|体調|病院|飲み|食べ|誕生日|自分へのプレゼント|プレゼント選び|ネタバレ|途中からリベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い)/iu.test(value);
+    return /(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|髪型|スマホ|配信を見る|体調|病院|飲み|食べ|食べ放題|誕生日|自分へのプレゼント|プレゼント選び|プレゼント|写真|歯磨き|うがい|買い物|職場|お菓子|ものまね|謝罪|クイズ|ネタバレ|途中からリベンジ|リベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い|fanart|fan art|outfit|hairstyle|gift|photo|quiz|shopping|stream|teeth|rinsing|apolog|bug|model|emoji|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)/iu.test(value);
+  }
+
+  function isLooseSingletonChapterText(title, artist, raw) {
+    const text = `${title || ""} ${artist || ""} ${raw || ""}`;
+    const compact = normalizeNoiseTitleKey(text);
+    if (!compact || isKnownSongSafeFromCommentary(title, artist)) return false;
+    if (/^(?:afk|asmr+|jubeat|kimo|youtubepremium)$/iu.test(compact)) return true;
+    if (/^(?:エンドカード|cパート|復習タイム開始|本編終了|歌パート終了|閉会式開始|眼鏡着用|明日の予定|今週の予定|引っ越し完了)$/iu.test(compact)) return true;
+    if (/(?:コメント|コメ|リクエスト|アンケート|雑談|説明|告知|予定|紹介|写真|生写真|サンプル|抽選|結果|復習|練習|開始|終了|本編|エンドカード|cパート|閉会式|音量注意|リベンジ|番外編|ネタバレ|眼鏡|着用|食材|食べ|飲み|病院|喉|体調|アレルギー|あくび|プレゼント|衣装|髪型|歯磨き|うがい|買い物|職場|謝罪|クイズ|ものまね|ファンアート|fanart|fan art|gift|photo|outfit|hairstyle|quiz|shopping|stream|teeth|rinsing|apolog|bug|model|emoji|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)/iu.test(text)) {
+      return true;
+    }
+    return isSentenceLikeTitle(title) || isSentenceLikeCredit(artist);
+  }
+
+  function hasSongListOrdinal(raw) {
+    const value = String(raw || "")
+      .normalize("NFKC")
+      .replace(/^\s*(?:[┣┗└├│┃]|[|｜]|[-–—>＞]+)?\s*\(?\d{1,2}:\d{2}(?::\d{2})?\)?\s*/u, "");
+    return /^(?:#\d{1,3}|M\d{1,3}|e?\d{1,3}[.)．、）:：]|[①②③④⑤⑥⑦⑧⑨⑩])\s*/iu.test(value);
   }
 
   function hasSongTitleLatinGloss(title) {

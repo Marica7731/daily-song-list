@@ -178,6 +178,9 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "食あたり", artist: "Food Poisoning" }), true);
   assert.equal(isBlockedSongEntry({ title: "お茶を飲みながら逆立ち", artist: "Handstand While Drinking Tea" }), true);
   assert.equal(isBlockedSongEntry({ title: "おすすめの曲紹介", artist: "Song Recommendations" }), true);
+  assert.equal(isBlockedSongEntry({ title: "上野公園の桜", artist: "Cherry Blossoms at Ueno Park", raw: "00:12:15 上野公園の桜 / Cherry Blossoms at Ueno Park" }), true);
+  assert.equal(isBlockedSongEntry({ title: "END", artist: "Cパート", raw: "0:31:24 END / Cパート" }), true);
+  assert.equal(isBlockedSongEntry({ title: "エンドカード", artist: "Cパート", raw: "2:24:02 エンドカード(Cパート" }), true);
   assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
   assert.equal(isBlockedSongEntry({ title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / Bansanka (tuki.)" }), false);
   assert.equal(isBlockedSongEntry({ title: "花になって", artist: "緑黄色社会" }), false);

@@ -24,6 +24,7 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - Exact or normalized labels: `ED`, `OP`, `END`, `Start`, `START`, `Opening`, `opening`, `Ending`, `ending`, `オープニング`, `エンディング`, `エンドカード`, `Intro`, `Outro`, `open`, `OPEN`, `Set List`, `Setlist`, `セットリスト`, `セトリ`, `タイムスタンプ`, `曲名`.
 - Stream lifecycle labels: `開始`, `歌唱開始`, `歌唱開始時間`, `歌唱開始時刻`, `配信開始`, `配信スタート`, `待機画面スタート`, `Start Stream`.
 - Section-marker rows with descriptor fields are rejected when both sides are non-song metadata, for example `セットリスト / 歌唱開始時間` and `ED / お遊戯あり`.
+- `Cパート` / `エンドカード` outro rows are rejected as section metadata, including `END / Cパート` and `エンドカード(Cパート`.
 - Activity markers already in the rule file remain scoped to unknown-artist rows: `自己紹介`, `声入り`, `挨拶`, `スパチャ読み`, and related rows.
 - Standalone wave separators and event fragments: `～`, `～リアルライブチケット#耐久 7`.
 - Chant/reaction rows from the `天Q` screenshot: `天Q`, `HI 天Q~`, `天Q天Q~~WO~~~`, `DQ~`, `HAWAWA`, `BUAAAA`, `HE HE`, `E HO E HO`, `AAA TEST TEST`, plus existing `KOPIPE`, `KP`, `A LELELELE`.
@@ -32,7 +33,7 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - Riona source rows without a reliable artist are rejected by channel scope, while explicit-artist songs on the same channel are retained.
 - Bracketed commentary notes such as `【雑談】リクエスト確認` and `（去年のなれたん）...` are rejected as non-song rows.
 - Unknown-artist conversational rows are rejected across channels, including greetings and wrap-up chants like `おつはのちゅっちゅる〜！`, generic `雑談`/`聊天`/`挨拶` labels, and person-reference chatter such as `次のバトンは香鳴ハノンちゃん`.
-- Singleton pseudo-song rows are rejected only with source-count context. The curation layer, JS runtime ranking exporter, and Python DB fallback compute normalized title source counts, then drop rows where the normalized title appears in one source, the artist is unknown or is an English explanatory gloss, and the title/raw text looks like daily chatter, stream notes, topic labels, or explanation text. Reliable English artist names remain guarded, for example `ホログラム / NICO Touches the Walls` and `明日への扉 / I WiSH`.
+- Singleton pseudo-song rows are rejected only with source-count context. The curation layer, JS runtime ranking exporter, and Python DB fallback compute normalized title source counts, then drop rows where the normalized title appears in one source, the artist is unknown or is an English explanatory gloss, and the title/raw text looks like daily chatter, stream notes, topic labels, or explanation text. Rows with an English explanatory gloss and no song-list ordinal are also rejected before singleton scoring because these are usually translated chapter headings, for example `上野公園の桜 / Cherry Blossoms at Ueno Park`. Reliable English artist names remain guarded, for example `ホログラム / NICO Touches the Walls`, `元彼氏として / My Hair is Bad`, and `明日への扉 / I WiSH`.
 - `vsinger_moment_http` / `vsinger-moment` / `moment` provenance is not an `isCollected` source. Only manual, verified, song-search, and accepted `youtube_channel_discovery` rows set the collected flag.
 
 ## START Guardrail
@@ -107,3 +108,11 @@ node scripts\audit-accepted-cleaning-impact.js
 ```
 
 The script reads `data/external/youtube-channel-discovery/accepted/*.json` plus local runtime JSON, reports before/after counts for Naraetan, KanaruHanon, and IsakiRiona, and prints `CODEX_ACCEPTED_CLEANING_IMPACT_OK`. It also verifies `START:DASH!!`, `ENDLESS STORY`, and `Never Ending Story` remain kept.
+
+Latest local accepted impact audit in this branch:
+
+- query time: `2026-07-21T11:11:27.936Z`
+- Naraetan accepted source: `2026-07-19-naraetanV-full.json`; songs `5715 -> 5266`; unique normalized titles `2576 -> 2147`; dirty candidates `445 -> 0`.
+- KanaruHanon accepted source: `2026-07-19-kanaruhanon-full.json`; songs `6701 -> 6503`; unique normalized titles `1299 -> 1250`; dirty candidates `183 -> 0`.
+- IsakiRiona runtime fallback: songs `38 -> 38`; unique normalized titles `19 -> 19`; dirty candidates `0 -> 0`.
+- Guardrails retained: `START:DASH!! / μ's`, `ENDLESS STORY / REIRA starring YUNA ITO`, and `Never Ending Story / Limahl`.

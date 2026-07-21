@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const { normalizeArtistKey, normalizeSongTitleKey } = require("../assets/ranking-utils");
-const { filterBlockedVideos, isBlockedSongEntry } = require("../assets/source-filter");
+const { filterBlockedVideos, isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../assets/source-filter");
 const { applyCurationToVideos, classifyEntry, loadCurationContext, isUnknownArtist } = require("./curation");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -78,6 +78,10 @@ function main() {
       "CODEX_ACCEPTED_CLEANING_IMPACT_OK",
       ...summaries.map((summary) => `${summary.id}Raw=${summary.before.songRows}`),
       ...summaries.map((summary) => `${summary.id}After=${summary.after.songRows}`),
+      ...summaries.map((summary) => `${summary.id}RawUnique=${summary.before.uniqueTitleRows}`),
+      ...summaries.map((summary) => `${summary.id}AfterUnique=${summary.after.uniqueTitleRows}`),
+      ...summaries.map((summary) => `${summary.id}SingletonPseudoBefore=${summary.before.singletonPseudoRows}`),
+      ...summaries.map((summary) => `${summary.id}SingletonPseudoAfter=${summary.after.singletonPseudoRows}`),
       ...summaries.map((summary) => `${summary.id}DirtyBefore=${summary.before.ruleCandidateRows}`),
       ...summaries.map((summary) => `${summary.id}DirtyAfter=${summary.after.ruleCandidateRows}`),
       `safeSongChecks=${safeSongChecks.length}`,
@@ -168,10 +172,12 @@ function summarizeVideos(videos, sourceVideos, globalTitleStats, context) {
   const singletonTitleRows = songs.filter(({ song }) => globalTitleStats.get(songTitleKey(song))?.sourceCount === 1).length;
   const englishGlossArtistRows = songs.filter(({ song }) => isEnglishGlossArtistRow(song)).length;
   const ruleCandidateRows = songs.filter(({ song, source }) => isRuleCandidate(song, source, context)).length;
+  const singletonPseudoRows = songs.filter(({ song }) => isSingletonPseudoSongEntry(song, globalTitleStats)).length;
   return {
     songRows: songs.length,
     uniqueTitleRows,
     singletonTitleRows,
+    singletonPseudoRows,
     unknownArtistRows,
     singletonUnknownRows,
     englishGlossArtistRows,
