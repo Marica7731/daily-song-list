@@ -180,7 +180,7 @@ test("artist rank song details share inline source model and append remaining so
   assert.match(renderArtistBody, /renderSourceInlineStrip\(sourcePresentation/u);
   assert.match(renderArtistBody, /sources\.dataset\.sourceDeferred = "true"/u);
   assert.match(renderArtistBody, /sources\._sourceOccurrences = group\.occurrences/u);
-  assert.doesNotMatch(renderArtistBody, /dataset\.toggleArtistSongSource = "true"/u);
+  assert.match(renderArtistBody, /group\.sourceMode === "vtuber"[\s\S]*dataset\.toggleArtistSongSource = "true"/u);
   assert.match(renderArtistBody, /renderCopySongLinksIconButton\(group\.occurrences\)/u);
 
   const toggleSourceBody = functionBody("function toggleArtistSongSource");

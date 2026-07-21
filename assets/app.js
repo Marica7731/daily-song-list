@@ -6876,16 +6876,22 @@ function renderInlineSource(occurrence) {
 }
 
 function sourceDetailPathForRecord(record, occurrences = []) {
-  const explicitPath = cleanText(record?.sourceDetailPath);
+  const ownerRecord = record?._record || {};
+  const explicitPath = cleanText(record?.sourceDetailPath || ownerRecord?.sourceDetailPath);
   if (explicitPath) return explicitPath;
-  if (state.runtimeApi.available && record?.sourceDetailKey) {
-    return `/api/sources/${encodeURIComponent(record.sourceDetailKey)}`;
+  const detailKey = cleanText(record?.sourceDetailKey || ownerRecord?.sourceDetailKey);
+  if (state.runtimeApi.available && detailKey) {
+    return `/api/sources/${encodeURIComponent(detailKey)}`;
   }
   const candidates = [
     record?.sourceDetail?.path,
     record?.sourceDetails?.path,
     record?.detailPath,
     record?.detail?.path,
+    ownerRecord?.sourceDetail?.path,
+    ownerRecord?.sourceDetails?.path,
+    ownerRecord?.detailPath,
+    ownerRecord?.detail?.path,
     occurrences?.[0]?.sourceDetailPath,
     occurrences?.[0]?.sourceDetail?.path,
     occurrences?.[0]?.item?.sourceDetailPath,
@@ -6929,12 +6935,23 @@ async function sourceDetailPageForContainer(container, currentOccurrences = [], 
   const page = Math.max(1, Math.floor(Number(options.page) || Number(container?.dataset?.sourcePage) || 1));
   const pageSize = Math.max(1, Math.floor(Number(options.pageSize) || sourceDrawerPageSizeForMode()));
   const path = cleanText(container?._sourceDetailPath);
+  const songKey = cleanText(container?._sourceSongKey);
+  if (path && songKey) {
+    const loaded = await sourceDetailOccurrencesForContainer(container, currentOccurrences);
+    return localSourceDetailPage(filterOccurrencesForSongKey(loaded, songKey), { page, pageSize });
+  }
   if (path) {
     const result = await loadSourceDetailPage(path, cleanText(container?._sourceDetailKey), { page, pageSize });
     if (result.found === false) throw new Error("来源详情不存在");
     return result;
   }
   return localSourceDetailPage(currentOccurrences, { page, pageSize });
+}
+
+function filterOccurrencesForSongKey(occurrences = [], songKey = "") {
+  const key = cleanText(songKey);
+  if (!key) return occurrences || [];
+  return (occurrences || []).filter((occurrence) => normalizeEntityKey(occurrence?.song?.title) === key);
 }
 
 async function loadSourceDetailOccurrences(path, key = "") {
@@ -7564,7 +7581,7 @@ function mergeVtuberSongGroupsForDrawer(completeGroups = [], fallbackGroups = []
   return sortVtuberSongGroups(
     Array.from(byKey.values())
       .map((group) => normalizeArtistSongGroupCount(hydrateArtistSongGroup(group)))
-      .filter((group) => group.occurrences?.length),
+      .filter((group) => group.sourceMode === "vtuber" || group.occurrences?.length),
   );
 }
 
@@ -7629,7 +7646,8 @@ function appendArtistSongGroupRange(drawer, songGroups, start, end) {
 
 function renderArtistSongGroup(group) {
   hydrateArtistSongGroup(group);
-  if (!group.occurrences?.length) return null;
+  const hasOccurrences = Boolean(group.occurrences?.length);
+  if (!hasOccurrences && group.sourceMode !== "vtuber") return null;
   const section = document.createElement("section");
   section.className = "artist-song-group";
   if (group.sourceMode === "vtuber") section.classList.add("artist-song-group-vtuber");
@@ -7637,16 +7655,21 @@ function renderArtistSongGroup(group) {
   const header = document.createElement("div");
   header.className = "artist-song-header";
 
-  const firstOccurrence = group.occurrences[0];
+  const firstOccurrence = group.occurrences?.[0] || null;
   const previewOccurrence = latestOccurrenceByVideoDate(group.occurrences) || firstOccurrence;
-  const previewItem = previewOccurrence?.item || firstOccurrence.item;
-  const previewSong = previewOccurrence?.song || firstOccurrence.song;
-  const thumb = document.createElement("a");
-  thumb.className = "artist-song-thumb source-link";
-  thumb.href = youtubeTimeUrl(previewItem.videoId, previewSong.seconds);
-  thumb.target = "_blank";
-  thumb.rel = "noreferrer";
-  thumb.setAttribute("aria-label", `打开歌曲来源：${group.title}`);
+  const previewItem = previewOccurrence?.item || group._record || {};
+  const previewSong = previewOccurrence?.song || { seconds: 0, title: group.title };
+  const thumbTag = previewItem.videoId ? "a" : "span";
+  const thumb = document.createElement(thumbTag);
+  thumb.className = previewItem.videoId ? "artist-song-thumb source-link" : "artist-song-thumb artist-song-thumb-static";
+  if (previewItem.videoId) {
+    thumb.href = youtubeTimeUrl(previewItem.videoId, previewSong.seconds);
+    thumb.target = "_blank";
+    thumb.rel = "noreferrer";
+    thumb.setAttribute("aria-label", `打开歌曲来源：${group.title}`);
+  } else {
+    thumb.setAttribute("aria-hidden", "true");
+  }
   thumb.append(createThumbnailImage(previewItem, "artist-song-thumb-image", {
     alt: group.title,
     preferCompact: true,
@@ -7658,11 +7681,16 @@ function renderArtistSongGroup(group) {
   titleWrap.className = "artist-song-title-wrap";
   const title = document.createElement("a");
   title.className = "artist-song-title";
-  title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
-  title.target = "_blank";
-  title.rel = "noreferrer";
   title.textContent = group.title;
-  title.setAttribute("aria-label", `打开歌曲首次来源：${group.title}`);
+  if (firstOccurrence?.item?.videoId) {
+    title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
+    title.target = "_blank";
+    title.rel = "noreferrer";
+    title.setAttribute("aria-label", `打开歌曲首次来源：${group.title}`);
+  } else {
+    title.href = buildSearchUrlForSongGroup(group);
+    title.setAttribute("aria-label", `搜索歌曲：${group.title}`);
+  }
   titleWrap.append(title);
 
   if (group.isNiche) {
@@ -7697,7 +7725,7 @@ function renderArtistSongGroup(group) {
 
   const sources = document.createElement("div");
   sources.className = "artist-song-sources";
-  sources.id = `artist-song-sources-${makeDomId(`${group.key}-${firstOccurrence.item.videoId}`)}`;
+  sources.id = `artist-song-sources-${makeDomId(`${group.key}-${firstOccurrence?.item?.videoId || "song"}`)}`;
   sources.dataset.sourceMode = "artist-song";
   sources.dataset.sourceDeferred = "true";
   sources.dataset.sourcePage = "1";
@@ -7705,24 +7733,33 @@ function renderArtistSongGroup(group) {
   sources.hidden = true;
   section._artistSongSources = sources;
 
+  const sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
+  const expectedSourceCount =
+    group.sourceMode === "vtuber" && !(Number(group.videoCount) > 0)
+      ? Math.max(0, Number(group.count) || 0)
+      : group.videoCount;
   const sourcePresentation = window.FrontendUtils.sourcePresentationModel(group.occurrences, {
     expanded: false,
     inlineLimit: sourceInlineLimitForMode(),
-    totalVideoCount: group.videoCount,
-    hasExternalDetails: Boolean(sourceDetailPathForRecord(group, group.occurrences)),
+    totalVideoCount: expectedSourceCount,
+    hasExternalDetails: Boolean(sourceDetailPath),
   });
   sources._sourceOccurrences = group.occurrences;
   sources._songSourceOccurrences = group.occurrences;
   sources._sourceResolver = group._sourceResolver || null;
-  sources._sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
+  sources._sourceDetailPath = sourceDetailPath;
+  sources._sourceDetailKey = cleanText(group._record?.sourceDetailKey || "");
+  sources._sourceSongKey = group.key || normalizeEntityKey(group.title);
 
-  meta.append(renderCopySongLinksIconButton(group.occurrences));
+  if (hasOccurrences) {
+    meta.append(renderCopySongLinksIconButton(group.occurrences));
+  }
   if (group.sourceMode === "vtuber" && sourcePresentation.canExpand) {
     const sourceToggle = document.createElement("button");
     sourceToggle.className = "artist-song-source-toggle";
     sourceToggle.type = "button";
     sourceToggle.dataset.toggleArtistSongSource = "true";
-    sourceToggle.dataset.sourceVideoCount = String(group.videoCount || sourcePresentation.videoCount || 0);
+    sourceToggle.dataset.sourceVideoCount = String(expectedSourceCount || sourcePresentation.videoCount || 0);
     sourceToggle.dataset.occurrenceCount = String(group.count || sourcePresentation.occurrenceCount || group.occurrences.length);
     sourceToggle.setAttribute("aria-expanded", "false");
     sourceToggle.setAttribute("aria-controls", sources.id);
@@ -7745,7 +7782,22 @@ function renderArtistSongGroup(group) {
     );
   }
   if (sourcePresentation.canExpand) section.append(sources);
+  if (group.sourceMode === "vtuber" && !sourcePresentation.canExpand && Number(group.count || 0) > 0) {
+    const missing = document.createElement("div");
+    missing.className = "source-inline-empty source-inline-missing artist-song-missing-source";
+    missing.textContent = "来源明细待重建";
+    section.append(missing);
+  }
   return section;
+}
+
+function buildSearchUrlForSongGroup(group) {
+  const params = new URLSearchParams(window.location.search);
+  params.set("view", "songs");
+  params.set("q", group?.title || "");
+  params.set("searchScope", "song");
+  params.delete("page");
+  return `${window.location.pathname}?${params.toString()}`;
 }
 
 function artistLabelForSongGroup(group) {
@@ -8436,7 +8488,9 @@ function getArtistSongGroups(record) {
 function getVtuberSongGroups(record) {
   if (!record._vtuberSongGroups) {
     const occurrences = filterDisplaySongOccurrences(record?.occurrences || []);
-    const groups = occurrences.length ? buildArtistSongGroups(occurrences) : lightweightSongGroupsForRecord(record);
+    const fallbackGroups = lightweightSongGroupsForRecord(record);
+    const occurrenceGroups = buildArtistSongGroups(occurrences);
+    const groups = fallbackGroups.length ? mergeVtuberSongGroupsForDrawer(occurrenceGroups, fallbackGroups) : occurrenceGroups;
     record._vtuberSongGroups = sortVtuberSongGroups(groups.map(markVtuberSongGroup));
   }
   return record._vtuberSongGroups;
