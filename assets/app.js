@@ -347,6 +347,7 @@ const els = {
   queryTrigger: document.querySelector("#queryTrigger"),
   queryTriggerText: document.querySelector("#queryTriggerText"),
   queryCountBadge: document.querySelector("#queryCountBadge"),
+  queryFieldMenu: document.querySelector(".query-field-menu"),
   queryDialog: document.querySelector("#queryDialog"),
   queryPanel: document.querySelector("#queryDialog .query-panel"),
   queryInput: document.querySelector("#queryInput"),
@@ -1391,11 +1392,17 @@ async function applySnapshotPath(path, previousPath, options = {}) {
 function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromState()) {
   const hideUnknownField = els.hideUnknownToggle?.closest(".query-toggle");
   const videoLikeView = state.view === "videos";
+  const vtuberView = state.view === "vtuberRank";
   if (els.metricFilterGroup) els.metricFilterGroup.hidden = videoLikeView;
   syncQueryMetricOptions();
   if (els.displayFilterGroup) els.displayFilterGroup.hidden = true;
   if (hideUnknownField) hideUnknownField.hidden = state.view === "artistRank" || state.view === "vtuberRank";
   if (els.hideUnknownToggle) els.hideUnknownToggle.disabled = state.view === "artistRank" || state.view === "vtuberRank";
+  if (els.queryFieldMenu) {
+    els.queryFieldMenu.hidden = vtuberView;
+    if (vtuberView) els.queryFieldMenu.open = false;
+  }
+  for (const input of els.searchFieldToggles) input.disabled = vtuberView;
   if (els.trendFilterGroup) els.trendFilterGroup.hidden = true;
   if (els.minCountFilterGroup) els.minCountFilterGroup.hidden = true;
   else if (els.minCountSelect?.closest(".query-field")) els.minCountSelect.closest(".query-field").hidden = true;
@@ -1679,6 +1686,29 @@ function queryDraftOccurrences(rangeCache, draft) {
   return base.filter((occurrence) => occurrenceSearchTextForCurrentView(occurrence).includes(filterKey));
 }
 
+function searchScopeForView(view = state.view, filters = {}) {
+  if (view === "vtuberRank") return "channel";
+  return filters.searchScope || "all";
+}
+
+function searchFieldsForView(view = state.view, filters = {}) {
+  if (view === "vtuberRank") return ["channel"];
+  return Array.isArray(filters.searchFields) ? filters.searchFields : DEFAULT_SEARCH_FIELDS;
+}
+
+function searchFieldKeyForView(view = state.view, fields = DEFAULT_SEARCH_FIELDS) {
+  if (view === "vtuberRank" || view === "artistRank" || view === "videos") return "default";
+  return normalizedSearchFieldKey(fields || DEFAULT_SEARCH_FIELDS);
+}
+
+function requestFiltersForView(view = state.view, filters = {}) {
+  return {
+    ...filters,
+    searchScope: searchScopeForView(view, filters),
+    searchFields: searchFieldsForView(view, filters),
+  };
+}
+
 function queryDraftSongRecords(rangeCache, draft, occurrences = queryDraftOccurrences(rangeCache, draft)) {
   const filterKey = normalizeSearch(draft.q);
   if (!filterKey) return draftScopedSongRecords(rangeCache, draft);
@@ -1756,8 +1786,8 @@ function queryResultCountKey(draft) {
     draft.nicheOnly ? "niche" : "all",
     queryDraftHideUnknownForView(draft) ? "hide-unknown" : "show-unknown",
     normalizeSearch(draft.q),
-    draft.searchScope || "all",
-    normalizedSearchFieldKey(draft.searchFields || DEFAULT_SEARCH_FIELDS),
+    searchScopeForView(state.view, draft),
+    searchFieldKeyForView(state.view, draft.searchFields || DEFAULT_SEARCH_FIELDS),
     draft.rankMetric,
     draft.trend,
     trendState,
@@ -3329,7 +3359,7 @@ async function renderRequestedRuntime(options = {}) {
 }
 
 function requestFilterState() {
-  return {
+  return requestFiltersForView(state.view, {
     q: state.filter || "",
     searchScope: state.searchScope || "all",
     searchFields: state.searchFields || DEFAULT_SEARCH_FIELDS,
@@ -3338,11 +3368,11 @@ function requestFilterState() {
     minCount: 1,
     trend: "all",
     indexBucket: state.indexBucket,
-  };
+  });
 }
 
 function requestFilterStateFromDraft(draft) {
-  return {
+  return requestFiltersForView(state.view, {
     q: draft.q || "",
     searchScope: draft.searchScope || "all",
     searchFields: draft.searchFields || DEFAULT_SEARCH_FIELDS,
@@ -3351,7 +3381,7 @@ function requestFilterStateFromDraft(draft) {
     minCount: 1,
     trend: "all",
     indexBucket: state.indexBucket,
-  };
+  });
 }
 
 function requestViewFingerprint(result) {
@@ -3397,7 +3427,7 @@ async function requestViewPage(request) {
   const summary = await loadRequestSummary(range, request.signal);
   const viewRef = requestViewRef(requestMeta, request.view, request.rankMetric, requestScopeKey(request.view));
   if (!viewRef?.manifestPath) throw new Error(`request view manifest missing: ${request.view}`);
-  const filters = request.filters || {};
+  const filters = requestFiltersForView(request.view, request.filters || {});
   const pageSize = Number(request.pageSize) || currentPageSize();
   const nativePageSize = Number(viewRef.pageSize) || pageSize;
   const directPage = canUseDirectRequestPage(request.view, filters) && pageSize === nativePageSize;
@@ -3417,7 +3447,7 @@ async function requestViewPage(request) {
       page: 1,
       totalCount: pagePayload.totalCount ?? viewRef.totalCount ?? entries.length,
       filteredBaseCount: viewRef.totalCount ?? entries.length,
-      filterKey: requestFilterKey(filters),
+      filterKey: requestFilterKey(filters, request.view),
     });
     state.requestRuntime.pageResultCache.set(requestKey, result);
     if (!request.prefetch) state.page = result.pageInfo.page;
@@ -3446,7 +3476,7 @@ async function requestViewPage(request) {
       page,
       totalCount: pagePayload.totalCount ?? manifest.totalCount ?? entries.length,
       filteredBaseCount: manifest.totalCount ?? entries.length,
-      filterKey: requestFilterKey(filters),
+      filterKey: requestFilterKey(filters, request.view),
     });
     state.requestRuntime.pageResultCache.set(requestKey, result);
     if (!request.prefetch) state.page = result.pageInfo.page;
@@ -3476,7 +3506,7 @@ async function requestViewPage(request) {
     page: pageInfo.page,
     totalCount: entries.length,
     filteredBaseCount: indexPayload.totalCount ?? manifest.totalCount ?? entries.length,
-    filterKey: requestFilterKey(filters),
+    filterKey: requestFilterKey(filters, request.view),
     totalOccurrenceCount: resultOccurrenceCount,
     totalVideoCount: resultVideoCount,
   });
@@ -3487,16 +3517,16 @@ async function requestViewPage(request) {
 
 function shouldUseRuntimeApiForRequest(request) {
   if (!state.runtimeApi.available) return false;
-  const filters = request?.filters || {};
+  const filters = requestFiltersForView(request?.view || state.view, request?.filters || {});
   const query = normalizeSearch(filters.q || "");
-  const searchFields = Array.isArray(filters.searchFields) ? filters.searchFields : DEFAULT_SEARCH_FIELDS;
+  const searchFields = searchFieldsForView(request?.view || state.view, filters);
   const allFieldQuery = query && (filters.searchScope || "all") === "all" && searchFields.length === 0;
   if (!allFieldQuery) return true;
   return !requestRuntimeMeta(canonicalRangeId(request?.range || state.range));
 }
 
 async function requestApiViewPage(request, range) {
-  const filters = request.filters || {};
+  const filters = requestFiltersForView(request.view, request.filters || {});
   const pageSize = Number(request.pageSize) || currentPageSize();
   const apiView = apiViewForRequestView(request.view);
   const metricName = apiMetricForRequest(request);
@@ -3512,7 +3542,7 @@ async function requestApiViewPage(request, range) {
   if (query && filters.searchScope && filters.searchScope !== "all") {
     params.set("searchScope", filters.searchScope);
   } else if (query) {
-    const searchFields = Array.isArray(filters.searchFields) ? filters.searchFields : DEFAULT_SEARCH_FIELDS;
+    const searchFields = searchFieldsForView(request.view, filters);
     params.set("searchFields", searchFields.length ? searchFields.join(",") : "all");
   }
   if (Number(filters.minCount) > 1 && request.view !== "videos") params.set("minCount", String(Number(filters.minCount)));
@@ -3551,7 +3581,7 @@ async function requestApiViewPage(request, range) {
     page,
     totalCount: Number(payload.totalCount) || 0,
     filteredBaseCount: Number(payload.filteredBaseCount ?? payload.totalCount) || 0,
-    filterKey: requestFilterKey(filters),
+    filterKey: requestFilterKey(filters, request.view),
     totalOccurrenceCount: Number(payload.totalOccurrenceCount) || 0,
     totalVideoCount: Number(payload.totalVideoCount) || 0,
   });
@@ -3706,22 +3736,23 @@ function buildRequestPageKey(request) {
     request.view,
     request.rankMetric,
     requestScopeKey(request.view),
-    requestFilterKey(request.filters),
+    requestFilterKey(request.filters, request.view),
     Number(request.page) || 1,
     Number(request.pageSize) || currentPageSize(),
   ].join("::");
 }
 
-function requestFilterKey(filters = {}) {
+function requestFilterKey(filters = {}, view = state.view) {
+  const effectiveFilters = requestFiltersForView(view, filters);
   return [
-    normalizeSearch(filters.q || ""),
-    filters.searchScope || "all",
-    normalizedSearchFieldKey(filters.searchFields || DEFAULT_SEARCH_FIELDS),
-    filters.nicheOnly ? "niche" : "all",
-    filters.hideUnknownArtist ? "hide" : "show",
-    filters.trend || "all",
-    Number(filters.minCount) || 1,
-    filters.indexBucket || INDEX_ALL_BUCKET,
+    normalizeSearch(effectiveFilters.q || ""),
+    effectiveFilters.searchScope || "all",
+    searchFieldKeyForView(view, effectiveFilters.searchFields || DEFAULT_SEARCH_FIELDS),
+    effectiveFilters.nicheOnly ? "niche" : "all",
+    effectiveFilters.hideUnknownArtist ? "hide" : "show",
+    effectiveFilters.trend || "all",
+    Number(effectiveFilters.minCount) || 1,
+    effectiveFilters.indexBucket || INDEX_ALL_BUCKET,
   ].join("|");
 }
 
@@ -4167,6 +4198,7 @@ function renderRequestedPageResult(result, options = {}) {
     fragment.append(renderRankHeader("vtuber"));
     for (const [index, record] of result.records.entries()) {
       const entry = result.entries[index] || {};
+      const songGroups = getVtuberSongGroups(record);
       fragment.append(renderRankRecord({
         mode: "vtuber",
         key: `vtuber-${record.key}`,
@@ -4180,7 +4212,8 @@ function renderRequestedPageResult(result, options = {}) {
         countUnit: result.metric === "songs" ? "首歌" : result.metric === "videos" ? "视频" : "次歌唱",
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
-        songPreview: vtuberSongPreview(record),
+        songGroups,
+        songPreview: songGroups.slice(0, 2).map((group) => group.title),
         getSongGroups: () => getVtuberSongGroups(record),
         priorityInlineMedia: index < 8,
       }));
@@ -4453,7 +4486,7 @@ function defineLazyValue(target, key, factory) {
 function currentSelection(rangeCache) {
   const filterKey = normalizeSearch(state.filter);
   const hideUnknownForView = shouldHideUnknownForCurrentView();
-  const searchFieldKey = state.view === "songRank" || state.view === "songAz" ? normalizedSearchFieldKey(state.searchFields || DEFAULT_SEARCH_FIELDS) : "default";
+  const searchFieldKey = searchFieldKeyForView(state.view, state.searchFields || DEFAULT_SEARCH_FIELDS);
   const key = `${state.view}::${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}::${filterKey}::${searchFieldKey}`;
   if (rangeCache.selectionCache.has(key)) return rangeCache.selectionCache.get(key);
 
@@ -4829,6 +4862,7 @@ function renderVtuberRank(group, rangeCache, selection) {
   appendPagination(fragment, { pageInfo, unit: "个频道", variant: "top" });
   fragment.append(renderRankHeader("vtuber"));
   for (const [index, record] of pageInfo.visible.entries()) {
+    const songGroups = getVtuberSongGroups(record);
     fragment.append(
       renderRankRecord({
         mode: "vtuber",
@@ -4843,7 +4877,8 @@ function renderVtuberRank(group, rangeCache, selection) {
         countUnit: state.rankMetric === "songs" ? "首歌" : state.rankMetric === "videos" ? "视频" : "次歌唱",
         occurrences: record.occurrences,
         songCount: songCountForRecord(record),
-        songPreview: vtuberSongPreview(record),
+        songGroups,
+        songPreview: songGroups.slice(0, 2).map((group) => group.title),
         getSongGroups: () => getVtuberSongGroups(record),
         priorityInlineMedia: index < 8,
       }),
@@ -6294,7 +6329,7 @@ function renderRecordContent(title, meta, options) {
   } else if (mode === "vtuber") {
     const collectedBadge = renderVtuberCollectionBadge(record);
     if (collectedBadge) metaLine.append(collectedBadge);
-    appendVtuberSubline(metaLine, { occurrences, songPreview, videoCount });
+    appendVtuberSubline(metaLine, { occurrences, songCount, songPreview, videoCount });
   } else {
     appendSublinePart(metaLine, meta.primary, meta.missingPrimary ? "artist-missing" : "subline-primary");
     appendSublinePart(metaLine, sourceVideoCountSubline(record, videoCount, sourceDetailPath), "subline-video-count");
@@ -6422,8 +6457,9 @@ function isMomentKnownSourceType(value) {
   return type === "vsinger_moment_http" || type === "vsinger-moment" || type === "moment";
 }
 
-function appendVtuberSubline(metaContainer, { occurrences, songPreview, videoCount }) {
+function appendVtuberSubline(metaContainer, { occurrences, songCount, songPreview, videoCount }) {
   appendSublinePart(metaContainer, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
+  appendSublinePart(metaContainer, `${songCount} 首歌`, "subline-song-count");
   appendSublinePart(metaContainer, `${videoCount} 个视频`, "subline-video-count");
   if (videoCount === 1 && occurrences.length === 1) {
     appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));

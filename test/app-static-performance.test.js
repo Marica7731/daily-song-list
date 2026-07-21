@@ -283,6 +283,9 @@ test("explicit search scopes query text by current view", () => {
   assert.match(scopedSearchBody, /state\.view === "vtuberRank"[\s\S]*vtuberOccurrenceSearchText\(occurrence\)/u);
   assert.match(scopedSearchBody, /state\.view === "songRank" \|\| state\.view === "songAz"[\s\S]*songOccurrenceSearchText\(occurrence, state\.searchFields \|\| DEFAULT_SEARCH_FIELDS\)/u);
   assert.match(scopedSearchBody, /return occurrence\?\.searchText \|\| ""/u);
+  assert.match(functionBody("function searchScopeForView"), /view === "vtuberRank"[\s\S]*return "channel"/u);
+  assert.match(functionBody("function searchFieldsForView"), /view === "vtuberRank"[\s\S]*return \["channel"\]/u);
+  assert.match(functionBody("function searchFieldKeyForView"), /view === "vtuberRank"[\s\S]*return "default"/u);
   assert.match(functionBody("function queryDraftOccurrences"), /songOccurrenceSearchText\(occurrence, draft\.searchFields\)\.includes\(filterKey\)/u);
 
   const songScopedSearchBody = functionBody("function songOccurrenceSearchText");
@@ -341,8 +344,8 @@ test("query overlay opens before suggestions and result preview work", () => {
   const countBody = functionBody("function queryDraftResultCount");
   assert.doesNotMatch(countBody, /buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
   assert.match(countBody, /queryResultCountCache/u);
-  assert.match(functionBody("function queryResultCountKey"), /draft\.searchScope \|\| "all"/u);
-  assert.match(functionBody("function queryResultCountKey"), /normalizedSearchFieldKey\(draft\.searchFields \|\| DEFAULT_SEARCH_FIELDS\)/u);
+  assert.match(functionBody("function queryResultCountKey"), /searchScopeForView\(state\.view, draft\)/u);
+  assert.match(functionBody("function queryResultCountKey"), /searchFieldKeyForView\(state\.view, draft\.searchFields \|\| DEFAULT_SEARCH_FIELDS\)/u);
   assert.match(functionBody("function createRangeCacheObject"), /queryIndexes:[\s\S]*queryIndexLoads:[\s\S]*queryResultCountCache:/u);
 });
 
@@ -432,13 +435,17 @@ test("all-field searches fall back to request runtime while the API catches up",
 
   const routeBody = functionBody("function shouldUseRuntimeApiForRequest");
   assert.match(routeBody, /if \(!state\.runtimeApi\.available\) return false/u);
+  assert.match(routeBody, /requestFiltersForView\(request\?\.view \|\| state\.view, request\?\.filters \|\| \{\}\)/u);
   assert.match(routeBody, /const query = normalizeSearch\(filters\.q \|\| ""\)/u);
-  assert.match(routeBody, /const searchFields = Array\.isArray\(filters\.searchFields\) \? filters\.searchFields : DEFAULT_SEARCH_FIELDS/u);
+  assert.match(routeBody, /const searchFields = searchFieldsForView\(request\?\.view \|\| state\.view, filters\)/u);
   assert.match(routeBody, /const allFieldQuery = query && \(filters\.searchScope \|\| "all"\) === "all" && searchFields\.length === 0/u);
   assert.match(routeBody, /if \(!allFieldQuery\) return true/u);
   assert.match(routeBody, /return !requestRuntimeMeta\(canonicalRangeId\(request\?\.range \|\| state\.range\)\)/u);
 
   const apiBody = functionBody("async function requestApiViewPage");
+  assert.match(apiBody, /requestFiltersForView\(request\.view, request\.filters \|\| \{\}\)/u);
+  assert.match(apiBody, /params\.set\("searchScope", filters\.searchScope\)/u);
+  assert.match(apiBody, /const searchFields = searchFieldsForView\(request\.view, filters\)/u);
   assert.match(apiBody, /params\.set\("searchFields", searchFields\.length \? searchFields\.join\(","\) : "all"\)/u);
   assert.doesNotMatch(apiBody, /params\.set\("searchScope", "source"\)/u);
 });

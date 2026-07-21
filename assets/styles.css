@@ -1649,7 +1649,7 @@ mark {
 .source-inline-strip {
   grid-area: sources;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) 92px;
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
