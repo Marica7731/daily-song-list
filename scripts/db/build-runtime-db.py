@@ -1859,6 +1859,8 @@ def is_runtime_confirmed_dirty_title(title, raw) -> bool:
     combined = normalize_runtime_commentary_text(f"{title} {raw}")
     if not title_text:
         return True
+    if re.fullmatch(r"(?:afk|afk(?:\(awayfromkeyboard\))?|afkawayfromkeyboard|awayfromkeyboard)", title_text, re.IGNORECASE):
+        return True
     if is_bracketed_runtime_commentary_note(title):
         return True
     if re.search(r"(?:自己肯定感|なれたん|naraetan)", combined, re.IGNORECASE):
@@ -1943,7 +1945,7 @@ def is_runtime_commentary_noise(title, raw) -> bool:
     title_text = normalize_runtime_commentary_text(title)
     if not title_text:
         return False
-    if re.search(r"(?:雑談|聊天|说明|説明|コメント|コメ|アンケート|投票|リクエスト|配信|歌枠|喉|のど|自己紹介|お知らせ|告知|自己肯定感)", title_text, re.IGNORECASE):
+    if re.search(r"(?:雑談|聊天|说明|説明|コメント|コメ|アンケート|投票|リクエスト|配信|歌枠|喉|のど|自己紹介|お知らせ|告知|自己肯定感|OP画面|EDトーク|休憩[&＆]?雑談タイム|カンニングタイム)", title_text, re.IGNORECASE):
         return True
     if re.search(r"(?:なれコール)?アンケート|歌詞考察|曲紹介(?:タイム)?", title_text, re.IGNORECASE):
         return True
@@ -1951,7 +1953,7 @@ def is_runtime_commentary_noise(title, raw) -> bool:
         return True
     if re.search(r"(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう|気がする|したい|してください|なんで|かな|かも|だよ|だね|なの|か)$", title_text, re.IGNORECASE):
         return True
-    if re.search(r"(?:背景を変える|食べる|飲む|お名前呼び|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|登録|ギフト|曲紹介|歌うフリ|姉|妹|幼馴染|指が細い|身長が低い|家族に例える)", combined, re.IGNORECASE):
+    if re.search(r"(?:背景を変える|食べる|飲む|お名前呼び|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|登録|ギフト|曲紹介|歌うフリ|姉|妹|幼馴染|指が細い|身長が低い|家族に例える|ペットショップ|ラー油|ケンタッキー|バーガーキング|酒のラベル|春が嫌い|カンニング|再確認|覚えてきた曲|ごらんください|ご覧ください)", combined, re.IGNORECASE):
         return True
     return False
 
@@ -1964,6 +1966,8 @@ def is_runtime_conversational_pseudo_song(title, raw) -> bool:
     if re.fullmatch(r"(?:おはよう|おはよ|こんにちは|こんばんは|こん[\wー~〜～]{2,20}|おつ[\wー~〜～]{1,24}|またね|ばいばい|bye)", title_text, re.IGNORECASE):
         return True
     if re.fullmatch(r"(?:ご挨拶|挨拶|雑談|聊天|閑談|コメント|コメ|感想|日常|近況)(?:タイム|枠|中|する|です)?", title_text, re.IGNORECASE):
+        return True
+    if re.fullmatch(r"(?:新しいOP画面|OP画面|EDトーク|休憩[&＆]?雑談タイム|カンニングタイム(?:Part\d+)?)", title_text, re.IGNORECASE):
         return True
     if re.fullmatch(r"(?:次(?:の)?バトンは|次は).{2,40}(?:ちゃん|さん|くん)", title_text):
         return True
@@ -2008,7 +2012,7 @@ def is_runtime_explanatory_english_gloss_artist(title, artist, raw) -> bool:
         return False
     if re.match(r"(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did)\b", artist_text):
         return True
-    return bool(re.search(r"\b(?:about|accidental|anime|blossoms?|broadcasting|celebrit(?:y|ies)|chat|club|comment|conan|detective|drink(?:ing)?|ending songs?|famous|favorite|food|guide|hair|hospital|how to|imitating|information|memories|menu|mind of its own|new outfit|opening|organizing|park|personal|phones?|poisoning|quotes?|recommendations?|song list|stocked|surprised|throat|thoughts?|watching)\b", artist_text, re.IGNORECASE))
+    return bool(re.search(r"\b(?:about|accidental|anime|apartment|apolog(?:y|ize)|atmosphere|blossoms?|body|broadcasting|brush(?:ing)?|bugging|burger|celebrit(?:y|ies)|chat|cheating|chili|club|comment|conan|cooking|copyright|count|dance|detective|drink(?:ing)?|ending songs?|famous|favorite|filefish|food|gift|guide|guinea|hair|hairstyle|heart|hospital|how to|imitating|information|kfc|korea|label|learned|luck|memories|menu|microphone|mind of its own|money|muted|new outfit|newly|oil|opening|organizing|outfits?|park|personal|pet|phones?|poisoning|quiz|quotes?|rechecking|recommendations?|rolled|sake|shop|song list|spring|stocked|surprised|swiss|take a look|throat|thoughts?|watching|welcome|workplace)\b", artist_text, re.IGNORECASE))
 
 
 def is_runtime_singleton_daily_topic_text(title, raw) -> bool:
@@ -2019,7 +2023,7 @@ def is_runtime_singleton_daily_topic_text(title, raw) -> bool:
         return True
     if re.fullmatch(r"(?:たすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|本編終了|歌パート終了|練習パート|復習タイム開始)", value, re.IGNORECASE):
         return True
-    return bool(re.search(r"(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|スマホ|配信を見る|体調|病院|飲み|食べ|誕生日|自分へのプレゼント|プレゼント選び|ネタバレ|途中からリベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い)", value, re.IGNORECASE))
+    return bool(re.search(r"(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|髪型|スマホ|配信を見る|体調|病院|飲み|食べ|料理|メニュー|誕生日|自分へのプレゼント|プレゼント選び|プレゼント|写真|歯磨き|うがい|買い物|職場|お菓子|ものまね|謝罪|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|ネタバレ|途中からリベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|大阪の話|海遊館|歌みた|歌ってみた|こだわりポイント|ペットショップ|ラー油|ケンタッキー|バーガーキング|酒のラベル|春が嫌い|カンニング|再確認|覚えてきた曲|ごらんください|ご覧ください|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い|joysound|音楽停止|fanart|outfit|hairstyle|gift|photo|quiz|shopping|stream|teeth|rinsing|apolog|apartment|atmosphere|body|bug|bugging|cooking|copyright|count|dance|filefish|heart|luck|microphone|model|money|muted|emoji|guinea|korea|rolled|sake|spring|swiss|welcome|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)", value, re.IGNORECASE))
 
 
 def has_runtime_song_title_latin_gloss(title) -> bool:
@@ -2047,7 +2051,7 @@ def is_runtime_topic_like_bilingual_commentary(title, artist, raw) -> bool:
         return False
     if is_runtime_commentary_noise(title_text, raw_text) or is_runtime_sentence_like_title(title_text):
         return True
-    return bool(re.search(r"(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ)", title_text, re.IGNORECASE))
+    return bool(re.search(r"(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ|体調|歯磨き|うがい|買い物|職場|謝|絵文字|プレゼント|踏んで|海遊館|大阪の話|衣装|髪型|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|料理|メニュー|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|joysound)", title_text, re.IGNORECASE))
 
 
 def is_known_song_safe_from_runtime_commentary(title, artist) -> bool:
@@ -2087,7 +2091,7 @@ def is_english_gloss_like_text(text) -> bool:
         return True
     if re.search(r"[?？]$", value) or re.search(r"\([^)]{3,80}\)", value):
         return True
-    return bool(re.search(r"\b(?:about|accidental|accented|ad|alcohol|anime|attack|ballad|carbonated|catchy|click|commercial|differences?|difficult|dream|drink(?:ing)?|food|hospital|introduced?|introducing|japanese|korean|marks?|music|parents?|picture|poisoning|poll|popular|pronunciation|recommendations?|recently|rice|risks?|salon|song|songs|souvenirs?|stops?|tea|temptation|traditional|vowel|watched)\b", value, re.IGNORECASE))
+    return bool(re.search(r"\b(?:about|accidental|accented|ad|alcohol|anime|apartment|atmosphere|attack|ballad|body|bugging|burger|carbonated|catchy|cheating|chili|click|commercial|cooking|copyright|count|dance|differences?|difficult|dream|drink(?:ing)?|filefish|food|gift|guinea|hairstyle|heart|hospital|introduced?|introducing|japanese|kfc|korean|korea|label|learned|luck|marks?|microphone|money|music|muted|newly|oil|outfits?|parents?|pet|picture|poisoning|poll|popular|pronunciation|quiz|rechecking|recommendations?|recently|rice|risks?|rolled|sake|salon|shop|song|songs|souvenirs?|spring|stops?|swiss|tea|temptation|traditional|vowel|watched|welcome|workplace)\b", value, re.IGNORECASE))
 
 
 def is_runtime_sentence_like_credit(text) -> bool:

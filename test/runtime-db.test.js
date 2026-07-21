@@ -447,6 +447,97 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
                 { title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / tuki.", time: "0:08", seconds: 8 },
                 { title: "上野公園の桜", artist: "Cherry Blossoms at Ueno Park", raw: "0:09 上野公園の桜 / Cherry Blossoms at Ueno Park", time: "0:09", seconds: 9 },
                 { title: "ホログラム", artist: "NICO Touches the Walls", raw: "0:10 ホログラム / NICO Touches the Walls", time: "0:10", seconds: 10 },
+                {
+                  title: "今日の衣装と髪型",
+                  artist: "Today’s Outfit and Hairstyle",
+                  raw: "00:35:35 今日の衣装と髪型 / Today’s Outfit and Hairstyle",
+                  time: "0:11",
+                  seconds: 11,
+                },
+                {
+                  title: "韓国の職場の雰囲気",
+                  artist: "Workplace Atmosphere in Korea",
+                  raw: "00:26:16 韓国の職場の雰囲気 / Workplace Atmosphere in Korea",
+                  time: "0:12",
+                  seconds: 12,
+                },
+                {
+                  title: "恋ダンスをするネンドウ君",
+                  artist: "Nendou Doing the “Koi Dance”",
+                  raw: "03:47:46 恋ダンスをするネンドウ君 / Nendou Doing the “Koi Dance”",
+                  time: "0:13",
+                  seconds: 13,
+                },
+                {
+                  title: "缶をマイクに",
+                  artist: "Using a Can as a Microphone",
+                  raw: "00:22:13 缶をマイクに / Using a Can as a Microphone",
+                  time: "0:14",
+                  seconds: 14,
+                },
+                {
+                  title: "あなたのお金を数えましょう",
+                  artist: "Let’s Count Your Money",
+                  raw: "01:01:09 あなたのお金を数えましょう / Let’s Count Your Money",
+                  time: "0:15",
+                  seconds: 15,
+                },
+                {
+                  title: "著作権の問題でミュートされています",
+                  artist: "Muted Due to Copyright Issues",
+                  raw: "01:40:09 著作権の問題でミュートされています / Muted Due to Copyright Issues",
+                  time: "0:16",
+                  seconds: 16,
+                },
+                {
+                  title: "AFK (away from keyboard)",
+                  artist: "未記載",
+                  raw: "03:36:05 03:38:51 AFK (away from keyboard)",
+                  time: "0:17",
+                  seconds: 17,
+                },
+                {
+                  title: "ペットショップ",
+                  artist: "Pet Shop",
+                  raw: "01:58:12 ペットショップ / Pet Shop",
+                  time: "0:18",
+                  seconds: 18,
+                },
+                {
+                  title: "ドンキホーテのラー油",
+                  artist: "Donki Hote’s Chili Oil",
+                  raw: "01:47:22 ドンキホーテのラー油 / Donki Hote’s Chili Oil",
+                  time: "0:19",
+                  seconds: 19,
+                },
+                {
+                  title: "ケンタッキーとバーガーキング",
+                  artist: "KFC and Burger King",
+                  raw: "01:06:15 ケンタッキーとバーガーキング / KFC and Burger King",
+                  time: "0:20",
+                  seconds: 20,
+                },
+                {
+                  title: "切り抜き酒のラベル",
+                  artist: "Clip-Style Sake Label",
+                  raw: "02:07:56 切り抜き酒のラベル / Clip-Style Sake Label",
+                  time: "0:21",
+                  seconds: 21,
+                },
+                {
+                  title: "春が嫌いな人",
+                  artist: "People Who Hate Spring",
+                  raw: "00:18:38 春が嫌いな人 / People Who Hate Spring",
+                  time: "0:22",
+                  seconds: 22,
+                },
+                {
+                  title: "カンニング（新しく覚えてきた曲を再確認）",
+                  artist: "Cheating (Rechecking a Newly Learned Song)",
+                  raw: "00:42:54 カンニング（新しく覚えてきた曲を再確認） / Cheating (Rechecking a Newly Learned Song)",
+                  time: "0:23",
+                  seconds: 23,
+                },
               ],
             },
             {
@@ -589,7 +680,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり OR 上野公園の桜",
+      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり OR 上野公園の桜 OR 今日の衣装と髪型 OR 韓国の職場の雰囲気 OR 恋ダンスをするネンドウ君 OR 缶をマイクに OR あなたのお金を数えましょう OR 著作権の問題でミュートされています OR AFK OR ペットショップ OR ドンキホーテのラー油 OR ケンタッキーとバーガーキング OR 切り抜き酒のラベル OR 春が嫌いな人 OR カンニング",
       "--search-scope",
       "title",
       "--page-size",
@@ -795,6 +886,28 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(pythonBuildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+  const pythonDirtySongOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPathPython,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "今日の衣装と髪型 OR 韓国の職場の雰囲気 OR 恋ダンスをするネンドウ君 OR 缶をマイクに OR あなたのお金を数えましょう OR 著作権の問題でミュートされています OR AFK OR ペットショップ OR ドンキホーテのラー油 OR ケンタッキーとバーガーキング OR 切り抜き酒のラベル OR 春が嫌いな人 OR カンニング",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(pythonDirtySongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(pythonDirtySongOutput, /"totalCount": 0/);
+
   const pythonFlowerVtuberSongMetricOutput = execFileSync(
     PYTHON,
     [

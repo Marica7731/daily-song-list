@@ -54,6 +54,7 @@ function main() {
   const allVideos = [...acceptedVideos, ...runtimeVideos];
   const globalTitleStats = buildGlobalTitleStats(allVideos);
   const summaries = TARGETS.map((target) => summarizeTarget(target, acceptedVideos, runtimeVideos, globalTitleStats, context));
+  const globalSummary = summarizeGlobal(allVideos, globalTitleStats, context);
   const querySummaries = QUERY_TARGETS.map((target) => summarizeQuery(target, allVideos, globalTitleStats, context));
   const safeSongChecks = SAFE_SONGS.map(([title, artist]) => {
     const source = { channelName: "Safety Fixture", channelHandle: "@safety" };
@@ -72,6 +73,7 @@ function main() {
     acceptedDir: path.relative(ROOT, ACCEPTED_DIR).replace(/\\/g, "/"),
     runtimeJsons: RUNTIME_JSON_PATHS.filter((filePath) => fs.existsSync(filePath)).map((filePath) => path.relative(ROOT, filePath).replace(/\\/g, "/")),
     sourceInventory: buildSourceInventory(acceptedVideos),
+    globalSummary,
     summaries,
     querySummaries,
     safeSongChecks,
@@ -94,6 +96,12 @@ function main() {
       ...summaries.map((summary) => `${summary.id}SingletonPseudoAfter=${summary.after.singletonPseudoRows}`),
       ...summaries.map((summary) => `${summary.id}DirtyBefore=${summary.before.ruleCandidateRows}`),
       ...summaries.map((summary) => `${summary.id}DirtyAfter=${summary.after.ruleCandidateRows}`),
+      `globalRaw=${globalSummary.before.songRows}`,
+      `globalAfter=${globalSummary.after.songRows}`,
+      `globalDirtyBefore=${globalSummary.before.ruleCandidateRows}`,
+      `globalDirtyAfter=${globalSummary.after.ruleCandidateRows}`,
+      `globalSingletonPseudoBefore=${globalSummary.before.singletonPseudoRows}`,
+      `globalSingletonPseudoAfter=${globalSummary.after.singletonPseudoRows}`,
       ...querySummaries.map((summary) => `${summary.id}Before=${summary.before.matchingTitleRows}`),
       ...querySummaries.map((summary) => `${summary.id}After=${summary.after.matchingTitleRows}`),
       ...querySummaries.map((summary) => `${summary.id}DirtyBefore=${summary.before.ruleCandidateRows}`),
@@ -122,6 +130,27 @@ function buildSourceInventory(acceptedVideos) {
       file: path.relative(ROOT, filePath).replace(/\\/g, "/"),
       exists: fs.existsSync(filePath),
     })),
+  };
+}
+
+function summarizeGlobal(allVideos, globalTitleStats, context) {
+  const curationContext = { ...context, titleStats: globalTitleStats };
+  const before = summarizeVideos(allVideos, allVideos, globalTitleStats, curationContext);
+  const curated = applyCurationToVideos(filterBlockedVideos(deepClone(allVideos)), curationContext);
+  const after = summarizeVideos(curated, allVideos, globalTitleStats, curationContext);
+  return {
+    sourceVideoRows: allVideos.length,
+    before,
+    after,
+    delta: {
+      songRows: before.songRows - after.songRows,
+      unknownArtistRows: before.unknownArtistRows - after.unknownArtistRows,
+      singletonUnknownRows: before.singletonUnknownRows - after.singletonUnknownRows,
+      singletonPseudoRows: before.singletonPseudoRows - after.singletonPseudoRows,
+      ruleCandidateRows: before.ruleCandidateRows - after.ruleCandidateRows,
+      englishGlossArtistRows: before.englishGlossArtistRows - after.englishGlossArtistRows,
+    },
+    curationStats: curated.curationStats || {},
   };
 }
 

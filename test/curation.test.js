@@ -311,6 +311,29 @@ test("curation drops residual daily chatter without removing target real songs",
           { title: "閉会式開始", artist: "未記載", seconds: 5, raw: "0:31:45 0:32:43 閉会式開始" },
           { title: "大阪の話③:海遊館", artist: "未記載", seconds: 6, raw: "0:58:44 大阪の話③:海遊館" },
           { title: "Campus mode!!歌みたのこだわりポイント", artist: "未記載", seconds: 7, raw: "1:32:15 Campus mode!!歌みたのこだわりポイント" },
+          { title: "今日の衣装と髪型", artist: "Today’s Outfit and Hairstyle", seconds: 12, raw: "0:12 今日の衣装と髪型 / Today’s Outfit and Hairstyle" },
+          { title: "クイズタイム（スイスのモルモット）", artist: "Quiz Time (Swiss Guinea Pigs)", seconds: 13, raw: "0:13 クイズタイム（スイスのモルモット） / Quiz Time (Swiss Guinea Pigs)" },
+          { title: "恋ダンスをするネンドウ君", artist: "Nendou Doing the “Koi Dance”", seconds: 14, raw: "0:14 恋ダンスをするネンドウ君 / Nendou Doing the “Koi Dance”" },
+          { title: "缶をマイクに", artist: "Using a Can as a Microphone", seconds: 15, raw: "0:15 缶をマイクに / Using a Can as a Microphone" },
+          { title: "あなたのお金を数えましょう", artist: "Let’s Count Your Money", seconds: 16, raw: "0:16 あなたのお金を数えましょう / Let’s Count Your Money" },
+          { title: "著作権の問題でミュートされています", artist: "Muted Due to Copyright Issues", seconds: 17, raw: "0:17 著作権の問題でミュートされています / Muted Due to Copyright Issues" },
+          { title: "AFK (away from keyboard)", artist: "未記載", seconds: 18, raw: "03:36:05 03:38:51 AFK (away from keyboard)" },
+          { title: "ペットショップ", artist: "Pet Shop", seconds: 19, raw: "01:58:12 ペットショップ / Pet Shop" },
+          { title: "ドンキホーテのラー油", artist: "Donki Hote’s Chili Oil", seconds: 20, raw: "01:47:22 ドンキホーテのラー油 / Donki Hote’s Chili Oil" },
+          { title: "ケンタッキーとバーガーキング", artist: "KFC and Burger King", seconds: 21, raw: "01:06:15 ケンタッキーとバーガーキング / KFC and Burger King" },
+          { title: "切り抜き酒のラベル", artist: "Clip-Style Sake Label", seconds: 22, raw: "02:07:56 切り抜き酒のラベル / Clip-Style Sake Label" },
+          { title: "春が嫌いな人", artist: "People Who Hate Spring", seconds: 23, raw: "00:18:38 春が嫌いな人 / People Who Hate Spring" },
+          {
+            title: "カンニング（新しく覚えてきた曲を再確認）",
+            artist: "Cheating (Rechecking a Newly Learned Song)",
+            seconds: 24,
+            raw: "00:42:54 カンニング（新しく覚えてきた曲を再確認） / Cheating (Rechecking a Newly Learned Song)",
+          },
+          { title: "雑談タイム!", artist: "未記載", seconds: 25, raw: "00:43:10 雑談タイム!" },
+          { title: "新しいOP画面", artist: "未記載", seconds: 26, raw: "00:03:12 新しいOP画面 / New OP screen" },
+          { title: "EDトーク", artist: "未記載", seconds: 27, raw: "02:11:00 EDトーク" },
+          { title: "休憩&雑談タイム", artist: "未記載", seconds: 28, raw: "01:20:00 休憩&雑談タイム" },
+          { title: "カンニングタイムPart2", artist: "未記載", seconds: 29, raw: "00:45:00 カンニングタイムPart2" },
           { title: "晴る", artist: "ヨルシカ", seconds: 8, raw: "0:08 晴る / ヨルシカ" },
           { title: "晩餐歌", artist: "tuki.", seconds: 9, raw: "0:09 晩餐歌 / tuki." },
           { title: "花になって", artist: "緑黄色社会", seconds: 10, raw: "0:10 花になって / 緑黄色社会" },
@@ -325,7 +348,7 @@ test("curation drops residual daily chatter without removing target real songs",
     videos[0].songs.map((item) => `${item.title} / ${item.artist}`),
     ["晴る / ヨルシカ", "晩餐歌 / tuki.", "花になって / 緑黄色社会", "START / 愛内里菜"],
   );
-  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 7);
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 25);
 });
 
 test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", () => {
