@@ -11,6 +11,7 @@ on:
       - main
     paths:
       - ".github/workflows/deploy-runtime-db.yml"
+      - "assets/ranking-utils.js"
       - "config/**"
       - "data/status.json"
       - "data/latest.json"
