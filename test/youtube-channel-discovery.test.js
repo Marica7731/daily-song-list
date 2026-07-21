@@ -277,6 +277,61 @@ test("channel discovery retries transient video detail failures", async () => {
   assert.equal(result.manifest.occurrenceCount, 1);
 });
 
+test("channel discovery records per-video inspect failures without failing the channel", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-inspect-failure-test-"));
+  const firstUrl = "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1";
+  const client = {
+    metrics: { requestCount: 1 },
+    async getText(url) {
+      assert.equal(url, firstUrl);
+      return {
+        status: 200,
+        body: youtubeHtml({
+          initialData: channelData({
+            videos: [videoRenderer("FFFFFFFFFFF", "【歌枠】upcoming detail failure", "1 日前")],
+          }),
+        }),
+        bytes: 10,
+        fromCache: false,
+      };
+    },
+  };
+
+  const result = await runChannelDiscovery(
+    {
+      channelUrl: "https://www.youtube.com/@noa_polaris",
+      singerName: "Noa Polaris",
+      outputDir: dir,
+      cacheDir: path.join(dir, "cache"),
+      keywords: ["歌"],
+      tabs: ["streams"],
+      maxChannelPages: 1,
+      maxCandidates: 10,
+      maxInspect: 1,
+      inspectMaxAttempts: 1,
+      requestIntervalMs: 0,
+      requestJitterMs: 0,
+      fresh: true,
+      candidateOnly: false,
+      ytDlpFallback: false,
+    },
+    {
+      client,
+      extractSearchItems,
+      async inspectVideoSongList() {
+        throw new Error("This live event will begin in 18 days.");
+      },
+    },
+  );
+
+  assert.equal(result.manifest.candidateCount, 1);
+  assert.equal(result.manifest.usableVideoCount, 0);
+  assert.equal(result.audits.length, 1);
+  assert.equal(result.audits[0].result, "fetch_error");
+  assert.match(result.audits[0].error, /live event will begin/u);
+  assert.equal(fs.existsSync(path.join(dir, "manifest.json")), true);
+});
+
 test("channel discovery falls back to yt-dlp for channel page network errors", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-yt-dlp-page-test-"));
   const firstUrl = "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1";

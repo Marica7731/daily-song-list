@@ -128,7 +128,7 @@ async function runChannelDiscovery(options, deps) {
     const inspectable = candidates.filter((candidate) => !completed.has(candidate.videoId)).slice(0, options.maxInspect);
     for (const candidate of inspectable) {
       await maybeDelay(options.requestIntervalMs);
-      const result = await inspectVideoSongListWithRetry(candidate, deps, options);
+      const result = await inspectVideoSongListSafely(candidate, deps, options);
       if (result?.detail) {
         details.push(enrichDetail(result.detail, candidate, options.singerName));
         completed.add(candidate.videoId);
@@ -211,6 +211,34 @@ async function runChannelDiscovery(options, deps) {
   });
 
   return { manifest, rawVideos, details, occurrences, audits };
+}
+
+async function inspectVideoSongListSafely(candidate, deps, options) {
+  try {
+    return await inspectVideoSongListWithRetry(candidate, deps, options);
+  } catch (error) {
+    return {
+      detail: null,
+      audit: failedInspectionAudit(candidate, error),
+    };
+  }
+}
+
+function failedInspectionAudit(candidate, error) {
+  return {
+    videoId: candidate.videoId || "",
+    title: candidate.title || "",
+    channelName: candidate.channelName || "",
+    keyword: candidate.keyword || "",
+    keywords: candidate.keywords || [],
+    sourceGroups: candidate.sourceGroups || [],
+    publishedText: candidate.publishedText || "",
+    publishedTimestamp: candidate.publishedTimestamp || null,
+    durationText: candidate.durationText || "",
+    result: "fetch_error",
+    error: String(error?.message || error || "unknown inspect error"),
+    sources: [],
+  };
 }
 
 async function fetchChannelPageWithFallback(pageUrl, options, deps, startedAt) {
