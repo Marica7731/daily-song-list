@@ -42,7 +42,7 @@ jobs:
   deploy:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 80
+    timeout-minutes: 180
     env:
       VPS2_HOST: "192.255.151.75"
       VPS2_USER: "root"
@@ -91,8 +91,8 @@ jobs:
       - name: Build runtime database
         run: |
           mkdir -p artifacts/runtime
-          python3 scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
-          python3 scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only
+          python3 -u scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
+          python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only
 
       - name: Write database manifest
         id: manifest

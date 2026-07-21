@@ -46,6 +46,12 @@ def configure_stdio() -> None:
             stream.reconfigure(encoding="utf-8", errors="replace")
 
 
+def log_phase(phase: str, **fields: object) -> None:
+    details = " ".join(f"{key}={value}" for key, value in fields.items())
+    suffix = f" {details}" if details else ""
+    print(f"CODEX_RUNTIME_DB_BUILD_PHASE phase={phase}{suffix}", flush=True)
+
+
 def main() -> int:
     configure_stdio()
     args = parse_args()
@@ -56,15 +62,20 @@ def main() -> int:
         temp_path.unlink()
 
     try:
+        log_phase("read_latest_start", input=args.input)
         latest = hydrate_payload_channel_metadata(
             read_json(args.input),
             (args.youtube_channel_discovery_dir / "channel-metadata.json").resolve(),
         )
+        log_phase("read_latest_ok", inputBytes=args.input.stat().st_size)
+        log_phase("sqlite_open_start", temp=temp_path)
         conn = sqlite3.connect(temp_path)
         conn.execute("PRAGMA journal_mode=OFF")
         conn.execute("PRAGMA synchronous=OFF")
         conn.execute("PRAGMA temp_store=MEMORY")
+        log_phase("schema_start")
         fts_enabled = create_schema(conn)
+        log_phase("schema_ok", fts="enabled" if fts_enabled else "disabled")
         write_meta(conn, "schema_version", str(SCHEMA_VERSION))
         write_meta(conn, "builder", "scripts/db/build-runtime-db.py")
         write_meta(conn, "built_at", utc_now())
@@ -79,25 +90,50 @@ def main() -> int:
             write_meta(conn, "latest_captured_at", str(latest.get("capturedAt")))
 
         if args.ranking_source == "js":
+            log_phase("runtime_rankings_start", source="js")
             latest_counts = ingest_js_runtime_export(conn, args, output_path, fts_enabled)
             write_meta(conn, "runtime_ranking_source", "runtime-js")
         else:
+            log_phase("runtime_rankings_start", source="python")
             latest_counts = ingest_latest_payload(conn, latest, args.limit_per_range, fts_enabled)
             write_meta(conn, "runtime_ranking_source", "python")
+        log_phase(
+            "runtime_rankings_ok",
+            videos=latest_counts["videos"],
+            songs=latest_counts["songs"],
+            occurrences=latest_counts["occurrences"],
+            rankingRows=latest_counts["ranking_rows"],
+            sourceOccurrences=latest_counts.get("source_occurrences", 0),
+        )
+        if args.vsinger_dir and not args.no_vsinger:
+            log_phase("vsinger_start", dir=args.vsinger_dir)
         vsinger_counts = (
             ingest_vsinger_backfill(conn, args.vsinger_dir, args.limit_external_shards, fts_enabled)
             if args.vsinger_dir and not args.no_vsinger
             else empty_external_counts()
+        )
+        log_phase(
+            "vsinger_ok",
+            songs=vsinger_counts["songs"],
+            videos=vsinger_counts["videos"],
+            occurrences=vsinger_counts["occurrences"],
+            rankingRows=vsinger_counts["ranking_rows"],
         )
         for key, value in latest_counts.items():
             write_meta(conn, f"latest_{key}", str(value))
         for key, value in vsinger_counts.items():
             write_meta(conn, f"vsinger_{key}", str(value))
 
+        log_phase("commit_start")
         conn.commit()
+        log_phase("commit_ok", tempBytes=temp_path.stat().st_size if temp_path.exists() else 0)
+        log_phase("vacuum_start")
         conn.execute("VACUUM")
+        log_phase("vacuum_ok", tempBytes=temp_path.stat().st_size if temp_path.exists() else 0)
         conn.close()
+        log_phase("replace_start", output=output_path)
         os.replace(temp_path, output_path)
+        log_phase("replace_ok", outputBytes=output_path.stat().st_size)
     except Exception as exc:  # pragma: no cover - exercised by CLI failure paths
         try:
             conn.close()  # type: ignore[name-defined]
@@ -496,26 +532,46 @@ def ingest_js_runtime_export(
         if args.require_youtube_channel_discovery:
             command.append("--require-youtube-channel-discovery")
 
-    completed = subprocess.run(
+    log_phase("js_export_start", output=export_path)
+    process = subprocess.Popen(
         command,
         cwd=ROOT,
-        check=False,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         text=True,
         encoding="utf-8",
     )
-    if completed.returncode != 0 or "CODEX_RUNTIME_RANKINGS_EXPORT_OK" not in completed.stdout:
+    export_ok = False
+    output_tail: list[str] = []
+    assert process.stdout is not None
+    for line in process.stdout:
+        print(line, end="", flush=True)
+        if "CODEX_RUNTIME_RANKINGS_EXPORT_OK" in line:
+            export_ok = True
+        output_tail.append(line.rstrip("\n"))
+        if len(output_tail) > 40:
+            output_tail = output_tail[-40:]
+    return_code = process.wait()
+    log_phase("js_export_done", exit=return_code, outputBytes=export_path.stat().st_size if export_path.exists() else 0)
+    if return_code != 0 or not export_ok:
         raise RuntimeError(
             "runtime ranking export failed: "
-            f"exit={completed.returncode} stdout={completed.stdout.strip()} stderr={completed.stderr.strip()}"
+            f"exit={return_code} tail={os.linesep.join(output_tail)}"
         )
 
+    log_phase("js_import_start", input=export_path)
     counts = import_js_runtime_export(conn, export_path, fts_enabled)
+    log_phase(
+        "js_import_ok",
+        rankingRows=counts["ranking_rows"],
+        sourceDetails=counts["source_details"],
+        sourceOccurrences=counts["source_occurrences"],
+    )
     try:
         export_path.unlink()
     except FileNotFoundError:
         pass
-    write_meta(conn, "runtime_ranking_export_stdout", completed.stdout.strip())
+    write_meta(conn, "runtime_ranking_export_stdout_tail", os.linesep.join(output_tail))
     return counts
 
 
@@ -613,6 +669,17 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
                 continue
             else:
                 raise ValueError(f"unsupported runtime ranking export record at line {line_number}: {kind}")
+            if line_number % 100000 == 0:
+                log_phase(
+                    "js_import_progress",
+                    lines=line_number,
+                    rankingRows=counts["ranking_rows"],
+                    sourceDetails=counts["source_details"],
+                    sourceOccurrences=counts["source_occurrences"],
+                    videos=len(video_ids),
+                    songs=len(song_keys),
+                    occurrences=len(occurrence_ids),
+                )
     counts["videos"] = len(video_ids)
     counts["songs"] = len(song_keys)
     counts["occurrences"] = len(occurrence_ids)
@@ -1096,7 +1163,8 @@ def ingest_vsinger_backfill(
         selected_shards = shards.get(kind) if isinstance(shards.get(kind), list) else []
         if limit_shards > 0:
             selected_shards = selected_shards[:limit_shards]
-        for shard in selected_shards:
+        log_phase("vsinger_kind_start", kind=kind, shards=len(selected_shards))
+        for shard_index, shard in enumerate(selected_shards, start=1):
             shard_file = backfill_dir / str(shard.get("file", ""))
             rows = read_json(shard_file)
             if not isinstance(rows, list):
@@ -1123,6 +1191,17 @@ def ingest_vsinger_backfill(
                         videos_by_youtube,
                     )
                 counts["occurrences"] += len(rows)
+            if shard_index == 1 or shard_index == len(selected_shards) or shard_index % 25 == 0:
+                log_phase(
+                    "vsinger_shard_progress",
+                    kind=kind,
+                    shard=shard_index,
+                    shards=len(selected_shards),
+                    rows=len(rows),
+                    songs=counts["songs"],
+                    videos=counts["videos"],
+                    occurrences=counts["occurrences"],
+                )
 
     if limit_shards <= 0:
         expected = manifest.get("counts") or {}
