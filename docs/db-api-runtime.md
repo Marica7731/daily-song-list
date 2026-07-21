@@ -189,7 +189,7 @@ Response fields:
 - `totalSongCount`: sum of `songCount` across filtered rows when available. It is mainly for `view=vtubers&metric=songs`.
 - `totalVideoCount`: sum of `videoCount` across the filtered rows. It remains available for diagnostics and API clients, but the frontend summary does not display it for song, artist, or VTuber rankings because it is not a unique-video count.
 - `pageCount`: total pages for the current filtered query.
-- `records`: display-ready rows; song and artist rows include `sourceDetailKey` when full source details are available.
+- `records`: display-ready rows; song, artist, and VTuber rows include `sourceDetailKey` when full source details are available.
 
 Record shapes are intentionally display-ready and may include extra frontend fields from `assets/ranking-utils.js`. Treat the following fields as stable:
 
@@ -248,6 +248,7 @@ It also probes the reviewed YouTube channel補漏 samples `ノア・ポラリス
 - With `page` or `pageSize`, the endpoint pages by unique source video in stored position order and returns only that page's occurrence rows. The response also includes `page`, `pageSize`, `pageCount`, `totalCount`, `totalVideoCount`, and `totalOccurrenceCount`.
 - When `found=false`, the response is `{ schemaVersion, found: false, sourceKey }`.
 - The frontend uses this endpoint for "view all sources" in API mode, so large source lists stay out of initial ranking responses.
+- VTuber source details are keyed from the channel ranking row and store complete channel occurrences in `source_occurrences`; the ranking response keeps only preview occurrences. The frontend uses this endpoint to rebuild the expanded VTuber song list by song count, then lets each song expand to its own occurrence/source list.
 - The frontend source drawer requests page size 20 on desktop/tablet and 10 on mobile so opening a song with thousands of sources does not download or insert the full list before first paint.
 
 Supported ranking views in this first step:

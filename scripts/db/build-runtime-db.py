@@ -812,6 +812,7 @@ def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> 
             "videos": set(),
             "songs": {},
             "occurrences": [],
+            "source_occurrences": [],
         }
     record = state["vtubers"][channel_key]
     if video_id:
@@ -821,6 +822,7 @@ def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> 
         record["count"] += 1
         increment_vtuber_song_count(record["songs"], song)
         append_preview_occurrence(record["occurrences"], item, song, video_id)
+        record["source_occurrences"].append(source_occurrence_payload(item, song, video_id))
 
 
 def build_ranking_rows(range_id: str, state: dict) -> list[dict]:
@@ -1039,6 +1041,12 @@ def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list
             "timestampCount": record["count"],
             "songs": count_map_to_list(record["songs"]),
             "occurrences": record["occurrences"],
+            "sourceDetailKey": stable_key("source-vtuber", range_id, record["key"]),
+        }
+        source_detail_payload = {
+            **payload,
+            "occurrencePreviewLimited": len(record["source_occurrences"]) > len(record["occurrences"]),
+            "occurrences": record["source_occurrences"],
         }
         row = {
             "key": record["key"],
@@ -1051,6 +1059,12 @@ def rank_rows_for_vtubers(range_id: str, records, metric: str = "count") -> list
             "timestamp_count": record["count"],
             "payload": payload,
             "search_text": search_text(record["name"], record["channel_name"], record["channel_id"], record["channel_handle"], record["channel_url"]),
+            "source_detail": {
+                "source_key": payload["sourceDetailKey"],
+                "entity_type": "vtuber",
+                "entity_key": record["key"],
+                "payload": source_detail_payload,
+            },
         }
         result.append(row_payload(range_id, "vtubers", rank, row, metric=metric))
     return result
@@ -1662,6 +1676,26 @@ def append_preview_occurrence(preview: list[dict], item: dict, song: dict, video
             "song": compact_song(song),
         }
     )
+
+
+def source_occurrence_payload(item: dict, song: dict, video_id: str) -> dict:
+    source_item = compact_video({**item, "videoId": video_id or item.get("videoId")})
+    source_song = compact_song(song)
+    return {
+        "item": source_item,
+        "song": source_song,
+        "searchText": search_text(
+            source_item.get("videoId"),
+            source_item.get("title"),
+            source_item.get("channelName"),
+            source_item.get("channelId"),
+            source_item.get("channelHandle"),
+            source_item.get("channelUrl"),
+            source_item.get("keyword"),
+            source_song.get("title"),
+            source_song.get("artist"),
+        ),
+    }
 
 
 def occurrence_preview_search_parts(occurrences: list[dict]):

@@ -520,6 +520,26 @@ test("builds whole-video setlist text from source group occurrences when item is
   );
 });
 
+test("whole-video setlist item keeps complete video songs ahead of current-song occurrences", () => {
+  const clippedOccurrence = occurrence("53zVElX6V7c", "小東ひとな / Hitona Kohigashi", { seconds: 1951, title: "Current", artist: "A" });
+  const sourceItem = {
+    ...clippedOccurrence.item,
+    songs: [{ seconds: 1951, title: "Current", artist: "A" }],
+    _allSongs: [
+      { seconds: 1951, title: "Current", artist: "A" },
+      { seconds: 3173, title: "Second", artist: "B" },
+      { seconds: 4200, title: "Third", artist: "C" },
+    ],
+  };
+
+  const setlistItem = sourceGroupSetlistItem(sourceItem, { occurrences: [clippedOccurrence] });
+
+  assert.equal(
+    buildSetlistText(setlistItem),
+    ["32:31 01. Current - A", "52:53 02. Second - B", "1:10:00 03. Third - C"].join("\n"),
+  );
+});
+
 test("builds same-song source link text from unique source videos", () => {
   const links = buildSongSourceLinksText([
     occurrence("VideoA", "羽海乃ゆき", { seconds: 75, title: "song" }),

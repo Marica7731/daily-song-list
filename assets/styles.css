@@ -1613,7 +1613,7 @@ mark {
 .source-inline-strip {
   grid-area: sources;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 92px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-1);
   min-width: 0;
@@ -1636,7 +1636,7 @@ mark {
 
 .source-inline-preview-list {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   align-items: center;
   gap: var(--space-1);
   width: 100%;
@@ -1791,7 +1791,7 @@ mark {
   flex: 0 0 auto;
   justify-content: center;
   min-width: 0;
-  max-width: 92px;
+  max-width: 128px;
   min-height: 28px;
   overflow: hidden;
   border-color: var(--line);
@@ -2147,7 +2147,7 @@ mark {
 
 .artist-song-header {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) auto;
+  grid-template-columns: 72px minmax(0, 1fr) minmax(116px, auto);
   gap: var(--space-2);
   align-items: center;
   min-width: 0;
@@ -2175,10 +2175,9 @@ mark {
 }
 
 .artist-song-title-wrap {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+  display: grid;
+  align-content: center;
+  gap: 2px;
   min-width: 0;
 }
 
@@ -2228,6 +2227,7 @@ mark {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: var(--space-2);
   min-width: 0;
 }
@@ -3308,18 +3308,28 @@ mark {
   }
 
   .artist-song-header {
-    grid-template-columns: 56px minmax(0, 1fr) auto;
+    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-areas:
+      "thumb title"
+      "thumb actions";
     align-items: start;
+    gap: 5px 7px;
   }
 
   .artist-song-thumb {
+    grid-area: thumb;
     width: 56px;
   }
 
+  .artist-song-title-wrap {
+    grid-area: title;
+  }
+
   .artist-song-summary-actions {
+    grid-area: actions;
     align-self: start;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: 4px;
   }
 
@@ -4011,7 +4021,7 @@ mark {
     justify-self: end;
     width: auto;
     min-height: 28px;
-    max-width: 92px;
+    max-width: 100%;
     border-color: var(--line);
     padding-inline: 7px;
     background: #f8fafc;
@@ -4588,7 +4598,6 @@ mark {
   }
 
   .artist-song-summary-actions {
-    grid-column: 2;
     justify-self: start;
   }
 }

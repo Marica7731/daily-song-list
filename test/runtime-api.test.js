@@ -26,7 +26,11 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
       "--no-vsinger",
       "--no-youtube-channel-discovery",
     ],
-    { cwd: ROOT, encoding: "utf8" },
+    {
+      cwd: ROOT,
+      encoding: "utf8",
+      env: { ...process.env, DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT: "2" },
+    },
   );
 
   const port = await getFreePort();
@@ -173,6 +177,19 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(vtubers.records[0].channelId, "UC-alpha");
     assert.equal(vtubers.records[0].count, 3);
     assert.equal(vtubers.records[0].videoCount, 2);
+    assert.equal(vtubers.records[0].occurrences.length, 2);
+    assert.ok(vtubers.records[0].sourceDetailKey);
+
+    const vtuberSource = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(vtubers.records[0].sourceDetailKey)}`);
+    assert.equal(vtuberSource.found, true);
+    assert.equal(vtuberSource.record.name, "Alpha Ch.");
+    assert.equal(vtuberSource.record.count, 3);
+    assert.equal(vtuberSource.record.videoCount, 2);
+    assert.equal(vtuberSource.record.occurrences.length, 3);
+    assert.deepEqual(
+      vtuberSource.record.occurrences.map((occurrence) => occurrence.song.title),
+      ["Song One", "Song Two", "Song Three"],
+    );
 
     const vtuberSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&q=Alpha&pageSize=5`);
     assert.equal(vtuberSearch.totalCount, 1);

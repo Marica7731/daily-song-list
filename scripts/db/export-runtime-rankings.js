@@ -175,7 +175,7 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
       for (const spec of specs) {
         const ranks = buildRequestRanks(spec.records, spec.metric);
         spec.records.forEach((record, index) => {
-          const sourceDetailKey = spec.type === "video" || spec.type === "vtuber" ? "" : stableRequestKey(`${rangeId}:${spec.sourcePrefix}:all:${record.key || record.videoId || ""}`);
+          const sourceDetailKey = spec.type === "video" ? "" : stableRequestKey(`${rangeId}:${spec.sourcePrefix}:all:${record.key || record.videoId || ""}`);
           const payloadRecord = serializeRecord(spec.type, record, {
             detailKey: `all:${record.key || record.videoId || ""}`,
             sourceDetailKey,
@@ -203,7 +203,7 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
           writer.write(row);
           rankingRowCount += 1;
           if (sourceDetailKey && !writtenSourceKeys.has(sourceDetailKey)) {
-            const recordOccurrences = record.occurrences || [];
+            const recordOccurrences = record.sourceOccurrences || record.occurrences || [];
             writer.write({
               kind: "sourceDetail",
               rangeId,
@@ -408,6 +408,7 @@ function buildVtuberRequestItems(items, songIdentityLookup = null) {
         videos: new Set(),
         songs: new Map(),
         occurrences: [],
+        sourceOccurrences: [],
         aliases: new Set(),
       });
     }
@@ -426,6 +427,11 @@ function buildVtuberRequestItems(items, songIdentityLookup = null) {
           searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
         });
       }
+      record.sourceOccurrences.push({
+        item,
+        song,
+        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
+      });
     }
   }
   const result = Array.from(records.values()).map((record) => {
@@ -785,7 +791,7 @@ function serializeVtuberRequestRecord(record, options = {}) {
     timestampCount: Number(record.timestampCount ?? record.count) || 0,
     songs: serializeCountMap(record.songs),
     occurrences: occurrences.slice(0, REQUEST_PREVIEW_SOURCE_LIMIT).map((occurrence) => serializeOccurrence(occurrence, { includeCurrentSong: true })),
-    sourceDetailKey: "",
+    sourceDetailKey: options.sourceDetailKey || "",
     sourceDetailPath: "",
     searchText: requestRecordSearchText(record, "vtuber"),
   };

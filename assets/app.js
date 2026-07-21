@@ -560,10 +560,6 @@ function bindEvents() {
 
   els.content.addEventListener("click", (event) => {
     const link = event.target.closest("a[href]");
-    const explicitAction = event.target.closest(
-      "button, [data-copy-setlist], [data-copy-song-links], [data-clear-search], [data-page], [data-source-page], [data-page-size], [data-index-bucket], [data-toggle-artist-songs], [data-toggle-video-songs], [data-toggle-source]",
-    );
-    if (link && (!explicitAction || !link.contains(explicitAction))) return;
 
     const copySetlist = event.target.closest("[data-copy-setlist]");
     if (copySetlist) {
@@ -645,7 +641,10 @@ function bindEvents() {
         return;
       }
       toggleSourceDrawer(sourceToggle.closest(".rank-row, .index-row"));
+      return;
     }
+
+    if (link) return;
   });
 
   els.content.addEventListener("change", (event) => {
@@ -676,9 +675,6 @@ function bindEvents() {
   });
 
   els.content.addEventListener("click", (event) => {
-    const link = event.target.closest("a[href]");
-    if (link) return;
-
     const sourceCollapse = event.target.closest("[data-collapse-source]");
     if (sourceCollapse) {
       event.preventDefault();
@@ -700,6 +696,8 @@ function bindEvents() {
       return;
     }
 
+    const link = event.target.closest("a[href]");
+    if (link) return;
   });
 
   window.addEventListener("popstate", () => {
@@ -7694,7 +7692,7 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
       const visibleOccurrences = pageState.occurrences;
       row._sourceDetailOccurrences = pageState.completeOccurrences || visibleOccurrences || drawerOccurrences;
       if (isSongGroupMode) {
-        songGroups = completeSongGroupsForDrawer(visibleOccurrences, songGroups, mode);
+        songGroups = completeSongGroupsForDrawer(row._sourceDetailOccurrences || visibleOccurrences, songGroups, mode);
         row._artistSongGroups = songGroups;
       }
       clearSourceDrawerStatus(drawer);
