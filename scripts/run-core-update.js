@@ -30,22 +30,23 @@ if (eventName === "schedule" && eventSchedule === COMPENSATION_CRON) {
 
 setOutput("skipped", "false");
 setOutput("mode", runMode);
-const command = process.platform === "win32" ? "npm.cmd" : "npm";
-const result = spawnSync(command, ["run", "update:core"], {
-  cwd: ROOT,
-  stdio: "inherit",
-});
+const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+const nodeCommand = process.execPath;
 
-if (result.error) {
-  console.error(`[core-update] failed to start npm run update:core: ${result.error.message}`);
-  process.exit(1);
+const steps = [
+  ["update-songlist", nodeCommand, ["scripts/update-songlist.js"]],
+  ["apply-song-search-niche", nodeCommand, ["scripts/apply-song-search-niche.js"]],
+  ["fetch-channel-avatar-cache", nodeCommand, ["scripts/fetch-channel-avatar-cache.js", "--daily"]],
+  ["build-runtime-data", nodeCommand, ["scripts/build-runtime-data.js"]],
+  ["validate-core", npmCommand, ["run", "validate:core"]],
+];
+
+for (const [name, command, args] of steps) {
+  runStep(name, command, args);
 }
-if (result.signal) {
-  console.error(`[core-update] npm run update:core stopped by signal ${result.signal}`);
-  process.exit(1);
-}
-if ((result.status || 0) === 0) setOutput("updated", "true");
-process.exit(result.status || 0);
+
+setOutput("updated", "true");
+process.exit(0);
 
 function latestCapturedAt() {
   const meta = readJson(path.join(ROOT, "data", "ui", "meta.json"));
@@ -67,4 +68,27 @@ function setOutput(name, value) {
   const outputPath = process.env.GITHUB_OUTPUT || "";
   if (!outputPath) return;
   fs.appendFileSync(outputPath, `${name}=${String(value)}\n`, "utf8");
+}
+
+function runStep(name, command, args) {
+  const startedAt = Date.now();
+  console.log(`[core-update] start ${name}: ${command} ${args.join(" ")}`);
+  const result = spawnSync(command, args, {
+    cwd: ROOT,
+    stdio: "inherit",
+  });
+  const elapsedSeconds = Math.round((Date.now() - startedAt) / 1000);
+  if (result.error) {
+    console.error(`[core-update] ${name} failed to start after ${elapsedSeconds}s: ${result.error.message}`);
+    process.exit(1);
+  }
+  if (result.signal) {
+    console.error(`[core-update] ${name} stopped by signal ${result.signal} after ${elapsedSeconds}s`);
+    process.exit(1);
+  }
+  if ((result.status || 0) !== 0) {
+    console.error(`[core-update] ${name} failed after ${elapsedSeconds}s with exit code ${result.status}`);
+    process.exit(result.status || 1);
+  }
+  console.log(`[core-update] done ${name} elapsed=${elapsedSeconds}s`);
 }
