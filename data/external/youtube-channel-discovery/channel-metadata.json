@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-21T15:41:07.442Z",
+  "generatedAt": "2026-07-21T16:39:06.795Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-21T15:41:07.442Z",
+    "fetchedAt": "2026-07-21T16:39:06.795Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-21T15:41:07.442Z",
+    "generatedAt": "2026-07-21T16:39:06.795Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7936,45 +7936,31 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 965,
-      "parseableChannels": 749,
+      "totalChannels": 964,
+      "parseableChannels": 746,
       "realAvatar": 643,
-      "thumbnailFallback": 322,
+      "thumbnailFallback": 321,
       "missingDisplayImage": 0,
-      "missingAvatar": 322,
+      "missingAvatar": 321,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 330
+      "skipped_collected_evidence": 329
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 114,
-      "missing_channel_url_or_handle": 216
+      "missing_channel_url_or_handle": 218,
+      "batch_limit_reached": 111
     },
     "skippedSamples": [
       {
-        "handle": "/@KaguraTomyoji",
-        "channelId": "UC8W8jZ1P9bhJFYLelr3EvIQ",
-        "displayName": "燈明寺かぐら - Tomyoji Kagura -",
-        "sourceUrl": "https://www.youtube.com/@KaguraTomyoji",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@AnonRemu",
-        "channelId": "UCPqswBEjZm3FdvOzPyDw9wg",
-        "displayName": "Remu Ch. 綺音れむ",
-        "sourceUrl": "https://www.youtube.com/@AnonRemu",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@ShinoYakushino",
-        "channelId": "UCm2gbO8BoBgSFtDM_aQKmIw",
-        "displayName": "薬師乃しの",
-        "sourceUrl": "https://www.youtube.com/@ShinoYakushino",
-        "reason": "batch_limit_reached"
+        "handle": "",
+        "channelId": "",
+        "displayName": "双葉いよ - FutabaIyo -",
+        "sourceUrl": "",
+        "reason": "missing_channel_url_or_handle"
       },
       {
         "handle": "",
@@ -8126,7 +8112,21 @@
       {
         "handle": "",
         "channelId": "",
+        "displayName": "燈明寺かぐら - Tomyoji Kagura -",
+        "sourceUrl": "",
+        "reason": "missing_channel_url_or_handle"
+      },
+      {
+        "handle": "",
+        "channelId": "",
         "displayName": "Kyoko Ch. 倉持京子",
+        "sourceUrl": "",
+        "reason": "missing_channel_url_or_handle"
+      },
+      {
+        "handle": "",
+        "channelId": "",
+        "displayName": "宮守ゆり",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
