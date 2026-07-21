@@ -11,9 +11,7 @@ on:
       - main
     paths:
       - ".github/workflows/deploy-runtime-db.yml"
-      - "assets/**"
       - "config/**"
-      - "index.html"
       - "data/status.json"
       - "data/latest.json"
       - "data/external/vsinger-http/backfill/**"
@@ -26,8 +24,6 @@ on:
       - "scripts/import-channel-discovery.js"
       - "scripts/vsinger-http/**"
       - "scripts/youtube-channel-discovery*.js"
-      - "server/**"
-      - "test/runtime-api.test.js"
       - "test/runtime-db.test.js"
   workflow_dispatch:
 

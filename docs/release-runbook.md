@@ -15,7 +15,7 @@
    - `node scripts/check-js-syntax.js`
    - `npm run test:db`
    - 涉及 UI 时追加相关 `node --test test/*ui*.test.js test/frontend-utils.test.js test/app-static-performance.test.js`
-5. push 到 `main` 后让 `Deploy SQLite runtime DB` 在 GitHub Actions 构建并部署 SQLite。
+5. push 到 `main` 后先走 `Deploy VPS static files` 快速同步源码、静态文件并重启 API；不要让 UI/API 热修触发完整 SQLite 构建。
 6. 线上验收以 `/api/meta.source_commit_sha`、HTTP 状态、关键查询和页面交互为准，不用本地文件当线上事实。
 
 ### 来源补漏 / 数据批次
@@ -65,13 +65,14 @@
 ## 加速规则
 
 1. 优先瘦提交：代码/UI 热修不带全量生成产物。
-2. 把生成产物交给 CI：让部署 workflow 在干净 checkout 上重建 DB。
-3. 分批来源：谁先有完整 manifest 谁先合，未完成频道不阻塞其他批次。
-4. 避免海量小文件进 commit：`data/review/sources/**`、`data/ui/**` 分片只有在明确需要静态 runtime 发布时才纳入。
-5. 发布前先看 `git diff --stat`，发现几千个 JSON 或几 GB 改动时，先拆分。
-6. 失败时不要盲目重跑上传：先确认失败发生在 build、artifact verification、upload、activate 还是 public verification。
-7. 每日快照 workflow 保留保守抓取预算和顺序视频抓取；优化优先做 summary、缓存、重试和失败定位，不把预算调到激进值。
-8. backfill inbox 只提交不可变 bundle；不要顺手提交 `data/ui/**`、`data/review/sources/**` 或本地 review queue。
+2. 区分快慢车道：UI/API 热修走 `Deploy VPS static files`；来源、`data/latest.json`、DB schema/export 脚本变化才走 `Deploy SQLite runtime DB`。
+3. 把生成产物交给 CI：让部署 workflow 在干净 checkout 上重建 DB。
+4. 分批来源：谁先有完整 manifest 谁先合，未完成频道不阻塞其他批次。
+5. 避免海量小文件进 commit：`data/review/sources/**`、`data/ui/**` 分片只有在明确需要静态 runtime 发布时才纳入。
+6. 发布前先看 `git diff --stat`，发现几千个 JSON 或几 GB 改动时，先拆分。
+7. 失败时不要盲目重跑上传：先确认失败发生在 build、artifact verification、upload、activate 还是 public verification。
+8. 每日快照 workflow 保留保守抓取预算和顺序视频抓取；优化优先做 summary、缓存、重试和失败定位，不把预算调到激进值。
+9. backfill inbox 只提交不可变 bundle；不要顺手提交 `data/ui/**`、`data/review/sources/**` 或本地 review queue。
 
 ## GitHub Actions handoff
 
