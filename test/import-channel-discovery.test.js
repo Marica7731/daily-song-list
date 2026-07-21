@@ -57,6 +57,13 @@ test("channel discovery import reads usable details and preserves provenance", (
             sourceId: "comment:1",
             sourceHash: "hash-1",
           },
+          {
+            time: "13:00",
+            seconds: 780,
+            title: "Brave Shine",
+            artist: "Aimer Start",
+            raw: "13:00 Brave Shine / Aimer Start",
+          },
         ],
       },
       { videoId: "BBBBBBBBBBB", title: "empty", songs: [] },
@@ -71,11 +78,11 @@ test("channel discovery import reads usable details and preserves provenance", (
   assert.equal(stats.usableVideos, 1);
   assert.equal(stats.skippedNoSongs, 1);
   assert.equal(stats.skippedInvalidVideoId, 1);
-  assert.equal(stats.songs, 1);
+  assert.equal(stats.songs, 2);
   assert.equal(videos[0].sourceGroups.includes("youtube_channel_discovery"), true);
   assert.equal(videos[0].sourceUrls.includes("https://www.youtube.com/@noa_polaris/streams"), true);
   assert.equal(videos[0].sourceUrls.includes("https://www.youtube.com/watch?v=AAAAAAAAAAA"), true);
-  assert.deepEqual(videos[0].songs.map((song) => song.title), ["少女レイ"]);
+  assert.deepEqual(videos[0].songs.map((song) => `${song.title} / ${song.artist}`), ["少女レイ / みきとP", "Brave Shine / Aimer"]);
   assert.equal(videos[0].songs[0].sourceId, "comment:1");
   assert.equal(videos[0].thumbnailUrl, "https://example.test/noa-thumb.jpg");
 });

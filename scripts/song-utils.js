@@ -202,7 +202,7 @@ function rejectTimestampLine(onReject, reason, payload) {
 }
 
 function auditParsedSongForImport(song, source = {}) {
-  const normalized = normalizeParsedSong(song);
+  const normalized = normalizeSourceAwareArtist(normalizeParsedSong(song), source);
   const title = String(normalized?.title || "").trim();
   const artist = String(normalized?.artist || "").trim();
   const raw = String(normalized?.raw || song?.raw || "");
@@ -547,7 +547,14 @@ function isReactionActivityEntry(title, artist, raw) {
 function isShortReactionPseudoSongTitle(title, artist) {
   const value = normalizeReactionActivityText(title);
   if (/^(?:くしゃみ|助かる|たすかる|がち恋距離助かる|ガチ恋距離助かる)$/iu.test(value)) return true;
+  if (isUnknownArtistField(artist) && isCompoundShortReactionPseudoTitle(value)) return true;
   return /ここすき$/u.test(value) && isUnknownArtistField(artist);
+}
+
+function isCompoundShortReactionPseudoTitle(value) {
+  if (!value || value.length > 24) return false;
+  if (/(?:くしゃみ|咳払い|せき払い|咳).{0,10}(?:助かる|たすかる)(?:んだワ|んだわ|[ー〜～]*)?$/iu.test(value)) return true;
+  return /^(?:圧|バカ|ばか|ちゅ|ちゅー|めっちゃ|とても|大変)?(?:助かる|たすかる)$/iu.test(value);
 }
 
 function isReactionActivityText(text) {

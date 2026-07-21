@@ -161,6 +161,44 @@ test("buildClientGroup filters runtime activity markers while preserving START s
   );
 });
 
+test("buildClientGroup applies source-aware runtime song cleanup", () => {
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "NOAPOLARIS1",
+        title: "Noa Karaoke",
+        channelName: "ノア・ポラリス -Noa Polaris-",
+        channelHandle: "/@noa_polaris",
+        songs: [
+          { seconds: 1, title: "自己紹介", artist: "Aimer", isNiche: true },
+          { seconds: 2, title: "Brave Shine", artist: "Aimer Start", isNiche: false },
+        ],
+      },
+      {
+        videoId: "RIONA000001",
+        title: "Riona Karaoke",
+        channelName: "Riona Ch. 響咲リオナ - FLOW GLOW",
+        channelHandle: "/@IsakiRiona",
+        songs: [
+          { seconds: 3, title: "Unknown Row", artist: "未記載", isNiche: true },
+          { seconds: 4, title: "Known Song", artist: "Known Artist", isNiche: false },
+        ],
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    group.items.map((item) => [item.videoId, item.songs.map((song) => `${song.title} / ${song.artist}`)]),
+    [
+      ["NOAPOLARIS1", ["Brave Shine / Aimer"]],
+      ["RIONA000001", ["Known Song / Known Artist"]],
+    ],
+  );
+  assert.deepEqual(Object.keys(group.items[0].songs[0]).sort(), ["artist", "isNiche", "seconds", "title"]);
+});
+
 test("buildClientGroup drops videos after all songs are filtered", () => {
   const group = buildClientGroup({
     id: "all",

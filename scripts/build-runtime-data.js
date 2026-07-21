@@ -4,7 +4,7 @@ const crypto = require("node:crypto");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION } = require("../assets/source-filter");
 const RankingUtils = require("../assets/ranking-utils");
 const { isActivityMarkerTitle } = require("./curation");
-const { isLikelyNonSongEntry } = require("./song-utils");
+const { isLikelyNonSongEntry, normalizeSourceAwareArtist } = require("./song-utils");
 const { augmentPayloadWithVsingerBackfill } = require("./vsinger-http/runtime-importer");
 const {
   CANONICAL_RANGES,
@@ -200,7 +200,7 @@ function buildClientGroup(group) {
 
 function buildClientVideo(item) {
   const publishedTimestamp = finiteTimestamp(item.publishedTimestamp);
-  const songs = (item.songs || []).map(buildClientSong).map(cleanRuntimeSong).filter(Boolean);
+  const songs = (item.songs || []).map(buildClientSong).map((song) => cleanRuntimeSong(song, item)).filter(Boolean);
   if (songs.length === 0) return null;
   const result = {
     videoId: item.videoId || "",
@@ -289,16 +289,19 @@ function buildClientSong(song) {
   };
 }
 
-function cleanRuntimeSong(song) {
+function cleanRuntimeSong(song, source = {}) {
   const title = cleanRuntimeTitle(song?.title);
   if (!title) return null;
   let artist = String(song?.artist || "").trim();
-  if (shouldDropRuntimeSong({ ...song, title, artist })) return null;
+  const normalized = normalizeSourceAwareArtist({ ...song, title, artist }, source);
+  artist = String(normalized?.artist || "").trim();
+  if (shouldDropRuntimeSong({ ...normalized, title, artist }, source)) return null;
   artist = cleanRuntimeArtist(artist);
   return {
-    ...song,
+    seconds: Math.max(0, Number(normalized.seconds) || 0),
     title,
     artist,
+    isNiche: normalized.isNiche === true,
   };
 }
 
@@ -308,10 +311,10 @@ function cleanRuntimeTitle(title) {
   return value;
 }
 
-function shouldDropRuntimeSong(song) {
+function shouldDropRuntimeSong(song, source = {}) {
   const artist = cleanRuntimeArtist(song.artist);
   if (isKnownStartSong(song.title, artist)) return false;
-  if (isLikelyNonSongEntry(song)) return true;
+  if (isLikelyNonSongEntry(song, source)) return true;
   if (isActivityMarkerTitle(song.title, artist || "未記載")) return true;
   if (isRuntimeActivityTitle(song.title, artist)) return true;
   return false;

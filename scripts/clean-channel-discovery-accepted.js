@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { dropSameSecondTranslatedAliasSongs } = require("../assets/source-filter");
-const { isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist } = require("./song-utils");
+const { auditParsedSongForImport } = require("./song-utils");
 
 const ROOT = path.resolve(__dirname, "..");
 const DEFAULT_ACCEPTED_DIR = path.join(ROOT, "data", "external", "youtube-channel-discovery", "accepted");
@@ -79,9 +79,9 @@ function cleanAcceptedFile(filePath, options = {}) {
     songsBefore += originalSongs.length;
     const sourceContext = acceptedVideoSourceContext(video, payload);
     const filteredSongs = originalSongs
-      .map((song) => normalizeParsedSong(song))
-      .map((song) => normalizeSourceAwareArtist(song, sourceContext))
-      .filter((song) => song.title && !isLikelyNonSongEntry(song, sourceContext));
+      .map((song) => auditParsedSongForImport(song, sourceContext))
+      .filter((audit) => audit.action === "accept" && audit.song?.title)
+      .map((audit) => audit.song);
     const cleanedSongs = dropSameSecondTranslatedAliasSongs(filteredSongs)
       .map((song, index) => ({ ...song, index: index + 1 }));
     songsAfter += cleanedSongs.length;
@@ -139,6 +139,14 @@ function cleanAcceptedFile(filePath, options = {}) {
 
 function acceptedVideoSourceContext(video, payload) {
   return {
+    videoId: video?.videoId || "",
+    title: video?.title || "",
+    videoTitle: video?.title || "",
+    channelName: video?.channelName || video?.discoverySingerName || "",
+    channelId: video?.channelId || "",
+    channelHandle: video?.channelHandle || "",
+    channelUrl: video?.channelUrl || video?.discoveryChannelUrl || "",
+    sourceUrl: video?.sourceUrl || "",
     candidate: video,
     sourceRecord: video,
     source: payload && typeof payload === "object" && !Array.isArray(payload) ? payload : null,

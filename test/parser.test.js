@@ -91,6 +91,9 @@ test("rejects naretan commentary and request timestamps while keeping real song 
       "0:28 そして花になる ここすき",
       "0:29 ED / うっかり",
       "0:30 END / Cパート / 5月生写真チラ見せ",
+      "0:31 くしゃみ助かる",
+      "0:32 くしゃみたすかるんだワ",
+      "0:33 圧助かる",
     ].join("\n"),
   ]);
 

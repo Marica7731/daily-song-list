@@ -223,11 +223,11 @@
   }
 
   function isRionaChannelSource(source = {}) {
-    const handleValues = uniqueStrings([source.channelHandle, source.handle, source.ownerHandle, ...channelUrlValues(source)]);
+    const handleValues = uniqueStrings([...sourceFieldValues(source, ["channelHandle", "handle", "ownerHandle"]), ...channelUrlValues(source)]);
     if (handleValues.some((value) => normalizeHandle(value) === "isakiriona")) return true;
     const channelUrlMatch = channelUrlValues(source).some((value) => normalizeChannelUrl(value) === "@isakiriona");
     if (channelUrlMatch) return true;
-    const channelName = normalizeMatcherText(source.channelName || source.ownerText || source.longBylineText || source.shortBylineText || "");
+    const channelName = normalizeMatcherText(sourceFieldValues(source, ["channelName", "ownerText", "longBylineText", "shortBylineText"]).join(" "));
     return channelName.includes("響咲リオナ") || /^riona ch\./iu.test(channelName);
   }
 
@@ -241,7 +241,7 @@
   }
 
   function isKisakiChannelSource(source = {}) {
-    const handleValues = uniqueStrings([source.channelHandle, source.handle, source.ownerHandle, ...channelUrlValues(source)]);
+    const handleValues = uniqueStrings([...sourceFieldValues(source, ["channelHandle", "handle", "ownerHandle"]), ...channelUrlValues(source)]);
     if (handleValues.some((value) => {
       const decoded = decodeURIComponentSafe(value).normalize("NFKC").trim();
       const handle = decoded
@@ -255,7 +255,7 @@
     })) {
       return true;
     }
-    const channelName = normalizeMatcherText(source.channelName || source.ownerText || source.longBylineText || source.shortBylineText || "");
+    const channelName = normalizeMatcherText(sourceFieldValues(source, ["channelName", "ownerText", "longBylineText", "shortBylineText"]).join(" "));
     return channelName.includes("妃玖") || /\bkisaki\b/iu.test(channelName);
   }
 
@@ -272,15 +272,17 @@
 
   function isNoaPolarisSource(source = {}) {
     const values = uniqueStrings([
-      source.channelName,
-      source.ownerText,
-      source.longBylineText,
-      source.shortBylineText,
-      source.authorName,
-      source.authorText,
-      source.channelHandle,
-      source.handle,
-      source.ownerHandle,
+      ...sourceFieldValues(source, [
+        "channelName",
+        "ownerText",
+        "longBylineText",
+        "shortBylineText",
+        "authorName",
+        "authorText",
+        "channelHandle",
+        "handle",
+        "ownerHandle",
+      ]),
       ...channelUrlValues(source),
     ]);
     return values.some((value) => {
@@ -292,16 +294,10 @@
   function isSelfReferentialChannelTitle(title, source = {}) {
     const titleKey = normalizeChannelIdentityTitle(title);
     if (!titleKey || titleKey.length < 3) return false;
-    const channelCandidates = uniqueStrings([
-      source.channelName,
-      source.ownerText,
-      source.longBylineText,
-      source.shortBylineText,
-      source.authorName,
-      source.authorText,
-    ]).map(normalizeChannelIdentityTitle);
+    const channelCandidates = uniqueStrings(sourceFieldValues(source, ["channelName", "ownerText", "longBylineText", "shortBylineText", "authorName", "authorText"]))
+      .map(normalizeChannelIdentityTitle);
     if (channelCandidates.some((value) => value && (value === titleKey || value.includes(titleKey)))) return true;
-    const handleCandidates = uniqueStrings([source.channelHandle, source.handle, source.ownerHandle, ...channelUrlValues(source)])
+    const handleCandidates = uniqueStrings([...sourceFieldValues(source, ["channelHandle", "handle", "ownerHandle"]), ...channelUrlValues(source)])
       .map(normalizeHandle)
       .filter(Boolean);
     return handleCandidates.some((value) => value === titleKey || value.replace(/ch(?:annel)?$/iu, "") === titleKey);
@@ -374,8 +370,16 @@
   function isShortReactionPseudoSongTitle(title, artist) {
     const key = normalizeNoiseTitleKey(title);
     if (/^(?:くしゃみ|助かる|たすかる|がち恋距離助かる|ガチ恋距離助かる)$/iu.test(key)) return true;
+    if (isUnknownArtist(artist) && isCompoundShortReactionPseudoTitle(key)) return true;
     if (/ここすき$/u.test(key) && isUnknownArtist(artist)) return true;
     return false;
+  }
+
+  function isCompoundShortReactionPseudoTitle(key) {
+    const value = String(key || "").trim();
+    if (!value || value.length > 24) return false;
+    if (/(?:くしゃみ|咳払い|せき払い|咳).{0,10}(?:助かる|たすかる)(?:んだワ|んだわ|[ー〜～]*)?$/iu.test(value)) return true;
+    return /^(?:圧|バカ|ばか|ちゅ|ちゅー|めっちゃ|とても|大変)?(?:助かる|たすかる)$/iu.test(value);
   }
 
   function isNonSongNoiseTitle(text) {
@@ -972,7 +976,23 @@
   }
 
   function channelUrlValues(item = {}) {
-    return uniqueStrings([item.channelUrl, item.authorUrl, item.ownerUrl]);
+    return uniqueStrings(sourceFieldValues(item, ["channelUrl", "authorUrl", "ownerUrl", "sourceUrl", "discoveryChannelUrl"]));
+  }
+
+  function sourceFieldValues(item = {}, keys = [], seen = new Set()) {
+    if (!item || typeof item !== "object" || seen.has(item)) return [];
+    seen.add(item);
+    const values = [];
+    for (const key of keys) {
+      const value = item[key];
+      if (Array.isArray(value)) values.push(...value);
+      else if (value != null) values.push(value);
+    }
+    for (const nestedKey of ["candidate", "sourceRecord", "source", "video", "item", "detail"]) {
+      const nested = item[nestedKey];
+      if (nested && typeof nested === "object") values.push(...sourceFieldValues(nested, keys, seen));
+    }
+    return uniqueStrings(values);
   }
 
   function normalizeHandle(value) {

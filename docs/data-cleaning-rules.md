@@ -131,6 +131,14 @@ Remaining dirty-keyword audit hits include reviewed false positives such as `Sta
 - Current local cleancheck DB threshold audit (`songCount > 1000 OR occurrences > 5000`) still finds four channels after batch-1 cleanup: Naraetan `1461/4248`, Hanon `1195/6468`, 明日夢かなえ `1056/3665`, and Noa `1030/4695`. Same-second CJK/Latin duplicates were originally concentrated in Naraetan (`842` groups); after the shared list-level pass only one reviewed single-pair source remains, for example `ぴゅあぴゅあはーと / 放課後ティータイム` versus `Pure Pure Heart / Houkago Tea Time`. Residual `ワンコーラス` entries are kept as real song version notes; high-confidence reaction/comment rows such as `くしゃみ`, `助かる`, `ガチ恋距離助かる`, and `ここすき` are dropped in both import and runtime paths.
 - Artist metadata stripping belongs in `scripts/song-utils.js` so import and runtime rebuilds agree. Reviewed suffixes include `(EN:...)`, `※Be Careful of Volume`, `※音源一時停止有`, and `(同接200人突破おめでとうございます)`. These suffixes are removed from the artist field, not treated as song aliases.
 
+2026-07-22 second-pass reaction cleanup note:
+
+- Production API threshold audit at `2026-07-21T23:48:56.106Z` found 29 VTuber targets where `songCount > 1000 OR count > 5000`. Query both `metric=songs` and `metric=count`, because count-heavy channels can sit below the song threshold.
+- Do not broaden cleanup to every title containing `かわいい` or `可愛い`. Real songs such as `わたしの一番かわいいところ` and `可愛いあの子が気にゐらない` appear frequently in the target set and must be retained.
+- Do not treat `No01.` / `No02.` prefixes as non-song by themselves. Those are often song-list ordinals already handled by title cleanup, not proof of noise.
+- The reusable import/runtime rule is narrower: short unknown-artist reaction pseudo titles ending in `助かる` / `たすかる`, especially when combined with `くしゃみ`, `咳`, `圧`, `バカ`, or `ちゅ`, are non-song rows. Examples: `くしゃみ助かる`, `くしゃみたすかるんだワ`, `圧助かる`, `ちゅたすかる`.
+- Keep this rule in both `assets/source-filter.js` and `scripts/song-utils.js`; source imports, accepted JSON cleanup, runtime export, and the client fallback should agree.
+
 For accepted JSON impact checks, run:
 
 ```powershell
@@ -141,8 +149,8 @@ The script reads `data/external/youtube-channel-discovery/accepted/*.json` plus 
 
 Latest local accepted impact audit in this branch:
 
-- query time: `2026-07-21T20:39:06.517Z`
-- Naraetan accepted source: `2026-07-19-naraetanV-full.json`; songs `5715 -> 5195`; unique normalized titles `2576 -> 2080`; dirty candidates `516 -> 0`.
-- KanaruHanon accepted source: `2026-07-19-kanaruhanon-full.json`; songs `6701 -> 6486`; unique normalized titles `1299 -> 1236`; dirty candidates `200 -> 0`.
+- query time: `2026-07-21T23:56:47.331Z`
+- Naraetan accepted source: `2026-07-19-naraetanV-full.json`; songs `5715 -> 5161`; unique normalized titles `2576 -> 2049`; dirty candidates `550 -> 0`.
+- KanaruHanon accepted source: `2026-07-19-kanaruhanon-full.json`; songs `6701 -> 6464`; unique normalized titles `1299 -> 1220`; dirty candidates `222 -> 0`.
 - IsakiRiona runtime fallback: songs `38 -> 38`; unique normalized titles `19 -> 19`; dirty candidates `0 -> 0`.
 - Guardrails retained: `START:DASH!! / μ's`, `ENDLESS STORY / REIRA starring YUNA ITO`, and `Never Ending Story / Limahl`.
