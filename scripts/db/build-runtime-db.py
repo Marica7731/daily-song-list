@@ -1731,21 +1731,21 @@ def is_moment_source_type(value) -> bool:
 def is_collected_source(item: dict) -> bool:
     source_groups = item.get("sourceGroups") if isinstance(item.get("sourceGroups"), list) else []
     source_quality = item.get("sourceQuality") if isinstance(item.get("sourceQuality"), dict) else {}
-    if is_moment_source(item):
-        return False
-    explicit = item.get("isCollected")
-    if explicit is True or explicit == 1 or clean_text(explicit).lower() == "true":
-        return True
     known_type = clean_text(item.get("knownSourceType") or known_source_type(item)).lower()
     true_types = {"manual", "verified", "song-search", "song_search", "youtube_channel_discovery"}
-    return (
+    if (
         "youtube_channel_discovery" in source_groups
         or known_type in true_types
         or (
             source_quality.get("sourceType") == "external"
             and clean_text(source_quality.get("sourceSystem")).lower() != "vsinger_moment_http"
         )
-    )
+    ):
+        return True
+    if is_moment_source(item):
+        return False
+    explicit = item.get("isCollected")
+    return explicit is True or explicit == 1 or clean_text(explicit).lower() == "true"
 
 
 def is_moment_source(item: dict) -> bool:
@@ -1800,6 +1800,8 @@ def is_runtime_confirmed_dirty_title(title, raw) -> bool:
     if is_bracketed_runtime_commentary_note(title):
         return True
     if re.search(r"(?:自己肯定感|なれたん|naraetan)", combined, re.IGNORECASE):
+        return True
+    if is_runtime_conversational_pseudo_song(title, raw):
         return True
     return bool(re.search(r"^(?:雑談|聊天|说明|説明|コメント|コメ|アンケート|投票|リクエスト)(?:確認|募集|受付|結果|タイム|ください|下さい|中|する|して|お願いします|お願い)?$", title_text, re.IGNORECASE))
 
@@ -1889,6 +1891,22 @@ def is_runtime_commentary_noise(title, raw) -> bool:
         return True
     if re.search(r"(?:背景を変える|食べる|飲む|お名前呼び|チャンネル登録|スパチャ|メンシ|スクショ|サムネ|写真|登録|ギフト|曲紹介|歌うフリ|姉|妹|幼馴染|指が細い|身長が低い|家族に例える)", combined, re.IGNORECASE):
         return True
+    return False
+
+
+def is_runtime_conversational_pseudo_song(title, raw) -> bool:
+    title_text = normalize_runtime_commentary_text(title)
+    combined = normalize_runtime_commentary_text(f"{title} {raw}")
+    if not title_text:
+        return False
+    if re.fullmatch(r"(?:おはよう|おはよ|こんにちは|こんばんは|こん[\wー~〜～]{2,20}|おつ[\wー~〜～]{1,24}|またね|ばいばい|bye)", title_text, re.IGNORECASE):
+        return True
+    if re.fullmatch(r"(?:ご挨拶|挨拶|雑談|聊天|閑談|コメント|コメ|感想|日常|近況)(?:タイム|枠|中|する|です)?", title_text, re.IGNORECASE):
+        return True
+    if re.fullmatch(r"(?:次(?:の)?バトンは|次は).{2,40}(?:ちゃん|さん|くん)", title_text):
+        return True
+    if re.search(r"(?:次(?:の)?バトンは|嫁|お嫁|旦那|推し|リスナー|視聴者|チャンネル登録|高評価|スパチャ|メンシ|コメント|コメ|雑談|聊天|閑談|日常|近況)", combined):
+        return bool(re.search(r"(?:ちゃん|さん|くん|だよ|です|ます|でした|だった|ありがとう|おめでとう|よろしく|お疲れ|おつかれ)", combined))
     return False
 
 

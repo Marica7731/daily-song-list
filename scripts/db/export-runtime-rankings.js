@@ -599,16 +599,18 @@ function isMomentSourceType(value) {
 
 function isCollectedSource(item) {
   const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
-  if (isMomentSource(item)) return false;
-  const explicit = item.isCollected;
-  if (explicit === true || explicit === 1 || String(explicit).toLocaleLowerCase() === "true") return true;
   const knownType = RankingUtils.cleanText(item.knownSourceType || knownSourceTypeForVideo(item)).toLocaleLowerCase();
   const trueTypes = new Set(["manual", "verified", "song-search", "song_search", "youtube_channel_discovery"]);
-  return (
+  if (
     sourceGroups.includes("youtube_channel_discovery") ||
     trueTypes.has(knownType) ||
     (item.sourceQuality?.sourceType === "external" && RankingUtils.cleanText(item.sourceQuality?.sourceSystem).toLocaleLowerCase() !== "vsinger_moment_http")
-  );
+  ) {
+    return true;
+  }
+  if (isMomentSource(item)) return false;
+  const explicit = item.isCollected;
+  return explicit === true || explicit === 1 || String(explicit).toLocaleLowerCase() === "true";
 }
 
 function isMomentSource(item) {

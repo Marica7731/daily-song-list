@@ -132,6 +132,7 @@
     if (!hasArtist && isBracketedCommentaryNote(title)) return true;
     if (isCommentaryNoiseEntry(title, artist, song?.raw)) return true;
     if (isNumericIndexFragmentEntry(title, artist, song?.raw)) return true;
+    if (!hasArtist && isConversationalPseudoSongTitle(title, song?.raw)) return true;
     if (!hasArtist && isNonSongNoiseTitle(title)) return true;
     return !hasArtist && isChatReactionShoutText(title);
   }
@@ -239,9 +240,9 @@
       return true;
     }
     if (/^(?:前半|後半)?再開$/u.test(key)) return true;
-    if (/^おつ[\p{L}\p{N}ー]{1,18}$/iu.test(key)) return true;
+    if (/^おつ[\p{L}\p{N}ー~〜～]{1,24}$/iu.test(key)) return true;
     if (/^せーの.*おつ/u.test(key)) return true;
-    if (/^こん[\p{L}\p{N}ー]{2,16}$/iu.test(key)) return true;
+    if (/^こん[\p{L}\p{N}ー~〜～]{2,20}$/iu.test(key)) return true;
     return new Set([
       "この曲について",
       "待機",
@@ -353,6 +354,19 @@
     if (/^(?:歌唱|歌|曲)?開始(?:時間|時刻)?$/iu.test(key)) return true;
     if (/^(?:歌唱|初手|声|音|お遊戯|おゆうぎ)(?:あり|有り)$/iu.test(key)) return true;
     if (/^(?:順番は)?じゃんけんで$/iu.test(key)) return true;
+    return false;
+  }
+
+  function isConversationalPseudoSongTitle(title, raw) {
+    const value = normalizeNoiseTitleKey(title);
+    const combined = normalizeNoiseTitleKey(`${title || ""} ${raw || ""}`);
+    if (!value) return false;
+    if (/^(?:おはよう|おはよ|こんにちは|こんばんは|こん[\p{L}\p{N}ー~〜～]{2,20}|おつ[\p{L}\p{N}ー~〜～]{1,24}|またね|ばいばい|bye)$/iu.test(value)) return true;
+    if (/^(?:ご挨拶|挨拶|雑談|聊天|閑談|コメント|コメ|感想|日常|近況)(?:タイム|枠|中|する|です)?$/iu.test(value)) return true;
+    if (/^(?:次(?:の)?バトンは|次は).{2,40}(?:ちゃん|さん|くん)$/u.test(value)) return true;
+    if (/(?:次(?:の)?バトンは|嫁|お嫁|旦那|推し|リスナー|視聴者|チャンネル登録|高評価|スパチャ|メンシ|コメント|コメ|雑談|聊天|閑談|日常|近況)/u.test(combined)) {
+      return isSentenceLikeTitle(title) || /(?:ちゃん|さん|くん|だよ|です|ます|でした|だった|ありがとう|おめでとう|よろしく|お疲れ|おつかれ)/u.test(combined);
+    }
     return false;
   }
 

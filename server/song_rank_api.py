@@ -180,6 +180,26 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             and total == 0
         ):
             return vtuber_song_fallback_payload(conn, range_id, q, page, page_size, min_count, base_total)
+        if (
+            q
+            and view in {"songs", "songIndex"}
+            and metric == "videos"
+            and effective_search_scope in {"song", "title", "artist"}
+            and search_fields in (["title", "artist"], ["title"], ["artist"])
+            and total == 0
+        ):
+            return source_matched_rankings_payload(
+                db_path,
+                range_id,
+                view,
+                metric,
+                q,
+                "video",
+                page,
+                page_size,
+                min_count,
+                ["video"],
+            )
     return {
         "schemaVersion": 1,
         "rangeId": range_id,

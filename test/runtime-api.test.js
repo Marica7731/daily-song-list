@@ -154,6 +154,13 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     const scopedVideoTitleSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Morning&searchScope=video&pageSize=5`);
     assert.equal(scopedVideoTitleSongSearch.totalCount, 2);
 
+    const defaultFieldVideoMetricSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&metric=videos&q=Morning&searchFields=title,artist&pageSize=5`);
+    assert.equal(defaultFieldVideoMetricSongSearch.metric, "videos");
+    assert.equal(defaultFieldVideoMetricSongSearch.searchScope, "video");
+    assert.deepEqual(defaultFieldVideoMetricSongSearch.searchFields, ["video"]);
+    assert.equal(defaultFieldVideoMetricSongSearch.totalCount, 2);
+    assert.deepEqual(defaultFieldVideoMetricSongSearch.records.map((record) => record.videoCount), [1, 1]);
+
     const channelSongIndexSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songIndex&q=Alpha&pageSize=5`);
     assert.equal(channelSongIndexSearch.totalCount, 0);
 

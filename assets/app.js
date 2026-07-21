@@ -3501,7 +3501,12 @@ async function requestApiViewPage(request, range) {
   });
   assertApiRankingPayload(payload);
   const records = hydrateRequestRecords(payload.records, request.view);
-  const entries = records.map((record, index) => apiIndexEntryForRecord(record, request.view, payload.metric || metricName, index));
+  const page = Number(payload.page) || request.page || 1;
+  const hasFilteredRank = Boolean(query || Number(filters.minCount) > 1);
+  const pageOffset = hasFilteredRank ? (Math.max(1, page) - 1) * pageSize : 0;
+  const entries = records.map((record, index) => apiIndexEntryForRecord(record, request.view, payload.metric || metricName, index, {
+    rank: hasFilteredRank ? pageOffset + index + 1 : null,
+  }));
   const summary = apiSummaryFromPayload(payload);
   const manifest = {
     schemaVersion: 1,
@@ -3522,7 +3527,7 @@ async function requestApiViewPage(request, range) {
     entries,
     records,
     bucketEntries: request.view === "songAz" ? entries : null,
-    page: Number(payload.page) || request.page,
+    page,
     totalCount: Number(payload.totalCount) || 0,
     filteredBaseCount: Number(payload.filteredBaseCount ?? payload.totalCount) || 0,
     filterKey: requestFilterKey(filters),
@@ -3553,14 +3558,15 @@ function assertApiRankingPayload(payload) {
   }
 }
 
-function apiIndexEntryForRecord(record, view, metricName, index) {
+function apiIndexEntryForRecord(record, view, metricName, index, options = {}) {
   const type = view === "artistRank" ? "artist" : view === "vtuberRank" ? "vtuber" : view === "videos" ? "video" : "song";
   const key = record.key || record.videoId || record.detailKey || String(index);
+  const rank = Number(options.rank) || Number(record.rank) || index + 1;
   return {
     type: record.type || type,
     key,
     detailKey: key,
-    rank: Number(record.rank) || index + 1,
+    rank,
     isTied: false,
     isNiche: isNicheRecord(record),
     rankValue: rankValueForRequestRecord(record, metricName),
@@ -3754,7 +3760,7 @@ async function filterRequestIndexEntries(entries, options = {}) {
       result = [];
     }
   }
-  if (options.view === "songRank" || options.view === "artistRank") {
+  if (options.view === "songRank" || options.view === "artistRank" || options.view === "vtuberRank") {
     return applyRequestRanks(result);
   }
   return result;
@@ -3771,11 +3777,12 @@ function requestEntryMatchesTrend(entry, mode, trendFilter) {
 }
 
 function applyRequestRanks(entries) {
+  const rankedEntries = [...entries].sort(compareRequestRankEntries);
   const frequencies = new Map();
-  for (const entry of entries) frequencies.set(entry.rankValue, (frequencies.get(entry.rankValue) || 0) + 1);
+  for (const entry of rankedEntries) frequencies.set(entry.rankValue, (frequencies.get(entry.rankValue) || 0) + 1);
   let previousValue = null;
   let rank = 0;
-  return entries.map((entry, index) => {
+  return rankedEntries.map((entry, index) => {
     if (entry.rankValue !== previousValue) {
       rank = index + 1;
       previousValue = entry.rankValue;
@@ -3786,6 +3793,10 @@ function applyRequestRanks(entries) {
       isTied: (frequencies.get(entry.rankValue) || 0) > 1,
     };
   });
+}
+
+function compareRequestRankEntries(a, b) {
+  return Number(b.rankValue) - Number(a.rankValue) || Number(a.rank || 0) - Number(b.rank || 0) || compareValues(a.searchText || a.key, b.searchText || b.key);
 }
 
 async function loadRequestSearchCandidates(query, filters = {}, signal) {
@@ -4421,7 +4432,8 @@ function defineLazyValue(target, key, factory) {
 function currentSelection(rangeCache) {
   const filterKey = normalizeSearch(state.filter);
   const hideUnknownForView = shouldHideUnknownForCurrentView();
-  const key = `${state.view}::${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}::${filterKey}`;
+  const searchFieldKey = state.view === "songRank" || state.view === "songAz" ? normalizedSearchFieldKey(state.searchFields || DEFAULT_SEARCH_FIELDS) : "default";
+  const key = `${state.view}::${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}::${filterKey}::${searchFieldKey}`;
   if (rangeCache.selectionCache.has(key)) return rangeCache.selectionCache.get(key);
 
   const baseOccurrences = selectedOccurrences(rangeCache, { hideUnknownForView });
@@ -4512,7 +4524,7 @@ function shouldHideUnknownForCurrentView() {
 function occurrenceSearchTextForCurrentView(occurrence) {
   if (state.view === "artistRank") return artistOccurrenceSearchText(occurrence);
   if (state.view === "vtuberRank") return vtuberOccurrenceSearchText(occurrence);
-  if (state.view === "songRank" || state.view === "songAz") return songOccurrenceSearchText(occurrence);
+  if (state.view === "songRank" || state.view === "songAz") return songOccurrenceSearchText(occurrence, state.searchFields || DEFAULT_SEARCH_FIELDS);
   return occurrence?.searchText || "";
 }
 
@@ -5997,6 +6009,10 @@ function renderRankRecord({
   const sourceVideoCount = Math.max(0, Number(videoCount) || 0);
   const safeOccurrences = occurrences || [];
   const occurrenceCount = safeOccurrences.length;
+  const totalOccurrenceCount =
+    mode === "vtuber"
+      ? Math.max(0, Number(record?.count ?? record?.timestampCount ?? occurrenceCount) || occurrenceCount)
+      : occurrenceCount;
   const isExpanded = state.expandedRows.has(rowKey);
   const sourceDetailPath = sourceDetailPathForRecord(record, safeOccurrences);
   const sourcePresentation =
@@ -6067,6 +6083,7 @@ function renderRankRecord({
       occurrences: safeOccurrences,
       songCount: artistSongCount,
       videoCount: sourceVideoCount,
+      occurrenceCount: totalOccurrenceCount,
       count,
       countUnit,
       rankCount: count,
@@ -6486,6 +6503,7 @@ function renderRankSide({
   rankCount = 0,
   rankMetric = "occurrences",
   trend = null,
+  occurrenceCount = occurrences.length,
 }) {
   const side = document.createElement("div");
   side.className = "rank-side";
@@ -6506,7 +6524,7 @@ function renderRankSide({
 
   if (mode === "artist" || mode === "vtuber") {
     if (expandable) {
-      side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: occurrences.length, videoCount, rankCount, rankMetric }));
+      side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount, videoCount, rankCount, rankMetric }));
     } else {
       side.append(renderStaticSideChip(mode === "vtuber" ? `${songCount}首歌` : `${songCount}首曲目`));
     }
@@ -8256,13 +8274,15 @@ function getVtuberSongGroups(record) {
 function lightweightSongGroupsForRecord(record) {
   const entries = record?.songs instanceof Map ? sortedDisplaySongEntries(record.songs) : [];
   if (!entries.length) return buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []));
+  const occurrenceGroups = buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []));
+  const occurrenceGroupsByKey = new Map(occurrenceGroups.map((group) => [group.key, group]));
   return entries.map((entry) => ({
     key: entry.key || normalizeEntityKey(entry.name),
     title: entry.name,
     count: entry.count,
     isNiche: false,
-    occurrences: null,
-    videoCount: 0,
+    occurrences: occurrenceGroupsByKey.get(entry.key)?.occurrences || null,
+    videoCount: occurrenceGroupsByKey.get(entry.key)?.videoCount || 0,
     _record: record,
   }));
 }

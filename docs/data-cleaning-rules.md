@@ -31,6 +31,8 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - Unknown-artist rows whose title is the channel or streamer identity are rejected with source context, for example `なれたん` in `Naretan Ch. なれたん`.
 - Riona source rows without a reliable artist are rejected by channel scope, while explicit-artist songs on the same channel are retained.
 - Bracketed commentary notes such as `【雑談】リクエスト確認` and `（去年のなれたん）...` are rejected as non-song rows.
+- Unknown-artist conversational rows are rejected across channels, including greetings and wrap-up chants like `おつはのちゅっちゅる〜！`, generic `雑談`/`聊天`/`挨拶` labels, and person-reference chatter such as `次のバトンは香鳴ハノンちゃん`.
+- `vsinger_moment_http` / `vsinger-moment` / `moment` provenance is not an `isCollected` source. Only manual, verified, song-search, and accepted `youtube_channel_discovery` rows set the collected flag.
 
 ## START Guardrail
 

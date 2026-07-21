@@ -3522,21 +3522,43 @@ mark {
   }
 
   .query-search-form.query-trigger {
-    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    grid-template-columns: 24px minmax(0, 1fr) 24px 24px;
     place-items: center;
     width: 100%;
     min-width: 0;
-    height: 34px;
-    min-height: 34px;
-    padding: 0 8px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0 6px;
+    gap: 4px;
+  }
+
+  .query-search-form .query-submit-button,
+  .query-search-form .clear-query-button,
+  .query-search-form .query-field-menu-trigger {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+  }
+
+  .query-search-form input {
+    height: 30px;
+    font-size: 13px;
+    line-height: 30px;
   }
 
   .query-search-form .query-field-summary svg {
     display: block;
+    width: 16px;
+    height: 16px;
   }
 
   .query-search-form .query-count {
     display: inline-grid;
+    min-width: 14px;
+    height: 14px;
+    padding: 0 3px;
+    font-size: 9px;
+    line-height: 14px;
   }
 
   .query-trigger:not(.query-search-form) svg:not(.query-trigger-icon),

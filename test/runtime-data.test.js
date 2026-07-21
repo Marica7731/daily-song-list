@@ -76,6 +76,57 @@ test("buildClientGroup keeps only runtime video and song fields", () => {
   assert.equal(group.items[0].songs[0].seconds, 75);
 });
 
+test("buildClientGroup treats moment sources as not collected even with stale flags", () => {
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "MOMENT00001",
+        title: "moment video",
+        channelName: "Moment Ch.",
+        knownSourceType: "vsinger_moment_http",
+        isCollected: true,
+        sourceGroups: ["vsinger-moment"],
+        sourceQuality: { sourceType: "external", sourceSystem: "vsinger_moment_http" },
+        songs: [{ seconds: 1, title: "Moment Song", artist: "Moment Artist" }],
+      },
+      {
+        videoId: "SCAN0000001",
+        title: "scan video",
+        channelName: "Scan Ch.",
+        sourceGroups: ["youtube_channel_discovery"],
+        songs: [{ seconds: 2, title: "Scanned Song", artist: "Scanned Artist" }],
+      },
+      {
+        videoId: "MANUAL00001",
+        title: "manual video",
+        channelName: "Manual Ch.",
+        knownSourceType: "manual",
+        songs: [{ seconds: 3, title: "Manual Song", artist: "Manual Artist" }],
+      },
+      {
+        videoId: "MIXED000001",
+        title: "mixed video",
+        channelName: "Mixed Ch.",
+        knownSourceType: "vsinger_moment_http",
+        sourceGroups: ["vsinger-moment", "youtube_channel_discovery"],
+        songs: [{ seconds: 4, title: "Mixed Song", artist: "Mixed Artist" }],
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    group.items.map((item) => [item.videoId, item.knownSourceType, item.isCollected]),
+    [
+      ["MOMENT00001", "vsinger_moment_http", false],
+      ["SCAN0000001", "youtube_channel_discovery", true],
+      ["MANUAL00001", "manual", true],
+      ["MIXED000001", "vsinger_moment_http", true],
+    ],
+  );
+});
+
 test("buildClientGroup filters runtime activity markers while preserving START songs", () => {
   const group = buildClientGroup({
     id: "all",

@@ -212,7 +212,7 @@ function buildClientVideo(item) {
     avatarUrl: item.avatarUrl || item.channelAvatarUrl || "",
     sourceUrl: item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl || "",
     knownSourceType: item.knownSourceType || knownSourceTypeForVideo(item),
-    isCollected: item.isCollected === true || isCollectedSource(item),
+    isCollected: isCollectedSource(item),
     keyword: item.keyword || "",
     publishedText: item.publishedText || "",
     publishedTimestamp,
@@ -238,12 +238,31 @@ function knownSourceTypeForVideo(item) {
 
 function isCollectedSource(item) {
   const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
-  return (
+  const knownType = String(item.knownSourceType || knownSourceTypeForVideo(item) || "").trim().toLocaleLowerCase();
+  const sourceSystem = String(item.sourceQuality?.sourceSystem || "").trim().toLocaleLowerCase();
+  const trueTypes = new Set(["manual", "verified", "song-search", "song_search", "youtube_channel_discovery"]);
+  if (
     sourceGroups.includes("youtube_channel_discovery") ||
-    sourceGroups.includes("vsinger-moment") ||
-    item.sourceQuality?.sourceType === "external" ||
-    item.sourceQuality?.sourceSystem === "vsinger_moment_http"
-  );
+    trueTypes.has(knownType) ||
+    (item.sourceQuality?.sourceType === "external" && !isMomentSourceType(sourceSystem))
+  ) {
+    return true;
+  }
+  if (isMomentSource(item)) return false;
+  const explicit = item.isCollected;
+  return explicit === true || explicit === 1 || String(explicit).toLocaleLowerCase() === "true";
+}
+
+function isMomentSource(item) {
+  const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
+  const sourceSystem = String(item.sourceQuality?.sourceSystem || "").trim().toLocaleLowerCase();
+  const knownType = String(item.knownSourceType || sourceSystem || "").trim().toLocaleLowerCase();
+  return sourceGroups.includes("vsinger-moment") || isMomentSourceType(sourceSystem) || isMomentSourceType(knownType);
+}
+
+function isMomentSourceType(value) {
+  const type = String(value || "").trim().toLocaleLowerCase();
+  return type === "vsinger_moment_http" || type === "vsinger-moment" || type === "moment";
 }
 
 function timestampToIso(value) {

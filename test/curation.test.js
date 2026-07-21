@@ -228,6 +228,39 @@ test("curation drops naretan commentary rows while keeping explicit known songs"
   assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 9);
 });
 
+test("curation drops global conversational pseudo-song rows from multiple channels", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "NARAETAN002",
+        channelName: "なれたん Naraetan Ch.",
+        channelHandle: "/@naraetanV",
+        songs: [
+          { title: "雑談タイム", artist: "未記載", seconds: 1, raw: "0:01 雑談タイム" },
+          { title: "START:DASH!!", artist: "μ's", seconds: 2, raw: "0:02 START:DASH!! / μ's" },
+        ],
+      },
+      {
+        videoId: "HANON000001",
+        channelName: "Hanon Ch. 香鳴ハノン【パレプロ】",
+        channelHandle: "/@kanaruhanon",
+        songs: [
+          { title: "おつはのちゅっちゅる〜！", artist: "未記載", seconds: 3, raw: "1:01:14 おつはのちゅっちゅる〜！" },
+          { title: "次のバトンは香鳴ハノンちゃん", artist: "未記載", seconds: 4, raw: "00:24:24 次のバトンは香鳴ハノンちゃん" },
+          { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", seconds: 5, raw: "0:05 ENDLESS STORY / REIRA starring YUNA ITO" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos.flatMap((item) => item.songs.map((song) => `${item.videoId}:${song.title} / ${song.artist}`)),
+    ["NARAETAN002:START:DASH!! / μ's", "HANON000001:ENDLESS STORY / REIRA starring YUNA ITO"],
+  );
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 3);
+});
+
 test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", () => {
   const videos = applyCurationToVideos(
     [

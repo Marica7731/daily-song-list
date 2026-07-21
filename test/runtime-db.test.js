@@ -410,6 +410,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
               channelHandle: "@IsakiRiona",
               channelUrl: "https://www.youtube.com/@IsakiRiona",
               knownSourceType: "vsinger_moment_http",
+              isCollected: true,
               sourceGroups: ["vsinger-moment"],
               songs: [
                 { title: "自己肯定感がドンドン上がってる", artist: "未記載", time: "56:02", seconds: 3362 },
