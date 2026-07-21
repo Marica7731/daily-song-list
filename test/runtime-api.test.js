@@ -28,6 +28,7 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     ],
     { cwd: ROOT, encoding: "utf8" },
   );
+  stripVtuberPayloadIdentity(dbPath, "Alpha Ch.");
 
   const port = await getFreePort();
   const child = spawn(
@@ -103,6 +104,7 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(vtubers.totalCount, 3);
     assert.equal(vtubers.records[0].name, "Alpha Ch.");
     assert.equal(vtubers.records[0].channelId, "UC-alpha");
+    assert.equal(vtubers.records[0].channelHandle, "/@alpha_ch");
     assert.equal(vtubers.records[0].count, 3);
     assert.equal(vtubers.records[0].videoCount, 2);
 
@@ -211,6 +213,36 @@ function writeLatestFixture(latestPath) {
 
 function sha256File(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
+}
+
+function stripVtuberPayloadIdentity(dbPath, channelName) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-sql-"));
+  const scriptPath = path.join(dir, "strip_vtuber_identity.py");
+  fs.writeFileSync(
+    scriptPath,
+    [
+      "import json",
+      "import sqlite3",
+      "import sys",
+      "db_path = sys.argv[1]",
+      "channel_name = sys.argv[2]",
+      "with sqlite3.connect(db_path) as conn:",
+      "    rows = conn.execute(\"SELECT rowid, payload_json FROM ranking_rows WHERE view = 'vtubers' AND name = ?\", (channel_name,)).fetchall()",
+      "    for rowid, payload_json in rows:",
+      "        payload = json.loads(payload_json)",
+      "        payload['channelId'] = ''",
+      "        payload['channelHandle'] = ''",
+      "        payload['channelUrl'] = ''",
+      "        conn.execute('UPDATE ranking_rows SET payload_json = ? WHERE rowid = ?', (json.dumps(payload, ensure_ascii=False, separators=(',', ':')), rowid))",
+      "    conn.commit()",
+    ].join("\n"),
+    "utf8",
+  );
+  try {
+    execFileSync(PYTHON, [scriptPath, dbPath, channelName], { cwd: ROOT, encoding: "utf8" });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 async function getFreePort() {

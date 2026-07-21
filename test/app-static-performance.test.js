@@ -148,33 +148,51 @@ test("copy setlist buttons use all available songs for the same video id", () =>
   assert.match(appSource, /const videoId = cleanText\(item\.videoId\)/u);
   assert.match(appSource, /target\.songs\.push\(normalizedSong\)/u);
   assert.match(appSource, /normalizeSetlistSongsForItem\(item\.songs\)/u);
+  assert.match(functionBody("async function copyVideoSetlist"), /hydrateVideoSetlistItem\(item\)/u);
+  assert.match(functionBody("async function hydrateVideoSetlistItem"), /view: "videos"[\s\S]*fields: "video"/u);
+  assert.match(functionBody("async function hydrateVideoSetlistItem"), /_allSongs: songs/u);
+  assert.match(functionBody("async function hydrateVideoSetlistItem"), /state\.videoSetlistCache/u);
   assert.match(functionBody("function renderSourceVideoGroup"), /renderCopySetlistIconButton\(group\.setlistItem \|\| videoItem\)/u);
   assert.match(functionBody("function renderSourceInlineGroup"), /renderCopySetlistButton\(group\.setlistItem \|\| item/u);
 });
 
-test("artist rank song details share inline source model and append remaining songs in batches", () => {
+test("artist and VTuber song details append remaining songs in batches", () => {
   const appendArtistBody = functionBody("function appendArtistSongGroups");
   assert.match(appendArtistBody, /appendArtistSongGroupRange/u);
   assert.doesNotMatch(appendArtistBody, /appendSourceDrawerLinks|renderSourceVideoGroup/u);
 
   const renderArtistBody = functionBody("function renderArtistSongGroup");
+  assert.match(renderArtistBody, /const isVtuberMode = mode === "vtuber"/u);
   assert.match(renderArtistBody, /sourcePresentationModel\(group\.occurrences/u);
-  assert.match(renderArtistBody, /renderSourceInlineStrip\(sourcePresentation/u);
+  assert.match(renderArtistBody, /if \(!isVtuberMode\)[\s\S]*renderSourceInlineStrip\(sourcePresentation/u);
+  assert.match(renderArtistBody, /renderArtistSongSourceButton\(sources\.id, sourcePresentation, group\)/u);
   assert.match(renderArtistBody, /sources\.dataset\.sourceDeferred = "true"/u);
   assert.match(renderArtistBody, /sources\._sourceOccurrences = group\.occurrences/u);
-  assert.doesNotMatch(renderArtistBody, /dataset\.toggleArtistSongSource = "true"/u);
+  assert.match(functionBody("function renderArtistSongSourceButton"), /dataset\.toggleArtistSongSource = "true"/u);
   assert.match(renderArtistBody, /renderCopySongLinksIconButton\(group\.occurrences\)/u);
 
   const toggleSourceBody = functionBody("function toggleArtistSongSource");
   assert.match(toggleSourceBody, /sources\.dataset\.sourceDeferred === "true"/u);
+  assert.match(toggleSourceBody, /syncArtistSongGroupSourceSummary\(section, sources, sourceOccurrences\)/u);
   assert.match(toggleSourceBody, /copyOccurrences: sources\._songSourceOccurrences \|\| sources\._sourceOccurrences/u);
   assert.match(toggleSourceBody, /showToolbar: false/u);
   assert.match(toggleSourceBody, /closeSiblingArtistSongSources\(section\)/u);
+  assert.match(functionBody("function syncArtistSongGroupSourceSummary"), /syncArtistSongGroupThumb\(section, group\)/u);
+  assert.match(functionBody("function syncArtistSongGroupSourceSummary"), /syncArtistSongGroupVideoCount\(section, videoCount\)/u);
 
   const toggleLimitBody = functionBody("function toggleArtistSongLimit");
-  assert.match(toggleLimitBody, /const nextVisible = Math\.min\(songGroups\.length, current \+ ARTIST_SONG_GROUP_BATCH_SIZE\)/u);
-  assert.match(toggleLimitBody, /appendArtistSongGroupRange\(drawer, songGroups, current, nextVisible\)/u);
+  assert.match(toggleLimitBody, /const nextVisible = Math\.min\(songGroups\.length, current \+ artistSongGroupBatchSize\(drawer\)\)/u);
+  assert.match(toggleLimitBody, /appendArtistSongGroupRange\(drawer, songGroups, current, nextVisible, \{/u);
   assert.doesNotMatch(toggleLimitBody, /replaceChildren/u);
+  assert.match(appSource, /event\.stopPropagation\(\);[\s\S]*toggleArtistSongLimit\(artistMore\.closest\("\.artist-song-drawer, \.rank-row"\)\)/u);
+  assert.match(functionBody("function artistSongGroupBatchSize"), /sourceMode === "vtuber" \? VTUBER_SONG_GROUP_BATCH_SIZE/u);
+});
+
+test("VTuber song groups filter source status and placeholder artists from first-level song list", () => {
+  assert.match(functionBody("function buildVtuberRecords"), /if \(!isIgnoredVtuberSongTitle\(songTitle\)\) incrementCount\(record\.songs, songTitle\)/u);
+  assert.match(functionBody("function isIgnoredVtuberSongTitle"), /已收录/u);
+  assert.match(functionBody("function getVtuberSongGroups"), /\.filter\(\(group\) => !isIgnoredVtuberSongTitle\(group\.title\)\)/u);
+  assert.match(functionBody("function artistSummaryForOccurrences"), /window\.RankingUtils\.isUnknownArtistName\(artist\)[\s\S]*continue/u);
 });
 
 test("delayed trend diffs update visible badges without rerendering the list for all trend", () => {
@@ -246,6 +264,7 @@ test("explicit search keeps song source context while artist and VTuber views us
 
 test("inline search form submits immediately without result-count preview gating", () => {
   const bindBody = functionBody("function bindQueryOverlayEvents");
+  assert.match(bindBody, /els\.queryForm\?\.addEventListener\("submit", \(event\) => \{[\s\S]*event\.preventDefault\(\);[\s\S]*applyQueryDraft\(\)\.catch/u);
   assert.match(bindBody, /compositionstart/u);
   assert.match(bindBody, /compositionend/u);
   assert.match(bindBody, /event\.isComposing \|\| state\.queryComposing/u);
@@ -273,7 +292,6 @@ test("range prefetch stays fast and does not use an 8 second delay", () => {
   const scheduleBody = functionBody("function scheduleOtherRangePrefetch");
   assert.match(scheduleBody, /window\.setTimeout\(\(\) => \{[\s\S]*requestIdleCallback\(run, \{ timeout: 1200 \}\)/u);
   assert.match(scheduleBody, /\}, 300\)/u);
-  assert.match(bindBody, /els\.queryForm\?\.addEventListener\("submit", \(event\) => \{[\s\S]*event\.preventDefault\(\);[\s\S]*applyQueryDraft\(\)\.catch/u);
   assert.doesNotMatch(scheduleBody, /8000|8\s*\*\s*1000/u);
 
   const intentBody = functionBody("function bindRangeIntentPrefetch");

@@ -31,6 +31,8 @@ const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
 const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
+const VTUBER_SONG_GROUP_INITIAL_LIMIT = 40;
+const VTUBER_SONG_GROUP_BATCH_SIZE = 40;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 1;
 const SOURCE_INLINE_LIMITS = {
   mobile: 2,
@@ -64,8 +66,6 @@ const VIDEO_LAYOUTS = {
   cards: "卡片",
   compact: "紧凑",
 };
-const PAGE_SIZES = {
-  songRank: DEFAULT_LIST_PAGE_SIZE,
 const SEARCH_FIELD_LABELS = {
   title: "歌名",
   artist: "歌手",
@@ -73,6 +73,8 @@ const SEARCH_FIELD_LABELS = {
   video: "视频",
 };
 const SEARCH_FIELD_ORDER = Object.keys(SEARCH_FIELD_LABELS);
+const PAGE_SIZES = {
+  songRank: DEFAULT_LIST_PAGE_SIZE,
   artistRank: DEFAULT_LIST_PAGE_SIZE,
   vtuberRank: DEFAULT_LIST_PAGE_SIZE,
   songAz: DEFAULT_LIST_PAGE_SIZE,
@@ -245,10 +247,10 @@ const state = {
   range: "7d",
   view: "songRank",
   filter: "",
-  nicheOnly: false,
-  hideUnknownArtist: false,
   searchFields: [],
   searchFieldsByView: {},
+  nicheOnly: false,
+  hideUnknownArtist: false,
   indexBucket: INDEX_ALL_BUCKET,
   pageSize: DEFAULT_LIST_PAGE_SIZE,
   rankMetric: "occurrences",
@@ -278,6 +280,7 @@ const state = {
   rankDiffLoads: new Map(),
   sourceDetailCache: new Map(),
   sourceDetailLoads: new Map(),
+  videoSetlistCache: new Map(),
   requestRuntime: {
     summaryCache: new Map(),
     viewManifestCache: new Map(),
@@ -319,19 +322,19 @@ const els = {
   activeQueryStrip: document.querySelector("#activeQueryStrip"),
   summary: document.querySelector("#summary"),
   content: document.querySelector("#videoList"),
+  queryForm: document.querySelector("#queryForm"),
   queryTrigger: document.querySelector("#queryTrigger"),
   queryTriggerText: document.querySelector("#queryTriggerText"),
   queryCountBadge: document.querySelector("#queryCountBadge"),
-  queryForm: document.querySelector("#queryForm"),
   queryDialog: document.querySelector("#queryDialog"),
   queryPanel: document.querySelector("#queryDialog .query-panel"),
   queryInput: document.querySelector("#queryInput"),
-  nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
-  hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
-  cancelQueryButton: document.querySelector("#cancelQueryButton"),
   searchFieldChips: document.querySelector("#searchFieldChips"),
   searchFieldPicker: document.querySelector("#searchFieldPicker"),
   searchFieldInputs: Array.from(document.querySelectorAll("input[name='searchField']")),
+  nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
+  hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
+  cancelQueryButton: document.querySelector("#cancelQueryButton"),
   clearQueryButton: document.querySelector("#clearQueryButton"),
   clearRecentSearchesButton: document.querySelector("#clearRecentSearchesButton"),
   recentSearches: document.querySelector("#recentSearches"),
@@ -597,7 +600,8 @@ function bindEvents() {
     const artistMore = event.target.closest("[data-toggle-artist-songs]");
     if (artistMore) {
       event.preventDefault();
-      toggleArtistSongLimit(artistMore.closest(".rank-row"));
+      event.stopPropagation();
+      toggleArtistSongLimit(artistMore.closest(".artist-song-drawer, .rank-row"));
       return;
     }
 
@@ -687,13 +691,13 @@ function bindRangeIntentPrefetch(tab) {
 function switchView(nextView, options = {}) {
   if (!nextView || state.view === nextView) return;
   storeViewPosition();
+  state.searchFieldsByView[state.view] = normalizeSearchFields(state.searchFields, state.view);
   state.view = nextView;
+  state.searchFields = normalizeSearchFields(state.searchFieldsByView[nextView] ?? defaultSearchFieldsForView(nextView), nextView);
   state.expandedRows.clear();
   resetPagination();
   syncControlsFromState();
-  state.searchFieldsByView[state.view] = normalizeSearchFields(state.searchFields, state.view);
   renderOrSyncUrl({ urlMode: options.urlMode || "push" });
-  state.searchFields = normalizeSearchFields(state.searchFieldsByView[nextView] ?? defaultSearchFieldsForView(nextView), nextView);
   restoreViewPosition();
 }
 
@@ -724,17 +728,17 @@ function bindQueryOverlayEvents() {
   els.queryInput?.addEventListener("input", (event) => {
     updateQueryDraft({ q: els.queryInput.value }, {
       sync: "input",
-      schedule: !(event.isComposing || state.queryComposing),
+      schedule: false,
     });
   });
   els.queryInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
-      if (event.isComposing || state.queryComposing) return;
+      if (event.isComposing || state.queryComposing) {
+        event.preventDefault();
+        return;
+      }
       event.preventDefault();
       applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
-    } else if (event.key === "Escape") {
-      event.preventDefault();
-      closeOverlay("query");
     }
   });
   els.searchSuggestions?.addEventListener("click", (event) => {
@@ -766,10 +770,6 @@ function bindQueryOverlayEvents() {
       setQueryDraft(readQueryDraftFromControls(), { sync: "controls" });
     });
   });
-  els.querySnapshotDateSelect?.addEventListener("change", () => {
-    const path = firstSnapshotPathForDate(els.querySnapshotDateSelect.value);
-    updateQueryDraft({ snapshotPath: path }, { sync: "snapshot" });
-  });
   for (const input of els.searchFieldInputs) {
     input.addEventListener("change", () => {
       const draft = setQueryDraft(readQueryDraftFromControls(), { sync: "controls", schedule: false });
@@ -786,6 +786,10 @@ function bindQueryOverlayEvents() {
     const field = button.dataset.removeSearchField || "";
     const nextFields = normalizeSearchFields(state.searchFields).filter((item) => item !== field);
     applyQueryPatch({ searchFields: nextFields }, { focusTrigger: false });
+  });
+  els.querySnapshotDateSelect?.addEventListener("change", () => {
+    const path = firstSnapshotPathForDate(els.querySnapshotDateSelect.value);
+    updateQueryDraft({ snapshotPath: path }, { sync: "snapshot" });
   });
   els.resetQueryButton?.addEventListener("click", () => {
     setQueryDraft(window.FrontendUtils.clearAllRestrictiveFilters(state.queryDraft || makeQueryDraftFromState(), queryDraftOptions()), { sync: "full" });
@@ -1200,15 +1204,16 @@ function queryDraftOptions(extra = {}) {
   return {
     defaults: {
       pageSize: DEFAULT_LIST_PAGE_SIZE,
+      view: state.view,
       snapshotPath: SNAPSHOT_LATEST_PATH,
     },
+    view: state.view,
+    validSearchFields: SEARCH_FIELD_ORDER,
     validRankMetrics: Object.keys(RANK_METRICS),
     validTrendFilters: Object.keys(TREND_FILTERS),
     validMinCounts: MIN_COUNT_OPTIONS,
     validPageSizes: LIST_PAGE_SIZE_OPTIONS,
     latestSnapshotPath: SNAPSHOT_LATEST_PATH,
-    view: state.view,
-    validSearchFields: SEARCH_FIELD_ORDER,
     snapshots: state.snapshots,
     ...extra,
   };
@@ -1221,6 +1226,7 @@ function makeQueryDraftFromState() {
 function defaultQueryDraft() {
   return window.FrontendUtils.defaultQueryDraft({
     pageSize: DEFAULT_LIST_PAGE_SIZE,
+    view: state.view,
     snapshotPath: SNAPSHOT_LATEST_PATH,
   });
 }
@@ -1230,12 +1236,6 @@ function sanitizeQueryDraft(draft) {
   return state.runtimeApi.available ? { ...next, trend: "all" } : next;
 }
 
-function syncQueryControlsFromDraft(draft, options = {}) {
-  return syncQueryPanelFromDraft(draft, {
-    ...options,
-    syncMode: options.light ? "light" : options.syncMode || "full",
-  });
-}
 function defaultSearchFieldsForView(view = state.view) {
   return window.FrontendUtils.defaultSearchFieldsForView(view);
 }
@@ -1268,6 +1268,12 @@ function searchFieldLabelText(fields = state.searchFields, view = state.view) {
   return normalized.map((field) => SEARCH_FIELD_LABELS[field]).filter(Boolean).join("、");
 }
 
+function syncQueryControlsFromDraft(draft, options = {}) {
+  return syncQueryPanelFromDraft(draft, {
+    ...options,
+    syncMode: options.light ? "light" : options.syncMode || "full",
+  });
+}
 
 function syncQueryPanelFromDraft(draft, options = {}) {
   if (!draft) return null;
@@ -1276,14 +1282,14 @@ function syncQueryPanelFromDraft(draft, options = {}) {
   state.queryDraft = next;
   syncQueryInputValue(next);
   syncQueryClearButton(next);
+  syncSearchFieldInputs(next);
+  renderSearchFieldChips(next.searchFields);
   if (options.syncMode === "input") return next;
   if (options.syncMode === "light") return next;
   syncQueryToggleValues(next);
   syncQuerySelectValues(next);
   syncQuerySnapshotControls(next, previous, options);
   updateQueryAvailability(next);
-  syncSearchFieldInputs(next);
-  renderSearchFieldChips(next.searchFields);
   return next;
 }
 
@@ -1331,12 +1337,6 @@ function syncQueryClearButton(draft) {
   els.clearQueryButton.tabIndex = hasQuery ? 0 : -1;
 }
 
-function syncDraftSnapshotTimes(dateValue, selectedPath = "") {
-  if (!els.querySnapshotSelect) return;
-  els.querySnapshotSelect.replaceChildren();
-  if (dateValue === "latest") {
-    const option = document.createElement("option");
-    option.value = SNAPSHOT_LATEST_PATH;
 function syncSearchFieldInputs(draft = makeQueryDraftFromState()) {
   const selected = new Set(normalizeSearchFields(draft.searchFields, state.view));
   for (const input of els.searchFieldInputs) {
@@ -1372,6 +1372,12 @@ function renderSearchFieldChips(fields = state.searchFields) {
   }
 }
 
+function syncDraftSnapshotTimes(dateValue, selectedPath = "") {
+  if (!els.querySnapshotSelect) return;
+  els.querySnapshotSelect.replaceChildren();
+  if (dateValue === "latest") {
+    const option = document.createElement("option");
+    option.value = SNAPSHOT_LATEST_PATH;
     option.textContent = "最新快照";
     els.querySnapshotSelect.append(option);
     els.querySnapshotSelect.value = SNAPSHOT_LATEST_PATH;
@@ -1407,25 +1413,25 @@ function readQueryDraftFromControls() {
     trend: Object.hasOwn(TREND_FILTERS, els.trendFilterSelect?.value) ? els.trendFilterSelect.value : "all",
     minCount: MIN_COUNT_OPTIONS.includes(Number(els.minCountSelect?.value)) ? Number(els.minCountSelect.value) : 1,
     pageSize: LIST_PAGE_SIZE_OPTIONS.includes(Number(els.queryPageSizeSelect?.value)) ? Number(els.queryPageSizeSelect.value) : DEFAULT_LIST_PAGE_SIZE,
+    searchFields: selectedSearchFields,
     snapshotPath: els.querySnapshotSelect?.value || SNAPSHOT_LATEST_PATH,
   });
 }
 
 async function applyQueryDraft() {
   const draft = readQueryDraftFromControls();
-    searchFields: selectedSearchFields,
   const previousPath = state.currentSnapshotPath;
   closeOverlay("query");
   state.filter = draft.q;
   state.nicheOnly = draft.nicheOnly;
   state.hideUnknownArtist = draft.hideUnknownArtist;
+  state.searchFields = draft.searchFields;
   state.rankMetric = draft.rankMetric;
   state.trend = draft.trend;
   state.minCount = draft.minCount;
   state.pageSize = draft.pageSize;
   state.expandedRows.clear();
   resetPagination();
-  state.searchFields = draft.searchFields;
   syncControlsFromState();
   if (draft.q) writeRecentSearches([draft.q, ...readRecentSearches().filter((item) => item !== draft.q)].slice(0, 10));
   if (previousPath !== draft.snapshotPath) {
@@ -1474,13 +1480,13 @@ function applyQueryPatch(patch, options = {}) {
   state.filter = draft.q;
   state.nicheOnly = draft.nicheOnly;
   state.hideUnknownArtist = draft.hideUnknownArtist;
+  state.searchFields = draft.searchFields;
   state.rankMetric = draft.rankMetric;
   state.trend = draft.trend;
   state.minCount = draft.minCount;
   state.pageSize = draft.pageSize;
   state.expandedRows.clear();
   resetPagination();
-  state.searchFields = draft.searchFields;
   syncControlsFromState();
   const afterRender = () => {
     if (options.focusTrigger) focusWithoutScrolling(els.queryTrigger || els.controls || document.body);
@@ -1821,13 +1827,13 @@ function queryResultCountKey(draft) {
     draft.nicheOnly ? "niche" : "all",
     queryDraftHideUnknownForView(draft) ? "hide-unknown" : "show-unknown",
     normalizeSearch(draft.q),
+    searchFieldsKey(draft.searchFields),
     draft.rankMetric,
     draft.trend,
     trendState,
     draft.minCount,
   ].join("::");
 }
-    searchFieldsKey(draft.searchFields),
 
 function currentResultCountForDraft(draft) {
   const key = queryResultCountKey(draft);
@@ -1933,13 +1939,13 @@ function applyInitialUrlState() {
     "hideUnknown",
     "showUnknown",
     "q",
+    "fields",
     "snapshot",
     "trend",
     "minCount",
   ];
   const hasStateParams = stateParamKeys.some((key) => urlParams.has(key));
   if (!shouldApplySharedState && !hasStateParams) {
-    "fields",
     Object.assign(state, {
       range: defaults.range,
       view: defaults.view,
@@ -1953,13 +1959,13 @@ function applyInitialUrlState() {
       nicheOnly: defaults.outside,
       hideUnknownArtist: defaults.hideUnknown,
       filter: defaults.q,
+      searchFields: defaultSearchFieldsForView(defaults.view),
       currentSnapshotPath: SNAPSHOT_LATEST_PATH,
     });
     state.sharedUrlApplied = false;
     return;
   }
   const parsed = window.FrontendUtils.parseUrlState(window.location.search, {
-      searchFields: defaultSearchFieldsForView(defaults.view),
     defaults,
     validRanges: Object.keys(RANGE_LABELS),
     rangeAliases: RANGE_ALIASES,
@@ -1969,13 +1975,13 @@ function applyInitialUrlState() {
     validVideoLayouts: Object.keys(VIDEO_LAYOUTS),
     validTrendFilters: Object.keys(TREND_FILTERS),
     validMinCounts: MIN_COUNT_OPTIONS,
+    validSearchFields: SEARCH_FIELD_ORDER,
     latestSnapshotPath: SNAPSHOT_LATEST_PATH,
     snapshots: state.snapshots,
   });
 
   state.range = parsed.range;
   state.view = parsed.view;
-    validSearchFields: SEARCH_FIELD_ORDER,
   state.page = parsed.page;
   state.pageSize = parsed.pageSize;
   state.indexBucket = parsed.bucket;
@@ -1986,13 +1992,13 @@ function applyInitialUrlState() {
   state.nicheOnly = parsed.outside;
   state.hideUnknownArtist = parsed.hideUnknown;
   state.filter = parsed.q;
+  state.searchFields = normalizeSearchFields(parsed.searchFields, parsed.view);
   state.currentSnapshotPath = parsed.snapshotPath;
   state.sharedUrlApplied = shouldApplySharedState;
 }
 
 function normalizeTrendStateForRuntime() {
   if (!state.runtimeApi.available) return false;
-  state.searchFields = normalizeSearchFields(parsed.searchFields, parsed.view);
   let changed = false;
   if (state.trend !== "all") {
     state.trend = "all";
@@ -2014,17 +2020,17 @@ function syncControlsFromState() {
   syncBottomNavFromState();
   if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = state.nicheOnly;
   if (els.hideUnknownToggle) els.hideUnknownToggle.checked = state.hideUnknownArtist;
+  const draft = makeQueryDraftFromState();
+  syncQueryInputValue(draft);
+  syncQueryClearButton(draft);
+  syncSearchFieldInputs(draft);
+  renderSearchFieldChips(state.searchFields);
   syncSnapshotControlsFromState();
   syncQueryTriggerState();
   renderActiveQueryStrip();
 }
 
 function syncUrlState(urlMode = "replace") {
-  const draft = makeQueryDraftFromState();
-  syncQueryInputValue(draft);
-  syncQueryClearButton(draft);
-  syncSearchFieldInputs(draft);
-  renderSearchFieldChips(state.searchFields);
   if (!window.history?.pushState || !window.history?.replaceState) return;
   const serialized = window.FrontendUtils.serializeUrlState(
     {
@@ -2038,13 +2044,13 @@ function syncUrlState(urlMode = "replace") {
       outside: state.nicheOnly,
       hideUnknown: state.hideUnknownArtist,
       q: state.filter,
+      searchFields: state.searchFields,
       snapshotPath: state.currentSnapshotPath,
       trend: state.trend,
       minCount: state.minCount,
     },
     {
       defaults: defaultUrlState(),
-      searchFields: state.searchFields,
       latestSnapshotPath: SNAPSHOT_LATEST_PATH,
       snapshots: state.snapshots,
       rangeAliases: RANGE_ALIASES,
@@ -2091,13 +2097,13 @@ function defaultUrlState() {
     outside: false,
     hideUnknown: false,
     q: "",
+    searchFields: defaultSearchFieldsForView("songRank"),
   };
 }
 
 async function restoreStateFromUrl() {
   const previousPath = state.currentSnapshotPath;
   const previousListKey = listStateKey();
-    searchFields: defaultSearchFieldsForView("songRank"),
   applyInitialUrlState();
   normalizeTrendStateForRuntime();
   syncControlsFromState();
@@ -3358,6 +3364,7 @@ async function renderRequestedRuntime(options = {}) {
     scheduleCurrentRankDiffLoad();
   } catch (error) {
     if (error?.name === "AbortError" || revision !== state.requestRuntime.revision) return;
+    let recoveredWithFallback = false;
     if (previousResult) {
       setSnapshotBusy(false);
       renderRequestedPageResult(previousResult, { staleError: error });
@@ -3371,12 +3378,13 @@ async function renderRequestedRuntime(options = {}) {
           syncUrl: options.syncUrl !== false,
           urlMode: options.urlMode || "replace",
         });
+        recoveredWithFallback = true;
       } catch (fallbackError) {
         setSnapshotBusy(false);
         renderEmpty(`页面读取失败：${fallbackError.message || error.message}`, { reloadable: true, role: "alert" });
       }
     }
-    showToast(`页面读取失败：${error.message}`);
+    if (!recoveredWithFallback) showToast(`页面读取失败：${error.message}`);
   } finally {
     if (state.requestRuntime.activeController === controller) state.requestRuntime.activeController = null;
   }
@@ -3385,6 +3393,7 @@ async function renderRequestedRuntime(options = {}) {
 function requestFilterState() {
   return {
     q: state.filter || "",
+    searchFields: state.searchFields,
     nicheOnly: state.nicheOnly,
     hideUnknownArtist: shouldHideUnknownForCurrentView(),
     minCount: state.minCount,
@@ -3393,7 +3402,6 @@ function requestFilterState() {
   };
 }
 
-    searchFields: state.searchFields,
 function requestViewFingerprint(result) {
   return [
     result?.range,
@@ -3539,6 +3547,11 @@ async function requestApiViewPage(request, range) {
   });
   const query = cleanText(filters.q || "");
   if (query) params.set("q", query);
+  if (query) params.set("fields", window.FrontendUtils.searchFieldsParam(filters.searchFields, {
+    view: request.view,
+    validSearchFields: SEARCH_FIELD_ORDER,
+    defaultFields: defaultSearchFieldsForView(request.view),
+  }));
   if (Number(filters.minCount) > 1 && request.view !== "videos") params.set("minCount", String(Number(filters.minCount)));
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
     cache: "no-cache",
@@ -3547,11 +3560,6 @@ async function requestApiViewPage(request, range) {
   assertApiRankingPayload(payload);
   const records = hydrateRequestRecords(payload.records, request.view);
   const entries = records.map((record, index) => apiIndexEntryForRecord(record, request.view, payload.metric || metricName, index));
-  if (query) params.set("fields", window.FrontendUtils.searchFieldsParam(filters.searchFields, {
-    view: request.view,
-    validSearchFields: SEARCH_FIELD_ORDER,
-    defaultFields: defaultSearchFieldsForView(request.view),
-  }));
   const summary = apiSummaryFromPayload(payload);
   const manifest = {
     schemaVersion: 1,
@@ -3735,6 +3743,7 @@ function buildRequestPageKey(request) {
 function requestFilterKey(filters = {}) {
   return [
     normalizeSearch(filters.q || ""),
+    searchFieldsKey(filters.searchFields),
     filters.nicheOnly ? "niche" : "all",
     filters.hideUnknownArtist ? "hide" : "show",
     filters.trend || "all",
@@ -3743,7 +3752,6 @@ function requestFilterKey(filters = {}) {
   ].join("|");
 }
 
-    searchFieldsKey(filters.searchFields),
 async function loadRequestSummary(range, signal) {
   if (state.runtimeApi.available) {
     return apiSummaryFromPayload({
@@ -3808,14 +3816,6 @@ async function filterRequestIndexEntries(entries, options = {}) {
   return result;
 }
 
-function requestEntryMatchesTrend(entry, mode, trendFilter) {
-  const trend = state.rankDiffs?.[state.range]?.[mode]?.get(entry.key);
-  if (!trend) return false;
-  if (trendFilter === "new") return trend.isNew === true;
-  const rankDelta = Number(trend.rankDelta) || 0;
-  if (trendFilter === "up") return rankDelta > 0;
-  if (trendFilter === "down") return rankDelta < 0;
-  return true;
 async function filterRequestEntriesBySearch(entries, options = {}) {
   const query = normalizeSearch(options.query || "");
   if (!query) return entries;
@@ -3942,6 +3942,14 @@ function requestRecordMatchResult(record, metricName, entry = null) {
   };
 }
 
+function requestEntryMatchesTrend(entry, mode, trendFilter) {
+  const trend = state.rankDiffs?.[state.range]?.[mode]?.get(entry.key);
+  if (!trend) return false;
+  if (trendFilter === "new") return trend.isNew === true;
+  const rankDelta = Number(trend.rankDelta) || 0;
+  if (trendFilter === "up") return rankDelta > 0;
+  if (trendFilter === "down") return rankDelta < 0;
+  return true;
 }
 
 function applyRequestRanks(entries) {
@@ -4069,20 +4077,20 @@ function requestSearchBucket(query) {
 }
 
 async function loadRequestDetailRecords(entries, signal) {
+  if ((entries || []).every((entry) => entry?._hydratedRecordOverride)) {
+    return entries.map((entry) => entry._hydratedRecordOverride).filter(Boolean);
+  }
   const byShard = new Map();
   for (const entry of entries || []) {
+    if (entry._hydratedRecordOverride) continue;
     if (!entry.detailShard) continue;
     if (!byShard.has(entry.detailShard)) byShard.set(entry.detailShard, []);
     byShard.get(entry.detailShard).push(entry);
   }
   const recordByKey = new Map();
   for (const [path, pathEntries] of byShard.entries()) {
-  if ((entries || []).every((entry) => entry?._hydratedRecordOverride)) {
-    return entries.map((entry) => entry._hydratedRecordOverride).filter(Boolean);
-  }
     const payload = await readCachedRequestJson(state.requestRuntime.detailShardCache, path, signal);
     for (const record of payload.records || []) {
-    if (entry._hydratedRecordOverride) continue;
       recordByKey.set(record.detailKey, record);
     }
     for (const entry of pathEntries) {
@@ -5655,6 +5663,7 @@ function buildVideoViewItems(items, options = {}) {
   const nicheOnly = options.nicheOnly ?? state.nicheOnly;
   const hideUnknownArtists = options.hideUnknownArtists ?? shouldHideUnknownForCurrentView();
   const normalizedFilter = normalizeSearch(filter);
+  const selected = searchFieldSet(options.searchFields ?? state.searchFields, "videos");
   const result = [];
   for (const item of items || []) {
     const nicheSongs = (item.songs || []).filter((song) => !nicheOnly || window.FrontendUtils.isNicheSong(song));
@@ -5663,7 +5672,6 @@ function buildVideoViewItems(items, options = {}) {
     const sourceItem = item._sourceItem || item;
     if (!normalizedFilter) {
       if (!sourceSongs.length) continue;
-  const selected = searchFieldSet(options.searchFields ?? state.searchFields, "videos");
       result.push({ ...item, songs: sourceSongs, _displaySongs: sourceSongs, _allSongs: originalSongs, _sourceItem: sourceItem, _songSearchMatchCount: 0 });
       continue;
     }
@@ -5731,7 +5739,8 @@ function buildVtuberRecords(occurrences) {
     if (videoKey) record.videos.add(videoKey);
     record.count += 1;
     record.occurrences.push(occurrence);
-    incrementCount(record.songs, cleanText(song.title));
+    const songTitle = cleanText(song.title);
+    if (!isIgnoredVtuberSongTitle(songTitle)) incrementCount(record.songs, songTitle);
   }
   return addRecordRuntimeFields(Array.from(records.values()).map((record) => {
     record.videoCount = record.videos.size;
@@ -5824,6 +5833,11 @@ function vtuberOccurrenceSearchText(occurrence) {
 
 function vtuberRecordSearchText(record) {
   return normalizeSearch([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, ...(record.aliases || [])].join(" "));
+}
+
+function isIgnoredVtuberSongTitle(title) {
+  const key = normalizeEntityKey(title);
+  return key === normalizeEntityKey("已收录") || key === normalizeEntityKey("已收錄");
 }
 
 function collectSongOccurrences(items) {
@@ -6061,6 +6075,7 @@ function renderRankRecord({
   row.append(
     renderRecordContent(title, meta, {
       mode,
+      record,
       occurrences: safeOccurrences,
       songGroups,
       songCount,
@@ -6205,6 +6220,7 @@ function renderRankHeader(mode = "song") {
 function renderRecordContent(title, meta, options) {
   const {
     mode = "song",
+    record = null,
     occurrences,
     songGroups = [],
     songCount = songGroups.length,
@@ -6217,7 +6233,19 @@ function renderRecordContent(title, meta, options) {
 
   const heading = document.createElement(`h${headingLevel}`);
   heading.className = "rank-title";
-  heading.append(document.createTextNode(title));
+  if (mode === "vtuber") {
+    const channelLink = window.FrontendUtils.youtubeChannelLink(record || {});
+    const link = document.createElement("a");
+    link.className = "rank-title-link";
+    link.href = channelLink.href;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = title;
+    link.setAttribute("aria-label", channelLink.isFallbackSearch ? `搜索频道：${title}` : `打开频道：${title}`);
+    heading.append(link);
+  } else {
+    heading.append(document.createTextNode(title));
+  }
   for (const badgeText of meta.badges || []) {
     const badge = document.createElement("span");
     badge.className = "song-badge niche-badge";
@@ -6353,7 +6381,7 @@ function renderRankSide({
     if (expandable) {
       side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount: count, videoCount }));
     } else {
-      side.append(renderStaticSideChip(`${songCount}首曲目`));
+      side.append(renderStaticSideChip(mode === "vtuber" ? `${songCount}首歌` : `${songCount}首曲目`));
     }
     return side;
   }
@@ -7037,7 +7065,9 @@ function renderLinkListIcon() {
 function appendArtistSongGroups(drawer, songGroups) {
   drawer._artistSongGroups = songGroups;
   const visibleCount = artistVisibleSongCount(drawer, songGroups.length);
-  appendArtistSongGroupRange(drawer, songGroups, artistRenderedSongCount(drawer), visibleCount);
+  appendArtistSongGroupRange(drawer, songGroups, artistRenderedSongCount(drawer), visibleCount, {
+    mode: drawer.dataset.sourceMode || "artist",
+  });
   syncArtistSongMoreButton(drawer, visibleCount, songGroups.length);
   appendMobileSourceCollapse(drawer);
 }
@@ -7048,19 +7078,28 @@ function artistRenderedSongCount(drawer) {
 
 function artistVisibleSongCount(drawer, total) {
   const parsed = Number.parseInt(drawer.dataset.visibleArtistSongs || "", 10);
-  const requested = Number.isFinite(parsed) && parsed > 0 ? parsed : ARTIST_SONG_GROUP_INITIAL_LIMIT;
-  const visibleCount = Math.min(total, Math.max(ARTIST_SONG_GROUP_INITIAL_LIMIT, requested));
+  const initialLimit = artistSongGroupInitialLimit(drawer);
+  const requested = Number.isFinite(parsed) && parsed > 0 ? parsed : initialLimit;
+  const visibleCount = Math.min(total, Math.max(initialLimit, requested));
   drawer.dataset.visibleArtistSongs = String(visibleCount);
   return visibleCount;
 }
 
-function appendArtistSongGroupRange(drawer, songGroups, start, end) {
+function artistSongGroupInitialLimit(drawer) {
+  return drawer?.dataset?.sourceMode === "vtuber" ? VTUBER_SONG_GROUP_INITIAL_LIMIT : ARTIST_SONG_GROUP_INITIAL_LIMIT;
+}
+
+function artistSongGroupBatchSize(drawer) {
+  return drawer?.dataset?.sourceMode === "vtuber" ? VTUBER_SONG_GROUP_BATCH_SIZE : ARTIST_SONG_GROUP_BATCH_SIZE;
+}
+
+function appendArtistSongGroupRange(drawer, songGroups, start, end, options = {}) {
   const fragment = document.createDocumentFragment();
   const safeStart = Math.max(0, start);
   const safeEnd = Math.min(songGroups.length, Math.max(safeStart, end));
   let firstAppended = null;
   for (const group of songGroups.slice(safeStart, safeEnd)) {
-    const node = renderArtistSongGroup(group);
+    const node = renderArtistSongGroup(group, options);
     if (!firstAppended) firstAppended = node;
     fragment.append(node);
   }
@@ -7068,9 +7107,13 @@ function appendArtistSongGroupRange(drawer, songGroups, start, end) {
   return firstAppended;
 }
 
-function renderArtistSongGroup(group) {
+function renderArtistSongGroup(group, options = {}) {
+  const mode = options.mode || "artist";
+  const isVtuberMode = mode === "vtuber";
   const section = document.createElement("section");
   section.className = "artist-song-group";
+  section.dataset.songGroupMode = mode;
+  section._songGroup = group;
 
   const header = document.createElement("div");
   header.className = "artist-song-header";
@@ -7142,7 +7185,9 @@ function renderArtistSongGroup(group) {
   sources.id = `artist-song-sources-${makeDomId(`${group.key}-${firstOccurrence?.item?.videoId || "deferred"}`)}`;
   sources.dataset.sourceMode = "artist-song";
   sources.dataset.sourceDeferred = "true";
-  if (group.sourceIncomplete) sources.dataset.sourceIncomplete = "true";
+  const sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
+  const canResolveIncompleteSources = Boolean(group.sourceIncomplete && state.runtimeApi.available);
+  if (canResolveIncompleteSources) sources.dataset.sourceIncomplete = "true";
   sources.hidden = true;
   section._artistSongSources = sources;
   const setlistOccurrences = group.setlistOccurrences || group.occurrences;
@@ -7150,32 +7195,54 @@ function renderArtistSongGroup(group) {
   const sourcePresentation = window.FrontendUtils.sourcePresentationModel(group.occurrences, {
     expanded: false,
     inlineLimit: sourceInlineLimitForMode(),
-    totalVideoCount: Math.max(Number(group.videoCount) || 0, group.sourceIncomplete ? 1 : 0),
-    hasExternalDetails: Boolean(sourceDetailPathForRecord(group, group.occurrences)) || Boolean(group.sourceIncomplete),
+    totalVideoCount: Math.max(Number(group.videoCount) || 0, canResolveIncompleteSources ? 1 : 0),
+    hasExternalDetails: Boolean(sourceDetailPath) || canResolveIncompleteSources,
   });
   attachSetlistItemsToSourceGroups(sourcePresentation.inlineGroups, setlistOccurrences);
   sources._sourceOccurrences = group.occurrences;
   sources._songSourceOccurrences = group.occurrences;
   sources._setlistOccurrences = setlistOccurrences;
-  if (group.sourceIncomplete) sources._sourceResolver = () => loadVtuberSongSources(group);
-  sources._sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
+  if (canResolveIncompleteSources) sources._sourceResolver = () => loadVtuberSongSources(group);
+  sources._sourceDetailPath = sourceDetailPath;
 
-  meta.append(renderCopySongLinksIconButton(group.occurrences));
+  const hasPotentialSources = Boolean(group.occurrences?.length) || Boolean(sourceDetailPath) || canResolveIncompleteSources;
+  if (hasPotentialSources) meta.append(renderCopySongLinksIconButton(group.occurrences));
+  const shouldAttachSources = isVtuberMode
+    ? hasPotentialSources && (sourcePresentation.videoCount > 0 || sourcePresentation.canExpand || canResolveIncompleteSources)
+    : sourcePresentation.canExpand;
+  if (isVtuberMode && shouldAttachSources) {
+    meta.append(renderArtistSongSourceButton(sources.id, sourcePresentation, group));
+  }
   header.append(meta);
   section.append(header);
-  section.append(
-    renderSourceInlineStrip(sourcePresentation, {
-      drawerId: sources.id,
-      isExpanded: false,
-      occurrences: group.occurrences,
-      mode: "artist-song",
-      rankCount: group.count,
-      rankMetric: "occurrences",
-      showCopyAll: false,
-    }),
-  );
-  if (sourcePresentation.canExpand) section.append(sources);
+  if (!isVtuberMode) {
+    section.append(
+      renderSourceInlineStrip(sourcePresentation, {
+        drawerId: sources.id,
+        isExpanded: false,
+        occurrences: group.occurrences,
+        mode: "artist-song",
+        rankCount: group.count,
+        rankMetric: "occurrences",
+        showCopyAll: false,
+      }),
+    );
+  }
+  if (shouldAttachSources) section.append(sources);
   return section;
+}
+
+function renderArtistSongSourceButton(drawerId, sourcePresentation, group) {
+  const button = document.createElement("button");
+  button.className = "artist-song-source-toggle";
+  button.type = "button";
+  button.dataset.toggleArtistSongSource = "true";
+  button.dataset.sourceVideoCount = String(sourcePresentation.videoCount || 0);
+  button.dataset.occurrenceCount = String(sourcePresentation.occurrenceCount || group.occurrences?.length || 0);
+  button.setAttribute("aria-expanded", "false");
+  button.setAttribute("aria-controls", drawerId);
+  updateArtistSongSourceButton(button, false);
+  return button;
 }
 
 function syncArtistSongMoreButton(drawer, visibleCount, totalCount) {
@@ -7185,7 +7252,7 @@ function syncArtistSongMoreButton(drawer, visibleCount, totalCount) {
     return null;
   }
   const remaining = totalCount - visibleCount;
-  const batch = Math.min(ARTIST_SONG_GROUP_BATCH_SIZE, remaining);
+  const batch = Math.min(artistSongGroupBatchSize(drawer), remaining);
   if (!more) {
     more = document.createElement("button");
     more.className = "artist-song-more";
@@ -7362,15 +7429,18 @@ function keepSourceRowVisible(row) {
 }
 
 function toggleArtistSongLimit(row) {
-  if (!row) return;
-  const drawer = row.querySelector(".artist-song-drawer");
+  const drawer = row?.classList?.contains("artist-song-drawer") ? row : row?.querySelector(".artist-song-drawer");
   if (!drawer) return;
-  const songGroups = row._artistSongGroups || row._getArtistSongGroups?.() || [];
-  row._artistSongGroups = songGroups;
+  const rankRow = drawer.closest(".rank-row");
+  const songGroups = rankRow?._artistSongGroups || drawer._artistSongGroups || rankRow?._getArtistSongGroups?.() || drawer._getArtistSongGroups?.() || [];
+  if (rankRow) rankRow._artistSongGroups = songGroups;
+  drawer._artistSongGroups = songGroups;
   const current = artistRenderedSongCount(drawer);
-  const nextVisible = Math.min(songGroups.length, current + ARTIST_SONG_GROUP_BATCH_SIZE);
+  const nextVisible = Math.min(songGroups.length, current + artistSongGroupBatchSize(drawer));
   drawer.dataset.visibleArtistSongs = String(nextVisible);
-  const firstNewGroup = appendArtistSongGroupRange(drawer, songGroups, current, nextVisible);
+  const firstNewGroup = appendArtistSongGroupRange(drawer, songGroups, current, nextVisible, {
+    mode: drawer.dataset.sourceMode || rankRow?.dataset.drawerMode || "artist",
+  });
   syncArtistSongMoreButton(drawer, nextVisible, songGroups.length);
   appendMobileSourceCollapse(drawer);
   window.requestAnimationFrame(() => focusWithoutScrolling(firstNewGroup || drawer));
@@ -7391,6 +7461,7 @@ async function toggleArtistSongSource(button) {
       delete sources.dataset.sourceIncomplete;
     }
     sources._sourceOccurrences = sourceOccurrences;
+    syncArtistSongGroupSourceSummary(section, sources, sourceOccurrences);
     appendSourceDrawerLinks(sources, sourceOccurrences, {
       copyOccurrences: sources._songSourceOccurrences || sources._sourceOccurrences || [],
       setlistOccurrences: sources._setlistOccurrences || sources._songSourceOccurrences || sources._sourceOccurrences || [],
@@ -7403,6 +7474,93 @@ async function toggleArtistSongSource(button) {
   button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
   if (button.dataset.sourceSummaryToggle === "true") updateSourceInlineMoreButton(button, nextExpanded);
   else updateArtistSongSourceButton(button, nextExpanded);
+}
+
+function syncArtistSongGroupSourceSummary(section, sources, occurrences) {
+  const sourceOccurrences = occurrences || [];
+  if (!section || !sourceOccurrences.length) return;
+  const group = section._songGroup || {};
+  const latestOccurrence = latestOccurrenceByVideoDate(sourceOccurrences) || sourceOccurrences[0];
+  const videoCount = uniqueVideoCount(sourceOccurrences);
+  group.occurrences = sourceOccurrences;
+  group.videoCount = videoCount;
+  group.latestOccurrence = latestOccurrence;
+  group.artistSummary = artistSummaryForOccurrences(sourceOccurrences) || group.artistSummary || "";
+  group.sourceIncomplete = false;
+  section._songGroup = group;
+  if (sources) {
+    sources._sourceOccurrences = sourceOccurrences;
+    sources._songSourceOccurrences = sourceOccurrences;
+  }
+  syncArtistSongGroupThumb(section, group);
+  syncArtistSongGroupTitleLink(section, group);
+  syncArtistSongGroupArtist(section, group.artistSummary);
+  syncArtistSongGroupVideoCount(section, videoCount);
+  const button = section.querySelector("[data-toggle-artist-song-source]");
+  if (button) {
+    button.dataset.sourceVideoCount = String(videoCount);
+    button.dataset.occurrenceCount = String(sourceOccurrences.length);
+    updateArtistSongSourceButton(button, button.getAttribute("aria-expanded") === "true");
+  }
+}
+
+function syncArtistSongGroupThumb(section, group) {
+  const header = section.querySelector(":scope > .artist-song-header");
+  const latestOccurrence = group?.latestOccurrence;
+  if (!header || !latestOccurrence?.item?.videoId) return;
+  let thumb = header.querySelector(":scope > .artist-song-thumb");
+  if (!thumb) {
+    thumb = document.createElement("a");
+    thumb.className = "artist-song-thumb source-link";
+    header.insertBefore(thumb, header.firstChild);
+  }
+  thumb.href = youtubeTimeUrl(latestOccurrence.item.videoId, latestOccurrence.song?.seconds || 0);
+  thumb.target = "_blank";
+  thumb.rel = "noreferrer";
+  thumb.setAttribute("aria-label", `打开最新来源：${group.title}`);
+  thumb.textContent = "";
+  thumb.append(
+    createThumbnailImage(latestOccurrence.item, "artist-song-thumb-image", {
+      preferCompact: true,
+      width: 72,
+      height: 40,
+    }),
+  );
+}
+
+function syncArtistSongGroupTitleLink(section, group) {
+  const title = section.querySelector(":scope .artist-song-title");
+  const firstOccurrence = group?.occurrences?.[0];
+  if (!title || !firstOccurrence?.item?.videoId) return;
+  title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song?.seconds || 0);
+  title.target = "_blank";
+  title.rel = "noreferrer";
+  title.setAttribute("aria-label", `打开歌曲来源：${group.title}`);
+}
+
+function syncArtistSongGroupArtist(section, artistSummary) {
+  const meta = section.querySelector(":scope .artist-song-summary-actions");
+  if (!meta || !artistSummary) return;
+  let artist = meta.querySelector(":scope > .artist-song-artist");
+  if (!artist) {
+    artist = document.createElement("span");
+    artist.className = "artist-song-artist";
+    meta.insertBefore(artist, meta.firstChild);
+  }
+  artist.textContent = artistSummary;
+}
+
+function syncArtistSongGroupVideoCount(section, videoCount) {
+  const meta = section.querySelector(":scope .artist-song-summary-actions");
+  if (!meta || !videoCount) return;
+  let count = meta.querySelector(":scope > .artist-song-video-count");
+  if (!count) {
+    count = document.createElement("span");
+    count.className = "artist-song-video-count";
+    const copyButton = meta.querySelector(":scope > [data-copy-song-links]");
+    meta.insertBefore(count, copyButton || null);
+  }
+  count.textContent = `${videoCount}个视频`;
 }
 
 function closeSiblingArtistSongSources(section) {
@@ -7749,7 +7907,11 @@ function getArtistSongGroups(record) {
 function getVtuberSongGroups(record) {
   if (!record._songGroups) {
     const setlistOccurrences = record.occurrences || [];
-    const previewGroups = new Map(buildArtistSongGroups(setlistOccurrences).map((group) => [group.key, group]));
+    const previewGroups = new Map(
+      buildArtistSongGroups(setlistOccurrences)
+        .filter((group) => !isIgnoredVtuberSongTitle(group.title))
+        .map((group) => [group.key, group]),
+    );
     const songEntries = sortedCountEntries(record.songs);
     const groups = songEntries.length
       ? songEntries.map((entry) => {
@@ -7783,7 +7945,11 @@ function enrichVtuberSongGroup(group, setlistOccurrences, record) {
 
 function artistSummaryForOccurrences(occurrences) {
   const artists = new Map();
-  for (const { song } of occurrences || []) incrementCount(artists, cleanText(song?.artist));
+  for (const { song } of occurrences || []) {
+    const artist = cleanText(song?.artist);
+    if (window.RankingUtils.isUnknownArtistName(artist)) continue;
+    incrementCount(artists, artist);
+  }
   return sortedCountEntries(artists).slice(0, 2).map(formatCountEntry).join("、");
 }
 
@@ -7862,7 +8028,8 @@ function renderTrendBadge(trend) {
 }
 
 async function copyVideoSetlist(item) {
-  const text = window.FrontendUtils.buildSetlistText(item, {
+  const setlistItem = await hydrateVideoSetlistItem(item);
+  const text = window.FrontendUtils.buildSetlistText(setlistItem, {
     isUnknownArtistName: window.RankingUtils.isUnknownArtistName,
   });
   if (!text) {
@@ -7872,6 +8039,34 @@ async function copyVideoSetlist(item) {
   await writeClipboardText(text);
   const count = text.split("\n").filter(Boolean).length;
   showToast(`已复制整场歌单 · ${count}首`);
+}
+
+async function hydrateVideoSetlistItem(item) {
+  const videoId = cleanText(item?.videoId);
+  if (!videoId || !state.runtimeApi.available) return item || {};
+  if (state.videoSetlistCache.has(videoId)) {
+    return { ...(item || {}), ...state.videoSetlistCache.get(videoId) };
+  }
+  const params = new URLSearchParams({
+    range: canonicalRangeId(state.range),
+    view: "videos",
+    page: "1",
+    pageSize: "1",
+    q: videoId,
+    fields: "video",
+  });
+  try {
+    const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, { cache: "no-cache" });
+    const records = Array.isArray(payload?.records) ? payload.records : [];
+    const record = records.find((candidate) => cleanText(candidate?.videoId) === videoId) || null;
+    if (!record) return item || {};
+    const songs = Array.isArray(record.songs) ? record.songs : [];
+    const hydrated = { ...record, _allSongs: songs };
+    state.videoSetlistCache.set(videoId, hydrated);
+    return { ...(item || {}), ...hydrated };
+  } catch {
+    return item || {};
+  }
 }
 
 async function copySongSourceLinks(occurrences) {

@@ -2134,6 +2134,15 @@ mark {
   color: var(--accent-strong);
 }
 
+.rank-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rank-title-link:hover {
+  color: var(--accent-strong);
+}
+
 .artist-song-count {
   justify-self: end;
   color: var(--muted);
@@ -2273,13 +2282,21 @@ mark {
 
 .artist-song-more {
   justify-self: start;
+  position: relative;
+  z-index: 1;
+  min-height: var(--chip-height);
   border: 0;
   border-radius: var(--radius-control);
-  padding: 3px 0;
+  padding: 3px var(--chip-padding-x);
   background: transparent;
   color: var(--accent);
   font-size: 12.5px;
   font-weight: 700;
+}
+
+.artist-song-more:hover {
+  background: #f8fafc;
+  color: var(--accent-strong);
 }
 
 .source-video-group {
@@ -3306,7 +3323,7 @@ mark {
   }
 
   body.is-modal-open {
-    overflow: hidden;
+    overflow: auto;
   }
 
   .layout {
@@ -3374,23 +3391,6 @@ mark {
     color: var(--accent-strong);
   }
 
-  .mobile-bottom-nav {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 60;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    min-height: calc(52px + env(safe-area-inset-bottom));
-    padding: 3px 8px calc(3px + env(safe-area-inset-bottom));
-    border-top: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(14px);
-  }
-
-  .bottom-nav-item {
-    display: grid;
   .query-search-bar {
     grid-template-columns: minmax(0, 1fr) 38px 38px;
     grid-template-areas:
@@ -3439,6 +3439,23 @@ mark {
     font-size: 11.5px;
   }
 
+  .mobile-bottom-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 60;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    min-height: calc(52px + env(safe-area-inset-bottom));
+    padding: 3px 8px calc(3px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(14px);
+  }
+
+  .bottom-nav-item {
+    display: grid;
     justify-items: center;
     gap: 2px;
     min-width: 0;
@@ -3503,6 +3520,7 @@ mark {
     display: grid;
     grid-template-areas:
       "main"
+      "actions"
       "note";
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-1);
@@ -3530,7 +3548,29 @@ mark {
   }
 
   .summary-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+    overflow-x: auto;
+    padding-bottom: 1px;
+    scrollbar-width: none;
+  }
+
+  .summary-actions::-webkit-scrollbar {
     display: none;
+  }
+
+  .summary-segmented {
+    flex: 0 0 auto;
+    min-height: 30px;
+    padding: 2px;
+  }
+
+  .summary-action {
+    min-height: 26px;
+    padding: 0 8px;
+    font-size: 11.5px;
   }
 
   .summary-metrics {
@@ -3548,31 +3588,9 @@ mark {
     min-height: 16px;
     font-size: 11.5px;
     line-height: 16px;
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    min-width: 0;
-    overflow-x: auto;
-    padding-bottom: 1px;
-    scrollbar-width: none;
-  }
-
-  .summary-actions::-webkit-scrollbar {
   }
 
   .summary-note {
-  .summary-segmented {
-    flex: 0 0 auto;
-    min-height: 30px;
-    padding: 2px;
-  }
-
-  .summary-action {
-    min-height: 26px;
-    padding: 0 8px;
-    font-size: 11.5px;
-  }
-
     display: block;
     margin: 0 0 2px;
     overflow: hidden;

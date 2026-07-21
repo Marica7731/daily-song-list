@@ -175,6 +175,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             """,
             [*params, page_size, offset],
         ).fetchall()
+        records = [decode_row(conn, row) for row in rows]
     return {
         "schemaVersion": 1,
         "rangeId": range_id,
@@ -187,7 +188,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         "totalOccurrenceCount": totals["total_occurrences"],
         "totalVideoCount": totals["total_videos"],
         "pageCount": (total + page_size - 1) // page_size,
-        "records": [decode_row(row) for row in rows],
+        "records": records,
     }
 
 
@@ -507,14 +508,44 @@ def source_payload(db_path: Path, key: str, query: dict[str, list[str]] | None =
     return {"schemaVersion": 1, "found": True, "sourceKey": key, "record": record}
 
 
-def decode_row(row: sqlite3.Row) -> dict:
+def decode_row(conn: sqlite3.Connection, row: sqlite3.Row) -> dict:
     payload = json.loads(row["payload_json"])
     payload.setdefault("rank", row["rank"])
     payload.setdefault("key", row["detail_key"])
     payload.setdefault("count", row["count"])
     payload.setdefault("videoCount", row["video_count"])
     payload.setdefault("timestampCount", row["timestamp_count"])
+    if payload.get("type") == "vtuber":
+        enrich_vtuber_channel_identity(conn, payload)
     return payload
+
+
+def enrich_vtuber_channel_identity(conn: sqlite3.Connection, payload: dict) -> None:
+    if payload.get("channelId") and payload.get("channelHandle"):
+        return
+    channel_name = str(payload.get("channelName") or payload.get("name") or "").strip()
+    if not channel_name:
+        return
+    row = conn.execute(
+        """
+        SELECT channel_id, channel_handle, channel_url, COUNT(*) AS usage_count
+        FROM videos
+        WHERE lower(channel_name) = lower(?)
+          AND (channel_id <> '' OR channel_handle <> '' OR channel_url <> '')
+        GROUP BY channel_id, channel_handle, channel_url
+        ORDER BY usage_count DESC, channel_id DESC, channel_handle DESC, channel_url DESC
+        LIMIT 1
+        """,
+        (channel_name,),
+    ).fetchone()
+    if row is None:
+        return
+    if not payload.get("channelId") and row["channel_id"]:
+        payload["channelId"] = row["channel_id"]
+    if not payload.get("channelHandle") and row["channel_handle"]:
+        payload["channelHandle"] = row["channel_handle"]
+    if not payload.get("channelUrl") and row["channel_url"]:
+        payload["channelUrl"] = row["channel_url"]
 
 
 def read_meta(conn: sqlite3.Connection) -> dict[str, str]:

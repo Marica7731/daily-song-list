@@ -282,7 +282,7 @@
 
     const result = {
       range: parseRangeParam(params.get("range"), validRanges, fallbackRange, options),
-      view: validViews.has(params.get("view")) ? params.get("view") : fallbackView,
+      view: parsedView,
       page: positiveInteger(params.get("page"), positiveInteger(defaults.page, 1)),
       pageSize: validPageSizes.has(parsedPageSize) ? parsedPageSize : hasPageSizeParam ? 50 : fallbackPageSize,
       bucket: params.has("bucket") ? cleanBucketLabel(params.get("bucket")) : defaults.bucket || "全部",
@@ -338,7 +338,7 @@
     if (page !== defaults.page) params.set("page", String(page));
     if (view !== "videos" && pageSize !== defaults.pageSize) params.set("pageSize", String(pageSize));
     if (view === "songAz" && bucket !== defaults.bucket) params.set("bucket", bucket);
-    if ((view === "songRank" || view === "artistRank") && rankMetric !== defaults.rankMetric) {
+    if ((view === "songRank" || view === "artistRank" || view === "vtuberRank") && rankMetric !== defaults.rankMetric) {
       params.set("metric", rankMetric);
     }
     if (view === "videos" && videoLayout !== defaults.videoLayout) params.set("layout", videoLayout);
@@ -356,7 +356,7 @@
   }
 
   function defaultQueryDraft(defaults = {}) {
-    return {
+    const draft = {
       q: "",
       nicheOnly: false,
       hideUnknownArtist: false,
@@ -1101,7 +1101,7 @@
       const occurrenceCount = Math.max(0, Number(options.occurrenceCount ?? options.total) || 0);
       const videoCount = Math.max(0, Number(options.videoCount) || 0);
       return {
-        text: isExpanded ? `收起 · ${occurrenceCount}次歌唱 / ${songCount}首歌 / ${videoCount}个视频` : `${songCount}首歌`,
+        text: isExpanded ? "收起" : `${songCount}首歌`,
         ariaLabel: isExpanded
           ? `收起该频道曲目，当前频道共 ${occurrenceCount} 次歌唱、${songCount} 首歌、${videoCount} 个视频`
           : `查看该频道的 ${songCount} 首歌`,
