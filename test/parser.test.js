@@ -82,6 +82,9 @@ test("rejects naretan commentary and request timestamps while keeping real song 
       "0:19 花になって / 緑黄色社会",
       "0:20 晴る / ヨルシカ",
       "0:21 START / レフティーモンスターP feat. Lily",
+      "0:22 なれコールアンケート",
+      "0:23 Never Ending Story / Limahl",
+      "0:24 START:DASH!! / μ's",
     ].join("\n"),
   ]);
 
@@ -95,6 +98,8 @@ test("rejects naretan commentary and request timestamps while keeping real song 
       "花になって / 緑黄色社会",
       "晴る / ヨルシカ",
       "START / レフティーモンスターP feat. Lily",
+      "Never Ending Story / Limahl",
+      "START:DASH!! / μ's",
     ],
   );
 });
@@ -211,12 +216,13 @@ test("keeps START whitelist songs while dropping unknown START markers", () => {
       "0:03 StaRt / Mrs. GREEN APPLE",
       "0:04 START / レフティーモンスターP feat. Lily",
       "0:05 START / 愛内里菜",
+      "0:06 START:DASH!! / μ's",
     ].join("\n"),
   ]);
 
   assert.deepEqual(
     songs.map((song) => `${song.title} / ${song.artist}`),
-    ["StaRt / Mrs. GREEN APPLE", "START / レフティーモンスターP feat. Lily", "START / 愛内里菜"],
+    ["StaRt / Mrs. GREEN APPLE", "START / レフティーモンスターP feat. Lily", "START / 愛内里菜", "START:DASH!! / μ's"],
   );
 });
 

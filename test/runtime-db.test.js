@@ -441,7 +441,9 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
                   time: "0:05",
                   seconds: 5,
                 },
-                { title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / tuki.", time: "0:06", seconds: 6 },
+                { title: "なれコールアンケート", artist: "未記載", raw: "01:44:00 なれコールアンケート", time: "0:06", seconds: 6 },
+                { title: "食あたり", artist: "Food Poisoning", raw: "01:44:10 食あたり / Food Poisoning", time: "0:07", seconds: 7 },
+                { title: "晩餐歌", artist: "tuki.", raw: "1:04:22 晩餐歌 / tuki.", time: "0:08", seconds: 8 },
               ],
             },
             {
@@ -491,6 +493,8 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
             { title: "Ending Talk", artist: "unknown", time: "8:00", seconds: 480 },
             { title: "本編終了", artist: "未記載", time: "9:00", seconds: 540 },
             { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", time: "10:00", seconds: 600 },
+            { title: "Never Ending Story", artist: "Limahl", time: "10:30", seconds: 630 },
+            { title: "START:DASH!!", artist: "μ's", time: "10:45", seconds: 645 },
             { title: "Pretender", artist: "Official髭男dism", time: "11:00", seconds: 660 },
             { title: "spending", artist: "Known Artist", time: "12:00", seconds: 720 },
             { title: "Opening", artist: "Known Artist", time: "13:00", seconds: 780 },
@@ -582,7 +586,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止",
+      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり",
       "--search-scope",
       "title",
       "--page-size",
@@ -613,7 +617,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(retainedMomentSongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(retainedMomentSongOutput, /"totalCount": 3/);
+  assert.match(retainedMomentSongOutput, /"totalCount": 4/);
 
   const safeSongOutput = execFileSync(
     PYTHON,
@@ -626,7 +630,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "\"ENDLESS STORY\" OR Pretender OR spending OR Opening",
+      "\"ENDLESS STORY\" OR \"Never Ending Story\" OR \"START:DASH\" OR Pretender OR spending OR Opening",
       "--search-scope",
       "title",
       "--page-size",
@@ -635,7 +639,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(safeSongOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(safeSongOutput, /"totalCount": 4/);
+  assert.match(safeSongOutput, /"totalCount": 6/);
 
   const videoHandleSearchOutput = execFileSync(
     PYTHON,
@@ -697,12 +701,12 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(vtuberSongMetricOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
   assert.match(vtuberSongMetricOutput, /"metric": "songs"/);
   assert.match(vtuberSongMetricOutput, /"name": "Hanon Ch\. 香鳴ハノン【パレプロ】"/);
-  assert.match(vtuberSongMetricOutput, /"songCount": 5/);
+  assert.match(vtuberSongMetricOutput, /"songCount": 7/);
   assert.match(vtuberSongMetricOutput, /"isCollected": true/);
   const vtuberSongMetricPayload = parseDbQueryOutput(vtuberSongMetricOutput);
   assert.deepEqual(
     vtuberSongMetricPayload.records[0].songs.map((song) => song.name),
-    ["Overlay Song", "ENDLESS STORY", "Pretender", "spending", "Opening"],
+    ["Overlay Song", "ENDLESS STORY", "Never Ending Story", "START:DASH!!", "Pretender", "spending", "Opening"],
   );
 
   const flowerVtuberSongMetricOutput = execFileSync(

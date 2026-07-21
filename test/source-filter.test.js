@@ -115,12 +115,16 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "配信について", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "リクエストください", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "コメント欄", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "なれコールアンケート", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "歌詞考察", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "なれたん自己紹介", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "喉が痛い", artist: "配信について" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "Opening", artist: "Known Artist" }), false);
   assert.equal(isBlockedSongEntry({ title: "Open Your Eyes", artist: "Guano Apes" }), false);
   assert.equal(isBlockedSongEntry({ title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO" }), false);
+  assert.equal(isBlockedSongEntry({ title: "Never Ending Story", artist: "Limahl" }), false);
+  assert.equal(isBlockedSongEntry({ title: "START:DASH!!", artist: "μ's" }), false);
   assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
   assert.equal(isBlockedSongEntry({ title: "START", artist: "レフティーモンスターP feat. Lily" }), false);
   assert.equal(isBlockedSongEntry({ title: "天Q", artist: "Known Artist" }), false);
@@ -212,6 +216,7 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
               { title: "8", artist: "29(土) ワンマンライブ開催！＆クラファン開催中！(追加ゴール)", seconds: 2000, time: "0:33:20" },
               { title: "コメ「喉が痛い」", artist: "未記載", seconds: 2100, time: "0:35:00" },
               { title: "リクエスト受付中", artist: "未記載", seconds: 2110, time: "0:35:10" },
+              { title: "なれコールアンケート", artist: "未記載", seconds: 2115, time: "0:35:15" },
               { title: "02| キュートなキューたい", artist: "CUTIE STREET", seconds: 1361, time: "0:22:41" },
               { title: "Opening", artist: "Known Artist", seconds: 2120, time: "0:35:20" },
             ],
@@ -227,7 +232,7 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
     { title: "キュートなキューたい", artist: "CUTIE STREET", seconds: 1361, time: "0:22:41" },
     { title: "Opening", artist: "Known Artist", seconds: 2120, time: "0:35:20" },
   ]);
-  assert.equal(filtered.source.clientFilteredBlockedSongCount, 9);
+  assert.equal(filtered.source.clientFilteredBlockedSongCount, 10);
   assert.equal(filtered.source.clientNormalizedSongCount, 1);
 });
 

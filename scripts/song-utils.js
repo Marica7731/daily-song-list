@@ -261,6 +261,7 @@ function isCommentaryNonSongText(text) {
   if (/^(?:リクエスト|リク)(?:募集|確認|受付|タイム|ください|下さい|募集中|受付中|ok|OK)?$/iu.test(value)) return true;
   if (/^(?:コメント|コメ)(?:読み|欄|確認|返信|返し|して|ください|下さい|募集中|歓迎)$/iu.test(value)) return true;
   if (/^(?:配信|歌枠)(?:開始|終了|予定|告知|中|について|ありがとう|お疲れさま?|おつかれさま?)$/iu.test(value)) return true;
+  if (/(?:なれコール)?アンケート|歌詞考察|曲紹介(?:タイム)?/u.test(value)) return true;
   if (/喉(?:が|は)?(?:痛い|いたい|不調|治らない|やられた|終わった)|のど(?:が|は)?(?:痛い|いたい|不調)|喉の調子(?:が|は)?/iu.test(value)) return true;
   if (/^(?:なれたん|naraetan)(?:は|が|の|も|って|です|だよ|である|自称|説明|自己紹介|について).{0,60}$/iu.test(value)) return true;
   return false;
@@ -286,7 +287,7 @@ function isJapaneseTopicTitleWithEnglishGloss(title, artist) {
   if (!titleText || !artistText || !containsJapanese(titleText) || containsJapanese(artistText)) return false;
   if (!isEnglishGlossLikeText(artistText)) return false;
   if (isCommentaryNonSongText(titleText) || isTopicLikeTitle(titleText) || isSentenceLikeTitle(titleText)) return true;
-  return /(?:op|ed|opening|ending|雑談|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ)/iu.test(titleText);
+  return /(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ)/iu.test(titleText);
 }
 
 function isEnglishGlossLikeText(text) {
@@ -305,6 +306,7 @@ function isKnownSongSafeFromCommentary(title, artist) {
   const artistText = String(artist || "").trim();
   if (/星座になれたら/u.test(titleText)) return true;
   if (/^(?:ENDLESS STORY|Never Ending Story|Opening|Ending)$/iu.test(titleText) && artistText && artistText !== "未記載") return true;
+  if (/^START:DASH!!$/iu.test(titleText) && artistText && artistText !== "未記載") return true;
   return false;
 }
 

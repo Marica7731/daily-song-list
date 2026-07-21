@@ -96,6 +96,9 @@ test("buildClientGroup filters runtime activity markers while preserving START s
           { seconds: 8, title: "開始　～　春泥棒", artist: "ヨルシカ", isNiche: false },
           { seconds: 9, title: "閉会式開始", artist: "未記載", isNiche: false },
           { seconds: 10, title: "開始ツイートしてなーい！", artist: "\"I forgot to tweet that the stream started!\"", isNiche: false },
+          { seconds: 11, title: "なれコールアンケート", artist: "未記載", isNiche: false },
+          { seconds: 12, title: "Never Ending Story", artist: "Limahl", isNiche: false },
+          { seconds: 13, title: "START:DASH!!", artist: "μ's", isNiche: false },
         ],
       },
     ],
@@ -103,7 +106,7 @@ test("buildClientGroup filters runtime activity markers while preserving START s
 
   assert.deepEqual(
     group.items[0].songs.map((song) => `${song.title} / ${song.artist}`),
-    ["StaRt / Mrs. GREEN APPLE", "メズマライザー / 未記載", "仮装狂騒曲 / 初星学園", "春泥棒 / ヨルシカ"],
+    ["StaRt / Mrs. GREEN APPLE", "メズマライザー / 未記載", "仮装狂騒曲 / 初星学園", "春泥棒 / ヨルシカ", "Never Ending Story / Limahl", "START:DASH!! / μ's"],
   );
 });
 

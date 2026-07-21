@@ -1881,6 +1881,8 @@ def is_runtime_commentary_noise(title, raw) -> bool:
         return False
     if re.search(r"(?:雑談|聊天|说明|説明|コメント|コメ|アンケート|投票|リクエスト|配信|歌枠|喉|のど|自己紹介|お知らせ|告知|自己肯定感)", title_text, re.IGNORECASE):
         return True
+    if re.search(r"(?:なれコール)?アンケート|歌詞考察|曲紹介(?:タイム)?", title_text, re.IGNORECASE):
+        return True
     if re.search(r"(?:なれたん|naraetan)", combined, re.IGNORECASE):
         return True
     if re.search(r"(?:について|のお話|問題|しよう|している|していない|だった|でした|です|ます|ありがとう|おめでとう|気がする|したい|してください|なんで|かな|かも|だよ|だね|なの|か)$", title_text, re.IGNORECASE):
@@ -1906,13 +1908,15 @@ def is_runtime_topic_like_bilingual_commentary(title, artist, raw) -> bool:
         return False
     if is_runtime_commentary_noise(title_text, raw_text) or is_runtime_sentence_like_title(title_text):
         return True
-    return bool(re.search(r"(?:op|ed|opening|ending|雑談|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ)", title_text, re.IGNORECASE))
+    return bool(re.search(r"(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ)", title_text, re.IGNORECASE))
 
 
 def is_known_song_safe_from_runtime_commentary(title, artist) -> bool:
     title_text = clean_text(title)
     artist_text = clean_text(artist)
     if "星座になれたら" in title_text:
+        return True
+    if re.fullmatch(r"START:DASH!!", title_text, re.IGNORECASE) and artist_text and not is_unknown_artist(artist_text):
         return True
     return bool(re.fullmatch(r"(?:ENDLESS STORY|Never Ending Story|Opening|Ending)", title_text, re.IGNORECASE) and artist_text and not is_unknown_artist(artist_text))
 

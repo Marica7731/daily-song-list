@@ -212,6 +212,9 @@ test("curation drops naretan commentary rows while keeping explicit known songs"
           { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", seconds: 9, raw: "0:09 ENDLESS STORY / REIRA starring YUNA ITO" },
           { title: "Opening", artist: "Known Artist", seconds: 10, raw: "0:10 Opening / Known Artist" },
           { title: "楽しみにしてろよ!", artist: "練習後のなれたんを", seconds: 11, raw: "0:11 楽しみにしてろよ! / 練習後のなれたんを" },
+          { title: "なれコールアンケート", artist: "未記載", seconds: 12, raw: "0:12 なれコールアンケート" },
+          { title: "Never Ending Story", artist: "Limahl", seconds: 13, raw: "0:13 Never Ending Story / Limahl" },
+          { title: "START:DASH!!", artist: "μ's", seconds: 14, raw: "0:14 START:DASH!! / μ's" },
         ],
       },
     ],
@@ -220,9 +223,9 @@ test("curation drops naretan commentary rows while keeping explicit known songs"
 
   assert.deepEqual(
     videos[0].songs.map((item) => `${item.title} / ${item.artist}`),
-    ["星座になれたら / 結束バンド", "ENDLESS STORY / REIRA starring YUNA ITO", "Opening / Known Artist"],
+    ["星座になれたら / 結束バンド", "ENDLESS STORY / REIRA starring YUNA ITO", "Opening / Known Artist", "Never Ending Story / Limahl", "START:DASH!! / μ's"],
   );
-  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 8);
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 9);
 });
 
 test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", () => {
