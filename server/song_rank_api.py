@@ -202,22 +202,33 @@ def source_matched_rankings_payload(
 ) -> dict:
     base_where = ["r.range_id = ?", "r.view = ?", "r.metric = ?", "r.scope_key = 'all'", "r.detail_key != ''"]
     base_params: list[object] = [range_id, view, metric]
-    source_clause, source_values = source_occurrence_filter(q, search_scope)
+    source_clause, source_values = source_occurrence_filter(q, search_scope, search_fields)
     candidate_where = list(base_where)
     candidate_params = list(base_params)
-    matched_params = [*candidate_params, *source_values]
+    matched_params = [range_id, *source_values, *candidate_params]
     having = ""
     if min_count > 1 and view not in {"videos", "vtubers"}:
         having = "HAVING matched_videos >= ?" if metric == "videos" else "HAVING matched_count >= ?"
         matched_params.append(min_count)
     matched_sql = f"""
+        WITH matched_sources AS (
+          SELECT
+            so.source_key,
+            COUNT(*) AS matched_count,
+            COUNT(DISTINCT COALESCE(NULLIF(so.video_id, ''), 'position:' || so.position)) AS matched_videos,
+            MIN(so.position) AS first_match_position
+          FROM source_occurrences so
+          WHERE so.range_id = ?
+            AND {source_clause}
+          GROUP BY so.source_key
+        )
         SELECT
           r.row_id, r.rank, r.detail_key, r.title, r.artist, r.name, r.count, r.song_count,
           r.video_count, r.timestamp_count, r.payload_json,
           sd.source_key AS matched_source_key,
-          COUNT(*) AS matched_count,
-          COUNT(DISTINCT COALESCE(NULLIF(so.video_id, ''), 'position:' || so.position)) AS matched_videos,
-          MIN(so.position) AS first_match_position
+          ms.matched_count,
+          ms.matched_videos,
+          ms.first_match_position
         FROM (
           SELECT *
           FROM ranking_rows r
@@ -226,10 +237,8 @@ def source_matched_rankings_payload(
         JOIN source_details sd
           ON sd.range_id = r.range_id
          AND sd.entity_key = r.detail_key
-        JOIN source_occurrences so
-          ON so.range_id = r.range_id
-         AND so.source_key = sd.source_key
-        WHERE {source_clause}
+        JOIN matched_sources ms
+          ON ms.source_key = sd.source_key
         GROUP BY r.row_id
         {having}
     """
@@ -261,7 +270,7 @@ def source_matched_rankings_payload(
             [*matched_params, page_size, offset],
         ).fetchall()
         records = [
-            decode_source_matched_row(conn, row, q, search_scope)
+            decode_source_matched_row(conn, row, q, search_scope, search_fields)
             for row in rows
         ]
     total = totals["total_count"]
@@ -284,16 +293,11 @@ def source_matched_rankings_payload(
     }
 
 
-def source_occurrence_filter(query: str, scope: str) -> tuple[str, list[str]]:
+def source_occurrence_filter(query: str, scope: str, search_fields: list[str] | None = None) -> tuple[str, list[str]]:
     groups = parse_search_groups(query)
     if not groups:
         return "1 = 1", []
-    if scope == "channel":
-        fields = ["lower(so.channel_name)", "lower(so.search_text)"]
-    elif scope == "video":
-        fields = ["lower(so.title)", "lower(so.video_id)", "lower(so.search_text)"]
-    else:
-        fields = ["lower(so.search_text)"]
+    fields = source_occurrence_search_fields(scope, search_fields)
     values: list[str] = []
     or_clauses = []
     for group in groups:
@@ -309,9 +313,29 @@ def source_occurrence_filter(query: str, scope: str) -> tuple[str, list[str]]:
     return "(" + " OR ".join(or_clauses) + ")", values
 
 
-def decode_source_matched_row(conn: sqlite3.Connection, row: sqlite3.Row, query: str, search_scope: str) -> dict:
+def source_occurrence_search_fields(scope: str, search_fields: list[str] | None = None) -> list[str]:
+    if search_fields == []:
+        return ["lower(so.channel_name)", "lower(so.title)", "lower(so.video_id)"]
+    requested = set(search_fields or [])
+    if requested:
+        fields: list[str] = []
+        if "channel" in requested:
+            fields.append("lower(so.channel_name)")
+        if "video" in requested:
+            fields.extend(["lower(so.title)", "lower(so.video_id)"])
+        if "source" in requested:
+            fields.append("lower(so.search_text)")
+        return fields or ["lower(so.search_text)"]
+    if scope == "channel":
+        return ["lower(so.channel_name)"]
+    if scope == "video":
+        return ["lower(so.title)", "lower(so.video_id)"]
+    return ["lower(so.search_text)"]
+
+
+def decode_source_matched_row(conn: sqlite3.Connection, row: sqlite3.Row, query: str, search_scope: str, search_fields: list[str] | None = None) -> dict:
     record = decode_row(row)
-    matched_occurrences = matched_source_occurrences(conn, row["matched_source_key"], query, search_scope, 20)
+    matched_occurrences = matched_source_occurrences(conn, row["matched_source_key"], query, search_scope, 20, search_fields)
     matched_count = int(row["matched_count"] or 0)
     matched_videos = int(row["matched_videos"] or 0)
     record["globalCount"] = record.get("count", 0)
@@ -372,8 +396,9 @@ def matched_source_occurrences(
     query: str,
     search_scope: str,
     limit: int,
+    search_fields: list[str] | None = None,
 ) -> list[sqlite3.Row]:
-    clause, values = source_occurrence_filter(query, search_scope)
+    clause, values = source_occurrence_filter(query, search_scope, search_fields)
     return conn.execute(
         f"""
         SELECT payload_json, video_id
