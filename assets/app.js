@@ -7630,6 +7630,7 @@ function renderArtistSongGroup(group) {
   if (!group.occurrences?.length) return null;
   const section = document.createElement("section");
   section.className = "artist-song-group";
+  if (group.sourceMode === "vtuber") section.classList.add("artist-song-group-vtuber");
 
   const header = document.createElement("div");
   header.className = "artist-song-header";

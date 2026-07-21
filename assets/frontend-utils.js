@@ -1223,22 +1223,8 @@
     }
     if (mode === "vtuber") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
-      const rankMetric = options.rankMetric || "occurrences";
-      const occurrenceCount = Math.max(0, Number(options.occurrenceCount || (rankMetric === "occurrences" ? options.rankCount : 0)) || 0);
-      const videoCount = Math.max(0, Number(options.videoCount) || 0);
-      const expandedText = [
-        "收起",
-        occurrenceCount ? `${occurrenceCount}次歌唱` : "",
-        songCount ? `${songCount}首歌` : "",
-        videoCount ? `${videoCount}个视频` : "",
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      const collapsedText = [occurrenceCount ? `${occurrenceCount}次歌唱` : "", songCount ? `${songCount}首歌` : ""]
-        .filter(Boolean)
-        .join(" / ") || `${songCount}首歌`;
       return {
-        text: isExpanded ? expandedText : collapsedText,
+        text: isExpanded ? "收起" : "展开",
         ariaLabel: isExpanded ? "收起该频道歌曲" : `查看该频道的 ${songCount} 首歌曲`,
       };
     }
