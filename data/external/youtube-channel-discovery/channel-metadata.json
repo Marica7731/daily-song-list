@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-21T16:39:06.795Z",
+  "generatedAt": "2026-07-21T18:31:20.743Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-21T16:39:06.795Z",
+    "fetchedAt": "2026-07-21T18:31:20.743Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-21T16:39:06.795Z",
+    "generatedAt": "2026-07-21T18:31:20.743Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7936,31 +7936,31 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 964,
-      "parseableChannels": 746,
+      "totalChannels": 963,
+      "parseableChannels": 747,
       "realAvatar": 643,
-      "thumbnailFallback": 321,
+      "thumbnailFallback": 320,
       "missingDisplayImage": 0,
-      "missingAvatar": 321,
+      "missingAvatar": 320,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 329
+      "skipped_collected_evidence": 328
     },
     "failures": [],
     "skippedSummary": {
-      "missing_channel_url_or_handle": 218,
-      "batch_limit_reached": 111
+      "batch_limit_reached": 112,
+      "missing_channel_url_or_handle": 216
     },
     "skippedSamples": [
       {
         "handle": "",
-        "channelId": "",
-        "displayName": "双葉いよ - FutabaIyo -",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
+        "channelId": "UCXw752V8J8yl_kkiEycyyqg",
+        "displayName": "えん / neG",
+        "sourceUrl": "https://www.youtube.com/channel/UCXw752V8J8yl_kkiEycyyqg",
+        "reason": "batch_limit_reached"
       },
       {
         "handle": "",
