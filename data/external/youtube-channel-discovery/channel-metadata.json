@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-20T21:03:44.327Z",
+  "generatedAt": "2026-07-21T14:20:52.300Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-20T21:03:44.327Z",
+    "fetchedAt": "2026-07-21T14:20:52.300Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,77 +7928,60 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-20T21:03:44.327Z",
+    "generatedAt": "2026-07-21T14:20:52.300Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
-    "maxFetch": 60,
+    "maxFetch": 0,
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
       "totalChannels": 966,
-      "parseableChannels": 745,
-      "realAvatar": 588,
-      "thumbnailFallback": 378,
+      "parseableChannels": 750,
+      "realAvatar": 643,
+      "thumbnailFallback": 323,
       "missingDisplayImage": 0,
-      "missingAvatar": 378,
+      "missingAvatar": 323,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 608,
-      "failed": 4,
-      "skipped_collected_evidence": 323,
-      "fetched": 56
+      "skipped_collected_evidence": 331,
+      "already_cached": 664
     },
-    "failures": [
-      {
-        "handle": "/@sumica-",
-        "channelId": "UCOpxpMDqjWr7LIGps19pw0w",
-        "displayName": "-sumica-澄花",
-        "sourceUrl": "https://www.youtube.com/@sumica-",
-        "reason": "http_404"
-      },
-      {
-        "handle": "/@Dia-",
-        "channelId": "UC80TduEq6Sp4n2DkiUH2eLQ",
-        "displayName": "Diα - ディア",
-        "sourceUrl": "https://www.youtube.com/@Dia-",
-        "reason": "http_404"
-      },
-      {
-        "handle": "/@ChitaCh.",
-        "channelId": "UCPCqeKKPJvkErl-ijJ-Z5FQ",
-        "displayName": "Chita Ch.堕天ちた",
-        "sourceUrl": "https://www.youtube.com/@ChitaCh.",
-        "reason": "http_404"
-      },
-      {
-        "handle": "/@H.Midori-Ch-",
-        "channelId": "UCa_QYqKVEOE_EIZWgiOEZ5A",
-        "displayName": "H.Midori Ch🍃葉山翠",
-        "sourceUrl": "https://www.youtube.com/@H.Midori-Ch-",
-        "reason": "http_404"
-      }
-    ],
+    "failures": [],
     "skippedSummary": {
-      "missing_channel_url_or_handle": 221,
-      "batch_limit_reached": 102
+      "batch_limit_reached": 115,
+      "missing_channel_url_or_handle": 216
     },
     "skippedSamples": [
       {
-        "handle": "",
-        "channelId": "",
-        "displayName": "【幽弦おばけ】おばけの住処👻🎧𓂃𓈒𓏸︎︎︎︎",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
+        "handle": "/@ShinoYakushino",
+        "channelId": "UCm2gbO8BoBgSFtDM_aQKmIw",
+        "displayName": "薬師乃しの",
+        "sourceUrl": "https://www.youtube.com/@ShinoYakushino",
+        "reason": "batch_limit_reached"
       },
       {
-        "handle": "",
-        "channelId": "",
-        "displayName": "Nemuri Ch.月乃ねむり",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
+        "handle": "/@AnonRemu",
+        "channelId": "UCPqswBEjZm3FdvOzPyDw9wg",
+        "displayName": "Remu Ch. 綺音れむ",
+        "sourceUrl": "https://www.youtube.com/@AnonRemu",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@etrachannel",
+        "channelId": "UCAHXqn4nAd2j3LRu1Qyi_JA",
+        "displayName": "エトラ / étraチャンネル",
+        "sourceUrl": "https://www.youtube.com/@etrachannel",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@nemuch.4632",
+        "channelId": "UCU6XL1U-MB7D7fFTSF2e_Pg",
+        "displayName": "Nemu Ch. 白羽ねむ",
+        "sourceUrl": "https://www.youtube.com/@nemuch.4632",
+        "reason": "batch_limit_reached"
       },
       {
         "handle": "",
@@ -8020,6 +8003,13 @@
         "displayName": "むかいせな / Mukai Sena",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
+      },
+      {
+        "handle": "/@Dia-",
+        "channelId": "UC80TduEq6Sp4n2DkiUH2eLQ",
+        "displayName": "Diα - ディア",
+        "sourceUrl": "https://www.youtube.com/@Dia-",
+        "reason": "batch_limit_reached"
       },
       {
         "handle": "",
@@ -8099,23 +8089,16 @@
         "reason": "missing_channel_url_or_handle"
       },
       {
-        "handle": "",
-        "channelId": "",
+        "handle": "/@Nijyuuu7",
+        "channelId": "UCpJc-f0Xs-u3QrkBQr5QiEQ",
         "displayName": "にじゅな",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
+        "sourceUrl": "https://www.youtube.com/@Nijyuuu7/streams",
+        "reason": "batch_limit_reached"
       },
       {
         "handle": "",
         "channelId": "",
         "displayName": "みなとん。は歌う",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "AOI from 狐狸假面 KitsuneKamen Ch.",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       },
@@ -8144,20 +8127,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "lilia",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "燈明寺かぐら - Tomyoji Kagura -",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "Kyoko Ch. 倉持京子",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
