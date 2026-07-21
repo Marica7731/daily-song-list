@@ -1,0 +1,111 @@
+# YouTube channel discovery report
+
+- Generated: 2026-07-21T18:59:52.365Z
+- Channel: https://www.youtube.com/@ShirazunaIwo
+- Singer: ShirazunaIwo
+- Keywords: フルート, 生演奏, live, ライブ, クラリネット, piano streaming, ピアノ演奏, 歌, 歌枠, 弾き語, karaoke, 歌ってみた, 3D Live
+- Candidates: 54
+- Usable videos: 47
+- Occurrences: 787
+
+## Candidate videos
+
+- dGMCP50PmRE 【歌枠 / KARAOKE 】連休明けを頑張る貴方へ。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- 2DQ4slwG2G8 【 #アプ盛夏歌リレー 】夏といえば海！海といえば深海！深海といえば不知名イヲ🐋❕｜Singing Stream【不知名イヲ/Re:AcT】 (歌)
+- Xf8PmL2MubE 【#高低差歌枠リレー】皆様をマナリア海溝にお連れしましょう。｜Singing Stream【不知名イヲ/Re:AcT】 (歌, 歌枠)
+- yeyIFQIGj-U 【歌枠 / KARAOKE 】三連休前にしっとりピアノに合わせて歌う。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- 4YiU6pX8cfo 【歌枠 / KARAOKE 】憂鬱な月曜日に聴く懐かしい歌。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- KpRBlApmrFQ 【歌枠 / KARAOKE 】今日はミセスさんを存分に歌うと決めた昼下がりの歌枠🍏｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- OScJ_cKtFDg 【 #シークレット歌枠リレー】3枠目は遠い海の底からお届けいたします🫧【不知名イヲ/Re:AcT】 (歌, 歌枠)
+- br50altsFCk 【歌枠 / KARAOKE 】ダークな曲だけ存分に歌う歌枠。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- qMjBlelkUUs 【歌枠 / KARAOKE 】一足早い夏フェス気分を味わいたい歌枠⛱｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- cmQgBUuZXng 【歌枠 / KARAOKE 】天の川の向こう側で逢いましょうね。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- r062NVQ7wek 【歌枠 / KARAOKE 】最近の急激な眠気に後ろから襲われている歌枠。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- 5Ihz-I5okYU 【歌枠 / KARAOKE 】初見さんもどうぞ。雨間のヨルシカさん縛り☔【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠, karaoke)
+- BqpVX4zfqGg 【 #眠りに導く歌枠リレー 】遠い海の底から響く子守唄を。【 不知名イヲ / Re:AcT 】 (歌, 歌枠)
+- vJjt99uY438 【#歌枠🎙 】今日からあなたもこの声の虜。【不知名イヲ/Re:AcT】 (歌, 歌枠)
+- iJffmdk7Uys 【#歌枠🎙 】初見さん歓迎🐋深海からお届けする低音響く歌声。【不知名イヲ/Re:AcT】 #作業用bgm (歌, 歌枠)
+- fpM0Bdq7u7M 【#歌枠🎙 】低音響くバラードでチルな金曜日。【不知名イヲ/Re:AcT】 (歌, 歌枠)
+- B5nRIabTJzA 【#私が輝く歌リレー】深海から響くリッチな低音をお届け🐋【不知名イヲ/Re:AcT】 (歌)
+- c2dL44ZOsr0 【#推ススメ新人Vtuber歌枠リレー vol.3 】どうやら推ススメの歌声らしい。【不知名イヲ/Re:AcT】 (歌, 歌枠)
+- O8JElpAgl1I 【ボカロ縛り歌枠🎙 】初見さん歓迎🐋低音で歌うボカロ曲聴いていきませんか。【不知名イヲ/Re:AcT】#作業bgm (歌, 歌枠)
+- mpAdqSMSK3o 【耐久歌枠🎙 】5900人達成したので19:00まで登録者どこまで増えるか残酷な天使のテーゼ縛り。頼む。【不知名イヲ/Re:AcT】#作業bgm (歌, 歌枠)
+- BaYx0KvdPwU 【定期歌枠🎙 】初見さん歓迎🐋午後からも頑張るためのミセスさん多めロック縛り。【不知名イヲ/Re:AcT】#作業bgm (歌, 歌枠)
+- 1w_76_WhwRE 【定期歌枠🎙 】初見さん歓迎🐋低音で歌うボカロ曲聴いていきませんか。【不知名イヲ/Re:AcT】#作業bgm (歌, 歌枠)
+- W2IRtKyAdNc 【定期歌枠🎙 】初見さん歓迎🐋憂鬱な月曜日に懐かしのロックをお届けします。【不知名イヲ/Re:AcT】 (歌, 歌枠)
+- -BoMGqONQBA 【定期歌枠🎙 】初見さん大歓迎🐋とにかく幅広い選曲を一曲聴いていって。【不知名イヲ/Re:AcT】#作業bgm (歌, 歌枠)
+- y0K_ccN5Hj8 【定期歌枠🎙 】目指せチャンネル登録者6000✊あまりにも幅広いジャンルを聴いてみてほしい。【不知名イヲ/Re:AcT】#作業bgm (歌, 歌枠)
+- YP0pSFeqh4Q 【#歌枠🎙 】初見さん歓迎🐋低音って貴重なんですよ。【不知名イヲ/Re:AcT】 (歌, 歌枠)
+- Jm0UJ5tn4AQ 【メンバーシップ限定】ミセスさんのライブに行ってきたんですよ…※セトリ等のネタバレあり (ライブ)
+- W4c4Fiw2Fwo 【歌枠🎙/ #karaoke 】5000人まであと少し🐋唯一無二の低音ダウナー、貴方も確かめてみて。【不知名イヲ/Re:AcT】 (歌, 歌枠, karaoke)
+- 8NMb85JL3TU 【歌枠🎙/ #karaoke 】初見さん歓迎🐋おやすみの日のチルタイムに一曲。【不知名イヲ/Re:AcT】 (歌, 歌枠, karaoke)
+- rL24vSI5Ox8 【歌枠🎙/ #karaoke 】初見さん歓迎🐋チルでちょっぴり切ない金曜の夜。【不知名イヲ/Re:AcT】 (歌, 歌枠, karaoke)
+- ... 24 more
+
+## Parsed videos
+
+- dGMCP50PmRE 【歌枠 / KARAOKE 】連休明けを頑張る貴方へ。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm songs=17
+- 2DQ4slwG2G8 【 #アプ盛夏歌リレー 】夏といえば海！海といえば深海！深海といえば不知名イヲ🐋❕｜Singing Stream【不知名イヲ/Re:AcT】 songs=5
+- Xf8PmL2MubE 【#高低差歌枠リレー】皆様をマナリア海溝にお連れしましょう。｜Singing Stream【不知名イヲ/Re:AcT】 songs=5
+- yeyIFQIGj-U 【歌枠 / KARAOKE 】三連休前にしっとりピアノに合わせて歌う。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm songs=16
+- 4YiU6pX8cfo 【歌枠 / KARAOKE 】憂鬱な月曜日に聴く懐かしい歌。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm songs=14
+- KpRBlApmrFQ 【歌枠 / KARAOKE 】今日はミセスさんを存分に歌うと決めた昼下がりの歌枠🍏｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm songs=22
+- OScJ_cKtFDg 【 #シークレット歌枠リレー】3枠目は遠い海の底からお届けいたします🫧【不知名イヲ/Re:AcT】 songs=5
+- br50altsFCk 【歌枠 / KARAOKE 】ダークな曲だけ存分に歌う歌枠。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm songs=17
+- qMjBlelkUUs 【歌枠 / KARAOKE 】一足早い夏フェス気分を味わいたい歌枠⛱｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm songs=17
+- cmQgBUuZXng 【歌枠 / KARAOKE 】天の川の向こう側で逢いましょうね。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm songs=16
+- r062NVQ7wek 【歌枠 / KARAOKE 】最近の急激な眠気に後ろから襲われている歌枠。｜Singing Stream【不知名イヲ/Re:AcT】 #作業用bgm songs=18
+- 5Ihz-I5okYU 【歌枠 / KARAOKE 】初見さんもどうぞ。雨間のヨルシカさん縛り☔【不知名イヲ/Re:AcT】 #作業用bgm songs=13
+- BqpVX4zfqGg 【 #眠りに導く歌枠リレー 】遠い海の底から響く子守唄を。【 不知名イヲ / Re:AcT 】 songs=4
+- vJjt99uY438 【#歌枠🎙 】今日からあなたもこの声の虜。【不知名イヲ/Re:AcT】 songs=12
+- iJffmdk7Uys 【#歌枠🎙 】初見さん歓迎🐋深海からお届けする低音響く歌声。【不知名イヲ/Re:AcT】 #作業用bgm songs=10
+- B5nRIabTJzA 【#私が輝く歌リレー】深海から響くリッチな低音をお届け🐋【不知名イヲ/Re:AcT】 songs=5
+- O8JElpAgl1I 【ボカロ縛り歌枠🎙 】初見さん歓迎🐋低音で歌うボカロ曲聴いていきませんか。【不知名イヲ/Re:AcT】#作業bgm songs=32
+- mpAdqSMSK3o 【耐久歌枠🎙 】5900人達成したので19:00まで登録者どこまで増えるか残酷な天使のテーゼ縛り。頼む。【不知名イヲ/Re:AcT】#作業bgm songs=50
+- BaYx0KvdPwU 【定期歌枠🎙 】初見さん歓迎🐋午後からも頑張るためのミセスさん多めロック縛り。【不知名イヲ/Re:AcT】#作業bgm songs=15
+- 1w_76_WhwRE 【定期歌枠🎙 】初見さん歓迎🐋低音で歌うボカロ曲聴いていきませんか。【不知名イヲ/Re:AcT】#作業bgm songs=31
+- W2IRtKyAdNc 【定期歌枠🎙 】初見さん歓迎🐋憂鬱な月曜日に懐かしのロックをお届けします。【不知名イヲ/Re:AcT】 songs=28
+- -BoMGqONQBA 【定期歌枠🎙 】初見さん大歓迎🐋とにかく幅広い選曲を一曲聴いていって。【不知名イヲ/Re:AcT】#作業bgm songs=11
+- y0K_ccN5Hj8 【定期歌枠🎙 】目指せチャンネル登録者6000✊あまりにも幅広いジャンルを聴いてみてほしい。【不知名イヲ/Re:AcT】#作業bgm songs=19
+- YP0pSFeqh4Q 【#歌枠🎙 】初見さん歓迎🐋低音って貴重なんですよ。【不知名イヲ/Re:AcT】 songs=28
+- Jm0UJ5tn4AQ 【メンバーシップ限定】ミセスさんのライブに行ってきたんですよ…※セトリ等のネタバレあり songs=1
+- W4c4Fiw2Fwo 【歌枠🎙/ #karaoke 】5000人まであと少し🐋唯一無二の低音ダウナー、貴方も確かめてみて。【不知名イヲ/Re:AcT】 songs=28
+- 8NMb85JL3TU 【歌枠🎙/ #karaoke 】初見さん歓迎🐋おやすみの日のチルタイムに一曲。【不知名イヲ/Re:AcT】 songs=34
+- rL24vSI5Ox8 【歌枠🎙/ #karaoke 】初見さん歓迎🐋チルでちょっぴり切ない金曜の夜。【不知名イヲ/Re:AcT】 songs=16
+- UufozPvY79Q 【歌枠🎙/ #karaoke 】初見さん歓迎🐋華金にロックを一曲いかがですか。【不知名イヲ/Re:AcT】 songs=15
+- eDJPKuYwMnI 【歌枠🎙/ #karaoke 】初見さん歓迎🐋唯一無二の歌声、貴方も確かめてみて。【不知名イヲ/Re:AcT】 songs=13
+- ... 17 more
+
+## Occurrence sample
+
+- dGMCP50PmRE 0:05:22 メーベル / 須田 景凪(バルーン)
+- dGMCP50PmRE 0:10:23 パメラ / 須田 景凪(バルーン)
+- dGMCP50PmRE 0:19:03 メランコリーキッチン / 米津玄師
+- dGMCP50PmRE 0:24:23 さよーならまたいつか！ / 米津玄師
+- dGMCP50PmRE 0:29:52 透明人間 / 東京事変
+- dGMCP50PmRE 0:42:19 地獄でなぜ悪い / 星野源
+- dGMCP50PmRE 0:47:52 SUN / 星野源
+- dGMCP50PmRE 1:01:02 魔性 / ヨルシカ
+- dGMCP50PmRE 1:07:30 思想犯 / ヨルシカ
+- dGMCP50PmRE 1:25:09 VIP / Mrs. GREEN APPLE
+- dGMCP50PmRE 1:29:11 天国 / Mrs. GREEN APPLE
+- dGMCP50PmRE 1:43:45 Attitude / Mrs. GREEN APPLE
+- dGMCP50PmRE 1:50:20 有心論 / RADWIMPS
+- dGMCP50PmRE 1:56:17 水流のロック / 日食なつこ
+- dGMCP50PmRE 2:10:20 卵とじ / 倉橋ヨエコ
+- dGMCP50PmRE 2:25:30 ヴィーナスとジーザス / やくしまるえつこ
+- dGMCP50PmRE 2:29:53 ビターバカンス / Mrs. GREEN APPLE
+- 2DQ4slwG2G8 0:00:47 クスシキ / Mrs. GREEN APPLE
+- 2DQ4slwG2G8 0:04:07 魂のルフラン / 高橋洋子
+- 2DQ4slwG2G8 0:10:42 JANE DOE / 米津玄師、宇多田ヒカル
+- 2DQ4slwG2G8 0:16:57 lulu / Mrs. GREEN APPLE
+- 2DQ4slwG2G8 0:24:40 daze / じん
+- Xf8PmL2MubE 0:01:06 え? あぁ、そう / 蝶々P
+- Xf8PmL2MubE 0:05:22 カンタレラ / nero
+- Xf8PmL2MubE 0:10:07 JANE DOE / 米津玄師、宇多田ヒカル
+- Xf8PmL2MubE 0:15:46 ゴールデンタイムラバー / スキマスイッチ
+- Xf8PmL2MubE 0:26:14 クスシキ / Mrs. GREEN APPLE
+- yeyIFQIGj-U 0:06:44 グレゴリオ / 古川本舗
+- yeyIFQIGj-U 0:14:30 グリグリメガネと月光蟲 / 古川本舗
+- yeyIFQIGj-U 0:22:04 スーパー・ノヴァ / 古川本舗
+- ... 757 more
