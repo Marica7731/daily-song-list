@@ -49,6 +49,8 @@ test("status display separates capture time from derived rebuild time", () => {
   assert.doesNotMatch(body, /rebuiltDerivedAt \|\| status\.completedAt/u);
   assert.match(functionBody("function runtimeMetaFromApiMeta"), /const \{ diffs: _staticDiffs, \.\.\.fallbackRuntimeMeta \} = fallbackMeta \|\| \{\}/u);
   assert.match(functionBody("function runtimeMetaFromApiMeta"), /\.\.\.fallbackRuntimeMeta/u);
+  assert.match(functionBody("function mergeRuntimeStatus"), /meta\?\.api\?\.available && metaStatus\?\.status === "success"/u);
+  assert.match(functionBody("function mergeRuntimeStatus"), /completeRuntimeStatus\(metaStatus, metaStatus, meta\)/u);
 });
 
 test("home controls remove legacy info buttons and expose hide-unknown toggle", () => {

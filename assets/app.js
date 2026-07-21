@@ -3126,6 +3126,9 @@ function renderStatusAlerts(messages) {
 }
 
 function mergeRuntimeStatus(metaStatus, statusFile, meta) {
+  if (meta?.api?.available && metaStatus?.status === "success") {
+    return completeRuntimeStatus(metaStatus, metaStatus, meta);
+  }
   const candidates = [metaStatus, statusFile].filter((item) => item && typeof item === "object");
   if (!candidates.length) return null;
   const newest = candidates
@@ -3135,6 +3138,10 @@ function mergeRuntimeStatus(metaStatus, statusFile, meta) {
     }))
     .sort((a, b) => (Number.isFinite(b._time) ? b._time : 0) - (Number.isFinite(a._time) ? a._time : 0))[0];
   const { _time, ...status } = newest;
+  return completeRuntimeStatus(status, metaStatus, meta);
+}
+
+function completeRuntimeStatus(status, metaStatus, meta) {
   return {
     ...status,
     capturedAt: status.capturedAt || status.dataCapturedAt || meta?.capturedAt || metaStatus?.capturedAt || "",
