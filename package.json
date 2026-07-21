@@ -24,6 +24,7 @@
     "diagnose:video": "node scripts/diagnose-video.js",
     "diagnose:song-dedup": "node scripts/diagnose-song-dedup.js",
     "diagnose:song-identities": "node scripts/diagnose-song-identities.js",
+    "audit:global-cleanup": "node scripts/audit-global-source-cleanup.js",
     "youtube:discover-channel": "node scripts/youtube-channel-discovery.js",
     "youtube:backfill-channel-batch": "node scripts/run-youtube-channel-backfill-batch.js",
     "youtube:import-channel-discovery": "node scripts/import-channel-discovery.js",

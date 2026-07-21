@@ -79,6 +79,35 @@ npm run blocklist:generate
 npm run blocklist:validate
 ```
 
+## Placeholder Artist Backfill
+
+`未記載` / `未记载` / `待补歌手` are placeholder artists, not displayable artist identities.
+
+The cleanup pipeline now tries to backfill those placeholders before ranking/runtime export when there is a reliable single artist source:
+
+- the raw row itself contains a safe `title / artist` credit;
+- another occurrence of the same canonical song has a non-placeholder artist;
+- `config/song-search-known-overrides.json` contains a reviewed song/artist guard.
+
+Ambiguous same-title songs are left as unknown instead of being guessed. Unknown placeholders remain excluded from artist ranking/dedupe through `assets/ranking-utils.js`.
+
+## Moment-Only Song-Search Rows
+
+Song-search rows whose only source is Moment / VSinger Moment are ignored when building the local known-song index. They no longer make a song count as known/collected by themselves. A reviewed local override or any non-Moment source can still make the same song known.
+
+## YouTube Channel Discovery Runtime Cleanup
+
+Accepted YouTube channel discovery overlays are cleaned again at DB/runtime load time. This protects the API path even if an accepted JSON was created before newer curation rules existed.
+
+The runtime loader applies, in order:
+
+- blocked VTuber source filtering;
+- entry curation and near-duplicate cleanup;
+- placeholder artist backfill;
+- configured song alias canonicalization.
+
+This is the main guard for large channel imports such as `@naraetanV` and `@kanaruhanon`.
+
 ## Validation Commands
 
 For this class of data cleanup, run:
@@ -86,8 +115,10 @@ For this class of data cleanup, run:
 ```powershell
 node scripts\rebuild-derived-data.js
 node --max-old-space-size=8192 scripts\build-runtime-data.js
+node scripts\audit-global-source-cleanup.js
 node scripts\analyze-data-quality-cleanup.js
 node --test test\parser.test.js test\curation.test.js test\source-filter.test.js
+node --test test\artist-backfill.test.js test\youtube-channel-discovery-runtime.test.js test\song-search-index.test.js test\song-aliases.test.js
 node scripts\validate-data.js --core
 npm run blocklist:validate
 ```

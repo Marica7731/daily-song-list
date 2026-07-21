@@ -67,6 +67,31 @@ test("canonicalizes reviewed page title variants without merging different songs
   assert.equal(canonicalizeSongIdentity({ title: "晴るる", artist: "あたらよ" }, context).title, "晴るる");
 });
 
+test("canonicalizes Calc title variants to Calc. for reviewed artists", () => {
+  const context = createSongAliasContext({
+    schemaVersion: 1,
+    records: [
+      {
+        artist: "ジミーサムP",
+        canonicalTitle: "Calc.",
+        aliases: ["Calc.", "Calc", "Calc (Eng Ver.)", "33「Calc.」"],
+        reason: "verified_same_song",
+      },
+      {
+        artist: "ジミーサムP feat. 初音ミク",
+        canonicalTitle: "Calc.",
+        aliases: ["Calc.", "Calc", "Calc (Eng Ver.)", "33「Calc.」"],
+        reason: "verified_same_song",
+      },
+    ],
+  });
+
+  assert.equal(canonicalizeSongIdentity({ title: "Calc", artist: "ジミーサムP" }, context).title, "Calc.");
+  assert.equal(canonicalizeSongIdentity({ title: "Calc (Eng Ver.)", artist: "ジミーサムP" }, context).title, "Calc.");
+  assert.equal(canonicalizeSongIdentity({ title: "33「Calc.」", artist: "ジミーサムP feat. 初音ミク" }, context).title, "Calc.");
+  assert.equal(canonicalizeSongIdentity({ title: "Calc", artist: "Other Artist" }, context).title, "Calc");
+});
+
 test("canonicalizes aliases across payload groups and exposes alias summary", () => {
   const payload = canonicalizePayloadSongAliases(
     {

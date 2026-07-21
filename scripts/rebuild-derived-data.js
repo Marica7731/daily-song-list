@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { annotatePayloadWithSongSearchNiche, mergeSupplementalKnownSongs, songSearchSourceSummary } = require("./song-search-index");
+const { backfillMissingArtistsInPayload } = require("./artist-backfill");
 const { applyCurationToVideos, hashNormalizedText, isParserCorruptionEntry, loadCurationContext } = require("./curation");
 const { createSongSearchLookup } = require("../assets/frontend-utils");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION, assertNoBlockedVideos, createBlockedSourceAudit, filterBlockedVideos } = require("../assets/source-filter");
@@ -94,11 +95,8 @@ function main() {
     blocklistHash: BLOCKLIST_HASH,
   };
 
-  payload = canonicalizePayloadSongAliases(payload, songAliasContext);
-
-  if (songSearchIndex?.titleKeys?.length || songSearchIndex?.titleArtistKeys?.length) {
-    payload = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(payload, songSearchIndex, songAliasContext), songSearchSourceSummary(songSearchIndex));
-  }
+  payload = applyPostCurationSongIdentity(payload, songAliasContext, songSearchIndex);
+  stats.artistBackfilledCount += payload.source?.artistBackfill?.filledCount || 0;
 
   const capturedAt = new Date(payload.capturedAt || payload.generatedAt || Date.now());
   const catalogInputVideos = filterBlockedVideos(collectUniqueGroupVideos(payload.groups), { audit: blockedSourceAudit });
@@ -132,6 +130,7 @@ function main() {
       },
     },
   };
+  payload = applyPostCurationSongIdentity(payload, songAliasContext, songSearchIndex, { preserveArtistBackfillSummary: true });
 
   writeJson(LATEST_PATH, payload);
   for (const rangeId of RANGES) {
@@ -148,6 +147,7 @@ function main() {
       `parsedRaw=${stats.parsedFromRaw}`,
       `fixedTitles=${stats.fixedTitleCount}`,
       `repaired=${stats.repairedEntryCount}`,
+      `artistBackfilled=${stats.artistBackfilledCount}`,
       `manualDropped=${stats.manualDroppedEntryCount}`,
       `ruleDropped=${payload.source.curationSummary.ruleDroppedEntryCount}`,
       `blockedSources=${blockedSourceAudit.summary().removed}`,
@@ -211,10 +211,8 @@ function rebuildDerivedFromCatalog() {
     blocklistVersion: BLOCKLIST_VERSION,
     blocklistHash: BLOCKLIST_HASH,
   };
-  payload = canonicalizePayloadSongAliases(payload, songAliasContext);
-  if (songSearchIndex?.titleKeys?.length || songSearchIndex?.titleArtistKeys?.length) {
-    payload = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(payload, songSearchIndex, songAliasContext), songSearchSourceSummary(songSearchIndex));
-  }
+  payload = applyPostCurationSongIdentity(payload, songAliasContext, songSearchIndex);
+  stats.artistBackfilledCount += payload.source?.artistBackfill?.filledCount || 0;
 
   const canonicalCatalogResult = rebuildVideoCatalogFromVideos(collectUniqueGroupVideos(payload.groups), capturedAt, {
     previousCatalog: catalogRefresh.catalog,
@@ -230,6 +228,7 @@ function rebuildDerivedFromCatalog() {
       videoCatalog: buildVideoCatalogSource(canonicalCatalogResult, capturedAt, catalogRefresh.stats),
     },
   };
+  payload = applyPostCurationSongIdentity(payload, songAliasContext, songSearchIndex, { preserveArtistBackfillSummary: true });
 
   writeJson(LATEST_PATH, payload);
   for (const rangeId of RANGES) {
@@ -248,6 +247,7 @@ function rebuildDerivedFromCatalog() {
       `recent7d=${payload.groups["7d"]?.items?.length || 0}`,
       `songs=${countSongs(payload.groups.all?.items || [])}`,
       `parsedRaw=${stats.parsedFromRaw}`,
+      `artistBackfilled=${stats.artistBackfilledCount}`,
       `blockedSources=${blockedSourceAudit.summary().removed}`,
     ].join(" "),
   );
@@ -281,6 +281,7 @@ function createRebuildStats() {
     droppedVideoCount: 0,
     forceRefreshVideoIds: [],
     blockedSourceDroppedVideoCount: 0,
+    artistBackfilledCount: 0,
   };
 }
 
@@ -416,6 +417,7 @@ function buildCurationSummary(previous = {}, stats) {
     forceRefreshVideoIds: [...new Set([...(previous.forceRefreshVideoIds || []), ...stats.forceRefreshVideoIds])].sort(),
     fixedTitleCount: carryCount(previous.fixedTitleCount, stats.fixedTitleCount),
     fixedArtistCount: carryCount(previous.fixedArtistCount, stats.fixedArtistCount),
+    artistBackfilledCount: carryCount(previous.artistBackfilledCount, stats.artistBackfilledCount),
     fixedSecondsCount: carryCount(previous.fixedSecondsCount, stats.fixedSecondsCount),
     repairedEntryCount: carryCount(previous.repairedEntryCount, stats.repairedEntryCount),
     parsedFromRawCount: Math.max(numberOrZero(previous.parsedFromRawCount), stats.parsedFromRaw),
@@ -442,6 +444,29 @@ function attachSongSearchSummary(payload, summary) {
       songSearch: summary,
     },
   };
+}
+
+function applyPostCurationSongIdentity(payload, songAliasContext, songSearchIndex, options = {}) {
+  const previousArtistBackfill = payload.source?.artistBackfill || null;
+  let next = canonicalizePayloadSongAliases(payload, songAliasContext);
+  next = backfillMissingArtistsInPayload(next, {
+    aliasContext: songAliasContext,
+    supplementalKnownSongs: songSearchIndex?.supplementalKnownSongs || [],
+  });
+  next = canonicalizePayloadSongAliases(next, songAliasContext);
+  if (options.preserveArtistBackfillSummary && previousArtistBackfill) {
+    next = {
+      ...next,
+      source: {
+        ...(next.source || {}),
+        artistBackfill: previousArtistBackfill,
+      },
+    };
+  }
+  if (songSearchIndex?.titleKeys?.length || songSearchIndex?.titleArtistKeys?.length) {
+    next = attachSongSearchSummary(annotatePayloadWithSongSearchNiche(next, songSearchIndex, songAliasContext), songSearchSourceSummary(songSearchIndex));
+  }
+  return next;
 }
 
 function writeDerivedStatus(payload) {

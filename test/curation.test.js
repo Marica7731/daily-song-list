@@ -156,6 +156,12 @@ test("curation drops naraetan-style narration rows before title-only known-song 
           { title: "あくび", artist: "未記載", seconds: 10, raw: "00:00:10 あくび / Yawn" },
           { title: "ペットショップ", artist: "未記載", seconds: 20, raw: "00:00:20 ペットショップ / Pet Shop" },
           { title: "【幾億光年】スーパーで聞いた曲", artist: "未記載", seconds: 30, raw: "00:00:30 【幾億光年】スーパーで聞いた曲" },
+          {
+            title: "去年のなれたんはもう全部歌った",
+            artist: "Last year Naraetan already sang all of them",
+            seconds: 35,
+            raw: "15. 00:00:35 去年のなれたんはもう全部歌った / Last year Naraetan already sang all of them",
+          },
           { title: "練習　晩餐歌", artist: "tuki.", seconds: 40, raw: "00:00:40 練習　晩餐歌/tuki." },
           { title: "マリーゴールド", artist: "未記載", seconds: 50, raw: "00:00:50 マリーゴールド" },
           { title: "Sonw halation", artist: "未記載", seconds: 60, raw: "00:01:00 Sonw halation" },
@@ -169,7 +175,7 @@ test("curation drops naraetan-style narration rows before title-only known-song 
     videos[0].songs.map((item) => item.title),
     ["マリーゴールド", "Sonw halation"],
   );
-  assert.equal(videos.curationStats.conversationDroppedEntries, 4);
+  assert.equal(videos.curationStats.conversationDroppedEntries, 5);
 });
 
 test("curation drops weak unknown singleton rows only when corpus and lookup evidence are weak", () => {
@@ -241,6 +247,24 @@ test("curation drops announcement and action rows from current dirty samples", (
 
   assert.deepEqual(videos[0].songs.map((item) => item.title), ["アンノウン・マザーグース"]);
   assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 6);
+});
+
+test("curation drops IsakiRiona self-esteem chat rows from timestamp lists", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "ZEAgcWCnkwQ",
+        songs: [
+          { title: "自己肯定感がドンドン上がってる", artist: "未記載", seconds: 3362, raw: "56:02 自己肯定感がドンドン上がってる" },
+          { title: "晩餐歌", artist: "tuki.", seconds: 3600, raw: "1:00:00 晩餐歌 / tuki." },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(videos[0].songs.map((item) => item.title), ["晩餐歌"]);
+  assert.equal(videos.curationStats.conversationDroppedEntries, 1);
 });
 
 test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", () => {

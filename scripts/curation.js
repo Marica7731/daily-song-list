@@ -315,7 +315,7 @@ function isStrongNonSongActivityText(value) {
   if (/(?:免許の適正性|声がサイレン|楽しそう|触れれる|褒め合って体にいい|難しい曲を挑戦|花火大会.*行きたい|すぐ会えるよって意味で歌いたい|謝罪会見|改めて謝罪|ばいちょろり.*終了|マリパのわさび事件)/u.test(text)) {
     return true;
   }
-  if (/(?:リスナー同士の結婚報告|なかったことにしよう|とてもくやしい|リクエストできる歌のリスト|妻を迎えに行かないと|久しぶりに来てまた食べ物の話|夏を感じる曲|喉が痛い|歌声禁斷症勢|譲り合い精神|突然3Dモデルがバグった|燃え尽きて消えた|包囲されたちびたん|会社をクビに|ガイドメロディが大きい|曲が増えた理由|飽きるまでずっと繰り返し|疑われちゃう可能性|ミニストップ行けよ|ビックリした|プレゼントが届きました|歌っている途中)/u.test(text)) {
+  if (/(?:リスナー同士の結婚報告|なかったことにしよう|とてもくやしい|リクエストできる歌のリスト|妻を迎えに行かないと|久しぶりに来てまた食べ物の話|夏を感じる曲|喉が痛い|歌声禁斷症勢|譲り合い精神|突然3Dモデルがバグった|燃え尽きて消えた|包囲されたちびたん|会社をクビに|ガイドメロディが大きい|曲が増えた理由|飽きるまでずっと繰り返し|疑われちゃう可能性|ミニストップ行けよ|ビックリした|プレゼントが届きました|歌っている途中|自己肯定感.*上がってる)/u.test(text)) {
     return true;
   }
   if (/(?:食べ物|食べる|飲む|飲酒|お酒|ビール|ハイボール|喉|病院|薬|体調|風邪|咳|くしゃみ|あくび|欠伸)/u.test(text) && /(?:話|痛い|行く|行け|届|した|する|です|ます|ちゃう|[?？])/.test(text)) {
@@ -792,9 +792,9 @@ function isHardNonSongNarrationEntry(song, lookup) {
   const artist = String(song?.artist || "").normalize("NFKC").trim();
   const raw = String(song?.raw || "").normalize("NFKC").trim();
   if (!title) return false;
-  if (isSongListNumberedRaw(raw)) return false;
   if (isExactTitleArtistKnownByLookup(song, lookup)) return false;
-  if (isStrongNonSongActivityText(title) || isStrongNonSongActivityText(raw)) return true;
+  const numberedSongListRow = isSongListNumberedRaw(raw);
+  if (!numberedSongListRow && (isStrongNonSongActivityText(title) || isStrongNonSongActivityText(raw))) return true;
   if (hasEmbeddedSongTitleWithNarration(title, artist)) return true;
   if (hasLikelyTranslationCredit(title, artist, raw)) return true;
   return false;

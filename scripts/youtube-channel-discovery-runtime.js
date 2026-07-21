@@ -2,6 +2,13 @@ const fs = require("node:fs");
 const path = require("node:path");
 const crypto = require("node:crypto");
 
+const { createSongSearchLookup } = require("../assets/frontend-utils");
+const { createBlockedSourceAudit, filterBlockedVideos } = require("../assets/source-filter");
+const { backfillMissingArtistsInVideos } = require("./artist-backfill");
+const { applyCurationToVideos, loadCurationContext } = require("./curation");
+const { canonicalizeSongIdentity, loadSongAliasContext } = require("./song-aliases");
+const { mergeSupplementalKnownSongs } = require("./song-search-index");
+
 const SOURCE_GROUP = "youtube_channel_discovery";
 
 function loadYoutubeChannelDiscoveryRuntimeVideos(options = {}) {
@@ -54,16 +61,63 @@ function loadYoutubeChannelDiscoveryRuntimeVideos(options = {}) {
     });
   }
 
-  const videos = [...byVideoId.values()];
+  const rawVideos = [...byVideoId.values()];
+  const cleanup = options.cleanup === false
+    ? { videos: rawVideos, stats: { enabled: false } }
+    : cleanYoutubeChannelDiscoveryRuntimeVideos(rawVideos, options);
+  const videos = cleanup.videos;
   const summary = {
     sourceSystem: SOURCE_GROUP,
     generatedAt: generatedAt || latestIso(...fileSummaries.map((item) => item.generatedAt)) || "",
     files: fileSummaries,
     fileCount: fileSummaries.length,
+    rawVideoCount: rawVideos.length,
+    rawOccurrenceCount: rawVideos.reduce((total, video) => total + (Array.isArray(video.songs) ? video.songs.length : 0), 0),
     videoCount: videos.length,
     occurrenceCount: videos.reduce((total, video) => total + (Array.isArray(video.songs) ? video.songs.length : 0), 0),
+    cleanup: cleanup.stats,
   };
   return { videos, summary };
+}
+
+function cleanYoutubeChannelDiscoveryRuntimeVideos(videos, options = {}) {
+  const aliasContext = options.aliasContext || loadSongAliasContext();
+  const songSearchIndex = mergeSupplementalKnownSongs(options.songSearchIndex || {}, options.supplementalKnownSongs);
+  const songSearchLookup = createSongSearchLookup(songSearchIndex);
+  const blockedSourceAudit = createBlockedSourceAudit();
+  const sourceFiltered = filterBlockedVideos(videos || [], { audit: blockedSourceAudit });
+  const curationContext = {
+    ...loadCurationContext(options),
+    songAliasContext: aliasContext,
+    songSearchLookup,
+    corpusVideos: sourceFiltered,
+  };
+  const curated = applyCurationToVideos(sourceFiltered, curationContext);
+  const backfilled = backfillMissingArtistsInVideos(curated, {
+    aliasContext,
+    supplementalKnownSongs: songSearchIndex.supplementalKnownSongs || [],
+    corpusVideos: curated,
+  });
+  const cleanedVideos = backfilled
+    .map((video) => ({
+      ...video,
+      songs: (video.songs || [])
+        .map((song) => canonicalizeSongIdentity(song, aliasContext))
+        .filter((song) => song?.title)
+        .map((song, index) => ({ ...song, index: index + 1 })),
+    }))
+    .filter((video) => video.songs.length);
+  const stats = {
+    enabled: true,
+    inputVideos: (videos || []).length,
+    inputOccurrences: countSongs(videos),
+    blockedSources: blockedSourceAudit.summary(),
+    curation: curated.curationStats || {},
+    artistBackfill: backfilled.artistBackfillStats || {},
+    outputVideos: cleanedVideos.length,
+    outputOccurrences: countSongs(cleanedVideos),
+  };
+  return { videos: cleanedVideos, stats };
 }
 
 function normalizeRuntimeVideo(video, sourceFile) {
@@ -148,6 +202,10 @@ function uniqueValues(values) {
   return [...new Set(values.map((value) => stringValue(value)).filter(Boolean))];
 }
 
+function countSongs(videos) {
+  return (videos || []).reduce((total, video) => total + (Array.isArray(video.songs) ? video.songs.length : 0), 0);
+}
+
 function stringValue(value) {
   return String(value || "").trim();
 }
@@ -175,6 +233,7 @@ function sha256(text) {
 
 module.exports = {
   SOURCE_GROUP,
+  cleanYoutubeChannelDiscoveryRuntimeVideos,
   loadYoutubeChannelDiscoveryRuntimeVideos,
   normalizeRuntimeVideo,
 };
