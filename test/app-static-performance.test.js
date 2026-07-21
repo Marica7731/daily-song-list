@@ -344,7 +344,9 @@ test("all-field searches fall back to request runtime while the API catches up",
   assert.match(routeBody, /if \(!state\.runtimeApi\.available\) return false/u);
   assert.match(routeBody, /const query = normalizeSearch\(filters\.q \|\| ""\)/u);
   assert.match(routeBody, /const searchFields = Array\.isArray\(filters\.searchFields\) \? filters\.searchFields : DEFAULT_SEARCH_FIELDS/u);
-  assert.match(routeBody, /query && \(filters\.searchScope \|\| "all"\) === "all" && searchFields\.length === 0/u);
+  assert.match(routeBody, /const allFieldQuery = query && \(filters\.searchScope \|\| "all"\) === "all" && searchFields\.length === 0/u);
+  assert.match(routeBody, /if \(!allFieldQuery\) return true/u);
+  assert.match(routeBody, /return !requestRuntimeMeta\(canonicalRangeId\(request\?\.range \|\| state\.range\)\)/u);
 
   const apiBody = functionBody("async function requestApiViewPage");
   assert.match(apiBody, /params\.set\("searchFields", searchFields\.length \? searchFields\.join\(","\) : "all"\)/u);

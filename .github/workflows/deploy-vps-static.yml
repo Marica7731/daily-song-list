@@ -63,6 +63,9 @@ jobs:
             git checkout main
             git merge --ff-only --quiet '${DEPLOY_SHA}'
             test \"\$(git rev-parse HEAD)\" = '${DEPLOY_SHA}'
+            if systemctl list-unit-files song-rank-api.service >/dev/null 2>&1; then
+              systemctl restart song-rank-api
+            fi
             nginx -t
             systemctl reload nginx
           "

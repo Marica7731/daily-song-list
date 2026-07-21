@@ -3465,7 +3465,9 @@ function shouldUseRuntimeApiForRequest(request) {
   const filters = request?.filters || {};
   const query = normalizeSearch(filters.q || "");
   const searchFields = Array.isArray(filters.searchFields) ? filters.searchFields : DEFAULT_SEARCH_FIELDS;
-  return !(query && (filters.searchScope || "all") === "all" && searchFields.length === 0);
+  const allFieldQuery = query && (filters.searchScope || "all") === "all" && searchFields.length === 0;
+  if (!allFieldQuery) return true;
+  return !requestRuntimeMeta(canonicalRangeId(request?.range || state.range));
 }
 
 async function requestApiViewPage(request, range) {
