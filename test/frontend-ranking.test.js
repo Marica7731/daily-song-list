@@ -562,6 +562,33 @@ test("buildArtistSongGroups keeps same normalized title separated for incompatib
   );
 });
 
+test("buildArtistSongGroups can merge same work title for vtuber expansion", () => {
+  const groups = buildArtistSongGroups(
+    [
+      occurrence("私になれ", "未記載", "watashi-a"),
+      occurrence("私になれ", "パン野実々美", "watashi-b"),
+      occurrence("私になれ", "パン野実々美 [7th", "watashi-c"),
+      occurrence("群像夏", "未記載", "gunzou-a"),
+      occurrence("群像夏", "パン野実々美", "gunzou-b"),
+      occurrence("群像夏", "パン野実々美 - eBASEBALLパワフルプロ野球2022主題歌", "gunzou-c"),
+      occurrence("群像夏", "パン野実々美 [パワプロ2022主題歌", "gunzou-d"),
+    ],
+    { mergeSameWorkTitle: true },
+  );
+
+  assert.equal(groups.length, 2);
+  const watashi = groups.find((group) => group.title === "私になれ");
+  const gunzou = groups.find((group) => group.title === "群像夏");
+  assert.equal(watashi.count, 3);
+  assert.equal(watashi.key, songWorkTitleKey("私になれ"));
+  assert.equal(watashi.displayArtist, "パン野実々美");
+  assert.equal(watashi.videoCount, 3);
+  assert.equal(gunzou.count, 4);
+  assert.equal(gunzou.key, songWorkTitleKey("群像夏"));
+  assert.equal(gunzou.displayArtist, "パン野実々美");
+  assert.equal(gunzou.videoCount, 4);
+});
+
 function occurrence(title, artist, videoId, overrides = {}) {
   return {
     item: {

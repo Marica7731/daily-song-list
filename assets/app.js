@@ -5897,7 +5897,7 @@ function buildArtistRecords(occurrences) {
   };
 }
 
-function buildArtistSongGroups(occurrences) {
+function buildArtistSongGroups(occurrences, extraOptions = {}) {
   return window.RankingUtils.buildArtistSongGroups(occurrences, {
     cleanText,
     compareValues,
@@ -5905,6 +5905,7 @@ function buildArtistSongGroups(occurrences) {
     isNicheSong: window.FrontendUtils.isNicheSong,
     makeSongSortKey,
     normalizeEntityKey,
+    ...extraOptions,
   });
 }
 
@@ -6642,7 +6643,7 @@ function renderSourceInlineStrip(model, options = {}) {
     empty.className = "source-inline-empty";
     const hasUnresolvedCount = Number(options.rankCount || options.occurrenceCount || 0) > 0;
     if (hasUnresolvedCount) empty.classList.add("source-inline-missing");
-    empty.textContent = hasUnresolvedCount ? "来源明细待重建" : "无来源";
+    empty.textContent = "无来源";
     strip.append(empty);
     return strip;
   }
@@ -7574,7 +7575,9 @@ function appendArtistSongGroups(drawer, songGroups) {
 }
 
 function completeSongGroupsForDrawer(occurrences, fallbackGroups = [], mode = "") {
-  const completeGroups = buildArtistSongGroups(filterDisplaySongOccurrences(occurrences || []));
+  const completeGroups = buildArtistSongGroups(filterDisplaySongOccurrences(occurrences || []), {
+    mergeSameWorkTitle: mode === "vtuber",
+  });
   if (mode === "vtuber") return mergeVtuberSongGroupsForDrawer(completeGroups, fallbackGroups);
   return completeGroups.length ? completeGroups : fallbackGroups || [];
 }
@@ -7583,7 +7586,7 @@ function mergeVtuberSongGroupsForDrawer(completeGroups = [], fallbackGroups = []
   const byKey = new Map();
   const addGroup = (group) => {
     if (!group) return;
-    const key = group.key || normalizeEntityKey(group.title);
+    const key = sourceSongKeyForGroup(group) || group.key || normalizeEntityKey(group.title);
     if (!key) return;
     const next = markVtuberSongGroup(group);
     const existing = byKey.get(key);
@@ -7779,18 +7782,6 @@ function renderArtistSongGroup(group) {
   if (hasOccurrences) {
     meta.append(renderCopySongLinksIconButton(group.occurrences));
   }
-  if (group.sourceMode === "vtuber" && sourcePresentation.canExpand) {
-    const sourceToggle = document.createElement("button");
-    sourceToggle.className = "artist-song-source-toggle";
-    sourceToggle.type = "button";
-    sourceToggle.dataset.toggleArtistSongSource = "true";
-    sourceToggle.dataset.sourceVideoCount = String(expectedSourceCount || sourcePresentation.videoCount || 0);
-    sourceToggle.dataset.occurrenceCount = String(group.count || sourcePresentation.occurrenceCount || group.occurrences.length);
-    sourceToggle.setAttribute("aria-expanded", "false");
-    sourceToggle.setAttribute("aria-controls", sources.id);
-    updateArtistSongSourceButton(sourceToggle, false);
-    meta.append(sourceToggle);
-  }
   header.append(meta);
   section.append(header);
   if (group.sourceMode !== "vtuber") {
@@ -7806,13 +7797,7 @@ function renderArtistSongGroup(group) {
       }),
     );
   }
-  if (sourcePresentation.canExpand) section.append(sources);
-  if (group.sourceMode === "vtuber" && !sourcePresentation.canExpand && Number(group.count || 0) > 0) {
-    const missing = document.createElement("div");
-    missing.className = "source-inline-empty source-inline-missing artist-song-missing-source";
-    missing.textContent = "来源明细待重建";
-    section.append(missing);
-  }
+  if (group.sourceMode !== "vtuber" && sourcePresentation.canExpand) section.append(sources);
   return section;
 }
 
@@ -8513,18 +8498,18 @@ function getArtistSongGroups(record) {
 function getVtuberSongGroups(record) {
   if (!record._vtuberSongGroups) {
     const occurrences = filterDisplaySongOccurrences(record?.occurrences || []);
-    const fallbackGroups = lightweightSongGroupsForRecord(record);
-    const occurrenceGroups = buildArtistSongGroups(occurrences);
+    const fallbackGroups = lightweightSongGroupsForRecord(record, { mergeSameWorkTitle: true });
+    const occurrenceGroups = buildArtistSongGroups(occurrences, { mergeSameWorkTitle: true });
     const groups = fallbackGroups.length ? mergeVtuberSongGroupsForDrawer(occurrenceGroups, fallbackGroups) : occurrenceGroups;
     record._vtuberSongGroups = sortVtuberSongGroups(groups.map(markVtuberSongGroup));
   }
   return record._vtuberSongGroups;
 }
 
-function lightweightSongGroupsForRecord(record) {
+function lightweightSongGroupsForRecord(record, options = {}) {
   const entries = record?.songs instanceof Map ? sortedDisplaySongEntries(record.songs) : [];
-  if (!entries.length) return buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []));
-  const occurrenceGroups = buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []));
+  if (!entries.length) return buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []), options);
+  const occurrenceGroups = buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []), options);
   const matchedOccurrenceGroups = new Set();
   return entries.map((entry) => ({
     ...lightweightSongGroupForEntry(entry, occurrenceGroups, matchedOccurrenceGroups),

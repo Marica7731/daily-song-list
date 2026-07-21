@@ -201,7 +201,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(appSource, /function vtuberChannelUrlCandidate/u);
   assert.match(appSource, /function vtuberChannelUrlCandidate[\s\S]*item\.sourceUrl/u);
   assert.match(appSource, /function vtuberChannelUrlCandidate[\s\S]*item\.sourceUrls/u);
-  assert.match(functionBody("function getVtuberSongGroups"), /lightweightSongGroupsForRecord\(record\)/u);
+  assert.match(functionBody("function getVtuberSongGroups"), /lightweightSongGroupsForRecord\(record, \{ mergeSameWorkTitle: true \}\)/u);
   assert.match(functionBody("function getVtuberSongGroups"), /mergeVtuberSongGroupsForDrawer\(occurrenceGroups, fallbackGroups\)/u);
   assert.match(functionBody("function sourceDetailPathForRecord"), /record\?\._record \|\| \{\}/u);
   assert.match(appSource, /async function sourceDetailPageForContainer[\s\S]*filterOccurrencesForSongKey\(loaded, songKey, songTitle\)/u);
@@ -381,10 +381,10 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
   assert.match(songGroupBody, /group\.sourceMode === "vtuber" \? vtuberSongGroupMetaLabel\(group\) : artistSongCountLabel\(group\)/u);
-  assert.match(songGroupBody, /group\.sourceMode === "vtuber" && sourcePresentation\.canExpand[\s\S]*sourceToggle\.dataset\.toggleArtistSongSource = "true"/u);
+  assert.doesNotMatch(songGroupBody, /group\.sourceMode === "vtuber" && sourcePresentation\.canExpand[\s\S]*sourceToggle\.dataset\.toggleArtistSongSource = "true"/u);
   assert.match(songGroupBody, /if \(group\.sourceMode !== "vtuber"\) \{[\s\S]*renderSourceInlineStrip\(sourcePresentation/u);
   assert.match(appSource, /function vtuberSongGroupMetaLabel\(group\)[\s\S]*`\$\{count\}次 · \$\{videoCount\}视频`/u);
-  assert.match(appSource, /来源明细待重建/u);
+  assert.doesNotMatch(appSource, /来源明细待重建/u);
   assert.doesNotMatch(appSource, /次歌唱/u);
   assert.doesNotMatch(requestedPageBody.match(/result\.view === "vtuberRank"[\s\S]*?\}\);[\s\S]*?\}/u)?.[0] || "", /次歌唱/u);
   assert.match(songSourceBody, /sourceDetailPageForContainer\(sources, sources\._sourceOccurrences \|\| \[\]/u);
@@ -393,6 +393,7 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(sourcePageBody, /sourceDetailPageForContainer\(sourceContainer, sourceContainer\._sourceDetailOccurrences \|\| sourceContainer\._sourceOccurrences \|\| \[\]/u);
   assert.match(cssSource, /\.artist-song-artist\s*\{[\s\S]*text-overflow: ellipsis;[\s\S]*white-space: nowrap;/u);
   assert.doesNotMatch(cssSource, /\.artist-song-group-vtuber \.source-inline-strip/u);
+  assert.match(songGroupBody, /if \(group\.sourceMode !== "vtuber" && sourcePresentation\.canExpand\) section\.append\(sources\)/u);
 });
 
 function functionBody(signature) {

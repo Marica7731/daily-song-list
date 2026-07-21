@@ -180,7 +180,10 @@
   function buildArtistSongGroups(occurrences, options = {}) {
     const isNicheSong = typeof options.isNicheSong === "function" ? options.isNicheSong : defaultIsNicheSong;
     const compare = typeof options.compareValues === "function" ? options.compareValues : compareValues;
-    return buildSongRecords(occurrences, options)
+    const records = options.mergeSameWorkTitle
+      ? mergeSameWorkTitleSongRecords(buildSongRecords(occurrences, options), options)
+      : buildSongRecords(occurrences, options);
+    return records
       .sort((a, b) => b.count - a.count || compare(a.sortKey, b.sortKey) || compare(a.title, b.title))
       .map((record) => ({
         key: record.key,
@@ -195,6 +198,33 @@
         isNiche: record.occurrences.length > 0 && record.occurrences.every(({ song }) => isNicheSong(song)),
         occurrences: record.occurrences,
       }));
+  }
+
+  function mergeSameWorkTitleSongRecords(records, options = {}) {
+    const makeSortKey = options.makeSongSortKey || ((value) => normalizeEntityKey(value));
+    const byKey = new Map();
+    for (const record of records || []) {
+      const key = record.canonicalWorkTitleKey || record.titleKey || normalizeSongTitleKey(record.title);
+      if (!key) continue;
+      record.key = key;
+      record.canonicalWorkTitleKey = key;
+      const existing = byKey.get(key);
+      if (!existing) {
+        byKey.set(key, record);
+        continue;
+      }
+      const [winner, loser] = compareRecordDominance(existing, record) <= 0 ? [existing, record] : [record, existing];
+      mergeRecord(winner, loser);
+      winner.key = key;
+      winner.canonicalWorkTitleKey = key;
+      if (winner === record) byKey.set(key, winner);
+      applyDisplayTitle(
+        winner,
+        selectCanonicalTitle(new Map([[winner.title, winner.count], [loser.title, loser.count]])) || winner.title,
+        makeSortKey,
+      );
+    }
+    return Array.from(byKey.values()).map(finalizeSongRecord);
   }
 
   function mergeKnownArtistVariants(titleGroup) {
@@ -1011,7 +1041,8 @@
     const entries = sortedCountEntries(record.artists);
     if (!entries.length) return "";
     const curatedCanonical = curatedArtistCanonicalNameForEntries(entries);
-    if (entries.length === 1 || shouldCollapseArtistAliases(entries)) return curatedCanonical || entries[0].name;
+    const sharedBaseName = sharedDisplayArtistBaseName(entries);
+    if (entries.length === 1 || shouldCollapseArtistAliases(entries)) return curatedCanonical || sharedBaseName || entries[0].name;
     return entries.slice(0, 2).map((entry) => (entry.count > 1 ? `${entry.name} (${entry.count})` : entry.name)).join("、");
   }
 
@@ -1023,8 +1054,42 @@
     const curatedCanonical = curatedArtistCanonicalNameForEntries(entries);
     if (curatedCanonical && entries.every((entry) => curatedArtistAliasKey(entry.name) === normalizeArtistKey(curatedCanonical))) return true;
     if (dominantKey && entries.every((entry) => normalizeArtistKey(entry.name) === dominantKey)) return true;
+    if (sharedArtistBaseKey(entries)) return true;
     if (dominant.count / total < 0.75) return false;
     return entries.slice(1).every((entry) => isDisplayArtistAliasOf(entry.name, dominant.name) || isLikelyArtistKeyTypo(normalizeArtistKey(entry.name), dominantKey));
+  }
+
+  function sharedDisplayArtistBaseName(entries) {
+    const key = sharedArtistBaseKey(entries);
+    if (!key) return "";
+    const candidates = entries
+      .flatMap((entry) => artistDisplayBaseCandidates(entry.name))
+      .filter((value) => normalizeArtistKey(value) === key)
+      .sort((a, b) => a.length - b.length || compareValues(a, b));
+    return candidates[0] || "";
+  }
+
+  function sharedArtistBaseKey(entries) {
+    const candidateSets = entries
+      .map((entry) => new Set([normalizeArtistKey(entry.name), ...artistBaseKeys(entry.name, normalizeArtistKey)].filter(Boolean)))
+      .filter((set) => set.size);
+    if (candidateSets.length !== entries.length || !candidateSets.length) return "";
+    return Array.from(candidateSets[0]).find((key) => candidateSets.every((set) => set.has(key))) || "";
+  }
+
+  function artistDisplayBaseCandidates(value) {
+    const text = normalizeArtistIdentityText(value);
+    return uniqueStrings([
+      text,
+      stripArtistBeforeFeat(text),
+      stripTrailingNonArtistParenthetical(text),
+      stripArtistBeforeWorkAnnotation(text),
+      stripArtistBeforeBrokenBracket(text),
+      stripTrailingNonArtistDescriptor(stripArtistBeforeWorkAnnotation(text)),
+      stripTrailingNonArtistDescriptor(stripArtistBeforeBrokenBracket(text)),
+      stripTrailingNonArtistDescriptor(text),
+      stripTrailingLatinAlias(text),
+    ].filter(Boolean));
   }
 
   function isDisplayArtistAliasOf(alias, canonical) {
@@ -1172,7 +1237,7 @@
   }
 
   function stripArtistBeforeBrokenBracket(value) {
-    const match = String(value).match(/^(.*?)\s*(?:[-ー–—]\s*)?【(.{1,100})$/u);
+    const match = String(value).match(/^(.*?)\s*(?:[-ー–—]\s*)?[【\[［](.{1,100})$/u);
     if (!match) return "";
     return isNonArtistDescriptor(match[2]) ? match[1].trim() : "";
   }
@@ -1196,6 +1261,7 @@
     return (
       /^(?:19|20)\d{2}年?$/u.test(normalized) ||
       /^\d{1,5}$/u.test(normalized) ||
+      /^\d{1,2}(?:st|nd|rd|th)(?:\s*(?:anniversary|live|birthday|year))?$/iu.test(normalized) ||
       /^(?:(?:self\s*)?cover|covered|original|原曲|原唱|retake|take\s*\d+|key|キー|歌詞|調整|途中)$/iu.test(normalized) ||
       /^(?:official|channel|ch\.?|youtube|yt)$/iu.test(normalized) ||
       /^(?:(?:piano|acoustic|アコースティック|ピアノ|アカペラ)(?:\s*(?:ver\.?|version|版))?)$/iu.test(normalized) ||
@@ -1215,7 +1281,10 @@
     return (
       /(?:TV\s*size|TV\s*アニメ|TV\s*anime|アニメ|動畫|动画|映画|ドラマ|opening|ending|主題歌|主题歌|テーマ|CM|機動戦士|ガンダム|NARUTO|エヴァンゲリオン)/iu.test(
         value,
-      ) || /(?:^|[\s/／:：_\-ー–—])(?:OP|ED)(?:$|[\s/／:：_\-ー–—])/iu.test(value)
+      ) ||
+      /(?:eBASEBALL|パワフルプロ野球|パワプロ).{0,40}(?:主題歌|主题歌|テーマ)/iu.test(value) ||
+      /(?:ゲーム|game).{0,40}(?:主題歌|主题歌|テーマ)/iu.test(value) ||
+      /(?:^|[\s/／:：_\-ー–—])(?:OP|ED)(?:$|[\s/／:：_\-ー–—])/iu.test(value)
     );
   }
 
