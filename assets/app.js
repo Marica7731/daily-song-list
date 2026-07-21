@@ -3360,7 +3360,7 @@ async function requestViewPage(request) {
   }
 
   const range = canonicalRangeId(request.range);
-  if (state.runtimeApi.available) {
+  if (shouldUseRuntimeApiForRequest(request)) {
     const result = await requestApiViewPage(request, range);
     state.requestRuntime.pageResultCache.set(requestKey, result);
     if (!request.prefetch) state.page = result.pageInfo.page;
@@ -3458,6 +3458,14 @@ async function requestViewPage(request) {
   state.requestRuntime.pageResultCache.set(requestKey, result);
   if (!request.prefetch) state.page = result.pageInfo.page;
   return result;
+}
+
+function shouldUseRuntimeApiForRequest(request) {
+  if (!state.runtimeApi.available) return false;
+  const filters = request?.filters || {};
+  const query = normalizeSearch(filters.q || "");
+  const searchFields = Array.isArray(filters.searchFields) ? filters.searchFields : DEFAULT_SEARCH_FIELDS;
+  return !(query && (filters.searchScope || "all") === "all" && searchFields.length === 0);
 }
 
 async function requestApiViewPage(request, range) {

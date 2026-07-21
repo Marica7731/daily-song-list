@@ -337,6 +337,20 @@ test("range prefetch stays fast and does not use an 8 second delay", () => {
   assert.match(intentBody, /\["pointerdown", "touchstart", "mousedown", "focus"\]/u);
 });
 
+test("all-field searches fall back to request runtime while the API catches up", () => {
+  assert.match(functionBody("async function requestViewPage"), /shouldUseRuntimeApiForRequest\(request\)/u);
+
+  const routeBody = functionBody("function shouldUseRuntimeApiForRequest");
+  assert.match(routeBody, /if \(!state\.runtimeApi\.available\) return false/u);
+  assert.match(routeBody, /const query = normalizeSearch\(filters\.q \|\| ""\)/u);
+  assert.match(routeBody, /const searchFields = Array\.isArray\(filters\.searchFields\) \? filters\.searchFields : DEFAULT_SEARCH_FIELDS/u);
+  assert.match(routeBody, /query && \(filters\.searchScope \|\| "all"\) === "all" && searchFields\.length === 0/u);
+
+  const apiBody = functionBody("async function requestApiViewPage");
+  assert.match(apiBody, /params\.set\("searchFields", searchFields\.length \? searchFields\.join\(","\) : "all"\)/u);
+  assert.doesNotMatch(apiBody, /params\.set\("searchScope", "source"\)/u);
+});
+
 function functionBody(signature) {
   const start = appSource.indexOf(signature);
   assert.notEqual(start, -1, `missing ${signature}`);
