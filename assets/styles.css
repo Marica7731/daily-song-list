@@ -4354,32 +4354,16 @@ mark {
     max-width: 100%;
   }
 
-  .artist-song-group-vtuber .artist-song-count,
-  .artist-song-group-vtuber .artist-song-video-count {
+  .artist-song-group-vtuber .artist-song-count {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    border-radius: 0;
+    background: transparent;
+    color: var(--muted);
     font-size: 11.5px;
+    font-weight: 700;
     line-height: 1.2;
-  }
-
-  .artist-song-group-vtuber .source-inline-strip {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
-    margin-left: 0;
-    padding-top: 2px;
-    overflow: visible;
-  }
-
-  .artist-song-group-vtuber .source-inline-preview-rail {
-    grid-column: 1 / -1;
-    max-width: none;
-  }
-
-  .artist-song-group-vtuber .source-inline-preview-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .artist-song-group-vtuber .source-inline-actions {
-    justify-self: start;
-    margin-top: 0;
   }
 
   .source-drawer-toolbar {

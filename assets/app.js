@@ -7715,19 +7715,33 @@ function renderArtistSongGroup(group) {
   sources._sourceDetailPath = sourceDetailPathForRecord(group, group.occurrences);
 
   meta.append(renderCopySongLinksIconButton(group.occurrences));
+  if (group.sourceMode === "vtuber" && sourcePresentation.canExpand) {
+    const sourceToggle = document.createElement("button");
+    sourceToggle.className = "artist-song-source-toggle";
+    sourceToggle.type = "button";
+    sourceToggle.dataset.toggleArtistSongSource = "true";
+    sourceToggle.dataset.sourceVideoCount = String(group.videoCount || sourcePresentation.videoCount || 0);
+    sourceToggle.dataset.occurrenceCount = String(group.count || sourcePresentation.occurrenceCount || group.occurrences.length);
+    sourceToggle.setAttribute("aria-expanded", "false");
+    sourceToggle.setAttribute("aria-controls", sources.id);
+    updateArtistSongSourceButton(sourceToggle, false);
+    meta.append(sourceToggle);
+  }
   header.append(meta);
   section.append(header);
-  section.append(
-    renderSourceInlineStrip(sourcePresentation, {
-      drawerId: sources.id,
-      isExpanded: false,
-      occurrences: group.occurrences,
-      mode: "artist-song",
-      rankCount: group.count,
-      rankMetric: "occurrences",
-      showCopyAll: false,
-    }),
-  );
+  if (group.sourceMode !== "vtuber") {
+    section.append(
+      renderSourceInlineStrip(sourcePresentation, {
+        drawerId: sources.id,
+        isExpanded: false,
+        occurrences: group.occurrences,
+        mode: "artist-song",
+        rankCount: group.count,
+        rankMetric: "occurrences",
+        showCopyAll: false,
+      }),
+    );
+  }
   if (sourcePresentation.canExpand) section.append(sources);
   return section;
 }
@@ -7750,9 +7764,8 @@ function artistSongCountLabel(group) {
   const count = Math.max(0, Number(group?.count) || 0);
   const videoCount = Math.max(0, Number(group?.videoCount) || uniqueVideoCount(group?.occurrences || []));
   if (group?.sourceMode === "vtuber") return `${count}次`;
-  const unit = group?.sourceMode === "vtuber" ? "次歌唱" : "次";
-  if (videoCount > 0 && videoCount !== count) return `${count}${unit} · ${videoCount}来源`;
-  return `${count}${unit}`;
+  if (videoCount > 0 && videoCount !== count) return `${count}次 · ${videoCount}来源`;
+  return `${count}次`;
 }
 
 function vtuberSongGroupMetaLabel(group) {
