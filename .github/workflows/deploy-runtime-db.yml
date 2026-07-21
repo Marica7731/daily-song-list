@@ -190,8 +190,8 @@ jobs:
             test \"\$(git remote get-url origin)\" = 'https://github.com/Marica7731/daily-song-list.git'
             git fetch --quiet origin main --prune
             git checkout main
-            git merge --ff-only --quiet '${DEPLOY_SHA}'
-            test \"\$(git rev-parse HEAD)\" = '${DEPLOY_SHA}'
+            git reset --hard --quiet origin/main
+            git merge-base --is-ancestor '${DEPLOY_SHA}' HEAD
             install -m 0644 deploy/vps2/song-rank-api.service /etc/systemd/system/song-rank-api.service
             install -m 0755 deploy/vps2/song-rank-runtime-update.sh /usr/local/bin/song-rank-runtime-update.sh
             install -m 0755 deploy/vps2/song-rank-db-activate.sh /usr/local/bin/song-rank-db-activate.sh
