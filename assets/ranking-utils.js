@@ -183,12 +183,18 @@
     return buildSongRecords(occurrences, options)
       .sort((a, b) => b.count - a.count || compare(a.sortKey, b.sortKey) || compare(a.title, b.title))
       .map((record) => ({
-      key: record.key,
-      title: record.title,
-      count: record.count,
-      isNiche: record.occurrences.length > 0 && record.occurrences.every(({ song }) => isNicheSong(song)),
-      occurrences: record.occurrences,
-    }));
+        key: record.key,
+        title: record.title,
+        count: record.count,
+        videoCount: uniqueOccurrenceVideoCount(record.occurrences),
+        titleKey: record.titleKey,
+        canonicalWorkTitleKey: record.canonicalWorkTitleKey,
+        artistIdentityKey: record.artistIdentityKey,
+        songIdentityKey: record.songIdentityKey,
+        displayArtist: record.displayArtist,
+        isNiche: record.occurrences.length > 0 && record.occurrences.every(({ song }) => isNicheSong(song)),
+        occurrences: record.occurrences,
+      }));
   }
 
   function mergeKnownArtistVariants(titleGroup) {
@@ -1033,6 +1039,15 @@
 
   function countMapNames(map) {
     return Array.from(map?.values?.() || []).map((entry) => entry?.name || entry?.title || "").filter(Boolean);
+  }
+
+  function uniqueOccurrenceVideoCount(occurrences = []) {
+    const ids = new Set();
+    for (const occurrence of occurrences || []) {
+      const id = cleanText(occurrence?.item?.videoId || occurrence?.videoId);
+      if (id) ids.add(id);
+    }
+    return ids.size;
   }
 
   function stripLeadingTitleListMarker(value) {

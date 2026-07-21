@@ -7773,7 +7773,7 @@ function renderArtistSongGroup(group) {
   sources._sourceResolver = group._sourceResolver || null;
   sources._sourceDetailPath = sourceDetailPath;
   sources._sourceDetailKey = cleanText(group._record?.sourceDetailKey || "");
-  sources._sourceSongKey = group.key || normalizeEntityKey(group.title);
+  sources._sourceSongKey = sourceSongKeyForGroup(group);
   sources._sourceSongTitle = group.title;
 
   if (hasOccurrences) {
@@ -8525,16 +8525,75 @@ function lightweightSongGroupsForRecord(record) {
   const entries = record?.songs instanceof Map ? sortedDisplaySongEntries(record.songs) : [];
   if (!entries.length) return buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []));
   const occurrenceGroups = buildArtistSongGroups(filterDisplaySongOccurrences(record?.occurrences || []));
-  const occurrenceGroupsByKey = new Map(occurrenceGroups.map((group) => [group.key, group]));
+  const matchedOccurrenceGroups = new Set();
   return entries.map((entry) => ({
-    key: entry.key || normalizeEntityKey(entry.name),
-    title: entry.name,
+    ...lightweightSongGroupForEntry(entry, occurrenceGroups, matchedOccurrenceGroups),
     count: entry.count,
-    isNiche: false,
-    occurrences: occurrenceGroupsByKey.get(entry.key)?.occurrences || null,
-    videoCount: occurrenceGroupsByKey.get(entry.key)?.videoCount || 0,
     _record: record,
   }));
+}
+
+function lightweightSongGroupForEntry(entry, occurrenceGroups, matchedOccurrenceGroups) {
+  const matched = uniqueOccurrenceGroupForSongEntry(entry, occurrenceGroups, matchedOccurrenceGroups);
+  if (!matched) {
+    return {
+      key: songWorkKeyForTitle(entry.name) || entry.key || normalizeEntityKey(entry.name),
+      title: entry.name,
+      canonicalWorkTitleKey: songWorkKeyForTitle(entry.name),
+      isNiche: false,
+      occurrences: null,
+      videoCount: 0,
+    };
+  }
+  matchedOccurrenceGroups.add(matched);
+  return {
+    key: matched.key,
+    title: matched.title || entry.name,
+    canonicalWorkTitleKey: matched.canonicalWorkTitleKey || songWorkKeyForTitle(matched.title || entry.name),
+    titleKey: matched.titleKey,
+    artistIdentityKey: matched.artistIdentityKey,
+    songIdentityKey: matched.songIdentityKey,
+    displayArtist: matched.displayArtist,
+    isNiche: matched.isNiche,
+    occurrences: matched.occurrences,
+    videoCount: matched.videoCount || uniqueVideoCount(matched.occurrences || []),
+  };
+}
+
+function uniqueOccurrenceGroupForSongEntry(entry, occurrenceGroups, matchedOccurrenceGroups) {
+  const entryKeys = songMatchKeys(entry.key, entry.name);
+  if (!entryKeys.size) return null;
+  const matches = [];
+  for (const group of occurrenceGroups || []) {
+    if (matchedOccurrenceGroups?.has(group)) continue;
+    if (setsIntersect(entryKeys, songKeysForGroup(group))) matches.push(group);
+  }
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function songKeysForGroup(group) {
+  return songMatchKeys(group?.canonicalWorkTitleKey, group?.titleKey, group?.songKey, group?.title);
+}
+
+function sourceSongKeyForGroup(group) {
+  return (
+    cleanText(group?.canonicalWorkTitleKey) ||
+    cleanText(group?.titleKey) ||
+    cleanText(group?.songKey) ||
+    songWorkKeyForTitle(group?.title) ||
+    normalizeEntityKey(group?.title)
+  );
+}
+
+function songWorkKeyForTitle(title) {
+  return window.RankingUtils?.songWorkTitleKey?.(title) || "";
+}
+
+function setsIntersect(left, right) {
+  for (const value of left || []) {
+    if (right?.has(value)) return true;
+  }
+  return false;
 }
 
 function filterDisplaySongOccurrences(occurrences) {

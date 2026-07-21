@@ -532,6 +532,36 @@ test("buildArtistSongGroups recalculates niche after merged variants", () => {
   assert.equal(groups[0].isNiche, false);
 });
 
+test("buildArtistSongGroups exposes canonical song identity for vtuber expansion backfill", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("Calc", "ジミーサムP", "A"),
+    occurrence("Calc.", "OneRoom", "B"),
+    occurrence("Calc. (Eng Ver.)", "ジミーサムP", "B"),
+  ]);
+
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].title, "Calc.");
+  assert.equal(groups[0].count, 3);
+  assert.equal(groups[0].videoCount, 2);
+  assert.equal(groups[0].canonicalWorkTitleKey, songWorkTitleKey("Calc."));
+  assert.equal(groups[0].artistIdentityKey, "ジミーサムp");
+  assert.equal(groups[0].songIdentityKey, `${songWorkTitleKey("Calc.")}::ジミーサムp`);
+  assert.deepEqual(new Set(groups[0].occurrences.map(({ item }) => item.videoId)), new Set(["A", "B"]));
+});
+
+test("buildArtistSongGroups keeps same normalized title separated for incompatible artists", () => {
+  const groups = buildArtistSongGroups([
+    occurrence("私になれ", "Artist A", "A"),
+    occurrence("私になれ", "Artist B", "B"),
+  ]);
+
+  assert.equal(groups.length, 2);
+  assert.deepEqual(
+    groups.map((group) => group.songIdentityKey).sort(),
+    [`${songWorkTitleKey("私になれ")}::artista`, `${songWorkTitleKey("私になれ")}::artistb`],
+  );
+});
+
 function occurrence(title, artist, videoId, overrides = {}) {
   return {
     item: {

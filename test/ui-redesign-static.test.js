@@ -205,7 +205,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(functionBody("function getVtuberSongGroups"), /mergeVtuberSongGroupsForDrawer\(occurrenceGroups, fallbackGroups\)/u);
   assert.match(functionBody("function sourceDetailPathForRecord"), /record\?\._record \|\| \{\}/u);
   assert.match(appSource, /async function sourceDetailPageForContainer[\s\S]*filterOccurrencesForSongKey\(loaded, songKey, songTitle\)/u);
-  assert.match(functionBody("function renderArtistSongGroup"), /sources\._sourceSongKey = group\.key \|\| normalizeEntityKey\(group\.title\)/u);
+  assert.match(functionBody("function renderArtistSongGroup"), /sources\._sourceSongKey = sourceSongKeyForGroup\(group\)/u);
+  assert.match(functionBody("function sourceSongKeyForGroup"), /canonicalWorkTitleKey/u);
   assert.match(appSource, /function renderVtuberCollectionBadge/u);
   assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
   const vtuberTitleLineBlock = cssBlock(".vtuber-title-line");
