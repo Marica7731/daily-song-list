@@ -56,11 +56,19 @@ function positiveInteger(value, fallback, label) {
   return parsed;
 }
 
+function booleanOption(value, fallback = false) {
+  if (value == null || value === "") return Boolean(fallback);
+  if (value === true || value === "1" || value === "true") return true;
+  if (value === false || value === "0" || value === "false") return false;
+  return Boolean(fallback);
+}
+
 function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
   const rawChannelUrl = String(args["channel-url"] || args.url || args._?.[0] || defaults.channelUrl || "").trim();
   if (!rawChannelUrl) throw new Error("Usage: npm run youtube:discover-channel -- --channel-url <YouTube channel URL>");
   const channelUrl = normalizeChannelUrl(rawChannelUrl);
   const requestIntervalMs = positiveInteger(args["request-interval-ms"], defaults.requestIntervalMs ?? 2500, "--request-interval-ms");
+  const ytDlpFallback = args["no-yt-dlp-fallback"] === true ? false : booleanOption(args["yt-dlp-fallback"], defaults.ytDlpFallback ?? true);
   return {
     channelUrl,
     singerName: String(args["singer-name"] || args.name || defaults.singerName || "").trim(),
@@ -75,6 +83,10 @@ function channelDiscoveryOptionsFromArgs(args, defaults = {}) {
     requestJitterMs: positiveInteger(args["request-jitter-ms"], defaults.requestJitterMs ?? 1000, "--request-jitter-ms"),
     fresh: args.fresh === true || args.fresh === "1" || args.fresh === "true",
     candidateOnly: args["candidate-only"] === true || args["candidate-only"] === "1" || args["candidate-only"] === "true",
+    ytDlpFallback,
+    ytDlpPath: String(args["yt-dlp-path"] || defaults.ytDlpPath || process.env.YT_DLP || "yt-dlp").trim() || "yt-dlp",
+    ytDlpCommentLimit: positiveInteger(args["yt-dlp-comment-limit"], defaults.ytDlpCommentLimit ?? 80, "--yt-dlp-comment-limit"),
+    ytDlpTimeoutMs: positiveInteger(args["yt-dlp-timeout-ms"], defaults.ytDlpTimeoutMs ?? 90000, "--yt-dlp-timeout-ms"),
   };
 }
 
@@ -88,7 +100,7 @@ async function runChannelDiscovery(options, deps) {
   const pageSummaries = [];
 
   for (const pageUrl of pageUrls) {
-    const pageResult = await fetchChannelPageWithContinuations(pageUrl, options, deps);
+    const pageResult = await fetchChannelPageWithFallback(pageUrl, options, deps, startedAt);
     pageSummaries.push(pageResult.summary);
     for (const item of pageResult.items) {
       mergeDiscoveryCandidate(candidatesByVideoId, item, {
@@ -157,6 +169,10 @@ async function runChannelDiscovery(options, deps) {
     maxCandidates: options.maxCandidates,
     maxInspect: options.maxInspect,
     candidateOnly: options.candidateOnly,
+    ytDlpFallback: options.ytDlpFallback,
+    ytDlpPath: options.ytDlpPath,
+    ytDlpCommentLimit: options.ytDlpCommentLimit,
+    ytDlpTimeoutMs: options.ytDlpTimeoutMs,
     candidateCount: rawVideos.length,
     inspectedInLatestRun: inspectedCount,
     usableVideoCount: details.length,
@@ -197,6 +213,18 @@ async function runChannelDiscovery(options, deps) {
   return { manifest, rawVideos, details, occurrences, audits };
 }
 
+async function fetchChannelPageWithFallback(pageUrl, options, deps, startedAt) {
+  try {
+    return await fetchChannelPageWithContinuations(pageUrl, options, deps);
+  } catch (error) {
+    if (!shouldUseYtDlpFallback(error, options, deps.fetchChannelPageFallback)) throw error;
+    return deps.fetchChannelPageFallback(pageUrl, options, {
+      error,
+      fetchedAt: startedAt.toISOString(),
+    });
+  }
+}
+
 async function inspectVideoSongListWithRetry(candidate, deps, options) {
   const attempts = Math.max(1, Number(options.inspectMaxAttempts) || 3);
   let lastError = null;
@@ -205,9 +233,13 @@ async function inspectVideoSongListWithRetry(candidate, deps, options) {
       return await deps.inspectVideoSongList(candidate);
     } catch (error) {
       lastError = error;
-      if (!isRetriableRequestError(error) || attempt === attempts) throw error;
+      if (!isRetriableRequestError(error)) throw error;
+      if (attempt === attempts) break;
       await maybeDelay(Math.max(250, Number(options.requestIntervalMs) || 0) * (attempt + 1) + randomJitterMs(options.requestJitterMs));
     }
+  }
+  if (shouldUseYtDlpFallback(lastError, options, deps.inspectVideoSongListFallback)) {
+    return deps.inspectVideoSongListFallback(candidate, options, { error: lastError });
   }
   throw lastError || new Error(`inspect failed for ${candidate.videoId || candidate.title || "candidate"}`);
 }
@@ -348,6 +380,10 @@ function isRetriableContinuationStatus(status) {
 function isRetriableRequestError(error) {
   const message = String(error?.message || error || "");
   return /(?:HTTP\s+(?:429|5\d\d)|fetch failed|ECONNRESET|ETIMEDOUT|ECONNREFUSED|UND_ERR|timeout|network)/iu.test(message);
+}
+
+function shouldUseYtDlpFallback(error, options, fallbackFn) {
+  return Boolean(options.ytDlpFallback && typeof fallbackFn === "function" && error && isRetriableRequestError(error));
 }
 
 function findBrowseContinuation(data) {

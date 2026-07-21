@@ -110,9 +110,13 @@ function parseArgs(argv) {
     else if (name === "--per-channel-timeout-ms") raw.perChannelTimeoutMs = positiveInteger(requireValue(argv, ++index, name), 20 * 60 * 1000);
     else if (name === "--export-timeout-ms") raw.exportTimeoutMs = positiveInteger(requireValue(argv, ++index, name), 5 * 60 * 1000);
     else if (name === "--batch-size") raw.batchSize = positiveInteger(requireValue(argv, ++index, name), 1);
+    else if (name === "--yt-dlp-path") raw.ytDlpPath = requireValue(argv, ++index, name);
+    else if (name === "--yt-dlp-comment-limit") raw.ytDlpCommentLimit = positiveInteger(requireValue(argv, ++index, name), 80);
+    else if (name === "--yt-dlp-timeout-ms") raw.ytDlpTimeoutMs = positiveInteger(requireValue(argv, ++index, name), 90000);
     else if (name === "--fresh") raw.fresh = true;
     else if (name === "--rerun-completed") raw.rerunCompleted = true;
     else if (name === "--candidate-only") raw.candidateOnly = true;
+    else if (name === "--no-yt-dlp-fallback") raw.ytDlpFallback = false;
     else if (name === "--clean-output-root") raw.cleanOutputRoot = true;
     else if (name === "--no-export") raw.noExport = true;
     else throw new Error(`unknown argument: ${name}`);
@@ -134,6 +138,10 @@ function parseArgs(argv) {
     fresh: raw.fresh === true,
     rerunCompleted: raw.rerunCompleted === true,
     candidateOnly: raw.candidateOnly === true,
+    ytDlpFallback: raw.ytDlpFallback !== false,
+    ytDlpPath: stringValue(raw.ytDlpPath || process.env.YT_DLP || "yt-dlp"),
+    ytDlpCommentLimit: raw.ytDlpCommentLimit ?? 80,
+    ytDlpTimeoutMs: raw.ytDlpTimeoutMs ?? 90000,
     cleanOutputRoot: raw.cleanOutputRoot === true,
     noExport: raw.noExport === true,
   };
@@ -249,6 +257,10 @@ function discoveryArgs(target, args, outputDir) {
   }
   if (args.fresh) result.push("--fresh");
   if (args.candidateOnly) result.push("--candidate-only");
+  if (!args.ytDlpFallback) result.push("--no-yt-dlp-fallback");
+  if (args.ytDlpPath) result.push("--yt-dlp-path", args.ytDlpPath);
+  result.push("--yt-dlp-comment-limit", String(args.ytDlpCommentLimit));
+  result.push("--yt-dlp-timeout-ms", String(args.ytDlpTimeoutMs));
   return result;
 }
 
@@ -407,6 +419,10 @@ function manifestOptions(args) {
     exportTimeoutMs: args.exportTimeoutMs,
     batchSize: args.batchSize,
     candidateOnly: args.candidateOnly,
+    ytDlpFallback: args.ytDlpFallback,
+    ytDlpPath: args.ytDlpPath,
+    ytDlpCommentLimit: args.ytDlpCommentLimit,
+    ytDlpTimeoutMs: args.ytDlpTimeoutMs,
     noExport: args.noExport,
   };
 }

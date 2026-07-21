@@ -42,6 +42,24 @@ npm run youtube:discover-channel -- \
 
 Resume by rerunning the same command without `--fresh`. The checkpoint is `checkpoint.json` inside the output directory. Use `--fresh` only when the previous checkpoint should be ignored.
 
+## yt-dlp fallback
+
+The default crawler uses the project HTTP client first. If YouTube channel pages or watch pages fail with transient network/TLS/429/5xx errors, discovery now falls back to local `yt-dlp` when available. The fallback is bounded by the same per-channel process timeout in batch mode and has its own per-command timeout:
+
+```bash
+npm run youtube:discover-channel -- \
+  --channel-url https://youtube.com/@pannomimimi \
+  --singer-name "Panno Mimimi" \
+  --output-dir artifacts/channel-discovery/pannomimimi \
+  --max-candidates 20 \
+  --max-inspect 5 \
+  --yt-dlp-path yt-dlp \
+  --yt-dlp-comment-limit 80 \
+  --yt-dlp-timeout-ms 90000
+```
+
+Use `--no-yt-dlp-fallback` to prove the primary HTTP path alone. yt-dlp page summaries are marked with `backend: "yt-dlp"` and `fallbackFrom`, so the manifest shows which channels needed the fallback.
+
 ## Pre-import dirty-data audit
 
 Discovery output is not imported just because the crawler found timestamps. `youtube:import-channel-discovery` and `youtube:export-channel-increment` run a pre-import audit before writing catalog or accepted increment data. The audit records raw candidate counts, then classifies cleaned rows as `accepted`, `skipped`, `failed`, or `suspicious`.
@@ -104,6 +122,7 @@ npm run youtube:backfill-channel-batch -- \
   --request-interval-ms 3000 \
   --request-jitter-ms 1500 \
   --per-channel-timeout-ms 1200000 \
+  --yt-dlp-timeout-ms 90000 \
   --batch-size 1
 ```
 
@@ -329,6 +348,7 @@ node --test test/runtime-db.test.js
 node --test test/video-catalog.test.js
 node --check scripts/youtube-channel-discovery.js
 node --check scripts/youtube-channel-discovery-core.js
+node --check scripts/youtube-yt-dlp-fallback.js
 node --check scripts/run-youtube-channel-backfill-batch.js
 node --check scripts/import-channel-discovery.js
 node --check scripts/export-channel-discovery-increment.js

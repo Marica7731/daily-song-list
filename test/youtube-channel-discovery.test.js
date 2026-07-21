@@ -20,6 +20,10 @@ const {
   rawVideoCandidate,
   runChannelDiscovery,
 } = require("../scripts/youtube-channel-discovery-core");
+const {
+  playlistJsonToDiscoveryPageResult,
+  videoInfoToSongListResult,
+} = require("../scripts/youtube-yt-dlp-fallback");
 
 test("channel options normalize YouTube handles, tabs, keywords, and output paths", () => {
   const options = channelDiscoveryOptionsFromArgs(parseCliArgs([
@@ -271,6 +275,204 @@ test("channel discovery retries transient video detail failures", async () => {
   assert.equal(inspectCalls, 2);
   assert.equal(result.manifest.usableVideoCount, 1);
   assert.equal(result.manifest.occurrenceCount, 1);
+});
+
+test("channel discovery falls back to yt-dlp for channel page network errors", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-yt-dlp-page-test-"));
+  const firstUrl = "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1";
+  const client = {
+    metrics: { requestCount: 1 },
+    async getText() {
+      throw new Error("fetch failed");
+    },
+  };
+  let fallbackCalls = 0;
+  const fetchChannelPageFallback = async (pageUrl, options, context) => {
+    fallbackCalls += 1;
+    assert.equal(pageUrl, firstUrl);
+    assert.match(context.error.message, /fetch failed/u);
+    return {
+      items: [
+        {
+          videoId: "YYYYYYYYYYY",
+          title: "【歌枠】fallback setlist",
+          thumbnailUrl: "https://i.ytimg.com/vi/YYYYYYYYYYY/hqdefault.jpg",
+          channelName: "Noa Polaris",
+          channelId: "UC_NOA",
+          channelAvatarUrl: "https://yt3.ggpht.com/noa=s240",
+          publishedTimestamp: Date.parse("2026-07-20T00:00:00Z"),
+          matchedKeywords: ["歌"],
+          discoverySourceUrl: pageUrl,
+        },
+      ],
+      summary: { pageUrl, backend: "yt-dlp", rawItemCount: 1, candidateCount: 1 },
+    };
+  };
+
+  const result = await runChannelDiscovery(
+    {
+      channelUrl: "https://www.youtube.com/@noa_polaris",
+      singerName: "Noa Polaris",
+      outputDir: dir,
+      cacheDir: path.join(dir, "cache"),
+      keywords: ["歌"],
+      tabs: ["streams"],
+      maxChannelPages: 1,
+      maxCandidates: 10,
+      maxInspect: 0,
+      requestIntervalMs: 0,
+      requestJitterMs: 0,
+      fresh: true,
+      candidateOnly: true,
+      ytDlpFallback: true,
+    },
+    { client, extractSearchItems, fetchChannelPageFallback },
+  );
+
+  assert.equal(fallbackCalls, 1);
+  assert.equal(result.manifest.candidateCount, 1);
+  assert.equal(result.manifest.pageSummaries[0].backend, "yt-dlp");
+  assert.equal(result.rawVideos[0].thumbnailUrl, "https://i.ytimg.com/vi/YYYYYYYYYYY/hqdefault.jpg");
+});
+
+test("channel discovery falls back to yt-dlp for retried video detail failures", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-yt-dlp-detail-test-"));
+  const firstUrl = "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1";
+  const client = {
+    metrics: { requestCount: 1 },
+    async getText(url) {
+      assert.equal(url, firstUrl);
+      return {
+        status: 200,
+        body: youtubeHtml({
+          initialData: channelData({
+            videos: [videoRenderer("ZZZZZZZZZZZ", "【歌枠】fallback detail", "1 日前")],
+          }),
+        }),
+        bytes: 10,
+        fromCache: false,
+      };
+    },
+  };
+  let fallbackCalls = 0;
+  const result = await runChannelDiscovery(
+    {
+      channelUrl: "https://www.youtube.com/@noa_polaris",
+      singerName: "Noa Polaris",
+      outputDir: dir,
+      cacheDir: path.join(dir, "cache"),
+      keywords: ["歌"],
+      tabs: ["streams"],
+      maxChannelPages: 1,
+      maxCandidates: 10,
+      maxInspect: 1,
+      inspectMaxAttempts: 1,
+      requestIntervalMs: 0,
+      requestJitterMs: 0,
+      fresh: true,
+      candidateOnly: false,
+      ytDlpFallback: true,
+    },
+    {
+      client,
+      extractSearchItems,
+      async inspectVideoSongList() {
+        throw new Error("fetch failed");
+      },
+      async inspectVideoSongListFallback(candidate, options, context) {
+        fallbackCalls += 1;
+        assert.equal(candidate.videoId, "ZZZZZZZZZZZ");
+        assert.match(context.error.message, /fetch failed/u);
+        return {
+          detail: {
+            videoId: candidate.videoId,
+            title: candidate.title,
+            channelName: "Noa Polaris",
+            thumbnailUrl: candidate.thumbnailUrl,
+            songs: [{ time: "2:00", seconds: 120, title: "Fallback Song", artist: "Fallback Artist", raw: "2:00 Fallback Song / Fallback Artist" }],
+          },
+          audit: { videoId: candidate.videoId, result: "selected", backend: "yt-dlp" },
+        };
+      },
+    },
+  );
+
+  assert.equal(fallbackCalls, 1);
+  assert.equal(result.manifest.usableVideoCount, 1);
+  assert.equal(result.audits[0].backend, "yt-dlp");
+  assert.equal(result.occurrences[0].cleanedTitle, "Fallback Song");
+});
+
+test("yt-dlp playlist and video info JSON map to discovery artifacts", () => {
+  const playlistResult = playlistJsonToDiscoveryPageResult(
+    {
+      id: "UC_NOA",
+      channel: "Noa Polaris",
+      uploader_id: "@noa_polaris",
+      channel_url: "https://www.youtube.com/@noa_polaris",
+      thumbnails: [
+        { id: "banner", url: "https://example.test/banner.jpg", width: 2120, height: 351 },
+        { id: "avatar_uncropped", url: "https://yt3.ggpht.com/noa=s900", width: 900, height: 900 },
+      ],
+      entries: [
+        {
+          id: "YTDPAGE0001",
+          title: "【歌枠】yt-dlp page",
+          duration: 3661,
+          timestamp: 1784592000,
+          thumbnails: [{ url: "https://i.ytimg.com/vi/YTDPAGE0001/hqdefault.jpg", width: 480, height: 360 }],
+          live_status: "was_live",
+          view_count: 1234,
+        },
+        { id: "YTDPAGE0002", title: "雑談だけ" },
+      ],
+    },
+    "https://www.youtube.com/@noa_polaris/streams?hl=ja&persist_hl=1",
+    {
+      channelUrl: "https://www.youtube.com/@noa_polaris",
+      singerName: "Noa Polaris",
+      keywords: ["歌"],
+    },
+    { error: new Error("fetch failed"), fetchedAt: "2026-07-21T00:00:00.000Z" },
+  );
+
+  assert.equal(playlistResult.items.length, 1);
+  assert.equal(playlistResult.items[0].videoId, "YTDPAGE0001");
+  assert.equal(playlistResult.items[0].durationText, "1:01:01");
+  assert.equal(playlistResult.items[0].channelAvatarUrl, "https://yt3.ggpht.com/noa=s900");
+  assert.equal(playlistResult.summary.backend, "yt-dlp");
+
+  const detailResult = videoInfoToSongListResult(
+    {
+      id: "YTDPAGE0001",
+      title: "【歌枠】yt-dlp detail",
+      channel: "Noa Polaris",
+      channel_id: "UC_NOA",
+      uploader_id: "@noa_polaris",
+      timestamp: 1784592000,
+      duration: 3661,
+      thumbnail: "https://i.ytimg.com/vi/YTDPAGE0001/hqdefault.jpg",
+      description: "0:10 春泥棒 / ヨルシカ\n0:20 おはようございます",
+      comments: [{ id: "UgxSetlist", author: "listener", text: "1:00 少女レイ / みきとP\n2:00 雑談" }],
+    },
+    {
+      videoId: "YTDPAGE0001",
+      title: "【歌枠】yt-dlp detail",
+      channelName: "Noa Polaris",
+      thumbnailUrl: "https://i.ytimg.com/vi/YTDPAGE0001/hqdefault.jpg",
+      channelAvatarUrl: "https://yt3.ggpht.com/noa=s900",
+      keywords: ["歌"],
+      sourceGroups: ["youtube_channel_discovery"],
+    },
+    {},
+    { error: new Error("fetch failed") },
+  );
+
+  assert.equal(detailResult.audit.backend, "yt-dlp");
+  assert.equal(detailResult.detail.songs.length, 1);
+  assert.equal(detailResult.detail.songs[0].title, "春泥棒");
+  assert.equal(detailResult.detail.songs[0].artist, "ヨルシカ");
+  assert.match(detailResult.detail.selectedSourceId, /^description:/u);
 });
 
 test("raw and occurrence records carry fields needed by the review/import pipeline", () => {
