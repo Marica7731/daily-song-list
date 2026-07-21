@@ -318,6 +318,9 @@ function isCommentaryNoiseConversationText(text) {
 function isStrongNonSongActivityText(value) {
   const text = String(value || "").normalize("NFKC").replace(/[\s\u3000]+/gu, "").replace(/[!！?？。．.]+$/gu, "");
   if (!text) return false;
+  if (/^(?:YoutubePremium|AFK|awayfromkeyboard|take\d+|テイク\d+)$/iu.test(text)) return true;
+  if (/^(?:練習|practice).{2,}$/iu.test(text)) return true;
+  if (/^(?:コメ|コメント)[「『"“].+[」』"”]$/u.test(text)) return true;
   if (/^(?:閉会式|閉会|開会式)(?:も?(?:見てください|みてください|見てね|みてね))?$/u.test(text)) return true;
   if (/^\d+を手で表現した$/u.test(text)) return true;
   if (/(?:周年記念)?(?:お)?写真公開/u.test(text)) return true;
@@ -327,6 +330,12 @@ function isStrongNonSongActivityText(value) {
   if (/(?:アルバム)?発売記念キャンペーン開催/u.test(text)) return true;
   if (/(?:地声|歌声|バラード).+(?:すごい|合ってる|透明感)/u.test(text)) return true;
   if (/(?:免許の適正性|声がサイレン|楽しそう|触れれる|褒め合って体にいい|難しい曲を挑戦|花火大会.*行きたい|すぐ会えるよって意味で歌いたい|謝罪会見|改めて謝罪|ばいちょろり.*終了|マリパのわさび事件)/u.test(text)) {
+    return true;
+  }
+  if (/(?:リスナー同士の結婚報告|なかったことにしよう|とてもくやしい|リクエストできる歌のリスト|妻を迎えに行かないと|久しぶりに来てまた食べ物の話|夏を感じる曲|喉が痛い|歌声禁斷症勢|譲り合い精神|突然3Dモデルがバグった|燃え尽きて消えた|包囲されたちびたん|会社をクビに|ガイドメロディが大きい|曲が増えた理由|飽きるまでずっと繰り返し|疑われちゃう可能性|ミニストップ行けよ|ビックリした|プレゼントが届きました|歌っている途中)/u.test(text)) {
+    return true;
+  }
+  if (/(?:食べ物|食べる|飲む|飲酒|お酒|ビール|ハイボール|喉|病院|薬|体調|風邪|咳|くしゃみ|あくび|欠伸)/u.test(text) && /(?:話|痛い|行く|行け|届|した|する|です|ます|ちゃう|[?？])/.test(text)) {
     return true;
   }
   return false;
