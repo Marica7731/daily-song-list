@@ -127,9 +127,11 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         raise ValueError("range must be 7d or all")
     if view not in {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}:
         raise ValueError("view must be songs, songIndex, artists, videos, vtubers, or vsingerSongs")
-    if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and (
-        effective_search_scope in {"source", "video", "channel"} or search_fields == []
-    ):
+    if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and effective_search_scope in {
+        "source",
+        "video",
+        "channel",
+    }:
         return source_matched_rankings_payload(db_path, range_id, view, metric, q, effective_search_scope, page, page_size, min_count, search_fields)
     base_where = ["range_id = ?", "view = ?", "metric = ?", "scope_key = 'all'"]
     base_params: list[object] = [range_id, view, metric]
