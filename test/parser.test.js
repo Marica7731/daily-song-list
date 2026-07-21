@@ -99,6 +99,27 @@ test("rejects naretan commentary and request timestamps while keeping real song 
   );
 });
 
+test("rejects singleton narration and English gloss rows from Naraetan-style sources", () => {
+  const songs = parseTimestampSongs([
+    [
+      "0:01 あくび / Yawn",
+      "0:02 ペットショップ / Pet Shop",
+      "0:03 リスナー同士の結婚報告 / A marriage report between listeners",
+      "0:04 妻を迎えに行かないと / I have to go pick up my wife",
+      "0:05 ガイドメロディが大きい / Guide melody is too loud",
+      "0:06 コメント欄が壊れています / The comment section is broken",
+      "0:07 病院に行ってきました / I went to the hospital",
+      "0:08 晩餐歌 / tuki.",
+      "0:09 晴る / ヨルシカ",
+    ].join("\n"),
+  ]);
+
+  assert.deepEqual(
+    songs.map((song) => `${song.title} / ${song.artist}`),
+    ["晩餐歌 / tuki", "晴る / ヨルシカ"],
+  );
+});
+
 test("filters common non-song timestamp sections", () => {
   const songs = parseTimestampSongs([
     [

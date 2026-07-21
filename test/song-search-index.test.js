@@ -123,6 +123,42 @@ test("merges supplemental known song overrides into niche annotation", () => {
   );
 });
 
+test("supplemental known songs keep 晴るる by あたらよ distinct from 雨晴るる", () => {
+  const index = mergeSupplementalKnownSongs(
+    buildSongSearchIndex([{ title: "雨晴るる", artist: "ヨルシカ" }], {
+      generatedAt: "2026-07-21T00:00:00.000Z",
+      files: ["known.js"],
+    }),
+    [{ title: "晴るる", artist: "あたらよ", reason: "manual_known_song_confirmation" }],
+  );
+  const payload = {
+    groups: {
+      "72h": {
+        items: [
+          {
+            videoId: "EEEEEEEEEEE",
+            songs: [
+              { title: "晴るる", artist: "あたらよ", seconds: 1, time: "0:00:01" },
+              { title: "晴るる", artist: "未記載", seconds: 2, time: "0:00:02" },
+              { title: "雨晴るる", artist: "ヨルシカ", seconds: 3, time: "0:00:03" },
+              { title: "雨晴るる", artist: "あたらよ", seconds: 4, time: "0:00:04" },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const annotated = annotatePayloadWithSongSearchNiche(payload, index);
+
+  assert.deepEqual(
+    annotated.groups["72h"].items[0].songs.map((song) => song.isNiche),
+    [false, false, false, false],
+  );
+  assert.equal(index.titleArtistKeys.includes("晴るる::あたらよ"), true);
+  assert.equal(index.titleArtistKeys.includes("雨晴るる::ヨルシカ"), true);
+});
+
 test("annotates noisy title matches as known song-search entries", () => {
   const index = buildSongSearchIndex(
     [
