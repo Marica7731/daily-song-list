@@ -229,6 +229,7 @@ def vtuber_song_fallback_payload(
         vtuber = decode_row(row)
         channel_name = vtuber.get("name") or vtuber.get("title") or row["name"] or ""
         channel_key = vtuber.get("channelId") or vtuber.get("channelHandle") or vtuber.get("key") or row["detail_key"] or channel_name
+        match_terms = vtuber_fallback_match_terms(vtuber, row, q)
         total_videos += as_non_negative_int(vtuber.get("videoCount"))
         for song in vtuber.get("songs") or []:
             title = str(song.get("name") or song.get("title") or song.get("key") or "").strip()
@@ -255,10 +256,12 @@ def vtuber_song_fallback_payload(
                     "sourceFilterQuery": q,
                     "searchText": compact_text(f"{title} {channel_name} {q}"),
                     "_channelMap": {},
+                    "_matchTerms": [],
                 }
                 songs_by_key[key] = record
             record["count"] += count
             record["videoCount"] += as_non_negative_int(song.get("videoCount"))
+            record["_matchTerms"].extend(match_terms)
             channel_map = record["_channelMap"]
             if channel_key:
                 channel_entry = channel_map.setdefault(
@@ -283,6 +286,9 @@ def vtuber_song_fallback_payload(
     total = len(ranked_records)
     offset = (max(1, page) - 1) * page_size
     page_records = ranked_records[offset : offset + page_size]
+    for record in page_records:
+        enrich_vtuber_song_fallback_record(conn, range_id, record)
+        record.pop("_matchTerms", None)
     return {
         "schemaVersion": 1,
         "rangeId": range_id,
@@ -300,6 +306,168 @@ def vtuber_song_fallback_payload(
         "pageCount": (total + page_size - 1) // page_size,
         "records": page_records,
     }
+
+
+def vtuber_fallback_match_terms(vtuber: dict, row: sqlite3.Row, q: str) -> list[str]:
+    raw_terms: list[object] = [
+        q,
+        row["detail_key"],
+        row["title"],
+        row["artist"],
+        row["name"],
+        vtuber.get("key"),
+        vtuber.get("name"),
+        vtuber.get("title"),
+        vtuber.get("channelName"),
+        vtuber.get("channelId"),
+        vtuber.get("channelHandle"),
+        vtuber.get("handle"),
+        vtuber.get("channelUrl"),
+        vtuber.get("sourceUrl"),
+    ]
+    aliases = vtuber.get("aliases")
+    if isinstance(aliases, list):
+        for alias in aliases:
+            if isinstance(alias, dict):
+                raw_terms.extend(alias.values())
+            else:
+                raw_terms.append(alias)
+    terms: list[str] = []
+    seen: set[str] = set()
+    for raw_term in raw_terms:
+        value = compact_text(raw_term)
+        if not value:
+            continue
+        candidates = {value}
+        if "youtube.com/" in value:
+            candidates.add(value.rstrip("/").rsplit("/", 1)[-1])
+        if value.startswith("/@"):
+            candidates.add(value[1:])
+            candidates.add(value[2:])
+        elif value.startswith("@"):
+            candidates.add(value[1:])
+        for candidate in candidates:
+            candidate = candidate.strip().lower()
+            if len(candidate) < 3 or candidate in seen:
+                continue
+            seen.add(candidate)
+            terms.append(candidate)
+    return terms
+
+
+def enrich_vtuber_song_fallback_record(conn: sqlite3.Connection, range_id: str, record: dict) -> None:
+    match_terms = sorted({term for term in record.get("_matchTerms") or [] if isinstance(term, str) and len(term) >= 3})
+    if not match_terms:
+        return
+    candidate_rows = conn.execute(
+        """
+        SELECT r.detail_key, r.title, r.artist, r.count, r.video_count, r.timestamp_count, r.payload_json, sd.source_key
+        FROM ranking_rows r
+        LEFT JOIN source_details sd
+          ON sd.range_id = r.range_id
+         AND sd.entity_type = 'song'
+         AND sd.entity_key = r.detail_key
+        WHERE r.range_id = ?
+          AND r.view = 'songs'
+          AND r.metric = 'count'
+          AND r.scope_key = 'all'
+          AND r.title = ?
+        ORDER BY r.count DESC, r.rank ASC
+        LIMIT 30
+        """,
+        (range_id, record.get("title") or ""),
+    ).fetchall()
+    if not candidate_rows:
+        return
+    matched_occurrences: list[dict] = []
+    artists: dict[str, int] = {}
+    seen_occurrences: set[tuple[str, int, str, str]] = set()
+    for candidate in candidate_rows:
+        source_key = candidate["source_key"]
+        if not source_key:
+            continue
+        occurrence_rows = conn.execute(
+            """
+            SELECT payload_json
+            FROM source_occurrences
+            WHERE range_id = ?
+              AND source_key = ?
+            ORDER BY published_timestamp DESC, position ASC
+            LIMIT 500
+            """,
+            (range_id, source_key),
+        ).fetchall()
+        for occurrence_row in occurrence_rows:
+            occurrence = json.loads(occurrence_row["payload_json"])
+            if not vtuber_fallback_occurrence_matches(occurrence, match_terms):
+                continue
+            item = occurrence.get("item") if isinstance(occurrence.get("item"), dict) else {}
+            song = occurrence.get("song") if isinstance(occurrence.get("song"), dict) else {}
+            video_id = str(item.get("videoId") or occurrence.get("videoId") or "").strip()
+            seconds = as_non_negative_int(song.get("seconds") if song.get("seconds") is not None else occurrence.get("seconds"))
+            dedupe_key = (
+                video_id,
+                seconds,
+                compact_text(song.get("title") or record.get("title")),
+                compact_text(song.get("artist") or candidate["artist"]),
+            )
+            if dedupe_key in seen_occurrences:
+                continue
+            seen_occurrences.add(dedupe_key)
+            artist = str(song.get("artist") or candidate["artist"] or "").strip()
+            if artist:
+                artists[artist] = artists.get(artist, 0) + 1
+            matched_occurrences.append(occurrence)
+    if not matched_occurrences:
+        return
+    matched_occurrences.sort(
+        key=lambda occurrence: (
+            -as_non_negative_int((occurrence.get("item") if isinstance(occurrence.get("item"), dict) else {}).get("publishedTimestamp")),
+            as_non_negative_int((occurrence.get("song") if isinstance(occurrence.get("song"), dict) else {}).get("seconds")),
+        )
+    )
+    matched_video_count = len(
+        {
+            str((occurrence.get("item") if isinstance(occurrence.get("item"), dict) else {}).get("videoId") or occurrence.get("videoId") or "")
+            for occurrence in matched_occurrences
+        }
+    )
+    record["globalCount"] = record.get("count", 0)
+    record["globalVideoCount"] = record.get("videoCount", 0)
+    record["globalTimestampCount"] = record.get("timestampCount", record.get("count", 0))
+    record["count"] = len(matched_occurrences)
+    record["timestampCount"] = len(matched_occurrences)
+    record["videoCount"] = matched_video_count
+    record["matchedBySource"] = True
+    record["occurrences"] = matched_occurrences[:20]
+    record["occurrencePreviewLimited"] = len(matched_occurrences) > len(record["occurrences"])
+    record["artists"] = [
+        {"key": compact_text(name), "name": name, "count": count}
+        for name, count in sorted(artists.items(), key=lambda item: (-item[1], item[0]))
+    ]
+    if record["artists"]:
+        record["displayArtist"] = record["artists"][0]["name"]
+
+
+def vtuber_fallback_occurrence_matches(occurrence: dict, match_terms: list[str]) -> bool:
+    item = occurrence.get("item") if isinstance(occurrence.get("item"), dict) else {}
+    values = [
+        item.get("channelName"),
+        item.get("channelId"),
+        item.get("channelHandle"),
+        item.get("handle"),
+        item.get("channelUrl"),
+        item.get("authorUrl"),
+        item.get("ownerUrl"),
+    ]
+    compact_values = [compact_text(value) for value in values if value]
+    if not compact_values:
+        return False
+    for value in compact_values:
+        for term in match_terms:
+            if value == term or term in value or value in term:
+                return True
+    return False
 
 
 def source_matched_rankings_payload(

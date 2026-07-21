@@ -107,6 +107,11 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(allFieldSongSearch.totalOccurrenceCount, 3);
     assert.deepEqual(allFieldSongSearch.records.map((record) => record.title), ["Song One", "Song Three", "Song Two"]);
     assert.equal(allFieldSongSearch.records[0].matchedByVtuber, true);
+    assert.equal(allFieldSongSearch.records[0].matchedBySource, true);
+    assert.equal(allFieldSongSearch.records[0].displayArtist, "Singer A");
+    assert.equal(allFieldSongSearch.records[0].occurrences.length, 1);
+    assert.equal(allFieldSongSearch.records[0].occurrences[0].item.channelName, "Alpha Ch.");
+    assert.equal(allFieldSongSearch.records[0].occurrences[0].item.thumbnailUrl, "https://i.ytimg.com/vi/video-a/hqdefault.jpg");
     assert.equal(allFieldSongSearch.records[0].channels[0].name, "Alpha Ch.");
 
     const scopedChannelSourceSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchScope=channel&pageSize=5`);
