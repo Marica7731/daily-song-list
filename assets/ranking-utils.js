@@ -909,7 +909,7 @@
   }
 
   function normalizeSongWorkTitle(value) {
-    const text = stripLeadingTitleListMarker(cleanText(value));
+    const text = stripEnclosingTitleQuotes(stripLeadingTitleListMarker(cleanText(value)));
     const extracted = extractSongVariant(text);
     return {
       displayTitle: text,
@@ -927,15 +927,15 @@
     const text = cleanText(value).normalize("NFKC");
     if (!text) return { workTitle: "", variantLabel: "", variantKind: "" };
     const bracket = text.match(/^(.+?)\s*[(（［\[【「『]\s*([^()（）\[\]［］【】「」『』]{1,80})\s*[)）］\]】」』]\s*$/u);
-    if (bracket && isWhitelistedSongVariant(bracket[2])) {
+    if (bracket && isSafeSongVariant(bracket[1], bracket[2], { allowRepeatedTitle: true })) {
       return { workTitle: bracket[1].trim(), variantLabel: cleanVariantLabel(bracket[2]), variantKind: "version" };
     }
     const separated = text.match(/^(.+?)\s*(?:[-ー–—|｜:：/／])\s*(.{1,80})\s*$/u);
-    if (separated && isWhitelistedSongVariant(separated[2])) {
+    if (separated && isSafeSongVariant(separated[1], separated[2], { allowRepeatedTitle: true })) {
       return { workTitle: separated[1].trim(), variantLabel: cleanVariantLabel(separated[2]), variantKind: "version" };
     }
     const spacedVariant = text.match(/^(.+?)\s+(.{1,80})\s*$/u);
-    if (spacedVariant && isWhitelistedSongVariant(spacedVariant[2])) {
+    if (spacedVariant && isSafeSongVariant(spacedVariant[1], spacedVariant[2], { allowRepeatedTitle: false })) {
       return { workTitle: spacedVariant[1].trim(), variantLabel: cleanVariantLabel(spacedVariant[2]), variantKind: "version" };
     }
     const trailingListIndex = text.match(/^(.+?)\s+(?:[#＃]?\d{1,3}\s*(?:曲目|曲|番目))\s*$/u);
@@ -945,14 +945,26 @@
     return { workTitle: text, variantLabel: "", variantKind: "" };
   }
 
-  function cleanVariantLabel(value) {
-    return cleanText(value).replace(/^[\s:：\-ー–—|｜/／]+/u, "").trim();
+  function stripEnclosingTitleQuotes(value) {
+    let text = cleanText(value);
+    for (let i = 0; i < 3; i += 1) {
+      const next = text.replace(/^[「『【［\[(（]\s*(.+?)\s*[」』】］\])）]$/u, "$1").trim();
+      if (next === text) break;
+      text = next;
+    }
+    return text;
   }
 
-  function isWhitelistedSongVariant(value) {
+  function cleanVariantLabel(value) {
+    return cleanText(value).replace(/^[\s:：\-ー–—|｜/／]+|[\s:：\-ー–—|｜/／]+$/gu, "").trim();
+  }
+
+  function isSafeSongVariant(workTitle, value, options = {}) {
     const text = cleanVariantLabel(value).normalize("NFKC");
+    const title = cleanText(workTitle).normalize("NFKC");
+    if (options.allowRepeatedTitle && text && normalizeSongTitleKey(text) === normalizeSongTitleKey(title)) return true;
     return (
-      /^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella|acappella|アカペラ|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更)$/iu.test(text)
+      /^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella|acappella|アカペラ|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|english\s*(?:ver\.?|version)?|eng\s*(?:ver\.?|version)?|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更|[A-Za-z][A-Za-z0-9 .'’_-]{0,40}\s+ver\.?)$/iu.test(text)
     );
   }
 
@@ -1032,7 +1044,7 @@
         .replace(/^\s*[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]\s*/u, "")
         .replace(/^\s*(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})\s*(?:曲目|曲|番目)\s*(?:[.．。、,,:：)）\]\-|｜/／]+|\s+)/u, "")
         .replace(
-          /^\s*(?:(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[\s。、,,:：)）\]\-|｜/／]+|(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[.．](?![0-9０-９])\s*)/u,
+          /^\s*(?:(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})(?=[「『【［\[(（])|(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[\s。、,,:：)）\]\-|｜/／]+|(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[.．](?![0-9０-９])\s*)/u,
           "",
         );
       if (next === result) break;

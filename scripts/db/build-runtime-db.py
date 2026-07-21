@@ -2263,21 +2263,31 @@ def vtuber_canonical_song_title(value) -> str:
 
 
 def normalize_song_work_title(value) -> str:
-    text = strip_leading_title_list_marker(clean_text(value))
+    text = strip_enclosing_title_quotes(strip_leading_title_list_marker(clean_text(value)))
     if not text:
         return ""
     bracket = re.match(r"^(.+?)\s*[(（［\[【「『]\s*([^()（）\[\]［］【】「」『』]{1,80})\s*[)）］\]】」』]\s*$", text)
-    if bracket and is_whitelisted_song_variant(bracket.group(2)):
+    if bracket and is_safe_song_variant(bracket.group(1), bracket.group(2), allow_repeated_title=True):
         return bracket.group(1).strip()
     separated = re.match(r"^(.+?)\s*(?:[-ー–—|｜:：/／])\s*(.{1,80})\s*$", text)
-    if separated and is_whitelisted_song_variant(separated.group(2)):
+    if separated and is_safe_song_variant(separated.group(1), separated.group(2), allow_repeated_title=True):
         return separated.group(1).strip()
     spaced = re.match(r"^(.+?)\s+(.{1,80})\s*$", text)
-    if spaced and is_whitelisted_song_variant(spaced.group(2)):
+    if spaced and is_safe_song_variant(spaced.group(1), spaced.group(2), allow_repeated_title=False):
         return spaced.group(1).strip()
     trailing_index = re.match(r"^(.+?)\s+(?:[#＃]?\d{1,3}\s*(?:曲目|曲|番目))\s*$", text)
     if trailing_index:
         return trailing_index.group(1).strip()
+    return text
+
+
+def strip_enclosing_title_quotes(value) -> str:
+    text = clean_text(value)
+    for _ in range(3):
+        next_text = re.sub(r"^[「『【［\[(（]\s*(.+?)\s*[」』】］\])）]$", r"\1", text).strip()
+        if next_text == text:
+            break
+        text = next_text
     return text
 
 
@@ -2288,18 +2298,21 @@ def strip_leading_title_list_marker(value) -> str:
         next_value = re.sub(r"^\s*[＊*]\s*(?=(?:[#＃]?\d{1,3}[.．](?![0-9０-９])|[#＃]?\d{1,3}[)）、:：]|[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]))", "", next_value)
         next_value = re.sub(r"^\s*[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]\s*", "", next_value)
         next_value = re.sub(r"^\s*(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})\s*(?:曲目|曲|番目)\s*(?:[.．。、,,:：)）\]\-|｜/／]+|\s+)", "", next_value)
-        next_value = re.sub(r"^\s*(?:(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[\s。、,,:：)）\]\-|｜/／]+|(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[.．](?![0-9０-９])\s*)", "", next_value)
+        next_value = re.sub(r"^\s*(?:(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})(?=[「『【［\[(（])|(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[\s。、,,:：)）\]\-|｜/／]+|(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})[.．](?![0-9０-９])\s*)", "", next_value)
         if next_value == result:
             break
         result = next_value
     return result.strip()
 
 
-def is_whitelisted_song_variant(value) -> bool:
-    text = clean_text(value).lstrip(" :：-ー–—|｜/／").strip()
+def is_safe_song_variant(work_title, value, allow_repeated_title=False) -> bool:
+    text = re.sub(r"^[\s:：\-ー–—|｜/／]+|[\s:：\-ー–—|｜/／]+$", "", clean_text(value)).strip()
+    title = clean_text(work_title)
+    if allow_repeated_title and text and normalize_key(text) == normalize_key(title):
+        return True
     return bool(
         re.match(
-            r"^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella|acappella|アカペラ|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更)$",
+            r"^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella|acappella|アカペラ|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|english\s*(?:ver\.?|version)?|eng\s*(?:ver\.?|version)?|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更|[A-Za-z][A-Za-z0-9 .'’_-]{0,40}\s+ver\.?)$",
             text,
             re.IGNORECASE,
         )

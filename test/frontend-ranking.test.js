@@ -184,10 +184,34 @@ test("front front front fixture conserves occurrences under work identity", () =
 test("song work title key only strips whitelisted variants and list markers", () => {
   assert.equal(songWorkTitleKey("前前前世 -Piano Ver"), songWorkTitleKey("前前前世"));
   assert.equal(songWorkTitleKey("前前前世 33曲目"), songWorkTitleKey("前前前世"));
+  assert.equal(songWorkTitleKey("33「Calc.」"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("55【Calc.】"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("Calc"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("Calc. (Calc.)"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("Calc. (Eng Ver.)"), songWorkTitleKey("Calc."));
+  assert.equal(songWorkTitleKey("Calc.-Riano Ver-"), songWorkTitleKey("Calc."));
   assert.notEqual(songWorkTitleKey("前前前世 Remix"), songWorkTitleKey("前前前世"));
   assert.notEqual(songWorkTitleKey("前前前世 -Night Drive"), songWorkTitleKey("前前前世"));
   assert.equal(normalizeSongWorkTitle("Song (Acoustic Ver)").variantLabel, "Acoustic Ver");
   assert.equal(extractSongVariant("Song - Remix").variantLabel, "");
+});
+
+test("merges Calc title punctuation, list markers, and safe version labels", () => {
+  const records = buildSongRecords([
+    occurrence("Calc", "ジミーサムP", "A"),
+    occurrence("Calc.", "ジミーサムP", "B"),
+    occurrence("33「Calc.」", "", "C"),
+    occurrence("55【Calc.】", "", "D"),
+    occurrence("Calc. (Eng Ver.)", "ジミーサムP", "E"),
+    occurrence("Calc. (Calc.)", "ジミーサムP", "F"),
+    occurrence("Calc.-Riano Ver-", "ジミーサムP", "G"),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].title, "Calc.");
+  assert.equal(records[0].displayArtist, "ジミーサムP");
+  assert.equal(records[0].count, 7);
+  assert.deepEqual(new Set(records[0].occurrences.map(({ item }) => item.videoId)), new Set(["A", "B", "C", "D", "E", "F", "G"]));
 });
 
 test("merges month spelling, list markers, safe variants, and decorated artist aliases", () => {
