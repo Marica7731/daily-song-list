@@ -6640,7 +6640,9 @@ function renderSourceInlineStrip(model, options = {}) {
   if (!model.videoCount) {
     const empty = document.createElement("span");
     empty.className = "source-inline-empty";
-    empty.textContent = "无来源";
+    const hasUnresolvedCount = Number(options.rankCount || options.occurrenceCount || 0) > 0;
+    if (hasUnresolvedCount) empty.classList.add("source-inline-missing");
+    empty.textContent = hasUnresolvedCount ? "来源明细待重建" : "无来源";
     strip.append(empty);
     return strip;
   }

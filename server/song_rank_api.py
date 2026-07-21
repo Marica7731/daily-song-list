@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 import sqlite3
 import sys
+import unicodedata
 from urllib.parse import parse_qs, unquote, urlparse
 
 
@@ -379,6 +380,10 @@ def enrich_vtuber_song_fallback_record(conn: sqlite3.Connection, range_id: str, 
     match_terms = sorted({term for term in record.get("_matchTerms") or [] if isinstance(term, str) and len(term) >= 3})
     if not match_terms:
         return
+    title_key = song_title_lookup_key(record.get("title") or "")
+    if not title_key:
+        return
+    title_like = title_like_pattern_for_lookup(record.get("title") or "")
     candidate_rows = conn.execute(
         """
         SELECT r.detail_key, r.title, r.artist, r.count, r.video_count, r.timestamp_count, r.payload_json, sd.source_key
@@ -391,11 +396,11 @@ def enrich_vtuber_song_fallback_record(conn: sqlite3.Connection, range_id: str, 
           AND r.view = 'songs'
           AND r.metric = 'count'
           AND r.scope_key = 'all'
-          AND r.title = ?
+          AND (lower(r.title) = lower(?) OR lower(r.title) LIKE ? ESCAPE '\\')
         ORDER BY r.count DESC, r.rank ASC
-        LIMIT 30
+        LIMIT 200
         """,
-        (range_id, record.get("title") or ""),
+        (range_id, record.get("title") or "", title_like),
     ).fetchall()
     if not candidate_rows:
         return
@@ -403,6 +408,8 @@ def enrich_vtuber_song_fallback_record(conn: sqlite3.Connection, range_id: str, 
     artists: dict[str, int] = {}
     seen_occurrences: set[tuple[str, int, str, str]] = set()
     for candidate in candidate_rows:
+        if song_title_lookup_key(candidate["title"]) != title_key:
+            continue
         source_key = candidate["source_key"]
         if not source_key:
             continue
@@ -1065,6 +1072,27 @@ def as_non_negative_int(value: object) -> int:
 
 def compact_text(value: object) -> str:
     return re.sub(r"\s+", " ", str(value or "").strip().lower())
+
+
+def song_title_lookup_key(value: object) -> str:
+    text = unicodedata.normalize("NFKC", str(value or "")).strip().lower()
+    return re.sub(r"[\s._:：・･/\\\-ー—–~〜～!！?？()[\]【】「」『』\"'“”‘’]+", "", text)
+
+
+def title_like_pattern_for_lookup(value: object) -> str:
+    text = unicodedata.normalize("NFKC", str(value or "")).strip().lower()
+    tokens = [
+        token
+        for token in re.split(r"[\s._:：・･/\\\-ー—–~〜～!！?？()[\]【】「」『』\"'“”‘’]+", text)
+        if token
+    ]
+    if not tokens:
+        return "%"
+    return "%" + "%".join(escape_like_value(token) for token in tokens) + "%"
+
+
+def escape_like_value(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 if __name__ == "__main__":

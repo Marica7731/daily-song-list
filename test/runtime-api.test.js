@@ -9,6 +9,17 @@ const test = require("node:test");
 
 const ROOT = path.resolve(__dirname, "..");
 const PYTHON = process.env.PYTHON || "python";
+const SERVER_SOURCE = fs.readFileSync(path.join(ROOT, "server", "song_rank_api.py"), "utf8");
+
+test("runtime API vtuber fallback uses normalized song title lookup for source enrichment", () => {
+  assert.match(SERVER_SOURCE, /def song_title_lookup_key/u);
+  assert.match(SERVER_SOURCE, /def title_like_pattern_for_lookup/u);
+  assert.match(SERVER_SOURCE, /song_title_lookup_key\(candidate\["title"\]\) != title_key/u);
+  assert.doesNotMatch(
+    SERVER_SOURCE,
+    /r\.scope_key = 'all'\s+AND r\.title = \?/u,
+  );
+});
 
 test("runtime API serves health and ranking rows from SQLite", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-"));
