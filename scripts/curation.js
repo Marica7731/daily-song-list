@@ -322,6 +322,10 @@ function isStrongNonSongActivityText(value) {
   if (!text) return false;
   if (/^(?:YoutubePremium|AFK|awayfromkeyboard|take\d+|テイク\d+)$/iu.test(text)) return true;
   if (/^(?:練習|practice).{2,}$/iu.test(text)) return true;
+  if (/^(?:本編|歌パート|閉会式|復習タイム|練習パート)(?:開始|終了)$/u.test(text)) return true;
+  if (/^(?:たすかる|バカたすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|はのみくり[ー〜～]*ん)$/iu.test(text)) return true;
+  if (/(?:歌みた|歌ってみた).*(?:こだわり|話|紹介|ポイント)/u.test(text)) return true;
+  if (/^大阪の話[①-⑳\d:：].+$/u.test(text)) return true;
   if (/^(?:コメ|コメント)[「『"“].+[」』"”]$/u.test(text)) return true;
   if (/^(?:閉会式|閉会|開会式)(?:も?(?:見てください|みてください|見てね|みてね))?$/u.test(text)) return true;
   if (/^\d+を手で表現した$/u.test(text)) return true;

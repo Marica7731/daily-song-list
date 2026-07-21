@@ -296,6 +296,38 @@ test("curation drops singleton topic/gloss pseudo songs while keeping reliable E
   assert.ok(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries >= 2);
 });
 
+test("curation drops residual daily chatter without removing target real songs", () => {
+  const videos = applyCurationToVideos(
+    [
+      {
+        videoId: "NARAETAN004",
+        channelName: "なれたん Naraetan Ch.",
+        channelHandle: "/@naraetanV",
+        songs: [
+          { title: "食べ放題", artist: "All-You-Can-Eat", seconds: 1, raw: "01:37:53 食べ放題 / All-You-Can-Eat" },
+          { title: "歯磨き後のうがい", artist: "Rinsing After Brushing My Teeth", seconds: 2, raw: "01:28:49 歯磨き後のうがい / Rinsing After Brushing My Teeth" },
+          { title: "たすかる", artist: "未記載", seconds: 3, raw: "2:14:48 たすかる" },
+          { title: "はのぴょ〜ん！", artist: "未記載", seconds: 4, raw: "0:02:23 はのぴょ〜ん！" },
+          { title: "閉会式開始", artist: "未記載", seconds: 5, raw: "0:31:45 0:32:43 閉会式開始" },
+          { title: "大阪の話③:海遊館", artist: "未記載", seconds: 6, raw: "0:58:44 大阪の話③:海遊館" },
+          { title: "Campus mode!!歌みたのこだわりポイント", artist: "未記載", seconds: 7, raw: "1:32:15 Campus mode!!歌みたのこだわりポイント" },
+          { title: "晴る", artist: "ヨルシカ", seconds: 8, raw: "0:08 晴る / ヨルシカ" },
+          { title: "晩餐歌", artist: "tuki.", seconds: 9, raw: "0:09 晩餐歌 / tuki." },
+          { title: "花になって", artist: "緑黄色社会", seconds: 10, raw: "0:10 花になって / 緑黄色社会" },
+          { title: "START", artist: "愛内里菜", seconds: 11, raw: "0:11 START / 愛内里菜" },
+        ],
+      },
+    ],
+    { overrides: { records: [] } },
+  );
+
+  assert.deepEqual(
+    videos[0].songs.map((item) => `${item.title} / ${item.artist}`),
+    ["晴る / ヨルシカ", "晩餐歌 / tuki.", "花になって / 緑黄色社会", "START / 愛内里菜"],
+  );
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 7);
+});
+
 test("curation preserves gORDBq5IpBo songs while dropping chat timeline rows", () => {
   const videos = applyCurationToVideos(
     [

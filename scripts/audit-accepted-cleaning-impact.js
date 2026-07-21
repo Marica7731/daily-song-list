@@ -41,12 +41,20 @@ const SAFE_SONGS = [
   ["Never Ending Story", "Limahl"],
 ];
 
+const QUERY_TARGETS = [
+  { id: "haru", q: "晴る" },
+  { id: "bansanka", q: "晩餐歌" },
+  { id: "hananinattee", q: "花になって" },
+];
+
 function main() {
   const context = loadCurationContext();
   const acceptedVideos = loadAcceptedVideos();
   const runtimeVideos = loadRuntimeVideos();
-  const globalTitleStats = buildGlobalTitleStats([...acceptedVideos, ...runtimeVideos]);
+  const allVideos = [...acceptedVideos, ...runtimeVideos];
+  const globalTitleStats = buildGlobalTitleStats(allVideos);
   const summaries = TARGETS.map((target) => summarizeTarget(target, acceptedVideos, runtimeVideos, globalTitleStats, context));
+  const querySummaries = QUERY_TARGETS.map((target) => summarizeQuery(target, allVideos, globalTitleStats, context));
   const safeSongChecks = SAFE_SONGS.map(([title, artist]) => {
     const source = { channelName: "Safety Fixture", channelHandle: "@safety" };
     const song = { title, artist, seconds: 1, raw: `0:01 ${title} / ${artist}` };
@@ -63,7 +71,9 @@ function main() {
     generatedAt: new Date().toISOString(),
     acceptedDir: path.relative(ROOT, ACCEPTED_DIR).replace(/\\/g, "/"),
     runtimeJsons: RUNTIME_JSON_PATHS.filter((filePath) => fs.existsSync(filePath)).map((filePath) => path.relative(ROOT, filePath).replace(/\\/g, "/")),
+    sourceInventory: buildSourceInventory(acceptedVideos),
     summaries,
+    querySummaries,
     safeSongChecks,
   };
 
@@ -84,9 +94,35 @@ function main() {
       ...summaries.map((summary) => `${summary.id}SingletonPseudoAfter=${summary.after.singletonPseudoRows}`),
       ...summaries.map((summary) => `${summary.id}DirtyBefore=${summary.before.ruleCandidateRows}`),
       ...summaries.map((summary) => `${summary.id}DirtyAfter=${summary.after.ruleCandidateRows}`),
+      ...querySummaries.map((summary) => `${summary.id}Before=${summary.before.matchingTitleRows}`),
+      ...querySummaries.map((summary) => `${summary.id}After=${summary.after.matchingTitleRows}`),
+      ...querySummaries.map((summary) => `${summary.id}DirtyBefore=${summary.before.ruleCandidateRows}`),
+      ...querySummaries.map((summary) => `${summary.id}DirtyAfter=${summary.after.ruleCandidateRows}`),
       `safeSongChecks=${safeSongChecks.length}`,
     ].join(" "),
   );
+}
+
+function buildSourceInventory(acceptedVideos) {
+  const acceptedFiles = fs.existsSync(ACCEPTED_DIR) ? fs.readdirSync(ACCEPTED_DIR).filter((name) => name.endsWith(".json")).sort() : [];
+  const artifactDiscoveryDir = path.join(ROOT, "artifacts", "channel-discovery");
+  const artifactDiscoveryDirs = fs.existsSync(artifactDiscoveryDir) ? fs.readdirSync(artifactDiscoveryDir).sort() : [];
+  const vsingerManifest = path.join(ROOT, "data", "external", "vsinger-http", "backfill", "manifest.json");
+  return {
+    acceptedFileCount: acceptedFiles.length,
+    acceptedVideoRows: acceptedVideos.length,
+    acceptedTargetFiles: TARGETS.filter((target) => target.acceptedFile).map((target) => ({
+      id: target.id,
+      file: target.acceptedFile,
+      exists: fs.existsSync(path.join(ACCEPTED_DIR, target.acceptedFile)),
+    })),
+    artifactChannelDiscoveryDirs: artifactDiscoveryDirs,
+    vsingerBackfillManifestExists: fs.existsSync(vsingerManifest),
+    runtimeJsonsExist: RUNTIME_JSON_PATHS.map((filePath) => ({
+      file: path.relative(ROOT, filePath).replace(/\\/g, "/"),
+      exists: fs.existsSync(filePath),
+    })),
+  };
 }
 
 function loadAcceptedVideos() {
@@ -157,6 +193,49 @@ function summarizeTarget(target, acceptedVideos, runtimeVideos, globalTitleStats
   };
 }
 
+function summarizeQuery(target, videos, globalTitleStats, context) {
+  const queryKey = singletonTitleKey(target.q);
+  const sourceVideos = (videos || []).filter((video) => (video.songs || []).some((song) => queryMatchesSong(song, queryKey)));
+  const curationContext = { ...context, titleStats: globalTitleStats };
+  const before = summarizeQueryVideos(sourceVideos, sourceVideos, globalTitleStats, curationContext, queryKey);
+  const curated = applyCurationToVideos(filterBlockedVideos(deepClone(sourceVideos)), curationContext);
+  const after = summarizeQueryVideos(curated, sourceVideos, globalTitleStats, curationContext, queryKey);
+  return {
+    id: target.id,
+    q: target.q,
+    sourceVideoRows: sourceVideos.length,
+    before,
+    after,
+    delta: {
+      matchingTitleRows: before.matchingTitleRows - after.matchingTitleRows,
+      exactTitleRows: before.exactTitleRows - after.exactTitleRows,
+      unknownArtistRows: before.unknownArtistRows - after.unknownArtistRows,
+      ruleCandidateRows: before.ruleCandidateRows - after.ruleCandidateRows,
+    },
+  };
+}
+
+function summarizeQueryVideos(videos, sourceVideos, globalTitleStats, context, queryKey) {
+  const sourceByVideoId = new Map(sourceVideos.map((video) => [video.videoId, video]));
+  const entries = [];
+  for (const video of videos || []) {
+    const source = sourceByVideoId.get(video.videoId) || video;
+    for (const song of Array.isArray(video.songs) ? video.songs : []) {
+      if (queryMatchesSong(song, queryKey)) entries.push({ song, source });
+    }
+  }
+  return {
+    matchingTitleRows: entries.length,
+    exactTitleRows: entries.filter(({ song }) => songTitleKey(song) === queryKey).length,
+    uniqueTitleRows: new Set(entries.map(({ song }) => songTitleKey(song)).filter(Boolean)).size,
+    artistVariantRows: new Set(entries.map(({ song }) => normalizeArtistKey(song?.artist || "")).filter(Boolean)).size,
+    unknownArtistRows: entries.filter(({ song }) => isUnknownArtist(song?.artist)).length,
+    singletonPseudoRows: entries.filter(({ song }) => isSingletonPseudoSongEntry(song, globalTitleStats)).length,
+    ruleCandidateRows: entries.filter(({ song, source }) => isRuleCandidate(song, source, context)).length,
+    sampleRows: sampleSongs(entries, 8),
+  };
+}
+
 function summarizeVideos(videos, sourceVideos, globalTitleStats, context) {
   const sourceByVideoId = new Map(sourceVideos.map((video) => [video.videoId, video]));
   const songs = [];
@@ -224,6 +303,11 @@ function matchesTarget(video, target) {
 
 function songTitleKey(song) {
   return singletonTitleKey(song?.title || "");
+}
+
+function queryMatchesSong(song, queryKey) {
+  const key = songTitleKey(song);
+  return Boolean(key && queryKey && key.includes(queryKey));
 }
 
 function isSafeSong(song) {

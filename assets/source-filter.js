@@ -475,7 +475,7 @@
     if (isKnownSongSafeFromCommentary(titleText, artistText)) return false;
     if (hasStructuredSongNumber(rawText) && !isCommentaryNoiseText(titleText)) return false;
     if (isJapaneseTopicTitleWithEnglishGloss(titleText, artistText)) return true;
-    if (/(?:話|理由|コメント|コメ|リクエスト|アンケート|おすすめ|おススメ|喉|のど|配信|動画|練習|噛|食べ|飲み|旅行|友達|家族|姉|妹|幼馴染|指|身長|リップ|フリ|視聴者|収益化|チャンネル|スーパー|キーボード|アレルギー|リスナー|歌声|サビ|歌詞)/u.test(combined)) {
+    if (/(?:話|理由|コメント|コメ|リクエスト|アンケート|おすすめ|おススメ|喉|のど|配信|動画|練習|噛|食べ|飲み|旅行|友達|家族|姉|妹|幼馴染|指|身長|リップ|フリ|視聴者|収益化|チャンネル|スーパー|キーボード|アレルギー|リスナー|歌声|サビ|歌詞|体調|病院|歯磨き|うがい|買い物|職場|謝|絵文字|プレゼント|写真|踏んで|海遊館)/u.test(combined)) {
       return isTopicLikeTitle(titleText) || isSentenceLikeTitle(titleText) || isSentenceLikeCredit(artistText) || isCommentaryNoiseText(titleText) || isCommentaryNoiseText(artistText);
     }
     return isSentenceLikeTitle(titleText) && isSentenceLikeCredit(artistText);
@@ -487,7 +487,7 @@
     if (!titleText || !artistText || !containsJapanese(titleText) || containsJapanese(artistText)) return false;
     if (!isEnglishGlossLikeText(artistText)) return false;
     if (isCommentaryNoiseText(titleText) || isTopicLikeTitle(titleText) || isSentenceLikeTitle(titleText)) return true;
-    return /(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ)/iu.test(titleText);
+    return /(?:op|ed|opening|ending|雑談|日常|閑談|問候|挨拶|感想|紹介|説明|韓国|韓国人|日本|日本語|英語|発音|長音|病院|食|飯|飲|茶|酒|炭酸|ドリンク|餅|音楽停止|クリック|おすすめ|曲紹介|歌詞考察|考察|アンケート|リクエスト|コメント|コメ|家族|両親|姉|妹|幼馴染|身長|指|チャンネル|登録|美容院|カラオケ|ドラマ|お土産|夢|広告|写真|リスク|違い|難しい|ちゃんぽん|キムチ|ソーマ|体調|歯磨き|うがい|買い物|職場|謝|絵文字|プレゼント|踏んで|海遊館|大阪の話)/iu.test(titleText);
   }
 
   function isEnglishGlossLikeText(text) {
@@ -498,7 +498,7 @@
     if (!words.length || words.length > 18) return false;
     if (isSentenceLikeCredit(value)) return true;
     if (/[?？]$/.test(value) || /\([^)]{3,80}\)/u.test(value)) return true;
-    return /\b(?:about|accidental|accented|ad|alcohol|anime|attack|ballad|carbonated|catchy|click|commercial|differences?|difficult|dream|drink(?:ing)?|food|hospital|introduced?|introducing|japanese|korean|marks?|music|parents?|picture|poisoning|poll|popular|pronunciation|recommendations?|recently|rice|risks?|salon|song|songs|souvenirs?|stops?|tea|temptation|traditional|vowel|watched)\b/iu.test(value);
+    return /\b(?:about|accidental|accented|ad|alcohol|all-you-can-eat|anime|apolog(?:y|ize)|attack|ballad|brush(?:ing)?|carbonated|catchy|click|commercial|differences?|difficult|dream|drink(?:ing)?|emoji|emojis|food|gift|hospital|introduced?|introducing|japanese|korean|marks?|move forward|music|pain relief|parents?|patches|picture|poisoning|poll|popular|pronunciation|recommendations?|recently|rice|rinsing|risks?|salon|song|songs|souvenirs?|stops?|tea|temptation|traditional|vowel|watched)\b/iu.test(value);
   }
 
   function isExplanatoryEnglishGlossArtist(title, artist, raw) {
@@ -510,7 +510,7 @@
     if (/^(?:I|I'm|I’m|You|We|They|It|That|This|There|A|An|The|Why|What|When|Where|How|Can|Will|Was|Were|For|Those|Things|Still|Collaboration|Did)\b/u.test(artistText)) {
       return true;
     }
-    return /\b(?:about|accidental|anime|blossoms?|broadcasting|celebrit(?:y|ies)|chat|club|comment|conan|detective|drink(?:ing)?|ending songs?|famous|favorite|food|guide|hair|hospital|how to|imitating|information|memories|menu|mind of its own|new outfit|opening|organizing|park|personal|phones?|poisoning|quotes?|recommendations?|song list|stocked|surprised|throat|thoughts?|watching)\b/iu.test(artistText);
+    return /\b(?:about|accidental|all-you-can-eat|anime|apolog(?:y|ize)|blossoms?|broadcasting|brush(?:ing)?|celebrit(?:y|ies)|chat|club|comment|conan|detective|drink(?:ing)?|emoji|emojis|ending songs?|famous|favorite|food|guide|hair|hospital|how to|imitating|information|memories|menu|mind of its own|move forward|new outfit|opening|organizing|pain relief|park|patches|personal|phones?|poisoning|quotes?|recommendations?|rinsing|song list|stocked|surprised|throat|thoughts?|watching)\b/iu.test(artistText);
   }
 
   function isKnownEnglishArtistName(artist) {
@@ -527,19 +527,21 @@
   }
 
   function isSingletonDailyTopicText(title, raw) {
+    const titleValue = normalizeNoiseTitleKey(title || "");
     const value = normalizeNoiseTitleKey(`${title || ""} ${raw || ""}`);
-    if (!value) return false;
+    if (!value && !titleValue) return false;
     if (/^(?:by[a-z0-9 .,'’"“”&+_\-!?~～#＃♯♭★☆♪♫♡♥◎・･=×∞]+)$/iu.test(String(title || "").normalize("NFKC").trim())) return true;
-    if (/^(?:たすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|本編終了|歌パート終了|練習パート|復習タイム開始)$/iu.test(value)) return true;
-    return /(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|髪型|スマホ|配信を見る|体調|病院|飲み|食べ|食べ放題|誕生日|自分へのプレゼント|プレゼント選び|プレゼント|写真|歯磨き|うがい|買い物|職場|お菓子|ものまね|謝罪|クイズ|ネタバレ|途中からリベンジ|リベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い|fanart|fan art|outfit|hairstyle|gift|photo|quiz|shopping|stream|teeth|rinsing|apolog|bug|model|emoji|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)/iu.test(value);
+    if (/^(?:たすかる|バカたすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|はのみくり[ー〜～]*ん|本編終了|歌パート終了|閉会式開始|練習パート|復習タイム開始)$/iu.test(titleValue)) return true;
+    return /(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|髪型|スマホ|配信を見る|体調|病院|飲み|食べ|食べ放題|誕生日|自分へのプレゼント|プレゼント選び|プレゼント|写真|歯磨き|うがい|買い物|職場|お菓子|ものまね|謝罪|クイズ|ネタバレ|途中からリベンジ|リベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|大阪の話|海遊館|歌みた|歌ってみた|こだわりポイント|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い|fanart|fan art|outfit|hairstyle|gift|photo|quiz|shopping|stream|teeth|rinsing|apolog|bug|model|emoji|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)/iu.test(value);
   }
 
   function isLooseSingletonChapterText(title, artist, raw) {
     const text = `${title || ""} ${artist || ""} ${raw || ""}`;
+    const titleCompact = normalizeNoiseTitleKey(title || "");
     const compact = normalizeNoiseTitleKey(text);
     if (!compact || isKnownSongSafeFromCommentary(title, artist)) return false;
-    if (/^(?:afk|asmr+|jubeat|kimo|youtubepremium)$/iu.test(compact)) return true;
-    if (/^(?:エンドカード|cパート|復習タイム開始|本編終了|歌パート終了|閉会式開始|眼鏡着用|明日の予定|今週の予定|引っ越し完了)$/iu.test(compact)) return true;
+    if (/^(?:afk|asmr+|jubeat|kimo|youtubepremium)$/iu.test(titleCompact) || /^(?:afk|asmr+|jubeat|kimo|youtubepremium)$/iu.test(compact)) return true;
+    if (/^(?:エンドカード|cパート|復習タイム開始|本編終了|歌パート終了|閉会式開始|眼鏡着用|明日の予定|今週の予定|引っ越し完了)$/iu.test(titleCompact)) return true;
     if (/(?:コメント|コメ|リクエスト|アンケート|雑談|説明|告知|予定|紹介|写真|生写真|サンプル|抽選|結果|復習|練習|開始|終了|本編|エンドカード|cパート|閉会式|音量注意|リベンジ|番外編|ネタバレ|眼鏡|着用|食材|食べ|飲み|病院|喉|体調|アレルギー|あくび|プレゼント|衣装|髪型|歯磨き|うがい|買い物|職場|謝罪|クイズ|ものまね|ファンアート|fanart|fan art|gift|photo|outfit|hairstyle|quiz|shopping|stream|teeth|rinsing|apolog|bug|model|emoji|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)/iu.test(text)) {
       return true;
     }

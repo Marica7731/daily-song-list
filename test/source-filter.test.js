@@ -91,6 +91,28 @@ test("source filter singleton pseudo-song helper uses source-count context", () 
   );
 });
 
+test("source filter singleton pseudo-song helper uses title text for daily chatter", () => {
+  const singletonStats = new Map([
+    ["たすかる", { sourceCount: 1 }],
+    ["はのぴょ〜ん", { sourceCount: 1 }],
+    ["閉会式開始", { sourceCount: 1 }],
+    ["大阪の話3海遊館", { sourceCount: 1 }],
+    ["campusmode歌みたのこだわりポイント", { sourceCount: 1 }],
+  ]);
+
+  assert.equal(isSingletonPseudoSongEntry({ title: "たすかる", artist: "未記載", raw: "2:14:48 たすかる" }, singletonStats), true);
+  assert.equal(isSingletonPseudoSongEntry({ title: "はのぴょ〜ん！", artist: "未記載", raw: "0:02:23 はのぴょ〜ん！" }, singletonStats), true);
+  assert.equal(isSingletonPseudoSongEntry({ title: "閉会式開始", artist: "未記載", raw: "0:31:45 0:32:43 閉会式開始" }, singletonStats), true);
+  assert.equal(isSingletonPseudoSongEntry({ title: "大阪の話③:海遊館", artist: "未記載", raw: "0:58:44 大阪の話③:海遊館" }, singletonStats), true);
+  assert.equal(
+    isSingletonPseudoSongEntry(
+      { title: "Campus mode!!歌みたのこだわりポイント", artist: "未記載", raw: "1:32:15 Campus mode!!歌みたのこだわりポイント" },
+      singletonStats,
+    ),
+    true,
+  );
+});
+
 test("source filter removes section markers and cleans ordinal song prefixes", () => {
   assert.equal(isBlockedSongEntry({ title: "この曲について", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "待機", artist: "待补歌手" }), true);
@@ -179,6 +201,10 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "お茶を飲みながら逆立ち", artist: "Handstand While Drinking Tea" }), true);
   assert.equal(isBlockedSongEntry({ title: "おすすめの曲紹介", artist: "Song Recommendations" }), true);
   assert.equal(isBlockedSongEntry({ title: "上野公園の桜", artist: "Cherry Blossoms at Ueno Park", raw: "00:12:15 上野公園の桜 / Cherry Blossoms at Ueno Park" }), true);
+  assert.equal(isBlockedSongEntry({ title: "食べ放題", artist: "All-You-Can-Eat", raw: "01:37:53 食べ放題 / All-You-Can-Eat" }), true);
+  assert.equal(isBlockedSongEntry({ title: "歯磨き後のうがい", artist: "Rinsing After Brushing My Teeth", raw: "01:28:49 歯磨き後のうがい / Rinsing After Brushing My Teeth" }), true);
+  assert.equal(isBlockedSongEntry({ title: "テーピングと湿布", artist: "Taping and Pain Relief Patches", raw: "00:17:36 テーピングと湿布 / Taping and Pain Relief Patches" }), true);
+  assert.equal(isBlockedSongEntry({ title: "一応謝ろう", artist: "Let Me Apologize Just in Case", raw: "02:06:42 一応謝ろう / Let Me Apologize Just in Case" }), true);
   assert.equal(isBlockedSongEntry({ title: "END", artist: "Cパート", raw: "0:31:24 END / Cパート" }), true);
   assert.equal(isBlockedSongEntry({ title: "エンドカード", artist: "Cパート", raw: "2:24:02 エンドカード(Cパート" }), true);
   assert.equal(isBlockedSongEntry({ title: "星座になれたら", artist: "結束バンド" }), false);
