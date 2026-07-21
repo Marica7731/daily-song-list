@@ -318,11 +318,11 @@
     if (state.outside) params.set("outside", "1");
     if (unknownArtistsHiddenForUrl(state, defaults)) params.set("hideUnknown", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
-    if (state.q && searchScope !== (defaults.searchScope || "all")) params.set("searchScope", searchScope);
+    if (state.q && view !== "vtuberRank" && searchScope !== (defaults.searchScope || "all")) params.set("searchScope", searchScope);
     const searchFields = sanitizeSearchFields(state.searchFields, defaults.searchFields || ["title", "artist"]);
     const defaultSearchFields = sanitizeSearchFields(defaults.searchFields, ["title", "artist"]);
     const fieldsDiffer = searchFields.join(",") !== defaultSearchFields.join(",");
-    if (state.q && searchScope === (defaults.searchScope || "all") && fieldsDiffer) {
+    if (state.q && view !== "vtuberRank" && searchScope === (defaults.searchScope || "all") && fieldsDiffer) {
       params.set("searchFields", searchFields.length ? searchFields.join(",") : "all");
     }
     if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
@@ -516,6 +516,7 @@
   }
 
   function activeSearchFieldsForChips(draft, options = {}) {
+    if ((options.view || "songRank") === "vtuberRank") return [];
     const normalized = sanitizeQueryDraft(draft, options);
     if (!normalized.q || normalized.searchScope !== "all") return [];
     return normalized.searchFields || [];

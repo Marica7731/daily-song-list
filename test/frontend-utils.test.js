@@ -1193,7 +1193,7 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
       { ...defaultQueryDraft(), q: "なれたん", hideUnknownArtist: true, minCount: 10 },
       { ...options, view: "vtuberRank" },
     ).map((item) => [item.key, item.label]),
-    [["q", "なれたん"], ["searchField:title", "歌名"], ["searchField:artist", "歌手"]],
+    [["q", "なれたん"]],
   );
 
   assert.deepEqual(queryTriggerModel(defaultQueryDraft(), { ...options, view: "songRank", mode: "mobile" }), {
@@ -1226,11 +1226,11 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
       { ...options, view: "vtuberRank", mode: "mobile" },
     ),
     {
-      count: 3,
-      labels: ["なれたん", "歌名", "歌手"],
+      count: 1,
+      labels: ["なれたん"],
       hasActive: true,
       visibleCountText: "",
-      ariaLabel: "打开搜索与筛选，当前有 3 个筛选条件：なれたん、歌名、歌手",
+      ariaLabel: "打开搜索与筛选，当前有 1 个筛选条件：なれたん",
     },
   );
 });
@@ -1468,6 +1468,8 @@ test("url state keeps rank metric and video layout only when relevant", () => {
     rankMetric: "songs",
     minCount: 10,
     q: "なれたん",
+    searchScope: "artist",
+    searchFields: ["title", "artist"],
   };
   assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(vtuberState, options))), {
     view: "vtuberRank",
