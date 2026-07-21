@@ -242,6 +242,26 @@ button {
   stroke-linejoin: round;
 }
 
+.query-submit-button {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-left: -5px;
+  border: 0;
+  border-radius: var(--radius-control-sm);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.query-submit-button:hover,
+.query-submit-button:focus-visible {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  outline: none;
+}
+
 .query-trigger-text {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -250,7 +270,7 @@ button {
 
 .query-search-form {
   position: relative;
-  grid-template-columns: 18px minmax(0, 1fr) auto auto;
+  grid-template-columns: 28px minmax(0, 1fr) auto auto;
 }
 
 .query-search-form input {

@@ -127,7 +127,9 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         raise ValueError("range must be 7d or all")
     if view not in {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}:
         raise ValueError("view must be songs, songIndex, artists, videos, vtubers, or vsingerSongs")
-    if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and effective_search_scope in {"source", "video", "channel"}:
+    if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and (
+        effective_search_scope in {"source", "video", "channel"} or search_fields == []
+    ):
         return source_matched_rankings_payload(db_path, range_id, view, metric, q, effective_search_scope, page, page_size, min_count, search_fields)
     base_where = ["range_id = ?", "view = ?", "metric = ?", "scope_key = 'all'"]
     base_params: list[object] = [range_id, view, metric]
@@ -203,10 +205,6 @@ def source_matched_rankings_payload(
     source_clause, source_values = source_occurrence_filter(q, search_scope)
     candidate_where = list(base_where)
     candidate_params = list(base_params)
-    if search_scope == "all":
-        candidate_clause, candidate_values = search_filter_for_view(view, q, "all")
-        candidate_where.append(candidate_clause)
-        candidate_params.extend(candidate_values)
     matched_params = [*candidate_params, *source_values]
     having = ""
     if min_count > 1 and view not in {"videos", "vtubers"}:

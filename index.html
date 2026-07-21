@@ -20,7 +20,7 @@
     <link rel="icon" href="favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png?v=icon1" />
     <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=icon1" />
-    <link rel="stylesheet" href="assets/styles.css?v=h91abda6ac8b3" />
+    <link rel="stylesheet" href="assets/styles.css?v=h44893f117df6" />
   </head>
   <body>
     <main class="layout">
@@ -49,9 +49,11 @@
           </div>
 
           <form class="query-trigger query-search-form" id="querySearchForm" role="search">
-            <svg class="query-trigger-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" />
-            </svg>
+            <button class="query-submit-button" type="submit" aria-label="搜索">
+              <svg class="query-trigger-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m21 21-5.2-5.2M10.8 18a7.2 7.2 0 1 1 0-14.4 7.2 7.2 0 0 1 0 14.4Z" />
+              </svg>
+            </button>
             <label class="sr-only" for="queryInput">搜索歌曲、歌手、VTuber或视频</label>
             <input id="queryInput" type="search" autocomplete="off" placeholder="搜索歌曲、歌手、VTuber或视频" />
             <button class="icon-button clear-query-button" id="clearQueryButton" type="button" aria-label="清空搜索词">
@@ -250,9 +252,9 @@
     </button>
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="assets/blocked-vtuber-meta.js?v=h91abda6ac8b3" defer></script>
-    <script src="assets/frontend-utils.js?v=h91abda6ac8b3" defer></script>
-    <script src="assets/ranking-utils.js?v=h91abda6ac8b3" defer></script>
-    <script src="assets/app.js?v=h91abda6ac8b3" defer></script>
+    <script src="assets/blocked-vtuber-meta.js?v=h44893f117df6" defer></script>
+    <script src="assets/frontend-utils.js?v=h44893f117df6" defer></script>
+    <script src="assets/ranking-utils.js?v=h44893f117df6" defer></script>
+    <script src="assets/app.js?v=h44893f117df6" defer></script>
   </body>
 </html>

@@ -24,9 +24,10 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>频道<\/span>/u);
   assert.match(indexSource, /class="query-field-menu-panel"[\s\S]*name="searchField" value="channel"[\s\S]*name="searchField" value="video"[\s\S]*全不选时搜索全部字段/u);
   assert.doesNotMatch(indexSource, /id="searchSuggestions"/u);
-  assert.match(indexSource, /id="queryInput" type="search"[\s\S]*id="clearQueryButton"/u);
+  assert.match(indexSource, /class="query-submit-button" type="submit" aria-label="搜索"[\s\S]*id="queryInput" type="search"[\s\S]*id="clearQueryButton"/u);
   assert.match(cssSource, /\.query-search-form input\[type="search"\]\s*\{[\s\S]*-webkit-appearance: none;[\s\S]*appearance: textfield;/u);
   assert.match(cssSource, /\.query-search-form input\[type="search"\]::-webkit-search-cancel-button,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-decoration,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-results-button,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-results-decoration\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /\.query-submit-button\s*\{[\s\S]*cursor: pointer;/u);
   assert.match(cssSource, /\.query-search-form \.clear-query-button\s*\{[\s\S]*position: static;[\s\S]*width: 28px;[\s\S]*height: 28px;/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
