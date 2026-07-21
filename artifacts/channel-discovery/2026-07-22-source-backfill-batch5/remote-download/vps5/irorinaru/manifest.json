@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-21T21:42:22.357Z",
+  "channelUrl": "https://www.youtube.com/@irorinaru/streams",
+  "singerName": "irorinaru",
+  "keywords": [
+    "フルート",
+    "生演奏",
+    "live",
+    "ライブ",
+    "クラリネット",
+    "piano streaming",
+    "ピアノ演奏",
+    "歌",
+    "歌枠",
+    "弾き語",
+    "karaoke",
+    "歌ってみた",
+    "3D Live"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@irorinaru/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/@irorinaru/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 100,
+  "maxCandidates": 0,
+  "maxInspect": 1000,
+  "inspectShardIndex": 0,
+  "inspectShardCount": 1,
+  "candidateOnly": false,
+  "candidateCount": 42,
+  "inspectedInLatestRun": 42,
+  "usableVideoCount": 4,
+  "occurrenceCount": 15,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@irorinaru/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 7,
+      "rawItemCount": 201,
+      "candidateCount": 41,
+      "continuationRounds": 6,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1183638
+    },
+    {
+      "pageUrl": "https://www.youtube.com/@irorinaru/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 2,
+      "candidateCount": 1,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 800854
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 1984492,
+    "totalElapsedMs": 347,
+    "statuses": {
+      "200": 2
+    }
+  }
+}
