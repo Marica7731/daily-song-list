@@ -5,6 +5,7 @@ const test = require("node:test");
 
 const appSource = fs.readFileSync(path.join(__dirname, "..", "assets", "app.js"), "utf8");
 const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const stylesSource = fs.readFileSync(path.join(__dirname, "..", "assets", "styles.css"), "utf8");
 
 test("initial app load does not fetch full latest or rank diffs in init", () => {
   const initBody = functionBody("async function init");
@@ -220,7 +221,7 @@ test("delayed trend diffs update visible badges without rerendering the list for
   assert.match(normalizeBody, /state\.trend = "all"/u);
   assert.match(normalizeBody, /state\.queryDraft = \{ \.\.\.state\.queryDraft, trend: "all" \}/u);
   const availabilityBody = functionBody("function updateQueryAvailability");
-  assert.match(availabilityBody, /els\.trendFilterGroup\.hidden = state\.runtimeApi\.available/u);
+  assert.match(availabilityBody, /els\.trendFilterGroup\.hidden = apiMode/u);
   assert.doesNotMatch(availabilityBody, /API模式暂不支持趋势筛选/u);
   assert.match(functionBody("async function loadRankDiffForRange"), /if \(state\.runtimeApi\.available\) return false/u);
   assert.match(functionBody("async function filterRequestIndexEntries"), /!state\.runtimeApi\.available && filters\.trend/u);
@@ -262,7 +263,7 @@ test("explicit search scopes query text by current view", () => {
   const scopedSearchBody = functionBody("function occurrenceSearchTextForCurrentView");
   assert.match(scopedSearchBody, /state\.view === "artistRank"[\s\S]*artistOccurrenceSearchText\(occurrence\)/u);
   assert.match(scopedSearchBody, /state\.view === "vtuberRank"[\s\S]*vtuberOccurrenceSearchText\(occurrence\)/u);
-  assert.match(scopedSearchBody, /state\.view === "songRank" \|\| state\.view === "songAz"[\s\S]*songOccurrenceSearchText\(occurrence\)/u);
+  assert.match(scopedSearchBody, /state\.view === "songRank" \|\| state\.view === "songAz"[\s\S]*songOccurrenceSearchText\(occurrence, state\.searchFields \|\| DEFAULT_SEARCH_FIELDS\)/u);
   assert.match(scopedSearchBody, /return occurrence\?\.searchText \|\| ""/u);
   assert.match(functionBody("function queryDraftOccurrences"), /songOccurrenceSearchText\(occurrence, draft\.searchFields\)\.includes\(filterKey\)/u);
 
@@ -325,6 +326,76 @@ test("query overlay opens before suggestions and result preview work", () => {
   assert.match(functionBody("function queryResultCountKey"), /draft\.searchScope \|\| "all"/u);
   assert.match(functionBody("function queryResultCountKey"), /normalizedSearchFieldKey\(draft\.searchFields \|\| DEFAULT_SEARCH_FIELDS\)/u);
   assert.match(functionBody("function createRangeCacheObject"), /queryIndexes:[\s\S]*queryIndexLoads:[\s\S]*queryResultCountCache:/u);
+});
+
+test("top search stays directly usable on mobile and only focuses empty icon submits", () => {
+  const bindBody = functionBody("function bindQueryOverlayEvents");
+  assert.match(bindBody, /submittedBySearchButton/u);
+  assert.match(bindBody, /!cleanText\(els\.queryInput\?\.value\)/u);
+  assert.match(bindBody, /focusWithoutScrolling\(els\.queryInput\)/u);
+  assert.match(bindBody, /applyQueryDraft\(\)/u);
+  assert.doesNotMatch(bindBody, /els\.querySearchForm\?\.addEventListener\("click"[\s\S]*openQueryOverlay/u);
+});
+
+test("API mode hides unsupported query filters while preserving field toggles", () => {
+  const availabilityBody = functionBody("function updateQueryAvailability");
+  assert.match(availabilityBody, /const apiMode = Boolean\(state\.runtimeApi\.available\)/u);
+  assert.match(availabilityBody, /els\.displayFilterGroup\.hidden = apiMode \|\| state\.view === "videos"/u);
+  assert.match(availabilityBody, /els\.trendFilterGroup\.hidden = apiMode/u);
+  assert.match(availabilityBody, /els\.minCountFilterGroup\.hidden = apiMode \|\| videoLikeView/u);
+  assert.match(availabilityBody, /els\.queryHistorySection\.hidden = apiMode/u);
+  assert.match(functionBody("function activeFilterCount"), /return activeQueryItems\(makeQueryDraftFromState\(\)\)\.length/u);
+  assert.match(functionBody("function activeQueryItems"), /if \(!state\.runtimeApi\.available\) return items/u);
+  assert.match(functionBody("function activeQueryItems"), /item\.key !== "trend" && item\.key !== "minCount"/u);
+  assert.match(indexSource, /value="title" checked[\s\S]*value="artist" checked[\s\S]*value="channel"[\s\S]*value="video"/u);
+  assert.match(indexSource, /全不选时搜索全部字段/u);
+  assert.match(functionBody("function normalizedSearchFieldKey"), /return normalized\.length \? normalized\.join\(","\) : "all"/u);
+});
+
+test("top filter chips and search box avoid duplicate clear controls and empty columns", () => {
+  assert.match(functionBody("function syncQueryClearButton"), /els\.querySearchForm\?\.classList\.toggle\("has-query-text", hasQuery\)/u);
+  assert.match(stylesSource, /\.query-search-form \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) auto;/u);
+  assert.match(stylesSource, /\.query-search-form\.has-query-text \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) auto auto;/u);
+  assert.match(stylesSource, /\.query-search-form input\[type="search"\]::-ms-clear/u);
+  assert.match(stylesSource, /\.active-query-chip-close \{[\s\S]*flex: 0 0 auto;/u);
+  assert.match(stylesSource, /\.query-count \{[\s\S]*height: 14px;/u);
+  assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-form\.query-trigger \{[\s\S]*grid-template-columns: 24px minmax\(0, 1fr\) 24px;/u);
+  assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-form\.query-trigger\.has-query-text \{[\s\S]*grid-template-columns: 24px minmax\(0, 1fr\) 24px 24px;/u);
+});
+
+test("source and video links handle plain left clicks without stealing modified clicks", () => {
+  const handlerBody = functionBody("function handleContentLinkNavigation");
+  assert.match(handlerBody, /event\.button !== 0/u);
+  assert.match(handlerBody, /event\.metaKey \|\| event\.ctrlKey \|\| event\.shiftKey \|\| event\.altKey/u);
+  assert.match(handlerBody, /isSourceOrVideoContentLink\(link\)/u);
+  assert.match(handlerBody, /window\.open\(link\.href, "_blank", "noopener,noreferrer"\)/u);
+  assert.match(functionBody("function isSourceOrVideoContentLink"), /source-inline-strip, \.source-drawer, \.inline-source, \.video-card/u);
+  assert.match(functionBody("function bindEvents"), /if \(link && handleContentLinkNavigation\(event, link\)\) return/u);
+});
+
+test("copy setlist resolves same-video songs and emits timestamp link rows", () => {
+  const copyBody = functionBody("async function copyVideoSetlist");
+  assert.match(copyBody, /buildSetlistLinkText\(fullItem/u);
+  assert.match(copyBody, /_setlistResolution === "visible"/u);
+  assert.match(copyBody, /来源详情不足/u);
+
+  const textBody = functionBody("function buildSetlistLinkText");
+  assert.match(textBody, /normalizeSetlistSongs/u);
+  assert.match(textBody, /youtubeTimeUrl\(videoId, song\.seconds\)/u);
+
+  const resolveBody = functionBody("async function resolveFullVideoSetlistItem");
+  assert.match(resolveBody, /resolveVisibleVideoSetlistItem\(item, videoId, options\)/u);
+  assert.match(resolveBody, /requestApiViewPage\(request, canonicalRangeId\(state\.range\)\)/u);
+  assert.match(resolveBody, /_setlistResolution: "api"/u);
+
+  const visibleBody = functionBody("function resolveVisibleVideoSetlistItem");
+  assert.match(visibleBody, /options\.button\?\._sourceOccurrences/u);
+  assert.match(visibleBody, /collectKnownVideoSetlistSongs\(videoId/u);
+  assert.match(visibleBody, /_setlistResolution: songs\.length > baseCount \? "visible"/u);
+
+  assert.match(functionBody("function collectKnownVideoSetlistSongs"), /collectKnownVideoSetlistSongsFromDom\(videoId, addOccurrence\)/u);
+  assert.match(functionBody("function collectKnownVideoSetlistSongs"), /collectKnownVideoSetlistSongsFromCache\(videoId, addOccurrence\)/u);
+  assert.match(functionBody("function hydrateSetlistVideoItem"), /_sourceOccurrences: group\?\.occurrences \|\| \[\]/u);
 });
 
 test("range prefetch stays fast and does not use an 8 second delay", () => {

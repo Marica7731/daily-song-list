@@ -363,8 +363,10 @@ const els = {
   trendFilterGroup: document.querySelector("#trendFilterGroup"),
   trendFilterSelect: document.querySelector("#trendFilterSelect"),
   trendFilterHint: document.querySelector("#trendFilterHint"),
+  minCountFilterGroup: document.querySelector("#minCountFilterGroup"),
   minCountSelect: document.querySelector("#minCountSelect"),
   queryPageSizeSelect: document.querySelector("#queryPageSizeSelect"),
+  queryHistorySection: document.querySelector(".query-history-section"),
   querySnapshotDateSelect: document.querySelector("#querySnapshotDateSelect"),
   querySnapshotSelect: document.querySelector("#querySnapshotSelect"),
   querySnapshotSummary: document.querySelector("#querySnapshotSummary"),
@@ -560,12 +562,13 @@ function bindEvents() {
 
   els.content.addEventListener("click", (event) => {
     const link = event.target.closest("a[href]");
+    if (link && handleContentLinkNavigation(event, link)) return;
 
     const copySetlist = event.target.closest("[data-copy-setlist]");
     if (copySetlist) {
       event.preventDefault();
       event.stopPropagation();
-      copyVideoSetlist(copySetlist._videoItem).catch((error) => showToast(`复制失败：${error.message}`));
+      copyVideoSetlist(copySetlist._videoItem, { button: copySetlist }).catch((error) => showToast(`复制失败：${error.message}`));
       return;
     }
 
@@ -734,9 +737,35 @@ function switchView(nextView, options = {}) {
   restoreViewPosition();
 }
 
+function handleContentLinkNavigation(event, link) {
+  if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
+  if (!isSourceOrVideoContentLink(link)) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  const target = link.target || "_self";
+  if (target === "_blank") {
+    window.open(link.href, "_blank", "noopener,noreferrer");
+  } else {
+    window.location.assign(link.href);
+  }
+  return true;
+}
+
+function isSourceOrVideoContentLink(link) {
+  return Boolean(
+    link.closest(".source-inline-strip, .source-drawer, .inline-source, .video-card") ||
+      link.matches(".source-link, .source-video-title, .source-video-thumb-link, .source-inline-channel, .video-title, .thumb-link, .video-song-link"),
+  );
+}
+
 function bindQueryOverlayEvents() {
   els.querySearchForm?.addEventListener("submit", (event) => {
     event.preventDefault();
+    const submittedBySearchButton = event.submitter?.classList?.contains("query-submit-button");
+    if (submittedBySearchButton && !cleanText(els.queryInput?.value) && document.activeElement !== els.queryInput) {
+      focusWithoutScrolling(els.queryInput);
+      return;
+    }
     applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
   });
   els.queryTrigger?.addEventListener("click", () => openQueryOverlay(els.queryTrigger));
@@ -1204,6 +1233,7 @@ function syncQueryClearButton(draft) {
   const hasQuery = Boolean(String(draft?.q || "").trim());
   els.clearQueryButton.hidden = !hasQuery;
   els.clearQueryButton.tabIndex = hasQuery ? 0 : -1;
+  els.querySearchForm?.classList.toggle("has-query-text", hasQuery);
 }
 
 function syncDraftSnapshotTimes(dateValue, selectedPath = "") {
@@ -1361,16 +1391,19 @@ function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromS
   const rankView = state.view === "songRank" || state.view === "artistRank";
   const hideUnknownField = els.hideUnknownToggle?.closest(".query-toggle");
   const videoLikeView = state.view === "videos";
+  const apiMode = Boolean(state.runtimeApi.available);
   if (els.metricFilterGroup) els.metricFilterGroup.hidden = videoLikeView;
   syncQueryMetricOptions();
-  if (els.displayFilterGroup) els.displayFilterGroup.hidden = state.view === "videos";
+  if (els.displayFilterGroup) els.displayFilterGroup.hidden = apiMode || state.view === "videos";
   if (hideUnknownField) hideUnknownField.hidden = state.view === "artistRank" || state.view === "vtuberRank";
   if (els.hideUnknownToggle) els.hideUnknownToggle.disabled = state.view === "artistRank" || state.view === "vtuberRank";
-  if (els.trendFilterGroup) els.trendFilterGroup.hidden = state.runtimeApi.available || state.view === "songAz" || state.view === "vtuberRank" || videoLikeView;
-  if (els.minCountSelect?.closest(".query-field")) els.minCountSelect.closest(".query-field").hidden = videoLikeView;
+  if (els.trendFilterGroup) els.trendFilterGroup.hidden = apiMode || state.view === "songAz" || state.view === "vtuberRank" || videoLikeView;
+  if (els.minCountFilterGroup) els.minCountFilterGroup.hidden = apiMode || videoLikeView;
+  else if (els.minCountSelect?.closest(".query-field")) els.minCountSelect.closest(".query-field").hidden = apiMode || videoLikeView;
+  if (els.queryHistorySection) els.queryHistorySection.hidden = apiMode;
   if (els.trendFilterSelect) {
     const isLatestDraft = draft.snapshotPath === SNAPSHOT_LATEST_PATH;
-    const disabled = state.runtimeApi.available || !rankView || !isLatestDraft || state.rankDiffLoads.has(state.range) || state.rankDiffs[state.range] === null;
+    const disabled = apiMode || !rankView || !isLatestDraft || state.rankDiffLoads.has(state.range) || state.rankDiffs[state.range] === null;
     els.trendFilterSelect.disabled = disabled;
     if (els.trendFilterHint) {
       els.trendFilterHint.textContent = state.runtimeApi.available
@@ -1423,10 +1456,7 @@ function syncBottomNavFromState() {
 }
 
 function activeFilterCount() {
-  return window.FrontendUtils.activeQueryConditionCount(makeQueryDraftFromState(), {
-    ...queryDraftOptions(),
-    view: state.view,
-  });
+  return activeQueryItems(makeQueryDraftFromState()).length;
 }
 
 function syncQueryTriggerState() {
@@ -1491,11 +1521,13 @@ function renderActiveQueryStrip() {
 }
 
 function activeQueryItems(draft) {
-  return window.FrontendUtils.activeQueryConditionItems(draft, {
+  const items = window.FrontendUtils.activeQueryConditionItems(draft, {
     ...queryDraftOptions(),
     view: state.view,
     trendLabels: TREND_FILTERS,
   });
+  if (!state.runtimeApi.available) return items;
+  return items.filter((item) => item.key !== "trend" && item.key !== "minCount");
 }
 
 function clearQueryCondition(key) {
@@ -6602,7 +6634,7 @@ function renderSourceInlineStrip(model, options = {}) {
 
 function renderSourceInlineGroup(group, options = {}) {
   const item = group.item || group.occurrences?.[0]?.item || {};
-  const setlistItem = window.FrontendUtils.sourceGroupSetlistItem(item, group);
+  const setlistItem = window.FrontendUtils.sourceGroupSetlistItem(hydrateSetlistVideoItem(item, group), group);
   const firstOccurrence = group.occurrences?.[0];
   const videoId = item.videoId || group.videoId || "";
   const firstSeconds = firstOccurrence?.song?.seconds ?? group.firstSeconds ?? 0;
@@ -7327,6 +7359,7 @@ function hydrateSetlistVideoItem(videoItem = {}, group = {}) {
       ...videoItem,
       songs: knownSongs,
       _allSongs: knownSongs,
+      _sourceOccurrences: group?.occurrences || [],
     };
   }
   const groupedSongs = Array.isArray(group?.occurrences)
@@ -7337,9 +7370,10 @@ function hydrateSetlistVideoItem(videoItem = {}, group = {}) {
       ...videoItem,
       songs: groupedSongs,
       _allSongs: groupedSongs,
+      _sourceOccurrences: group?.occurrences || [],
     };
   }
-  return videoItem;
+  return { ...videoItem, _sourceOccurrences: group?.occurrences || [] };
 }
 
 function findVideoItemById(videoId) {
@@ -8311,9 +8345,9 @@ function renderTrendBadge(trend) {
   return badge;
 }
 
-async function copyVideoSetlist(item) {
-  const fullItem = await resolveFullVideoSetlistItem(item);
-  const text = window.FrontendUtils.buildSetlistText(fullItem, {
+async function copyVideoSetlist(item, options = {}) {
+  const fullItem = await resolveFullVideoSetlistItem(item, options);
+  const text = buildSetlistLinkText(fullItem, {
     isUnknownArtistName: window.RankingUtils.isUnknownArtistName,
   });
   if (!text) {
@@ -8322,39 +8356,137 @@ async function copyVideoSetlist(item) {
   }
   await writeClipboardText(text);
   const count = text.split("\n").filter(Boolean).length;
+  if (fullItem._setlistResolution === "visible") {
+    showToast(`已复制可见同场歌单 · ${count}首（来源详情不足）`);
+    return;
+  }
   showToast(`已复制整场歌单 · ${count}首`);
 }
 
-async function resolveFullVideoSetlistItem(item) {
-  const songs = Array.isArray(item?._allSongs) ? item._allSongs : item?.songs;
-  if (Array.isArray(songs) && songs.length > 1) return item;
+function buildSetlistLinkText(item, options = {}) {
+  const songs = window.FrontendUtils.normalizeSetlistSongs(item?._allSongs || item?.songs || [], options);
   const videoId = cleanText(item?.videoId);
-  if (!videoId || !state.runtimeApi.available) return item;
-  try {
-    const request = {
-      view: "videos",
-      rankMetric: "occurrences",
-      page: 1,
-      pageSize: 5,
-      filters: {
-        q: videoId,
-        searchScope: "all",
-        searchFields: ["video"],
-        minCount: 1,
-        trend: "all",
-      },
-      signal: null,
-    };
-    const result = await requestApiViewPage(request, canonicalRangeId(state.range));
-    const match = (result.records || []).find((record) => cleanText(record.videoId) === videoId);
-    const matchSongs = Array.isArray(match?._allSongs) ? match._allSongs : match?.songs;
-    if (match && Array.isArray(matchSongs) && matchSongs.length > (Array.isArray(songs) ? songs.length : 0)) {
-      return { ...item, ...match, songs: matchSongs, _allSongs: matchSongs };
+  return songs
+    .map((song, index) => {
+      const ordinal = String(index + 1).padStart(2, "0");
+      const base = `${window.FrontendUtils.formatSetlistTime(song.seconds)} ${ordinal}. ${song.title}`;
+      const label = song.artist ? `${base} - ${song.artist}` : base;
+      const url = videoId ? youtubeTimeUrl(videoId, song.seconds) : "";
+      return [label, url].filter(Boolean).join(" ");
+    })
+    .join("\n");
+}
+
+async function resolveFullVideoSetlistItem(item, options = {}) {
+  const videoId = cleanText(item?.videoId);
+  let best = resolveVisibleVideoSetlistItem(item, videoId, options);
+  if (videoId && state.runtimeApi.available) {
+    try {
+      const request = {
+        view: "videos",
+        rankMetric: "occurrences",
+        page: 1,
+        pageSize: 5,
+        filters: {
+          q: videoId,
+          searchScope: "all",
+          searchFields: ["video"],
+          minCount: 1,
+          trend: "all",
+        },
+        signal: null,
+      };
+      const result = await requestApiViewPage(request, canonicalRangeId(state.range));
+      const match = (result.records || []).find((record) => cleanText(record.videoId) === videoId);
+      const matchSongs = Array.isArray(match?._allSongs) ? match._allSongs : match?.songs;
+      if (match && Array.isArray(matchSongs) && matchSongs.length > setlistSongCount(best)) {
+        best = { ...best, ...match, songs: matchSongs, _allSongs: matchSongs, _setlistResolution: "api" };
+      }
+    } catch (error) {
+      console.warn("full video setlist lookup failed", error);
     }
-  } catch (error) {
-    console.warn("full video setlist lookup failed", error);
   }
-  return item;
+  return best;
+}
+
+function resolveVisibleVideoSetlistItem(item = {}, videoId = cleanText(item?.videoId), options = {}) {
+  if (!videoId) return item || {};
+  const known = findVideoItemById(videoId) || {};
+  const sourceOccurrences = options.button?._sourceOccurrences || item?._sourceOccurrences || [];
+  const songs = collectKnownVideoSetlistSongs(videoId, [item, known], sourceOccurrences);
+  if (!songs.length) return item || {};
+  const baseCount = setlistSongCount(item);
+  return {
+    ...known,
+    ...item,
+    videoId,
+    songs,
+    _allSongs: songs,
+    _setlistResolution: songs.length > baseCount ? "visible" : item?._setlistResolution || "",
+  };
+}
+
+function collectKnownVideoSetlistSongs(videoId, items = [], occurrences = []) {
+  const songs = [];
+  const addSong = (song) => {
+    if (song) songs.push(song);
+  };
+  const addItem = (item) => {
+    for (const song of item?._allSongs || item?.songs || []) addSong(song);
+  };
+  const addOccurrence = (occurrence) => {
+    if (cleanText(occurrence?.item?.videoId || occurrence?.videoId) === videoId) addSong(occurrence?.song);
+  };
+  for (const item of items) addItem(item);
+  for (const occurrence of occurrences || []) addOccurrence(occurrence);
+  collectKnownVideoSetlistSongsFromPayload(videoId, addItem, addOccurrence);
+  collectKnownVideoSetlistSongsFromDom(videoId, addOccurrence);
+  collectKnownVideoSetlistSongsFromCache(videoId, addOccurrence);
+  return window.FrontendUtils.normalizeSetlistSongs(songs, {
+    isUnknownArtistName: window.RankingUtils.isUnknownArtistName,
+  });
+}
+
+function collectKnownVideoSetlistSongsFromPayload(videoId, addItem, addOccurrence) {
+  const stack = Array.isArray(state.payload?.items) ? [...state.payload.items] : [];
+  while (stack.length) {
+    const item = stack.pop();
+    if (!item || typeof item !== "object") continue;
+    if (cleanText(item.videoId) === videoId) addItem(item);
+    if (Array.isArray(item.occurrences)) {
+      for (const occurrence of item.occurrences) addOccurrence(occurrence);
+    }
+    for (const key of ["items", "videos", "sources", "records"]) {
+      if (Array.isArray(item[key])) stack.push(...item[key]);
+    }
+  }
+}
+
+function collectKnownVideoSetlistSongsFromDom(videoId, addOccurrence) {
+  if (!els.content) return;
+  const containers = els.content.querySelectorAll(".rank-row, .index-row, .source-drawer, .artist-song-sources");
+  for (const container of containers) {
+    for (const key of ["_sourceDetailOccurrences", "_sourceOccurrences", "_songSourceOccurrences"]) {
+      for (const occurrence of container[key] || []) addOccurrence(occurrence);
+    }
+  }
+}
+
+function collectKnownVideoSetlistSongsFromCache(videoId, addOccurrence) {
+  for (const value of state.sourceDetailCache.values()) {
+    if (Array.isArray(value)) {
+      for (const occurrence of value) addOccurrence(occurrence);
+    } else if (Array.isArray(value?.completeOccurrences)) {
+      for (const occurrence of value.completeOccurrences) addOccurrence(occurrence);
+    } else if (Array.isArray(value?.occurrences)) {
+      for (const occurrence of value.occurrences) addOccurrence(occurrence);
+    }
+  }
+}
+
+function setlistSongCount(item) {
+  const songs = Array.isArray(item?._allSongs) ? item._allSongs : item?.songs;
+  return Array.isArray(songs) ? songs.length : 0;
 }
 
 async function copySongSourceLinks(occurrences) {
