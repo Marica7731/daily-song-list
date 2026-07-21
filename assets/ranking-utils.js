@@ -260,16 +260,18 @@
 
   function mergePartialSameTitleArtistVariants(recordsByKey) {
     let changed = true;
+    const caches = createPartialArtistMergeCaches();
     while (changed) {
       changed = false;
       const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
       for (const record of records) {
         if (recordsByKey.get(record.artistKey) !== record) continue;
-        const target = selectPartialArtistTarget(record, recordsByKey, { requireSharedSong: false });
+        const target = selectPartialArtistTarget(record, recordsByKey, { requireSharedSong: false, ...caches });
         if (!target) continue;
         const [winner, loser] = compareRecordDominance(target, record) <= 0 ? [target, record] : [record, target];
         if (winner === loser) continue;
         mergeRecord(winner, loser);
+        invalidatePartialArtistMergeCache(caches, winner);
         recordsByKey.delete(loser.artistKey);
         changed = true;
         break;
@@ -279,16 +281,18 @@
 
   function mergePartialArtistRankingVariants(recordsByKey) {
     let changed = true;
+    const caches = createPartialArtistMergeCaches();
     while (changed) {
       changed = false;
       const records = Array.from(recordsByKey.values()).sort(compareRecordDominance);
       for (const record of records) {
         if (recordsByKey.get(record.key) !== record) continue;
-        const target = selectPartialArtistTarget(record, recordsByKey, { requireSharedSong: true });
+        const target = selectPartialArtistTarget(record, recordsByKey, { requireSharedSong: true, ...caches });
         if (!target) continue;
         const [winner, loser] = compareRecordDominance(target, record) <= 0 ? [target, record] : [record, target];
         if (winner === loser) continue;
         mergeArtistRankRecord(winner, loser);
+        invalidatePartialArtistMergeCache(caches, winner);
         recordsByKey.delete(loser.key);
         changed = true;
         break;
@@ -300,16 +304,16 @@
     const matches = [];
     for (const candidate of recordsByKey.values()) {
       if (candidate === record) continue;
-      if (options.requireSharedSong && !artistRecordsShareSong(record, candidate)) continue;
-      if (partialArtistIdentityMatch(record, candidate)) matches.push(candidate);
+      if (options.requireSharedSong && !artistRecordsShareSong(record, candidate, options)) continue;
+      if (partialArtistIdentityMatch(record, candidate, options)) matches.push(candidate);
     }
     if (matches.length !== 1) return null;
     return matches[0];
   }
 
-  function partialArtistIdentityMatch(a, b) {
-    const aNames = partialArtistRecordNames(a);
-    const bNames = partialArtistRecordNames(b);
+  function partialArtistIdentityMatch(a, b, options = {}) {
+    const aNames = partialArtistRecordNamesCached(a, options);
+    const bNames = partialArtistRecordNamesCached(b, options);
     for (const left of aNames) {
       for (const right of bNames) {
         if (isConservativePartialArtistNameMatch(left, right)) return true;
@@ -364,10 +368,48 @@
     return uniqueStrings(names);
   }
 
-  function artistRecordsShareSong(a, b) {
-    const aKeys = new Set(countMapNames(a.songs).map(normalizeSongTitleKey).filter(Boolean));
+  function createPartialArtistMergeCaches() {
+    return {
+      partialNames: new WeakMap(),
+      songKeys: new WeakMap(),
+    };
+  }
+
+  function invalidatePartialArtistMergeCache(caches, record) {
+    caches?.partialNames?.delete?.(record);
+    caches?.songKeys?.delete?.(record);
+  }
+
+  function partialArtistRecordNamesCached(record, options = {}) {
+    const cache = options.partialNames;
+    if (!cache) return partialArtistRecordNames(record);
+    let names = cache.get(record);
+    if (!names) {
+      names = partialArtistRecordNames(record);
+      cache.set(record, names);
+    }
+    return names;
+  }
+
+  function artistSongKeySetCached(record, options = {}) {
+    const cache = options.songKeys;
+    if (!cache) return new Set(countMapNames(record.songs).map(normalizeSongTitleKey).filter(Boolean));
+    let keys = cache.get(record);
+    if (!keys) {
+      keys = new Set(countMapNames(record.songs).map(normalizeSongTitleKey).filter(Boolean));
+      cache.set(record, keys);
+    }
+    return keys;
+  }
+
+  function artistRecordsShareSong(a, b, options = {}) {
+    const aKeys = artistSongKeySetCached(a, options);
     if (!aKeys.size) return false;
-    return countMapNames(b.songs).some((name) => aKeys.has(normalizeSongTitleKey(name)));
+    const bKeys = artistSongKeySetCached(b, options);
+    for (const key of bKeys) {
+      if (aKeys.has(key)) return true;
+    }
+    return false;
   }
 
   function hasAnyArtistIdentityAnnotation(record) {
