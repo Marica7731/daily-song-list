@@ -355,7 +355,15 @@ async function collectCandidates(now) {
   const byVideoId = new Map();
   const searchSummaries = [];
   for (const search of buildSearchSources()) {
-    const result = await fetchSearchSource(search);
+    let result;
+    try {
+      result = await fetchSearchSource(search);
+    } catch (error) {
+      const summary = createFailedSearchSummary(search, error);
+      searchSummaries.push(summary);
+      console.warn(`[search:${search.sourceGroup}] ${search.keyword} failed=${summary.error}`);
+      continue;
+    }
     searchSummaries.push(result.summary);
     for (const item of result.items) {
       mergeCandidate(byVideoId, item, search, nowMs);
@@ -394,6 +402,26 @@ function buildSearchSources() {
       url: keyword.urls[sourceGroup],
     })),
   );
+}
+
+function createFailedSearchSummary(search, error) {
+  return {
+    sourceGroup: search.sourceGroup,
+    sourceLabel: search.sourceLabel,
+    keyword: search.keyword,
+    keywordKey: search.keywordKey,
+    url: search.url,
+    itemCount: 0,
+    limit: SEARCH_LIMIT,
+    continuationRounds: 0,
+    reachedEnd: false,
+    truncatedByLimit: false,
+    skippedBlacklistedSource: 0,
+    skippedActiveLiveOrUpcoming: 0,
+    failed: true,
+    error: error?.message || String(error),
+    collectedAt: new Date().toISOString(),
+  };
 }
 
 async function fetchSearchSource(search) {
@@ -2833,7 +2861,13 @@ async function fetchWithRetry(url, options) {
     if (requestLimiter.shouldStop()) {
       throw new RateLimitAbortError(`YouTube HTTP 429 limit reached (${requestLimiter.error429Count}/${MAX_429_ERRORS}); stopped further inspections`);
     }
-    response = await fetch(url, options);
+    try {
+      response = await fetch(url, options);
+    } catch (error) {
+      if (attempt >= FETCH_RETRIES) throw error;
+      await delay(networkRetryDelayMs(attempt));
+      continue;
+    }
     if (response.status === 429) {
       requestLimiter.note429();
       if (requestLimiter.shouldStop()) {
@@ -2846,6 +2880,10 @@ async function fetchWithRetry(url, options) {
     await delay(waitMs);
   }
   return response;
+}
+
+function networkRetryDelayMs(attempt, random = Math.random, retryJitterMs = RETRY_JITTER_MS) {
+  return 750 * attempt * attempt + randomJitterMs(retryJitterMs, random);
 }
 
 function isRetryableHttpStatus(status) {
@@ -3073,6 +3111,7 @@ module.exports = {
   filterBlockedVideos,
   filterArtistRichMixedSourceSongs,
   fetchMygitTodaySnapshotSource,
+  fetchWithRetry,
   fetchVideoSongList,
   hasMonthlyDiscoverySource,
   isBlockedSource,
@@ -3081,6 +3120,7 @@ module.exports = {
   mergeFetchedAndCarriedVideos,
   matchKnownTitleArtistFromVideoTitle,
   normalizeMygitTodaySnapshotItem,
+  networkRetryDelayMs,
   parseRetryAfterMs,
   parseOptionalLimit,
   randomJitterMs,

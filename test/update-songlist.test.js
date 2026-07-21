@@ -19,11 +19,13 @@ const {
   extractMygitTodaySnapshotItems,
   filterArtistRichMixedSourceSongs,
   fetchMygitTodaySnapshotSource,
+  fetchWithRetry,
   hasMonthlyDiscoverySource,
   isBlockedSource,
   mergeInspectionCache,
   mergeFetchedAndCarriedVideos,
   matchKnownTitleArtistFromVideoTitle,
+  networkRetryDelayMs,
   parseOptionalLimit,
   parseRetryAfterMs,
   randomJitterMs,
@@ -910,6 +912,35 @@ test("429 retry delay honors cooldown and Retry-After headers", () => {
   assert.equal(retryDelayMs(response(503, "Sun, 12 Jul 2026 00:00:05 GMT"), 1, nowMs), 5000);
   assert.equal(retryDelayMs(response(500, ""), 2, nowMs), 3000);
   assert.equal(retryDelayMs(response(500, ""), 2, nowMs, () => 0.5, 500), 3250);
+});
+
+test("network fetch errors are retried before failing the update", async () => {
+  const originalFetch = global.fetch;
+  let calls = 0;
+  global.fetch = async () => {
+    calls += 1;
+    if (calls === 1) throw new TypeError("fetch failed");
+    return {
+      ok: true,
+      status: 200,
+      headers: { get: () => "" },
+      async text() {
+        return "ok";
+      },
+    };
+  };
+
+  try {
+    const response = await fetchWithRetry("https://example.invalid/search", {});
+    assert.equal(response.ok, true);
+    assert.equal(calls, 2);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test("network retry delay is deterministic when the random source is injected", () => {
+  assert.equal(networkRetryDelayMs(2, () => 0.5, 500), 3250);
 });
 
 test("random jitter is deterministic when the random source is injected", () => {
