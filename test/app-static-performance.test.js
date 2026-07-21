@@ -189,7 +189,7 @@ test("delayed trend diffs update visible badges without rerendering the list for
   const normalizeBody = functionBody("function normalizeTrendStateForRuntime");
   assert.match(normalizeBody, /state\.trend = "all"/u);
   assert.match(normalizeBody, /state\.queryDraft = \{ \.\.\.state\.queryDraft, trend: "all" \}/u);
-  assert.match(functionBody("function updateQueryAvailability"), /API模式暂不支持趋势筛选/u);
+  assert.doesNotMatch(functionBody("function updateQueryAvailability"), /API模式暂不支持趋势筛选/u);
   assert.match(functionBody("async function loadRankDiffForRange"), /if \(state\.runtimeApi\.available\) return false/u);
   assert.match(functionBody("async function filterRequestIndexEntries"), /!state\.runtimeApi\.available && filters\.trend/u);
 
@@ -229,53 +229,51 @@ test("explicit search keeps song source context while artist and VTuber views us
 
   const scopedSearchBody = functionBody("function occurrenceSearchTextForCurrentView");
   assert.doesNotMatch(scopedSearchBody, /songOccurrenceSearchText/u);
-  assert.match(scopedSearchBody, /state\.view === "artistRank"[\s\S]*artistOccurrenceSearchText\(occurrence\)/u);
-  assert.match(scopedSearchBody, /state\.view === "vtuberRank"[\s\S]*vtuberOccurrenceSearchText\(occurrence\)/u);
-  assert.match(scopedSearchBody, /return occurrence\?\.searchText \|\| ""/u);
+  assert.match(scopedSearchBody, /occurrenceSearchTextForFields\(occurrence, state\.searchFields, state\.view\)/u);
+  assert.match(functionBody("function occurrenceSearchTextForFields"), /selected\.has\("title"\)[\s\S]*selected\.has\("artist"\)[\s\S]*selected\.has\("channel"\)[\s\S]*selected\.has\("video"\)/u);
+  assert.match(functionBody("function switchView"), /defaultSearchFieldsForView\(nextView\)/u);
 
   const collectBody = functionBody("function collectSongOccurrences");
   assert.match(collectBody, /\[item\.videoId, item\.title, item\.channelName, item\.keyword, song\.title, song\.artist\]/u);
   assert.doesNotMatch(appSource, /function songOccurrenceSearchText/u);
 
   const videoBody = functionBody("function buildVideoViewItems");
-  assert.match(videoBody, /const videoMatched = matchesSearch\(\[item\.videoId, item\.title, item\.channelName, item\.keyword\], filter\)/u);
-  assert.match(videoBody, /const matchedSongs = sourceSongs\.filter\(\(song\) => matchesSearch/u);
+  assert.match(videoBody, /const selected = searchFieldSet\(options\.searchFields \?\? state\.searchFields, "videos"\)/u);
+  assert.match(videoBody, /selected\.has\("video"\)[\s\S]*selected\.has\("channel"\)[\s\S]*selected\.has\("title"\)[\s\S]*selected\.has\("artist"\)/u);
+  assert.match(videoBody, /const matchedSongs = sourceSongs\.filter\(\(song\) =>[\s\S]*matchesSearch/u);
   assert.doesNotMatch(videoBody, /searchableSongs/u);
 });
 
-test("query overlay opens before suggestions and result preview work", () => {
-  const openBody = functionBody("function openQueryOverlay");
-  const setActiveIndex = openBody.indexOf('state.activeOverlay = "query"');
-  const openIndex = openBody.indexOf("setDialogOpen(els.queryDialog, true)");
-  const inertIndex = openBody.indexOf("setPageInert(true)");
-  const syncIndex = openBody.indexOf("syncQueryControlsFromDraft");
-  assert.ok(setActiveIndex >= 0 && openIndex > setActiveIndex, "query overlay should set active overlay before opening");
-  assert.ok(syncIndex > openIndex, "query overlay should light-sync controls after the shell is visible");
-  assert.match(openBody, /syncQueryControlsFromDraft\(state\.queryDraft, \{ light: true, forceSnapshot: false \}\)/u);
-  assert.ok(inertIndex > syncIndex, "query overlay should delay page inert work until after the visible shell");
-  const beforeOpen = openBody.slice(0, openIndex);
-  assert.doesNotMatch(beforeOpen, /renderSearchSuggestions|queryDraftResultCount|buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
-  assert.match(openBody, /requestAnimationFrame\(\(\) => \{[\s\S]*setTimeout\(\(\) => \{[\s\S]*setPageInert\(true\);[\s\S]*hydrateQueryOverlayAfterFirstFrame\(revision\)/u);
-
+test("inline search form submits immediately without result-count preview gating", () => {
   const bindBody = functionBody("function bindQueryOverlayEvents");
   assert.match(bindBody, /compositionstart/u);
   assert.match(bindBody, /compositionend/u);
   assert.match(bindBody, /event\.isComposing \|\| state\.queryComposing/u);
-  assert.match(bindBody, /updateQueryDraft\(\{ q: els\.queryInput\.value \}, \{[\s\S]*sync: "input"/u);
+  assert.match(bindBody, /els\.queryInput\?\.addEventListener\("input", \(event\) => \{[\s\S]*schedule: false/u);
+  assert.match(bindBody, /els\.queryInput\?\.addEventListener\("keydown", \(event\) => \{[\s\S]*event\.key === "Enter"[\s\S]*applyQueryDraft\(\)\.catch/u);
+  assert.match(bindBody, /for \(const input of els\.searchFieldInputs\) \{[\s\S]*applyQueryPatch\(\{ searchFields: draft\.searchFields \}/u);
+  assert.match(bindBody, /els\.searchFieldChips\?\.addEventListener\("click", \(event\) => \{[\s\S]*data-remove-search-field[\s\S]*applyQueryPatch\(\{ searchFields: nextFields \}/u);
+  assert.doesNotMatch(bindBody, /openQueryOverlay\(event\.currentTarget\)|scheduleQueryDraftPreview\(/u);
 
-  const suggestionBody = functionBody("function renderSearchSuggestions");
-  assert.ok(suggestionBody.indexOf("if (!hasQuery) return") < suggestionBody.indexOf("buildSearchSuggestions"));
-  assert.match(appSource, /const QUERY_SUGGESTION_SCAN_LIMIT = 360;/u);
-  const countBody = functionBody("function queryDraftResultCount");
-  assert.doesNotMatch(countBody, /buildSongRecords|buildArtistRecords|buildVideoViewItems/u);
-  assert.match(countBody, /queryResultCountCache/u);
-  assert.match(functionBody("function createRangeCacheObject"), /queryIndexes:[\s\S]*queryIndexLoads:[\s\S]*queryResultCountCache:/u);
+  const readBody = functionBody("function readQueryDraftFromControls");
+  assert.match(readBody, /selectedSearchFields = els\.searchFieldInputs\.filter\(\(input\) => input\.checked\)\.map\(\(input\) => input\.value\)/u);
+  assert.match(readBody, /searchFields: selectedSearchFields/u);
+
+  const triggerBody = functionBody("function syncQueryTriggerState");
+  assert.match(triggerBody, /els\.queryCountBadge\.hidden = true/u);
+  assert.match(triggerBody, /els\.queryCountBadge\.textContent = ""/u);
+  assert.match(triggerBody, /提交搜索，字段/u);
+
+  const chipsBody = functionBody("function renderSearchFieldChips");
+  assert.match(chipsBody, /if \(!normalized\.length\) \{[\s\S]*search-field-chip-all[\s\S]*全部字段/u);
+  assert.match(chipsBody, /close\.dataset\.removeSearchField = field/u);
 });
 
 test("range prefetch stays fast and does not use an 8 second delay", () => {
   const scheduleBody = functionBody("function scheduleOtherRangePrefetch");
   assert.match(scheduleBody, /window\.setTimeout\(\(\) => \{[\s\S]*requestIdleCallback\(run, \{ timeout: 1200 \}\)/u);
   assert.match(scheduleBody, /\}, 300\)/u);
+  assert.match(bindBody, /els\.queryForm\?\.addEventListener\("submit", \(event\) => \{[\s\S]*event\.preventDefault\(\);[\s\S]*applyQueryDraft\(\)\.catch/u);
   assert.doesNotMatch(scheduleBody, /8000|8\s*\*\s*1000/u);
 
   const intentBody = functionBody("function bindRangeIntentPrefetch");

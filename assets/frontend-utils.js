@@ -51,6 +51,60 @@
     return String(value ?? "").normalize("NFKC").toLocaleLowerCase();
   }
 
+  const SEARCH_FIELD_LABELS = {
+    title: "歌名",
+    artist: "歌手",
+    channel: "频道",
+    video: "视频",
+  };
+  const SEARCH_FIELD_ORDER = Object.keys(SEARCH_FIELD_LABELS);
+  const SEARCH_FIELD_ALIASES = {
+    song: "title",
+    songs: "title",
+    songTitle: "title",
+    singer: "artist",
+    vtuber: "channel",
+    vtubers: "channel",
+    source: "channel",
+    sources: "channel",
+    videos: "video",
+  };
+
+  function defaultSearchFieldsForView(view = "songRank") {
+    if (view === "songRank" || view === "songAz" || view === "songs" || view === "songIndex" || view === "vsingerSongs") return ["title", "artist"];
+    if (view === "artistRank" || view === "artists") return ["artist"];
+    if (view === "vtuberRank" || view === "vtubers") return ["channel"];
+    if (view === "videos") return ["video", "channel"];
+    return ["title", "artist"];
+  }
+
+  function normalizeSearchFields(value, options = {}) {
+    const validFields = new Set(options.validSearchFields || SEARCH_FIELD_ORDER);
+    const source = Array.isArray(value)
+      ? value
+      : String(value ?? "")
+          .split(",")
+          .map((part) => part.trim());
+    const fields = [];
+    for (const item of source) {
+      const key = String(item || "").trim();
+      if (!key) continue;
+      if (key === "all" || key === "*") return [];
+      const canonical = SEARCH_FIELD_ALIASES[key] || key;
+      if (!validFields.has(canonical) || fields.includes(canonical)) continue;
+      fields.push(canonical);
+    }
+    if (fields.length) return fields;
+    if (Array.isArray(value)) return [];
+    if (String(value ?? "").trim() === "") return options.defaultFields ? [...options.defaultFields] : defaultSearchFieldsForView(options.view);
+    return [];
+  }
+
+  function searchFieldsParam(fields, options = {}) {
+    const normalized = normalizeSearchFields(fields, options);
+    return normalized.length ? normalized.join(",") : "all";
+  }
+
   function matchesSearch(parts, filter) {
     const normalized = normalizeSearch(filter);
     if (!normalized) return true;
@@ -221,7 +275,12 @@
     const validTrendFilters = new Set(options.validTrendFilters || ["all", "new", "up", "down"]);
     const validMinCounts = new Set((options.validMinCounts || [1, 2, 5, 10]).map(Number));
 
-    return {
+    const parsedView = validViews.has(params.get("view")) ? params.get("view") : fallbackView;
+    const defaultSearchFields = Array.isArray(defaults.searchFields)
+      ? normalizeSearchFields(defaults.searchFields, { view: parsedView })
+      : defaultSearchFieldsForView(parsedView);
+
+    const result = {
       range: parseRangeParam(params.get("range"), validRanges, fallbackRange, options),
       view: validViews.has(params.get("view")) ? params.get("view") : fallbackView,
       page: positiveInteger(params.get("page"), positiveInteger(defaults.page, 1)),
@@ -236,6 +295,10 @@
       trend: validTrendFilters.has(trend) ? trend : defaults.trend || "all",
       minCount: validMinCounts.has(parsedMinCount) ? parsedMinCount : positiveInteger(defaults.minCount, 1),
     };
+    if (params.has("fields")) {
+      result.searchFields = normalizeSearchFields(params.get("fields"), { ...options, view: parsedView, defaultFields: defaultSearchFields });
+    }
+    return result;
   }
 
   function serializeUrlState(state, options = {}) {
@@ -261,6 +324,14 @@
     const videoLayout = state.videoLayout || defaults.videoLayout;
     const trend = state.trend || defaults.trend;
     const minCount = positiveInteger(state.minCount, defaults.minCount);
+    const defaultSearchFields = Array.isArray(defaults.searchFields)
+      ? normalizeSearchFields(defaults.searchFields, { ...options, view })
+      : defaultSearchFieldsForView(view);
+    const searchFields = normalizeSearchFields(state.searchFields ?? defaultSearchFields, {
+      ...options,
+      view,
+      defaultFields: defaultSearchFields,
+    });
 
     if (range !== defaults.range) params.set("range", range);
     if (view !== defaults.view) params.set("view", view);
@@ -274,6 +345,7 @@
     if (state.outside) params.set("outside", "1");
     if (unknownArtistsHiddenForUrl(state, defaults)) params.set("hideUnknown", "1");
     if (state.q) params.set("q", String(state.q).slice(0, 200));
+    if (state.q && !sameSearchFields(searchFields, defaultSearchFields)) params.set("fields", searchFieldsParam(searchFields, { ...options, view }));
     if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
     if (view !== "videos" && view !== "vtuberRank" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
 
@@ -295,23 +367,24 @@
       snapshotPath: defaults.snapshotPath || "data/latest.json",
       ...defaults,
     };
+    if (Array.isArray(defaults.searchFields)) draft.searchFields = [...defaults.searchFields];
+    return draft;
   }
 
   function makeQueryDraftFromState(source = {}, defaults = {}) {
-    return sanitizeQueryDraft(
-      {
-        ...defaultQueryDraft(defaults),
-        q: source.filter ?? source.q ?? "",
-        nicheOnly: Boolean(source.nicheOnly ?? source.outside),
-        hideUnknownArtist: unknownArtistsHiddenForDraft(source, defaults),
-        rankMetric: source.rankMetric,
-        trend: source.trend,
-        minCount: source.minCount,
-        pageSize: source.pageSize,
-        snapshotPath: source.currentSnapshotPath || source.snapshotPath,
-      },
-      defaults,
-    );
+    const draft = {
+      ...defaultQueryDraft(defaults),
+      q: source.filter ?? source.q ?? "",
+      nicheOnly: Boolean(source.nicheOnly ?? source.outside),
+      hideUnknownArtist: unknownArtistsHiddenForDraft(source, defaults),
+      rankMetric: source.rankMetric,
+      trend: source.trend,
+      minCount: source.minCount,
+      pageSize: source.pageSize,
+      snapshotPath: source.currentSnapshotPath || source.snapshotPath,
+    };
+    if (Object.hasOwn(source, "searchFields") || Object.hasOwn(defaults, "searchFields")) draft.searchFields = source.searchFields;
+    return sanitizeQueryDraft(draft, defaults);
   }
 
   function sanitizeQueryDraft(draft = {}, options = {}) {
@@ -335,6 +408,13 @@
       pageSize: validPageSizes.has(pageSize) ? pageSize : defaults.pageSize,
       snapshotPath,
     };
+    if (Object.hasOwn(draft, "searchFields") || Object.hasOwn(defaults, "searchFields")) {
+      next.searchFields = normalizeSearchFields(draft.searchFields ?? defaults.searchFields, {
+        ...options,
+        view: options.view || defaults.view || "songRank",
+        defaultFields: Array.isArray(defaults.searchFields) ? defaults.searchFields : defaultSearchFieldsForView(options.view || defaults.view || "songRank"),
+      });
+    }
     if (snapshotPath !== latestSnapshotPath && options.disableTrendForSnapshots !== false) next.trend = "all";
     return next;
   }
@@ -350,11 +430,6 @@
     if (normalized.q) items.push({ key: "q", label: normalized.q, fullLabel: normalized.q });
     if (normalized.nicheOnly) items.push({ key: "nicheOnly", label: "只看小众" });
     if (normalized.hideUnknownArtist && filterAppliesToView("hideUnknownArtist", view)) items.push({ key: "hideUnknownArtist", label: "隐藏无歌手" });
-    if ((view === "songRank" || view === "artistRank") && normalized.trend !== "all") {
-      const trendLabels = options.trendLabels || {};
-      items.push({ key: "trend", label: trendLabels[normalized.trend] || "趋势" });
-    }
-    if (view !== "videos" && view !== "vtuberRank" && normalized.minCount > 1) items.push({ key: "minCount", label: `${normalized.minCount}次以上` });
     return items;
   }
 
@@ -407,8 +482,14 @@
       labels,
       hasActive: count > 0,
       visibleCountText: !compact && count > 0 ? String(count) : "",
-      ariaLabel: count > 0 ? `打开搜索与筛选，当前有 ${count} 个筛选条件：${labels.join("、")}` : "打开搜索与筛选",
+      ariaLabel: count > 0 ? `提交搜索，当前有 ${count} 个筛选条件：${labels.join("、")}` : "提交搜索",
     };
+  }
+
+  function sameSearchFields(a, b) {
+    const left = normalizeSearchFields(a);
+    const right = normalizeSearchFields(b);
+    return left.length === right.length && left.every((field, index) => field === right[index]);
   }
 
   function parseUnknownArtistUrlState(params, defaults = {}) {
@@ -1426,6 +1507,7 @@
     parseUrlState,
     defaultQueryDraft,
     makeQueryDraftFromState,
+    defaultSearchFieldsForView,
     compactSourceToggleModel,
     rankToggleModel,
     runtimeRangeMeta,
@@ -1434,6 +1516,8 @@
     runtimeRangeShards,
     serializeUrlState,
     sanitizeQueryDraft,
+    normalizeSearchFields,
+    searchFieldsParam,
     shouldPrefetchRuntimeRange,
     shouldSkipSourceFilter,
     sourcePresentationModel,

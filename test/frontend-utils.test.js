@@ -14,6 +14,7 @@ const {
   createSnapshotLoader,
   createSongSearchLookup,
   createTrendLookup,
+  defaultSearchFieldsForView,
   clearAllRestrictiveFilters,
   clearRestrictiveFilter,
   desktopPageTokens,
@@ -33,6 +34,7 @@ const {
   mobilePageModel,
   mobilePageStepperModel,
   normalizeSearch,
+  normalizeSearchFields,
   normalizeSetlistSongs,
   normalizeSongSearchText,
   paginateItems,
@@ -45,6 +47,7 @@ const {
   runtimeRangeShards,
   serializeUrlState,
   sanitizeQueryDraft,
+  searchFieldsParam,
   shouldPrefetchRuntimeRange,
   shouldSkipSourceFilter,
   sourcePresentationModel,
@@ -204,7 +207,7 @@ test("VTuber channel rank toggle uses unique song count", () => {
   assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌");
 
   const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7, occurrenceCount: 9138, videoCount: 432 });
-  assert.equal(expanded.text, "收起 · 9138次歌唱 / 7首歌 / 432个视频");
+  assert.equal(expanded.text, "收起");
   assert.equal(expanded.ariaLabel, "收起该频道曲目，当前频道共 9138 次歌唱、7 首歌、432 个视频");
 });
 
@@ -854,6 +857,47 @@ test("url state parses trend, minCount, and legacy shared marker", () => {
   assert.equal(Object.hasOwn(parseUrlState("?detail=javascript:alert(1)", options), "detail"), false);
 });
 
+test("url state serializes search fields and treats all as an empty field array", () => {
+  const options = { ...urlStateOptions(), validSearchFields: ["title", "artist", "channel", "video"] };
+
+  assert.deepEqual(defaultSearchFieldsForView("songRank"), ["title", "artist"]);
+  assert.deepEqual(defaultSearchFieldsForView("vtuberRank"), ["channel"]);
+  assert.deepEqual(normalizeSearchFields("all", options), []);
+  assert.equal(searchFieldsParam([], options), "all");
+
+  const defaultSerialized = serializeUrlState(
+    {
+      view: "songRank",
+      q: "晴れ",
+      searchFields: ["title", "artist"],
+    },
+    options,
+  );
+  assert.equal(new URLSearchParams(defaultSerialized).has("fields"), false);
+
+  const channelSerialized = serializeUrlState(
+    {
+      view: "songRank",
+      q: "Alpha",
+      searchFields: ["channel"],
+    },
+    options,
+  );
+  assert.equal(new URLSearchParams(channelSerialized).get("fields"), "channel");
+  assert.deepEqual(parseUrlState(`?${channelSerialized}`, options).searchFields, ["channel"]);
+
+  const allSerialized = serializeUrlState(
+    {
+      view: "songRank",
+      q: "Riona",
+      searchFields: [],
+    },
+    options,
+  );
+  assert.equal(new URLSearchParams(allSerialized).get("fields"), "all");
+  assert.deepEqual(parseUrlState("?q=Alpha&fields=all", options).searchFields, []);
+});
+
 test("url state uses hideUnknown=1 for restrictive unknown-artist filtering and reads legacy showUnknown", () => {
   const options = urlStateOptions();
   const hidden = parseUrlState("?hideUnknown=1&showUnknown=1&outside=1", options);
@@ -889,6 +933,7 @@ test("query draft derives search and every filter field from applied state", () 
       trend: "up",
       minCount: 5,
       pageSize: 100,
+      searchFields: ["title", "artist"],
       currentSnapshotPath: "data/latest.json",
     },
     queryDraftOptions(),
@@ -902,9 +947,10 @@ test("query draft derives search and every filter field from applied state", () 
     trend: "up",
     minCount: 5,
     pageSize: 100,
+    searchFields: ["title", "artist"],
     snapshotPath: "data/latest.json",
   });
-  assert.deepEqual(defaultQueryDraft({ pageSize: 100, snapshotPath: "data/snapshots/2026-07-10.json" }), {
+  assert.deepEqual(defaultQueryDraft({ pageSize: 100, searchFields: ["channel"], snapshotPath: "data/snapshots/2026-07-10.json" }), {
     q: "",
     nicheOnly: false,
     hideUnknownArtist: false,
@@ -912,6 +958,7 @@ test("query draft derives search and every filter field from applied state", () 
     trend: "all",
     minCount: 1,
     pageSize: 100,
+    searchFields: ["channel"],
     snapshotPath: "data/snapshots/2026-07-10.json",
   });
 });
@@ -933,17 +980,17 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
   );
 
   assert.equal(snapshotDraft.trend, "all");
-  assert.equal(activeQueryConditionCount(snapshotDraft, { ...options, view: "songRank" }), 3);
-  assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 3);
+  assert.equal(activeQueryConditionCount(snapshotDraft, { ...options, view: "songRank" }), 2);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, pageSize: 50 }, { ...options, view: "songRank" }), 2);
   assert.equal(activeQueryConditionCount({ ...snapshotDraft, rankMetric: "videos", minCount: 10 }, { ...options, view: "videos" }), 2);
-  assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 3);
+  assert.equal(activeQueryConditionCount({ ...snapshotDraft, trend: "up", minCount: 10 }, { ...options, view: "songAz" }), 2);
   assert.equal(activeQueryConditionCount(defaultQueryDraft(), { ...options, view: "songRank" }), 0);
   assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), hideUnknownArtist: true }, { ...options, view: "songRank" }), 1);
   assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), hideUnknownArtist: true }, { ...options, view: "artistRank" }), 0);
   assert.equal(activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ" }, { ...options, view: "songRank" }), 1);
   assert.equal(
     activeQueryConditionCount({ ...defaultQueryDraft(), q: "少女レイ", nicheOnly: true, minCount: 2 }, { ...options, view: "songRank" }),
-    3,
+    2,
   );
   assert.deepEqual(
     activeQueryConditionItems(
@@ -958,7 +1005,7 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
     labels: [],
     hasActive: false,
     visibleCountText: "",
-    ariaLabel: "打开搜索与筛选",
+    ariaLabel: "提交搜索",
   });
   assert.deepEqual(
     queryTriggerModel(
@@ -966,11 +1013,11 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
       { ...options, view: "songRank", mode: "mobile" },
     ),
     {
-      count: 3,
-      labels: ["少女レイ", "只看小众", "2次以上"],
+      count: 2,
+      labels: ["少女レイ", "只看小众"],
       hasActive: true,
       visibleCountText: "",
-      ariaLabel: "打开搜索与筛选，当前有 3 个筛选条件：少女レイ、只看小众、2次以上",
+      ariaLabel: "提交搜索，当前有 2 个筛选条件：少女レイ、只看小众",
     },
   );
   assert.equal(
@@ -987,7 +1034,7 @@ test("query draft sanitizes snapshot trend and counts only active conditions", (
       labels: ["なれたん"],
       hasActive: true,
       visibleCountText: "",
-      ariaLabel: "打开搜索与筛选，当前有 1 个筛选条件：なれたん",
+      ariaLabel: "提交搜索，当前有 1 个筛选条件：なれたん",
     },
   );
 });
@@ -1014,10 +1061,9 @@ test("restrictive filter helpers clear only real narrowing conditions", () => {
       ["q", "Proof Filter"],
       ["nicheOnly", "只看小众"],
       ["hideUnknownArtist", "隐藏无歌手"],
-      ["minCount", "5次以上"],
     ],
   );
-  assert.deepEqual(filterEffectModel(normalized, { ...options, view: "songRank" }).count, 4);
+  assert.deepEqual(filterEffectModel(normalized, { ...options, view: "songRank" }).count, 3);
 
   assert.equal(clearRestrictiveFilter(normalized, "hideUnknownArtist", options).hideUnknownArtist, false);
   assert.equal(clearRestrictiveFilter(normalized, "q", options).q, "");
@@ -1224,6 +1270,7 @@ test("url state keeps rank metric and video layout only when relevant", () => {
   };
   assert.deepEqual(Object.fromEntries(new URLSearchParams(serializeUrlState(vtuberState, options))), {
     view: "vtuberRank",
+    metric: "videos",
     q: "なれたん",
   });
 });

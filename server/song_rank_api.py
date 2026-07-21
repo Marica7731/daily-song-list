@@ -14,6 +14,18 @@ from urllib.parse import parse_qs, quote, unquote, urlparse
 
 
 DEFAULT_DB_PATH = Path("artifacts/runtime/song-rank.sqlite")
+SEARCH_FIELD_ORDER = ("title", "artist", "channel", "video")
+SEARCH_FIELD_ALIASES = {
+    "song": "title",
+    "songs": "title",
+    "songTitle": "title",
+    "singer": "artist",
+    "vtuber": "channel",
+    "vtubers": "channel",
+    "source": "channel",
+    "sources": "channel",
+    "videos": "video",
+}
 
 
 def configure_stdio() -> None:
@@ -118,13 +130,14 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
     page_size = min(200, max(1, parse_int(first(query, "pageSize", "50"), "pageSize")))
     q = first(query, "q", "").strip()
     metric = normalize_metric(view, first(query, "metric", "count"))
+    search_fields = parse_search_fields(first(query, "fields", ""), view)
     min_count = max(1, parse_int(first(query, "minCount", "1"), "minCount"))
     if range_id not in {"7d", "all"}:
         raise ValueError("range must be 7d or all")
     if view not in {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}:
         raise ValueError("view must be songs, songIndex, artists, videos, vtubers, or vsingerSongs")
     if q and view in {"songs", "songIndex"}:
-        return contextual_song_rankings_payload(db_path, range_id, view, page, page_size, q, metric, min_count)
+        return contextual_song_rankings_payload(db_path, range_id, view, page, page_size, q, metric, min_count, search_fields)
 
     base_where = ["range_id = ?", "view = ?", "metric = ?", "scope_key = 'all'"]
     base_params: list[object] = [range_id, view, metric]
@@ -135,7 +148,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         where.append(f"{column} >= ?")
         params.append(min_count)
     if q:
-        clause, values = search_filter_for_view(view, q)
+        clause, values = search_filter_for_view(view, q, search_fields)
         where.append(clause)
         params.extend(values)
     where_sql = " AND ".join(where)
@@ -189,6 +202,35 @@ def normalize_metric(view: str, metric: str) -> str:
     return "count"
 
 
+def default_search_fields_for_view(view: str) -> set[str]:
+    if view in {"songs", "songIndex", "vsingerSongs"}:
+        return {"title", "artist"}
+    if view == "artists":
+        return {"artist"}
+    if view == "vtubers":
+        return {"channel"}
+    if view == "videos":
+        return {"video", "channel"}
+    return {"title", "artist"}
+
+
+def parse_search_fields(raw: str, view: str) -> set[str]:
+    value = (raw or "").strip()
+    if not value:
+        return default_search_fields_for_view(view)
+    fields: list[str] = []
+    for part in value.split(","):
+        key = part.strip()
+        if not key:
+            continue
+        if key in {"all", "*"}:
+            return set(SEARCH_FIELD_ORDER)
+        canonical = SEARCH_FIELD_ALIASES.get(key, key)
+        if canonical in SEARCH_FIELD_ORDER and canonical not in fields:
+            fields.append(canonical)
+    return set(fields) if fields else set(SEARCH_FIELD_ORDER)
+
+
 def contextual_song_rankings_payload(
     db_path: Path,
     range_id: str,
@@ -198,11 +240,30 @@ def contextual_song_rankings_payload(
     q: str,
     metric: str,
     min_count: int,
+    search_fields: set[str],
 ) -> dict:
     needle = f"%{q.lower()}%"
     page = max(1, page)
     offset = (page - 1) * page_size
     base_params: list[object] = [range_id, view, metric]
+    record_terms: list[str] = []
+    record_params: list[object] = []
+    if "title" in search_fields:
+        record_terms.append("lower(r.title) LIKE ?")
+        record_params.append(needle)
+    if "artist" in search_fields:
+        record_terms.append("lower(r.artist) LIKE ?")
+        record_params.append(needle)
+    record_match_sql = f"({' OR '.join(record_terms)})" if record_terms else "0"
+    source_terms: list[str] = []
+    source_params: list[object] = []
+    if "channel" in search_fields:
+        source_terms.append("lower(so.channel_name) LIKE ?")
+        source_params.append(needle)
+    if "video" in search_fields:
+        source_terms.append("(lower(so.title) LIKE ? OR lower(so.video_id) LIKE ?)")
+        source_params.extend([needle, needle])
+    source_match_sql = f"({' OR '.join(source_terms)})" if source_terms else "0"
     source_match_cte = """
         WITH source_matches AS (
           SELECT sd.entity_key AS detail_key,
@@ -215,11 +276,11 @@ def contextual_song_rankings_payload(
            AND so.range_id = sd.range_id
           WHERE sd.range_id = ?
             AND sd.entity_type = 'song'
-            AND lower(so.search_text) LIKE ?
+            AND {source_match_sql}
           GROUP BY sd.entity_key, sd.source_key
         )
-    """
-    cte_params: list[object] = [range_id, needle]
+    """.format(source_match_sql=source_match_sql)
+    cte_params: list[object] = [range_id, *source_params]
     occurrence_value = "CASE WHEN sm.matched_count IS NOT NULL THEN sm.matched_count ELSE r.count END"
     video_value = "CASE WHEN sm.matched_count IS NOT NULL THEN sm.matched_video_count ELSE r.video_count END"
     rank_value = video_value if metric == "videos" else occurrence_value
@@ -228,9 +289,9 @@ def contextual_song_rankings_payload(
         "r.view = ?",
         "r.metric = ?",
         "r.scope_key = 'all'",
-        "(lower(r.search_text) LIKE ? OR lower(r.title) LIKE ? OR lower(r.artist) LIKE ? OR sm.matched_count IS NOT NULL)",
+        f"({record_match_sql} OR sm.matched_count IS NOT NULL)",
     ]
-    params: list[object] = [*base_params, needle, needle, needle]
+    params: list[object] = [*base_params, *record_params]
     if min_count > 1:
         where.append(f"{rank_value} >= ?")
         params.append(min_count)
@@ -279,7 +340,7 @@ def contextual_song_rankings_payload(
             """,
             [*cte_params, *params, page_size, offset],
         ).fetchall()
-        records = [decode_contextual_song_row(conn, row, q) for row in rows]
+        records = [decode_contextual_song_row(conn, row, q, search_fields) for row in rows]
     return {
         "schemaVersion": 1,
         "rangeId": range_id,
@@ -296,18 +357,40 @@ def contextual_song_rankings_payload(
     }
 
 
-def search_filter_for_view(view: str, query: str) -> tuple[str, list[str]]:
+def search_filter_for_view(view: str, query: str, search_fields: set[str] | None = None) -> tuple[str, list[str]]:
     needle = f"%{query.lower()}%"
+    fields = search_fields or set(SEARCH_FIELD_ORDER)
+    clauses: list[str] = []
+    values: list[str] = []
+    def add(sql: str, count: int = 1) -> None:
+        clauses.append(sql)
+        values.extend([needle] * count)
     if view in {"songs", "songIndex", "vsingerSongs"}:
-        return "(lower(search_text) LIKE ? OR lower(title) LIKE ? OR lower(artist) LIKE ?)", [needle, needle, needle]
-    if view == "artists":
-        return "(lower(search_text) LIKE ? OR lower(name) LIKE ?)", [needle, needle]
-    if view == "vtubers":
-        return "(lower(search_text) LIKE ? OR lower(name) LIKE ?)", [needle, needle]
-    return "(lower(search_text) LIKE ? OR lower(title) LIKE ? OR lower(name) LIKE ?)", [needle, needle, needle]
+        if "title" in fields:
+            add("lower(title) LIKE ?")
+        if "artist" in fields:
+            add("lower(artist) LIKE ?")
+        if "channel" in fields or "video" in fields:
+            add("lower(search_text) LIKE ?")
+    elif view == "artists":
+        if "artist" in fields or fields == set(SEARCH_FIELD_ORDER):
+            add("(lower(search_text) LIKE ? OR lower(name) LIKE ?)", 2)
+    elif view == "vtubers":
+        if "channel" in fields or fields == set(SEARCH_FIELD_ORDER):
+            add("(lower(search_text) LIKE ? OR lower(name) LIKE ?)", 2)
+    else:
+        if "video" in fields:
+            add("(lower(title) LIKE ? OR lower(detail_key) LIKE ?)", 2)
+        if "channel" in fields:
+            add("lower(name) LIKE ?")
+        if "title" in fields or "artist" in fields:
+            add("lower(search_text) LIKE ?")
+    if not clauses:
+        return "0", []
+    return f"({' OR '.join(clauses)})", values
 
 
-def decode_contextual_song_row(conn: sqlite3.Connection, row: sqlite3.Row, q: str) -> dict:
+def decode_contextual_song_row(conn: sqlite3.Connection, row: sqlite3.Row, q: str, search_fields: set[str]) -> dict:
     payload = json.loads(row["payload_json"])
     payload.setdefault("key", row["detail_key"])
     payload.setdefault("count", row["count"])
@@ -322,7 +405,7 @@ def decode_contextual_song_row(conn: sqlite3.Connection, row: sqlite3.Row, q: st
     source_key = row["source_key"]
     if matched_count is not None and source_key:
         matched_video_count = int(row["matched_video_count"] or 0)
-        occurrences = matching_source_occurrences(conn, source_key, q, limit=20)
+        occurrences = matching_source_occurrences(conn, source_key, q, search_fields, limit=20)
         payload["matchedBySource"] = True
         payload["sourceFilterQuery"] = q
         payload["count"] = int(matched_count or 0)
@@ -331,19 +414,43 @@ def decode_contextual_song_row(conn: sqlite3.Connection, row: sqlite3.Row, q: st
         payload["occurrences"] = occurrences
         payload["channels"] = count_occurrence_channels(occurrences)
         payload["occurrencePreviewLimited"] = int(matched_count or 0) > len(occurrences)
-        payload["sourceDetailPath"] = f"/api/sources/{quote(source_key, safe='')}?q={quote(q, safe='')}"
+        payload["sourceDetailPath"] = f"/api/sources/{quote(source_key, safe='')}?q={quote(q, safe='')}&fields={quote(search_fields_param(search_fields), safe='')}"
     return payload
 
 
-def matching_source_occurrences(conn: sqlite3.Connection, source_key: str, q: str, limit: int = 0) -> list[dict]:
+def source_occurrence_filter_sql(search_fields: set[str]) -> tuple[str, list[str]]:
+    needle_marker = "?"
+    terms: list[str] = []
+    values: list[str] = []
+    if "channel" in search_fields:
+        terms.append("lower(channel_name) LIKE ?")
+        values.append(needle_marker)
+    if "video" in search_fields:
+        terms.append("(lower(title) LIKE ? OR lower(video_id) LIKE ?)")
+        values.extend([needle_marker, needle_marker])
+    if "title" in search_fields or "artist" in search_fields:
+        terms.append("lower(search_text) LIKE ?")
+        values.append(needle_marker)
+    return (f"({' OR '.join(terms)})" if terms else "0", values)
+
+
+def search_fields_param(search_fields: set[str]) -> str:
+    if set(search_fields) == set(SEARCH_FIELD_ORDER):
+        return "all"
+    return ",".join(field for field in SEARCH_FIELD_ORDER if field in search_fields)
+
+
+def matching_source_occurrences(conn: sqlite3.Connection, source_key: str, q: str, search_fields: set[str], limit: int = 0) -> list[dict]:
+    field_clause, placeholders = source_occurrence_filter_sql(search_fields)
     sql = """
         SELECT payload_json
         FROM source_occurrences
         WHERE source_key = ?
-          AND lower(search_text) LIKE ?
+          AND {field_clause}
         ORDER BY position
-    """
-    params: list[object] = [source_key, f"%{q.lower()}%"]
+    """.format(field_clause=field_clause)
+    needle = f"%{q.lower()}%"
+    params: list[object] = [source_key, *[needle for _ in placeholders]]
     if limit > 0:
         sql = f"{sql} LIMIT ?"
         params.append(limit)
@@ -369,16 +476,19 @@ def source_payload(db_path: Path, key: str, query: dict[str, list[str]] | None =
     if not key:
         raise ValueError("source key is required")
     q = first(query or {}, "q", "").strip()
+    search_fields = parse_search_fields(first(query or {}, "fields", "all"), "songs")
     with connect(db_path) as conn:
         row = conn.execute("SELECT payload_json FROM source_details WHERE source_key = ?", (key,)).fetchone()
         if q:
+            field_clause, placeholders = source_occurrence_filter_sql(search_fields)
+            needle = f"%{q.lower()}%"
             occurrence_rows = conn.execute(
-                """
+                f"""
                 SELECT payload_json FROM source_occurrences
-                WHERE source_key = ? AND lower(search_text) LIKE ?
+                WHERE source_key = ? AND {field_clause}
                 ORDER BY position
                 """,
-                (key, f"%{q.lower()}%"),
+                [key, *[needle for _ in placeholders]],
             ).fetchall()
         else:
             occurrence_rows = conn.execute(

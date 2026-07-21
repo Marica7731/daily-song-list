@@ -66,6 +66,13 @@ const VIDEO_LAYOUTS = {
 };
 const PAGE_SIZES = {
   songRank: DEFAULT_LIST_PAGE_SIZE,
+const SEARCH_FIELD_LABELS = {
+  title: "歌名",
+  artist: "歌手",
+  channel: "频道",
+  video: "视频",
+};
+const SEARCH_FIELD_ORDER = Object.keys(SEARCH_FIELD_LABELS);
   artistRank: DEFAULT_LIST_PAGE_SIZE,
   vtuberRank: DEFAULT_LIST_PAGE_SIZE,
   songAz: DEFAULT_LIST_PAGE_SIZE,
@@ -240,6 +247,8 @@ const state = {
   filter: "",
   nicheOnly: false,
   hideUnknownArtist: false,
+  searchFields: [],
+  searchFieldsByView: {},
   indexBucket: INDEX_ALL_BUCKET,
   pageSize: DEFAULT_LIST_PAGE_SIZE,
   rankMetric: "occurrences",
@@ -313,12 +322,16 @@ const els = {
   queryTrigger: document.querySelector("#queryTrigger"),
   queryTriggerText: document.querySelector("#queryTriggerText"),
   queryCountBadge: document.querySelector("#queryCountBadge"),
+  queryForm: document.querySelector("#queryForm"),
   queryDialog: document.querySelector("#queryDialog"),
   queryPanel: document.querySelector("#queryDialog .query-panel"),
   queryInput: document.querySelector("#queryInput"),
   nicheOnlyToggle: document.querySelector("#nicheOnlyToggle"),
   hideUnknownToggle: document.querySelector("#hideUnknownToggle"),
   cancelQueryButton: document.querySelector("#cancelQueryButton"),
+  searchFieldChips: document.querySelector("#searchFieldChips"),
+  searchFieldPicker: document.querySelector("#searchFieldPicker"),
+  searchFieldInputs: Array.from(document.querySelectorAll("input[name='searchField']")),
   clearQueryButton: document.querySelector("#clearQueryButton"),
   clearRecentSearchesButton: document.querySelector("#clearRecentSearchesButton"),
   recentSearches: document.querySelector("#recentSearches"),
@@ -678,16 +691,23 @@ function switchView(nextView, options = {}) {
   state.expandedRows.clear();
   resetPagination();
   syncControlsFromState();
+  state.searchFieldsByView[state.view] = normalizeSearchFields(state.searchFields, state.view);
   renderOrSyncUrl({ urlMode: options.urlMode || "push" });
+  state.searchFields = normalizeSearchFields(state.searchFieldsByView[nextView] ?? defaultSearchFieldsForView(nextView), nextView);
   restoreViewPosition();
 }
 
 function bindQueryOverlayEvents() {
-  els.queryTrigger?.addEventListener("click", () => openQueryOverlay(els.queryTrigger));
+  els.queryForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    applyQueryDraft().catch((error) => showToast(`查询应用失败：${error.message}`));
+  });
   els.cancelQueryButton?.addEventListener("click", () => closeOverlay("query"));
   els.queryDialog?.querySelector("[data-close-overlay='query']")?.addEventListener("click", () => closeOverlay("query"));
   els.clearQueryButton?.addEventListener("click", () => {
-    updateQueryDraft({ q: "" }, { sync: "input" });
+    if (els.queryInput) els.queryInput.value = "";
+    updateQueryDraft({ q: "" }, { sync: "input", schedule: false });
+    applyQueryPatch({ q: "" }, { focusTrigger: true });
     if (els.queryInput) els.queryInput.focus();
   });
   els.clearRecentSearchesButton?.addEventListener("click", () => {
@@ -749,6 +769,23 @@ function bindQueryOverlayEvents() {
   els.querySnapshotDateSelect?.addEventListener("change", () => {
     const path = firstSnapshotPathForDate(els.querySnapshotDateSelect.value);
     updateQueryDraft({ snapshotPath: path }, { sync: "snapshot" });
+  });
+  for (const input of els.searchFieldInputs) {
+    input.addEventListener("change", () => {
+      const draft = setQueryDraft(readQueryDraftFromControls(), { sync: "controls", schedule: false });
+      if (state.filter) applyQueryPatch({ searchFields: draft.searchFields });
+      else {
+        state.searchFields = draft.searchFields;
+        syncControlsFromState();
+      }
+    });
+  }
+  els.searchFieldChips?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-remove-search-field]");
+    if (!button) return;
+    const field = button.dataset.removeSearchField || "";
+    const nextFields = normalizeSearchFields(state.searchFields).filter((item) => item !== field);
+    applyQueryPatch({ searchFields: nextFields }, { focusTrigger: false });
   });
   els.resetQueryButton?.addEventListener("click", () => {
     setQueryDraft(window.FrontendUtils.clearAllRestrictiveFilters(state.queryDraft || makeQueryDraftFromState(), queryDraftOptions()), { sync: "full" });
@@ -1170,6 +1207,8 @@ function queryDraftOptions(extra = {}) {
     validMinCounts: MIN_COUNT_OPTIONS,
     validPageSizes: LIST_PAGE_SIZE_OPTIONS,
     latestSnapshotPath: SNAPSHOT_LATEST_PATH,
+    view: state.view,
+    validSearchFields: SEARCH_FIELD_ORDER,
     snapshots: state.snapshots,
     ...extra,
   };
@@ -1197,6 +1236,38 @@ function syncQueryControlsFromDraft(draft, options = {}) {
     syncMode: options.light ? "light" : options.syncMode || "full",
   });
 }
+function defaultSearchFieldsForView(view = state.view) {
+  return window.FrontendUtils.defaultSearchFieldsForView(view);
+}
+
+function normalizeSearchFields(fields, view = state.view) {
+  return window.FrontendUtils.normalizeSearchFields(fields, {
+    view,
+    validSearchFields: SEARCH_FIELD_ORDER,
+    defaultFields: defaultSearchFieldsForView(view),
+  });
+}
+
+function searchFieldsKey(fields = state.searchFields, view = state.view) {
+  const normalized = normalizeSearchFields(fields, view);
+  return normalized.length ? normalized.join(",") : "all";
+}
+
+function searchFieldSet(fields = state.searchFields, view = state.view) {
+  const normalized = normalizeSearchFields(fields, view);
+  return new Set(normalized.length ? normalized : SEARCH_FIELD_ORDER);
+}
+
+function searchFieldsEqual(a, b, view = state.view) {
+  return searchFieldsKey(a, view) === searchFieldsKey(b, view);
+}
+
+function searchFieldLabelText(fields = state.searchFields, view = state.view) {
+  const normalized = normalizeSearchFields(fields, view);
+  if (!normalized.length) return "全部字段";
+  return normalized.map((field) => SEARCH_FIELD_LABELS[field]).filter(Boolean).join("、");
+}
+
 
 function syncQueryPanelFromDraft(draft, options = {}) {
   if (!draft) return null;
@@ -1211,6 +1282,8 @@ function syncQueryPanelFromDraft(draft, options = {}) {
   syncQuerySelectValues(next);
   syncQuerySnapshotControls(next, previous, options);
   updateQueryAvailability(next);
+  syncSearchFieldInputs(next);
+  renderSearchFieldChips(next.searchFields);
   return next;
 }
 
@@ -1264,6 +1337,41 @@ function syncDraftSnapshotTimes(dateValue, selectedPath = "") {
   if (dateValue === "latest") {
     const option = document.createElement("option");
     option.value = SNAPSHOT_LATEST_PATH;
+function syncSearchFieldInputs(draft = makeQueryDraftFromState()) {
+  const selected = new Set(normalizeSearchFields(draft.searchFields, state.view));
+  for (const input of els.searchFieldInputs) {
+    input.checked = selected.has(input.value);
+  }
+}
+
+function renderSearchFieldChips(fields = state.searchFields) {
+  if (!els.searchFieldChips) return;
+  const normalized = normalizeSearchFields(fields, state.view);
+  els.searchFieldChips.replaceChildren();
+  if (!normalized.length) {
+    const chip = document.createElement("span");
+    chip.className = "search-field-chip search-field-chip-all";
+    chip.textContent = "全部字段";
+    els.searchFieldChips.append(chip);
+    return;
+  }
+  for (const field of normalized) {
+    const label = SEARCH_FIELD_LABELS[field];
+    if (!label) continue;
+    const chip = document.createElement("span");
+    chip.className = "search-field-chip";
+    const text = document.createElement("span");
+    text.textContent = label;
+    const close = document.createElement("button");
+    close.type = "button";
+    close.dataset.removeSearchField = field;
+    close.setAttribute("aria-label", `移除搜索字段：${label}`);
+    close.textContent = "×";
+    chip.append(text, close);
+    els.searchFieldChips.append(chip);
+  }
+}
+
     option.textContent = "最新快照";
     els.querySnapshotSelect.append(option);
     els.querySnapshotSelect.value = SNAPSHOT_LATEST_PATH;
@@ -1289,7 +1397,8 @@ function updateQuerySnapshotSummary(path = SNAPSHOT_LATEST_PATH) {
 }
 
 function readQueryDraftFromControls() {
-  const selectedMetric = document.querySelector("input[name='queryMetric']:checked")?.value || "occurrences";
+  const selectedMetric = document.querySelector("input[name='queryMetric']:checked")?.value || state.rankMetric || "occurrences";
+  const selectedSearchFields = els.searchFieldInputs.filter((input) => input.checked).map((input) => input.value);
   return sanitizeQueryDraft({
     q: els.queryInput?.value || "",
     nicheOnly: Boolean(els.nicheOnlyToggle?.checked),
@@ -1304,6 +1413,7 @@ function readQueryDraftFromControls() {
 
 async function applyQueryDraft() {
   const draft = readQueryDraftFromControls();
+    searchFields: selectedSearchFields,
   const previousPath = state.currentSnapshotPath;
   closeOverlay("query");
   state.filter = draft.q;
@@ -1315,6 +1425,7 @@ async function applyQueryDraft() {
   state.pageSize = draft.pageSize;
   state.expandedRows.clear();
   resetPagination();
+  state.searchFields = draft.searchFields;
   syncControlsFromState();
   if (draft.q) writeRecentSearches([draft.q, ...readRecentSearches().filter((item) => item !== draft.q)].slice(0, 10));
   if (previousPath !== draft.snapshotPath) {
@@ -1369,6 +1480,7 @@ function applyQueryPatch(patch, options = {}) {
   state.pageSize = draft.pageSize;
   state.expandedRows.clear();
   resetPagination();
+  state.searchFields = draft.searchFields;
   syncControlsFromState();
   const afterRender = () => {
     if (options.focusTrigger) focusWithoutScrolling(els.queryTrigger || els.controls || document.body);
@@ -1410,7 +1522,7 @@ function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromS
     els.trendFilterSelect.disabled = disabled;
     if (els.trendFilterHint) {
       els.trendFilterHint.textContent = state.runtimeApi.available
-        ? "API模式暂不支持趋势筛选"
+        ? ""
         : !isLatestDraft
         ? "历史快照不支持趋势筛选"
         : state.rankDiffLoads.has(state.range)
@@ -1443,19 +1555,20 @@ function syncQueryTriggerState() {
   const items = activeQueryItems(draft);
   const count = items.length;
   if (els.queryCountBadge) {
-    els.queryCountBadge.hidden = count <= 0;
-    els.queryCountBadge.textContent = count > 0 ? String(count) : "";
+    els.queryCountBadge.hidden = true;
+    els.queryCountBadge.textContent = "";
     els.queryCountBadge.setAttribute("aria-label", `当前有 ${count} 个搜索与筛选条件`);
   }
   if (els.queryTriggerText) {
-    els.queryTriggerText.textContent = state.filter || "搜索歌曲、歌手、VTuber或视频";
-    els.queryTriggerText.title = state.filter || "";
+    els.queryTriggerText.textContent = "搜索";
+    els.queryTriggerText.title = state.filter ? `${state.filter} · ${searchFieldLabelText()}` : searchFieldLabelText();
   }
   if (els.queryTrigger) {
     els.queryTrigger.classList.toggle("has-active-query", count > 0);
     els.queryTrigger.dataset.activeQueryCount = String(count);
     const labels = items.map((item) => item.fullLabel || item.label).filter(Boolean);
-    els.queryTrigger.setAttribute("aria-label", count > 0 ? `打开搜索与筛选，当前有 ${count} 个筛选条件：${labels.join("、")}` : "打开搜索与筛选");
+    const fieldText = searchFieldLabelText();
+    els.queryTrigger.setAttribute("aria-label", count > 0 ? `提交搜索，当前有 ${count} 个筛选条件：${labels.join("、")}，字段：${fieldText}` : `提交搜索，字段：${fieldText}`);
   }
 }
 
@@ -1628,19 +1741,13 @@ function queryDraftOccurrences(rangeCache, draft) {
   const base = queryDraftBaseOccurrences(rangeCache, draft);
   const filterKey = normalizeSearch(draft.q);
   if (!filterKey) return base;
-  if (state.view === "artistRank") {
-    return base.filter((occurrence) => artistOccurrenceSearchText(occurrence).includes(filterKey));
-  }
-  if (state.view === "vtuberRank") {
-    return base.filter((occurrence) => vtuberOccurrenceSearchText(occurrence).includes(filterKey));
-  }
-  return base.filter((occurrence) => occurrence.searchText.includes(filterKey));
+  return base.filter((occurrence) => occurrenceSearchTextForFields(occurrence, draft.searchFields, state.view).includes(filterKey));
 }
 
 function queryDraftSongRecords(rangeCache, draft, occurrences = queryDraftOccurrences(rangeCache, draft)) {
   const filterKey = normalizeSearch(draft.q);
   if (!filterKey) return draftScopedSongRecords(rangeCache, draft);
-  const key = `query-records::song::${draft.nicheOnly ? "niche" : "all"}::${queryDraftHideUnknownForView(draft) ? "hide-unknown" : "show-unknown"}::${filterKey}`;
+  const key = `query-records::song::${draft.nicheOnly ? "niche" : "all"}::${queryDraftHideUnknownForView(draft) ? "hide-unknown" : "show-unknown"}::${filterKey}::${searchFieldsKey(draft.searchFields)}`;
   if (!rangeCache.queryRecordCache.has(key)) {
     rangeCache.queryRecordCache.set(key, buildSongRecords(occurrences));
   }
@@ -1650,7 +1757,7 @@ function queryDraftSongRecords(rangeCache, draft, occurrences = queryDraftOccurr
 function queryDraftArtistRecords(rangeCache, draft, occurrences = queryDraftOccurrences(rangeCache, draft)) {
   const filterKey = normalizeSearch(draft.q);
   if (!filterKey) return draft.nicheOnly ? rangeCache.nicheArtistRecords : rangeCache.allArtistRecords;
-  const key = `query-records::artist::${draft.nicheOnly ? "niche" : "all"}::${filterKey}`;
+  const key = `query-records::artist::${draft.nicheOnly ? "niche" : "all"}::${filterKey}::${searchFieldsKey(draft.searchFields)}`;
   if (!rangeCache.queryRecordCache.has(key)) {
     rangeCache.queryRecordCache.set(key, buildArtistRecords(occurrences).records);
   }
@@ -1660,7 +1767,7 @@ function queryDraftArtistRecords(rangeCache, draft, occurrences = queryDraftOccu
 function queryDraftVtuberRecords(rangeCache, draft, occurrences = queryDraftOccurrences(rangeCache, draft)) {
   const filterKey = normalizeSearch(draft.q);
   if (!filterKey) return draft.nicheOnly ? rangeCache.nicheVtuberRecords : rangeCache.allVtuberRecords;
-  const key = `query-records::vtuber::${draft.nicheOnly ? "niche" : "all"}::${filterKey}`;
+  const key = `query-records::vtuber::${draft.nicheOnly ? "niche" : "all"}::${filterKey}::${searchFieldsKey(draft.searchFields)}`;
   if (!rangeCache.queryRecordCache.has(key)) {
     rangeCache.queryRecordCache.set(key, buildVtuberRecords(occurrences));
   }
@@ -1720,6 +1827,7 @@ function queryResultCountKey(draft) {
     draft.minCount,
   ].join("::");
 }
+    searchFieldsKey(draft.searchFields),
 
 function currentResultCountForDraft(draft) {
   const key = queryResultCountKey(draft);
@@ -1831,6 +1939,7 @@ function applyInitialUrlState() {
   ];
   const hasStateParams = stateParamKeys.some((key) => urlParams.has(key));
   if (!shouldApplySharedState && !hasStateParams) {
+    "fields",
     Object.assign(state, {
       range: defaults.range,
       view: defaults.view,
@@ -1850,6 +1959,7 @@ function applyInitialUrlState() {
     return;
   }
   const parsed = window.FrontendUtils.parseUrlState(window.location.search, {
+      searchFields: defaultSearchFieldsForView(defaults.view),
     defaults,
     validRanges: Object.keys(RANGE_LABELS),
     rangeAliases: RANGE_ALIASES,
@@ -1865,6 +1975,7 @@ function applyInitialUrlState() {
 
   state.range = parsed.range;
   state.view = parsed.view;
+    validSearchFields: SEARCH_FIELD_ORDER,
   state.page = parsed.page;
   state.pageSize = parsed.pageSize;
   state.indexBucket = parsed.bucket;
@@ -1881,6 +1992,7 @@ function applyInitialUrlState() {
 
 function normalizeTrendStateForRuntime() {
   if (!state.runtimeApi.available) return false;
+  state.searchFields = normalizeSearchFields(parsed.searchFields, parsed.view);
   let changed = false;
   if (state.trend !== "all") {
     state.trend = "all";
@@ -1908,6 +2020,11 @@ function syncControlsFromState() {
 }
 
 function syncUrlState(urlMode = "replace") {
+  const draft = makeQueryDraftFromState();
+  syncQueryInputValue(draft);
+  syncQueryClearButton(draft);
+  syncSearchFieldInputs(draft);
+  renderSearchFieldChips(state.searchFields);
   if (!window.history?.pushState || !window.history?.replaceState) return;
   const serialized = window.FrontendUtils.serializeUrlState(
     {
@@ -1927,6 +2044,7 @@ function syncUrlState(urlMode = "replace") {
     },
     {
       defaults: defaultUrlState(),
+      searchFields: state.searchFields,
       latestSnapshotPath: SNAPSHOT_LATEST_PATH,
       snapshots: state.snapshots,
       rangeAliases: RANGE_ALIASES,
@@ -1979,6 +2097,7 @@ function defaultUrlState() {
 async function restoreStateFromUrl() {
   const previousPath = state.currentSnapshotPath;
   const previousListKey = listStateKey();
+    searchFields: defaultSearchFieldsForView("songRank"),
   applyInitialUrlState();
   normalizeTrendStateForRuntime();
   syncControlsFromState();
@@ -3274,6 +3393,7 @@ function requestFilterState() {
   };
 }
 
+    searchFields: state.searchFields,
 function requestViewFingerprint(result) {
   return [
     result?.range,
@@ -3289,7 +3409,7 @@ function requestViewFingerprintFromState() {
   return [
     state.range,
     state.view,
-    state.view === "artistRank" || state.view === "songRank" ? state.rankMetric : "index",
+    state.view === "artistRank" || state.view === "songRank" || state.view === "vtuberRank" ? state.rankMetric : "index",
     requestScopeKey(state.view),
     requestFilterKey(requestFilterState()),
     currentPageSize(),
@@ -3427,6 +3547,11 @@ async function requestApiViewPage(request, range) {
   assertApiRankingPayload(payload);
   const records = hydrateRequestRecords(payload.records, request.view);
   const entries = records.map((record, index) => apiIndexEntryForRecord(record, request.view, payload.metric || metricName, index));
+  if (query) params.set("fields", window.FrontendUtils.searchFieldsParam(filters.searchFields, {
+    view: request.view,
+    validSearchFields: SEARCH_FIELD_ORDER,
+    defaultFields: defaultSearchFieldsForView(request.view),
+  }));
   const summary = apiSummaryFromPayload(payload);
   const manifest = {
     schemaVersion: 1,
@@ -3618,6 +3743,7 @@ function requestFilterKey(filters = {}) {
   ].join("|");
 }
 
+    searchFieldsKey(filters.searchFields),
 async function loadRequestSummary(range, signal) {
   if (state.runtimeApi.available) {
     return apiSummaryFromPayload({
@@ -3654,8 +3780,11 @@ async function filterRequestIndexEntries(entries, options = {}) {
   const query = normalizeSearch(filters.q || "");
   let result = entries;
   if (query) {
-    const candidates = await loadRequestSearchCandidates(query, options.signal);
-    result = result.filter((entry) => candidates.has(`${entry.type}:${entry.detailKey}`) || normalizeSearch(entry.searchText).includes(query));
+    result = await filterRequestEntriesBySearch(result, {
+      ...options,
+      query,
+      fields: filters.searchFields,
+    });
   }
   if (options.view === "songAz" && filters.indexBucket && filters.indexBucket !== INDEX_ALL_BUCKET) {
     result = result.filter((entry) => entry.bucket === filters.indexBucket);
@@ -3673,7 +3802,7 @@ async function filterRequestIndexEntries(entries, options = {}) {
       result = [];
     }
   }
-  if (options.view === "songRank" || options.view === "artistRank") {
+  if (options.view === "songRank" || options.view === "artistRank" || options.view === "vtuberRank") {
     return applyRequestRanks(result);
   }
   return result;
@@ -3687,6 +3816,132 @@ function requestEntryMatchesTrend(entry, mode, trendFilter) {
   if (trendFilter === "up") return rankDelta > 0;
   if (trendFilter === "down") return rankDelta < 0;
   return true;
+async function filterRequestEntriesBySearch(entries, options = {}) {
+  const query = normalizeSearch(options.query || "");
+  if (!query) return entries;
+  const candidates = await loadRequestSearchCandidates(query, options.signal);
+  const broad = entries.filter((entry) => candidates.has(`${entry.type}:${entry.detailKey}`) || normalizeSearch(entry.searchText).includes(query));
+  if (!broad.length) return [];
+  const records = await loadRequestDetailRecords(broad, options.signal);
+  const result = [];
+  for (const [index, entry] of broad.entries()) {
+    const record = records[index];
+    const match = requestRecordSearchMatch(record, entry, {
+      view: options.view,
+      metric: options.metric,
+      fields: options.fields,
+      query,
+    });
+    if (!match.matched) continue;
+    result.push({
+      ...entry,
+      rankValue: match.rankValue,
+      count: match.count,
+      videoCount: match.videoCount,
+      _hydratedRecordOverride: match.record,
+    });
+  }
+  if (options.view === "songAz") return result;
+  return result.sort((a, b) =>
+    (Number(b.rankValue) || 0) - (Number(a.rankValue) || 0) ||
+    compareValues(a.searchText || a.detailKey || a.key, b.searchText || b.detailKey || b.key),
+  );
+}
+
+function requestRecordSearchMatch(record, entry, options = {}) {
+  if (!record) return { matched: false };
+  if (options.view === "videos") return requestVideoRecordSearchMatch(record, entry, options);
+  const selected = searchFieldSet(options.fields, options.view);
+  const ownParts = requestRecordOwnSearchParts(record, options.view, selected);
+  const ownMatched = ownParts.length > 0 && normalizeSearch(ownParts.join(" ")).includes(options.query);
+  if (ownMatched) {
+    return requestRecordMatchResult(record, options.metric);
+  }
+  const occurrences = Array.isArray(record.occurrences) ? record.occurrences : [];
+  const matchedOccurrences = occurrences.filter((occurrence) => occurrenceSearchTextForFields(occurrence, options.fields, options.view).includes(options.query));
+  if (!matchedOccurrences.length) return { matched: false };
+  return requestRecordMatchResult(requestRecordWithMatchedOccurrences(record, options.view, matchedOccurrences), options.metric);
+}
+
+function requestRecordOwnSearchParts(record, view, selected) {
+  if (view === "artistRank") return selected.has("artist") ? [record.name, ...(record.aliases || [])] : [];
+  if (view === "vtuberRank") {
+    return selected.has("channel")
+      ? [record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, ...(record.aliases || []), ...knownVtuberSearchAliases(record.name)]
+      : [];
+  }
+  const parts = [];
+  if (selected.has("title")) parts.push(record.title, ...(record.variantLabels || []));
+  if (selected.has("artist")) parts.push(record.displayArtist, record.artist, ...Array.from(record.artists?.values?.() || []).map((entry) => entry.name));
+  return parts;
+}
+
+function requestVideoRecordSearchMatch(record, entry, options = {}) {
+  const selected = searchFieldSet(options.fields, "videos");
+  const videoParts = [];
+  if (selected.has("video")) videoParts.push(record.videoId, record.title, record.keyword);
+  if (selected.has("channel")) videoParts.push(record.channelName, record.channelId, record.channelHandle, record.channelUrl);
+  const videoMatched = videoParts.length > 0 && normalizeSearch(videoParts.join(" ")).includes(options.query);
+  const allSongs = Array.isArray(record._allSongs) ? record._allSongs : Array.isArray(record.songs) ? record.songs : [];
+  const matchedSongs = allSongs.filter((song) =>
+    normalizeSearch([
+      selected.has("title") ? song?.title : "",
+      selected.has("artist") ? song?.artist : "",
+    ].join(" ")).includes(options.query),
+  );
+  if (!videoMatched && !matchedSongs.length) return { matched: false };
+  const displaySongs = videoMatched ? allSongs : matchedSongs;
+  return requestRecordMatchResult({
+    ...record,
+    songs: displaySongs,
+    _displaySongs: displaySongs,
+    _allSongs: allSongs,
+    count: displaySongs.length,
+    occurrenceCount: displaySongs.length,
+  }, options.metric || "occurrences", entry);
+}
+
+function requestRecordWithMatchedOccurrences(record, view, occurrences) {
+  const next = {
+    ...record,
+    occurrences,
+    count: occurrences.length,
+    timestampCount: occurrences.length,
+    videoCount: uniqueVideoCount(occurrences),
+  };
+  if (view === "songRank" || view === "songAz") {
+    next.artists = requestCountMapFromOccurrences(occurrences, (occurrence) => occurrence?.song?.artist);
+    next.channels = requestCountMapFromOccurrences(occurrences, (occurrence) => occurrence?.item?.channelName);
+  } else if (view === "artistRank" || view === "vtuberRank") {
+    next.songs = requestCountMapFromOccurrences(occurrences, (occurrence) => occurrence?.song?.title);
+    next.channels = requestCountMapFromOccurrences(occurrences, (occurrence) => occurrence?.item?.channelName);
+  }
+  return next;
+}
+
+function requestCountMapFromOccurrences(occurrences, getName) {
+  const map = new Map();
+  for (const occurrence of occurrences || []) {
+    const name = cleanText(getName(occurrence));
+    if (!name) continue;
+    incrementCount(map, name);
+  }
+  return map;
+}
+
+function requestRecordMatchResult(record, metricName, entry = null) {
+  const count = Number(record.count ?? record.occurrenceCount ?? entry?.count) || 0;
+  const videoCount = Number(record.videoCount ?? entry?.videoCount) || 0;
+  const rankValue = metricName === "videos" ? videoCount : count;
+  return {
+    matched: true,
+    record,
+    count,
+    videoCount,
+    rankValue,
+  };
+}
+
 }
 
 function applyRequestRanks(entries) {
@@ -3822,15 +4077,19 @@ async function loadRequestDetailRecords(entries, signal) {
   }
   const recordByKey = new Map();
   for (const [path, pathEntries] of byShard.entries()) {
+  if ((entries || []).every((entry) => entry?._hydratedRecordOverride)) {
+    return entries.map((entry) => entry._hydratedRecordOverride).filter(Boolean);
+  }
     const payload = await readCachedRequestJson(state.requestRuntime.detailShardCache, path, signal);
     for (const record of payload.records || []) {
+    if (entry._hydratedRecordOverride) continue;
       recordByKey.set(record.detailKey, record);
     }
     for (const entry of pathEntries) {
       if (!recordByKey.has(entry.detailKey)) throw new Error(`detail record missing: ${entry.detailKey}`);
     }
   }
-  return (entries || []).map((entry) => hydrateRequestRecord(recordByKey.get(entry.detailKey), entry.type)).filter(Boolean);
+  return (entries || []).map((entry) => entry._hydratedRecordOverride || hydrateRequestRecord(recordByKey.get(entry.detailKey), entry.type)).filter(Boolean);
 }
 
 function hydrateRequestRecords(records, view) {
@@ -4044,8 +4303,8 @@ function renderRequestedPageResult(result, options = {}) {
         record,
         meta: vtuberMeta(record),
         videoCount: record.videoCount,
-        count: Number(record.count) || 0,
-        countUnit: "次",
+        count: rankValueForRequestRecord(record, result.metric),
+        countUnit: result.metric === "videos" ? "视频" : "次歌唱",
         occurrences: record.occurrences,
         songCount: record.songs.size,
         songPreview: vtuberSongPreview(record),
@@ -4320,7 +4579,7 @@ function defineLazyValue(target, key, factory) {
 function currentSelection(rangeCache) {
   const filterKey = normalizeSearch(state.filter);
   const hideUnknownForView = shouldHideUnknownForCurrentView();
-  const key = `${state.view}::${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}::${filterKey}`;
+  const key = `${state.view}::${state.nicheOnly ? "niche" : "all"}::${hideUnknownForView ? "hide-unknown" : "show-unknown"}::${filterKey}::${searchFieldsKey()}`;
   if (rangeCache.selectionCache.has(key)) return rangeCache.selectionCache.get(key);
 
   const baseOccurrences = selectedOccurrences(rangeCache, { hideUnknownForView });
@@ -4409,9 +4668,37 @@ function shouldHideUnknownForCurrentView() {
 }
 
 function occurrenceSearchTextForCurrentView(occurrence) {
-  if (state.view === "artistRank") return artistOccurrenceSearchText(occurrence);
-  if (state.view === "vtuberRank") return vtuberOccurrenceSearchText(occurrence);
-  return occurrence?.searchText || "";
+  return occurrenceSearchTextForFields(occurrence, state.searchFields, state.view);
+}
+
+function occurrenceSearchTextForFields(occurrence, fields = state.searchFields, view = state.view) {
+  const item = occurrence?.item || {};
+  const song = occurrence?.song || {};
+  const selected = searchFieldSet(fields, view);
+  const parts = [];
+  if (selected.has("title")) parts.push(song.title);
+  if (selected.has("artist")) parts.push(song.artist);
+  if (selected.has("channel")) {
+    parts.push(item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.authorUrl, item.ownerUrl, ...knownVtuberSearchAliases(item.channelName));
+  }
+  if (selected.has("video")) parts.push(item.videoId, item.title, item.keyword);
+  return normalizeSearch(parts.join(" "));
+}
+
+function itemSearchTextForFields(item, fields = state.searchFields, view = state.view) {
+  const selected = searchFieldSet(fields, view);
+  const parts = [];
+  if (selected.has("channel")) {
+    parts.push(item?.channelName, item?.channelId, item?.channelHandle, item?.channelUrl, item?.authorUrl, item?.ownerUrl, ...knownVtuberSearchAliases(item?.channelName));
+  }
+  if (selected.has("video")) parts.push(item?.videoId, item?.title, item?.keyword);
+  if (selected.has("title") || selected.has("artist")) {
+    for (const song of item?.songs || []) {
+      if (selected.has("title")) parts.push(song?.title);
+      if (selected.has("artist")) parts.push(song?.artist);
+    }
+  }
+  return normalizeSearch(parts.join(" "));
 }
 
 function hiddenUnknownOccurrenceCount(rangeCache) {
@@ -4450,7 +4737,7 @@ function cacheRankModel(rangeCache, key, records) {
 function sortedRecordsKey(type) {
   const hideKey = shouldHideUnknownForCurrentView() ? "hide-unknown" : "show-unknown";
   const metricKey = state.rankMetric;
-  return `${type}::${state.nicheOnly ? "niche" : "all"}::${hideKey}::${normalizeSearch(state.filter)}::${metricKey}`;
+  return `${type}::${state.nicheOnly ? "niche" : "all"}::${hideKey}::${normalizeSearch(state.filter)}::${searchFieldsKey()}::${metricKey}`;
 }
 
 function filteredRankModel(records, mode) {
@@ -4704,7 +4991,7 @@ function renderVtuberRank(group, rangeCache, selection) {
         meta: vtuberMeta(record),
         videoCount: record.videoCount,
         count: rankValue(record),
-        countUnit: rankCountUnit(),
+        countUnit: state.rankMetric === "videos" ? "视频" : "次歌唱",
         occurrences: record.occurrences,
         songCount: record.songs.size,
         songPreview: vtuberSongPreview(record),
@@ -4812,9 +5099,10 @@ function videoItemsForRange(rangeCache, options = {}) {
   const filter = options.ignoreSearch ? "" : options.filter ?? state.filter;
   const nicheOnly = options.nicheOnly ?? state.nicheOnly;
   const hideUnknownArtists = options.hideUnknownArtists ?? shouldHideUnknownForCurrentView();
-  const key = `videos::${nicheOnly ? "niche" : "all"}::${hideUnknownArtists ? "hide-unknown" : "show-unknown"}::${normalizeSearch(filter)}`;
+  const fields = options.searchFields ?? state.searchFields;
+  const key = `videos::${nicheOnly ? "niche" : "all"}::${hideUnknownArtists ? "hide-unknown" : "show-unknown"}::${normalizeSearch(filter)}::${searchFieldsKey(fields)}`;
   if (!rangeCache.sortedRecords.has(key)) {
-    rangeCache.sortedRecords.set(key, buildVideoViewItems(rangeCache.items, { filter, nicheOnly, hideUnknownArtists }));
+    rangeCache.sortedRecords.set(key, buildVideoViewItems(rangeCache.items, { filter, nicheOnly, hideUnknownArtists, searchFields: fields }));
   }
   return rangeCache.sortedRecords.get(key);
 }
@@ -4949,7 +5237,7 @@ function renderSummaryActions() {
   const actions = document.createElement("div");
   actions.className = "summary-actions";
 
-  if (state.view === "songRank" || state.view === "artistRank") {
+  if (state.view === "songRank" || state.view === "artistRank" || state.view === "vtuberRank") {
     const metricGroup = document.createElement("div");
     metricGroup.className = "summary-segmented";
     metricGroup.setAttribute("role", "group");
@@ -5375,12 +5663,26 @@ function buildVideoViewItems(items, options = {}) {
     const sourceItem = item._sourceItem || item;
     if (!normalizedFilter) {
       if (!sourceSongs.length) continue;
+  const selected = searchFieldSet(options.searchFields ?? state.searchFields, "videos");
       result.push({ ...item, songs: sourceSongs, _displaySongs: sourceSongs, _allSongs: originalSongs, _sourceItem: sourceItem, _songSearchMatchCount: 0 });
       continue;
     }
 
-    const videoMatched = matchesSearch([item.videoId, item.title, item.channelName, item.keyword], filter);
-    const matchedSongs = sourceSongs.filter((song) => matchesSearch([item.videoId, song.title, song.artist], filter));
+    const videoMatched = matchesSearch([
+      selected.has("video") ? item.videoId : "",
+      selected.has("video") ? item.title : "",
+      selected.has("video") ? item.keyword : "",
+      selected.has("channel") ? item.channelName : "",
+      selected.has("channel") ? item.channelId : "",
+      selected.has("channel") ? item.channelHandle : "",
+      selected.has("channel") ? item.channelUrl : "",
+    ], filter);
+    const matchedSongs = sourceSongs.filter((song) =>
+      matchesSearch([
+        selected.has("title") ? song?.title : "",
+        selected.has("artist") ? song?.artist : "",
+      ], filter),
+    );
     if (!videoMatched && !matchedSongs.length) continue;
 
     const matchedSongSet = new Set(matchedSongs);

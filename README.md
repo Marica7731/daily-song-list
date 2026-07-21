@@ -105,13 +105,13 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
 | --- |
 | <img src="docs/assets/screenshots/mobile-controls-active.png" alt="Mobile compact active controls" width="180" /> |
 
-| Active query strip | Recent searches | Suggestions |
+| Active query strip | Search controls | Field picker |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-active-query-strip.png" alt="Mobile active query strip with search and filters" width="180" /> | <img src="docs/assets/screenshots/mobile-query-recent.png" alt="Mobile search and filter panel with recent searches" width="180" /> | <img src="docs/assets/screenshots/mobile-query-suggestions.png" alt="Mobile search suggestions in query panel" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-active-query-strip.png" alt="Mobile active query strip with search and filters" width="180" /> | <img src="docs/assets/screenshots/mobile-query-recent.png" alt="Mobile inline search controls" width="180" /> | <img src="docs/assets/screenshots/mobile-query-suggestions.png" alt="Mobile search field picker controls" width="180" /> |
 
-| Filter controls | Snapshot controls | Bottom navigation |
+| Narrow filters | Historical context | Bottom navigation |
 | --- | --- | --- |
-| <img src="docs/assets/screenshots/mobile-query-filter.png" alt="Mobile query panel filter controls" width="180" /> | <img src="docs/assets/screenshots/mobile-query-history.png" alt="Mobile query panel history snapshot controls" width="180" /> | <img src="docs/assets/screenshots/mobile-bottom-nav-active.png" alt="Mobile bottom navigation active icon state" width="180" /> |
+| <img src="docs/assets/screenshots/mobile-query-filter.png" alt="Mobile niche and unknown artist controls" width="180" /> | <img src="docs/assets/screenshots/mobile-query-history.png" alt="Mobile historical context controls" width="180" /> | <img src="docs/assets/screenshots/mobile-bottom-nav-active.png" alt="Mobile bottom navigation active icon state" width="180" /> |
 
 ## How it Works
 
@@ -168,7 +168,7 @@ The maintained layout contract lives in [`docs/ui-spec.md`](docs/ui-spec.md). Th
    - Ranking rows place count and trend in a fixed right-side `rank-side` column. Song and song-index source previews now occupy a dedicated grid area spanning the content and right-side columns, grouped by unique source video.
    - Responsive ranking layout uses one maintained breakpoint system: mobile is `<=720px`, tablet is `721px-919px`, and desktop is `>=920px`. Mobile and tablet drawers render in-place below the current row, keep only one row expanded at a time, and use timestamp links whose visible text is only the time while the accessible label keeps song, artist, and channel context.
    - `FrontendUtils.sourcePresentationModel` inlines compact source videos by responsive proof contract: mobile 3+ rows show two inline sources, while desktop/tablet proof fixtures lock the 3-source layout. Inline sources render compact 16:9 video thumbnails without overlay text; the primary timestamp sits below the channel name in the source meta row and remains a jump link. Three or more source videos show a compact `查看全部来源`; one click renders the complete source list and the drawer toolbar provides `收起来源`. One-source rows no longer open drawers.
-   - The unified query panel opens its shell before suggestions, recent searches, query indexes, or result-count previews run. Search input, recent searches, suggestions, and filters share one panel on mobile and desktop; there are no separate search/filter tabs. Search input updates only the draft query text, clear button, suggestions timer, and preview timer; IME composition does not rebuild the whole form on every intermediate character.
+   - The toolbar search is an inline form, not a required modal. Songs default to `歌名` + `歌手`, VTuber ranking defaults to `频道`, and video view defaults to `视频` + `频道`; removing every field chip means `fields=all` instead of no results. The search button submits immediately and does not wait for a precomputed result count.
    - Each inline source includes a micro video thumbnail, channel link, timestamp meta link, optional extra-time toggle, and compact setlist-copy icon. Mobile rows keep the collapsed preview to two real inline sources and use a compact `查看全部来源` action for any 3+ source videos. Tablet and desktop proof fixtures lock the wider 3-source inline layout. The expanded source toolbar exposes the song-level copy action and the top collapse action.
    - Pagination uses one token model across songs, artists, song index, and videos. Numeric pagination uses non-clickable ellipsis markers; mobile top pagination uses a compact page stepper, and the song index combines bucket selection with page selection in one toolbar.
    - Initial load reads `data/ui/meta.json` first, then loads only the active range shard manifest and first page from `meta.ranges[range].shards.runtime`. It also reads `data/status.json` for the latest scheduler state. It does not read `data/latest.json` for the latest page unless the compact cumulative range fails validation and the page needs the last-good fallback; rank diff files load after the first榜单 render.

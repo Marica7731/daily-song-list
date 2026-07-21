@@ -61,7 +61,7 @@
   --active-content-max: 1240px;
   --page-max: var(--active-content-max);
   --content-gutter: max(var(--page-x), calc((100vw - var(--page-max)) / 2 + var(--page-x)));
-  --controls-height: 48px;
+  --controls-height: 72px;
   --visual-viewport-height: 100dvh;
   --visual-viewport-offset-top: 0px;
   --visual-viewport-bottom: 0px;
@@ -148,6 +148,7 @@ button {
 
 .range-mode,
 .view-mode,
+.query-search-bar,
 .query-trigger {
   min-width: 0;
 }
@@ -225,6 +226,212 @@ button {
   font-size: 13px;
   font-weight: 600;
   text-align: left;
+}
+
+.query-search-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) auto;
+  grid-template-areas:
+    "input fields submit"
+    "chips chips chips";
+  align-items: center;
+  gap: 6px var(--space-2);
+  width: 100%;
+}
+
+.search-field {
+  position: relative;
+  grid-area: input;
+  display: grid;
+  min-width: 0;
+}
+
+.search-field input {
+  min-height: var(--control-default);
+  padding-left: 36px;
+  padding-right: 38px;
+}
+
+.search-field input:focus,
+.search-field input:focus-visible {
+  border-color: var(--accent);
+  outline: 2px solid rgba(15, 118, 110, 0.2);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+
+.search-field-icon {
+  position: absolute;
+  top: 50%;
+  left: 11px;
+  z-index: 1;
+  width: 17px;
+  height: 17px;
+  color: var(--muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.search-field .clear-query-button {
+  top: 50%;
+  right: 2px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  transform: translateY(-50%);
+}
+
+.search-field-chips {
+  grid-area: chips;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 1px;
+  scrollbar-width: none;
+}
+
+.search-field-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.search-field-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  max-width: min(160px, 42vw);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  border-radius: var(--radius-pill);
+  padding: 0 7px;
+  background: #ffffff;
+  color: var(--accent-strong);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.search-field-chip span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.search-field-chip button {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.search-field-chip button:hover {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.search-field-chip-all {
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.search-field-picker {
+  position: relative;
+  grid-area: fields;
+  min-width: 0;
+}
+
+.search-field-picker summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: var(--control-default);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  padding: 0 10px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+}
+
+.search-field-picker summary::-webkit-details-marker {
+  display: none;
+}
+
+.search-field-picker[open] summary,
+.search-field-picker summary:hover {
+  border-color: rgba(15, 118, 110, 0.34);
+  color: var(--accent-strong);
+}
+
+.search-field-picker svg {
+  width: 16px;
+  height: 16px;
+}
+
+.search-field-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 4px;
+  width: 176px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.search-field-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  border-radius: var(--radius-control);
+  padding: 0 6px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.search-field-options label:hover {
+  background: #f8fafc;
+}
+
+.search-field-options small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.query-search-bar .query-trigger {
+  grid-area: submit;
+  grid-template-columns: 18px auto;
+  justify-content: center;
+  width: auto;
+  min-width: 76px;
+  text-align: center;
+}
+
+.query-search-bar .query-count {
+  display: none;
 }
 
 .query-trigger:hover {
@@ -2864,7 +3071,7 @@ mark {
 /* 15. Responsive breakpoints */
 @media (min-width: 920px) and (max-width: 1279px) {
   .controls-inner {
-    grid-template-columns: auto minmax(280px, 1fr) minmax(260px, 380px);
+    grid-template-columns: auto minmax(280px, 1fr) minmax(360px, 500px);
   }
 
   .view-mode .tab {
@@ -2888,7 +3095,11 @@ mark {
   }
 
   .controls-inner {
-    grid-template-columns: auto minmax(0, 1fr) minmax(220px, 320px);
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .query-search-bar {
+    grid-column: 1 / -1;
   }
 
   .view-mode .tab {
@@ -3068,7 +3279,7 @@ mark {
 
 @media (min-width: 1280px) {
   .controls-inner {
-    grid-template-columns: auto auto minmax(340px, 480px);
+    grid-template-columns: auto auto minmax(420px, 560px);
   }
 
   .source-drawer {
@@ -3079,7 +3290,7 @@ mark {
 @media (max-width: 720px) {
   :root {
     --page-x: 8px;
-    --controls-height: 44px;
+    --controls-height: 96px;
     --chip-height: 28px;
     --chip-icon-size: 28px;
     --filter-control-height: 36px;
@@ -3113,13 +3324,12 @@ mark {
   }
 
   .controls-inner {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-2);
     width: 100%;
   }
 
-  .view-mode,
-  .query-trigger-text {
+  .view-mode {
     display: none;
   }
 
@@ -3181,6 +3391,54 @@ mark {
 
   .bottom-nav-item {
     display: grid;
+  .query-search-bar {
+    grid-template-columns: minmax(0, 1fr) 38px 38px;
+    grid-template-areas:
+      "input fields submit"
+      "chips chips chips";
+    gap: 5px;
+  }
+
+  .search-field input {
+    min-height: 36px;
+    padding-left: 34px;
+  }
+
+  .search-field-picker summary {
+    width: 38px;
+    min-width: 38px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+  }
+
+  .search-field-picker summary span {
+    display: none;
+  }
+
+  .search-field-options {
+    right: 0;
+    width: min(224px, calc(100vw - 24px));
+  }
+
+  .query-search-bar .query-trigger {
+    width: 38px;
+    min-width: 38px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+  }
+
+  .query-search-bar .query-trigger-text {
+    display: none;
+  }
+
+  .search-field-chip {
+    min-height: 22px;
+    max-width: 36vw;
+    font-size: 11.5px;
+  }
+
     justify-items: center;
     gap: 2px;
     min-width: 0;
@@ -3290,9 +3548,31 @@ mark {
     min-height: 16px;
     font-size: 11.5px;
     line-height: 16px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+    overflow-x: auto;
+    padding-bottom: 1px;
+    scrollbar-width: none;
+  }
+
+  .summary-actions::-webkit-scrollbar {
   }
 
   .summary-note {
+  .summary-segmented {
+    flex: 0 0 auto;
+    min-height: 30px;
+    padding: 2px;
+  }
+
+  .summary-action {
+    min-height: 26px;
+    padding: 0 8px;
+    font-size: 11.5px;
+  }
+
     display: block;
     margin: 0 0 2px;
     overflow: hidden;

@@ -141,7 +141,7 @@ Operator fields:
 Frontend API-mode behavior:
 
 - When `/api/meta` returns a valid payload, the frontend enters SQLite/API mode and must not request `data/diff/latest-*.json`; those static diff files can resolve to HTML on the VPS/Nginx deployment and produce JSON parse toasts.
-- API mode normalizes `trend` filters to `all`, disables the trend selector, and shows `API模式暂不支持趋势筛选`.
+- API mode ignores legacy `trend` filters and does not render a trend selector or API-mode warning in the search controls.
 - API mode maps the frontend `vtuberRank` tab to `view=vtubers`. Treat it as a channel/VTuber identity ranking, not as another artist ranking.
 - The freshness chip uses SQLite `meta.built_at` / `rebuiltDerivedAt` as the staleness baseline. `meta.latest_captured_at` remains source-data provenance and must not trigger the 2-hour stale alert by itself.
 - Song, artist, and VTuber summaries show two metrics: row count and `歌曲收录`. The frontend intentionally does not show a unique-video metric in those summaries. The video view still shows `个视频` and `个时间戳`.
@@ -154,17 +154,18 @@ Supported query parameters:
 - `view`: `songs`, `songIndex`, `artists`, `videos`, `vtubers`, or `vsingerSongs`; default `songs`.
 - `metric`: `occurrences`, `count`, or `videos`; `videos` is valid for `songs`, `artists`, and `vtubers`. Non-video metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
 - `q`: optional case-insensitive search. The match scope is tab-specific; see below.
+- `fields`: optional comma-separated search fields. Supported values are `title`, `artist`, `channel`, `video`, and `all`. Missing `fields` uses the view default; `fields=all` searches every supported field. The frontend serializes `fields` only when a non-empty `q` is present.
 - `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos` and `vtubers`, `minCount` is ignored by the UI/API ranking view.
 - `page`: 1-based page number.
 - `pageSize`: maximum 200.
 
 Search scope contract:
 
-- `songs` and `songIndex` match song identity fields and source context. When a song row is matched by source context, such as channel name or video title, the API derives contextual `count`, `videoCount`, `timestampCount`, and `occurrences` from the matching source rows only. It also keeps `globalRank`, `globalCount`, `globalVideoCount`, and `globalTimestampCount` for diagnostics.
-- `vsingerSongs` matches source song title, artist, and singer fields. It is a raw-source diagnostic view and does not currently run the contextual source-row rewrite used by `songs`.
-- `artists` matches singer/artist identity fields only, such as canonical name and aliases. Song titles, channel names, and video titles must not make an unrelated artist row match.
-- `vtubers` matches channel/VTuber identity fields only, such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields. Song titles and video titles must not make an unrelated VTuber row match.
-- `videos` matches video/source context, including video ID/title, channel identity, and parsed song-list/timestamp text.
+- `songs` and `songIndex` default to `fields=title,artist`. They match source context only when `fields` includes `channel`, `video`, or `all`. When a song row is matched by source context, such as channel name or video title, the API derives contextual `count`, `videoCount`, `timestampCount`, and `occurrences` from the matching source rows only. It also keeps `globalRank`, `globalCount`, `globalVideoCount`, and `globalTimestampCount` for diagnostics.
+- `vsingerSongs` defaults to `fields=title,artist` and matches source song title, artist, and singer fields. It is a raw-source diagnostic view and does not currently run the contextual source-row rewrite used by `songs`.
+- `artists` defaults to `fields=artist` and matches singer/artist identity fields only, such as canonical name and aliases. Song titles, channel names, and video titles must not make an unrelated artist row match unless the request explicitly uses `fields=all`.
+- `vtubers` defaults to `fields=channel` and matches channel/VTuber identity fields, such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields. Song titles and video titles must not make an unrelated VTuber row match by default.
+- `videos` defaults to `fields=video,channel`. `fields=video` matches video ID/title, `fields=channel` matches channel identity, and `fields=title`, `fields=artist`, or `fields=all` also search parsed song-list/timestamp text.
 
 Response fields:
 
@@ -186,7 +187,7 @@ Record shapes are intentionally display-ready and may include extra frontend fie
 | `vtubers` | `rank`, `type`, `key`, `name`, `channelName`, `channelId`, `channelHandle`, `channelUrl`, `count`, `videoCount`, `timestampCount`, `songs` preview, `occurrences` preview |
 | `vsingerSongs` | `rank`, `type`, `title`, `artist`, `singerName`, `count`, `videoCount`, `sourceDetailKey` when full details exist |
 
-Sorting is by stored `rank` ascending for unfiltered requests and for `songIndex`. For `songs` source-context searches, the API re-ranks the filtered result by contextual `count` or `videoCount` so a channel query is ordered by that channel's matching sources instead of the all-site rank.
+Sorting is by stored `rank` ascending for unfiltered requests and for `songIndex`. For `songs` searches, the API re-ranks filtered results by the matching occurrence/video count so search result order is driven by matched collection count instead of the all-site rank.
 
 Example response shape:
 

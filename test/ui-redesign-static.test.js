@@ -9,14 +9,18 @@ const indexSource = fs.readFileSync(path.join(__dirname, "..", "index.html"), "u
 const captureSource = fs.readFileSync(path.join(__dirname, "..", "scripts", "capture-readme-screenshots.js"), "utf8");
 const verifySource = fs.readFileSync(path.join(__dirname, "..", "scripts", "verify-local-performance.js"), "utf8");
 
-test("mobile information architecture exposes one query center and a one-row toolbar", () => {
-  assert.match(indexSource, /id="queryTrigger"[\s\S]*aria-controls="queryDialog"/u);
+test("mobile information architecture exposes one inline search bar and a one-row toolbar", () => {
+  assert.match(indexSource, /class="query-search-bar" id="queryForm" role="search" aria-label="搜索榜单"/u);
+  assert.match(indexSource, /id="queryInput"[\s\S]*id="searchFieldChips"[\s\S]*id="searchFieldPicker"[\s\S]*id="queryTrigger"/u);
+  assert.match(indexSource, /name="searchField" value="title" checked[\s\S]*歌名[\s\S]*name="searchField" value="artist" checked[\s\S]*歌手/u);
+  assert.match(indexSource, /name="searchField" value="channel"[\s\S]*频道[\s\S]*name="searchField" value="video"[\s\S]*视频/u);
+  assert.match(indexSource, /全不选时搜索全部字段/u);
+  assert.match(indexSource, /<button class="query-trigger" id="queryTrigger" type="submit" aria-label="提交搜索">/u);
   assert.doesNotMatch(indexSource, /id="openSearchButton"|id="openFilterButton"|id="desktopFilterButton"/u);
   assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /class="[^"]*view-mode[^"]*"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>频道<\/span>/u);
-  assert.match(indexSource, /id="queryDialog"[\s\S]*role="dialog"[\s\S]*aria-labelledby="queryDialogTitle"[\s\S]*搜索与筛选/u);
-  assert.match(indexSource, /id="queryInput"[\s\S]*id="searchSuggestions"[\s\S]*id="trendFilterSelect"[\s\S]*id="minCountSelect"/u);
+  assert.doesNotMatch(indexSource, /id="queryDialog"|id="trendFilterSelect"|id="minCountSelect"|id="querySnapshotSummary"|id="queryResultPreview"/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
   assert.match(indexSource, /id="activeQueryStrip"/u);
@@ -24,8 +28,9 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /id="status" hidden aria-hidden="true"/u);
   assert.doesNotMatch(indexSource, /class="topbar"|class="topbar-inner"|<h1>Daily Song List<\/h1>|歌曲时间戳排行/u);
   assert.doesNotMatch(indexSource, /class="controls-primary"|class="mobile-toolbar-actions"|class="controls-secondary"/u);
-  assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*class="query-trigger"/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
+  assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*class="query-search-bar"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\);/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-bar\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 38px 38px;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/u);
   assert.match(cssSource, /\.bottom-nav-icon-wrap\s*\{[\s\S]*width: 32px;[\s\S]*height: 24px;/u);
   assert.match(cssSource, /\.bottom-nav-icon-wrap svg\s*\{[\s\S]*width: 19px;[\s\S]*height: 19px;/u);
@@ -150,27 +155,26 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
   assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: 34px;[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=|id="querySearchPanel"|id="queryFilterPanel"/u);
-  assert.match(indexSource, /class="query-discovery-panel"[\s\S]*class="[^"]*query-filter-matrix[^"]*"/u);
-  assert.match(indexSource, /id="querySnapshotSummary"/u);
-  assert.match(indexSource, /<\/div>\s*<footer class="query-panel-footer">/u);
-  assert.doesNotMatch(indexSource, /<\/div>\s*<\/div>\s*<footer class="query-panel-footer">/u);
-  assert.match(indexSource, /class="query-filter-matrix query-form-grid"/u);
-  assert.match(indexSource, /class="query-sort-field" id="metricFilterGroup"/u);
-  assert.match(indexSource, /class="query-field query-compact-field query-context-card page-size-filter"/u);
-  assert.match(indexSource, /class="query-history-section query-context-card"/u);
-  assert.match(cssSource, /\.query-form-grid\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*gap: var\(--query-grid-gap\);/u);
-  assert.match(cssSource, /\.query-sort-field\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
-  assert.match(cssSource, /\.query-panel-footer\s*\{[\s\S]*display: grid;[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
-  assert.doesNotMatch(cssSource, /grid-template-columns: auto auto;[\s\S]*justify-content: space-between/u);
+  assert.match(indexSource, /class="query-search-bar" id="queryForm"[\s\S]*class="search-field"[\s\S]*id="searchFieldChips"[\s\S]*class="search-field-picker"/u);
+  assert.match(indexSource, /id="nicheOnlyToggle"[\s\S]*只看小众[\s\S]*id="hideUnknownToggle"[\s\S]*隐藏无歌手/u);
+  assert.doesNotMatch(indexSource, /id="queryDialog"|id="querySnapshotSummary"|id="queryResultPreview"|id="trendFilterSelect"|id="minCountSelect"|id="queryPageSizeSelect"|id="querySnapshotSelect"/u);
+  assert.match(cssSource, /\.query-search-bar\s*\{[\s\S]*grid-template-areas:[\s\S]*"input fields submit"[\s\S]*"chips chips chips"/u);
+  assert.match(cssSource, /\.search-field-chips\s*\{[\s\S]*overflow-x: auto;[\s\S]*scrollbar-width: none;/u);
+  assert.match(cssSource, /\.search-field-chip\s*\{[\s\S]*min-height: 24px;[\s\S]*border-radius: var\(--radius-pill\);/u);
+  assert.match(cssSource, /\.search-field-picker summary\s*\{[\s\S]*min-height: var\(--control-default\);/u);
+  assert.match(cssSource, /\.search-field-options\s*\{[\s\S]*position: absolute;[\s\S]*width: 176px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.search-field-options\s*\{[\s\S]*width: min\(224px, calc\(100vw - 24px\)\);/u);
+  assert.match(cssSource, /\.query-search-bar \.query-trigger\s*\{[\s\S]*grid-area: submit;[\s\S]*min-width: 76px;/u);
+  assert.match(cssSource, /\.query-search-bar \.query-count\s*\{[\s\S]*display: none;/u);
   assert.doesNotMatch(indexSource, /query-quick-toggles|query-compact-fields|query-context-fields|query-metric-control/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel\s*\{[\s\S]*height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);[\s\S]*max-height: min\(calc\(var\(--visual-viewport-height\) - 8px\), 92dvh\);/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-panel-body\s*\{[\s\S]*padding-top: 8px;[\s\S]*padding-bottom: 12px;/u);
-  assert.match(cssSource, /\.query-panel-body\s*\{[\s\S]*display: grid;[\s\S]*gap: var\(--space-3\);/u);
-  assert.match(cssSource, /\.query-filter-matrix\s*\{/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.search-field-picker summary\s*\{[\s\S]*width: 38px;[\s\S]*height: 36px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-bar \.query-trigger\s*\{[\s\S]*width: 38px;[\s\S]*height: 36px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-bar \.query-trigger-text\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.search-field-chip\s*\{[\s\S]*min-height: 22px;[\s\S]*max-width: 36vw;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary\s*\{[\s\S]*"main"[\s\S]*"actions"[\s\S]*"note"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: flex;[\s\S]*overflow-x: auto;/u);
   assert.doesNotMatch(cssSource, /\.query-tabs\b|\.query-tab\s*\{|\.query-tab\[|\.query-tab-panel\b|\.query-panel\.is-filter-tab/u);
   assert.doesNotMatch(cssSource, /\.query-panel\.is-filter-tab \.query-panel-body\s*\{[\s\S]*144px/u);
-  assert.match(captureSource, /async function assertQueryHistoryPanelSpacing/u);
-  assert.match(captureSource, /query history overlaps footer/u);
   assert.doesNotMatch(appSource, /function setQueryPanelTab|queryTabButtons|queryTabPanels/u);
   assert.match(cssSource, /\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"\. drawer drawer"/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.rank-row\s*\{[\s\S]*"rank content side"[\s\S]*"\. sources sources"[\s\S]*"drawer drawer drawer"/u);
@@ -212,7 +216,6 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(verifySource, /async function mobileVideoCardGeometry/u);
   assert.match(verifySource, /async function desktopRankVisualGeometry/u);
   assert.match(verifySource, /async function compactSourceDrawerFlow/u);
-  assert.match(verifySource, /query-panel-bottom-\$\{viewport\.join\("x"\)\}\.png/u);
   assert.match(verifySource, /rank-expanded-trend-\$\{viewport\.join\("x"\)\}\.png/u);
 });
 
@@ -227,11 +230,12 @@ test("mobile source preview contract matches compact documentation", () => {
 });
 
 test("desktop and tablet contracts use explicit responsive layout", () => {
-  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(280px, 1fr\) minmax\(260px, 380px\);/u);
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(280px, 1fr\) minmax\(360px, 500px\);/u);
   assert.doesNotMatch(cssSource, /grid-template-columns: auto minmax\(0, 1fr\) auto auto minmax\(220px, 1\.1fr\) minmax\(108px, 140px\) minmax\(160px, 220px\)/u);
-  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto auto minmax\(340px, 480px\);/u);
+  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto auto minmax\(420px, 560px\);/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) var\(--rank-side-width-tablet\)/u);
-  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) minmax\(220px, 320px\);/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\);/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.query-search-bar\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
   assert.match(appSource, /mode === "mobile"[\s\S]*variant === "top"[\s\S]*renderMobileTopPagination\(pageInfo\)/u);
 });
 
