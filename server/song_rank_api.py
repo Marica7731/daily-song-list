@@ -171,6 +171,15 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             [*params, page_size, offset],
         ).fetchall()
         records = [decode_row(row) for row in rows]
+        if (
+            q
+            and view == "songs"
+            and metric == "count"
+            and effective_search_scope == "all"
+            and search_fields == []
+            and total == 0
+        ):
+            return vtuber_song_fallback_payload(conn, range_id, q, page, page_size, min_count, base_total)
     return {
         "schemaVersion": 1,
         "rangeId": range_id,
@@ -187,6 +196,109 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         "totalVideoCount": totals["total_videos"],
         "pageCount": (total + page_size - 1) // page_size,
         "records": records,
+    }
+
+
+def vtuber_song_fallback_payload(
+    conn: sqlite3.Connection,
+    range_id: str,
+    q: str,
+    page: int,
+    page_size: int,
+    min_count: int,
+    base_total: int,
+) -> dict:
+    clause, values = search_filter_for_view("vtubers", q, "all")
+    rows = conn.execute(
+        f"""
+        SELECT rank, detail_key, title, artist, name, count, song_count, video_count, timestamp_count, payload_json
+        FROM ranking_rows
+        WHERE range_id = ?
+          AND view = 'vtubers'
+          AND metric = 'count'
+          AND scope_key = 'all'
+          AND {clause}
+        ORDER BY count DESC, rank ASC
+        LIMIT 12
+        """,
+        [range_id, *values],
+    ).fetchall()
+    songs_by_key: dict[str, dict] = {}
+    total_videos = 0
+    for row in rows:
+        vtuber = decode_row(row)
+        channel_name = vtuber.get("name") or vtuber.get("title") or row["name"] or ""
+        channel_key = vtuber.get("channelId") or vtuber.get("channelHandle") or vtuber.get("key") or row["detail_key"] or channel_name
+        total_videos += as_non_negative_int(vtuber.get("videoCount"))
+        for song in vtuber.get("songs") or []:
+            title = str(song.get("name") or song.get("title") or song.get("key") or "").strip()
+            if not title:
+                continue
+            count = as_non_negative_int(song.get("count"))
+            if count < min_count:
+                continue
+            key = compact_text(song.get("key") or title)
+            record = songs_by_key.get(key)
+            if record is None:
+                record = {
+                    "type": "song",
+                    "key": key,
+                    "title": title,
+                    "displayArtist": "",
+                    "artists": [],
+                    "channels": [],
+                    "occurrences": [],
+                    "count": 0,
+                    "videoCount": 0,
+                    "timestampCount": 0,
+                    "matchedByVtuber": True,
+                    "sourceFilterQuery": q,
+                    "searchText": compact_text(f"{title} {channel_name} {q}"),
+                    "_channelMap": {},
+                }
+                songs_by_key[key] = record
+            record["count"] += count
+            record["videoCount"] += as_non_negative_int(song.get("videoCount"))
+            channel_map = record["_channelMap"]
+            if channel_key:
+                channel_entry = channel_map.setdefault(
+                    channel_key,
+                    {"key": channel_key, "name": channel_name, "count": 0},
+                )
+                channel_entry["count"] += count
+    records = sorted(songs_by_key.values(), key=lambda item: (-item["count"], item["title"]))
+    ranked_records: list[dict] = []
+    previous_count: int | None = None
+    current_rank = 0
+    for index, record in enumerate(records):
+        if record["count"] != previous_count:
+            current_rank = index + 1
+            previous_count = record["count"]
+        record["rank"] = current_rank
+        record["channels"] = sorted(
+            record.pop("_channelMap").values(),
+            key=lambda item: (-item["count"], item["name"]),
+        )
+        ranked_records.append(record)
+    total = len(ranked_records)
+    offset = (max(1, page) - 1) * page_size
+    page_records = ranked_records[offset : offset + page_size]
+    return {
+        "schemaVersion": 1,
+        "rangeId": range_id,
+        "view": "songs",
+        "metric": response_metric("count"),
+        "searchScope": "all",
+        "searchFields": [],
+        "page": max(1, page),
+        "pageSize": page_size,
+        "totalCount": total,
+        "filteredBaseCount": base_total,
+        "totalOccurrenceCount": sum(record["count"] for record in ranked_records),
+        "totalSongCount": total,
+        "totalVideoCount": total_videos,
+        "pageCount": (total + page_size - 1) // page_size,
+        "records": page_records,
     }
 
 
@@ -754,6 +866,17 @@ def parse_int(value: str, label: str) -> int:
         return int(value)
     except ValueError as exc:
         raise ValueError(f"{label} must be an integer") from exc
+
+
+def as_non_negative_int(value: object) -> int:
+    try:
+        return max(0, int(value or 0))
+    except (TypeError, ValueError):
+        return 0
+
+
+def compact_text(value: object) -> str:
+    return re.sub(r"\s+", " ", str(value or "").strip().lower())
 
 
 if __name__ == "__main__":

@@ -3481,8 +3481,8 @@ mark {
   }
 
   .controls-inner {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-2);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
     width: 100%;
   }
 
@@ -3521,8 +3521,26 @@ mark {
     overflow: visible;
   }
 
-  .query-trigger svg:not(.query-trigger-icon),
-  .query-trigger .query-count {
+  .query-search-form.query-trigger {
+    grid-template-columns: 28px minmax(0, 1fr) auto auto;
+    place-items: center;
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    min-height: 34px;
+    padding: 0 8px;
+  }
+
+  .query-search-form .query-field-summary svg {
+    display: block;
+  }
+
+  .query-search-form .query-count {
+    display: inline-grid;
+  }
+
+  .query-trigger:not(.query-search-form) svg:not(.query-trigger-icon),
+  .query-trigger:not(.query-search-form) .query-count {
     display: none;
   }
 

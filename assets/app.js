@@ -1450,6 +1450,10 @@ function syncQueryTriggerState() {
     const labels = items.map((item) => item.fullLabel || item.label).filter(Boolean);
     els.queryTrigger.setAttribute("aria-label", count > 0 ? `打开搜索与筛选，当前有 ${count} 个筛选条件：${labels.join("、")}` : "打开搜索与筛选");
   }
+  if (els.querySearchForm) {
+    els.querySearchForm.classList.toggle("has-active-query", count > 0);
+    els.querySearchForm.dataset.activeQueryCount = String(count);
+  }
 }
 
 function renderActiveQueryStrip() {
