@@ -4,10 +4,12 @@ const test = require("node:test");
 const {
   bestCombinedTitleArtistCandidate,
   cleanSafeTitleCandidate,
+  createKnownSongArtistOverrideContext,
   entryRepairSignals,
   parserCorruptionTitleCandidate,
   repairParsedEntry,
   titleArtistSplitCandidates,
+  validateKnownSongArtistOverrides,
 } = require("../scripts/entry-repair");
 const { buildSongSearchIndex } = require("../scripts/song-search-index");
 
@@ -117,6 +119,62 @@ test("splits combined title artist text only on a unique title-artist lookup mat
   assert.equal(fixed.artist, "ハナレグミ");
   assert.equal(ambiguous.title, "発光帯　ハナレグミ");
   assert.equal(ambiguous.artist, "未記載");
+});
+
+test("fills high-confidence unknown artists from reviewed title metadata only", () => {
+  const heat = repairParsedEntry({
+    time: "0:00:10",
+    seconds: 10,
+    title: "熱異常",
+    artist: "待补歌手",
+    raw: "0:10 熱異常",
+  });
+  const bracketed = repairParsedEntry({
+    time: "0:00:20",
+    seconds: 20,
+    title: "（少女レイ）",
+    artist: "未記載",
+    raw: "0:20 （少女レイ）",
+  });
+  const explicit = repairParsedEntry({
+    time: "0:00:30",
+    seconds: 30,
+    title: "熱異常",
+    artist: "Other Artist",
+    raw: "0:30 熱異常 / Other Artist",
+  });
+  const chatter = repairParsedEntry({
+    time: "0:00:40",
+    seconds: 40,
+    title: "熱異常について",
+    artist: "待补歌手",
+    raw: "0:40 熱異常について",
+  });
+
+  assert.equal(heat.artist, "いよわ");
+  assert.equal(heat.repair.changed, true);
+  assert.equal(heat.repair.reasons.includes("known_song_artist_override"), true);
+  assert.equal(bracketed.title, "（少女レイ）");
+  assert.equal(bracketed.artist, "みきとP");
+  assert.equal(explicit.artist, "Other Artist");
+  assert.equal(chatter.artist, "待补歌手");
+});
+
+test("validates high-confidence artist override config conflicts", () => {
+  const validation = validateKnownSongArtistOverrides({
+    schemaVersion: 1,
+    records: [
+      { title: "熱異常", artist: "いよわ", reviewedAt: "2026-07-21" },
+      { title: "熱異常", artist: "Other Artist", reviewedAt: "2026-07-21" },
+    ],
+  });
+  const context = createKnownSongArtistOverrideContext({
+    schemaVersion: 1,
+    records: [{ title: "新宝島", artist: "サカナクション", reviewedAt: "2026-07-21" }],
+  });
+
+  assert.equal(validation.errors.some((error) => error.includes("conflicts")), true);
+  assert.equal(context.byTitleKey.get("新宝島").artist, "サカナクション");
 });
 
 test("cleans safe title decorations without overwriting raw text", () => {

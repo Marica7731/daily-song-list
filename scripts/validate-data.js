@@ -3,6 +3,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { BLOCKLIST_HASH, BLOCKLIST_VERSION, matchBlockedSource } = require("../assets/source-filter");
 const { NON_SONG_RULES_PATH, OVERRIDES_PATH, validateCurationOverrides } = require("./curation");
+const { KNOWN_SONG_ARTIST_OVERRIDES_PATH, validateKnownSongArtistOverrides } = require("./entry-repair");
 const { SONG_ALIASES_PATH, canonicalizeSongIdentity, loadSongAliasContext, validateSongAliasConfig } = require("./song-aliases");
 const { SUPPLEMENTAL_KNOWN_SONGS_PATH, loadSupplementalKnownSongs } = require("./song-search-index");
 const { CATALOG_RETENTION_POLICY, MONTH_CATALOG_DAYS, VIDEO_CATALOG_PATH, isWithinCatalogWindow } = require("./video-catalog");
@@ -427,6 +428,13 @@ function validateCurationConfig() {
     } catch (error) {
       errors.push(`song-search-known-overrides: ${error.message}`);
     }
+  }
+
+  if (!fs.existsSync(KNOWN_SONG_ARTIST_OVERRIDES_PATH)) {
+    errors.push("missing known song artist overrides: config/known-song-artist-overrides.json");
+  } else {
+    const validation = validateKnownSongArtistOverrides(readJson(KNOWN_SONG_ARTIST_OVERRIDES_PATH));
+    for (const error of validation.errors) errors.push(`known-song-artist-overrides: ${error}`);
   }
 }
 

@@ -1,6 +1,10 @@
+const fs = require("node:fs");
+const path = require("node:path");
 const { createSongSearchLookup, normalizeSongSearchText } = require("../assets/frontend-utils");
 
 const UNKNOWN_ARTIST = "未記載";
+const ROOT = path.resolve(__dirname, "..");
+const KNOWN_SONG_ARTIST_OVERRIDES_PATH = path.join(ROOT, "config", "known-song-artist-overrides.json");
 const DELIMITER_CHARS = "/／|｜￤∣丨";
 const BRACKET_PAIRS = [
   ["【", "】"],
@@ -63,6 +67,12 @@ function repairParsedEntry(song, lookupInput = null) {
     repairs.push("combined_title_artist_lookup");
   }
 
+  const knownArtist = findKnownSongArtistOverride(title, artist);
+  if (knownArtist) {
+    artist = knownArtist.artist;
+    repairs.push("known_song_artist_override");
+  }
+
   const known = songSearchRecognition({ title, artist }, lookup);
   return {
     ...song,
@@ -77,6 +87,61 @@ function repairParsedEntry(song, lookupInput = null) {
     },
     curationSignals: signals,
   };
+}
+
+let knownSongArtistOverrideContext = null;
+
+function loadKnownSongArtistOverrides(filePath = KNOWN_SONG_ARTIST_OVERRIDES_PATH) {
+  if (filePath === KNOWN_SONG_ARTIST_OVERRIDES_PATH && knownSongArtistOverrideContext) return knownSongArtistOverrideContext;
+  const config = readJsonIfExists(filePath) || { schemaVersion: 1, records: [] };
+  const context = createKnownSongArtistOverrideContext(config);
+  if (filePath === KNOWN_SONG_ARTIST_OVERRIDES_PATH) knownSongArtistOverrideContext = context;
+  return context;
+}
+
+function createKnownSongArtistOverrideContext(config = {}) {
+  const records = Array.isArray(config.records) ? config.records : [];
+  const byTitleKey = new Map();
+  const errors = [];
+
+  if (Number(config.schemaVersion) !== 1) errors.push("schemaVersion must be 1");
+  if (!Array.isArray(config.records)) errors.push("records must be array");
+  for (const [index, record] of records.entries()) {
+    const title = cleanConfigText(record?.title);
+    const artist = cleanConfigText(record?.artist);
+    const titleKey = normalizeSongSearchText(title);
+    if (!title || !titleKey) errors.push(`records[${index}].title invalid`);
+    if (!artist || isUnknownArtist(artist)) errors.push(`records[${index}].artist invalid`);
+    if (record?.reviewedAt && Number.isNaN(Date.parse(record.reviewedAt))) errors.push(`records[${index}].reviewedAt invalid`);
+    if (!titleKey || !artist) continue;
+    const value = {
+      title,
+      artist,
+      reason: cleanConfigText(record?.reason) || "high_confidence_artist_completion",
+      reviewedAt: cleanConfigText(record?.reviewedAt),
+      evidence: Array.isArray(record?.evidence) ? record.evidence.map(cleanConfigText).filter(Boolean) : [],
+    };
+    const existing = byTitleKey.get(titleKey);
+    if (existing && existing.artist !== artist) {
+      errors.push(`records[${index}] conflicts for ${title}`);
+      continue;
+    }
+    byTitleKey.set(titleKey, value);
+  }
+
+  return { schemaVersion: Number(config.schemaVersion) || 1, records, byTitleKey, errors };
+}
+
+function validateKnownSongArtistOverrides(config = {}) {
+  const context = createKnownSongArtistOverrideContext(config);
+  return { errors: context.errors, context };
+}
+
+function findKnownSongArtistOverride(title, artist, context = loadKnownSongArtistOverrides()) {
+  if (!isUnknownArtist(artist)) return null;
+  const titleKey = normalizeSongSearchText(cleanSafeTitleCandidate(title));
+  if (!titleKey) return null;
+  return context?.byTitleKey?.get(titleKey) || null;
 }
 
 function bestDelimiterRepairCandidate(song, lookupInput = null) {
@@ -428,7 +493,7 @@ function isUnknownArtist(value) {
 }
 
 function isUnknownArtistKey(value) {
-  return new Set(["", "unknown", "na", "n/a", "none", "null", "未記載", "未记载", "不明", "なし", "无"]).has(value);
+  return new Set(["", "unknown", "na", "n/a", "none", "null", "未記載", "未记载", "不明", "なし", "无", "待补歌手", "待補歌手", "待补", "待補"]).has(value);
 }
 
 function titleArtistKey(title, artist) {
@@ -441,6 +506,18 @@ function cleanSignalText(value) {
   return String(value || "")
     .replace(/^(?:[\[【(（]\s*)?\d{1,2}:\d{2}(?::\d{2})?\s*(?:[\]】)）])?\s*/u, "")
     .trim();
+}
+
+function cleanConfigText(value) {
+  return String(value || "").replace(/\s+/gu, " ").trim();
+}
+
+function readJsonIfExists(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    return null;
+  }
 }
 
 function isCustomEmojiOnlyText(value) {
@@ -509,15 +586,20 @@ function uniqueValues(values) {
 }
 
 module.exports = {
+  KNOWN_SONG_ARTIST_OVERRIDES_PATH,
   bestCombinedTitleArtistCandidate,
   bestDelimiterRepairCandidate,
   cleanSafeTitleCandidate,
   cleanSafeArtistCandidate,
+  createKnownSongArtistOverrideContext,
   entryRepairSignals,
+  findKnownSongArtistOverride,
+  loadKnownSongArtistOverrides,
   parserCorruptionTitleCandidate,
   repairParsedEntry,
   scoreTitleArtistSplit,
   songSearchRecognition,
   stripCrossFieldWrapper,
   titleArtistSplitCandidates,
+  validateKnownSongArtistOverrides,
 };

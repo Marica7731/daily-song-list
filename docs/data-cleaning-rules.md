@@ -36,6 +36,17 @@ Unknown-artist section labels are rejected by parser and curation rules:
 - Singleton pseudo-song rows are rejected only with source-count context. The curation layer, JS runtime ranking exporter, and Python DB fallback compute normalized title source counts, then drop rows where the normalized title appears in one source, the artist is unknown or is an English explanatory gloss, and the title/raw text looks like daily chatter, stream notes, topic labels, or explanation text. Rows with an English explanatory gloss and no song-list ordinal are also rejected before singleton scoring because these are usually translated chapter headings, for example `上野公園の桜 / Cherry Blossoms at Ueno Park`. Reliable English artist names remain guarded, for example `ホログラム / NICO Touches the Walls`, `元彼氏として / My Hair is Bad`, and `明日への扉 / I WiSH`.
 - `vsinger_moment_http` / `vsinger-moment` / `moment` provenance is not an `isCollected` source. Only manual, verified, song-search, and accepted `youtube_channel_discovery` rows set the collected flag.
 
+## High-Confidence Artist Completion
+
+Unknown-artist rows may be repaired only when the normalized title exactly matches a reviewed record in `config/known-song-artist-overrides.json`. The repair layer applies these records after parser cleanup and delimiter repair, and only when `artist` is an unknown marker such as `未記載`, `待补歌手`, or `待補歌手`. It does not overwrite explicit artists and does not apply to longer chatter titles such as `熱異常について`.
+
+Current reviewed examples include:
+
+- `熱異常` -> `いよわ`; checked against the local song-search index (`熱異常::いよわfeat足立レイ`), YouTube result query `熱異常 いよわ YouTube`, and Apple Music query `熱異常 いよわ Apple Music`.
+- Frequent current unknown-artist rows with song-search title-artist matches and platform confirmation, including `少女レイ / みきとP`, `IRIS OUT / 米津玄師`, `HOT LIMIT / T.M.Revolution`, `Bling-Bang-Bang-Born / Creepy Nuts`, `怪獣の花唄 / Vaundy`, `天体観測 / BUMP OF CHICKEN`, `新宝島 / サカナクション`, `鬼ノ宴 / 友成空`, and `魂のルフラン / 高橋洋子`.
+
+Do not add a title to `known-song-artist-overrides.json` merely because song-search has a title-only match. Keep it as `待补歌手` when the title maps to multiple plausible artists, appears only once, lacks platform evidence, or looks like commentary, an English explanatory gloss, a chapter heading, translation text, or stream activity. Those rows should be reviewed through curation/non-song rules instead of artist completion.
+
 ## START Guardrail
 
 `START` and `Start` are not globally removed. Unknown-artist `START` section markers are dropped, but explicit known-artist rows are kept. Tests cover:
