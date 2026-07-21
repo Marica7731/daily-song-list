@@ -5,6 +5,7 @@ const {
   annotatePayloadWithSongSearchNiche,
   buildSongSearchIndex,
   fetchSongSearchIndex,
+  isMomentOnlySongSearchSources,
   mergeSupplementalKnownSongs,
   parseSongSearchDataFile,
 } = require("../scripts/song-search-index");
@@ -57,6 +58,69 @@ test("builds title and title-artist keys for niche annotation", () => {
   assert.equal(index.titleArtistKeyCount, 2);
   assert.equal(index.titleKeys.includes("knownsong"), true);
   assert.equal(index.titleArtistKeys.includes("knownsong::knownartist"), true);
+});
+
+test("does not treat Moment-only song-search rows as collected songs", () => {
+  const index = buildSongSearchIndex(
+    [
+      { title: "Moment Only Song", artist: "Moment Artist", sources: new Set(["vsinger-moment/songs.js"]) },
+      { title: "Shared Song", artist: "Shared Artist", sources: new Set(["vsinger-moment/songs.js", "manual-youtube.js"]) },
+    ],
+    { generatedAt: "2026-07-22T00:00:00.000Z", files: ["songs.js"] },
+  );
+
+  assert.equal(isMomentOnlySongSearchSources(["vsinger-moment/songs.js"]), true);
+  assert.equal(isMomentOnlySongSearchSources(["vsinger-moment/songs.js", "manual-youtube.js"]), false);
+  assert.equal(index.titleKeys.includes("momentonlysong"), false);
+  assert.equal(index.titleArtistKeys.includes("momentonlysong::momentartist"), false);
+  assert.equal(index.titleKeys.includes("sharedsong"), true);
+  assert.equal(index.momentOnlyRecordCount, 1);
+});
+
+test("Moment-only song-search rows do not mark payload songs as collected", () => {
+  const index = buildSongSearchIndex(
+    [
+      { title: "Moment Only Song", artist: "Moment Artist", sources: new Set(["vsinger-moment/songs.js"]) },
+      { title: "Trusted Song", artist: "Trusted Artist", sources: new Set(["manual-youtube.js"]) },
+    ],
+    { generatedAt: "2026-07-22T00:00:00.000Z", files: ["songs.js"] },
+  );
+  const payload = {
+    groups: {
+      all: {
+        items: [
+          {
+            videoId: "AAAAAAAAAAA",
+            songs: [
+              { title: "Moment Only Song", artist: "Moment Artist", seconds: 1 },
+              { title: "Trusted Song", artist: "Trusted Artist", seconds: 2 },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const annotated = annotatePayloadWithSongSearchNiche(payload, index);
+
+  assert.deepEqual(
+    annotated.groups.all.items[0].songs.map((song) => song.isNiche),
+    [true, false],
+  );
+});
+
+test("supplemental known songs can restore a reviewed Moment-only title", () => {
+  const index = mergeSupplementalKnownSongs(
+    buildSongSearchIndex([{ title: "Reviewed Song", artist: "Reviewed Artist", sources: new Set(["moment.js"]) }], {
+      generatedAt: "2026-07-22T00:00:00.000Z",
+      files: ["moment.js"],
+    }),
+    [{ title: "Reviewed Song", artist: "Reviewed Artist", reason: "manual_known_song_confirmation" }],
+  );
+
+  assert.equal(index.titleKeys.includes("reviewedsong"), true);
+  assert.equal(index.titleArtistKeys.includes("reviewedsong::reviewedartist"), true);
+  assert.equal(index.supplementalKnownSongCount, 1);
 });
 
 test("annotates payload songs as niche when they are absent from song-search", () => {

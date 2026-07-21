@@ -23,6 +23,8 @@ test("batch runner parses bounded options", () => {
     "4",
     "--per-channel-timeout-ms",
     "60000",
+    "--audit-exceptions",
+    "config/youtube-channel-import-audit-exceptions.json",
     "--no-export",
   ]);
 
@@ -31,6 +33,7 @@ test("batch runner parses bounded options", () => {
   assert.equal(args.maxCandidates, 3);
   assert.equal(args.maxInspect, 4);
   assert.equal(args.perChannelTimeoutMs, 60000);
+  assert.ok(args.auditExceptionsPath.endsWith(path.join("config", "youtube-channel-import-audit-exceptions.json")));
   assert.equal(args.noExport, true);
 });
 
@@ -63,7 +66,7 @@ test("batch runner summaries and safe clean guard stay bounded", () => {
         status: "completed",
         timedOut: false,
         discovery: { candidateCount: 2, inspectedInLatestRun: 1, usableVideoCount: 1, occurrenceCount: 3 },
-        import: { imported: 1, skipped: 0, failed: 0, increments: { videos: 1, songs: 2, occurrences: 3 } },
+        import: { imported: 1, skipped: 0, failed: 0, suspicious: 2, increments: { videos: 1, songs: 2, occurrences: 3 } },
       },
       b: {
         status: "failed",
@@ -76,6 +79,7 @@ test("batch runner summaries and safe clean guard stay bounded", () => {
   assert.equal(summary.completed, 1);
   assert.equal(summary.failed, 1);
   assert.equal(summary.timedOut, 1);
+  assert.equal(summary.suspicious, 2);
   assert.equal(summary.importedVideos, 1);
   assert.equal(summary.importedOccurrences, 3);
 });

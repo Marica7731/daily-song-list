@@ -20,7 +20,7 @@ async function main() {
   const generatedAt = new Date().toISOString();
   const curation = loadCurationContext();
   const catalog = loadVideoCatalog();
-  const { videos, stats: readStats } = readDiscoveryVideos(inputs);
+  const { videos, stats: readStats } = readDiscoveryVideos(inputs, { auditExceptionsPath: args["audit-exceptions"] });
   if (!videos.length && !args["allow-empty"]) {
     throw new Error(`no usable channel discovery video details found in ${inputs.join(", ")}`);
   }
@@ -52,6 +52,7 @@ async function main() {
       `usableVideos=${videos.length}`,
       `acceptedVideos=${acceptedVideos.length}`,
       `skippedRegressions=${safeImport.stats.skippedExistingRegressions}`,
+      `suspicious=${inputSummaries.reduce((total, item) => total + item.suspicious, 0)}`,
       `occurrences=${payload.occurrenceCount}`,
       `failed=${inputSummaries.reduce((total, item) => total + item.failed, 0)}`,
       `output=${quoteForMarker(outputPath)}`,
@@ -74,6 +75,9 @@ function buildInputSummaries(inputDirs, readStats, usableVideos, acceptedVideos,
     const accepted = acceptedByInput.get(inputKey) || [];
     const regressionSkipped = usable.filter((video) => skippedRegressionIds.has(video.videoId));
     const failedReasons = summarizeFailedAudits(audits);
+    const preImportAudit = normalizePreImportAuditSummary(read.preImportAudit);
+    const preImportFailedVideos = Number(preImportAudit.cleaned?.videos?.failed) || 0;
+    const suspiciousVideos = Number(preImportAudit.cleaned?.videos?.withSuspiciousRows) || Number(preImportAudit.cleaned?.videos?.suspicious) || 0;
     const importedOccurrenceCount = sumSongCount(accepted);
     const skippedNoSongs = Number(read.skippedNoSongs) || 0;
     const skippedInvalidVideoId = Number(read.skippedInvalidVideoId) || 0;
@@ -84,15 +88,25 @@ function buildInputSummaries(inputDirs, readStats, usableVideos, acceptedVideos,
       singerName: stringValue(manifest.singerName),
       generatedAt: stringValue(manifest.generatedAt),
       imported: accepted.length,
+      rawCandidates: {
+        videos: Number(preImportAudit.raw?.videoDetails) || Number(read.videoDetails) || 0,
+        songs: Number(preImportAudit.raw?.songCandidates) || Number(read.rawSongCandidates) || 0,
+      },
       skipped: skippedNoSongs + skippedInvalidVideoId + duplicateVideoIds + regressionSkipped.length,
-      failed: failedReasons.total,
-      failedReasons: failedReasons.byResult,
+      failed: failedReasons.total + preImportFailedVideos,
+      suspicious: suspiciousVideos,
+      failedReasons: mergeReasonCounts(failedReasons.byResult, preImportAudit.reasons?.failed),
+      suspiciousReasons: preImportAudit.reasons?.suspicious || {},
+      caseSamples: preImportAudit.caseSamples || {},
       skippedReasons: {
         noSongs: skippedNoSongs,
         invalidVideoId: skippedInvalidVideoId,
         duplicateVideoIds,
         existingRegression: regressionSkipped.length,
+        preImportAudit: preImportAudit.reasons?.skipped || {},
       },
+      preImportAudit,
+      suspiciousQueue: preImportAudit.suspiciousQueue || preImportAudit.suspiciousItems || [],
       increments: {
         videos: accepted.length,
         occurrences: importedOccurrenceCount,
@@ -143,6 +157,55 @@ function summarizeFailedAudits(audits) {
     byResult[result] = (byResult[result] || 0) + 1;
   }
   return { total, byResult };
+}
+
+function normalizePreImportAuditSummary(summary) {
+  return {
+    policy: summary?.policy || {},
+    raw: {
+      videoDetails: Number(summary?.raw?.videoDetails) || 0,
+      songCandidates: Number(summary?.raw?.songCandidates) || 0,
+    },
+    cleaned: {
+      videos: {
+        accepted: Number(summary?.cleaned?.videos?.accepted) || 0,
+        skipped: Number(summary?.cleaned?.videos?.skipped) || 0,
+        failed: Number(summary?.cleaned?.videos?.failed) || 0,
+        suspicious: Number(summary?.cleaned?.videos?.suspicious) || 0,
+        withSuspiciousRows: Number(summary?.cleaned?.videos?.withSuspiciousRows) || 0,
+        withFailedRows: Number(summary?.cleaned?.videos?.withFailedRows) || 0,
+        dropped: Number(summary?.cleaned?.videos?.dropped) || 0,
+      },
+      songs: {
+        accepted: Number(summary?.cleaned?.songs?.accepted) || 0,
+        skipped: Number(summary?.cleaned?.songs?.skipped) || 0,
+        failed: Number(summary?.cleaned?.songs?.failed) || 0,
+        suspicious: Number(summary?.cleaned?.songs?.suspicious) || 0,
+        dropped: Number(summary?.cleaned?.songs?.dropped) || 0,
+      },
+    },
+    reasons: {
+      skipped: summary?.reasons?.skipped || {},
+      failed: summary?.reasons?.failed || {},
+      suspicious: summary?.reasons?.suspicious || {},
+      acceptedExceptions: Number(summary?.reasons?.acceptedExceptions) || 0,
+      rejectedExceptions: Number(summary?.reasons?.rejectedExceptions) || 0,
+    },
+    caseSamples: summary?.caseSamples || {},
+    channelSummaries: Array.isArray(summary?.channelSummaries) ? summary.channelSummaries : [],
+    suspiciousItems: Array.isArray(summary?.suspiciousItems) ? summary.suspiciousItems : [],
+    suspiciousQueue: Array.isArray(summary?.suspiciousQueue) ? summary.suspiciousQueue : Array.isArray(summary?.suspiciousItems) ? summary.suspiciousItems : [],
+  };
+}
+
+function mergeReasonCounts(...items) {
+  const result = {};
+  for (const item of items || []) {
+    for (const [key, value] of Object.entries(item || {})) {
+      result[key] = (result[key] || 0) + (Number(value) || 0);
+    }
+  }
+  return result;
 }
 
 function ratioSummary(items, hasValue) {

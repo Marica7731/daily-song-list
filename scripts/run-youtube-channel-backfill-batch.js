@@ -85,6 +85,7 @@ async function main() {
       `timedOut=${manifest.summary.timedOut}`,
       `imported=${manifest.summary.imported}`,
       `skipped=${manifest.summary.skipped}`,
+      `suspicious=${manifest.summary.suspicious}`,
       `occurrences=${manifest.summary.importedOccurrences}`,
       `manifest=${quoteForMarker(manifestPath)}`,
       `accepted=${quoteForMarker(manifest.export?.output || "")}`,
@@ -100,6 +101,7 @@ function parseArgs(argv) {
     else if (name === "--targets") raw.targetsPath = requireValue(argv, ++index, name);
     else if (name === "--output-root") raw.outputRoot = requireValue(argv, ++index, name);
     else if (name === "--accepted-output" || name === "--output") raw.acceptedOutput = requireValue(argv, ++index, name);
+    else if (name === "--audit-exceptions") raw.auditExceptionsPath = requireValue(argv, ++index, name);
     else if (name === "--max-channel-pages") raw.maxChannelPages = positiveInteger(requireValue(argv, ++index, name), 100);
     else if (name === "--max-candidates") raw.maxCandidates = nonNegativeInteger(requireValue(argv, ++index, name), 0);
     else if (name === "--max-inspect") raw.maxInspect = nonNegativeInteger(requireValue(argv, ++index, name), 1000);
@@ -120,6 +122,7 @@ function parseArgs(argv) {
     targetsPath: path.resolve(ROOT, raw.targetsPath || DEFAULT_TARGETS_PATH),
     outputRoot: path.resolve(ROOT, raw.outputRoot || DEFAULT_OUTPUT_ROOT),
     acceptedOutput: path.resolve(ROOT, raw.acceptedOutput || DEFAULT_ACCEPTED_OUTPUT),
+    auditExceptionsPath: raw.auditExceptionsPath ? path.resolve(ROOT, raw.auditExceptionsPath) : "",
     maxChannelPages: raw.maxChannelPages ?? 100,
     maxCandidates: raw.maxCandidates ?? 0,
     maxInspect: raw.maxInspect ?? 1000,
@@ -264,6 +267,7 @@ async function runAcceptedExport(manifest, args) {
   const commandArgs = [EXPORT_SCRIPT];
   for (const inputDir of inputDirs) commandArgs.push("--input-dir", inputDir);
   commandArgs.push("--output", args.acceptedOutput);
+  if (args.auditExceptionsPath) commandArgs.push("--audit-exceptions", args.auditExceptionsPath);
   const logPath = path.join(args.outputRoot, "export.log");
   const result = await runCommand(process.execPath, commandArgs, {
     cwd: ROOT,
@@ -293,7 +297,9 @@ function applyExportSummariesToChannels(manifest, exportRecord) {
     if (!summary) continue;
     channel.import = summary;
     channel.failed = summary.failed;
+    channel.suspicious = summary.suspicious;
     channel.failedReasons = summary.failedReasons;
+    channel.suspiciousReasons = summary.suspiciousReasons;
   }
 }
 
@@ -391,6 +397,7 @@ function manifestOptions(args) {
     targetsPath: projectRelativePath(args.targetsPath),
     outputRoot: projectRelativePath(args.outputRoot),
     acceptedOutput: projectRelativePath(args.acceptedOutput),
+    auditExceptionsPath: args.auditExceptionsPath ? projectRelativePath(args.auditExceptionsPath) : "",
     maxChannelPages: args.maxChannelPages,
     maxCandidates: args.maxCandidates,
     maxInspect: args.maxInspect,
@@ -418,6 +425,7 @@ function summarizeManifest(manifest) {
     imported: sumBy(imports, (item) => item.imported),
     skipped: sumBy(imports, (item) => item.skipped),
     importFailed: sumBy(imports, (item) => item.failed),
+    suspicious: sumBy(imports, (item) => item.suspicious),
     importedVideos: sumBy(imports, (item) => item.increments?.videos),
     importedSongs: sumBy(imports, (item) => item.increments?.songs),
     importedOccurrences: sumBy(imports, (item) => item.increments?.occurrences),
@@ -492,6 +500,7 @@ function channelMarker(channel) {
     `videos=${channel.discovery.usableVideoCount}`,
     `occurrences=${channel.discovery.occurrenceCount}`,
     `failed=${channel.failed}`,
+    `suspicious=${channel.suspicious || 0}`,
     `timedOut=${channel.timedOut ? 1 : 0}`,
     `outputDir=${quoteForMarker(channel.outputDir)}`,
   ].join(" ");

@@ -42,6 +42,45 @@ npm run youtube:discover-channel -- \
 
 Resume by rerunning the same command without `--fresh`. The checkpoint is `checkpoint.json` inside the output directory. Use `--fresh` only when the previous checkpoint should be ignored.
 
+## Pre-import dirty-data audit
+
+Discovery output is not imported just because the crawler found timestamps. `youtube:import-channel-discovery` and `youtube:export-channel-increment` run a pre-import audit before writing catalog or accepted increment data. The audit records raw candidate counts, then classifies cleaned rows as `accepted`, `skipped`, `failed`, or `suspicious`.
+
+Suspicious rows are held out of import. Review only those rows, then convert the decision into either a durable parser/curation rule or an explicit reviewed exception. Do not paste AI one-off judgments into accepted JSON without one of those durable records.
+
+The audit treats these patterns as suspicious:
+
+- narration, explanation, greetings, chat markers, and other non-song activity rows;
+- one-off rows with no artist;
+- one-off rows that still look weak after removing numbers, brackets, and sequence markers;
+- Japanese explanation text split from an English translation as `title / artist`;
+- OP/ED/Start/End/開始/タイムスタンプ/曲名 and bracket marker pollution.
+
+Video cover is mandatory for import. The importer uses the fetched `thumbnailUrl` and falls back to the stable YouTube `hqdefault.jpg` URL for valid video IDs. A row that still has no cover is blocked by the audit. Channel avatar URLs are preserved when YouTube exposes them, but no fake avatar is invented.
+
+Reviewed exceptions are optional and must be explicit:
+
+```json
+{
+  "schemaVersion": 1,
+  "accepted": [
+    {
+      "id": "review-2026-07-22-example",
+      "videoId": "AAAAAAAAAAA",
+      "seconds": 123,
+      "title": "Song Title",
+      "artist": "未記載",
+      "reviewedBy": "operator",
+      "reviewedAt": "2026-07-22T00:00:00Z",
+      "reason": "manual source confirms this title-only row is a song"
+    }
+  ],
+  "rejected": []
+}
+```
+
+Pass it with `--audit-exceptions <path>`. Exceptions without `reviewedBy` and `reason` are ignored.
+
 ## Bounded batch rescan
 
 For multi-channel補漏, use the batch runner instead of one long shell command. It runs channels sequentially, writes a resumable `batch-manifest.json` after each channel, keeps per-channel logs, enforces a timeout per channel, records a disk snapshot, and can export the accepted increment at the end.
@@ -58,6 +97,7 @@ Default bounded run:
 npm run youtube:backfill-channel-batch -- \
   --output-root artifacts/channel-discovery/source-rescan \
   --accepted-output data/external/youtube-channel-discovery/accepted/2026-07-22-source-rescan.json \
+  --audit-exceptions config/youtube-channel-import-audit-exceptions.json \
   --max-channel-pages 100 \
   --max-candidates 0 \
   --max-inspect 1000 \
@@ -235,6 +275,7 @@ To publish reviewed `video-details.json` rows without committing a large runtime
 npm run youtube:export-channel-increment -- \
   --input-dir artifacts/channel-discovery/noa_polaris \
   --input-dir artifacts/channel-discovery/kanaruhanon \
+  --audit-exceptions config/youtube-channel-import-audit-exceptions.json \
   --output data/external/youtube-channel-discovery/accepted/2026-07-19-manual-backfill.json
 npm run db:build
 npm run check:published:api -- http://127.0.0.1/
@@ -251,8 +292,9 @@ Accepted increment payloads include `inputSummaries[]`. For each channel, check:
 - `coverage.acceptedOccurrences.seconds`
 - `failedReasons` and `skippedReasons`
 - `missingThumbnailVideoIds` must be empty for accepted videos
+- `preImportAudit.raw`, `preImportAudit.cleaned`, `suspicious`, and `suspiciousReasons`
 
-These counts are based on YouTube discovery artifacts and catalog regression protection. VSinger Moment rows do not mark a channel as imported.
+These counts are based on YouTube discovery artifacts, manual reviewed exceptions, and catalog regression protection. VSinger Moment rows do not mark a channel as imported or collected; only this YouTube discovery source and manually reviewed local records are trusted collected sources.
 
 For fast local validation of YouTube-only補漏 rows, build a temporary DB without VSinger raw tables:
 

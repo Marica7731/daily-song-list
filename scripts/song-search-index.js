@@ -57,9 +57,10 @@ async function fetchSongSearchIndex(options = {}) {
         const titleKey = normalizeSongSearchText(entry.title);
         if (!titleKey) continue;
         const artistKey = normalizeSongSearchText(entry.artist);
+        const source = songSearchEntrySource(entry, file);
         const existing = entriesByKey.get(entryKey(titleKey, artistKey));
         if (existing) {
-          existing.sources.add(file);
+          existing.sources.add(source);
           continue;
         }
         entriesByKey.set(entryKey(titleKey, artistKey), {
@@ -67,7 +68,7 @@ async function fetchSongSearchIndex(options = {}) {
           artistKey,
           title: cleanText(entry.title),
           artist: cleanText(entry.artist),
-          sources: new Set([file]),
+          sources: new Set([source]),
         });
       }
       successfulFiles.push(file);
@@ -149,18 +150,26 @@ function buildSongSearchIndex(entries, options = {}) {
   const titleKeys = new Set();
   const titleArtistKeys = new Set();
   const samples = [];
+  let indexedRecordCount = 0;
+  let momentOnlyRecordCount = 0;
 
   for (const entry of entries || []) {
+    const sources = entrySources(entry);
+    if (isMomentOnlySongSearchSources(sources)) {
+      momentOnlyRecordCount += 1;
+      continue;
+    }
     const titleKey = entry.titleKey || normalizeSongSearchText(entry.title);
     const artistKey = entry.artistKey || normalizeSongSearchText(entry.artist);
     if (!titleKey) continue;
+    indexedRecordCount += 1;
     titleKeys.add(titleKey);
     if (artistKey && !isUnknownArtistKey(artistKey)) titleArtistKeys.add(`${titleKey}::${artistKey}`);
     if (samples.length < 8) {
       samples.push({
         title: cleanText(entry.title),
         artist: cleanText(entry.artist),
-        sources: entry.sources ? [...entry.sources].sort() : uniqueValues([entry.source]),
+        sources,
       });
     }
   }
@@ -182,7 +191,9 @@ function buildSongSearchIndex(entries, options = {}) {
     files: options.files || [],
     skippedFileCount: (options.skippedFiles || []).length,
     skippedFiles: options.skippedFiles || [],
-    recordCount: entries.length,
+    rawRecordCount: entries.length,
+    recordCount: indexedRecordCount,
+    momentOnlyRecordCount,
     titleKeyCount: titleKeys.size,
     titleArtistKeyCount: titleArtistKeys.size,
     titleKeys: [...titleKeys].sort(),
@@ -376,6 +387,30 @@ function entryKey(titleKey, artistKey) {
   return `${titleKey}::${artistKey || ""}`;
 }
 
+function songSearchEntrySource(entry, file = "") {
+  return cleanText(entry?.source || file);
+}
+
+function entrySources(entry) {
+  const values = entry?.sources ? [...entry.sources] : uniqueValues([entry?.source]);
+  return uniqueValues(values.map(cleanText)).sort();
+}
+
+function isMomentOnlySongSearchSources(sources) {
+  const values = (sources || []).map(cleanText).filter(Boolean);
+  return Boolean(values.length) && values.every(isMomentSongSearchSource);
+}
+
+function isMomentSongSearchSource(value) {
+  const text = cleanText(value).normalize("NFKC").toLocaleLowerCase();
+  if (!text) return false;
+  return (
+    /(?:^|[\/\\_.\-\s])vsinger[_.\-\s]*moment(?:$|[\/\\_.\-\s])/u.test(text) ||
+    /(?:^|[\/\\_.\-\s])moment(?:$|[\/\\_.\-\s])/u.test(text) ||
+    /vsinger.+moment|moment.+vsinger/u.test(text)
+  );
+}
+
 function isUnknownArtistKey(value) {
   return new Set(["", "unknown", "na", "n/a", "none", "null", "未記載", "未记载", "不明", "なし", "无"]).has(value);
 }
@@ -408,6 +443,8 @@ module.exports = {
   annotatePayloadWithSongSearchNiche,
   buildSongSearchIndex,
   fetchSongSearchIndex,
+  isMomentOnlySongSearchSources,
+  isMomentSongSearchSource,
   isSongSearchIndexAvailable,
   loadSupplementalKnownSongs,
   mergeSupplementalKnownSongs,
