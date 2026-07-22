@@ -1,0 +1,66 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch22",
+  "generatedAt": "2026-07-22T09:12:18.452Z",
+  "purpose": "consolidate omaru_piano shard0-3 artifact-local accepted increments after all shards completed",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch22/accepted-increment.json",
+    "note": "This consolidates previous artifact-local increments only. Integration can review and import deliberately; this commit does not write data/external."
+  },
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams",
+    "status": "imported_artifact_ready",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "shardCount": 4,
+    "completedShards": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "failedShards": [],
+    "pendingShards": [],
+    "sourceBatches": {
+      "shard0": "2026-07-22-source-backfill-batch21",
+      "shard1": "2026-07-22-source-backfill-batch18",
+      "shard2": "2026-07-22-source-backfill-batch19",
+      "shard3": "2026-07-22-source-backfill-batch20"
+    },
+    "previousFailureResolved": {
+      "shard0": "batch18 vps3 YouTube 429 gap resolved by batch21 vps5 low-rate retry"
+    },
+    "discovery": {
+      "candidatesAcrossShardRuns": 444,
+      "inspectedAcrossShardRuns": 111,
+      "usableVideoCount": 38,
+      "occurrenceCount": 128,
+      "note": "Candidate count is per shard run and repeats the same discovered candidate set; do not treat it as unique channel candidates."
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 18,
+      "occurrences": 64,
+      "songs": 55,
+      "publishedTimestampCoverage": "18/18",
+      "occurrenceTimeCoverage": "64/64",
+      "occurrenceSecondsCoverage": "64/64",
+      "discoveryThumbnailCoverage": "18/18",
+      "acceptedIncrementThumbnailFieldCoverage": "0/18"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 20,
+      "occurrences": 64
+    },
+    "duplicateVideoIds": []
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "note": "No remote host used in this consolidation batch. Source shard batches 18-21 each recorded their own VPS cleanup evidence."
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAuditSummary": "dirty-audit-summary.json"
+  }
+}
