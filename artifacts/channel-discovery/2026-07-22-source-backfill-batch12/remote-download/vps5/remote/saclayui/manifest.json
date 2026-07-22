@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-22T02:49:09.681Z",
+  "channelUrl": "https://www.youtube.com/@saclayui/streams",
+  "singerName": "saclayui",
+  "keywords": [
+    "フルート",
+    "生演奏",
+    "live",
+    "ライブ",
+    "クラリネット",
+    "piano streaming",
+    "ピアノ演奏",
+    "歌",
+    "歌枠",
+    "弾き語",
+    "karaoke",
+    "歌ってみた",
+    "3D Live"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@saclayui/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/@saclayui/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 100,
+  "maxCandidates": 0,
+  "maxInspect": 1000,
+  "inspectShardIndex": 0,
+  "inspectShardCount": 1,
+  "candidateOnly": false,
+  "candidateCount": 179,
+  "inspectedInLatestRun": 179,
+  "usableVideoCount": 20,
+  "occurrenceCount": 124,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@saclayui/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 6,
+      "rawItemCount": 169,
+      "candidateCount": 168,
+      "continuationRounds": 5,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1165376
+    },
+    {
+      "pageUrl": "https://www.youtube.com/@saclayui/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 27,
+      "candidateCount": 11,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1116413
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2281789,
+    "totalElapsedMs": 281,
+    "statuses": {
+      "200": 2
+    }
+  }
+}

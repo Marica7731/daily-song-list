@@ -1,0 +1,436 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-22-source-backfill-batch12",
+  "generatedAt": "2026-07-22T11:05:26+08:00",
+  "scope": "twelfth partial small-batch commit for the 2026-07-22 requested source queue; not a full 1000+ channel rescan",
+  "acceptedIncrement": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch12\\accepted\\2026-07-22-source-backfill-batch12.accepted.json",
+  "rawExport": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch12\\accepted\\2026-07-22-source-backfill-batch12.raw-export.json",
+  "failedCheckpointSummaries": [
+    "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch12\\failed\\omaru_piano.checkpoint-summary.json"
+  ],
+  "exportMarkerBeforeDirtyAudit": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=20 usableVideos=20 acceptedVideos=20 skippedRegressions=0 occurrences=124",
+  "dirtyAudit": {
+    "droppedVideoCount": 19,
+    "droppedOccurrenceCount": 122,
+    "dropped": [
+      {
+        "youtubeVideoId": "gvvmloTbTY4",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット ≫ｸﾗﾌｧﾝ100%達成したいっ！🌸リクエストOK演奏配信✨〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 14
+      },
+      {
+        "youtubeVideoId": "F8H32XV4zNM",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット ≫夕方演奏会っ🪇🎶1曲だけでも聴いてみませんかっ？！🌸リクエストOK演奏配信✨〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 7
+      },
+      {
+        "youtubeVideoId": "ZC763fnW01k",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#コラボ演奏 ≫ #ゆいもえコンサート ピアノ×クラリネットっ🎹音ノ羽萌ちゃんと初めてのコラボ演奏っ！🌸〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 5
+      },
+      {
+        "youtubeVideoId": "MfgR12hxe-s",
+        "channel": "/@saclayui",
+        "videoTitle": "豪華なバンドセットで送る #セッション 🎶〖さくらゆい #saclalive〗@HadukiHisame_VT @KohKohKoh @karashi_mentaiko",
+        "hits": [
+          "manual:non-song-frame"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "non-song-frame session/performance stream, not a clear karaoke/singing frame",
+        "occurrences": 8
+      },
+      {
+        "youtubeVideoId": "MldF8nWFFFI",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット ≫1時間だけ演奏するので聴きに来てねっ🎶リクエストOK〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 7
+      },
+      {
+        "youtubeVideoId": "CEpqydBp2XI",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット ≫春の曲沢山演奏するっ🌸〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 17
+      },
+      {
+        "youtubeVideoId": "B7-6Ic9pjZ4",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット ≫猫耳で猫の曲演奏するよーーっっ.ᐟ.ᐟ🪈🎶〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 8
+      },
+      {
+        "youtubeVideoId": "4NfYim9xKqM",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット≫👍100で企画発表？.ᐟ.ᐟリクエストOKな演奏配信っ🪈〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 3
+      },
+      {
+        "youtubeVideoId": "P--PEhhlTNM",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット≫基礎練習と初見の曲練習するっ.ᐟ.ᐟ🪈〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 7
+      },
+      {
+        "youtubeVideoId": "XHe9n1ZaGmw",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット≫寝落ちにぴったりなチルい曲っ🪈〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 1
+      },
+      {
+        "youtubeVideoId": "gf5SnTTM7nk",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#緊急 ≫CH登録者数7000見守り配信！！！🎶〖さくらゆい #saclalive〗",
+        "hits": [
+          "manual:non-song-frame"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "watch/countdown stream, not a clear karaoke/singing frame",
+        "occurrences": 6
+      },
+      {
+        "youtubeVideoId": "dyy2yAhfIc8",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット≫高評価120目指して沢山演奏するよーっ.ᐟ.ᐟ⛄〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 4
+      },
+      {
+        "youtubeVideoId": "6Ex02pxOWS4",
+        "channel": "/@saclayui",
+        "videoTitle": "≪コラボ演奏≫葉月ひなちゃんとコラボ🎶今年も楽器演奏で世界を明るくするっ.ᐟ.ᐟ #桜葉月〖さくらゆい #saclalive〗",
+        "hits": [
+          "manual:non-song-frame"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "collaboration performance stream, not a clear karaoke/singing frame",
+        "occurrences": 8
+      },
+      {
+        "youtubeVideoId": "Ttv335CP7jA",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット≫起きてくるのを祈ってください🙏リクエスト大歓迎っ.ᐟ.ᐟ🎈〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 2
+      },
+      {
+        "youtubeVideoId": "YTWa3QN8Oes",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット≫同接50でビッグな告知します🎶おにゅーなリードの音色をお届け.ᐟ.ᐟ🎈〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 2
+      },
+      {
+        "youtubeVideoId": "nS1BEjyPQ_8",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#クラリネット≫元気なったー！お知らせ２つあります！🌸リクエスト大歓迎っ.ᐟ.ᐟ🎈〖さくらゆい #saclalive〗",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 2
+      },
+      {
+        "youtubeVideoId": "CYFmJQ2RGo4",
+        "channel": "/@saclayui",
+        "videoTitle": "【作業用BGM】☔梅雨に聴きたいクラリネットメドレー☔ ❘❘ JPOP Rain Songs clarinet #さくらゆい",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 6
+      },
+      {
+        "youtubeVideoId": "QLy9wiGZHbI",
+        "channel": "/@saclayui",
+        "videoTitle": "【 #お正月演奏リレー2025 】21:00~クラリネットの音色はいかがですか？🎶【 #saclalive #Vtuber 】",
+        "hits": [
+          "clarinet"
+        ],
+        "broadHits": [
+          "live"
+        ],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 8
+      },
+      {
+        "youtubeVideoId": "BotaDwTiX_I",
+        "channel": "/@saclayui",
+        "videoTitle": "【#Vtuber初夏の生演奏リレー】私のクラリネットを聴けっ！🎼🌸演奏コンサート配信🎹【#日和ゆい / Vtuber】",
+        "hits": [
+          "live_performance",
+          "clarinet"
+        ],
+        "broadHits": [],
+        "reason": "instrumental/live-performance term",
+        "occurrences": 7
+      }
+    ],
+    "suspiciousCount": 1,
+    "suspicious": [
+      {
+        "youtubeVideoId": "2mFMDi9gf_k",
+        "channel": "/@saclayui",
+        "videoTitle": "≪#歌枠 ≫月に1度のおうた枠きたーーーっ！🎤3曲目からメン限です✨〖さくらゆい #saclalive〗",
+        "hits": [
+          "live"
+        ],
+        "occurrences": 2
+      }
+    ],
+    "termHitCounts": {
+      "clarinet": 16,
+      "manual:non-song-frame": 3,
+      "live_performance": 1,
+      "live": 1
+    },
+    "note": "Instrumental/live-performance terms are dropped before import; broad live/live terms are only suspicious and are not dropped blindly."
+  },
+  "acceptedSummary": {
+    "videos": 1,
+    "occurrences": 2,
+    "uniqueSongs": 2,
+    "publishedTimestampCoverage": "1/1",
+    "occurrenceTimeCoverage": "2/2",
+    "occurrenceSecondsCoverage": "2/2",
+    "discoveryThumbnailCoverage": "1/1",
+    "dbEffectiveDelta": {
+      "videos": 1,
+      "songs": 0,
+      "occurrences": 2,
+      "sourceOccurrences": 2,
+      "rankingRows": 3
+    }
+  },
+  "dbVerification": {
+    "mode": "local YouTube-only --no-vsinger; before includes data/external plus batch1-batch11 artifacts, after also includes batch12 artifact; not production evidence",
+    "before": {
+      "videos": 6632,
+      "songs": 28990,
+      "occurrences": 104708,
+      "sourceOccurrences": 201051,
+      "rankingRows": 124628
+    },
+    "after": {
+      "videos": 6633,
+      "songs": 28990,
+      "occurrences": 104710,
+      "sourceOccurrences": 201053,
+      "rankingRows": 124631
+    },
+    "delta": {
+      "videos": 1,
+      "songs": 0,
+      "occurrences": 2,
+      "sourceOccurrences": 2,
+      "rankingRows": 3
+    },
+    "querySaclalive": {
+      "before": {
+        "videos": 0,
+        "occurrences": 0
+      },
+      "after": {
+        "videos": 1,
+        "occurrences": 2
+      },
+      "delta": {
+        "videos": 1,
+        "occurrences": 2
+      }
+    }
+  },
+  "sources": [
+    {
+      "handle": "omaru_piano",
+      "url": "https://www.youtube.com/@omaru_piano/streams",
+      "status": "failed",
+      "reason": "remote discovery hit timeout before producing a complete manifest; checkpoint summary preserved for later retry",
+      "discoveryCandidates": 143,
+      "discoveryInspected": 139,
+      "discoveryUsableVideos": 0,
+      "discoveryOccurrences": 0,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "uniqueSongs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "reachedEnd": null,
+      "elapsedSeconds": 2700,
+      "failure": "timedOut=True exitCode=-9 inspected=139/143; no complete manifest"
+    },
+    {
+      "handle": "saclayui",
+      "url": "https://www.youtube.com/@saclayui/streams",
+      "status": "imported",
+      "reason": "complete remote manifest accepted after instrumental/non-song-frame dirty audit",
+      "discoveryCandidates": 179,
+      "discoveryInspected": 179,
+      "discoveryUsableVideos": 20,
+      "discoveryOccurrences": 124,
+      "acceptedVideos": 1,
+      "acceptedOccurrences": 2,
+      "uniqueSongs": 2,
+      "publishedTimestampCoverage": "1/1",
+      "occurrenceTimeCoverage": "2/2",
+      "occurrenceSecondsCoverage": "2/2",
+      "thumbnailCoverage": "1/1",
+      "reachedEnd": true,
+      "elapsedSeconds": 2230,
+      "failure": ""
+    }
+  ],
+  "statusCounts": {
+    "failed": 1,
+    "imported": 1
+  },
+  "remoteStatusFiles": [
+    "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch12\\remote-download\\vps3\\remote-status\\status.jsonl",
+    "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch12\\remote-download\\vps5\\remote-status\\status.jsonl"
+  ],
+  "remoteCleanup": {
+    "vps3": {
+      "status": "removed",
+      "path": "/opt/ytb-song-rank-source-backfill-20260722-batch12-vps3",
+      "df": "/dev/sda1 99G 11G 88G 11% /",
+      "marker": "CODEX_REMOTE_BATCH12_CLEANUP_OK"
+    },
+    "vps5": {
+      "status": "removed",
+      "path": "/opt/ytb-song-rank-source-backfill-20260722-batch12-vps5",
+      "df": "/dev/vda1 10G 2.6G 7.0G 28% /",
+      "marker": "CODEX_REMOTE_BATCH12_CLEANUP_OK"
+    }
+  },
+  "dirtyAuditRules": {
+    "dropExactOrInstrumentalTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone",
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "broadSuspiciousOnly": [
+      "live",
+      "ライブ"
+    ],
+    "manualDroppedVideoIds": [
+      "MfgR12hxe-s",
+      "gf5SnTTM7nk",
+      "6Ex02pxOWS4"
+    ]
+  },
+  "nextRecommendedBatch": [
+    {
+      "handle": "KOTATSUChHaruKotatsubutonclub",
+      "reason": "151 candidates with prior checkpoint"
+    },
+    {
+      "handle": "UCrF92dEkXiTtexol0yg4Gmw",
+      "reason": "233 candidate probe"
+    },
+    {
+      "handle": "AmanofuStella",
+      "reason": "prior checkpoint; needs continuation or shard"
+    }
+  ]
+}
