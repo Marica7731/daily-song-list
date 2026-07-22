@@ -1,0 +1,67 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch32-kohanalam-partial",
+  "generatedAt": "2026-07-22T14:59:07.868Z",
+  "source": {
+    "handle": "KohanaLam",
+    "url": "https://www.youtube.com/@KohanaLam/streams"
+  },
+  "policy": {
+    "dropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "contextualDropTerms": [
+      "live/ライブ without explicit song-frame signal"
+    ],
+    "scheduleOnlyDrop": "MV/Cover video with only live-info schedule timestamps"
+  },
+  "counts": {
+    "unfilteredVideoCount": 3,
+    "unfilteredOccurrenceCount": 15,
+    "acceptedVideoCount": 2,
+    "acceptedOccurrenceCount": 13,
+    "droppedVideoCount": 1,
+    "droppedOccurrenceCount": 2,
+    "suspiciousVideoCount": 0
+  },
+  "videos": [
+    {
+      "videoId": "1_scZU0bCgQ",
+      "title": "【定期配信】雑談弾き語り！",
+      "publishedTimestamp": 1779484202723,
+      "songCount": 5,
+      "status": "accepted",
+      "reason": "explicit or contextual song-list signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "H5aQ0sId9CA",
+      "title": "こはならむ『神様の秒針を壊した』MUSIC VIDEO / 劇場版「僕の心のヤバイやつ」挿入歌",
+      "publishedTimestamp": 1774300279490,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "official MV/Cover description timestamps are live-info schedule entries, not a song list"
+    },
+    {
+      "videoId": "X9gtw7q1rQM",
+      "title": "【定期配信】歌ったり話したり！",
+      "publishedTimestamp": 1774300202723,
+      "songCount": 8,
+      "status": "accepted",
+      "reason": "explicit or contextual song-list signal; no hard instrument/performance-only drop term"
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch32-kohanalam-partial",
+  "generatedAt": "2026-07-22T14:59:07.868Z",
+  "purpose": "KohanaLam partial accepted increment extracted from the previously committed vps3 checkpoint after the earlier large-source timeout",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch32-kohanalam-partial/accepted-increment.json",
+    "note": "This is a partial artifact-local increment from completed checkpoint details only. The full source remains pending for later sharded discovery."
+  },
+  "source": {
+    "handle": "KohanaLam",
+    "url": "https://www.youtube.com/@KohanaLam/streams",
+    "status": "partial",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "candidates": 224,
+    "inspected": 28,
+    "completedVideoIds": 3,
+    "checkpointDetailCount": 3,
+    "previousCheckpoint": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/remote-download/vps3/KohanaLam/checkpoint.json",
+    "pendingReason": "source has 224 candidates; this batch only exports the accepted subset from the 3 completed checkpoint details",
+    "acceptedAfterDirtyAudit": {
+      "videos": 2,
+      "occurrences": 13,
+      "songs": 13,
+      "publishedTimestampCoverage": "2/2",
+      "occurrenceTimeCoverage": "13/13",
+      "occurrenceSecondsCoverage": "13/13",
+      "acceptedIncrementThumbnailFieldCoverage": "0/2"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 1,
+      "occurrences": 2,
+      "suspiciousVideos": 0
+    }
+  },
+  "remoteCleanup": {
+    "usedRemoteHosts": false,
+    "reason": "local extraction from a previously committed checkpoint; no new remote directory was created in this batch"
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json",
+    "report": "report.md"
+  }
+}
