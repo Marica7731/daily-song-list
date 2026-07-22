@@ -41,8 +41,23 @@ UNKNOWN_ARTISTS = {
 KNOWN_SONG_ARTIST_OVERRIDES_PATH = ROOT / "config" / "known-song-artist-overrides.json"
 KNOWN_SONG_ARTIST_OVERRIDES_LOOKUP: dict[str, dict[str, str]] | None = None
 CURATED_ARTIST_ALIAS_GROUPS = (
+    {"canonical": "40mP", "aliases": ("40mp",)},
+    {"canonical": "Ado", "aliases": ("ado", "Ado :_heart:")},
+    {"canonical": "Aimer", "aliases": ("aimer",)},
+    {"canonical": "back number", "aliases": ("backnumber",)},
+    {"canonical": "BUMP OF CHICKEN", "aliases": ("bumpofchicken",)},
     {"canonical": "Calc.", "aliases": ("Calc",)},
+    {"canonical": "DECO*27", "aliases": ("deco27",)},
+    {"canonical": "LiSA", "aliases": ("lisa",)},
+    {"canonical": "Mrs. GREEN APPLE", "aliases": ("Mrs.GREEN APPLE", "Mr.s Green Apple", "mrsgreenapple")},
+    {"canonical": "Official髭男dism", "aliases": ("official髭男dism",)},
+    {"canonical": "RADWIMPS", "aliases": ("radwimps",)},
+    {"canonical": "T.M.Revolution", "aliases": ("T.M. Revolution", "tmrevolution")},
+    {"canonical": "tuki.", "aliases": ("tuki",)},
+    {"canonical": "YOASOBI", "aliases": ("yoasobi",)},
     {"canonical": "ジミーサムP", "aliases": ("ジミーサム", "OneRoom")},
+    {"canonical": "みきとP", "aliases": ("みきとＰ", "MikitoP", "mikitop")},
+    {"canonical": "ヨルシカ", "aliases": ("yorushika", "ヨルシカ（yorushika）")},
 )
 CURATED_ARTIST_ALIAS_LOOKUP: dict[str, dict[str, str]] | None = None
 
@@ -774,6 +789,7 @@ def empty_range_state() -> dict:
 
 def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: list[dict]) -> None:
     published_timestamp = int_or_none(item.get("publishedTimestamp"))
+    channel_handle = normalize_channel_handle(item.get("channelHandle"))
     payload = {
         "type": "video",
         "key": video_id,
@@ -781,7 +797,7 @@ def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: l
         "title": clean_text(item.get("title")),
         "channelName": clean_text(item.get("channelName")),
         "channelId": clean_text(item.get("channelId")),
-        "channelHandle": clean_text(item.get("channelHandle")),
+        "channelHandle": channel_handle,
         "channelUrl": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
         "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
         "sourceUrl": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
@@ -814,12 +830,12 @@ def record_video(state: dict, range_id: str, video_id: str, item: dict, songs: l
                 payload["title"],
                 payload["channelName"],
                 payload["channelId"],
-                payload["channelHandle"],
+                channel_handle,
                 payload["channelUrl"],
                 payload["keyword"],
                 *[part for song in songs for part in (song.get("title"), song.get("artist"))],
             ),
-            "channel_search_text": search_text(payload["channelName"], payload["channelId"], payload["channelHandle"], payload["channelUrl"]),
+            "channel_search_text": search_text(payload["channelName"], payload["channelId"], channel_handle, payload["channelUrl"]),
             "sort_timestamp": payload["publishedTimestamp"] or 0,
         }
     )
@@ -879,13 +895,14 @@ def record_vtuber(state: dict, video_id: str, item: dict, songs: list[dict]) -> 
     channel_key = channel_record_key(item)
     if not channel_key:
         return
+    channel_handle = normalize_channel_handle(item.get("channelHandle"))
     if channel_key not in state["vtubers"]:
         state["vtubers"][channel_key] = {
             "key": channel_key,
-            "name": clean_text(item.get("channelName") or item.get("channelHandle") or item.get("channelId") or "未知频道"),
+            "name": clean_text(item.get("channelName") or channel_handle or item.get("channelId") or "未知频道"),
             "channel_name": clean_text(item.get("channelName")),
             "channel_id": clean_text(item.get("channelId")),
-            "channel_handle": clean_text(item.get("channelHandle")),
+            "channel_handle": channel_handle,
             "channel_url": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
             "avatar_url": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
             "thumbnail_url": vtuber_thumbnail_candidate(item),
@@ -926,16 +943,15 @@ def build_ranking_rows(range_id: str, state: dict) -> list[dict]:
 def merge_channel_record_identity(record: dict, item: dict) -> None:
     channel_name = clean_text(item.get("channelName"))
     channel_id = clean_text(item.get("channelId"))
-    channel_handle = clean_text(item.get("channelHandle"))
+    channel_handle = normalize_channel_handle(item.get("channelHandle"))
     channel_url = clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"))
     avatar_url = clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl"))
     thumbnail_url = vtuber_thumbnail_candidate(item)
     source_url = clean_text(item.get("sourceUrl") or channel_url)
     source_type = clean_text(item.get("knownSourceType")) or known_source_type(item)
     if channel_name:
-        record["channel_name"] = record["channel_name"] or channel_name
-        if not record["name"] or record["name"] == "未知频道":
-            record["name"] = channel_name
+        record["channel_name"] = preferred_channel_display_name(record.get("channel_name"), channel_name)
+        record["name"] = preferred_channel_display_name("" if record.get("name") == "未知频道" else record.get("name"), record.get("channel_name") or channel_name)
     if channel_id:
         record["channel_id"] = record["channel_id"] or channel_id
     if channel_handle:
@@ -1577,6 +1593,8 @@ def insert_external_occurrence(conn: sqlite3.Connection, source_system: str, row
 
 
 def upsert_video(conn: sqlite3.Connection, video_id: str, item: dict) -> None:
+    channel_handle = normalize_channel_handle(item.get("channelHandle"))
+    payload = {**item, "channelHandle": channel_handle, "channelAliases": channel_aliases(item)}
     conn.execute(
         """
         INSERT OR REPLACE INTO videos(
@@ -1590,14 +1608,14 @@ def upsert_video(conn: sqlite3.Connection, video_id: str, item: dict) -> None:
             clean_text(item.get("title")),
             clean_text(item.get("channelName")),
             clean_text(item.get("channelId")),
-            clean_text(item.get("channelHandle")),
+            channel_handle,
             clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
             clean_text(item.get("keyword")),
             int_or_none(item.get("publishedTimestamp")),
             clean_text(item.get("publishedText")),
             clean_text(item.get("durationText")),
             clean_text(item.get("thumbnailUrl") or item.get("thumbnail")),
-            dumps_json(item),
+            dumps_json(payload),
         ),
     )
 
@@ -1607,10 +1625,15 @@ def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
     if not channel_key:
         return
     channel_url = clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"))
+    channel_handle = normalize_channel_handle(item.get("channelHandle") or channel_url or item.get("sourceUrl"))
+    display_name = preferred_channel_display_name(
+        clean_text(item.get("channelHandle") or item.get("channelId")),
+        item.get("channelName"),
+    )
     payload = {
         "channelId": clean_text(item.get("channelId")),
-        "handle": clean_text(item.get("channelHandle")),
-        "displayName": clean_text(item.get("channelName") or item.get("channelHandle") or item.get("channelId")),
+        "handle": channel_handle,
+        "displayName": display_name,
         "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
         "thumbnailUrl": vtuber_thumbnail_candidate(item),
         "sourceUrl": clean_text(item.get("sourceUrl") or channel_url),
@@ -1627,8 +1650,13 @@ def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(channel_key) DO UPDATE SET
           channel_id=COALESCE(NULLIF(channel_metadata.channel_id, ''), excluded.channel_id),
-          handle=COALESCE(NULLIF(channel_metadata.handle, ''), excluded.handle),
-          display_name=COALESCE(NULLIF(channel_metadata.display_name, ''), excluded.display_name),
+          handle=COALESCE(NULLIF(excluded.handle, ''), channel_metadata.handle),
+          display_name=CASE
+            WHEN excluded.display_name GLOB '*[ぁ-ゖァ-ヺ一-龯々〆〤]*'
+             AND channel_metadata.display_name NOT GLOB '*[ぁ-ゖァ-ヺ一-龯々〆〤]*'
+            THEN excluded.display_name
+            ELSE COALESCE(NULLIF(channel_metadata.display_name, ''), excluded.display_name)
+          END,
           avatar_url=COALESCE(NULLIF(channel_metadata.avatar_url, ''), excluded.avatar_url),
           thumbnail_url=COALESCE(NULLIF(channel_metadata.thumbnail_url, ''), excluded.thumbnail_url),
           source_url=COALESCE(NULLIF(channel_metadata.source_url, ''), excluded.source_url),
@@ -1750,18 +1778,23 @@ def insert_source_occurrence(
     item = payload.get("item") if isinstance(payload.get("item"), dict) else {}
     song = payload.get("song") if isinstance(payload.get("song"), dict) else {}
     video_id = clean_text(item.get("videoId"))
+    channel_handle = normalize_channel_handle(item.get("channelHandle"))
+    clean_item = {**item, "channelHandle": channel_handle, "channelAliases": channel_aliases(item)}
+    clean_payload = {**payload, "item": clean_item}
     channel_text = search_text(
         item.get("channelName"),
+        *channel_aliases(item),
         item.get("channelId"),
-        item.get("channelHandle"),
+        channel_handle,
         item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"),
     )
     occurrence_search_text = clean_text(payload.get("searchText")) or search_text(
         video_id,
         item.get("title"),
         item.get("channelName"),
+        *channel_aliases(item),
         item.get("channelId"),
-        item.get("channelHandle"),
+        channel_handle,
         item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"),
         item.get("keyword"),
         song.get("title"),
@@ -1783,12 +1816,12 @@ def insert_source_occurrence(
             clean_text(item.get("title")),
             clean_text(item.get("channelName")),
             clean_text(item.get("channelId")),
-            clean_text(item.get("channelHandle")),
+            channel_handle,
             clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
             int_or_none(item.get("publishedTimestamp")),
             int_or_none(song.get("seconds")),
             occurrence_search_text,
-            dumps_json(payload),
+            dumps_json(clean_payload),
         ),
     )
     occurrence_key = (source_key, position)
@@ -1839,6 +1872,7 @@ def source_occurrence_payload(item: dict, song: dict, video_id: str) -> dict:
             source_item.get("videoId"),
             source_item.get("title"),
             source_item.get("channelName"),
+            *channel_aliases(source_item),
             source_item.get("channelId"),
             source_item.get("channelHandle"),
             source_item.get("channelUrl"),
@@ -1868,13 +1902,15 @@ def source_payload_for_video(item: dict, songs: list[dict]) -> dict:
 
 def compact_video(item: dict) -> dict:
     published_timestamp = int_or_none(item.get("publishedTimestamp"))
+    channel_handle = normalize_channel_handle(item.get("channelHandle"))
     return {
         "videoId": clean_text(item.get("videoId")),
         "title": clean_text(item.get("title")),
         "channelName": clean_text(item.get("channelName")),
         "channelId": clean_text(item.get("channelId")),
-        "channelHandle": clean_text(item.get("channelHandle")),
+        "channelHandle": channel_handle,
         "channelUrl": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
+        "channelAliases": channel_aliases(item),
         "avatarUrl": clean_text(item.get("avatarUrl") or item.get("channelAvatarUrl")),
         "sourceUrl": clean_text(item.get("sourceUrl") or item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")),
         "knownSourceType": clean_text(item.get("knownSourceType")) or known_source_type(item),
@@ -1917,14 +1953,12 @@ def is_collected_source(item: dict) -> bool:
     source_groups = item.get("sourceGroups") if isinstance(item.get("sourceGroups"), list) else []
     source_quality = item.get("sourceQuality") if isinstance(item.get("sourceQuality"), dict) else {}
     known_type = clean_text(item.get("knownSourceType") or known_source_type(item)).lower()
+    source_system = clean_text(source_quality.get("sourceSystem")).lower()
     true_types = {"manual", "verified", "song-search", "song_search", "youtube_channel_discovery"}
     if (
         "youtube_channel_discovery" in source_groups
         or known_type in true_types
-        or (
-            source_quality.get("sourceType") == "external"
-            and clean_text(source_quality.get("sourceSystem")).lower() != "vsinger_moment_http"
-        )
+        or (source_quality.get("sourceType") == "external" and not is_moment_source_type(source_system))
     ):
         return True
     if is_moment_source(item):
@@ -2650,7 +2684,7 @@ def channel_record_key(item: dict) -> str:
     channel_id = clean_text(item.get("channelId"))
     if channel_id:
         return channel_id
-    channel_handle = clean_text(item.get("channelHandle")).lstrip("/")
+    channel_handle = normalize_channel_handle(item.get("channelHandle")).lstrip("/")
     if channel_handle:
         return normalize_key(channel_handle)
     channel_url_handle = handle_from_channel_url(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")).lstrip("/")
@@ -2730,12 +2764,20 @@ def hydrate_item_channel_metadata(item: dict, lookup: dict[str, dict]) -> dict:
     metadata = find_channel_metadata(lookup, normalize_channel_metadata(item))
     thumbnail_url = clean_text(item.get("thumbnailUrl") or item.get("thumbnail")) or thumbnail_url_for_video(item)
     if not metadata:
-        return {**item, "thumbnailUrl": thumbnail_url}
+        return {
+            **item,
+            "channelHandle": normalize_channel_handle(item.get("channelHandle")),
+            "channelAliases": channel_aliases(item),
+            "thumbnailUrl": thumbnail_url,
+        }
+    current_name = clean_text(item.get("channelName"))
+    preferred_name = preferred_channel_display_name(current_name, metadata.get("displayName", ""))
     return {
         **item,
-        "channelName": clean_text(item.get("channelName")) or metadata.get("displayName", ""),
+        "channelName": preferred_name,
+        "channelAliases": channel_alias_values([*channel_aliases(item), current_name, metadata.get("displayName", ""), metadata.get("channelHandle", "")]),
         "channelId": clean_text(item.get("channelId")) or metadata.get("channelId", ""),
-        "channelHandle": clean_text(item.get("channelHandle")) or metadata.get("channelHandle", ""),
+        "channelHandle": normalize_channel_handle(item.get("channelHandle")) or metadata.get("channelHandle", ""),
         "channelUrl": clean_text(item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl")) or metadata.get("channelUrl", "") or metadata.get("sourceUrl", ""),
         "avatarUrl": real_avatar_url(item.get("avatarUrl") or item.get("channelAvatarUrl")) or metadata.get("avatarUrl", ""),
         "sourceUrl": clean_text(item.get("sourceUrl")) or metadata.get("sourceUrl", "") or metadata.get("channelUrl", ""),
@@ -2776,7 +2818,7 @@ def merge_channel_metadata(existing: dict | None, incoming: dict) -> dict:
     if not existing:
         return incoming
     return {
-        "displayName": existing.get("displayName") or incoming.get("displayName", ""),
+        "displayName": preferred_channel_display_name(existing.get("displayName"), incoming.get("displayName", "")),
         "channelId": existing.get("channelId") or incoming.get("channelId", ""),
         "channelHandle": existing.get("channelHandle") or incoming.get("channelHandle", ""),
         "channelUrl": existing.get("channelUrl") or incoming.get("channelUrl", ""),
@@ -2796,6 +2838,56 @@ def channel_identity_keys(metadata: dict) -> list[str]:
         f"name:{normalize_key(metadata.get('displayName'))}" if metadata.get("displayName") else "",
     ]
     return [key for index, key in enumerate(keys) if key and key not in keys[:index]]
+
+
+def preferred_channel_display_name(current, candidate) -> str:
+    current_text = clean_text(current)
+    candidate_text = clean_text(candidate)
+    if not current_text:
+        return candidate_text
+    if not candidate_text:
+        return current_text
+    current_score = channel_display_name_score(current_text)
+    candidate_score = channel_display_name_score(candidate_text)
+    return candidate_text if candidate_score > current_score else current_text
+
+
+def channel_display_name_score(value) -> int:
+    text = clean_text(value)
+    if not text:
+        return -1
+    score = min(len(text), 80)
+    if re.search(r"[ぁ-ゖァ-ヺ一-龯々〆〤]", text):
+        score += 1000
+    if re.fullmatch(r"/?@[A-Za-z0-9._%~-]+", text) or re.fullmatch(r"/channel/UC[A-Za-z0-9_-]+", text):
+        score -= 1000
+    return score
+
+
+def channel_aliases(item: dict) -> list[str]:
+    aliases = item.get("channelAliases") if isinstance(item.get("channelAliases"), list) else []
+    return channel_alias_values(aliases)
+
+
+def channel_alias_values(values) -> list[str]:
+    return [value for value in unique_texts(values) if not is_channel_path_alias(value)]
+
+
+def is_channel_path_alias(value) -> bool:
+    text = clean_text(value).lower()
+    return text.startswith("/channel/") or "youtube.com/channel/" in text
+
+
+def unique_texts(values) -> list[str]:
+    result = []
+    seen = set()
+    for value in values or []:
+        text = clean_text(value)
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        result.append(text)
+    return result
 
 
 def normalize_channel_handle(value) -> str:

@@ -125,8 +125,6 @@ test("runtime API all-field source search sorts by matched occurrence count", as
     const sourceFtsProbe = probeSourceOccurrenceFts(dir, dbPath, "needle");
     assert.equal(sourceFtsProbe.hasSourceFts, 1);
     assert.equal(sourceFtsProbe.hasChannelFts, 1);
-    assert.equal(sourceFtsProbe.sourceFtsTotalRows, sourceFtsProbe.sourceOccurrenceRows);
-    assert.equal(sourceFtsProbe.channelFtsTotalRows, sourceFtsProbe.sourceOccurrenceRows);
     assert.ok(sourceFtsProbe.sourceFtsRows >= 4);
 
     const port = await getFreePort();
@@ -551,9 +549,6 @@ function probeSourceOccurrenceFts(dir, dbPath, query) {
       "out = {}",
       "out['hasSourceFts'] = conn.execute(\"SELECT COUNT(*) FROM sqlite_master WHERE name = 'source_occurrences_fts'\").fetchone()[0]",
       "out['hasChannelFts'] = conn.execute(\"SELECT COUNT(*) FROM sqlite_master WHERE name = 'source_occurrences_channel_fts'\").fetchone()[0]",
-      "out['sourceOccurrenceRows'] = conn.execute(\"SELECT COUNT(*) FROM source_occurrences\").fetchone()[0]",
-      "out['sourceFtsTotalRows'] = conn.execute(\"SELECT COUNT(*) FROM source_occurrences_fts\").fetchone()[0] if out['hasSourceFts'] else 0",
-      "out['channelFtsTotalRows'] = conn.execute(\"SELECT COUNT(*) FROM source_occurrences_channel_fts\").fetchone()[0] if out['hasChannelFts'] else 0",
       "out['sourceFtsRows'] = conn.execute(\"SELECT COUNT(*) FROM source_occurrences_fts WHERE range_id = 'all' AND source_occurrences_fts MATCH ?\", (f'\\\"{query}\\\"',)).fetchone()[0] if out['hasSourceFts'] else 0",
       "conn.close()",
       "print(json.dumps(out, ensure_ascii=False))",

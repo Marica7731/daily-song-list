@@ -76,6 +76,28 @@ test("buildClientGroup keeps only runtime video and song fields", () => {
   assert.equal(group.items[0].songs[0].seconds, 75);
 });
 
+test("buildClientGroup removes channel URL paths from handles and aliases", () => {
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "PATHHANDLE3",
+        title: "video",
+        channelName: "Channel",
+        channelId: "UC_REAL",
+        channelHandle: "/channel/UC_REAL",
+        channelUrl: "https://www.youtube.com/channel/UC_REAL",
+        channelAliases: ["/channel/UC_REAL", "Channel Alias"],
+        songs: [{ seconds: 1, title: "Song", artist: "Artist" }],
+      },
+    ],
+  });
+
+  assert.equal(group.items[0].channelHandle, "");
+  assert.deepEqual(group.items[0].channelAliases, ["Channel Alias"]);
+});
+
 test("buildClientGroup treats moment sources as not collected even with stale flags", () => {
   const group = buildClientGroup({
     id: "all",
@@ -90,6 +112,22 @@ test("buildClientGroup treats moment sources as not collected even with stale fl
         sourceGroups: ["vsinger-moment"],
         sourceQuality: { sourceType: "external", sourceSystem: "vsinger_moment_http" },
         songs: [{ seconds: 1, title: "Moment Song", artist: "Moment Artist" }],
+      },
+      {
+        videoId: "MOMENTALIAS1",
+        title: "moment alias video",
+        channelName: "Moment Alias Ch.",
+        isCollected: true,
+        sourceQuality: { sourceType: "external", sourceSystem: "moment" },
+        songs: [{ seconds: 5, title: "Moment Alias Song", artist: "Moment Alias Artist" }],
+      },
+      {
+        videoId: "MOMENTALIAS2",
+        title: "vsinger moment alias video",
+        channelName: "VSinger Moment Alias Ch.",
+        isCollected: true,
+        sourceQuality: { sourceType: "external", sourceSystem: "vsinger-moment" },
+        songs: [{ seconds: 6, title: "VSinger Moment Alias Song", artist: "VSinger Moment Alias Artist" }],
       },
       {
         videoId: "SCAN0000001",
@@ -120,11 +158,54 @@ test("buildClientGroup treats moment sources as not collected even with stale fl
     group.items.map((item) => [item.videoId, item.knownSourceType, item.isCollected]),
     [
       ["MOMENT00001", "vsinger_moment_http", false],
+      ["MOMENTALIAS1", "moment", false],
+      ["MOMENTALIAS2", "vsinger-moment", false],
       ["SCAN0000001", "youtube_channel_discovery", true],
       ["MANUAL00001", "manual", true],
       ["MIXED000001", "vsinger_moment_http", true],
     ],
   );
+});
+
+test("buildClientGroup backfills same-title unknown artists before UI search/source preview", () => {
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "FLOWER00001",
+        title: "Flower karaoke",
+        channelName: "Flower Ch.",
+        songs: [
+          { seconds: 10, title: "花になって", artist: "緑黄色社会" },
+          { seconds: 20, title: "晴るる", artist: "未記載" },
+        ],
+      },
+      {
+        videoId: "FLOWER00002",
+        title: "Flower alias karaoke",
+        channelName: "Flower Alias Ch.",
+        songs: [
+          { seconds: 30, title: "⟦16⟧ 花になって", artist: "未記載" },
+          { seconds: 40, title: "花になって - Be a flower", artist: "未記載" },
+          { seconds: 50, title: "52😎花になって", artist: "未記載" },
+        ],
+      },
+    ],
+  });
+
+  const songs = group.items.flatMap((item) => item.songs);
+  const flowerSongs = songs.filter((song) => song.title === "花になって");
+  assert.equal(flowerSongs.length, 4);
+  assert.deepEqual(
+    flowerSongs.map((song) => song.artist),
+    ["緑黄色社会", "緑黄色社会", "緑黄色社会", "緑黄色社会"],
+  );
+  const haruru = songs.find((song) => song.title === "晴るる");
+  assert.equal(haruru.artist, "未記載");
+
+  const flowerSearchText = JSON.stringify(buildSearchRecords(group.items).filter((record) => record.type === "song" && record.title === "花になって"));
+  assert.doesNotMatch(flowerSearchText, /未記載|⟦16⟧|Be a flower|52😎/u);
 });
 
 test("buildClientGroup filters runtime activity markers while preserving START songs", () => {

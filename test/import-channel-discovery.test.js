@@ -214,6 +214,35 @@ test("normalizeImportedVideo maps detail song fields into catalog-ready videos",
   assert.equal(video.qualityStatus, "usable");
 });
 
+test("normalizeImportedVideo does not preserve channel URL paths as handles", () => {
+  const withoutHandle = normalizeImportedVideo(
+    {
+      videoId: "PATHHANDLE1",
+      title: "歌枠",
+      channelId: "UC_REAL",
+      channelHandle: "/channel/UC_REAL",
+      channelUrl: "https://www.youtube.com/channel/UC_REAL",
+      songs: [{ seconds: 1, title: "Song", artist: "Artist" }],
+    },
+    "input-dir",
+    [{ seconds: 1, title: "Song", artist: "Artist" }],
+  );
+  assert.equal(withoutHandle.channelHandle, "");
+
+  const withHandleUrl = normalizeImportedVideo(
+    {
+      videoId: "PATHHANDLE2",
+      title: "歌枠",
+      channelHandle: "/channel/UC_REAL",
+      channelUrl: "https://www.youtube.com/@real_handle",
+      songs: [{ seconds: 1, title: "Song", artist: "Artist" }],
+    },
+    "input-dir",
+    [{ seconds: 1, title: "Song", artist: "Artist" }],
+  );
+  assert.equal(withHandleUrl.channelHandle, "/@real_handle");
+});
+
 test("channel discovery import backfills channel metadata within an input batch", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "channel-discovery-import-fallback-"));
   fs.writeFileSync(

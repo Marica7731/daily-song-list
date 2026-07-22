@@ -384,6 +384,7 @@ Failure pattern:
 - Those failures did not activate any candidate database on VPS2; production stayed on the previous successful `source_commit_sha`.
 - The root cause was a broad all-field aggregate search over `source_occurrences` during the API smoke probe. Default song search now stays on visible song identity fields; channel/source diagnostics must use explicit `searchScope=channel` or `searchScope=source`.
 - If this step fails, fix the API query path and rerun deploy. Do not retry upload or touch VPS2 manually, because the candidate was never activated.
+- If `Upload and activate database` fails with `No space left on device` while copying the active DB to `song-rank.sqlite.next.*`, check whether stale `song-rank.sqlite.previous` or old `song-rank.sqlite.next.*` files are occupying VPS2 state storage. The deploy workflow now removes those before seeding the rsync candidate, and `song-rank-db-activate.sh` moves the old active DB to `.previous` instead of copying it, so activation no longer requires a third full SQLite copy.
 
 Operational notes:
 

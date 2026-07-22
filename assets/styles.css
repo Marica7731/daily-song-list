@@ -60,7 +60,7 @@
   --page-x: clamp(8px, 1.4vw, 20px);
   --active-content-max: 1240px;
   --page-max: var(--active-content-max);
-  --content-gutter: max(var(--page-x), calc((100vw - var(--page-max)) / 2 + var(--page-x)));
+  --content-gutter: var(--page-x);
   --controls-height: 48px;
   --visual-viewport-height: 100dvh;
   --visual-viewport-offset-top: 0px;
@@ -116,7 +116,7 @@ button {
 
 .layout {
   width: min(var(--page-max), calc(100% - (var(--page-x) * 2)));
-  margin: 0 auto 40px;
+  margin: 0 0 40px var(--page-x);
 }
 
 .status[hidden] {
@@ -129,7 +129,7 @@ button {
   top: 0;
   z-index: 20;
   width: 100vw;
-  margin: 0 0 var(--space-2) calc(50% - 50vw);
+  margin: 0 0 var(--space-2) calc(var(--page-x) * -1);
   padding: 6px var(--content-gutter);
   border-bottom: 1px solid rgba(228, 231, 236, 0.9);
   background: rgba(245, 247, 250, 0.92);
@@ -138,17 +138,17 @@ button {
 
 .controls-inner {
   display: grid;
-  grid-template-columns: auto minmax(320px, 1fr) minmax(280px, 420px);
+  grid-template-columns: auto minmax(420px, auto) minmax(420px, 1fr);
   align-items: center;
   gap: var(--space-2);
   width: min(var(--page-max), calc(100vw - var(--page-x) * 2));
-  margin: 0 auto;
+  margin: 0;
   min-width: 0;
 }
 
 .range-mode,
 .view-mode,
-.query-trigger {
+.query-search-form {
   min-width: 0;
 }
 
@@ -210,29 +210,41 @@ button {
   color: var(--accent-strong);
 }
 
-.query-trigger {
+.query-search-form {
   display: grid;
-  grid-template-columns: 18px minmax(0, 1fr) 18px auto;
+  grid-template-columns: minmax(240px, 1fr) auto;
   align-items: center;
   gap: var(--space-2);
   width: 100%;
-  min-height: var(--control-default);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-control);
-  padding: 0 10px;
-  background: var(--panel);
   color: var(--muted);
   font-size: 13px;
   font-weight: 600;
-  text-align: left;
 }
 
-.query-trigger:hover {
+.query-input-shell {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: var(--control-default);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  padding: 0 8px;
+  background: var(--panel);
+}
+
+.query-input-shell:hover,
+.query-input-shell:focus-within {
   border-color: rgba(15, 118, 110, 0.34);
-  color: var(--ink);
 }
 
-.query-trigger svg {
+.query-search-form.has-active-query .query-input-shell {
+  border-color: rgba(15, 118, 110, 0.42);
+  background: #fbfefd;
+}
+
+.query-input-shell svg {
   width: 18px;
   height: 18px;
   fill: none;
@@ -268,18 +280,7 @@ button {
   white-space: nowrap;
 }
 
-.query-search-form {
-  position: relative;
-  grid-template-columns: 28px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 4px;
-}
-
-.query-search-form.has-query-text {
-  grid-template-columns: 28px minmax(0, 1fr) 28px auto;
-}
-
-.query-search-form input {
+.query-input-shell input {
   min-width: 0;
   width: 100%;
   border: 0;
@@ -289,26 +290,26 @@ button {
   outline: none;
 }
 
-.query-search-form input::placeholder {
+.query-input-shell input::placeholder {
   color: var(--muted);
 }
 
-.query-search-form input[type="search"] {
+.query-input-shell input[type="search"] {
   -webkit-appearance: none;
   appearance: textfield;
 }
 
-.query-search-form input[type="search"]::-webkit-search-cancel-button,
-.query-search-form input[type="search"]::-webkit-search-decoration,
-.query-search-form input[type="search"]::-webkit-search-results-button,
-.query-search-form input[type="search"]::-webkit-search-results-decoration {
+.query-input-shell input[type="search"]::-webkit-search-cancel-button,
+.query-input-shell input[type="search"]::-webkit-search-decoration,
+.query-input-shell input[type="search"]::-webkit-search-results-button,
+.query-input-shell input[type="search"]::-webkit-search-results-decoration {
   -webkit-appearance: none;
   appearance: none;
   display: none;
 }
 
-.query-search-form input[type="search"]::-ms-clear,
-.query-search-form input[type="search"]::-ms-reveal {
+.query-input-shell input[type="search"]::-ms-clear,
+.query-input-shell input[type="search"]::-ms-reveal {
   display: none;
   width: 0;
   height: 0;
@@ -326,99 +327,48 @@ button {
   display: none;
 }
 
-.query-field-menu {
-  position: relative;
+.query-field-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(48px, auto));
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
 }
 
-.query-field-menu summary {
-  list-style: none;
-}
-
-.query-field-menu summary::-webkit-details-marker {
+.query-field-bar[hidden] {
   display: none;
 }
 
-.query-field-menu-trigger {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-control-sm);
-  cursor: pointer;
-}
-
-.query-field-menu-trigger:hover {
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-}
-
-.query-field-menu-panel {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  z-index: 30;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(96px, 1fr));
-  gap: 6px;
-  min-width: 230px;
-  padding: 10px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-card);
-  background: var(--panel);
-  box-shadow: var(--shadow-lg);
-}
-
-.query-field-menu-panel label {
+.query-field-toggle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 34px;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 30px;
   padding: 0 8px;
   border: 1px solid var(--line);
-  border-radius: var(--radius-control-sm);
+  border-radius: var(--radius-control);
+  background: #ffffff;
   color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
   cursor: pointer;
 }
 
-.query-field-menu-panel label.is-selected {
+.query-field-toggle.is-selected,
+.query-field-toggle:has(input:checked) {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent-strong);
 }
 
-.query-field-menu-hint {
-  grid-column: 1 / -1;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.query-count {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  transform: translate(45%, -45%);
-  display: inline-grid;
-  place-items: center;
-  min-width: 12px;
-  height: 12px;
-  border-radius: var(--radius-pill);
-  padding: 0 3px;
-  background: var(--accent);
-  color: #ffffff;
-  font-size: 8px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 12px;
-}
-
-.query-count[hidden] {
-  display: none;
-}
-
-.query-search-form .query-count[hidden] {
-  display: none;
+.query-field-toggle input {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--accent);
 }
 
 .active-query-strip {
@@ -1521,6 +1471,19 @@ mark {
   grid-area: subline;
 }
 
+.vtuber-expand-summary {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--accent-strong);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-row-vtuber.is-expanded .vtuber-expand-summary {
+  display: none;
+}
+
 .vtuber-display-image {
   grid-area: image;
   width: 44px;
@@ -2171,7 +2134,7 @@ mark {
 
 .artist-song-drawer[data-source-mode="vtuber"] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: 84px;
+  grid-auto-rows: 96px;
   gap: 8px;
 }
 
@@ -2298,8 +2261,9 @@ mark {
 .artist-song-group-vtuber {
   gap: 0;
   align-content: stretch;
-  min-height: 84px;
+  min-height: 96px;
   height: 100%;
+  overflow: hidden;
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
@@ -2335,6 +2299,7 @@ mark {
   align-content: start;
   justify-content: stretch;
   gap: 3px;
+  overflow: hidden;
   text-align: left;
 }
 
@@ -2344,6 +2309,7 @@ mark {
 }
 
 .artist-song-group-vtuber .artist-song-artist {
+  display: block;
   font-size: 11px;
   line-height: 1.25;
   text-align: left;
@@ -2354,13 +2320,17 @@ mark {
   justify-self: end;
   justify-content: flex-end;
   gap: 4px;
+  overflow: hidden;
   text-align: right;
 }
 
 .artist-song-group-vtuber .artist-song-count {
   justify-self: end;
+  max-width: 100%;
+  overflow: hidden;
   font-size: 11px;
   text-align: right;
+  text-overflow: ellipsis;
 }
 
 .artist-song-source-toggle {
@@ -2484,13 +2454,13 @@ mark {
 
 .source-page-jump {
   display: inline-grid;
-  grid-template-columns: 48px auto auto;
+  grid-template-columns: 52px auto auto;
   align-items: center;
   gap: 4px;
 }
 
 .source-page-jump input {
-  width: 48px;
+  width: 52px;
   height: var(--chip-height);
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
@@ -2508,6 +2478,7 @@ mark {
 }
 
 .source-page-button {
+  min-width: 52px;
   min-height: var(--chip-height);
   border-color: var(--line);
   background: #ffffff;
@@ -3345,7 +3316,12 @@ mark {
 /* 15. Responsive breakpoints */
 @media (min-width: 920px) and (max-width: 1279px) {
   .controls-inner {
-    grid-template-columns: auto minmax(280px, 1fr) minmax(260px, 380px);
+    grid-template-columns: auto minmax(360px, 1fr);
+  }
+
+  .query-search-form {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(260px, 1fr) auto;
   }
 
   .view-mode .tab {
@@ -3369,7 +3345,12 @@ mark {
   }
 
   .controls-inner {
-    grid-template-columns: auto minmax(0, 1fr) minmax(220px, 320px);
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .query-search-form {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(240px, 1fr) auto;
   }
 
   .view-mode .tab {
@@ -3617,7 +3598,7 @@ mark {
 
 @media (min-width: 1280px) {
   .controls-inner {
-    grid-template-columns: auto auto minmax(340px, 480px);
+    grid-template-columns: auto auto minmax(540px, 1fr);
   }
 
   .source-drawer {
@@ -3662,8 +3643,9 @@ mark {
   }
 
   .controls-inner {
-    grid-template-columns: minmax(108px, 0.85fr) minmax(0, 1.4fr);
-    gap: 4px;
+    grid-template-columns: minmax(104px, 0.42fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 4px 6px;
     width: 100%;
   }
 
@@ -3673,6 +3655,7 @@ mark {
   }
 
   .range-mode {
+    grid-column: 1;
     width: 100%;
     overflow: visible;
   }
@@ -3690,101 +3673,45 @@ mark {
     font-size: 12px;
   }
 
-  .query-trigger {
-    position: relative;
+  .query-search-form {
+    grid-column: 2;
     grid-template-columns: 1fr;
-    place-items: center;
-    width: 34px;
-    min-width: 34px;
-    height: 34px;
-    min-height: 34px;
-    padding: 0;
-    overflow: visible;
-  }
-
-  .query-search-form.query-trigger {
-    grid-template-columns: 24px minmax(0, 1fr) 24px;
-    place-items: center;
+    align-items: stretch;
     width: 100%;
     min-width: 0;
-    height: 36px;
-    min-height: 36px;
-    padding: 0 6px;
     gap: 4px;
   }
 
-  .query-search-form.query-trigger.has-query-text {
-    grid-template-columns: 24px minmax(0, 1fr) 24px 24px;
+  .query-input-shell {
+    grid-template-columns: 24px minmax(0, 1fr) 24px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 6px;
   }
 
   .query-search-form .query-submit-button,
-  .query-search-form .clear-query-button,
-  .query-search-form .query-field-menu-trigger {
+  .query-search-form .clear-query-button {
     width: 24px;
     height: 24px;
     margin: 0;
   }
 
-  .query-search-form input {
+  .query-input-shell input {
     height: 34px;
     font-size: 13px;
     line-height: 34px;
   }
 
-  .query-search-form .query-field-summary svg {
-    display: block;
-    width: 16px;
-    height: 16px;
-  }
-
-  .query-search-form .query-field-menu {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-    left: 6px;
-    height: 24px;
-    pointer-events: none;
-  }
-
-  .query-search-form .query-field-menu-trigger {
-    position: absolute;
-    top: 0;
-    right: 0;
-    pointer-events: auto;
-  }
-
-  .query-search-form .query-field-menu-panel {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    left: auto;
+  .query-field-bar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3px;
     width: 100%;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    min-width: 0;
-    max-width: none;
-    pointer-events: auto;
   }
 
-  .query-search-form .query-count {
-    display: inline-grid;
-    min-width: 10px;
-    height: 10px;
-    padding: 0 3px;
-    font-size: 8px;
-    line-height: 10px;
-    top: 1px;
-    right: 1px;
-  }
-
-  .query-trigger:not(.query-search-form) svg:not(.query-trigger-icon),
-  .query-trigger:not(.query-search-form) .query-count {
-    display: none;
-  }
-
-  .query-trigger.has-active-query {
-    border-color: rgba(15, 118, 110, 0.34);
-    background: var(--accent-soft);
-    color: var(--accent-strong);
+  .query-field-toggle {
+    min-height: 26px;
+    padding-inline: 4px;
+    font-size: 10.5px;
   }
 
   .mobile-bottom-nav {
@@ -4455,29 +4382,31 @@ mark {
   }
 
   .artist-song-drawer[data-source-mode="vtuber"] {
-    grid-template-columns: 1fr;
-    grid-auto-rows: 74px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 98px;
     gap: 7px;
   }
 
   .artist-song-group-vtuber {
-    min-height: 74px;
-    padding: 8px;
+    min-height: 98px;
+    padding: 7px;
   }
 
   .artist-song-group-vtuber:last-child {
-    padding: 8px;
+    padding: 7px;
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 58px minmax(0, 1fr) minmax(44px, auto);
-    grid-template-areas: "thumb title actions";
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-areas:
+      "thumb title"
+      "thumb actions";
     align-items: start;
-    gap: 7px;
+    gap: 4px 6px;
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
-    width: 58px;
+    width: 44px;
     align-self: start;
   }
 
@@ -4505,17 +4434,17 @@ mark {
 
   .artist-song-group-vtuber .artist-song-summary-actions {
     align-self: start;
-    justify-self: end;
-    justify-content: flex-end;
+    justify-self: start;
+    justify-content: flex-start;
     gap: 3px;
     max-width: 100%;
-    text-align: right;
+    text-align: left;
   }
 
   .artist-song-group-vtuber .artist-song-count {
     display: inline-flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     min-height: 22px;
     border-radius: 0;
     background: transparent;
@@ -4536,11 +4465,11 @@ mark {
   }
 
   .source-page-jump {
-    grid-template-columns: 42px auto 44px;
+    grid-template-columns: 44px auto 44px;
   }
 
   .source-page-jump input {
-    width: 42px;
+    width: 44px;
   }
 
   .source-page-total {
@@ -4978,6 +4907,38 @@ mark {
     min-width: 24px;
     min-height: 24px;
     padding: 0;
+  }
+
+  .artist-song-drawer[data-source-mode="vtuber"] {
+    grid-auto-rows: 96px;
+    gap: 5px;
+  }
+
+  .artist-song-group-vtuber {
+    min-height: 96px;
+    padding: 6px;
+  }
+
+  .artist-song-group-vtuber:last-child {
+    padding: 6px;
+  }
+
+  .artist-song-group-vtuber .artist-song-header {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .artist-song-group-vtuber .artist-song-thumb {
+    width: 38px;
+  }
+
+  .artist-song-group-vtuber .artist-song-title {
+    font-size: 11.5px;
+  }
+
+  .artist-song-group-vtuber .artist-song-artist,
+  .artist-song-group-vtuber .artist-song-count {
+    font-size: 10px;
   }
 }
 

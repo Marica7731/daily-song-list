@@ -190,12 +190,14 @@ function buildRuntimeRangePayload(payload, rangeId) {
 }
 
 function buildClientGroup(group) {
+  const items = (group.items || []).map(buildClientVideo).filter(Boolean);
+  const titleArtistFallbacks = buildRuntimeTitleArtistFallbacks(items);
   return {
     id: group.id || "",
     title: group.title || group.id || "",
     generatedAt: group.generatedAt || "",
     updatedAt: group.updatedAt || "",
-    items: (group.items || []).map(buildClientVideo).filter(Boolean),
+    items: items.map((item) => withRuntimeArtistFallbacks(item, titleArtistFallbacks)).filter(Boolean),
   };
 }
 
@@ -208,7 +210,7 @@ function buildClientVideo(item) {
     title: item.title || "",
     channelName: item.channelName || "",
     channelId: item.channelId || "",
-    channelHandle: item.channelHandle || "",
+    channelHandle: cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelUrl || item.authorUrl || item.ownerUrl || item.sourceUrl),
     channelUrl: item.channelUrl || item.authorUrl || item.ownerUrl || "",
     avatarUrl: item.avatarUrl || item.channelAvatarUrl || "",
     sourceUrl: item.sourceUrl || item.channelUrl || item.authorUrl || item.ownerUrl || "",
@@ -225,7 +227,88 @@ function buildClientVideo(item) {
     thumbnailUrl: runtimeThumbnailUrl(item),
     songs,
   };
+  const channelAliases = channelAliasValues(item.channelAliases);
+  if (channelAliases.length) result.channelAliases = channelAliases;
   if (!result.channelUrl) delete result.channelUrl;
+  return result;
+}
+
+function withRuntimeArtistFallbacks(item, titleArtistFallbacks = null) {
+  if (!item || !titleArtistFallbacks?.size) return item;
+  const songs = dedupeRuntimeSameSecondSongs(
+    (item.songs || [])
+      .map((song) => applyRuntimeArtistFallback(song, titleArtistFallbacks))
+      .filter(Boolean),
+  );
+  if (!songs.length) return null;
+  return {
+    ...item,
+    songs,
+  };
+}
+
+function applyRuntimeArtistFallback(song, titleArtistFallbacks = null) {
+  if (!song || !titleArtistFallbacks?.size || !RankingUtils.isUnknownArtistName(song.artist)) return song;
+  const fallback = titleArtistFallbacks.get(runtimeSongWorkTitleKey(song.title));
+  if (!fallback) return song;
+  const title = cleanText(fallback.title) || cleanText(song.title);
+  const artist = RankingUtils.canonicalizeArtistName(fallback.artist);
+  if (!title || !artist || RankingUtils.isUnknownArtistName(artist)) return song;
+  return {
+    ...song,
+    title,
+    artist,
+  };
+}
+
+function buildRuntimeTitleArtistFallbacks(items) {
+  const records = new Map();
+  for (const item of items || []) {
+    for (const song of item?.songs || []) {
+      const title = cleanRuntimeSafeTitleCandidate(song?.title);
+      const artist = RankingUtils.canonicalizeArtistName(song?.artist);
+      if (!title || !artist || RankingUtils.isUnknownArtistName(artist)) continue;
+      const key = runtimeSongWorkTitleKey(title);
+      if (!key) continue;
+      if (!records.has(key)) {
+        records.set(key, {
+          titles: new Map(),
+          artists: new Map(),
+        });
+      }
+      const record = records.get(key);
+      incrementCount(record.titles, title);
+      incrementCount(record.artists, artist);
+    }
+  }
+
+  const fallbacks = new Map();
+  for (const [key, record] of records) {
+    const title = dominantRuntimeCountName(record.titles);
+    const artist = dominantRuntimeCountName(record.artists);
+    if (title && artist) fallbacks.set(key, { title, artist });
+  }
+  return fallbacks;
+}
+
+function runtimeSongWorkTitleKey(value) {
+  return RankingUtils.songWorkTitleKey(cleanRuntimeSafeTitleCandidate(value));
+}
+
+function dominantRuntimeCountName(map) {
+  return Array.from(map.values()).sort((a, b) => b.count - a.count || compareValues(a.name, b.name))[0]?.name || "";
+}
+
+function dedupeRuntimeSameSecondSongs(songs) {
+  const result = [];
+  const seen = new Set();
+  for (const song of songs || []) {
+    const seconds = Math.max(0, Number(song?.seconds) || 0);
+    const key = [Math.trunc(seconds), RankingUtils.songWorkTitleKey(song?.title), RankingUtils.normalizeArtistKey(song?.artist)].join("\u0001");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(song);
+  }
   return result;
 }
 
@@ -309,6 +392,21 @@ function cleanRuntimeSong(song, source = {}) {
 function cleanRuntimeTitle(title) {
   let value = String(title || "").trim();
   value = value.replace(/^開始\s*[~〜～・･:：\-—–−/／|｜￤∣丨]+\s*/u, "").trim();
+  return value;
+}
+
+function cleanRuntimeSafeTitleCandidate(title) {
+  let value = cleanRuntimeTitle(title);
+  for (let index = 0; index < 4; index += 1) {
+    const next = value
+      .normalize("NFKC")
+      .replace(/^\s*[⟦［\[]\s*#?\d{1,4}\s*[⟧］\]]\s*/u, "")
+      .replace(/^\s*[#＃]?\d{1,4}\s*[\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F♪♫♬♩▶▷►▸▹>|・･●○◆◇■□]+/u, "")
+      .replace(/^\s*[＊*]?\s*(?:[#＃]?\d{1,4}|[０-９]{1,4})\s*(?:曲目|曲|番目)?\s*[.)．。、,,:：)）\]\-|｜/／]+\s*/u, "")
+      .trim();
+    if (next === value) break;
+    value = next;
+  }
   return value;
 }
 
@@ -1382,7 +1480,7 @@ function collectRuntimeOccurrences(items) {
       occurrences.push({
         item,
         song,
-        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
+        searchText: normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, song.title, song.artist].join(" ")),
       });
     }
   }
@@ -1434,7 +1532,7 @@ function buildVideoRequestItems(items, options = {}) {
       videoCount: 1,
       key: item.videoId || stableRequestKey(`${item.channelName}:${item.title}`),
       searchText: normalizeSearchText(
-        [item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, ...scopedSongs.flatMap((song) => [song.title, song.artist])].join(" "),
+        [item.videoId, item.title, ...channelSearchParts(item), item.keyword, ...scopedSongs.flatMap((song) => [song.title, song.artist])].join(" "),
       ),
     });
   }
@@ -1456,10 +1554,10 @@ function buildVtuberRequestItems(items, options = {}) {
       records.set(key, {
         type: "vtuber",
         key,
-        name: cleanText(item.channelName || item.channelHandle || item.channelId || "未知频道"),
+        name: cleanText(item.channelName || cleanChannelHandle(item.channelHandle) || item.channelId || "未知频道"),
         channelName: cleanText(item.channelName),
         channelId: cleanText(item.channelId),
-        channelHandle: cleanText(item.channelHandle),
+        channelHandle: cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelUrl || item.authorUrl || item.ownerUrl || item.sourceUrl),
         channelUrl: cleanText(item.channelUrl || item.authorUrl || item.ownerUrl),
         avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl),
         thumbnailUrl: vtuberThumbnailCandidate(item),
@@ -1484,7 +1582,7 @@ function buildVtuberRequestItems(items, options = {}) {
       record.occurrences.push({
         item,
         song,
-        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
+        searchText: normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, song.title, song.artist].join(" ")),
       });
     }
   }
@@ -1528,7 +1626,7 @@ function channelRecordKey(item, identityLookup = null) {
 function directChannelRecordKey(item) {
   const channelId = cleanText(item?.channelId);
   if (channelId) return channelId;
-  const handle = cleanText(item?.channelHandle).replace(/^\/+/, "");
+  const handle = cleanChannelHandle(item?.channelHandle).replace(/^\/+/, "");
   if (handle) return normalizeSearchText(handle);
   const urlHandle = handleFromChannelUrl(item?.channelUrl || item?.authorUrl || item?.ownerUrl);
   if (urlHandle) return normalizeSearchText(urlHandle);
@@ -1536,7 +1634,7 @@ function directChannelRecordKey(item) {
 }
 
 function handleFromChannelUrl(value) {
-  const match = String(value || "").match(/youtube\.com\/(@[A-Za-z0-9._-]+)/iu);
+  const match = String(value || "").match(/youtube\.com\/(@[A-Za-z0-9._%~-]+)/iu);
   return match ? match[1] : "";
 }
 
@@ -1548,14 +1646,14 @@ function channelNameIdentityKey(item) {
 function mergeChannelRecordIdentity(record, item) {
   const channelName = cleanText(item.channelName);
   const channelId = cleanText(item.channelId);
-  const channelHandle = cleanText(item.channelHandle);
+  const channelHandle = cleanChannelHandle(item.channelHandle);
   const channelUrl = cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
   const avatarUrl = cleanText(item.avatarUrl || item.channelAvatarUrl);
   const thumbnailUrl = vtuberThumbnailCandidate(item);
   if (channelName) {
     record.aliases.add(channelName);
-    if (!record.channelName) record.channelName = channelName;
-    if (!record.name || record.name === "未知频道") record.name = channelName;
+    record.channelName = preferredChannelDisplayName(record.channelName, channelName);
+    record.name = preferredChannelDisplayName(record.name === "未知频道" ? "" : record.name, record.channelName || channelName);
   }
   if (channelId) {
     record.aliases.add(channelId);
@@ -1703,7 +1801,7 @@ function serializeOccurrence(occurrence, options = {}) {
     song: buildClientSong(occurrence.song || {}),
     searchText:
       occurrence.searchText ||
-      normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
+      normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
   };
 }
 
@@ -1724,10 +1822,10 @@ function requestRecordSearchText(record, type) {
     return normalizeSearchText([record.name, ...(record.aliases || [])].join(" "));
   }
   if (type === "vtuber") {
-    return normalizeSearchText([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, ...(record.aliases || [])].join(" "));
+    return normalizeSearchText([record.name, ...channelSearchParts(record), ...(record.aliases || [])].join(" "));
   }
   if (type === "video") {
-    return normalizeSearchText([record.videoId, record.title, record.channelName, record.channelId, record.channelHandle, record.channelUrl, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
+    return normalizeSearchText([record.videoId, record.title, ...channelSearchParts(record), record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
   }
   return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels), ...(record.variantLabels || []), ...occurrenceSearchParts(record.occurrences)].join(" "));
 }
@@ -1743,7 +1841,7 @@ function occurrenceSearchParts(occurrences) {
   return (occurrences || []).flatMap((occurrence) => {
     const item = occurrence.item || {};
     const song = occurrence.song || {};
-    return [item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist];
+    return [item.videoId, item.title, ...channelSearchParts(item), item.keyword, song.title, song.artist];
   });
 }
 
@@ -1909,7 +2007,7 @@ function buildSourceDetailRecords(items) {
     title: item.title || "",
     channelName: item.channelName || "",
     channelId: item.channelId || "",
-    channelHandle: item.channelHandle || "",
+    channelHandle: cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelUrl || item.authorUrl || item.ownerUrl || item.sourceUrl),
     channelUrl: item.channelUrl || item.authorUrl || item.ownerUrl || "",
     keyword: item.keyword || "",
     keywords: listValues(item.keywords),
@@ -1940,7 +2038,7 @@ function buildSearchRecords(items) {
       title: item.title || "",
       channelName: item.channelName || "",
       keyword: item.keyword || "",
-      searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword].join(" ")),
+      searchText: normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword].join(" ")),
     });
     for (const song of item.songs || []) {
       records.push({
@@ -1950,7 +2048,7 @@ function buildSearchRecords(items) {
         title: song.title || "",
         artist: song.artist || "",
         isNiche: song.isNiche === true,
-        searchText: normalizeSearchText([item.videoId, song.title, song.artist, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl].join(" ")),
+        searchText: normalizeSearchText([item.videoId, song.title, song.artist, item.title, ...channelSearchParts(item)].join(" ")),
       });
     }
   }
@@ -1963,6 +2061,44 @@ function normalizeSearchText(value) {
     .toLocaleLowerCase()
     .replace(/\s+/gu, " ")
     .trim();
+}
+
+function channelSearchParts(item = {}) {
+  return [item.channelName, ...channelAliasValues(item.channelAliases), item.channelId, cleanChannelHandle(item.channelHandle), item.channelUrl || item.authorUrl || item.ownerUrl];
+}
+
+function channelAliasValues(value) {
+  return listValues(value).map((item) => cleanText(item)).filter((item) => item && !isChannelPathAlias(item));
+}
+
+function isChannelPathAlias(value) {
+  const text = cleanText(value).toLocaleLowerCase();
+  return text.startsWith("/channel/") || text.includes("youtube.com/channel/");
+}
+
+function cleanChannelHandle(value) {
+  const text = cleanText(value);
+  if (!text) return "";
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text)) return text.startsWith("/") ? text : `/${text}`;
+  const match = text.match(/youtube\.com\/(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/iu);
+  return match ? `/${match[1]}` : "";
+}
+
+function preferredChannelDisplayName(current, candidate) {
+  const currentText = cleanText(current);
+  const candidateText = cleanText(candidate);
+  if (!currentText) return candidateText;
+  if (!candidateText) return currentText;
+  return channelDisplayNameScore(candidateText) > channelDisplayNameScore(currentText) ? candidateText : currentText;
+}
+
+function channelDisplayNameScore(value) {
+  const text = cleanText(value);
+  if (!text) return -1;
+  let score = Math.min(text.length, 80);
+  if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text) || /^\/channel\/UC[A-Za-z0-9_-]+$/u.test(text)) score -= 1000;
+  return score;
 }
 
 function incrementCount(map, name) {

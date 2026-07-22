@@ -197,12 +197,14 @@ function addChannelMetadata(lookup, metadata) {
 
 function hydrateChannelMetadata(video, lookup) {
   const metadata = findChannelMetadata(lookup, metadataFromVideo(video));
+  const cleanVideoHandle = normalizeHandle(video.channelHandle);
   const hydrated = metadata
     ? {
         ...video,
-        channelName: video.channelName || metadata.displayName || "",
+        channelName: preferredChannelDisplayName(video.channelName, metadata.displayName),
+        channelAliases: channelAliasValues([...(Array.isArray(video.channelAliases) ? video.channelAliases : []), video.channelName, metadata.displayName, metadata.channelHandle]),
         channelId: video.channelId || metadata.channelId || "",
-        channelHandle: video.channelHandle || metadata.channelHandle || "",
+        channelHandle: cleanVideoHandle || metadata.channelHandle || "",
         channelUrl: video.channelUrl || metadata.sourceUrl || metadata.channelUrl || "",
         avatarUrl: video.avatarUrl || metadata.avatarUrl || "",
         thumbnailUrl: video.thumbnailUrl || metadata.thumbnailUrl || "",
@@ -210,8 +212,20 @@ function hydrateChannelMetadata(video, lookup) {
         knownSourceType: video.knownSourceType || metadata.knownSourceType || SOURCE_GROUP,
         isCollected: video.isCollected === false ? false : metadata.isCollected !== false,
       }
-    : video;
+    : {
+        ...video,
+        channelHandle: cleanVideoHandle,
+      };
   return withTimeMetadata(hydrated);
+}
+
+function channelAliasValues(values) {
+  return uniqueValues(values).filter((value) => !isChannelPathAlias(value));
+}
+
+function isChannelPathAlias(value) {
+  const text = stringValue(value).toLocaleLowerCase();
+  return text.startsWith("/channel/") || text.includes("youtube.com/channel/");
 }
 
 function findChannelMetadata(lookup, metadata) {
@@ -239,7 +253,7 @@ function normalizeChannelMetadata(metadata) {
 function mergeChannelMetadata(existing, incoming) {
   if (!existing) return incoming;
   return {
-    displayName: existing.displayName || incoming.displayName,
+    displayName: preferredChannelDisplayName(existing.displayName, incoming.displayName),
     channelId: existing.channelId || incoming.channelId,
     channelHandle: existing.channelHandle || incoming.channelHandle,
     channelUrl: existing.channelUrl || incoming.channelUrl,
@@ -263,9 +277,9 @@ function channelIdentityKeys(metadata) {
 function normalizeHandle(value) {
   const text = stringValue(value);
   if (!text) return "";
-  const match = text.match(/(?:youtube\.com\/)?(@[A-Za-z0-9._-]+)/iu);
+  const match = text.match(/(?:youtube\.com\/|^\/?)(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/iu);
   if (match) return `/${match[1]}`;
-  return text.startsWith("@") ? `/${text}` : text.replace(/^\/+(@)/u, "/$1");
+  return "";
 }
 
 function normalizeChannelUrlKey(value) {
@@ -315,6 +329,23 @@ function uniqueValues(values) {
 
 function stringValue(value) {
   return String(value || "").trim();
+}
+
+function preferredChannelDisplayName(current, candidate) {
+  const currentText = stringValue(current);
+  const candidateText = stringValue(candidate);
+  if (!currentText) return candidateText;
+  if (!candidateText) return currentText;
+  return channelDisplayNameScore(candidateText) > channelDisplayNameScore(currentText) ? candidateText : currentText;
+}
+
+function channelDisplayNameScore(value) {
+  const text = stringValue(value);
+  if (!text) return -1;
+  let score = Math.min(text.length, 80);
+  if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text) || /^\/channel\/UC[A-Za-z0-9_-]+$/u.test(text)) score -= 1000;
+  return score;
 }
 
 function latestIso(...values) {

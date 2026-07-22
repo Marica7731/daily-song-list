@@ -29,20 +29,17 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /id="mobileBottomNav"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="songAz"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /class="[^"]*view-mode[^"]*"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>频道<\/span>/u);
-  assert.match(indexSource, /class="query-field-menu-panel"[\s\S]*name="searchField" value="channel"[\s\S]*name="searchField" value="video"[\s\S]*全不选时搜索全部字段/u);
+  assert.match(indexSource, /class="query-field-bar"[\s\S]*name="searchField" value="title" checked[\s\S]*name="searchField" value="artist" checked[\s\S]*name="searchField" value="channel" checked[\s\S]*name="searchField" value="video"/u);
+  assert.doesNotMatch(indexSource, /queryCountBadge|query-field-menu|query-count/u);
   assert.doesNotMatch(indexSource, /id="searchSuggestions"/u);
   assert.match(indexSource, /class="query-submit-button" type="submit" aria-label="搜索"[\s\S]*id="queryInput" type="search"[\s\S]*id="clearQueryButton"/u);
-  assert.match(cssSource, /\.query-search-form input\[type="search"\]\s*\{[\s\S]*-webkit-appearance: none;[\s\S]*appearance: textfield;/u);
-  assert.match(cssSource, /\.query-search-form input\[type="search"\]::-webkit-search-cancel-button,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-decoration,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-results-button,[\s\S]*\.query-search-form input\[type="search"\]::-webkit-search-results-decoration\s*\{[\s\S]*display: none;/u);
+  assert.match(cssSource, /\.query-input-shell input\[type="search"\]\s*\{[\s\S]*-webkit-appearance: none;[\s\S]*appearance: textfield;/u);
+  assert.match(cssSource, /\.query-input-shell input\[type="search"\]::-webkit-search-cancel-button,[\s\S]*\.query-input-shell input\[type="search"\]::-webkit-search-decoration,[\s\S]*\.query-input-shell input\[type="search"\]::-webkit-search-results-button,[\s\S]*\.query-input-shell input\[type="search"\]::-webkit-search-results-decoration\s*\{[\s\S]*display: none;/u);
   assert.match(cssSource, /\.query-submit-button\s*\{[\s\S]*cursor: pointer;/u);
   assert.match(cssSource, /\.query-search-form \.clear-query-button\s*\{[\s\S]*position: static;[\s\S]*width: 28px;[\s\S]*height: 28px;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu"), /position: absolute;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu"), /left: 6px;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu"), /right: 6px;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /position: absolute;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /left: auto;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /right: 0;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /width: 100%;/u);
+  assert.match(cssBlock(".query-field-bar"), /grid-template-columns: repeat\(4, minmax\(48px, auto\)\)/u);
+  assert.match(cssBlock(".query-field-toggle"), /min-height: 30px/u);
+  assert.doesNotMatch(cssSource, /query-field-menu|query-count/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
   assert.match(indexSource, /id="activeQueryStrip"/u);
@@ -51,7 +48,7 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.doesNotMatch(indexSource, /class="topbar"|class="topbar-inner"|<h1>Daily Song List<\/h1>|歌曲时间戳排行/u);
   assert.doesNotMatch(indexSource, /class="controls-primary"|class="mobile-toolbar-actions"|class="controls-secondary"/u);
   assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*id="querySearchForm"/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) auto;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(104px, 0\.42fr\) minmax\(0, 1fr\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/u);
   assert.match(cssSource, /\.bottom-nav-icon-wrap\s*\{[\s\S]*width: 32px;[\s\S]*height: 24px;/u);
   assert.match(cssSource, /\.bottom-nav-icon-wrap svg\s*\{[\s\S]*width: 19px;[\s\S]*height: 19px;/u);
@@ -79,10 +76,10 @@ test("URL state and query draft are wired while visible share actions are remove
 
 test("VTuber view hides song-field search controls and keeps channel search semantics", () => {
   const availabilityBody = functionBody("function updateQueryAvailability");
-  assert.match(appSource, /queryFieldMenu: document\.querySelector\("\.query-field-menu"\)/u);
+  assert.match(appSource, /queryFieldBar: document\.querySelector\("\.query-field-bar"\)/u);
+  assert.match(appSource, /const DEFAULT_SEARCH_FIELDS = \["title", "artist", "channel"\]/u);
   assert.match(availabilityBody, /const vtuberView = state\.view === "vtuberRank"/u);
-  assert.match(availabilityBody, /els\.queryFieldMenu\.hidden = vtuberView/u);
-  assert.match(availabilityBody, /if \(vtuberView\) els\.queryFieldMenu\.open = false/u);
+  assert.match(availabilityBody, /els\.queryFieldBar\.hidden = vtuberView/u);
   assert.match(availabilityBody, /for \(const input of els\.searchFieldToggles\) input\.disabled = vtuberView/u);
   assert.match(appSource, /function requestFiltersForView\(view = state\.view, filters = \{\}\)[\s\S]*searchScope: searchScopeForView\(view, filters\),[\s\S]*searchFields: searchFieldsForView\(view, filters\)/u);
   assert.match(functionBody("function occurrenceSearchTextForCurrentView"), /if \(state\.view === "vtuberRank"\) return vtuberOccurrenceSearchText\(occurrence\);/u);
@@ -157,7 +154,7 @@ test("source drawer is inline, grouped, and visible on mobile", () => {
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.index-toolbar\s*\{[\s\S]*position: static;[\s\S]*top: auto;/u);
   assert.match(cssSource, /\.rank-row::before\s*\{[\s\S]*grid-area: rank;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row::before\s*\{[\s\S]*display: none;/u);
-  assert.match(cssSource, /\.query-count\[hidden\]\s*\{[\s\S]*display: none;/u);
+  assert.doesNotMatch(cssSource, /query-count|query-field-menu/u);
   assert.doesNotMatch(cssSource, /\.query-trigger\.has-active-query::after/u);
 });
 
@@ -183,8 +180,8 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /input:not\(\[type="checkbox"\]\):not\(\[type="radio"\]\)/u);
   assert.match(cssSource, /\.query-toggle\s*\{[\s\S]*align-items: center;[\s\S]*min-height: 34px;[\s\S]*border-radius: var\(--radius-control\);/u);
   assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=|id="querySearchPanel"|id="queryFilterPanel"/u);
-  assert.match(indexSource, /class="query-field-menu-panel"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"[\s\S]*name="searchField" value="channel"[\s\S]*name="searchField" value="video"/u);
-  assert.match(cssSource, /\.query-field-menu-panel label\.is-selected\s*\{[\s\S]*background: var\(--accent-soft\);/u);
+  assert.match(indexSource, /class="query-field-bar"[\s\S]*name="searchField" value="title"[\s\S]*name="searchField" value="artist"[\s\S]*name="searchField" value="channel"[\s\S]*name="searchField" value="video"/u);
+  assert.match(cssSource, /\.query-field-toggle\.is-selected,[\s\S]*\.query-field-toggle:has\(input:checked\)\s*\{[\s\S]*background: var\(--accent-soft\);/u);
   assert.match(indexSource, /<\/div>\s*<footer class="query-panel-footer">/u);
   assert.doesNotMatch(indexSource, /<\/div>\s*<\/div>\s*<footer class="query-panel-footer">/u);
   assert.doesNotMatch(indexSource, /class="query-tabs"|data-query-panel-tab=/u);
@@ -289,11 +286,15 @@ test("mobile source preview contract matches compact documentation", () => {
 });
 
 test("desktop and tablet contracts use explicit responsive layout", () => {
-  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(280px, 1fr\) minmax\(260px, 380px\);/u);
+  assert.match(cssBlock(".layout"), /margin: 0 0 40px var\(--page-x\);/u);
+  assert.match(cssBlock(".controls-inner"), /margin: 0;/u);
+  assert.match(cssSource, /--content-gutter:\s*var\(--page-x\);/u);
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(360px, 1fr\);/u);
+  assert.match(cssSource, /@media \(min-width: 920px\) and \(max-width: 1279px\)[\s\S]*\.query-search-form\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-template-columns: minmax\(260px, 1fr\) auto;/u);
   assert.doesNotMatch(cssSource, /grid-template-columns: auto minmax\(0, 1fr\) auto auto minmax\(220px, 1\.1fr\) minmax\(108px, 140px\) minmax\(160px, 220px\)/u);
-  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto auto minmax\(340px, 480px\);/u);
+  assert.match(cssSource, /@media \(min-width: 1280px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto auto minmax\(540px, 1fr\);/u);
   assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*--rank-columns: 42px minmax\(0, 1fr\) var\(--rank-side-width-tablet\)/u);
-  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\) minmax\(220px, 320px\);/u);
+  assert.match(cssSource, /@media \(min-width: 721px\) and \(max-width: 919px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: auto minmax\(0, 1fr\);/u);
   assert.match(appSource, /mode === "mobile"[\s\S]*variant === "top"[\s\S]*renderMobileTopPagination\(pageInfo\)/u);
   assert.match(appSource, /function renderPageJumpControl\(pageInfo\)/u);
   assert.match(appSource, /input\.dataset\.pageInput = "true"/u);
@@ -317,7 +318,8 @@ test("latest runtime uses request pagination instead of loading every page shard
   assert.match(appSource, /AbortController/u);
   assert.match(appSource, /scheduleAdjacentRequestPagePrefetch/u);
   assert.match(appSource, /loadRequestSearchRecords/u);
-  assert.match(appSource, /requestSearchBucket\(query\)/u);
+  assert.match(appSource, /requestSearchBuckets\(query\)/u);
+  assert.match(functionBody("function requestSearchBuckets"), /FrontendUtils\.searchTokens\(query\)/u);
   assert.match(appSource, /loadRequestDetailRecords/u);
   assert.match(appSource, /sourceDetailKey/u);
   assert.doesNotMatch(appSource, /Promise\.all\(\s*pages\.map/u);
@@ -351,6 +353,8 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function renderSourcePageSummary"), /form\.addEventListener\("submit"/u);
   assert.match(functionBody("function renderSourcePageSummary"), /submit\.addEventListener\("click"/u);
   assert.doesNotMatch(functionBody("function renderSourcePageSummary"), /document\.createElement\("select"\)|data\.pageSelect/u);
+  assert.match(cssSource, /\.source-page-jump\s*\{[\s\S]*grid-template-columns: 52px auto auto;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-page-jump\s*\{[\s\S]*grid-template-columns: 44px auto 44px;/u);
   assert.match(appSource, /setSourceDrawerPageForDrawer\(drawer, page\)/u);
   assert.match(appSource, /submitSourceDrawerPageForm\(sourcePageSubmit\.closest\("\[data-source-page-form\]"\)\)/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: none;/u);
@@ -419,7 +423,9 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   const vtuberSublineEnd = appSource.indexOf("function renderVtuberAvatar", vtuberSublineStart);
   const vtuberSublineBody = appSource.slice(vtuberSublineStart, vtuberSublineEnd);
   assert.match(vtuberSublineBody, /songPreview \|\| \[\]\)\.slice\(0, 2\)\.join\("、"\)/u);
-  assert.doesNotMatch(vtuberSublineBody, /`\$\{songCount\} 首歌`|`\$\{videoCount\} 个视频`/u);
+  assert.match(vtuberSublineBody, /vtuberExpandSummaryText\(songCount, videoCount\)/u);
+  assert.match(vtuberSublineBody, /展开显示 \$\{songText\}/u);
+  assert.match(cssSource, /\.rank-row-vtuber\.is-expanded \.vtuber-expand-summary\s*\{[\s\S]*display: none;/u);
   assert.match(songGroupBody, /artistLabelForSongGroup\(group\)/u);
   assert.match(songGroupBody, /artistSongCountLabel\(group\)/u);
   assert.match(functionBody("function artistLabelForSongGroup"), /displayArtist = cleanText\(group\?\.displayArtist\)/u);
@@ -444,7 +450,8 @@ test("VTuber channel expansion renders paged song groups before source pages", (
   assert.match(cssSource, /\.artist-song-artist\s*\{[\s\S]*text-overflow: ellipsis;[\s\S]*white-space: nowrap;/u);
   assert.doesNotMatch(cssSource, /\.artist-song-group-vtuber \.source-inline-strip/u);
   assert.match(cssSource, /@media \(min-width: 920px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: 1fr;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/u);
+  assert.match(cssSource, /\.artist-song-group-vtuber\s*\{[\s\S]*overflow: hidden;/u);
   assert.doesNotMatch(cssBlock(".artist-song-group-vtuber .artist-song-title-wrap"), /justify-content: center/u);
   assert.doesNotMatch(lastCssBlock(".artist-song-group-vtuber .artist-song-title-wrap"), /justify-content: center/u);
   assert.match(songGroupBody, /if \(sourcePresentation\.canExpand && group\.sourceMode !== "vtuber"\) section\.append\(sources\)/u);

@@ -341,10 +341,9 @@ async function assertDirectQuerySearch(page, name, options = {}) {
   const proof = await page.evaluate((expectedOpenFields) => {
     const form = document.querySelector("#querySearchForm");
     const input = document.querySelector("#queryInput");
-    const fieldMenu = document.querySelector(".query-field-menu");
-    const fieldMenuPanel = document.querySelector(".query-field-menu-panel");
+    const fieldBar = document.querySelector(".query-field-bar");
     const formRect = form?.getBoundingClientRect();
-    const panelRect = fieldMenuPanel?.getBoundingClientRect();
+    const fieldBarRect = fieldBar?.getBoundingClientRect();
     const fields = Array.from(document.querySelectorAll("input[name='searchField']")).map((node) => ({
       value: node.value,
       checked: node.checked,
@@ -354,21 +353,22 @@ async function assertDirectQuerySearch(page, name, options = {}) {
       hasForm: !!form,
       placeholder: input?.getAttribute("placeholder") || "",
       fields,
-      fieldMenuOpen: !!fieldMenu?.hasAttribute("open"),
-      fieldMenuPanelRect: panelRect
-        ? { left: panelRect.left, right: panelRect.right, width: panelRect.width }
+      hasFieldBar: !!fieldBar,
+      fieldBarHidden: !!fieldBar?.hidden || getComputedStyle(fieldBar).display === "none",
+      fieldBarRect: fieldBarRect
+        ? { left: fieldBarRect.left, right: fieldBarRect.right, width: fieldBarRect.width }
         : null,
       queryFormRect: formRect
         ? { left: formRect.left, right: formRect.right, width: formRect.width }
         : null,
-      hint: document.querySelector(".query-field-menu-hint")?.textContent?.replace(/\s+/g, " ").trim() || "",
+      fieldMenuExists: !!document.querySelector(".query-field-menu"),
       hiddenDialogOpen: !!document.querySelector("#queryDialog:not([hidden])"),
       viewportWidth: window.innerWidth,
       expectedOpenFields,
     };
   }, !!options.openFields);
   if (!proof.hasForm) throw new Error(`${name}: direct query form missing`);
-  if (!/搜索歌曲/u.test(proof.placeholder)) throw new Error(`${name}: query placeholder missing expected copy ${JSON.stringify(proof)}`);
+  if (!/(?:搜索歌曲|歌手\/频道 \+ 歌曲)/u.test(proof.placeholder)) throw new Error(`${name}: query placeholder missing expected copy ${JSON.stringify(proof)}`);
   const values = proof.fields.map((field) => field.value);
   for (const value of ["title", "artist", "channel", "video"]) {
     if (!values.includes(value)) throw new Error(`${name}: missing search field ${value} ${JSON.stringify(proof)}`);
@@ -377,19 +377,22 @@ async function assertDirectQuerySearch(page, name, options = {}) {
   if (!proof.fields.some((field) => field.value === "title" && field.checked) || !proof.fields.some((field) => field.value === "artist" && field.checked)) {
     throw new Error(`${name}: title and artist should be checked by default ${JSON.stringify(proof)}`);
   }
-  if (options.openFields && !proof.fieldMenuOpen) throw new Error(`${name}: search field menu did not open ${JSON.stringify(proof)}`);
+  if (!proof.fields.some((field) => field.value === "channel" && field.checked)) {
+    throw new Error(`${name}: channel should be checked by default ${JSON.stringify(proof)}`);
+  }
+  if (!proof.hasFieldBar || proof.fieldBarHidden) throw new Error(`${name}: direct search field bar missing ${JSON.stringify(proof)}`);
+  if (proof.fieldMenuExists) throw new Error(`${name}: legacy search field menu should not exist ${JSON.stringify(proof)}`);
   if (options.openFields) {
-    const panelRect = proof.fieldMenuPanelRect;
+    const panelRect = proof.fieldBarRect;
     const formRect = proof.queryFormRect;
-    if (!panelRect || !formRect) throw new Error(`${name}: search field menu geometry missing ${JSON.stringify(proof)}`);
-    if (panelRect.left < -1 || panelRect.right > proof.viewportWidth + 1) throw new Error(`${name}: search field menu outside viewport ${JSON.stringify(proof)}`);
+    if (!panelRect || !formRect) throw new Error(`${name}: search field bar geometry missing ${JSON.stringify(proof)}`);
+    if (panelRect.left < -1 || panelRect.right > proof.viewportWidth + 1) throw new Error(`${name}: search field bar outside viewport ${JSON.stringify(proof)}`);
     if (proof.viewportWidth <= 720) {
-      if (panelRect.left < formRect.left - 1) throw new Error(`${name}: search field menu overflows left of query form ${JSON.stringify(proof)}`);
-      if (panelRect.right > formRect.right + 1) throw new Error(`${name}: search field menu overflows right of query form ${JSON.stringify(proof)}`);
-      if (panelRect.width > formRect.width + 1) throw new Error(`${name}: search field menu wider than query form ${JSON.stringify(proof)}`);
+      if (panelRect.left < formRect.left - 1) throw new Error(`${name}: search field bar overflows left of query form ${JSON.stringify(proof)}`);
+      if (panelRect.right > formRect.right + 1) throw new Error(`${name}: search field bar overflows right of query form ${JSON.stringify(proof)}`);
+      if (panelRect.width > formRect.width + 1) throw new Error(`${name}: search field bar wider than query form ${JSON.stringify(proof)}`);
     }
   }
-  if (!/全不选时搜索全部字段/u.test(proof.hint)) throw new Error(`${name}: empty-field hint missing ${JSON.stringify(proof)}`);
   if (proof.hiddenDialogOpen) throw new Error(`${name}: legacy query dialog should stay closed`);
 }
 
@@ -400,11 +403,6 @@ async function captureQuerySearch(browser, viewport, name, options = {}) {
   if (options.searchText) {
     await page.fill("#queryInput", options.searchText);
     await sleep(250);
-  }
-  if (options.openFields) {
-    await page.locator(".query-field-menu summary").click();
-    await page.waitForSelector(".query-field-menu[open] .query-field-menu-panel", { timeout: 3_000 });
-    await sleep(150);
   }
   await assertDirectQuerySearch(page, name, options);
   await save(page, name, { viewport, params: options.params || {}, selector: options.selector || ".controls", scene: options.scene });
@@ -1814,21 +1812,24 @@ async function assertMobileControlsCompact(page) {
     const range = document.querySelector(".range-mode");
     const trigger = document.querySelector("#queryTrigger");
     const searchForm = document.querySelector("#querySearchForm");
+    const fieldBar = document.querySelector(".query-field-bar");
     const next = document.querySelector("#activeQueryStrip:not([hidden]), #summary");
     return {
       controls: controls ? rectFor(controls) : null,
       range: range ? rectFor(range) : null,
       trigger: trigger ? rectFor(trigger) : null,
       searchForm: searchForm ? rectFor(searchForm) : null,
+      fieldBar: fieldBar ? rectFor(fieldBar) : null,
       next: next ? rectFor(next) : null,
       scrollWidth: document.body.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
     };
   });
   if (!shape.controls || !shape.range) throw new Error(`mobile controls missing: ${JSON.stringify(shape)}`);
-  if (shape.controls.height > 48 || shape.controls.paddingTop > 6 || shape.controls.paddingBottom > 6) {
+  if (shape.controls.height > 78 || shape.controls.paddingTop > 6 || shape.controls.paddingBottom > 6) {
     throw new Error(`mobile controls too large: ${JSON.stringify(shape)}`);
   }
+  if (!shape.fieldBar || shape.fieldBar.height > 28) throw new Error(`mobile direct field bar invalid: ${JSON.stringify(shape)}`);
   if (shape.trigger && Math.abs(shape.range.height - shape.trigger.height) > 1) throw new Error(`mobile controls height mismatch: ${JSON.stringify(shape)}`);
   if (shape.next && shape.next.top - shape.controls.bottom > 8) throw new Error(`mobile controls gap too large: ${JSON.stringify(shape)}`);
   if (shape.scrollWidth > shape.clientWidth) throw new Error(`mobile controls overflow: ${JSON.stringify(shape)}`);

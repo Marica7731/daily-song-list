@@ -51,10 +51,15 @@
     return String(value ?? "").normalize("NFKC").toLocaleLowerCase();
   }
 
+  function searchTokens(value) {
+    return normalizeSearch(value).split(/\s+/u).filter(Boolean);
+  }
+
   function matchesSearch(parts, filter) {
-    const normalized = normalizeSearch(filter);
-    if (!normalized) return true;
-    return normalizeSearch((parts || []).filter(Boolean).join(" ")).includes(normalized);
+    const tokens = searchTokens(filter);
+    if (!tokens.length) return true;
+    const haystack = normalizeSearch((parts || []).filter(Boolean).join(" "));
+    return tokens.every((token) => haystack.includes(token));
   }
 
   function filterItemsBySearch(items, filter) {
@@ -70,7 +75,7 @@
     const normalized = normalizeSearch(filter);
     if (!normalized) return occurrences;
     return (occurrences || []).filter(({ item, song }) =>
-      matchesSearch([item?.videoId, item?.title, item?.channelName, item?.keyword, song?.title, song?.artist], normalized),
+      matchesSearch([item?.videoId, item?.title, ...channelSearchParts(item), item?.keyword, song?.title, song?.artist], normalized),
     );
   }
 
@@ -98,8 +103,8 @@
   function responsiveListPageSize(mode = "desktop", options = {}) {
     const sizes = {
       mobile: positiveInteger(options.mobile, 20),
-      tablet: positiveInteger(options.tablet, 50),
-      desktop: positiveInteger(options.desktop, 50),
+      tablet: positiveInteger(options.tablet, 20),
+      desktop: positiveInteger(options.desktop, 30),
     };
     return sizes[mode] || sizes.desktop;
   }
@@ -980,41 +985,47 @@
     for (const occurrence of occurrences || []) {
       const item = occurrence?.item || {};
       const name = cleanText(item.channelName);
-      const nameKey = normalizeSearch(name);
-      if (!nameKey) continue;
-      const identity = lookup.get(nameKey) || {
+      const keys = channelIdentityKeysForItem(item);
+      if (!keys.length) continue;
+      const identity =
+        keys.map((key) => lookup.get(key)).find(Boolean) || {
         channelName: "",
         channelId: "",
         channelHandle: "",
         channelUrl: "",
         avatarUrl: "",
         channelAvatarUrl: "",
+        channelAliases: [],
       };
       identity.channelName = preferredChannelName(identity.channelName, name);
       identity.channelId ||= cleanText(item.channelId);
-      identity.channelHandle ||= cleanText(item.channelHandle);
+      identity.channelHandle ||= cleanChannelHandle(item.channelHandle);
       identity.channelUrl ||= youtubeChannelSourceUrl(item);
       identity.avatarUrl ||= cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl);
       identity.channelAvatarUrl ||= cleanText(item.channelAvatarUrl || item.avatarUrl);
-      lookup.set(nameKey, identity);
+      identity.channelAliases = channelAliasValues([...(identity.channelAliases || []), ...channelSearchParts(item), name]);
+      for (const key of channelIdentityKeysForIdentity(identity)) lookup.set(key, identity);
+      for (const key of keys) lookup.set(key, identity);
     }
     return lookup;
   }
 
   function hydrateSourceItemChannelIdentity(item, lookup) {
     const name = cleanText(item.channelName);
-    const identity = lookup?.get?.(normalizeSearch(name));
+    const identity = channelIdentityKeysForItem(item).map((key) => lookup?.get?.(key)).find(Boolean);
     if (!identity) return item;
     const next = {
       ...item,
       channelName: preferredChannelName(name, identity.channelName),
+      channelAliases: channelAliasValues([...(Array.isArray(item.channelAliases) ? item.channelAliases : []), ...(identity.channelAliases || []), name, identity.channelName]),
       channelId: cleanText(item.channelId) || identity.channelId,
-      channelHandle: cleanText(item.channelHandle) || identity.channelHandle,
+      channelHandle: cleanChannelHandle(item.channelHandle) || identity.channelHandle,
       channelUrl: youtubeChannelSourceUrl(item) || identity.channelUrl,
       avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl) || identity.avatarUrl,
       channelAvatarUrl: cleanText(item.channelAvatarUrl || item.avatarUrl) || identity.channelAvatarUrl,
     };
     return next.channelName === item.channelName &&
+      JSON.stringify(next.channelAliases || []) === JSON.stringify(item.channelAliases || []) &&
       next.channelId === item.channelId &&
       next.channelHandle === item.channelHandle &&
       next.channelUrl === item.channelUrl &&
@@ -1029,10 +1040,68 @@
     const candidateText = cleanText(candidate);
     if (!currentText) return candidateText;
     if (!candidateText) return currentText;
-    if (candidateText.length > currentText.length && normalizeSearch(candidateText).includes(normalizeSearch(currentText))) {
-      return candidateText;
+    return channelDisplayNameScore(candidateText) > channelDisplayNameScore(currentText) ? candidateText : currentText;
+  }
+
+  function channelDisplayNameScore(value) {
+    const text = cleanText(value);
+    if (!text) return -1;
+    let score = Math.min(text.length, 80);
+    if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
+    if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text) || /^\/channel\/UC[A-Za-z0-9_-]+$/u.test(text)) score -= 1000;
+    return score;
+  }
+
+  function channelIdentityKeysForItem(item = {}) {
+    return channelIdentityKeysForIdentity({
+      channelName: cleanText(item.channelName),
+      channelId: cleanText(item.channelId),
+      channelHandle: cleanChannelHandle(item.channelHandle),
+      channelUrl: youtubeChannelSourceUrl(item),
+    });
+  }
+
+  function channelIdentityKeysForIdentity(identity = {}) {
+    return uniqueCleanTexts([
+      identity.channelId ? `id:${identity.channelId}` : "",
+      identity.channelHandle ? `handle:${normalizeSearch(identity.channelHandle)}` : "",
+      identity.channelUrl ? `url:${normalizeSearch(identity.channelUrl)}` : "",
+      identity.channelName ? `name:${normalizeSearch(identity.channelName)}` : "",
+    ]);
+  }
+
+  function channelSearchParts(item = {}) {
+    const aliases = Array.isArray(item?.channelAliases) ? item.channelAliases : [];
+    return [item?.channelName, ...channelAliasValues(aliases), item?.channelId, cleanChannelHandle(item?.channelHandle), item?.channelUrl || item?.authorUrl || item?.ownerUrl];
+  }
+
+  function channelAliasValues(values) {
+    return uniqueCleanTexts(values).filter((value) => !isChannelPathAlias(value));
+  }
+
+  function cleanChannelHandle(value) {
+    const text = cleanText(value);
+    if (!text) return "";
+    if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text)) return text.startsWith("/") ? text : `/${text}`;
+    const match = text.match(/^https?:\/\/(?:www\.)?youtube\.com\/(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/iu);
+    return match ? `/${match[1]}` : "";
+  }
+
+  function isChannelPathAlias(value) {
+    const text = cleanText(value).toLocaleLowerCase();
+    return text.startsWith("/channel/") || text.includes("youtube.com/channel/");
+  }
+
+  function uniqueCleanTexts(values) {
+    const result = [];
+    const seen = new Set();
+    for (const value of values || []) {
+      const text = cleanText(value);
+      if (!text || seen.has(text)) continue;
+      seen.add(text);
+      result.push(text);
     }
-    return currentText;
+    return result;
   }
 
   function mergeCompleteSourceOccurrences(detailOccurrences = [], previewOccurrences = []) {
@@ -1437,12 +1506,10 @@
 
   function youtubeChannelHandleUrl(value) {
     if (!value) return "";
-    if (/^https?:\/\/(www\.)?youtube\.com\//i.test(value)) return value;
-    if (value.startsWith("/")) return `https://www.youtube.com${value}`;
+    const directHandle = cleanText(value).match(/^https?:\/\/(?:www\.)?youtube\.com\/(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/iu);
+    if (directHandle) return `https://www.youtube.com/${directHandle[1]}`;
+    if (value.startsWith("/@")) return `https://www.youtube.com${value}`;
     if (value.startsWith("@")) return `https://www.youtube.com/${value}`;
-    if (value.startsWith("channel/") || value.startsWith("c/") || value.startsWith("user/")) {
-      return `https://www.youtube.com/${value}`;
-    }
     return "";
   }
 
@@ -1803,6 +1870,7 @@
     indexBucketButtonModel,
     matchesSearch,
     normalizeSearch,
+    searchTokens,
     normalizeSetlistSongs,
     normalizeSongSearchText,
     paginateItems,

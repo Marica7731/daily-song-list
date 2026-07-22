@@ -279,7 +279,7 @@ test("selection builds only the records needed by the current view", () => {
 
 test("explicit search scopes query text by current view", () => {
   const selectionBody = functionBody("function currentSelection");
-  assert.match(selectionBody, /occurrenceSearchTextForCurrentView\(occurrence\)\.includes\(filterKey\)/u);
+  assert.match(selectionBody, /searchTextMatchesQuery\(occurrenceSearchTextForCurrentView\(occurrence\), state\.filter\)/u);
   assert.doesNotMatch(selectionBody, /baseOccurrences\.filter\(\(occurrence\) => occurrence\.searchText\.includes\(filterKey\)\)/u);
 
   const scopedSearchBody = functionBody("function occurrenceSearchTextForCurrentView");
@@ -290,7 +290,7 @@ test("explicit search scopes query text by current view", () => {
   assert.match(functionBody("function searchScopeForView"), /view === "vtuberRank"[\s\S]*return "channel"/u);
   assert.match(functionBody("function searchFieldsForView"), /view === "vtuberRank"[\s\S]*return \["channel"\]/u);
   assert.match(functionBody("function searchFieldKeyForView"), /view === "vtuberRank"[\s\S]*return "default"/u);
-  assert.match(functionBody("function queryDraftOccurrences"), /songOccurrenceSearchText\(occurrence, draft\.searchFields\)\.includes\(filterKey\)/u);
+  assert.match(functionBody("function queryDraftOccurrences"), /searchTextMatchesQuery\(songOccurrenceSearchText\(occurrence, draft\.searchFields\), draft\.q\)/u);
 
   const songScopedSearchBody = functionBody("function songOccurrenceSearchText");
   assert.match(songScopedSearchBody, /item\.videoId,[\s\S]*item\.title,[\s\S]*item\.channelName,[\s\S]*item\.channelHandle,[\s\S]*item\.channelId,[\s\S]*item\.keyword,[\s\S]*song\.title,[\s\S]*song\.artist/u);
@@ -373,21 +373,21 @@ test("query UI hides legacy filters while preserving field toggles", () => {
   assert.match(functionBody("function activeFilterCount"), /return activeQueryItems\(makeQueryDraftFromState\(\)\)\.length/u);
   assert.match(functionBody("function activeQueryItems"), /if \(!state\.runtimeApi\.available\) return items/u);
   assert.match(functionBody("function activeQueryItems"), /item\.key !== "trend" && item\.key !== "minCount"/u);
-  assert.match(indexSource, /value="title" checked[\s\S]*value="artist" checked[\s\S]*value="channel"[\s\S]*value="video"/u);
-  assert.match(indexSource, /全不选时搜索全部字段/u);
+  assert.match(indexSource, /value="title" checked[\s\S]*value="artist" checked[\s\S]*value="channel" checked[\s\S]*value="video"/u);
+  assert.match(indexSource, /class="query-field-bar"[\s\S]*class="query-field-toggle"/u);
+  assert.doesNotMatch(indexSource, /queryCountBadge|query-field-menu|query-count/u);
   assert.match(functionBody("function normalizedSearchFieldKey"), /return normalized\.length \? normalized\.join\(","\) : "all"/u);
 });
 
 test("top filter chips and search box avoid duplicate clear controls and empty columns", () => {
   assert.match(functionBody("function syncQueryClearButton"), /els\.querySearchForm\?\.classList\.toggle\("has-query-text", hasQuery\)/u);
-  assert.match(stylesSource, /\.query-search-form \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) auto;/u);
-  assert.match(stylesSource, /\.query-search-form\.has-query-text \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) 28px auto;/u);
-  assert.match(stylesSource, /\.query-search-form input\[type="search"\]::-ms-clear/u);
+  assert.match(stylesSource, /\.query-search-form \{[\s\S]*grid-template-columns: minmax\(240px, 1fr\) auto;/u);
+  assert.match(stylesSource, /\.query-input-shell \{[\s\S]*grid-template-columns: 28px minmax\(0, 1fr\) 28px;/u);
+  assert.match(stylesSource, /\.query-input-shell input\[type="search"\]::-ms-clear/u);
   assert.match(stylesSource, /\.active-query-chip-close \{[\s\S]*flex: 0 0 auto;/u);
-  assert.match(stylesSource, /\.query-count \{[\s\S]*height: 12px;/u);
-  assert.match(stylesSource, /\.query-search-form \.query-count\[hidden\] \{[\s\S]*display: none;/u);
-  assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-form\.query-trigger \{[\s\S]*grid-template-columns: 24px minmax\(0, 1fr\) 24px;/u);
-  assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-form\.query-trigger\.has-query-text \{[\s\S]*grid-template-columns: 24px minmax\(0, 1fr\) 24px 24px;/u);
+  assert.doesNotMatch(stylesSource, /query-count|query-field-menu/u);
+  assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-input-shell\s*\{[\s\S]*grid-template-columns: 24px minmax\(0, 1fr\) 24px;/u);
+  assert.match(stylesSource, /@media \(max-width: 720px\)[\s\S]*\.query-field-bar\s*\{[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/u);
 });
 
 test("source and video links handle plain left clicks without stealing modified clicks", () => {
@@ -395,10 +395,26 @@ test("source and video links handle plain left clicks without stealing modified 
   assert.match(handlerBody, /isSourceOrVideoContentLink\(link\)/u);
   assert.match(handlerBody, /event\.button !== 0 \|\| event\.metaKey \|\| event\.ctrlKey \|\| event\.shiftKey \|\| event\.altKey/u);
   assert.match(handlerBody, /event\.preventDefault\(\)/u);
-  assert.match(handlerBody, /window\.location\.href = link\.href/u);
-  assert.doesNotMatch(handlerBody, /window\.open|location\.assign/u);
+  assert.match(handlerBody, /window\.open\(link\.href, "_blank", "noopener,noreferrer"\)/u);
+  assert.doesNotMatch(handlerBody, /window\.location\.href|location\.assign/u);
   assert.match(functionBody("function isSourceOrVideoContentLink"), /source-inline-strip, \.source-drawer, \.inline-source, \.video-card/u);
   assert.match(functionBody("function bindEvents"), /if \(link && handleContentLinkNavigation\(event, link\)\) return/u);
+});
+
+test("VTuber record identity keeps channel paths out of handles and prefers Japanese names", () => {
+  const keyBody = functionBody("function directVtuberRecordKey");
+  assert.match(keyBody, /cleanVtuberChannelHandle\(item\?\.channelHandle\)/u);
+  assert.match(keyBody, /vtuberHandleFromChannelUrl\(vtuberChannelUrlCandidate\(item\)\)/u);
+  assert.doesNotMatch(keyBody, /cleanText\(item\?\.channelHandle\)\.replace/u);
+
+  const mergeBody = functionBody("function mergeVtuberRecordIdentity");
+  assert.match(mergeBody, /const channelHandle = cleanVtuberChannelHandle\(item\.channelHandle\)/u);
+  assert.match(mergeBody, /record\.channelName = preferredVtuberChannelName\(record\.channelName, channelName\)/u);
+  assert.match(mergeBody, /record\.name = preferredVtuberChannelName\(record\.name, channelName\)/u);
+  assert.match(functionBody("function vtuberChannelDisplayNameScore"), /\[ぁ-ゖァ-ヺ一-龯々〆〤\]/u);
+  const cleanHandleBody = functionBody("function cleanVtuberChannelHandle");
+  assert.match(cleanHandleBody, /text\.startsWith\("\/"\) \? text : `\/\$\{text\}`/u);
+  assert.doesNotMatch(cleanHandleBody, /channel\/UC/u);
 });
 
 test("copy setlist resolves same-video songs and emits timestamp link rows", () => {
@@ -448,6 +464,9 @@ test("all-field searches use runtime API when it is available", () => {
 
   const apiBody = functionBody("async function requestApiViewPage");
   assert.match(apiBody, /requestFiltersForView\(request\.view, request\.filters \|\| \{\}\)/u);
+  assert.match(apiBody, /const params = new URLSearchParams\(/u);
+  assert.match(apiBody, /const query = cleanText\(filters\.q \|\| ""\)/u);
+  assert.match(apiBody, /if \(query\) params\.set\("q", query\)/u);
   assert.match(apiBody, /params\.set\("searchScope", filters\.searchScope\)/u);
   assert.match(apiBody, /const searchFields = searchFieldsForView\(request\.view, filters\)/u);
   assert.match(apiBody, /params\.set\("searchFields", searchFields\.length \? searchFields\.join\(","\) : "all"\)/u);

@@ -691,7 +691,7 @@ function upsertMygitSnapshotCandidate(byVideoId, item) {
   if (!existing.viewText && item.viewText) existing.viewText = item.viewText;
   if (!existing.channelName && item.channelName) existing.channelName = item.channelName;
   if (!existing.channelId && item.channelId) existing.channelId = item.channelId;
-  if (!existing.channelHandle && item.channelHandle) existing.channelHandle = item.channelHandle;
+  existing.channelHandle = mergedChannelHandle(existing.channelHandle, item.channelHandle || item.channelUrl);
   if (!existing.snapshotId && item.snapshotId) existing.snapshotId = item.snapshotId;
 }
 
@@ -761,6 +761,7 @@ function mergeCandidate(byVideoId, item, search, nowMs) {
   if (!existing) {
     byVideoId.set(item.videoId, {
       ...item,
+      channelHandle: normalizeChannelHandle(item.channelHandle || item.channelUrl || ""),
       keyword: item.keyword || search.keyword,
       keywords,
       keywordKeys,
@@ -783,7 +784,7 @@ function mergeCandidate(byVideoId, item, search, nowMs) {
   if (!existing.viewText && item.viewText) existing.viewText = item.viewText;
   if (!existing.channelName && item.channelName) existing.channelName = item.channelName;
   if (!existing.channelId && item.channelId) existing.channelId = item.channelId;
-  if (!existing.channelHandle && item.channelHandle) existing.channelHandle = item.channelHandle;
+  existing.channelHandle = mergedChannelHandle(existing.channelHandle, item.channelHandle || item.channelUrl);
 }
 
 function addUnique(list, value) {
@@ -1015,7 +1016,7 @@ function mergeFetchedAndCarriedVideos(fetchedVideos, carriedVideos) {
       mergeVideoMetadata(existing, carried);
       continue;
     }
-    byVideoId.set(carried.videoId, carried);
+    byVideoId.set(carried.videoId, { ...carried, channelHandle: normalizeChannelHandle(carried.channelHandle || carried.channelUrl || "") });
   }
   return [...byVideoId.values()];
 }
@@ -1029,7 +1030,7 @@ function mergeVideoMetadata(target, source) {
   if (!target.thumbnailUrl && source.thumbnailUrl) target.thumbnailUrl = source.thumbnailUrl;
   if (!target.durationText && source.durationText) target.durationText = source.durationText;
   if (!target.channelId && source.channelId) target.channelId = source.channelId;
-  if (!target.channelHandle && source.channelHandle) target.channelHandle = source.channelHandle;
+  target.channelHandle = mergedChannelHandle(target.channelHandle, source.channelHandle || source.channelUrl);
 }
 
 function selectCandidatesForInspection(candidates, now, options = {}) {
@@ -2344,7 +2345,7 @@ function channelIdFromRenderer(renderer) {
 }
 
 function channelHandleFromRenderer(renderer) {
-  return channelEndpointFromRenderer(renderer)?.canonicalBaseUrl || "";
+  return normalizeChannelHandle(channelEndpointFromRenderer(renderer)?.canonicalBaseUrl || "");
 }
 
 function channelEndpointFromRenderer(renderer) {
@@ -2785,9 +2786,14 @@ function extractVideoIdFromWatchUrl(url) {
 
 function normalizeChannelHandle(value) {
   const text = normalizeWhitespace(value || "");
-  const match = text.match(/(?:^|\/)(@[A-Za-z0-9._-]+)(?:[/?#]|$)/u);
+  const match = text.match(/(?:^|\/)(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/u);
   if (match) return match[1];
-  return text.startsWith("@") ? text : "";
+  return /^@[A-Za-z0-9._%~-]+$/u.test(text) ? text : "";
+}
+
+function mergedChannelHandle(current, candidate) {
+  const currentHandle = normalizeChannelHandle(current);
+  return currentHandle || normalizeChannelHandle(candidate);
 }
 
 function roundNumber(value, digits = 2) {

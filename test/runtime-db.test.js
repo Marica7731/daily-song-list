@@ -9,6 +9,89 @@ const test = require("node:test");
 const ROOT = path.resolve(__dirname, "..");
 const PYTHON = process.env.PYTHON || "python";
 
+test("runtime DB builder cleans channel path handles without metadata and upgrades display names", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-db-channel-handle-"));
+  const latestPath = path.join(dir, "latest.json");
+  const dbPath = path.join(dir, "song-rank.sqlite");
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-22T00:00:00.000Z",
+      capturedAt: "2026-07-22T00:00:00.000Z",
+      groups: {
+        all: {
+          items: [
+            {
+              videoId: "ISSHIKI0001",
+              title: "English label",
+              channelName: "Isshiki Izu",
+              channelId: "UCISSHIKI",
+              channelHandle: "/channel/UCISSHIKI",
+              channelUrl: "https://www.youtube.com/channel/UCISSHIKI",
+              channelAliases: ["/channel/UCISSHIKI", "Isshiki Izu"],
+              songs: [{ title: "雑魚", artist: "柊マグネタイト", seconds: 10 }],
+            },
+            {
+              videoId: "ISSHIKI0002",
+              title: "Japanese label",
+              channelName: "一色イズ◇Isshiki IS",
+              channelId: "UCISSHIKI",
+              channelHandle: "/@IsshikiIS",
+              channelUrl: "https://www.youtube.com/@IsshikiIS",
+              songs: [{ title: "雑魚", artist: "柊マグネタイト", seconds: 20 }],
+            },
+          ],
+        },
+      },
+    }),
+    "utf8",
+  );
+  const buildOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+      "--input",
+      latestPath,
+      "--output",
+      dbPath,
+      "--no-vsinger",
+      "--no-youtube-channel-discovery",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+
+  const probePath = path.join(dir, "channel-handle-db-probe.py");
+  fs.writeFileSync(
+    probePath,
+    [
+      "import json",
+      "import sqlite3",
+      "import sys",
+      "conn = sqlite3.connect(sys.argv[1])",
+      "out = {}",
+      "out['videos'] = [json.loads(row[0]) for row in conn.execute(\"SELECT payload_json FROM videos ORDER BY video_id\")]",
+      "out['occurrences'] = [json.loads(row[0]) for row in conn.execute(\"SELECT payload_json FROM occurrences ORDER BY occurrence_id\")]",
+      "out['sourceOccurrences'] = [json.loads(row[0]) for row in conn.execute(\"SELECT payload_json FROM source_occurrences WHERE range_id = 'all' ORDER BY source_key, position\")]",
+      "row = conn.execute(\"SELECT handle, display_name, payload_json FROM channel_metadata WHERE channel_id = 'UCISSHIKI'\").fetchone()",
+      "out['channelMetadata'] = {'handle': row[0], 'displayName': row[1], 'payload': json.loads(row[2])}",
+      "conn.close()",
+      "print(json.dumps(out, ensure_ascii=True))",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  const probe = JSON.parse(execFileSync(PYTHON, [probePath, dbPath], { cwd: ROOT, encoding: "utf8" }));
+  assert.equal(probe.videos.every((item) => item.channelHandle !== "/channel/UCISSHIKI"), true);
+  assert.equal(probe.occurrences.every((item) => item.video.channelHandle !== "/channel/UCISSHIKI"), true);
+  assert.equal(
+    probe.sourceOccurrences.every((item) => item.item.channelHandle !== "/channel/UCISSHIKI" && !(item.item.channelAliases || []).includes("/channel/UCISSHIKI")),
+    true,
+  );
+  assert.equal(probe.channelMetadata.handle, "/@IsshikiIS");
+  assert.equal(probe.channelMetadata.displayName, "一色イズ◇Isshiki IS");
+});
+
 test("runtime DB builder creates queryable rankings and external tables", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-db-"));
   const latestPath = path.join(dir, "latest.json");
@@ -488,6 +571,93 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   assert.match(vsingerVtuberOutput, /"isCollected": false/);
 });
 
+test("runtime DB builder treats moment source aliases as not collected", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-db-moment-alias-"));
+  const latestPath = path.join(dir, "latest.json");
+
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      capturedAt: "2026-07-19T00:00:00.000Z",
+      groups: {
+        "7d": { items: [] },
+        all: {
+          items: [
+            {
+              videoId: "MOMALIAS001",
+              title: "Moment alias karaoke",
+              channelName: "Moment Alias Ch.",
+              isCollected: true,
+              sourceQuality: { sourceType: "external", sourceSystem: "moment" },
+              songs: [{ title: "Moment Alias Song", artist: "Moment Alias Artist", seconds: 10, time: "0:10" }],
+            },
+            {
+              videoId: "VSALIAS0001",
+              title: "VSinger moment alias karaoke",
+              channelName: "VSinger Moment Alias Ch.",
+              isCollected: true,
+              sourceQuality: { sourceType: "external", sourceSystem: "vsinger-moment" },
+              songs: [{ title: "VSinger Moment Alias Song", artist: "VSinger Moment Alias Artist", seconds: 20, time: "0:20" }],
+            },
+            {
+              videoId: "MANUALALIAS",
+              title: "Manual source karaoke",
+              channelName: "Manual Alias Ch.",
+              knownSourceType: "manual",
+              isCollected: false,
+              songs: [{ title: "Manual Alias Song", artist: "Manual Alias Artist", seconds: 30, time: "0:30" }],
+            },
+          ],
+        },
+      },
+    }),
+    "utf8",
+  );
+
+  for (const rankingSource of ["js", "python"]) {
+    const dbPath = path.join(dir, `song-rank-${rankingSource}.sqlite`);
+    const buildArgs = [
+      path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+      "--input",
+      latestPath,
+      "--output",
+      dbPath,
+      "--no-vsinger",
+      "--no-youtube-channel-discovery",
+    ];
+    if (rankingSource === "python") buildArgs.push("--ranking-source", "python");
+    const buildOutput = execFileSync(PYTHON, buildArgs, { cwd: ROOT, encoding: "utf8" });
+    assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+
+    const vtuberOutput = execFileSync(
+      PYTHON,
+      [
+        path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+        "--db",
+        dbPath,
+        "--range",
+        "all",
+        "--view",
+        "vtubers",
+        "--q",
+        "Alias",
+        "--page-size",
+        "10",
+      ],
+      { cwd: ROOT, encoding: "utf8" },
+    );
+    const payload = parseDbQueryOutput(vtuberOutput);
+    const byName = new Map(payload.records.map((record) => [record.name, record]));
+    assert.equal(byName.get("Moment Alias Ch.").knownSourceType, "moment", rankingSource);
+    assert.equal(byName.get("Moment Alias Ch.").isCollected, false, rankingSource);
+    assert.equal(byName.get("VSinger Moment Alias Ch.").knownSourceType, "vsinger-moment", rankingSource);
+    assert.equal(byName.get("VSinger Moment Alias Ch.").isCollected, false, rankingSource);
+    assert.equal(byName.get("Manual Alias Ch.").knownSourceType, "manual", rankingSource);
+    assert.equal(byName.get("Manual Alias Ch.").isCollected, true, rankingSource);
+  }
+});
+
 test("runtime DB builder repairs indexed unknown-artist known songs before ranking", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-db-repair-"));
   const latestPath = path.join(dir, "latest.json");
@@ -561,6 +731,51 @@ test("runtime DB builder repairs indexed unknown-artist known songs before ranki
     assert.match(queryOutput, /"count": 5/, rankingSource);
     assert.match(queryOutput, /"displayArtist": "緑黄色社会"/, rankingSource);
     assert.doesNotMatch(queryOutput, /::unknown|未記載|⟦16⟧|16 花になって|Be a flower|52😎/u, rankingSource);
+
+    const sourcePreviewProbePath = path.join(dir, `source-preview-probe-${rankingSource}.py`);
+    fs.writeFileSync(
+      sourcePreviewProbePath,
+      [
+        "import json",
+        "import sqlite3",
+        "import sys",
+        "conn = sqlite3.connect(sys.argv[1])",
+        "def payloads(table):",
+        "    rows = conn.execute(f\"SELECT payload_json FROM {table} WHERE range_id = 'all'\").fetchall()",
+        "    for (payload_json,) in rows:",
+        "        try:",
+        "            yield json.loads(payload_json)",
+        "        except Exception:",
+        "            continue",
+        "def song_from_payload(payload):",
+        "    song = payload.get('song') if isinstance(payload, dict) else {}",
+        "    return song if isinstance(song, dict) else {}",
+        "def is_flower(song):",
+        "    title = str(song.get('title') or '')",
+        "    return '花になって' in title or 'Be a flower' in title",
+        "def summarize(table):",
+        "    songs = [song_from_payload(payload) for payload in payloads(table)]",
+        "    flowers = [song for song in songs if is_flower(song)]",
+        "    return {",
+        "        'flower_count': len(flowers),",
+        "        'unknown_count': sum(1 for song in flowers if str(song.get('artist') or '') == '未記載'),",
+        "        'dirty_title_count': sum(1 for song in flowers if any(marker in str(song.get('title') or '') for marker in ('⟦16⟧', '16 花になって', 'Be a flower', '52😎'))),",
+        "    }",
+        "out = {'source_occurrences': summarize('source_occurrences'), 'occurrences': summarize('occurrences')}",
+        "conn.close()",
+        "print(json.dumps(out, ensure_ascii=False))",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    const sourcePreviewProbeOutput = execFileSync(PYTHON, [sourcePreviewProbePath, dbPath], { cwd: ROOT, encoding: "utf8" });
+    const sourcePreviewProbe = JSON.parse(sourcePreviewProbeOutput);
+    assert.ok(sourcePreviewProbe.source_occurrences.flower_count > 0, rankingSource);
+    assert.equal(sourcePreviewProbe.source_occurrences.unknown_count, 0, rankingSource);
+    assert.equal(sourcePreviewProbe.source_occurrences.dirty_title_count, 0, rankingSource);
+    assert.equal(sourcePreviewProbe.occurrences.flower_count, 5, rankingSource);
+    assert.equal(sourcePreviewProbe.occurrences.unknown_count, 0, rankingSource);
+    assert.equal(sourcePreviewProbe.occurrences.dirty_title_count, 0, rankingSource);
 
     const haruruOutput = execFileSync(
       PYTHON,
@@ -810,7 +1025,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
           url: "https://www.youtube.com/watch?v=chanvideo01",
           channelName: "",
           channelId: "",
-          channelHandle: "",
+          channelHandle: "/channel/UCay6Y3oEoiC6ZEE2G0UZu_A",
           channelUrl: "https://www.youtube.com/@kanaruhanon",
           publishedTimestamp: 1784332800000,
           publishedText: "2026-07-18",
@@ -1117,6 +1332,37 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(videoHandleSearchOutput, /Hanon Ch\. 香鳴ハノン【パレプロ】/);
   assert.match(videoHandleSearchOutput, /UCay6Y3oEoiC6ZEE2G0UZu_A/);
   assert.match(videoHandleSearchOutput, /hanon-avatar/);
+
+  const channelHandleProbePath = path.join(dir, "channel-handle-probe.py");
+  fs.writeFileSync(
+    channelHandleProbePath,
+    [
+      "import json",
+      "import sqlite3",
+      "import sys",
+      "conn = sqlite3.connect(sys.argv[1])",
+      "rows = conn.execute(\"SELECT payload_json FROM source_occurrences WHERE range_id = 'all'\").fetchall()",
+      "matches = []",
+      "for (payload_json,) in rows:",
+      "    payload = json.loads(payload_json)",
+      "    item = payload.get('item') if isinstance(payload, dict) else {}",
+      "    if isinstance(item, dict) and item.get('videoId') == '3sYGvwElb14':",
+      "        matches.append({",
+      "            'channelName': item.get('channelName'),",
+      "            'channelHandle': item.get('channelHandle'),",
+      "            'channelAliases': item.get('channelAliases'),",
+      "        })",
+      "conn.close()",
+      "print(json.dumps(matches, ensure_ascii=True))",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  const channelHandleProbe = JSON.parse(execFileSync(PYTHON, [channelHandleProbePath, dbPath], { cwd: ROOT, encoding: "utf8" }));
+  assert.ok(channelHandleProbe.length > 0);
+  assert.equal(channelHandleProbe.every((item) => item.channelName === "Hanon Ch. 香鳴ハノン【パレプロ】"), true);
+  assert.equal(channelHandleProbe.every((item) => item.channelHandle === "/@kanaruhanon"), true);
+  assert.equal(channelHandleProbe.every((item) => !(item.channelAliases || []).includes("/channel/UCay6Y3oEoiC6ZEE2G0UZu_A")), true);
 
   const videoUrlSearchOutput = execFileSync(
     PYTHON,

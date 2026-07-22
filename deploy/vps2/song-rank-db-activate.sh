@@ -25,13 +25,21 @@ cd "${PROJECT_DIR}"
 python3 scripts/db/query-runtime-db.py --db "${CANDIDATE_DB}" --range all --view songs --q "少女レイ" --page-size 5 --summary-only
 
 mkdir -p "${STATE_DIR}"
+previous_db="${DB_PATH}.previous"
+rm -f "${previous_db}"
 if [[ -f "${DB_PATH}" ]]; then
-  cp -f "${DB_PATH}" "${DB_PATH}.previous"
+  mv -f "${DB_PATH}" "${previous_db}"
 fi
-mv -f "${CANDIDATE_DB}" "${DB_PATH}"
+if ! mv -f "${CANDIDATE_DB}" "${DB_PATH}"; then
+  if [[ -f "${previous_db}" && ! -f "${DB_PATH}" ]]; then
+    mv -f "${previous_db}" "${DB_PATH}"
+  fi
+  echo "CODEX_RUNTIME_DB_ACTIVATE_ERROR replace-failed db=${DB_PATH} candidate=${CANDIDATE_DB}"
+  exit 1
+fi
 chown www-data:www-data "${DB_PATH}"
-if [[ -f "${DB_PATH}.previous" ]]; then
-  chown www-data:www-data "${DB_PATH}.previous"
+if [[ -f "${previous_db}" ]]; then
+  chown www-data:www-data "${previous_db}"
 fi
 if [[ -f "${CANDIDATE_DB}.manifest.json" ]]; then
   mv -f "${CANDIDATE_DB}.manifest.json" "${DB_PATH}.manifest.json"

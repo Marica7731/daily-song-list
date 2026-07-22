@@ -83,7 +83,7 @@ const SEARCH_FIELDS = {
   channel: "频道",
   video: "视频",
 };
-const DEFAULT_SEARCH_FIELDS = ["title", "artist"];
+const DEFAULT_SEARCH_FIELDS = ["title", "artist", "channel"];
 const VIEW_RANK_METRIC_ORDER = {
   songRank: ["occurrences", "videos"],
   artistRank: ["occurrences", "videos"],
@@ -349,8 +349,7 @@ const els = {
   querySearchForm: document.querySelector("#querySearchForm"),
   queryTrigger: document.querySelector("#queryTrigger"),
   queryTriggerText: document.querySelector("#queryTriggerText"),
-  queryCountBadge: document.querySelector("#queryCountBadge"),
-  queryFieldMenu: document.querySelector(".query-field-menu"),
+  queryFieldBar: document.querySelector(".query-field-bar"),
   queryDialog: document.querySelector("#queryDialog"),
   queryPanel: document.querySelector("#queryDialog .query-panel"),
   queryInput: document.querySelector("#queryInput"),
@@ -764,7 +763,7 @@ function handleContentLinkNavigation(event, link) {
   if (!link || event.defaultPrevented || !isSourceOrVideoContentLink(link)) return false;
   if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return false;
   event.preventDefault();
-  window.location.href = link.href;
+  window.open(link.href, "_blank", "noopener,noreferrer");
   return true;
 }
 
@@ -979,6 +978,10 @@ function appendHighlightedText(container, text, query) {
   container.append(mark, document.createTextNode(source.slice(index + needle.length)));
 }
 
+function searchTextMatchesQuery(searchText, query) {
+  return window.FrontendUtils.matchesSearch([searchText], query);
+}
+
 function buildSearchSuggestions(query, draft = state.queryDraft || makeQueryDraftFromState()) {
   const filterKey = normalizeSearch(query);
   if (!filterKey || !state.payload) return [];
@@ -986,7 +989,7 @@ function buildSearchSuggestions(query, draft = state.queryDraft || makeQueryDraf
   const key = queryIndexKey(draft);
   const index = rangeCache.queryIndexes.get(key) || buildFastSearchSuggestionIndex(filterKey, rangeCache, draft);
   const songSuggestions = index.songs
-    .filter((entry) => entry.normalizedText.includes(filterKey))
+    .filter((entry) => searchTextMatchesQuery(entry.normalizedText, query))
     .slice(0, 5)
     .map((entry) => ({
       label: entry.label,
@@ -995,7 +998,7 @@ function buildSearchSuggestions(query, draft = state.queryDraft || makeQueryDraf
     }));
 
   const artistSuggestions = index.artists
-    .filter((entry) => entry.normalizedText.includes(filterKey))
+    .filter((entry) => searchTextMatchesQuery(entry.normalizedText, query))
     .slice(0, 3)
     .map((entry) => ({
       label: entry.label,
@@ -1004,7 +1007,7 @@ function buildSearchSuggestions(query, draft = state.queryDraft || makeQueryDraf
     }));
 
   const channelSuggestions = index.channels
-    .filter((entry) => entry.normalizedText.includes(filterKey))
+    .filter((entry) => searchTextMatchesQuery(entry.normalizedText, query))
     .slice(0, 3)
     .map((entry) => ({
       label: entry.label,
@@ -1036,9 +1039,9 @@ function buildFastSearchSuggestionIndex(filterKey, rangeCache, draft) {
     const artist = cleanText(song.artist || "");
     const channel = cleanText(item.channelName || "");
     if (title && songs.length < 5) {
-      const normalizedText = normalizeSearch([title, artist].join(" "));
+      const normalizedText = normalizeSearch([title, artist, channel].join(" "));
       const key = normalizeEntityKey([title, artist].join("\n"));
-      if (normalizedText.includes(filterKey) && !seenSongs.has(key)) {
+      if (searchTextMatchesQuery(normalizedText, filterKey) && !seenSongs.has(key)) {
         seenSongs.add(key);
         songs.push({
           label: title,
@@ -1051,7 +1054,7 @@ function buildFastSearchSuggestionIndex(filterKey, rangeCache, draft) {
     if (artist && artists.length < 3 && !window.RankingUtils.isUnknownArtistName(artist)) {
       const normalizedText = normalizeSearch(artist);
       const key = normalizeEntityKey(artist);
-      if (normalizedText.includes(filterKey) && !seenArtists.has(key)) {
+      if (searchTextMatchesQuery(normalizedText, filterKey) && !seenArtists.has(key)) {
         seenArtists.add(key);
         artists.push({
           label: artist,
@@ -1064,7 +1067,7 @@ function buildFastSearchSuggestionIndex(filterKey, rangeCache, draft) {
     if (channel && channels.length < 3) {
       const normalizedText = normalizeSearch(channel);
       const key = normalizeEntityKey(channel);
-      if (normalizedText.includes(filterKey) && !seenChannels.has(key)) {
+      if (searchTextMatchesQuery(normalizedText, filterKey) && !seenChannels.has(key)) {
         seenChannels.add(key);
         channels.push({
           label: channel,
@@ -1423,10 +1426,7 @@ function updateQueryAvailability(draft = state.queryDraft || makeQueryDraftFromS
   if (els.displayFilterGroup) els.displayFilterGroup.hidden = true;
   if (hideUnknownField) hideUnknownField.hidden = state.view === "artistRank" || state.view === "vtuberRank";
   if (els.hideUnknownToggle) els.hideUnknownToggle.disabled = state.view === "artistRank" || state.view === "vtuberRank";
-  if (els.queryFieldMenu) {
-    els.queryFieldMenu.hidden = vtuberView;
-    if (vtuberView) els.queryFieldMenu.open = false;
-  }
+  if (els.queryFieldBar) els.queryFieldBar.hidden = vtuberView;
   for (const input of els.searchFieldToggles) input.disabled = vtuberView;
   if (els.trendFilterGroup) els.trendFilterGroup.hidden = true;
   if (els.minCountFilterGroup) els.minCountFilterGroup.hidden = true;
@@ -1486,11 +1486,6 @@ function syncQueryTriggerState() {
   const draft = makeQueryDraftFromState();
   const items = activeQueryItems(draft);
   const count = items.length;
-  if (els.queryCountBadge) {
-    els.queryCountBadge.hidden = count <= 0;
-    els.queryCountBadge.textContent = count > 0 ? String(count) : "";
-    els.queryCountBadge.setAttribute("aria-label", `当前有 ${count} 个搜索与筛选条件`);
-  }
   if (els.queryTriggerText) {
     els.queryTriggerText.textContent = state.filter || "搜索歌曲、歌手、VTuber或视频";
     els.queryTriggerText.title = state.filter || "";
@@ -1700,15 +1695,15 @@ function queryDraftOccurrences(rangeCache, draft) {
   const filterKey = normalizeSearch(draft.q);
   if (!filterKey) return base;
   if (state.view === "artistRank") {
-    return base.filter((occurrence) => artistOccurrenceSearchText(occurrence).includes(filterKey));
+    return base.filter((occurrence) => searchTextMatchesQuery(artistOccurrenceSearchText(occurrence), draft.q));
   }
   if (state.view === "vtuberRank") {
-    return base.filter((occurrence) => vtuberOccurrenceSearchText(occurrence).includes(filterKey));
+    return base.filter((occurrence) => searchTextMatchesQuery(vtuberOccurrenceSearchText(occurrence), draft.q));
   }
   if (state.view === "songRank" || state.view === "songAz") {
-    return base.filter((occurrence) => songOccurrenceSearchText(occurrence, draft.searchFields).includes(filterKey));
+    return base.filter((occurrence) => searchTextMatchesQuery(songOccurrenceSearchText(occurrence, draft.searchFields), draft.q));
   }
-  return base.filter((occurrence) => occurrenceSearchTextForCurrentView(occurrence).includes(filterKey));
+  return base.filter((occurrence) => searchTextMatchesQuery(occurrenceSearchTextForCurrentView(occurrence), draft.q));
 }
 
 function searchScopeForView(view = state.view, filters = {}) {
@@ -2016,7 +2011,11 @@ function syncControlsFromState() {
   syncBottomNavFromState();
   if (els.nicheOnlyToggle) els.nicheOnlyToggle.checked = state.nicheOnly;
   if (els.hideUnknownToggle) els.hideUnknownToggle.checked = state.hideUnknownArtist;
-  for (const input of els.searchFieldToggles) input.checked = state.searchFields.includes(input.value);
+  for (const input of els.searchFieldToggles) {
+    input.checked = state.searchFields.includes(input.value);
+    const label = input.closest("label");
+    if (label) label.classList.toggle("is-selected", input.checked);
+  }
   syncSnapshotControlsFromState();
   syncQueryTriggerState();
   renderActiveQueryStrip();
@@ -3813,7 +3812,7 @@ async function filterRequestIndexEntries(entries, options = {}) {
   if (query) {
     const candidates = await loadRequestSearchCandidates(query, filters, options.signal);
     const allowEntryTextFallback = searchUsesAllFields(filters);
-    result = result.filter((entry) => candidates.has(`${entry.type}:${entry.detailKey}`) || (allowEntryTextFallback && normalizeSearch(entry.searchText).includes(query)));
+    result = result.filter((entry) => candidates.has(`${entry.type}:${entry.detailKey}`) || (allowEntryTextFallback && searchTextMatchesQuery(entry.searchText, query)));
   }
   if (options.view === "songAz" && filters.indexBucket && filters.indexBucket !== INDEX_ALL_BUCKET) {
     result = result.filter((entry) => entry.bucket === filters.indexBucket);
@@ -3974,22 +3973,42 @@ async function loadRequestSearchRecords(query, signal) {
   const manifestPath = requestMeta?.search?.manifestPath;
   if (!manifestPath) return [];
   const manifest = await readCachedRequestJson(state.requestRuntime.searchManifestCache, manifestPath, signal);
-  const bucket = requestSearchBucket(query);
-  const bucketMeta = manifest.buckets?.[bucket] || manifest.buckets?._;
-  if (!bucketMeta?.pages?.length) return [];
+  const bucketIds = Array.from(requestSearchBuckets(query));
+  const bucketMetas = bucketIds.map((bucket) => manifest.buckets?.[bucket]).filter((bucketMeta) => bucketMeta?.pages?.length);
+  if (!bucketMetas.length && manifest.buckets?._?.pages?.length) bucketMetas.push(manifest.buckets._);
+  if (!bucketMetas.length) return [];
   const records = [];
-  for (const page of bucketMeta.pages) {
-    const payload = await readCachedRequestJson(state.requestRuntime.searchShardCache, page.path, signal);
-    for (const record of payload.records || []) {
-      if (!normalizeSearch(record.searchText).includes(query)) continue;
-      records.push(record);
+  const seenPages = new Set();
+  const seenRecords = new Set();
+  for (const bucketMeta of bucketMetas) {
+    for (const page of bucketMeta.pages) {
+      if (!page?.path || seenPages.has(page.path)) continue;
+      seenPages.add(page.path);
+      const payload = await readCachedRequestJson(state.requestRuntime.searchShardCache, page.path, signal);
+      for (const record of payload.records || []) {
+        const key = `${record.type || ""}:${record.detailKey || record.key || record.label || ""}`;
+        if (seenRecords.has(key)) continue;
+        if (!searchTextMatchesQuery(record.searchText, query)) continue;
+        seenRecords.add(key);
+        records.push(record);
+      }
     }
   }
   return records;
 }
 
+function requestSearchBuckets(query) {
+  const buckets = new Set();
+  for (const token of window.FrontendUtils.searchTokens(query)) {
+    buckets.add(requestSearchBucket(token));
+    if (buckets.size >= 64) break;
+  }
+  if (!buckets.size) buckets.add("_");
+  return buckets;
+}
+
 function requestSearchBucket(query) {
-  const normalized = normalizeSearch(query).replace(/\s+/gu, "");
+  const normalized = normalizeSearch(query).trim();
   const char = normalized[0] || "_";
   const code = char.codePointAt(0) || 95;
   return `b${String(code % 64).padStart(2, "0")}`;
@@ -4528,7 +4547,7 @@ function currentSelection(rangeCache) {
   if (!filterKey) {
     attachSelectionRecordGetters(selection, rangeCache, baseOccurrences, { hideUnknownForView, filtered: false });
   } else {
-    const occurrences = baseOccurrences.filter((occurrence) => occurrenceSearchTextForCurrentView(occurrence).includes(filterKey));
+    const occurrences = baseOccurrences.filter((occurrence) => searchTextMatchesQuery(occurrenceSearchTextForCurrentView(occurrence), state.filter));
     selection.occurrences = occurrences;
     selection.videoCount = uniqueVideoCount(occurrences);
     attachSelectionRecordGetters(selection, rangeCache, occurrences, { hideUnknownForView, filtered: true });
@@ -5647,10 +5666,10 @@ function buildVtuberRecords(occurrences) {
       records.set(key, {
         type: "vtuber",
         key,
-        name: cleanText(item.channelName || item.channelHandle || item.channelId || "未知频道"),
+        name: preferredVtuberChannelName("未知频道", item.channelName || cleanVtuberChannelHandle(item.channelHandle) || item.channelId),
         channelName: cleanText(item.channelName),
         channelId: cleanText(item.channelId),
-        channelHandle: cleanText(item.channelHandle),
+        channelHandle: cleanVtuberChannelHandle(item.channelHandle),
         channelUrl: vtuberChannelUrlCandidate(item),
         sourceUrl: cleanText(item.sourceUrl),
         avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl || item.authorAvatarUrl || item.profileImageUrl),
@@ -5720,7 +5739,7 @@ function vtuberRecordKey(item, identityLookup = null) {
 function directVtuberRecordKey(item) {
   const channelId = cleanText(item?.channelId);
   if (channelId) return channelId;
-  const handle = cleanText(item?.channelHandle).replace(/^\/+/, "") || vtuberHandleFromChannelUrl(vtuberChannelUrlCandidate(item));
+  const handle = cleanVtuberChannelHandle(item?.channelHandle).replace(/^\/+/, "") || vtuberHandleFromChannelUrl(vtuberChannelUrlCandidate(item)).replace(/^\/+/, "");
   if (handle) return normalizeEntityKey(handle);
   return "";
 }
@@ -5739,15 +5758,15 @@ function isCompositeChannelName(value) {
 function mergeVtuberRecordIdentity(record, item) {
   const channelName = cleanText(item.channelName);
   const channelId = cleanText(item.channelId);
-  const channelHandle = cleanText(item.channelHandle);
+  const channelHandle = cleanVtuberChannelHandle(item.channelHandle);
   const channelUrl = vtuberChannelUrlCandidate(item);
   const sourceUrl = cleanText(item.sourceUrl);
   const avatarUrl = cleanText(item.avatarUrl || item.channelAvatarUrl);
   const thumbnailUrl = vtuberThumbnailCandidate(item);
   if (channelName) {
     record.aliases.add(channelName);
-    if (!record.channelName) record.channelName = channelName;
-    if (!record.name || record.name === "未知频道") record.name = channelName;
+    record.channelName = preferredVtuberChannelName(record.channelName, channelName);
+    record.name = preferredVtuberChannelName(record.name, channelName);
   }
   if (channelId) {
     record.aliases.add(channelId);
@@ -5814,7 +5833,32 @@ function isYoutubeChannelUrl(value) {
 function vtuberHandleFromChannelUrl(value) {
   const text = cleanText(value);
   const match = text.match(/youtube\.com\/(@[^/?#]+)/iu);
-  return match ? match[1] : "";
+  return match ? cleanVtuberChannelHandle(match[1]) : "";
+}
+
+function cleanVtuberChannelHandle(value) {
+  const text = cleanText(value);
+  if (!text) return "";
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text)) return text.startsWith("/") ? text : `/${text}`;
+  const match = text.match(/^https?:\/\/(?:www\.)?youtube\.com\/(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/iu);
+  return match ? `/${match[1]}` : "";
+}
+
+function preferredVtuberChannelName(current, candidate) {
+  const currentText = cleanText(current);
+  const candidateText = cleanText(candidate);
+  if (!currentText || currentText === "未知频道") return candidateText || currentText;
+  if (!candidateText) return currentText;
+  return vtuberChannelDisplayNameScore(candidateText) > vtuberChannelDisplayNameScore(currentText) ? candidateText : currentText;
+}
+
+function vtuberChannelDisplayNameScore(value) {
+  const text = cleanText(value);
+  if (!text) return -1;
+  let score = Math.min(text.length, 80);
+  if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text) || /^\/channel\/UC[A-Za-z0-9_-]+$/u.test(text)) score -= 1000;
+  return score;
 }
 
 function knownVtuberSearchAliases(channelName) {
@@ -6482,9 +6526,21 @@ function isMomentKnownSourceType(value) {
 
 function appendVtuberSubline(metaContainer, { occurrences, songCount, songPreview, videoCount }) {
   appendSublinePart(metaContainer, (songPreview || []).slice(0, 2).join("、"), "subline-primary artist-song-preview");
+  appendSublinePart(metaContainer, vtuberExpandSummaryText(songCount, videoCount), "vtuber-expand-summary");
   if (videoCount === 1 && occurrences.length === 1) {
     appendSublineNode(metaContainer, renderInlineSource(occurrences[0]));
   }
+}
+
+function vtuberExpandSummaryText(songCount, videoCount) {
+  const totalSongs = Math.max(0, Number(songCount) || 0);
+  const totalVideos = Math.max(0, Number(videoCount) || 0);
+  if (!totalSongs && !totalVideos) return "";
+  const visibleSongs = totalSongs ? Math.min(vtuberSongGroupPageSizeForMode(), totalSongs) : 0;
+  const songText = totalSongs > visibleSongs ? `${visibleSongs}/${totalSongs} 首歌` : `${totalSongs} 首歌`;
+  const parts = [`展开显示 ${songText}`];
+  if (totalVideos) parts.push(`${totalVideos} 个视频`);
+  return parts.join(" · ");
 }
 
 function renderVtuberAvatar(record) {
@@ -6729,7 +6785,7 @@ function renderSourceInlineGroup(group, options = {}) {
   thumb.className = "source-inline-thumb source-link";
   thumb.href = youtubeTimeUrl(videoId, firstSeconds);
   thumb.target = "_blank";
-  thumb.rel = "noreferrer";
+  thumb.rel = "noopener noreferrer";
   thumb.tabIndex = -1;
   thumb.setAttribute("aria-label", `打开来源视频时间戳：${group.title || videoId || "来源视频"}`);
   thumb.append(
@@ -6778,7 +6834,7 @@ function renderSourceInlineGroup(group, options = {}) {
   channel.className = "source-inline-channel";
   channel.href = channelLink.href;
   channel.target = "_blank";
-  channel.rel = "noreferrer";
+  channel.rel = "noopener noreferrer";
   channel.textContent = group.channelName || "未知频道";
   channel.setAttribute("aria-label", channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`);
   channel.title = channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`;
@@ -6793,7 +6849,7 @@ function renderSourceInlineGroup(group, options = {}) {
     time.className = "source-link source-inline-time";
     time.href = youtubeTimeUrl(videoId, firstSeconds);
     time.target = "_blank";
-    time.rel = "noreferrer";
+    time.rel = "noopener noreferrer";
     time.textContent = formatSeconds(firstSeconds);
     time.title = [group.title || item.title || videoId || "来源视频", time.textContent].filter(Boolean).join(" · ");
     time.setAttribute("aria-label", `打开时间戳：${time.title}`);
@@ -6876,7 +6932,7 @@ function renderInlineSource(occurrence) {
   time.className = "inline-source-time";
   time.href = model.time.href;
   time.target = "_blank";
-  time.rel = "noreferrer";
+  time.rel = "noopener noreferrer";
   time.textContent = model.time.text;
   time.setAttribute("aria-label", model.time.ariaLabel);
 
@@ -6889,7 +6945,7 @@ function renderInlineSource(occurrence) {
   channel.className = "inline-source-channel";
   channel.href = model.channel.href;
   channel.target = "_blank";
-  channel.rel = "noreferrer";
+  channel.rel = "noopener noreferrer";
   channel.textContent = model.channel.text;
   channel.title = model.channel.ariaLabel;
   channel.setAttribute("aria-label", model.channel.ariaLabel);
@@ -7433,7 +7489,7 @@ function renderSourceVideoGroup(group, options = {}) {
   thumbLink.className = "source-video-thumb-link";
   thumbLink.href = youtubeTimeUrl(videoId, firstSeconds);
   thumbLink.target = "_blank";
-  thumbLink.rel = "noreferrer";
+  thumbLink.rel = "noopener noreferrer";
   thumbLink.setAttribute("aria-label", `打开来源视频时间戳：${group.title || videoId || "来源视频"}`);
   thumbLink.append(
     createThumbnailImage({ ...videoItem, videoId, thumbnailUrl: videoItem.thumbnailUrl || group.thumbnailUrl }, "source-video-thumb", {
@@ -7478,7 +7534,7 @@ function renderSourceVideoGroup(group, options = {}) {
   channel.className = "source-video-channel";
   channel.href = channelLink.href;
   channel.target = "_blank";
-  channel.rel = "noreferrer";
+  channel.rel = "noopener noreferrer";
   channel.textContent = group.channelName || "未知频道";
   channel.setAttribute("aria-label", channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`);
   channel.title = channelLink.isFallbackSearch ? `搜索频道：${channel.textContent}` : `打开频道：${channel.textContent}`;
@@ -7490,7 +7546,7 @@ function renderSourceVideoGroup(group, options = {}) {
   title.className = "source-video-title";
   title.href = youtubeTimeUrl(videoId, firstSeconds);
   title.target = "_blank";
-  title.rel = "noreferrer";
+  title.rel = "noopener noreferrer";
   title.textContent = group.title || videoId || "来源视频";
   title.setAttribute("aria-label", `打开来源视频时间戳：${title.textContent}`);
   main.append(title);
@@ -7528,7 +7584,7 @@ function renderSourceTimestampLink(occurrence, className = "source-link source-t
   link.className = className.includes("source-link") ? className : `source-link ${className}`;
   link.href = youtubeTimeUrl(occurrence.item.videoId, occurrence.song.seconds);
   link.target = "_blank";
-  link.rel = "noreferrer";
+  link.rel = "noopener noreferrer";
 
   const timeText = occurrence.song.time || formatSeconds(occurrence.song.seconds);
   const songTitle = cleanText(occurrence.song.title) || "未命名歌曲";
@@ -7836,7 +7892,7 @@ function renderArtistSongGroup(group) {
   if (previewItem.videoId) {
     thumb.href = youtubeTimeUrl(previewItem.videoId, previewSong.seconds);
     thumb.target = "_blank";
-    thumb.rel = "noreferrer";
+    thumb.rel = "noopener noreferrer";
     thumb.setAttribute("aria-label", `打开最新来源：${group.title}`);
   } else {
     thumb.setAttribute("aria-hidden", "true");
@@ -7856,7 +7912,7 @@ function renderArtistSongGroup(group) {
   if (firstOccurrence?.item?.videoId) {
     title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song.seconds);
     title.target = "_blank";
-    title.rel = "noreferrer";
+    title.rel = "noopener noreferrer";
     title.setAttribute("aria-label", `打开歌曲首次来源：${group.title}`);
   } else {
     title.href = buildSearchUrlForSongGroup(group);
@@ -8351,7 +8407,7 @@ function syncArtistSongGroupThumb(section, group) {
   }
   thumb.href = youtubeTimeUrl(latestOccurrence.item.videoId, latestOccurrence.song?.seconds || 0);
   thumb.target = "_blank";
-  thumb.rel = "noreferrer";
+  thumb.rel = "noopener noreferrer";
   thumb.setAttribute("aria-label", `打开最新来源：${group.title}`);
   thumb.textContent = "";
   thumb.append(
@@ -8369,7 +8425,7 @@ function syncArtistSongGroupTitleLink(section, group) {
   if (!title || !firstOccurrence?.item?.videoId) return;
   title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song?.seconds || 0);
   title.target = "_blank";
-  title.rel = "noreferrer";
+  title.rel = "noopener noreferrer";
   title.setAttribute("aria-label", `打开歌曲来源：${group.title}`);
 }
 
@@ -8458,7 +8514,7 @@ function renderVideo(item) {
   thumbLink.className = "thumb-link";
   thumbLink.href = url;
   thumbLink.target = "_blank";
-  thumbLink.rel = "noreferrer";
+  thumbLink.rel = "noopener noreferrer";
   thumbLink.setAttribute("aria-label", `打开视频：${item.title || item.videoId}`);
 
   thumbLink.append(createThumbnailImage(item, "thumb"));
@@ -8476,7 +8532,7 @@ function renderVideo(item) {
   title.className = "video-title";
   title.href = url;
   title.target = "_blank";
-  title.rel = "noreferrer";
+  title.rel = "noopener noreferrer";
   title.textContent = item.title || item.videoId;
   title.title = `打开视频：${item.title || item.videoId}`;
   title.setAttribute("aria-label", `打开视频：${item.title || item.videoId}`);
@@ -8565,7 +8621,7 @@ function appendVideoSongLinks(list, item, songs, extraClass = "") {
     const link = document.createElement("a");
     link.href = youtubeTimeUrl(item.videoId, song.seconds);
     link.target = "_blank";
-    link.rel = "noreferrer";
+    link.rel = "noopener noreferrer";
 
     const time = document.createElement("span");
     time.className = "time";

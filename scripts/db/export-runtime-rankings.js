@@ -181,7 +181,10 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
       logPhase("range_items_ready", { range: rangeId, items: baseItems.length });
       const titleStats = buildRuntimeTitleStats(baseItems);
       logPhase("range_title_stats_ready", { range: rangeId, titles: titleStats.size });
-      const items = baseItems.map((item) => withRuntimeScopedSongs(item, titleStats));
+      const filteredItems = baseItems.map((item) => withRuntimeScopedSongs(item, titleStats));
+      const titleArtistFallbacks = buildRuntimeTitleArtistFallbacks(filteredItems);
+      logPhase("range_artist_fallbacks_ready", { range: rangeId, titles: titleArtistFallbacks.size });
+      const items = filteredItems.map((item) => withRuntimeArtistFallbacks(item, titleArtistFallbacks));
       const occurrences = collectRuntimeOccurrences(items);
       logPhase("range_occurrences_ready", { range: rangeId, occurrences: occurrences.length });
       const writtenSourceKeys = new Set();
@@ -419,7 +422,7 @@ function serializeSourceOccurrence(occurrence) {
   return {
     item: serializedItem,
     song: buildClientSong(occurrence.song || {}),
-    searchText: occurrence.searchText || normalizeSearchText([item.videoId, item.title, item.channelName, item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
+    searchText: occurrence.searchText || normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
   };
 }
 
@@ -437,7 +440,7 @@ function collectRuntimeOccurrences(items) {
       occurrences.push({
         item,
         song,
-        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
+        searchText: normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, song.title, song.artist].join(" ")),
       });
     }
   }
@@ -457,7 +460,7 @@ function buildVideoRequestItems(items) {
       videoCount: 1,
       key: item.videoId || stableRequestKey(`${item.channelName}:${item.title}`),
       searchText: normalizeSearchText(
-        [item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, ...scopedSongs.flatMap((song) => [song.title, song.artist])].join(" "),
+        [item.videoId, item.title, ...channelSearchParts(item), item.keyword, ...scopedSongs.flatMap((song) => [song.title, song.artist])].join(" "),
       ),
     });
   }
@@ -479,7 +482,7 @@ function buildVtuberRequestItems(items, songIdentityLookup = null) {
         name: RankingUtils.cleanText(item.channelName || item.channelHandle || item.channelId || "未知频道"),
         channelName: RankingUtils.cleanText(item.channelName),
         channelId: RankingUtils.cleanText(item.channelId),
-        channelHandle: RankingUtils.cleanText(item.channelHandle),
+        channelHandle: cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelUrl || item.authorUrl || item.ownerUrl || item.sourceUrl),
         channelUrl: RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl),
         avatarUrl: RankingUtils.cleanText(item.avatarUrl || item.channelAvatarUrl),
         thumbnailUrl: vtuberThumbnailCandidate(item),
@@ -510,13 +513,13 @@ function buildVtuberRequestItems(items, songIdentityLookup = null) {
         record.occurrences.push({
           item,
           song,
-          searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
+          searchText: normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, song.title, song.artist].join(" ")),
         });
       }
       record.sourceOccurrences.push({
         item,
         song,
-        searchText: normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist].join(" ")),
+        searchText: normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, song.title, song.artist].join(" ")),
       });
     }
   }
@@ -567,6 +570,35 @@ function withRuntimeScopedSongs(item, titleStats = null, aliasContext = null) {
     ...item,
     songs: runtimeScopedSongs(item.songs, item, titleStats, aliasContext),
   };
+}
+
+function withRuntimeArtistFallbacks(item, titleArtistFallbacks = null) {
+  if (!item || typeof item !== "object" || !titleArtistFallbacks?.size) return item;
+  return {
+    ...item,
+    songs: dedupeCanonicalSameSecondSongs(
+      (Array.isArray(item.songs) ? item.songs : [])
+        .map((song) => applyRuntimeArtistFallback(song, titleArtistFallbacks))
+        .filter(Boolean),
+    ),
+  };
+}
+
+function applyRuntimeArtistFallback(song, titleArtistFallbacks = null) {
+  if (!song || typeof song !== "object" || !titleArtistFallbacks?.size || !RankingUtils.isUnknownArtistName(song.artist)) return song;
+  const fallback = titleArtistFallbacks.get(runtimeSongWorkTitleKey(song.canonicalTitle || song.title));
+  if (!fallback) return song;
+  const title = RankingUtils.cleanText(fallback.title) || RankingUtils.cleanText(song.title);
+  const artist = RankingUtils.canonicalizeArtistName(fallback.artist);
+  if (!title || !artist || RankingUtils.isUnknownArtistName(artist)) return song;
+  const next = {
+    ...song,
+    title,
+    artist,
+  };
+  if (!RankingUtils.cleanText(next.canonicalTitle)) next.canonicalTitle = title;
+  if (RankingUtils.isUnknownArtistName(next.canonicalArtist)) next.canonicalArtist = artist;
+  return next;
 }
 
 function runtimeScopedSongs(songs, source = {}, titleStats = null, aliasContext = null) {
@@ -624,6 +656,52 @@ function buildRuntimeTitleStats(items) {
   return records;
 }
 
+function buildRuntimeTitleArtistFallbacks(items) {
+  const records = new Map();
+  for (const item of items || []) {
+    for (const song of Array.isArray(item?.songs) ? item.songs : []) {
+      const title = vtuberCanonicalSongTitle(song?.canonicalTitle || song?.title) || RankingUtils.cleanText(song?.title);
+      const artist = RankingUtils.canonicalizeArtistName(song?.canonicalArtist || song?.artist);
+      if (!title || !artist || RankingUtils.isUnknownArtistName(artist)) continue;
+      const key = runtimeSongWorkTitleKey(title);
+      if (!key) continue;
+      if (!records.has(key)) {
+        records.set(key, {
+          titles: new Map(),
+          artists: new Map(),
+        });
+      }
+      const record = records.get(key);
+      incrementRuntimeCount(record.titles, title);
+      incrementRuntimeCount(record.artists, artist);
+    }
+  }
+
+  const fallbacks = new Map();
+  for (const [key, record] of records) {
+    const title = dominantRuntimeCountName(record.titles);
+    const artist = dominantRuntimeCountName(record.artists);
+    if (title && artist) fallbacks.set(key, { title, artist });
+  }
+  return fallbacks;
+}
+
+function incrementRuntimeCount(map, name) {
+  const cleanName = RankingUtils.cleanText(name);
+  if (!cleanName) return;
+  if (!map.has(cleanName)) map.set(cleanName, { name: cleanName, count: 0 });
+  map.get(cleanName).count += 1;
+}
+
+function dominantRuntimeCountName(map) {
+  return Array.from(map.values()).sort((a, b) => b.count - a.count || compareValues(a.name, b.name))[0]?.name || "";
+}
+
+function runtimeSongWorkTitleKey(value) {
+  const title = vtuberCanonicalSongTitle(value) || RankingUtils.cleanText(value);
+  return RankingUtils.songWorkTitleKey(title);
+}
+
 function singletonTitleKey(value) {
   return String(value || "")
     .normalize("NFKC")
@@ -644,7 +722,7 @@ function channelRecordKey(item, identityLookup = null) {
 function directChannelRecordKey(item) {
   const channelId = RankingUtils.cleanText(item.channelId);
   if (channelId) return channelId;
-  const handle = RankingUtils.cleanText(item.channelHandle).replace(/^\/+/, "");
+  const handle = cleanChannelHandle(item.channelHandle).replace(/^\/+/, "");
   if (handle) return normalizeSearchText(handle);
   const urlHandle = handleFromChannelUrl(item.channelUrl || item.authorUrl || item.ownerUrl);
   if (urlHandle) return normalizeSearchText(urlHandle);
@@ -652,7 +730,7 @@ function directChannelRecordKey(item) {
 }
 
 function handleFromChannelUrl(value) {
-  const match = String(value || "").match(/youtube\.com\/(@[A-Za-z0-9._-]+)/iu);
+  const match = String(value || "").match(/youtube\.com\/(@[A-Za-z0-9._%~-]+)/iu);
   return match ? match[1] : "";
 }
 
@@ -670,7 +748,7 @@ function isCompositeChannelName(value) {
 function mergeChannelRecordIdentity(record, item) {
   const channelName = RankingUtils.cleanText(item.channelName);
   const channelId = RankingUtils.cleanText(item.channelId);
-  const channelHandle = RankingUtils.cleanText(item.channelHandle);
+  const channelHandle = cleanChannelHandle(item.channelHandle);
   const channelUrl = RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl);
   const avatarUrl = RankingUtils.cleanText(item.avatarUrl || item.channelAvatarUrl);
   const thumbnailUrl = vtuberThumbnailCandidate(item);
@@ -678,8 +756,8 @@ function mergeChannelRecordIdentity(record, item) {
   const knownSourceType = RankingUtils.cleanText(item.knownSourceType || knownSourceTypeForVideo(item));
   if (channelName) {
     record.aliases.add(channelName);
-    if (!record.channelName) record.channelName = channelName;
-    if (!record.name || record.name === "未知频道") record.name = channelName;
+    record.channelName = preferredChannelDisplayName(record.channelName, channelName);
+    record.name = preferredChannelDisplayName(record.name === "未知频道" ? "" : record.name, record.channelName || channelName);
   }
   if (channelId) {
     record.aliases.add(channelId);
@@ -746,11 +824,12 @@ function isMomentSourceType(value) {
 function isCollectedSource(item) {
   const sourceGroups = Array.isArray(item.sourceGroups) ? item.sourceGroups : [];
   const knownType = RankingUtils.cleanText(item.knownSourceType || knownSourceTypeForVideo(item)).toLocaleLowerCase();
+  const sourceSystem = RankingUtils.cleanText(item.sourceQuality?.sourceSystem).toLocaleLowerCase();
   const trueTypes = new Set(["manual", "verified", "song-search", "song_search", "youtube_channel_discovery"]);
   if (
     sourceGroups.includes("youtube_channel_discovery") ||
     trueTypes.has(knownType) ||
-    (item.sourceQuality?.sourceType === "external" && RankingUtils.cleanText(item.sourceQuality?.sourceSystem).toLocaleLowerCase() !== "vsinger_moment_http")
+    (item.sourceQuality?.sourceType === "external" && !isMomentSourceType(sourceSystem))
   ) {
     return true;
   }
@@ -954,7 +1033,7 @@ function serializeOccurrence(occurrence, options = {}) {
     song: buildClientSong(occurrence.song || {}),
     searchText:
       occurrence.searchText ||
-      normalizeSearchText([item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
+      normalizeSearchText([item.videoId, item.title, ...channelSearchParts(item), item.keyword, occurrence.song?.title, occurrence.song?.artist].join(" ")),
   };
 }
 
@@ -1003,10 +1082,10 @@ function requestRecordSearchText(record, type) {
     return normalizeSearchText([record.name, ...(record.aliases || [])].join(" "));
   }
   if (type === "vtuber") {
-    return normalizeSearchText([record.name, record.channelName, record.channelId, record.channelHandle, record.channelUrl, ...(record.aliases || [])].join(" "));
+    return normalizeSearchText([record.name, ...channelSearchParts(record), ...(record.aliases || [])].join(" "));
   }
   if (type === "video") {
-    return normalizeSearchText([record.videoId, record.title, record.channelName, record.channelId, record.channelHandle, record.channelUrl, record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
+    return normalizeSearchText([record.videoId, record.title, ...channelSearchParts(record), record.keyword, ...(record.songs || []).flatMap((song) => [song.title, song.artist])].join(" "));
   }
   return normalizeSearchText([record.title, record.displayArtist, ...mapNames(record.artists), ...mapNames(record.channels), ...(record.variantLabels || []), ...occurrenceSearchParts(record.occurrences)].join(" "));
 }
@@ -1022,7 +1101,7 @@ function occurrenceSearchParts(occurrences) {
   return (occurrences || []).flatMap((occurrence) => {
     const item = occurrence.item || {};
     const song = occurrence.song || {};
-    return [item.videoId, item.title, item.channelName, item.channelId, item.channelHandle, item.channelUrl, item.keyword, song.title, song.artist];
+    return [item.videoId, item.title, ...channelSearchParts(item), item.keyword, song.title, song.artist];
   });
 }
 
@@ -1036,6 +1115,45 @@ function normalizeSearchText(value) {
     .toLocaleLowerCase()
     .replace(/\s+/gu, " ")
     .trim();
+}
+
+function channelSearchParts(item = {}) {
+  return [item.channelName, ...channelAliasValues(item.channelAliases), item.channelId, cleanChannelHandle(item.channelHandle), item.channelUrl || item.authorUrl || item.ownerUrl];
+}
+
+function channelAliasValues(value) {
+  const aliases = Array.isArray(value) ? value : [];
+  return aliases.map((item) => RankingUtils.cleanText(item)).filter((item) => item && !isChannelPathAlias(item));
+}
+
+function isChannelPathAlias(value) {
+  const text = RankingUtils.cleanText(value).toLocaleLowerCase();
+  return text.startsWith("/channel/") || text.includes("youtube.com/channel/");
+}
+
+function cleanChannelHandle(value) {
+  const text = RankingUtils.cleanText(value);
+  if (!text) return "";
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text)) return text.startsWith("/") ? text : `/${text}`;
+  const match = text.match(/youtube\.com\/(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/iu);
+  return match ? `/${match[1]}` : "";
+}
+
+function preferredChannelDisplayName(current, candidate) {
+  const currentText = RankingUtils.cleanText(current);
+  const candidateText = RankingUtils.cleanText(candidate);
+  if (!currentText) return candidateText;
+  if (!candidateText) return currentText;
+  return channelDisplayNameScore(candidateText) > channelDisplayNameScore(currentText) ? candidateText : currentText;
+}
+
+function channelDisplayNameScore(value) {
+  const text = RankingUtils.cleanText(value);
+  if (!text) return -1;
+  let score = Math.min(text.length, 80);
+  if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text) || /^\/channel\/UC[A-Za-z0-9_-]+$/u.test(text)) score -= 1000;
+  return score;
 }
 
 function compareValues(a, b) {

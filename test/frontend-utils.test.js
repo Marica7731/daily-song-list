@@ -30,6 +30,7 @@ const {
   isSongSearchKnown,
   indexBucketButtonModel,
   makeQueryDraftFromState,
+  matchesSearch,
   mobilePageModel,
   mobilePageStepperModel,
   normalizeSearch,
@@ -38,6 +39,7 @@ const {
   paginateItems,
   parseUrlState,
   responsiveListPageSize,
+  searchTokens,
   queryTriggerModel,
   rankToggleModel,
   runtimeRangeMeta,
@@ -129,6 +131,13 @@ test("search clear and filtering use title, artist, channel, video id, and video
   assert.deepEqual(
     filterOccurrencesBySearch(occurrences, "OTHERID0001").map(({ item }) => item.videoId),
     ["OTHERID0001"],
+  );
+  assert.deepEqual(searchTokens("AZKi  First Good-Bye"), ["azki", "first", "good-bye"]);
+  assert.equal(matchesSearch(["First Good-Bye", "梶浦由記", "AZKi Channel"], "azki first"), true);
+  assert.equal(matchesSearch(["First Good-Bye", "梶浦由記", "AZKi Channel"], "first missing"), false);
+  assert.deepEqual(
+    filterOccurrencesBySearch(occurrences, "AZKi First").map(({ song }) => song.title),
+    ["First Good-Bye"],
   );
   assert.equal(filterItemsBySearch(items, normalizeSearch("")).length, 2);
   assert.equal(filterOccurrencesBySearch(occurrences, "").length, 3);
@@ -469,6 +478,28 @@ test("groups source occurrences hydrate missing channel identity from same named
   assert.equal(youtubeChannelLink(missingMetadataGroup.item).href, "https://www.youtube.com/@kohigashihitona");
 });
 
+test("groups source occurrences normalize display names by channel identity while keeping aliases searchable", () => {
+  const groups = groupOccurrencesByVideo([
+    occurrence("ISSHIKI0001", "Isshiki Izu", { seconds: 90 }, {
+      channelId: "UCisshiki",
+      channelHandle: "/@IsshikiIS",
+      channelUrl: "https://www.youtube.com/@IsshikiIS",
+      channelAliases: ["/channel/UCisshiki"],
+    }),
+    occurrence("ISSHIKI0002", "一色イズ◇Isshiki IS", { seconds: 120 }, {
+      channelId: "UCisshiki",
+      channelHandle: "/@IsshikiIS",
+      channelUrl: "https://www.youtube.com/@IsshikiIS",
+    }),
+  ]);
+
+  assert.deepEqual(groups.map((group) => group.channelName), ["一色イズ◇Isshiki IS", "一色イズ◇Isshiki IS"]);
+  assert.equal(groups.every((group) => group.item.channelAliases.includes("Isshiki Izu")), true);
+  assert.equal(groups.every((group) => !group.item.channelAliases.includes("/channel/UCisshiki")), true);
+  assert.equal(filterOccurrencesBySearch(groups.flatMap((group) => group.occurrences), "Isshiki Izu").length, 2);
+  assert.equal(filterOccurrencesBySearch(groups.flatMap((group) => group.occurrences), "@IsshikiIS").length, 2);
+});
+
 test("builds whole-video setlist text from original songs", () => {
   const item = {
     _allSongs: [
@@ -586,6 +617,10 @@ test("channel link uses handle, channelId, and search fallback", () => {
     "https://www.youtube.com/@handle",
   );
   assert.equal(
+    youtubeChannelLink({ channelHandle: "/channel/UCID", channelId: "UCID", channelName: "Id Channel" }).href,
+    "https://www.youtube.com/channel/UCID",
+  );
+  assert.equal(
     youtubeChannelLink({ channelId: "UCID", channelName: "Id Channel" }).href,
     "https://www.youtube.com/channel/UCID",
   );
@@ -655,8 +690,8 @@ test("pagination uses pageSize 50 and clamps pages to available bounds", () => {
 });
 
 test("responsive list and source drawer page models keep UI page-size contracts", () => {
-  assert.equal(responsiveListPageSize("desktop"), 50);
-  assert.equal(responsiveListPageSize("tablet"), 50);
+  assert.equal(responsiveListPageSize("desktop"), 30);
+  assert.equal(responsiveListPageSize("tablet"), 20);
   assert.equal(responsiveListPageSize("mobile"), 20);
   assert.equal(responsiveListPageSize("desktop", { desktop: 60, mobile: 12 }), 60);
   assert.equal(responsiveListPageSize("mobile", { desktop: 60, mobile: 12 }), 12);
@@ -1040,6 +1075,10 @@ test("url state parses and serializes range, view, page, pageSize, bucket, outsi
     snapshot: "archive-20260710",
   });
   assert.deepEqual(parseUrlState(serialized, options), parsed);
+
+  const multiTermSerialized = serializeUrlState({ ...parsed, view: "songRank", q: "Singer A Song One" }, options);
+  assert.equal(new URLSearchParams(multiTermSerialized).get("q"), "Singer A Song One");
+  assert.equal(parseUrlState(multiTermSerialized, options).q, "Singer A Song One");
 
   const allFieldSerialized = serializeUrlState({ ...parsed, view: "songRank", searchFields: [] }, options);
   assert.deepEqual(Object.fromEntries(new URLSearchParams(allFieldSerialized)), {

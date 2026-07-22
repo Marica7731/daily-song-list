@@ -27,9 +27,22 @@
     { canonical: "ジミーサムP", aliases: ["ジミーサム", "OneRoom"] },
   ];
   const OFFICIAL_ARTIST_NAMES = new Map([
+    ["40mp", "40mP"],
     ["ado", "Ado"],
+    ["aimer", "Aimer"],
+    ["backnumber", "back number"],
+    ["bumpofchicken", "BUMP OF CHICKEN"],
     ["deco27", "DECO*27"],
+    ["lisa", "LiSA"],
+    ["mikitop", "みきとP"],
+    ["mrsgreenapple", "Mrs. GREEN APPLE"],
+    ["official髭男dism", "Official髭男dism"],
+    ["radwimps", "RADWIMPS"],
+    ["tmrevolution", "T.M.Revolution"],
+    ["tuki", "tuki."],
+    ["yoasobi", "YOASOBI"],
     ["yorushika", "ヨルシカ"],
+    ["みきとp", "みきとP"],
     ["ヨルシカ", "ヨルシカ"],
     ["ヨルシカyorushika", "ヨルシカ"],
   ]);

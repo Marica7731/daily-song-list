@@ -476,6 +476,26 @@ test("search item extraction supports ordinary videos and Shorts renderers", () 
   );
 });
 
+test("search item extraction keeps channel URL paths out of handles", () => {
+  const data = {
+    contents: [
+      {
+        videoRenderer: {
+          videoId: "VIDEOID0004",
+          title: { runs: [{ text: "ordinary video" }] },
+          ownerText: { runs: [{ text: "channel", navigationEndpoint: { browseEndpoint: { browseId: "UCCHANPATH", canonicalBaseUrl: "/channel/UCCHANPATH" } } }] },
+          lengthText: { simpleText: "1:23:45" },
+        },
+      },
+    ],
+  };
+
+  const [item] = extractSearchItems(data);
+
+  assert.equal(item.channelId, "UCCHANPATH");
+  assert.equal(item.channelHandle, "");
+});
+
 test("video title known-song detection creates conservative 0-second source for Shorts covers", () => {
   const lookup = knownSongLookup([
     ["発光帯", "ハナレグミ"],
@@ -667,6 +687,15 @@ test("fetched videos win over carried videos while preserving month membership",
   assert.equal(merged.length, 1);
   assert.deepEqual(merged[0].songs.map((item) => item.title), ["new"]);
   assert.deepEqual(merged[0].sourceGroups.sort(), ["month", "today"]);
+});
+
+test("fetched videos replace carried channel URL paths with clean handles", () => {
+  const fetched = [{ ...video("CLEANHANDL1", 3, ["today"], { channelHandle: "/@clean_handle" }), songs: [song("new")] }];
+  const carried = [{ ...video("CLEANHANDL1", 3, ["month"], { channelHandle: "/channel/UC_CLEAN", channelUrl: "https://www.youtube.com/channel/UC_CLEAN" }), songs: [song("old")] }];
+
+  const merged = mergeFetchedAndCarriedVideos(fetched, carried);
+
+  assert.equal(merged[0].channelHandle, "@clean_handle");
 });
 
 test("all group includes every usable catalog video while recent group uses 7 days", () => {

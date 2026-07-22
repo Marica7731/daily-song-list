@@ -220,10 +220,13 @@ jobs:
           sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             mkdir -p '${REMOTE_STATE_DIR}'
-            rm -f '${remote_db}' '${remote_db}.manifest.json'
+            rm -f '${remote_db}' '${remote_db}.manifest.json' '${REMOTE_DB_PATH}.previous'
+            find '${REMOTE_STATE_DIR}' -maxdepth 1 -type f -name 'song-rank.sqlite.next.*' -delete
+            df -h '${REMOTE_STATE_DIR}'
             if [ -f '${REMOTE_DB_PATH}' ]; then
               cp -f '${REMOTE_DB_PATH}' '${remote_db}'
             fi
+            df -h '${REMOTE_STATE_DIR}'
           "
           sshpass -p "${VPS2_PASSWORD}" rsync \
             --inplace \

@@ -45,12 +45,24 @@ function hydratePayloadWithChannelMetadata(payload, options = {}) {
 
 function hydrateVideoWithChannelMetadata(item, lookup) {
   const metadata = findChannelMetadata(lookup, metadataFromVideo(item));
-  if (!metadata) return withDisplayThumbnail(item);
+  if (!metadata) {
+    const channelAliases = channelAliasValues(item.channelAliases);
+    return withDisplayThumbnail({
+      ...item,
+      ...(channelAliases.length ? { channelAliases } : {}),
+      channelHandle: normalizeHandle(item.channelHandle || item.channelUrl || item.sourceUrl),
+    });
+  }
+  const currentName = stringValue(item.channelName);
+  const preferredName = preferredChannelDisplayName(currentName, metadata.displayName);
+  const currentHandle = normalizeHandle(item.channelHandle);
+  const channelAliases = channelAliasValues([...(Array.isArray(item.channelAliases) ? item.channelAliases : []), currentName, metadata.displayName, currentHandle, metadata.channelHandle]);
   const hydrated = {
     ...item,
-    channelName: item.channelName || metadata.displayName || "",
+    channelName: preferredName,
+    channelAliases,
     channelId: item.channelId || metadata.channelId || "",
-    channelHandle: item.channelHandle || metadata.channelHandle || "",
+    channelHandle: currentHandle || metadata.channelHandle || "",
     channelUrl: item.channelUrl || metadata.channelUrl || metadata.sourceUrl || "",
     avatarUrl: realAvatarUrl(item.avatarUrl || item.channelAvatarUrl) || metadata.avatarUrl || "",
     sourceUrl: item.sourceUrl || metadata.sourceUrl || metadata.channelUrl || "",
@@ -118,7 +130,7 @@ function normalizeChannelMetadata(metadata = {}) {
 function mergeChannelMetadata(existing, incoming) {
   if (!existing) return incoming;
   return {
-    displayName: existing.displayName || incoming.displayName,
+    displayName: preferredChannelDisplayName(existing.displayName, incoming.displayName),
     channelId: existing.channelId || incoming.channelId,
     channelHandle: existing.channelHandle || incoming.channelHandle,
     channelUrl: existing.channelUrl || incoming.channelUrl,
@@ -161,10 +173,9 @@ function realAvatarUrl(value) {
 function normalizeHandle(value) {
   const text = stringValue(value);
   if (!text) return "";
-  const match = text.match(/(?:youtube\.com\/)?(@[A-Za-z0-9._-]+)/iu);
+  const match = text.match(/^https?:\/\/(?:www\.)?youtube\.com\/(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/iu);
   if (match) return `/${match[1]}`;
-  if (text.startsWith("@")) return `/${text}`;
-  if (text.startsWith("/@")) return text;
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text)) return text.startsWith("/") ? text : `/${text}`;
   return "";
 }
 
@@ -180,8 +191,36 @@ function normalizeTextKey(value) {
   return stringValue(value).normalize("NFKC").toLocaleLowerCase();
 }
 
+function preferredChannelDisplayName(current, candidate) {
+  const currentText = stringValue(current);
+  const candidateText = stringValue(candidate);
+  if (!currentText) return candidateText;
+  if (!candidateText) return currentText;
+  const currentScore = channelDisplayNameScore(currentText);
+  const candidateScore = channelDisplayNameScore(candidateText);
+  return candidateScore > currentScore ? candidateText : currentText;
+}
+
+function channelDisplayNameScore(value) {
+  const text = stringValue(value);
+  if (!text) return -1;
+  let score = Math.min(text.length, 80);
+  if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text)) score -= 1000;
+  return score;
+}
+
 function uniqueValues(values) {
   return [...new Set(values.map(stringValue).filter(Boolean))];
+}
+
+function channelAliasValues(values) {
+  return uniqueValues(Array.isArray(values) ? values : []).filter((value) => !isChannelPathAlias(value));
+}
+
+function isChannelPathAlias(value) {
+  const text = stringValue(value).toLocaleLowerCase();
+  return text.startsWith("/channel/") || text.includes("youtube.com/channel/");
 }
 
 function stringValue(value) {
@@ -198,6 +237,7 @@ module.exports = {
   loadChannelMetadataCache,
   metadataFromVideo,
   normalizeChannelMetadata,
+  preferredChannelDisplayName,
   realAvatarUrl,
   thumbnailUrlForVideo,
 };

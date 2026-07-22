@@ -193,7 +193,7 @@ function importAuditRecord(detail, rawSong, audit) {
     channel: {
       name: stringValue(detail?.channelName || detail?.discoverySingerName),
       id: stringValue(detail?.channelId),
-      handle: stringValue(detail?.channelHandle || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl)),
+      handle: normalizeChannelHandle(detail?.channelHandle) || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl),
       url: stringValue(detail?.channelUrl || detail?.discoveryChannelUrl),
     },
     video: {
@@ -218,7 +218,7 @@ function sourceContextFromDetail(detail) {
     title: stringValue(detail?.title),
     channelName: stringValue(detail?.channelName || detail?.discoverySingerName),
     channelId: stringValue(detail?.channelId),
-    channelHandle: stringValue(detail?.channelHandle || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl)),
+    channelHandle: normalizeChannelHandle(detail?.channelHandle) || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl),
     channelUrl: stringValue(detail?.channelUrl || detail?.discoveryChannelUrl),
   };
 }
@@ -276,7 +276,7 @@ function normalizeImportedVideo(detail, inputDir, songs, channelFallback = {}) {
     title: stringValue(detail.title),
     channelName: stringValue(detail.channelName || channelFallback.channelName || detail.discoverySingerName),
     channelId: stringValue(detail.channelId || channelFallback.channelId),
-    channelHandle: stringValue(detail.channelHandle || channelFallback.channelHandle || handleFromUrl(channelUrl)),
+    channelHandle: normalizeChannelHandle(detail.channelHandle || channelFallback.channelHandle) || handleFromUrl(channelUrl),
     channelUrl,
     publishedTimestamp: finiteTimestamp(detail.publishedTimestamp),
     thumbnailUrl: stringValue(detail.thumbnailUrl) || thumbnailUrlForVideoId(videoId),
@@ -348,21 +348,21 @@ function stringValue(value) {
 function collectChannelFallbacks(detailEntries) {
   const fallbacks = new Map();
   for (const { detail } of detailEntries) {
-    const key = channelKeyFromDetail(detail);
-    if (!key) continue;
-    const current = fallbacks.get(key) || { channelName: "", channelId: "", channelHandle: "", channelUrl: "" };
     const candidate = {
       channelName: stringValue(detail.channelName),
       channelId: stringValue(detail.channelId),
-      channelHandle: stringValue(detail.channelHandle || handleFromUrl(detail.channelUrl || detail.discoveryChannelUrl)),
+      channelHandle: normalizeChannelHandle(detail.channelHandle) || handleFromUrl(detail.channelUrl || detail.discoveryChannelUrl),
       channelUrl: stringValue(detail.channelUrl || detail.discoveryChannelUrl),
     };
-    fallbacks.set(key, {
-      channelName: preferredValue(current.channelName, candidate.channelName, Boolean(candidate.channelId)),
-      channelId: current.channelId || candidate.channelId,
-      channelHandle: current.channelHandle || candidate.channelHandle,
-      channelUrl: current.channelUrl || candidate.channelUrl,
-    });
+    for (const key of channelKeysFromDetail(detail)) {
+      const current = fallbacks.get(key) || { channelName: "", channelId: "", channelHandle: "", channelUrl: "" };
+      fallbacks.set(key, {
+        channelName: preferredValue(current.channelName, candidate.channelName, Boolean(candidate.channelId)),
+        channelId: current.channelId || candidate.channelId,
+        channelHandle: current.channelHandle || candidate.channelHandle,
+        channelUrl: current.channelUrl || candidate.channelUrl,
+      });
+    }
   }
   return fallbacks;
 }
@@ -374,7 +374,18 @@ function preferredValue(current, candidate, preferCandidate) {
 }
 
 function channelKeyFromDetail(detail) {
-  return stringValue(detail?.channelHandle || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl) || detail?.channelId);
+  return channelKeysFromDetail(detail)[0] || "";
+}
+
+function channelKeysFromDetail(detail) {
+  return uniqueValues([detail?.channelId, normalizeChannelHandle(detail?.channelHandle) || handleFromUrl(detail?.channelUrl || detail?.discoveryChannelUrl)]);
+}
+
+function normalizeChannelHandle(value) {
+  const text = stringValue(value);
+  if (!text) return "";
+  const match = text.match(/(?:youtube\.com\/|^\/?)(@[A-Za-z0-9._%~-]+)(?:[/?#]|$)/iu);
+  return match ? `/${match[1]}` : "";
 }
 
 function handleFromUrl(value) {
