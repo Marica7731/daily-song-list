@@ -1,0 +1,270 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch23",
+  "generatedAt": "2026-07-22T10:22:27.423Z",
+  "source": {
+    "handle": "SoraOtoha",
+    "url": "https://www.youtube.com/@SoraOtoha"
+  },
+  "policy": {
+    "dropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "contextualDropTerms": [
+      "雑談 without explicit song-frame signal"
+    ]
+  },
+  "counts": {
+    "policy": {
+      "dropTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDropTerms": [
+        "piano streaming",
+        "piano performance",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ],
+      "contextualDropTerms": [
+        "雑談 without explicit song-frame signal"
+      ]
+    },
+    "unfilteredVideoCount": 26,
+    "unfilteredOccurrenceCount": 496,
+    "acceptedVideoCount": 26,
+    "droppedVideoCount": 0
+  },
+  "videos": [
+    {
+      "videoId": "4EC4mRgbZOg",
+      "title": "【定期歌枠🌟】41th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り#歌枠",
+      "publishedTimestamp": 1784452710605,
+      "songCount": 22,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "m9brhopeO_c",
+      "title": "【#歌枠コラボ】音羽奏來 × 鈴花いのり｜一夜限りのハーモニー🪽🎀 #歌枠 #新人vtuber",
+      "publishedTimestamp": 1783675110605,
+      "songCount": 13,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "71tcJ1UhJdQ",
+      "title": "#朝活 『7時から☀️歌で始まる最高の朝。雑談も💬初見さん大歓迎！』【Re:AcT/音羽奏來】",
+      "publishedTimestamp": 1783502310605,
+      "songCount": 24,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "TsI23yda3nc",
+      "title": "【#歌枠 】スクロールする手、1曲だけ止めていきませんか？🪽🫧【Re:AcT/音羽奏來】",
+      "publishedTimestamp": 1782119910605,
+      "songCount": 29,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "EGpe3K3VSeg",
+      "title": "【定期歌枠🌟】36th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り#歌枠",
+      "publishedTimestamp": 1782119910605,
+      "songCount": 21,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "9uhFfiZI8T4",
+      "title": "〚#推ススメ新人Vtuber歌枠リレーvol.3〛 歌声で記憶に残りたいVsinger⟡.*〖 Re:AcT/音羽奏來🪽🫧〗",
+      "publishedTimestamp": 1782119910605,
+      "songCount": 5,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "alI87WN1crw",
+      "title": "【#歌枠 】少年ジャンプ縛り歌枠🌟OP曲、ED曲、映画主題歌を歌いまくる！！【Re:Act/音羽奏來】",
+      "publishedTimestamp": 1779527910605,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "TCoN3uRofE8",
+      "title": "〖 #歌枠 〗ただいま🎤⟡.*復帰明け歌います🎸私の歌声覚えて行ってね！【Re:AcT/音羽奏來】",
+      "publishedTimestamp": 1779527910605,
+      "songCount": 13,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "YRWbO7Ov0vQ",
+      "title": "『聞いて欲しい歌があるんだ🎧𓈒 𓂂𓏸』【Re:AcT/音羽奏來】 #shorts ＃新人Vtuber ＃歌枠",
+      "publishedTimestamp": 1776935910605,
+      "songCount": 20,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "oepIQDX29po",
+      "title": "【定期ライブ歌枠🌟】31th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "publishedTimestamp": 1776935910605,
+      "songCount": 20,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "JBOdiN2cl6k",
+      "title": "『入院前最後の歌枠✧*｡手術前に歌いまくるぞー！！！🎧𓈒 𓂂𓏸』【Re:AcT/音羽奏來】 #shorts ＃新人Vtuber ＃歌枠",
+      "publishedTimestamp": 1774343910605,
+      "songCount": 22,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "1WDx77Wgq-c",
+      "title": "『1日の終わりに夜のひとときに1曲聞いていきませんか？🎧𓈒 𓂂𓏸』【Re:AcT/音羽奏來】 #shorts ＃新人Vtuber ＃歌枠",
+      "publishedTimestamp": 1771751910605,
+      "songCount": 21,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "TKQXS_ODlLI",
+      "title": "『一日の終わりに私の歌を1曲聞いていきませんか？🎧𓈒 𓂂𓏸』【Re:AcT/音羽奏來】 #shorts ＃新人Vtuber ＃歌枠",
+      "publishedTimestamp": 1771751910605,
+      "songCount": 15,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "lX-A3yrsef0",
+      "title": "【定期ライブ歌枠🌟】25th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "publishedTimestamp": 1771751910605,
+      "songCount": 20,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "-5HMGzm-2Ds",
+      "title": "『デビュー7か月🎤✨1日の終わりに夜のひとときに1曲聞いていきませんか？🎧𓈒 𓂂𓏸』【Re:AcT/音羽奏來】 #shorts ＃新人Vtuber ＃歌枠",
+      "publishedTimestamp": 1769159910605,
+      "songCount": 22,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "_Jczivhs7Do",
+      "title": "『新年初縦型歌枠🎸初見さんも大歓迎 🙌✨1曲だけでも聴いて欲しい🎧𓈒 𓂂𓏸』【Re:AcT/音羽奏來】 #shorts ＃新人Vtuber ＃歌枠",
+      "publishedTimestamp": 1769159910605,
+      "songCount": 22,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "z23d0PVrABY",
+      "title": "『朝活縦型歌枠🎸初見さんも大歓迎 🙌✨この声で目覚めませんか🎧𓈒 𓂂𓏸』【Re:AcT/音羽奏來】 #shorts ＃新人Vtuber ＃歌枠",
+      "publishedTimestamp": 1769159910605,
+      "songCount": 27,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "fKvqWEoycdY",
+      "title": "【定期ライブ歌枠🌟】22th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り",
+      "publishedTimestamp": 1769159910605,
+      "songCount": 20,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "5EvD5Tb8qss",
+      "title": "『生誕前夜祭🪽🫧歌枠そらの好きな曲歌いまくる🎤✧*｡』【#shorts】/Re:AcT・音羽奏來 #弾き語り #新人Vtuber",
+      "publishedTimestamp": 1766567910605,
+      "songCount": 18,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "4lt30aMC0BQ",
+      "title": "【歌枠】初見さんも大歓迎🙌💕一日の疲れを私の歌で癒してく？？🎸/【Re:AcT/音羽奏來】 #shorts ＃新人Vtuber ＃歌枠",
+      "publishedTimestamp": 1766567910605,
+      "songCount": 38,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "3DTXTpKQjTc",
+      "title": "【定期ライブ歌枠🌟】17th Sora LIVE: Re:SONANCE🪽🫧/【Re:AcT/音羽奏來】#新人Vtuber #歌枠 #弾き語り",
+      "publishedTimestamp": 1766567910605,
+      "songCount": 20,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "DYGay4GF118",
+      "title": "【歌枠】初見さんも大歓迎🙌💕歌枠復活‼️沢山歌います🎸/【Re:AcT/音羽奏來】 #shorts",
+      "publishedTimestamp": 1763975910605,
+      "songCount": 22,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "YdT7vmgkkEw",
+      "title": "【定期ライブ歌枠🌟】12th Sora LIVE: Re:SONANCE🪽🫧/【Re:AcT/音羽奏來】",
+      "publishedTimestamp": 1763975910605,
+      "songCount": 23,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "XYYaF0cCS_E",
+      "title": "【歌枠】初見さんも大歓迎🙌💕今日も沢山歌って弾き語る🎸/【Re:AcT/音羽奏來】 #shorts",
+      "publishedTimestamp": 1761383910605,
+      "songCount": 18,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "EdrK9eyPWec",
+      "title": "【歌枠】初見さんも大歓迎🙌💕2,000人突破ありがとう！！弾き語ります🎸/【Re:AcT/音羽奏來】 #shorts",
+      "publishedTimestamp": 1758791910605,
+      "songCount": 10,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    },
+    {
+      "videoId": "8hM_R2adLtM",
+      "title": "【歌枠🎸】◸重大告知あり⋆͛📣◿初見さんも大歓迎🔰 一週間ぶりに歌うぜ🫶🏻︎🫧Re:AcT/音羽奏來",
+      "publishedTimestamp": 1758791910605,
+      "songCount": 10,
+      "status": "accepted",
+      "reason": "explicit song-frame signal; no hard instrument/performance-only drop term"
+    }
+  ]
+}

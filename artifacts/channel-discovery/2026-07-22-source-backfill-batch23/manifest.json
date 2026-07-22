@@ -1,0 +1,82 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch23",
+  "generatedAt": "2026-07-22T10:22:27.423Z",
+  "purpose": "SoraOtoha shard2 retry after prior full-run timeout",
+  "remoteSourceCommit": "7899bb351100781185101ee49ff84c1376c6a912",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch23/accepted-increment.json",
+    "note": "The increment contains only completed shard2 accepted videos after dirty audit. The full source remains partial because shards0/1/3 are not complete in artifact-local increments yet."
+  },
+  "source": {
+    "handle": "SoraOtoha",
+    "url": "https://www.youtube.com/@SoraOtoha",
+    "status": "partial",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "shardCount": 4,
+    "completedShards": [
+      2
+    ],
+    "failedShards": [],
+    "pendingShards": [
+      0,
+      1,
+      3
+    ],
+    "previousFailure": {
+      "batch": "2026-07-22-source-backfill-batch11",
+      "status": "timeout before complete manifest at 64/127 inspected"
+    },
+    "candidates": 127,
+    "inspected": 32,
+    "discovery": {
+      "usableVideoCount": 26,
+      "occurrenceCount": 496,
+      "rawPublishedCoverage": "127/127",
+      "detailPublishedCoverage": "26/26",
+      "thumbnailCoverage": "26/26",
+      "reachedEnd": true,
+      "elapsedSeconds": 3199
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 26,
+      "occurrences": 496,
+      "songs": 203,
+      "publishedTimestampCoverage": "26/26",
+      "occurrenceTimeCoverage": "496/496",
+      "occurrenceSecondsCoverage": "496/496",
+      "thumbnailCoverage": "26/26",
+      "acceptedIncrementThumbnailFieldCoverage": "0/26",
+      "thumbnailCoverageSource": "discovery shard2 status before cache cleanup; completed shard reported 26/26 thumbnails"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 0,
+      "occurrences": 0,
+      "details": []
+    }
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.7G 6.9G 28% /",
+        "marker": "CODEX_REMOTE_BATCH23_CLEANUP_OK"
+      }
+    },
+    "raw": {
+      "vps5": {
+        "exitCode": 0,
+        "stdout": "cleanup=removed\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/vda1        10G  2.7G  6.9G  28% /\nCODEX_REMOTE_BATCH23_CLEANUP_OK\n",
+        "stderr": ""
+      }
+    }
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json"
+  }
+}
