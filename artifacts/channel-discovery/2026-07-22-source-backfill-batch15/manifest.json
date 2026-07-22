@@ -1,0 +1,104 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch15",
+  "generatedAt": "2026-07-22T05:17:13Z",
+  "purpose": "asaxmayo sharded source-backfill attempt with bounded remote runners",
+  "remoteSourceCommit": "64bad38907ec92d72c602fe7c37ae952dc650ade",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "reason": "all shards failed or timed out before complete discovery manifests; partial checkpoints are not accepted imports"
+  },
+  "source": {
+    "handle": "asaxmayo",
+    "url": "https://www.youtube.com/@asaxmayo/streams",
+    "status": "failed",
+    "failureType": "partial_shards_incomplete",
+    "imported": false,
+    "shardCount": 4,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "publishedTimestampCoverage": "0/0",
+    "occurrenceTimeCoverage": "0/0",
+    "occurrenceSecondsCoverage": "0/0",
+    "thumbnailCoverage": "0/0",
+    "candidateCountRange": "571-591",
+    "candidateCountNote": "different remote hosts observed different candidate counts while fetching continuations; rerun should use a single candidate snapshot or slower sequential shard resume",
+    "shards": [
+      {
+        "shard": "0/4",
+        "remoteHost": "vps3",
+        "status": "failed",
+        "failureType": "youtube_http_429",
+        "exitCode": 1,
+        "timedOut": false,
+        "elapsedSeconds": 3261,
+        "candidateCount": 571,
+        "inspectedInLatestRun": 90,
+        "usableVideoCountAtCheckpoint": 49,
+        "hasCompleteManifest": false,
+        "hasCheckpoint": true,
+        "failureSummary": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+      },
+      {
+        "shard": "1/4",
+        "remoteHost": "vps5",
+        "status": "failed",
+        "failureType": "timeout",
+        "exitCode": -9,
+        "timedOut": true,
+        "elapsedSeconds": 3601,
+        "candidateCount": 591,
+        "inspectedInLatestRun": 100,
+        "usableVideoCountAtCheckpoint": 53,
+        "hasCompleteManifest": false,
+        "hasCheckpoint": true,
+        "failureSummary": "remote shard runner reached 3600s timeout before manifest"
+      },
+      {
+        "shard": "2/4",
+        "remoteHost": "vps3",
+        "status": "failed",
+        "failureType": "youtube_http_429",
+        "exitCode": 1,
+        "timedOut": false,
+        "elapsedSeconds": 3221,
+        "candidateCount": 571,
+        "inspectedInLatestRun": 94,
+        "usableVideoCountAtCheckpoint": 57,
+        "hasCompleteManifest": false,
+        "hasCheckpoint": true,
+        "failureSummary": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+      },
+      {
+        "shard": "3/4",
+        "remoteHost": "vps5",
+        "status": "failed",
+        "failureType": "timeout",
+        "exitCode": -9,
+        "timedOut": true,
+        "elapsedSeconds": 3601,
+        "candidateCount": 591,
+        "inspectedInLatestRun": 106,
+        "usableVideoCountAtCheckpoint": 58,
+        "hasCompleteManifest": false,
+        "hasCheckpoint": true,
+        "failureSummary": "remote shard runner reached 3600s timeout before manifest"
+      }
+    ],
+    "nextAction": "rerun more conservatively: use one stable candidate snapshot, lower concurrency, longer request interval, and resume/shard from checkpoint; do not import partial checkpoint details"
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps3": {
+        "result": "removed",
+        "dfAfter": "/dev/sda1 99G 11G 88G 11% /"
+      },
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.6G 7.0G 28% /"
+      }
+    }
+  }
+}
