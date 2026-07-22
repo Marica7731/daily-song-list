@@ -1,0 +1,73 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch33-kyoka-shard0",
+  "generatedAt": "2026-07-22T15:35:00Z",
+  "purpose": "status-only stopped attempt for Kyoka_0609 shard0 source-backfill retry",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "reason": "remote shard0 run was stopped before manifest/export/dirty-audit; no complete accepted artifact was produced"
+  },
+  "source": {
+    "handle": "Kyoka_0609",
+    "url": "https://www.youtube.com/@Kyoka_0609",
+    "status": "failed",
+    "imported": false,
+    "acceptedIncrementReadyForReview": false,
+    "shard": {
+      "inspectShardIndex": 0,
+      "inspectShardCount": 4,
+      "status": "stopped_before_export",
+      "pendingReason": "checkpoint had progress but no complete manifest/export; stopped to avoid an unbounded long run"
+    },
+    "discoveryCheckpointAtStop": {
+      "queriedAt": "2026-07-22T15:28:44Z",
+      "candidateCount": 164,
+      "inspectedInLatestRun": 32,
+      "completedVideoIds": 31,
+      "detailCount": 31,
+      "updatedAt": "2026-07-22T15:28:35Z",
+      "manifestGenerated": false,
+      "videoDetailsExported": false
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 0,
+      "occurrences": 0,
+      "songs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "acceptedThumbnailFieldCoverage": "0/0"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 0,
+      "occurrences": 0,
+      "suspiciousVideos": 0,
+      "reason": "dirty audit was not run because no exportable local artifact was retrieved"
+    },
+    "failure": {
+      "stage": "remote_discovery_before_export",
+      "reason": "bounded worker run was manually stopped after progress remained too slow for this batch; remote checkpoint was not retained locally as an accepted artifact",
+      "nextAction": "retry Kyoka_0609 in a later batch with smaller shard size or allow the full 3600s timeout, then export only after manifest/video-details are available"
+    }
+  },
+  "remoteExecution": {
+    "usedRemoteHosts": true,
+    "hosts": [
+      {
+        "hostLabel": "vps-jp",
+        "hostname": "VM-c8189ce8-42c5-4763-bfb1-d000d087dbb5",
+        "createdPath": "/opt/ytb-song-rank-source-backfill-20260722-batch33-kyoka-shard0-vps-jp",
+        "setup": "git clone --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list.git",
+        "commandSummary": "timeout 3600s npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@Kyoka_0609 --inspect-shard-count 4 --inspect-shard-index 0",
+        "processCleanup": "killed timeout/npm/node runner pids 561929/561931/561942/561943; pids no longer existed on recheck",
+        "cleanupStatus": "removed",
+        "postCleanupDfH": "/dev/sda1 99G 27G 73G 27% /"
+      }
+    ]
+  },
+  "artifacts": {
+    "acceptedIncrement": null,
+    "dirtyAudit": null,
+    "report": "report.md"
+  }
+}
