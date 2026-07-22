@@ -33,6 +33,7 @@ const REQUEST_PAGE_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_PAGE_SI
 const REQUEST_DETAIL_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_DETAIL_SHARD_SIZE, 96);
 const REQUEST_SOURCE_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_SHARD_SIZE, 48);
 const REQUEST_SEARCH_SHARD_SIZE = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_SHARD_SIZE, 2000);
+const REQUEST_SEARCH_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_SEARCH_SHARD_MAX_BYTES, 8 * 1024 * 1024);
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
 const REQUEST_DETAIL_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_DETAIL_SHARD_MAX_BYTES, 8 * 1024 * 1024);
 const REQUEST_SOURCE_SHARD_MAX_BYTES = positiveInteger(process.env.DAILY_SONG_REQUEST_SOURCE_SHARD_MAX_BYTES, 8 * 1024 * 1024);
@@ -1017,7 +1018,21 @@ function writeRequestSearch(options) {
   }
   const bucketEntries = [];
   for (const [bucket, bucketRecords] of Array.from(buckets.entries()).sort((a, b) => a[0].localeCompare(b[0], "en"))) {
-    const chunks = chunkArray(bucketRecords, REQUEST_SEARCH_SHARD_SIZE);
+    const payloadBase = {
+      schemaVersion: RUNTIME_SCHEMA_VERSION,
+      kind: "request-search-page",
+      rangeId,
+      bucket,
+      dataVersion,
+      generatedAt,
+      capturedAt,
+    };
+    const chunks = chunkRecordsByPayloadBytes(bucketRecords, {
+      maxBytes: REQUEST_SEARCH_SHARD_MAX_BYTES,
+      pageSize: REQUEST_SEARCH_SHARD_SIZE,
+      payloadBase,
+      recordName: "records",
+    });
     const pages = chunks.map((chunk, index) => {
       const pageIndex = index + 1;
       const payload = {
@@ -1211,6 +1226,9 @@ function writeKeyedRequestShardSet(options) {
 }
 
 function chunkRecordsByPayloadBytes(records, options = {}) {
+  if (options.payloadBase && options.recordName) {
+    return chunkRecordsByPayloadBytesFast(records, options);
+  }
   const pageSize = positiveInteger(options.pageSize, records.length || 1);
   const maxBytes = positiveInteger(options.maxBytes, Number.MAX_SAFE_INTEGER);
   const buildPayload = options.buildPayload;
@@ -1235,10 +1253,36 @@ function chunkRecordsByPayloadBytes(records, options = {}) {
   return chunks;
 }
 
+function chunkRecordsByPayloadBytesFast(records, options = {}) {
+  const pageSize = positiveInteger(options.pageSize, records.length || 1);
+  const maxBytes = positiveInteger(options.maxBytes, Number.MAX_SAFE_INTEGER);
+  const payloadBase = options.payloadBase || {};
+  const recordName = options.recordName || "records";
+  const chunks = [];
+  let chunk = [];
+  let chunkRecordsBytes = 0;
+  const overheadPayload = { ...payloadBase, page: 999999, pageCount: 999999, [recordName]: [] };
+  const overheadBytes = Buffer.byteLength(stringifyRuntimeJson(overheadPayload), "utf8");
+  for (const record of records || []) {
+    const recordBytes = Buffer.byteLength(stringifyRuntimeJson(record), "utf8");
+    const separatorBytes = chunk.length ? 1 : 0;
+    const nextBytes = overheadBytes + chunkRecordsBytes + separatorBytes + recordBytes;
+    if (chunk.length && (chunk.length >= pageSize || nextBytes > maxBytes)) {
+      chunks.push(chunk);
+      chunk = [];
+      chunkRecordsBytes = 0;
+    }
+    chunkRecordsBytes += (chunk.length ? 1 : 0) + recordBytes;
+    chunk.push(record);
+  }
+  if (chunk.length) chunks.push(chunk);
+  return chunks;
+}
+
 function cleanupRequestRuntimeFiles(rangeId) {
   const rangeDir = path.join(UI_DIR, "ranges", rangeId);
   for (const dirName of ["records", "sources", "views", "search"]) {
-    fs.rmSync(path.join(rangeDir, dirName), { recursive: true, force: true });
+    fs.rmSync(path.join(rangeDir, dirName), { recursive: true, force: true, maxRetries: 8, retryDelay: 250 });
   }
   if (!fs.existsSync(rangeDir)) return;
   for (const file of fs.readdirSync(rangeDir, { withFileTypes: true })) {

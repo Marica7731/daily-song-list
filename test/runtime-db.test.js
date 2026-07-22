@@ -358,6 +358,74 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   assert.match(vtuberAliasQueryOutput, /"totalCount": 1/);
   assert.match(vtuberAliasQueryOutput, /"name": "Haru Ch\. 花前ハル"/);
 
+  const videoHandleChannelScopeOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "videos",
+      "--q",
+      "beta_ch",
+      "--search-scope",
+      "channel",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(videoHandleChannelScopeOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(videoHandleChannelScopeOutput, /"totalCount": 1/);
+  assert.match(videoHandleChannelScopeOutput, /"title": "Night Karaoke"/);
+
+  const videoIdChannelScopeOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "videos",
+      "--q",
+      "UC-alpha",
+      "--search-scope",
+      "channel",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(videoIdChannelScopeOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(videoIdChannelScopeOutput, /"totalCount": 1/);
+  assert.match(videoIdChannelScopeOutput, /"title": "Late Karaoke"/);
+
+  const videoTitleChannelScopeOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "videos",
+      "--q",
+      "Night",
+      "--search-scope",
+      "channel",
+      "--page-size",
+      "5",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(videoTitleChannelScopeOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(videoTitleChannelScopeOutput, /"totalCount": 0/);
+
   const videoMetricQueryOutput = execFileSync(
     PYTHON,
     [

@@ -174,12 +174,14 @@ def search_fields_for_view(view: str, scope: str) -> list[str]:
         "song": ["lower(title)", "lower(artist)"],
         "title": ["lower(title)"],
         "artist": ["lower(artist)", "lower(name)"],
-        "channel": ["lower(search_text)", "lower(name)"],
+        "channel": ["lower(channel_search_text)", "lower(name)"],
         "video": ["lower(search_text)", "lower(title)"],
         "source": ["lower(search_text)"],
     }[scope]
     if view == "artists" and scope in {"song", "title"}:
         candidates = ["lower(name)"]
+    if view == "videos" and scope == "channel":
+        candidates = ["lower(channel_search_text)", "lower(name)"]
     if view == "vtubers" and scope in {"song", "title", "artist"}:
         candidates = ["lower(name)"]
     result = []

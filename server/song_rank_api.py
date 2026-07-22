@@ -629,14 +629,14 @@ def source_occurrence_search_fields(scope: str, search_fields: list[str] | None 
     if requested:
         fields: list[str] = []
         if "channel" in requested:
-            fields.append("lower(so.channel_name)")
+            fields.extend(["lower(so.channel_name)", "lower(so.channel_id)", "lower(so.channel_handle)", "lower(so.channel_url)"])
         if "video" in requested:
             fields.extend(["lower(so.title)", "lower(so.video_id)"])
         if "source" in requested:
             fields.append("lower(so.search_text)")
         return fields or ["lower(so.search_text)"]
     if scope == "channel":
-        return ["lower(so.channel_name)"]
+        return ["lower(so.channel_name)", "lower(so.channel_id)", "lower(so.channel_handle)", "lower(so.channel_url)"]
     if scope == "video":
         return ["lower(so.title)", "lower(so.video_id)"]
     return ["lower(so.search_text)"]
@@ -864,7 +864,7 @@ def search_fields_for_view(view: str, scope: str) -> list[str]:
         "song": ["lower(title)", "lower(artist)"],
         "title": ["lower(title)"],
         "artist": ["lower(artist)", "lower(name)"],
-        "channel": ["lower(search_text)", "lower(name)"],
+        "channel": ["lower(channel_search_text)", "lower(name)"],
         "video": ["lower(search_text)", "lower(title)"],
         "source": ["lower(search_text)"],
     }[scope]
@@ -872,6 +872,8 @@ def search_fields_for_view(view: str, scope: str) -> list[str]:
         candidates = ["lower(title)", "lower(artist)", "lower(name)"]
     if view == "artists" and scope in {"song", "title"}:
         candidates = ["lower(name)"]
+    if view == "videos" and scope == "channel":
+        candidates = ["lower(channel_search_text)", "lower(name)"]
     if view == "vtubers" and scope in {"song", "title", "artist"}:
         candidates = ["lower(name)"]
     result = []

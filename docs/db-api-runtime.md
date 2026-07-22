@@ -8,6 +8,7 @@ This is the first deployable step away from committing tens of thousands of fron
 - `scripts/db/export-runtime-rankings.js` reuses the existing frontend/runtime JS merge rules to export derived ranking rows without writing `data/ui` shards.
 - The same builder imports the public VSinger Moment backfill shards into normalized raw `external_*` tables.
 - The builder derives `channel_metadata` from reviewed YouTube channel discovery rows and cached public channel metadata.
+- SQLite schema version 2 stores normalized channel identity search text on ranking rows and source occurrence rows, so `channel` searches can match channel display name, YouTube channel ID, handle, and URL without scanning unrelated song/video text.
 - `scripts/db/query-runtime-db.py` provides smoke-test reads with a completion marker.
 - `server/song_rank_api.py` serves read-only HTTP endpoints for rankings, metadata, health, and source details.
 - The API exposes `view=vtubers` for channel/VTuber rankings; the frontend API-mode tab is `vtuberRank`.
@@ -62,6 +63,7 @@ HTTP endpoints:
 - `GET /api/rankings?range=all&view=songs&page=1&pageSize=50`
 - `GET /api/rankings?range=7d&view=artists&q=花`
 - `GET /api/rankings?range=all&view=vtubers&q=HanamaeHaru&pageSize=5`
+- `GET /api/rankings?range=all&view=videos&q=@kanaruhanon&searchFields=channel&pageSize=5`
 - `GET /api/sources/{sourceDetailKey}`
 - `GET /api/sources/{sourceDetailKey}?page=1&pageSize=20`
 - `GET /api/sources/{sourceDetailKey}?q=なれたん`
@@ -119,7 +121,7 @@ curl -fsS "http://127.0.0.1:8765/api/sources/codex-missing-source-key"
 ```json
 {
   "status": "ok",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "builtAt": "2026-07-19T00:00:00Z",
   "latestGeneratedAt": "2026-07-19T00:00:00.000Z",
   "counts": { "ranking_rows": 1, "source_occurrences": 1 }
@@ -162,7 +164,7 @@ Supported query parameters:
 - `metric`: `occurrences`, `count`, `songs`, or `videos`; `videos` is valid for `songs`, `artists`, and `vtubers`, and `songs` is valid for `vtubers`. Non-video/song metrics are normalized to occurrence counts in the response as `metric: "occurrences"`. For `songIndex`, `videos`, and `vsingerSongs`, the current implementation accepts any `metric` value and reads the occurrence-count rows.
 - `q`: optional case-insensitive search. Terms match as continuous substrings, with whitespace/`AND`/`+`/`与`/`和` as AND and `OR`/`|`/`或` as OR group separators. Quote a phrase to keep spaces inside one term.
 - `searchScope`: optional legacy field selector. `all` is the default; for song-like ranking views it searches visible song identity fields only, while `channel`, `video`, and `source` must be selected explicitly when operators need source-context matches. `song`, `title`, `artist`, `channel`, `video`, `source`, and `entity` narrow the fields. `searchField` is accepted as a backward-compatible alias.
-- `searchFields`: optional comma-separated user-facing song field selector for the frontend search bar. Supported values are `title`, `artist`, `channel`, `video`, and `source`. Omitted `searchFields` keeps the default song-identity behavior (`title,artist` in the UI). Explicit `searchFields=all` means the user has removed all field chips and wants all available source context searched for that request; the frontend does not persist this selector across page refreshes.
+- `searchFields`: optional comma-separated user-facing song field selector for the frontend search bar. Supported values are `title`, `artist`, `channel`, `video`, and `source`. Omitted `searchFields` keeps the default song-identity behavior (`title,artist` in the UI). Explicit `searchFields=all` means the user has removed all field chips and wants all available source context searched for that request; the frontend does not persist this selector across page refreshes. `searchFields=channel` matches channel display names, YouTube channel IDs, handles such as `@kanaruhanon`, and channel URLs.
 - `minCount`: optional minimum count. For `songs` and `artists`, `metric=videos` applies it to `videoCount`; otherwise it applies to `count`. For `videos` and `vtubers`, `minCount` is ignored by the UI/API ranking view.
 - `page`: 1-based page number.
 - `pageSize`: maximum 200.

@@ -13,7 +13,7 @@
     "migrate:catalog-unbounded": "node scripts/migrate-permanent-data.js",
     "import:git-history": "node scripts/migrate-permanent-data.js --dry-run",
     "backfill:history": "node scripts/migrate-permanent-data.js",
-    "build:runtime": "node scripts/build-runtime-data.js",
+    "build:runtime": "node --max-old-space-size=8192 scripts/build-runtime-data.js",
     "publish:catalog-runtime": "node scripts/rebuild-derived-data.js --from-catalog && node scripts/build-runtime-data.js",
     "version:assets": "node scripts/update-asset-version.js",
     "blocklist:generate": "node scripts/generate-blocked-vtuber-channels.js",

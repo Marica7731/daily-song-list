@@ -244,9 +244,16 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(vtuberAliasSearch.totalCount, 1);
     assert.equal(vtuberAliasSearch.records[0].name, "Haru Ch. 花前ハル");
 
-    const videoHandleSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=beta_ch&pageSize=5`);
+    const videoHandleSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=beta_ch&searchFields=channel&pageSize=5`);
     assert.equal(videoHandleSearch.totalCount, 1);
     assert.equal(videoHandleSearch.records[0].title, "Night Karaoke");
+
+    const videoIdChannelSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=UC-alpha&searchFields=channel&pageSize=5`);
+    assert.equal(videoIdChannelSearch.totalCount, 1);
+    assert.equal(videoIdChannelSearch.records[0].title, "Late Karaoke");
+
+    const videoTitleChannelSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=Night&searchFields=channel&pageSize=5`);
+    assert.equal(videoTitleChannelSearch.totalCount, 0);
 
     const sourceKey = rankings.records[0].sourceDetailKey;
     const source = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}`);
