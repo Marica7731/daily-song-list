@@ -2171,7 +2171,8 @@ mark {
 
 .artist-song-drawer[data-source-mode="vtuber"] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  grid-auto-rows: 84px;
+  gap: 8px;
 }
 
 .artist-song-drawer[data-source-mode="vtuber"] .source-drawer-toolbar,
@@ -2295,54 +2296,71 @@ mark {
 }
 
 .artist-song-group-vtuber {
-  gap: 6px;
-  min-height: 0;
-  padding: 6px;
+  gap: 0;
+  align-content: stretch;
+  min-height: 84px;
+  height: 100%;
+  padding: 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   background: #f8fafc;
 }
 
 .artist-song-group-vtuber .artist-song-header {
-  grid-template-columns: 56px minmax(0, 1fr);
-  grid-template-areas:
-    "thumb title"
-    "thumb actions";
-  gap: 4px 6px;
+  grid-template-columns: 62px minmax(0, 1fr) minmax(44px, auto);
+  grid-template-areas: "thumb title actions";
+  gap: 8px;
   align-items: start;
+  min-height: 100%;
 }
 
 .artist-song-group-vtuber:last-child {
-  padding: 6px;
+  padding: 8px;
   border: 1px solid var(--line);
 }
 
 .artist-song-group-vtuber .artist-song-title {
   display: -webkit-box;
   overflow: hidden;
-  font-size: 12.5px;
-  line-height: 1.25;
+  font-size: 13px;
+  line-height: 1.28;
+  text-align: left;
+  overflow-wrap: anywhere;
   white-space: normal;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
+.artist-song-group-vtuber .artist-song-title-wrap {
+  align-content: start;
+  justify-content: stretch;
+  gap: 3px;
+  text-align: left;
+}
+
 .artist-song-group-vtuber .artist-song-thumb {
-  width: 56px;
+  width: 62px;
+  align-self: start;
 }
 
 .artist-song-group-vtuber .artist-song-artist {
   font-size: 11px;
+  line-height: 1.25;
+  text-align: left;
 }
 
 .artist-song-group-vtuber .artist-song-summary-actions {
-  justify-self: start;
+  align-self: start;
+  justify-self: end;
+  justify-content: flex-end;
   gap: 4px;
+  text-align: right;
 }
 
 .artist-song-group-vtuber .artist-song-count {
-  justify-self: start;
+  justify-self: end;
   font-size: 11px;
+  text-align: right;
 }
 
 .artist-song-source-toggle {
@@ -2457,11 +2475,36 @@ mark {
 }
 
 .source-page-summary {
-  min-width: 54px;
+  min-width: 0;
   color: var(--muted);
   font-size: 12.5px;
   font-weight: 700;
   text-align: center;
+}
+
+.source-page-jump {
+  display: inline-grid;
+  grid-template-columns: 48px auto auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.source-page-jump input {
+  width: 48px;
+  height: var(--chip-height);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: #ffffff;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.source-page-total {
+  min-width: 42px;
+  text-align: left;
+  white-space: nowrap;
 }
 
 .source-page-button {
@@ -3556,6 +3599,10 @@ mark {
     display: grid;
   }
 
+  .artist-song-drawer[data-source-mode="vtuber"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
 }
 
 @media (min-width: 1024px) {
@@ -3691,17 +3738,32 @@ mark {
   }
 
   .query-search-form .query-field-menu {
-    position: static;
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    left: 6px;
+    height: 24px;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .query-search-form .query-field-menu-trigger {
+    position: absolute;
+    top: 0;
+    right: 0;
+    pointer-events: auto;
   }
 
   .query-search-form .query-field-menu-panel {
-    top: calc(100% + 8px);
-    left: auto;
-    right: 0;
+    position: fixed;
+    top: 144px;
+    left: 10px;
+    right: 10px;
+    width: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     min-width: 0;
-    width: min(320px, 100%);
-    max-width: 100%;
+    max-width: none;
+    pointer-events: auto;
   }
 
   .query-search-form .query-count {
@@ -4394,32 +4456,37 @@ mark {
   }
 
   .artist-song-drawer[data-source-mode="vtuber"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 5px;
+    grid-template-columns: 1fr;
+    grid-auto-rows: 74px;
+    gap: 7px;
   }
 
   .artist-song-group-vtuber {
-    gap: 4px;
-    padding: 6px;
+    min-height: 74px;
+    padding: 8px;
+  }
+
+  .artist-song-group-vtuber:last-child {
+    padding: 8px;
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 48px minmax(0, 1fr);
-    grid-template-areas:
-      "thumb title"
-      "thumb actions";
+    grid-template-columns: 58px minmax(0, 1fr) minmax(44px, auto);
+    grid-template-areas: "thumb title actions";
     align-items: start;
-    gap: 3px 5px;
+    gap: 7px;
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
-    width: 48px;
+    width: 58px;
     align-self: start;
   }
 
   .artist-song-group-vtuber .artist-song-title-wrap {
     min-height: 0;
-    justify-content: center;
+    align-content: start;
+    justify-content: stretch;
+    text-align: left;
   }
 
   .artist-song-group-vtuber .artist-song-title {
@@ -4434,19 +4501,22 @@ mark {
   .artist-song-group-vtuber .artist-song-artist {
     display: block;
     font-size: 10.5px;
+    text-align: left;
   }
 
   .artist-song-group-vtuber .artist-song-summary-actions {
     align-self: start;
-    justify-self: start;
-    justify-content: flex-start;
+    justify-self: end;
+    justify-content: flex-end;
     gap: 3px;
     max-width: 100%;
+    text-align: right;
   }
 
   .artist-song-group-vtuber .artist-song-count {
     display: inline-flex;
     align-items: center;
+    justify-content: flex-end;
     min-height: 22px;
     border-radius: 0;
     background: transparent;
@@ -4460,6 +4530,27 @@ mark {
     align-items: center;
     min-height: 30px;
     padding: 0 0 4px;
+  }
+
+  .source-drawer-pagination {
+    gap: 5px;
+  }
+
+  .source-page-jump {
+    grid-template-columns: 42px auto 44px;
+  }
+
+  .source-page-jump input {
+    width: 42px;
+  }
+
+  .source-page-total {
+    min-width: 34px;
+    font-size: 11.5px;
+  }
+
+  .source-page-submit {
+    padding-inline: 7px;
   }
 
   .source-drawer-actions {
@@ -4811,14 +4902,12 @@ mark {
   }
 
   .artist-song-group-vtuber .artist-song-header {
-    grid-template-columns: 44px minmax(0, 1fr);
-    grid-template-areas:
-      "thumb title"
-      "thumb actions";
+    grid-template-columns: 50px minmax(0, 1fr) minmax(38px, auto);
+    grid-template-areas: "thumb title actions";
   }
 
   .artist-song-group-vtuber .artist-song-thumb {
-    width: 44px;
+    width: 50px;
   }
 
   .artist-song-group-vtuber .artist-song-title {

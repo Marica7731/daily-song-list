@@ -31,8 +31,6 @@ const QUERY_PREVIEW_INPUT_DEBOUNCE_MS = 520;
 const QUERY_SUGGESTION_SCAN_LIMIT = 360;
 const ARTIST_SONG_GROUP_INITIAL_LIMIT = 8;
 const ARTIST_SONG_GROUP_BATCH_SIZE = 8;
-const VTUBER_SONG_GROUP_INITIAL_LIMIT = 4;
-const VTUBER_SONG_GROUP_BATCH_SIZE = 12;
 const SOURCE_TIMESTAMP_INITIAL_LIMIT = 3;
 const SOURCE_TIMESTAMP_DEDUP_WINDOW_SECONDS = 30;
 const SOURCE_INLINE_LIMITS = {
@@ -62,6 +60,8 @@ const SOURCE_DRAWER_PAGE_SIZE_BY_MODE = {
   tablet: MOBILE_PAGE_SIZE,
   desktop: DESKTOP_PAGE_SIZE,
 };
+const VTUBER_SONG_GROUP_INITIAL_LIMIT = MOBILE_PAGE_SIZE;
+const VTUBER_SONG_GROUP_BATCH_SIZE = MOBILE_PAGE_SIZE;
 const CURRENT_FILTER_VERSION = 4;
 const RANK_METRICS = {
   occurrences: "歌唱次数",
@@ -605,6 +605,15 @@ function bindEvents() {
       return;
     }
 
+    const sourcePageSubmit = event.target.closest("[data-source-page-submit]");
+    if (sourcePageSubmit) {
+      event.preventDefault();
+      submitSourceDrawerPageForm(sourcePageSubmit.closest("[data-source-page-form]")).catch((error) =>
+        showToast(`来源翻页失败：${error.message}`),
+      );
+      return;
+    }
+
     const pageSizeButton = event.target.closest("[data-page-size]");
     if (pageSizeButton) {
       const nextPageSize = Number.parseInt(pageSizeButton.dataset.pageSize || "", 10);
@@ -662,6 +671,13 @@ function bindEvents() {
       resetPagination();
       render({ focusAfterPageChange: true, urlMode: "push" });
     }
+  });
+
+  els.content.addEventListener("submit", (event) => {
+    const sourceForm = event.target.closest("[data-source-page-form]");
+    if (!sourceForm) return;
+    event.preventDefault();
+    submitSourceDrawerPageForm(sourceForm).catch((error) => showToast(`来源翻页失败：${error.message}`));
   });
 
   els.content.addEventListener("submit", (event) => {
@@ -7300,18 +7316,53 @@ function appendSourceDrawerPager(drawer, pageInfo) {
   pager.setAttribute("aria-label", `${isSongGroupMode ? "曲目" : "来源"}分页，第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
   pager.append(
     renderSourcePageButton("上一页", pageInfo.previousPage || 1, !pageInfo.hasPrevious, drawer.id),
-    renderSourcePageSummary(pageInfo),
+    renderSourcePageSummary(pageInfo, drawer.id),
     renderSourcePageButton("下一页", pageInfo.nextPage || pageInfo.pageCount, !pageInfo.hasNext, drawer.id),
   );
   const anchor = drawer.querySelector(":scope > .source-collapse-bottom") || null;
   drawer.insertBefore(pager, anchor);
 }
 
-function renderSourcePageSummary(pageInfo) {
-  const summary = document.createElement("span");
-  summary.className = "source-page-summary";
-  summary.textContent = `${pageInfo.page}/${pageInfo.pageCount}`;
-  return summary;
+function renderSourcePageSummary(pageInfo, drawerId) {
+  const form = document.createElement("form");
+  form.className = "source-page-summary source-page-jump";
+  form.dataset.sourcePageForm = "true";
+  form.setAttribute("aria-controls", drawerId);
+  form.setAttribute("aria-label", `跳至曲目页码，当前第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
+
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = "1";
+  input.max = String(pageInfo.pageCount);
+  input.step = "1";
+  input.value = String(pageInfo.page);
+  input.inputMode = "numeric";
+  input.dataset.pageInput = "true";
+  input.setAttribute("aria-label", `输入页码，范围 1 到 ${pageInfo.pageCount}`);
+
+  const total = document.createElement("span");
+  total.className = "source-page-total";
+  total.textContent = `/ ${pageInfo.pageCount}`;
+
+  const submit = document.createElement("button");
+  submit.className = "source-page-button source-page-submit ui-chip";
+  submit.type = "submit";
+  submit.dataset.sourcePageSubmit = "true";
+  submit.textContent = "选页";
+  submit.setAttribute("aria-label", "跳转到输入的曲目页码");
+
+  form.append(input, total, submit);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    submitSourceDrawerPageForm(form).catch((error) => showToast(`来源翻页失败：${error.message}`));
+  });
+  submit.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    submitSourceDrawerPageForm(form).catch((error) => showToast(`来源翻页失败：${error.message}`));
+  });
+  return form;
 }
 
 function renderSourcePageButton(label, page, disabled, drawerId) {
@@ -7750,8 +7801,8 @@ function artistSongBatchSize(drawer) {
   return drawer?.dataset?.sourceMode === "vtuber" ? VTUBER_SONG_GROUP_BATCH_SIZE : ARTIST_SONG_GROUP_BATCH_SIZE;
 }
 
-function vtuberSongGroupPageSizeForMode() {
-  return VTUBER_SONG_GROUP_INITIAL_LIMIT;
+function vtuberSongGroupPageSizeForMode(mode = getResponsiveMode()) {
+  return sourceDrawerPageSizeForMode(mode);
 }
 
 function appendArtistSongGroupRange(drawer, songGroups, start, end) {
@@ -7912,13 +7963,18 @@ function buildSearchUrlForSongGroup(group) {
 }
 
 function artistLabelForSongGroup(group) {
+  const displayArtist = cleanText(group?.displayArtist);
+  if (displayArtist && !window.RankingUtils.isUnknownArtistName(displayArtist)) return displayArtist;
+
   const counts = new Map();
   for (const occurrence of group?.occurrences || []) {
     const name = cleanText(occurrence?.song?.artist);
     if (!name) continue;
     counts.set(name, (counts.get(name) || 0) + 1);
   }
-  return Array.from(counts.entries())
+  const entries = Array.from(counts.entries()).sort((a, b) => b[1] - a[1] || compareValues(a[0], b[0]));
+  const knownEntries = entries.filter(([name]) => !window.RankingUtils.isUnknownArtistName(name));
+  return (knownEntries.length ? knownEntries : entries)
     .sort((a, b) => b[1] - a[1] || compareValues(a[0], b[0]))
     .slice(0, 2)
     .map(([name]) => name)
@@ -8096,9 +8152,20 @@ async function setSourceDrawerExpanded(row, nextExpanded, options = {}) {
 
 async function setSourceDrawerPage(button) {
   const drawer = document.getElementById(button.getAttribute("aria-controls")) || button.closest(".source-drawer");
+  const page = Math.max(1, Math.floor(Number(button.dataset.sourcePage) || 1));
+  await setSourceDrawerPageForDrawer(drawer, page);
+}
+
+async function submitSourceDrawerPageForm(form) {
+  const drawer = document.getElementById(form?.getAttribute("aria-controls")) || form?.closest(".source-drawer");
+  const input = form?.querySelector("[data-page-input]");
+  const page = Math.max(1, Math.floor(Number(input?.value) || 1));
+  await setSourceDrawerPageForDrawer(drawer, page);
+}
+
+async function setSourceDrawerPageForDrawer(drawer, page) {
   const row = drawer?.closest(".rank-row, .index-row");
   if (!drawer || !row) return;
-  const page = Math.max(1, Math.floor(Number(button.dataset.sourcePage) || 1));
   if (drawer.dataset.sourceMode === "vtuber") {
     drawer.dataset.sourcePage = String(page);
     const songGroups = row._artistSongGroups || (typeof row._getArtistSongGroups === "function" ? row._getArtistSongGroups() : []);
