@@ -1,0 +1,113 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch21",
+  "generatedAt": "2026-07-22T09:08:32.412Z",
+  "purpose": "omaru_piano shard0 retry after prior 429, with strict instrument/non-song dirty audit",
+  "remoteSourceCommit": "4ae6d0239163f61ccbf0e68ff24017b5c23ad40d",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch21/accepted-increment.json",
+    "note": "The increment contains only completed shard0 accepted videos after dirty audit. Together with batches18/19/20, all four omaru_piano shards now have completed evidence; integration still needs to merge artifact-local increments deliberately."
+  },
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams",
+    "status": "imported_partial_artifact",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "shardCount": 4,
+    "completedShards": [
+      0
+    ],
+    "previousCompletedShards": [
+      1,
+      2,
+      3
+    ],
+    "failedShards": [],
+    "pendingShards": [],
+    "previousFailureResolved": {
+      "batch": "2026-07-22-source-backfill-batch18",
+      "oldStatus": "youtube_429 after 4/144 inspected on vps3",
+      "resolvedBy": "batch21 vps5 low-rate retry completed shard0"
+    },
+    "candidates": 148,
+    "inspected": 37,
+    "discovery": {
+      "usableVideoCount": 5,
+      "occurrenceCount": 25,
+      "rawPublishedCoverage": "148/148",
+      "detailPublishedCoverage": "5/5",
+      "thumbnailCoverage": "5/5",
+      "reachedEnd": true,
+      "elapsedSeconds": 2252
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 1,
+      "occurrences": 5,
+      "songs": 5,
+      "publishedTimestampCoverage": "1/1",
+      "occurrenceTimeCoverage": "5/5",
+      "occurrenceSecondsCoverage": "5/5",
+      "thumbnailCoverage": "1/1",
+      "acceptedIncrementThumbnailFieldCoverage": "0/1",
+      "thumbnailCoverageSource": "discovery shard0 status before cache cleanup; completed shard reported 5/5 thumbnails, so retained accepted subset is treated as full discovery thumbnail coverage"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 4,
+      "occurrences": 20,
+      "details": [
+        {
+          "videoId": "d5qKpkCaBrE",
+          "songCount": 1,
+          "status": "suspicious_dropped",
+          "reason": "post-live thank-you event without explicit song stream signal",
+          "title": "【#vmusicianクレリエール 】ライブお疲れさまでした！ありがとうの会【#澄音緒まる 】"
+        },
+        {
+          "videoId": "mhIJc6CBrUQ",
+          "songCount": 2,
+          "status": "dropped",
+          "reason": "exact phrase drop: piano performance / ピアノ演奏",
+          "title": "【#ピアノ演奏】piano performance🎶ピアノの音聴きませんか？？【#おまぴあ】"
+        },
+        {
+          "videoId": "Yelk-d-9HNI",
+          "songCount": 10,
+          "status": "dropped",
+          "reason": "サックス and Session signal; mixed performance/session rather than clear song frame",
+          "title": "【#まるまよの】 歌×サックス×ピアノSession🎶叫べ、アオハル！！！夏の曲！！！【#おまる #朔栖まよ #ヨノ】"
+        },
+        {
+          "videoId": "nv5zH2e5biw",
+          "songCount": 7,
+          "status": "dropped",
+          "reason": "生演奏 relay and classical/instrument performance framing",
+          "title": "【#Vtuber初夏の生演奏リレー 】目指せトレンド入り！気分爽快なクラシックなどなどいろんな曲をお届けします♪【おまる /#ピアノ #vtuber 】"
+        }
+      ]
+    }
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.6G 6.9G 28% /",
+        "marker": "CODEX_REMOTE_BATCH21_CLEANUP_OK"
+      }
+    },
+    "raw": {
+      "vps5": {
+        "exitCode": 0,
+        "stdout": "cleanup=removed\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/vda1        10G  2.6G  6.9G  28% /\nCODEX_REMOTE_BATCH21_CLEANUP_OK\n",
+        "stderr": ""
+      }
+    }
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json"
+  }
+}

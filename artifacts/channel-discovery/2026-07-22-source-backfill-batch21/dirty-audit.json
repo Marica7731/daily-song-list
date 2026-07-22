@@ -1,0 +1,104 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch21",
+  "generatedAt": "2026-07-22T09:08:32.412Z",
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams"
+  },
+  "policy": {
+    "dropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "contextualDropTerms": [
+      "Session",
+      "セッション"
+    ]
+  },
+  "counts": {
+    "policy": {
+      "dropTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDropTerms": [
+        "piano streaming",
+        "piano performance",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ],
+      "contextualDropTerms": [
+        "Session",
+        "セッション"
+      ]
+    },
+    "unfilteredVideoCount": 5,
+    "unfilteredOccurrenceCount": 25,
+    "acceptedVideoCount": 1,
+    "droppedVideoCount": 4
+  },
+  "videos": [
+    {
+      "videoId": "d5qKpkCaBrE",
+      "title": "【#vmusicianクレリエール 】ライブお疲れさまでした！ありがとうの会【#澄音緒まる 】",
+      "publishedTimestamp": 1782116995676,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "post-live thank-you event without explicit song stream signal"
+    },
+    {
+      "videoId": "mhIJc6CBrUQ",
+      "title": "【#ピアノ演奏】piano performance🎶ピアノの音聴きませんか？？【#おまぴあ】",
+      "publishedTimestamp": 1771748995676,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "exact phrase drop: piano performance / ピアノ演奏"
+    },
+    {
+      "videoId": "Yelk-d-9HNI",
+      "title": "【#まるまよの】 歌×サックス×ピアノSession🎶叫べ、アオハル！！！夏の曲！！！【#おまる #朔栖まよ #ヨノ】",
+      "publishedTimestamp": 1753172995676,
+      "songCount": 10,
+      "status": "dropped",
+      "reason": "サックス and Session signal; mixed performance/session rather than clear song frame"
+    },
+    {
+      "videoId": "ARAn4Syhmtk",
+      "title": "【#2Dデビュー１周年記念演奏コラボ祭】歌＆ピアノ／焔魔るり・おまる【コラボ】",
+      "publishedTimestamp": 1721636995676,
+      "songCount": 5,
+      "status": "accepted",
+      "reason": "explicit 歌＆ピアノ singing collaboration signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "nv5zH2e5biw",
+      "title": "【#Vtuber初夏の生演奏リレー 】目指せトレンド入り！気分爽快なクラシックなどなどいろんな曲をお届けします♪【おまる /#ピアノ #vtuber 】",
+      "publishedTimestamp": 1721636995676,
+      "songCount": 7,
+      "status": "dropped",
+      "reason": "生演奏 relay and classical/instrument performance framing"
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-22T09:08:32.412Z",
+  "inputs": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch21/candidate-increment-unfiltered.json"
+  ],
+  "readStats": {
+    "inputDirs": 1,
+    "videoDetails": 5,
+    "usableVideos": 5,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 25,
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": []
+  },
+  "videoCount": 1,
+  "occurrenceCount": 5,
+  "videos": [
+    {
+      "videoId": "ARAn4Syhmtk",
+      "title": "【#2Dデビュー１周年記念演奏コラボ祭】歌＆ピアノ／焔魔るり・おまる【コラボ】",
+      "channelName": "omaru_piano",
+      "channelId": "UCgLEceZtHtnlvDvMIcATXhg",
+      "channelHandle": "/@omaru_piano",
+      "channelUrl": "https://www.youtube.com/@omaru_piano/streams",
+      "publishedTimestamp": 1721636995676,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@omaru_piano/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=ARAn4Syhmtk"
+      ],
+      "selectedSourceId": "UgyU2O8mj5yLNt0GP0B4AaABAg",
+      "selectedSourceHash": "939da3ec780cbeac5040e379e7b840beb158af336959b0bb8c41de4fe018f535",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:12:12",
+          "seconds": 732,
+          "title": "自由への扉\"When Will My Life Begin\"",
+          "artist": "塔の上のラプンツェル",
+          "raw": "01. 0:12:12 自由への扉\"When Will My Life Begin\"(塔の上のラプンツェル)",
+          "rawHash": "738211dbc8ea9dcc240d2c7b85526c2a705b7e130381a7b285ce5789d39048bd",
+          "sourceId": "UgyU2O8mj5yLNt0GP0B4AaABAg",
+          "sourceHash": "939da3ec780cbeac5040e379e7b840beb158af336959b0bb8c41de4fe018f535",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:28:58",
+          "seconds": 1738,
+          "title": "蒼のエーテル",
+          "artist": "坂本真綾",
+          "raw": "02. 0:28:58 蒼のエーテル / 坂本真綾",
+          "rawHash": "467417d7f5f22ac2c2f565ee5c6e1faabe8fb67d26387b4ea6f3758bf2be5bb3",
+          "sourceId": "UgyU2O8mj5yLNt0GP0B4AaABAg",
+          "sourceHash": "939da3ec780cbeac5040e379e7b840beb158af336959b0bb8c41de4fe018f535",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:36:09",
+          "seconds": 2169,
+          "title": "Oz",
+          "artist": "yama",
+          "raw": "03. 0:36:09 Oz. / yama",
+          "rawHash": "e33af8a124d0c72de654966993bf1b80694ee872c8e84bd276f3a7e140e5d672",
+          "sourceId": "UgyU2O8mj5yLNt0GP0B4AaABAg",
+          "sourceHash": "939da3ec780cbeac5040e379e7b840beb158af336959b0bb8c41de4fe018f535",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:51:36",
+          "seconds": 3096,
+          "title": "10月無口な君を忘れる",
+          "artist": "あらたよ",
+          "raw": "04. 0:51:36 10月無口な君を忘れる / あらたよ",
+          "rawHash": "c41a595d6c8ab3aa78138748170f1c00a747e44df08ad43781263ec77b256f2e",
+          "sourceId": "UgyU2O8mj5yLNt0GP0B4AaABAg",
+          "sourceHash": "939da3ec780cbeac5040e379e7b840beb158af336959b0bb8c41de4fe018f535",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:11:50",
+          "seconds": 4310,
+          "title": "ミルキーウェイ (feat. 焔魔るり)",
+          "artist": "cyan slime",
+          "raw": "05. 1:11:50 ミルキーウェイ (feat. 焔魔るり) / cyan slime",
+          "rawHash": "f3a73dd291ebb5ce04cb91256aaf3f37f46198e643be022803320d83d1e49258",
+          "sourceId": "UgyU2O8mj5yLNt0GP0B4AaABAg",
+          "sourceHash": "939da3ec780cbeac5040e379e7b840beb158af336959b0bb8c41de4fe018f535",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T09:07:07.223Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch21/remote-download/vps5/omaru_piano-shard0-of4",
+        "discoverySingerName": "omaru_piano",
+        "discoveryChannelUrl": "https://www.youtube.com/@omaru_piano/streams",
+        "matchedKeywords": [
+          "歌"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    }
+  ],
+  "inputNote": "Original discovery input was the completed vps5 shard output; remote-download cache was removed after extracting this artifact-local increment.",
+  "dirtyAudit": {
+    "policy": {
+      "dropTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDropTerms": [
+        "piano streaming",
+        "piano performance",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ],
+      "contextualDropTerms": [
+        "Session",
+        "セッション"
+      ]
+    },
+    "unfilteredVideoCount": 5,
+    "unfilteredOccurrenceCount": 25,
+    "acceptedVideoCount": 1,
+    "droppedVideoCount": 4
+  }
+}
