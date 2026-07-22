@@ -1,0 +1,69 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch24-laz-furuto-shard0",
+  "generatedAt": "2026-07-22T11:40:00.000Z",
+  "purpose": "bounded Laz_Furuto shard0 source-backfill attempt after earlier candidate-only pending status",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "reason": "no complete discovery manifest was produced; timeout/interrupted checkpoints are not accepted imports"
+  },
+  "source": {
+    "handle": "Laz_Furuto",
+    "url": "https://www.youtube.com/@Laz_Furuto/streams",
+    "status": "failed",
+    "failureType": "timeout_before_complete_manifest",
+    "imported": false,
+    "acceptedIncrementReadyForReview": false,
+    "shardCount": 4,
+    "attemptedShard": 0,
+    "completedShards": [],
+    "failedShards": [
+      0
+    ],
+    "pendingShards": [
+      1,
+      2,
+      3
+    ],
+    "candidateCount": 312,
+    "inspectedInLatestRun": 69,
+    "checkpointDetails": 21,
+    "checkpointAudits": 69,
+    "usableVideoCount": 0,
+    "occurrenceCount": 0,
+    "acceptedAfterDirtyAudit": {
+      "videos": 0,
+      "occurrences": 0,
+      "songs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverage": "0/0"
+    },
+    "failureSummary": "vps5 runner timed out after 3600 seconds before manifest; checkpoint reached 69 inspected candidates and 21 video details, but no complete manifest/report was emitted",
+    "localPreflightFailure": "local direct run failed before candidate checkpoint with YouTube channel page fetch failed; retried on non-culua vps5"
+  },
+  "runner": {
+    "host": "vps5",
+    "remoteRoot": "/opt/ytb-song-rank-source-backfill-20260722-batch24-laz-furuto-shard0-vps5",
+    "remoteSourceCommit": "7034fe29c57d386746389d61a09411b241539506",
+    "startedAt": "2026-07-22T10:35:40.555Z",
+    "finishedAt": "2026-07-22T11:35:40.652Z",
+    "elapsedSeconds": 3600,
+    "timeoutSeconds": 3600,
+    "signal": "SIGTERM",
+    "hasManifest": false,
+    "hasCheckpoint": true
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.7G 6.9G 28% /",
+        "marker": "CODEX_REMOTE_BATCH24_CLEANUP_OK"
+      }
+    }
+  },
+  "nextAction": "Retry Laz_Furuto with finer shards, for example shard0 split into 8 or 12 inspect shards, or lower per-run maxInspect, and only export accepted increment after a complete manifest is emitted."
+}
