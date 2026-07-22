@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-status-only",
+  "generatedAt": "2026-07-22T17:19:29.992Z",
+  "status": "interrupted",
+  "reason": "Remote discovery was still running without a final manifest when the controller requested interruption; it was terminated and is not treated as successful.",
+  "source": {
+    "url": "https://www.youtube.com/@AmanofuStella",
+    "singerName": "天ノ譜ステラ"
+  },
+  "existingAcceptedAudit": {
+    "acceptedDirectory": "data/external/youtube-channel-discovery/accepted",
+    "acceptedFileHits": 0,
+    "manifestMentions": 10,
+    "conclusion": "No complete self-crawled accepted increment was found for AmanofuStella; earlier manifest mentions were pending/status records, not accepted evidence."
+  },
+  "discovery": {
+    "status": "interrupted",
+    "candidateCount": 235,
+    "inspectedCount": 80,
+    "usableVideoCount": 70,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "publishedTimestampCoverage": "70/70 partial checkpoint only",
+    "publishedTimestampRange": {
+      "min": 1753203372254,
+      "max": 1782147372254
+    },
+    "occurrenceTimeCoverage": "617/617 partial checkpoint only",
+    "occurrenceSecondsCoverage": "617/617 partial checkpoint only",
+    "occurrenceSecondsRange": {
+      "min": 60,
+      "max": 32677
+    },
+    "thumbnailCoverage": {
+      "videos": "70/70 partial checkpoint only",
+      "occurrences": "0/617 partial checkpoint only"
+    },
+    "params": {
+      "maxChannelPages": 100,
+      "maxCandidates": 0,
+      "maxInspect": 1000,
+      "requestIntervalMs": 3500,
+      "requestJitterMs": 1500
+    },
+    "dirtyAudit": {
+      "dropped": null,
+      "suspicious": null,
+      "reason": "Dirty audit was not run because discovery did not complete and no accepted increment was exported."
+    }
+  },
+  "remoteExecution": {
+    "usedHost": "vps-jp",
+    "hostname": "VM-c8189ce8-42c5-4763-bfb1-d000d087dbb5",
+    "remoteDir": "/opt/ytb-song-rank-source-backfill-20260723-batch37-amanofustella-vps-jp-r1",
+    "sourceCommit": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+    "setup": "remote sparse clone; no source archive upload",
+    "commandSummary": "timeout 3600s npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@AmanofuStella --singer-name 天ノ譜ステラ --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3500 --request-jitter-ms 1500",
+    "interruptedAt": "2026-07-22T17:16:13Z",
+    "lastStage": "2026-07-22T17:16:13Z stage=discovery_done exit=143",
+    "cleanupStatus": "removed",
+    "postCleanupDfH": "/dev/sda1 99G 11G 88G 11% /"
+  },
+  "outputs": {
+    "manifest": "manifest.json",
+    "report": "report.md",
+    "checkpointSummary": "checkpoint-summary.json"
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  }
+}
