@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-22T06:48:05.908Z",
+  "generatedAt": "2026-07-22T08:12:16.968Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-22T06:48:05.908Z",
+    "fetchedAt": "2026-07-22T08:12:16.968Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-22T06:48:05.908Z",
+    "generatedAt": "2026-07-22T08:12:16.968Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7936,37 +7936,30 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 965,
-      "parseableChannels": 750,
+      "totalChannels": 964,
+      "parseableChannels": 749,
       "realAvatar": 643,
-      "thumbnailFallback": 322,
+      "thumbnailFallback": 321,
       "missingDisplayImage": 0,
-      "missingAvatar": 322,
+      "missingAvatar": 321,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 332
+      "skipped_collected_evidence": 331
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 117,
+      "batch_limit_reached": 116,
       "missing_channel_url_or_handle": 215
     },
     "skippedSamples": [
       {
-        "handle": "/@ykn0911v",
-        "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
-        "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
-        "sourceUrl": "https://www.youtube.com/@ykn0911v",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@Shira_senhamari",
-        "channelId": "UCGiLYTC7QQSDY4sYX2ePMXQ",
-        "displayName": "千羽毬しら@歌えるパチスロVTuber",
-        "sourceUrl": "https://www.youtube.com/@Shira_senhamari",
+        "handle": "/@kohiponch",
+        "channelId": "UCJE9BZz0ld_yqc2ryoA3-GQ",
+        "displayName": "Pon Ch. 小日向ぽん",
+        "sourceUrl": "https://www.youtube.com/@kohiponch",
         "reason": "batch_limit_reached"
       },
       {
@@ -8127,6 +8120,13 @@
         "handle": "",
         "channelId": "",
         "displayName": "Kyoko Ch. 倉持京子",
+        "sourceUrl": "",
+        "reason": "missing_channel_url_or_handle"
+      },
+      {
+        "handle": "",
+        "channelId": "",
+        "displayName": "宮守ゆり",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
