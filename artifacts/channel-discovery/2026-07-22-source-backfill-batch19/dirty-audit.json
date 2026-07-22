@@ -1,0 +1,148 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch19",
+  "generatedAt": "2026-07-22T07:43:37.653Z",
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams"
+  },
+  "policy": {
+    "dropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "contextualDropTerms": [
+      "合奏"
+    ]
+  },
+  "counts": {
+    "policy": {
+      "dropTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDropTerms": [
+        "piano streaming",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ],
+      "contextualDropTerms": [
+        "合奏"
+      ]
+    },
+    "unfilteredVideoCount": 11,
+    "unfilteredOccurrenceCount": 38,
+    "acceptedVideoCount": 6,
+    "droppedVideoCount": 5
+  },
+  "videos": [
+    {
+      "videoId": "ABwvzd4R9RE",
+      "title": "【虹をかけよう🌈#ライドリフェス歌枠リレー2026 】ゲストあり？！ちょっとここらで合奏聴いていきませんか？【#澄音緒まる】",
+      "publishedTimestamp": 1782890170780,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "song-relay title but this stream asks viewers to listen to ensemble performance; not a clear singing frame"
+    },
+    {
+      "videoId": "KsSGdH62b6o",
+      "title": "いよいよ明日！！クレリエールライブ前夜祭！！",
+      "publishedTimestamp": 1782112570780,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "live-eve event title without explicit song stream or singing signal"
+    },
+    {
+      "videoId": "s63JJr2raJA",
+      "title": "【#歌練習 】ひよっこ弾き語りの練習枠【#澄音緒まる 】",
+      "publishedTimestamp": 1779520570780,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "explicit singing/song-frame signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "iT0KO80icjo",
+      "title": "【#ピアノ演奏】#色彩迎春2026 まであと4日／みんなの知ってるクラシック曲って何？【#おまぴあ】",
+      "publishedTimestamp": 1769152570780,
+      "songCount": 7,
+      "status": "dropped",
+      "reason": "exact phrase drop: ピアノ演奏; classical piano/instrument prompt"
+    },
+    {
+      "videoId": "PzUc0ymDSG8",
+      "title": "【#おまる3周年】女神が歌う、祝福の調べ／ダメ元直談判！スゴい方お呼びしてみた！【#MUS1CA #おまぴあ】",
+      "publishedTimestamp": 1763968570780,
+      "songCount": 9,
+      "status": "accepted",
+      "reason": "explicit singing/song-frame signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "gcCMZa0J46w",
+      "title": "【#超初心者 練習歌枠】 やさしい夜に寄り添う歌【#おまる #vtuber #おまぴあ 】",
+      "publishedTimestamp": 1758784570780,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "explicit singing/song-frame signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "Gg_mU4ER6jU",
+      "title": "【#弾き語り 】はじめての歌枠？！お盆納涼祭♪【#おまぴあ #vtuber】",
+      "publishedTimestamp": 1756192570780,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "explicit singing/song-frame signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "q1ALF90-b9Q",
+      "title": "【#記念】ついに！達成！！！1.5万人登録感謝します！【#relaxmusic #ピアノ演奏 #おまぴあ】",
+      "publishedTimestamp": 1753168570780,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "exact phrase drop: ピアノ演奏; registration thank-you stream with relaxmusic/piano performance signal"
+    },
+    {
+      "videoId": "9HYJIBqF1Vg",
+      "title": "【#2Dデビュー１周年記念演奏コラボ祭】クラリネット＆ピアノ／昼間さな・おまる【コラボ】",
+      "publishedTimestamp": 1721632570780,
+      "songCount": 4,
+      "status": "dropped",
+      "reason": "instrument/non-song drop term: クラリネット"
+    },
+    {
+      "videoId": "kuhaeU0vzAw",
+      "title": "【#2Dデビュー１周年記念演奏コラボ祭】歌＆ピアノ／しーせん・おまる【コラボ】",
+      "publishedTimestamp": 1721632570780,
+      "songCount": 6,
+      "status": "accepted",
+      "reason": "explicit singing/song-frame signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "yUuGGnJk8kg",
+      "title": "【#2Dデビュー１周年記念演奏コラボ祭】歌＆ピアノ／瀬戸乃とと・おまる【コラボ】",
+      "publishedTimestamp": 1721632570780,
+      "songCount": 4,
+      "status": "accepted",
+      "reason": "explicit singing/song-frame signal and no hard instrument-only drop term"
+    }
+  ]
+}

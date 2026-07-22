@@ -1,0 +1,117 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch19",
+  "generatedAt": "2026-07-22T07:43:37.653Z",
+  "purpose": "omaru_piano shard2 retry with strict instrument/non-song dirty audit",
+  "remoteSourceCommit": "97eba8765583ced63b03fb069314db3f3939a23f",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch19/accepted-increment.json",
+    "note": "The increment contains only completed shard2 accepted videos after dirty audit. The full source remains partial because shard0 failed, shard1 is in batch18, and shard3 is still pending."
+  },
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams",
+    "status": "partial",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "shardCount": 4,
+    "completedShards": [
+      2
+    ],
+    "previousCompletedShards": [
+      1
+    ],
+    "failedShards": [
+      0
+    ],
+    "pendingShards": [
+      3
+    ],
+    "candidates": 148,
+    "inspected": 37,
+    "discovery": {
+      "usableVideoCount": 11,
+      "occurrenceCount": 38,
+      "rawPublishedCoverage": "148/148",
+      "detailPublishedCoverage": "11/11",
+      "thumbnailCoverage": "11/11",
+      "reachedEnd": true,
+      "elapsedSeconds": 1637
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 6,
+      "occurrences": 22,
+      "songs": 20,
+      "publishedTimestampCoverage": "6/6",
+      "occurrenceTimeCoverage": "22/22",
+      "occurrenceSecondsCoverage": "22/22",
+      "thumbnailCoverage": "6/6",
+      "acceptedIncrementThumbnailFieldCoverage": "0/6",
+      "thumbnailCoverageSource": "discovery shard2 status before cache cleanup; completed shard reported 11/11 thumbnails, so retained accepted subset is treated as full discovery thumbnail coverage"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 5,
+      "occurrences": 16,
+      "details": [
+        {
+          "videoId": "ABwvzd4R9RE",
+          "songCount": 2,
+          "status": "dropped",
+          "reason": "song-relay title but this stream asks viewers to listen to ensemble performance; not a clear singing frame",
+          "title": "【虹をかけよう🌈#ライドリフェス歌枠リレー2026 】ゲストあり？！ちょっとここらで合奏聴いていきませんか？【#澄音緒まる】"
+        },
+        {
+          "videoId": "KsSGdH62b6o",
+          "songCount": 1,
+          "status": "suspicious_dropped",
+          "reason": "live-eve event title without explicit song stream or singing signal",
+          "title": "いよいよ明日！！クレリエールライブ前夜祭！！"
+        },
+        {
+          "videoId": "iT0KO80icjo",
+          "songCount": 7,
+          "status": "dropped",
+          "reason": "exact phrase drop: ピアノ演奏; classical piano/instrument prompt",
+          "title": "【#ピアノ演奏】#色彩迎春2026 まであと4日／みんなの知ってるクラシック曲って何？【#おまぴあ】"
+        },
+        {
+          "videoId": "q1ALF90-b9Q",
+          "songCount": 2,
+          "status": "dropped",
+          "reason": "exact phrase drop: ピアノ演奏; registration thank-you stream with relaxmusic/piano performance signal",
+          "title": "【#記念】ついに！達成！！！1.5万人登録感謝します！【#relaxmusic #ピアノ演奏 #おまぴあ】"
+        },
+        {
+          "videoId": "9HYJIBqF1Vg",
+          "songCount": 4,
+          "status": "dropped",
+          "reason": "instrument/non-song drop term: クラリネット",
+          "title": "【#2Dデビュー１周年記念演奏コラボ祭】クラリネット＆ピアノ／昼間さな・おまる【コラボ】"
+        }
+      ]
+    }
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.6G 6.9G 28% /",
+        "marker": "CODEX_REMOTE_BATCH19_CLEANUP_OK"
+      }
+    },
+    "raw": {
+      "vps5": {
+        "exitCode": 0,
+        "stdout": "cleanup=removed\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/vda1        10G  2.6G  6.9G  28% /\nCODEX_REMOTE_BATCH19_CLEANUP_OK\n",
+        "stderr": ""
+      }
+    }
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json"
+  }
+}
