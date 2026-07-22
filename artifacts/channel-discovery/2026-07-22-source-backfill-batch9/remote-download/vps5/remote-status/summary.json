@@ -1,0 +1,15 @@
+{
+  "results": [
+    {
+      "handle": "KAMIKUMONONOA",
+      "url": "https://www.youtube.com/@KAMIKUMONONOA",
+      "startedAt": "2026-07-21T23:37:52Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 1794,
+      "stdoutTail": "\n> daily-song-list@1.0.0 youtube:discover-channel\n> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@KAMIKUMONONOA --singer-name KAMIKUMONONOA --output-dir /opt/ytb-song-rank-source-backfill-20260722-batch9-vps5/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch9/remote/KAMIKUMONONOA --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3000 --request-jitter-ms 1500 --keyword フルート --keyword 生演奏 --keyword live --keyword ライブ --keyword クラリネット --keyword piano streaming --keyword ピアノ演奏 --keyword 歌 --keyword 歌枠 --keyword 弾き語 --keyword karaoke --keyword 歌ってみた --keyword 3D Live\n\nCODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@KAMIKUMONONOA\" candidates=36 inspected=36 videos=14 occurrences=176 elapsedSeconds=1793 outputDir=\"/opt/ytb-song-rank-source-backfill-20260722-batch9-vps5/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch9/remote/KAMIKUMONONOA\"\n",
+      "stderrTail": "",
+      "hasManifest": true
+    }
+  ]
+}

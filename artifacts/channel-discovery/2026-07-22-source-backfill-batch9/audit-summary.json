@@ -1,0 +1,62 @@
+{
+  "videoCount": 30,
+  "occurrenceCount": 370,
+  "uniqueSongCount": 337,
+  "publishedTimestampCoverage": "30/30",
+  "occurrenceTimeCoverage": "370/370",
+  "occurrenceSecondsCoverage": "370/370",
+  "discoveryThumbnailCoverage": "30/30",
+  "channels": {
+    "@%E5%A6%83%E7%8E%96-kisaki": {
+      "acceptedVideos": 16,
+      "acceptedOccurrences": 194,
+      "publishedTimestampPresent": 16,
+      "occurrenceTimePresent": 194,
+      "occurrenceSecondsPresent": 194,
+      "thumbnailPresent": 16,
+      "uniqueSongs": 175
+    },
+    "@KAMIKUMONONOA": {
+      "acceptedVideos": 14,
+      "acceptedOccurrences": 176,
+      "publishedTimestampPresent": 14,
+      "occurrenceTimePresent": 176,
+      "occurrenceSecondsPresent": 176,
+      "thumbnailPresent": 14,
+      "uniqueSongs": 172
+    }
+  },
+  "dirtyAudit": {
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "dropped": [],
+    "suspiciousCount": 2,
+    "suspicious": [
+      {
+        "youtubeVideoId": "UYZvCpQVWvY",
+        "channel": "@%E5%A6%83%E7%8E%96-kisaki",
+        "videoTitle": "【祝！収益化記念配信】ありがとうすぎ！ライブ振り返りも！#妃玖ノ記録【妃玖/RKmusic/Fused】",
+        "hits": [],
+        "broadHits": [
+          "ライブ"
+        ],
+        "occurrences": 14
+      },
+      {
+        "youtubeVideoId": "pUv1_Bbu4oE",
+        "channel": "@KAMIKUMONONOA",
+        "videoTitle": "【歌枠】B'zさんの曲だけをかき集めた最強あげあげ生配信はこちら【#生ののあらいぶ / #KARAOKE】",
+        "hits": [],
+        "broadHits": [
+          "live"
+        ],
+        "occurrences": 18
+      }
+    ],
+    "termHitCounts": {
+      "ライブ": 1,
+      "live": 1
+    },
+    "note": "Exact instrumental phrase filters were applied; broad live/live terms were reviewed and not dropped blindly."
+  }
+}

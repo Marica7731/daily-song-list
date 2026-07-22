@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-22-source-backfill-batch9",
+  "generatedAt": "2026-07-22T08:15:21+08:00",
+  "scope": "ninth partial small-batch commit for the 2026-07-22 requested source queue; not a full 1000+ channel rescan",
+  "remoteSourceCommit": "67febdfb30ebbd76c44ba96bd1a9dbfdbcc75aa5",
+  "acceptedIncrement": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch9\\accepted\\2026-07-22-source-backfill-batch9.accepted.json",
+  "rawExport": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch9\\accepted\\2026-07-22-source-backfill-batch9.raw-export.json",
+  "exportMarkerBeforeDirtyAudit": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=2 readVideos=31 usableVideos=31 acceptedVideos=30 skippedRegressions=1 occurrences=370",
+  "dirtyAudit": {
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "dropped": [],
+    "suspiciousCount": 2,
+    "suspicious": [
+      {
+        "youtubeVideoId": "UYZvCpQVWvY",
+        "channel": "@%E5%A6%83%E7%8E%96-kisaki",
+        "videoTitle": "【祝！収益化記念配信】ありがとうすぎ！ライブ振り返りも！#妃玖ノ記録【妃玖/RKmusic/Fused】",
+        "hits": [],
+        "broadHits": [
+          "ライブ"
+        ],
+        "occurrences": 14
+      },
+      {
+        "youtubeVideoId": "pUv1_Bbu4oE",
+        "channel": "@KAMIKUMONONOA",
+        "videoTitle": "【歌枠】B'zさんの曲だけをかき集めた最強あげあげ生配信はこちら【#生ののあらいぶ / #KARAOKE】",
+        "hits": [],
+        "broadHits": [
+          "live"
+        ],
+        "occurrences": 18
+      }
+    ],
+    "termHitCounts": {
+      "ライブ": 1,
+      "live": 1
+    },
+    "note": "Exact instrumental phrase filters were applied; broad live/live terms were reviewed and not dropped blindly."
+  },
+  "acceptedSummary": {
+    "videoCount": 30,
+    "occurrenceCount": 370,
+    "uniqueSongCount": 337,
+    "publishedTimestampCoverage": "30/30",
+    "occurrenceTimeCoverage": "370/370",
+    "occurrenceSecondsCoverage": "370/370",
+    "discoveryThumbnailCoverage": "30/30",
+    "channels": {
+      "@%E5%A6%83%E7%8E%96-kisaki": {
+        "acceptedVideos": 16,
+        "acceptedOccurrences": 194,
+        "publishedTimestampPresent": 16,
+        "occurrenceTimePresent": 194,
+        "occurrenceSecondsPresent": 194,
+        "thumbnailPresent": 16,
+        "uniqueSongs": 175
+      },
+      "@KAMIKUMONONOA": {
+        "acceptedVideos": 14,
+        "acceptedOccurrences": 176,
+        "publishedTimestampPresent": 14,
+        "occurrenceTimePresent": 176,
+        "occurrenceSecondsPresent": 176,
+        "thumbnailPresent": 14,
+        "uniqueSongs": 172
+      }
+    },
+    "dirtyAudit": {
+      "droppedVideoCount": 0,
+      "droppedOccurrenceCount": 0,
+      "dropped": [],
+      "suspiciousCount": 2,
+      "suspicious": [
+        {
+          "youtubeVideoId": "UYZvCpQVWvY",
+          "channel": "@%E5%A6%83%E7%8E%96-kisaki",
+          "videoTitle": "【祝！収益化記念配信】ありがとうすぎ！ライブ振り返りも！#妃玖ノ記録【妃玖/RKmusic/Fused】",
+          "hits": [],
+          "broadHits": [
+            "ライブ"
+          ],
+          "occurrences": 14
+        },
+        {
+          "youtubeVideoId": "pUv1_Bbu4oE",
+          "channel": "@KAMIKUMONONOA",
+          "videoTitle": "【歌枠】B'zさんの曲だけをかき集めた最強あげあげ生配信はこちら【#生ののあらいぶ / #KARAOKE】",
+          "hits": [],
+          "broadHits": [
+            "live"
+          ],
+          "occurrences": 18
+        }
+      ],
+      "termHitCounts": {
+        "ライブ": 1,
+        "live": 1
+      },
+      "note": "Exact instrumental phrase filters were applied; broad live/live terms were reviewed and not dropped blindly."
+    }
+  },
+  "dbVerification": {
+    "mode": "local YouTube-only --no-vsinger; before includes data/external plus batch1-batch8 artifacts, after also includes batch9 artifact; not production evidence",
+    "before": {
+      "videos": 6468,
+      "songs": 28440,
+      "occurrences": 102501,
+      "sourceOccurrences": 196820,
+      "rankingRows": 122949
+    },
+    "after": {
+      "videos": 6497,
+      "songs": 28559,
+      "occurrences": 102876,
+      "sourceOccurrences": 197563,
+      "rankingRows": 123287
+    },
+    "delta": {
+      "videos": 29,
+      "songs": 119,
+      "occurrences": 375,
+      "sourceOccurrences": 743,
+      "rankingRows": 338
+    },
+    "channelAfter": {
+      "kisaki": {
+        "query": "kisaki",
+        "beforeVideos": 1,
+        "beforeOccurrences": 19,
+        "afterVideos": 17,
+        "afterOccurrences": 213
+      },
+      "KAMIKUMONONOA": {
+        "query": "KAMIKUMONONOA",
+        "beforeVideos": 0,
+        "beforeOccurrences": 0,
+        "afterVideos": 13,
+        "afterOccurrences": 167
+      }
+    }
+  },
+  "remoteCleanup": {
+    "vps3": {
+      "status": "removed",
+      "path": "/opt/ytb-song-rank-source-backfill-20260722-batch9-vps3",
+      "df": "/dev/sda1 99G 11G 89G 11% /"
+    },
+    "vps5": {
+      "status": "removed",
+      "path": "/opt/ytb-song-rank-source-backfill-20260722-batch9-vps5",
+      "df": "/dev/vda1 10G 2.6G 7.0G 27% /"
+    }
+  },
+  "statusCounts": {
+    "imported": 19,
+    "failed": 1,
+    "pending": 16
+  },
+  "sources": [
+    {
+      "handle": "kisaki",
+      "url": "https://www.youtube.com/@%E5%A6%83%E7%8E%96-kisaki",
+      "status": "imported",
+      "reason": "complete manifest imported into artifacts accepted increment",
+      "acceptedVideos": 16,
+      "acceptedOccurrences": 194,
+      "uniqueSongs": 175,
+      "publishedTimestampCoverage": "16/16",
+      "occurrenceTimeCoverage": "194/194",
+      "occurrenceSecondsCoverage": "194/194",
+      "discoveryThumbnailCoverage": "16/16",
+      "discoveryCandidateCount": 34,
+      "discoveryInspectedCount": 34,
+      "discoveryUsableVideoCount": 17,
+      "discoveryOccurrenceCount": 212,
+      "reachedEnd": true,
+      "elapsedSeconds": 376,
+      "failure": ""
+    },
+    {
+      "handle": "KAMIKUMONONOA",
+      "url": "https://www.youtube.com/@KAMIKUMONONOA",
+      "status": "imported",
+      "reason": "complete manifest imported into artifacts accepted increment",
+      "acceptedVideos": 14,
+      "acceptedOccurrences": 176,
+      "uniqueSongs": 172,
+      "publishedTimestampCoverage": "14/14",
+      "occurrenceTimeCoverage": "176/176",
+      "occurrenceSecondsCoverage": "176/176",
+      "discoveryThumbnailCoverage": "14/14",
+      "discoveryCandidateCount": 36,
+      "discoveryInspectedCount": 36,
+      "discoveryUsableVideoCount": 14,
+      "discoveryOccurrenceCount": 176,
+      "reachedEnd": true,
+      "elapsedSeconds": 1794,
+      "failure": ""
+    }
+  ]
+}
