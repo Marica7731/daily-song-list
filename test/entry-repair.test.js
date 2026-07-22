@@ -171,6 +171,20 @@ test("fills high-confidence unknown artists from reviewed title metadata only", 
     artist: "未記載",
     raw: "1:10 花になって",
   });
+  const flowerBracketIndex = repairParsedEntry({
+    time: "0:01:15",
+    seconds: 75,
+    title: "⟦16⟧ 花になって",
+    artist: "未記載",
+    raw: "1:15 ⟦16⟧ 花になって",
+  });
+  const flowerPlainIndex = repairParsedEntry({
+    time: "0:01:16",
+    seconds: 76,
+    title: "16 花になって",
+    artist: "未記載",
+    raw: "1:16 16 花になって",
+  });
   const flowerCommentary = repairParsedEntry({
     time: "0:01:20",
     seconds: 80,
@@ -210,6 +224,13 @@ test("fills high-confidence unknown artists from reviewed title metadata only", 
   assert.equal(haru.artist, "ヨルシカ");
   assert.equal(bansanka.artist, "tuki.");
   assert.equal(flower.artist, "緑黄色社会");
+  assert.equal(flowerBracketIndex.title, "花になって");
+  assert.equal(flowerBracketIndex.artist, "緑黄色社会");
+  assert.equal(flowerBracketIndex.repair.reasons.includes("safe_title_cleanup"), true);
+  assert.equal(flowerBracketIndex.repair.reasons.includes("known_song_artist_override"), true);
+  assert.equal(flowerPlainIndex.title, "花になって");
+  assert.equal(flowerPlainIndex.artist, "緑黄色社会");
+  assert.equal(cleanSafeTitleCandidate("10 Years After"), "10 Years After");
   assert.equal(flowerCommentary.artist, "待补歌手");
   assert.equal(mitani.artist, "みたにみく");
   assert.equal(selfEsteem.title, "自己肯定感爆上げ↑↑しゅきしゅきソング");

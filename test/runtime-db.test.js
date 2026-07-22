@@ -488,6 +488,78 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
   assert.match(vsingerVtuberOutput, /"isCollected": false/);
 });
 
+test("runtime DB builder repairs indexed unknown-artist known songs before ranking", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-db-repair-"));
+  const latestPath = path.join(dir, "latest.json");
+  const dbPath = path.join(dir, "song-rank.sqlite");
+
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      capturedAt: "2026-07-19T00:00:00.000Z",
+      groups: {
+        "7d": { items: [] },
+        all: {
+          items: [
+            {
+              videoId: "known-song-repair",
+              title: "Indexed known songs",
+              channelName: "Repair Ch.",
+              thumbnailUrl: "https://i.ytimg.com/vi/known-song-repair/hqdefault.jpg",
+              publishedTimestamp: 1784430000000,
+              publishedText: "2026-07-19",
+              songs: [
+                { title: "花になって", artist: "緑黄色社会", seconds: 10, time: "0:10" },
+                { title: "⟦16⟧ 花になって", artist: "未記載", seconds: 20, time: "0:20" },
+                { title: "16 花になって", artist: "未記載", seconds: 30, time: "0:30" },
+              ],
+            },
+          ],
+        },
+      },
+    }),
+    "utf8",
+  );
+
+  const buildOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+      "--input",
+      latestPath,
+      "--output",
+      dbPath,
+      "--no-vsinger",
+      "--no-youtube-channel-discovery",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+
+  const queryOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "花になって",
+      "--summary-only",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(queryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(queryOutput, /"totalCount": 1/);
+  assert.match(queryOutput, /"count": 3/);
+  assert.match(queryOutput, /"displayArtist": "緑黄色社会"/);
+  assert.doesNotMatch(queryOutput, /::unknown|未記載|⟦16⟧|16 花になって/u);
+});
+
 test("runtime DB builder merges accepted YouTube channel discovery increments into rankings", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-channel-db-"));
   const latestPath = path.join(dir, "latest.json");

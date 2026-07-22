@@ -22,6 +22,7 @@ const {
   buildRuntimeRangePayload,
 } = require("../build-runtime-data");
 const { canonicalizeSongIdentity, loadSongAliasContext } = require("../song-aliases");
+const { repairParsedEntry } = require("../entry-repair");
 const { isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist } = require("../song-utils");
 const { dropSameSecondTranslatedAliasSongs, isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../../assets/source-filter");
 
@@ -572,7 +573,7 @@ function runtimeScopedSongs(songs, source = {}, titleStats = null, aliasContext 
   const scoped = [];
   for (const song of Array.isArray(songs) ? songs : []) {
     if (!song || typeof song !== "object") continue;
-    const normalizedSong = normalizeSourceAwareArtist(normalizeParsedSong(song), source);
+    const normalizedSong = normalizeSourceAwareArtist(repairParsedEntry(normalizeParsedSong(song)), source);
     if (!RankingUtils.cleanText(normalizedSong.title)) continue;
     if (isBlockedSongEntry(normalizedSong, source)) continue;
     if (titleStats && isSingletonPseudoSongEntry(normalizedSong, titleStats)) continue;
