@@ -251,8 +251,11 @@ jobs:
           "
           trap - ERR
 
-      - name: Verify VPS2 API
+      - name: Verify VPS2 health endpoint
+        run: curl -fsS http://staging-ytb-song-rank.culua.com/healthz
+
+      - name: Verify production API
         env:
           DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
           DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
-        run: npm run check:published:api -- http://staging-ytb-song-rank.culua.com/
+        run: npm run check:published:api -- https://ytb-song-rank.culua.com/
