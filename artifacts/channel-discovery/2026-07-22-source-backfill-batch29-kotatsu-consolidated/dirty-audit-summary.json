@@ -1,0 +1,80 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch29-kotatsu-consolidated",
+  "generatedAt": "2026-07-22T14:38:10.179Z",
+  "source": {
+    "handle": "KOTATSUChHaruKotatsubutonclub",
+    "url": "https://www.youtube.com/@KOTATSUChHaruKotatsubutonclub"
+  },
+  "inputs": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch25-kotatsu-shard0/dirty-audit.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch26-kotatsu-shard1/dirty-audit.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch27-kotatsu-shard2/dirty-audit.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch28-kotatsu-shard3/dirty-audit.json"
+  ],
+  "droppedVideos": 0,
+  "droppedOccurrences": 0,
+  "suspiciousVideos": 1,
+  "duplicateVideoIds": [],
+  "shardRows": [
+    {
+      "shard": 0,
+      "batchId": "2026-07-22-source-backfill-batch25-kotatsu-shard0",
+      "status": "partial",
+      "candidates": 164,
+      "inspected": 41,
+      "acceptedVideos": 14,
+      "acceptedOccurrences": 130,
+      "acceptedSongs": 128,
+      "droppedVideos": 0,
+      "skippedExistingRegressions": 0,
+      "publishedCoverage": "14/14",
+      "timeCoverage": "130/130",
+      "secondsCoverage": "130/130"
+    },
+    {
+      "shard": 1,
+      "batchId": "2026-07-22-source-backfill-batch26-kotatsu-shard1",
+      "status": "partial",
+      "candidates": 156,
+      "inspected": 39,
+      "acceptedVideos": 11,
+      "acceptedOccurrences": 75,
+      "acceptedSongs": 75,
+      "droppedVideos": 0,
+      "skippedExistingRegressions": 1,
+      "publishedCoverage": "11/11",
+      "timeCoverage": "75/75",
+      "secondsCoverage": "75/75"
+    },
+    {
+      "shard": 2,
+      "batchId": "2026-07-22-source-backfill-batch27-kotatsu-shard2",
+      "status": "partial",
+      "candidates": 152,
+      "inspected": 38,
+      "acceptedVideos": 9,
+      "acceptedOccurrences": 113,
+      "acceptedSongs": 111,
+      "droppedVideos": 0,
+      "skippedExistingRegressions": 0,
+      "publishedCoverage": "9/9",
+      "timeCoverage": "113/113",
+      "secondsCoverage": "113/113"
+    },
+    {
+      "shard": 3,
+      "batchId": "2026-07-22-source-backfill-batch28-kotatsu-shard3",
+      "status": "imported_partial_artifact",
+      "candidates": 147,
+      "inspected": 36,
+      "acceptedVideos": 6,
+      "acceptedOccurrences": 102,
+      "acceptedSongs": 101,
+      "droppedVideos": 0,
+      "skippedExistingRegressions": 1,
+      "publishedCoverage": "6/6",
+      "timeCoverage": "102/102",
+      "secondsCoverage": "102/102"
+    }
+  ]
+}
