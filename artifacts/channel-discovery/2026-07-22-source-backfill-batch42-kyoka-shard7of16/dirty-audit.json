@@ -1,0 +1,936 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit",
+  "generatedAt": "2026-07-22T19:11:55.845Z",
+  "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+  "singerName": "Kyoka_0609",
+  "shard": {
+    "inspectShardIndex": 7,
+    "inspectShardCount": 16
+  },
+  "rules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDrops": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousLiveRule": "live/ライブ without explicit 歌枠/歌/弾き語り/karaoke/歌ってみた signal is excluded from accepted; live is not blindly filtered when singing signals are present"
+  },
+  "summary": {
+    "inputVideos": 10,
+    "acceptedVideos": 9,
+    "droppedVideos": 0,
+    "suspiciousVideos": 1,
+    "acceptedOccurrences": 193,
+    "droppedOccurrences": 0,
+    "suspiciousOccurrences": 5,
+    "suspiciousVideoIds": [
+      "Qvwf4jPxLH0"
+    ],
+    "droppedVideoIds": []
+  },
+  "videos": [
+    {
+      "videoId": "wHGQRd_sbyk",
+      "youtubeUrl": "https://www.youtube.com/watch?v=wHGQRd_sbyk",
+      "title": "🏮 実写 #歌枠 ｜明日はライブです!!その前に、歌うことにしました♡ #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1779562971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 21,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": [
+          "歌枠",
+          "歌"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:06:19",
+          "seconds": 379,
+          "title": "裏切りの夕焼け",
+          "artist": "Theatre Brook",
+          "raw": "0:06:19　01.裏切りの夕焼け／Theatre Brook【デュラララ!!】（2010/02/14）"
+        },
+        {
+          "time": "0:09:51",
+          "seconds": 591,
+          "title": "コンプリケイション",
+          "artist": "ROOKiEZ is PUNK'D",
+          "raw": "0:09:51　02.コンプリケイション／ROOKiEZ is PUNK'D【デュラララ!!】（2010/06/02）"
+        },
+        {
+          "time": "0:14:41",
+          "seconds": 881,
+          "title": "流れ星～Shooting Star～",
+          "artist": "HOME MADE 家族",
+          "raw": "0:14:41　03.流れ星～Shooting Star～／HOME MADE 家族【NARUTO-ナルト- 疾風伝】（2007/03/07）"
+        },
+        {
+          "time": "0:30:23",
+          "seconds": 1823,
+          "title": "ラブソング",
+          "artist": "なとり",
+          "raw": "0:30:23　04.ラブソング／なとり（2023/12/20）"
+        },
+        {
+          "time": "0:35:14",
+          "seconds": 2114,
+          "title": "Overdose",
+          "artist": "なとり",
+          "raw": "0:35:14　05.Overdose／なとり（2022/09/07）"
+        },
+        {
+          "time": "0:38:40",
+          "seconds": 2320,
+          "title": "セレナーデ",
+          "artist": "なとり【推しの子】（2026/02/04）※途中で終了",
+          "raw": "0:38:40　06.セレナーデ／なとり【推しの子】（2026/02/04）※途中で終了"
+        },
+        {
+          "time": "0:40:15",
+          "seconds": 2415,
+          "title": "セレナーデ",
+          "artist": "なとり【推しの子】（2026/02/04）※2回目リベンジ",
+          "raw": "0:40:15　07.セレナーデ／なとり【推しの子】（2026/02/04）※2回目リベンジ"
+        },
+        {
+          "time": "0:54:17",
+          "seconds": 3257,
+          "title": "丸の内サディスティック",
+          "artist": "椎名林檎",
+          "raw": "0:54:17　08.丸の内サディスティック／椎名林檎（1999/02/24）"
+        }
+      ]
+    },
+    {
+      "videoId": "sOmdffbNiXg",
+      "youtubeUrl": "https://www.youtube.com/watch?v=sOmdffbNiXg",
+      "title": "🏮【#歌枠 #KARAOKE】げりらで歌う【響架】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1771786971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "歌",
+        "歌枠",
+        "karaoke"
+      ],
+      "songCount": 23,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌枠",
+          "karaoke",
+          "歌"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:03:14",
+          "seconds": 194,
+          "title": "金木犀",
+          "artist": "なとり",
+          "raw": "00:03:14　01.金木犀／なとり（2023/08/25）"
+        },
+        {
+          "time": "0:08:03",
+          "seconds": 483,
+          "title": "fake face dance music",
+          "artist": "音田雅則",
+          "raw": "00:08:03　02.fake face dance music／音田雅則（2023/07/11）"
+        },
+        {
+          "time": "0:11:28",
+          "seconds": 688,
+          "title": "ズルい幻",
+          "artist": "めいちゃん",
+          "raw": "00:11:28　03.ズルい幻／めいちゃん（2022/02/08）"
+        },
+        {
+          "time": "0:15:35",
+          "seconds": 935,
+          "title": "Duty Friend",
+          "artist": "LUPIN the Third～峰不二子という女～",
+          "raw": "00:15:35　04.Duty Friend／NIKIIE（LUPIN the Third～峰不二子という女～）（2012/06/06）"
+        },
+        {
+          "time": "0:20:09",
+          "seconds": 1209,
+          "title": "能動的三分間",
+          "artist": "東京事変",
+          "raw": "00:20:09　05.能動的三分間／東京事変（2009/12/02）"
+        },
+        {
+          "time": "0:23:27",
+          "seconds": 1407,
+          "title": "怪獣",
+          "artist": "サカナクション（チ。 ―地球の運動について―）",
+          "raw": "00:23:27　06.怪獣／サカナクション（チ。 ―地球の運動について―）（2025/02/20）"
+        },
+        {
+          "time": "0:27:51",
+          "seconds": 1671,
+          "title": "歌舞伎町の女王",
+          "artist": "椎名林檎",
+          "raw": "00:27:51　07.歌舞伎町の女王／椎名林檎（1998/09/09）"
+        },
+        {
+          "time": "0:30:54",
+          "seconds": 1854,
+          "title": "丸の内サディスティック",
+          "artist": "椎名林檎",
+          "raw": "00:30:54　08.丸の内サディスティック／椎名林檎（1999/02/24）"
+        }
+      ]
+    },
+    {
+      "videoId": "ZkhqgOLLpPA",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZkhqgOLLpPA",
+      "title": "🏮【 実写歌枠 】暇な時間にいかがですか!!あたしの歌聴いてってほしいな～ #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1766602971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 22,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌枠",
+          "歌"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:05:09",
+          "seconds": 309,
+          "title": "ブルーバード",
+          "artist": "いきものがかり（NARUTO-ナルト- 疾風伝）",
+          "raw": "00:05:09　01.ブルーバード／いきものがかり（NARUTO-ナルト- 疾風伝）（2008/07/09）"
+        },
+        {
+          "time": "0:09:03",
+          "seconds": 543,
+          "title": "distance",
+          "artist": "NARUTO-ナルト- 疾風伝",
+          "raw": "00:09:03　02.distance／LONG SHOT PARTY（NARUTO-ナルト- 疾風伝）（2008/01/23）"
+        },
+        {
+          "time": "0:12:21",
+          "seconds": 741,
+          "title": "シルエット",
+          "artist": "NARUTO-ナルト- 疾風伝",
+          "raw": "00:12:21　03.シルエット／KANA-BOON（NARUTO-ナルト- 疾風伝）（2014/11/26）"
+        },
+        {
+          "time": "0:16:31",
+          "seconds": 991,
+          "title": "Sign",
+          "artist": "NARUTO-ナルト- 疾風伝",
+          "raw": "00:16:31　04.Sign／FLOW（NARUTO-ナルト- 疾風伝）（2010/01/13）"
+        },
+        {
+          "time": "0:21:15",
+          "seconds": 1275,
+          "title": "ユラユラ",
+          "artist": "NARUTO -ナルト-",
+          "raw": "00:21:15　05.ユラユラ／Hearts Grow（NARUTO -ナルト-）（2006/12/06）"
+        },
+        {
+          "time": "0:26:29",
+          "seconds": 1589,
+          "title": "ラヴァーズ",
+          "artist": "NARUTO-ナルト- 疾風伝",
+          "raw": "00:26:29　06.ラヴァーズ／7!!（NARUTO-ナルト- 疾風伝）（2011/06/29）"
+        },
+        {
+          "time": "0:30:19",
+          "seconds": 1819,
+          "title": "GO!!!",
+          "artist": "NARUTO -ナルト-",
+          "raw": "00:30:19　07.GO!!!／FLOW（NARUTO -ナルト-）（2004/04/28）"
+        },
+        {
+          "time": "0:39:35",
+          "seconds": 2375,
+          "title": "ignited -イグナイテッド",
+          "artist": "機動戦士ガンダムSEED DESTINY",
+          "raw": "00:39:35　08.ignited -イグナイテッド-／T.M.Revolution（機動戦士ガンダムSEED DESTINY）（2004/11/17）"
+        }
+      ]
+    },
+    {
+      "videoId": "Y-WE4UbY2n0",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Y-WE4UbY2n0",
+      "title": "🏮【 実写歌枠 】一緒に楽しい深夜の時間を過ごそうね💜 #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1761418971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 20,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌枠",
+          "歌"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:07:08",
+          "seconds": 428,
+          "title": "サヨナラの空",
+          "artist": "銀魂",
+          "raw": "00:07:08　01.サヨナラの空／Qwai（銀魂）（2010/02/24）"
+        },
+        {
+          "time": "0:11:42",
+          "seconds": 702,
+          "title": "ハロ/ハワユ",
+          "artist": "ナノウ(ほえほえP) feat. 初音ミク",
+          "raw": "00:11:42　02.ハロ/ハワユ／ナノウ(ほえほえP) feat. 初音ミク（2010/07/20）"
+        },
+        {
+          "time": "0:16:51",
+          "seconds": 1011,
+          "title": "流れ星～Shooting Star～",
+          "artist": "HOME MADE 家族（NARUTO-ナルト- 疾風伝）",
+          "raw": "00:16:51　03.流れ星～Shooting Star～／HOME MADE 家族（NARUTO-ナルト- 疾風伝）（2007/03/07）"
+        },
+        {
+          "time": "0:22:01",
+          "seconds": 1321,
+          "title": "For You",
+          "artist": "NARUTO-ナルト- 疾風伝",
+          "raw": "00:22:01　04.For You／AZU（NARUTO-ナルト- 疾風伝）（2010/03/03）"
+        },
+        {
+          "time": "0:43:32",
+          "seconds": 2612,
+          "title": "Together",
+          "artist": "あきよしふみえ（ポケットモンスター ダイヤモンド&パール）",
+          "raw": "00:43:32　05.Together／あきよしふみえ（ポケットモンスター ダイヤモンド&パール）（2007/07/18）"
+        },
+        {
+          "time": "0:47:40",
+          "seconds": 2860,
+          "title": "Climax Jump",
+          "artist": "仮面ライダー電王",
+          "raw": "00:47:40　06.Climax Jump／AAA DEN-O form（仮面ライダー電王）（2007/03/21）"
+        },
+        {
+          "time": "0:52:16",
+          "seconds": 3136,
+          "title": "キラメキラリ",
+          "artist": "高槻やよい(仁後真耶子)（THE IDOLM@STER）",
+          "raw": "00:52:16　07.キラメキラリ／高槻やよい(仁後真耶子)（THE IDOLM@STER）（2007/07/18）"
+        },
+        {
+          "time": "1:02:53",
+          "seconds": 3773,
+          "title": "残酷な天使のテーゼ",
+          "artist": "高橋洋子（新世紀エヴァンゲリオン）",
+          "raw": "01:02:53　08.残酷な天使のテーゼ／高橋洋子（新世紀エヴァンゲリオン）（1995/10/25）"
+        }
+      ]
+    },
+    {
+      "videoId": "GxDZkKIgen8",
+      "youtubeUrl": "https://www.youtube.com/watch?v=GxDZkKIgen8",
+      "title": "🏮【 夏休み！実写歌枠 】今日は金曜✨きらきらな一日に一緒にしちゃおうね💜💜 #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1756234971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 24,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌枠",
+          "歌"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:07:19",
+          "seconds": 439,
+          "title": "怪獣の花唄",
+          "artist": "Vaundy",
+          "raw": "00:07:19　怪獣の花唄／Vaundy"
+        },
+        {
+          "time": "0:16:17",
+          "seconds": 977,
+          "title": "1・2・3",
+          "artist": "ポケットモンスター",
+          "raw": "00:16:17　1・2・3／After the Rain（ポケットモンスター）"
+        },
+        {
+          "time": "0:21:26",
+          "seconds": 1286,
+          "title": "シュガーソングとビターステップ",
+          "artist": "血界戦線",
+          "raw": "00:21:26　シュガーソングとビターステップ／UNISON SQUARE GARDEN（血界戦線）"
+        },
+        {
+          "time": "0:25:49",
+          "seconds": 1549,
+          "title": "ドラえもん",
+          "artist": "星野源（ドラえもん）",
+          "raw": "00:25:49　ドラえもん／星野源（ドラえもん）"
+        },
+        {
+          "time": "0:40:26",
+          "seconds": 2426,
+          "title": "残響散歌",
+          "artist": "鬼滅の刃 遊郭編",
+          "raw": "00:40:26　残響散歌／Aimer（鬼滅の刃 遊郭編）"
+        },
+        {
+          "time": "0:43:41",
+          "seconds": 2621,
+          "title": "紅蓮華",
+          "artist": "鬼滅の刃",
+          "raw": "00:43:41　紅蓮華／LiSA（鬼滅の刃）"
+        },
+        {
+          "time": "0:47:48",
+          "seconds": 2868,
+          "title": "crossing field",
+          "artist": "ソードアート・オンライン",
+          "raw": "00:47:48　crossing field／LiSA（ソードアート・オンライン）"
+        },
+        {
+          "time": "0:54:45",
+          "seconds": 3285,
+          "title": "Magia",
+          "artist": "魔法少女まどか☆マギカ",
+          "raw": "00:54:45　Magia／Kalafina（魔法少女まどか☆マギカ）"
+        }
+      ]
+    },
+    {
+      "videoId": "Qvwf4jPxLH0",
+      "youtubeUrl": "https://www.youtube.com/watch?v=Qvwf4jPxLH0",
+      "title": "【 🎮MINECRAFT雑談 】フェスのステージを作る.ᐟ.ᐟ会場探しと建築開始だぁ.ᐟ.ᐟ【 #最響ライブ 👹】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753210971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "ライブ"
+      ],
+      "songCount": 5,
+      "decision": "suspicious",
+      "accepted": false,
+      "reasons": [
+        "live title without explicit singing signal"
+      ],
+      "matchedTerms": [
+        "ライブ"
+      ],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": []
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "1:59:46",
+          "seconds": 7186,
+          "title": "Casket",
+          "artist": "響架",
+          "raw": "01:59:46　Casket／響架"
+        },
+        {
+          "time": "3:21:11",
+          "seconds": 12071,
+          "title": "世界が終るまでは…",
+          "artist": "WANDS（SLAM DUNK）",
+          "raw": "03:21:11　世界が終るまでは…／WANDS（SLAM DUNK）"
+        },
+        {
+          "time": "3:30:48",
+          "seconds": 12648,
+          "title": "夢であるように",
+          "artist": "DEEN（テイルズ オブ デスティニー） ※アカペラサビのみ",
+          "raw": "03:30:48　夢であるように／DEEN（テイルズ オブ デスティニー）　※アカペラサビのみ"
+        },
+        {
+          "time": "5:09:24",
+          "seconds": 18564,
+          "title": "紅蓮華",
+          "artist": "鬼滅の刃",
+          "raw": "05:09:24　紅蓮華／LiSA（鬼滅の刃）"
+        },
+        {
+          "time": "5:13:29",
+          "seconds": 18809,
+          "title": "魂のルフラン",
+          "artist": "高橋洋子（新世紀エヴァンゲリオン劇場版 シト新生）",
+          "raw": "05:13:29　魂のルフラン／高橋洋子（新世紀エヴァンゲリオン劇場版 シト新生）"
+        }
+      ]
+    },
+    {
+      "videoId": "ns3d5_aavnE",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ns3d5_aavnE",
+      "title": "🏮【 実写歌枠 】お昼時ですよっ.ᐟ憂鬱な日だって歌っちゃお #shorts #Vtuber 【 #最響ライブ 👹 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753210971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 16,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": [
+          "歌枠",
+          "歌"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:05:14",
+          "seconds": 314,
+          "title": "赤いスイートピー",
+          "artist": "松田聖子",
+          "raw": "00:05:14　赤いスイートピー／松田聖子"
+        },
+        {
+          "time": "0:09:43",
+          "seconds": 583,
+          "title": "青い珊瑚礁",
+          "artist": "松田聖子",
+          "raw": "00:09:43　青い珊瑚礁／松田聖子"
+        },
+        {
+          "time": "0:13:22",
+          "seconds": 802,
+          "title": "年下の男の子",
+          "artist": "キャンディーズ",
+          "raw": "00:13:22　年下の男の子／キャンディーズ"
+        },
+        {
+          "time": "0:24:18",
+          "seconds": 1458,
+          "title": "フレンズ",
+          "artist": "REBECCA",
+          "raw": "00:24:18　フレンズ／REBECCA"
+        },
+        {
+          "time": "0:28:52",
+          "seconds": 1732,
+          "title": "HOT LIMIT",
+          "artist": "T.M.Revolution",
+          "raw": "00:28:52　HOT LIMIT／T.M.Revolution"
+        },
+        {
+          "time": "0:33:08",
+          "seconds": 1988,
+          "title": "WHITE BREATH",
+          "artist": "T.M.Revolution",
+          "raw": "00:33:08　WHITE BREATH／T.M.Revolution"
+        },
+        {
+          "time": "0:37:36",
+          "seconds": 2256,
+          "title": "Butter-Fly",
+          "artist": "和田光司（デジモンアドベンチャー）",
+          "raw": "00:37:36　Butter-Fly／和田光司（デジモンアドベンチャー）"
+        },
+        {
+          "time": "0:44:32",
+          "seconds": 2672,
+          "title": "いったやんけ！",
+          "artist": "響架",
+          "raw": "00:44:32　いったやんけ！／響架"
+        }
+      ]
+    },
+    {
+      "videoId": "RPNSC6rISwg",
+      "youtubeUrl": "https://www.youtube.com/watch?v=RPNSC6rISwg",
+      "title": "🏮【 実写歌枠 】寝起き過ぎる歌枠。声出し一緒にする？？ #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753210971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 20,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌枠",
+          "歌"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:06:51",
+          "seconds": 411,
+          "title": "にんげんっていいな",
+          "artist": "中嶋義実,ヤングフレッシュ（まんが日本昔ばなし）",
+          "raw": "00:06:51　にんげんっていいな／中嶋義実,ヤングフレッシュ（まんが日本昔ばなし）"
+        },
+        {
+          "time": "0:08:48",
+          "seconds": 528,
+          "title": "どんぐりころころ",
+          "artist": "童謡",
+          "raw": "00:08:48　どんぐりころころ／童謡"
+        },
+        {
+          "time": "0:10:12",
+          "seconds": 612,
+          "title": "手のひらを太陽に",
+          "artist": "童謡",
+          "raw": "00:10:12　手のひらを太陽に／童謡"
+        },
+        {
+          "time": "0:14:24",
+          "seconds": 864,
+          "title": "怪獣のバラード",
+          "artist": "合唱曲",
+          "raw": "00:14:24　怪獣のバラード／合唱曲"
+        },
+        {
+          "time": "0:17:17",
+          "seconds": 1037,
+          "title": "てをつなごう",
+          "artist": "ハムちゃんず（とっとこハム太郎）",
+          "raw": "00:17:17　てをつなごう／ハムちゃんず（とっとこハム太郎）"
+        },
+        {
+          "time": "0:24:18",
+          "seconds": 1458,
+          "title": "夢をかなえてドラえもん",
+          "artist": "mao,ひまわりキッズ（ドラえもん）",
+          "raw": "00:24:18　夢をかなえてドラえもん／mao,ひまわりキッズ（ドラえもん）"
+        },
+        {
+          "time": "0:28:53",
+          "seconds": 1733,
+          "title": "ケセラセラ",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "00:28:53　ケセラセラ／Mrs. GREEN APPLE"
+        },
+        {
+          "time": "0:34:45",
+          "seconds": 2085,
+          "title": "残響散歌",
+          "artist": "鬼滅の刃 遊郭編",
+          "raw": "00:34:45　残響散歌／Aimer（鬼滅の刃 遊郭編）"
+        }
+      ]
+    },
+    {
+      "videoId": "JBEKsJtNUkI",
+      "youtubeUrl": "https://www.youtube.com/watch?v=JBEKsJtNUkI",
+      "title": "🏮【 実写歌枠/雑談 】土曜日.ᐟやっぱりお昼はアニソンでしょ💜 #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753210971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 18,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌枠",
+          "歌"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:04:43",
+          "seconds": 283,
+          "title": "CHA-LA HEAD-CHA-LA",
+          "artist": "影山ヒロノブ（ドラゴンボールZ）",
+          "raw": "00:04:43　CHA-LA HEAD-CHA-LA／影山ヒロノブ（ドラゴンボールZ）"
+        },
+        {
+          "time": "0:08:20",
+          "seconds": 500,
+          "title": "夢をかなえてドラえもん",
+          "artist": "mao,ひまわりキッズ（ドラえもん）",
+          "raw": "00:08:20　夢をかなえてドラえもん／mao,ひまわりキッズ（ドラえもん）"
+        },
+        {
+          "time": "0:14:48",
+          "seconds": 888,
+          "title": "アンパンマンのマーチ",
+          "artist": "ドリーミング（アンパンマン）",
+          "raw": "00:14:48　アンパンマンのマーチ／ドリーミング（アンパンマン）"
+        },
+        {
+          "time": "0:19:54",
+          "seconds": 1194,
+          "title": "めざせポケモンマスター",
+          "artist": "松本梨香（ポケットモンスター）",
+          "raw": "00:19:54　めざせポケモンマスター／松本梨香（ポケットモンスター）"
+        },
+        {
+          "time": "0:28:30",
+          "seconds": 1710,
+          "title": "おジャ魔女カーニバル！！",
+          "artist": "MAHO堂（おジャ魔女どれみ）",
+          "raw": "00:28:30　おジャ魔女カーニバル！！／MAHO堂（おジャ魔女どれみ）"
+        },
+        {
+          "time": "0:32:48",
+          "seconds": 1968,
+          "title": "ムーンライト伝説",
+          "artist": "美少女戦士セーラームーン",
+          "raw": "00:32:48　ムーンライト伝説／DALI（美少女戦士セーラームーン）"
+        },
+        {
+          "time": "0:38:58",
+          "seconds": 2338,
+          "title": "Butter-Fly",
+          "artist": "和田光司（デジモンアドベンチャー）",
+          "raw": "00:38:58　Butter-Fly／和田光司（デジモンアドベンチャー）"
+        },
+        {
+          "time": "0:43:23",
+          "seconds": 2603,
+          "title": "バッチコイ!!!",
+          "artist": "デブパレード（NARUTO-ナルト-疾風伝）",
+          "raw": "00:43:23　バッチコイ!!!／デブパレード（NARUTO-ナルト-疾風伝）"
+        }
+      ]
+    },
+    {
+      "videoId": "xsOlT1QU_10",
+      "youtubeUrl": "https://www.youtube.com/watch?v=xsOlT1QU_10",
+      "title": "🏮【実写歌枠/Sing 】今日はアニソン歌っていくどー‪.ᐟ激アツになってこ🎶 #shorts #Vtuber 【 #最響ライブ 👹 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753210971250,
+      "thumbnailUrl": null,
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 29,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": [
+          "歌枠",
+          "歌",
+          "sing"
+        ]
+      },
+      "coverage": {
+        "published": true,
+        "thumbnail": false,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:07:17",
+          "seconds": 437,
+          "title": "星座になれたら",
+          "artist": "結束バンド（ぼっち・ざ・ろっく!）",
+          "raw": "00:07:17　星座になれたら／結束バンド（ぼっち・ざ・ろっく!）"
+        },
+        {
+          "time": "0:14:53",
+          "seconds": 893,
+          "title": "RAGE OF DUST",
+          "artist": "機動戦士ガンダム 鉄血のオルフェンズ",
+          "raw": "00:14:53　RAGE OF DUST／SPYAIR（機動戦士ガンダム 鉄血のオルフェンズ）"
+        },
+        {
+          "time": "0:21:07",
+          "seconds": 1267,
+          "title": "私は最強",
+          "artist": "ウタ(Ado)",
+          "raw": "00:21:07　私は最強／ウタ(Ado)（ONE PIECE FILM RED）"
+        },
+        {
+          "time": "0:27:49",
+          "seconds": 1669,
+          "title": "いったやんけ！",
+          "artist": "響架",
+          "raw": "00:27:49　いったやんけ！／響架"
+        },
+        {
+          "time": "0:30:51",
+          "seconds": 1851,
+          "title": "Casket",
+          "artist": "響架",
+          "raw": "00:30:51　Casket／響架"
+        },
+        {
+          "time": "0:36:18",
+          "seconds": 2178,
+          "title": "魂のルフラン",
+          "artist": "高橋洋子（新世紀エヴァンゲリオン劇場版 シト新生）",
+          "raw": "00:36:18　魂のルフラン／高橋洋子（新世紀エヴァンゲリオン劇場版 シト新生）"
+        },
+        {
+          "time": "0:43:31",
+          "seconds": 2611,
+          "title": "Together",
+          "artist": "あきよしふみえ（ポケットモンスター ダイヤモンド&パール）",
+          "raw": "00:43:31　Together／あきよしふみえ（ポケットモンスター ダイヤモンド&パール）"
+        },
+        {
+          "time": "0:50:35",
+          "seconds": 3035,
+          "title": "Butter-Fly",
+          "artist": "和田光司（デジモンアドベンチャー）",
+          "raw": "00:50:35　Butter-Fly／和田光司（デジモンアドベンチャー）"
+        }
+      ]
+    }
+  ]
+}
