@@ -161,11 +161,11 @@ Supported query parameters:
 
 Search scope contract:
 
-- `songs` and `songIndex` default to `fields=title,artist`. They match source context only when `fields` includes `channel`, `video`, or `all`. When a song row is matched by source context, such as channel name or video title, the API derives contextual `count`, `videoCount`, `timestampCount`, and `occurrences` from the matching source rows only. It also keeps `globalRank`, `globalCount`, `globalVideoCount`, and `globalTimestampCount` for diagnostics.
+- `songs` and `songIndex` default to `fields=title,artist`. They match source context only when `fields` includes `channel`, `video`, or `all`. For source-context searches, `fields=channel` matches source channel display name, YouTube channel ID, handle, and channel URL. When a song row is matched by source context, such as channel identity or video title, the API derives contextual `count`, `videoCount`, `timestampCount`, and `occurrences` from the matching source rows only. It also keeps `globalRank`, `globalCount`, `globalVideoCount`, and `globalTimestampCount` for diagnostics.
 - `vsingerSongs` defaults to `fields=title,artist` and matches source song title, artist, and singer fields. It is a raw-source diagnostic view and does not currently run the contextual source-row rewrite used by `songs`.
 - `artists` defaults to `fields=artist` and matches singer/artist identity fields only, such as canonical name and aliases. Song titles, channel names, and video titles must not make an unrelated artist row match unless the request explicitly uses `fields=all`.
 - `vtubers` defaults to `fields=channel` and matches channel/VTuber identity fields, such as `name`, `channelName`, `channelId`, `channelHandle`, and channel URL fields. Song titles and video titles must not make an unrelated VTuber row match by default.
-- `videos` defaults to `fields=video,channel`. `fields=video` matches video ID/title, `fields=channel` matches channel identity, and `fields=title`, `fields=artist`, or `fields=all` also search parsed song-list/timestamp text.
+- `videos` defaults to `fields=video,channel`. `fields=video` matches video ID/title, `fields=channel` matches only channel display name, YouTube channel ID, handle, and channel URL; it must not match a video title or parsed song-list text. `fields=title`, `fields=artist`, or `fields=all` also search parsed song-list/timestamp text.
 
 Response fields:
 
@@ -247,6 +247,7 @@ Supported ranking views in this first step:
 - Runtime entity tables are query support data: `videos`, `songs`, and `occurrences` are built from `data/latest.json` after VSinger import is applied.
 - Reviewed YouTube channel補漏 increments are small source-like overlays in `data/external/youtube-channel-discovery/accepted/*.json`; they are merged into the runtime entity build, but are not raw VSinger rows and do not rewrite the committed static JSON runtime.
 - Derived query tables are display-ready: `ranking_rows`, `source_details`, and `source_occurrences` reuse `scripts/vsinger-http/runtime-importer.js`, `scripts/youtube-channel-discovery-runtime.js`, and `assets/ranking-utils.js`, so title variants, song versions, artist aliases, and unknown-artist handling stay consistent with the frontend.
+- Schema version 2 adds `ranking_rows.channel_search_text` for exact video/channel field search and `source_occurrences.channel_id`, `channel_handle`, and `channel_url` for contextual song/source filtering. Deploy schema version 2 DBs with matching API code; a version 1 DB does not have these columns.
 - `source_details` stores the entity summary and preview; `source_occurrences` stores the full derived source list by `source_key` so large songs do not become multi-megabyte JSON blobs.
 
 The raw tables are intentionally not overwritten by cleanup decisions. Dirty data handling belongs in derived layers, so future canonical entity work can reprocess the same source rows without fetching the data again.

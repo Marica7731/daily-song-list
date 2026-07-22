@@ -187,6 +187,8 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
       "songs",
       "--q",
       "Alpha",
+      "--fields",
+      "channel",
       "--summary-only",
     ],
     { cwd: ROOT, encoding: "utf8" },
@@ -375,6 +377,8 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "videos",
       "--q",
       "@overlay",
+      "--fields",
+      "channel",
     ],
     { cwd: ROOT, encoding: "utf8" },
   );
@@ -382,6 +386,26 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.match(videoHandleSearchOutput, /"totalCount": 1/);
   assert.match(videoHandleSearchOutput, /Channel Overlay Karaoke/);
   assert.match(videoHandleSearchOutput, /"thumbnailUrl": "https:\/\/example\.test\/overlay-thumb\.jpg"/);
+
+  const videoTitleChannelSearchOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "videos",
+      "--q",
+      "Overlay Karaoke",
+      "--fields",
+      "channel",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(videoTitleChannelSearchOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(videoTitleChannelSearchOutput, /"totalCount": 0/);
 
   const videoUrlSearchOutput = execFileSync(
     PYTHON,

@@ -171,8 +171,8 @@ def query_contextual_songs(
     source_terms: list[str] = []
     source_params: list[object] = []
     if "channel" in search_fields:
-        source_terms.append("lower(so.channel_name) LIKE ?")
-        source_params.append(needle)
+        source_terms.append("(lower(so.channel_name) LIKE ? OR lower(so.channel_id) LIKE ? OR lower(so.channel_handle) LIKE ? OR lower(so.channel_url) LIKE ?)")
+        source_params.extend([needle, needle, needle, needle])
     if "video" in search_fields:
         source_terms.append("(lower(so.title) LIKE ? OR lower(so.video_id) LIKE ?)")
         source_params.extend([needle, needle])
@@ -347,7 +347,7 @@ def search_filter_for_view(view: str, query: str, search_fields: set[str] | None
         if "video" in fields:
             add("(lower(title) LIKE ? OR lower(detail_key) LIKE ?)", 2)
         if "channel" in fields:
-            add("lower(name) LIKE ?")
+            add("lower(channel_search_text) LIKE ?")
         if "title" in fields or "artist" in fields:
             add("lower(search_text) LIKE ?")
     if not clauses:

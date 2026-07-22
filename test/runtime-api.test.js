@@ -100,6 +100,16 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     const allFieldSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&fields=all&pageSize=5`);
     assert.equal(allFieldSongSearch.totalCount, 3);
 
+    const channelHandleSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=beta_ch&fields=channel&pageSize=5`);
+    assert.equal(channelHandleSongSearch.totalCount, 1);
+    assert.equal(channelHandleSongSearch.records[0].title, "Song One");
+    assert.equal(channelHandleSongSearch.records[0].occurrences[0].item.channelHandle, "@beta_ch");
+
+    const channelIdSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=UC-alpha&fields=channel&pageSize=5`);
+    assert.equal(channelIdSongSearch.totalCount, 1);
+    assert.equal(channelIdSongSearch.records[0].title, "Song Three");
+    assert.equal(channelIdSongSearch.records[0].occurrences[0].item.channelId, "UC-alpha");
+
     const vtubers = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&pageSize=5`);
     assert.equal(vtubers.totalCount, 3);
     assert.equal(vtubers.records[0].name, "Alpha Ch.");
@@ -127,6 +137,17 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     const videoHandleSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=beta_ch&pageSize=5`);
     assert.equal(videoHandleSearch.totalCount, 1);
     assert.equal(videoHandleSearch.records[0].title, "Night Karaoke");
+
+    const videoChannelHandleSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=beta_ch&fields=channel&pageSize=5`);
+    assert.equal(videoChannelHandleSearch.totalCount, 1);
+    assert.equal(videoChannelHandleSearch.records[0].title, "Night Karaoke");
+
+    const videoChannelIdSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=UC-alpha&fields=channel&pageSize=5`);
+    assert.equal(videoChannelIdSearch.totalCount, 1);
+    assert.equal(videoChannelIdSearch.records[0].title, "Late Karaoke");
+
+    const videoTitleAsChannelSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=Night&fields=channel&pageSize=5`);
+    assert.equal(videoTitleAsChannelSearch.totalCount, 0);
 
     const sourceKey = rankings.records[0].sourceDetailKey;
     const source = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}`);
@@ -295,6 +316,7 @@ async function waitForExit(child) {
 
 async function fetchJson(url) {
   const response = await fetch(url);
-  assert.equal(response.status, 200);
-  return await response.json();
+  const text = await response.text();
+  assert.equal(response.status, 200, `${url}: HTTP ${response.status} ${text}`);
+  return JSON.parse(text);
 }

@@ -281,6 +281,34 @@ test("request keyed shards split before the payload byte budget is exceeded", ()
   assert.deepEqual(chunks.map((chunk) => chunk.map((record) => record.key)), [["a"], ["b"], ["c"]]);
 });
 
+test("request search shards split by estimated payload bytes without repeated full payload serialization", () => {
+  const records = [
+    { key: "a", searchText: "alpha " + "x".repeat(90) },
+    { key: "b", searchText: "beta " + "y".repeat(90) },
+    { key: "c", searchText: "gamma " + "z".repeat(90) },
+  ];
+  const chunks = chunkRecordsByPayloadBytes(records, {
+    pageSize: 10,
+    maxBytes: 260,
+    payloadBase: { schemaVersion: 1, kind: "request-search-page", rangeId: "all", bucket: "b01" },
+    recordName: "records",
+  });
+
+  assert.ok(chunks.length > 1);
+  chunks.forEach((chunk, index) => {
+    const payload = {
+      schemaVersion: 1,
+      kind: "request-search-page",
+      rangeId: "all",
+      bucket: "b01",
+      page: index + 1,
+      pageCount: chunks.length,
+      records: chunk,
+    };
+    assert.ok(Buffer.byteLength(JSON.stringify(payload), "utf8") <= 260);
+  });
+});
+
 test("compact rank diff removes unchanged entries and detailed fields", () => {
   const entries = compactRankDiffEntries([
     {
