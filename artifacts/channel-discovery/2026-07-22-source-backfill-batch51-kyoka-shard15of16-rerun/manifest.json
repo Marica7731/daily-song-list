@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-artifact-local-partial",
+  "generatedAt": "2026-07-22T22:59:22.725Z",
+  "status": "success",
+  "source": {
+    "url": "https://www.youtube.com/@Kyoka_0609",
+    "singerName": "Kyoka_0609"
+  },
+  "shard": {
+    "inspectShardIndex": 15,
+    "inspectShardCount": 16
+  },
+  "result": {
+    "imported": 10,
+    "skipped": 0,
+    "failed": 0,
+    "success": true
+  },
+  "discovery": {
+    "generatedAt": "2026-07-22T22:57:53.126Z",
+    "candidateCount": 165,
+    "inspectedCount": 10,
+    "usableVideoCount": 10,
+    "occurrenceCount": 218,
+    "maxChannelPages": 100,
+    "maxCandidates": 0,
+    "maxInspect": 1000,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 17,
+        "rawItemCount": 484,
+        "candidateCount": 163,
+        "continuationRounds": 16,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 1180977
+      },
+      {
+        "pageUrl": "https://www.youtube.com/@Kyoka_0609/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 2,
+        "rawItemCount": 22,
+        "candidateCount": 2,
+        "continuationRounds": 1,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 1082542
+      }
+    ],
+    "requestStats": {
+      "requestCount": 2,
+      "networkRequestCount": 2,
+      "cacheHitCount": 0,
+      "totalBytes": 2263519,
+      "totalElapsedMs": 502,
+      "statuses": {
+        "200": 2
+      }
+    },
+    "reachedEnd": true,
+    "publishedTimestampCoverage": {
+      "rawCandidates": "0/165",
+      "unfilteredVideos": "10/10",
+      "acceptedVideos": "10/10"
+    },
+    "occurrenceTimeCoverage": "218/218",
+    "occurrenceSecondsCoverage": "218/218",
+    "thumbnailCoverage": {
+      "unfilteredVideos": "0/10",
+      "acceptedVideos": "0/10",
+      "acceptedOccurrenceRows": "0/218",
+      "discoveryDetailVideos": "10/10",
+      "discoveryDetailOccurrenceRows": "218/218"
+    }
+  },
+  "increment": {
+    "unfiltered": {
+      "file": "candidate-increment-unfiltered.json",
+      "videoCount": 10,
+      "occurrenceCount": 218
+    },
+    "accepted": {
+      "file": "accepted-increment.json",
+      "videos": 10,
+      "occurrences": 218,
+      "songs": 218
+    }
+  },
+  "audit": {
+    "file": "dirty-audit.json",
+    "dirtyDropped": 0,
+    "suspicious": 0,
+    "droppedOccurrences": 0,
+    "suspiciousOccurrences": 0,
+    "rules": {
+      "hardExclude": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDrops": [
+        "piano streaming",
+        "piano performance",
+        "ピアノ演奏"
+      ],
+      "liveRule": "live/ライブ is suspicious/drop only when the title lacks explicit singing signals such as 歌枠, 歌, 弾き語り, karaoke, 歌ってみた."
+    }
+  },
+  "coverage": {
+    "acceptedVideos": 10,
+    "acceptedOccurrences": 218,
+    "acceptedSongs": 218,
+    "publishedVideosWithTimestamp": 10,
+    "acceptedVideosWithThumbnail": 0,
+    "acceptedVideosWithDiscoveryThumbnail": 10,
+    "occurrencesWithTime": 218,
+    "occurrencesWithSeconds": 218,
+    "occurrenceRowsWithThumbnail": 0,
+    "occurrenceRowsWithDiscoveryThumbnail": 218,
+    "rawCandidates": 165,
+    "rawCandidatesWithPublished": 0,
+    "unfilteredVideos": 10,
+    "unfilteredPublished": 10,
+    "unfilteredVideosWithThumbnail": 0,
+    "unfilteredVideosWithDiscoveryThumbnail": 10,
+    "discoveryDetailVideos": 10,
+    "discoveryDetailVideosWithThumbnail": 10,
+    "publishedTimestampCoverage": "10/10",
+    "thumbnailCoverage": "0/10",
+    "discoveryThumbnailCoverage": "10/10",
+    "occurrenceTimeCoverage": "218/218",
+    "occurrenceSecondsCoverage": "218/218",
+    "occurrenceThumbnailCoverage": "0/218",
+    "occurrenceDiscoveryThumbnailCoverage": "218/218"
+  },
+  "files": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "remoteExecution": {
+    "preferredHost": "Mac",
+    "usedHost": "Mac",
+    "hostname": "bedeMacBook-Air.local",
+    "remoteDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun/repo",
+    "sourceCommit": "636f5f40f7d4924b00be551d220e43a9d8f4c052",
+    "setup": "git archive copied from Windows current HEAD; extracted in independent Mac temp directory; source ~/.daily-song-list-build-env used; npm install --no-audit --no-fund",
+    "precheck": {
+      "sourceFilterExists": true,
+      "marker": "CODEX_SOURCE_FILTER_PRECHECK_OK path=assets/source-filter.js bytes=20366 sha256=98658ef49b0577a202cf6f83fe7ec9898143cefd524004fcf4e8fb01ef09db2a"
+    },
+    "commandSummary": "shell watchdog 3600s npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@Kyoka_0609 --singer-name Kyoka_0609 --output-dir artifacts/channel-discovery/2026-07-22-source-backfill-batch51-kyoka-shard15of16-rerun-discovery --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-count 16 --inspect-shard-index 15 --request-interval-ms 3500 --request-jitter-ms 1500",
+    "status": "success",
+    "cleanupStatus": "removed",
+    "postCleanupDfH": "/dev/disk3s5   926Gi   135Gi   753Gi    16%    562k  7.9G    0%   /System/Volumes/Data",
+    "stageLogTail": [
+      "2026-07-22T22:49:22Z stage=setup_start host=bedeMacBook-Air.local",
+      "2026-07-22T22:49:22Z stage=setup_done",
+      "2026-07-22T22:49:22Z stage=precheck_source_filter CODEX_SOURCE_FILTER_PRECHECK_OK path=assets/source-filter.js bytes=20366 sha256=98658ef49b0577a202cf6f83fe7ec9898143cefd524004fcf4e8fb01ef09db2a",
+      "2026-07-22T22:49:22Z stage=install_start host=bedeMacBook-Air.local",
+      "2026-07-22T22:49:22Z stage=heartbeat install elapsed=0s",
+      "2026-07-22T22:50:22Z stage=install_done exit=0",
+      "stdout_tail: ",
+      "stdout_tail: up to date in 83ms",
+      "2026-07-22T22:50:22Z stage=discovery_start host=bedeMacBook-Air.local",
+      "2026-07-22T22:50:22Z stage=heartbeat discovery elapsed=0s",
+      "2026-07-22T22:51:22Z stage=heartbeat discovery elapsed=60s",
+      "2026-07-22T22:52:22Z stage=heartbeat discovery elapsed=120s",
+      "2026-07-22T22:53:22Z stage=heartbeat discovery elapsed=180s",
+      "2026-07-22T22:54:22Z stage=heartbeat discovery elapsed=240s",
+      "2026-07-22T22:55:22Z stage=heartbeat discovery elapsed=300s",
+      "2026-07-22T22:56:22Z stage=heartbeat discovery elapsed=360s",
+      "2026-07-22T22:57:22Z stage=heartbeat discovery elapsed=420s",
+      "2026-07-22T22:58:22Z stage=discovery_done exit=0",
+      "stdout_tail: > node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@Kyoka_0609 --singer-name Kyoka_0609 --output-dir artifacts/channel-discovery/2026-07-22-source-backfill-batch51-kyoka-shard15of16-rerun-discovery --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-count 16 --inspect-shard-index 15 --request-interval-ms 3500 --request-jitter-ms 1500",
+      "stdout_tail: ",
+      "stdout_tail: CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@Kyoka_0609\" candidates=165 inspected=10 videos=10 occurrences=218 elapsedSeconds=451 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch51-kyoka-shard15of16-rerun-discovery\"",
+      "2026-07-22T22:58:22Z stage=export_start host=bedeMacBook-Air.local",
+      "2026-07-22T22:58:22Z stage=heartbeat export elapsed=0s",
+      "2026-07-22T22:59:22Z stage=export_done exit=0",
+      "stdout_tail: > node scripts/export-channel-discovery-increment.js --input-dir artifacts/channel-discovery/2026-07-22-source-backfill-batch51-kyoka-shard15of16-rerun-discovery --output /Users/be/codex-temp/daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun/final/candidate-increment-unfiltered.json",
+      "stdout_tail: ",
+      "stdout_tail: CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=10 usableVideos=10 acceptedVideos=10 skippedRegressions=0 occurrences=218 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun/final/candidate-increment-unfiltered.json\"",
+      "2026-07-22T22:59:22Z stage=postprocess_start"
+    ],
+    "stdoutTail": [
+      "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@Kyoka_0609\" candidates=165 inspected=10 videos=10 occurrences=218 elapsedSeconds=451 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch51-kyoka-shard15of16-rerun-discovery\"",
+      "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=10 usableVideos=10 acceptedVideos=10 skippedRegressions=0 occurrences=218 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun/final/candidate-increment-unfiltered.json\""
+    ],
+    "discoveryMarker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@Kyoka_0609\" candidates=165 inspected=10 videos=10 occurrences=218 elapsedSeconds=451 outputDir=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch51-kyoka-shard15of16-rerun-discovery\"",
+    "exportMarker": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=10 usableVideos=10 acceptedVideos=10 skippedRegressions=0 occurrences=218 output=\"/Users/be/codex-temp/daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun/final/candidate-increment-unfiltered.json\"",
+    "postprocessMarker": "CODEX_POSTPROCESS_OK acceptedVideos=10 acceptedOccurrences=218 dirtyDropped=0 suspicious=0 thumbnailCoverage=0/10 discoveryThumbnailCoverage=10/10",
+    "remoteTempExistsAfterCleanup": false
+  },
+  "localTemp": {
+    "dir": "G:\\codex-temp\\daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun",
+    "cleanupStatus": "removed",
+    "verification": "cleanup removed G: temp directory; Test-Path returned false"
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "storageAudit": {
+    "localTempDir": "G:\\codex-temp\\daily-song-list-source-backfill-batch51-kyoka-shard15of16-rerun",
+    "localTempCleanupStatus": "removed",
+    "windowsDNewLargeFiles": false,
+    "windowsCNewLargeFiles": false,
+    "notes": "D: contains only the final five small artifact files for this shard. C: was not used for temp files."
+  },
+  "elapsedSeconds": 601
+}
