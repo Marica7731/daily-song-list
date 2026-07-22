@@ -1,0 +1,179 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch16",
+  "generatedAt": "2026-07-22T05:21:21Z",
+  "purpose": "unresolved source queue audit after batch15 shard failures",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "reason": "this batch records unresolved non-skippable sources and retry strategy; no complete discovery manifest was produced"
+  },
+  "acceptedEvidenceAudit": {
+    "acceptedDirectory": "data/external/youtube-channel-discovery/accepted",
+    "positiveSample": {
+      "handle": "HazukiHina",
+      "acceptedFileHits": 1
+    },
+    "unresolvedAcceptedFileHits": 0,
+    "marker": "CODEX_UNRESOLVED_ACCEPTED_HIT_AUDIT_OK targets=12 positiveHazukiFiles=1",
+    "conclusion": "none of the unresolved sources has self-crawled accepted evidence in data/external; do not skip them as already collected"
+  },
+  "sources": [
+    {
+      "handle": "AmanofuStella",
+      "url": "https://www.youtube.com/@AmanofuStella",
+      "status": "pending",
+      "candidateCount": 235,
+      "inspectedInLatestRun": 18,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "candidate count too large for current small-batch runner; needs low-concurrency shard/resume"
+    },
+    {
+      "handle": "arale_yumemita",
+      "url": "https://www.youtube.com/@arale_yumemita",
+      "status": "failed",
+      "candidateCount": 186,
+      "inspectedInLatestRun": 96,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "prior remote runner timed out before complete manifest; no checkpoint available in committed artifacts"
+    },
+    {
+      "handle": "ebakyouka",
+      "url": "https://www.youtube.com/@ebakyouka/streams",
+      "status": "pending",
+      "candidateCount": 464,
+      "inspectedInLatestRun": 20,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "large source stopped after checkpoint in earlier small batch; needs low-concurrency shard/resume"
+    },
+    {
+      "handle": "KohanaLam",
+      "url": "https://www.youtube.com/@KohanaLam/streams",
+      "status": "pending",
+      "candidateCount": 224,
+      "inspectedInLatestRun": 28,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "large source stopped after checkpoint in earlier small batch; needs low-concurrency shard/resume"
+    },
+    {
+      "handle": "Kyoka_0609",
+      "url": "https://www.youtube.com/@Kyoka_0609",
+      "status": "pending",
+      "candidateCount": 245,
+      "inspectedInLatestRun": 6,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "candidate count too large for current small-batch runner; needs low-concurrency shard/resume"
+    },
+    {
+      "handle": "Laz_Furuto",
+      "url": "https://www.youtube.com/@Laz_Furuto/streams",
+      "status": "pending",
+      "candidateCount": 312,
+      "inspectedInLatestRun": 0,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "candidate-only probe succeeded; needs low-concurrency shard/resume"
+    },
+    {
+      "handle": "UtenHiyori",
+      "url": "https://www.youtube.com/@UtenHiyori",
+      "status": "pending",
+      "candidateCount": 428,
+      "inspectedInLatestRun": 0,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "candidate-only probe succeeded; needs low-concurrency shard/resume"
+    },
+    {
+      "handle": "SoraOtoha",
+      "url": "https://www.youtube.com/@SoraOtoha",
+      "status": "failed",
+      "candidateCount": 127,
+      "inspectedInLatestRun": 64,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "prior remote runner timed out before complete manifest"
+    },
+    {
+      "handle": "omaru_piano",
+      "url": "https://www.youtube.com/@omaru_piano/streams",
+      "status": "failed",
+      "candidateCount": 143,
+      "inspectedInLatestRun": 139,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "prior remote runner timed out before complete manifest; also requires strict piano/instrument dirty audit before any import"
+    },
+    {
+      "handle": "KOTATSUChHaruKotatsubutonclub",
+      "url": "https://www.youtube.com/@KOTATSUChHaruKotatsubutonclub",
+      "status": "failed",
+      "candidateCount": 134,
+      "inspectedInLatestRun": 130,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "batch13 reached timeout without a complete manifest"
+    },
+    {
+      "handle": "UCrF92dEkXiTtexol0yg4Gmw",
+      "url": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+      "status": "failed",
+      "candidateCount": 306,
+      "inspectedInLatestRun": 135,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "batch13 reached timeout without a complete manifest"
+    },
+    {
+      "handle": "asaxmayo",
+      "url": "https://www.youtube.com/@asaxmayo/streams",
+      "status": "failed",
+      "candidateCount": "571-591",
+      "inspectedInLatestRun": "90/100/94/106 by shard",
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "acceptedFileHits": 0,
+      "reason": "batch15 shards failed with YouTube HTTP 429 or timeout; candidate counts differed across hosts"
+    }
+  ],
+  "retryPolicy": {
+    "doNotImportPartialCheckpoints": true,
+    "recommended": [
+      "use one stable candidate snapshot per source",
+      "run one shard at a time per host, not two concurrent shards per host",
+      "increase request interval beyond 5000ms after HTTP 429",
+      "commit complete manifests first; keep incomplete shards as failed/pending only"
+    ]
+  },
+  "remoteCleanup": {
+    "usedRemoteHosts": false,
+    "reason": "audit-only batch; no new remote directory was created"
+  }
+}
