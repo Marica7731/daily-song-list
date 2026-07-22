@@ -155,6 +155,7 @@ button {
 
 .range-mode {
   justify-self: start;
+  min-width: 132px;
 }
 
 .view-mode {
@@ -3693,8 +3694,18 @@ mark {
   }
 
   .page-select input {
+    width: 42px;
     min-height: var(--chip-height);
     padding: 0 4px;
+  }
+
+  .page-select-total {
+    display: none;
+  }
+
+  .page-select-submit {
+    min-width: 42px;
+    padding-inline: 6px;
   }
 
   .rank-panel,

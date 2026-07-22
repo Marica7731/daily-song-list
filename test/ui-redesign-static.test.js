@@ -29,6 +29,9 @@ test("mobile information architecture exposes one inline search bar and a one-ro
   assert.doesNotMatch(indexSource, /class="topbar"|class="topbar-inner"|<h1>Daily Song List<\/h1>|歌曲时间戳排行/u);
   assert.doesNotMatch(indexSource, /class="controls-primary"|class="mobile-toolbar-actions"|class="controls-secondary"/u);
   assert.match(indexSource, /class="controls-inner"[\s\S]*class="[^"]*range-mode[^"]*"[\s\S]*class="[^"]*view-mode[^"]*"[\s\S]*class="query-search-bar"/u);
+  assert.match(captureSource, /README_QUERY_INLINE/u);
+  assert.match(captureSource, /#searchFieldPicker\[open\] \.search-field-options/u);
+  assert.doesNotMatch(captureSource, /#queryDialog:not\(\[hidden\]\) \.query-panel|README_QUERY_OPEN/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.controls-inner\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-bar\s*\{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 38px 38px;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.mobile-bottom-nav[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\)/u);
@@ -210,7 +213,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*--source-thumb-width: var\(--source-thumb-width-narrow\)/u);
   assert.match(verifySource, /async function mobileFilterSheetFlow/u);
   assert.match(verifySource, /async function waitForQueryFilterControls/u);
-  assert.match(verifySource, /details:not\(\[open\]\)/u);
+  assert.match(verifySource, /#searchFieldPicker\[open\] \.search-field-options/u);
   assert.match(verifySource, /async function mobileRankVisualGeometry/u);
   assert.match(verifySource, /async function mobileCopyAllLinksFlow/u);
   assert.match(verifySource, /async function mobileVideoCardGeometry/u);

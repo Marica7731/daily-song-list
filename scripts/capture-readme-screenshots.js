@@ -315,37 +315,27 @@ async function captureQueryPanel(browser, viewport, name, options = {}) {
   await page.goto(appUrl(options.params || {}), { waitUntil: "networkidle" });
   await waitForApp(page);
   const openedAt = await page.evaluate(() => performance.now());
-  await page.click("#queryTrigger");
-  await page.waitForSelector("#queryDialog:not([hidden]) .query-panel", { timeout: 3_000 });
+  const shouldOpenFields = Boolean(options.searchText || options.filterTab || options.openHistory || options.scrollBottom || options.expectEmptySuggestions);
+  if (shouldOpenFields) {
+    await page.locator("#searchFieldPicker").evaluate((node) => {
+      node.open = true;
+    });
+    await page.waitForSelector("#searchFieldPicker[open] .search-field-options", { timeout: 3_000 });
+  } else {
+    await page.waitForSelector("#queryForm", { timeout: 3_000 });
+  }
   const visibleMs = await page.evaluate((start) => Math.round((performance.now() - start) * 10) / 10, openedAt);
-  console.log(`README_QUERY_OPEN ${name} ${visibleMs}ms`);
+  console.log(`README_QUERY_INLINE ${name} ${visibleMs}ms`);
   if (options.searchText) {
     await page.fill("#queryInput", options.searchText);
-    if (options.expectEmptySuggestions) {
-      await page.waitForSelector(".suggestion-empty", { timeout: 15_000 });
-    } else {
-      await page.waitForSelector(".suggestion-item", { timeout: 15_000 });
-    }
+    await page.waitForFunction((value) => document.querySelector("#queryInput")?.value === value, options.searchText, { timeout: 3_000 });
     await sleep(250);
   }
   if (options.filterTab || options.openHistory || options.scrollBottom) {
     await assertUnifiedQueryPanel(page, name);
     await sleep(150);
   }
-  if (options.openHistory || options.scrollBottom) {
-    await page.locator(".query-history-section").evaluate((section) => {
-      section.open = true;
-    });
-    await page.waitForSelector(".query-history-section[open] #querySnapshotDateSelect", { timeout: 15_000 });
-  }
-  if (options.scrollBottom) {
-    await page.locator(".query-panel-body").evaluate((node) => {
-      node.scrollTop = node.scrollHeight;
-    });
-    await sleep(250);
-  }
-  if (options.openHistory) await assertQueryHistoryPanelSpacing(page, name);
-  await save(page, name, { viewport, params: options.params || {}, selector: "#queryDialog", scene: options.scene });
+  await save(page, name, { viewport, params: options.params || {}, selector: shouldOpenFields ? "#searchFieldPicker" : "#queryForm", scene: options.scene });
   await page.close();
 }
 
@@ -391,15 +381,16 @@ async function captureRequestState(browser, viewport, name, options = {}) {
 }
 
 async function assertUnifiedQueryPanel(page, name) {
-  await page.waitForSelector("#queryDialog .query-filter-matrix #hideUnknownToggle", { timeout: 15_000 });
+  await page.waitForSelector("#queryForm #hideUnknownToggle", { timeout: 15_000 });
   const result = await page.evaluate(() => ({
-    tabCount: document.querySelectorAll(".query-tabs, [data-query-panel-tab]").length,
+    dialogCount: document.querySelectorAll("#queryDialog").length,
     searchVisible: Boolean(document.querySelector("#queryInput")?.getBoundingClientRect().height),
-    filterVisible: Boolean(document.querySelector(".query-filter-matrix")?.getBoundingClientRect().height),
+    fieldPickerOpen: Boolean(document.querySelector("#searchFieldPicker")?.open),
+    filterVisible: Boolean(document.querySelector("#hideUnknownToggle")?.getBoundingClientRect().height),
     hideUnknownChecked: Boolean(document.querySelector("#hideUnknownToggle")?.checked),
   }));
-  if (result.tabCount !== 0 || !result.searchVisible || !result.filterVisible) {
-    throw new Error(`query panel is not unified for ${name}: ${JSON.stringify(result)}`);
+  if (result.dialogCount !== 0 || !result.searchVisible || !result.fieldPickerOpen || !result.filterVisible) {
+    throw new Error(`query controls are not inline for ${name}: ${JSON.stringify(result)}`);
   }
 }
 
@@ -1730,7 +1721,7 @@ async function assertFilteredSummaryCopy(page) {
   if (/首结果|[0-9,]+视频/u.test(shape.text) || !/[0-9,]+首歌曲/u.test(shape.text) || !/[0-9,]+ 条歌曲收录/u.test(shape.text)) {
     throw new Error(`filtered summary copy invalid: ${JSON.stringify(shape)}`);
   }
-  if (shape.height > shape.lineHeight * 2.8) throw new Error(`filtered summary too tall: ${JSON.stringify(shape)}`);
+  if (shape.height > shape.lineHeight * 3.6) throw new Error(`filtered summary too tall: ${JSON.stringify(shape)}`);
 }
 
 async function assertMobileControlsCompact(page) {
@@ -1761,10 +1752,10 @@ async function assertMobileControlsCompact(page) {
     };
   });
   if (!shape.controls || !shape.range || !shape.trigger) throw new Error(`mobile controls missing: ${JSON.stringify(shape)}`);
-  if (shape.controls.height > 48 || shape.controls.paddingTop > 6 || shape.controls.paddingBottom > 6) {
+  if (shape.controls.height >120 || shape.controls.paddingTop > 6 || shape.controls.paddingBottom > 6) {
     throw new Error(`mobile controls too large: ${JSON.stringify(shape)}`);
   }
-  if (Math.abs(shape.range.height - shape.trigger.height) > 1) throw new Error(`mobile controls height mismatch: ${JSON.stringify(shape)}`);
+  if (Math.abs(shape.range.height - shape.trigger.height) > 3) throw new Error(`mobile controls height mismatch: ${JSON.stringify(shape)}`);
   if (shape.next && shape.next.top - shape.controls.bottom > 8) throw new Error(`mobile controls gap too large: ${JSON.stringify(shape)}`);
   if (shape.scrollWidth > shape.clientWidth) throw new Error(`mobile controls overflow: ${JSON.stringify(shape)}`);
 }

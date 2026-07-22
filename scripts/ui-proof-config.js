@@ -131,7 +131,7 @@ const screenshotContracts = {
   "desktop-query-panel.png": {
     scene: "desktop-unified-query-panel",
     params: {},
-    selector: "#queryDialog",
+    selector: "#queryForm",
     viewport: { width: 1440, height: 900 },
   },
   "mobile-summary-baseline.png": {
@@ -208,7 +208,7 @@ const screenshotContracts = {
   "mobile-query-filter.png": {
     scene: "mobile-unified-filter-panel",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: "#searchFieldPicker",
   },
   "mobile-query-history.png": {
     viewport: { width: 390, height: 844 },
@@ -216,22 +216,22 @@ const screenshotContracts = {
   "mobile-query-grid-alignment.png": {
     scene: "mobile-query-grid-alignment",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: "#searchFieldPicker",
   },
   "mobile-query-empty-suggestions-compact.png": {
     scene: "mobile-query-empty-suggestions-compact",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: "#searchFieldPicker",
   },
   "mobile-query-footer-alignment.png": {
     scene: "mobile-query-footer-alignment",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: "#searchFieldPicker",
   },
   "mobile-query-history-alignment.png": {
     scene: "mobile-query-history-alignment",
     viewport: { width: 390, height: 844 },
-    selector: "#queryDialog",
+    selector: "#searchFieldPicker",
   },
   "mobile-page-request-loading.png": {
     scene: "mobile-page-request-loading",

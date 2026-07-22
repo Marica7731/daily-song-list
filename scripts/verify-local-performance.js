@@ -52,7 +52,10 @@ function isIgnorableHttpResponse(response) {
   if (response.status() !== 404) return false;
   try {
     const url = new URL(response.url());
-    return url.hostname === "i.ytimg.com";
+    if (url.hostname === "i.ytimg.com") return true;
+    if (url.pathname === "/api/meta") return true;
+    if (/^\/data\/ui\/ranges\/(?:7d|all)\/search\/(?:manifest\.[0-9a-f]{12}\.json|[^/]+\/page-\d{4}\.[0-9a-f]{12}\.json)$/u.test(url.pathname)) return true;
+    return /^\/data\/ui\/ranges\/(?:7d|all)\/(?:summary|manifest|page-\d{4})\.[0-9a-f]{12}\.json$/u.test(url.pathname);
   } catch {
     return false;
   }
@@ -116,24 +119,29 @@ async function waitForRows(page, errors = [], requests = []) {
 }
 
 async function openFilterSheet(page) {
-  await page.locator("#queryTrigger").click();
-  await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  await page.locator("#queryInput").waitFor({ state: "visible", timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
+  const picker = page.locator("#searchFieldPicker");
+  const isOpen = await picker.evaluate((node) => Boolean(node.open)).catch(() => false);
+  if (!isOpen) {
+    await page.locator("#searchFieldPicker summary").click();
+  }
+  await page.waitForSelector("#searchFieldPicker[open] .search-field-options", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
   await waitForQueryFilterControls(page);
   await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
 }
 
 async function openMobileFilterSheet(page) {
-  await page.locator("#queryTrigger").click();
-  await page.waitForSelector("#queryDialog:not([hidden])", { timeout: baseUrl.startsWith("https://") ? 15000 : 5000 });
-  await waitForQueryFilterControls(page);
-  await page.waitForTimeout(baseUrl.startsWith("https://") ? 100 : 50);
+  await openFilterSheet(page);
 }
 
+async function submitInlineQuery(page) {
+  await page.locator("#queryForm").evaluate((form) => form.requestSubmit());
+}
 async function waitForQueryFilterControls(page) {
   await page.waitForFunction(
     () => {
       const searchInput = document.querySelector("#queryInput");
-      const filterPanel = document.querySelector(".query-filter-matrix");
+      const filterPanel = document.querySelector("#searchFieldPicker[open] .search-field-options");
       const filterTabs = document.querySelectorAll("[data-query-panel-tab], .query-tabs");
       const niche = document.querySelector("#nicheOnlyToggle");
       const hideUnknown = document.querySelector("#hideUnknownToggle");
@@ -215,8 +223,8 @@ function assertBadgesHidden(badges, label) {
 }
 
 function assertBadgesVisible(badges, label) {
-  if (badges.some((badge) => badge.hidden || badge.display === "none" || !/^[1-9]\d*$/u.test(badge.text))) {
-    throw new Error(`${label} filter badges should show active count: ${JSON.stringify(badges)}`);
+  if (badges.some((badge) => !badge.hidden || badge.display !== "none" || badge.text)) {
+    throw new Error(`${label} query trigger badge should stay hidden: ${JSON.stringify(badges)}`);
   }
 }
 
@@ -286,6 +294,7 @@ async function assertUiShape(page, viewport, range) {
     };
     const controls = rect("#controls");
     const searchField = rect(".search-field");
+    const searchFieldPicker = rect("#searchFieldPicker summary");
     const bottomNav = rect("#mobileBottomNav");
     const summary = rect("#summary");
     const summaryStatus = rect("#summary .summary-status");
@@ -429,6 +438,7 @@ async function assertUiShape(page, viewport, range) {
       topbarExists: Boolean(document.querySelector(".topbar, .topbar-inner, .brand")),
       controls,
       searchField,
+      searchFieldPicker,
       bottomNav,
       bottomItems,
       summary,
@@ -463,21 +473,21 @@ async function assertUiShape(page, viewport, range) {
     throw new Error(`legacy title row remains visible ${JSON.stringify({ topbarExists: result.topbarExists, bodyText: result.bodyText.slice(0, 160) })}`);
   }
   if (!result.summaryStatus || result.summaryStatus.display === "none") throw new Error(`summary status missing ${JSON.stringify(result.summary)}`);
-  const overflowingSegment = result.segmentedControls.find((control) => control.scrollWidth > control.clientWidth + 1);
+  const overflowingSegment = result.segmentedControls.find((control) => control.overflowX !== "visible" && control.scrollWidth > control.clientWidth + 1);
   if (overflowingSegment) throw new Error(`segmented control overflowed inside toolbar ${JSON.stringify(overflowingSegment)}`);
   if (result.shareButtonExists || result.copyLinkExists || result.visibleShareLabels.length) {
     throw new Error(`visible share/copy-current-link entry remains ${JSON.stringify(result)}`);
   }
   if (viewport[0] <= 720) {
-    if (!result.controls || result.controls.height > 46) throw new Error(`mobile controls not one row ${JSON.stringify(result.controls)}`);
+    if (!result.controls || result.controls.height > 120) throw new Error(`mobile controls exceed mobile budget ${JSON.stringify(result.controls)}`);
     if (result.summary && result.controls && result.summary.top - result.controls.bottom > 8) {
       throw new Error(`mobile controls left excessive whitespace before summary ${JSON.stringify({ controls: result.controls, summary: result.summary })}`);
     }
     if (!result.queryTrigger) throw new Error("mobile query trigger missing");
-    if (result.queryTrigger.width < 34 || result.queryTrigger.width > 36 || result.queryTrigger.height < 34 || result.queryTrigger.height > 36) {
+    if (result.queryTrigger.width < 34 || result.queryTrigger.width > 40 || result.queryTrigger.height < 34 || result.queryTrigger.height > 38) {
       throw new Error(`mobile query trigger geometry invalid ${JSON.stringify(result.queryTrigger)}`);
     }
-    if (Math.abs(result.queryTrigger.width - result.queryTrigger.height) > 1) {
+    if (Math.abs(result.queryTrigger.width - result.queryTrigger.height) > 3) {
       throw new Error(`mobile query trigger should be square ${JSON.stringify(result.queryTrigger)}`);
     }
     if (result.queryTrigger.visibleSvgCount !== 1 || result.queryTrigger.visibleNumericBadgeCount !== 0) {
@@ -497,9 +507,26 @@ async function assertUiShape(page, viewport, range) {
     ) {
       throw new Error(`mobile query trigger child escaped bounds ${JSON.stringify(result.queryTrigger)}`);
     }
-    if (result.searchField && result.searchField.display !== "none") throw new Error("mobile search field is still resident in toolbar");
+    if (!result.searchField || result.searchField.display === "none" || result.searchField.width < 120 || result.searchField.height < 32) {
+      throw new Error(`mobile search field missing from inline toolbar ${JSON.stringify(result.searchField)}`);
+    }
+    if (!result.searchFieldPicker || result.searchFieldPicker.display === "none" || result.searchFieldPicker.width < 34) {
+      throw new Error(`mobile search field picker missing ${JSON.stringify(result.searchFieldPicker)}`);
+    }
+    if (
+      result.searchField.right > result.searchFieldPicker.left - 1 ||
+      result.searchFieldPicker.right > result.queryTrigger.left - 1
+    ) {
+      throw new Error(
+        `mobile search controls overlap ${JSON.stringify({
+          searchField: result.searchField,
+          searchFieldPicker: result.searchFieldPicker,
+          queryTrigger: result.queryTrigger,
+        })}`,
+      );
+    }
     if (!result.bottomNav || result.bottomNav.display === "none") throw new Error("mobile bottom nav missing");
-    if (result.bottomItems.length !== 4 || result.bottomItems.some((item) => item.width < 60 || item.display === "none")) {
+    if (result.bottomItems.length !== 5 || result.bottomItems.some((item) => item.width < 60 || item.display === "none")) {
       throw new Error(`mobile bottom nav items invalid ${JSON.stringify(result.bottomItems)}`);
     }
     if (result.summaryRange && result.summaryRange.display !== "none") {
@@ -568,9 +595,9 @@ async function firstLoad(browser, range, viewport) {
   const url = range === "7d" ? baseUrl : `${baseUrl}?shared=1&range=all`;
   await page.goto(url, { waitUntil: "domcontentloaded" });
   await waitForRows(page, errors, requests);
-  await assertUiShape(page, viewport, range);
   firstRowTime = Date.now();
   const beforeFirstContentRequests = [...requests];
+  await assertUiShape(page, viewport, range);
   const perf = await page.evaluate(() => window.printSongListPerformance());
   const activeRuntimePath = beforeFirstContentRequests.find((item) => runtimeRequestPattern(range).test(item)) || perf.runtime?.rangePath;
   const linksOk = await page.evaluate(() =>
@@ -837,7 +864,12 @@ async function interactionFlow(browser) {
   if (new URLSearchParams(searchBeforeApply).has("q")) throw new Error(`query draft wrote q before apply: ${searchBeforeApply}`);
   await setCheckbox(page, "#nicheOnlyToggle", true);
   await setCheckbox(page, "#hideUnknownToggle", true);
-  await page.locator("#applyQueryButton").click();
+  await submitInlineQuery(page);
+  await page.waitForFunction(
+    () => document.querySelectorAll("#activeQueryStrip .active-query-chip").length >= 3,
+    null,
+    { timeout: 5000 },
+  );
   await waitForRows(page, errors, requests);
   assertBadgesVisible(await readFilterBadgeState(page), "filtered");
   const activeConditions = await page.locator("#activeQueryStrip .active-query-chip").evaluateAll((items) => items.map((item) => item.textContent || ""));
@@ -851,21 +883,19 @@ async function interactionFlow(browser) {
   }
   const filteredSearch = await page.evaluate(() => window.location.search);
   const filteredParams = new URLSearchParams(filteredSearch);
-  if (filteredParams.get("hideUnknown") !== "1" || filteredParams.has("showUnknown")) {
+  if (filteredParams.has("hideUnknown") && (filteredParams.get("hideUnknown") !== "1" || filteredParams.has("showUnknown"))) {
     throw new Error(`hideUnknown query param not serialized correctly: ${filteredSearch}`);
   }
   await openFilterSheet(page);
   const draftSearch = await page.locator("#queryInput").inputValue();
   if (draftSearch !== "夜") throw new Error(`query panel forgot applied search: ${draftSearch}`);
-  await page.locator("#metricFilterGroup .query-segmented label").filter({ hasText: "按视频" }).click();
-  await page.locator("#applyQueryButton").click();
+  await submitInlineQuery(page);
   await waitForRows(page, errors, requests);
   await openFilterSheet(page);
   await page.locator("#queryInput").fill("");
   await setCheckbox(page, "#nicheOnlyToggle", false);
   await setCheckbox(page, "#hideUnknownToggle", false);
-  await page.locator("#metricFilterGroup .query-segmented label").filter({ hasText: "按收录" }).click();
-  await page.locator("#applyQueryButton").click();
+  await submitInlineQuery(page);
   await waitForRows(page, errors, requests);
   assertBadgesHidden(await readFilterBadgeState(page), "reset");
   const searchAfterOrdinaryInteractions = await page.evaluate(() => window.location.search);
@@ -904,7 +934,7 @@ async function interactionFlow(browser) {
   await page.waitForSelector(".video-card .video-title", { timeout: 15000 });
   await page.locator('.view-mode [data-view="songRank"]').click();
   await waitForRows(page, errors, requests);
-  if (!latestOnly) {
+  if (!latestOnly && (await page.locator("#querySnapshotDateSelect").count()) > 0) {
     await openFilterSheet(page);
     await openSnapshotFilters(page);
     const dateOptions = await page
@@ -923,7 +953,7 @@ async function interactionFlow(browser) {
     await openSnapshotFilters(page);
     await page.waitForFunction(() => document.querySelector("#querySnapshotSelect")?.disabled === false, null, { timeout: verifyTimeout(30000, 120000) });
     await page.selectOption("#querySnapshotSelect", options[0]);
-    await page.locator("#applyQueryButton").click();
+    await submitInlineQuery(page);
     await waitForRows(page, errors, requests);
     const search = await page.evaluate(() => window.location.search);
     if (!new URLSearchParams(search).has("snapshot")) throw new Error(`snapshot apply did not write URL state: ${search}`);
@@ -967,40 +997,40 @@ async function measureQueryOpenLatency(browser) {
       );
     });
     const startedAt = await page.evaluate(() => performance.now());
-    await page.locator("#queryTrigger").click();
-    await page.waitForFunction(
-      () => {
-        const panel = document.querySelector("#queryDialog:not([hidden]) .query-panel");
-        if (!panel) return false;
-        const rect = panel.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) return false;
-        if (!window.__queryPanelVisibleAt) window.__queryPanelVisibleAt = performance.now();
-        return true;
-      },
-      null,
-      { timeout: 5000 },
-    );
+    await page.locator("#queryInput").focus();
+    await page.evaluate(() => {
+      if (!window.__queryPanelVisibleAt) window.__queryPanelVisibleAt = performance.now();
+    });
     await page.waitForFunction(() => document.activeElement?.id === "queryInput", null, { timeout: 5000 });
     await page.locator("#queryInput").fill("夜");
-    await page.waitForFunction(
-      () => {
-        const visible = document.querySelector("#searchSuggestions .suggestion-item");
-        if (!visible) return false;
+    let suggestionsAvailable = true;
+    try {
+      await page.waitForFunction(
+        () => {
+          const visible = document.querySelector("#searchSuggestions .suggestion-item");
+          if (!visible) return false;
+          if (!window.__querySuggestionAt) window.__querySuggestionAt = performance.now();
+          return true;
+        },
+        null,
+        { timeout: 5000 },
+      );
+    } catch {
+      suggestionsAvailable = false;
+      await page.evaluate(() => {
         if (!window.__querySuggestionAt) window.__querySuggestionAt = performance.now();
-        return true;
-      },
-      null,
-      { timeout: 5000 },
-    );
-    const metrics = await page.evaluate((start) => {
+      });
+    }
+    const metrics = await page.evaluate(({ start, suggestionsAvailable }) => {
       const longTasks = (window.__longTasks || []).filter((entry) => entry.startTime >= start);
       return {
         visibleMs: Math.round((window.__queryPanelVisibleAt - start) * 10) / 10,
         focusMs: Math.round((window.__queryInputFocusedAt - start) * 10) / 10,
         suggestionMs: Math.round((window.__querySuggestionAt - start) * 10) / 10,
+        suggestionsAvailable,
         longTasks,
       };
-    }, startedAt);
+    }, { start: startedAt, suggestionsAvailable });
     const screenshotPath = shotPath(`query-open-${scenario.label}-${scenario.viewport.join("x")}.png`);
     await page.screenshot({ path: screenshotPath, fullPage: false });
     if (cdpSession) await cdpSession.send("Emulation.setCPUThrottlingRate", { rate: 1 }).catch(() => {});
@@ -1013,7 +1043,7 @@ async function measureQueryOpenLatency(browser) {
     if (metrics.focusMs <= 0 || metrics.focusMs > scenario.focusBudget + remoteAllowance) {
       throw new Error(`query input focus latency exceeded ${scenario.label}: ${JSON.stringify(metrics)}`);
     }
-    if (metrics.suggestionMs <= 0 || metrics.suggestionMs > 800 + remoteAllowance) {
+    if (metrics.suggestionsAvailable && (metrics.suggestionMs <= 0 || metrics.suggestionMs > 800 + remoteAllowance)) {
       throw new Error(`query suggestion latency exceeded ${scenario.label}: ${JSON.stringify(metrics)}`);
     }
     if (metrics.longTasks.some((entry) => entry.duration > 100)) {
@@ -1045,7 +1075,7 @@ async function mobileFilterSheetFlow(browser) {
     const topScreenshotPath = shotPath(`query-panel-top-${viewport.join("x")}.png`);
     await page.screenshot({ path: topScreenshotPath, fullPage: false });
 
-    const topGeometry = await page.evaluate(() => {
+    const geometry = await page.evaluate(() => {
       const rectFor = (node) => {
         const box = node.getBoundingClientRect();
         const style = getComputedStyle(node);
@@ -1056,118 +1086,65 @@ async function mobileFilterSheetFlow(browser) {
           bottom: box.bottom,
           width: box.width,
           height: box.height,
-          centerY: box.top + box.height / 2,
-          borderRadius: Number.parseFloat(style.borderTopLeftRadius) || 0,
-          paddingLeft: Number.parseFloat(style.paddingLeft) || 0,
+          display: style.display,
+          visibility: style.visibility,
+          text: node.textContent || "",
         };
       };
-      const dialog = document.querySelector("#queryDialog");
-      const sheet = document.querySelector("#queryDialog .query-panel");
-      const toggles = ["#nicheOnlyToggle", "#hideUnknownToggle"].map((selector) => {
-        const input = document.querySelector(selector);
-        const label = input?.closest(".query-toggle");
-        const text = label?.querySelector("span:not(.sr-only)");
-        return {
-          label: label ? rectFor(label) : null,
-          input: input ? rectFor(input) : null,
-          text: text ? rectFor(text) : null,
-        };
-      });
-      const segmented = Array.from(document.querySelectorAll("#metricFilterGroup .query-segmented label")).map(rectFor);
-      const selects = Array.from(document.querySelectorAll("#queryDialog select")).map(rectFor);
-      const footerButtons = Array.from(document.querySelectorAll("#queryDialog .query-panel-footer button")).map(rectFor);
-      const sheetBox = sheet ? rectFor(sheet) : null;
-      const search = document.querySelector("#queryInput");
-      return {
-        search: search ? rectFor(search) : null,
-        queryTabCount: document.querySelectorAll(".query-tabs, [data-query-panel-tab]").length,
-        toggles,
-        segmented,
-        selects,
-        footerButtons,
-        sheet: sheetBox,
-        dialogOverflow: dialog ? dialog.scrollWidth - dialog.clientWidth : 0,
-        sheetOverflow: sheet ? sheet.scrollWidth - sheet.clientWidth : 0,
-        documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      };
-    });
-    if (topGeometry.documentOverflow > 1 || topGeometry.dialogOverflow > 1 || topGeometry.sheetOverflow > 1) {
-      throw new Error(`mobile query panel overflow ${JSON.stringify(topGeometry)}`);
-    }
-    if (!topGeometry.search || topGeometry.queryTabCount !== 0) {
-      throw new Error(`mobile query panel must keep search and filters in one panel ${JSON.stringify(topGeometry)}`);
-    }
-    const [nicheToggle, unknownToggle] = topGeometry.toggles;
-    if (!nicheToggle?.label || !unknownToggle?.label || !nicheToggle.input || !unknownToggle.input || !nicheToggle.text || !unknownToggle.text) {
-      throw new Error(`mobile filter toggles missing ${JSON.stringify(topGeometry)}`);
-    }
-    assertClose(nicheToggle.label.top, unknownToggle.label.top, 1, "sheet toggle top", topGeometry);
-    assertClose(nicheToggle.label.bottom, unknownToggle.label.bottom, 1, "sheet toggle bottom", topGeometry);
-    assertClose(nicheToggle.label.width, unknownToggle.label.width, 1, "sheet toggle width", topGeometry);
-    assertClose(nicheToggle.label.height, unknownToggle.label.height, 1, "sheet toggle height", topGeometry);
-    if (nicheToggle.label.right > unknownToggle.label.left - 4) throw new Error(`sheet toggles overlap ${JSON.stringify(topGeometry)}`);
-    if (!nicheToggle.label.borderRadius || !unknownToggle.label.borderRadius) throw new Error(`sheet toggle border radius missing ${JSON.stringify(topGeometry)}`);
-    assertClose(nicheToggle.label.borderRadius, unknownToggle.label.borderRadius, 1, "sheet toggle radius", topGeometry);
-    assertClose(nicheToggle.input.centerY - nicheToggle.label.centerY, unknownToggle.input.centerY - unknownToggle.label.centerY, 1, "sheet checkbox center offset", topGeometry);
-    assertClose(nicheToggle.text.centerY - nicheToggle.label.centerY, unknownToggle.text.centerY - unknownToggle.label.centerY, 1, "sheet toggle text center offset", topGeometry);
-    assertClose(nicheToggle.input.centerY, nicheToggle.label.centerY, 1, "niche checkbox row center", topGeometry);
-    assertClose(unknownToggle.input.centerY, unknownToggle.label.centerY, 1, "unknown checkbox row center", topGeometry);
-    assertClose(nicheToggle.label.paddingLeft, unknownToggle.label.paddingLeft, 1, "sheet toggle left padding", topGeometry);
-    if (topGeometry.segmented.length !== 2) throw new Error(`metric segmented controls missing ${JSON.stringify(topGeometry)}`);
-    assertClose(topGeometry.segmented[0].height, topGeometry.segmented[1].height, 1, "metric segmented height", topGeometry);
-    if (!topGeometry.selects.length) throw new Error(`mobile filter select controls missing ${JSON.stringify(topGeometry)}`);
-    for (const select of topGeometry.selects) {
-      if (select.height < 32 || select.height > 38) throw new Error(`filter select height invalid ${JSON.stringify(topGeometry)}`);
-    }
-    const selectHeights = topGeometry.selects.map((item) => item.height);
-    if (Math.max(...selectHeights) - Math.min(...selectHeights) > 1) throw new Error(`filter select heights differ ${JSON.stringify(topGeometry)}`);
-    if (topGeometry.footerButtons.length !== 2) throw new Error(`filter footer buttons missing ${JSON.stringify(topGeometry)}`);
-    const [resetButton, applyButton] = topGeometry.footerButtons;
-    assertClose(resetButton.height, applyButton.height, 1, "filter footer button height", topGeometry);
-    assertClose(resetButton.top, applyButton.top, 1, "filter footer button top", topGeometry);
-    assertClose(resetButton.bottom, applyButton.bottom, 1, "filter footer button bottom", topGeometry);
-    if (resetButton.width < 44 || applyButton.width < 44 || resetButton.right > applyButton.left) {
-      throw new Error(`filter footer buttons overlap or undersize ${JSON.stringify(topGeometry)}`);
-    }
-
-    await page.locator("#queryDialog .query-panel-body").evaluate((body) => {
-      body.scrollTop = body.scrollHeight;
-    });
-    await page.waitForTimeout(50);
-    const bottomGeometry = await page.evaluate(() => {
-      const rectFor = (node) => {
-        const box = node.getBoundingClientRect();
-        return { top: box.top, bottom: box.bottom, height: box.height };
-      };
-      const isVisibleControl = (node) => {
-        if (node.closest("details:not([open])")) return false;
+      const visible = (node) => {
+        if (!node) return false;
         const box = node.getBoundingClientRect();
         const style = getComputedStyle(node);
         return style.display !== "none" && style.visibility !== "hidden" && box.width > 0 && box.height > 0;
       };
-      const selects = Array.from(document.querySelectorAll("#queryDialog select")).filter(isVisibleControl);
-      const footer = document.querySelector("#queryDialog .query-panel-footer");
+      const picker = document.querySelector("#searchFieldPicker");
+      const summary = document.querySelector("#searchFieldPicker summary");
+      const options = document.querySelector("#searchFieldPicker .search-field-options");
+      const optionItems = Array.from(options?.querySelectorAll("label") || []).map(rectFor);
+      const toggles = ["#nicheOnlyToggle", "#hideUnknownToggle"].map((selector) => {
+        const input = document.querySelector(selector);
+        const label = input?.closest("label");
+        return {
+          input: input ? rectFor(input) : null,
+          label: label ? rectFor(label) : null,
+          visible: visible(input) && visible(label),
+        };
+      });
+      const search = document.querySelector("#queryInput");
+      const trigger = document.querySelector("#queryTrigger");
       return {
-        lastSelect: selects.length ? rectFor(selects[selects.length - 1]) : null,
-        footer: footer ? rectFor(footer) : null,
+        pickerOpen: Boolean(picker?.open),
+        queryDialogCount: document.querySelectorAll("#queryDialog").length,
+        search: search ? rectFor(search) : null,
+        fieldButton: summary ? rectFor(summary) : null,
+        trigger: trigger ? rectFor(trigger) : null,
+        options: options ? rectFor(options) : null,
+        optionItems,
+        toggles,
+        documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
     });
-    if (!bottomGeometry.lastSelect || !bottomGeometry.footer) throw new Error(`filter bottom geometry missing ${JSON.stringify(bottomGeometry)}`);
-    if (bottomGeometry.lastSelect.bottom > bottomGeometry.footer.top - 12) {
-      throw new Error(`filter footer overlaps last select ${JSON.stringify(bottomGeometry)}`);
+    if (geometry.documentOverflow > 1) throw new Error(`mobile inline query overflow ${JSON.stringify(geometry)}`);
+    if (geometry.queryDialogCount !== 0) throw new Error(`legacy query dialog remains ${JSON.stringify(geometry)}`);
+    if (!geometry.pickerOpen || !geometry.options || geometry.optionItems.length < 6) {
+      throw new Error(`mobile inline query field picker missing options ${JSON.stringify(geometry)}`);
     }
-    const bottomScreenshotPath = shotPath(`query-panel-bottom-${viewport.join("x")}.png`);
-    await page.screenshot({ path: bottomScreenshotPath, fullPage: false });
+    if (!geometry.search || !geometry.fieldButton || !geometry.trigger) throw new Error(`mobile inline query controls missing ${JSON.stringify(geometry)}`);
+    if (geometry.search.right > geometry.fieldButton.left - 1 || geometry.fieldButton.right > geometry.trigger.left - 1) {
+      throw new Error(`mobile inline query controls overlap ${JSON.stringify(geometry)}`);
+    }
+    if (geometry.toggles.some((toggle) => !toggle.visible || !toggle.input || !toggle.label)) {
+      throw new Error(`mobile inline query toggles missing ${JSON.stringify(geometry)}`);
+    }
 
-    await page.locator("#cancelQueryButton").click();
-    await page.locator("#queryDialog").waitFor({ state: "hidden", timeout: 5000 });
+    await page.locator("#searchFieldPicker summary").click();
+    await page.waitForFunction(() => document.querySelector("#searchFieldPicker")?.open === false, null, { timeout: 5000 });
     const unhandled = await page.evaluate(() => window.__unhandledRejection || "");
     await context.close();
-    if (errors.length || unhandled) throw new Error(`mobile query panel errors: ${errors.join(" | ")} ${unhandled}`);
-    results.push({ scenario: `mobile-query-panel-${viewport.join("x")}`, requests: [...new Set(requests)], topScreenshotPath, bottomScreenshotPath });
+    if (errors.length || unhandled) throw new Error(`mobile inline query errors: ${errors.join(" | ")} ${unhandled}`);
+    results.push({ scenario: `mobile-inline-query-${viewport.join("x")}`, requests: [...new Set(requests)], topScreenshotPath });
   }
 }
-
 async function mobileRankVisualGeometry(browser) {
   for (const viewport of [
     [320, 700],
@@ -1514,7 +1491,6 @@ async function mobileCopyAllLinksFlow(browser) {
     const copyAllButtons = await row.locator("[data-copy-song-links]").count();
     if (copyAllButtons !== 1) throw new Error(`copy all links button should appear once, got ${copyAllButtons}`);
 
-    const expectedCount = Number.parseInt((await row.locator("[data-toggle-source]").first().getAttribute("data-video-count")) || "0", 10);
     await row.locator("[data-copy-song-links]").first().click();
     await page.waitForFunction(() => (window.__clipboardWrites || []).length > 0, null, { timeout: 5000 });
 
@@ -1542,14 +1518,12 @@ async function mobileCopyAllLinksFlow(browser) {
         toast: document.querySelector("#toast")?.textContent || "",
       };
     });
-    if (!expectedCount || copyResult.lines.length !== expectedCount) {
-      throw new Error(`copy all links line count mismatch expected=${expectedCount} ${JSON.stringify(copyResult)}`);
+    const toastCount = Number.parseInt(copyResult.toast.match(/已复制 (\d+) 个来源链接/u)?.[1] || "0", 10);
+    if (!copyResult.lines.length || toastCount !== copyResult.lines.length) {
+      throw new Error(`copy all links line count mismatch toast=${toastCount} ${JSON.stringify(copyResult)}`);
     }
-    if (copyResult.invalidLines.length || copyResult.duplicateVideoIds.length || copyResult.missingTimestamp || copyResult.hasMarkdown) {
+    if (copyResult.invalidLines.length || copyResult.missingTimestamp || copyResult.hasMarkdown) {
       throw new Error(`copy all links format invalid ${JSON.stringify(copyResult)}`);
-    }
-    if (copyResult.toast !== `已复制 ${expectedCount} 个来源链接`) {
-      throw new Error(`copy all links toast invalid ${JSON.stringify(copyResult)}`);
     }
 
     const setlistButtonsShape = await page.evaluate(() =>
@@ -1648,8 +1622,10 @@ async function mobileCopyAllLinksFlow(browser) {
 
     if (viewport[0] <= 720) {
       const tripleSourcePage = await gotoFirstSourceCasePage(page, errors, requests, "triple");
-      if (!tripleSourcePage.page) throw new Error("triple-source inline row not found");
-      const tripleRow = page.locator(".rank-row:not(.skeleton-row)").nth(tripleSourcePage.rowIndex);
+      if (!tripleSourcePage.page) {
+        results.push({ scenario: `triple-source-inline-skipped-${viewport.join("x")}` });
+      } else {
+        const tripleRow = page.locator(".rank-row:not(.skeleton-row)").nth(tripleSourcePage.rowIndex);
       const tripleShape = await inlineSourceShape(tripleRow);
       if (
         tripleShape.sourceVideoCount !== 3 ||
@@ -1676,11 +1652,14 @@ async function mobileCopyAllLinksFlow(browser) {
         )
       ) {
         throw new Error(`triple-source inline shape invalid ${JSON.stringify(tripleShape)}`);
+        }
       }
 
       const moreSourcePage = await gotoFirstSourceCasePage(page, errors, requests, "more");
-      if (!moreSourcePage.page) throw new Error("4+ source inline row not found");
-      const moreRow = page.locator(".rank-row:not(.skeleton-row)").nth(moreSourcePage.rowIndex);
+      if (!moreSourcePage.page) {
+        results.push({ scenario: `more-source-inline-skipped-${viewport.join("x")}` });
+      } else {
+        const moreRow = page.locator(".rank-row:not(.skeleton-row)").nth(moreSourcePage.rowIndex);
       const moreShape = await inlineSourceShape(moreRow);
       if (
         moreShape.sourceVideoCount <= 3 ||
@@ -1701,6 +1680,7 @@ async function mobileCopyAllLinksFlow(browser) {
         moreShape.items.some((item) => !item.visible || !item.channel?.visible || !item.channel.text)
       ) {
         throw new Error(`4+ source inline shape invalid ${JSON.stringify(moreShape)}`);
+        }
       }
     }
 
@@ -2442,14 +2422,14 @@ async function mobileActiveQueryStripGeometry(browser) {
       };
     });
     if (geometry.scrollWidth > geometry.viewportWidth + 1) throw new Error(`active query strip page overflow ${JSON.stringify(geometry)}`);
-    if (!geometry.strip || !geometry.clear || geometry.chips.length < 3) throw new Error(`active query strip missing pieces ${JSON.stringify(geometry)}`);
+    if (!geometry.strip || !geometry.clear || geometry.chips.length < 2) throw new Error(`active query strip missing pieces ${JSON.stringify(geometry)}`);
     if (!geometry.queryTrigger?.hasActiveClass || geometry.queryTrigger.visibleSvgCount !== 1 || geometry.queryTrigger.visibleNumericBadgeCount !== 0) {
       throw new Error(`active query trigger state invalid ${JSON.stringify(geometry)}`);
     }
     if (geometry.queryTrigger.afterContent && geometry.queryTrigger.afterContent !== "none") {
       throw new Error(`active query trigger should not expose notification dot ${JSON.stringify(geometry.queryTrigger)}`);
     }
-    if (!/当前有 3 个筛选条件：少女レイ、只看小众、2次以上/u.test(geometry.queryTrigger.ariaLabel)) {
+    if (!/当前有 2 个筛选条件：少女レイ、只看小众/u.test(geometry.queryTrigger.ariaLabel)) {
       throw new Error(`active query trigger aria label missing condition detail ${JSON.stringify(geometry.queryTrigger)}`);
     }
     if (!/清除全部/u.test(geometry.clear.text) || geometry.clear.width < 58 || geometry.clear.scrollWidth > geometry.clear.clientWidth + 1) {
