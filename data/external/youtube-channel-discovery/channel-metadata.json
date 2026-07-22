@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-21T23:48:59.656Z",
+  "generatedAt": "2026-07-22T00:43:28.354Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-21T23:48:59.656Z",
+    "fetchedAt": "2026-07-22T00:43:28.354Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-21T23:48:59.656Z",
+    "generatedAt": "2026-07-22T00:43:28.354Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7937,7 +7937,7 @@
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
       "totalChannels": 963,
-      "parseableChannels": 746,
+      "parseableChannels": 747,
       "realAvatar": 643,
       "thumbnailFallback": 320,
       "missingDisplayImage": 0,
@@ -7951,10 +7951,17 @@
     },
     "failures": [],
     "skippedSummary": {
-      "missing_channel_url_or_handle": 217,
-      "batch_limit_reached": 111
+      "batch_limit_reached": 112,
+      "missing_channel_url_or_handle": 216
     },
     "skippedSamples": [
+      {
+        "handle": "",
+        "channelId": "UCXw752V8J8yl_kkiEycyyqg",
+        "displayName": "えん / neG",
+        "sourceUrl": "https://www.youtube.com/channel/UCXw752V8J8yl_kkiEycyyqg",
+        "reason": "batch_limit_reached"
+      },
       {
         "handle": "",
         "channelId": "",
@@ -8120,13 +8127,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "宮守ゆり",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "猫目石 ネモ / Nemo Nekomeishi",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
