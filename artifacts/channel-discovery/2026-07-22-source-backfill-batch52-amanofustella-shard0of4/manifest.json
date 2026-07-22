@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-status-only",
+  "generatedAt": "2026-07-22T23:39:26.389Z",
+  "status": "interrupted",
+  "reason": "User requested immediate stop after prolonged wait; remote discovery was terminated before final discovery manifest/export/dirty-audit could be produced.",
+  "source": {
+    "url": "https://www.youtube.com/@AmanofuStella",
+    "singerName": "天ノ譜ステラ"
+  },
+  "shard": {
+    "inspectShardIndex": 0,
+    "inspectShardCount": 4
+  },
+  "result": {
+    "imported": 0,
+    "skipped": 0,
+    "failed": 1,
+    "success": false
+  },
+  "discovery": {
+    "status": "interrupted",
+    "candidateCount": 241,
+    "inspectedCount": 45,
+    "usableVideoCount": 45,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "partialOccurrenceCount": 414,
+    "publishedTimestampCoverage": "45/45 partial checkpoint only",
+    "publishedTimestampRange": {
+      "min": 1721690622979,
+      "max": 1784157831933
+    },
+    "occurrenceTimeCoverage": "414/414 partial checkpoint only",
+    "occurrenceSecondsCoverage": "414/414 partial checkpoint only",
+    "occurrenceSecondsRange": {
+      "min": 0,
+      "max": 41708
+    },
+    "thumbnailCoverage": {
+      "videos": "45/45 partial checkpoint only",
+      "occurrences": "414/414 partial checkpoint only"
+    },
+    "params": {
+      "maxChannelPages": 100,
+      "maxCandidates": 0,
+      "maxInspect": 1000,
+      "inspectShardIndex": 0,
+      "inspectShardCount": 4,
+      "requestIntervalMs": 3500,
+      "requestJitterMs": 1500
+    },
+    "reachedEnd": false,
+    "dirtyAudit": {
+      "dropped": null,
+      "suspicious": null,
+      "reason": "Dirty audit was not run because discovery did not complete and no increment was exported.",
+      "rules": {
+        "hardExclude": [
+          "フルート",
+          "生演奏",
+          "クラリネット",
+          "サックス",
+          "サクソフォン",
+          "sax",
+          "saxophone"
+        ],
+        "exactPhraseDrops": [
+          "piano streaming",
+          "piano performance",
+          "ピアノ演奏"
+        ],
+        "liveRule": "live/ライブ is suspicious/drop only when the title lacks explicit singing signals such as 歌枠, 歌, 弾き語り, karaoke, 歌ってみた."
+      }
+    },
+    "auditRecordCount": 50
+  },
+  "remoteExecution": {
+    "preferredHost": "Mac",
+    "usedHost": "Mac",
+    "hostname": "bedeMacBook-Air.local",
+    "remoteDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch52-amanofustella-shard0of4/repo",
+    "sourceCommit": "309000bdba0e7442757363c98dfd60c47192449d",
+    "setup": "minimal git archive copied from Windows current HEAD; extracted in independent Mac temp directory; source ~/.daily-song-list-build-env used; npm install --no-audit --no-fund",
+    "precheck": {
+      "sourceFilterExists": true,
+      "marker": "2026-07-22T23:20:50Z stage=precheck_source_filter CODEX_SOURCE_FILTER_PRECHECK_OK path=assets/source-filter.js bytes=20366 sha256=98658ef49b0577a202cf6f83fe7ec9898143cefd524004fcf4e8fb01ef09db2a"
+    },
+    "commandSummary": "shell watchdog 3600s npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@AmanofuStella --singer-name 天ノ譜ステラ --output-dir artifacts/channel-discovery/2026-07-22-source-backfill-batch52-amanofustella-shard0of4-discovery --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-count 4 --inspect-shard-index 0 --request-interval-ms 3500 --request-jitter-ms 1500",
+    "interruptedAt": "2026-07-22T23:37:55Z",
+    "lastStage": "2026-07-22T23:36:51Z stage=heartbeat discovery elapsed=901s",
+    "cleanupStatus": "removed",
+    "postCleanupDfH": "/dev/disk3s5   926Gi   135Gi   753Gi    16%    562k  7.9G    0%   /System/Volumes/Data",
+    "remoteTempExistsAfterCleanup": false,
+    "stageLogTail": [
+      "2026-07-22T23:20:50Z stage=setup_start host=bedeMacBook-Air.local",
+      "2026-07-22T23:20:50Z stage=setup_done",
+      "2026-07-22T23:20:50Z stage=env_sourced path=/Users/be/.daily-song-list-build-env",
+      "2026-07-22T23:20:50Z stage=precheck_source_filter CODEX_SOURCE_FILTER_PRECHECK_OK path=assets/source-filter.js bytes=20366 sha256=98658ef49b0577a202cf6f83fe7ec9898143cefd524004fcf4e8fb01ef09db2a",
+      "2026-07-22T23:20:50Z stage=install_start host=bedeMacBook-Air.local",
+      "2026-07-22T23:20:50Z stage=heartbeat install elapsed=0s",
+      "2026-07-22T23:21:50Z stage=install_done exit=0",
+      "stdout_tail: ",
+      "stdout_tail: up to date in 83ms",
+      "2026-07-22T23:21:50Z stage=discovery_start host=bedeMacBook-Air.local",
+      "2026-07-22T23:21:50Z stage=heartbeat discovery elapsed=0s",
+      "2026-07-22T23:22:50Z stage=heartbeat discovery elapsed=60s",
+      "2026-07-22T23:23:50Z stage=heartbeat discovery elapsed=120s",
+      "2026-07-22T23:24:50Z stage=heartbeat discovery elapsed=180s",
+      "2026-07-22T23:25:50Z stage=heartbeat discovery elapsed=240s",
+      "2026-07-22T23:26:50Z stage=heartbeat discovery elapsed=300s",
+      "2026-07-22T23:27:50Z stage=heartbeat discovery elapsed=360s",
+      "2026-07-22T23:28:50Z stage=heartbeat discovery elapsed=420s",
+      "2026-07-22T23:29:50Z stage=heartbeat discovery elapsed=480s",
+      "2026-07-22T23:30:50Z stage=heartbeat discovery elapsed=540s",
+      "2026-07-22T23:31:50Z stage=heartbeat discovery elapsed=600s",
+      "2026-07-22T23:32:50Z stage=heartbeat discovery elapsed=660s",
+      "2026-07-22T23:33:51Z stage=heartbeat discovery elapsed=720s",
+      "2026-07-22T23:34:51Z stage=heartbeat discovery elapsed=781s",
+      "2026-07-22T23:35:51Z stage=heartbeat discovery elapsed=841s",
+      "2026-07-22T23:36:51Z stage=heartbeat discovery elapsed=901s"
+    ],
+    "stdoutTail": [
+      "> daily-song-list@1.0.0 youtube:discover-channel",
+      "> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@AmanofuStella --singer-name 天ノ譜ステラ --output-dir artifacts/channel-discovery/2026-07-22-source-backfill-batch52-amanofustella-shard0of4-discovery --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-count 4 --inspect-shard-index 0 --request-interval-ms 3500 --request-jitter-ms 1500 --keyword フルート --keyword 生演奏 --keyword クラリネット --keyword サックス --keyword サクソフォン --keyword sax --keyword saxophone --keyword piano streaming --keyword piano performance --keyword ピアノ演奏 --keyword live --keyword ライブ --keyword 歌 --keyword 歌枠 --keyword 弾き語り --keyword karaoke --keyword 歌ってみた --keyword 3D Live"
+    ],
+    "stderrTail": [],
+    "discoveryMarker": "",
+    "exportMarker": "",
+    "postprocessMarker": ""
+  },
+  "outputs": {
+    "manifest": "manifest.json",
+    "report": "report.md",
+    "checkpoint": "remote checkpoint was used for stats but is not part of final artifact"
+  },
+  "files": [
+    "manifest.json",
+    "report.md"
+  ],
+  "localTemp": {
+    "dir": "G:\\codex-temp\\daily-song-list-source-backfill-batch52-amanofustella-shard0of4",
+    "cleanupStatus": "removed",
+    "verification": "cleanup removed G: temp directory; Test-Path returned false"
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "storageAudit": {
+    "localTempDir": "G:\\codex-temp\\daily-song-list-source-backfill-batch52-amanofustella-shard0of4",
+    "localTempCleanupStatus": "removed",
+    "windowsDNewLargeFiles": false,
+    "windowsCNewLargeFiles": false,
+    "notes": "D: final output is limited to status-only manifest/report. C: was not used for temp files."
+  }
+}
