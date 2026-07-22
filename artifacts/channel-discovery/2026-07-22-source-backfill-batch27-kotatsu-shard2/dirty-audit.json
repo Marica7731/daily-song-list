@@ -1,0 +1,50 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch27-kotatsu-shard2",
+  "generatedAt": "2026-07-22T13:53:24.264Z",
+  "source": {
+    "handle": "KOTATSUChHaruKotatsubutonclub",
+    "url": "https://www.youtube.com/@KOTATSUChHaruKotatsubutonclub"
+  },
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ]
+  },
+  "counts": {
+    "unfilteredVideoCount": 9,
+    "unfilteredOccurrenceCount": 113,
+    "acceptedVideoCount": 9,
+    "acceptedOccurrenceCount": 113,
+    "skippedExistingRegressions": 0,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 1
+  },
+  "dropped": [],
+  "suspicious": [
+    {
+      "videoId": "kfpVKQkg9FI",
+      "title": "【オリジナルLIVE】「春」",
+      "songCount": 23,
+      "terms": [
+        "live"
+      ],
+      "decision": "reviewed"
+    }
+  ]
+}
