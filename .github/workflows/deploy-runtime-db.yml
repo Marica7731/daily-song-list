@@ -336,4 +336,15 @@ jobs:
         env:
           DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
           DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
-        run: npm run check:published:api -- https://ytb-song-rank.culua.com/
+        run: |
+          set -Eeuo pipefail
+          for attempt in {1..12}; do
+            if npm run check:published:api -- https://ytb-song-rank.culua.com/; then
+              exit 0
+            fi
+            if [ "${attempt}" = "12" ]; then
+              exit 1
+            fi
+            echo "CODEX_PUBLISHED_API_RETRY attempt=${attempt}"
+            sleep 10
+          done

@@ -148,7 +148,7 @@ Troubleshooting map:
 - DB build failure: inspect `Build runtime database`; no remote candidate is uploaded.
 - Local API artifact failure: inspect `Verify runtime API artifact`; no remote candidate is activated.
 - Upload or activation failure: inspect `Upload and activate database`; remote candidates named `song-rank.sqlite.next.<run>.<attempt>` are removed on workflow failure. If the log shows `CODEX_RUNTIME_DB_UPLOAD_MODE direct-inplace`, check that `song-rank-api` is stopped, then rerun the deploy to finish the interrupted in-place upload before restarting the public API.
-- Health or production API failure: inspect `Verify VPS2 health endpoint` and `Verify production API`, then run `journalctl -u song-rank-api -n 100 --no-pager` and `curl -fsS http://127.0.0.1:8765/healthz` on VPS2.
+- Health or production API failure: inspect `Verify VPS2 health endpoint` and `Verify production API`, then run `journalctl -u song-rank-api -n 100 --no-pager` and `curl -fsS http://127.0.0.1:8765/healthz` on VPS2. The production API check retries briefly after activation because the public endpoint can return a transient HTML error page while nginx/upstream state settles.
 - Concurrency cancellation is expected when a newer deploy run starts; the newest successful deploy is authoritative.
 
 Manual rerun options:
