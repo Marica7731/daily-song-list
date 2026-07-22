@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-22T00:43:28.354Z",
+  "generatedAt": "2026-07-22T03:36:04.132Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-22T00:43:28.354Z",
+    "fetchedAt": "2026-07-22T03:36:04.132Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-22T00:43:28.354Z",
+    "generatedAt": "2026-07-22T03:36:04.132Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7936,30 +7936,30 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 963,
-      "parseableChannels": 747,
+      "totalChannels": 964,
+      "parseableChannels": 749,
       "realAvatar": 643,
-      "thumbnailFallback": 320,
+      "thumbnailFallback": 321,
       "missingDisplayImage": 0,
-      "missingAvatar": 320,
+      "missingAvatar": 321,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 664,
-      "skipped_collected_evidence": 328
+      "skipped_collected_evidence": 331,
+      "already_cached": 664
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 112,
-      "missing_channel_url_or_handle": 216
+      "batch_limit_reached": 116,
+      "missing_channel_url_or_handle": 215
     },
     "skippedSamples": [
       {
-        "handle": "",
-        "channelId": "UCXw752V8J8yl_kkiEycyyqg",
-        "displayName": "えん / neG",
-        "sourceUrl": "https://www.youtube.com/channel/UCXw752V8J8yl_kkiEycyyqg",
+        "handle": "/@ykn0911v",
+        "channelId": "UC2YLG8u2xHZdu7ACn_9t2jg",
+        "displayName": "- ゆっきん【博多弁猫Vtuber】 yukkin -",
+        "sourceUrl": "https://www.youtube.com/@ykn0911v",
         "reason": "batch_limit_reached"
       },
       {
