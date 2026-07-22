@@ -1,0 +1,1429 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-22T21:03:38.554Z",
+  "inputs": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery"
+  ],
+  "readStats": {
+    "inputDirs": 1,
+    "videoDetails": 11,
+    "usableVideos": 11,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 108,
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": [],
+    "rawSongs": 108,
+    "acceptedSongs": 89,
+    "droppedSongs": 0,
+    "suspiciousSongs": 19,
+    "skippedAllSongsRejected": 2,
+    "importAudit": {
+      "schemaVersion": 1,
+      "dropped": [],
+      "suspicious": [
+        {
+          "videoId": "ftwuA4qWPsc",
+          "title": "🎂｜誕生日!!｜ライブパートからぽしゃけとお肉で優勝する!!だってお誕生日だもん #響架産まれました2026 ∞ 響架",
+          "reasons": [
+            "live_without_explicit_singing_signal"
+          ]
+        },
+        {
+          "videoId": "sVvi6SqPSnA",
+          "title": "📢【 楽曲リリース記念 】キミたちと一緒にお祝いがしたい！楽曲制作裏話やこだわりポイント語っちゃう【 #最響ライブ 】",
+          "reasons": [
+            "live_without_explicit_singing_signal"
+          ]
+        }
+      ]
+    },
+    "dirtyAuditDroppedVideos": 0,
+    "dirtyAuditSuspiciousVideos": 2,
+    "dirtyAuditAcceptedVideos": 9
+  },
+  "videoCount": 9,
+  "occurrenceCount": 89,
+  "videos": [
+    {
+      "videoId": "YKTnFrRMl1M",
+      "title": "【 #StarLink歌枠リレー 】最響に輝く一日を！キミに届けるよ！【 響架 】",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1774385750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=YKTnFrRMl1M"
+      ],
+      "selectedSourceId": "UgxYOqQ-b6fOqBjsIaV4AaABAg",
+      "selectedSourceHash": "b9f059b80bf77f3e0010f50f77433a9eb0113a2c9fe8a8cdfa0b2e6873f31bfd",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:01:24",
+          "seconds": 84,
+          "title": "天体観測",
+          "artist": "BUMP OF CHICKEN",
+          "raw": "01:24　01.天体観測／BUMP OF CHICKEN（2001/03/14）",
+          "rawHash": "5765a22b26327c32fc8d330d046d8ff3f8d9621eae8f486913aebfec2d2939cc",
+          "sourceId": "UgxYOqQ-b6fOqBjsIaV4AaABAg",
+          "sourceHash": "b9f059b80bf77f3e0010f50f77433a9eb0113a2c9fe8a8cdfa0b2e6873f31bfd",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:08:30",
+          "seconds": 510,
+          "title": "Record!!",
+          "artist": "響架",
+          "raw": "08:30　02.Record!!／響架（2025/10/20）",
+          "rawHash": "c4fcc880e4e63f27ca55e63c37d5840f897984ed6938fd1f54e4656fd7ce265e",
+          "sourceId": "UgxYOqQ-b6fOqBjsIaV4AaABAg",
+          "sourceHash": "b9f059b80bf77f3e0010f50f77433a9eb0113a2c9fe8a8cdfa0b2e6873f31bfd",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:15:55",
+          "seconds": 955,
+          "title": "私が明日死ぬなら",
+          "artist": "キタニタツヤ",
+          "raw": "15:55　03.私が明日死ぬなら／キタニタツヤ（2024/01/10）",
+          "rawHash": "62c1aa865daf7eccbe89e1e9c64181d216af6275190197d89052cb521f13843f",
+          "sourceId": "UgxYOqQ-b6fOqBjsIaV4AaABAg",
+          "sourceHash": "b9f059b80bf77f3e0010f50f77433a9eb0113a2c9fe8a8cdfa0b2e6873f31bfd",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:20:05",
+          "seconds": 1205,
+          "title": "1×",
+          "artist": "響架",
+          "raw": "20:05　04.1×／響架（2025/06/09）",
+          "rawHash": "356dc5110042eb504553d004a85034747fa473269b8e1bcbab4dd76eb8f97372",
+          "sourceId": "UgxYOqQ-b6fOqBjsIaV4AaABAg",
+          "sourceHash": "b9f059b80bf77f3e0010f50f77433a9eb0113a2c9fe8a8cdfa0b2e6873f31bfd",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.526Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "歌",
+          "歌枠"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "Cud7u7p0Las",
+      "title": "🏮【#歌枠 雑談/#KARAOKE】久しぶりに歌う!!リハビるぞ～～ほんのり華声なあたしですが。【響架】",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1771793750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=Cud7u7p0Las"
+      ],
+      "selectedSourceId": "UgwmbIdd9lTDKIL36gd4AaABAg",
+      "selectedSourceHash": "32d1d694841f6a361738bc2a1a3b4a6b1da15a6735b7dea0733fb8aecd714dea",
+      "songs": [
+        {
+          "index": 1,
+          "time": "1:00:57",
+          "seconds": 3657,
+          "title": "初恋サイダー",
+          "artist": "Buono!",
+          "raw": "01:00:57　01.初恋サイダー／Buono!（2012/01/18）",
+          "rawHash": "583a40eec1233e4850df1716a4eb6e05193d57423d9e5a9b3730a89a49111c75",
+          "sourceId": "UgwmbIdd9lTDKIL36gd4AaABAg",
+          "sourceHash": "32d1d694841f6a361738bc2a1a3b4a6b1da15a6735b7dea0733fb8aecd714dea",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "1:05:07",
+          "seconds": 3907,
+          "title": "MY BOY",
+          "artist": "しゅごキャラ!! どきっ",
+          "raw": "01:05:07　02.MY BOY／Buono!（しゅごキャラ!! どきっ）（2009/04/29）",
+          "rawHash": "41175c60314a4cbafef6231acadba9a92dcc2764a25f6b03a2222e35d39aa99b",
+          "sourceId": "UgwmbIdd9lTDKIL36gd4AaABAg",
+          "sourceHash": "32d1d694841f6a361738bc2a1a3b4a6b1da15a6735b7dea0733fb8aecd714dea",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "1:11:23",
+          "seconds": 4283,
+          "title": "ultra soul",
+          "artist": "B'z",
+          "raw": "01:11:23　03.ultra soul／B'z（2001/03/14）",
+          "rawHash": "e9761a7157eb7ba509a550bb0ed9fe3507cb570573c4fb634d2214920686ac96",
+          "sourceId": "UgwmbIdd9lTDKIL36gd4AaABAg",
+          "sourceHash": "32d1d694841f6a361738bc2a1a3b4a6b1da15a6735b7dea0733fb8aecd714dea",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "1:15:46",
+          "seconds": 4546,
+          "title": "Together",
+          "artist": "あきよしふみえ（ポケットモンスター ダイヤモンド&パール）",
+          "raw": "01:15:46　04.Together／あきよしふみえ（ポケットモンスター ダイヤモンド&パール）（2007/07/18）",
+          "rawHash": "03a0a548810ea26f169a1a221257dd03596fed335e138f532bfa36c75ccc1d40",
+          "sourceId": "UgwmbIdd9lTDKIL36gd4AaABAg",
+          "sourceHash": "32d1d694841f6a361738bc2a1a3b4a6b1da15a6735b7dea0733fb8aecd714dea",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "1:21:20",
+          "seconds": 4880,
+          "title": "Over soul",
+          "artist": "林原めぐみ（シャーマンキング）",
+          "raw": "01:21:20　05.Over soul／林原めぐみ（シャーマンキング）（2001/08/29）",
+          "rawHash": "e00875cc9e18d5fb5206d194e66e471eb3f7a60ef7fcd457bcc1c50bdb9cb8db",
+          "sourceId": "UgwmbIdd9lTDKIL36gd4AaABAg",
+          "sourceHash": "32d1d694841f6a361738bc2a1a3b4a6b1da15a6735b7dea0733fb8aecd714dea",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "1:25:24",
+          "seconds": 5124,
+          "title": "CHA-LA HEAD-CHA-LA",
+          "artist": "影山ヒロノブ（ドラゴンボールZ）",
+          "raw": "01:25:24　06.CHA-LA HEAD-CHA-LA／影山ヒロノブ（ドラゴンボールZ）（1989/05/01）",
+          "rawHash": "b043fcdf65e9d975626b74358cea5a5da46e58acd190e6433533f4245f7740a6",
+          "sourceId": "UgwmbIdd9lTDKIL36gd4AaABAg",
+          "sourceHash": "32d1d694841f6a361738bc2a1a3b4a6b1da15a6735b7dea0733fb8aecd714dea",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "1:29:13",
+          "seconds": 5353,
+          "title": "限界突破×サバイバー",
+          "artist": "氷川きよし（ドラゴンボール超）",
+          "raw": "01:29:13　07.限界突破×サバイバー／氷川きよし（ドラゴンボール超）（2017/10/25）",
+          "rawHash": "6c38ded65ed90c796c11b554bfd7021caeb17389685291ad516548c3f95607ec",
+          "sourceId": "UgwmbIdd9lTDKIL36gd4AaABAg",
+          "sourceHash": "32d1d694841f6a361738bc2a1a3b4a6b1da15a6735b7dea0733fb8aecd714dea",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.526Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "歌",
+          "歌枠",
+          "karaoke"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "0swiaLXfk7k",
+      "title": "【 #筋トレ歌枠リレー 】自分の限界を超えていけ!!筋トレをしてレッツ健康🌟高評価でノルマ+1【響架】",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1764017750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=0swiaLXfk7k"
+      ],
+      "selectedSourceId": "Ugy69UokbxrTbXA6Jwx4AaABAg",
+      "selectedSourceHash": "cc7736d462f7baad6541f7f93e2cb0f3881b420c4a61ef97ab076396c78593e4",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:00:55",
+          "seconds": 55,
+          "title": "いったやんけ！",
+          "artist": "響架",
+          "raw": "00:55　01.いったやんけ！／響架（2025/01/01）",
+          "rawHash": "605d6e1bb27a862086cfdd9f2142a42197bc0ce2990cb0975fc9a88a08350069",
+          "sourceId": "Ugy69UokbxrTbXA6Jwx4AaABAg",
+          "sourceHash": "cc7736d462f7baad6541f7f93e2cb0f3881b420c4a61ef97ab076396c78593e4",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:05:09",
+          "seconds": 309,
+          "title": "限界バトル",
+          "artist": "遊☆戯☆王デュエルモンスターズGX",
+          "raw": "05:09　02.限界バトル／JAM Project（遊☆戯☆王デュエルモンスターズGX）（2004/11/26）",
+          "rawHash": "71aedf3be8fbbfc670f55b9d385172eb40dfdde33cd1be77b885feadedc91805",
+          "sourceId": "Ugy69UokbxrTbXA6Jwx4AaABAg",
+          "sourceHash": "cc7736d462f7baad6541f7f93e2cb0f3881b420c4a61ef97ab076396c78593e4",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:09:28",
+          "seconds": 568,
+          "title": "限界突破×サバイバー",
+          "artist": "氷川きよし（ドラゴンボール超）",
+          "raw": "09:28　03.限界突破×サバイバー／氷川きよし（ドラゴンボール超）（2017/10/25）",
+          "rawHash": "844e79906a8bcb2fe70deb11bf258006b38ec1b622bc46a371a2db2b94adf580",
+          "sourceId": "Ugy69UokbxrTbXA6Jwx4AaABAg",
+          "sourceHash": "cc7736d462f7baad6541f7f93e2cb0f3881b420c4a61ef97ab076396c78593e4",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:13:30",
+          "seconds": 810,
+          "title": "brave heart",
+          "artist": "宮﨑歩（デジモンアドベンチャー）",
+          "raw": "13:30　04.brave heart／宮﨑歩（デジモンアドベンチャー）（1999/06/25）",
+          "rawHash": "ed782ea61c461ea5a7d3ababf8bc1e37fd96d58eb9c77f54dd35066f99532882",
+          "sourceId": "Ugy69UokbxrTbXA6Jwx4AaABAg",
+          "sourceHash": "cc7736d462f7baad6541f7f93e2cb0f3881b420c4a61ef97ab076396c78593e4",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:24:54",
+          "seconds": 1494,
+          "title": "ultra soul",
+          "artist": "B'z",
+          "raw": "24:54　05.ultra soul／B'z（2001/03/14）",
+          "rawHash": "5cff300224a800e98d0bed8e565a711233699d11801a8bb83916a007f07202ba",
+          "sourceId": "Ugy69UokbxrTbXA6Jwx4AaABAg",
+          "sourceHash": "cc7736d462f7baad6541f7f93e2cb0f3881b420c4a61ef97ab076396c78593e4",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.526Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "歌",
+          "歌枠"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "o99cSyPcTyw",
+      "title": "【 アイマスシリーズ歌枠/実写 】華金を最高の神曲たちで彩ってかない!? #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1758833750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=o99cSyPcTyw"
+      ],
+      "selectedSourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+      "selectedSourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:03:34",
+          "seconds": 214,
+          "title": "お願い!シンデレラ",
+          "artist": "原紗友里,青木瑠璃子,松嵜麗,杜野まこ（アイドルマスター シンデレラガールズ）",
+          "raw": "00:03:34　お願い!シンデレラ／原紗友里,青木瑠璃子,松嵜麗,杜野まこ（アイドルマスター シンデレラガールズ）",
+          "rawHash": "6c4f41c1388b79a60e215d6790ac87ec5cdd4c6eab62840b8f72cb3c6c0addb4",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:07:50",
+          "seconds": 470,
+          "title": "花ざかりWeekend✿",
+          "artist": "アイドルマスター ミリオンライブ！ シアターデイズ",
+          "raw": "00:07:50　花ざかりWeekend✿／4Luxury（アイドルマスター ミリオンライブ！ シアターデイズ）",
+          "rawHash": "5e1efece3308bae704715d2c36d3282a0810cce8210a3c631fe48aa0100a45e1",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:17:18",
+          "seconds": 1038,
+          "title": "Tulip",
+          "artist": "アイドルマスター シンデレラガールズ",
+          "raw": "00:17:18　Tulip／LiPPS（アイドルマスター シンデレラガールズ）",
+          "rawHash": "c23d8a245845558f4fc114e9e650c5769bfdea12b4ee0838328f8e5444ec4394",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:26:02",
+          "seconds": 1562,
+          "title": "Luna say maybe",
+          "artist": "初星学園,美波,月村手毬（学園アイドルマスター）",
+          "raw": "00:26:02　Luna say maybe／初星学園,美波,月村手毬（学園アイドルマスター）",
+          "rawHash": "b9fcd43a7a7f3f947144155809ab7b6750d6dc4e4778c0895f605c0086284a01",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:30:37",
+          "seconds": 1837,
+          "title": "神様は死んだ、って",
+          "artist": "斑鳩ルカ (川口莉奈)（アイドルマスター シャイニーカラーズ）",
+          "raw": "00:30:37　神様は死んだ、って／斑鳩ルカ (川口莉奈)（アイドルマスター シャイニーカラーズ）",
+          "rawHash": "fb3538b4399ec14166bc7400c9fad6014bb6fbdf8a70741556a916f6e4c1f4e4",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:34:43",
+          "seconds": 2083,
+          "title": "Tame-Lie-One-Step",
+          "artist": "紫雲清夏(湊 みや)（学園アイドルマスター）",
+          "raw": "00:34:43　Tame-Lie-One-Step／紫雲清夏(湊 みや)（学園アイドルマスター）",
+          "rawHash": "86bc85b04bc340b37e558c65b243e5a6aa3f316616c90fe47cbf74fd72a34ea2",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "0:47:25",
+          "seconds": 2845,
+          "title": "目が逢う瞬間",
+          "artist": "如月千早(今井麻美)（THE IDOLM@STER MASTER）",
+          "raw": "00:47:25　目が逢う瞬間／如月千早(今井麻美)（THE IDOLM@STER MASTER）",
+          "rawHash": "337a73ff76824a497feba087aa9a04f88965247c1cf5fa4663a864a0c4f99e2b",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "0:52:13",
+          "seconds": 3133,
+          "title": "水中キャンディ",
+          "artist": "馬場このみ(高橋未奈美)（アイドルマスター ミリオンライブ！）",
+          "raw": "00:52:13　水中キャンディ／馬場このみ(高橋未奈美)（アイドルマスター ミリオンライブ！）",
+          "rawHash": "02291b1b5ed072d34eb6f9b903da2f2f21830f20d5e44e9aa5a1669d0da90c1e",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "1:01:10",
+          "seconds": 3670,
+          "title": "キラメキラリ",
+          "artist": "高槻やよい(仁後真耶子)（THE IDOLM@STER）",
+          "raw": "01:01:10　キラメキラリ／高槻やよい(仁後真耶子)（THE IDOLM@STER）",
+          "rawHash": "c239a62e609f1e4b6d2ab9b936d4eeb36a4dc6636e1e651a14e6a8b056714389",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "1:05:30",
+          "seconds": 3930,
+          "title": "GO MY WAY!!",
+          "artist": "高槻やよい(仁後真耶子)（THE IDOLM@STER）",
+          "raw": "01:05:30　GO MY WAY!!／高槻やよい(仁後真耶子)（THE IDOLM@STER）",
+          "rawHash": "aa6f34d7579ffa38245dc7951226eaf588491888e07c71af78c5a89d0f9ebd86",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:15:19",
+          "seconds": 4519,
+          "title": "オーバーマスター",
+          "artist": "星井美希(長谷川明子),我那覇響(沼倉愛美),四条貴音(原由実)（THE IDOLM@STER SP）",
+          "raw": "01:15:19　オーバーマスター／星井美希(長谷川明子),我那覇響(沼倉愛美),四条貴音(原由実)（THE IDOLM@STER SP）",
+          "rawHash": "bed54b5b03e3b90e4f650220c4e65d90e891ded338f8dca1bdf52d88c5ae32fe",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:21:46",
+          "seconds": 4906,
+          "title": "Thank You!",
+          "artist": "アイドルマスター ミリオンライブ！",
+          "raw": "01:21:46　Thank You!／765 MILLIONSTARS（アイドルマスター ミリオンライブ！）",
+          "rawHash": "7c608ecc3432807edca3a3595629e23f87daa2574f8714b2a8d62ed941c7bbb2",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "1:26:54",
+          "seconds": 5214,
+          "title": "M@STERPIECE",
+          "artist": "THE IDOLM@STER MOVIE 輝きの向こう側へ!",
+          "raw": "01:26:54　M@STERPIECE／765 MILLIONSTARS（THE IDOLM@STER MOVIE 輝きの向こう側へ!）",
+          "rawHash": "37aee0e15b7918ccf603c4eaa975edeb368edd32d52f2a46a8cf88141b3d4fc1",
+          "sourceId": "UgzRQUVzrCjBRqyYccJ4AaABAg",
+          "sourceHash": "9f8f6d98530ffaa4f5c84a4ba0d123e19f0756db33814ca1edb7a0500815de6b",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.526Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "歌",
+          "歌枠"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "AOyB-pC9juA",
+      "title": "【#塩かずのこ家歌枠リレー】さーて‪.ᐟトップバッター末っ子‪.ᐟいっちょブチアゲいっちゃいますかｧ‪.ᐟ‪.ᐟ",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1753217750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=AOyB-pC9juA"
+      ],
+      "selectedSourceId": "UgzRE9CY0OL0MTmONlp4AaABAg",
+      "selectedSourceHash": "f6bee1c955237e525f69910a41eb2dc046edd909aff688157d4a59a74f46decb",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:00:52",
+          "seconds": 52,
+          "title": "千本桜",
+          "artist": "黒うさP feat. 初音ミク",
+          "raw": "00:52　千本桜／黒うさP feat. 初音ミク",
+          "rawHash": "55e26ff78ee8ddb6051126bf239e76cc725675ea4262adb13aa5e8260748a686",
+          "sourceId": "UgzRE9CY0OL0MTmONlp4AaABAg",
+          "sourceHash": "f6bee1c955237e525f69910a41eb2dc046edd909aff688157d4a59a74f46decb",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:07:35",
+          "seconds": 455,
+          "title": "ロキ",
+          "artist": "みきとP feat. 鏡音リン",
+          "raw": "07:35　ロキ／みきとP feat. 鏡音リン",
+          "rawHash": "b96fd3e3ff26de766d1b93d85722867b1b91a775e42d2f1be2c038b8c075b975",
+          "sourceId": "UgzRE9CY0OL0MTmONlp4AaABAg",
+          "sourceHash": "f6bee1c955237e525f69910a41eb2dc046edd909aff688157d4a59a74f46decb",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:15:54",
+          "seconds": 954,
+          "title": "Casket",
+          "artist": "響架",
+          "raw": "15:54　Casket／響架",
+          "rawHash": "f45ac395fbbee4e3ba8226861734638ccae36d6ec42b9d8c601b6d7b8eca5bc0",
+          "sourceId": "UgzRE9CY0OL0MTmONlp4AaABAg",
+          "sourceHash": "f6bee1c955237e525f69910a41eb2dc046edd909aff688157d4a59a74f46decb",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:22:33",
+          "seconds": 1353,
+          "title": "ココロオドル",
+          "artist": "SDガンダムフォース",
+          "raw": "22:33　ココロオドル／nobodyknows+（SDガンダムフォース）",
+          "rawHash": "97c2ac6454818125b50fec37b7853849c5f0a4f42ab0f90cf86838f32b119be7",
+          "sourceId": "UgzRE9CY0OL0MTmONlp4AaABAg",
+          "sourceHash": "f6bee1c955237e525f69910a41eb2dc046edd909aff688157d4a59a74f46decb",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:28:20",
+          "seconds": 1700,
+          "title": "Casket",
+          "artist": "響架 ※2回目途中で終了",
+          "raw": "28:20　Casket／響架　※2回目途中で終了",
+          "rawHash": "a400667d155c7ca0963ee94abb153dc62059038cce813fe81d38f30526fa4703",
+          "sourceId": "UgzRE9CY0OL0MTmONlp4AaABAg",
+          "sourceHash": "f6bee1c955237e525f69910a41eb2dc046edd909aff688157d4a59a74f46decb",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.526Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "歌",
+          "歌枠"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "T6YUCuvzCes",
+      "title": "🏮【 ガンダム歌枠/実写 】激アツガンダムソングでアガる深夜.ᐟ #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1753217750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=T6YUCuvzCes"
+      ],
+      "selectedSourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+      "selectedSourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:06:01",
+          "seconds": 361,
+          "title": "FLYING IN THE SKY",
+          "artist": "鵜島仁文（機動武闘伝Gガンダム）",
+          "raw": "00:06:01　FLYING IN THE SKY／鵜島仁文（機動武闘伝Gガンダム）",
+          "rawHash": "c3e5cf6b17006bbfeaecbfb415804af8ef290ed2ff33a83053ebd2d619e62781",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:10:08",
+          "seconds": 608,
+          "title": "INVOKE",
+          "artist": "未記載",
+          "raw": "00:10:08　INVOKE／T.M.Revolution（機動戦士ガンダムSEED）",
+          "rawHash": "eea30a1762e495701c940687f8ab33ae709fabf3571704c4636c6803d474320d",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:14:34",
+          "seconds": 874,
+          "title": "DREAMS",
+          "artist": "機動新世紀ガンダムX",
+          "raw": "00:14:34　DREAMS／ROMANTIC MODE（機動新世紀ガンダムX）",
+          "rawHash": "2cbd5c23d978ae7ef92649d2716d12c49cda8ba427486994ad8c5b924a644022",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:19:40",
+          "seconds": 1180,
+          "title": "Zips",
+          "artist": "機動戦士ガンダムSEED MSV",
+          "raw": "00:19:40　Zips／T.M.Revolution（機動戦士ガンダムSEED MSV）",
+          "rawHash": "33ce7851220c816db5e1e90ad9b35937b28a29bccc4835cf146796efce8d28c3",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:23:51",
+          "seconds": 1431,
+          "title": "slash",
+          "artist": "機動戦士ガンダム 水星の魔女",
+          "raw": "00:23:51　slash／yama（機動戦士ガンダム 水星の魔女）",
+          "rawHash": "91ffadc89a8aeae1af0a199ae7a450e224f7784c08c97be79e16ed97c2a80240",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:29:37",
+          "seconds": 1777,
+          "title": "去り際のロマンティクス",
+          "artist": "機動戦士ガンダムSEED FREEDOM",
+          "raw": "00:29:37　去り際のロマンティクス／See-Saw（機動戦士ガンダムSEED FREEDOM）",
+          "rawHash": "51cd63e6ed26d0ea7bf03b0dbffa2bc7134a56876c0dac6faf30a381739c3cd0",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "0:34:20",
+          "seconds": 2060,
+          "title": "あんなに一緒だったのに",
+          "artist": "未記載",
+          "raw": "00:34:20　あんなに一緒だったのに／See-Saw（機動戦士ガンダムSEED）",
+          "rawHash": "625958dcc86434289a73d5c933fb024758757c9fb6d5979e81a4d16e5867ac7b",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "0:39:12",
+          "seconds": 2352,
+          "title": "Life Goes On",
+          "artist": "有坂美香（機動戦士ガンダムSEED DESTINY）",
+          "raw": "00:39:12　Life Goes On／有坂美香（機動戦士ガンダムSEED DESTINY）",
+          "rawHash": "fcc99627c5f3496081bc231d13b095341b7176c2028bd1db75691a3d86937308",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "0:43:43",
+          "seconds": 2623,
+          "title": "I AM",
+          "artist": "機動戦士ガンダムUC",
+          "raw": "00:43:43　RE:I AM／Aimer（機動戦士ガンダムUC）",
+          "rawHash": "190666e85c0a93f16a9113f8fb07c23b28e9a319593e2054bed45f5fd447e912",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "0:49:58",
+          "seconds": 2998,
+          "title": "vestige-ヴェスティージ",
+          "artist": "機動戦士ガンダムSEED DESTINY",
+          "raw": "00:49:58　vestige-ヴェスティージ-／T.M.Revolution（機動戦士ガンダムSEED DESTINY）",
+          "rawHash": "637431150a63cec1df6e13c946d963eb710e5937ebe6da8399f7b41dc16ba142",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "0:59:28",
+          "seconds": 3568,
+          "title": "泪のムコウ",
+          "artist": "ステレオポニー（機動戦士ガンダム00）",
+          "raw": "00:59:28　泪のムコウ／ステレオポニー（機動戦士ガンダム00）",
+          "rawHash": "22169d85e3400e703c845ec59bc38019c0274f0dc785b74a45bb1dcf04239b88",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:03:12",
+          "seconds": 3792,
+          "title": "儚くも永久のカナシ",
+          "artist": "機動戦士ガンダム00",
+          "raw": "01:03:12　儚くも永久のカナシ／UVERworld（機動戦士ガンダム00）",
+          "rawHash": "f30785c2cfb2abf170a14b7903f1e23b79a8c497945c16bc3a7450399f5d64f6",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "1:07:49",
+          "seconds": 4069,
+          "title": "嵐の中で輝いて",
+          "artist": "米倉千尋（機動戦士ガンダム 第08MS小隊）",
+          "raw": "01:07:49　嵐の中で輝いて／米倉千尋（機動戦士ガンダム 第08MS小隊）",
+          "rawHash": "d34a3a2f5c1ba3425d3474d031cb9409d8ccba70a78d7d16a7c2d552b2adbd93",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "1:19:04",
+          "seconds": 4744,
+          "title": "Resolution",
+          "artist": "機動新世紀ガンダムX",
+          "raw": "01:19:04　Resolution／ROMANTIC MODE（機動新世紀ガンダムX）",
+          "rawHash": "e64db9e4a15942ab6da1140b68c8c37658c9230b33bb912f6180c07d6b1627cf",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "1:24:18",
+          "seconds": 5058,
+          "title": "ignited -イグナイテッド",
+          "artist": "機動戦士ガンダムSEED DESTINY",
+          "raw": "01:24:18　ignited -イグナイテッド-／T.M.Revolution（機動戦士ガンダムSEED DESTINY）",
+          "rawHash": "b0b0d52096286f3fadbf48eccd43669669ae704eca2a4cb4afeb6f5e5fb30331",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "1:27:38",
+          "seconds": 5258,
+          "title": "Meteor -ミーティア",
+          "artist": "未記載",
+          "raw": "01:27:38　Meteor -ミーティア-／T.M.Revolution（機動戦士ガンダムSEED）",
+          "rawHash": "79d59521a8a1a4ac62a81f86f3bd4657407ba5ee73d062c13c1a589c4efedfa4",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "1:34:59",
+          "seconds": 5699,
+          "title": "FREEDOM",
+          "artist": "西川貴教 with t.komuro（劇場版「機動戦士ガンダムSEED FREEDOM」）",
+          "raw": "01:34:59　FREEDOM／西川貴教 with t.komuro（劇場版「機動戦士ガンダムSEED FREEDOM」）",
+          "rawHash": "20cf1dc0f7543a9247c375358ab7b9c5dc45712ea9cc0a72a83a01d5be00db36",
+          "sourceId": "UgzsToaNd1Ec7ouO2-d4AaABAg",
+          "sourceHash": "601dc024b958125c64d68555fa543b286bdf55158cd0ade6586f96f9d779d182",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.529Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "歌",
+          "歌枠"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "IOxaiJHQYNs",
+      "title": "🏮【 実写歌枠 】そこのキミ.ᐟ日曜深夜はブチ上がる歌枠だよねっ♪ #shorts #Vtuber 【 #最響ライブ 👹 】",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1753217750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=IOxaiJHQYNs"
+      ],
+      "selectedSourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+      "selectedSourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:04:47",
+          "seconds": 287,
+          "title": "春を告げる",
+          "artist": "yama ※アコースティックバージョン",
+          "raw": "00:04:47　春を告げる／yama　※アコースティックバージョン",
+          "rawHash": "61b8bf1b259ae64b255ad6f89a94b0192667cae1f40eac249be42062c3de1a9e",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:08:42",
+          "seconds": 522,
+          "title": "雑踏、僕らの街",
+          "artist": "トゲナシトゲアリ（ガールズバンドクライ）",
+          "raw": "00:08:42　雑踏、僕らの街／トゲナシトゲアリ（ガールズバンドクライ）",
+          "rawHash": "5c58646d0a6a9e99aebdb1d2878e3bc79422ed6c970e71ca99277d8137512faa",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:12:27",
+          "seconds": 747,
+          "title": "Countach",
+          "artist": "轟はじめ",
+          "raw": "00:12:27　Countach／轟はじめ",
+          "rawHash": "d4b7390fbf0ca903de8338bbf447c4b56b790e788819e127d99adf97e67d3213",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:23:35",
+          "seconds": 1415,
+          "title": "愛をこめて花束を",
+          "artist": "Superfly",
+          "raw": "00:23:35　愛をこめて花束を／Superfly",
+          "rawHash": "235b9be1f1fb9b7820aad47776bab1f0afedbc8c805928db98a3f2fe47d128b7",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:30:27",
+          "seconds": 1827,
+          "title": "Rolling star",
+          "artist": "YUI（BLEACH）",
+          "raw": "00:30:27　Rolling star／YUI（BLEACH）",
+          "rawHash": "3545534a52e44c25990f6ee17a724fc7fc35d221751cdd531e550f9af22e6917",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:33:39",
+          "seconds": 2019,
+          "title": "気まぐれロマンティック",
+          "artist": "いきものがかり",
+          "raw": "00:33:39　気まぐれロマンティック／いきものがかり",
+          "rawHash": "7947ada7be4e8e26749f99b14a65674c2d1cb041f86d56f07a98802a5390f29a",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "0:42:08",
+          "seconds": 2528,
+          "title": "JAP",
+          "artist": "戦国BASARA",
+          "raw": "00:42:08　JAP／abingdon boys school（戦国BASARA）",
+          "rawHash": "b38973cd5993606d7db1486a999fee1afeb86535ccc43b6c74e4cc462273c851",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "0:46:36",
+          "seconds": 2796,
+          "title": "resonance",
+          "artist": "ソウルイーター",
+          "raw": "00:46:36　resonance／T.M.Revolution（ソウルイーター）",
+          "rawHash": "3b6ab38ab617432318b8d01a949a5f757348a78e28261fb0ab6d188c92da15c4",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "0:52:55",
+          "seconds": 3175,
+          "title": "星が瞬くこんな夜に",
+          "artist": "魔法使いの夜",
+          "raw": "00:52:55　星が瞬くこんな夜に／supercell（魔法使いの夜）",
+          "rawHash": "356a102e5556bbabb50b5eed499e3d09938b4f0a1fc3c7caa1c86a70180de74a",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "0:57:39",
+          "seconds": 3459,
+          "title": "晩餐歌",
+          "artist": "tuki",
+          "raw": "00:57:39　晩餐歌／tuki.",
+          "rawHash": "838e8253c8a859e59b87cc0edc406030056b68f2b9a9249f73af0b719a48aec7",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "1:01:18",
+          "seconds": 3678,
+          "title": "Pretender",
+          "artist": "Official髭男dism",
+          "raw": "01:01:18　Pretender／Official髭男dism",
+          "rawHash": "4632ee135d308892ea8544f15aa0f5b5bde09df21cea723c6a7f58f9e9ea6ce1",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:06:42",
+          "seconds": 4002,
+          "title": "君の知らない物語",
+          "artist": "化物語",
+          "raw": "01:06:42　君の知らない物語／supercell（化物語）",
+          "rawHash": "a7c8f675d09ed3096469baf178978146ff167cd37fde53871699e90a6a30be95",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "1:25:09",
+          "seconds": 5109,
+          "title": "Casket",
+          "artist": "響架",
+          "raw": "01:25:09　Casket／響架",
+          "rawHash": "80653ccc83b45203e043d03230664b553be977740d16be5502126fb26ee42153",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "1:31:04",
+          "seconds": 5464,
+          "title": "残酷な天使のテーゼ",
+          "artist": "高橋洋子（新世紀エヴァンゲリオン）",
+          "raw": "01:31:04　残酷な天使のテーゼ／高橋洋子（新世紀エヴァンゲリオン）",
+          "rawHash": "f4b1489a46a3583ec373485fac5a156838dce333d5797067136c0238b9cff27d",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "1:37:10",
+          "seconds": 5830,
+          "title": "創聖のアクエリオン",
+          "artist": "創聖のアクエリオン",
+          "raw": "01:37:10　創聖のアクエリオン／AKINO（創聖のアクエリオン）",
+          "rawHash": "65b80565f6fa367f389583cc57d853e696e04807f73401b8d621457d24742b64",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "1:41:59",
+          "seconds": 6119,
+          "title": "魂のルフラン",
+          "artist": "高橋洋子（新世紀エヴァンゲリオン劇場版 シト新生）",
+          "raw": "01:41:59　魂のルフラン／高橋洋子（新世紀エヴァンゲリオン劇場版 シト新生）",
+          "rawHash": "8c41fdac5fd26bb49787bb05a8844f07359a447faffbd9bb64cf7851b9a6e73f",
+          "sourceId": "UgzzYCQ4CvIx_dl3S6V4AaABAg",
+          "sourceHash": "fd234e7a12e92306c174b4b199f28579fe1382f9a914e68b0328f86d352adf4f",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.529Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "ライブ",
+          "歌",
+          "歌枠"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "zXf_b6yIHvc",
+      "title": "🏮【 実写歌枠 】深夜だ.ᐟ火曜だ.ᐟお歌でテンション燃やしてこ♪ #shorts #Vtuber 【 #最響ライブ 👹 】",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1753217750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=zXf_b6yIHvc"
+      ],
+      "selectedSourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+      "selectedSourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:04:49",
+          "seconds": 289,
+          "title": "crossing field",
+          "artist": "ソードアート・オンライン",
+          "raw": "00:04:49　crossing field／LiSA（ソードアート・オンライン）",
+          "rawHash": "cf4322536e1dd08983af0859d8cb3984f9e12055371f1ba6d719bb1367563fa7",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:09:10",
+          "seconds": 550,
+          "title": "千本桜",
+          "artist": "黒うさP feat. 初音ミク",
+          "raw": "00:09:10　千本桜／黒うさP feat. 初音ミク",
+          "rawHash": "3d377058ef4749cc1b53986b6aa749907170c157bbc36fed7a8690f477830e2c",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "0:14:44",
+          "seconds": 884,
+          "title": "星座になれたら",
+          "artist": "結束バンド（ぼっち・ざ・ろっく!）",
+          "raw": "00:14:44　星座になれたら／結束バンド（ぼっち・ざ・ろっく!）",
+          "rawHash": "041d1cbfedc3c14858f6316955efff5f857bca998ad4dfd884da3f211b94afe8",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 4,
+          "time": "0:19:07",
+          "seconds": 1147,
+          "title": "月並みに輝け",
+          "artist": "結束バンド（劇場総集編ぼっち・ざ・ろっく！）",
+          "raw": "00:19:07　月並みに輝け／結束バンド（劇場総集編ぼっち・ざ・ろっく！）",
+          "rawHash": "0c6a9c32f3cf8f2eabe3107462688ff10214fa9b2ca09a6c4c7c05a6f81bb01c",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 5,
+          "time": "0:26:40",
+          "seconds": 1600,
+          "title": "DAN DAN 心魅かれてく",
+          "artist": "ドラゴンボールGT",
+          "raw": "00:26:40　DAN DAN 心魅かれてく／FIELD OF VIEW（ドラゴンボールGT）",
+          "rawHash": "bc3de39842adc3b4699cbf6e3ed08e2cc50e136b85f5df7405248ac91599c740",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 6,
+          "time": "0:33:03",
+          "seconds": 1983,
+          "title": "名前のない怪物",
+          "artist": "EGOIST（PSYCHO-PASS）",
+          "raw": "00:33:03　名前のない怪物／EGOIST（PSYCHO-PASS）",
+          "rawHash": "c896de0c72448d74a62baa432b7e23c08da7fde97e09ecdb861a493096a1fa71",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 7,
+          "time": "0:38:18",
+          "seconds": 2298,
+          "title": "狂乱 Hey Kids!!",
+          "artist": "ノラガミ ARAGOTO",
+          "raw": "00:38:18　狂乱 Hey Kids!!／THE ORAL CIGARETTES（ノラガミ ARAGOTO）",
+          "rawHash": "e952d99f32d0e829c5d127e2df3a7c1bd2b605a48eae4b423e360662d93149e1",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 8,
+          "time": "0:44:09",
+          "seconds": 2649,
+          "title": "Together",
+          "artist": "あきよしふみえ（ポケットモンスター ダイヤモンド&パール）",
+          "raw": "00:44:09　Together／あきよしふみえ（ポケットモンスター ダイヤモンド&パール）",
+          "rawHash": "b82df3d9d89972aac74d89378db613f115d9569feacbaa1a150d6bb98aa4608f",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 9,
+          "time": "0:48:18",
+          "seconds": 2898,
+          "title": "1・2・3",
+          "artist": "ポケットモンスター",
+          "raw": "00:48:18　1・2・3／After the Rain（ポケットモンスター）",
+          "rawHash": "7eda29a4eaf2dab85f7d127f6f4b556caa9cc762627136731c17ac5be9f7c5fa",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 10,
+          "time": "0:53:41",
+          "seconds": 3221,
+          "title": "めざせポケモンマスター",
+          "artist": "松本梨香（ポケットモンスター）",
+          "raw": "00:53:41　めざせポケモンマスター／松本梨香（ポケットモンスター）",
+          "rawHash": "2b49783f848ddfeb4fec3672f2d9e41e4f697c650082172eabc92320014b18f1",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 11,
+          "time": "0:58:16",
+          "seconds": 3496,
+          "title": "夢をかなえてドラえもん",
+          "artist": "mao,ひまわりキッズ（ドラえもん）",
+          "raw": "00:58:16　夢をかなえてドラえもん／mao,ひまわりキッズ（ドラえもん）",
+          "rawHash": "a98a9e6a23d9f57f4312a985872c238e819f872dbed13947366c40256f7c379a",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 12,
+          "time": "1:04:35",
+          "seconds": 3875,
+          "title": "OVERLAP",
+          "artist": "遊☆戯☆王デュエルモンスターズ",
+          "raw": "01:04:35　OVERLAP／Kimeru（遊☆戯☆王デュエルモンスターズ）",
+          "rawHash": "1b8b55f62dfd3e933f570ec82ada0fb1b02e4997f71d9ebdea21dd52448c0188",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 13,
+          "time": "1:15:08",
+          "seconds": 4508,
+          "title": "嘘",
+          "artist": "シド（鋼の錬金術師）",
+          "raw": "01:15:08　嘘／シド（鋼の錬金術師）",
+          "rawHash": "7829acc7e3a6e72dbbb51bb2c22385161709cd9e675d3c89dc1a5f51c8a662eb",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 14,
+          "time": "1:18:35",
+          "seconds": 4715,
+          "title": "曇天",
+          "artist": "銀魂",
+          "raw": "01:18:35　曇天／DOES（銀魂）",
+          "rawHash": "8f8b328c2b93e465af11de16619a1e043ccf03aecaa255a4c9904e296565dbbb",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 15,
+          "time": "1:22:11",
+          "seconds": 4931,
+          "title": "修羅",
+          "artist": "銀魂",
+          "raw": "01:22:11　修羅／DOES（銀魂）",
+          "rawHash": "e896d840a98474e3a8f06e10955be12699d06df88cac2bd99b6841c958600b75",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 16,
+          "time": "1:26:41",
+          "seconds": 5201,
+          "title": "シルエット",
+          "artist": "NARUTO-ナルト-疾風伝",
+          "raw": "01:26:41　シルエット／KANA-BOON（NARUTO-ナルト-疾風伝）",
+          "rawHash": "d1cefa4e6817efbf8d7b0bfe1cc138bc5c3242fe8cafc7df067be3c31404d560",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 17,
+          "time": "1:32:48",
+          "seconds": 5568,
+          "title": "世界が終るまでは…",
+          "artist": "WANDS（SLAM DUNK）",
+          "raw": "01:32:48　世界が終るまでは…／WANDS（SLAM DUNK）",
+          "rawHash": "a6c07fa44b8b24422daa301c8b4c408b0f200ebc45ae523471c6e99a135e7559",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 18,
+          "time": "1:38:42",
+          "seconds": 5922,
+          "title": "God knows",
+          "artist": "涼宮ハルヒ(平野綾)（涼宮ハルヒの憂鬱）",
+          "raw": "01:38:42　God knows...／涼宮ハルヒ(平野綾)（涼宮ハルヒの憂鬱）",
+          "rawHash": "bc472c80ca15faeef64cc14bce548ad57486bee65acb7abef63114e9a464275d",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        },
+        {
+          "index": 19,
+          "time": "1:55:59",
+          "seconds": 6959,
+          "title": "Casket",
+          "artist": "響架",
+          "raw": "01:55:59　Casket／響架",
+          "rawHash": "c4c629dfbd8ac89393df67d451bf805f461ae2ecb7ea24c73e32d9bd555e33ac",
+          "sourceId": "UgxRkhvCb3mYMBLgqTx4AaABAg",
+          "sourceHash": "5b8644f5e3f901015c60c8f7f7288ea7f5e5c5eae28b60a1c96e4b2836d4d758",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.529Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "ライブ",
+          "歌",
+          "歌枠"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    },
+    {
+      "videoId": "tmQZ9LWkbI8",
+      "title": "🏮【 実写雑談歌枠 】おはよ!!!!!!!バカねむタンバリンｼｬﾝｼｬﾝsyﾝ #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "channelId": "",
+      "channelHandle": "/@Kyoka_0609",
+      "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+      "publishedTimestamp": 1753217750866,
+      "sourceGroups": [
+        "youtube_channel_discovery"
+      ],
+      "sourceUrls": [
+        "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "https://www.youtube.com/watch?v=tmQZ9LWkbI8"
+      ],
+      "selectedSourceId": "UgwLgxj2fq00o1wImBd4AaABAg",
+      "selectedSourceHash": "b196e27a0499fbff0e33317f5c943ea651d7a46e2b7ee8bbdb9f8f200b328db7",
+      "songs": [
+        {
+          "index": 1,
+          "time": "0:34:07",
+          "seconds": 2047,
+          "title": "1×",
+          "artist": "響架",
+          "raw": "00:34:07　1×／響架",
+          "rawHash": "f2ea29fa55736b0d6114e74bc0e86a83c7139efadcb882638481588ee6594695",
+          "sourceId": "UgwLgxj2fq00o1wImBd4AaABAg",
+          "sourceHash": "b196e27a0499fbff0e33317f5c943ea651d7a46e2b7ee8bbdb9f8f200b328db7",
+          "isNiche": false
+        },
+        {
+          "index": 2,
+          "time": "0:39:11",
+          "seconds": 2351,
+          "title": "タマシイレボリューション",
+          "artist": "Superfly",
+          "raw": "00:39:11　タマシイレボリューション／Superfly",
+          "rawHash": "52e1055ff20ab32e476e347c5ac0578014e0578898d15424dcc0a1fef7438085",
+          "sourceId": "UgwLgxj2fq00o1wImBd4AaABAg",
+          "sourceHash": "b196e27a0499fbff0e33317f5c943ea651d7a46e2b7ee8bbdb9f8f200b328db7",
+          "isNiche": false
+        },
+        {
+          "index": 3,
+          "time": "1:49:13",
+          "seconds": 6553,
+          "title": "Together",
+          "artist": "あきよしふみえ（ポケットモンスター ダイヤモンド&パール）",
+          "raw": "01:49:13　Together／あきよしふみえ（ポケットモンスター ダイヤモンド&パール）",
+          "rawHash": "2c84cab927e177cb7ace56bf0c38396671b131dbe82884aa944fdf1a87b1a053",
+          "sourceId": "UgwLgxj2fq00o1wImBd4AaABAg",
+          "sourceHash": "b196e27a0499fbff0e33317f5c943ea651d7a46e2b7ee8bbdb9f8f200b328db7",
+          "isNiche": false
+        }
+      ],
+      "lastInspectedAt": "2026-07-22T21:03:38.529Z",
+      "qualityStatus": "usable",
+      "discoveryImport": {
+        "sourceGroup": "youtube_channel_discovery",
+        "inputDir": "artifacts/channel-discovery/2026-07-22-source-backfill-batch47-kyoka-shard12of16-discovery",
+        "discoverySingerName": "Kyoka_0609",
+        "discoveryChannelUrl": "https://www.youtube.com/@Kyoka_0609",
+        "matchedKeywords": [
+          "歌",
+          "歌枠"
+        ]
+      },
+      "curationVersion": "curation-v1:12c32dcbcb07",
+      "curationHash": "12c32dcbcb07300c29b45831be625e4086f1fcb1a14fad4377384d07c9aae9c3"
+    }
+  ]
+}
