@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-artifact-local-partial",
+  "generatedAt": "2026-07-22T19:34:35.947Z",
+  "status": "success",
+  "source": {
+    "url": "https://www.youtube.com/@Kyoka_0609",
+    "singerName": "Kyoka_0609"
+  },
+  "shard": {
+    "inspectShardIndex": 8,
+    "inspectShardCount": 16
+  },
+  "discovery": {
+    "generatedAt": "2026-07-22T19:30:43.750Z",
+    "candidateCount": 238,
+    "inspectedCount": 15,
+    "usableVideoCount": 11,
+    "occurrenceCount": 187,
+    "maxChannelPages": 100,
+    "maxCandidates": 0,
+    "maxInspect": 1000,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 16,
+        "rawItemCount": 466,
+        "candidateCount": 231,
+        "continuationRounds": 15,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 1108952
+      },
+      {
+        "pageUrl": "https://www.youtube.com/@Kyoka_0609/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 2,
+        "rawItemCount": 15,
+        "candidateCount": 7,
+        "continuationRounds": 1,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 974817
+      }
+    ],
+    "requestStats": {
+      "requestCount": 2,
+      "networkRequestCount": 2,
+      "cacheHitCount": 0,
+      "totalBytes": 2083769,
+      "totalElapsedMs": 290,
+      "statuses": {
+        "200": 2
+      }
+    },
+    "publishedTimestampCoverage": {
+      "rawCandidates": "238/238",
+      "unfilteredVideos": "11/11",
+      "acceptedVideos": "11/11"
+    },
+    "occurrenceTimeCoverage": "187/187",
+    "occurrenceSecondsCoverage": "187/187",
+    "thumbnailCoverage": {
+      "unfilteredVideos": "0/11",
+      "acceptedVideos": "0/11",
+      "acceptedOccurrenceRows": "0/187"
+    },
+    "requestIntervalMs": 3500,
+    "requestJitterMs": 1500
+  },
+  "increment": {
+    "unfiltered": {
+      "file": "candidate-increment-unfiltered.json",
+      "videoCount": 11,
+      "occurrenceCount": 187
+    },
+    "accepted": {
+      "file": "accepted-increment.json",
+      "videos": 11,
+      "occurrences": 187,
+      "songs": 161
+    }
+  },
+  "audit": {
+    "file": "dirty-audit.json",
+    "dirtyDropped": 0,
+    "suspicious": 0,
+    "droppedOccurrences": 0,
+    "suspiciousOccurrences": 0
+  },
+  "coverage": {
+    "acceptedVideos": 11,
+    "acceptedOccurrences": 187,
+    "acceptedSongs": 161,
+    "publishedVideosWithTimestamp": 11,
+    "acceptedVideosWithThumbnail": 0,
+    "occurrencesWithTime": 187,
+    "occurrencesWithSeconds": 187,
+    "occurrenceRowsWithThumbnail": 0,
+    "publishedTimestampCoverage": "11/11",
+    "thumbnailCoverage": "0/11",
+    "occurrenceTimeCoverage": "187/187",
+    "occurrenceSecondsCoverage": "187/187",
+    "occurrenceThumbnailCoverage": "0/187",
+    "rawCandidates": 238,
+    "rawCandidatesWithPublished": 238,
+    "unfilteredVideos": 11,
+    "unfilteredPublished": 11,
+    "unfilteredVideosWithThumbnail": 0
+  },
+  "files": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "remoteExecution": {
+    "preferredHost": "vps5",
+    "usedHost": "vps-jp",
+    "hostname": "VM-c8189ce8-42c5-4763-bfb1-d000d087dbb5",
+    "fallbackReason": "vps5 was not resolvable from local SSH config; culua and rainy-cloud hosts were not used",
+    "remoteDir": "/opt/ytb-song-rank-source-backfill-20260723-batch43-kyoka-shard8of16-vps-jp-r1",
+    "sourceCommit": "3d15e986302cb3c68da113e1cc26386d2e6abd5a",
+    "setup": "git clone --filter=blob:none --sparse --branch main https://github.com/Marica7731/daily-song-list.git; git sparse-checkout set --no-cone /scripts /config /assets /package.json /test /docs /data/external",
+    "commandSummary": "timeout 3600s npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@Kyoka_0609 --singer-name Kyoka_0609 --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-count 16 --inspect-shard-index 8 --request-interval-ms 3500 --request-jitter-ms 1500",
+    "status": "success",
+    "cleanupStatus": "removed",
+    "postCleanupDfH": "/dev/sda1        99G   11G   89G  11% /",
+    "stageLogTail": [
+      "2026-07-22T19:19:37Z stage=setup_start host=VM-c8189ce8-42c5-4763-bfb1-d000d087dbb5",
+      "2026-07-22T19:19:51Z stage=source_ready commit=3d15e986302cb3c68da113e1cc26386d2e6abd5a",
+      "2026-07-22T19:19:51Z stage=discovery_start Kyoka_0609 shard=8/16",
+      "2026-07-22T19:20:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:21:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:22:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:23:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:24:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:25:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:26:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:27:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:28:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:29:51Z stage=heartbeat discovery Kyoka_0609 shard=8/16",
+      "2026-07-22T19:30:43Z stage=discovery_done exit=0"
+    ],
+    "stdoutTail": [
+      "> daily-song-list@1.0.0 youtube:discover-channel",
+      "> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@Kyoka_0609 --singer-name Kyoka_0609 --output-dir /opt/ytb-song-rank-source-backfill-20260723-batch43-kyoka-shard8of16-vps-jp-r1/discovery --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-count 16 --inspect-shard-index 8 --request-interval-ms 3500 --request-jitter-ms 1500 --keyword フルート --keyword 生演奏 --keyword クラリネット --keyword サックス --keyword サクソフォン --keyword sax --keyword saxophone --keyword piano streaming --keyword piano performance --keyword ピアノ演奏 --keyword live --keyword ライブ --keyword 歌 --keyword 歌枠 --keyword 弾き語り --keyword karaoke --keyword 歌ってみた --keyword 3D Live",
+      "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@Kyoka_0609\" candidates=238 inspected=15 videos=11 occurrences=187 elapsedSeconds=653 outputDir=\"/opt/ytb-song-rank-source-backfill-20260723-batch43-kyoka-shard8of16-vps-jp-r1/discovery\""
+    ]
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  }
+}
