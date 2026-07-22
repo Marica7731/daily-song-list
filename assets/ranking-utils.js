@@ -33,6 +33,7 @@
     ["ヨルシカ", "ヨルシカ"],
     ["ヨルシカyorushika", "ヨルシカ"],
   ]);
+  const OFFICIAL_TITLE_GLOSS_KEYS = new Map([["花になって", ["beaflower"]]]);
   let curatedArtistAliasLookup = null;
 
   function buildSongRecords(occurrences, options = {}) {
@@ -112,8 +113,16 @@
       const unknownTarget =
         selectDominantRecord(knownRecords) || findKnownRecordFromCombinedTitle(titleGroup.titleKey, allKnownRecords);
       if (unknownTarget) {
+        const fallbackArtist = dominantRecordArtist(unknownTarget);
         for (const { occurrence, variantLabel } of titleGroup.unknownOccurrences) {
-          addOccurrence(unknownTarget, occurrence, { clean, increment, skipArtist: true, variantLabel });
+          addOccurrence(unknownTarget, occurrence, {
+            clean,
+            increment,
+            skipArtist: true,
+            variantLabel,
+            fallbackArtist,
+            fallbackTitle: unknownTarget.title || displayTitle,
+          });
         }
         continue;
       }
@@ -887,11 +896,31 @@
   }
 
   function addOccurrence(record, occurrence, options) {
+    const recordOccurrence = normalizedOccurrenceForRecord(occurrence, options);
     record.count += 1;
-    record.occurrences.push(occurrence);
-    if (!options.skipArtist) options.increment(record.artists, canonicalizeArtistName(options.clean(occurrence?.song?.artist)));
-    options.increment(record.channels, options.clean(occurrence?.item?.channelName));
+    record.occurrences.push(recordOccurrence);
+    if (!options.skipArtist) options.increment(record.artists, canonicalizeArtistName(options.clean(recordOccurrence?.song?.artist)));
+    options.increment(record.channels, options.clean(recordOccurrence?.item?.channelName));
     incrementVariantLabel(record.variantLabelCounts, options.variantLabel);
+  }
+
+  function normalizedOccurrenceForRecord(occurrence, options = {}) {
+    const fallbackArtist = cleanText(options.fallbackArtist);
+    if (!fallbackArtist || !isUnknownArtistName(occurrence?.song?.artist)) return occurrence;
+    const fallbackTitle = cleanText(options.fallbackTitle);
+    return {
+      ...occurrence,
+      song: {
+        ...(occurrence?.song || {}),
+        title: fallbackTitle || occurrence?.song?.title || "",
+        artist: fallbackArtist,
+      },
+    };
+  }
+
+  function dominantRecordArtist(record) {
+    const entries = sortedCountEntries(record?.artists);
+    return entries[0]?.name || "";
   }
 
   function incrementVariantLabel(map, label) {
@@ -1044,9 +1073,17 @@
     const text = cleanVariantLabel(value).normalize("NFKC");
     const title = cleanText(workTitle).normalize("NFKC");
     if (options.allowRepeatedTitle && text && normalizeSongTitleKey(text) === normalizeSongTitleKey(title)) return true;
+    if (isLatinGlossVariant(title, text)) return true;
     return (
       /^(?:piano\s*(?:ver\.?|version)?|ピアノ\s*(?:ver\.?|版)?|acoustic\s*(?:ver\.?|version)?|アコースティック|弾き語り|a\s*cappella\s*(?:ver\.?|version|版)?|acappella\s*(?:ver\.?|version|版)?|アカペラ\s*(?:ver\.?|version|版)?|阿卡贝拉\s*(?:ver\.?|version|版)?|清唱(?:版)?|short\s*(?:ver\.?|version)?|full\s*(?:ver\.?|version)?|tv\s*size|english\s*(?:ver\.?|version|版)?|eng\s*(?:ver\.?|version|版)?|英語\s*(?:ver\.?|version|版)?|英文\s*(?:ver\.?|version|版)?|key\s*[+-]\s*\d+|キー\s*[+-]?\s*\d+|原キー|キー変更|[A-Za-z][A-Za-z0-9 .'’_-]{0,40}\s+ver\.?)$/iu.test(text)
     );
+  }
+
+  function isLatinGlossVariant(workTitle, value) {
+    const glossKeys = OFFICIAL_TITLE_GLOSS_KEYS.get(normalizeSongTitleKey(workTitle));
+    if (!glossKeys?.length) return false;
+    const glossKey = normalizeSongTitleKey(value);
+    return glossKeys.some((key) => glossKey === key || glossKey.startsWith(key));
   }
 
   function finalizeSongRecords(records) {

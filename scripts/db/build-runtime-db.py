@@ -38,6 +38,8 @@ UNKNOWN_ARTISTS = {
     "待補",
     "-",
 }
+KNOWN_SONG_ARTIST_OVERRIDES_PATH = ROOT / "config" / "known-song-artist-overrides.json"
+KNOWN_SONG_ARTIST_OVERRIDES_LOOKUP: dict[str, dict[str, str]] | None = None
 CURATED_ARTIST_ALIAS_GROUPS = (
     {"canonical": "Calc.", "aliases": ("Calc",)},
     {"canonical": "ジミーサムP", "aliases": ("ジミーサム", "OneRoom")},
@@ -439,6 +441,7 @@ def ingest_latest_payload(
             items = items[:limit_per_range]
         write_meta(conn, f"range_{range_id}_item_count", str(len(items)))
         title_stats = build_runtime_title_stats(items)
+        title_artist_fallbacks = build_runtime_title_artist_fallbacks(items, title_stats)
 
         range_state = empty_range_state()
         for item_index, item in enumerate(items):
@@ -450,7 +453,7 @@ def ingest_latest_payload(
             upsert_channel_metadata(conn, item)
 
             item_songs = item.get("songs") if isinstance(item.get("songs"), list) else []
-            valid_songs = runtime_scoped_songs(item_songs, item, title_stats)
+            valid_songs = runtime_scoped_songs(item_songs, item, title_stats, title_artist_fallbacks)
             record_video(range_state, range_id, video_id, item, valid_songs)
             record_vtuber(range_state, video_id, item, valid_songs)
             source_key = stable_key("source-video", range_id, video_id)
@@ -1829,7 +1832,12 @@ def is_moment_source(item: dict) -> bool:
     )
 
 
-def runtime_scoped_songs(songs, source: dict | None = None, title_stats: dict | None = None) -> list[dict]:
+def runtime_scoped_songs(
+    songs,
+    source: dict | None = None,
+    title_stats: dict | None = None,
+    title_artist_fallbacks: dict[str, dict[str, str]] | None = None,
+) -> list[dict]:
     if not isinstance(songs, list):
         return []
     result: list[dict] = []
@@ -1837,18 +1845,99 @@ def runtime_scoped_songs(songs, source: dict | None = None, title_stats: dict | 
         if not isinstance(song, dict):
             continue
         normalized = normalize_runtime_song(song)
+        normalized = apply_runtime_artist_fallback(normalized, title_artist_fallbacks)
         if clean_text(normalized.get("title")) and not is_likely_runtime_non_song_entry(normalized, source, title_stats):
             result.append(normalized)
     return result
 
 
 def normalize_runtime_song(song: dict) -> dict:
-    title = strip_leading_title_list_marker(clean_text(song.get("title")))
-    if title == clean_text(song.get("title")):
+    original_title = clean_text(song.get("title"))
+    original_artist = clean_text(song.get("artist"))
+    title = clean_runtime_safe_title_candidate(original_title)
+    artist = original_artist
+    known_override = known_song_artist_override_for_title(title) if is_unknown_artist(artist) else None
+    if known_override:
+        title = known_override["title"]
+        artist = known_override["artist"]
+    if title == original_title and artist == original_artist:
         return song
     normalized = dict(song)
     normalized["title"] = title
+    normalized["artist"] = artist
     return normalized
+
+
+def apply_runtime_artist_fallback(song: dict, title_artist_fallbacks: dict[str, dict[str, str]] | None) -> dict:
+    if not title_artist_fallbacks or not is_unknown_artist(song.get("artist")):
+        return song
+    fallback = title_artist_fallbacks.get(runtime_song_work_title_key(song.get("title")))
+    if not fallback:
+        return song
+    title = clean_text(fallback.get("title")) or clean_text(song.get("title"))
+    artist = clean_text(fallback.get("artist"))
+    if not title or not artist or is_unknown_artist(artist):
+        return song
+    normalized = dict(song)
+    normalized["title"] = title
+    normalized["artist"] = artist
+    return normalized
+
+
+def clean_runtime_safe_title_candidate(value) -> str:
+    text = strip_leading_title_list_marker(clean_text(value))
+    if not text:
+        return ""
+    text = re.sub(
+        r"^(?:未記載|未记载|待补歌手|待補歌手|待补|待補)\s+"
+        r"(?=(?:[⟦［\[]\s*#?[0-9０-９]{1,3}\s*[⟧］\]]\s*[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]"
+        r"|[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]"
+        r"|[mｍ]?[0-9０-９]{1,3}[.．]"
+        r"|[#＃]?[0-9０-９]{1,3}\s*[≫»>]"
+        r"|[#＃]?[0-9０-９]{1,3}\s*[)）、:：]"
+        r"|[#＃]?[0-9０-９]{1,3}\s+[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]))",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    ).strip()
+    text = re.sub(
+        r"^(?:[⟦［\[]\s*#?[0-9０-９]{1,3}\s*[⟧］\]]\s*(?=[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff])"
+        r"|[\u2460-\u2473\u3251-\u325f\u32b1-\u32bf]\s*"
+        r"|[mｍ][0-9０-９]{1,3}[.．]\s*"
+        r"|[0-9０-９]{1,3}\s*[≫»>]+\s*"
+        r"|[#＃]?[0-9０-９]{1,3}[.．](?![0-9０-９])\s*"
+        r"|[#＃]?[0-9０-９]{1,3}\s*[)）、:：]\s*"
+        r"|[#＃]?[0-9０-９]{1,3}\s+(?=[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]))",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    ).strip()
+    return re.sub(r"^[\s\u3000\-–—:：;；,，.。]+|[\s\u3000\-–—:：;；,，.。]+$", "", text).strip()
+
+
+def known_song_artist_override_for_title(title) -> dict[str, str] | None:
+    lookup = load_known_song_artist_overrides()
+    return lookup.get(normalize_key(title))
+
+
+def load_known_song_artist_overrides() -> dict[str, dict[str, str]]:
+    global KNOWN_SONG_ARTIST_OVERRIDES_LOOKUP
+    if KNOWN_SONG_ARTIST_OVERRIDES_LOOKUP is not None:
+        return KNOWN_SONG_ARTIST_OVERRIDES_LOOKUP
+    lookup: dict[str, dict[str, str]] = {}
+    if KNOWN_SONG_ARTIST_OVERRIDES_PATH.exists():
+        payload = read_json(KNOWN_SONG_ARTIST_OVERRIDES_PATH)
+        records = payload.get("records") if isinstance(payload, dict) and isinstance(payload.get("records"), list) else []
+        for record in records:
+            if not isinstance(record, dict):
+                continue
+            title = clean_text(record.get("title"))
+            artist = clean_text(record.get("artist"))
+            key = normalize_key(title)
+            if title and artist and key:
+                lookup[key] = {"title": title, "artist": artist}
+    KNOWN_SONG_ARTIST_OVERRIDES_LOOKUP = lookup
+    return lookup
 
 
 def is_likely_runtime_non_song_entry(song: dict, source: dict | None = None, title_stats: dict | None = None) -> bool:
@@ -1904,6 +1993,45 @@ def build_runtime_title_stats(items: list[dict]) -> dict[str, dict[str, int]]:
         key: {"rows": int(record["rows"]), "sourceCount": len(record["sources"])}  # type: ignore[arg-type]
         for key, record in records.items()
     }
+
+
+def build_runtime_title_artist_fallbacks(items: list[dict], title_stats: dict | None = None) -> dict[str, dict[str, str]]:
+    records: dict[str, dict[str, object]] = {}
+    for item in items or []:
+        if not isinstance(item, dict):
+            continue
+        songs = item.get("songs") if isinstance(item.get("songs"), list) else []
+        for song in songs:
+            if not isinstance(song, dict):
+                continue
+            normalized_song = normalize_runtime_song(song)
+            if is_likely_runtime_non_song_entry(normalized_song, item, title_stats):
+                continue
+            title = clean_text(normalized_song.get("title"))
+            artist = canonical_artist_display_name(normalized_song.get("artist")) or clean_text(normalized_song.get("artist"))
+            if not title or is_unknown_artist(artist):
+                continue
+            key = runtime_song_work_title_key(title)
+            if not key:
+                continue
+            if key not in records:
+                records[key] = {
+                    "titles": {},
+                    "artists": {},
+                }
+            increment_count(records[key]["titles"], vtuber_canonical_song_title(title) or title)  # type: ignore[arg-type]
+            increment_count(records[key]["artists"], artist)  # type: ignore[arg-type]
+    fallbacks: dict[str, dict[str, str]] = {}
+    for key, record in records.items():
+        title = dominant_count_name(record["titles"])  # type: ignore[arg-type]
+        artist = dominant_count_name(record["artists"])  # type: ignore[arg-type]
+        if title and artist:
+            fallbacks[key] = {"title": title, "artist": artist}
+    return fallbacks
+
+
+def runtime_song_work_title_key(value) -> str:
+    return normalize_singleton_title_key(vtuber_canonical_song_title(value) or clean_runtime_safe_title_candidate(value))
 
 
 def is_runtime_confirmed_dirty_title(title, raw) -> bool:
@@ -2262,6 +2390,11 @@ def count_map_to_list(value: dict[str, int]) -> list[dict]:
         elif name:
             records.append({"name": name, "count": int(count or 0)})
     return [record for record in sorted(records, key=lambda item: (-item["count"], normalize_key(item["name"]))) if record["name"]]
+
+
+def dominant_count_name(value: dict[str, int]) -> str:
+    records = count_map_to_list(value)
+    return records[0]["name"] if records else ""
 
 
 def increment_vtuber_song_count(target: dict[str, dict], song: dict) -> None:

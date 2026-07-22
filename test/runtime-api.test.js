@@ -21,6 +21,81 @@ test("runtime API vtuber fallback uses normalized song title lookup for source e
   );
 });
 
+test("runtime API merges indexed unknown artist song variants into the known song result", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-indexed-unknown-"));
+  const latestPath = path.join(dir, "latest.json");
+  const dbPath = path.join(dir, "song-rank.sqlite");
+  let child = null;
+  let stderr = "";
+
+  try {
+    writeIndexedUnknownArtistFixture(latestPath);
+    execFileSync(
+      PYTHON,
+      [
+        path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+        "--input",
+        latestPath,
+        "--output",
+        dbPath,
+        "--no-vsinger",
+        "--no-youtube-channel-discovery",
+      ],
+      {
+        cwd: ROOT,
+        encoding: "utf8",
+        env: { ...process.env, DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT: "2" },
+        timeout: 30000,
+      },
+    );
+
+    const port = await getFreePort();
+    child = spawn(
+      PYTHON,
+      [
+        path.join(ROOT, "server", "song_rank_api.py"),
+        "--db",
+        dbPath,
+        "--host",
+        "127.0.0.1",
+        "--port",
+        String(port),
+      ],
+      { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] },
+    );
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString("utf8");
+    });
+
+    await waitForReady(child, port);
+    const params = new URLSearchParams({
+      range: "all",
+      view: "songs",
+      q: "花になって",
+      pageSize: "5",
+    });
+    const flowerSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?${params}`);
+    assert.equal(flowerSearch.totalCount, 1);
+    assert.equal(flowerSearch.totalOccurrenceCount, 3);
+    assert.equal(flowerSearch.records.length, 1);
+    assert.equal(flowerSearch.records[0].title, "花になって");
+    assert.equal(flowerSearch.records[0].displayArtist, "緑黄色社会");
+    assert.equal(flowerSearch.records[0].count, 3);
+
+    const responseText = JSON.stringify(flowerSearch);
+    assert.doesNotMatch(responseText, /未記載/u);
+    assert.doesNotMatch(responseText, /⟦16⟧/u);
+    assert.doesNotMatch(responseText, /16 花になって/u);
+  } finally {
+    if (child) {
+      child.kill();
+      await waitForExit(child);
+      assert.equal(stderr.includes("Traceback"), false, stderr);
+    }
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("runtime API serves health and ranking rows from SQLite", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-"));
   const latestPath = path.join(dir, "latest.json");
@@ -298,6 +373,44 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(stderr.includes("Traceback"), false, stderr);
   }
 });
+
+function writeIndexedUnknownArtistFixture(latestPath) {
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      capturedAt: "2026-07-19T00:00:00.000Z",
+      groups: {
+        all: {
+          items: [
+            indexedUnknownArtistVideo("flower-known", "Flower Known Karaoke", [
+              { title: "花になって", artist: "緑黄色社会", seconds: 10, time: "0:10" },
+            ]),
+            indexedUnknownArtistVideo("flower-bracket-index", "Flower Bracket Karaoke", [
+              { title: "⟦16⟧ 花になって", artist: "未記載", seconds: 20, time: "0:20" },
+            ]),
+            indexedUnknownArtistVideo("flower-plain-index", "Flower Plain Karaoke", [
+              { title: "16 花になって", artist: "未記載", seconds: 30, time: "0:30" },
+            ]),
+          ],
+        },
+      },
+    }),
+    "utf8",
+  );
+}
+
+function indexedUnknownArtistVideo(videoId, title, songs) {
+  return {
+    videoId,
+    title,
+    channelName: "Flower Ch.",
+    thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    publishedTimestamp: 1784419200000,
+    publishedText: "2026-07-19",
+    songs,
+  };
+}
 
 function writeLatestFixture(latestPath) {
   fs.writeFileSync(

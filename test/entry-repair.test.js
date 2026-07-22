@@ -231,6 +231,8 @@ test("fills high-confidence unknown artists from reviewed title metadata only", 
   assert.equal(flowerPlainIndex.title, "花になって");
   assert.equal(flowerPlainIndex.artist, "緑黄色社会");
   assert.equal(cleanSafeTitleCandidate("10 Years After"), "10 Years After");
+  assert.equal(cleanSafeTitleCandidate("[10] Years After"), "[10] Years After");
+  assert.equal(cleanSafeTitleCandidate("⟦10⟧ Years After"), "⟦10⟧ Years After");
   assert.equal(flowerCommentary.artist, "待补歌手");
   assert.equal(mitani.artist, "みたにみく");
   assert.equal(selfEsteem.title, "自己肯定感爆上げ↑↑しゅきしゅきソング");

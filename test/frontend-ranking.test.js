@@ -439,12 +439,14 @@ test("song ranking backfills placeholders and strips duplicated artist descripto
     occurrence("花になって", "未記載", "flower-a"),
     occurrence("花になって", "緑黄色社会", "flower-b"),
     occurrence("花になって", "緑黄色社会、緑黄色社会|Be a flower / Ryokuu Shakai", "flower-c"),
+    occurrence("花になって - Be a flower", "未記載", "flower-d"),
   ]);
 
   assert.equal(records.length, 1);
   assert.equal(records[0].title, "花になって");
   assert.equal(records[0].displayArtist, "緑黄色社会");
-  assert.equal(records[0].count, 3);
+  assert.equal(records[0].count, 4);
+  assert.equal(records[0].occurrences.every((item) => !isUnknownArtistName(item.song.artist)), true);
 });
 
 test("artist ranking does not merge explicit CV identity into the base artist", () => {

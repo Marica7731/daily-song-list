@@ -491,7 +491,6 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
 test("runtime DB builder repairs indexed unknown-artist known songs before ranking", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-db-repair-"));
   const latestPath = path.join(dir, "latest.json");
-  const dbPath = path.join(dir, "song-rank.sqlite");
 
   fs.writeFileSync(
     latestPath,
@@ -513,6 +512,10 @@ test("runtime DB builder repairs indexed unknown-artist known songs before ranki
                 { title: "花になって", artist: "緑黄色社会", seconds: 10, time: "0:10" },
                 { title: "⟦16⟧ 花になって", artist: "未記載", seconds: 20, time: "0:20" },
                 { title: "16 花になって", artist: "未記載", seconds: 30, time: "0:30" },
+                { title: "花になって - Be a flower", artist: "未記載", seconds: 40, time: "0:40" },
+                { title: "52😎花になって", artist: "未記載", seconds: 50, time: "0:50" },
+                { title: "晴る", artist: "ヨルシカ", seconds: 60, time: "1:00" },
+                { title: "晴るる", artist: "未記載", seconds: 70, time: "1:10" },
               ],
             },
           ],
@@ -522,9 +525,9 @@ test("runtime DB builder repairs indexed unknown-artist known songs before ranki
     "utf8",
   );
 
-  const buildOutput = execFileSync(
-    PYTHON,
-    [
+  for (const rankingSource of ["js", "python"]) {
+    const dbPath = path.join(dir, `song-rank-${rankingSource}.sqlite`);
+    const buildArgs = [
       path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
       "--input",
       latestPath,
@@ -532,32 +535,55 @@ test("runtime DB builder repairs indexed unknown-artist known songs before ranki
       dbPath,
       "--no-vsinger",
       "--no-youtube-channel-discovery",
-    ],
-    { cwd: ROOT, encoding: "utf8" },
-  );
-  assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
+    ];
+    if (rankingSource === "python") buildArgs.push("--ranking-source", "python");
+    const buildOutput = execFileSync(PYTHON, buildArgs, { cwd: ROOT, encoding: "utf8" });
+    assert.match(buildOutput, /CODEX_RUNTIME_DB_BUILD_OK/);
 
-  const queryOutput = execFileSync(
-    PYTHON,
-    [
-      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
-      "--db",
-      dbPath,
-      "--range",
-      "all",
-      "--view",
-      "songs",
-      "--q",
-      "花になって",
-      "--summary-only",
-    ],
-    { cwd: ROOT, encoding: "utf8" },
-  );
-  assert.match(queryOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(queryOutput, /"totalCount": 1/);
-  assert.match(queryOutput, /"count": 3/);
-  assert.match(queryOutput, /"displayArtist": "緑黄色社会"/);
-  assert.doesNotMatch(queryOutput, /::unknown|未記載|⟦16⟧|16 花になって/u);
+    const queryOutput = execFileSync(
+      PYTHON,
+      [
+        path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+        "--db",
+        dbPath,
+        "--range",
+        "all",
+        "--view",
+        "songs",
+        "--q",
+        "花になって",
+        "--summary-only",
+      ],
+      { cwd: ROOT, encoding: "utf8" },
+    );
+    assert.match(queryOutput, /CODEX_RUNTIME_DB_QUERY_OK/, rankingSource);
+    assert.match(queryOutput, /"totalCount": 1/, rankingSource);
+    assert.match(queryOutput, /"count": 5/, rankingSource);
+    assert.match(queryOutput, /"displayArtist": "緑黄色社会"/, rankingSource);
+    assert.doesNotMatch(queryOutput, /::unknown|未記載|⟦16⟧|16 花になって|Be a flower|52😎/u, rankingSource);
+
+    const haruruOutput = execFileSync(
+      PYTHON,
+      [
+        path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+        "--db",
+        dbPath,
+        "--range",
+        "all",
+        "--view",
+        "songs",
+        "--q",
+        "晴るる",
+        "--summary-only",
+      ],
+      { cwd: ROOT, encoding: "utf8" },
+    );
+    const haruruPayload = parseDbQueryOutput(haruruOutput);
+    assert.equal(haruruPayload.totalCount, 1, rankingSource);
+    assert.equal(haruruPayload.firstRecord.title, "晴るる", rankingSource);
+    assert.notEqual(haruruPayload.firstRecord.displayArtist, "ヨルシカ", rankingSource);
+    assert.equal(["", "未記載"].includes(haruruPayload.firstRecord.displayArtist), true, rankingSource);
+  }
 });
 
 test("runtime DB builder merges accepted YouTube channel discovery increments into rankings", () => {

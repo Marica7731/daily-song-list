@@ -1,6 +1,6 @@
 # Codex Windows / Mac / GitHub SSH 复用说明
 
-更新时间：2026-07-22 04:15:21 +08:00
+更新时间：2026-07-22 22:32:08 +08:00
 
 本文记录当前 Windows 主机、Mac 构建机和 GitHub 账号级 SSH 的配置方式。只记录公钥、路径、命令和验证证据；不要把密码、私钥、token 写入本文或提交到仓库。
 
@@ -142,6 +142,44 @@ b6123e8ed54ecd0355893e2cce6cb87829023563  refs/heads/main
 git push --dry-run origin HEAD:refs/heads/codex/mac-ssh-permission-test
 * [new branch] HEAD -> codex/mac-ssh-permission-test
 ```
+
+## daily-song-list 构建分工
+
+### 推荐路径
+
+当前最稳的分工是：
+
+- Windows 负责代码编辑、差异审查、commit、push、线上发布收口。
+- Windows 临时工作树和大日志优先放 `G:\`，不要放 `C:\`；`D:\` 空间不足时不要再继续塞大数据 checkout。
+- Mac 负责干净 checkout 后的重型构建、SQLite/JSON 再生成和二次校验。
+
+### Windows 本地收口
+
+在 Windows 修改完成后，先在 G 盘工作树跑本地快速验证：
+
+```powershell
+cd G:\daily_song_list_data_clean_publish_20260722
+npm run check
+git diff --check
+```
+
+如果需要后台跑数据任务，日志放到 G 盘临时目录，例如：
+
+```powershell
+New-Item -ItemType Directory -Force G:\codex_tmp\daily-song-list-runlogs
+```
+
+临时 runner、日志、`.codex-tmp` 不能进 commit。
+
+### Mac 干净复验
+
+Windows commit 并 push 后，让 Mac 拉远端提交复验，避免 Mac 跑不到本地未提交 diff：
+
+```powershell
+ssh daily-song-list-mac "source ~/.daily-song-list-build-env && cd ~/daily-song-list && git fetch --depth=1 --filter=blob:none origin main && git checkout -B main FETCH_HEAD && PYTHON=python3 npm run test:db"
+```
+
+大 JSON / SQLite / runtime DB 类任务优先放 Mac 跑。需要全量构建时，先确认 Mac repo 的 sparse checkout 是否包含所需目录；如果只跑 DB 测试，当前 sparse checkout 足够。
 
 ## 从零重建步骤
 
