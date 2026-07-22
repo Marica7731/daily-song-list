@@ -47,19 +47,21 @@ const RESPONSIVE_BREAKPOINTS = {
   mobileMax: 720,
   tabletMax: 919,
 };
-const LIST_PAGE_SIZE_OPTIONS = [20, 50, 100];
-const DEFAULT_LIST_PAGE_SIZE = 50;
+const MOBILE_PAGE_SIZE = 20;
+const DESKTOP_PAGE_SIZE = 30;
+const LIST_PAGE_SIZE_OPTIONS = [MOBILE_PAGE_SIZE, DESKTOP_PAGE_SIZE];
+const DEFAULT_LIST_PAGE_SIZE = DESKTOP_PAGE_SIZE;
+const VIDEO_PAGE_SIZE = DESKTOP_PAGE_SIZE;
 const LIST_PAGE_SIZE_BY_MODE = {
-  mobile: 20,
-  tablet: 50,
-  desktop: 50,
+  mobile: MOBILE_PAGE_SIZE,
+  tablet: MOBILE_PAGE_SIZE,
+  desktop: DESKTOP_PAGE_SIZE,
 };
 const SOURCE_DRAWER_PAGE_SIZE_BY_MODE = {
-  mobile: 10,
-  tablet: 20,
-  desktop: 20,
+  mobile: MOBILE_PAGE_SIZE,
+  tablet: MOBILE_PAGE_SIZE,
+  desktop: DESKTOP_PAGE_SIZE,
 };
-const VIDEO_PAGE_SIZE = 24;
 const CURRENT_FILTER_VERSION = 4;
 const RANK_METRICS = {
   occurrences: "歌唱次数",
@@ -659,12 +661,15 @@ function bindEvents() {
       state.expandedRows.clear();
       resetPagination();
       render({ focusAfterPageChange: true, urlMode: "push" });
-      return;
     }
+  });
 
-    const select = event.target.closest("[data-page-select]");
-    if (!select) return;
-    const page = Number.parseInt(select.value || "1", 10);
+  els.content.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-page-form]");
+    if (!form) return;
+    event.preventDefault();
+    const input = form.querySelector("[data-page-input]");
+    const page = Number.parseInt(input?.value || "", 10);
     setPage(page);
     render({ focusAfterPageChange: true, urlMode: "push" });
   });
@@ -2144,7 +2149,6 @@ function setPage(page) {
 }
 
 function currentPageSize() {
-  if (state.view === "videos") return VIDEO_PAGE_SIZE;
   if (PAGE_SIZES[state.view]) return LIST_PAGE_SIZE_OPTIONS.includes(Number(state.pageSize)) ? Number(state.pageSize) : defaultListPageSizeForMode();
   return defaultListPageSizeForMode();
 }
@@ -5274,9 +5278,9 @@ function renderPaginationControl({ pageInfo, unit, variant = "bottom" }) {
 }
 
 function shouldShowPageSizeControl(pageInfo, variant = "bottom") {
-  if (variant === "top") return false;
-  if (state.view === "videos") return false;
-  return pageInfo.total > Math.min(...LIST_PAGE_SIZE_OPTIONS);
+  void pageInfo;
+  void variant;
+  return false;
 }
 
 function renderPageSizeControl() {
@@ -5341,13 +5345,7 @@ function renderMobileTopPagination(pageInfo, options = {}) {
   const controls = document.createElement("div");
   controls.className = options.index ? "pagination-controls pagination-stepper pagination-stepper-index" : "pagination-controls pagination-stepper";
   controls.append(renderPageButton("上一页", model.previousPage || 1, !model.hasPrevious, false, { icon: "prev" }));
-  for (const page of options.index ? [] : model.previousNeighbors) {
-    controls.append(renderPageButton(String(page), page, false, false, { className: "pagination-neighbor" }));
-  }
   controls.append(renderPageSelectControl(pageInfo, { compact: true }));
-  for (const page of options.index ? [] : model.nextNeighbors) {
-    controls.append(renderPageButton(String(page), page, false, false, { className: "pagination-neighbor" }));
-  }
   controls.append(renderPageButton("下一页", model.nextPage || model.pageCount, !model.hasNext, false, { icon: "next" }));
   return controls;
 }
@@ -5356,11 +5354,9 @@ function renderMobileBottomPagination(pageInfo) {
   const controls = document.createElement("div");
   controls.className = "pagination-controls pagination-bottom-stepper";
   controls.append(
-    renderPageButton("首页", 1, pageInfo.page === 1, false, { icon: "first" }),
     renderPageButton("上一页", pageInfo.page - 1, pageInfo.page === 1, false, { icon: "prev" }),
     renderPageSelectControl(pageInfo, { compact: true }),
     renderPageButton("下一页", pageInfo.page + 1, pageInfo.page === pageInfo.pageCount, false, { icon: "next" }),
-    renderPageButton("末页", pageInfo.pageCount, pageInfo.page === pageInfo.pageCount, false, { icon: "last" }),
   );
   return controls;
 }
@@ -5407,23 +5403,34 @@ function renderPageEllipsisToken(token) {
   return item;
 }
 
-function renderPageSelectControl(pageInfo, options = {}) {
+function renderPageSelectControl(pageInfo, options) {
+  options = options || {};
   if (!options.compact) return renderPageJumpControl(pageInfo);
-  const label = document.createElement("label");
+  const label = document.createElement("form");
   label.className = options.compact ? "page-select page-select-compact" : "page-select";
+  label.dataset.pageForm = "true";
+  label.setAttribute("aria-label", `跳至页码，当前第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
   const text = document.createElement("span");
-  text.textContent = options.compact ? `${pageInfo.page}/${pageInfo.pageCount}` : "跳至";
-  const select = document.createElement("select");
-  select.dataset.pageSelect = "true";
-  select.setAttribute("aria-label", `当前第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页，选择其他页`);
-  for (let page = 1; page <= pageInfo.pageCount; page += 1) {
-    const option = document.createElement("option");
-    option.value = String(page);
-    option.textContent = `${page}`;
-    select.append(option);
-  }
-  select.value = String(pageInfo.page);
-  label.append(text, select);
+  text.className = "page-select-label";
+  text.textContent = options.compact ? "第" : "跳至";
+  const input = document.createElement("input");
+  input.type = "number";
+  input.min = "1";
+  input.max = String(pageInfo.pageCount);
+  input.step = "1";
+  input.value = String(pageInfo.page);
+  input.inputMode = "numeric";
+  input.dataset.pageInput = "true";
+  input.setAttribute("aria-label", `输入页码，范围 1 到 ${pageInfo.pageCount}`);
+  const total = document.createElement("span");
+  total.className = "page-select-total";
+  total.textContent = `/ ${pageInfo.pageCount}`;
+  const submit = document.createElement("button");
+  submit.className = "pagination-button page-select-submit";
+  submit.type = "submit";
+  submit.textContent = "选页";
+  submit.setAttribute("aria-label", "跳转到输入页码");
+  label.append(text, input, total, submit);
   return label;
 }
 
@@ -7784,7 +7791,7 @@ function renderArtistSongGroup(group) {
     thumb.href = youtubeTimeUrl(previewItem.videoId, previewSong.seconds);
     thumb.target = "_blank";
     thumb.rel = "noreferrer";
-    thumb.setAttribute("aria-label", `打开歌曲来源：${group.title}`);
+    thumb.setAttribute("aria-label", `打开最新来源：${group.title}`);
   } else {
     thumb.setAttribute("aria-hidden", "true");
   }
@@ -8238,6 +8245,95 @@ async function toggleArtistSongSource(button) {
   button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
   if (button.dataset.sourceSummaryToggle === "true") updateSourceInlineMoreButton(button, nextExpanded);
   else updateArtistSongSourceButton(button, nextExpanded);
+}
+
+function syncArtistSongGroupSourceSummary(section, sources, occurrences) {
+  const sourceOccurrences = occurrences || [];
+  if (!section || !sourceOccurrences.length) return;
+  const group = section._songGroup || {};
+  const latestOccurrence = latestOccurrenceByVideoDate(sourceOccurrences) || sourceOccurrences[0];
+  const videoCount = uniqueVideoCount(sourceOccurrences);
+  group.occurrences = sourceOccurrences;
+  group.videoCount = videoCount;
+  group.latestOccurrence = latestOccurrence;
+  group.artistSummary = artistSummaryForOccurrences(sourceOccurrences) || group.artistSummary || "";
+  group.sourceIncomplete = false;
+  section._songGroup = group;
+  if (sources) {
+    sources._sourceOccurrences = sourceOccurrences;
+    sources._songSourceOccurrences = sourceOccurrences;
+  }
+  syncArtistSongGroupThumb(section, group);
+  syncArtistSongGroupTitleLink(section, group);
+  syncArtistSongGroupArtist(section, group.artistSummary);
+  syncArtistSongGroupVideoCount(section, videoCount);
+  const button = section.querySelector("[data-toggle-artist-song-source]");
+  if (button) {
+    button.dataset.sourceVideoCount = String(videoCount);
+    button.dataset.occurrenceCount = String(sourceOccurrences.length);
+    updateArtistSongSourceButton(button, button.getAttribute("aria-expanded") === "true");
+  }
+}
+
+function syncArtistSongGroupThumb(section, group) {
+  const header = section.querySelector(":scope > .artist-song-header");
+  const latestOccurrence = group?.latestOccurrence;
+  if (!header || !latestOccurrence?.item?.videoId) return;
+  let thumb = header.querySelector(":scope > .artist-song-thumb");
+  if (!thumb || thumb.tagName !== "A") {
+    const nextThumb = document.createElement("a");
+    nextThumb.className = "artist-song-thumb source-link";
+    if (thumb) thumb.replaceWith(nextThumb);
+    else header.insertBefore(nextThumb, header.firstChild);
+    thumb = nextThumb;
+  }
+  thumb.href = youtubeTimeUrl(latestOccurrence.item.videoId, latestOccurrence.song?.seconds || 0);
+  thumb.target = "_blank";
+  thumb.rel = "noreferrer";
+  thumb.setAttribute("aria-label", `打开最新来源：${group.title}`);
+  thumb.textContent = "";
+  thumb.append(
+    createThumbnailImage(latestOccurrence.item, "artist-song-thumb-image", {
+      preferCompact: true,
+      width: 72,
+      height: 40,
+    }),
+  );
+}
+
+function syncArtistSongGroupTitleLink(section, group) {
+  const title = section.querySelector(":scope .artist-song-title");
+  const firstOccurrence = group?.occurrences?.[0];
+  if (!title || !firstOccurrence?.item?.videoId) return;
+  title.href = youtubeTimeUrl(firstOccurrence.item.videoId, firstOccurrence.song?.seconds || 0);
+  title.target = "_blank";
+  title.rel = "noreferrer";
+  title.setAttribute("aria-label", `打开歌曲来源：${group.title}`);
+}
+
+function syncArtistSongGroupArtist(section, artistSummary) {
+  const meta = section.querySelector(":scope .artist-song-summary-actions");
+  if (!meta || !artistSummary) return;
+  let artist = meta.querySelector(":scope > .artist-song-artist");
+  if (!artist) {
+    artist = document.createElement("span");
+    artist.className = "artist-song-artist";
+    meta.insertBefore(artist, meta.firstChild);
+  }
+  artist.textContent = artistSummary;
+}
+
+function syncArtistSongGroupVideoCount(section, videoCount) {
+  const meta = section.querySelector(":scope .artist-song-summary-actions");
+  if (!meta || !videoCount) return;
+  let count = meta.querySelector(":scope > .artist-song-video-count");
+  if (!count) {
+    count = document.createElement("span");
+    count.className = "artist-song-video-count";
+    const copyButton = meta.querySelector(":scope > [data-copy-song-links]");
+    meta.insertBefore(count, copyButton || null);
+  }
+  count.textContent = `${videoCount}个视频`;
 }
 
 function closeSiblingArtistSongSources(section) {

@@ -93,7 +93,7 @@ const proofInputPaths = [
 const screenshotContracts = {
   "desktop-monthly-song-rank.png": {
     scene: "desktop-all-range-song-rank",
-    params: { range: "1m", pageSize: 100 },
+    params: { range: "1m" },
     viewport: { width: 1366, height: 768 },
   },
   "desktop-artist-rank.png": {
@@ -263,7 +263,7 @@ const screenshotContracts = {
   },
   "desktop-request-pagination.png": {
     scene: "desktop-request-pagination",
-    params: { range: "all", page: 2, pageSize: 50 },
+    params: { range: "all", page: 2 },
     viewport: { width: 1440, height: 900 },
   },
   "desktop-update-failure-status.png": {

@@ -62,7 +62,7 @@ test("UI proof contracts pin new fixture scenes and proof docs", () => {
   assert.equal(screenshotContracts["mobile-trend-corrected-decrease.png"].params.case, "correctedDecrease");
   assert.equal(screenshotContracts["mobile-song-kana-romaji-merged.png"].scene, "fixture-identity-merge");
   assert.equal(screenshotContracts["mobile-video-diagnostic-result.png"].scene, "fixture-video-diagnostic");
-  assert.deepEqual(screenshotContracts["desktop-monthly-song-rank.png"].params, { range: "1m", pageSize: 100 });
+  assert.deepEqual(screenshotContracts["desktop-monthly-song-rank.png"].params, { range: "1m" });
   assert.equal(screenshotContracts["desktop-monthly-song-rank.png"].scene, "desktop-all-range-song-rank");
   assert.deepEqual(screenshotContracts["desktop-artist-rank.png"].params, { view: "artistRank" });
   assert.deepEqual(screenshotContracts["desktop-song-index.png"].params, { view: "songAz" });
