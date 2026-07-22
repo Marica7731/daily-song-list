@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { createSongSearchLookup, normalizeSongSearchText } = require("../assets/frontend-utils");
+const { canonicalizeArtistName } = require("../assets/ranking-utils");
 
 const UNKNOWN_ARTIST = "未記載";
 const ROOT = path.resolve(__dirname, "..");
@@ -255,7 +256,7 @@ function cleanSafeTitleCandidate(value) {
 }
 
 function cleanSafeArtistCandidate(value) {
-  return stripUnpairedTrailingCloseBracket(
+  return canonicalizeArtistName(stripUnpairedTrailingCloseBracket(
     stripCustomEmojiAliases(value)
     .replace(/\s+/gu, " ")
     .replace(/\s+(?:19|20)\d{2}\s*[\/／.-]\s*(?:0?[1-9]|1[0-2])\b.*$/u, "")
@@ -264,7 +265,7 @@ function cleanSafeArtistCandidate(value) {
     .replace(/\s*[☆★]+\s*$/u, "")
     .replace(/\s*[-ー–—]?\s*[【［\[(（「『]\s*$/u, "")
       .trim(),
-  );
+  ));
 }
 
 function stripUnpairedTrailingCloseBracket(value) {

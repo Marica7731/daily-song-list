@@ -192,6 +192,13 @@ test("fills high-confidence unknown artists from reviewed title metadata only", 
     artist: "待补歌手",
     raw: "1:40 53🎤 自己肯定感爆上げ↑↑しゅきしゅきソング",
   });
+  const june = repairParsedEntry({
+    time: "0:01:50",
+    seconds: 110,
+    title: "とても素敵な6月でした",
+    artist: "未記載",
+    raw: "1:50 とても素敵な6月でした",
+  });
 
   assert.equal(heat.artist, "いよわ");
   assert.equal(heat.repair.changed, true);
@@ -207,6 +214,7 @@ test("fills high-confidence unknown artists from reviewed title metadata only", 
   assert.equal(mitani.artist, "みたにみく");
   assert.equal(selfEsteem.title, "自己肯定感爆上げ↑↑しゅきしゅきソング");
   assert.equal(selfEsteem.artist, "初星学園");
+  assert.equal(june.artist, "Eight");
 });
 
 test("validates high-confidence artist override config conflicts", () => {

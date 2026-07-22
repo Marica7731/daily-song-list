@@ -26,6 +26,13 @@
     { canonical: "Calc.", aliases: ["Calc"] },
     { canonical: "ジミーサムP", aliases: ["ジミーサム", "OneRoom"] },
   ];
+  const OFFICIAL_ARTIST_NAMES = new Map([
+    ["ado", "Ado"],
+    ["deco27", "DECO*27"],
+    ["yorushika", "ヨルシカ"],
+    ["ヨルシカ", "ヨルシカ"],
+    ["ヨルシカyorushika", "ヨルシカ"],
+  ]);
   let curatedArtistAliasLookup = null;
 
   function buildSongRecords(occurrences, options = {}) {
@@ -57,7 +64,7 @@
       const titleGroup = titleGroups.get(titleKey);
       incrementTitleCount(titleGroup.titleCounts, work.workTitle);
       incrementTitleCount(titleGroup.rawTitleCounts, title);
-      const artist = clean(occurrence?.song?.artist);
+      const artist = canonicalizeArtistName(clean(occurrence?.song?.artist));
       const rawArtistKey = normalize(artist);
       const artistKey = normalizeArtist(artist) || rawArtistKey;
       if (isKnownArtist(artist, rawArtistKey) && !isLikelyNonArtistAnnotation(artist)) {
@@ -140,7 +147,8 @@
     let missingArtistCount = 0;
 
     for (const occurrence of occurrences || []) {
-      const artist = clean(occurrence?.song?.artist);
+      const rawArtist = clean(occurrence?.song?.artist);
+      const artist = canonicalizeArtistName(rawArtist);
       if (isUnknownArtistName(artist)) {
         missingArtistCount += 1;
         continue;
@@ -166,7 +174,7 @@
       const record = records.get(key);
       record.count += 1;
       record.occurrences.push(occurrence);
-      incrementAliasCount(record.aliasCounts, artist);
+      incrementAliasCount(record.aliasCounts, rawArtist);
       increment(record.songs, clean(occurrence?.song?.title));
       increment(record.channels, clean(occurrence?.item?.channelName));
     }
@@ -809,7 +817,12 @@
         count,
       }))
       .sort(compareArtistAlias);
-    if (aliases[0]) record.name = aliases[0].name;
+    const officialCanonical = OFFICIAL_ARTIST_NAMES.get(normalizeArtistKey(record.name));
+    if (officialCanonical) {
+      record.name = officialCanonical;
+    } else if (aliases[0]) {
+      record.name = aliases[0].name;
+    }
     const curatedCanonical = curatedArtistCanonicalNameForRecord(record);
     if (curatedCanonical) record.name = curatedCanonical;
     record.aliases = aliases;
@@ -876,7 +889,7 @@
   function addOccurrence(record, occurrence, options) {
     record.count += 1;
     record.occurrences.push(occurrence);
-    if (!options.skipArtist) options.increment(record.artists, options.clean(occurrence?.song?.artist));
+    if (!options.skipArtist) options.increment(record.artists, canonicalizeArtistName(options.clean(occurrence?.song?.artist)));
     options.increment(record.channels, options.clean(occurrence?.item?.channelName));
     incrementVariantLabel(record.variantLabelCounts, options.variantLabel);
   }
@@ -933,6 +946,38 @@
       .replace(/[’‘]/g, "'")
       .replace(/[“”]/g, '"')
       .replace(/[^\p{Letter}\p{Number}]+/gu, "");
+  }
+
+  function canonicalizeArtistName(value) {
+    const raw = cleanText(value);
+    if (!raw) return "";
+    const deduped = stripRepeatedLeadingArtistWithDescriptor(stripArtistEmojiDecorations(raw));
+    const key = normalizeArtistKey(deduped);
+    return OFFICIAL_ARTIST_NAMES.get(key) || deduped;
+  }
+
+  function stripArtistEmojiDecorations(value) {
+    let text = cleanText(value);
+    for (let index = 0; index < 4; index += 1) {
+      const next = text
+        .replace(/[:：]_[^\s　:：/／|｜￤∣丨]+[:：]?/gu, " ")
+        .replace(/(^|[\s\u3000])_[A-Za-z0-9][A-Za-z0-9_-]*[:：]?(?=$|[\s\u3000])/gu, " ")
+        .replace(/^[\s\u3000\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F]+|[\s\u3000\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F]+$/gu, "")
+        .replace(/\s+/gu, " ")
+        .trim();
+      if (next === text) break;
+      text = next;
+    }
+    return text;
+  }
+
+  function stripRepeatedLeadingArtistWithDescriptor(value) {
+    const text = cleanText(value);
+    const normalized = text.normalize("NFKC");
+    const match = normalized.match(/^(.{2,40}?)[、,，]\s*\1\s*(?:[|｜/／].*)?$/u);
+    if (!match) return text;
+    const separator = text.search(/[、,，]/u);
+    return separator > 0 ? text.slice(0, separator).trim() : match[1].trim();
   }
 
   function normalizeSongTitleKey(value) {
@@ -1377,6 +1422,7 @@
     buildCompetitionRanks,
     buildSongRecords,
     cleanText,
+    canonicalizeArtistName,
     extractSongVariant,
     isUnknownArtistName,
     artistIdentityMatch,

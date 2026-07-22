@@ -176,3 +176,11 @@ Latest local accepted impact audit in this branch:
 - KanaruHanon accepted source: `2026-07-19-kanaruhanon-full.json`; songs `6701 -> 6464`; unique normalized titles `1299 -> 1220`; dirty candidates `222 -> 0`.
 - IsakiRiona runtime fallback: songs `38 -> 38`; unique normalized titles `19 -> 19`; dirty candidates `0 -> 0`.
 - Guardrails retained: `START:DASH!! / μ's`, `ENDLESS STORY / REIRA starring YUNA ITO`, and `Never Ending Story / Limahl`.
+
+## 2026-07-22 official artist and known-song guardrails
+
+- Common artist spellings are canonicalized before song/artist ranking so source imports and runtime rebuilds agree: `ado` and Ado custom-emoji variants display as `Ado`, `deco27` displays as `DECO*27`, and `yorushika` / `ヨルシカ（yorushika）` display as `ヨルシカ`.
+- Placeholder artists such as `未記載` are still hidden from display when another occurrence of the same canonical song has a reliable artist. Do not display `未記載` after a song group has been merged into a known-artist record.
+- Repeated artist metadata leaked into an artist field can be collapsed only when the same leading name repeats before a work descriptor, for example `緑黄色社会、緑黄色社会|Be a flower ...` -> `緑黄色社会`. Do not strip arbitrary `|` or `/` suffixes without the repeated-name guard.
+- `とても素敵な6月でした / Eight` is a reviewed known-song guard. It should not be labeled niche and can backfill unknown artist placeholders by exact title.
+- `音成みらね / Mirane ch. 【VSingerAI】` is blocked as a user-confirmed AI singing spam source by exact channel id `UCLIE3ZrB5RSqnLnT7ReFJpw`. Keep this as source/channel blocking only; do not add broad title aliases.

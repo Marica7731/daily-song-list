@@ -414,6 +414,39 @@ test("artist ranking merges conservative non-identity artist annotations", () =>
   );
 });
 
+test("artist canonicalization keeps official names for common variants", () => {
+  const { records } = buildArtistRecords([
+    occurrence("唱", "Ado :_heart:", "ado-a"),
+    occurrence("新時代", "ado", "ado-b"),
+    occurrence("ゴーストルール", "deco27", "deco-a"),
+    occurrence("妄想税", "DECO*27", "deco-b"),
+    occurrence("晴る", "yorushika", "yoru-a"),
+    occurrence("花に亡霊", "ヨルシカ（yorushika）", "yoru-b"),
+  ]);
+
+  assert.deepEqual(
+    records.map((record) => [record.name, record.count]).sort((a, b) => a[0].localeCompare(b[0], "ja")),
+    [
+      ["Ado", 2],
+      ["DECO*27", 2],
+      ["ヨルシカ", 2],
+    ].sort((a, b) => a[0].localeCompare(b[0], "ja")),
+  );
+});
+
+test("song ranking backfills placeholders and strips duplicated artist descriptors", () => {
+  const records = buildSongRecords([
+    occurrence("花になって", "未記載", "flower-a"),
+    occurrence("花になって", "緑黄色社会", "flower-b"),
+    occurrence("花になって", "緑黄色社会、緑黄色社会|Be a flower / Ryokuu Shakai", "flower-c"),
+  ]);
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].title, "花になって");
+  assert.equal(records[0].displayArtist, "緑黄色社会");
+  assert.equal(records[0].count, 3);
+});
+
 test("artist ranking does not merge explicit CV identity into the base artist", () => {
   const { records } = buildArtistRecords([
     occurrence("恋愛サーキュレーション", "千石撫子", "A"),
