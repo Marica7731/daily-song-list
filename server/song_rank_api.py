@@ -128,6 +128,52 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
         raise ValueError("range must be 7d or all")
     if view not in {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}:
         raise ValueError("view must be songs, songIndex, artists, videos, vtubers, or vsingerSongs")
+    if q and view in {"songs", "songIndex", "vsingerSongs"} and effective_search_scope == "channel":
+        with connect(db_path) as conn:
+            base_total = base_total_for_view(conn, range_id, view, metric)
+            return vtuber_song_fallback_payload(
+                conn,
+                range_id,
+                q,
+                view,
+                page,
+                page_size,
+                min_count,
+                base_total,
+                "channel",
+                search_fields,
+            )
+    if q and view in {"songs", "songIndex", "vsingerSongs"} and effective_search_scope == "all" and search_fields == []:
+        with connect(db_path) as conn:
+            base_total = base_total_for_view(conn, range_id, view, metric)
+            vtuber_payload = vtuber_song_fallback_payload(
+                conn,
+                range_id,
+                q,
+                view,
+                page,
+                page_size,
+                min_count,
+                base_total,
+                "all",
+                search_fields,
+            )
+            if vtuber_payload["totalCount"] > 0:
+                return vtuber_payload
+            video_payload = video_song_fallback_payload(
+                conn,
+                range_id,
+                q,
+                view,
+                page,
+                page_size,
+                min_count,
+                base_total,
+                "all",
+                search_fields,
+            )
+            if video_payload["totalCount"] > 0:
+                return video_payload
     if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and effective_search_scope in {
         "source",
         "video",
@@ -180,7 +226,7 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             and search_fields == []
             and total == 0
         ):
-            return vtuber_song_fallback_payload(conn, range_id, q, page, page_size, min_count, base_total)
+            return vtuber_song_fallback_payload(conn, range_id, q, view, page, page_size, min_count, base_total)
         if (
             q
             and view in {"songs", "songIndex"}
@@ -224,12 +270,15 @@ def vtuber_song_fallback_payload(
     conn: sqlite3.Connection,
     range_id: str,
     q: str,
+    view: str,
     page: int,
     page_size: int,
     min_count: int,
     base_total: int,
+    search_scope: str = "all",
+    search_fields: list[str] | None = None,
 ) -> dict:
-    clause, values = search_filter_for_view("vtubers", q, "all")
+    clause, values = search_filter_for_view("vtubers", q, search_scope)
     rows = conn.execute(
         f"""
         SELECT rank, detail_key, title, artist, name, count, song_count, video_count, timestamp_count, payload_json
@@ -313,10 +362,10 @@ def vtuber_song_fallback_payload(
     return {
         "schemaVersion": 1,
         "rangeId": range_id,
-        "view": "songs",
+        "view": view,
         "metric": response_metric("count"),
-        "searchScope": "all",
-        "searchFields": [],
+        "searchScope": search_scope,
+        "searchFields": search_fields if search_fields is not None else search_fields_for_scope(search_scope),
         "page": max(1, page),
         "pageSize": page_size,
         "totalCount": total,
@@ -327,6 +376,164 @@ def vtuber_song_fallback_payload(
         "pageCount": (total + page_size - 1) // page_size,
         "records": page_records,
     }
+
+
+def video_song_fallback_payload(
+    conn: sqlite3.Connection,
+    range_id: str,
+    q: str,
+    view: str,
+    page: int,
+    page_size: int,
+    min_count: int,
+    base_total: int,
+    search_scope: str = "all",
+    search_fields: list[str] | None = None,
+) -> dict:
+    clause, values = column_search_filter(q, ["lower(title)", "lower(detail_key)"])
+    rows = conn.execute(
+        f"""
+        SELECT rank, detail_key, title, artist, name, count, song_count, video_count, timestamp_count, payload_json
+        FROM ranking_rows
+        WHERE range_id = ?
+          AND view = 'videos'
+          AND metric = 'count'
+          AND scope_key = 'all'
+          AND {clause}
+        ORDER BY rank ASC
+        LIMIT 500
+        """,
+        [range_id, *values],
+    ).fetchall()
+    songs_by_key: dict[str, dict] = {}
+    for row in rows:
+        video = decode_row(row)
+        video_id = str(video.get("videoId") or row["detail_key"] or "").strip()
+        item = {
+            "videoId": video_id,
+            "title": video.get("title") or row["title"] or "",
+            "channelName": video.get("channelName") or row["name"] or "",
+            "channelId": video.get("channelId") or "",
+            "channelHandle": video.get("channelHandle") or "",
+            "channelUrl": video.get("channelUrl") or video.get("sourceUrl") or "",
+            "thumbnailUrl": video.get("thumbnailUrl") or "",
+            "publishedTimestamp": video.get("publishedTimestamp"),
+            "publishedText": video.get("publishedText") or "",
+        }
+        for song in video.get("songs") or []:
+            title = str(song.get("title") or song.get("name") or "").strip()
+            if not title:
+                continue
+            artist = str(song.get("artist") or "").strip()
+            key = compact_text(song.get("key") or f"{title}::{artist}")
+            record = songs_by_key.get(key)
+            if record is None:
+                record = {
+                    "type": "song",
+                    "key": key,
+                    "title": title,
+                    "displayArtist": artist,
+                    "artist": artist,
+                    "artists": {},
+                    "channels": {},
+                    "occurrences": [],
+                    "count": 0,
+                    "videoCount": 0,
+                    "timestampCount": 0,
+                    "matchedBySource": True,
+                    "sourceFilterQuery": q,
+                    "searchText": compact_text(f"{title} {artist} {q}"),
+                    "_videoIds": set(),
+                }
+                songs_by_key[key] = record
+            record["count"] += 1
+            record["timestampCount"] += 1
+            record["_videoIds"].add(video_id)
+            if artist:
+                record["artists"][artist] = record["artists"].get(artist, 0) + 1
+            channel_name = str(item["channelName"] or "").strip()
+            if channel_name:
+                record["channels"][channel_name] = record["channels"].get(channel_name, 0) + 1
+            record["occurrences"].append({"item": item, "song": song, "videoId": video_id})
+    records = [
+        record
+        for record in songs_by_key.values()
+        if record["count"] >= min_count
+    ]
+    records.sort(key=lambda item: (-item["count"], item["title"]))
+    previous_count: int | None = None
+    current_rank = 0
+    for index, record in enumerate(records):
+        if record["count"] != previous_count:
+            current_rank = index + 1
+            previous_count = record["count"]
+        record["rank"] = current_rank
+        record["videoCount"] = len(record.pop("_videoIds"))
+        record["artists"] = [
+            {"key": compact_text(name), "name": name, "count": count}
+            for name, count in sorted(record["artists"].items(), key=lambda item: (-item[1], item[0]))
+        ]
+        record["channels"] = [
+            {"key": compact_text(name), "name": name, "count": count}
+            for name, count in sorted(record["channels"].items(), key=lambda item: (-item[1], item[0]))
+        ]
+        if record["artists"]:
+            record["displayArtist"] = record["artists"][0]["name"]
+        record["occurrencePreviewLimited"] = len(record["occurrences"]) > 20
+        record["occurrences"] = record["occurrences"][:20]
+    total = len(records)
+    offset = (max(1, page) - 1) * page_size
+    page_records = records[offset : offset + page_size]
+    return {
+        "schemaVersion": 1,
+        "rangeId": range_id,
+        "view": view,
+        "metric": response_metric("count"),
+        "searchScope": search_scope,
+        "searchFields": search_fields if search_fields is not None else search_fields_for_scope(search_scope),
+        "page": max(1, page),
+        "pageSize": page_size,
+        "totalCount": total,
+        "filteredBaseCount": base_total,
+        "totalOccurrenceCount": sum(record["count"] for record in records),
+        "totalSongCount": total,
+        "totalVideoCount": sum(record["videoCount"] for record in records),
+        "pageCount": (total + page_size - 1) // page_size,
+        "records": page_records,
+    }
+
+
+def base_total_for_view(conn: sqlite3.Connection, range_id: str, view: str, metric: str) -> int:
+    return conn.execute(
+        """
+        SELECT COUNT(*) AS total_count
+        FROM ranking_rows
+        WHERE range_id = ?
+          AND view = ?
+          AND metric = ?
+          AND scope_key = 'all'
+        """,
+        (range_id, view, metric),
+    ).fetchone()["total_count"]
+
+
+def column_search_filter(query: str, fields: list[str]) -> tuple[str, list[str]]:
+    groups = parse_search_groups(query)
+    if not groups or not fields:
+        return "1 = 1", []
+    values: list[str] = []
+    or_clauses = []
+    for group in groups:
+        and_clauses = []
+        for term in group:
+            like = like_pattern(term)
+            and_clauses.append("(" + " OR ".join(f"{field} LIKE ? ESCAPE '\\'" for field in fields) + ")")
+            values.extend([like] * len(fields))
+        if and_clauses:
+            or_clauses.append("(" + " AND ".join(and_clauses) + ")")
+    if not or_clauses:
+        return "1 = 1", []
+    return "(" + " OR ".join(or_clauses) + ")", values
 
 
 def vtuber_fallback_match_terms(vtuber: dict, row: sqlite3.Row, q: str) -> list[str]:
@@ -407,6 +614,9 @@ def enrich_vtuber_song_fallback_record(conn: sqlite3.Connection, range_id: str, 
     matched_occurrences: list[dict] = []
     artists: dict[str, int] = {}
     seen_occurrences: set[tuple[str, int, str, str]] = set()
+    global_count = as_non_negative_int(record.get("count"))
+    global_video_count = as_non_negative_int(record.get("videoCount"))
+    global_timestamp_count = as_non_negative_int(record.get("timestampCount", record.get("count", 0)))
     for candidate in candidate_rows:
         if song_title_lookup_key(candidate["title"]) != title_key:
             continue
@@ -424,10 +634,12 @@ def enrich_vtuber_song_fallback_record(conn: sqlite3.Connection, range_id: str, 
             """,
             (range_id, source_key),
         ).fetchall()
+        candidate_matched = False
         for occurrence_row in occurrence_rows:
             occurrence = json.loads(occurrence_row["payload_json"])
             if not vtuber_fallback_occurrence_matches(occurrence, match_terms):
                 continue
+            candidate_matched = True
             item = occurrence.get("item") if isinstance(occurrence.get("item"), dict) else {}
             song = occurrence.get("song") if isinstance(occurrence.get("song"), dict) else {}
             video_id = str(item.get("videoId") or occurrence.get("videoId") or "").strip()
@@ -445,6 +657,10 @@ def enrich_vtuber_song_fallback_record(conn: sqlite3.Connection, range_id: str, 
             if artist:
                 artists[artist] = artists.get(artist, 0) + 1
             matched_occurrences.append(occurrence)
+        if candidate_matched:
+            global_count = max(global_count, as_non_negative_int(candidate["count"]))
+            global_video_count = max(global_video_count, as_non_negative_int(candidate["video_count"]))
+            global_timestamp_count = max(global_timestamp_count, as_non_negative_int(candidate["timestamp_count"]))
     if not matched_occurrences:
         return
     matched_occurrences.sort(
@@ -459,9 +675,9 @@ def enrich_vtuber_song_fallback_record(conn: sqlite3.Connection, range_id: str, 
             for occurrence in matched_occurrences
         }
     )
-    record["globalCount"] = record.get("count", 0)
-    record["globalVideoCount"] = record.get("videoCount", 0)
-    record["globalTimestampCount"] = record.get("timestampCount", record.get("count", 0))
+    record["globalCount"] = global_count
+    record["globalVideoCount"] = global_video_count
+    record["globalTimestampCount"] = global_timestamp_count
     record["count"] = len(matched_occurrences)
     record["timestampCount"] = len(matched_occurrences)
     record["videoCount"] = matched_video_count

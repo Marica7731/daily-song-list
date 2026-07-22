@@ -129,6 +129,22 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(allFieldSongSearch.records[0].occurrences[0].item.thumbnailUrl, "https://i.ytimg.com/vi/video-a/hqdefault.jpg");
     assert.equal(allFieldSongSearch.records[0].channels[0].name, "Alpha Ch.");
 
+    const channelFieldSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Alpha&searchFields=channel&pageSize=5`);
+    assert.equal(channelFieldSongSearch.searchScope, "channel");
+    assert.deepEqual(channelFieldSongSearch.searchFields, ["channel"]);
+    assert.equal(channelFieldSongSearch.totalCount, 3);
+    assert.equal(channelFieldSongSearch.records[0].matchedByVtuber, true);
+    assert.equal(channelFieldSongSearch.records[0].matchedBySource, true);
+    assert.equal(channelFieldSongSearch.records[0].occurrences[0].item.channelName, "Alpha Ch.");
+
+    const allFieldVideoTitleSongSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Morning&searchFields=all&pageSize=5`);
+    assert.equal(allFieldVideoTitleSongSearch.searchScope, "all");
+    assert.deepEqual(allFieldVideoTitleSongSearch.searchFields, []);
+    assert.equal(allFieldVideoTitleSongSearch.totalCount, 2);
+    assert.deepEqual(allFieldVideoTitleSongSearch.records.map((record) => record.title), ["Song One", "Song Two"]);
+    assert.equal(allFieldVideoTitleSongSearch.records[0].matchedBySource, true);
+    assert.equal(allFieldVideoTitleSongSearch.records[0].occurrences[0].item.title, "Morning Karaoke");
+
     const allFieldArtistSourceSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Singer%20A&searchFields=all&pageSize=5`);
     assert.equal(allFieldArtistSourceSearch.searchScope, "all");
     assert.deepEqual(allFieldArtistSourceSearch.searchFields, []);
