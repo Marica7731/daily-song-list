@@ -763,39 +763,61 @@ def source_matched_rankings_payload(
     offset = (max(1, page) - 1) * page_size
     with connect(db_path) as conn:
         source_rows_sql, source_values = source_occurrence_match_rows_sql(conn, range_id, q, search_scope, search_fields)
-        matched_params = [*source_values, *candidate_params]
+        source_entity_type = source_detail_entity_type_for_view(view)
+        conn.execute("DROP TABLE IF EXISTS temp.matched_sources")
+        conn.execute(
+            """
+            CREATE TEMP TABLE matched_sources(
+              source_key TEXT PRIMARY KEY,
+              matched_count INTEGER NOT NULL,
+              matched_videos INTEGER NOT NULL,
+              first_match_position INTEGER NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            f"""
+            INSERT INTO temp.matched_sources(source_key, matched_count, matched_videos, first_match_position)
+            SELECT
+              source_key,
+              COUNT(*) AS matched_count,
+              COUNT(DISTINCT COALESCE(NULLIF(video_id, ''), 'position:' || position)) AS matched_videos,
+              MIN(position) AS first_match_position
+            FROM ({source_rows_sql}) source_matches
+            GROUP BY source_key
+            """,
+            source_values,
+        )
+        conn.execute("CREATE INDEX temp.idx_matched_sources_rank ON matched_sources(matched_count, matched_videos, first_match_position)")
+        matched_params: list[object] = [range_id, source_entity_type, *candidate_params]
         if min_count > 1 and view not in {"videos", "vtubers"}:
             matched_params.append(min_count)
         matched_sql = f"""
-            WITH matched_source_occurrences AS (
-              {source_rows_sql}
-            ),
-            matched_sources AS (
-              SELECT
-                source_key,
-                COUNT(*) AS matched_count,
-                COUNT(DISTINCT COALESCE(NULLIF(video_id, ''), 'position:' || position)) AS matched_videos,
-                MIN(position) AS first_match_position
-              FROM matched_source_occurrences
-              GROUP BY source_key
-            )
             SELECT
-              r.row_id, r.rank, r.detail_key, r.title, r.artist, r.name, r.count, r.song_count,
-              r.video_count, r.timestamp_count, r.payload_json,
-              sd.source_key AS matched_source_key,
-              ms.matched_count,
-              ms.matched_videos,
-              ms.first_match_position
-            FROM (
-              SELECT *
-              FROM ranking_rows r
-              WHERE {" AND ".join(candidate_where)}
-            ) r
+              MIN(r.row_id) AS row_id,
+              MIN(r.rank) AS rank,
+              r.detail_key,
+              MIN(r.title) AS title,
+              MIN(r.artist) AS artist,
+              MIN(r.name) AS name,
+              MIN(r.count) AS count,
+              MIN(r.song_count) AS song_count,
+              MIN(r.video_count) AS video_count,
+              MIN(r.timestamp_count) AS timestamp_count,
+              MIN(r.payload_json) AS payload_json,
+              MIN(sd.source_key) AS matched_source_key,
+              SUM(ms.matched_count) AS matched_count,
+              SUM(ms.matched_videos) AS matched_videos,
+              MIN(ms.first_match_position) AS first_match_position
+            FROM temp.matched_sources ms
             JOIN source_details sd
-              ON sd.range_id = r.range_id
-             AND sd.entity_key = r.detail_key
-            JOIN matched_sources ms
-              ON ms.source_key = sd.source_key
+              ON sd.range_id = ?
+             AND sd.entity_type = ?
+             AND sd.source_key = ms.source_key
+            JOIN ranking_rows r
+              ON r.range_id = sd.range_id
+             AND r.detail_key = sd.entity_key
+            WHERE {" AND ".join(candidate_where)}
             GROUP BY r.row_id
             {having}
         """
@@ -846,6 +868,18 @@ def source_matched_rankings_payload(
         "pageCount": (total + page_size - 1) // page_size,
         "records": records,
     }
+
+
+def source_detail_entity_type_for_view(view: str) -> str:
+    if view == "artists":
+        return "artist"
+    if view == "videos":
+        return "video"
+    if view == "vtubers":
+        return "vtuber"
+    if view == "vsingerSongs":
+        return "vsingerSong"
+    return "song"
 
 
 def source_occurrence_match_rows_sql(

@@ -82,6 +82,7 @@ def main() -> int:
         conn.execute("PRAGMA temp_store=MEMORY")
         log_phase("schema_start")
         fts_enabled = create_schema(conn)
+        source_occurrence_seen: set[tuple[str, int]] = set()
         log_phase("schema_ok", fts="enabled" if fts_enabled else "disabled")
         write_meta(conn, "schema_version", str(SCHEMA_VERSION))
         write_meta(conn, "source_occurrences_fts_enabled", "1" if fts_enabled else "0")
@@ -99,11 +100,17 @@ def main() -> int:
 
         if args.ranking_source == "js":
             log_phase("runtime_rankings_start", source="js")
-            latest_counts = ingest_js_runtime_export(conn, args, output_path, fts_enabled)
+            latest_counts = ingest_js_runtime_export(conn, args, output_path, fts_enabled, source_occurrence_seen)
             write_meta(conn, "runtime_ranking_source", "runtime-js")
         else:
             log_phase("runtime_rankings_start", source="python")
-            latest_counts = ingest_latest_payload(conn, latest, args.limit_per_range, fts_enabled)
+            latest_counts = ingest_latest_payload(
+                conn,
+                latest,
+                args.limit_per_range,
+                fts_enabled,
+                source_occurrence_seen,
+            )
             write_meta(conn, "runtime_ranking_source", "python")
         log_phase(
             "runtime_rankings_ok",
@@ -116,7 +123,7 @@ def main() -> int:
         if args.vsinger_dir and not args.no_vsinger:
             log_phase("vsinger_start", dir=args.vsinger_dir)
         vsinger_counts = (
-            ingest_vsinger_backfill(conn, args.vsinger_dir, args.limit_external_shards, fts_enabled)
+            ingest_vsinger_backfill(conn, args.vsinger_dir, args.limit_external_shards, fts_enabled, source_occurrence_seen)
             if args.vsinger_dir and not args.no_vsinger
             else empty_external_counts()
         )
@@ -133,6 +140,19 @@ def main() -> int:
             write_meta(conn, f"latest_{key}", str(value))
         for key, value in vsinger_counts.items():
             write_meta(conn, f"vsinger_{key}", str(value))
+        source_occurrence_rows = conn.execute("SELECT COUNT(*) FROM source_occurrences").fetchone()[0]
+        source_occurrence_fts_rows = (
+            conn.execute("SELECT COUNT(*) FROM source_occurrences_fts").fetchone()[0]
+            if fts_enabled
+            else 0
+        )
+        write_meta(conn, "source_occurrences_rows", str(source_occurrence_rows))
+        write_meta(conn, "source_occurrences_fts_rows", str(source_occurrence_fts_rows))
+        log_phase(
+            "source_occurrences_finalize",
+            rows=source_occurrence_rows,
+            ftsRows=source_occurrence_fts_rows,
+        )
 
         log_phase("commit_start")
         conn.commit()
@@ -300,6 +320,7 @@ def create_schema(conn: sqlite3.Connection) -> bool:
         );
         CREATE INDEX idx_ranking_lookup ON ranking_rows(range_id, view, metric, scope_key, rank);
         CREATE INDEX idx_ranking_detail ON ranking_rows(range_id, view, detail_key);
+        CREATE INDEX idx_ranking_match_detail ON ranking_rows(range_id, view, metric, scope_key, detail_key);
 
         CREATE TABLE channel_metadata (
           channel_key TEXT PRIMARY KEY,
@@ -325,6 +346,8 @@ def create_schema(conn: sqlite3.Connection) -> bool:
           payload_json TEXT NOT NULL
         );
         CREATE INDEX idx_source_details_entity ON source_details(range_id, entity_type, entity_key);
+        CREATE INDEX idx_source_details_source ON source_details(range_id, source_key);
+        CREATE INDEX idx_source_details_match ON source_details(range_id, entity_type, source_key, entity_key);
 
         CREATE TABLE source_occurrences (
           source_key TEXT NOT NULL,
@@ -344,6 +367,7 @@ def create_schema(conn: sqlite3.Connection) -> bool:
         );
         CREATE INDEX idx_source_occurrences_lookup ON source_occurrences(source_key, position);
         CREATE INDEX idx_source_occurrences_range ON source_occurrences(range_id, source_key);
+        CREATE INDEX idx_source_occurrences_range_source_video_pos ON source_occurrences(range_id, source_key, video_id, position);
 
         CREATE TABLE external_songs (
           source_system TEXT NOT NULL,
@@ -453,6 +477,7 @@ def ingest_latest_payload(
     payload: dict,
     limit_per_range: int,
     fts_enabled: bool,
+    source_occurrence_seen: set[tuple[str, int]],
     build_rankings: bool = True,
 ) -> dict[str, int]:
     groups = payload.get("groups") if isinstance(payload.get("groups"), dict) else {}
@@ -526,6 +551,7 @@ def ingest_latest_payload(
                         range_id,
                         source_detail["payload"],
                         fts_enabled,
+                        source_occurrence_seen,
                     )
                 insert_ranking_row(conn, row, fts_enabled)
             ranking_row_count += len(ranking_rows)
@@ -547,6 +573,7 @@ def ingest_js_runtime_export(
     args: argparse.Namespace,
     output_path: Path,
     fts_enabled: bool,
+    source_occurrence_seen: set[tuple[str, int]],
 ) -> dict[str, int]:
     export_path = output_path.with_name(f"{output_path.stem}.runtime-rankings.jsonl.tmp")
     if export_path.exists():
@@ -607,7 +634,7 @@ def ingest_js_runtime_export(
         )
 
     log_phase("js_import_start", input=export_path)
-    counts = import_js_runtime_export(conn, export_path, fts_enabled)
+    counts = import_js_runtime_export(conn, export_path, fts_enabled, source_occurrence_seen)
     log_phase(
         "js_import_ok",
         rankingRows=counts["ranking_rows"],
@@ -622,7 +649,12 @@ def ingest_js_runtime_export(
     return counts
 
 
-def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_enabled: bool) -> dict[str, int]:
+def import_js_runtime_export(
+    conn: sqlite3.Connection,
+    export_path: Path,
+    fts_enabled: bool,
+    source_occurrence_seen: set[tuple[str, int]],
+) -> dict[str, int]:
     counts = {
         "videos": 0,
         "songs": 0,
@@ -677,15 +709,16 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
                 )
                 counts["source_details"] += 1
             elif kind == "sourceOccurrence":
-                insert_source_occurrence(
+                if insert_source_occurrence(
                     conn,
                     clean_text(record.get("sourceKey")),
                     clean_text(record.get("rangeId")),
                     int(record.get("position") or 0),
                     record.get("payload") if isinstance(record.get("payload"), dict) else {},
                     fts_enabled,
-                )
-                counts["source_occurrences"] += 1
+                    source_occurrence_seen,
+                ):
+                    counts["source_occurrences"] += 1
             elif kind == "runtimeVideo":
                 item = record.get("item") if isinstance(record.get("item"), dict) else {}
                 range_id = clean_text(record.get("rangeId"))
@@ -1206,6 +1239,7 @@ def ingest_vsinger_backfill(
     backfill_dir: Path,
     limit_shards: int,
     fts_enabled: bool,
+    source_occurrence_seen: set[tuple[str, int]],
 ) -> dict[str, int]:
     manifest_path = backfill_dir / "manifest.json"
     counts = empty_external_counts()
@@ -1298,6 +1332,7 @@ def ingest_vsinger_backfill(
                 row["range_id"],
                 source_detail["payload"],
                 fts_enabled,
+                source_occurrence_seen,
             )
         insert_ranking_row(conn, row, fts_enabled)
     counts["ranking_rows"] = len(ranking_rows)
@@ -1686,15 +1721,32 @@ def insert_source_detail(conn: sqlite3.Connection, source_key: str, range_id: st
     )
 
 
-def insert_source_occurrences_for_detail(conn: sqlite3.Connection, source_key: str, range_id: str, payload: dict, fts_enabled: bool) -> int:
+def insert_source_occurrences_for_detail(
+    conn: sqlite3.Connection,
+    source_key: str,
+    range_id: str,
+    payload: dict,
+    fts_enabled: bool,
+    source_occurrence_seen: set[tuple[str, int]],
+) -> int:
     occurrences = payload.get("occurrences") if isinstance(payload.get("occurrences"), list) else []
+    inserted_count = 0
     for position, occurrence in enumerate(occurrences):
         if isinstance(occurrence, dict):
-            insert_source_occurrence(conn, source_key, range_id, position, occurrence, fts_enabled)
-    return len(occurrences)
+            if insert_source_occurrence(conn, source_key, range_id, position, occurrence, fts_enabled, source_occurrence_seen):
+                inserted_count += 1
+    return inserted_count
 
 
-def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id: str, position: int, payload: dict, fts_enabled: bool) -> None:
+def insert_source_occurrence(
+    conn: sqlite3.Connection,
+    source_key: str,
+    range_id: str,
+    position: int,
+    payload: dict,
+    fts_enabled: bool,
+    source_occurrence_seen: set[tuple[str, int]],
+) -> bool:
     item = payload.get("item") if isinstance(payload.get("item"), dict) else {}
     song = payload.get("song") if isinstance(payload.get("song"), dict) else {}
     video_id = clean_text(item.get("videoId"))
@@ -1739,7 +1791,11 @@ def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id
             dumps_json(payload),
         ),
     )
-    if fts_enabled:
+    occurrence_key = (source_key, position)
+    is_new_occurrence = occurrence_key not in source_occurrence_seen
+    if is_new_occurrence:
+        source_occurrence_seen.add(occurrence_key)
+    if fts_enabled and is_new_occurrence:
         conn.execute(
             """
             INSERT INTO source_occurrences_fts(source_key, range_id, position, video_id, search_text)
@@ -1754,6 +1810,7 @@ def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id
             """,
             (source_key, range_id, position, video_id, channel_text),
         )
+    return is_new_occurrence
 
 
 def append_preview_occurrence(preview: list[dict], item: dict, song: dict, video_id: str) -> None:
