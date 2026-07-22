@@ -26,6 +26,8 @@ test("source filter removes blocked HK/TW VTuber channels without matching ordin
   assert.equal(isBlockedSource({ channelUrl: "https://www.youtube.com/@rhoda1126", channelName: "Japanese Channel", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelId: "UCD1QOCJIAPsMKMvRSXjLahw", channelName: "Aruma Ch. 薬袋アルマ", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelHandle: "@ArumaCh", channelName: "薬袋アルマ", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelId: "UCMhjWfFiyxVjNWBJpkDotcg", channelName: "Japanese Channel", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelUrl: "https://www.youtube.com/channel/UCMhjWfFiyxVjNWBJpkDotcg", channelName: "Japanese Channel", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "奔跑日記！ / 米亞 MYA" }), false);
   assert.equal(isBlockedSource({ channelName: "Narrator Music", title: "HKVtuber 台湾旅行" }), false);
   assert.equal(isBlockedSongEntry({ title: "DEN Q~~~", artist: "未記載" }), true);
@@ -205,6 +207,9 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isBlockedSongEntry({ title: "1個目！", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "曲終わり", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "Ending", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "结束", artist: "待补歌手" }), true);
+  assert.equal(isBlockedSongEntry({ title: "結束", artist: "未記載" }), true);
+  assert.equal(isBlockedSongEntry({ title: "全曲结束", artist: "待補歌手" }), true);
   assert.equal(isBlockedSongEntry({ title: "opening", artist: "未記載" }), true);
   assert.equal(isBlockedSongEntry({ title: "END", artist: "エンドカード" }), true);
   assert.equal(isBlockedSongEntry({ title: "オープニング", artist: "未記載" }), true);
@@ -459,6 +464,8 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(isLikelyNonSongEntry({ title: "Opening Talk", artist: "未記載" }), true);
   assert.equal(isLikelyNonSongEntry({ title: "Ending Talk", artist: "unknown" }), true);
   assert.equal(isLikelyNonSongEntry({ title: "本編終了", artist: "未記載" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "结束", artist: "待补歌手" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "結束", artist: "未記載" }), true);
   assert.equal(isLikelyNonSongEntry({ title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO" }), false);
   assert.equal(isLikelyNonSongEntry({ title: "Pretender", artist: "Official髭男dism" }), false);
   assert.equal(isLikelyNonSongEntry({ title: "spending", artist: "Known Artist" }), false);

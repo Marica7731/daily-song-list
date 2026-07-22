@@ -408,7 +408,7 @@
     if (/^(?:朝食|配信の食事事情|心音asmr|ギターの話|お声も起きてきた|告知とed|joysound|音楽停止|ペットショップ)$/iu.test(key)) return true;
     if (/(?:フルート|クラリネット|生演奏|ライブ|live|piano streaming|ピアノ演奏|edテーマ|メンシ|こそこそ話)/iu.test(key)) return true;
     if (/^(?:雑談タイム|新しいop画面|op画面|edトーク|休憩雑談タイム|カンニングタイム(?:part\d+)?)$/iu.test(key)) return true;
-    if (/^(?:本編終了|曲のリクエスト|お知らせその\d+|嬉しいお知らせがあることのお知らせ)$/u.test(key)) return true;
+    if (/^(?:本編終了|结束|結束|全曲结束|全曲結束|曲のリクエスト|お知らせその\d+|嬉しいお知らせがあることのお知らせ)$/u.test(key)) return true;
     if (/^(?:お知らせタイム|大事なお知らせ|嬉しいお知らせ|悲しいお知らせ|明日の配信のお知らせ)$/u.test(key)) return true;
     if (/^(?:新しいbgm|bgm変更|縦型配信の機能|配信前のアクシデント(?:の原因)?|明日夢かなえ入場|居酒屋で聞いて知った曲)$/iu.test(key)) return true;
     if (/^(?:実はpart\d+がありました|bgm切り忘れにやっときづいたわたし)$/iu.test(key)) return true;
@@ -580,7 +580,7 @@
       .replace(/[!！?？。．.]+$/gu, "")
       .trim();
     if (!value) return false;
-    if (/^(?:本編終了|曲のリクエスト|嬉しいお知らせ|悲しいお知らせ|お知らせタイム|大事なお知らせ|明日の配信のお知らせ|嬉しいお知らせがあることのお知らせ|本日の目標)$/u.test(value)) return true;
+    if (/^(?:本編終了|结束|結束|全曲结束|全曲結束|曲のリクエスト|嬉しいお知らせ|悲しいお知らせ|お知らせタイム|大事なお知らせ|明日の配信のお知らせ|嬉しいお知らせがあることのお知らせ|本日の目標)$/u.test(value)) return true;
     if (/^お知らせその\d+$/u.test(value)) return true;
     if (/^(?:新しいBGM|BGM変更|縦型配信の機能|配信前のアクシデント(?:の原因)?|明日夢かなえ入場|居酒屋で聞いて知った曲)$/iu.test(value)) return true;
     if (/^(?:実はPart\d+がありました|BGM切り忘れにやっときづいたわたし)$/iu.test(value)) return true;

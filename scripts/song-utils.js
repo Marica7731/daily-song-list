@@ -280,7 +280,7 @@ function isLikelyNonSongEntry(song, source = {}) {
   if (isCommentaryNonSongEntry(title, artist, raw)) return true;
   if (!hasArtist && /^(?:\d+次会|達成[!！]?|歌みたの話)$/u.test(title)) return true;
   if (!hasArtist && /^(?:(?:歌|配信)?枠)?\s*(?:start|stream\s*start|karaoke\s*start|開始)$/iu.test(title)) return true;
-  if (/^(音入り|音入[り]?|声入り|マイクテスト|開始|終了|曲始まり|オープニング|エンディング|登場|退場|ゲスト|スパチャ読み|読み開始|コメント読み|告知|雑談|雑談タイム[!！]?|休憩|休憩[&＆]?雑談タイム|新しいOP画面|OP画面|OPトーク|待機OPstart|EDトーク|カンニングタイム(?:Part\d+)?|ただいま|まで)$/iu.test(title)) {
+  if (/^(音入り|音入[り]?|声入り|マイクテスト|開始|終了|结束|結束|曲始まり|オープニング|エンディング|登場|退場|ゲスト|スパチャ読み|読み開始|コメント読み|告知|雑談|雑談タイム[!！]?|休憩|休憩[&＆]?雑談タイム|新しいOP画面|OP画面|OPトーク|待機OPstart|EDトーク|カンニングタイム(?:Part\d+)?|ただいま|まで)$/iu.test(title)) {
     return true;
   }
   if (/^雑談\s*[\/／|｜]\s*\S/u.test(title)) return true;
@@ -306,7 +306,7 @@ function isLikelyNonSongEntry(song, source = {}) {
   if (/(?:手で表現した|お写真公開|写真公開|ライブ開催決定|お披露目で.+やりたい|スタンドマイク回したかった)/iu.test(combined)) {
     return true;
   }
-  if (!hasArtist && /^(?:本編開始|全曲終了|開始[・\s]?|終了[・\s]?|ライブ開催決定|特別ゲスト|突然の)/iu.test(title)) {
+  if (!hasArtist && /^(?:本編開始|全曲終了|全曲结束|全曲結束|開始[・\s]?|終了[・\s]?|结束[・\s]?|結束[・\s]?|ライブ開催決定|特別ゲスト|突然の)/iu.test(title)) {
     return true;
   }
   if (!hasArtist && /(?:お話|話$|話①|話②|話題|裏話|スケジュール|おすすめ|コメント|チャット|ギフト|設定|手癖|腰|良い音|到着|ただいま|お土産|先生|予想|コンディション|休暇中|気圧|体調|配信|動画|映画|クリップ|バランス|読み|頑張|ありがとう|お疲れ|おつかれ)/iu.test(combined)) {
@@ -413,7 +413,7 @@ function isStandaloneNonSongMarker(text) {
   if (!value) return false;
   if (/^(?:op|ed|end|opening|ending|openingtalk|endingtalk|streamstart|streamend|streamended|karaokestart|karaokeend)$/iu.test(value)) return true;
   if (/^(?:setlist|timestamp|timestamps)$/iu.test(value)) return true;
-  if (/^(?:本編開始|本編終了|全曲終了|配信開始|配信終了|開始|終了|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)$/u.test(value)) return true;
+  if (/^(?:本編開始|本編終了|全曲終了|全曲结束|全曲結束|配信開始|配信終了|開始|終了|结束|結束|セットリスト|セトリ|タイムスタンプ|曲名|歌唱開始時間)$/u.test(value)) return true;
   return false;
 }
 
@@ -856,7 +856,7 @@ function isObviouslyNonSongText(text) {
   const value = stripWeirdLeadingChars(text);
   if (!value) return true;
   if (/^(?:\d+次会|達成[!！]?|歌みたの話)$/u.test(value)) return true;
-  if (/^(開始|歌唱開始|歌唱開始時間|歌唱開始時刻|结束|終了|end|start|op|ed|opening|ending|オープニング|エンディング|エンドカード|intro|outro|set\s*list|setlist|セットリスト|セトリ|タイムスタンプ|曲名|talk|talk[_-]?\d+|mc|雑談|聊天|感想|告知|返场|休息|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|読み開始|ただいま)$/iu.test(value)) {
+  if (/^(開始|歌唱開始|歌唱開始時間|歌唱開始時刻|结束|結束|終了|end|start|op|ed|opening|ending|オープニング|エンディング|エンドカード|intro|outro|set\s*list|setlist|セットリスト|セトリ|タイムスタンプ|曲名|talk|talk[_-]?\d+|mc|雑談|聊天|感想|告知|返场|休息|声入り|ご挨拶|挨拶|アナウンス|自己紹介|幕開け|読み開始|ただいま)$/iu.test(value)) {
     return true;
   }
   if (/^[~〜～]+(?:リアルライブチケット#耐久\s*\d+)?$/iu.test(value)) return true;
@@ -933,7 +933,7 @@ function looksLikeArtistCreditWithWorkMetadata(text) {
 
 function isNonSongSectionMarker(text) {
   const key = normalizeSectionMarker(text);
-  return /^(opening|open|op|start|starting|intro|introduction|幕開け|開幕|開始|オープニング|声入り|ご挨拶|挨拶|アナウンス|自己紹介|closing|close|end|ending|ed|outro|閉幕|終幕|終了|エンディング|エンドカード)$/iu.test(key);
+  return /^(opening|open|op|start|starting|intro|introduction|幕開け|開幕|開始|オープニング|声入り|ご挨拶|挨拶|アナウンス|自己紹介|closing|close|end|ending|ed|outro|閉幕|終幕|終了|结束|結束|エンディング|エンドカード)$/iu.test(key);
 }
 
 function normalizeSectionMarker(text) {
@@ -949,7 +949,7 @@ function isBadSongField(text) {
   if (TIMESTAMP_RE.test(value) && value.match(TIMESTAMP_RE)?.[0] === value) return true;
   if (!/[A-Za-z0-9ぁ-んァ-ヶ一-龯々]/u.test(value)) return true;
   if (/^0\d+[.．]\d+$/u.test(value)) return true;
-  if (/^(talk|mc|雑談|聊天|感想|开场|開始|歌唱開始|歌唱開始時間|歌唱開始時刻|结束|終了|告知|返场|休息|set\s*list|setlist|セットリスト|セトリ|タイムスタンプ)$/iu.test(value)) return true;
+  if (/^(talk|mc|雑談|聊天|感想|开场|開始|歌唱開始|歌唱開始時間|歌唱開始時刻|结束|結束|終了|告知|返场|休息|set\s*list|setlist|セットリスト|セトリ|タイムスタンプ)$/iu.test(value)) return true;
   return false;
 }
 

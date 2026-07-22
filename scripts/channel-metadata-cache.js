@@ -206,7 +206,7 @@ function channelDisplayNameScore(value) {
   if (!text) return -1;
   let score = Math.min(text.length, 80);
   if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
-  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text)) score -= 1000;
+  if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text) || /^\/channel\/UC[A-Za-z0-9_-]+$/u.test(text) || /^UC[A-Za-z0-9_-]{20,}$/u.test(text)) score -= 1000;
   return score;
 }
 

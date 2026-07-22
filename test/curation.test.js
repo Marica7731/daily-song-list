@@ -179,6 +179,7 @@ test("curation drops announcement and action rows from current dirty samples", (
         videoId: "DIRTY000001",
         songs: [
           { title: "閉会式", artist: "待补歌手", seconds: 1, raw: "0:01 閉会式" },
+          { title: "結束", artist: "未記載", seconds: 8, raw: "0:08 結束" },
           { title: "閉会式も見てください", artist: "待补歌手", seconds: 7, raw: "0:07 閉会式も見てください" },
           { title: "1を手で表現した", artist: "待补歌手", seconds: 2, raw: "0:02 1を手で表現した" },
           { title: "2周年記念お写真公開！", artist: "待补歌手", seconds: 3, raw: "0:03 2周年記念お写真公開！" },
@@ -192,7 +193,7 @@ test("curation drops announcement and action rows from current dirty samples", (
   );
 
   assert.deepEqual(videos[0].songs.map((item) => item.title), ["アンノウン・マザーグース"]);
-  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 6);
+  assert.equal(videos.curationStats.ruleDroppedEntries + videos.curationStats.conversationDroppedEntries, 7);
 });
 
 test("curation drops naretan commentary rows while keeping explicit known songs", () => {

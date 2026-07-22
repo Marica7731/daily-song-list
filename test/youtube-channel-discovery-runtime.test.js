@@ -54,6 +54,11 @@ test("runtime discovery hydrates one channel id to the preferred Japanese displa
           displayName: "一色イズ◇Isshiki IS",
           sourceUrl: "https://www.youtube.com/@IsshikiIS",
         },
+        {
+          channelId: "UCnKt20HH_BiuID0FDHGMcvw",
+          displayName: "IMI",
+          sourceUrl: "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw",
+        },
       ],
     }),
     "utf8",
@@ -73,14 +78,25 @@ test("runtime discovery hydrates one channel id to the preferred Japanese displa
           channelAliases: ["/channel/UCISSHIKI", "Isshiki Izu"],
           songs: [{ seconds: 10, title: "雑魚", artist: "柊マグネタイト" }],
         },
+        {
+          videoId: "IMI000000001",
+          title: "歌枠",
+          channelName: "UCnKt20HH_BiuID0FDHGMcvw",
+          channelId: "UCnKt20HH_BiuID0FDHGMcvw",
+          channelHandle: "/channel/UCnKt20HH_BiuID0FDHGMcvw",
+          channelUrl: "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw",
+          songs: [{ seconds: 20, title: "ノープラン", artist: "IMI" }],
+        },
       ],
     }),
     "utf8",
   );
 
   const payload = loadYoutubeChannelDiscoveryRuntimeVideos({ importDir: dir, required: true });
-  assert.equal(payload.videos.length, 1);
+  assert.equal(payload.videos.length, 2);
   assert.equal(payload.videos[0].channelName, "一色イズ◇Isshiki IS");
   assert.equal(payload.videos[0].channelHandle, "/@IsshikiIS");
   assert.equal(payload.videos[0].channelAliases.includes("/channel/UCISSHIKI"), false);
+  assert.equal(payload.videos[1].channelName, "IMI");
+  assert.equal(payload.videos[1].channelHandle, "");
 });

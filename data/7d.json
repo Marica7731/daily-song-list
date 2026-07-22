@@ -2652,6 +2652,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -4715,12 +4716,21 @@
           "time": "0:31:54",
           "seconds": 1914,
           "title": "天国",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "31:54 天国/Mrs.GREEN APPLE",
           "rawHash": "581a8f6cd58ab89231f8d8dce58eebfbcae4051ec940239f73c6088404e4cef7",
           "sourceId": "UgxOCocusq4xuOckfPh4AaABAg",
           "sourceHash": "0f64bf77e9084ad260f871e95493d35bf9b05133429aa26dec5dee0430190956",
-          "isNiche": false
+          "isNiche": false,
+          "repair": {
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
+          }
         },
         {
           "index": 9,
@@ -4832,12 +4842,21 @@
           "time": "1:23:10",
           "seconds": 4990,
           "title": "クスシキ",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "1:23:10 クスシキ/Mrs.GREEN APPLE",
           "rawHash": "85a0a83b4cd44535ec32bd547efb3c2e99ea0529e73da2afa8eee949cc239fe7",
           "sourceId": "UgxOCocusq4xuOckfPh4AaABAg",
           "sourceHash": "0f64bf77e9084ad260f871e95493d35bf9b05133429aa26dec5dee0430190956",
-          "isNiche": false
+          "isNiche": false,
+          "repair": {
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
+          }
         },
         {
           "index": 18,
@@ -4960,12 +4979,21 @@
           "time": "2:08:41",
           "seconds": 7721,
           "title": "ライラック",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "2:08:41 ライラック/Mrs.GREEN APPLE",
           "rawHash": "0b5ef9f6457d29d68d9ae0c74b5d39172194cbd6ffba461cdd50ba5432725709",
           "sourceId": "UgxOCocusq4xuOckfPh4AaABAg",
           "sourceHash": "0f64bf77e9084ad260f871e95493d35bf9b05133429aa26dec5dee0430190956",
-          "isNiche": false
+          "isNiche": false,
+          "repair": {
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
+          }
         },
         {
           "index": 28,
@@ -6036,15 +6064,17 @@
           "time": "0:00:25",
           "seconds": 25,
           "title": "夏の影",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "0:25　夏の影／Mrs.GREEN APPLE",
           "rawHash": "90febb7098a98f26835dcbf3e07d8886f96d255200d38b7fdb08f45b33347865",
           "sourceId": "Ugx3EYJHunh6yEgVxvJ4AaABAg",
           "sourceHash": "e846f9c19c32a63a2ed90bb2de90b0b53dd435c9ef5c31a25d43d4d06c036657",
           "isNiche": true,
           "repair": {
-            "changed": false,
-            "reasons": [],
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup"
+            ],
             "knownTitle": false,
             "knownTitleArtist": false
           },
@@ -6148,17 +6178,20 @@
           "time": "0:20:33",
           "seconds": 1233,
           "title": "ｽｰﾊﾟｰｽﾀｰになったら",
-          "artist": "Back number",
+          "artist": "back number",
           "raw": "20:33　ｽｰﾊﾟｰｽﾀｰになったら／Back number",
           "rawHash": "5d9f114c419fff03d3979c5fa202fb1fcd5cf6989eab8ddf0cb876fd7dfe1b4a",
           "sourceId": "Ugx3EYJHunh6yEgVxvJ4AaABAg",
           "sourceHash": "e846f9c19c32a63a2ed90bb2de90b0b53dd435c9ef5c31a25d43d4d06c036657",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -6175,7 +6208,7 @@
           "time": "0:26:33",
           "seconds": 1593,
           "title": "ﾋｰﾛｰｽｰﾂ",
-          "artist": "Back number",
+          "artist": "back number",
           "raw": "26:33　ﾋｰﾛｰｽｰﾂ／Back number",
           "rawHash": "2d38c152470e131c2057dae5bc9cfed1d27e93c3ec682085664e629fc9446fba",
           "sourceId": "Ugx3EYJHunh6yEgVxvJ4AaABAg",
@@ -6231,7 +6264,7 @@
           "time": "0:40:05",
           "seconds": 2405,
           "title": "lulu",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "40:05　lulu.／Mrs.GREEN APPLE",
           "rawHash": "6327c8c418ed013c679942ca885851507740c064dd8fafa787bdc110fa866945",
           "sourceId": "Ugx3EYJHunh6yEgVxvJ4AaABAg",
@@ -6240,6 +6273,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "safe_title_cleanup",
               "delimiter_split"
             ],
@@ -6261,7 +6295,7 @@
           "time": "0:46:40",
           "seconds": 2800,
           "title": "ｹｾﾗｾﾗ",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "46:40　ｹｾﾗｾﾗ／Mrs.GREEN APPLE",
           "rawHash": "b1c4796cca940e4165e2bfbfe0488315839a08e5af98d540232858a900e2831d",
           "sourceId": "Ugx3EYJHunh6yEgVxvJ4AaABAg",
@@ -6290,17 +6324,20 @@
           "time": "0:53:08",
           "seconds": 3188,
           "title": "Soranji",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "53:08　Soranji／Mrs.GREEN APPLE",
           "rawHash": "6e20de36c10435fab26823e4a48af0460881902e635effa006c66917dd175941",
           "sourceId": "Ugx3EYJHunh6yEgVxvJ4AaABAg",
           "sourceHash": "e846f9c19c32a63a2ed90bb2de90b0b53dd435c9ef5c31a25d43d4d06c036657",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -6454,7 +6491,7 @@
           "time": "1:32:41",
           "seconds": 5561,
           "title": "ﾗｲﾗｯｸ",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "1:32:41　ﾗｲﾗｯｸ／Mrs.GREEN APPLE",
           "rawHash": "3f68426b915dea83ed80ab5cacc6cda8bcfd6142e8e1ec53eb335d3554e1d1b0",
           "sourceId": "Ugx3EYJHunh6yEgVxvJ4AaABAg",
@@ -6483,15 +6520,17 @@
           "time": "1:39:05",
           "seconds": 5945,
           "title": "Magic",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "1:39:05　Magic／Mrs.GREEN APPLE",
           "rawHash": "014ed556933dc67f53676df11a2e7aebfd0e3e05bcf636714c9bb4d66ec37a3e",
           "sourceId": "Ugx3EYJHunh6yEgVxvJ4AaABAg",
           "sourceHash": "e846f9c19c32a63a2ed90bb2de90b0b53dd435c9ef5c31a25d43d4d06c036657",
           "isNiche": true,
           "repair": {
-            "changed": false,
-            "reasons": [],
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup"
+            ],
             "knownTitle": false,
             "knownTitleArtist": false
           },
@@ -8162,17 +8201,20 @@
           "time": "0:39:38",
           "seconds": 2378,
           "title": "わたがし",
-          "artist": "Back number",
+          "artist": "back number",
           "raw": "39:38 └ わたがし (Watagashi) / Back number",
           "rawHash": "f48f81b5e92bdb3cf282e397b767a0695ed364924f1e60560edf2006e2b866e0",
           "sourceId": "UgxVBAGnzYwkTOm3wIJ4AaABAg",
           "sourceHash": "9d8ec5877fff3a2c75d53ce7e9135ce7cc93708c41a0ed3cfc8a74a8208df835",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -11277,6 +11319,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -13071,12 +13114,20 @@
           "time": "0:38:22",
           "seconds": 2302,
           "title": "Bansanka",
-          "artist": "tuki",
+          "artist": "tuki.",
           "raw": "0:38:22 Bansanka - tuki.",
           "rawHash": "59c183dbd4eec57f02fa9246d6ff16afc68d1ec951ef767fa6eed7a944606824",
           "sourceId": "UgwUJqo6zkc_Gxcbm654AaABAg",
           "sourceHash": "743717e326ad055546b8440787f0f168422543fea98e7592906d97b8dc29b400",
-          "isNiche": true
+          "isNiche": true,
+          "repair": {
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup"
+            ],
+            "knownTitle": false,
+            "knownTitleArtist": false
+          }
         },
         {
           "index": 5,
@@ -13347,17 +13398,20 @@
           "time": "0:29:26",
           "seconds": 1766,
           "title": "瞬き",
-          "artist": "back numberさん",
+          "artist": "back number",
           "raw": "29:26 瞬き/back numberさん",
           "rawHash": "cc4ec5ac2031b9e09bc4918e64cd03fd7b0eecec85b8448c1c617d4c5f06adb8",
           "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
           "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -13374,17 +13428,20 @@
           "time": "0:35:21",
           "seconds": 2121,
           "title": "携帯電話",
-          "artist": "RADWIMPSさん",
+          "artist": "RADWIMPS",
           "raw": "35:21 携帯電話/RADWIMPSさん",
           "rawHash": "e4f768af81903e8aad2b59fb98688fde2c03f2de097f342a865b73fe414e0108",
           "sourceId": "UgzCbJY1gw62_sV3IYZ4AaABAg",
           "sourceHash": "e0c31478c6239c3ae4c57686b51bf3637e1a59caad19202b26e735e1e8e38171",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -14266,17 +14323,20 @@
           "time": "5:24:49",
           "seconds": 19489,
           "title": "晩餐歌",
-          "artist": "tuki",
+          "artist": "tuki.",
           "raw": "05:24:49 30.晩餐歌／tuki",
           "rawHash": "b1d22b13276695bf8a326aaae6de2f1a8d4fcaaddf9b592cbe22d35b8328d1d3",
           "sourceId": "UgzxhrI-Op66vcVlGT54AaABAg",
           "sourceHash": "9d23d8e0e149a71e5e91938a5bde91bf381497ab8f7e3672f3a9b6275655de95",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -17037,7 +17097,7 @@
           "time": "0:44:12",
           "seconds": 2652,
           "title": "晩餐歌",
-          "artist": "tuki",
+          "artist": "tuki.",
           "raw": "00:44:12 4. 晩餐歌 Piano Ver./tuki.",
           "rawHash": "8ce585f77a1194c21e5cc2ebd474c6f5c7707fe6f3b151498d3a4b3875a2c5a9",
           "sourceId": "UgzTZEhCEvfP3iLrCwx4AaABAg",
@@ -17046,6 +17106,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "safe_title_cleanup"
             ],
             "knownTitle": false,
@@ -19314,6 +19375,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -19645,7 +19707,7 @@
           "time": "0:05:38",
           "seconds": 338,
           "title": "RE:I AM",
-          "artist": "/ Aimer",
+          "artist": "Aimer",
           "raw": "5:38 RE:I AM // Aimer",
           "rawHash": "938749367322b813b5385cbe02438dedadf40df86b8191115c74dccd718e43f4",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -19674,7 +19736,7 @@
           "time": "0:16:44",
           "seconds": 1004,
           "title": "StarRingChild",
-          "artist": "/ Aimer",
+          "artist": "Aimer",
           "raw": "16:44 StarRingChild // Aimer",
           "rawHash": "5ebeca38cf508034a2480beb000f4243005abce14d39dc498b438fd9bec83073",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -19790,7 +19852,7 @@
           "time": "0:45:28",
           "seconds": 2728,
           "title": "HOT LIMIT",
-          "artist": "/ T.M.Revolution",
+          "artist": "T.M.Revolution",
           "raw": "45:28 HOT LIMIT // T.M.Revolution",
           "rawHash": "c2411f464b0051e0324d3fdbd042c0f3813c94ee71d4b01eb5c9addaeac9f198",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -20076,7 +20138,7 @@
           "time": "1:43:22",
           "seconds": 6202,
           "title": "ブルーアンバー",
-          "artist": "/ back number",
+          "artist": "back number",
           "raw": "1:43:22 ブルーアンバー // back number",
           "rawHash": "673e412abc1d6686d3721470aeab577bbcdcf5ebe17221f627ddd6753655aa70",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -20132,7 +20194,7 @@
           "time": "1:54:00",
           "seconds": 6840,
           "title": "水平線",
-          "artist": "/ back number",
+          "artist": "back number",
           "raw": "1:54:00 水平線 // back number",
           "rawHash": "0f578d9d6df4691aa9119a9eab992ef96cc33df8048e73bae61c970529dac059",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -20161,7 +20223,7 @@
           "time": "1:59:20",
           "seconds": 7160,
           "title": "天国",
-          "artist": "/ Mrs. GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "1:59:20 天国 // Mrs. GREEN APPLE",
           "rawHash": "7239f36c7f265d2bc60fd88d1f137c8132c25d9f45bd963f4684af37d9859a73",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -20190,7 +20252,7 @@
           "time": "2:05:36",
           "seconds": 7536,
           "title": "ナハトムジーク",
-          "artist": "/ Mrs. GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "2:05:36 ナハトムジーク // Mrs. GREEN APPLE",
           "rawHash": "31c314b901db17212ea4ff614373227c68c02939996f24f31c8fd2d467fef1dc",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -20219,7 +20281,7 @@
           "time": "2:10:53",
           "seconds": 7853,
           "title": "lulu",
-          "artist": "/ Mrs. GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "2:10:53 lulu. // Mrs. GREEN APPLE",
           "rawHash": "0cba4c61c2050768ed1ff3260c06a6577e1c46a7e78cc4e7c3a6bfd78f545306",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -20249,7 +20311,7 @@
           "time": "2:16:08",
           "seconds": 8168,
           "title": "ダーリン",
-          "artist": "/ Mrs. GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "2:16:08 ダーリン // Mrs. GREEN APPLE",
           "rawHash": "206713398d622249c2b2692bba8864b81d56f10316f2816bb2d117124c05cd83",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -20305,7 +20367,7 @@
           "time": "2:27:22",
           "seconds": 8842,
           "title": "点描の唄",
-          "artist": "/ Mrs. GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "2:27:22 点描の唄 // Mrs. GREEN APPLE",
           "rawHash": "606beed54fbec11b9701ea122eb429dbcc60a2e1aa600126b1aca1defa74e125",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -20334,7 +20396,7 @@
           "time": "2:33:10",
           "seconds": 9190,
           "title": "ケセラセラ",
-          "artist": "/ Mrs. GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "2:33:10 ケセラセラ // Mrs. GREEN APPLE",
           "rawHash": "6ba2e51a54a0cb05e0b067f27dfa5c704972c13529fd0631372f6f0598ad7104",
           "sourceId": "Ugxbx_X7HM-mFdsfPSh4AaABAg",
@@ -27807,6 +27869,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -31025,7 +31088,8 @@
           "raw": "7:36 地球最後の告白を/kemu",
           "rawHash": "6e5a39584a529aa54f10cd5529b49a8b91684b260475ccae4b594dda870938b5",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
           "index": 2,
@@ -31036,7 +31100,8 @@
           "raw": "26:49 プロポーズ/内緒のピアス",
           "rawHash": "c0f47b41ba7acc712e957794a1a36802842836df31ec2fc0d185eeff01b63aba",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
           "index": 3,
@@ -31047,7 +31112,8 @@
           "raw": "32:20 粛聖!! ロリ神レクイエム☆/しぐれうい(9歳)",
           "rawHash": "5333c9a7cf1d341fb9a28ce36a1595a3ca26d93f200098d67174f016a1f0a73d",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
           "index": 4,
@@ -31058,7 +31124,8 @@
           "raw": "40:52 花に亡霊/ヨルシカ",
           "rawHash": "1871d0e5b25518680271b42865535043f18d2d2463105ea67009d9deffd22114",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
           "index": 5,
@@ -31069,10 +31136,11 @@
           "raw": "47:45 コールボーイ/Syudou",
           "rawHash": "d5c841bcae9cec0384bf6b6ce66f3a536b15469d1121fbe62cc0efcc44e41bc8",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
-          "index": 7,
+          "index": 6,
           "time": "0:54:17",
           "seconds": 3257,
           "title": "CH4NGE",
@@ -31080,21 +31148,32 @@
           "raw": "54:17 CH4NGE/Giga",
           "rawHash": "7d472574c5453f87a5a3042023e83c34b39e569095e8ac63deb898687b17333a",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
-          "index": 8,
+          "index": 7,
           "time": "1:03:55",
           "seconds": 3835,
           "title": "ライラック",
-          "artist": "Mr.s Green Apple",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "1:03:55 ライラック/Mr.s Green Apple",
           "rawHash": "041e3ba98935af517acaa00503cc7e89bf7112100c215e20070041ee649e4ff6",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "repair": {
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
+          },
+          "isNiche": false
         },
         {
-          "index": 9,
+          "index": 8,
           "time": "1:15:01",
           "seconds": 4501,
           "title": "ジャンキーナイトタウンオーケストラ",
@@ -31102,10 +31181,11 @@
           "raw": "1:15:01 ジャンキーナイトタウンオーケストラ/すりぃ",
           "rawHash": "2c247e437bb307a6b3c9ca57c9fa695a02ca1997d696e4b6578aa07823852324",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
-          "index": 10,
+          "index": 9,
           "time": "1:28:22",
           "seconds": 5302,
           "title": "Dragon Night",
@@ -31113,10 +31193,11 @@
           "raw": "1:28:22 Dragon Night/SEKAI NO OWARI",
           "rawHash": "93dd0544a6df10f4bcaa7f6dea3f64f9e1191c6e660aeabb7ec621097b88c1e0",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": true
         },
         {
-          "index": 11,
+          "index": 10,
           "time": "1:34:15",
           "seconds": 5655,
           "title": "鬼ノ宴",
@@ -31124,10 +31205,11 @@
           "raw": "1:34:15 鬼ノ宴/友成空",
           "rawHash": "3fb6ca0ce5e46cbc70acf4895fdb6a476b3d16499ce50593f14f229707c6b280",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
-          "index": 12,
+          "index": 11,
           "time": "1:37:57",
           "seconds": 5877,
           "title": "エンヴィキャットウォーク",
@@ -31135,10 +31217,11 @@
           "raw": "1:37:57 エンヴィキャットウォーク/りぶ",
           "rawHash": "fce190d7c2b8123a48553a7fc74c21be1661417faccf6968a171b042580e74d2",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         },
         {
-          "index": 13,
+          "index": 12,
           "time": "1:52:25",
           "seconds": 6745,
           "title": "U",
@@ -31146,7 +31229,8 @@
           "raw": "1:52:25 U/millennium parade × Belle",
           "rawHash": "dd697b8e345ae845c53c3c8e579e55bcbd0c7283cbeff8465a0acfa925ce301f",
           "sourceId": "UgyBhzDZncjM-WO0lbx4AaABAg",
-          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c"
+          "sourceHash": "4be78592c0dd443f99e141eb6bcefab9d404a44b3c8aba04eb194ca4164a0e6c",
+          "isNiche": false
         }
       ],
       "catalogFirstSeenAt": "2026-07-19T14:08:56.115Z",
@@ -35205,15 +35289,17 @@
           "time": "0:17:52",
           "seconds": 1072,
           "title": "零-zero",
-          "artist": "tuki",
+          "artist": "tuki.",
           "raw": "17:52 零-zero- /tuki.",
           "rawHash": "fba2c4e61a18ef3efac245408521739796a2f0bb1c5406014361710ea5d7b1fd",
           "sourceId": "UgzHNU8h1fYDA0tGBLJ4AaABAg",
           "sourceHash": "0f35d114d3dbdec3e8d1a3805df374cf3d6ca501b6a53ec7b1598ef6a312941a",
           "isNiche": true,
           "repair": {
-            "changed": false,
-            "reasons": [],
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup"
+            ],
             "knownTitle": false,
             "knownTitleArtist": false
           },
@@ -54242,6 +54328,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -59574,7 +59661,7 @@
           "time": "1:03:56",
           "seconds": 3836,
           "title": "晩餐歌",
-          "artist": "Tuki.",
+          "artist": "tuki.",
           "raw": "01:03:56 晩餐歌/Tuki.",
           "rawHash": "4cb069c1054d5e4c07535569c102fda969022240c4acb407c787f6d4651357da",
           "sourceId": "UgzCM3-5Yth9doT_z9F4AaABAg",
@@ -59583,6 +59670,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -61018,7 +61106,7 @@
           "time": "1:35:57",
           "seconds": 5757,
           "title": "晩餐歌",
-          "artist": "Tuki",
+          "artist": "tuki.",
           "raw": "10\t晩餐歌\tTuki.\t1:35:57",
           "rawHash": "c93692ac7ce2ea5fec1da5d6b3d7b5567c618919be7668a38640be50cfd131e6",
           "sourceId": "UgxKlseWjACOa0akhHV4AaABAg",
@@ -65570,17 +65658,20 @@
           "time": "1:30:26",
           "seconds": 5426,
           "title": "水平線",
-          "artist": "backnumber",
+          "artist": "back number",
           "raw": "1:30:26 水平線/backnumber",
           "rawHash": "8ad48c3258eee3bff3ae8ff18800791180255ce5371604e0720a072796af9756",
           "sourceId": "Ugz1uWruOpMXuNNRael4AaABAg",
           "sourceHash": "ef5bbde4bcd021a32a266b529220c3b87a759c1dce9fb012d2bfa29bb3b24e77",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -66516,17 +66607,20 @@
           "time": "0:07:58",
           "seconds": 478,
           "title": "インフェルノ",
-          "artist": "Mrs. Green Apple",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "7:58      1. インフェルノ / Mrs. Green Apple",
           "rawHash": "7c7942c3f520a128135343834272590c79dc5d1bf80b95a3db465196a5ed5d99",
           "sourceId": "UgwDAGrbCvVewGo1l4p4AaABAg",
           "sourceHash": "21921a912080c4ca4c5fe391daed08aae0d7fb35e9b0789b3a6a6c6eae53f07d",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -67084,17 +67178,20 @@
           "time": "0:03:37",
           "seconds": 217,
           "title": "高嶺の花子さん",
-          "artist": "Back number",
+          "artist": "back number",
           "raw": "03:37 1. 高嶺の花子さん (Takaneno Hanakosan) / Back number",
           "rawHash": "9bfab0f9a73725afb3e92a97c8906dcb2162494ddd22de67965eeaa13716e4df",
           "sourceId": "Ugydap2NqXppqbe1St94AaABAg",
           "sourceHash": "8fefdc377d75f782e8b0c8922d5eb647c69dff4979d821453d147b65dbd57869",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -76729,12 +76826,21 @@
           "time": "0:39:00",
           "seconds": 2340,
           "title": "HOT LIMIT",
-          "artist": "T.M. Revolution",
+          "artist": "T.M.Revolution",
           "raw": "00:39:00  03. HOT LIMIT / T.M. Revolution",
           "rawHash": "31ca9f9e350fc42eeff8bf7823583c1a3c5be7899f3bfebd836ac7d2ddd22dc1",
           "sourceId": "UgwBZTj1cwLOXh0gMA14AaABAg",
           "sourceHash": "ffee34e09f3c364c3c65f90ae724dd5cee74891336fd84f402c3c0035be49b49",
-          "isNiche": false
+          "isNiche": false,
+          "repair": {
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
+          }
         },
         {
           "index": 4,
@@ -83807,17 +83913,20 @@
           "time": "0:28:50",
           "seconds": 1730,
           "title": "高嶺の花子さん",
-          "artist": "backnumber様",
+          "artist": "back number",
           "raw": "28:50 高嶺の花子さん／backnumber様",
           "rawHash": "23198b0cffb97c6affa148f26f345261534550f6ba8db9b58c8ee6f839ed1c51",
           "sourceId": "Ugz8xnbsDhNKx-6Tg5t4AaABAg",
           "sourceHash": "0cddac2d3732c4199483b57c2b658eb08c397f3420a1fb5dc8353a82a0b2103d",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -83834,17 +83943,20 @@
           "time": "0:38:54",
           "seconds": 2334,
           "title": "わたがし",
-          "artist": "backnumber様",
+          "artist": "back number",
           "raw": "38:54 わたがし／backnumber様",
           "rawHash": "43074c24d370475f3ffecc18f4eae2c66ced4a44115010027f1bc4f0bb25fc7c",
           "sourceId": "Ugz8xnbsDhNKx-6Tg5t4AaABAg",
           "sourceHash": "0cddac2d3732c4199483b57c2b658eb08c397f3420a1fb5dc8353a82a0b2103d",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -98678,7 +98790,7 @@
           "time": "3:15:27",
           "seconds": 11727,
           "title": "晩餐歌",
-          "artist": "Tuki.",
+          "artist": "tuki.",
           "raw": "3:15:27 📮晩餐歌/Tuki.",
           "rawHash": "ed682903788a3fe2f35e926962f7700092f3e0782daa048218dec1d326c4e39b",
           "sourceId": "UgwSaX5kK_g7-luT-N54AaABAg",
@@ -98687,6 +98799,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -104412,17 +104525,20 @@
           "time": "1:09:52",
           "seconds": 4192,
           "title": "ブルーアンバー",
-          "artist": "Back number",
+          "artist": "back number",
           "raw": "4. 1:09:52 ブルーアンバー/Back number",
           "rawHash": "bb951f0aa8a22056324a4980a126d6254ee964b9037f3ab7dc0ce1cc05a22886",
           "sourceId": "UgzjRHKg3YclvgrxkLF4AaABAg",
           "sourceHash": "b5f788915a34cc124538444327447a48af0394fa03db55d8521bc0aa881d9720",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -104790,17 +104906,20 @@
           "time": "3:30:28",
           "seconds": 12628,
           "title": "晩餐歌",
-          "artist": "Tuki",
+          "artist": "tuki.",
           "raw": "18. 3:30:28 晩餐歌/Tuki.",
           "rawHash": "0b2b258eadfc88a0d0db40f5991efb1fdc5f3ca594c4321466e8825bb5b8b01a",
           "sourceId": "UgzjRHKg3YclvgrxkLF4AaABAg",
           "sourceHash": "b5f788915a34cc124538444327447a48af0394fa03db55d8521bc0aa881d9720",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -107908,7 +108027,7 @@
           "time": "0:08:58",
           "seconds": 538,
           "title": "青と夏",
-          "artist": "/ Mrs. GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "0:08:58 01≫青と夏 // Mrs. GREEN APPLE",
           "rawHash": "f06b563a90fa81ae7fdfdbf140e4d5e65a89a6758525da850dac631985617cb0",
           "sourceId": "UgztagBaWky7WuDJXlF4AaABAg",
@@ -117250,33 +117369,6 @@
         },
         {
           "index": 3,
-          "time": "0:24:32",
-          "seconds": 1472,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "24:32 結束",
-          "rawHash": "c1d5160a68e8d329127e2cc97dff0f71e4271aa417308ab513fe7d1596913a1e",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 4,
           "time": "0:37:29",
           "seconds": 2249,
           "title": "裹著心的光 -林俊傑",
@@ -117303,34 +117395,7 @@
           }
         },
         {
-          "index": 5,
-          "time": "0:41:55",
-          "seconds": 2515,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "41:55 結束",
-          "rawHash": "35a0f73fb09e4bb7619b9fd64e38e2095d39770acc4b6c0ff7f6f814f4df9860",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 6,
+          "index": 4,
           "time": "0:52:07",
           "seconds": 3127,
           "title": "いのちの名前",
@@ -117359,61 +117424,7 @@
           }
         },
         {
-          "index": 7,
-          "time": "0:55:57",
-          "seconds": 3357,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "55:57 結束",
-          "rawHash": "8f6f6f34c90f01efa234eeec9077a4d5a8c77cd585fadd037e0f25c1b0bf0e46",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 8,
-          "time": "1:08:42",
-          "seconds": 4122,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "1:08:42 結束",
-          "rawHash": "78e7d2f0da551148fbeab57eb06396fca3bad66e065a1152e2d694ca5e70c257",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 9,
+          "index": 5,
           "time": "1:21:30",
           "seconds": 4890,
           "title": "真的傻 -徐佳瑩",
@@ -117440,38 +117451,11 @@
           }
         },
         {
-          "index": 10,
-          "time": "1:25:54",
-          "seconds": 5154,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "1:25:54 結束",
-          "rawHash": "3a066c1d40c1c98f294220c0253560c1073e07e1f4e04d2728d65169cd0b82de",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 11,
+          "index": 6,
           "time": "1:34:17",
           "seconds": 5657,
           "title": "相思相愛",
-          "artist": "-Official髭男dism",
+          "artist": "Official髭男dism",
           "raw": "1:34:17 相思相愛 -Official髭男dism",
           "rawHash": "df1d4cc1602a79fd79215912998f71cd009eb966c0827eb461e594a9101325ec",
           "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
@@ -117496,34 +117480,7 @@
           }
         },
         {
-          "index": 12,
-          "time": "1:40:05",
-          "seconds": 6005,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "1:40:05 結束",
-          "rawHash": "b821552198f38f3445aa44f9ec99391a96bd4b7b257e4cdf38993ef54403b756",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 13,
+          "index": 7,
           "time": "1:51:20",
           "seconds": 6680,
           "title": "相思相愛",
@@ -117552,34 +117509,7 @@
           }
         },
         {
-          "index": 14,
-          "time": "1:55:39",
-          "seconds": 6939,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "1:55:39 結束",
-          "rawHash": "1d0ea44eef3947fbeacae4745ede29a990a2cbd270b12717bc6c0fc7e8f22acf",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 15,
+          "index": 8,
           "time": "2:02:29",
           "seconds": 7349,
           "title": "我想用力忘記你 -A-Lin",
@@ -117606,34 +117536,7 @@
           }
         },
         {
-          "index": 16,
-          "time": "2:06:46",
-          "seconds": 7606,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "2:06:46 結束",
-          "rawHash": "e55970b345a72c52a4fb47bdd8eeb018d54e682c7aba45bfbaff8368b141a313",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 17,
+          "index": 9,
           "time": "2:18:53",
           "seconds": 8333,
           "title": "大掃除 -DECO*27",
@@ -117660,67 +117563,13 @@
           }
         },
         {
-          "index": 18,
-          "time": "2:23:04",
-          "seconds": 8584,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "2:23:04 結束",
-          "rawHash": "0a58f1c1d17f27224efd77afd9a39f47bada95e3549bfba902f12541d825ccf8",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 19,
+          "index": 10,
           "time": "2:28:07",
           "seconds": 8887,
           "title": "落在生命裡的光 -尹昔眠",
           "artist": "未記載",
           "raw": "2:28:07 落在生命裡的光 -尹昔眠",
           "rawHash": "ac66b6add33583a0bd993add3e769fcb7e70cf9da38232bb3b14bc877123689a",
-          "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
-          "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
-          "isNiche": true,
-          "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
-          },
-          "curationSignals": {
-            "customEmojiOnly": false,
-            "reactionTextOnly": false,
-            "numericPseudoTitle": false,
-            "activityOrAnnouncement": false,
-            "suppressLikelySong": false,
-            "suggestedAction": "",
-            "reasons": []
-          }
-        },
-        {
-          "index": 20,
-          "time": "2:31:42",
-          "seconds": 9102,
-          "title": "結束",
-          "artist": "未記載",
-          "raw": "2:31:42 結束",
-          "rawHash": "6ce366c5c6a8aab33b71b1f75be4a0959b486950d1366095a00c7bf4e93190fb",
           "sourceId": "Ugyez4rCc-x-qqr_nht4AaABAg",
           "sourceHash": "0e63c5afca45b5e80c415edba52501f60fd5f9f72198f7ac4fe47c87d1843ee3",
           "isNiche": true,
@@ -118982,6 +118831,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -124624,17 +124474,20 @@
           "time": "1:08:38",
           "seconds": 4118,
           "title": "高嶺の花子さん",
-          "artist": "backnumber",
+          "artist": "back number",
           "raw": "11 1:08:38  高嶺の花子さん/ backnumber",
           "rawHash": "b6b4e1a0a94135f7e91a38029bb7f94f1aede0ce233aa5c616ec2d2829742333",
           "sourceId": "UgzTl6CVMq5dOONA9fN4AaABAg",
           "sourceHash": "1b5c97860180a4087beca16f8e6b5502a7d9a571593a7c5610e9bc72219106db",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -134262,17 +134115,20 @@
           "time": "0:04:23",
           "seconds": 263,
           "title": "わたがし",
-          "artist": "backnumber",
+          "artist": "back number",
           "raw": "4:23　わたがし/backnumber",
           "rawHash": "bdd1da00b6d5b60720c1b58e0386dff5eaf557f4c10a2bd1c1e0f2609379b10e",
           "sourceId": "Ugy0LG7HgyPP-0PbFsx4AaABAg",
           "sourceHash": "15114e080bc8153575279b7a56c67ccd9858e078359a3f59458ad55373539573",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -135397,17 +135253,20 @@
           "time": "0:11:52",
           "seconds": 712,
           "title": "ライラック",
-          "artist": "Mrs.GREEN APPLE",
+          "artist": "Mrs. GREEN APPLE",
           "raw": "④0:11:52 ライラック/Mrs.GREEN APPLE",
           "rawHash": "b6540bf83f09f0c838be3bbad0708a48e27bb68544487eeb0440bb092d99cc1d",
           "sourceId": "UgzukuiD0pjfpwg4Jt94AaABAg",
           "sourceHash": "15523fda6d9ef9064f946a58f945404f641a0974564d6b3049418050644c7b0f",
           "isNiche": false,
           "repair": {
-            "changed": false,
-            "reasons": [],
-            "knownTitle": false,
-            "knownTitleArtist": false
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup",
+              "delimiter_split"
+            ],
+            "knownTitle": true,
+            "knownTitleArtist": true
           },
           "curationSignals": {
             "customEmojiOnly": false,
@@ -140898,6 +140757,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -146947,6 +146807,7 @@
           "repair": {
             "changed": true,
             "reasons": [
+              "safe_artist_cleanup",
               "delimiter_split"
             ],
             "knownTitle": true,
@@ -154430,15 +154291,17 @@
           "time": "0:27:21",
           "seconds": 1641,
           "title": "小夜子〈Sayoko〉",
-          "artist": "みきとＰ",
+          "artist": "みきとP",
           "raw": "0:27:21 #02. 小夜子〈Sayoko〉/ みきとＰ",
           "rawHash": "b9d6a4ac53e7f77eae1f514ba77526f87215f20c78ee12f8b46bd1c74bc51058",
           "sourceId": "Ugy7t5Hui4y_PpLDC5N4AaABAg",
           "sourceHash": "d31d40a88657a301c4877827f1c4bb0886ae9a0b4d8ef087bb6a1ba9343d4761",
           "isNiche": true,
           "repair": {
-            "changed": false,
-            "reasons": [],
+            "changed": true,
+            "reasons": [
+              "safe_artist_cleanup"
+            ],
             "knownTitle": false,
             "knownTitleArtist": false
           },

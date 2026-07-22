@@ -19,6 +19,11 @@ test("channel metadata hydration prefers Japanese display names and preserves al
           displayName: "一色イズ◇Isshiki IS",
           channelUrl: "https://www.youtube.com/@IsshikiIS",
         },
+        {
+          channelId: "UCnKt20HH_BiuID0FDHGMcvw",
+          displayName: "IMI",
+          channelUrl: "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw",
+        },
       ],
     }),
     "utf8",
@@ -38,6 +43,14 @@ test("channel metadata hydration prefers Japanese display names and preserves al
               channelAliases: ["/channel/UCisshiki", "Isshiki Izu"],
               songs: [{ title: "song", artist: "artist", seconds: 1 }],
             },
+            {
+              videoId: "IMI000000001",
+              title: "karaoke",
+              channelName: "UCnKt20HH_BiuID0FDHGMcvw",
+              channelId: "UCnKt20HH_BiuID0FDHGMcvw",
+              channelHandle: "/channel/UCnKt20HH_BiuID0FDHGMcvw",
+              songs: [{ title: "song", artist: "artist", seconds: 2 }],
+            },
           ],
         },
       },
@@ -49,4 +62,7 @@ test("channel metadata hydration prefers Japanese display names and preserves al
   assert.equal(item.channelName, "一色イズ◇Isshiki IS");
   assert.equal(item.channelHandle, "/@IsshikiIS");
   assert.deepEqual(item.channelAliases, ["Isshiki Izu", "一色イズ◇Isshiki IS", "/@IsshikiIS"]);
+  const imiItem = payload.groups.all.items[1];
+  assert.equal(imiItem.channelName, "IMI");
+  assert.equal(imiItem.channelHandle, "");
 });

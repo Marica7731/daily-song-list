@@ -40,6 +40,27 @@ test("runtime DB builder cleans channel path handles without metadata and upgrad
               channelUrl: "https://www.youtube.com/@IsshikiIS",
               songs: [{ title: "雑魚", artist: "柊マグネタイト", seconds: 20 }],
             },
+            {
+              videoId: "IMI000000001",
+              title: "Noisy channel id label",
+              channelName: "UCnKt20HH_BiuID0FDHGMcvw",
+              channelId: "UCnKt20HH_BiuID0FDHGMcvw",
+              channelHandle: "/channel/UCnKt20HH_BiuID0FDHGMcvw",
+              channelUrl: "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw",
+              channelAliases: ["UCnKt20HH_BiuID0FDHGMcvw"],
+              thumbnailUrl: "https://i.ytimg.com/vi/IMI000000001/hqdefault.jpg",
+              songs: [{ title: "ノープラン", artist: "IMI", seconds: 30 }],
+            },
+            {
+              videoId: "IMI000000002",
+              title: "Clean channel label",
+              channelName: "IMI",
+              channelId: "UCnKt20HH_BiuID0FDHGMcvw",
+              channelHandle: "/channel/UCnKt20HH_BiuID0FDHGMcvw",
+              channelUrl: "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw",
+              thumbnailUrl: "https://i.ytimg.com/vi/IMI000000002/hqdefault.jpg",
+              songs: [{ title: "ノープラン", artist: "IMI", seconds: 40 }],
+            },
           ],
         },
       },
@@ -90,6 +111,9 @@ test("runtime DB builder cleans channel path handles without metadata and upgrad
   );
   assert.equal(probe.channelMetadata.handle, "/@IsshikiIS");
   assert.equal(probe.channelMetadata.displayName, "一色イズ◇Isshiki IS");
+  const imiSourceOccurrences = probe.sourceOccurrences.filter((item) => item.item.channelId === "UCnKt20HH_BiuID0FDHGMcvw");
+  assert.deepEqual([...new Set(imiSourceOccurrences.map((item) => item.item.videoId))].sort(), ["IMI000000001", "IMI000000002"]);
+  assert.equal(imiSourceOccurrences.every((item) => item.item.channelName === "IMI"), true);
 });
 
 test("runtime DB builder creates queryable rankings and external tables", () => {
@@ -484,8 +508,9 @@ test("runtime DB builder creates queryable rankings and external tables", () => 
     { cwd: ROOT, encoding: "utf8" },
   );
   assert.match(videoIdChannelScopeOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
-  assert.match(videoIdChannelScopeOutput, /"totalCount": 1/);
+  assert.match(videoIdChannelScopeOutput, /"totalCount": 2/);
   assert.match(videoIdChannelScopeOutput, /"title": "Late Karaoke"/);
+  assert.match(videoIdChannelScopeOutput, /"title": "Morning Karaoke"/);
 
   const videoTitleChannelScopeOutput = execFileSync(
     PYTHON,
@@ -1036,6 +1061,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
             { title: "Opening Talk", artist: "未記載", time: "7:00", seconds: 420 },
             { title: "Ending Talk", artist: "unknown", time: "8:00", seconds: 480 },
             { title: "本編終了", artist: "未記載", time: "9:00", seconds: 540 },
+            { title: "结束", artist: "待补歌手", time: "9:15", seconds: 555 },
             { title: "曲名教えてください", artist: "未記載", raw: "9:30 曲名教えてください", time: "9:30", seconds: 570 },
             { title: "ENDLESS STORY", artist: "REIRA starring YUNA ITO", time: "10:00", seconds: 600 },
             { title: "Never Ending Story", artist: "Limahl", time: "10:30", seconds: 630 },
@@ -1208,7 +1234,7 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
       "--view",
       "songs",
       "--q",
-      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり OR 上野公園の桜 OR 今日の衣装と髪型 OR 韓国の職場の雰囲気 OR 恋ダンスをするネンドウ君 OR 缶をマイクに OR あなたのお金を数えましょう OR 著作権の問題でミュートされています OR AFK OR ペットショップ OR ドンキホーテのラー油 OR ケンタッキーとバーガーキング OR 切り抜き酒のラベル OR 春が嫌いな人 OR カンニング OR セトリは概要欄です OR 初見さんいらっしゃい OR 曲名教えてください",
+      "\"Opening Talk\" OR \"Ending Talk\" OR \"本編終了\" OR 结束 OR \"自己肯定感がドンドン上がってる\" OR なれたん OR \"【雑談】リクエスト確認\" OR 初めて日本の病院に行ってきました OR 音楽停止 OR なれコールアンケート OR 食あたり OR 上野公園の桜 OR 今日の衣装と髪型 OR 韓国の職場の雰囲気 OR 恋ダンスをするネンドウ君 OR 缶をマイクに OR あなたのお金を数えましょう OR 著作権の問題でミュートされています OR AFK OR ペットショップ OR ドンキホーテのラー油 OR ケンタッキーとバーガーキング OR 切り抜き酒のラベル OR 春が嫌いな人 OR カンニング OR セトリは概要欄です OR 初見さんいらっしゃい OR 曲名教えてください",
       "--search-scope",
       "title",
       "--page-size",

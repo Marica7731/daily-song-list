@@ -1,22 +1,29 @@
 {
   "schemaVersion": 1,
-  "listVersion": "2026-07-15.2",
-  "updatedAt": "2026-07-15T06:11:16+08:00",
+  "listVersion": "2026-07-22.1",
+  "updatedAt": "2026-07-22T23:45:00+08:00",
   "entries": [
     {
       "id": "legacy-001-uchi-fifi",
       "name": "羽芝扉扉",
-      "regions": ["LEGACY_REVIEW"],
+      "regions": ["TW"],
       "reason": "confirmed_regional_vtuber",
       "status": "blocked",
-      "channelIds": [],
+      "channelIds": ["UCMhjWfFiyxVjNWBJpkDotcg"],
       "handles": ["@uchififi"],
-      "channelUrls": [],
+      "channelUrls": ["https://www.youtube.com/@uchififi", "https://www.youtube.com/channel/UCMhjWfFiyxVjNWBJpkDotcg"],
       "aliases": ["羽芝扉扉", "Uchi Fifi", "uchififi"],
       "titleAliases": ["#羽芝扉扉", "#扉出來啦"],
       "unsafeBroadAliases": [],
-      "verifiedAt": "2026-07-15",
-      "evidence": ["legacy daily-song-list/assets/source-filter.js", "legacy mygit/scripts/update-youtube-ranking.js"]
+      "verifiedAt": "2026-07-22",
+      "evidence": [
+        "https://www.youtube.com/@uchififi",
+        "https://www.youtube.com/channel/UCMhjWfFiyxVjNWBJpkDotcg",
+        "https://hololist.net/uchi-fifi/",
+        "user-confirmed TW",
+        "legacy daily-song-list/assets/source-filter.js",
+        "legacy mygit/scripts/update-youtube-ranking.js"
+      ]
     },
     {
       "id": "legacy-002-earendel",

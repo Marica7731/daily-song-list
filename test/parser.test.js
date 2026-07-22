@@ -370,6 +370,8 @@ test("rejects carried reaction activities without rejecting real artist credits"
   assert.equal(isLikelyNonSongEntry({ title: "あくび🥱‪‪‬ᐝ", artist: "未記載", raw: "31:03  あくび🥱‪‪‬ᐝ" }), true);
   assert.equal(isLikelyNonSongEntry({ title: "ふんっ", artist: "ぷくっ", raw: "5:26:51 :_可愛い:ふんっ（ぷくっ）" }), true);
   assert.equal(isLikelyNonSongEntry({ title: "もうちょっと普通の時も", artist: "ぷくっ", raw: "6:17:44 もうちょっと普通の時も（ぷくっ）" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "结束", artist: "待补歌手", raw: "24:32 结束" }), true);
+  assert.equal(isLikelyNonSongEntry({ title: "結束", artist: "未記載", raw: "0:24:32 結束" }), true);
   assert.equal(isLikelyNonSongEntry({ title: "あくび", artist: "作曲者", raw: "3:38:54 あくび / 作曲者" }), false);
 });
 

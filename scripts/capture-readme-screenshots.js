@@ -354,7 +354,7 @@ async function assertDirectQuerySearch(page, name, options = {}) {
       placeholder: input?.getAttribute("placeholder") || "",
       fields,
       hasFieldBar: !!fieldBar,
-      fieldBarHidden: !!fieldBar?.hidden || getComputedStyle(fieldBar).display === "none",
+      fieldBarHidden: !fieldBar || !!fieldBar.hidden || getComputedStyle(fieldBar).display === "none",
       fieldBarRect: fieldBarRect
         ? { left: fieldBarRect.left, right: fieldBarRect.right, width: fieldBarRect.width }
         : null,

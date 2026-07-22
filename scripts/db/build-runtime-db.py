@@ -1652,6 +1652,15 @@ def upsert_channel_metadata(conn: sqlite3.Connection, item: dict) -> None:
           channel_id=COALESCE(NULLIF(channel_metadata.channel_id, ''), excluded.channel_id),
           handle=COALESCE(NULLIF(excluded.handle, ''), channel_metadata.handle),
           display_name=CASE
+            WHEN excluded.display_name <> ''
+             AND (
+               channel_metadata.display_name = ''
+               OR channel_metadata.display_name GLOB 'UC*'
+               OR channel_metadata.display_name GLOB '/channel/UC*'
+               OR channel_metadata.display_name GLOB '@*'
+               OR channel_metadata.display_name GLOB '/@*'
+             )
+            THEN excluded.display_name
             WHEN excluded.display_name GLOB '*[ぁ-ゖァ-ヺ一-龯々〆〤]*'
              AND channel_metadata.display_name NOT GLOB '*[ぁ-ゖァ-ヺ一-龯々〆〤]*'
             THEN excluded.display_name
@@ -1740,6 +1749,7 @@ def insert_occurrence(
 
 
 def insert_source_detail(conn: sqlite3.Connection, source_key: str, range_id: str, entity_type: str, entity_key: str, payload: dict) -> None:
+    payload = hydrate_source_detail_payload_channel_identities(payload, conn)
     conn.execute(
         """
         INSERT OR REPLACE INTO source_details(source_key, range_id, entity_type, entity_key, payload_json)
@@ -1757,6 +1767,7 @@ def insert_source_occurrences_for_detail(
     fts_enabled: bool,
     source_occurrence_seen: set[tuple[str, int]],
 ) -> int:
+    payload = hydrate_source_detail_payload_channel_identities(payload, conn)
     occurrences = payload.get("occurrences") if isinstance(payload.get("occurrences"), list) else []
     inserted_count = 0
     for position, occurrence in enumerate(occurrences):
@@ -1764,6 +1775,84 @@ def insert_source_occurrences_for_detail(
             if insert_source_occurrence(conn, source_key, range_id, position, occurrence, fts_enabled, source_occurrence_seen):
                 inserted_count += 1
     return inserted_count
+
+
+def hydrate_source_detail_payload_channel_identities(payload: dict, conn: sqlite3.Connection | None = None) -> dict:
+    if not isinstance(payload, dict):
+        return payload
+    occurrences = payload.get("occurrences") if isinstance(payload.get("occurrences"), list) else []
+    if not occurrences:
+        return payload
+    lookup: dict[str, dict] = {}
+    for occurrence in occurrences:
+        item = occurrence.get("item") if isinstance(occurrence, dict) and isinstance(occurrence.get("item"), dict) else None
+        if not item:
+            continue
+        merge_channel_metadata_into_lookup(lookup, normalize_channel_metadata(item))
+    if conn is not None:
+        merge_persisted_channel_metadata_into_lookup(conn, lookup, occurrences)
+    if not lookup:
+        return payload
+    hydrated_occurrences = []
+    changed = False
+    for occurrence in occurrences:
+        if not isinstance(occurrence, dict) or not isinstance(occurrence.get("item"), dict):
+            hydrated_occurrences.append(occurrence)
+            continue
+        item = occurrence["item"]
+        hydrated_item = hydrate_item_channel_metadata(item, lookup)
+        if hydrated_item is not item and hydrated_item != item:
+            changed = True
+            hydrated_occurrences.append({**occurrence, "item": hydrated_item})
+        else:
+            hydrated_occurrences.append(occurrence)
+    return {**payload, "occurrences": hydrated_occurrences} if changed else payload
+
+
+def merge_channel_metadata_into_lookup(lookup: dict[str, dict], metadata: dict) -> None:
+    keys = channel_identity_keys(metadata)
+    if not keys:
+        return
+    existing = next((lookup[key] for key in keys if key in lookup), None)
+    merged = merge_channel_metadata(existing, metadata)
+    for key in (*keys, *channel_identity_keys(merged)):
+        lookup[key] = merged
+
+
+def merge_persisted_channel_metadata_into_lookup(
+    conn: sqlite3.Connection,
+    lookup: dict[str, dict],
+    occurrences: list[dict],
+) -> None:
+    channel_ids = []
+    handles = []
+    for occurrence in occurrences:
+        item = occurrence.get("item") if isinstance(occurrence, dict) and isinstance(occurrence.get("item"), dict) else None
+        if not item:
+            continue
+        metadata = normalize_channel_metadata(item)
+        if metadata.get("channelId"):
+            channel_ids.append(metadata["channelId"])
+        if metadata.get("channelHandle"):
+            handles.append(metadata["channelHandle"])
+
+    for channel_id in unique_texts(channel_ids):
+        rows = conn.execute("SELECT payload_json FROM channel_metadata WHERE channel_id = ?", (channel_id,)).fetchall()
+        for row in rows:
+            merge_persisted_channel_metadata_row(lookup, row[0])
+    for handle in unique_texts(handles):
+        rows = conn.execute("SELECT payload_json FROM channel_metadata WHERE handle = ?", (handle,)).fetchall()
+        for row in rows:
+            merge_persisted_channel_metadata_row(lookup, row[0])
+
+
+def merge_persisted_channel_metadata_row(lookup: dict[str, dict], payload_json: str) -> None:
+    try:
+        payload = json.loads(payload_json)
+    except (TypeError, json.JSONDecodeError):
+        return
+    if isinstance(payload, dict):
+        merge_channel_metadata_into_lookup(lookup, normalize_channel_metadata(payload))
 
 
 def insert_source_occurrence(
@@ -2351,7 +2440,7 @@ def is_runtime_singleton_daily_topic_text(title, raw) -> bool:
         return False
     if re.fullmatch(r"by[A-Za-z0-9 .,'’\"“”&+_\-!?~～#＃♯♭★☆♪♫♡♥◎・･=×∞]+", clean_text(title), re.IGNORECASE):
         return True
-    if re.fullmatch(r"(?:たすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|本編終了|歌パート終了|練習パート|復習タイム開始)", value, re.IGNORECASE):
+    if re.fullmatch(r"(?:たすかる|はのぴょ[ー〜～]*ん|ぴょのは[ー〜～]*|本編終了|歌パート終了|结束|結束|全曲结束|全曲結束|練習パート|復習タイム開始)", value, re.IGNORECASE):
         return True
     return bool(re.search(r"(?:この曲|好きなパート|曲の歌い方|mv|制服|突然|3dモデル|バグ|公園|桜|新商品|個人情報|アニメ|名言|ガンダム|名探偵|歴代主題歌|歌リスト|整理|思い出|衣装|髪型|スマホ|配信を見る|体調|病院|飲み|食べ|料理|メニュー|誕生日|自分へのプレゼント|プレゼント選び|プレゼント|写真|歯磨き|うがい|買い物|職場|お菓子|ものまね|謝罪|クイズ|ダンス|巻き舌|雰囲気|アパート|集中してない|麻痺|缶|マイク|カワハギ|干物|お金|人の心|体がバグ|著作権|ミュート|恋愛運|ネタバレ|途中からリベンジ|生写真|サンプル|公開|紹介|ライブ|チケット|同時視聴|次の枠|パレプロとは|出番は.+ちゃん|次(?:の)?出番|次(?:の)?バトン|大阪の話|海遊館|歌みた|歌ってみた|こだわりポイント|ペットショップ|ラー油|ケンタッキー|バーガーキング|酒のラベル|春が嫌い|カンニング|再確認|覚えてきた曲|ごらんください|ご覧ください|雑談|聊天|閑談|コメント|コメ|日常|近況|説明|告知|可愛い|joysound|音楽停止|セトリ|セットリスト|タイムスタンプ|概要欄|説明欄|曲名|歌手|アーティスト|初見|はじめまして|いらっしゃい|歓迎|決まって|教えて|お願い|fanart|outfit|hairstyle|gift|photo|quiz|shopping|stream|teeth|rinsing|apolog|apartment|atmosphere|body|bug|bugging|cooking|copyright|count|dance|description|filefish|first-time|heart|hello|luck|microphone|model|money|muted|emoji|guinea|korea|request|rolled|sake|setlist|spring|swiss|timestamps?|welcome|workplace|sweet|performance|throat|saliva|condition|reason|story|showcase|introduced|previously|drawn|mom)", value, re.IGNORECASE))
 
@@ -2485,10 +2574,14 @@ def is_standalone_non_song_marker(value) -> bool:
         "本編開始",
         "本編終了",
         "全曲終了",
+        "全曲结束",
+        "全曲結束",
         "配信開始",
         "配信終了",
         "開始",
         "終了",
+        "结束",
+        "結束",
         "セットリスト",
         "セトリ",
         "タイムスタンプ",
@@ -2859,7 +2952,7 @@ def channel_display_name_score(value) -> int:
     score = min(len(text), 80)
     if re.search(r"[ぁ-ゖァ-ヺ一-龯々〆〤]", text):
         score += 1000
-    if re.fullmatch(r"/?@[A-Za-z0-9._%~-]+", text) or re.fullmatch(r"/channel/UC[A-Za-z0-9_-]+", text):
+    if re.fullmatch(r"/?@[A-Za-z0-9._%~-]+", text) or re.fullmatch(r"/channel/UC[A-Za-z0-9_-]+", text) or re.fullmatch(r"UC[A-Za-z0-9_-]{20,}", text):
         score -= 1000
     return score
 

@@ -500,6 +500,27 @@ test("groups source occurrences normalize display names by channel identity whil
   assert.equal(filterOccurrencesBySearch(groups.flatMap((group) => group.occurrences), "@IsshikiIS").length, 2);
 });
 
+test("groups source occurrences do not promote bare channel ids as display names", () => {
+  const channelId = "UCnKt20HH_BiuID0FDHGMcvw";
+  const groups = groupOccurrencesByVideo([
+    occurrence("IMI00000001", channelId, { seconds: 3900 }, {
+      channelId,
+      channelHandle: `/channel/${channelId}`,
+      channelUrl: `https://www.youtube.com/channel/${channelId}`,
+      channelAliases: [channelId],
+    }),
+    occurrence("IMI00000002", "IMI", { seconds: 7500 }, {
+      channelId,
+      channelHandle: `/channel/${channelId}`,
+      channelUrl: `https://www.youtube.com/channel/${channelId}`,
+    }),
+  ]);
+
+  assert.deepEqual(groups.map((group) => group.channelName), ["IMI", "IMI"]);
+  assert.equal(groups.every((group) => group.item.channelId === channelId), true);
+  assert.equal(filterOccurrencesBySearch(groups.flatMap((group) => group.occurrences), channelId).length, 2);
+});
+
 test("builds whole-video setlist text from original songs", () => {
   const item = {
     _allSongs: [

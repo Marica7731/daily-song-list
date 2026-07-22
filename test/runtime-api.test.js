@@ -348,8 +348,11 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
 
     const scopedChannelHandleSongIndexSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songIndex&q=alpha_ch&searchFields=channel&pageSize=5`);
     assert.equal(scopedChannelHandleSongIndexSearch.searchScope, "channel");
-    assert.equal(scopedChannelHandleSongIndexSearch.totalCount, 1);
-    assert.equal(scopedChannelHandleSongIndexSearch.records[0].title, "Song Three");
+    assert.equal(scopedChannelHandleSongIndexSearch.totalCount, 3);
+    assert.deepEqual(
+      new Set(scopedChannelHandleSongIndexSearch.records.map((record) => record.title)),
+      new Set(["Song One", "Song Two", "Song Three"]),
+    );
 
     const vtubers = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&pageSize=5`);
     assert.equal(vtubers.totalCount, 3);
@@ -412,8 +415,11 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(videoHandleSearch.records[0].title, "Night Karaoke");
 
     const videoIdChannelSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=UC-alpha&searchFields=channel&pageSize=5`);
-    assert.equal(videoIdChannelSearch.totalCount, 1);
-    assert.equal(videoIdChannelSearch.records[0].title, "Late Karaoke");
+    assert.equal(videoIdChannelSearch.totalCount, 2);
+    assert.deepEqual(
+      new Set(videoIdChannelSearch.records.map((record) => record.title)),
+      new Set(["Late Karaoke", "Morning Karaoke"]),
+    );
 
     const videoTitleChannelSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=Night&searchFields=channel&pageSize=5`);
     assert.equal(videoTitleChannelSearch.totalCount, 0);
