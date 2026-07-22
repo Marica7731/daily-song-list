@@ -1,0 +1,48 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch31-ebakyouka-partial",
+  "generatedAt": "2026-07-22T14:56:06.134Z",
+  "purpose": "ebakyouka partial accepted increment extracted from the previously committed vps3 checkpoint after the earlier large-source timeout",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch31-ebakyouka-partial/accepted-increment.json",
+    "note": "This is a partial artifact-local increment from completed checkpoint details only. The full source remains pending for later sharded discovery."
+  },
+  "source": {
+    "handle": "ebakyouka",
+    "url": "https://www.youtube.com/@ebakyouka/streams",
+    "status": "partial",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "candidates": 464,
+    "inspected": 20,
+    "completedVideoIds": 18,
+    "checkpointDetailCount": 18,
+    "previousCheckpoint": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/remote-download/vps3/ebakyouka/checkpoint.json",
+    "pendingReason": "source has 464 candidates; this batch only exports the 18 completed details from the prior checkpoint",
+    "acceptedAfterDirtyAudit": {
+      "videos": 18,
+      "occurrences": 455,
+      "songs": 395,
+      "publishedTimestampCoverage": "18/18",
+      "occurrenceTimeCoverage": "455/455",
+      "occurrenceSecondsCoverage": "455/455",
+      "acceptedIncrementThumbnailFieldCoverage": "0/18"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 0,
+      "occurrences": 0,
+      "suspiciousVideos": 0
+    }
+  },
+  "remoteCleanup": {
+    "usedRemoteHosts": false,
+    "reason": "local extraction from a previously committed checkpoint; no new remote directory was created in this batch"
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json",
+    "report": "report.md"
+  }
+}
