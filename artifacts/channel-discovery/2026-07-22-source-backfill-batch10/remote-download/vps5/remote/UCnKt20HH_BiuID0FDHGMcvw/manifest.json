@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-22T00:43:53.703Z",
+  "channelUrl": "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw",
+  "singerName": "UCnKt20HH_BiuID0FDHGMcvw",
+  "keywords": [
+    "フルート",
+    "生演奏",
+    "live",
+    "ライブ",
+    "クラリネット",
+    "piano streaming",
+    "ピアノ演奏",
+    "歌",
+    "歌枠",
+    "弾き語",
+    "karaoke",
+    "歌ってみた",
+    "3D Live"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 100,
+  "maxCandidates": 0,
+  "maxInspect": 1000,
+  "inspectShardIndex": 0,
+  "inspectShardCount": 1,
+  "candidateOnly": false,
+  "candidateCount": 116,
+  "inspectedInLatestRun": 116,
+  "usableVideoCount": 99,
+  "occurrenceCount": 1321,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 13,
+      "rawItemCount": 352,
+      "candidateCount": 116,
+      "continuationRounds": 12,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1142692
+    },
+    {
+      "pageUrl": "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 23,
+      "candidateCount": 0,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 1081788
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2224480,
+    "totalElapsedMs": 275,
+    "statuses": {
+      "200": 2
+    }
+  }
+}

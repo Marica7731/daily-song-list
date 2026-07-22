@@ -1,0 +1,15 @@
+{
+  "results": [
+    {
+      "handle": "hanaoto_youtube33",
+      "url": "https://www.youtube.com/@hanaoto_youtube33",
+      "startedAt": "2026-07-22T00:20:17Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 2226,
+      "stdoutTail": "\n> daily-song-list@1.0.0 youtube:discover-channel\n> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@hanaoto_youtube33 --singer-name hanaoto_youtube33 --output-dir /opt/ytb-song-rank-source-backfill-20260722-batch10-vps3/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch10/remote/hanaoto_youtube33 --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3000 --request-jitter-ms 1500 --keyword フルート --keyword 生演奏 --keyword live --keyword ライブ --keyword クラリネット --keyword piano streaming --keyword ピアノ演奏 --keyword 歌 --keyword 歌枠 --keyword 弾き語 --keyword karaoke --keyword 歌ってみた --keyword 3D Live\n\nCODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@hanaoto_youtube33\" candidates=104 inspected=104 videos=58 occurrences=889 elapsedSeconds=2225 outputDir=\"/opt/ytb-song-rank-source-backfill-20260722-batch10-vps3/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch10/remote/hanaoto_youtube33\"\n",
+      "stderrTail": "",
+      "hasManifest": true
+    }
+  ]
+}

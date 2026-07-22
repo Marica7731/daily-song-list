@@ -1,0 +1,111 @@
+# YouTube channel discovery report
+
+- Generated: 2026-07-22T00:43:53.703Z
+- Channel: https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw
+- Singer: UCnKt20HH_BiuID0FDHGMcvw
+- Keywords: フルート, 生演奏, live, ライブ, クラリネット, piano streaming, ピアノ演奏, 歌, 歌枠, 弾き語, karaoke, 歌ってみた, 3D Live
+- Candidates: 116
+- Usable videos: 99
+- Occurrences: 1321
+
+## Candidate videos
+
+- xA6yseQFS_Y ✦歌枠✦600高評価を集める会【IMI/RKMusic】【IMI/RKMusic】 (歌, 歌枠)
+- GMccBHYLz6g ✦#真っ赤に染めろ真夏の灼熱歌枠リレー✦熱い夏にしましょう【IMI/RKMusic】 (歌, 歌枠)
+- 4IwfcMQku1U ✦歌練✦のんびり【IMI/RKMusic】＃新人Vsinger (歌)
+- oGSKzLuVZE0 ✦お知らせ有り✦歌いもする【IMI/RKMusic】 (歌)
+- 81br7SfaJoU ✦歌練✦ ゆっくり歌練習【IMI/RKMusic】 (歌)
+- f6zY6XYqAV4 ✦歌枠✦好きな歌を好きなだけ【IMI/RKMusic】＃新人Vsinger (歌, 歌枠)
+- w0mPpyWljsM 【 DAY1 #RKMFes_歌枠リレー 】実質トップバッターってこと⁇【IMI/RKMusic】 (歌, 歌枠)
+- 6TPIYBHolk0 ✦#ぶいのね歌枠リレー ✦大好きな自分の音楽を【IMI/RKMusic】 (歌, 歌枠)
+- p04FbMaWBA0 ✦縦配信✦ボカロ歌いたい【IMI/RKMusic】＃新人Vsinger (歌)
+- uWDgADcS53s 【歌枠リレー】NUROJUNKデビューがちでおめでとう #NUROJUNK_DEBUT_SINGING_RELAY【IMI/RK Music】 (歌, 歌枠)
+- OmJ6-c-cmCs ✦#夜風にメロウ歌枠リレー✦夜に聴きたくなる音楽を【IMI/RKMusic】 (歌, 歌枠)
+- wTba0ZSYa60 ✦歌枠✦歌を練習したいだなも~【IMI/RKMusic】 (歌, 歌枠)
+- _M9hEvM7L-M ✦歌枠✦沢山休もう【IMI/RKMusic】＃新人Vsinger (歌, 歌枠)
+- 2SD7piVd5dQ ✦歌枠✦悲しい曲縛り【IMI/RKMusic】【IMI/RKMusic】 (歌, 歌枠)
+- oFSBmPpe4hY ✦縦配信✦ノープランの歌と喋り【IMI/RKMusic】＃新人Vsinger (歌)
+- v7zRy6Xdoco ✦#RKMusic歌枠リレー✦ここで歌う意味を...【IMI/RKMusic】 (歌, 歌枠)
+- Jg5a9VU_hmA ✦縦型配信✦久しぶりの歌枠かも【IMI/RKMusic】＃新人Vsinger (歌, 歌枠)
+- sinUBfndAN8 ✦縦配信✦歌おおおぉぉぉぉぉ【IMI/RKMusic】＃新人Vsinger (歌)
+- y2iHmhzTACo ✦#愛をつなぐ歌枠リレー ✦愛を沢山歌うよ【IMI/RKMusic】 (歌, 歌枠)
+- TRUtkDG6hEE ✦縦型配信✦ゆるく歌うかも【IMI/RKMusic】＃新人Vsinger (歌)
+- bbw_LJWl6DA ✦縦型配信✦歌います【IMI/RKMusic】＃新人Vsinger (歌)
+- yrLmC5pnFBU ✦縦型配信✦歌うかも【IMI/RKMusic】＃新人Vsinger (歌)
+- qLFDr2Y_hvM ✦縦型配信✦歌うし話す【IMI/RKMusic】＃新人Vsinger (歌)
+- YQ6RbckxV1o ✦縦型配信✦楽しく歌う【IMI/RKMusic】＃新人Vsinger (歌)
+- QlDX2MtxVA0 ✦初見さん大歓迎✦話すしちょと歌う【IMI/RKMusic】 (歌)
+- _Hw8nF5bHpg ✦ #夢を奏でる歌枠リレー✦次世代VsingerIMIです【IMI/RKMusic】＃新人Vsinger (歌, 歌枠)
+- oZkDnOO5JQU ✦#きらめく歌枠リレー✦キラキラしていきます【IMI/RKMusic】＃新人Vsinger (歌, 歌枠)
+- wRuvaDjDEs0 ✦IMIバースデー3Dライブ2026✦お知らせ有り【IMI/RKMusic】#IMIBD2026 (ライブ)
+- r1TsSIGYqSo ✦歌枠✦好きな歌をゆるく【IMI/RKMusic】 (歌, 歌枠)
+- k_QzyYjyPVI ✦歌枠✦話すし歌う【IMI/RKMusic】 (歌, 歌枠)
+- ... 86 more
+
+## Parsed videos
+
+- xA6yseQFS_Y ✦歌枠✦600高評価を集める会【IMI/RKMusic】【IMI/RKMusic】 songs=21
+- GMccBHYLz6g ✦#真っ赤に染めろ真夏の灼熱歌枠リレー✦熱い夏にしましょう【IMI/RKMusic】 songs=9
+- 4IwfcMQku1U ✦歌練✦のんびり【IMI/RKMusic】＃新人Vsinger songs=8
+- oGSKzLuVZE0 ✦お知らせ有り✦歌いもする【IMI/RKMusic】 songs=18
+- f6zY6XYqAV4 ✦歌枠✦好きな歌を好きなだけ【IMI/RKMusic】＃新人Vsinger songs=18
+- w0mPpyWljsM 【 DAY1 #RKMFes_歌枠リレー 】実質トップバッターってこと⁇【IMI/RKMusic】 songs=9
+- 6TPIYBHolk0 ✦#ぶいのね歌枠リレー ✦大好きな自分の音楽を【IMI/RKMusic】 songs=9
+- p04FbMaWBA0 ✦縦配信✦ボカロ歌いたい【IMI/RKMusic】＃新人Vsinger songs=18
+- uWDgADcS53s 【歌枠リレー】NUROJUNKデビューがちでおめでとう #NUROJUNK_DEBUT_SINGING_RELAY【IMI/RK Music】 songs=9
+- OmJ6-c-cmCs ✦#夜風にメロウ歌枠リレー✦夜に聴きたくなる音楽を【IMI/RKMusic】 songs=11
+- wTba0ZSYa60 ✦歌枠✦歌を練習したいだなも~【IMI/RKMusic】 songs=10
+- _M9hEvM7L-M ✦歌枠✦沢山休もう【IMI/RKMusic】＃新人Vsinger songs=31
+- 2SD7piVd5dQ ✦歌枠✦悲しい曲縛り【IMI/RKMusic】【IMI/RKMusic】 songs=11
+- oFSBmPpe4hY ✦縦配信✦ノープランの歌と喋り【IMI/RKMusic】＃新人Vsinger songs=14
+- v7zRy6Xdoco ✦#RKMusic歌枠リレー✦ここで歌う意味を...【IMI/RKMusic】 songs=7
+- Jg5a9VU_hmA ✦縦型配信✦久しぶりの歌枠かも【IMI/RKMusic】＃新人Vsinger songs=12
+- sinUBfndAN8 ✦縦配信✦歌おおおぉぉぉぉぉ【IMI/RKMusic】＃新人Vsinger songs=13
+- y2iHmhzTACo ✦#愛をつなぐ歌枠リレー ✦愛を沢山歌うよ【IMI/RKMusic】 songs=7
+- bbw_LJWl6DA ✦縦型配信✦歌います【IMI/RKMusic】＃新人Vsinger songs=20
+- yrLmC5pnFBU ✦縦型配信✦歌うかも【IMI/RKMusic】＃新人Vsinger songs=15
+- qLFDr2Y_hvM ✦縦型配信✦歌うし話す【IMI/RKMusic】＃新人Vsinger songs=14
+- YQ6RbckxV1o ✦縦型配信✦楽しく歌う【IMI/RKMusic】＃新人Vsinger songs=17
+- _Hw8nF5bHpg ✦ #夢を奏でる歌枠リレー✦次世代VsingerIMIです【IMI/RKMusic】＃新人Vsinger songs=7
+- oZkDnOO5JQU ✦#きらめく歌枠リレー✦キラキラしていきます【IMI/RKMusic】＃新人Vsinger songs=6
+- wRuvaDjDEs0 ✦IMIバースデー3Dライブ2026✦お知らせ有り【IMI/RKMusic】#IMIBD2026 songs=13
+- r1TsSIGYqSo ✦歌枠✦好きな歌をゆるく【IMI/RKMusic】 songs=10
+- k_QzyYjyPVI ✦歌枠✦話すし歌う【IMI/RKMusic】 songs=16
+- lVSDFL-P7IQ ✦#RKMusic歌枠リレー✦絶対最後まで見ろ...俺先輩になるんだ【IMI/RKMusic】＃新人Vsinger songs=7
+- aE1fKHhixC0 ✦#みくいみ✦アイドル歌枠【IMI/RKMusic・星衣未空莉/UniVIRTUAL】＃新人Vsinger songs=8
+- ZxFCK69dEgk ✦#最楽歌枠リレー✦アザトちゃんおたおめ【IMI/RKMusic】＃新人Vsinger songs=6
+- ... 69 more
+
+## Occurrence sample
+
+- xA6yseQFS_Y 0:07:01 ビビデバ / 星街すいせい
+- xA6yseQFS_Y 0:12:55 ロミオとシンデレラ / doriko
+- xA6yseQFS_Y 0:19:24 Just Be Friends / Dixie Flatline
+- xA6yseQFS_Y 0:25:22 名前のない怪物 / EGOIST
+- xA6yseQFS_Y 0:27:53 unravel / TK from 凛として時雨
+- xA6yseQFS_Y 0:32:50 季節は次々死んでいく / amazarashi
+- xA6yseQFS_Y 0:40:55 え？あぁ、そう / 蝶々P
+- xA6yseQFS_Y 0:44:39 妄想税 / DECO*27
+- xA6yseQFS_Y 0:52:14 もうちょっとで早く達成しそう / 集合
+- xA6yseQFS_Y 0:57:38 テレパシ / DECO*27
+- xA6yseQFS_Y 0:59:26 magnet / minato(流星P)
+- xA6yseQFS_Y 1:09:10 トリノコシティ / 40mP
+- xA6yseQFS_Y 1:15:12 メランコリック / Junky
+- xA6yseQFS_Y 1:20:32 脱法ロック / Neru
+- xA6yseQFS_Y 1:26:52 アンノウン・マザーグース / wowaka
+- xA6yseQFS_Y 1:31:34 あなたの夜が明けるまで / 傘村トータ
+- xA6yseQFS_Y 1:37:42 ロウワー / ぬゆり
+- xA6yseQFS_Y 1:40:02 ベノム / かいりきベア
+- xA6yseQFS_Y 1:43:23 きゅうくらりん / いよわ
+- xA6yseQFS_Y 1:44:56 初恋リバイバル / iLiFE!
+- xA6yseQFS_Y 1:48:45 ちゅ、多様性 / ano
+- GMccBHYLz6g 0:01:47 Henceforth / Orangestar
+- GMccBHYLz6g 0:06:18 夏曲の自己解釈 /
+- GMccBHYLz6g 0:07:22 I’m Diamond / IMI
+- GMccBHYLz6g 0:11:45 DRIVE / IMI
+- GMccBHYLz6g 0:15:39 口内炎の二次被害 /
+- GMccBHYLz6g 0:16:45 快晴 / Orangestar
+- GMccBHYLz6g 0:20:35 ICE BOX /
+- GMccBHYLz6g 0:23:29 OUTSIDER / IMI
+- GMccBHYLz6g 0:27:08 次枠:折咲もしゅ さん /
+- ... 1291 more

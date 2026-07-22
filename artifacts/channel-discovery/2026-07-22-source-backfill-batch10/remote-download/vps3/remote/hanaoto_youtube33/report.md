@@ -1,0 +1,111 @@
+# YouTube channel discovery report
+
+- Generated: 2026-07-22T00:57:23.171Z
+- Channel: https://www.youtube.com/@hanaoto_youtube33
+- Singer: hanaoto_youtube33
+- Keywords: フルート, 生演奏, live, ライブ, クラリネット, piano streaming, ピアノ演奏, 歌, 歌枠, 弾き語, karaoke, 歌ってみた, 3D Live
+- Candidates: 104
+- Usable videos: 58
+- Occurrences: 889
+
+## Candidate videos
+
+- thif7qVdZ_Q 【#フルート 】1日の終わりに元気と癒しをお届け中！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #新人vtuber #雑談 (フルート)
+- WMxyKikgUrc Sincerely / Flute cover ver. by 花音兎みみ【ヴァイオレット・エヴァーガーデン】#演奏してみた #vtuber #フルート (フルート)
+- bOyhDvXx5XM 【#フルート 】７月スタート！⭐夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 (フルート, live)
+- CVONqGNTU24 【#フルート 】夏の夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 (フルート, live)
+- FoSyeKTg-Uc 【#フルート 】告知あり！七夕の夜に願い事🪈🌟作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 (フルート, live)
+- tMrpntjMB7Y 【記念配信】半年記念配信！一緒にお祝いしよ！🌷🐰💼#bgm #vtuber #live2d #新人vtuber #雑談 (live)
+- 6Q-X0ISXSP0 【#フルート 】夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 (フルート, live)
+- Vizreg7FEg8 【#フルート 】おまたせ！夜に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d (フルート, live)
+- bFzfpNTKnl8 【#フルート 】お昼に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d (フルート, live)
+- po4-HRWN9g4 【#フルート 】お昼に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 (フルート, live)
+- 547OQHZd0Fc 【#フルート 】ひな×みみ🌙🌷アニソン演奏コラボ！#bgm #vtuber #live2d #新人vtuber #雑談 #みみひな (フルート, live)
+- vWiRreTayjc 【#フルート 】音大卒Vがお届けするクラシック演奏！夜に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙#bgm #vtuber #live2d (フルート, live)
+- e-xXBI_PI10 【#フルート 】突発！Ch.登録2100人耐久！夜に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d (フルート, live)
+- KnI3qXngywM 【#フルート 】夜に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d (フルート, live)
+- RDmi9WzfiG0 【#フルート 】夜に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d (フルート, live)
+- Dab4Av9LF1M 【#フルート 】夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 (フルート, live)
+- nI7li6PKzr4 【#フルート 】夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 (フルート, live)
+- pmQ60HB6Q8U 【#雑談 】お昼タイム！新作スタバ飲みながら雑談！🍌✨#bgm #vtuber #live2d #新人vtuber (live)
+- dAIjpHTPvRE 【#雑談 】お昼雑談！最近のあれこれ✨#bgm #vtuber #live2d #新人vtuber (live)
+- y27DgHS5jBY 【#雑談 】ときめきVR100連ガチャ回します！！！ #vtuber #live2d #ガチャ (live)
+- wQy4oQrKRQE 【#雑談 】夜の雑談タイム！🌙✨#bgm #vtuber #live2d #新人vtuber (live)
+- YButnm14lIM 【#崩壊スターレイル 】完全初見！🔰第3章！ピノコニー突入！#花音兎みみ #vtuber #live2d #新人vtuber #ゲーム実況 (live)
+- NlUrQPyJo0Y 【#崩壊スターレイル 】完全初見！🔰第3章！ピノコニー編！#花音兎みみ #vtuber #live2d #新人vtuber #ゲーム実況 (live)
+- BkMNfg6FJRA 【#崩壊スターレイル 】完全初見！🔰第3章！謎めくピノコニー！#花音兎みみ #vtuber #live2d #新人vtuber #ゲーム実況 (live)
+- PKGGRrseyg8 【初見さん大歓迎！】5ヶ月記念！Ch.登録2222人耐久！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#フルート#bgm #vtuber #live2d #新人vtuber #歌枠 #雑談 (フルート, live, 歌, 歌枠)
+- p7YxbwK1LRA 【全国一般人常識チェック】清楚な一般人です！！常識？ありますよ👀✨#花音兎みみ #vtuber #live2d #新人vtuber #ゲーム実況 (live)
+- F9SW8eMJ944 【#RBS26 】初リアイベ🎉振り返り雑談配信！お疲れさまでした！ #雑談 #縦型配信 #vtuber #live2d #新人vtuber (live)
+- CQuO8Ph6L_c 【#ときめきPR大使歌枠リレー 】初の歌枠リレー！ドキドキ💞音大卒V🌷🐰💼#フルート #vtuber #歌枠 #live2d #花音兎みみ (フルート, live, 歌, 歌枠)
+- w8tct77ci2k 【#フルート 】1日お疲れ様！雨音と一緒に元気と癒しをお届け！🪈🎀高評価80目標！夜のBGMにどうぞ🌙#bgm #縦型配信 #vtuber #live2d #新人vtuber (フルート, live)
+- _OC2GI_rzDE 【#フルート 】1日お疲れ様！元気と癒しをお届け！🪈🎀高評価80目標！夜のBGMにどうぞ🌙#bgm #縦型配信 #vtuber #live2d #新人vtuber (フルート, live)
+- ... 74 more
+
+## Parsed videos
+
+- thif7qVdZ_Q 【#フルート 】1日の終わりに元気と癒しをお届け中！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #新人vtuber #雑談 songs=17
+- CVONqGNTU24 【#フルート 】夏の夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 songs=13
+- FoSyeKTg-Uc 【#フルート 】告知あり！七夕の夜に願い事🪈🌟作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 songs=12
+- 6Q-X0ISXSP0 【#フルート 】夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 songs=11
+- Vizreg7FEg8 【#フルート 】おまたせ！夜に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d songs=10
+- bFzfpNTKnl8 【#フルート 】お昼に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d songs=14
+- po4-HRWN9g4 【#フルート 】お昼に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 songs=15
+- 547OQHZd0Fc 【#フルート 】ひな×みみ🌙🌷アニソン演奏コラボ！#bgm #vtuber #live2d #新人vtuber #雑談 #みみひな songs=9
+- e-xXBI_PI10 【#フルート 】突発！Ch.登録2100人耐久！夜に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d songs=17
+- Dab4Av9LF1M 【#フルート 】夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 songs=12
+- nI7li6PKzr4 【#フルート 】夜に癒しと元気をお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d #新人vtuber #雑談 songs=10
+- PKGGRrseyg8 【初見さん大歓迎！】5ヶ月記念！Ch.登録2222人耐久！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#フルート#bgm #vtuber #live2d #新人vtuber #歌枠 #雑談 songs=25
+- CQuO8Ph6L_c 【#ときめきPR大使歌枠リレー 】初の歌枠リレー！ドキドキ💞音大卒V🌷🐰💼#フルート #vtuber #歌枠 #live2d #花音兎みみ songs=4
+- w8tct77ci2k 【#フルート 】1日お疲れ様！雨音と一緒に元気と癒しをお届け！🪈🎀高評価80目標！夜のBGMにどうぞ🌙#bgm #縦型配信 #vtuber #live2d #新人vtuber songs=10
+- _OC2GI_rzDE 【#フルート 】1日お疲れ様！元気と癒しをお届け！🪈🎀高評価80目標！夜のBGMにどうぞ🌙#bgm #縦型配信 #vtuber #live2d #新人vtuber songs=8
+- Qf0C6FNxjRg 【#フルート 】1日お疲れ様！夜に元気と癒しをお届け！🪈🎀高評価80目標！夜のBGMにどうぞ🌙#bgm #縦型配信 #花音兎みみ #vtuber #live2d #新人vtuber songs=11
+- nG8TWSe8jYE 【#フルート 】Ch.1800人耐久！元気と癒しをお届け！🪈🎀夜のBGMにどうぞ🌙#bgm #vtuber #live2d songs=11
+- dH5wDoUvC18 【#フルート 】Ch.登録1900人耐久！元気と癒しをお届け！🪈🎀夜のBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d songs=22
+- eQkwiacwWGE 【#フルート 】Ch.登録2000人耐久！！元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d songs=36
+- mOpHwM3o-P8 【#フルート 】一日お疲れ様！夜に元気と癒しをお届け！🪈🎀夜の作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d songs=19
+- OVKDE6it02w 【#フルート 】夜に元気と癒しをお届け！🪈🎀作業やBGMにどうぞ🌙音大卒V🌷#bgm #vtuber #live2d songs=12
+- H5gPfxGyFA8 【#フルート 】夜に元気と癒しをお届け！🪈🎀夜のBGMにどうぞ🌙音大卒🌷#bgm #vtuber #live2d songs=11
+- KS57y6XcukQ 【#フルート #歌枠 】Ch.登録1850人目指す！週末にに元気と癒しをお届け！🪈🎀夜のBGMにどうぞ🌙#bgm #vtuber #live2d songs=26
+- s2lJX-b0buQ 【#歌枠 】Ch.登録2000人感謝歌枠！！🎉#bgm #vtuber #live2d #新人vtuber songs=13
+- SMa0vSDs54E 【#フルート 】1700人耐久！夜に元気と癒しをお届け！🪈🎀夜のBGMにどうぞ！#bgm #縦型配信 #花音兎みみ #vtuber #live2d #新人vtuber songs=15
+- t6z41ZR-074 【#フルート 】1日お疲れ様！夜に元気と癒しをお届け！🪈🎀夜のBGMにどうぞ！#bgm #縦型配信 #花音兎みみ #vtuber #live2d #新人vtuber songs=10
+- 34YBwdo0muI 【#フルート 】ch.登録1600人耐久！おはよう！朝に元気と癒しをお届け！🪈🎀朝のBGMにどうぞ！#朝活 #縦型配信 #花音兎みみ #vtuber #live2d #新人vtuber songs=20
+- 2wTrtuPm8tY 【#フルート 】おかえり！夜に元気と癒しをお届け！🪈🎀 #花音兎みみ #vtuber #live2d #新人vtuber songs=16
+- t7buven0Bn4 【#フルート 】おはよう！朝に元気と癒しをお届け！🪈🎀 #花音兎みみ #vtuber #live2d #新人vtuber songs=17
+- emp2UGBkB9E 【#フルート 】おはよう！朝に元気と癒しをお届け！🪈🎀#縦型配信 #花音兎みみ #vtuber #live2d #新人vtuber songs=26
+- ... 28 more
+
+## Occurrence sample
+
+- thif7qVdZ_Q 0:12:10 Ghost of a smile / EGOIST（2015）
+- thif7qVdZ_Q 0:21:03 All Alone With You / EGOIST（2013）
+- thif7qVdZ_Q 0:38:12 Planetes / EGOIST（2012）
+- thif7qVdZ_Q 0:47:40 ninelie / Aimer with chelly(EGOIST)（2016）
+- thif7qVdZ_Q 0:56:50 エウテルペ / EGOIST（2011）
+- thif7qVdZ_Q 1:03:54 名前のない怪物 / EGOIST（2012）
+- thif7qVdZ_Q 1:13:52 The Everlasting Guilty Crown / EGOIST（2012）
+- thif7qVdZ_Q 1:24:23 贖罪 / 傘村トータ（2018）
+- thif7qVdZ_Q 1:32:45 プラチナ / 坂本真綾（1999）
+- thif7qVdZ_Q 1:48:10 シルシ / LiSA（2014）
+- thif7qVdZ_Q 1:56:52 それを愛と呼ぶなら / Uru（2022）
+- thif7qVdZ_Q 2:05:57 今日という日を / Uru（2026）
+- thif7qVdZ_Q 2:14:24 たとえ どんなに… / 西野カナ（2011）
+- thif7qVdZ_Q 2:23:28 Always / 西野カナ（2012）
+- thif7qVdZ_Q 2:34:25 カブトムシ / aiko（1999）
+- thif7qVdZ_Q 2:44:35 すずめ feat. 十明 / RADWIMPS（2022）
+- thif7qVdZ_Q 2:54:52 なんでもないや / RADWIMPS（2016）
+- CVONqGNTU24 0:15:09 群青 / YOASOBI（2020）
+- CVONqGNTU24 0:26:42 瞳をとじて / 平井堅（2004）
+- CVONqGNTU24 0:36:52 愛唄 / GReeeeN（2007）
+- CVONqGNTU24 0:45:46 Good-bye days / YUI for 雨音薫（2006）
+- CVONqGNTU24 0:53:33 三日月 / 絢香（2006）
+- CVONqGNTU24 1:01:02 晩餐歌 / tuki.（2023）
+- CVONqGNTU24 1:07:22 夏祭り / JITTERIN'JINN（1990）
+- CVONqGNTU24 1:17:17 天ノ弱 / 164（2011）
+- CVONqGNTU24 1:26:52 打上花火 / DAOKO×米津玄師（2017）
+- CVONqGNTU24 1:33:32 secret base〜君がくれたもの〜 / ZONE（2001）
+- CVONqGNTU24 1:50:13 カブトムシ / aiko（1999）
+- CVONqGNTU24 1:58:01 W/X/Y / Tani Yuuki（2021）
+- CVONqGNTU24 2:17:31 ひまわりの約束 / 秦基博（2014）
+- ... 859 more

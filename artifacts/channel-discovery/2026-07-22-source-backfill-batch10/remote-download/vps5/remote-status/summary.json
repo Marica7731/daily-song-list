@@ -1,0 +1,15 @@
+{
+  "results": [
+    {
+      "handle": "UCnKt20HH_BiuID0FDHGMcvw",
+      "url": "https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw",
+      "startedAt": "2026-07-22T00:20:49Z",
+      "exitCode": 0,
+      "timedOut": false,
+      "elapsedSeconds": 1384,
+      "stdoutTail": "\n> daily-song-list@1.0.0 youtube:discover-channel\n> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw --singer-name UCnKt20HH_BiuID0FDHGMcvw --output-dir /opt/ytb-song-rank-source-backfill-20260722-batch10-vps5/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch10/remote/UCnKt20HH_BiuID0FDHGMcvw --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --request-interval-ms 3000 --request-jitter-ms 1500 --keyword フルート --keyword 生演奏 --keyword live --keyword ライブ --keyword クラリネット --keyword piano streaming --keyword ピアノ演奏 --keyword 歌 --keyword 歌枠 --keyword 弾き語 --keyword karaoke --keyword 歌ってみた --keyword 3D Live\n\nCODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/channel/UCnKt20HH_BiuID0FDHGMcvw\" candidates=116 inspected=116 videos=99 occurrences=1321 elapsedSeconds=1384 outputDir=\"/opt/ytb-song-rank-source-backfill-20260722-batch10-vps5/repo/artifacts/channel-discovery/2026-07-22-source-backfill-batch10/remote/UCnKt20HH_BiuID0FDHGMcvw\"\n",
+      "stderrTail": "",
+      "hasManifest": true
+    }
+  ]
+}
