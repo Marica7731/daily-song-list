@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-22T10:56:34.747Z",
+  "generatedAt": "2026-07-22T12:06:37.283Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-22T10:56:34.747Z",
+    "fetchedAt": "2026-07-22T12:06:37.283Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-22T10:56:34.747Z",
+    "generatedAt": "2026-07-22T12:06:37.283Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7936,32 +7936,25 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 964,
-      "parseableChannels": 749,
+      "totalChannels": 963,
+      "parseableChannels": 748,
       "realAvatar": 643,
-      "thumbnailFallback": 321,
+      "thumbnailFallback": 320,
       "missingDisplayImage": 0,
-      "missingAvatar": 321,
+      "missingAvatar": 320,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 331
+      "skipped_collected_evidence": 330
     },
     "failures": [],
     "skippedSummary": {
-      "batch_limit_reached": 116,
-      "missing_channel_url_or_handle": 215
+      "missing_channel_url_or_handle": 215,
+      "batch_limit_reached": 115
     },
     "skippedSamples": [
-      {
-        "handle": "/@kohiponch",
-        "channelId": "UCJE9BZz0ld_yqc2ryoA3-GQ",
-        "displayName": "Pon Ch. 小日向ぽん",
-        "sourceUrl": "https://www.youtube.com/@kohiponch",
-        "reason": "batch_limit_reached"
-      },
       {
         "handle": "",
         "channelId": "",
@@ -8127,6 +8120,13 @@
         "handle": "",
         "channelId": "",
         "displayName": "宮守ゆり",
+        "sourceUrl": "",
+        "reason": "missing_channel_url_or_handle"
+      },
+      {
+        "handle": "",
+        "channelId": "",
+        "displayName": "猫目石 ネモ / Nemo Nekomeishi",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
