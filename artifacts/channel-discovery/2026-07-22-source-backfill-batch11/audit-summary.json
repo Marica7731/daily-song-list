@@ -1,0 +1,50 @@
+{
+  "videoCount": 38,
+  "occurrenceCount": 496,
+  "uniqueSongCount": 291,
+  "publishedTimestampCoverage": "38/38",
+  "occurrenceTimeCoverage": "496/496",
+  "occurrenceSecondsCoverage": "496/496",
+  "discoveryThumbnailCoverage": "38/38",
+  "channels": {
+    "/@LEWNE_RKMusic": {
+      "acceptedVideos": 5,
+      "acceptedOccurrences": 23,
+      "uniqueSongs": 23,
+      "publishedTimestampPresent": 5,
+      "occurrenceTimePresent": 23,
+      "occurrenceSecondsPresent": 23,
+      "thumbnailPresent": 5
+    },
+    "https://www.youtube.com/channel/UCw0ty0mpHBx6xZt-K_hfNcA": {
+      "acceptedVideos": 33,
+      "acceptedOccurrences": 473,
+      "uniqueSongs": 277,
+      "publishedTimestampPresent": 33,
+      "occurrenceTimePresent": 473,
+      "occurrenceSecondsPresent": 473,
+      "thumbnailPresent": 33
+    }
+  },
+  "dirtyAudit": {
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "dropped": [],
+    "suspiciousCount": 1,
+    "suspicious": [
+      {
+        "youtubeVideoId": "vwDp67LnnzA",
+        "channel": "/@LEWNE_RKMusic",
+        "videoTitle": "【#歌枠 /#karaoke 】ワンマンまで残り5日⁉ライブ前に楽しい夜を│聴くだけでも大丈夫 #めだれう【MEDA × LEWNE】",
+        "hits": [
+          "ライブ"
+        ],
+        "occurrences": 6
+      }
+    ],
+    "termHitCounts": {
+      "ライブ": 1
+    },
+    "note": "Instrumental/live-performance terms are dropped before import; broad live/live terms are only suspicious and are not dropped blindly."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "batch": "2026-07-22-source-backfill-batch11",
+  "generatedAt": "2026-07-22T01:11:42Z",
+  "results": [
+    {
+      "handle": "UCw0ty0mpHBx6xZt-K_hfNcA",
+      "url": "https://www.youtube.com/channel/UCw0ty0mpHBx6xZt-K_hfNcA",
+      "exitCode": 1,
+      "timedOut": false,
+      "elapsedSeconds": 15,
+      "stdoutTail": "",
+      "stderrTail": "VsingerHttpError: Request failed for https://www.youtube.com/channel/UCw0ty0mpHBx6xZt-K_hfNcA/streams?hl=ja&persist_hl=1: fetch failed\n    at VsingerHttpClient.getText (D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\scripts\\vsinger-http\\http-client.js:119:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async fetchChannelPageWithContinuations (D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\scripts\\youtube-channel-discovery-core.js:242:20)\n    at async runChannelDiscovery (D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\scripts\\youtube-channel-discovery-core.js:92:24)\n    at async main (D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\scripts\\youtube-channel-discovery.js:27:18)\n",
+      "stdoutLog": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\local-run\\UCw0ty0mpHBx6xZt-K_hfNcA\\runner.stdout.log",
+      "stderrLog": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\local-run\\UCw0ty0mpHBx6xZt-K_hfNcA\\runner.stderr.log"
+    },
+    {
+      "handle": "SoraOtoha",
+      "url": "https://www.youtube.com/@SoraOtoha",
+      "exitCode": 1,
+      "timedOut": false,
+      "elapsedSeconds": 15,
+      "stdoutTail": "",
+      "stderrTail": "VsingerHttpError: Request failed for https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1: fetch failed\n    at VsingerHttpClient.getText (D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\scripts\\vsinger-http\\http-client.js:119:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async fetchChannelPageWithContinuations (D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\scripts\\youtube-channel-discovery-core.js:242:20)\n    at async runChannelDiscovery (D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\scripts\\youtube-channel-discovery-core.js:92:24)\n    at async main (D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\scripts\\youtube-channel-discovery.js:27:18)\n",
+      "stdoutLog": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\local-run\\SoraOtoha\\runner.stdout.log",
+      "stderrLog": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\local-run\\SoraOtoha\\runner.stderr.log"
+    }
+  ]
+}

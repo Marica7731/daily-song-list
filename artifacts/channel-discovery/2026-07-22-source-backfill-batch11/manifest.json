@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-22-source-backfill-batch11",
+  "generatedAt": "2026-07-22T10:06:15+08:00",
+  "scope": "eleventh partial small-batch commit for the 2026-07-22 requested source queue; not a full 1000+ channel rescan",
+  "acceptedIncrement": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\accepted\\2026-07-22-source-backfill-batch11.accepted.json",
+  "rawExport": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\accepted\\2026-07-22-source-backfill-batch11.raw-export.json",
+  "failedCheckpointSummaries": [
+    "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\failed\\SoraOtoha.checkpoint-summary.json"
+  ],
+  "exportMarkerBeforeDirtyAudit": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=38 usableVideos=38 acceptedVideos=38 skippedRegressions=0 occurrences=496",
+  "dirtyAudit": {
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "dropped": [],
+    "suspiciousCount": 1,
+    "suspicious": [
+      {
+        "youtubeVideoId": "vwDp67LnnzA",
+        "channel": "/@LEWNE_RKMusic",
+        "videoTitle": "【#歌枠 /#karaoke 】ワンマンまで残り5日⁉ライブ前に楽しい夜を│聴くだけでも大丈夫 #めだれう【MEDA × LEWNE】",
+        "hits": [
+          "ライブ"
+        ],
+        "occurrences": 6
+      }
+    ],
+    "termHitCounts": {
+      "ライブ": 1
+    },
+    "note": "Instrumental/live-performance terms are dropped before import; broad live/live terms are only suspicious and are not dropped blindly."
+  },
+  "acceptedSummary": {
+    "videos": 38,
+    "occurrences": 496,
+    "uniqueSongs": 291,
+    "publishedTimestampCoverage": "38/38",
+    "occurrenceTimeCoverage": "496/496",
+    "occurrenceSecondsCoverage": "496/496",
+    "discoveryThumbnailCoverage": "38/38",
+    "dbEffectiveDelta": {
+      "videos": 37,
+      "songs": 87,
+      "occurrences": 495,
+      "sourceOccurrences": 983,
+      "rankingRows": 337
+    }
+  },
+  "dbVerification": {
+    "mode": "local YouTube-only --no-vsinger; before includes data/external plus batch1-batch10 artifacts, after also includes batch11 artifact; not production evidence",
+    "before": {
+      "videos": 6595,
+      "songs": 28903,
+      "occurrences": 104213,
+      "sourceOccurrences": 200068,
+      "rankingRows": 124291
+    },
+    "after": {
+      "videos": 6632,
+      "songs": 28990,
+      "occurrences": 104708,
+      "sourceOccurrences": 201051,
+      "rankingRows": 124628
+    },
+    "delta": {
+      "videos": 37,
+      "songs": 87,
+      "occurrences": 495,
+      "sourceOccurrences": 983,
+      "rankingRows": 337
+    },
+    "queryUCw0ty0mpHBx6xZtKHfNcA": {
+      "before": {
+        "videos": 1,
+        "occurrences": 14
+      },
+      "after": {
+        "videos": 38,
+        "occurrences": 509
+      },
+      "delta": {
+        "videos": 37,
+        "occurrences": 495
+      }
+    }
+  },
+  "sources": [
+    {
+      "handle": "UCw0ty0mpHBx6xZt-K_hfNcA",
+      "url": "https://www.youtube.com/channel/UCw0ty0mpHBx6xZt-K_hfNcA",
+      "status": "imported",
+      "reason": "complete remote manifest accepted into batch11 artifact increment",
+      "discoveryCandidates": 121,
+      "discoveryInspected": 121,
+      "discoveryUsableVideos": 38,
+      "discoveryOccurrences": 496,
+      "acceptedVideos": 38,
+      "acceptedOccurrences": 496,
+      "uniqueSongs": 291,
+      "publishedTimestampCoverage": "38/38",
+      "occurrenceTimeCoverage": "496/496",
+      "occurrenceSecondsCoverage": "496/496",
+      "thumbnailCoverage": "38/38",
+      "reachedEnd": true,
+      "elapsedSeconds": 1415,
+      "failure": ""
+    },
+    {
+      "handle": "SoraOtoha",
+      "url": "https://www.youtube.com/@SoraOtoha",
+      "status": "failed",
+      "reason": "remote discovery hit timeout before producing a complete manifest; checkpoint summary preserved for later retry",
+      "discoveryCandidates": 127,
+      "discoveryInspected": 64,
+      "discoveryUsableVideos": 0,
+      "discoveryOccurrences": 0,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "uniqueSongs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "reachedEnd": null,
+      "elapsedSeconds": 2400,
+      "failure": "timedOut=True exitCode=-9 inspected=64/127; no complete manifest"
+    }
+  ],
+  "statusCounts": {
+    "imported": 1,
+    "failed": 1
+  },
+  "retryEvidence": {
+    "localAttempt": [
+      {
+        "handle": "UCw0ty0mpHBx6xZt-K_hfNcA",
+        "exitCode": 1,
+        "timedOut": false,
+        "elapsedSeconds": 15,
+        "stderrSummary": "fetch failed"
+      },
+      {
+        "handle": "SoraOtoha",
+        "exitCode": 1,
+        "timedOut": false,
+        "elapsedSeconds": 15,
+        "stderrSummary": "fetch failed"
+      }
+    ],
+    "remoteStatusFiles": [
+      "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\remote-download\\vps3\\remote-status\\status.jsonl",
+      "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch11\\remote-download\\vps5\\remote-status\\status.jsonl"
+    ]
+  },
+  "remoteCleanup": {
+    "vps3": {
+      "status": "removed",
+      "path": "/opt/ytb-song-rank-source-backfill-20260722-batch11-vps3",
+      "df": "/dev/sda1 99G 11G 89G 11% /",
+      "marker": "CODEX_REMOTE_BATCH11_CLEANUP_OK"
+    },
+    "vps5": {
+      "status": "removed",
+      "path": "/opt/ytb-song-rank-source-backfill-20260722-batch11-vps5",
+      "df": "/dev/vda1 10G 2.6G 7.0G 27% /",
+      "marker": "CODEX_REMOTE_BATCH11_CLEANUP_OK"
+    }
+  },
+  "nextRecommendedBatch": [
+    {
+      "handle": "omaru_piano",
+      "reason": "147 candidate probe; needs exact piano streaming/ピアノ演奏 dirty audit"
+    },
+    {
+      "handle": "KOTATSUChHaruKotatsubutonclub",
+      "reason": "151 candidates with prior checkpoint"
+    },
+    {
+      "handle": "saclayui",
+      "reason": "178 candidate probe"
+    }
+  ]
+}

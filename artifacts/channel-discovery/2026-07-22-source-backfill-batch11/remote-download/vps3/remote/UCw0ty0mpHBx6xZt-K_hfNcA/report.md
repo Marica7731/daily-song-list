@@ -1,0 +1,111 @@
+# YouTube channel discovery report
+
+- Generated: 2026-07-22T01:40:06.975Z
+- Channel: https://www.youtube.com/channel/UCw0ty0mpHBx6xZt-K_hfNcA
+- Singer: UCw0ty0mpHBx6xZt-K_hfNcA
+- Keywords: フルート, 生演奏, live, ライブ, クラリネット, piano streaming, ピアノ演奏, 歌, 歌枠, 弾き語, karaoke, 歌ってみた, 3D Live
+- Candidates: 121
+- Usable videos: 38
+- Occurrences: 496
+
+## Candidate videos
+
+- Fzn_pF0G6uY 【#歌枠 / #karaoke 】火曜日のこの時間といえば？？ #Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- T4A_-OsqOBo 【#歌枠 / #karaoke / #弾き語り 】一日に終わりに静かな夜 │聴くだけでも大丈夫 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, 弾き語, karaoke)
+- 8jLDR1j2WW4 【#歌枠 / #karaoke 】二日酔いの歌雑です皆さんほどほどにしましょう #Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- mY8eFOvFHy4 【#歌枠 / #karaoke / #弾き語り 】夜風を感じながらそんな夜もいい│聴くだけでも大丈夫 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, 弾き語, karaoke)
+- 062OnXFE1J4 【#歌枠 / #karaoke 】とうもろこし大好きです #Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- HXe15cBnqoY 【#歌枠 / #karaoke #弾き語り 】3秒でもいいので聴いていきませんか？ │聴くだけでも大丈夫 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, 弾き語, karaoke)
+- a77hPduaSXA 【#歌枠 / #karaoke 】RKMFes2026ありがとうなのだ #vsinger #Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- P7TEModoBUw 【 #garticphone / LEWNE視点 】マウスでも絵が描けること証明したるわ #るりなぎ春歌祭 #LEWREC #vtuber #vsinger 【LEWNE / RK Music】 (歌)
+- BrPDjgwjj-E 【 DAY3 #RKMFes_歌枠リレー 】当日楽しみすぎるので記憶飛ばします。 #vtuber #vsinger 【LEWNE / RK Music】 (歌, 歌枠)
+- JL4uaLU4DY4 【#歌枠 / #karaoke 】1年と1か月の女 #vsinger #Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- 6VtEK-6UAGw 【#歌枠 / #karaoke #弾き語り 】聴く人に少しでも安らぎと安心を│３秒でいいから聞いてください、聴くだけでも大丈夫 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, 弾き語, karaoke)
+- 6_hXyY7Xt_I 【#歌枠 / #karaoke 】 お疲れ様会！ワンマンライブありがとう！振り返りながら歌雑！ #Vtuber #LEWREC 【LEWNE / RK Music】 (ライブ, 歌, 歌枠, karaoke)
+- s3wOrTV8quw 【#歌枠 / #karaoke 】3秒でもいいので聴いていきませんか？│聴くだけでも大丈夫 #shorts #縦型配信 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- gsRYBiDThxE 【#歌枠 / #karaoke 】気分の上がり下がり激しい歌雑 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- 5JQawLuwrRs 【#歌枠 / #karaoke 】深夜の心にしみる歌を│聴くだけでも大丈夫 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- vwDp67LnnzA 【#歌枠 /#karaoke 】ワンマンまで残り5日⁉ライブ前に楽しい夜を│聴くだけでも大丈夫 #めだれう【MEDA × LEWNE】 (ライブ, 歌, 歌枠, karaoke)
+- jJlLK7bJBKY #ふぃぐふぃぐ LEWNE 1st ONE-MAN LIVE【#LEWNE / RK Music┆冒頭無料】 (live)
+- jKDB1hWqBQA 【#歌枠 / #karaoke 】お酒飲みながら金夜のお話ししよう #shorts #縦型配信 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- TOBy9Kh1vmg 【#歌枠 / #karaoke 】デビュー11か月の夜！！ #shorts #縦型配信 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- t-lM7nMl09U 【#歌枠 / #karaoke 】みんなただいま！！2週間ぶりの復活歌枠雑談配信 #shorts #縦型配信 #LEWREC #新人vtuber #vsinger【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- QsLTuj0BTFM 【#歌枠 / #karaoke / #弾き語り 】誰かの支えになれるような歌を│聴くだけで大丈夫 #shorts #縦型配信 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, 弾き語, karaoke)
+- 2FkHOUd5uyQ 【#歌枠 / #karaoke /#弾き語り 】春になっても夜は寒いですね #shorts #縦型配信 #LEWREC #新人vtuber #vsinger【LEWNE / RK Music】 (歌, 歌枠, 弾き語, karaoke)
+- aPFtvhzR9CM 【#雑談 /#vsinger 】なんだかんだ初めての雑談！マシュマロ(ゴミ)読みます #LEWREC #新人vtuber #vsinger #歌雑【LEWNE / RK Music】 (歌)
+- L7imDYEBrjU 【 #桜餅アイドル歌枠リレー 】みんな大好きLEWNEちゃんだよ！今日だけはアイドルもいいかもね #vtuber #vsinger 【LEWNE / RK Music】 (歌, 歌枠)
+- e_XyXGFFoRU 【 #春を彩る歌枠リレー 】春になりつつある今この時を彩らせてください🌸 #vtuber #vsinger 【LEWNE / RK Music】 (歌, 歌枠)
+- IDXvVMAroi4 【 #推ススメ新人Vtuber歌枠リレー 】こんばんわ！歌とトークのギャップで整っていかない？ #vtuber #vsinger 【LEWNE / RK Music】 (歌, 歌枠)
+- VF8Cr5Clhug 【#歌枠 / #karaoke 】3秒でもいいから、聞いていきませんか？誰かの心に届くまで #shorts #縦型配信 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- JhKQpDdh5Lg 【#歌枠 / #karaoke 】お知らせあり！火曜日だったはずだが？？歌枠雑談配信 #LEWREC #新人vtuber #vsinger #歌雑【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- tHNYtPOQZ2g 【#歌枠 / #karaoke 】デビュー10か月！？時がたつのは早いですね。歌枠雑談配信 #LEWREC #新人vtuber #vsinger #歌雑【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- XXcvhrXdM6c 【#歌枠 / #karaoke 】ピアノの夜もありだと思うよ。ピアノ伴奏の夜 #shorts #縦型配信 #新人Vtuber #LEWREC 【LEWNE / RK Music】 (歌, 歌枠, karaoke)
+- ... 91 more
+
+## Parsed videos
+
+- Fzn_pF0G6uY 【#歌枠 / #karaoke 】火曜日のこの時間といえば？？ #Vtuber #LEWREC 【LEWNE / RK Music】 songs=1
+- 6VtEK-6UAGw 【#歌枠 / #karaoke #弾き語り 】聴く人に少しでも安らぎと安心を│３秒でいいから聞いてください、聴くだけでも大丈夫 #新人Vtuber #LEWREC 【LEWNE / RK Music】 songs=14
+- gsRYBiDThxE 【#歌枠 / #karaoke 】気分の上がり下がり激しい歌雑 #新人Vtuber #LEWREC 【LEWNE / RK Music】 songs=1
+- vwDp67LnnzA 【#歌枠 /#karaoke 】ワンマンまで残り5日⁉ライブ前に楽しい夜を│聴くだけでも大丈夫 #めだれう【MEDA × LEWNE】 songs=6
+- jKDB1hWqBQA 【#歌枠 / #karaoke 】お酒飲みながら金夜のお話ししよう #shorts #縦型配信 #新人Vtuber #LEWREC 【LEWNE / RK Music】 songs=1
+- JhKQpDdh5Lg 【#歌枠 / #karaoke 】お知らせあり！火曜日だったはずだが？？歌枠雑談配信 #LEWREC #新人vtuber #vsinger #歌雑【LEWNE / RK Music】 songs=6
+- J58LJgoBgNU 【#歌枠 / #karaoke 】火曜日のうだ～っと歌雑 #shorts #縦型配信 【LEWNE / RK Music】 songs=29
+- 2h6BAazTv08 【#歌枠 / #karaoke 】火曜日のうだ～っと豆まき歌雑 #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=11
+- 9ozHY7HrDwA 【#歌枠 / #karaoke 】火曜日のうだうだ歌雑‼Vack-ON‼ありがとうございました！ #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=10
+- IUlqQ60Klcc 【#歌枠 / #karaoke 】泣きたい夜に、感情むき出しで弾き語り│聴くだけで大丈夫 #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=23
+- SOxYs8DJ6wU 【#歌枠 / #karaoke 】2026年初歌配信。さよなら2025 #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=15
+- 27oUKDt1F1I 【#歌枠 / #karaoke 】クリスマスイブの夜はお酒飲みながら弾き語り #shorts #縦型配信 #新人Vtuber【LEWNE / RK Music】 songs=14
+- Rrj02TxP6Sk 【#歌枠 / #karaoke 】火曜日のうだうだ歌雑 #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=9
+- yZVZ-_GiNK8 【#歌枠 / #karaoke 】火曜日のぐ～だぐだな歌雑 #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=9
+- 6wrlSHObTuc 【#歌枠 / #karaoke 】火曜日のゆったり歌雑🎶 #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=30
+- wQyXhvDf2x4 【#歌枠 / #karaoke 】弾き語ったり歌ったりする歌雑配信 #shorts #縦型配信 #新人vtuber 【LEWNE / RK Music】 songs=20
+- 7S8aPomsI-E 【#歌枠 / #karaoke 】夜中の弾き語りうとうと #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=7
+- JMMZg1vIIMk 【#歌枠 / #karaoke 】切ない曲に身を委ねてもいい。そんな夜の弾き語り Vsinger #新人Vtuber #shorts #vtuber #縦型配信 【LEWNE / RK Music】 songs=26
+- ItmrOOZZcnE 【#歌枠 / #karaoke 】デビュー6か月！大大感謝！！歌雑！！Vsinger #shorts #縦型配信 #新人vtuber #vsinger 【LEWNE / RK Music】 songs=7
+- USM1X_a2Nn8 【#歌枠 /#マシュマロ 】初コラボ⁉俺らに質問ある⁈初コラボで大暴れしたい #小鳥遊こばと 【LEWNE / RK Music】 songs=9
+- UQf9Jzh1m7s 【#歌枠 / #karaoke 】デビュー5か月！？マジ！？歌雑！！Vsinger #新人vtuber #shorts #縦型配信 #vsinger 【LEWNE / RK Music】 songs=1
+- yQS9_-AbLI4 【#歌枠 / #karaoke 】酔っぱらいは好きな曲をゆったりと話しながら歌う Vsinger #新人Vtuber #shorts #縦型配信【LEWNE / RK Music】 songs=11
+- Du3rEW5wfDU 【#歌枠 / #karaoke 】初めてのアカペラ？ゆったり歌雑 #shorts #縦型配信 【LEWNE / RK Music】 songs=18
+- 65xGM58Pxvk 【#歌枠 / #karaoke 】目指せ7000人セトリのない弾き語りVsinger #shorts #縦型配信 【LEWNE / RK Music】 songs=18
+- sIxm8pJY3Gw 【#歌枠 / #karaoke 】夜中のお眠りセトリのない弾き語りVsinger #新人Vtuber #shorts #縦型配信 【LEWNE / RK Music】 songs=15
+- sErc0tknG2s 【#弾き語り歌枠 / #karaoke 】飲酒！弾き語り！ゆったりセトリのない歌枠Vsinger #新人vtuber #shorts #縦型配信 【LEWNE / RK Music】 songs=5
+- Djt_NW-PxyQ 【#歌枠 / #karaoke 】しんみりしながら弾き語るVsinger #shorts #縦型配信 【LEWNE / RK Music】 songs=20
+- 8Vb9jN5OfXI 【#歌枠 / #karaoke 】眠れない君たちに歌う弾き語りVsinger #shorts #縦型配信 【LEWNE / RK Music】 songs=14
+- pbGvhPMNo2M 【#歌枠 / #karaoke 】夜中だからこそ、静かに弾き語りVsinger #shorts 【LEWNE / RK Music】 songs=20
+- bg7KtBevXxk 【 #弾き語り /#歌枠 】懐メロでエモに浸りたい【LEWNE / RK Music】 songs=10
+- ... 8 more
+
+## Occurrence sample
+
+- Fzn_pF0G6uY 0:59:08 羽緒たんのモノマネ / 似てない
+- 6VtEK-6UAGw 0:03:18 アルジャーノン / ヨルシカ
+- 6VtEK-6UAGw 0:10:30 ninelie / Aimer with cherry(EGOIST)
+- 6VtEK-6UAGw 0:22:39 残り香 / 茶和アヤカ
+- 6VtEK-6UAGw 0:32:40 嘘つき / 阿部真央
+- 6VtEK-6UAGw 0:48:07 忘れてください / ヨルシカ
+- 6VtEK-6UAGw 0:53:43 ロストメモリー / 深影
+- 6VtEK-6UAGw 1:12:16 ヒッチコック / ヨルシカ
+- 6VtEK-6UAGw 1:20:21 真夏の果実 / サザンオールスターズ
+- 6VtEK-6UAGw 1:29:09 相思相愛 / aiko
+- 6VtEK-6UAGw 1:38:10 深昏睡 / 春野
+- 6VtEK-6UAGw 1:44:20 惑星 / omoinotake
+- 6VtEK-6UAGw 1:52:20 シリウスの心臓 / ヰ世界情緒
+- 6VtEK-6UAGw 2:03:56 ぼくらのレットイットビー / はりーP
+- 6VtEK-6UAGw 2:21:18 よるのあと / adieu
+- gsRYBiDThxE 2:57:19 I'll come back to listen to this song again /
+- vwDp67LnnzA 0:05:46 3年目の浮気 / ヒロシ＆キーボー
+- vwDp67LnnzA 0:09:37 青春アミーゴ / 修二と彰
+- vwDp67LnnzA 0:20:22 magnet / 流星P
+- vwDp67LnnzA 0:33:08 未来予想図Ⅱ / DREAMS COME TRUE
+- vwDp67LnnzA 0:41:09 奏 / スキマスイッチ
+- vwDp67LnnzA 0:51:37 ガーネット / 奥華子
+- jKDB1hWqBQA 1:34:45 ひどい言い間違いで草 /
+- JhKQpDdh5Lg 1:51:31 そばにいるね / 青山テルマ
+- JhKQpDdh5Lg 1:57:53 GLAMOROUS SKY / 中島美嘉
+- JhKQpDdh5Lg 2:03:31 雪の華 / 中島美嘉
+- JhKQpDdh5Lg 2:11:08 one more time one more chance / 山崎まさよし
+- JhKQpDdh5Lg 2:20:10 ボクノート / スキマスイッチ
+- JhKQpDdh5Lg 2:25:52 風になる / 辻亞彌乃
+- J58LJgoBgNU 0:04:24 新宝島 / サカナクション
+- ... 466 more
