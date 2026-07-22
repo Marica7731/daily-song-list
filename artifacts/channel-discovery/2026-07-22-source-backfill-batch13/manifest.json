@@ -1,0 +1,101 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch13",
+  "generatedAt": "2026-07-22T03:58:00Z",
+  "purpose": "source-backfill checkpoint batch for long-running channels that did not reach a complete accepted manifest within the bounded runner timeout",
+  "remoteSourceCommit": "64bad38907ec92d72c602fe7c37ae952dc650ade",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "reason": "both channels timed out before a complete discovery manifest; interrupted/timeout results are not counted as imported"
+  },
+  "dirtyAuditPolicy": {
+    "excludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseExcludeTerms": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ]
+  },
+  "channels": [
+    {
+      "handle": "KOTATSUChHaruKotatsubutonclub",
+      "url": "https://www.youtube.com/@KOTATSUChHaruKotatsubutonclub",
+      "status": "failed",
+      "failureType": "timeout",
+      "imported": false,
+      "remoteHost": "vps3",
+      "remoteRoot": "/opt/ytb-song-rank-source-backfill-20260722-batch13-vps3",
+      "timeoutSeconds": 2700,
+      "elapsedSeconds": 2700,
+      "candidateCount": 134,
+      "inspectedInLatestRun": 130,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "reachedEnd": null,
+      "hasCompleteManifest": false,
+      "hasCheckpoint": true,
+      "evidence": [
+        "remote-status/status.jsonl done event: exitCode=-9 timedOut=true hasManifest=false hasCheckpoint=true",
+        "remote-status/summary.json records candidateCount=134 inspectedInLatestRun=130 usableVideoCount=0 occurrenceCount=0"
+      ],
+      "nextAction": "resume or shard from checkpoint; do not mark as imported until a complete manifest exists"
+    },
+    {
+      "handle": "UCrF92dEkXiTtexol0yg4Gmw",
+      "url": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+      "status": "failed",
+      "failureType": "timeout",
+      "imported": false,
+      "remoteHost": "vps5",
+      "remoteRoot": "/opt/ytb-song-rank-source-backfill-20260722-batch13-vps5",
+      "timeoutSeconds": 2700,
+      "elapsedSeconds": 2700,
+      "candidateCount": 306,
+      "inspectedInLatestRun": 135,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverage": "0/0",
+      "reachedEnd": null,
+      "hasCompleteManifest": false,
+      "hasCheckpoint": true,
+      "evidence": [
+        "remote-status/status.jsonl done event: exitCode=-9 timedOut=true hasManifest=false hasCheckpoint=true",
+        "remote-status/summary.json records candidateCount=306 inspectedInLatestRun=135 usableVideoCount=0 occurrenceCount=0"
+      ],
+      "nextAction": "resume or shard from checkpoint; do not mark as imported until a complete manifest exists"
+    }
+  ],
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps3": {
+        "result": "removed",
+        "dfAfter": "/dev/sda1 99G 11G 88G 11% /"
+      },
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.6G 7.0G 28% /"
+      }
+    }
+  }
+}
