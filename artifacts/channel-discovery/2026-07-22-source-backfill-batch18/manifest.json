@@ -1,0 +1,147 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch18",
+  "generatedAt": "2026-07-22T07:06:22.017Z",
+  "purpose": "omaru_piano fine-shard retry with strict instrument/non-song dirty audit",
+  "remoteSourceCommit": "97eba8765583ced63b03fb069314db3f3939a23f",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch18/accepted-increment.json",
+    "note": "The increment contains only completed shard1 accepted videos after dirty audit. The full source remains partial because shard0 failed and shards2/3 were not run in this batch. Raw discovery cache was removed; stable inputs now point at the unfiltered candidate increment summary."
+  },
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams",
+    "status": "partial",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "shardCount": 4,
+    "completedShards": [
+      1
+    ],
+    "failedShards": [
+      0
+    ],
+    "pendingShards": [
+      2,
+      3
+    ],
+    "candidates": {
+      "shard0": 144,
+      "shard1": 148
+    },
+    "inspected": {
+      "shard0": 4,
+      "shard1": 37
+    },
+    "discoveryShard1": {
+      "usableVideoCount": 14,
+      "occurrenceCount": 50,
+      "rawPublishedCoverage": "148/148",
+      "detailPublishedCoverage": "14/14",
+      "thumbnailCoverage": "14/14",
+      "reachedEnd": true,
+      "elapsedSeconds": 1610
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 8,
+      "occurrences": 34,
+      "songs": 31,
+      "publishedTimestampCoverage": "8/8",
+      "occurrenceTimeCoverage": "34/34",
+      "occurrenceSecondsCoverage": "34/34",
+      "thumbnailCoverage": "8/8",
+      "thumbnailCoverageSource": "discovery shard1 status before cache cleanup; completed shard reported 14/14 thumbnails, so retained accepted subset is treated as 8/8",
+      "acceptedIncrementThumbnailFieldCoverage": "0/8"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 6,
+      "occurrences": 16,
+      "details": [
+        {
+          "videoId": "yG43hWSzETo",
+          "songCount": 1,
+          "status": "dropped",
+          "reason": "opening ceremony for a song-relay event; not itself a clear singing stream",
+          "title": "【 虹をかけよう🌈#ライドリフェス歌枠リレー2026 】 開会式はこちらですーーーーー！！！【#澄音緒まる】"
+        },
+        {
+          "videoId": "GA-MUVMan_I",
+          "songCount": 6,
+          "status": "suspicious_dropped",
+          "reason": "promotional support live; title lacks explicit song stream signal",
+          "title": "【#シェルまる奏】海月シェルクラファン応援ライブ／ストレッチゴールでライブ決定！！【#海月シェル #澄音緒まる 】"
+        },
+        {
+          "videoId": "gTliXKmSFYw",
+          "songCount": 1,
+          "status": "dropped",
+          "reason": "instrument performance relay with explicit フルート guest signal",
+          "title": "【#Vmusician演奏リレー 21:00~】ラストランナーおまる！皆を笑顔にするゾ！広がれVmusicianの輪！ゲスト：紅茶々丸(ピアノ)/柴音(フルート)/YAY(バンド)【#おまぴあ 】"
+        },
+        {
+          "videoId": "4XyLxGkmwog",
+          "songCount": 1,
+          "status": "dropped",
+          "reason": "生演奏 relay and exact ピアノ演奏 phrase",
+          "title": "【#Vtuber冬めく生演奏リレー】あなたを笑顔にするピアノ演奏／夢の共演もあるよ！！天音なみだ・姫宮レーニャ・紫吹真雪【#vtuber #おまる 】"
+        },
+        {
+          "videoId": "HU8H2j8no-g",
+          "songCount": 6,
+          "status": "dropped",
+          "reason": "フルート and 生演奏 signals indicate instrumental/performance content",
+          "title": "【#コラボ】フルート＆ピアノ／#葉月ひな #おまる【#生演奏#Rainy season Concert】"
+        },
+        {
+          "videoId": "WDNV26_OEsk",
+          "songCount": 1,
+          "status": "suspicious_dropped",
+          "reason": "3Dライブ without explicit 歌枠 or singing signal in title",
+          "title": "【3Dライブ】星詠みの海／E.S TIKAL２【#cluster】"
+        }
+      ]
+    },
+    "failure": {
+      "shard0": {
+        "type": "youtube_429",
+        "exitCode": 1,
+        "timedOut": false,
+        "elapsedSeconds": 475,
+        "reason": "YouTube HTTP 429 limit reached (8/8); stopped further inspections"
+      }
+    }
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps3": {
+        "result": "removed",
+        "dfAfter": "/dev/sda1 99G 11G 88G 11% /",
+        "marker": "CODEX_REMOTE_BATCH18_CLEANUP_OK"
+      },
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.6G 6.9G 28% /",
+        "marker": "CODEX_REMOTE_BATCH18_CLEANUP_OK"
+      }
+    },
+    "raw": {
+      "vps3": {
+        "exitCode": 0,
+        "stdout": "cleanup=removed\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/sda1        99G   11G   88G  11% /\nCODEX_REMOTE_BATCH18_CLEANUP_OK\n",
+        "stderr": ""
+      },
+      "vps5": {
+        "exitCode": 0,
+        "stdout": "cleanup=removed\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/vda1        10G  2.6G  6.9G  28% /\nCODEX_REMOTE_BATCH18_CLEANUP_OK\n",
+        "stderr": ""
+      }
+    }
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json"
+  }
+}

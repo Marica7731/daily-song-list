@@ -1,0 +1,166 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch18",
+  "generatedAt": "2026-07-22T07:06:22.017Z",
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams"
+  },
+  "policy": {
+    "dropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ]
+  },
+  "counts": {
+    "policy": {
+      "dropTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDropTerms": [
+        "piano streaming",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ]
+    },
+    "unfilteredVideoCount": 14,
+    "unfilteredOccurrenceCount": 50,
+    "acceptedVideoCount": 8,
+    "droppedVideoCount": 6
+  },
+  "videos": [
+    {
+      "videoId": "yG43hWSzETo",
+      "title": "【 虹をかけよう🌈#ライドリフェス歌枠リレー2026 】 開会式はこちらですーーーーー！！！【#澄音緒まる】",
+      "publishedTimestamp": 1782887904044,
+      "songCount": 1,
+      "status": "dropped",
+      "reason": "opening ceremony for a song-relay event; not itself a clear singing stream"
+    },
+    {
+      "videoId": "GA-MUVMan_I",
+      "title": "【#シェルまる奏】海月シェルクラファン応援ライブ／ストレッチゴールでライブ決定！！【#海月シェル #澄音緒まる 】",
+      "publishedTimestamp": 1776926304044,
+      "songCount": 6,
+      "status": "suspicious_dropped",
+      "reason": "promotional support live; title lacks explicit song stream signal"
+    },
+    {
+      "videoId": "yD6mhi70mJ8",
+      "title": "【#歌枠 】うたのれんしゅう【#澄音緒まる】",
+      "publishedTimestamp": 1776926304044,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "title has explicit song/karaoke/singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "3PWM-sCNWw8",
+      "title": "【#歌枠 】弾き語りができるようになりたい！【#澄音緒まる】",
+      "publishedTimestamp": 1774334304044,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "title has explicit song/karaoke/singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "gTliXKmSFYw",
+      "title": "【#Vmusician演奏リレー 21:00~】ラストランナーおまる！皆を笑顔にするゾ！広がれVmusicianの輪！ゲスト：紅茶々丸(ピアノ)/柴音(フルート)/YAY(バンド)【#おまぴあ 】",
+      "publishedTimestamp": 1766558304044,
+      "songCount": 1,
+      "status": "dropped",
+      "reason": "instrument performance relay with explicit フルート guest signal"
+    },
+    {
+      "videoId": "9cgzzVZC5Gs",
+      "title": "【#ピアノ#歌枠 】 音の再会🎶歌とピアノのハーモニー🎶【#おまる#織姫はるか #vtuber #おまはる 】",
+      "publishedTimestamp": 1758782304044,
+      "songCount": 7,
+      "status": "accepted",
+      "reason": "title has explicit song/karaoke/singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "VGTdiXlorOU",
+      "title": "【#歌枠】深影×おまる／#送り火ノ譜【#ghostreaming #おまぴあ】",
+      "publishedTimestamp": 1756190304044,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "title has explicit song/karaoke/singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "xDufxcU3m2g",
+      "title": "【#まるまよの】～あなたにおくるアイの歌～【#ヨノノート #おまる #生搾りまよ】",
+      "publishedTimestamp": 1753166304044,
+      "songCount": 10,
+      "status": "accepted",
+      "reason": "title has explicit song/karaoke/singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "UM-TwS5Y_ms",
+      "title": "【 #NaNaFes歌枠リレー 】楽器演奏Vtuber、歌います。【O☆MA☆YO／#おまる ／＃朔栖まよ】",
+      "publishedTimestamp": 1721630304044,
+      "songCount": 4,
+      "status": "accepted",
+      "reason": "title has explicit song/karaoke/singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "QnLQikAMMnc",
+      "title": "【#2Dデビュー１周年記念演奏コラボ祭】歌＆ピアノ／インサイドちゃんMark2・おまる【コラボ】",
+      "publishedTimestamp": 1721630304044,
+      "songCount": 5,
+      "status": "accepted",
+      "reason": "title has explicit song/karaoke/singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "_lgckCQnBho",
+      "title": "【#2Dデビュー１周年記念演奏コラボ祭】歌＆ピアノ／水瀬 凪・おまる【コラボ】",
+      "publishedTimestamp": 1721630304044,
+      "songCount": 5,
+      "status": "accepted",
+      "reason": "title has explicit song/karaoke/singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "4XyLxGkmwog",
+      "title": "【#Vtuber冬めく生演奏リレー】あなたを笑顔にするピアノ演奏／夢の共演もあるよ！！天音なみだ・姫宮レーニャ・紫吹真雪【#vtuber #おまる 】",
+      "publishedTimestamp": 1721630304044,
+      "songCount": 1,
+      "status": "dropped",
+      "reason": "生演奏 relay and exact ピアノ演奏 phrase"
+    },
+    {
+      "videoId": "HU8H2j8no-g",
+      "title": "【#コラボ】フルート＆ピアノ／#葉月ひな #おまる【#生演奏#Rainy season Concert】",
+      "publishedTimestamp": 1721630304044,
+      "songCount": 6,
+      "status": "dropped",
+      "reason": "フルート and 生演奏 signals indicate instrumental/performance content"
+    },
+    {
+      "videoId": "WDNV26_OEsk",
+      "title": "【3Dライブ】星詠みの海／E.S TIKAL２【#cluster】",
+      "publishedTimestamp": 1690094333858,
+      "songCount": 1,
+      "status": "suspicious_dropped",
+      "reason": "3Dライブ without explicit 歌枠 or singing signal in title"
+    }
+  ]
+}
