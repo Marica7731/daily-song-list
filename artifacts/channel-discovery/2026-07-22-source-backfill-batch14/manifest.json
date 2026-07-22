@@ -1,0 +1,66 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch14",
+  "generatedAt": "2026-07-22T04:06:56Z",
+  "purpose": "source-backfill skip-evidence batch for a requested channel that is already covered by self-crawled accepted data",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "reason": "HazukiHina already exists in a committed youtube_channel_discovery accepted file; duplicate import was intentionally avoided"
+  },
+  "sources": [
+    {
+      "handle": "HazukiHina",
+      "url": "https://www.youtube.com/@HazukiHina/streams",
+      "status": "skipped",
+      "reason": "already self-crawled in data/external/youtube-channel-discovery/accepted/2026-07-20-source-backfill-wave1.json",
+      "sourceType": "self-crawled",
+      "evidence": {
+        "acceptedFile": "data/external/youtube-channel-discovery/accepted/2026-07-20-source-backfill-wave1.json",
+        "inputDir": "artifacts/channel-discovery/2026-07-20-source-backfill/HazukiHina",
+        "discoveryManifest": "artifacts/channel-discovery/2026-07-20-source-backfill/HazukiHina/manifest.json"
+      },
+      "existingAcceptedVideos": 7,
+      "existingAcceptedOccurrences": 51,
+      "existingUniqueSongs": 45,
+      "publishedTimestampCoverage": "7/7",
+      "occurrenceTimeCoverage": "51/51",
+      "occurrenceSecondsCoverage": "51/51",
+      "acceptedJsonThumbnailCoverage": "0/7",
+      "discoveryThumbnailCoverage": "7/7",
+      "discoveryCandidateCount": 12,
+      "discoveryInspectedCount": 11,
+      "discoveryUsableVideoCount": 7,
+      "discoveryOccurrenceCount": 51,
+      "importedVideos": 0,
+      "importedOccurrences": 0,
+      "importedSongs": 0
+    }
+  ],
+  "pendingOrFailedForLater": [
+    {
+      "handle": "asaxmayo",
+      "url": "https://www.youtube.com/@asaxmayo/streams",
+      "latestStatus": "pending",
+      "candidateProbe": 363,
+      "reason": "large candidate count; needs sharded discovery in a later unique batch"
+    },
+    {
+      "handle": "Laz_Furuto",
+      "url": "https://www.youtube.com/@Laz_Furuto/streams",
+      "latestStatus": "pending",
+      "candidateProbe": 312,
+      "reason": "large candidate count; needs sharded discovery in a later unique batch"
+    },
+    {
+      "handle": "UtenHiyori",
+      "url": "https://www.youtube.com/@UtenHiyori",
+      "latestStatus": "pending",
+      "candidateProbe": 428,
+      "reason": "large candidate count; needs sharded discovery in a later unique batch"
+    }
+  ],
+  "remoteCleanup": {
+    "usedRemoteHosts": false,
+    "reason": "skip-evidence batch only; no VPS directory was created"
+  }
+}
