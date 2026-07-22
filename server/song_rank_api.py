@@ -129,6 +129,20 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
     if view not in {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}:
         raise ValueError("view must be songs, songIndex, artists, videos, vtubers, or vsingerSongs")
     if q and view in {"songs", "songIndex", "vsingerSongs"} and effective_search_scope == "channel":
+        source_payload = source_matched_rankings_payload(
+            db_path,
+            range_id,
+            view,
+            metric,
+            q,
+            "channel",
+            page,
+            page_size,
+            min_count,
+            search_fields,
+        )
+        if source_payload["totalCount"] > 0:
+            return source_payload
         with connect(db_path) as conn:
             base_total = base_total_for_view(conn, range_id, view, metric)
             return vtuber_song_fallback_payload(
@@ -144,6 +158,20 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
                 search_fields,
             )
     if q and view in {"songs", "songIndex", "vsingerSongs"} and effective_search_scope == "all" and search_fields == []:
+        source_payload = source_matched_rankings_payload(
+            db_path,
+            range_id,
+            view,
+            metric,
+            q,
+            "all",
+            page,
+            page_size,
+            min_count,
+            search_fields,
+        )
+        if source_payload["totalCount"] > 0:
+            return source_payload
         with connect(db_path) as conn:
             base_total = base_total_for_view(conn, range_id, view, metric)
             vtuber_payload = vtuber_song_fallback_payload(

@@ -1905,7 +1905,7 @@ function publishFileWithRetry(source, destination) {
 }
 
 async function main() {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(playwrightLaunchOptions());
   const desktop = { width: 1440, height: 900 };
   const desktopWide = { width: 1366, height: 768 };
   const tablet = { width: 820, height: 900 };
@@ -2058,6 +2058,11 @@ async function main() {
   }
   const manifest = publishScreenshots();
   console.log(`README_SCREENSHOTS_OK count=${generated.length} output=${outputDir} proofInputHash=${manifest.proofInputHash}`);
+}
+
+function playwrightLaunchOptions() {
+  const executablePath = (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || process.env.CHROME_EXECUTABLE_PATH || "").trim();
+  return executablePath ? { executablePath } : {};
 }
 
 main().catch((error) => {

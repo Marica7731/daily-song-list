@@ -262,7 +262,7 @@ async function main() {
   const baseUrl = externalBaseUrl || localServer.baseUrl;
   let browser;
   try {
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch(playwrightLaunchOptions());
     for (const viewport of viewports) {
       await runViewport(browser, baseUrl, viewport);
     }
@@ -271,6 +271,11 @@ async function main() {
     if (browser) await browser.close();
     if (localServer?.server) await new Promise((resolve) => localServer.server.close(resolve));
   }
+}
+
+function playwrightLaunchOptions() {
+  const executablePath = (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || process.env.CHROME_EXECUTABLE_PATH || "").trim();
+  return executablePath ? { executablePath, headless: true } : { headless: true };
 }
 
 main().catch((error) => {

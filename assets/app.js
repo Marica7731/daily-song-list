@@ -3541,12 +3541,7 @@ async function requestViewPage(request) {
 
 function shouldUseRuntimeApiForRequest(request) {
   if (!state.runtimeApi.available) return false;
-  const filters = requestFiltersForView(request?.view || state.view, request?.filters || {});
-  const query = normalizeSearch(filters.q || "");
-  const searchFields = searchFieldsForView(request?.view || state.view, filters);
-  const allFieldQuery = query && (filters.searchScope || "all") === "all" && searchFields.length === 0;
-  if (!allFieldQuery) return true;
-  return !requestRuntimeMeta(canonicalRangeId(request?.range || state.range));
+  return true;
 }
 
 async function requestApiViewPage(request, range) {

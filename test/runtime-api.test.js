@@ -96,6 +96,70 @@ test("runtime API merges indexed unknown artist song variants into the known son
   }
 });
 
+test("runtime API all-field source search sorts by matched occurrence count", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-source-sort-"));
+  const latestPath = path.join(dir, "latest.json");
+  const dbPath = path.join(dir, "song-rank.sqlite");
+  let child = null;
+  let stderr = "";
+
+  try {
+    writeAllFieldSourceSortFixture(latestPath);
+    execFileSync(
+      PYTHON,
+      [
+        path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+        "--input",
+        latestPath,
+        "--output",
+        dbPath,
+        "--no-vsinger",
+        "--no-youtube-channel-discovery",
+      ],
+      {
+        cwd: ROOT,
+        encoding: "utf8",
+        env: { ...process.env, DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT: "2" },
+        timeout: 30000,
+      },
+    );
+
+    const port = await getFreePort();
+    child = spawn(
+      PYTHON,
+      [
+        path.join(ROOT, "server", "song_rank_api.py"),
+        "--db",
+        dbPath,
+        "--host",
+        "127.0.0.1",
+        "--port",
+        String(port),
+      ],
+      { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] },
+    );
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString("utf8");
+    });
+
+    await waitForReady(child, port);
+    const sourceSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=needle&searchFields=all&pageSize=5`);
+    assert.equal(sourceSearch.searchScope, "all");
+    assert.deepEqual(sourceSearch.searchFields, []);
+    assert.deepEqual(sourceSearch.records.map((record) => record.title), ["Search Strong", "Global Heavy"]);
+    assert.deepEqual(sourceSearch.records.map((record) => record.count), [3, 1]);
+    assert.deepEqual(sourceSearch.records.map((record) => record.globalCount), [3, 5]);
+    assert.equal(sourceSearch.records[0].matchedBySource, true);
+  } finally {
+    if (child) {
+      child.kill();
+      await waitForExit(child);
+      assert.equal(stderr.includes("Traceback"), false, stderr);
+    }
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("runtime API serves health and ranking rows from SQLite", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-"));
   const latestPath = path.join(dir, "latest.json");
@@ -196,7 +260,7 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(allFieldSongSearch.totalCount, 3);
     assert.equal(allFieldSongSearch.totalOccurrenceCount, 3);
     assert.deepEqual(allFieldSongSearch.records.map((record) => record.title), ["Song One", "Song Three", "Song Two"]);
-    assert.equal(allFieldSongSearch.records[0].matchedByVtuber, true);
+    assert.equal(allFieldSongSearch.records[0].matchedByVtuber, undefined);
     assert.equal(allFieldSongSearch.records[0].matchedBySource, true);
     assert.equal(allFieldSongSearch.records[0].displayArtist, "Singer A");
     assert.equal(allFieldSongSearch.records[0].occurrences.length, 1);
@@ -208,7 +272,7 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(channelFieldSongSearch.searchScope, "channel");
     assert.deepEqual(channelFieldSongSearch.searchFields, ["channel"]);
     assert.equal(channelFieldSongSearch.totalCount, 3);
-    assert.equal(channelFieldSongSearch.records[0].matchedByVtuber, true);
+    assert.equal(channelFieldSongSearch.records[0].matchedByVtuber, undefined);
     assert.equal(channelFieldSongSearch.records[0].matchedBySource, true);
     assert.equal(channelFieldSongSearch.records[0].occurrences[0].item.channelName, "Alpha Ch.");
 
@@ -220,7 +284,7 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(allFieldVideoTitleSongSearch.records[0].matchedBySource, true);
     assert.equal(allFieldVideoTitleSongSearch.records[0].occurrences[0].item.title, "Morning Karaoke");
 
-    const allFieldArtistSourceSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Singer%20A&searchFields=all&pageSize=5`);
+    const allFieldArtistSourceSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=%22Singer%20A%22&searchFields=all&pageSize=5`);
     assert.equal(allFieldArtistSourceSearch.searchScope, "all");
     assert.deepEqual(allFieldArtistSourceSearch.searchFields, []);
     assert.equal(allFieldArtistSourceSearch.totalCount, 1);
@@ -278,6 +342,11 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
 
     const scopedChannelSongIndexSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songIndex&q=Alpha&searchScope=channel&pageSize=5`);
     assert.equal(scopedChannelSongIndexSearch.totalCount, 3);
+
+    const scopedChannelHandleSongIndexSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songIndex&q=alpha_ch&searchFields=channel&pageSize=5`);
+    assert.equal(scopedChannelHandleSongIndexSearch.searchScope, "channel");
+    assert.equal(scopedChannelHandleSongIndexSearch.totalCount, 1);
+    assert.equal(scopedChannelHandleSongIndexSearch.records[0].title, "Song Three");
 
     const vtubers = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&pageSize=5`);
     assert.equal(vtubers.totalCount, 3);
@@ -405,6 +474,58 @@ function indexedUnknownArtistVideo(videoId, title, songs) {
     videoId,
     title,
     channelName: "Flower Ch.",
+    thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    publishedTimestamp: 1784419200000,
+    publishedText: "2026-07-19",
+    songs,
+  };
+}
+
+function writeAllFieldSourceSortFixture(latestPath) {
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-19T00:00:00.000Z",
+      capturedAt: "2026-07-19T00:00:00.000Z",
+      groups: {
+        all: {
+          items: [
+            sourceSortVideo("needle-a", "ordinary stream one", "needle", [
+              { title: "Global Heavy", artist: "Known Artist", seconds: 10, time: "0:10" },
+              { title: "Search Strong", artist: "Known Artist", seconds: 20, time: "0:20" },
+            ]),
+            sourceSortVideo("needle-b", "ordinary stream two", "needle", [
+              { title: "Search Strong", artist: "Known Artist", seconds: 30, time: "0:30" },
+            ]),
+            sourceSortVideo("needle-c", "ordinary stream three", "needle", [
+              { title: "Search Strong", artist: "Known Artist", seconds: 40, time: "0:40" },
+            ]),
+            sourceSortVideo("filler-a", "ordinary stream four", "", [
+              { title: "Global Heavy", artist: "Known Artist", seconds: 50, time: "0:50" },
+            ]),
+            sourceSortVideo("filler-b", "ordinary stream five", "", [
+              { title: "Global Heavy", artist: "Known Artist", seconds: 60, time: "1:00" },
+            ]),
+            sourceSortVideo("filler-c", "ordinary stream six", "", [
+              { title: "Global Heavy", artist: "Known Artist", seconds: 70, time: "1:10" },
+            ]),
+            sourceSortVideo("filler-d", "ordinary stream seven", "", [
+              { title: "Global Heavy", artist: "Known Artist", seconds: 80, time: "1:20" },
+            ]),
+          ],
+        },
+      },
+    }),
+    "utf8",
+  );
+}
+
+function sourceSortVideo(videoId, title, keyword, songs) {
+  return {
+    videoId,
+    title,
+    channelName: "Fixture Channel",
+    keyword,
     thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
     publishedTimestamp: 1784419200000,
     publishedText: "2026-07-19",

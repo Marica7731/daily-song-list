@@ -39,10 +39,10 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(lastCssBlock(".query-search-form .query-field-menu"), /position: absolute;/u);
   assert.match(lastCssBlock(".query-search-form .query-field-menu"), /left: 6px;/u);
   assert.match(lastCssBlock(".query-search-form .query-field-menu"), /right: 6px;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /position: fixed;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /left: 10px;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /right: 10px;/u);
-  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /width: auto;/u);
+  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /position: absolute;/u);
+  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /left: auto;/u);
+  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /right: 0;/u);
+  assert.match(lastCssBlock(".query-search-form .query-field-menu-panel"), /width: 100%;/u);
   assert.doesNotMatch(indexSource, /id="searchDialog"|id="filterDialog"|id="filterInput"/u);
   assert.doesNotMatch(indexSource, /id="detailDialog"/u);
   assert.match(indexSource, /id="activeQueryStrip"/u);
