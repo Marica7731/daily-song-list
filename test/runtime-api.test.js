@@ -48,7 +48,6 @@ test("runtime API merges indexed unknown artist song variants into the known son
         timeout: 30000,
       },
     );
-
     const port = await getFreePort();
     child = spawn(
       PYTHON,
@@ -123,6 +122,10 @@ test("runtime API all-field source search sorts by matched occurrence count", as
         timeout: 30000,
       },
     );
+    const sourceFtsProbe = probeSourceOccurrenceFts(dir, dbPath, "needle");
+    assert.equal(sourceFtsProbe.hasSourceFts, 1);
+    assert.equal(sourceFtsProbe.hasChannelFts, 1);
+    assert.ok(sourceFtsProbe.sourceFtsRows >= 4);
 
     const port = await getFreePort();
     child = spawn(
@@ -531,6 +534,29 @@ function sourceSortVideo(videoId, title, keyword, songs) {
     publishedText: "2026-07-19",
     songs,
   };
+}
+
+function probeSourceOccurrenceFts(dir, dbPath, query) {
+  const probePath = path.join(dir, "source-fts-probe.py");
+  fs.writeFileSync(
+    probePath,
+    [
+      "import json",
+      "import sqlite3",
+      "import sys",
+      "conn = sqlite3.connect(sys.argv[1])",
+      "query = sys.argv[2]",
+      "out = {}",
+      "out['hasSourceFts'] = conn.execute(\"SELECT COUNT(*) FROM sqlite_master WHERE name = 'source_occurrences_fts'\").fetchone()[0]",
+      "out['hasChannelFts'] = conn.execute(\"SELECT COUNT(*) FROM sqlite_master WHERE name = 'source_occurrences_channel_fts'\").fetchone()[0]",
+      "out['sourceFtsRows'] = conn.execute(\"SELECT COUNT(*) FROM source_occurrences_fts WHERE range_id = 'all' AND source_occurrences_fts MATCH ?\", (f'\\\"{query}\\\"',)).fetchone()[0] if out['hasSourceFts'] else 0",
+      "conn.close()",
+      "print(json.dumps(out, ensure_ascii=False))",
+      "",
+    ].join("\n"),
+    "utf8",
+  );
+  return JSON.parse(execFileSync(PYTHON, [probePath, dbPath, query], { cwd: ROOT, encoding: "utf8" }));
 }
 
 function writeLatestFixture(latestPath) {

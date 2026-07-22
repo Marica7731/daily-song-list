@@ -755,48 +755,50 @@ def source_matched_rankings_payload(
 ) -> dict:
     base_where = ["r.range_id = ?", "r.view = ?", "r.metric = ?", "r.scope_key = 'all'", "r.detail_key != ''"]
     base_params: list[object] = [range_id, view, metric]
-    source_clause, source_values = source_occurrence_filter(q, search_scope, search_fields)
     candidate_where = list(base_where)
     candidate_params = list(base_params)
-    matched_params = [range_id, *source_values, *candidate_params]
     having = ""
     if min_count > 1 and view not in {"videos", "vtubers"}:
         having = "HAVING matched_videos >= ?" if metric == "videos" else "HAVING matched_count >= ?"
-        matched_params.append(min_count)
-    matched_sql = f"""
-        WITH matched_sources AS (
-          SELECT
-            so.source_key,
-            COUNT(*) AS matched_count,
-            COUNT(DISTINCT COALESCE(NULLIF(so.video_id, ''), 'position:' || so.position)) AS matched_videos,
-            MIN(so.position) AS first_match_position
-          FROM source_occurrences so
-          WHERE so.range_id = ?
-            AND {source_clause}
-          GROUP BY so.source_key
-        )
-        SELECT
-          r.row_id, r.rank, r.detail_key, r.title, r.artist, r.name, r.count, r.song_count,
-          r.video_count, r.timestamp_count, r.payload_json,
-          sd.source_key AS matched_source_key,
-          ms.matched_count,
-          ms.matched_videos,
-          ms.first_match_position
-        FROM (
-          SELECT *
-          FROM ranking_rows r
-          WHERE {" AND ".join(candidate_where)}
-        ) r
-        JOIN source_details sd
-          ON sd.range_id = r.range_id
-         AND sd.entity_key = r.detail_key
-        JOIN matched_sources ms
-          ON ms.source_key = sd.source_key
-        GROUP BY r.row_id
-        {having}
-    """
     offset = (max(1, page) - 1) * page_size
     with connect(db_path) as conn:
+        source_rows_sql, source_values = source_occurrence_match_rows_sql(conn, range_id, q, search_scope, search_fields)
+        matched_params = [*source_values, *candidate_params]
+        if min_count > 1 and view not in {"videos", "vtubers"}:
+            matched_params.append(min_count)
+        matched_sql = f"""
+            WITH matched_source_occurrences AS (
+              {source_rows_sql}
+            ),
+            matched_sources AS (
+              SELECT
+                source_key,
+                COUNT(*) AS matched_count,
+                COUNT(DISTINCT COALESCE(NULLIF(video_id, ''), 'position:' || position)) AS matched_videos,
+                MIN(position) AS first_match_position
+              FROM matched_source_occurrences
+              GROUP BY source_key
+            )
+            SELECT
+              r.row_id, r.rank, r.detail_key, r.title, r.artist, r.name, r.count, r.song_count,
+              r.video_count, r.timestamp_count, r.payload_json,
+              sd.source_key AS matched_source_key,
+              ms.matched_count,
+              ms.matched_videos,
+              ms.first_match_position
+            FROM (
+              SELECT *
+              FROM ranking_rows r
+              WHERE {" AND ".join(candidate_where)}
+            ) r
+            JOIN source_details sd
+              ON sd.range_id = r.range_id
+             AND sd.entity_key = r.detail_key
+            JOIN matched_sources ms
+              ON ms.source_key = sd.source_key
+            GROUP BY r.row_id
+            {having}
+        """
         base_total = conn.execute(
             "SELECT COUNT(*) AS total_count FROM ranking_rows WHERE range_id = ? AND view = ? AND metric = ? AND scope_key = 'all'",
             base_params,
@@ -844,6 +846,84 @@ def source_matched_rankings_payload(
         "pageCount": (total + page_size - 1) // page_size,
         "records": records,
     }
+
+
+def source_occurrence_match_rows_sql(
+    conn: sqlite3.Connection,
+    range_id: str,
+    query: str,
+    scope: str,
+    search_fields: list[str] | None = None,
+) -> tuple[str, list[object]]:
+    fts_table = source_occurrence_fts_table(conn, query, scope, search_fields)
+    if fts_table:
+        return (
+            f"""
+            SELECT source_key, video_id, CAST(position AS INTEGER) AS position
+            FROM {fts_table}
+            WHERE range_id = ?
+              AND {fts_table} MATCH ?
+            """,
+            [range_id, source_fts_match_query(query)],
+        )
+    source_clause, source_values = source_occurrence_filter(query, scope, search_fields)
+    return (
+        f"""
+        SELECT so.source_key, so.video_id, so.position
+        FROM source_occurrences so
+        WHERE so.range_id = ?
+          AND {source_clause}
+        """,
+        [range_id, *source_values],
+    )
+
+
+def source_occurrence_fts_table(
+    conn: sqlite3.Connection,
+    query: str,
+    scope: str,
+    search_fields: list[str] | None = None,
+) -> str:
+    if not source_fts_match_query(query):
+        return ""
+    requested = set(search_fields or [])
+    table = ""
+    if search_fields == [] or requested == {"source"} or (not requested and scope == "source"):
+        table = "source_occurrences_fts"
+    elif requested == {"channel"} or (not requested and scope == "channel"):
+        table = "source_occurrences_channel_fts"
+    if not table or not sqlite_table_exists(conn, table):
+        return ""
+    return table
+
+
+def source_fts_match_query(query: str) -> str:
+    groups = parse_search_groups(query)
+    if not groups:
+        return ""
+    fts_groups: list[str] = []
+    for group in groups:
+        terms = []
+        for term in group:
+            text = unicodedata.normalize("NFKC", term or "").strip().lower()
+            if len(text) < 3:
+                return ""
+            terms.append(quote_fts_phrase(text))
+        if terms:
+            fts_groups.append(" ".join(terms))
+    return " OR ".join(fts_groups)
+
+
+def quote_fts_phrase(value: str) -> str:
+    return '"' + value.replace('"', '""') + '"'
+
+
+def sqlite_table_exists(conn: sqlite3.Connection, table: str) -> bool:
+    row = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type IN ('table', 'virtual table') AND name = ? LIMIT 1",
+        (table,),
+    ).fetchone()
+    return row is not None
 
 
 def source_occurrence_filter(query: str, scope: str, search_fields: list[str] | None = None) -> tuple[str, list[str]]:

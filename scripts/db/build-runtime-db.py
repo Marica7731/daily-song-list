@@ -84,6 +84,7 @@ def main() -> int:
         fts_enabled = create_schema(conn)
         log_phase("schema_ok", fts="enabled" if fts_enabled else "disabled")
         write_meta(conn, "schema_version", str(SCHEMA_VERSION))
+        write_meta(conn, "source_occurrences_fts_enabled", "1" if fts_enabled else "0")
         write_meta(conn, "builder", "scripts/db/build-runtime-db.py")
         write_meta(conn, "built_at", utc_now())
         write_meta(conn, "source_latest_json", str(args.input))
@@ -385,8 +386,35 @@ def create_schema(conn: sqlite3.Connection) -> bool:
     )
     try:
         conn.execute("CREATE VIRTUAL TABLE ranking_fts USING fts5(row_id UNINDEXED, search_text)")
+        conn.execute(
+            """
+            CREATE VIRTUAL TABLE source_occurrences_fts USING fts5(
+              source_key UNINDEXED,
+              range_id UNINDEXED,
+              position UNINDEXED,
+              video_id UNINDEXED,
+              search_text,
+              tokenize='trigram'
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE VIRTUAL TABLE source_occurrences_channel_fts USING fts5(
+              source_key UNINDEXED,
+              range_id UNINDEXED,
+              position UNINDEXED,
+              video_id UNINDEXED,
+              channel_text,
+              tokenize='trigram'
+            )
+            """
+        )
         return True
     except sqlite3.OperationalError:
+        conn.execute("DROP TABLE IF EXISTS ranking_fts")
+        conn.execute("DROP TABLE IF EXISTS source_occurrences_fts")
+        conn.execute("DROP TABLE IF EXISTS source_occurrences_channel_fts")
         return False
 
 
@@ -497,6 +525,7 @@ def ingest_latest_payload(
                         source_detail["source_key"],
                         range_id,
                         source_detail["payload"],
+                        fts_enabled,
                     )
                 insert_ranking_row(conn, row, fts_enabled)
             ranking_row_count += len(ranking_rows)
@@ -509,6 +538,7 @@ def ingest_latest_payload(
         "ranking_rows": ranking_row_count,
         "source_occurrences": source_occurrence_count,
         "fts_enabled": 1 if fts_enabled else 0,
+        "source_occurrences_fts_enabled": 1 if fts_enabled else 0,
     }
 
 
@@ -601,6 +631,7 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
         "source_details": 0,
         "source_occurrences": 0,
         "fts_enabled": 1 if fts_enabled else 0,
+        "source_occurrences_fts_enabled": 1 if fts_enabled else 0,
     }
     video_ids: set[str] = set()
     song_keys: set[str] = set()
@@ -652,6 +683,7 @@ def import_js_runtime_export(conn: sqlite3.Connection, export_path: Path, fts_en
                     clean_text(record.get("rangeId")),
                     int(record.get("position") or 0),
                     record.get("payload") if isinstance(record.get("payload"), dict) else {},
+                    fts_enabled,
                 )
                 counts["source_occurrences"] += 1
             elif kind == "runtimeVideo":
@@ -1265,6 +1297,7 @@ def ingest_vsinger_backfill(
                 source_detail["source_key"],
                 row["range_id"],
                 source_detail["payload"],
+                fts_enabled,
             )
         insert_ranking_row(conn, row, fts_enabled)
     counts["ranking_rows"] = len(ranking_rows)
@@ -1653,19 +1686,26 @@ def insert_source_detail(conn: sqlite3.Connection, source_key: str, range_id: st
     )
 
 
-def insert_source_occurrences_for_detail(conn: sqlite3.Connection, source_key: str, range_id: str, payload: dict) -> int:
+def insert_source_occurrences_for_detail(conn: sqlite3.Connection, source_key: str, range_id: str, payload: dict, fts_enabled: bool) -> int:
     occurrences = payload.get("occurrences") if isinstance(payload.get("occurrences"), list) else []
     for position, occurrence in enumerate(occurrences):
         if isinstance(occurrence, dict):
-            insert_source_occurrence(conn, source_key, range_id, position, occurrence)
+            insert_source_occurrence(conn, source_key, range_id, position, occurrence, fts_enabled)
     return len(occurrences)
 
 
-def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id: str, position: int, payload: dict) -> None:
+def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id: str, position: int, payload: dict, fts_enabled: bool) -> None:
     item = payload.get("item") if isinstance(payload.get("item"), dict) else {}
     song = payload.get("song") if isinstance(payload.get("song"), dict) else {}
+    video_id = clean_text(item.get("videoId"))
+    channel_text = search_text(
+        item.get("channelName"),
+        item.get("channelId"),
+        item.get("channelHandle"),
+        item.get("channelUrl") or item.get("authorUrl") or item.get("ownerUrl"),
+    )
     occurrence_search_text = clean_text(payload.get("searchText")) or search_text(
-        item.get("videoId"),
+        video_id,
         item.get("title"),
         item.get("channelName"),
         item.get("channelId"),
@@ -1687,7 +1727,7 @@ def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id
             source_key,
             range_id,
             position,
-            clean_text(item.get("videoId")),
+            video_id,
             clean_text(item.get("title")),
             clean_text(item.get("channelName")),
             clean_text(item.get("channelId")),
@@ -1699,6 +1739,21 @@ def insert_source_occurrence(conn: sqlite3.Connection, source_key: str, range_id
             dumps_json(payload),
         ),
     )
+    if fts_enabled:
+        conn.execute(
+            """
+            INSERT INTO source_occurrences_fts(source_key, range_id, position, video_id, search_text)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (source_key, range_id, position, video_id, occurrence_search_text),
+        )
+        conn.execute(
+            """
+            INSERT INTO source_occurrences_channel_fts(source_key, range_id, position, video_id, channel_text)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (source_key, range_id, position, video_id, channel_text),
+        )
 
 
 def append_preview_occurrence(preview: list[dict], item: dict, song: dict, video_id: str) -> None:
