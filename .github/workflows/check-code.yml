@@ -41,6 +41,11 @@ jobs:
         with:
           repository: Marica7731/mygit
           path: .tmp/mygit
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            config/blocked-vtuber-channels.json
+          sparse-checkout-cone-mode: false
 
       - name: Check blocklist mirror sync
         run: node scripts/check-blocked-vtuber-sync.js --source .tmp/mygit/config/blocked-vtuber-channels.json --mirror config/blocked-vtuber-channels.json
