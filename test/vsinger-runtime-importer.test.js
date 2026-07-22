@@ -60,6 +60,10 @@ test("VSinger backfill augments runtime groups and merges existing videos", () =
     merged.songs.map((item) => item.title),
     ["Existing Song", "フィナーレ", "晩餐歌"],
   );
+  assert.deepEqual(
+    merged.songs.map((item) => item.isNiche),
+    [true, true, true],
+  );
   assert.equal(merged.sourceGroups.includes("today"), true);
   assert.equal(merged.sourceGroups.includes("vsinger-moment"), true);
   assert.equal(result.source.externalSources.vsingerMoment.importedVideoCount, 2);

@@ -342,6 +342,9 @@ async function assertDirectQuerySearch(page, name, options = {}) {
     const form = document.querySelector("#querySearchForm");
     const input = document.querySelector("#queryInput");
     const fieldMenu = document.querySelector(".query-field-menu");
+    const fieldMenuPanel = document.querySelector(".query-field-menu-panel");
+    const formRect = form?.getBoundingClientRect();
+    const panelRect = fieldMenuPanel?.getBoundingClientRect();
     const fields = Array.from(document.querySelectorAll("input[name='searchField']")).map((node) => ({
       value: node.value,
       checked: node.checked,
@@ -352,8 +355,15 @@ async function assertDirectQuerySearch(page, name, options = {}) {
       placeholder: input?.getAttribute("placeholder") || "",
       fields,
       fieldMenuOpen: !!fieldMenu?.hasAttribute("open"),
+      fieldMenuPanelRect: panelRect
+        ? { left: panelRect.left, right: panelRect.right, width: panelRect.width }
+        : null,
+      queryFormRect: formRect
+        ? { left: formRect.left, right: formRect.right, width: formRect.width }
+        : null,
       hint: document.querySelector(".query-field-menu-hint")?.textContent?.replace(/\s+/g, " ").trim() || "",
       hiddenDialogOpen: !!document.querySelector("#queryDialog:not([hidden])"),
+      viewportWidth: window.innerWidth,
       expectedOpenFields,
     };
   }, !!options.openFields);
@@ -368,6 +378,17 @@ async function assertDirectQuerySearch(page, name, options = {}) {
     throw new Error(`${name}: title and artist should be checked by default ${JSON.stringify(proof)}`);
   }
   if (options.openFields && !proof.fieldMenuOpen) throw new Error(`${name}: search field menu did not open ${JSON.stringify(proof)}`);
+  if (options.openFields) {
+    const panelRect = proof.fieldMenuPanelRect;
+    const formRect = proof.queryFormRect;
+    if (!panelRect || !formRect) throw new Error(`${name}: search field menu geometry missing ${JSON.stringify(proof)}`);
+    if (panelRect.left < -1 || panelRect.right > proof.viewportWidth + 1) throw new Error(`${name}: search field menu outside viewport ${JSON.stringify(proof)}`);
+    if (proof.viewportWidth <= 720) {
+      if (panelRect.left < formRect.left - 1) throw new Error(`${name}: search field menu overflows left of query form ${JSON.stringify(proof)}`);
+      if (panelRect.right > formRect.right + 1) throw new Error(`${name}: search field menu overflows right of query form ${JSON.stringify(proof)}`);
+      if (panelRect.width > formRect.width + 1) throw new Error(`${name}: search field menu wider than query form ${JSON.stringify(proof)}`);
+    }
+  }
   if (!/全不选时搜索全部字段/u.test(proof.hint)) throw new Error(`${name}: empty-field hint missing ${JSON.stringify(proof)}`);
   if (proof.hiddenDialogOpen) throw new Error(`${name}: legacy query dialog should stay closed`);
 }
@@ -470,8 +491,8 @@ async function findSourceCase(browser, viewport, kind) {
   const page = await newPage(browser, viewport);
   try {
     for (let pageNumber = 1; pageNumber <= 25; pageNumber += 1) {
-      const params = { page: pageNumber, pageSize: 50 };
-      await page.goto(appUrl(params), { waitUntil: "domcontentloaded" });
+      const params = { page: pageNumber }; // responsive
+      await page.goto(appUrl(params), { waitUntil: "networkidle" });
       await waitForApp(page);
       const match = await page.evaluate((targetKind) => {
         const rows = Array.from(document.querySelectorAll(".rank-row:not(.skeleton-row)"));
@@ -546,8 +567,8 @@ async function captureSongIndexPage(browser, viewport, target, name) {
   await page.goto(appUrl({ view: "songAz" }), { waitUntil: "domcontentloaded" });
   await waitForApp(page);
   const pageCount = await page.evaluate(() => {
-    const select = document.querySelector(".pagination-top [data-page-select], .pagination-bottom [data-page-select]");
-    return select ? select.options.length : 1;
+    const input = document.querySelector(".pagination-top [data-page-input], .pagination-bottom [data-page-input]");
+    return input ? Number(input.max) || 1 : 1;
   });
   const nextPage = target === "last" ? pageCount : Math.max(1, Math.ceil(pageCount / 2));
   await page.goto(appUrl({ view: "songAz", page: nextPage }), { waitUntil: "domcontentloaded" });
@@ -1898,7 +1919,7 @@ async function main() {
       scene: "desktop-summary-baseline",
       selector: "#summary",
     });
-    await openPage(browser, desktopWide, { range: "1m", pageSize: 100 }, "desktop-monthly-song-rank.png", {
+    await openPage(browser, desktopWide, { range: "1m" }, /* auto */     "desktop-monthly-song-rank.png", {
       scene: "desktop-all-range-song-rank",
     });
     await openPage(browser, desktop, { view: "artistRank" }, "desktop-artist-rank.png");
@@ -1942,7 +1963,7 @@ async function main() {
       scrollBottom: true,
       scene: "mobile-video-expanded-bottom",
     });
-    await openPage(browser, { width: 320, height: 700 }, { page: 7, pageSize: 100 }, "mobile-pagination-320.png");
+    await openPage(browser, { width: 320, height: 700 }, { page: 7 }, /* auto */     "mobile-pagination-320.png");
     await captureElementFromPage(browser, mobile, { view: "videos" }, "#mobileBottomNav", "mobile-bottom-nav-active.png", {
       assert: assertBottomNavIconSelection,
       scene: "mobile-bottom-nav-active",
@@ -1994,7 +2015,7 @@ async function main() {
       failRequest: true,
       scene: "mobile-page-request-error",
     });
-    await openPage(browser, desktop, { range: "all", page: 2, pageSize: 50 }, "desktop-request-pagination.png", {
+    await openPage(browser, desktop, { range: "all", page: 2 }, /* auto */    "desktop-request-pagination.png", {
       scene: "desktop-request-pagination",
     });
     await captureRequestState(browser, desktop, "desktop-update-failure-status.png", {
@@ -2023,7 +2044,7 @@ async function main() {
     await captureFixtureSourceCase(browser, mobile, "longChannel", "mobile-source-long-channel.png");
     await captureFixtureSourceCase(browser, mobile, "longTime", "mobile-source-long-time.png");
     await captureFixtureSourceCase(browser, mobile, "extraTimes", "mobile-source-extra-times.png");
-    await openPage(browser, desktop, { page: 7, pageSize: 100 }, "desktop-pagination-middle.png");
+    await openPage(browser, desktop, { page: 7 }, /* auto */     "desktop-pagination-middle.png");
   } finally {
     await browser.close();
   }
