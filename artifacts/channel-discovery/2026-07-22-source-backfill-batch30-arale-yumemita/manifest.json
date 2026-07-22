@@ -1,0 +1,66 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch30-arale-yumemita",
+  "generatedAt": "2026-07-22T14:51:12Z",
+  "purpose": "status-only failed attempt for arale_yumemita source-backfill retry",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "reason": "no discovery manifest/checkpoint or accepted increment was produced; local YouTube access failed before candidate discovery and remote archive upload was interrupted before execution"
+  },
+  "sources": [
+    {
+      "handle": "arale_yumemita",
+      "url": "https://www.youtube.com/@arale_yumemita",
+      "status": "failed",
+      "imported": false,
+      "acceptedIncrementReadyForReview": false,
+      "candidateCount": 0,
+      "inspectedInLatestRun": 0,
+      "acceptedAfterDirtyAudit": {
+        "videos": 0,
+        "occurrences": 0,
+        "songs": 0,
+        "publishedTimestampCoverage": "0/0",
+        "occurrenceTimeCoverage": "0/0",
+        "occurrenceSecondsCoverage": "0/0",
+        "acceptedThumbnailFieldCoverage": "0/0"
+      },
+      "droppedByDirtyAudit": {
+        "videos": 0,
+        "occurrences": 0,
+        "suspiciousVideos": 0
+      },
+      "failure": {
+        "stage": "candidate_discovery_preflight",
+        "localAttempt": {
+          "commandType": "youtube-channel-discovery candidate-only",
+          "timeoutMs": 180000,
+          "result": "failed",
+          "reason": "local network to YouTube failed before candidate manifest generation; worker observed fetch failed and curl -4 TLS handshake failure"
+        },
+        "remoteAttempt": {
+          "hostLabel": "vps-shadow",
+          "result": "interrupted_before_execution",
+          "reason": "worker was interrupted while uploading source archive; no remote discovery command was started and no remote manifest/checkpoint was produced"
+        },
+        "nextAction": "retry this source in a later unique batch using a smaller source bundle or direct clone on a non-culua/non-yuyun host, then run sharded low-concurrency discovery with checkpoint heartbeats"
+      }
+    }
+  ],
+  "remoteCleanup": {
+    "usedRemoteHosts": true,
+    "hosts": [
+      {
+        "hostLabel": "vps-shadow",
+        "createdPath": "/opt/ytb-song-rank-source-backfill-20260722-batch30-arale-yumemita-vps-shadow",
+        "cleanupStatus": "removed",
+        "postCleanupDfH": "/dev/sda1 20G 5.9G 13G 32% /"
+      }
+    ]
+  },
+  "artifacts": {
+    "acceptedIncrement": null,
+    "dirtyAudit": null,
+    "report": "report.md"
+  }
+}
