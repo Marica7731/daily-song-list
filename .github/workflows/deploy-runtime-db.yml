@@ -213,42 +213,93 @@ jobs:
         run: |
           set -Eeuo pipefail
           remote_db="${REMOTE_STATE_DIR}/song-rank.sqlite.next.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}"
+          direct_mode=0
+          db_bytes="$(stat -c%s artifacts/runtime/song-rank.sqlite)"
+          candidate_min_free_bytes="$((db_bytes + 1073741824))"
           cleanup_remote_candidate() {
             sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "rm -f '${remote_db}' '${remote_db}.manifest.json'" || true
           }
-          trap cleanup_remote_candidate ERR
-          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+          handle_upload_error() {
+            cleanup_remote_candidate
+            if [ "${direct_mode}" = "1" ]; then
+              echo "CODEX_RUNTIME_DB_UPLOAD_ERROR direct-mode-failed service-left-stopped-to-avoid-serving-partial-db"
+              sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "systemctl status song-rank-api --no-pager -l || true" || true
+            fi
+          }
+          trap handle_upload_error ERR
+          remote_free_bytes="$(sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             mkdir -p '${REMOTE_STATE_DIR}'
             rm -f '${remote_db}' '${remote_db}.manifest.json' '${REMOTE_DB_PATH}.previous'
             find '${REMOTE_STATE_DIR}' -maxdepth 1 -type f -name 'song-rank.sqlite.next.*' -delete
-            df -h '${REMOTE_STATE_DIR}'
-            if [ -f '${REMOTE_DB_PATH}' ]; then
-              cp -f '${REMOTE_DB_PATH}' '${remote_db}'
-            fi
-            df -h '${REMOTE_STATE_DIR}'
-          "
-          sshpass -p "${VPS2_PASSWORD}" rsync \
-            --inplace \
-            --partial \
-            --compress \
-            --info=stats2 \
-            -e "ssh -o StrictHostKeyChecking=no" \
-            artifacts/runtime/song-rank.sqlite \
-            "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
-          sshpass -p "${VPS2_PASSWORD}" rsync \
-            --inplace \
-            --partial \
-            --compress \
-            -e "ssh -o StrictHostKeyChecking=no" \
-            artifacts/runtime/song-rank.sqlite.manifest.json \
-            "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
-          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
-            set -Eeuo pipefail
-            EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${remote_db}' /usr/local/bin/song-rank-db-activate.sh
-            systemctl disable --now song-rank-runtime-update.timer || true
-            systemctl reload nginx
-          "
+            df -B1 --output=avail '${REMOTE_STATE_DIR}' | tail -n 1 | tr -d '[:space:]'
+          ")"
+          if ! [[ "${remote_free_bytes}" =~ ^[0-9]+$ ]]; then
+            echo "CODEX_RUNTIME_DB_UPLOAD_ERROR invalid-remote-free-bytes value=${remote_free_bytes}"
+            exit 1
+          fi
+          echo "CODEX_RUNTIME_DB_UPLOAD_PLAN dbBytes=${db_bytes} remoteFreeBytes=${remote_free_bytes} candidateMinFreeBytes=${candidate_min_free_bytes}"
+          if [ "${remote_free_bytes}" -ge "${candidate_min_free_bytes}" ]; then
+            echo "CODEX_RUNTIME_DB_UPLOAD_MODE candidate"
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              if [ -f '${REMOTE_DB_PATH}' ]; then
+                cp -f '${REMOTE_DB_PATH}' '${remote_db}'
+              fi
+              df -h '${REMOTE_STATE_DIR}'
+            "
+            sshpass -p "${VPS2_PASSWORD}" rsync \
+              --inplace \
+              --partial \
+              --compress \
+              --info=stats2 \
+              -e "ssh -o StrictHostKeyChecking=no" \
+              artifacts/runtime/song-rank.sqlite \
+              "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
+            sshpass -p "${VPS2_PASSWORD}" rsync \
+              --inplace \
+              --partial \
+              --compress \
+              -e "ssh -o StrictHostKeyChecking=no" \
+              artifacts/runtime/song-rank.sqlite.manifest.json \
+              "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${remote_db}' /usr/local/bin/song-rank-db-activate.sh
+              systemctl disable --now song-rank-runtime-update.timer || true
+              systemctl reload nginx
+            "
+          else
+            direct_mode=1
+            echo "CODEX_RUNTIME_DB_UPLOAD_MODE direct-inplace"
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              systemctl stop song-rank-api || true
+              df -h '${REMOTE_STATE_DIR}'
+            "
+            sshpass -p "${VPS2_PASSWORD}" rsync \
+              --inplace \
+              --partial \
+              --compress \
+              --info=stats2 \
+              -e "ssh -o StrictHostKeyChecking=no" \
+              artifacts/runtime/song-rank.sqlite \
+              "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}"
+            sshpass -p "${VPS2_PASSWORD}" rsync \
+              --inplace \
+              --partial \
+              --compress \
+              -e "ssh -o StrictHostKeyChecking=no" \
+              artifacts/runtime/song-rank.sqlite.manifest.json \
+              "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}.manifest.json"
+            sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+              set -Eeuo pipefail
+              CODEX_RUNTIME_DB_DIRECT_ACTIVATE=1 EXPECTED_SHA256='${EXPECTED_SHA256}' CANDIDATE_DB='${REMOTE_DB_PATH}' /usr/local/bin/song-rank-db-activate.sh
+              systemctl disable --now song-rank-runtime-update.timer || true
+              systemctl reload nginx
+            "
+            direct_mode=0
+          fi
           trap - ERR
 
       - name: Verify VPS2 health endpoint
