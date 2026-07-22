@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-22T13:22:15.095Z",
+  "generatedAt": "2026-07-22T16:38:00.823Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-22T13:22:15.095Z",
+    "fetchedAt": "2026-07-22T16:38:00.823Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-22T13:22:15.095Z",
+    "generatedAt": "2026-07-22T16:38:00.823Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7936,9 +7936,9 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 964,
-      "parseableChannels": 749,
-      "realAvatar": 643,
+      "totalChannels": 963,
+      "parseableChannels": 748,
+      "realAvatar": 642,
       "thumbnailFallback": 321,
       "missingDisplayImage": 0,
       "missingAvatar": 321,
@@ -7946,8 +7946,8 @@
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
-      "already_cached": 664,
-      "skipped_collected_evidence": 331
+      "skipped_collected_evidence": 331,
+      "already_cached": 664
     },
     "failures": [],
     "skippedSummary": {
@@ -7956,10 +7956,17 @@
     },
     "skippedSamples": [
       {
-        "handle": "/@KOAKUMA_RIMU",
-        "channelId": "UC-18uK0xGpDZK29kFwLAiAg",
-        "displayName": "こあくまりむ / KOAKUMARIMU",
-        "sourceUrl": "https://www.youtube.com/@KOAKUMA_RIMU",
+        "handle": "/@RukaCh.",
+        "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
+        "displayName": "Ruka Ch. 雨海ルカ",
+        "sourceUrl": "https://www.youtube.com/@RukaCh.",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@Nekozaki_Roi",
+        "channelId": "UCjvncTrq_44m3znLtmQk5pg",
+        "displayName": "Roi Ch.猫崎ロイ",
+        "sourceUrl": "https://www.youtube.com/@Nekozaki_Roi",
         "reason": "batch_limit_reached"
       },
       {
@@ -8120,13 +8127,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "Kyoko Ch. 倉持京子",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "宮守ゆり",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
