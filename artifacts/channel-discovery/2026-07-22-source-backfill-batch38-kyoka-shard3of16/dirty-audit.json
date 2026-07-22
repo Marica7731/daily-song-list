@@ -1,0 +1,740 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit",
+  "generatedAt": "2026-07-22T17:45:57.120Z",
+  "channelUrl": "https://www.youtube.com/@Kyoka_0609",
+  "singerName": "Kyoka_0609",
+  "shard": {
+    "inspectShardIndex": 3,
+    "inspectShardCount": 16
+  },
+  "rules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDrops": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousLiveRule": "live/ライブ without explicit 歌枠/歌/弾き語り/karaoke/歌ってみた signal is excluded from accepted; live is not blindly filtered when singing signals are present"
+  },
+  "summary": {
+    "inputVideos": 9,
+    "acceptedVideos": 7,
+    "droppedVideos": 0,
+    "suspiciousVideos": 2,
+    "acceptedOccurrences": 152,
+    "droppedOccurrences": 26,
+    "suspiciousVideoIds": [
+      "sVvi6SqPSnA",
+      "26UUpl5mBeU"
+    ],
+    "droppedVideoIds": []
+  },
+  "videos": [
+    {
+      "videoId": "-jskArzX3EM",
+      "youtubeUrl": "https://www.youtube.com/watch?v=-jskArzX3EM",
+      "title": "🏮 実写 #歌枠 ｜明日を頑張る君へ！！楽しくなる歌をたくさん届けますっ！ #shorts #Vtuber ∞ 響架",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1782149688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/-jskArzX3EM/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB_7MsNCncBrplD1YPkyiBtqjz54Q",
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 20,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:03:09",
+          "seconds": 189,
+          "title": "ミックスナッツ",
+          "artist": "Official髭男dism",
+          "raw": "0:03:09　01.ミックスナッツ／Official髭男dism【SPY×FAMILY】（2022/04/15）"
+        },
+        {
+          "time": "0:06:59",
+          "seconds": 419,
+          "title": "宿命",
+          "artist": "Official髭男dism",
+          "raw": "0:06:59　02.宿命／Official髭男dism（2019/07/31）"
+        },
+        {
+          "time": "0:11:46",
+          "seconds": 706,
+          "title": "ギリギリchop",
+          "artist": "B'z",
+          "raw": "0:11:46　03.ギリギリchop／B'z【名探偵コナン】（1999/06/09）"
+        },
+        {
+          "time": "0:18:30",
+          "seconds": 1110,
+          "title": "謎",
+          "artist": "小松未歩",
+          "raw": "0:18:30　04.謎／小松未歩【名探偵コナン】（1997/05/28）"
+        },
+        {
+          "time": "0:23:09",
+          "seconds": 1389,
+          "title": "恋はスリル、ショック、サスペンス",
+          "artist": "愛内里菜",
+          "raw": "0:23:09　05.恋はスリル、ショック、サスペンス／愛内里菜【名探偵コナン】（2000/10/25）"
+        },
+        {
+          "time": "0:28:29",
+          "seconds": 1709,
+          "title": "イケナイ太陽",
+          "artist": "ORANGE RANGE",
+          "raw": "0:28:29　06.イケナイ太陽／ORANGE RANGE（2007/07/18）"
+        },
+        {
+          "time": "0:32:58",
+          "seconds": 1978,
+          "title": "ココロオドル",
+          "artist": "nobodyknows+",
+          "raw": "0:32:58　07.ココロオドル／nobodyknows+【SDガンダムフォース】（2004/05/26）"
+        },
+        {
+          "time": "0:41:49",
+          "seconds": 2509,
+          "title": "only my railgun",
+          "artist": "fripSide",
+          "raw": "0:41:49　08.only my railgun／fripSide【とある科学の超電磁砲】（2009/11/04）"
+        }
+      ]
+    },
+    {
+      "videoId": "ZfpZVlHNQMw",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ZfpZVlHNQMw",
+      "title": "🏮【#歌枠 #KARAOKE】響け!!キミの心を少しだけ前向きにする歌枠【響架】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1774373688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/ZfpZVlHNQMw/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDGyCKR1gs-fKpBlN2YVDoXMOyZ4g",
+      "matchedKeywords": [
+        "歌",
+        "歌枠",
+        "karaoke"
+      ],
+      "songCount": 27,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:06:12",
+          "seconds": 372,
+          "title": "CLOSER",
+          "artist": "井上ジョー（NARUTO-ナルト- 疾風伝）",
+          "raw": "00:06:12　01.CLOSER／井上ジョー（NARUTO-ナルト- 疾風伝）（2008/12/17）"
+        },
+        {
+          "time": "0:09:45",
+          "seconds": 585,
+          "title": "透明だった世界",
+          "artist": "秦基博（NARUTO-ナルト- 疾風伝）",
+          "raw": "00:09:45　02.透明だった世界／秦基博（NARUTO-ナルト- 疾風伝）（2010/08/11）"
+        },
+        {
+          "time": "0:13:47",
+          "seconds": 827,
+          "title": "遥か彼方",
+          "artist": "NARUTO -ナルト-",
+          "raw": "00:13:47　03.遥か彼方／ASIAN KUNG-FU GENERATION（NARUTO -ナルト-）（2003/04/23）"
+        },
+        {
+          "time": "0:17:59",
+          "seconds": 1079,
+          "title": "できっこないを やらなくちゃ",
+          "artist": "サンボマスター",
+          "raw": "00:17:59　04.できっこないを やらなくちゃ／サンボマスター（2010/02/24）"
+        },
+        {
+          "time": "0:21:37",
+          "seconds": 1297,
+          "title": "FLYING IN THE SKY",
+          "artist": "鵜島仁文（機動武闘伝Gガンダム）",
+          "raw": "00:21:37　05.FLYING IN THE SKY／鵜島仁文（機動武闘伝Gガンダム）（1994/05/25）"
+        },
+        {
+          "time": "0:25:30",
+          "seconds": 1530,
+          "title": "Zips",
+          "artist": "機動戦士ガンダムSEED MSV",
+          "raw": "00:25:30　06.Zips／T.M.Revolution（機動戦士ガンダムSEED MSV）（2004/03/17）"
+        },
+        {
+          "time": "0:29:41",
+          "seconds": 1781,
+          "title": "WHITE REFLECTION",
+          "artist": "新機動戦記ガンダムW Endless Waltz",
+          "raw": "00:29:41　07.WHITE REFLECTION／TWO-MIX（新機動戦記ガンダムW Endless Waltz）（1997/01/15）"
+        },
+        {
+          "time": "0:34:04",
+          "seconds": 2044,
+          "title": "INVOKE",
+          "artist": "未記載",
+          "raw": "00:34:04　08.INVOKE／T.M.Revolution（機動戦士ガンダムSEED）（2002/10/30）"
+        }
+      ]
+    },
+    {
+      "videoId": "AaJ3AVgaV70",
+      "youtubeUrl": "https://www.youtube.com/watch?v=AaJ3AVgaV70",
+      "title": "🏮【#歌枠/#KARAOKE】新年幕開け!!深夜の睡眠導入歌枠💗最高の夜を一緒にすごそっ【 響架 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1769189688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/AaJ3AVgaV70/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDYs7QmQbKsNNkrVQ55YtsOVqLoag",
+      "matchedKeywords": [
+        "歌",
+        "歌枠",
+        "karaoke"
+      ],
+      "songCount": 40,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:13:40",
+          "seconds": 820,
+          "title": "YUME日和",
+          "artist": "島谷ひとみ（ドラえもん）",
+          "raw": "00:13:40　01.YUME日和／島谷ひとみ（ドラえもん）（2003/11/06）"
+        },
+        {
+          "time": "0:17:50",
+          "seconds": 1070,
+          "title": "ハロ/ハワユ",
+          "artist": "ナノウ(ほえほえP) feat. 初音ミク",
+          "raw": "00:17:50　02.ハロ/ハワユ／ナノウ(ほえほえP) feat. 初音ミク（2010/07/20）"
+        },
+        {
+          "time": "0:23:01",
+          "seconds": 1381,
+          "title": "雫",
+          "artist": "スキマスイッチ（獣の奏者エリン）",
+          "raw": "00:23:01　03.雫／スキマスイッチ（獣の奏者エリン）（2009/01/10）"
+        },
+        {
+          "time": "0:26:25",
+          "seconds": 1585,
+          "title": "忘れじの言の葉",
+          "artist": "未来古代楽団 feat. 安次嶺希和子（グリムノーツ）",
+          "raw": "00:26:25　04.忘れじの言の葉／未来古代楽団 feat. 安次嶺希和子（グリムノーツ）（2016/07/27）"
+        },
+        {
+          "time": "0:30:32",
+          "seconds": 1832,
+          "title": "月のワルツ",
+          "artist": "諫山実生",
+          "raw": "00:30:32　05.月のワルツ／諫山実生（2004/12/01）"
+        },
+        {
+          "time": "0:43:55",
+          "seconds": 2635,
+          "title": "ビリミリオン",
+          "artist": "優里",
+          "raw": "00:43:55　06.ビリミリオン／優里（2023/01/19）"
+        },
+        {
+          "time": "0:47:57",
+          "seconds": 2877,
+          "title": "マリーゴールド",
+          "artist": "あいみょん",
+          "raw": "00:47:57　07.マリーゴールド／あいみょん（2018/08/08）"
+        },
+        {
+          "time": "0:53:09",
+          "seconds": 3189,
+          "title": "For You",
+          "artist": "NARUTO-ナルト- 疾風伝",
+          "raw": "00:53:09　08.For You／AZU（NARUTO-ナルト- 疾風伝）（2010/03/03）"
+        }
+      ]
+    },
+    {
+      "videoId": "4kdXc8U7qT0",
+      "youtubeUrl": "https://www.youtube.com/watch?v=4kdXc8U7qT0",
+      "title": "🏮【 実写歌枠 】最近寒すぎない!?!?キミたちあったかくなろ #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1764005688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/4kdXc8U7qT0/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA5Ph-G4sAsOzPz-B5HxwsLv06KgA",
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 16,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:06:58",
+          "seconds": 418,
+          "title": "fake face dance music",
+          "artist": "音田雅則",
+          "raw": "00:06:58　01.fake face dance music／音田雅則（2023/07/11）"
+        },
+        {
+          "time": "0:09:46",
+          "seconds": 586,
+          "title": "鬼ノ宴",
+          "artist": "友成空",
+          "raw": "00:09:46　02.鬼ノ宴／友成空（2024/01/10）"
+        },
+        {
+          "time": "0:12:52",
+          "seconds": 772,
+          "title": "睨めっ娘",
+          "artist": "友成空",
+          "raw": "00:12:52　03.睨めっ娘／友成空（2024/05/15）"
+        },
+        {
+          "time": "0:30:31",
+          "seconds": 1831,
+          "title": "春を告げる",
+          "artist": "yama",
+          "raw": "00:30:31　04.春を告げる／yama（2020/04/17）"
+        },
+        {
+          "time": "0:34:01",
+          "seconds": 2041,
+          "title": "ミックスナッツ",
+          "artist": "Official髭男dism",
+          "raw": "00:34:01　05.ミックスナッツ／Official髭男dism（SPY×FAMILY）（2022/04/15）"
+        },
+        {
+          "time": "1:07:17",
+          "seconds": 4037,
+          "title": "めざせポケモンマスター",
+          "artist": "松本梨香（ポケットモンスター）",
+          "raw": "01:07:17　06.めざせポケモンマスター／松本梨香（ポケットモンスター）（1997/06/28）"
+        },
+        {
+          "time": "1:12:04",
+          "seconds": 4324,
+          "title": "chAngE",
+          "artist": "miwa（BLEACH）",
+          "raw": "01:12:04　07.chAngE／miwa（BLEACH）（2010/09/01）"
+        },
+        {
+          "time": "1:21:22",
+          "seconds": 4882,
+          "title": "IRIS OUT",
+          "artist": "米津玄師（劇場版「チェンソーマン レゼ篇」）",
+          "raw": "01:21:22　08.IRIS OUT／米津玄師（劇場版「チェンソーマン レゼ篇」）（2025/09/24）"
+        }
+      ]
+    },
+    {
+      "videoId": "sVvi6SqPSnA",
+      "youtubeUrl": "https://www.youtube.com/watch?v=sVvi6SqPSnA",
+      "title": "📢【 楽曲リリース記念 】キミたちと一緒にお祝いがしたい！楽曲制作裏話やこだわりポイント語っちゃう【 #最響ライブ 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1758821688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/sVvi6SqPSnA/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCkHp7f_9SVwwaFBP6gu9QTZG3wOQ",
+      "matchedKeywords": [
+        "ライブ"
+      ],
+      "songCount": 2,
+      "decision": "suspicious",
+      "accepted": false,
+      "reasons": [
+        "live_without_explicit_song_signal"
+      ],
+      "matchedTerms": [
+        "ライブ"
+      ],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:06:50",
+          "seconds": 410,
+          "title": "SHAKER",
+          "artist": "響架",
+          "raw": "00:06:50　SHAKER／響架"
+        },
+        {
+          "time": "3:35:41",
+          "seconds": 12941,
+          "title": "SHAKER",
+          "artist": "響架 ※2回目",
+          "raw": "03:35:41　SHAKER／響架　※2回目"
+        }
+      ]
+    },
+    {
+      "videoId": "ey6ob6mrCpM",
+      "youtubeUrl": "https://www.youtube.com/watch?v=ey6ob6mrCpM",
+      "title": "🏮【 実写歌枠 】あたしは何を考えて歌ってるのか、どんな事を表現したいのか #shorts #Vtuber 【 #最響ライブ 👹 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753205688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/ey6ob6mrCpM/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCDd927OtZcoZrH6wfWdvb_TYxHcQ",
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 11,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:05:58",
+          "seconds": 358,
+          "title": "赤いスイートピー",
+          "artist": "松田聖子",
+          "raw": "00:05:58　赤いスイートピー／松田聖子"
+        },
+        {
+          "time": "0:13:14",
+          "seconds": 794,
+          "title": "マリーゴールド",
+          "artist": "あいみょん",
+          "raw": "00:13:14　マリーゴールド／あいみょん"
+        },
+        {
+          "time": "0:20:35",
+          "seconds": 1235,
+          "title": "晩餐歌",
+          "artist": "tuki.",
+          "raw": "00:20:35　晩餐歌／tuki."
+        },
+        {
+          "time": "0:24:44",
+          "seconds": 1484,
+          "title": "僕のこと",
+          "artist": "Mrs. GREEN APPLE",
+          "raw": "00:24:44　僕のこと／Mrs. GREEN APPLE"
+        },
+        {
+          "time": "0:35:32",
+          "seconds": 2132,
+          "title": "Mela!",
+          "artist": "緑黄色社会（僕のヒーローアカデミア）",
+          "raw": "00:35:32　Mela!／緑黄色社会（僕のヒーローアカデミア）"
+        },
+        {
+          "time": "0:39:57",
+          "seconds": 2397,
+          "title": "Shout Baby",
+          "artist": "緑黄色社会（僕のヒーローアカデミア）",
+          "raw": "00:39:57　Shout Baby／緑黄色社会（僕のヒーローアカデミア）"
+        },
+        {
+          "time": "0:52:12",
+          "seconds": 3132,
+          "title": "Casket",
+          "artist": "響架",
+          "raw": "00:52:12　Casket／響架"
+        },
+        {
+          "time": "1:01:32",
+          "seconds": 3692,
+          "title": "月並みに輝け",
+          "artist": "結束バンド（劇場総集編ぼっち・ざ・ろっく！）",
+          "raw": "01:01:32　月並みに輝け／結束バンド（劇場総集編ぼっち・ざ・ろっく！）"
+        }
+      ]
+    },
+    {
+      "videoId": "nyVqHMbDug0",
+      "youtubeUrl": "https://www.youtube.com/watch?v=nyVqHMbDug0",
+      "title": "🏮【 実写歌枠 】楽しかった週末最後の時間、お歌うたって一緒過ごそ.ᐟ🎵 #shorts #Vtuber 【 #最響ライブ 👹 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753205688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/nyVqHMbDug0/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAy4wwrjY_Hcc5YTR2RdIbCyV18cQ",
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 24,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:05:48",
+          "seconds": 348,
+          "title": "テトリス",
+          "artist": "柊マグネタイト feat. 重音テト",
+          "raw": "00:05:48　テトリス／柊マグネタイト feat. 重音テト"
+        },
+        {
+          "time": "0:11:04",
+          "seconds": 664,
+          "title": "愛して愛して愛して",
+          "artist": "きくお feat. 初音ミク",
+          "raw": "00:11:04　愛して愛して愛して／きくお feat. 初音ミク"
+        },
+        {
+          "time": "0:18:15",
+          "seconds": 1095,
+          "title": "僕達は天使だった",
+          "artist": "影山ヒロノブ（ドラゴンボールZ）",
+          "raw": "00:18:15　僕達は天使だった／影山ヒロノブ（ドラゴンボールZ）"
+        },
+        {
+          "time": "0:23:17",
+          "seconds": 1397,
+          "title": "世界が終るまでは…",
+          "artist": "WANDS（SLAM DUNK）",
+          "raw": "00:23:17　世界が終るまでは…／WANDS（SLAM DUNK）"
+        },
+        {
+          "time": "0:39:53",
+          "seconds": 2393,
+          "title": "Casket",
+          "artist": "響架",
+          "raw": "00:39:53　Casket／響架"
+        },
+        {
+          "time": "0:43:27",
+          "seconds": 2607,
+          "title": "DAN DAN 心魅かれてく",
+          "artist": "ドラゴンボールGT",
+          "raw": "00:43:27　DAN DAN 心魅かれてく／FIELD OF VIEW（ドラゴンボールGT）"
+        },
+        {
+          "time": "0:50:55",
+          "seconds": 3055,
+          "title": "CHA-LA HEAD-CHA-LA",
+          "artist": "影山ヒロノブ（ドラゴンボールZ）",
+          "raw": "00:50:55　CHA-LA HEAD-CHA-LA／影山ヒロノブ（ドラゴンボールZ）"
+        },
+        {
+          "time": "0:55:07",
+          "seconds": 3307,
+          "title": "でてこいとびきり ZENKAIパワー!",
+          "artist": "ドラゴンボールZ",
+          "raw": "00:55:07　でてこいとびきり ZENKAIパワー!／MANNA（ドラゴンボールZ）"
+        }
+      ]
+    },
+    {
+      "videoId": "1I18_iBkH34",
+      "youtubeUrl": "https://www.youtube.com/watch?v=1I18_iBkH34",
+      "title": "🏮【 実写歌枠 】無いものは出せないよね。そんな日があってもいい #shorts #Vtuber 【 響架 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753205688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/1I18_iBkH34/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD29ifjtvjxc2txdpNH-HebG8-B1Q",
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 14,
+      "decision": "accept",
+      "accepted": true,
+      "reasons": [],
+      "matchedTerms": [],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:06:35",
+          "seconds": 395,
+          "title": "陽はまた昇るから",
+          "artist": "緑黄色社会（クレヨンしんちゃん もののけニンジャ珍風伝）",
+          "raw": "00:06:35　陽はまた昇るから／緑黄色社会（クレヨンしんちゃん もののけニンジャ珍風伝）"
+        },
+        {
+          "time": "0:16:24",
+          "seconds": 984,
+          "title": "ぼくはくま",
+          "artist": "宇多田ヒカル",
+          "raw": "00:16:24　ぼくはくま／宇多田ヒカル"
+        },
+        {
+          "time": "0:18:56",
+          "seconds": 1136,
+          "title": "月のワルツ",
+          "artist": "諫山実生",
+          "raw": "00:18:56　月のワルツ／諫山実生"
+        },
+        {
+          "time": "0:24:05",
+          "seconds": 1445,
+          "title": "トウキョウト・ロック・シティ",
+          "artist": "VALSHE",
+          "raw": "00:24:05　トウキョウト・ロック・シティ／VALSHE"
+        },
+        {
+          "time": "0:34:06",
+          "seconds": 2046,
+          "title": "鬼ノ宴",
+          "artist": "友成空",
+          "raw": "00:34:06　鬼ノ宴／友成空"
+        },
+        {
+          "time": "0:37:25",
+          "seconds": 2245,
+          "title": "Bunny Girl",
+          "artist": "AKASAKI",
+          "raw": "00:37:25　Bunny Girl／AKASAKI"
+        },
+        {
+          "time": "0:44:42",
+          "seconds": 2682,
+          "title": "丸の内サディスティック",
+          "artist": "椎名林檎",
+          "raw": "00:44:42　丸の内サディスティック／椎名林檎"
+        },
+        {
+          "time": "0:49:01",
+          "seconds": 2941,
+          "title": "長く短い祭",
+          "artist": "椎名林檎",
+          "raw": "00:49:01　長く短い祭／椎名林檎"
+        }
+      ]
+    },
+    {
+      "videoId": "26UUpl5mBeU",
+      "youtubeUrl": "https://www.youtube.com/watch?v=26UUpl5mBeU",
+      "title": "🏮【 半年記念配信 】お祭り女、響架はずっと止まらない.ᐟ.ᐟ.ᐟ【 #最響ライブ 👹 】",
+      "channelName": "Kyoka_0609",
+      "publishedTimestamp": 1753205688521,
+      "thumbnailUrl": "https://i.ytimg.com/vi/26UUpl5mBeU/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDpgq_YuJpO4tpT-ZtyRpa665mV-Q",
+      "matchedKeywords": [
+        "ライブ"
+      ],
+      "songCount": 24,
+      "decision": "suspicious",
+      "accepted": false,
+      "reasons": [
+        "live_without_explicit_song_signal"
+      ],
+      "matchedTerms": [
+        "ライブ"
+      ],
+      "coverage": {
+        "published": true,
+        "thumbnail": true,
+        "allSongsHaveTime": true,
+        "allSongsHaveSeconds": true
+      },
+      "sampleSongs": [
+        {
+          "time": "0:02:15",
+          "seconds": 135,
+          "title": "新時代",
+          "artist": "ウタ(Ado)",
+          "raw": "00:02:15　新時代／ウタ(Ado)（ONE PIECE FILM RED）"
+        },
+        {
+          "time": "0:06:08",
+          "seconds": 368,
+          "title": "ルカルカ★ナイトフィーバー",
+          "artist": "samfree feat. 巡音ルカ※ウカウカ★ナイトフィーバー？",
+          "raw": "00:06:08　ルカルカ★ナイトフィーバー／samfree feat. 巡音ルカ※ウカウカ★ナイトフィーバー？"
+        },
+        {
+          "time": "0:15:37",
+          "seconds": 937,
+          "title": "怪獣の花唄",
+          "artist": "Vaundy",
+          "raw": "00:15:37　怪獣の花唄／Vaundy"
+        },
+        {
+          "time": "0:19:27",
+          "seconds": 1167,
+          "title": "ピースサイン",
+          "artist": "米津玄師（僕のヒーローアカデミア）",
+          "raw": "00:19:27　ピースサイン／米津玄師（僕のヒーローアカデミア）"
+        },
+        {
+          "time": "0:23:28",
+          "seconds": 1408,
+          "title": "月並みに輝け",
+          "artist": "結束バンド（劇場総集編ぼっち・ざ・ろっく！）",
+          "raw": "00:23:28　月並みに輝け／結束バンド（劇場総集編ぼっち・ざ・ろっく！）"
+        },
+        {
+          "time": "0:27:48",
+          "seconds": 1668,
+          "title": "ココロオドル",
+          "artist": "SDガンダムフォース",
+          "raw": "00:27:48　ココロオドル／nobodyknows+（SDガンダムフォース）"
+        },
+        {
+          "time": "0:34:49",
+          "seconds": 2089,
+          "title": "ロキ",
+          "artist": "みきとP feat. 鏡音リン",
+          "raw": "00:34:49　ロキ／みきとP feat. 鏡音リン"
+        },
+        {
+          "time": "0:38:37",
+          "seconds": 2317,
+          "title": "Mela!",
+          "artist": "緑黄色社会（僕のヒーローアカデミア）",
+          "raw": "00:38:37　Mela!／緑黄色社会（僕のヒーローアカデミア）"
+        }
+      ]
+    }
+  ]
+}
