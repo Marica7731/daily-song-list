@@ -1,0 +1,77 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch25-kotatsu-shard0",
+  "generatedAt": "2026-07-22T12:28:11.774Z",
+  "purpose": "KOTATSU shard0 bounded source-backfill artifact-local accepted increment",
+  "remoteSourceCommit": "7ca7adc19a45fa9fb0b4027c7e8237a5e6f4fcec",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch25-kotatsu-shard0/accepted-increment.json",
+    "note": "The increment contains only completed shard0 accepted videos after dirty audit. The full source remains partial until shards1/2/3 are completed or explicitly failed."
+  },
+  "source": {
+    "handle": "KOTATSUChHaruKotatsubutonclub",
+    "url": "https://www.youtube.com/@KOTATSUChHaruKotatsubutonclub",
+    "status": "partial",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "shardCount": 4,
+    "completedShards": [
+      0
+    ],
+    "failedShards": [],
+    "pendingShards": [
+      1,
+      2,
+      3
+    ],
+    "discovery": {
+      "candidateCount": 164,
+      "inspectedInLatestRun": 41,
+      "usableVideoCount": 14,
+      "occurrenceCount": 130,
+      "reachedEnd": true,
+      "rawPublishedCoverage": "164/164",
+      "detailPublishedCoverage": "14/14",
+      "thumbnailCoverage": "14/14",
+      "elapsedSeconds": 1794
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 14,
+      "occurrences": 130,
+      "songs": 128,
+      "publishedTimestampCoverage": "14/14",
+      "occurrenceTimeCoverage": "130/130",
+      "occurrenceSecondsCoverage": "130/130",
+      "discoveryThumbnailCoverage": "14/14",
+      "acceptedIncrementThumbnailFieldCoverage": "0/14"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 0,
+      "occurrences": 0,
+      "details": []
+    }
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.7G 6.9G 28% /",
+        "marker": "CODEX_REMOTE_BATCH25_CLEANUP_OK"
+      }
+    },
+    "raw": {
+      "vps5": {
+        "exitCode": 0,
+        "stdout": "cleanup=removed\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/vda1        10G  2.7G  6.9G  28% /\nCODEX_REMOTE_BATCH25_CLEANUP_OK\n",
+        "stderr": ""
+      }
+    }
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json"
+  }
+}
