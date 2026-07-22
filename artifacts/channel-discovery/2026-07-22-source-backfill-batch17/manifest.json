@@ -1,0 +1,76 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch17",
+  "generatedAt": "2026-07-22T06:28:18Z",
+  "purpose": "single-host low-concurrency omaru_piano retry after prior near-complete timeout",
+  "remoteSourceCommit": "9b4ee48c6d1b75eb0272aa1a7f8d8ac1d8f58252",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": false,
+    "reason": "runner timed out before complete discovery manifest; partial checkpoint details are not accepted imports"
+  },
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams",
+    "status": "failed",
+    "failureType": "timeout",
+    "imported": false,
+    "attempt": "single-host low-concurrency retry",
+    "remoteHost": "vps5",
+    "timeoutSeconds": 3600,
+    "elapsedSeconds": 3600,
+    "requestIntervalMs": 7000,
+    "requestJitterMs": 2000,
+    "maxCandidates": 160,
+    "maxInspect": 160,
+    "candidateCount": 148,
+    "inspectedInLatestRun": 96,
+    "usableVideoCountAtCheckpoint": 24,
+    "occurrenceCountAtCheckpoint": 0,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "publishedTimestampCoverage": "0/0",
+    "occurrenceTimeCoverage": "0/0",
+    "occurrenceSecondsCoverage": "0/0",
+    "thumbnailCoverage": "0/0",
+    "hasCompleteManifest": false,
+    "hasCheckpoint": true,
+    "previousAttemptEvidence": {
+      "batch": "2026-07-22-source-backfill-batch12",
+      "candidateCount": 143,
+      "inspectedInLatestRun": 139,
+      "occurrenceCount": 0,
+      "failure": "timedOut=True exitCode=-9 inspected=139/143; no complete manifest"
+    },
+    "dirtyAuditStatus": "not finalized because discovery did not complete; strict piano/instrument rules still required before any future import",
+    "nextAction": "retry in smaller shards or longer bounded window using the checkpoint; do not import partial details"
+  },
+  "dirtyAuditPolicy": {
+    "excludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseExcludeTerms": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ]
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.6G 6.9G 28% /"
+      }
+    }
+  }
+}
