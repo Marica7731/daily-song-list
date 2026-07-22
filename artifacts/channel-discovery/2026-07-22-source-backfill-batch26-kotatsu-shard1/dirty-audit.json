@@ -1,0 +1,40 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch26-kotatsu-shard1",
+  "generatedAt": "2026-07-22T13:13:47.204Z",
+  "source": {
+    "handle": "KOTATSUChHaruKotatsubutonclub",
+    "url": "https://www.youtube.com/@KOTATSUChHaruKotatsubutonclub"
+  },
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ]
+  },
+  "counts": {
+    "unfilteredVideoCount": 11,
+    "unfilteredOccurrenceCount": 75,
+    "acceptedVideoCount": 11,
+    "acceptedOccurrenceCount": 75,
+    "skippedExistingRegressions": 1,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0
+  },
+  "dropped": [],
+  "suspicious": []
+}
