@@ -1,0 +1,126 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch20",
+  "generatedAt": "2026-07-22T08:21:14.889Z",
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams"
+  },
+  "policy": {
+    "dropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "contextualDropTerms": [
+      "雑談",
+      "ピアノ演奏リレー"
+    ]
+  },
+  "counts": {
+    "policy": {
+      "dropTerms": [
+        "フルート",
+        "生演奏",
+        "クラリネット",
+        "サックス",
+        "サクソフォン",
+        "sax",
+        "saxophone"
+      ],
+      "exactPhraseDropTerms": [
+        "piano streaming",
+        "ピアノ演奏"
+      ],
+      "suspiciousOnlyTerms": [
+        "live",
+        "ライブ"
+      ],
+      "contextualDropTerms": [
+        "雑談",
+        "ピアノ演奏リレー"
+      ]
+    },
+    "unfilteredVideoCount": 8,
+    "unfilteredOccurrenceCount": 15,
+    "acceptedVideoCount": 3,
+    "droppedVideoCount": 5
+  },
+  "videos": [
+    {
+      "videoId": "IEwi_xfMly8",
+      "title": "【#ピアノ演奏】おはようのかたもおやすみのかたも🎵ピアノ聴いていってください♡【#おまぴあ】",
+      "publishedTimestamp": 1771746647178,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "exact phrase drop: ピアノ演奏; title asks listeners to hear piano"
+    },
+    {
+      "videoId": "7NMH61hQFCU",
+      "title": "【#ピアノ演奏】#色彩迎春2026 まであと1日／いよいよ明日がコンサートです。チケットのご用意はいいですか？？【#おまぴあ】",
+      "publishedTimestamp": 1769154647178,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "exact phrase drop: ピアノ演奏; concert countdown/piano content"
+    },
+    {
+      "videoId": "iMxWpXC4atI",
+      "title": "【#ピアノ弾き語り 】たまには練習をしておかないとね歌枠【#おまぴあ】",
+      "publishedTimestamp": 1769154647178,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "explicit 歌枠/歌枠リレー/弾き語り singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "dK1XCEkf1pw",
+      "title": "【#メロVアンバサダー歌枠リレー 】ピアノの音で癒しをお届けします🎶【#おまる #おまぴあ 】",
+      "publishedTimestamp": 1763970647178,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "explicit 歌枠/歌枠リレー/弾き語り singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "bCKDWTMY_bY",
+      "title": "【#Vtuberピアノ演奏リレー Vol.3】澄みわたる空に響くピアノ～ラ・カンパネラ【#おまる #vtuber #おまぴあ 】",
+      "publishedTimestamp": 1761378647178,
+      "songCount": 2,
+      "status": "dropped",
+      "reason": "piano performance relay, not a singing frame"
+    },
+    {
+      "videoId": "gs-UfGiCVig",
+      "title": "【#疲れにきく歌枠リレー】 はじめてのソロ歌枠／おつかれさまの子守唄【#おまる #vtuber #おまぴあ 】",
+      "publishedTimestamp": 1758786647178,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "explicit 歌枠/歌枠リレー/弾き語り singing signal and no hard instrument-only drop term"
+    },
+    {
+      "videoId": "gtmIwbNRVpE",
+      "title": "【フルート＆ピアノ生演奏】桐朋×藝大Vtuberが贈る✨名曲だらけの夢コンサート 第一部【#おまる #かっぴー #vtuber】",
+      "publishedTimestamp": 1756194647178,
+      "songCount": 5,
+      "status": "dropped",
+      "reason": "フルート and 生演奏 signals indicate instrumental/performance content"
+    },
+    {
+      "videoId": "50oAOJAx5Uw",
+      "title": "【#ピアノ#雑談】雑談が８割だからこそピアノ演奏の瞬間がトクベツなんだなって【#おまぴあ】",
+      "publishedTimestamp": 1753170647178,
+      "songCount": 1,
+      "status": "dropped",
+      "reason": "雑談-heavy stream with ピアノ演奏 signal; not a song frame"
+    }
+  ]
+}

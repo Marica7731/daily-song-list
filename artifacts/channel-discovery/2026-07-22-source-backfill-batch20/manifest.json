@@ -1,0 +1,119 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch20",
+  "generatedAt": "2026-07-22T08:21:14.889Z",
+  "purpose": "omaru_piano shard3 retry with strict instrument/non-song dirty audit",
+  "remoteSourceCommit": "4ae6d0239163f61ccbf0e68ff24017b5c23ad40d",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-22-source-backfill-batch20/accepted-increment.json",
+    "note": "The increment contains only completed shard3 accepted videos after dirty audit. Shards1/2 have accepted increments in batches18/19; shard0 remains the YouTube 429 gap."
+  },
+  "source": {
+    "handle": "omaru_piano",
+    "url": "https://www.youtube.com/@omaru_piano/streams",
+    "status": "partial",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "shardCount": 4,
+    "completedShards": [
+      3
+    ],
+    "previousCompletedShards": [
+      1,
+      2
+    ],
+    "failedShards": [
+      0
+    ],
+    "pendingShards": [],
+    "candidates": 148,
+    "inspected": 37,
+    "discovery": {
+      "usableVideoCount": 8,
+      "occurrenceCount": 15,
+      "rawPublishedCoverage": "148/148",
+      "detailPublishedCoverage": "8/8",
+      "thumbnailCoverage": "8/8",
+      "reachedEnd": true,
+      "elapsedSeconds": 1845
+    },
+    "acceptedAfterDirtyAudit": {
+      "videos": 3,
+      "occurrences": 3,
+      "songs": 1,
+      "publishedTimestampCoverage": "3/3",
+      "occurrenceTimeCoverage": "3/3",
+      "occurrenceSecondsCoverage": "3/3",
+      "thumbnailCoverage": "3/3",
+      "acceptedIncrementThumbnailFieldCoverage": "0/3",
+      "thumbnailCoverageSource": "discovery shard3 status before cache cleanup; completed shard reported 8/8 thumbnails, so retained accepted subset is treated as full discovery thumbnail coverage"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 5,
+      "occurrences": 12,
+      "details": [
+        {
+          "videoId": "IEwi_xfMly8",
+          "songCount": 2,
+          "status": "dropped",
+          "reason": "exact phrase drop: ピアノ演奏; title asks listeners to hear piano",
+          "title": "【#ピアノ演奏】おはようのかたもおやすみのかたも🎵ピアノ聴いていってください♡【#おまぴあ】"
+        },
+        {
+          "videoId": "7NMH61hQFCU",
+          "songCount": 2,
+          "status": "dropped",
+          "reason": "exact phrase drop: ピアノ演奏; concert countdown/piano content",
+          "title": "【#ピアノ演奏】#色彩迎春2026 まであと1日／いよいよ明日がコンサートです。チケットのご用意はいいですか？？【#おまぴあ】"
+        },
+        {
+          "videoId": "bCKDWTMY_bY",
+          "songCount": 2,
+          "status": "dropped",
+          "reason": "piano performance relay, not a singing frame",
+          "title": "【#Vtuberピアノ演奏リレー Vol.3】澄みわたる空に響くピアノ～ラ・カンパネラ【#おまる #vtuber #おまぴあ 】"
+        },
+        {
+          "videoId": "gtmIwbNRVpE",
+          "songCount": 5,
+          "status": "dropped",
+          "reason": "フルート and 生演奏 signals indicate instrumental/performance content",
+          "title": "【フルート＆ピアノ生演奏】桐朋×藝大Vtuberが贈る✨名曲だらけの夢コンサート 第一部【#おまる #かっぴー #vtuber】"
+        },
+        {
+          "videoId": "50oAOJAx5Uw",
+          "songCount": 1,
+          "status": "dropped",
+          "reason": "雑談-heavy stream with ピアノ演奏 signal; not a song frame",
+          "title": "【#ピアノ#雑談】雑談が８割だからこそピアノ演奏の瞬間がトクベツなんだなって【#おまぴあ】"
+        }
+      ]
+    },
+    "remainingGap": {
+      "shard0": "batch18 vps3 stopped after 4/144 inspected with YouTube HTTP 429"
+    }
+  },
+  "remoteCleanup": {
+    "performed": true,
+    "hosts": {
+      "vps5": {
+        "result": "removed",
+        "dfAfter": "/dev/vda1 10G 2.6G 6.9G 28% /",
+        "marker": "CODEX_REMOTE_BATCH20_CLEANUP_OK"
+      }
+    },
+    "raw": {
+      "vps5": {
+        "exitCode": 0,
+        "stdout": "cleanup=removed\nFilesystem      Size  Used Avail Use% Mounted on\n/dev/vda1        10G  2.6G  6.9G  28% /\nCODEX_REMOTE_BATCH20_CLEANUP_OK\n",
+        "stderr": ""
+      }
+    }
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json"
+  }
+}
