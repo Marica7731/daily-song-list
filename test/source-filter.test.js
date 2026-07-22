@@ -430,6 +430,8 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(cleanSongTitleNoise("13.05410-(ん)"), "05410-(ん)");
   assert.equal(cleanSongTitleNoise("28.366日"), "366日");
   assert.equal(cleanSongTitleNoise("01. Song"), "Song");
+  assert.equal(cleanSongTitleNoise("No01. Honey♥Come!!"), "Honey♥Come!!");
+  assert.equal(cleanSongTitleNoise("27;0:11:02 エマ"), "エマ");
   assert.equal(cleanSongTitleNoise("01≫アンノウン・マザーグース"), "アンノウン・マザーグース");
   assert.equal(cleanSongTitleNoise("02≫テオ"), "テオ");
   assert.equal(cleanSongTitleNoise("꒱‬ 01. 初恋サイダー"), "初恋サイダー");
@@ -438,6 +440,10 @@ test("source filter removes section markers and cleans ordinal song prefixes", (
   assert.equal(cleanSongTitleNoise("③クリープ"), "クリープ");
   assert.equal(cleanSongTitleNoise("10曲目   Brave Shine"), "Brave Shine");
   assert.equal(cleanSongTitleNoise("3 01. 初恋サイダー"), "初恋サイダー");
+  assert.equal(cleanSongTitleNoise("No Logic"), "No Logic");
+  assert.equal(cleanSongTitleNoise("NO, Thank You!"), "NO, Thank You!");
+  assert.equal(cleanSongTitleNoise("No.1"), "No.1");
+  assert.equal(cleanSongTitleNoise("Re;fract"), "Re;fract");
   assert.deepEqual(normalizeSongEntry({ title: "02| キュートなキューたい", artist: "CUTIE STREET" }), {
     title: "キュートなキューたい",
     artist: "CUTIE STREET",

@@ -307,8 +307,14 @@ test("numeric dot title keys stay distinct from stripped list indexes", () => {
   assert.equal(normalizeSongTitleKey("01) Song"), "song");
   assert.equal(normalizeSongTitleKey("⁆🦊03.星間飛行"), normalizeSongTitleKey("星間飛行"));
   assert.equal(normalizeSongTitleKey("＊ 04. KICK BACK"), normalizeSongTitleKey("KICK BACK"));
+  assert.equal(normalizeSongTitleKey("No01. Honey♥Come!!"), normalizeSongTitleKey("Honey♥Come!!"));
+  assert.equal(normalizeSongTitleKey("27;0:11:02 エマ"), normalizeSongTitleKey("エマ"));
   assert.notEqual(normalizeSongTitleKey("8.32"), normalizeSongTitleKey("32"));
   assert.notEqual(normalizeSongTitleKey("2.500♪"), normalizeSongTitleKey("500♪"));
+  assert.notEqual(normalizeSongTitleKey("No Logic"), normalizeSongTitleKey("Logic"));
+  assert.notEqual(normalizeSongTitleKey("NO, Thank You!"), normalizeSongTitleKey("Thank You!"));
+  assert.notEqual(normalizeSongTitleKey("No.1"), normalizeSongTitleKey("1"));
+  assert.notEqual(normalizeSongTitleKey("Re;fract"), normalizeSongTitleKey("fract"));
 
   const records = buildSongRecords([occurrence("8.32", "*Luna", "A"), occurrence("32", "*Luna", "B")]);
   assert.equal(records.length, 2);

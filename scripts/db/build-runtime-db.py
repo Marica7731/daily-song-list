@@ -1820,7 +1820,23 @@ def is_moment_source(item: dict) -> bool:
 def runtime_scoped_songs(songs, source: dict | None = None, title_stats: dict | None = None) -> list[dict]:
     if not isinstance(songs, list):
         return []
-    return [song for song in songs if isinstance(song, dict) and clean_text(song.get("title")) and not is_likely_runtime_non_song_entry(song, source, title_stats)]
+    result: list[dict] = []
+    for song in songs:
+        if not isinstance(song, dict):
+            continue
+        normalized = normalize_runtime_song(song)
+        if clean_text(normalized.get("title")) and not is_likely_runtime_non_song_entry(normalized, source, title_stats):
+            result.append(normalized)
+    return result
+
+
+def normalize_runtime_song(song: dict) -> dict:
+    title = strip_leading_title_list_marker(clean_text(song.get("title")))
+    if title == clean_text(song.get("title")):
+        return song
+    normalized = dict(song)
+    normalized["title"] = title
+    return normalized
 
 
 def is_likely_runtime_non_song_entry(song: dict, source: dict | None = None, title_stats: dict | None = None) -> bool:
@@ -1862,9 +1878,10 @@ def build_runtime_title_stats(items: list[dict]) -> dict[str, dict[str, int]]:
         for song in songs:
             if not isinstance(song, dict) or not clean_text(song.get("title")):
                 continue
-            if is_likely_runtime_non_song_entry(song, item, None):
+            normalized_song = normalize_runtime_song(song)
+            if is_likely_runtime_non_song_entry(normalized_song, item, None):
                 continue
-            key = normalize_singleton_title_key(song.get("title"))
+            key = normalize_singleton_title_key(normalized_song.get("title"))
             if not key:
                 continue
             if key not in records:
@@ -2295,6 +2312,8 @@ def strip_leading_title_list_marker(value) -> str:
     result = clean_text(value)
     for _ in range(4):
         next_value = re.sub(r"^\s*[╟├└│┃┏┗┣┳┻━─┬┴┌┐┘┤┼▶▷►▸▹>|・･●○◆◇■□♪♫♬♩♡♥◎★☆\uFE0F\U00002600-\U000027BF\U0001F300-\U0001FAFF⁅⁆]+", "", result)
+        next_value = re.sub(r"^\s*[NＮ][oｏ]\s*[0-9０-９]{1,3}[.．]\s+", "", next_value, flags=re.IGNORECASE)
+        next_value = re.sub(r"^\s*[0-9０-９]{1,3}\s*[;；]\s*[0-9０-９]{1,2}[:：][0-5０-５][0-9０-９][:：][0-5０-５][0-9０-９]\s+", "", next_value)
         next_value = re.sub(r"^\s*[＊*]\s*(?=(?:[#＃]?\d{1,3}[.．](?![0-9０-９])|[#＃]?\d{1,3}[)）、:：]|[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]))", "", next_value)
         next_value = re.sub(r"^\s*[\u2460-\u2473\u24f5-\u24fe\u2776-\u2793\u3251-\u325f\u32b1-\u32bf]\s*", "", next_value)
         next_value = re.sub(r"^\s*(?:[#＃]?\d{1,3}|[0-9０-９]{1,3})\s*(?:曲目|曲|番目)\s*(?:[.．。、,,:：)）\]\-|｜/／]+|\s+)", "", next_value)

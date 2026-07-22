@@ -609,6 +609,22 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
                 { title: "52😎花になって", artist: "未記載", time: "3:00", seconds: 180 },
               ],
             },
+            {
+              videoId: "PrEfIx00123",
+              title: "Prefix marker karaoke",
+              channelName: "Prefix Marker Ch.",
+              channelUrl: "https://www.youtube.com/@prefixmarker",
+              knownSourceType: "manual",
+              thumbnailUrl: "https://i.ytimg.com/vi/PrEfIx00123/hqdefault.jpg",
+              publishedTimestamp: 1784336100000,
+              publishedText: "2026-07-18",
+              songs: [
+                { title: "No01. Honey♥Come!!", artist: "小倉唯", time: "1:00", seconds: 60 },
+                { title: "Honey♥Come!!", artist: "小倉唯", time: "2:00", seconds: 120 },
+                { title: "27;0:11:02 エマ", artist: "go!go!vanillas", time: "3:00", seconds: 180 },
+                { title: "エマ", artist: "go!go!vanillas", time: "4:00", seconds: 240 },
+              ],
+            },
           ],
         },
       },
@@ -751,6 +767,54 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.equal(calcAlias.timestampCount, 2);
   assert.equal(noLogicAlias.displayArtist, "ジミーサムP");
   assert.equal(noLogicAlias.timestampCount, 2);
+
+  const prefixMarkerOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"Honey♥Come!!\" OR エマ",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(prefixMarkerOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const prefixMarkerPayload = parseDbQueryOutput(prefixMarkerOutput);
+  const honeyPrefix = prefixMarkerPayload.records.find((record) => record.title === "Honey♥Come!!");
+  const emaPrefix = prefixMarkerPayload.records.find((record) => record.title === "エマ");
+  assert.equal(honeyPrefix.timestampCount, 2);
+  assert.equal(emaPrefix.timestampCount, 2);
+
+  const rawPrefixMarkerOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPath,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"No01. Honey♥Come!!\" OR \"27;0:11:02 エマ\"",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(rawPrefixMarkerOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(rawPrefixMarkerOutput, /"totalCount": 0/);
 
   const dirtySongOutput = execFileSync(
     PYTHON,
@@ -1023,6 +1087,54 @@ test("runtime DB builder merges accepted YouTube channel discovery increments in
   assert.equal(pythonCalcAlias.timestampCount, 2);
   assert.equal(pythonNoLogicAlias.displayArtist, "ジミーサムP");
   assert.equal(pythonNoLogicAlias.timestampCount, 2);
+
+  const pythonPrefixMarkerOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPathPython,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"Honey♥Come!!\" OR エマ",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(pythonPrefixMarkerOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  const pythonPrefixMarkerPayload = parseDbQueryOutput(pythonPrefixMarkerOutput);
+  const pythonHoneyPrefix = pythonPrefixMarkerPayload.records.find((record) => record.title === "Honey♥Come!!");
+  const pythonEmaPrefix = pythonPrefixMarkerPayload.records.find((record) => record.title === "エマ");
+  assert.equal(pythonHoneyPrefix.timestampCount, 2);
+  assert.equal(pythonEmaPrefix.timestampCount, 2);
+
+  const pythonRawPrefixMarkerOutput = execFileSync(
+    PYTHON,
+    [
+      path.join(ROOT, "scripts", "db", "query-runtime-db.py"),
+      "--db",
+      dbPathPython,
+      "--range",
+      "all",
+      "--view",
+      "songs",
+      "--q",
+      "\"No01. Honey♥Come!!\" OR \"27;0:11:02 エマ\"",
+      "--search-scope",
+      "title",
+      "--page-size",
+      "10",
+    ],
+    { cwd: ROOT, encoding: "utf8" },
+  );
+  assert.match(pythonRawPrefixMarkerOutput, /CODEX_RUNTIME_DB_QUERY_OK/);
+  assert.match(pythonRawPrefixMarkerOutput, /"totalCount": 0/);
 
   const pythonDirtySongOutput = execFileSync(
     PYTHON,

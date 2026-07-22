@@ -139,6 +139,13 @@ Remaining dirty-keyword audit hits include reviewed false positives such as `Sta
 - The reusable import/runtime rule is narrower: short unknown-artist reaction pseudo titles ending in `助かる` / `たすかる`, especially when combined with `くしゃみ`, `咳`, `圧`, `バカ`, or `ちゅ`, are non-song rows. Examples: `くしゃみ助かる`, `くしゃみたすかるんだワ`, `圧助かる`, `ちゅたすかる`.
 - Keep this rule in both `assets/source-filter.js` and `scripts/song-utils.js`; source imports, accepted JSON cleanup, runtime export, and the client fallback should agree.
 
+2026-07-22 third-pass prefix cleanup note:
+
+- Production API target audit at `2026-07-22T00:43:41Z` found residual list prefixes in the 29 high-volume VTuber targets: `NoNN. title` in 5 targets / 332 aggregated song rows, and `NN;H:MM:SS title` in 1 target / 205 aggregated song rows.
+- These are song-list ordinals or leaked timestamp columns, not non-song rows. Strip the prefix and keep the song; do not drop the row.
+- Keep the matching strict: `No` + 1-3 digits + dot + whitespace, or 1-3 digits + semicolon + full `H:MM:SS` + whitespace. Guardrails that must remain unchanged include `No brand girls`, `No Logic`, `No title`, `No.1`, `NO, Thank You!`, `No pain, No game`, and `Re;fract`.
+- Maintain the rule in `assets/source-filter.js`, `assets/ranking-utils.js`, and the Python fallback in `scripts/db/build-runtime-db.py`. The JS import/runtime path, frontend search keys, and fallback DB builder need to merge the same base titles.
+
 For accepted JSON impact checks, run:
 
 ```powershell

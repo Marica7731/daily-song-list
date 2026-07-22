@@ -678,16 +678,20 @@ test("cleans ordinal prefixes while keeping real song rows", () => {
       "00:10:32 01| ハートアンドハート(Heart and Heart) | 苺咲べりぃ(Maisaki Berry)",
       "1:23:09 10曲目 Brave Shine / Aimer",
       "1:03:34 3 01. 初恋サイダー / Buono!",
+      "0:11:02 No01. Honey♥Come!! / 小倉唯",
+      "0:16:56 27;0:11:02 エマ / go!go!vanillas",
+      "0:18:00 No Logic / ジミーサムP",
+      "0:19:00 NO, Thank You! / 放課後ティータイム",
     ].join("\n"),
   ]);
 
   assert.deepEqual(
     songs.map((song) => song.title),
-    ["ハートアンドハート", "初恋サイダー", "Brave Shine"],
+    ["ハートアンドハート", "Honey♥Come!!", "エマ", "No Logic", "NO, Thank You!", "初恋サイダー", "Brave Shine"],
   );
   assert.deepEqual(
     songs.map((song) => song.artist),
-    ["苺咲べりぃ", "Buono!", "Aimer"],
+    ["苺咲べりぃ", "小倉唯", "go!go!vanillas", "ジミーサムP", "放課後ティータイム", "Buono!", "Aimer"],
   );
 });
 

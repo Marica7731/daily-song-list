@@ -152,6 +152,10 @@
       value = stripCustomEmojiAliases(value).trim();
       value = value.replace(/[\u200b-\u200f\u202a-\u202e\ufe0e\ufe0f]/gu, "").trim();
       value = value
+        .replace(/^\s*[NＮ][oｏ]\s*[\d０-９]{1,3}[.．]\s+/iu, "")
+        .replace(/^\s*[\d０-９]{1,3}\s*[;；]\s*[\d０-９]{1,2}[:：][0-5０-５][\d０-９][:：][0-5０-５][\d０-９]\s+/u, "")
+        .trim();
+      value = value
         .replace(
           /^\s*(?:[#＃]?\d{1,3}\s+)?(?:[mｍ]\d{1,3}\s*[.．]\s*|[#＃]?\d{1,3}\s*[)）、:：|｜≫>]\s*|[#＃]?\d{1,3}\s*[.．](?![\d０-９])\s*)/iu,
           "",
