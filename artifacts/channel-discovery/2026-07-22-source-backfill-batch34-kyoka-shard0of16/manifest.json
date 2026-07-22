@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "batchId": "2026-07-22-source-backfill-batch34-kyoka-shard0of16",
+  "kind": "youtube-channel-discovery-artifact-local-partial",
+  "generatedAt": "2026-07-22T15:58:23.937Z",
+  "status": "complete",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "commit": false,
+    "push": false,
+    "deploy": false
+  },
+  "source": {
+    "handle": "Kyoka_0609",
+    "url": "https://www.youtube.com/@Kyoka_0609",
+    "singerName": "Kyoka_0609",
+    "inspectShardIndex": 0,
+    "inspectShardCount": 16,
+    "candidateCount": 239,
+    "inspected": 15,
+    "completedVideoIds": 11,
+    "detailCount": 11,
+    "checkpointUpdatedAt": "2026-07-22T15:51:14.970Z",
+    "discoveryGeneratedAt": "2026-07-22T15:51:14.970Z"
+  },
+  "discovery": {
+    "manifestBackedUpAs": null,
+    "usableVideoCount": 11,
+    "occurrenceCount": 185,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/@Kyoka_0609/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 16,
+        "rawItemCount": 469,
+        "candidateCount": 232,
+        "continuationRounds": 15,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 1176798
+      },
+      {
+        "pageUrl": "https://www.youtube.com/@Kyoka_0609/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 2,
+        "rawItemCount": 15,
+        "candidateCount": 7,
+        "continuationRounds": 1,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 961786
+      }
+    ],
+    "requestStats": {
+      "requestCount": 2,
+      "networkRequestCount": 2,
+      "cacheHitCount": 0,
+      "totalBytes": 2138584,
+      "totalElapsedMs": 324,
+      "statuses": {
+        "200": 2
+      }
+    }
+  },
+  "remoteExecution": {
+    "preferredHost": "vps5",
+    "usedHost": "vps-jp",
+    "hostname": "VM-c8189ce8-42c5-4763-bfb1-d000d087dbb5",
+    "fallbackReason": "vps5 was not resolvable from local SSH config; culua and rainy-cloud hosts were not used",
+    "remoteDir": "/opt/ytb-song-rank-source-backfill-20260722-batch34-kyoka-shard0of16-vps-jp-retry3",
+    "setup": "git clone --filter=blob:none --sparse https://github.com/Marica7731/daily-song-list.git; git sparse-checkout set --no-cone /scripts /config /assets /package.json /package-lock.json /test /docs /data/external",
+    "packageLockNote": "package-lock.json does not exist in local branch or remote HEAD, so remote setup used npm install --package-lock=false after sparse checkout",
+    "commandSummary": "timeout 3600s npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@Kyoka_0609 --singer-name Kyoka_0609 --max-channel-pages 100 --max-candidates 0 --max-inspect 1000 --inspect-shard-count 16 --inspect-shard-index 0 --request-interval-ms 3500 --request-jitter-ms 1500",
+    "exitCode": 0,
+    "staleStopped": false,
+    "finishedAt": "2026-07-22T15:52:01Z",
+    "cleanupStatus": "removed",
+    "postCleanupDfH": "/dev/sda1 99G 27G 73G 27% /"
+  },
+  "increments": {
+    "candidateUnfiltered": {
+      "file": "candidate-increment-unfiltered.json",
+      "videos": 11,
+      "occurrences": 185
+    },
+    "accepted": {
+      "file": "accepted-increment.json",
+      "videos": 10,
+      "occurrences": 182,
+      "songs": 182
+    },
+    "dirtyAudit": {
+      "file": "dirty-audit.json",
+      "droppedVideos": 1,
+      "suspiciousVideos": 0
+    }
+  },
+  "coverage": {
+    "publishedTimestamp": {
+      "covered": 10,
+      "total": 10,
+      "label": "10/10"
+    },
+    "videoThumbnail": {
+      "covered": 10,
+      "total": 10,
+      "label": "10/10"
+    },
+    "occurrenceTime": {
+      "covered": 182,
+      "total": 182,
+      "label": "182/182"
+    },
+    "occurrenceSeconds": {
+      "covered": 182,
+      "total": 182,
+      "label": "182/182"
+    },
+    "occurrenceThumbnail": {
+      "covered": 182,
+      "total": 182,
+      "label": "182/182"
+    }
+  },
+  "outputs": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "manifest": "manifest.json",
+    "report": "report.md"
+  },
+  "uncommittedEvidencePolicy": {
+    "rawDiscoveryFilesPulledForVerification": [
+      "raw-videos.json",
+      "video-details.json",
+      "occurrences.json",
+      "audits.json",
+      "checkpoint.json"
+    ],
+    "committed": false,
+    "reason": "Only the small reviewed five-file artifact is intended for commit; raw discovery evidence is not committed."
+  }
+}

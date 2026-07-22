@@ -1,0 +1,380 @@
+{
+  "schemaVersion": 1,
+  "batchId": "2026-07-22-source-backfill-batch34-kyoka-shard0of16",
+  "generatedAt": "2026-07-22T15:58:23.937Z",
+  "source": {
+    "url": "https://www.youtube.com/@Kyoka_0609",
+    "handle": "Kyoka_0609",
+    "inspectShardIndex": 0,
+    "inspectShardCount": 16
+  },
+  "rules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseExcludes": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "liveWithoutClearSongSignal": true,
+    "obviousInstrumentalWithoutSongSignal": true
+  },
+  "summary": {
+    "candidateVideos": 11,
+    "candidateOccurrences": 185,
+    "acceptedVideos": 10,
+    "acceptedOccurrences": 182,
+    "acceptedSongs": 182,
+    "droppedVideos": 1,
+    "droppedOccurrences": 3,
+    "suspiciousVideos": 0,
+    "suspiciousOccurrences": 0
+  },
+  "coverage": {
+    "publishedTimestamp": {
+      "covered": 10,
+      "total": 10,
+      "label": "10/10"
+    },
+    "videoThumbnail": {
+      "covered": 10,
+      "total": 10,
+      "label": "10/10"
+    },
+    "occurrenceTime": {
+      "covered": 182,
+      "total": 182,
+      "label": "182/182"
+    },
+    "occurrenceSeconds": {
+      "covered": 182,
+      "total": 182,
+      "label": "182/182"
+    },
+    "occurrenceThumbnail": {
+      "covered": 182,
+      "total": 182,
+      "label": "182/182"
+    }
+  },
+  "videos": [
+    {
+      "videoId": "8qooRmisSIk",
+      "title": "🏮 実写 #歌枠 ｜今日を楽しく終えるため、明日も楽しく過ごせるために歌う！ #shorts #Vtuber ∞ 響架",
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 20,
+      "occurrenceCount": 20,
+      "publishedTimestamp": 1782142983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/8qooRmisSIk/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDjEm3IN3uTXAhl1uMMnAYUwKI-lg",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "kDLj_ZRg26c",
+      "title": "🏮【 実写歌枠 】金曜深夜ですね？一緒に過ごしてくれますか？ #shorts #Vtuber 【 響架 】",
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 30,
+      "occurrenceCount": 30,
+      "publishedTimestamp": 1774366983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/kDLj_ZRg26c/hqdefault.jpg?sqp=-oaymwEfCNACELwBSFXyq4qpAxEIARUAAIhCGAFwAcABBrgCGaLzl_8DDgjEvKvNBhjg6gQg4KgB&rs=AOn4CLABeqo9--rSjLYQHPKkz9CV86Y4YA&usqp=CBk",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "GfkZDdCMBd4",
+      "title": "🏮【#歌枠/#KARAOKE】ド深夜はお歌の時間♪明日は待望の歌枠リレーなので声出しする♡【 響架 】",
+      "matchedKeywords": [
+        "歌",
+        "歌枠",
+        "karaoke"
+      ],
+      "songCount": 31,
+      "occurrenceCount": 31,
+      "publishedTimestamp": 1769182983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/GfkZDdCMBd4/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAYxOOzz-Xu1gDsuQ6WtH1MKRL5Qw",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌",
+          "歌枠",
+          "karaoke"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "C4i4ZrBDNQ8",
+      "title": "🏮【 実写歌枠 】あたしの歌、よかったら聞いてって!!💗 #shorts #Vtuber 【 響架 】",
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 13,
+      "occurrenceCount": 13,
+      "publishedTimestamp": 1763998983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/C4i4ZrBDNQ8/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDTjZ54SgxhO5TUbQ0voe6B5PVutw",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "SzW541QBOwE",
+      "title": "🏮【 実写歌枠 】せっかくの夜だし、一緒に楽しい時間過ごしちゃおっか。 #shorts #Vtuber 【 響架 】",
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 19,
+      "occurrenceCount": 19,
+      "publishedTimestamp": 1758814983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/SzW541QBOwE/hqdefault.jpg?sqp=-oaymwEfCNACELwBSFXyq4qpAxEIARUAAIhCGAFwAcABBrgCGKLzl_8DCgjB1dvFBhjgqAE=&rs=AOn4CLBqCfWigm18DPe06ZNeGKbSZPyhRw&usqp=CBg",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "ptMegCVxePM",
+      "title": "🎮【 MINECRAFT/歌枠 】作ったステージに観客連れてくる💜やぱフェスって観客いないと始まらないよね.ᐟ【 #最響ライブ 👹】",
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 13,
+      "occurrenceCount": 13,
+      "publishedTimestamp": 1753198983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/ptMegCVxePM/hqdefault.jpg?sqp=-oaymwEgCNACELwBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC8xg=&rs=AOn4CLCO1Od35Vx1-6zSh_Wh8edv_B9mGw",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "GUQ6CgPqhsU",
+      "title": "🎮【ドラゴンボールZ:KAKAROT】完全初見🌟悟飯最推し、ベジットと共にここでスベテに決着をつける！！！【 #最響ライブ 👹 】",
+      "matchedKeywords": [
+        "ライブ"
+      ],
+      "songCount": 3,
+      "occurrenceCount": 3,
+      "publishedTimestamp": 1753198983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/GUQ6CgPqhsU/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLB2_QBf4iXX7I4CdxbE-65QX8-evQ",
+      "status": "drop",
+      "reasons": [
+        "live_without_clear_song_signal:ライブ"
+      ],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": [],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "aisR0XADOUI",
+      "title": "🏮【 実写歌枠 】GW最終日.ᐟ最後の一瞬まで一緒に過ごそ🎵 #shorts #Vtuber 【 響架 】",
+      "matchedKeywords": [
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 15,
+      "occurrenceCount": 15,
+      "publishedTimestamp": 1753198983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/aisR0XADOUI/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAZbW9FVzHjE9gkojIkbZHGuabdPw",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "Nla25yneFLE",
+      "title": "🏮【 実写歌枠 】歌っていく〜.ᐟ深夜のお歌を一緒にたのしも🎵 #shorts #Vtuber 【 #最響ライブ 👹 】",
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 17,
+      "occurrenceCount": 17,
+      "publishedTimestamp": 1753198983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/Nla25yneFLE/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBgJZeiN17-Y0gV27Q_dakOBWkJUg",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "1vdQDuNzvxE",
+      "title": "🏮【 実写歌枠 】日曜深夜はお歌の時間.ᐟアガる歌うたっていくぜっ #shorts #Vtuber 【 #最響ライブ 👹 】",
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 16,
+      "occurrenceCount": 16,
+      "publishedTimestamp": 1753198983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/1vdQDuNzvxE/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBJwweV6IDEzYqt_zw6AmearZCeVQ",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    },
+    {
+      "videoId": "ZRUv2N2rHdM",
+      "title": "🏮【 縦型歌枠 】懐メロ中心に楽しく歌う～～‪.ᐟふんふん♪ #shorts #Vtuber 【 #最響ライブ 👹】",
+      "matchedKeywords": [
+        "ライブ",
+        "歌",
+        "歌枠"
+      ],
+      "songCount": 8,
+      "occurrenceCount": 8,
+      "publishedTimestamp": 1753198983419,
+      "thumbnailUrl": "https://i.ytimg.com/vi/ZRUv2N2rHdM/hqdefault.jpg?sqp=-oaymwEfCNACELwBSFXyq4qpAxEIARUAAIhCGAFwAcABBrgCFw==&rs=AOn4CLBKrEGAAjTEuLq92JDK0kf7C9XRHg&usqp=CBc",
+      "status": "accept",
+      "reasons": [],
+      "suspicious": false,
+      "suspiciousReasons": [],
+      "evidence": {
+        "titleHardMatches": [],
+        "titleExactPhraseMatches": [],
+        "titleLiveMatches": [
+          "ライブ"
+        ],
+        "titleSongSignals": [
+          "歌",
+          "歌枠"
+        ],
+        "titleInstrumentalSignals": [],
+        "containsSongText": true
+      }
+    }
+  ]
+}
