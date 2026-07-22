@@ -304,6 +304,7 @@ async function assertUiShape(page, viewport, range) {
     const bottomControls = Array.from(document.querySelectorAll(".pagination-bottom .pagination-button")).map((node) => ({
       text: node.textContent || "",
       ariaLabel: node.getAttribute("aria-label") || "",
+      className: node.className || "",
       svgCount: node.querySelectorAll("svg").length,
       width: node.getBoundingClientRect().width,
       height: node.getBoundingClientRect().height,
@@ -504,18 +505,19 @@ async function assertUiShape(page, viewport, range) {
     if (result.summaryRange && result.summaryRange.display !== "none") {
       throw new Error(`mobile summary repeats range: ${result.summary.text}`);
     }
-    if (!result.topSelect || result.topPageSize) throw new Error(`mobile top pagination should expose page select without page size ${JSON.stringify(result)}`);
-    if (result.topSelect.width > 88) throw new Error(`mobile top page select too wide ${JSON.stringify(result.topSelect)}`);
-    if (result.topControls.some((control) => control.width > 30 || control.height > 30)) {
-      throw new Error(`mobile top pagination buttons too large ${JSON.stringify(result.topControls)}`);
+    if (!result.topSelect || result.topPageSize) throw new Error(`mobile top pagination should expose page input without page size ${JSON.stringify(result)}`);
+    if (result.topSelect.width > 170) throw new Error(`mobile top page input too wide ${JSON.stringify(result.topSelect)}`);
+    const topNavButtons = result.topControls.filter((control) => !String(control.className || "").includes("page-select-submit"));
+    if (topNavButtons.some((control) => control.width > 30 || control.height > 30)) {
+      throw new Error(`mobile top pagination arrow buttons too large ${JSON.stringify(result.topControls)}`);
     }
     if (
-      result.topControls.length &&
-      (result.topControls[0].ariaLabel !== "上一页" ||
-        result.topControls[result.topControls.length - 1].ariaLabel !== "下一页" ||
+      topNavButtons.length &&
+      (topNavButtons[0].ariaLabel !== "上一页" ||
+        topNavButtons[topNavButtons.length - 1].ariaLabel !== "下一页" ||
         result.topControls.some((control) => control.text.trim() === "…" || /向[前后]跳/u.test(control.ariaLabel)))
     ) {
-      throw new Error(`mobile top pagination should use stepper controls without clickable ellipsis ${JSON.stringify(result.topControls)}`);
+      throw new Error(`mobile top pagination should use input stepper controls without clickable ellipsis ${JSON.stringify(result.topControls)}`);
     }
     if (result.filterBadges.some((badge) => !badge.hidden || badge.display !== "none" || badge.text === "0")) {
       throw new Error(`inactive filter badge is visible ${JSON.stringify(result.filterBadges)}`);
@@ -525,10 +527,11 @@ async function assertUiShape(page, viewport, range) {
     }
     if (result.topPagination && result.topPagination.height > 52) throw new Error(`mobile top pagination too tall ${result.topPagination.height}`);
     if (result.bottomControls.length >= 2) {
-      const first = result.bottomControls[0];
-      const last = result.bottomControls[result.bottomControls.length - 1];
-      if (first.ariaLabel !== "首页" || last.ariaLabel !== "末页" || first.text.trim() || last.text.trim() || first.svgCount < 1 || last.svgCount < 1) {
-        throw new Error(`mobile bottom pagination first/last should be icon buttons ${JSON.stringify(result.bottomControls)}`);
+      const bottomNavButtons = result.bottomControls.filter((control) => !String(control.className || "").includes("page-select-submit"));
+      const first = bottomNavButtons[0];
+      const last = bottomNavButtons[bottomNavButtons.length - 1];
+      if (first.ariaLabel !== "上一页" || last.ariaLabel !== "下一页" || first.text.trim() || last.text.trim() || first.svgCount < 1 || last.svgCount < 1) {
+        throw new Error(`mobile bottom pagination should use previous/input/next controls ${JSON.stringify(result.bottomControls)}`);
       }
     }
     if (!result.firstRow || result.firstRow.bottom > viewport[1]) throw new Error(`first mobile row is not visible ${JSON.stringify(result)}`);
@@ -828,8 +831,6 @@ async function interactionFlow(browser) {
   await page.locator('[data-range="all"]').click();
   await waitForRows(page, errors, requests);
   if (!requests.some((item) => runtimeRequestPattern("all").test(item))) throw new Error("range switch did not load all runtime");
-  await page.locator('[data-page-size="100"]').first().click();
-  await waitForRows(page, errors, requests);
   await openFilterSheet(page);
   await page.locator("#queryInput").fill("夜");
   const searchBeforeApply = await page.evaluate(() => window.location.search);
@@ -951,7 +952,7 @@ async function measureQueryOpenLatency(browser) {
       cdpSession = await context.newCDPSession(page);
       await cdpSession.send("Emulation.setCPUThrottlingRate", { rate: scenario.throttle });
     }
-    await page.goto(`${baseUrl}?range=all&pageSize=100`, { waitUntil: "domcontentloaded" });
+    await page.goto(`${baseUrl}?range=all&proof=000000`, { waitUntil: "domcontentloaded" });
     await waitForRows(page, errors, requests);
     await page.evaluate(() => {
       window.__queryPanelVisibleAt = 0;

@@ -205,7 +205,7 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-card,[\s\S]*\.video-compact \.video-card\s*\{[\s\S]*grid-template-columns: clamp\(120px, 34vw, 144px\) minmax\(0, 1fr\);/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.video-body,[\s\S]*\.video-compact \.video-body\s*\{[\s\S]*display: contents;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.song-list,[\s\S]*\.video-compact \.song-list\s*\{[\s\S]*grid-column: 1 \/ -1;/u);
-  assert.match(cssSource, /\.video-grid\s*\{[\s\S]*grid-template-columns: repeat\(auto-fit, minmax\(280px, 1fr\)\);/u);
+  assert.match(cssSource, /\.video-grid\s*\{[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/u);
   assert.match(appSource, /className = "video-more video-more-top"/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*--source-thumb-width: var\(--source-thumb-width-narrow\)/u);
   assert.match(verifySource, /async function mobileFilterSheetFlow/u);
@@ -273,6 +273,12 @@ test("range cache song records are lazy getters", () => {
 
 test("mobile summary and pagination have compact rules", () => {
   assert.doesNotMatch(appSource, /summary-range/u);
+  assert.match(appSource, /const MOBILE_PAGE_SIZE = 20/u);
+  assert.match(appSource, /const DESKTOP_PAGE_SIZE = 30/u);
+  assert.match(functionBody("function currentPageSize"), /responsivePageSize\(\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /document\.createElement\("input"\)/u);
+  assert.match(functionBody("function renderPageSelectControl"), /textContent = "选页"/u);
+  assert.doesNotMatch(functionBody("function renderPageSelectControl"), /document\.createElement\("select"\)|data\.pageSelect/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: none;/u);
   assert.match(cssSource, /\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main actions"[\s\S]*"note note"/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary\s*\{[\s\S]*grid-template-areas:[\s\S]*"main"[\s\S]*"note"/u);
@@ -295,6 +301,8 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /function renderMobileBottomPagination/u);
   assert.match(appSource, /function renderPageEllipsisToken/u);
   assert.doesNotMatch(appSource, /function renderPageJumpToken|data-page-jump-direction/u);
+  assert.doesNotMatch(cssSource, /\.page-select-compact select|\.page-select-compact span::after/u);
+  assert.match(cssSource, /\.page-select input\s*\{[\s\S]*text-align: center;/u);
 });
 
 test("rank summaries keep metrics to entity count and song collections", () => {

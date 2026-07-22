@@ -266,7 +266,6 @@
     const fallbackRange = normalizeRangeId(defaults.range || firstSetValue(validRanges) || "", options);
     const fallbackView = defaults.view || firstSetValue(validViews) || "";
     const fallbackPageSize = positiveInteger(defaults.pageSize, 50);
-    const hasPageSizeParam = params.has("pageSize");
     const parsedPageSize = Number.parseInt(params.get("pageSize") || "", 10);
     const parsedMinCount = Number.parseInt(params.get("minCount") || "", 10);
     const rankMetric = params.get("metric");
@@ -284,7 +283,7 @@
       range: parseRangeParam(params.get("range"), validRanges, fallbackRange, options),
       view: parsedView,
       page: positiveInteger(params.get("page"), positiveInteger(defaults.page, 1)),
-      pageSize: validPageSizes.has(parsedPageSize) ? parsedPageSize : hasPageSizeParam ? 50 : fallbackPageSize,
+      pageSize: validPageSizes.has(parsedPageSize) ? parsedPageSize : fallbackPageSize,
       bucket: params.has("bucket") ? cleanBucketLabel(params.get("bucket")) : defaults.bucket || "全部",
       rankMetric: validRankMetrics.has(rankMetric) ? rankMetric : defaults.rankMetric || "occurrences",
       videoLayout: validVideoLayouts.has(videoLayout) ? videoLayout : defaults.videoLayout || "cards",

@@ -229,7 +229,7 @@ function buildRuntimeSong(song, occurrence, seconds) {
     raw: artist ? `${formatSeconds(seconds)} ${title} / ${artist}` : `${formatSeconds(seconds)} ${title}`,
     sourceId: occurrence?.externalSongId || song?.externalSongId || occurrence?.canonicalSongId || "",
     sourceHash: occurrence?.provenance?.hash || song?.provenance?.hash || "",
-    isNiche: false,
+    isNiche: true,
   };
 }
 

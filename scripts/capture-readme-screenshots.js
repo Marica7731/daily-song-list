@@ -429,7 +429,7 @@ async function findSourceCase(browser, viewport, kind) {
   const page = await newPage(browser, viewport);
   try {
     for (let pageNumber = 1; pageNumber <= 25; pageNumber += 1) {
-      const params = { page: pageNumber, pageSize: 50 };
+      const params = { page: pageNumber }; // responsive
       await page.goto(appUrl(params), { waitUntil: "networkidle" });
       await waitForApp(page);
       const match = await page.evaluate((targetKind) => {
@@ -505,8 +505,8 @@ async function captureSongIndexPage(browser, viewport, target, name) {
   await page.goto(appUrl({ view: "songAz" }), { waitUntil: "networkidle" });
   await waitForApp(page);
   const pageCount = await page.evaluate(() => {
-    const select = document.querySelector(".pagination-top [data-page-select], .pagination-bottom [data-page-select]");
-    return select ? select.options.length : 1;
+    const input = document.querySelector(".pagination-top [data-page-input], .pagination-bottom [data-page-input]");
+    return input ? Number(input.max) || 1 : 1;
   });
   const nextPage = target === "last" ? pageCount : Math.max(1, Math.ceil(pageCount / 2));
   await page.goto(appUrl({ view: "songAz", page: nextPage }), { waitUntil: "networkidle" });
@@ -1854,7 +1854,7 @@ async function main() {
       scene: "desktop-summary-baseline",
       selector: "#summary",
     });
-    await openPage(browser, desktopWide, { range: "1m", pageSize: 100 }, "desktop-monthly-song-rank.png", {
+    await openPage(browser, desktopWide, { range: "1m" }, /* auto */     "desktop-monthly-song-rank.png", {
       scene: "desktop-all-range-song-rank",
     });
     await openPage(browser, desktop, { view: "artistRank" }, "desktop-artist-rank.png");
@@ -1895,7 +1895,7 @@ async function main() {
       scrollBottom: true,
       scene: "mobile-video-expanded-bottom",
     });
-    await openPage(browser, { width: 320, height: 700 }, { page: 7, pageSize: 100 }, "mobile-pagination-320.png");
+    await openPage(browser, { width: 320, height: 700 }, { page: 7 }, /* auto */     "mobile-pagination-320.png");
     await captureElementFromPage(browser, mobile, { view: "videos" }, "#mobileBottomNav", "mobile-bottom-nav-active.png", {
       assert: assertBottomNavIconSelection,
       scene: "mobile-bottom-nav-active",
@@ -1948,7 +1948,7 @@ async function main() {
       failRequest: true,
       scene: "mobile-page-request-error",
     });
-    await openPage(browser, desktop, { range: "all", page: 2, pageSize: 50 }, "desktop-request-pagination.png", {
+    await openPage(browser, desktop, { range: "all", page: 2 }, /* auto */    "desktop-request-pagination.png", {
       scene: "desktop-request-pagination",
     });
     await captureRequestState(browser, desktop, "desktop-update-failure-status.png", {
@@ -1977,7 +1977,7 @@ async function main() {
     await captureFixtureSourceCase(browser, mobile, "longChannel", "mobile-source-long-channel.png");
     await captureFixtureSourceCase(browser, mobile, "longTime", "mobile-source-long-time.png");
     await captureFixtureSourceCase(browser, mobile, "extraTimes", "mobile-source-extra-times.png");
-    await openPage(browser, desktop, { page: 7, pageSize: 100 }, "desktop-pagination-middle.png");
+    await openPage(browser, desktop, { page: 7 }, /* auto */     "desktop-pagination-middle.png");
   } finally {
     await browser.close();
   }
