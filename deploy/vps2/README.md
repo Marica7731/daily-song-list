@@ -112,7 +112,7 @@ After production DNS points at VPS2, set the GitHub repository variable `DAILY_S
 
 The publish step first checks the free bytes under `/var/lib/culua/ytb-song-rank`. When the host can hold the active DB plus a run-scoped candidate DB and 1 GiB of margin, it copies the active database to a path such as `song-rank.sqlite.next.<run>.<attempt>`, then uses `rsync --inplace --partial --compress` to transfer only changed blocks from the GitHub-built SQLite file. The active database is not touched until the candidate sha256 and query probe pass inside `song-rank-db-activate.sh`.
 
-If VPS2 does not have enough room for both the active and candidate DB, the workflow falls back to direct in-place activation: it stops `song-rank-api`, rsyncs `artifacts/runtime/song-rank.sqlite` directly to `/var/lib/culua/ytb-song-rank/song-rank.sqlite`, validates the sha256 and query probe with `CODEX_RUNTIME_DB_DIRECT_ACTIVATE=1`, then restarts and health-checks the API. This low-space path has no `.previous` rollback copy; if the direct upload fails before activation finishes, leave the service stopped and rerun the deploy instead of serving a partial database.
+If VPS2 does not have enough room for both the active and candidate DB, the workflow checks that direct overwrite still has enough growth room for `new_db_size - active_db_size` plus 1 GiB of margin. It then disables the runtime update timer, stops `song-rank-api`, verifies the API is no longer active, rsyncs `artifacts/runtime/song-rank.sqlite` directly to `/var/lib/culua/ytb-song-rank/song-rank.sqlite`, validates the sha256 and query probe with `CODEX_RUNTIME_DB_DIRECT_ACTIVATE=1`, then restarts and health-checks the API. This low-space path has no `.previous` rollback copy; if the direct upload or activation fails, the workflow attempts to stop the API again and the deploy should be rerun instead of serving a partial database.
 
 The workflow always uploads the small manifest artifact; set repository variable `DAILY_SONG_UPLOAD_DB_ARTIFACT=1` only when you intentionally need the full `song-rank.sqlite` artifact for inspection.
 
@@ -147,7 +147,7 @@ Troubleshooting map:
 - Missing or wrong `VPS2_PASSWORD`: the `Install sshpass` or first SSH step fails before touching VPS2.
 - DB build failure: inspect `Build runtime database`; no remote candidate is uploaded.
 - Local API artifact failure: inspect `Verify runtime API artifact`; no remote candidate is activated.
-- Upload or activation failure: inspect `Upload and activate database`; remote candidates named `song-rank.sqlite.next.<run>.<attempt>` are removed on workflow failure. If the log shows `CODEX_RUNTIME_DB_UPLOAD_MODE direct-inplace`, rerun the deploy to finish the interrupted in-place upload before restarting the public API.
+- Upload or activation failure: inspect `Upload and activate database`; remote candidates named `song-rank.sqlite.next.<run>.<attempt>` are removed on workflow failure. If the log shows `CODEX_RUNTIME_DB_UPLOAD_MODE direct-inplace`, check that `song-rank-api` is stopped, then rerun the deploy to finish the interrupted in-place upload before restarting the public API.
 - Health or production API failure: inspect `Verify VPS2 health endpoint` and `Verify production API`, then run `journalctl -u song-rank-api -n 100 --no-pager` and `curl -fsS http://127.0.0.1:8765/healthz` on VPS2.
 - Concurrency cancellation is expected when a newer deploy run starts; the newest successful deploy is authoritative.
 
