@@ -146,6 +146,21 @@ Remaining dirty-keyword audit hits include reviewed false positives such as `Sta
 - Keep the matching strict: `No` + 1-3 digits + dot + whitespace, or 1-3 digits + semicolon + full `H:MM:SS` + whitespace. Guardrails that must remain unchanged include `No brand girls`, `No Logic`, `No title`, `No.1`, `NO, Thank You!`, `No pain, No game`, and `Re;fract`.
 - Maintain the rule in `assets/source-filter.js`, `assets/ranking-utils.js`, and the Python fallback in `scripts/db/build-runtime-db.py`. The JS import/runtime path, frontend search keys, and fallback DB builder need to merge the same base titles.
 
+2026-07-22 source backfill batch1-10 note:
+
+- Source worker batches may contain usable accepted JSON next to raw exports,
+  remote status, manifests, reports, checkpoints, and logs. Only
+  `*.accepted.json` under `data/external/youtube-channel-discovery/accepted/`
+  is a release input; do not merge a worker artifact branch directly.
+- The batch10 flute review confirms exact instrumental/source-format markers
+  such as `flute`, `#flute`, and `フルート` are high-confidence drops when they
+  are unknown-artist source rows. Do not broaden this to generic `live` or
+  `ライブ`; several reviewed batches had broad live hits that were real song
+  streams or 3D live setlists.
+- Batch11 and later batches should follow the same path: complete the worker
+  export, review dirty audit, copy only accepted JSON, run accepted cleanup plus
+  DB/runtime checks, then deploy and verify online API counts.
+
 For accepted JSON impact checks, run:
 
 ```powershell
