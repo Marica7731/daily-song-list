@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-22T20:29:29.262Z",
+  "generatedAt": "2026-07-22T22:24:04.870Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-22T20:29:29.262Z",
+    "fetchedAt": "2026-07-22T22:24:04.870Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-22T20:29:29.262Z",
+    "generatedAt": "2026-07-22T22:24:04.870Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7967,13 +7967,6 @@
         "channelId": "UC7mCyRHd4DvXRktDpLhCeYQ",
         "displayName": "織奏オロカ / Orocana Oroca",
         "sourceUrl": "https://www.youtube.com/@oroca_xx",
-        "reason": "batch_limit_reached"
-      },
-      {
-        "handle": "/@RukaCh.",
-        "channelId": "UClS3cnIUM9yzsBPQzeyX_8Q",
-        "displayName": "Ruka Ch. 雨海ルカ",
-        "sourceUrl": "https://www.youtube.com/@RukaCh.",
         "reason": "batch_limit_reached"
       },
       {
@@ -8127,6 +8120,13 @@
         "handle": "",
         "channelId": "",
         "displayName": "燈明寺かぐら - Tomyoji Kagura -",
+        "sourceUrl": "",
+        "reason": "missing_channel_url_or_handle"
+      },
+      {
+        "handle": "",
+        "channelId": "",
+        "displayName": "Kyoko Ch. 倉持京子",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
