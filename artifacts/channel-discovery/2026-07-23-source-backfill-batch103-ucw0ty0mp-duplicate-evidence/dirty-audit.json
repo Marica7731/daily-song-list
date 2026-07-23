@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch103-ucw0ty0mp-duplicate-evidence",
+  "generatedAt": "2026-07-23T18:14:47+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch11",
+  "filter": {
+    "handle": "UCw0ty0mpHBx6xZt-K_hfNcA",
+    "channelHandle": "/@LEWNE_RKMusic",
+    "channelUrl": "https://www.youtube.com/channel/UCw0ty0mpHBx6xZt-K_hfNcA",
+    "rule": "Filter by requested channel ID and the concrete accepted channel handle /@LEWNE_RKMusic."
+  },
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch11/dirty-audit.json",
+  "sourceBatchDroppedVideoCount": 0,
+  "sourceBatchDroppedOccurrenceCount": 0,
+  "sourceBatchSuspiciousCount": 1,
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 1,
+  "suspiciousOccurrenceCount": 6,
+  "suspicious": [
+    {
+      "youtubeVideoId": "vwDp67LnnzA",
+      "channel": "/@LEWNE_RKMusic",
+      "videoTitle": "【#歌枠 /#karaoke 】ワンマンまで残り5日⁉ライブ前に楽しい夜を│聴くだけでも大丈夫 #めだれう【MEDA × LEWNE】",
+      "hits": [
+        "ライブ"
+      ],
+      "occurrences": 6
+    }
+  ],
+  "termHitCounts": {
+    "ライブ": 1
+  },
+  "suspiciousRetainedAfterManualAudit": true,
+  "note": "Batch11 dirty audit dropped 0 videos / 0 occurrences. One broad ライブ suspicious row for the concrete channel handle was retained after manual audit."
+}
