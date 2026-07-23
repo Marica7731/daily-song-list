@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-artifact",
+  "status": "success",
+  "batch": 72,
+  "channelUrl": "https://www.youtube.com/@AmanofuStella",
+  "shard": {
+    "index": 15,
+    "count": 16,
+    "label": "15of16"
+  },
+  "generatedAt": "2026-07-23T05:20:47.366Z",
+  "imported": 12,
+  "skipped": 0,
+  "failed": 0,
+  "failureReason": "",
+  "candidateCount": 225,
+  "inspectedCount": 14,
+  "usableVideoCount": 12,
+  "accepted": {
+    "videos": 12,
+    "occurrences": 121,
+    "songs": 121,
+    "uniqueSongs": 119
+  },
+  "coverage": {
+    "publishedTimestamp": {
+      "present": 12,
+      "total": 12
+    },
+    "occurrenceTimeOrSeconds": {
+      "present": 121,
+      "total": 121
+    },
+    "acceptedThumbnailUrl": {
+      "present": 12,
+      "total": 12
+    },
+    "discoveryThumbnailUrl": {
+      "present": 225,
+      "total": 225
+    }
+  },
+  "reachedEnd": true,
+  "duration": {
+    "workerStartedAt": "2026-07-23T13:18:46+08:00",
+    "generatedAt": "2026-07-23T05:20:47.366Z",
+    "elapsedSecondsApprox": 122,
+    "stageSeconds": {
+      "discovery": 110,
+      "export-unfiltered": 10
+    }
+  },
+  "precheck": {
+    "macRepo": "/Users/be/daily-song-list",
+    "macRepoHead": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+    "sourceFilter": {
+      "path": "assets/source-filter.js",
+      "bytes": 60415,
+      "sha256": "bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103"
+    }
+  },
+  "cleanup": {
+    "macCleanupMarkerPresent": true,
+    "macDfSummary": "CLEANUP_START 2026-07-23T13:20:47+08:00\nFilesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   234Gi   653Gi    27%    655k  6.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   234Gi   653Gi    27%    655k  6.8G    0%   /System/Volumes/Data\nCLEANUP_AFTER_RM 2026-07-23T13:20:47+08:00\nFilesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   234Gi   653Gi    27%    655k  6.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   234Gi   653Gi    27%    655k  6.8G    0%   /System/Volumes/Data\nCLEANUP_OK 2026-07-23T13:20:47+08:00\n",
+    "macFinalCleanup": "MAC_FINAL_CLEANUP_START 2026-07-23T13:21:23+08:00\nMAC_FINAL_CLEANUP_OK exists=0 2026-07-23T13:21:23+08:00\nFilesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   234Gi   653Gi    27%    655k  6.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   234Gi   653Gi    27%    655k  6.8G    0%   /System/Volumes/Data"
+  },
+  "outputs": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "manifest": "manifest.json",
+    "report": "report.md"
+  },
+  "stageLog": "2026-07-23T13:18:46+08:00 WORKER_START channel=https://www.youtube.com/@AmanofuStella shard=15of16 batch=72\n2026-07-23T13:18:46+08:00 PRECHECK repo=/Users/be/daily-song-list\nf1b0e8423e755b2c3b38a5288c98bca3e5d092cc\nbd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103  assets/source-filter.js\nFilesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   234Gi   653Gi    27%    655k  6.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   234Gi   653Gi    27%    655k  6.8G    0%   /System/Volumes/Data\n2026-07-23T13:18:46+08:00 STAGE_START label=discovery timeoutSeconds=660\n2026-07-23T13:18:56+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=10\n2026-07-23T13:19:06+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=20\n2026-07-23T13:19:17+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=30\n2026-07-23T13:19:27+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=40\n2026-07-23T13:19:37+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=50\n2026-07-23T13:19:47+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=60\n2026-07-23T13:19:57+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=70\n2026-07-23T13:20:07+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=80\n2026-07-23T13:20:17+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=90\n2026-07-23T13:20:27+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=100\n2026-07-23T13:20:37+08:00 STAGE_PROGRESS label=discovery elapsedSeconds=110\n2026-07-23T13:20:37+08:00 STAGE_DONE label=discovery exitCode=0 elapsedSeconds=110\n2026-07-23T13:20:37+08:00 STAGE_START label=export-unfiltered timeoutSeconds=180\n2026-07-23T13:20:47+08:00 STAGE_PROGRESS label=export-unfiltered elapsedSeconds=10\n2026-07-23T13:20:47+08:00 STAGE_DONE label=export-unfiltered exitCode=0 elapsedSeconds=10\n2026-07-23T13:20:47+08:00 ACCEPTED_COPY_OK source=/Users/be/codex-temp/daily-song-list-source-backfill-batch72-amanofustella-shard15of16-mac-readonly/candidate-increment-unfiltered.json target=/Users/be/codex-temp/daily-song-list-source-backfill-batch72-amanofustella-shard15of16-mac-readonly/accepted-increment.json\n",
+  "windowsDisk": [
+    {
+      "Name": "C",
+      "Used": 255733755904,
+      "Free": 65405222912,
+      "Root": "C:\\"
+    },
+    {
+      "Name": "D",
+      "Used": 470183141376,
+      "Free": 9902133248,
+      "Root": "D:\\"
+    },
+    {
+      "Name": "G",
+      "Used": 1362025062400,
+      "Free": 686049718272,
+      "Root": "G:\\"
+    }
+  ],
+  "windowsCleanup": {
+    "gTempDirExists": false,
+    "markerFileKept": true
+  }
+}
