@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch96-himesakiyumeno-duplicate-evidence",
+  "generatedAt": "2026-07-23T17:24:55.8150744+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch3",
+  "filter": {
+    "handle": "HimesakiYumeno",
+    "channelHandle": "/@HimesakiYumeno",
+    "channelUrl": "https://www.youtube.com/@HimesakiYumeno",
+    "rule": "Only HimesakiYumeno is filtered from the batch3 dirty audit."
+  },
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/dirty-audit.json",
+  "batch3SuspiciousCount": 11,
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 10,
+  "suspiciousOccurrenceCount": 10,
+  "suspiciousRetainedAfterManualAudit": true,
+  "suspicious": {
+    "summary": "10 HimesakiYumeno broad live hits retained after manual audit.",
+    "retained": true,
+    "notDropped": true
+  },
+  "note": "Batch3 dirty audit had 11 total broad live suspicious entries across the batch. Only 10 belong to HimesakiYumeno; ChitaCh has the other 1 and is outside this batch96 channel filter. Batch3 dirty audit dropped 0/0. Suspicious entries were retained after manual audit and are not dirty dropped. Candidate-to-usable difference 81 to 52 is not dirty dropped."
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_accepted_increment",
+  "batchId": "2026-07-23-source-backfill-batch96-himesakiyumeno-duplicate-evidence",
+  "generatedAt": "2026-07-23T17:24:55.8150744+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch3",
+    "source": {
+      "handle": "HimesakiYumeno",
+      "channelHandle": "/@HimesakiYumeno",
+      "channelUrl": "https://www.youtube.com/@HimesakiYumeno",
+      "acceptedMatchRule": "accepted.videos matched where discoveryImport.discoverySingerName == HimesakiYumeno or channelHandle == /@HimesakiYumeno",
+      "manifestMatchRule": "manifest.sources matched where handle == HimesakiYumeno or url == https://www.youtube.com/@HimesakiYumeno"
+    },
+    "evidenceSource": {
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/accepted/2026-07-22-source-backfill-batch3.accepted.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch3/dirty-audit.json"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 52,
+      "acceptedOccurrences": 698,
+      "uniqueSongs": 471,
+      "note": "This accepted increment is intentionally empty because batch3 already contains the concrete accepted rows for HimesakiYumeno."
+    },
+    "coverage": {
+      "publishedTimestamp": "52/52",
+      "occurrenceTime": "698/698",
+      "occurrenceSeconds": "698/698",
+      "discoveryThumbnailCoverage": "52/52",
+      "coverCoverage": "52/52"
+    },
+    "manifestSourceEntry": {
+      "discoveryCandidateCount": 81,
+      "discoveryInspectedCount": 81,
+      "discoveryUsableVideoCount": 52,
+      "discoveryOccurrenceCount": 698,
+      "elapsedSeconds": 1932,
+      "reachedEnd": null
+    },
+    "dirtyAudit": {
+      "filter": "Only HimesakiYumeno is filtered from the batch3 concrete accepted artifact and batch3 source manifest.",
+      "droppedVideos": 0,
+      "droppedOccurrences": 0,
+      "sourceBatchSuspiciousCount": 11,
+      "sourceBatchSuspiciousRetained": true,
+      "filteredHimesakiYumenoSuspiciousCount": 10,
+      "note": "Batch3 dirty audit dropped 0/0. HimesakiYumeno has 10 broad live hits retained after manual audit; ChitaCh has the other 1. Suspicious rows are not dirty dropped, and the 81 candidate to 52 usable difference is not dirty dropped."
+    }
+  }
+}
