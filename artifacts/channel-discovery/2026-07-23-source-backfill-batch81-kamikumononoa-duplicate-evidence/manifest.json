@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery-duplicate-evidence-manifest",
+  "status": "skipped_duplicate",
+  "success": true,
+  "batch": "batch81",
+  "sourceUrl": "https://www.youtube.com/@KAMIKUMONONOA",
+  "sourceHandle": "@KAMIKUMONONOA",
+  "generatedAt": "2026-07-23T15:07:15.7397460+08:00",
+  "artifactDir": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-23-source-backfill-batch81-kamikumononoa-duplicate-evidence",
+  "windowsRepo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+  "windowsBranch": "codex/source-backfill-20260720-v2",
+  "windowsHead": "1cf03c309c19be606139cfbd18d5720f8f999c4a",
+  "candidateCount": 36,
+  "inspectedCount": 36,
+  "acceptedVideos": 14,
+  "acceptedOccurrences": 176,
+  "uniqueSongs": 172,
+  "coverage": {
+    "publishedTimestamp": "14/14",
+    "occurrenceTime": "176/176",
+    "occurrenceSeconds": "176/176",
+    "thumbnailOrCover": "14/14",
+    "reachedEnd": true
+  },
+  "evidence": {
+    "acceptedEvidenceFile": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch9\\accepted\\2026-07-22-source-backfill-batch9.accepted.json",
+    "batch9Manifest": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch9\\manifest.json",
+    "batch9AcceptedStatus": "imported accepted",
+    "batch9ChannelSummary": {
+      "acceptedVideos": 14,
+      "acceptedOccurrences": 176,
+      "publishedTimestampPresent": 14,
+      "occurrenceTimePresent": 176,
+      "occurrenceSecondsPresent": 176,
+      "thumbnailPresent": 14,
+      "uniqueSongs": 172
+    },
+    "candidateCount": 36,
+    "inspectedCount": 36,
+    "usableVideoCount": 14,
+    "discoveryOccurrenceCount": 176,
+    "reviewedButNotUsedAsSuccessEvidence": [
+      {
+        "batch": "batch73",
+        "path": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch73-kamikumononoa-mac-readonly\\manifest.json",
+        "status": "interrupted",
+        "success": false,
+        "reason": "interrupted/status-only artifact"
+      },
+      {
+        "batch": "batch75",
+        "path": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch75-kamikumononoa-shard0of4-mac-readonly\\manifest.json",
+        "status": "interrupted",
+        "success": false,
+        "reason": "interrupted/status-only artifact"
+      }
+    ]
+  },
+  "dirtyAudit": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhrases": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "livePolicy": "live/ライブ are not standalone hard excludes; suspicious/drop only when no singing signal is present",
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousCount": 1,
+    "note": "batch9 KAMIKUMONONOA live suspicious item reviewed and retained; it is recorded but not treated as dirty."
+  },
+  "runtime": {
+    "elapsedSeconds": 0.23,
+    "failureReason": null,
+    "youtubeFetchStarted": false,
+    "macUsed": false,
+    "macNote": "Mac not used",
+    "remoteTempCreated": false,
+    "remoteTempNote": "remote temp not created"
+  },
+  "cleanup": {
+    "tempRoot": "G:\\codex-temp",
+    "tempScriptRemovedByCaller": true,
+    "gTempNewLargeFiles": "none; temporary generation script was removed after use",
+    "windowsCNewLargeFiles": "none created by this worker",
+    "windowsDNewLargeFiles": "none beyond five small artifact files in the requested artifact directory",
+    "windowsGNewLargeFiles": "none created by this worker"
+  }
+}

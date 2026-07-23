@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "status": "skipped_duplicate",
+  "sourceUrl": "https://www.youtube.com/@KAMIKUMONONOA",
+  "auditRules": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhrases": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "livePolicy": "live/ライブ are not standalone hard excludes; suspicious/drop only when no singing signal is present"
+  },
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 1,
+  "suspicious": [
+    {
+      "youtubeVideoId": "pUv1_Bbu4oE",
+      "videoTitle": "【歌枠】B'zさんの曲だけをかき集めた最強あげあげ生配信はこちら【#生ののあらいぶ / #KARAOKE】",
+      "hits": [],
+      "broadHits": [
+        "live"
+      ],
+      "occurrences": 18,
+      "decision": "retained_from_batch9_manual_review"
+    }
+  ],
+  "termHitCounts": {},
+  "batch9ManualReviewNote": "batch9 has a KAMIKUMONONOA live suspicious item retained after manual review; retained here as duplicate evidence, not dropped blindly."
+}
