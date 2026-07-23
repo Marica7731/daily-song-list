@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-worker-manifest",
+  "batchId": "2026-07-23-source-backfill-batch79-hanaoto-youtube33-mac-readonly",
+  "status": "skipped",
+  "reason": "skipped_duplicate",
+  "generatedAt": "2026-07-23T14:53:03.8008030+08:00",
+  "channelUrl": "https://www.youtube.com/@hanaoto_youtube33",
+  "targetRepo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+  "branchConfirmed": "codex/source-backfill-20260720-v2",
+  "duplicateEvidence": {
+    "acceptedFile": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch10\\accepted\\2026-07-22-source-backfill-batch10.accepted.json",
+    "manifestFile": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch10\\manifest.json",
+    "dirtyAuditFile": "artifacts\\channel-discovery\\2026-07-22-source-backfill-batch10\\dirty-audit.json",
+    "reportLine": "batch10 report: hanaoto_youtube33 imported, discovery 58/889, accepted 4/49/38, reachedEnd=true"
+  },
+  "counts": {
+    "candidates": 104,
+    "inspected": 104,
+    "acceptedVideosThisBatch": 0,
+    "acceptedOccurrencesThisBatch": 0,
+    "acceptedUniqueSongsThisBatch": 0,
+    "duplicateAcceptedVideos": 4,
+    "duplicateAcceptedOccurrences": 49,
+    "duplicateAcceptedUniqueSongs": 38,
+    "duplicateDroppedVideos": 54,
+    "duplicateDroppedOccurrences": 840,
+    "duplicateSuspiciousVideos": 4
+  },
+  "coverage": {
+    "publishedTimestamp": "4/4",
+    "publishedTimestampRange": {
+      "minTimestamp": 1771719638125,
+      "maxTimestamp": 1779495638125,
+      "minIso": "2026-02-22T00:20:38.1250000Z",
+      "maxIso": "2026-05-23T00:20:38.1250000Z"
+    },
+    "occurrenceTime": "49/49",
+    "occurrenceSeconds": "49/49",
+    "thumbnailOrCover": "4/4"
+  },
+  "reachedEnd": true,
+  "elapsedSeconds": 0,
+  "duplicateDiscoveryElapsedSeconds": 2226,
+  "failureReason": null,
+  "cleanup": {
+    "macTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch79-hanaoto-youtube33-mac-readonly",
+    "macTempDirStatus": "not_present",
+    "localTempDir": "G:\\codex-temp",
+    "localTempScriptRemoved": true
+  },
+  "macDfSummary": [
+    "CODEX_MAC_CLEANUP_STATUS=not_present",
+    "Filesystem        Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+    "/dev/disk3s1s1   926Gi    16Gi   594Gi     3%    458k  4.3G    0%   /",
+    "/dev/disk3s5     926Gi   295Gi   594Gi    34%    678k  6.2G    0%   /System/Volumes/Data",
+    "/dev/disk3s5     926Gi   295Gi   594Gi    34%    678k  6.2G    0%   /System/Volumes/Data",
+    "CODEX_MAC_DF_OK"
+  ],
+  "localDiskNote": "No large C/D/G cache, checkout, runtime DB, or source export was created; only five small artifact files were written under this batch directory.",
+  "committed": false,
+  "pushed": false,
+  "deployed": false
+}
