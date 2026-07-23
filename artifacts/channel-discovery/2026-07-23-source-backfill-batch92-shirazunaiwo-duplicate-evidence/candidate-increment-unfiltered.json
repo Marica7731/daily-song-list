@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_candidate_increment_unfiltered",
+  "batchId": "2026-07-23-source-backfill-batch92-shirazunaiwo-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:56:51.0113976+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "source": {
+    "handle": "ShirazunaIwo",
+    "channelHandle": "/@ShirazunaIwo",
+    "channelUrl": "https://www.youtube.com/@ShirazunaIwo"
+  },
+  "candidates": [],
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "note": "ShirazunaIwo is already fully represented in the batch1 concrete accepted artifact. This duplicate-evidence batch does not repeat candidate rows.",
+    "evidenceSource": [
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/accepted/2026-07-22-source-backfill-batch1.accepted.json",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/manifest.json",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/report.md",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/dirty-audit.json"
+    ],
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch1",
+    "batch1DirectEvidence": {
+      "acceptedVideos": 45,
+      "acceptedOccurrences": 772,
+      "uniqueSongs": 456,
+      "publishedTimestampCoverage": "45/45",
+      "occurrenceTimeCoverage": "772/772",
+      "occurrenceSecondsCoverage": "772/772",
+      "discoveryThumbnailCoverage": "47/47",
+      "coverCoverage": "47/47"
+    }
+  }
+}

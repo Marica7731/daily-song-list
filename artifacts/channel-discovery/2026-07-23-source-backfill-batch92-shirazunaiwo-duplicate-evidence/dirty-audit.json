@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch92-shirazunaiwo-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:56:51.0113976+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/dirty-audit.json",
+  "filter": "channelHandle == /@ShirazunaIwo or channelUrl == https://www.youtube.com/@ShirazunaIwo",
+  "droppedVideoCount": 1,
+  "droppedOccurrenceCount": 1,
+  "dropped": [
+    {
+      "videoId": "Jm0UJ5tn4AQ",
+      "channelHandle": "/@ShirazunaIwo",
+      "title": "【メンバーシップ限定】ミセスさんのライブに行ってきたんですよ…※セトリ等のネタバレあり",
+      "occurrences": 1,
+      "reason": "non-song/member-only concert talk"
+    }
+  ],
+  "suspiciousCount": 0,
+  "suspiciousOccurrenceCount": 0,
+  "suspicious": [],
+  "note": "Filtered only to ShirazunaIwo. Batch1 dirty-audit dropped 1 video and 1 occurrence for this source. Suspicious fields are recorded as 0/0 because the source dirty-audit has no suspicious fields. Discovery candidate 54 to usable 47 is not treated as dirty dropped evidence."
+}
