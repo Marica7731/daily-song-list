@@ -1,0 +1,53 @@
+{
+  "batchId": "2026-07-22-source-backfill-batch53-amanofustella-shard0of16",
+  "generatedAt": "2026-07-23T00:01:33.445Z",
+  "source": {
+    "handle": "AmanofuStella",
+    "url": "https://www.youtube.com/@AmanofuStella",
+    "singerName": "天ノ譜ステラ"
+  },
+  "shard": {
+    "inspectShardIndex": 0,
+    "inspectShardCount": 16
+  },
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "singingSignals": [
+      "歌枠",
+      "歌",
+      "弾き語り",
+      "karaoke",
+      "歌ってみた"
+    ],
+    "liveRule": "live/ライブ is suspicious/drop only when the title lacks explicit singing signals such as 歌枠, 歌, 弾き語り, karaoke, 歌ってみた."
+  },
+  "counts": {
+    "unfilteredVideoCount": 13,
+    "unfilteredOccurrenceCount": 91,
+    "acceptedVideoCount": 13,
+    "acceptedOccurrenceCount": 91,
+    "acceptedSongCount": 87,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0
+  },
+  "dropped": [],
+  "suspicious": []
+}
