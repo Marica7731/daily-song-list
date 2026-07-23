@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch98-kamisatoniina-duplicate-evidence",
+  "generatedAt": "2026-07-23T17:38:55+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch4",
+  "filter": {
+    "handle": "Kamisatoniina",
+    "channelHandle": "/@Kamisatoniina",
+    "channelUrl": "https://www.youtube.com/@Kamisatoniina",
+    "rule": "Only Kamisatoniina is filtered from the batch4 dirty audit."
+  },
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/dirty-audit.json",
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 0,
+  "suspiciousOccurrenceCount": 0,
+  "suspicious": [],
+  "note": "Batch4 dirty audit dropped 0/0 and suspicious 0/0. The 50 candidate to 22 usable difference for Kamisatoniina is not dirty dropped."
+}

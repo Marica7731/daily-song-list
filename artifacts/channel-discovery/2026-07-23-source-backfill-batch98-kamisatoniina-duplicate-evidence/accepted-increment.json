@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_accepted_increment",
+  "batchId": "2026-07-23-source-backfill-batch98-kamisatoniina-duplicate-evidence",
+  "generatedAt": "2026-07-23T17:38:55+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch4",
+    "source": {
+      "handle": "Kamisatoniina",
+      "channelHandle": "/@Kamisatoniina",
+      "channelUrl": "https://www.youtube.com/@Kamisatoniina",
+      "acceptedMatchRule": "batch4 accepted.videos matched where discoveryImport.discoverySingerName == Kamisatoniina or channelHandle == /@Kamisatoniina",
+      "manifestMatchRule": "batch4 manifest.sources matched where handle == Kamisatoniina or url == https://www.youtube.com/@Kamisatoniina"
+    },
+    "evidenceSource": {
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/dirty-audit.json"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 22,
+      "acceptedOccurrences": 327,
+      "uniqueSongs": 179,
+      "note": "This accepted increment is intentionally empty because batch4 already contains the concrete accepted rows for Kamisatoniina."
+    },
+    "coverage": {
+      "publishedTimestamp": "22/22",
+      "occurrenceTime": "327/327",
+      "occurrenceSeconds": "327/327",
+      "discoveryThumbnailCoverage": "22/22",
+      "coverCoverage": "22/22"
+    },
+    "batch4SourceManifest": {
+      "discoveryCandidateCount": 50,
+      "discoveryInspectedCount": 50,
+      "discoveryUsableVideoCount": 22,
+      "discoveryOccurrenceCount": 327,
+      "elapsedSeconds": 958,
+      "reachedEnd": true
+    },
+    "dirtyAudit": {
+      "filter": "Only Kamisatoniina is filtered from the batch4 concrete accepted artifact and batch4 source manifest.",
+      "droppedVideos": 0,
+      "droppedOccurrences": 0,
+      "sourceBatchSuspiciousCount": 0,
+      "suspiciousCount": 0,
+      "note": "Batch4 dirty audit dropped 0/0 and suspicious 0/0. The 50 candidate to 22 usable difference is not dirty dropped."
+    }
+  }
+}
