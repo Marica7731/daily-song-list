@@ -107,4 +107,6 @@ jobs:
           else
             echo "::warning::public index probe failed from GitHub runner; VPS checkout verification passed"
           fi
-          curl -A 'Mozilla/5.0' -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/data/ui/meta.json?probe=${EXPECTED_SHA}" >/dev/null
+          if ! curl -A 'Mozilla/5.0' -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/data/ui/meta.json?probe=${EXPECTED_SHA}" >/dev/null; then
+            echo "::warning::public data/ui/meta.json probe failed from GitHub runner; VPS checkout verification passed"
+          fi
