@@ -1,0 +1,6 @@
+
+> daily-song-list@1.0.0 youtube:discover-channel
+> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@SoraOtoha --singer-name SoraOtoha --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch113-soraotoha-probe-full/probe --candidate-only --max-channel-pages 5 --max-candidates 120 --request-interval-ms 3000 --request-jitter-ms 1000
+
+CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel="https://www.youtube.com/@SoraOtoha" candidates=115 inspected=0 videos=0 occurrences=0 elapsedSeconds=37 outputDir="/tmp/ytb-song-rank-source-backfill-20260720/batch113-soraotoha-probe-full/probe"
+CODEX_PROBE_EXIT_CODE=0

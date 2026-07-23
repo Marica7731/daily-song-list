@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-23T12:21:36.743Z",
+  "channelUrl": "https://www.youtube.com/@SoraOtoha",
+  "singerName": "SoraOtoha",
+  "keywords": [
+    "LIVE",
+    "歌",
+    "弾き語",
+    "リレー"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/@SoraOtoha/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 5,
+  "maxCandidates": 120,
+  "maxInspect": 20,
+  "inspectShardIndex": 0,
+  "inspectShardCount": 1,
+  "candidateOnly": true,
+  "candidateCount": 115,
+  "inspectedInLatestRun": 0,
+  "usableVideoCount": 0,
+  "occurrenceCount": 0,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/@SoraOtoha/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 5,
+      "rawItemCount": 149,
+      "candidateCount": 112,
+      "continuationRounds": 4,
+      "reachedEnd": false,
+      "fromCache": false,
+      "bytes": 1166258
+    },
+    {
+      "pageUrl": "https://www.youtube.com/@SoraOtoha/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 2,
+      "rawItemCount": 10,
+      "candidateCount": 3,
+      "continuationRounds": 1,
+      "reachedEnd": true,
+      "fromCache": false,
+      "bytes": 898544
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2064802,
+    "totalElapsedMs": 545,
+    "statuses": {
+      "200": 2
+    }
+  }
+}

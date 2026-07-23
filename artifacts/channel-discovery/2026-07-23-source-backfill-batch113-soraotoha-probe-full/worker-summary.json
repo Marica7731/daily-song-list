@@ -1,0 +1,23 @@
+{
+  "batch": "batch113",
+  "channelUrl": "https://www.youtube.com/@SoraOtoha",
+  "handle": "SoraOtoha",
+  "singer": "SoraOtoha",
+  "status": "probe_only",
+  "candidateCount": 115,
+  "reachedEndAllTabs": false,
+  "completeForImport": false,
+  "fullDiscoveryRan": false,
+  "acceptedExported": false,
+  "acceptedPath": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-23-source-backfill-batch113-soraotoha-probe-full\\accepted\\2026-07-23-source-backfill-batch113.accepted.json",
+  "dirtyAudit": {
+    "dropped": 0,
+    "suspicious": 36
+  },
+  "remoteCleanup": {
+    "status": "ok",
+    "logPath": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-23-source-backfill-batch113-soraotoha-probe-full\\cleanup-and-df.log"
+  },
+  "failureReason": "probe_only: candidateCount=115 exceeds 25; reachedEndAllTabs=false; full discovery and export skipped by batch rule",
+  "generatedAt": "2026-07-23T12:25:38.556594Z"
+}

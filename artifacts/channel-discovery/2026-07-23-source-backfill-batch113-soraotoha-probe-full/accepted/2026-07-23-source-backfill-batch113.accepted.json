@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-23T12:25:38.556594Z",
+  "batchId": "2026-07-23-source-backfill-batch113-soraotoha-probe-full",
+  "status": "probe_only",
+  "completeForImport": false,
+  "reason": "candidate-only probe did not satisfy full-discovery gate; accepted increment is intentionally empty",
+  "inputs": [],
+  "readStats": {
+    "inputDirs": 0,
+    "candidateOnlySources": 1,
+    "candidateCount": 115,
+    "videoDetails": 0,
+    "usableVideos": 0,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 0,
+    "skippedExistingRegressions": 0
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "songCount": 0,
+  "videos": [],
+  "occurrences": [],
+  "songs": []
+}
