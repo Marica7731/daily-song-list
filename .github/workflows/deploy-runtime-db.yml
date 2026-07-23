@@ -103,9 +103,28 @@ jobs:
             db_commit_sha="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='source_commit_sha';" || true)"
             db_latest_sha256="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='source_latest_sha256';" || true)"
             db_schema_version="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='schema_version';" || true)"
-            if [ "${db_commit_sha}" = "${EXPECTED_COMMIT_SHA}" ] && [ "${db_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ] && [ "${db_schema_version}" = "2" ]; then
-              echo "CODEX_RUNTIME_DB_REUSE_CANDIDATE commitSha=${db_commit_sha} latestSha256=${db_latest_sha256}"
+            reuse_reason=""
+            if [ "${db_commit_sha}" = "${EXPECTED_COMMIT_SHA}" ]; then
+              reuse_reason="exact-commit"
+            elif [ "${db_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ] && [ "${db_schema_version}" = "2" ]; then
+              git fetch --depth=50 origin main --prune >/dev/null 2>&1 || true
+              if git cat-file -e "${db_commit_sha}^{commit}" 2>/dev/null; then
+                changed_db_inputs="$(git diff --name-only "${db_commit_sha}" "${EXPECTED_COMMIT_SHA}" -- assets config data/latest.json data/status.json data/external package.json scripts server || true)"
+                if [ -z "${changed_db_inputs}" ]; then
+                  reuse_reason="workflow-only-commit"
+                else
+                  echo "CODEX_RUNTIME_DB_REUSE_SKIP changedDbInputs=${changed_db_inputs}"
+                fi
+              else
+                echo "CODEX_RUNTIME_DB_REUSE_SKIP missingCachedCommit=${db_commit_sha}"
+              fi
+            fi
+            if [ -n "${reuse_reason}" ] && [ "${db_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ] && [ "${db_schema_version}" = "2" ]; then
+              echo "CODEX_RUNTIME_DB_REUSE_CANDIDATE reason=${reuse_reason} commitSha=${db_commit_sha} latestSha256=${db_latest_sha256}"
               cp -f "${cached_db}" artifacts/runtime/song-rank.sqlite
+              if [ "${db_commit_sha}" != "${EXPECTED_COMMIT_SHA}" ]; then
+                sqlite3 artifacts/runtime/song-rank.sqlite "UPDATE meta SET value='${EXPECTED_COMMIT_SHA}' WHERE key='source_commit_sha';"
+              fi
               if python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only; then
                 echo "CODEX_RUNTIME_DB_REUSE_OK"
                 exit 0
@@ -300,14 +319,16 @@ jobs:
             rsync \
               --inplace \
               --partial \
-              --checksum \
+              --whole-file \
+              --ignore-times \
               -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite \
               "${VPS2_USER}@${VPS2_HOST}:${remote_db}"
             rsync \
               --inplace \
               --partial \
-              --checksum \
+              --whole-file \
+              --ignore-times \
               -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite.manifest.json \
               "${VPS2_USER}@${VPS2_HOST}:${remote_db}.manifest.json"
@@ -342,14 +363,16 @@ jobs:
             rsync \
               --inplace \
               --partial \
-              --checksum \
+              --whole-file \
+              --ignore-times \
               -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite \
               "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}"
             rsync \
               --inplace \
               --partial \
-              --checksum \
+              --whole-file \
+              --ignore-times \
               -e "ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no" \
               artifacts/runtime/song-rank.sqlite.manifest.json \
               "${VPS2_USER}@${VPS2_HOST}:${REMOTE_DB_PATH}.manifest.json"
