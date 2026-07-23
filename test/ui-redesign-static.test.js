@@ -388,6 +388,17 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function currentPageSize"), /defaultListPageSizeForMode\(\)/u);
   assert.match(functionBody("function renderPageSelectControl"), /document\.createElement\("input"\)/u);
   assert.match(functionBody("function renderPageSelectControl"), /textContent = "选页"/u);
+  assert.match(functionBody("function renderPageSelectControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function renderPageJumpControl"), /addEventListener\("submit", handlePaginationFormSubmit\)/u);
+  assert.match(functionBody("function bindPaginationInput"), /event\.key !== "Enter"/u);
+  assert.match(functionBody("function bindPaginationInput"), /event\.stopPropagation\(\)/u);
+  assert.match(functionBody("function handlePaginationFormSubmit"), /event\.preventDefault\(\)/u);
+  assert.match(functionBody("function bindEvents"), /event\.defaultPrevented/u);
+  assert.match(functionBody("async function requestApiViewPage"), /params\.set\("nicheOnly", "1"\)/u);
+  assert.match(functionBody("async function requestApiViewPage"), /params\.set\("hideUnknownArtist", "1"\)/u);
+  assert.match(appSource, /function sourceDetailPagePath[\s\S]{0,1800}filters\.nicheOnly/u);
+  assert.match(appSource, /function sourceDetailPagePath[\s\S]{0,1800}filters\.hideUnknownArtist/u);
+  assert.match(appSource, /function sourceDetailOccurrencesForContainer[\s\S]{0,1800}filterSourceDetailOccurrences/u);
   assert.doesNotMatch(functionBody("function renderPageSelectControl"), /document\.createElement\("select"\)|data\.pageSelect/u);
   assert.match(functionBody("function renderSourcePageSummary"), /document\.createElement\("input"\)/u);
   assert.match(functionBody("function renderSourcePageSummary"), /dataset\.sourcePageForm = "true"/u);
@@ -400,6 +411,8 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(cssSource, /\.source-page-jump input\s*\{[\s\S]*width: 52px;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-page-jump\s*\{[\s\S]*grid-template-columns: 52px auto 52px;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-page-jump input\s*\{[\s\S]*width: 52px;/u);
+  assert.match(cssSource, /\.page-select input\s*\{[\s\S]*box-sizing: border-box;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.page-select input\s*\{[\s\S]*min-height: 28px;[\s\S]*height: 28px;/u);
   assert.match(appSource, /setSourceDrawerPageForDrawer\(drawer, page\)/u);
   assert.match(appSource, /submitSourceDrawerPageForm\(sourcePageSubmit\.closest\("\[data-source-page-form\]"\)\)/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: none;/u);

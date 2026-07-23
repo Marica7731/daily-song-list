@@ -680,23 +680,13 @@ function bindEvents() {
   });
 
   els.content.addEventListener("submit", (event) => {
-    const form = event.target.closest("[data-page-form]");
-    if (!form) return;
-    event.preventDefault();
-    const input = form.querySelector("[data-page-input]");
-    const page = Number.parseInt(input?.value || "", 10);
-    setPage(page);
-    render({ focusAfterPageChange: true, urlMode: "push" });
+    if (event.defaultPrevented || !event.target.closest("[data-page-form]")) return;
+    handlePaginationFormSubmit(event);
   });
 
   els.content.addEventListener("submit", (event) => {
-    const form = event.target.closest("[data-page-jump-form]");
-    if (!form) return;
-    event.preventDefault();
-    const input = form.querySelector("[data-page-input]");
-    const page = Number.parseInt(input?.value || "1", 10);
-    setPage(page);
-    render({ focusAfterPageChange: true, urlMode: "push" });
+    if (event.defaultPrevented || !event.target.closest("[data-page-jump-form]")) return;
+    handlePaginationFormSubmit(event);
   });
 
   els.content.addEventListener("click", (event) => {
@@ -3578,6 +3568,8 @@ async function requestApiViewPage(request, range) {
     params.set("searchFields", searchFields.length ? searchFields.join(",") : "all");
   }
   if (Number(filters.minCount) > 1 && request.view !== "videos") params.set("minCount", String(Number(filters.minCount)));
+  if (filters.nicheOnly) params.set("nicheOnly", "1");
+  if (filters.hideUnknownArtist) params.set("hideUnknownArtist", "1");
   const payload = await readJson(`${API_RANKINGS_PATH}?${params.toString()}`, {
     cache: "no-cache",
     signal: request.signal,
@@ -5504,6 +5496,7 @@ function renderPageSelectControl(pageInfo, options) {
   input.inputMode = "numeric";
   input.dataset.pageInput = "true";
   input.setAttribute("aria-label", `输入页码，范围 1 到 ${pageInfo.pageCount}`);
+  bindPaginationInput(input);
   const total = document.createElement("span");
   total.className = "page-select-total";
   total.textContent = `/ ${pageInfo.pageCount}`;
@@ -5512,6 +5505,7 @@ function renderPageSelectControl(pageInfo, options) {
   submit.type = "submit";
   submit.textContent = "选页";
   submit.setAttribute("aria-label", "跳转到输入页码");
+  label.addEventListener("submit", handlePaginationFormSubmit);
   label.append(text, input, total, submit);
   return label;
 }
@@ -5533,14 +5527,37 @@ function renderPageJumpControl(pageInfo) {
   input.value = String(pageInfo.page);
   input.dataset.pageInput = "true";
   input.setAttribute("aria-label", `输入页码，当前第 ${pageInfo.page} 页，共 ${pageInfo.pageCount} 页`);
+  bindPaginationInput(input);
   label.append(text, input);
 
   const button = document.createElement("button");
   button.className = "pagination-button page-jump-button";
   button.type = "submit";
   button.textContent = "跳转";
+  form.addEventListener("submit", handlePaginationFormSubmit);
   form.append(label, button);
   return form;
+}
+
+function bindPaginationInput(input) {
+  input.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    event.stopPropagation();
+    handlePaginationFormSubmit(event);
+  });
+}
+
+function handlePaginationFormSubmit(event) {
+  const form = event.currentTarget?.matches?.("[data-page-form], [data-page-jump-form]")
+    ? event.currentTarget
+    : event.target?.closest?.("[data-page-form], [data-page-jump-form]");
+  if (!form) return;
+  event.preventDefault();
+  const input = form.querySelector("[data-page-input]");
+  const page = Number.parseInt(input?.value || "1", 10);
+  setPage(page);
+  render({ focusAfterPageChange: true, urlMode: "push" });
 }
 
 function schedulePageChangeFocus() {
@@ -7063,18 +7080,18 @@ function sourceDetailPathFromShard(record, occurrences = []) {
 async function sourceDetailOccurrencesForContainer(container, currentOccurrences = []) {
   const path = cleanText(container?._sourceDetailPath);
   if (container?._sourceDetailLoaded && Array.isArray(container._sourceDetailOccurrences) && container._sourceDetailOccurrences.length) {
-    return container._sourceDetailOccurrences;
+    return filterSourceDetailOccurrences(container._sourceDetailOccurrences);
   }
-  if (!path || container?._sourceDetailLoaded) return currentOccurrences || [];
+  if (!path || container?._sourceDetailLoaded) return filterSourceDetailOccurrences(currentOccurrences || []);
   const loaded = await loadSourceDetailOccurrences(path, cleanText(container?._sourceDetailKey));
   container._sourceDetailLoaded = true;
-  if (!loaded.length) return currentOccurrences || [];
+  if (!loaded.length) return filterSourceDetailOccurrences(currentOccurrences || []);
   const merged = window.FrontendUtils.mergeCompleteSourceOccurrences(
     loaded,
     container._sourceOccurrences || container._songSourceOccurrences || currentOccurrences,
   );
   container._sourceDetailOccurrences = merged;
-  return merged;
+  return filterSourceDetailOccurrences(merged);
 }
 
 async function sourceDetailPageForContainer(container, currentOccurrences = [], options = {}) {
@@ -7088,11 +7105,26 @@ async function sourceDetailPageForContainer(container, currentOccurrences = [], 
     return localSourceDetailPage(filterOccurrencesForSongKey(loaded, songKey, songTitle), { page, pageSize });
   }
   if (path) {
-    const result = await loadSourceDetailPage(path, cleanText(container?._sourceDetailKey), { page, pageSize });
+    const result = await loadSourceDetailPage(path, cleanText(container?._sourceDetailKey), {
+      page,
+      pageSize,
+      filters: sourceDetailFiltersForCurrentView(),
+    });
     if (result.found === false) throw new Error("来源详情不存在");
+    if (!isRuntimeSourceDetailPath(path)) {
+      return localSourceDetailPage(filterSourceDetailOccurrences(result.completeOccurrences || result.occurrences), { page, pageSize });
+    }
     return result;
   }
-  return localSourceDetailPage(currentOccurrences, { page, pageSize });
+  return localSourceDetailPage(filterSourceDetailOccurrences(currentOccurrences), { page, pageSize });
+}
+
+function filterSourceDetailOccurrences(occurrences = []) {
+  const filters = sourceDetailFiltersForCurrentView();
+  let result = occurrences || [];
+  if (filters.nicheOnly) result = filterNicheOccurrences(result);
+  if (filters.hideUnknownArtist) result = filterUnknownArtistOccurrences(result);
+  return result;
 }
 
 function filterOccurrencesForSongKey(occurrences = [], songKey = "", songTitle = "") {
@@ -7144,12 +7176,18 @@ async function loadSourceDetailOccurrences(path, key = "") {
 async function loadSourceDetailPage(path, key = "", options = {}) {
   const page = Math.max(1, Math.floor(Number(options.page) || 1));
   const pageSize = Math.max(1, Math.floor(Number(options.pageSize) || sourceDrawerPageSizeForMode()));
-  const requestPath = sourceDetailPagePath(path, page, pageSize);
+  const requestPath = sourceDetailPagePath(path, page, pageSize, options.filters);
   const cacheKey = key ? `page:${requestPath}#${key}` : `page:${requestPath}`;
   if (state.sourceDetailCache.has(cacheKey)) return state.sourceDetailCache.get(cacheKey);
   if (state.sourceDetailLoads.has(cacheKey)) return state.sourceDetailLoads.get(cacheKey);
   const load = readJson(requestPath, { cache: cacheModeForPath(path) })
-    .then((payload) => normalizeSourceDetailPagePayload(payload, key, { page, pageSize }))
+    .then((payload) => {
+      const occurrences = normalizeSourceDetailOccurrences(payload, key);
+      if (!isRuntimeSourceDetailPath(path)) {
+        return localSourceDetailPage(filterSourceDetailOccurrences(occurrences), { page, pageSize });
+      }
+      return normalizeSourceDetailPagePayload(payload, key, { page, pageSize });
+    })
     .then((result) => {
       state.sourceDetailCache.set(cacheKey, result);
       return result;
@@ -7161,9 +7199,28 @@ async function loadSourceDetailPage(path, key = "", options = {}) {
   return load;
 }
 
-function sourceDetailPagePath(path, page, pageSize) {
+function sourceDetailPagePath(path, page, pageSize, filters = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+  if (isRuntimeSourceDetailPath(path)) {
+    if (filters.nicheOnly) params.set("nicheOnly", "1");
+    if (filters.hideUnknownArtist) params.set("hideUnknownArtist", "1");
+  }
   const separator = path.includes("?") ? "&" : "?";
-  return `${path}${separator}page=${encodeURIComponent(String(page))}&pageSize=${encodeURIComponent(String(pageSize))}`;
+  return `${path}${separator}${params.toString()}`;
+}
+
+function isRuntimeSourceDetailPath(path) {
+  return String(path || "").includes("/api/sources/");
+}
+
+function sourceDetailFiltersForCurrentView() {
+  return {
+    nicheOnly: Boolean(state.nicheOnly),
+    hideUnknownArtist: shouldHideUnknownForCurrentView(),
+  };
 }
 
 function normalizeSourceDetailPagePayload(payload, key = "", options = {}) {
@@ -8788,8 +8845,27 @@ function indexBucketWeight(label) {
 async function readJson(path, options = {}) {
   const startedAt = performanceAvailable() ? performance.now() : 0;
   const response = await fetch(path, { cache: options.cache || cacheModeForPath(path), signal: options.signal });
-  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
   const text = await response.text();
+  if (!response.ok) {
+    let detail = "";
+    try {
+      const payload = JSON.parse(text);
+      detail = cleanText(payload?.message || payload?.error);
+    } catch {
+      // Keep the status diagnostic even when a proxy returns HTML or plain text.
+    }
+    const label = response.status === 400
+      ? "请求参数错误"
+      : response.status === 404
+        ? "请求资源不存在"
+        : response.status === 504
+          ? "查询超时"
+          : "请求失败";
+    const error = new Error(`${path}: ${label}（HTTP ${response.status}）${detail ? `：${detail}` : ""}`);
+    error.status = response.status;
+    error.body = text.slice(0, 512);
+    throw error;
+  }
   const parseMark = perfMark("json-parse:start");
   try {
     return JSON.parse(text);

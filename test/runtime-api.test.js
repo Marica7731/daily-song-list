@@ -322,15 +322,53 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(meta.meta.latest_generated_at, "2026-07-19T00:00:00.000Z");
 
     const rankings = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&pageSize=5`);
-    assert.equal(rankings.totalCount, 4);
-    assert.equal(rankings.totalOccurrenceCount, 5);
+    assert.equal(rankings.totalCount, 5);
+    assert.equal(rankings.totalOccurrenceCount, 7);
     assert.equal(rankings.records[0].title, "Song One");
     assert.equal(rankings.records[0].count, 2);
 
     const videoMetricRankings = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&metric=videos&pageSize=5`);
     assert.equal(videoMetricRankings.metric, "videos");
-    assert.equal(videoMetricRankings.totalCount, 4);
+    assert.equal(videoMetricRankings.totalCount, 5);
     assert.equal(videoMetricRankings.records[0].title, "Song One");
+
+    const nicheOnlyRankings = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&nicheOnly=1&pageSize=5`);
+    assert.equal(nicheOnlyRankings.totalCount, 1);
+    assert.equal(nicheOnlyRankings.totalOccurrenceCount, 1);
+    assert.deepEqual(nicheOnlyRankings.records.map((record) => record.title), ["Song One"]);
+    assert.equal(nicheOnlyRankings.records[0].count, 1);
+    assert.equal(nicheOnlyRankings.records[0].videoCount, 1);
+    assert.equal(nicheOnlyRankings.records[0].occurrences.length, 1);
+    assert.equal(nicheOnlyRankings.records[0].occurrences[0].item.videoId, "video-a");
+
+    const hideUnknownArtistRankings = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&hideUnknownArtist=1&pageSize=5`);
+    assert.equal(hideUnknownArtistRankings.totalCount, 4);
+    assert.equal(hideUnknownArtistRankings.totalOccurrenceCount, 5);
+    assert.equal(hideUnknownArtistRankings.records.some((record) => record.title === "ZZ Mystery Song"), false);
+
+    const hideUnknownArtistSourceSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=ZZ%20Mystery%20Song&searchFields=title&hideUnknownArtist=1&pageSize=5`);
+    assert.equal(hideUnknownArtistSourceSearch.totalCount, 0);
+
+    const nicheSourceSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Morning&nicheOnly=1&pageSize=5`);
+    assert.equal(nicheSourceSearch.totalCount, 1);
+    assert.equal(nicheSourceSearch.records[0].title, "Song One");
+
+    const nicheArtists = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=artists&nicheOnly=1&pageSize=5`);
+    assert.equal(nicheArtists.totalCount, 1);
+    assert.equal(nicheArtists.totalOccurrenceCount, 1);
+    assert.equal(nicheArtists.records[0].name, "Singer A");
+    assert.equal(nicheArtists.records[0].count, 1);
+    assert.equal(nicheArtists.records[0].videoCount, 1);
+    assert.equal(nicheArtists.records[0].occurrences.length, 1);
+
+    const nicheVtubers = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=vtubers&nicheOnly=1&pageSize=5`);
+    assert.equal(nicheVtubers.totalCount, 1);
+    assert.equal(nicheVtubers.totalOccurrenceCount, 1);
+    assert.equal(nicheVtubers.records[0].name, "Alpha Ch.");
+    assert.equal(nicheVtubers.records[0].count, 1);
+    assert.equal(nicheVtubers.records[0].songCount, 1);
+    assert.equal(nicheVtubers.records[0].videoCount, 1);
+    assert.equal(nicheVtubers.records[0].occurrences.length, 1);
 
     const songTitleSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Song%20One&pageSize=5`);
     assert.equal(songTitleSearch.totalCount, 1);
@@ -339,6 +377,18 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(songTitleSearch.records[0].count, 2);
     assert.equal(songTitleSearch.records[0].matchedBySource, undefined);
     assert.equal(songTitleSearch.records[0].globalCount, undefined);
+
+    const combinedSongArtistSearch = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Song%20One%20Singer%20A&searchFields=all&pageSize=5`,
+    );
+    assert.equal(combinedSongArtistSearch.totalCount, 1);
+    assert.equal(combinedSongArtistSearch.totalOccurrenceCount, 2);
+    assert.equal(combinedSongArtistSearch.records[0].title, "Song One");
+
+    const boundedSearchPage = await fetchJson(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Song&pageSize=200`,
+    );
+    assert.equal(boundedSearchPage.pageSize, 50);
 
     const songFieldSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Singer&searchFields=title,artist&pageSize=5`);
     assert.equal(songFieldSearch.searchScope, "song");
@@ -535,6 +585,30 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     const videoTitleChannelSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=videos&q=Night&searchFields=channel&pageSize=5`);
     assert.equal(videoTitleChannelSearch.totalCount, 0);
 
+    const badBooleanResponse = await fetch(
+      `http://127.0.0.1:${port}/api/rankings?range=all&view=songs&nicheOnly=maybe`,
+    );
+    const badBooleanBody = await badBooleanResponse.text();
+    assert.equal(badBooleanResponse.status, 400, badBooleanBody);
+    assert.match(badBooleanBody, /nicheOnly.*boolean/u);
+
+    const badRangeResponse = await fetch(
+      `http://127.0.0.1:${port}/api/rankings?range=tomorrow&view=songs`,
+    );
+    const badRangeBody = await badRangeResponse.text();
+    assert.equal(badRangeResponse.status, 400, badRangeBody);
+    assert.match(badRangeBody, /range must be 7d or all/u);
+
+    const shortQueryResponse = await fetch(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=a`);
+    const shortQueryBody = await shortQueryResponse.text();
+    assert.equal(shortQueryResponse.status, 400, shortQueryBody);
+    assert.match(shortQueryBody, /at least 2 characters/u);
+
+    const notFoundResponse = await fetch(`http://127.0.0.1:${port}/not-a-runtime-route`);
+    const notFoundBody = await notFoundResponse.text();
+    assert.equal(notFoundResponse.status, 404, notFoundBody);
+    assert.match(notFoundBody, /not_found/u);
+
     const sourceKey = rankings.records[0].sourceDetailKey;
     const source = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}`);
     assert.equal(source.found, true);
@@ -556,6 +630,17 @@ test("runtime API serves health and ranking rows from SQLite", async () => {
     assert.equal(sourceSecondPage.page, 2);
     assert.equal(sourceSecondPage.record.occurrences.length, 1);
     assert.equal(sourceSecondPage.record.occurrences[0].item.videoId, "video-b");
+
+    const mysterySourceKey = rankings.records.find((record) => record.title === "ZZ Mystery Song").sourceDetailKey;
+    const mysterySourceHidden = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(mysterySourceKey)}?page=1&pageSize=5&hideUnknownArtist=1`);
+    assert.equal(mysterySourceHidden.totalCount, 0);
+    assert.equal(mysterySourceHidden.totalOccurrenceCount, 0);
+    assert.deepEqual(mysterySourceHidden.record.occurrences, []);
+
+    const songOneSourceNiche = await fetchJson(`http://127.0.0.1:${port}/api/sources/${encodeURIComponent(sourceKey)}?page=1&pageSize=5&nicheOnly=1`);
+    assert.equal(songOneSourceNiche.totalCount, 1);
+    assert.equal(songOneSourceNiche.totalOccurrenceCount, 1);
+    assert.equal(songOneSourceNiche.record.occurrences[0].item.videoId, "video-a");
   } finally {
     child.kill();
     await waitForExit(child);
@@ -766,7 +851,10 @@ function writeLatestFixture(latestPath) {
               thumbnailUrl: "https://i.ytimg.com/vi/video-b/hqdefault.jpg",
               publishedTimestamp: 1784422800000,
               publishedText: "2026-07-19",
-              songs: [{ title: "Song One", artist: "Singer A", seconds: 30, time: "0:30" }],
+              songs: [
+                { title: "Song One", artist: "Singer A", seconds: 30, time: "0:30" },
+                { title: "ZZ Mystery Song", artist: "unknown", seconds: 31, time: "0:31" },
+              ],
             },
             {
               videoId: "video-c",
@@ -790,7 +878,10 @@ function writeLatestFixture(latestPath) {
               thumbnailUrl: "https://i.ytimg.com/vi/video-d/hqdefault.jpg",
               publishedTimestamp: 1784430000000,
               publishedText: "2026-07-19",
-              songs: [{ title: "Song Four", artist: "Singer D", seconds: 50, time: "0:50" }],
+              songs: [
+                { title: "Song Four", artist: "Singer D", seconds: 50, time: "0:50" },
+                { title: "ZZ Mystery Song", artist: "unknown", seconds: 51, time: "0:51" },
+              ],
             },
           ],
         },
@@ -854,6 +945,7 @@ async function waitForExit(child) {
 
 async function fetchJson(url) {
   const response = await fetch(url);
-  assert.equal(response.status, 200);
-  return await response.json();
+  const body = await response.text();
+  assert.equal(response.status, 200, body);
+  return JSON.parse(body);
 }

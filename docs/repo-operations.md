@@ -176,6 +176,7 @@ curl.exe -sS "https://ytb-song-rank.culua.com/api/rankings?range=all&view=vtuber
 - `/healthz` 返回 HTTP 200 且 `status=ok`
 - `/api/meta` 计数合理，`source_occurrences`、`ranking_rows` 为正数
 - 关键 `/api/rankings` 查询不返回 500/504
+- 带 `q` 的列表请求最多返回 50 条；仅由单字符字母、数字或文字组成的短查询返回 400，避免触发无界大 LIKE。两字符及以上查询（例如 `晴る`）以及包含有效长词的组合查询仍可用，完整来源通过 `/api/sources/{sourceDetailKey}?page=...` 分页读取。
 - GitHub Actions 对应 run 是 `completed/success`
 - 用户可见页面不再依赖静态兜底错误状态
 

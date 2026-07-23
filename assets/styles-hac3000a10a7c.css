@@ -1936,6 +1936,7 @@ mark {
 .page-select input {
   width: 46px;
   min-height: var(--chip-height);
+  box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   padding: 0 6px;
@@ -1975,6 +1976,7 @@ mark {
 .page-jump input {
   width: 52px;
   min-height: var(--chip-height);
+  box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
   padding: 0 var(--space-2);
@@ -3974,7 +3976,8 @@ mark {
   }
 
   .page-select input {
-    min-height: var(--chip-height);
+    min-height: 28px;
+    height: 28px;
     padding: 0 4px;
   }
 

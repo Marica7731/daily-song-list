@@ -16,6 +16,8 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 
 DEFAULT_DB_PATH = Path("artifacts/runtime/song-rank.sqlite")
+MAX_RUNTIME_PAGE_SIZE = 200
+MAX_RUNTIME_SEARCH_PAGE_SIZE = 50
 
 
 def configure_stdio() -> None:
@@ -117,15 +119,19 @@ def meta_payload(db_path: Path) -> dict:
 def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
     range_id = first(query, "range", "all")
     view = first(query, "view", "songs")
-    page = parse_int(first(query, "page", "1"), "page")
-    page_size = min(200, max(1, parse_int(first(query, "pageSize", "50"), "pageSize")))
     q = first(query, "q", "").strip()
+    page = parse_int(first(query, "page", "1"), "page")
+    page_size_limit = MAX_RUNTIME_SEARCH_PAGE_SIZE if q else MAX_RUNTIME_PAGE_SIZE
+    page_size = min(page_size_limit, max(1, parse_int(first(query, "pageSize", "50"), "pageSize")))
+    validate_search_query(q)
     search_scope = normalize_search_scope(first(query, "searchScope", first(query, "searchField", "all")))
     search_fields = normalize_search_fields(first(query, "searchFields", ""))
     effective_search_scope = search_scope_from_fields(search_fields) if search_fields is not None and search_scope == "all" else search_scope
     ranking_search_scope = ranking_search_scope_for_source_fields(effective_search_scope, search_fields)
     metric = normalize_metric(view, first(query, "metric", "count"))
     min_count = max(1, parse_int(first(query, "minCount", "1"), "minCount"))
+    niche_only = parse_bool(first(query, "nicheOnly", "0"), "nicheOnly")
+    hide_unknown_artist = parse_bool(first(query, "hideUnknownArtist", "0"), "hideUnknownArtist")
     if range_id not in {"7d", "all"}:
         raise ValueError("range must be 7d or all")
     if view not in {"songs", "songIndex", "artists", "videos", "vtubers", "vsingerSongs"}:
@@ -142,6 +148,8 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
             page_size,
             min_count,
             search_fields,
+            niche_only,
+            hide_unknown_artist,
         )
         if source_payload["totalCount"] > 0:
             return source_payload
@@ -158,19 +166,30 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
                 base_total,
                 "channel",
                 search_fields,
+                niche_only,
+                hide_unknown_artist,
             )
     if q and view in {"songs", "songIndex", "artists", "vsingerSongs"} and effective_search_scope in {
         "source",
         "video",
         "channel",
     } and ranking_search_scope == effective_search_scope:
-        return source_matched_rankings_payload(db_path, range_id, view, metric, q, effective_search_scope, page, page_size, min_count, search_fields)
+        return source_matched_rankings_payload(
+            db_path, range_id, view, metric, q, effective_search_scope, page, page_size,
+            min_count, search_fields, niche_only, hide_unknown_artist,
+        )
     base_where = ["range_id = ?", "view = ?", "metric = ?", "scope_key = 'all'"]
     base_params: list[object] = [range_id, view, metric]
     where = list(base_where)
     params = list(base_params)
+    filter_where, filter_params = ranking_filter_sql(view, niche_only, hide_unknown_artist)
+    where.extend(filter_where)
+    params.extend(filter_params)
+    filtered_count_sql, filtered_song_count_sql, filtered_video_count_sql, filtered_timestamp_count_sql = ranking_row_count_sql(
+        view, niche_only, hide_unknown_artist,
+    )
     if min_count > 1 and view not in {"videos", "vtubers"}:
-        column = "video_count" if metric == "videos" else "count"
+        column = filtered_video_count_sql if metric == "videos" else filtered_count_sql
         where.append(f"{column} >= ?")
         params.append(min_count)
     if q:
@@ -183,26 +202,40 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
 
     with connect(db_path) as conn:
         base_total = conn.execute(
-            f"SELECT COUNT(*) AS total_count FROM ranking_rows WHERE {base_where_sql}",
+            f"SELECT COUNT(*) AS total_count FROM ranking_rows r WHERE {base_where_sql}",
             base_params,
         ).fetchone()["total_count"]
         totals = conn.execute(
-            f"SELECT COUNT(*) AS total_count, COALESCE(SUM(count), 0) AS total_occurrences, COALESCE(SUM(song_count), 0) AS total_songs, COALESCE(SUM(video_count), 0) AS total_videos FROM ranking_rows WHERE {where_sql}",
+            f"SELECT COUNT(*) AS total_count, COALESCE(SUM({filtered_count_sql}), 0) AS total_occurrences, COALESCE(SUM({filtered_song_count_sql}), 0) AS total_songs, COALESCE(SUM({filtered_video_count_sql}), 0) AS total_videos FROM ranking_rows r WHERE {where_sql}",
             params,
         ).fetchone()
         total = totals["total_count"]
-        order_sql = f"{'video_count' if metric == 'videos' else 'count'} DESC, rank ASC" if q else "rank"
+        if niche_only or hide_unknown_artist:
+            order_column = filtered_video_count_sql if metric == "videos" else filtered_count_sql
+            order_sql = f"{order_column} DESC, rank ASC"
+        else:
+            order_sql = f"{'video_count' if metric == 'videos' else 'count'} DESC, rank ASC" if q else "rank"
         rows = conn.execute(
             f"""
-            SELECT rank, detail_key, title, artist, name, count, song_count, video_count, timestamp_count, payload_json
-            FROM ranking_rows
+            SELECT rank, detail_key, title, artist, name,
+              {filtered_count_sql} AS count,
+              {filtered_song_count_sql} AS song_count,
+              {filtered_video_count_sql} AS video_count,
+              {filtered_timestamp_count_sql} AS timestamp_count,
+              payload_json
+            FROM ranking_rows r
             WHERE {where_sql}
             ORDER BY {order_sql}
             LIMIT ? OFFSET ?
             """,
             [*params, page_size, offset],
         ).fetchall()
-        records = [decode_row(row) for row in rows]
+        records = [
+            decode_filtered_ranking_row(
+                conn, row, range_id, view, niche_only, hide_unknown_artist,
+            )
+            for row in rows
+        ]
         if (
             q
             and view == "songs"
@@ -221,13 +254,21 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
                 page_size,
                 min_count,
                 search_fields,
+                niche_only,
+                hide_unknown_artist,
             )
             if source_payload["totalCount"] > 0:
                 return source_payload
-            vtuber_payload = vtuber_song_fallback_payload(conn, range_id, q, view, page, page_size, min_count, base_total, effective_search_scope, search_fields)
+            vtuber_payload = vtuber_song_fallback_payload(
+                conn, range_id, q, view, page, page_size, min_count, base_total,
+                effective_search_scope, search_fields, niche_only, hide_unknown_artist,
+            )
             if vtuber_payload["totalCount"] > 0:
                 return vtuber_payload
-            video_payload = video_song_fallback_payload(conn, range_id, q, view, page, page_size, min_count, base_total, effective_search_scope, search_fields)
+            video_payload = video_song_fallback_payload(
+                conn, range_id, q, view, page, page_size, min_count, base_total,
+                effective_search_scope, search_fields, niche_only, hide_unknown_artist,
+            )
             if video_payload["totalCount"] > 0:
                 return video_payload
         if (
@@ -249,6 +290,8 @@ def rankings_payload(db_path: Path, query: dict[str, list[str]]) -> dict:
                 page_size,
                 min_count,
                 ["video"],
+                niche_only,
+                hide_unknown_artist,
             )
     return {
         "schemaVersion": 1,
@@ -280,6 +323,8 @@ def vtuber_song_fallback_payload(
     base_total: int,
     search_scope: str = "all",
     search_fields: list[str] | None = None,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
 ) -> dict:
     clause, values = search_filter_for_view("vtubers", q, search_scope)
     rows = conn.execute(
@@ -305,6 +350,8 @@ def vtuber_song_fallback_payload(
         match_terms = vtuber_fallback_match_terms(vtuber, row, q)
         total_videos += as_non_negative_int(vtuber.get("videoCount"))
         for song in vtuber.get("songs") or []:
+            if not song_passes_runtime_filters(song, niche_only, hide_unknown_artist):
+                continue
             title = str(song.get("name") or song.get("title") or song.get("key") or "").strip()
             if not title:
                 continue
@@ -392,6 +439,8 @@ def video_song_fallback_payload(
     base_total: int,
     search_scope: str = "all",
     search_fields: list[str] | None = None,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
 ) -> dict:
     clause, values = column_search_filter(q, ["lower(title)", "lower(detail_key)"])
     rows = conn.execute(
@@ -424,6 +473,8 @@ def video_song_fallback_payload(
             "publishedText": video.get("publishedText") or "",
         }
         for song in video.get("songs") or []:
+            if not song_passes_runtime_filters(song, niche_only, hide_unknown_artist):
+                continue
             title = str(song.get("title") or song.get("name") or "").strip()
             if not title:
                 continue
@@ -727,17 +778,24 @@ def source_matched_rankings_payload(
     page_size: int,
     min_count: int,
     search_fields: list[str] | None = None,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
 ) -> dict:
     base_where = ["r.range_id = ?", "r.view = ?", "r.metric = ?", "r.scope_key = 'all'", "r.detail_key != ''"]
     base_params: list[object] = [range_id, view, metric]
     candidate_where = list(base_where)
     candidate_params = list(base_params)
+    filter_where, filter_params = ranking_filter_sql(view, niche_only, hide_unknown_artist)
+    candidate_where.extend(filter_where)
+    candidate_params.extend(filter_params)
     having = ""
     if min_count > 1 and view not in {"videos", "vtubers"}:
         having = "HAVING matched_videos >= ?" if metric == "videos" else "HAVING matched_count >= ?"
     offset = (max(1, page) - 1) * page_size
     with connect(db_path) as conn:
-        source_rows_sql, source_values = source_occurrence_match_rows_sql(conn, range_id, q, search_scope, search_fields)
+        source_rows_sql, source_values = source_occurrence_match_rows_sql(
+            conn, range_id, q, search_scope, search_fields, niche_only, hide_unknown_artist,
+        )
         source_entity_type = source_detail_entity_type_for_view(view)
         entity_clause, entity_values = search_filter_for_view(view, q, entity_source_search_scope_for_view(view))
         conn.execute("DROP TABLE IF EXISTS temp.matched_sources")
@@ -798,9 +856,11 @@ def source_matched_rankings_payload(
         matched_params: list[object] = [*entity_values, range_id, source_entity_type, *candidate_params]
         if min_count > 1 and view not in {"videos", "vtubers"}:
             matched_params.append(min_count)
+        base_filter_clauses, base_filter_params = ranking_filter_sql(view, niche_only, hide_unknown_artist)
+        base_filter_sql = " AND ".join(base_filter_clauses) or "1 = 1"
         base_total = conn.execute(
-            "SELECT COUNT(*) AS total_count FROM ranking_rows WHERE range_id = ? AND view = ? AND metric = ? AND scope_key = 'all'",
-            base_params,
+            f"SELECT COUNT(*) AS total_count FROM ranking_rows r WHERE range_id = ? AND view = ? AND metric = ? AND scope_key = 'all' AND {base_filter_sql}",
+            [*base_params, *base_filter_params],
         ).fetchone()["total_count"]
         totals = conn.execute(
             f"""
@@ -829,7 +889,7 @@ def source_matched_rankings_payload(
             [*matched_params, page_size, offset],
         ).fetchall()
         records = [
-            decode_source_matched_row(conn, row, q, search_scope, search_fields)
+            decode_source_matched_row(conn, row, q, search_scope, search_fields, niche_only, hide_unknown_artist)
             for row in rows
         ]
     total = totals["total_count"]
@@ -876,27 +936,35 @@ def source_occurrence_match_rows_sql(
     query: str,
     scope: str,
     search_fields: list[str] | None = None,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
 ) -> tuple[str, list[object]]:
     fts_table = source_occurrence_fts_table(conn, query, scope, search_fields)
     if fts_table:
+        source_filter, source_filter_values = source_occurrence_scope_sql(niche_only, hide_unknown_artist)
         return (
             f"""
-            SELECT source_key, video_id, CAST(position AS INTEGER) AS position
-            FROM {fts_table}
-            WHERE range_id = ?
+            SELECT f.source_key, f.video_id, CAST(f.position AS INTEGER) AS position
+            FROM {fts_table} f
+            JOIN source_occurrences so
+              ON so.source_key = f.source_key AND so.position = CAST(f.position AS INTEGER)
+            WHERE f.range_id = ?
               AND {fts_table} MATCH ?
+              AND {source_filter}
             """,
-            [range_id, source_fts_match_query(query)],
+            [range_id, source_fts_match_query(query), *source_filter_values],
         )
     source_clause, source_values = source_occurrence_filter(query, scope, search_fields)
+    source_filter, source_filter_values = source_occurrence_scope_sql(niche_only, hide_unknown_artist)
     return (
         f"""
         SELECT so.source_key, so.video_id, so.position
         FROM source_occurrences so
         WHERE so.range_id = ?
           AND {source_clause}
+          AND {source_filter}
         """,
-        [range_id, *source_values],
+        [range_id, *source_values, *source_filter_values],
     )
 
 
@@ -953,6 +1021,22 @@ def sqlite_table_exists(conn: sqlite3.Connection, table: str) -> bool:
     return row is not None
 
 
+def source_occurrence_scope_sql(niche_only: bool, hide_unknown_artist: bool) -> tuple[str, list[object]]:
+    return occurrence_scope_sql("so", niche_only, hide_unknown_artist)
+
+
+def occurrence_scope_sql(alias: str, niche_only: bool, hide_unknown_artist: bool) -> tuple[str, list[object]]:
+    clauses = []
+    if niche_only:
+        clauses.append(f"json_extract({alias}.payload_json, '$.song.isNiche') = 1")
+    if hide_unknown_artist:
+        clauses.append(
+            f"lower(trim(COALESCE(json_extract({alias}.payload_json, '$.song.artist'), ''))) NOT IN "
+            "('', 'unknown', '未記載', '未记载', '待补歌手', '待補歌手')"
+        )
+    return " AND ".join(clauses) or "1 = 1", []
+
+
 def source_occurrence_filter(query: str, scope: str, search_fields: list[str] | None = None) -> tuple[str, list[str]]:
     groups = parse_search_groups(query)
     if not groups:
@@ -995,9 +1079,19 @@ def source_occurrence_search_fields(scope: str, search_fields: list[str] | None 
     return ["lower(so.search_text)"]
 
 
-def decode_source_matched_row(conn: sqlite3.Connection, row: sqlite3.Row, query: str, search_scope: str, search_fields: list[str] | None = None) -> dict:
+def decode_source_matched_row(
+    conn: sqlite3.Connection,
+    row: sqlite3.Row,
+    query: str,
+    search_scope: str,
+    search_fields: list[str] | None = None,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
+) -> dict:
     record = decode_row(row)
-    matched_occurrences = matched_source_occurrences(conn, row["matched_source_key"], query, search_scope, 20, search_fields)
+    matched_occurrences = matched_source_occurrences(
+        conn, row["matched_source_key"], query, search_scope, 20, search_fields, niche_only, hide_unknown_artist,
+    )
     matched_count = int(row["matched_count"] or 0)
     matched_videos = int(row["matched_videos"] or 0)
     record["globalCount"] = record.get("count", 0)
@@ -1059,18 +1153,22 @@ def matched_source_occurrences(
     search_scope: str,
     limit: int,
     search_fields: list[str] | None = None,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
 ) -> list[sqlite3.Row]:
     clause, values = source_occurrence_filter(query, search_scope, search_fields)
+    source_filter, source_filter_values = source_occurrence_scope_sql(niche_only, hide_unknown_artist)
     return conn.execute(
         f"""
         SELECT payload_json, video_id
         FROM source_occurrences so
         WHERE so.source_key = ?
           AND {clause}
+          AND {source_filter}
         ORDER BY position
         LIMIT ?
         """,
-        [source_key, *values, limit],
+        [source_key, *values, *source_filter_values, limit],
     ).fetchall()
 
 
@@ -1288,15 +1386,22 @@ def source_payload(db_path: Path, key: str, query: dict[str, list[str]] | None =
         raise ValueError("source key is required")
     source_query = query or {}
     q = first(source_query, "q", "").strip()
+    validate_search_query(q)
+    niche_only = parse_bool(first(source_query, "nicheOnly", "0"), "nicheOnly")
+    hide_unknown_artist = parse_bool(first(source_query, "hideUnknownArtist", "0"), "hideUnknownArtist")
+    filter_active = niche_only or hide_unknown_artist
     use_paging = "page" in source_query or "pageSize" in source_query
     page = max(1, parse_int(first(source_query, "page", "1"), "page"))
-    page_size = min(200, max(1, parse_int(first(source_query, "pageSize", "50"), "pageSize")))
+    page_size_limit = MAX_RUNTIME_SEARCH_PAGE_SIZE if q else MAX_RUNTIME_PAGE_SIZE
+    page_size = min(page_size_limit, max(1, parse_int(first(source_query, "pageSize", "50"), "pageSize")))
     with connect(db_path) as conn:
         row = conn.execute("SELECT payload_json FROM source_details WHERE source_key = ?", (key,)).fetchone()
         if use_paging:
-            occurrence_rows, total_occurrences, total_videos, page = paged_source_occurrences(conn, key, q, page, page_size)
+            occurrence_rows, total_occurrences, total_videos, page = paged_source_occurrences(
+                conn, key, q, page, page_size, niche_only, hide_unknown_artist,
+            )
         else:
-            occurrence_rows = all_source_occurrences(conn, key, q)
+            occurrence_rows = all_source_occurrences(conn, key, q, niche_only, hide_unknown_artist)
             total_occurrences = len(occurrence_rows)
             total_videos = len({
                 occurrence["video_id"]
@@ -1307,8 +1412,10 @@ def source_payload(db_path: Path, key: str, query: dict[str, list[str]] | None =
         return {"schemaVersion": 1, "found": False, "sourceKey": key}
     record = json.loads(row["payload_json"])
     record["occurrences"] = [json.loads(occurrence["payload_json"]) for occurrence in occurrence_rows]
-    if q or use_paging:
+    if q or use_paging or filter_active:
         record["sourceFilterQuery"] = q
+        record["nicheOnly"] = niche_only
+        record["hideUnknownArtist"] = hide_unknown_artist
         record["count"] = total_occurrences
         record["timestampCount"] = total_occurrences
         record["videoCount"] = total_videos
@@ -1329,19 +1436,26 @@ def source_payload(db_path: Path, key: str, query: dict[str, list[str]] | None =
     return payload
 
 
-def all_source_occurrences(conn: sqlite3.Connection, key: str, q: str) -> list[sqlite3.Row]:
+def all_source_occurrences(
+    conn: sqlite3.Connection,
+    key: str,
+    q: str,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
+) -> list[sqlite3.Row]:
+    source_filter, source_filter_values = source_occurrence_scope_sql(niche_only, hide_unknown_artist)
     if q:
         return conn.execute(
             """
-            SELECT payload_json, video_id FROM source_occurrences
-            WHERE source_key = ? AND lower(search_text) LIKE ?
+            SELECT so.payload_json, so.video_id FROM source_occurrences so
+            WHERE so.source_key = ? AND lower(so.search_text) LIKE ? AND {source_filter}
             ORDER BY position
-            """,
-            (key, f"%{q.lower()}%"),
+            """.format(source_filter=source_filter),
+            [key, f"%{q.lower()}%", *source_filter_values],
         ).fetchall()
     return conn.execute(
-        "SELECT payload_json, video_id FROM source_occurrences WHERE source_key = ? ORDER BY position",
-        (key,),
+        f"SELECT so.payload_json, so.video_id FROM source_occurrences so WHERE so.source_key = ? AND {source_filter} ORDER BY so.position",
+        [key, *source_filter_values],
     ).fetchall()
 
 
@@ -1351,20 +1465,24 @@ def paged_source_occurrences(
     q: str,
     page: int,
     page_size: int,
+    niche_only: bool = False,
+    hide_unknown_artist: bool = False,
 ) -> tuple[list[sqlite3.Row], int, int, int]:
     group_expr = "COALESCE(NULLIF(video_id, ''), 'position:' || position)"
-    where = ["source_key = ?"]
+    source_filter, source_filter_values = source_occurrence_scope_sql(niche_only, hide_unknown_artist)
+    where = ["so.source_key = ?", source_filter]
     params: list[object] = [key]
     if q:
-        where.append("lower(search_text) LIKE ?")
+        where.append("lower(so.search_text) LIKE ?")
         params.append(f"%{q.lower()}%")
     where_sql = " AND ".join(where)
+    params.extend(source_filter_values)
     total_occurrences = conn.execute(
-        f"SELECT COUNT(*) AS total_count FROM source_occurrences WHERE {where_sql}",
+        f"SELECT COUNT(*) AS total_count FROM source_occurrences so WHERE {where_sql}",
         params,
     ).fetchone()["total_count"]
     total_videos = conn.execute(
-        f"SELECT COUNT(*) AS total_count FROM (SELECT 1 FROM source_occurrences WHERE {where_sql} GROUP BY {group_expr})",
+        f"SELECT COUNT(*) AS total_count FROM (SELECT 1 FROM source_occurrences so WHERE {where_sql} GROUP BY {group_expr})",
         params,
     ).fetchone()["total_count"]
     page_count = max(1, (total_videos + page_size - 1) // page_size)
@@ -1373,10 +1491,10 @@ def paged_source_occurrences(
     group_rows = conn.execute(
         f"""
         SELECT {group_expr} AS group_key
-        FROM source_occurrences
+        FROM source_occurrences so
         WHERE {where_sql}
         GROUP BY group_key
-        ORDER BY MIN(position)
+        ORDER BY MIN(so.position)
         LIMIT ? OFFSET ?
         """,
         [*params, page_size, offset],
@@ -1387,10 +1505,10 @@ def paged_source_occurrences(
     placeholders = ",".join("?" for _ in group_keys)
     occurrence_rows = conn.execute(
         f"""
-        SELECT payload_json, video_id FROM source_occurrences
+        SELECT so.payload_json, so.video_id FROM source_occurrences so
         WHERE {where_sql}
-          AND {group_expr} IN ({placeholders})
-        ORDER BY position
+        AND {group_expr} IN ({placeholders})
+        ORDER BY so.position
         """,
         [*params, *group_keys],
     ).fetchall()
@@ -1438,6 +1556,266 @@ def parse_int(value: str, label: str) -> int:
         return int(value)
     except ValueError as exc:
         raise ValueError(f"{label} must be an integer") from exc
+
+
+def parse_bool(value: str, label: str) -> bool:
+    normalized = (value or "").strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"", "0", "false", "no", "off"}:
+        return False
+    raise ValueError(f"{label} must be a boolean")
+
+
+def validate_search_query(query: str) -> None:
+    terms = [term for group in parse_search_groups(query) for term in group]
+    if terms and all(
+        len(unicodedata.normalize("NFKC", term).strip()) < 2
+        and any(character.isalnum() for character in unicodedata.normalize("NFKC", term).strip())
+        for term in terms
+    ):
+        raise ValueError("q terms must contain at least 2 characters")
+
+
+def ranking_filter_sql(view: str, niche_only: bool, hide_unknown_artist: bool) -> tuple[list[str], list[object]]:
+    clauses: list[str] = []
+    if view in {"songs", "songIndex"}:
+        if niche_only or hide_unknown_artist:
+            occurrence_filter, _ = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+            clauses.append(
+                "EXISTS (SELECT 1 FROM occurrences o JOIN songs s ON s.song_key = o.song_key "
+                "WHERE o.range_id = r.range_id AND s.title = r.title AND s.artist = r.artist "
+                f"AND {occurrence_filter})"
+            )
+    elif view == "artists":
+        if niche_only or hide_unknown_artist:
+            occurrence_filter, _ = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+            clauses.append(
+                "EXISTS (SELECT 1 FROM occurrences o JOIN songs s ON s.song_key = o.song_key "
+                "WHERE o.range_id = r.range_id AND lower(trim(s.artist)) = lower(trim(r.name)) "
+                f"AND {occurrence_filter})"
+            )
+    elif view == "videos":
+        if niche_only or hide_unknown_artist:
+            occurrence_filter, _ = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+            clauses.append(
+                "EXISTS (SELECT 1 FROM occurrences o "
+                "WHERE o.range_id = r.range_id AND o.video_id = r.detail_key "
+                f"AND {occurrence_filter})"
+            )
+    elif view == "vtubers":
+        if niche_only or hide_unknown_artist:
+            occurrence_filter, _ = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+            clauses.append(
+                "EXISTS (SELECT 1 FROM occurrences o "
+                "WHERE o.range_id = r.range_id AND "
+                f"{vtuber_row_occurrence_match_sql('o', 'r')} AND {occurrence_filter})"
+            )
+    return clauses, []
+
+
+def ranking_row_count_sql(
+    view: str,
+    niche_only: bool,
+    hide_unknown_artist: bool,
+) -> tuple[str, str, str, str]:
+    if not (niche_only or hide_unknown_artist):
+        return "r.count", "r.song_count", "r.video_count", "r.timestamp_count"
+    occurrence_filter, _ = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+    if view in {"songs", "songIndex"}:
+        where_sql = f"o.range_id = r.range_id AND s.title = r.title AND s.artist = r.artist AND {occurrence_filter}"
+        count_sql = f"(SELECT COUNT(*) FROM occurrences o JOIN songs s ON s.song_key = o.song_key WHERE {where_sql})"
+        video_count_sql = f"(SELECT COUNT(DISTINCT o.video_id) FROM occurrences o JOIN songs s ON s.song_key = o.song_key WHERE {where_sql})"
+        return count_sql, "r.song_count", video_count_sql, count_sql
+    if view == "artists":
+        where_sql = f"o.range_id = r.range_id AND lower(trim(s.artist)) = lower(trim(r.name)) AND {occurrence_filter}"
+        count_sql = f"(SELECT COUNT(*) FROM occurrences o JOIN songs s ON s.song_key = o.song_key WHERE {where_sql})"
+        song_count_sql = f"(SELECT COUNT(DISTINCT o.song_key) FROM occurrences o JOIN songs s ON s.song_key = o.song_key WHERE {where_sql})"
+        video_count_sql = f"(SELECT COUNT(DISTINCT o.video_id) FROM occurrences o JOIN songs s ON s.song_key = o.song_key WHERE {where_sql})"
+        return count_sql, song_count_sql, video_count_sql, count_sql
+    if view == "videos":
+        where_sql = f"o.range_id = r.range_id AND o.video_id = r.detail_key AND {occurrence_filter}"
+        count_sql = f"(SELECT COUNT(*) FROM occurrences o WHERE {where_sql})"
+        song_count_sql = f"(SELECT COUNT(DISTINCT o.song_key) FROM occurrences o WHERE {where_sql})"
+        video_count_sql = f"(CASE WHEN {count_sql} > 0 THEN 1 ELSE 0 END)"
+        return count_sql, song_count_sql, video_count_sql, count_sql
+    if view == "vtubers":
+        where_sql = f"o.range_id = r.range_id AND {vtuber_row_occurrence_match_sql('o', 'r')} AND {occurrence_filter}"
+        count_sql = f"(SELECT COUNT(*) FROM occurrences o WHERE {where_sql})"
+        song_count_sql = f"(SELECT COUNT(DISTINCT o.song_key) FROM occurrences o WHERE {where_sql})"
+        video_count_sql = f"(SELECT COUNT(DISTINCT o.video_id) FROM occurrences o WHERE {where_sql})"
+        return count_sql, song_count_sql, video_count_sql, count_sql
+    return "r.count", "r.song_count", "r.video_count", "r.timestamp_count"
+
+
+def vtuber_row_occurrence_match_sql(occurrence_alias: str, row_alias: str) -> str:
+    return (
+        f"(lower(trim(COALESCE(json_extract({occurrence_alias}.payload_json, '$.video.channelId'), ''))) = "
+        f"lower(trim({row_alias}.detail_key)) OR "
+        f"lower(trim(COALESCE(json_extract({occurrence_alias}.payload_json, '$.video.channelHandle'), ''))) = "
+        f"lower(trim({row_alias}.detail_key)) OR "
+        f"lower(trim(COALESCE(json_extract({occurrence_alias}.payload_json, '$.video.channelName'), ''))) = "
+        f"lower(trim({row_alias}.name)))"
+    )
+
+
+def decode_filtered_ranking_row(
+    conn: sqlite3.Connection,
+    row: sqlite3.Row,
+    range_id: str,
+    view: str,
+    niche_only: bool,
+    hide_unknown_artist: bool,
+) -> dict:
+    record = decode_row(row)
+    if not (niche_only or hide_unknown_artist):
+        return record
+    record["count"] = int(row["count"] or 0)
+    record["songCount"] = int(row["song_count"] or 0)
+    record["videoCount"] = int(row["video_count"] or 0)
+    record["timestampCount"] = int(row["timestamp_count"] or 0)
+    if view in {"songs", "songIndex"}:
+        occurrences = filtered_occurrence_payloads(
+            conn, range_id, row["detail_key"], "song", niche_only, hide_unknown_artist,
+            title=row["title"], artist=row["artist"],
+        )
+        record["occurrences"] = occurrences[:20]
+        record["occurrencePreviewLimited"] = len(occurrences) > len(record["occurrences"])
+        record["channels"] = occurrence_channel_counts(occurrences)
+    elif view == "videos":
+        occurrences = filtered_occurrence_payloads(
+            conn, range_id, row["detail_key"], "video_id", niche_only, hide_unknown_artist,
+        )
+        songs = []
+        seen_song_keys: set[str] = set()
+        for occurrence in occurrences:
+            song = occurrence.get("song") if isinstance(occurrence.get("song"), dict) else {}
+            title = str(song.get("title") or "").strip()
+            artist = str(song.get("artist") or "").strip()
+            song_key = compact_text(f"{title}::{artist}")
+            if title and song_key not in seen_song_keys:
+                seen_song_keys.add(song_key)
+                songs.append(song)
+        record["songs"] = songs
+        record["songCount"] = len(songs)
+    elif view in {"artists", "vtubers"}:
+        key_column = "artist" if view == "artists" else "vtuber"
+        occurrences = filtered_occurrence_payloads(
+            conn,
+            range_id,
+            row["detail_key"],
+            key_column,
+            niche_only,
+            hide_unknown_artist,
+            artist=row["name"] if view == "artists" else "",
+            channel_name=row["name"] if view == "vtubers" else "",
+        )
+        record["occurrences"] = occurrences[:20]
+        record["occurrencePreviewLimited"] = len(occurrences) > len(record["occurrences"])
+        record["songs"] = occurrence_song_counts(occurrences)
+        record["songCount"] = len(record["songs"])
+        if view == "artists":
+            record["channels"] = occurrence_channel_counts(occurrences)
+    return record
+
+
+def filtered_occurrence_payloads(
+    conn: sqlite3.Connection,
+    range_id: str,
+    key: str,
+    key_column: str,
+    niche_only: bool,
+    hide_unknown_artist: bool,
+    title: str = "",
+    artist: str = "",
+    channel_name: str = "",
+) -> list[dict]:
+    if key_column not in {"song", "artist", "video_id", "vtuber"}:
+        raise ValueError("unsupported occurrence key column")
+    occurrence_filter, _ = occurrence_scope_sql("o", niche_only, hide_unknown_artist)
+    if key_column in {"song", "artist"}:
+        from_sql = "occurrences o JOIN songs s ON s.song_key = o.song_key"
+        if key_column == "song":
+            key_clause = "s.title = ? AND s.artist = ?"
+            key_params = (title, artist)
+        else:
+            key_clause = "lower(trim(s.artist)) = lower(trim(?))"
+            key_params = (artist,)
+    elif key_column == "video_id":
+        from_sql = "occurrences o"
+        key_clause = "o.video_id = ?"
+        key_params = (key,)
+    else:
+        from_sql = "occurrences o"
+        key_clause = (
+            "(lower(trim(COALESCE(json_extract(o.payload_json, '$.video.channelId'), ''))) = lower(trim(?)) "
+            "OR lower(trim(COALESCE(json_extract(o.payload_json, '$.video.channelHandle'), ''))) = lower(trim(?)) "
+            "OR lower(trim(COALESCE(json_extract(o.payload_json, '$.video.channelName'), ''))) = lower(trim(?)))"
+        )
+        key_params = (key, key, channel_name)
+    rows = conn.execute(
+        f"""
+        SELECT o.payload_json
+        FROM {from_sql}
+        WHERE o.range_id = ?
+          AND {key_clause}
+          AND {occurrence_filter}
+        ORDER BY o.rowid
+        """,
+        (range_id, *key_params),
+    ).fetchall()
+    return [client_occurrence_payload(json.loads(row["payload_json"])) for row in rows]
+
+
+def occurrence_song_counts(occurrences: list[dict]) -> list[dict]:
+    counts: dict[str, int] = {}
+    for occurrence in occurrences:
+        song = occurrence.get("song") if isinstance(occurrence.get("song"), dict) else {}
+        name = str(song.get("title") or "").strip()
+        if name:
+            counts[name] = counts.get(name, 0) + 1
+    return [
+        {"name": name, "count": count}
+        for name, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+    ]
+
+
+def client_occurrence_payload(payload: dict) -> dict:
+    if isinstance(payload.get("item"), dict):
+        return payload
+    video = payload.get("video") if isinstance(payload.get("video"), dict) else {}
+    song = payload.get("song") if isinstance(payload.get("song"), dict) else {}
+    return {
+        "rangeId": payload.get("rangeId", ""),
+        "videoId": payload.get("videoId") or video.get("videoId", ""),
+        "item": video,
+        "song": song,
+    }
+
+
+def occurrence_channel_counts(occurrences: list[dict]) -> list[dict]:
+    counts: dict[str, int] = {}
+    for occurrence in occurrences:
+        item = occurrence.get("item") if isinstance(occurrence.get("item"), dict) else occurrence.get("video")
+        if not isinstance(item, dict):
+            item = {}
+        name = str(item.get("channelName") or "").strip()
+        if name:
+            counts[name] = counts.get(name, 0) + 1
+    return [
+        {"name": name, "count": count}
+        for name, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+    ]
+
+
+def song_passes_runtime_filters(song: dict, niche_only: bool, hide_unknown_artist: bool) -> bool:
+    if niche_only and not bool(song.get("isNiche") or song.get("is_niche")):
+        return False
+    if hide_unknown_artist:
+        artist = str(song.get("artist") or "").strip().lower()
+        if artist in {"", "unknown", "未記載", "未记载", "待补歌手", "待補歌手"}:
+            return False
+    return True
 
 
 def as_non_negative_int(value: object) -> int:

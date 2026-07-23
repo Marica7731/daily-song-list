@@ -101,6 +101,15 @@ test("VTuber collected badge requires trusted non-moment source", () => {
   assert.match(functionBody("function mergeVtuberRecordMetadata"), /badge\.isCollected && isTrustedVtuberCollectionSource\(item, badge\)/u);
 });
 
+test("runtime API errors preserve status-specific diagnostics", () => {
+  const readJsonBody = functionBody("async function readJson");
+  assert.match(readJsonBody, /response\.status === 400/u);
+  assert.match(readJsonBody, /response\.status === 404/u);
+  assert.match(readJsonBody, /response\.status === 504/u);
+  assert.match(readJsonBody, /error\.status = response\.status/u);
+  assert.match(readJsonBody, /payload\?\.message \|\| payload\?\.error/u);
+});
+
 test("song and index rows inline source previews and expand to full source lists", () => {
   const rankRecordBody = functionBody("function renderRankRecord");
   assert.match(rankRecordBody, /const sourceVideoCount = Math\.max\(0, Number\(videoCount\) \|\| 0\)/u);
