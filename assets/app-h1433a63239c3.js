@@ -5502,7 +5502,7 @@ function renderPageSelectControl(pageInfo, options) {
   total.textContent = `/ ${pageInfo.pageCount}`;
   const submit = document.createElement("button");
   submit.className = "pagination-button page-select-submit";
-  submit.type = "submit";
+  submit.type = "button";
   submit.textContent = "选页";
   submit.setAttribute("aria-label", "跳转到输入页码");
   submit.addEventListener("click", (event) => handlePaginationFormSubmit(event, label));
@@ -5533,7 +5533,7 @@ function renderPageJumpControl(pageInfo) {
 
   const button = document.createElement("button");
   button.className = "pagination-button page-jump-button";
-  button.type = "submit";
+  button.type = "button";
   button.textContent = "跳转";
   button.addEventListener("click", (event) => handlePaginationFormSubmit(event, form));
   form.addEventListener("submit", (event) => handlePaginationFormSubmit(event, form));
