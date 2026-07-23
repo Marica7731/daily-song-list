@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment-status-only-accepted",
+  "generatedAt": "2026-07-23T02:37:00.147Z",
+  "inputs": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch60-amanofustella-shard6of16-rerun/candidate-increment-unfiltered.json"
+  ],
+  "status": "interrupted",
+  "statusOnly": true,
+  "failureReason": "Interrupted by main session before discovery completed. Remote discovery was stopped at heartbeat elapsed=120s; no discovery manifest/checkpoint/video-details were written, export and postprocess never started, and accepted output is intentionally zero.",
+  "readStats": {
+    "inputDirs": 0,
+    "videoDetails": 0,
+    "usableVideos": 0,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 0,
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": [],
+    "dirtyAuditDroppedVideos": 0,
+    "dirtyAuditDroppedOccurrences": 0,
+    "rawSongs": 0,
+    "acceptedSongs": 0,
+    "droppedSongs": 0,
+    "suspiciousSongs": 0,
+    "skippedAllSongsRejected": 0,
+    "importAudit": {
+      "schemaVersion": 1,
+      "dropped": [],
+      "suspicious": []
+    },
+    "dirtyAuditSuspiciousVideos": 0,
+    "dirtyAuditAcceptedVideos": 0
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "sourceArtifact": "candidate-increment-unfiltered.json"
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit-status-only",
+  "batchId": "2026-07-22-source-backfill-batch60-amanofustella-shard6of16-rerun",
+  "generatedAt": "2026-07-23T02:37:00.147Z",
+  "status": "interrupted",
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "サクソフォン",
+      "sax",
+      "saxophone"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "piano performance",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "singingSignals": [
+      "歌枠",
+      "歌",
+      "弾き語り",
+      "karaoke",
+      "歌ってみた"
+    ],
+    "liveRule": "live/ライブ is suspicious/drop only when the title lacks explicit singing signals such as 歌枠, 歌, 弾き語り, karaoke, 歌ってみた."
+  },
+  "result": {
+    "inputVideoCount": 0,
+    "inputOccurrenceCount": 0,
+    "keptVideoCount": 0,
+    "keptOccurrenceCount": 0,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0,
+    "suspiciousOccurrenceCount": 0
+  },
+  "dropped": [],
+  "suspicious": [],
+  "note": "No candidate/export data existed before interruption; dirty audit policy is recorded but no videos were evaluated."
+}
