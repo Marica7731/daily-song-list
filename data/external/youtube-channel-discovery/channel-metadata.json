@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "sourceSystem": "youtube_channel_discovery",
-  "generatedAt": "2026-07-23T09:45:57.046Z",
+  "generatedAt": "2026-07-23T12:13:41.828Z",
   "source": {
     "kind": "youtube_public_channel_page",
-    "fetchedAt": "2026-07-23T09:45:57.046Z",
+    "fetchedAt": "2026-07-23T12:13:41.828Z",
     "note": "Low-rate public channel-page metadata cache for runtime VTuber channels. avatarUrl is a real channel avatar; thumbnailUrl is display fallback only."
   },
   "channels": [
@@ -7928,7 +7928,7 @@
     }
   ],
   "avatarFetchReport": {
-    "generatedAt": "2026-07-23T09:45:57.046Z",
+    "generatedAt": "2026-07-23T12:13:41.828Z",
     "dryRun": false,
     "daily": true,
     "delayMs": 1500,
@@ -7936,25 +7936,46 @@
     "staleDays": 30,
     "runtimeRange": "all",
     "runtimeCoverageBefore": {
-      "totalChannels": 962,
-      "parseableChannels": 747,
+      "totalChannels": 965,
+      "parseableChannels": 749,
       "realAvatar": 642,
-      "thumbnailFallback": 320,
+      "thumbnailFallback": 323,
       "missingDisplayImage": 0,
-      "missingAvatar": 320,
+      "missingAvatar": 323,
       "missingDisplayImageChannels": []
     },
     "runtimeCoverageTarget": "missingDisplayImage=0; realAvatar counts only real YouTube channel avatars",
     "counts": {
       "already_cached": 664,
-      "skipped_collected_evidence": 330
+      "skipped_collected_evidence": 333
     },
     "failures": [],
     "skippedSummary": {
-      "missing_channel_url_or_handle": 215,
-      "batch_limit_reached": 115
+      "batch_limit_reached": 117,
+      "missing_channel_url_or_handle": 216
     },
     "skippedSamples": [
+      {
+        "handle": "/@YamagamiKaruta",
+        "channelId": "UCllKI7VjyANuS1RXatizfLQ",
+        "displayName": "山神 カルタ / Karuta Yamagami",
+        "sourceUrl": "https://www.youtube.com/@YamagamiKaruta",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "/@%E5%A4%9C%E5%87%AA%E3%82%88%E3%81%AA",
+        "channelId": "UCgSEzhNM3Aqj55oh5rpIjaQ",
+        "displayName": "夜凪よな-Yonagi Yona-",
+        "sourceUrl": "https://www.youtube.com/@%E5%A4%9C%E5%87%AA%E3%82%88%E3%81%AA",
+        "reason": "batch_limit_reached"
+      },
+      {
+        "handle": "",
+        "channelId": "",
+        "displayName": "ベルモット・ベルーナ / Vermouth Belluna【APP LAND】",
+        "sourceUrl": "",
+        "reason": "missing_channel_url_or_handle"
+      },
       {
         "handle": "",
         "channelId": "",
@@ -7994,6 +8015,13 @@
         "handle": "",
         "channelId": "",
         "displayName": "東雲 めう。 / Shinonome Meu.",
+        "sourceUrl": "",
+        "reason": "missing_channel_url_or_handle"
+      },
+      {
+        "handle": "",
+        "channelId": "",
+        "displayName": "ukuna ch.うくな",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       },
@@ -8099,34 +8127,6 @@
         "handle": "",
         "channelId": "",
         "displayName": "ひけんたいろくごう",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "音ノ瀬つむぎ / Tsumugi Otonose",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "lilia",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "燈明寺かぐら - Tomyoji Kagura -",
-        "sourceUrl": "",
-        "reason": "missing_channel_url_or_handle"
-      },
-      {
-        "handle": "",
-        "channelId": "",
-        "displayName": "Kyoko Ch. 倉持京子",
         "sourceUrl": "",
         "reason": "missing_channel_url_or_handle"
       }
