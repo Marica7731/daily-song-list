@@ -931,7 +931,7 @@
         const normalized = normalizeChannelUrl(value);
         if (normalized) channelUrlIndex.set(normalized, { ...meta, matchedField: "channelUrl", matchedValue: value, matchType: "exact" });
       }
-      for (const value of [entry.name, ...(entry.aliases || [])]) {
+      for (const value of blockedChannelAliasCandidates(entry)) {
         const normalized = normalizeMatcherText(value);
         if (normalized) aliasIndex.set(normalized, { ...meta, matchedField: "channelName", matchedValue: value, matchType: "exact" });
       }
@@ -977,6 +977,21 @@
       name: entry.name,
       region: (entry.regions || []).join(","),
     };
+  }
+
+  function blockedChannelAliasCandidates(entry = {}) {
+    const baseValues = uniqueStrings([entry.name, ...(Array.isArray(entry.aliases) ? entry.aliases : [])]);
+    const result = [...baseValues];
+    const name = String(entry.name || "").trim();
+    if (!name) return result;
+    for (const alias of baseValues) {
+      if (!alias || alias === name) continue;
+      result.push(`${name} ${alias}`);
+      result.push(`${alias} ${name}`);
+      result.push(`${name} / ${alias}`);
+      result.push(`${alias} / ${name}`);
+    }
+    return uniqueStrings(result);
   }
 
   function channelUrlValues(item = {}) {

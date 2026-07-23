@@ -28,6 +28,8 @@ test("source filter removes blocked HK/TW VTuber channels without matching ordin
   assert.equal(isBlockedSource({ channelHandle: "@ArumaCh", channelName: "薬袋アルマ", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelId: "UCMhjWfFiyxVjNWBJpkDotcg", channelName: "Japanese Channel", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelUrl: "https://www.youtube.com/channel/UCMhjWfFiyxVjNWBJpkDotcg", channelName: "Japanese Channel", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelName: "羽芝扉扉 Uchi Fifi", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelName: "Uchi Fifi / 羽芝扉扉", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "奔跑日記！ / 米亞 MYA" }), false);
   assert.equal(isBlockedSource({ channelName: "Narrator Music", title: "HKVtuber 台湾旅行" }), false);
   assert.equal(isBlockedSongEntry({ title: "DEN Q~~~", artist: "未記載" }), true);

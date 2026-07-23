@@ -1904,7 +1904,7 @@ def blocked_source_matcher_index() -> dict[str, set[str]]:
             handle_key = blocked_handle_key(value)
             if handle_key:
                 index["handles"].add(handle_key)
-        for value in (entry.get("name"), *(entry.get("aliases") or [])):
+        for value in blocked_channel_alias_candidates(entry):
             key = blocked_alias_key(value)
             if key:
                 index["aliases"].add(key)
@@ -1941,6 +1941,23 @@ def merge_blocked_source_entry(base: dict | None, override: dict) -> dict:
         elif value not in (None, ""):
             merged[key] = value
     return merged
+
+
+def blocked_channel_alias_candidates(entry: dict) -> list[str]:
+    aliases = entry.get("aliases") if isinstance(entry.get("aliases"), list) else []
+    base_values = unique_texts([entry.get("name"), *aliases])
+    result = list(base_values)
+    name = clean_text(entry.get("name"))
+    if not name:
+        return result
+    for alias in base_values:
+        if not alias or alias == name:
+            continue
+        result.append(f"{name} {alias}")
+        result.append(f"{alias} {name}")
+        result.append(f"{name} / {alias}")
+        result.append(f"{alias} / {name}")
+    return unique_texts(result)
 
 
 def source_field_values(item: dict, keys: tuple[str, ...], seen: set[int] | None = None) -> list[str]:
