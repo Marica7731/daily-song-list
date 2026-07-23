@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-23-source-backfill-batch117-utenhiyori-partial-checkpoint",
+  "generatedAt": "2026-07-23T12:42:00.6169221Z",
+  "status": "partial_artifact_ready",
+  "completeForImport": false,
+  "scope": "partial accepted increment extracted from existing UtenHiyori checkpoint details; no YouTube fetch; no data/external write",
+  "source": {
+    "handle": "UtenHiyori",
+    "url": "https://www.youtube.com/@UtenHiyori",
+    "status": "partial_artifact_ready",
+    "acceptedIncrementReadyForReview": true,
+    "fullSourceStillPending": true,
+    "checkpoint": "artifacts/channel-discovery/2026-07-23-source-backfill-batch107-utenhiyori-continuation/mac-checkpoint.json",
+    "candidateCount": 337,
+    "inspectedInLatestRun": 45,
+    "checkpointDetailCount": 30,
+    "acceptedVideos": 30,
+    "acceptedOccurrences": 631,
+    "acceptedSongs": 471,
+    "uniqueSongsBeforeAudit": 471,
+    "publishedTimestampCoverage": "30/30",
+    "occurrenceTimeCoverage": "631/631",
+    "occurrenceSecondsCoverage": "631/631",
+    "thumbnailCoverage": "30/30",
+    "droppedVideos": 0,
+    "droppedOccurrences": 0,
+    "suspiciousVideos": 0,
+    "reachedEnd": false,
+    "failureReason": "full source remains pending; this batch exports only completed checkpoint details"
+  },
+  "acceptedIncrement": "accepted/2026-07-23-source-backfill-batch117-utenhiyori-partial-checkpoint.accepted.json",
+  "exportRan": true,
+  "exportMarker": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=30 usableVideos=30 acceptedVideos=30 skippedRegressions=0 occurrences=631 output=\"D:\\\\Projects\\\\daily_song_list_worker_source_backfill_20260720\\\\artifacts\\\\channel-discovery\\\\2026-07-23-source-backfill-batch117-utenhiyori-partial-checkpoint\\\\accepted\\\\2026-07-23-source-backfill-batch117-utenhiyori-partial-checkpoint.accepted.json\"",
+  "dirtyAudit": {
+    "path": "dirty-audit.json",
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0
+  },
+  "remoteCleanup": {
+    "status": "not_used",
+    "note": "No remote or VPS directory was created for this checkpoint extraction batch."
+  },
+  "localStorage": {
+    "tempInput": "G:\\codex-temp\\daily-song-list-source-backfill-scripts\\batch117-utenhiyori-input",
+    "tempInputRemoved": true,
+    "windowsLargeDiskWrites": "none; output is small artifact under existing D: checkout, transient input on G:"
+  },
+  "scopeVerification": {
+    "didNotStartYouTubeFetch": true,
+    "didNotUseMacOrVps": true,
+    "didNotCreateRemoteTempDirectory": true,
+    "didNotModifyDataExternal": true,
+    "didNotPushOrDeploy": true
+  }
+}

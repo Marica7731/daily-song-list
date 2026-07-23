@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit",
+  "batchId": "2026-07-23-source-backfill-batch117-utenhiyori-partial-checkpoint",
+  "generatedAt": "2026-07-23T12:42:00.6110517Z",
+  "source": "UtenHiyori",
+  "hardDropTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット"
+  ],
+  "hardDropExactPhrases": [
+    "piano streaming",
+    "ピアノ演奏"
+  ],
+  "suspiciousTerms": [
+    "live",
+    "ライブ"
+  ],
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "suspiciousVideoCount": 0,
+  "droppedVideos": [],
+  "suspiciousVideos": []
+}
