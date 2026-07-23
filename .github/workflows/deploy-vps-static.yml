@@ -30,6 +30,7 @@ jobs:
             index.html
             assets
             data/ui/meta.json
+            data/diff
             .nojekyll
             CNAME
 
@@ -63,11 +64,13 @@ jobs:
             git fetch --quiet origin main --prune
             git checkout main
             if git config --bool core.sparseCheckout | grep -qx true; then
-              git sparse-checkout add data/ui
+              git sparse-checkout add data/ui data/diff
             fi
             git merge --ff-only --quiet '${DEPLOY_SHA}'
             test \"\$(git rev-parse HEAD)\" = '${DEPLOY_SHA}'
             test -s data/ui/meta.json
+            test -s data/diff/latest-all.json
+            test -s data/diff/latest-7d.json
             if systemctl list-unit-files song-rank-api.service >/dev/null 2>&1; then
               systemctl restart song-rank-api
             fi
@@ -92,6 +95,8 @@ jobs:
               cd '${REMOTE_PROJECT_DIR}'
               test \"\$(git rev-parse HEAD)\" = '${EXPECTED_SHA}'
               test -s data/ui/meta.json
+              test -s data/diff/latest-all.json
+              test -s data/diff/latest-7d.json
               grep -o 'assets/app.js?v=[^\"]*' index.html | head -1
             "
           )"
@@ -109,4 +114,10 @@ jobs:
           fi
           if ! curl -A 'Mozilla/5.0' -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/data/ui/meta.json?probe=${EXPECTED_SHA}" >/dev/null; then
             echo "::warning::public data/ui/meta.json probe failed from GitHub runner; VPS checkout verification passed"
+          fi
+          if ! curl -A 'Mozilla/5.0' -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/data/diff/latest-all.json?probe=${EXPECTED_SHA}" >/dev/null; then
+            echo "::warning::public data/diff/latest-all.json probe failed from GitHub runner; VPS checkout verification passed"
+          fi
+          if ! curl -A 'Mozilla/5.0' -fsSL --retry 5 --retry-delay 3 "https://ytb-song-rank.culua.com/data/diff/latest-7d.json?probe=${EXPECTED_SHA}" >/dev/null; then
+            echo "::warning::public data/diff/latest-7d.json probe failed from GitHub runner; VPS checkout verification passed"
           fi
