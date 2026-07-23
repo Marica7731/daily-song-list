@@ -456,5 +456,5 @@ jobs:
           ssh -o BatchMode=no -o NumberOfPasswordPrompts=1 -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
             set -Eeuo pipefail
             cd '${REMOTE_PROJECT_DIR}'
-            DAILY_SONG_EXPECTED_COMMIT_SHA='${DAILY_SONG_EXPECTED_COMMIT_SHA}' DAILY_SONG_EXPECTED_LATEST_SHA256='${DAILY_SONG_EXPECTED_LATEST_SHA256}' npm run check:published:api -- http://127.0.0.1:8765/
+            DAILY_SONG_EXPECTED_COMMIT_SHA='${DAILY_SONG_EXPECTED_COMMIT_SHA}' DAILY_SONG_EXPECTED_LATEST_SHA256='${DAILY_SONG_EXPECTED_LATEST_SHA256}' DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH='${DAILY_SONG_ALLOW_SOURCE_COMMIT_MISMATCH}' npm run check:published:api -- http://127.0.0.1:8765/
           "
