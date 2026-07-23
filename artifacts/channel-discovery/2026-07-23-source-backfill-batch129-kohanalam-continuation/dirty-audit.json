@@ -1,0 +1,291 @@
+{
+  "batchId": "2026-07-23-source-backfill-batch129-kohanalam-continuation",
+  "generatedAt": "2026-07-23T14:21:36.230Z",
+  "source": {
+    "handle": "KohanaLam",
+    "url": "https://www.youtube.com/@KohanaLam/streams"
+  },
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "吹奏楽"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "livePolicy": "live and ライブ are retained as suspicious only unless another hard drop term matches",
+    "seedExclusion": "Batch32 seed detail videoIds are excluded before export."
+  },
+  "counts": {
+    "unfilteredVideoCount": 28,
+    "unfilteredOccurrenceCount": 261,
+    "acceptedVideoCount": 28,
+    "acceptedOccurrenceCount": 261,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 0,
+    "suspiciousOccurrenceCount": 0
+  },
+  "videos": [
+    {
+      "videoId": "WK0inhlmvzA",
+      "title": "【定期配信】弾き語りとお話！",
+      "publishedTimestamp": 1771855128169,
+      "songCount": 3,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "mbAecMcw1aI",
+      "title": "【定期配信】弾き語りと雑談！",
+      "publishedTimestamp": 1771855128169,
+      "songCount": 3,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "WdH5NOalOLU",
+      "title": "【定期配信】弾き語りとお話！",
+      "publishedTimestamp": 1769263128169,
+      "songCount": 4,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "OxKWh2I__zU",
+      "title": "9/1【お悩み相談＆弾き語り配信】新曲「人生に期待をしてはいけない」Releaseしました！",
+      "publishedTimestamp": 1758895128169,
+      "songCount": 6,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "t3b7ruDHKiw",
+      "title": "9/2【お悩み相談＆弾き語り配信】新曲「人生に期待をしてはいけない」Releaseしました！",
+      "publishedTimestamp": 1758895128169,
+      "songCount": 6,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "OaR-Rv6dT-A",
+      "title": "9/3【お悩み相談＆弾き語り配信】新曲「人生に期待をしてはいけない」Releaseしました！",
+      "publishedTimestamp": 1758895128169,
+      "songCount": 6,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "_Nd7tNWDu7k",
+      "title": "9/4【お悩み相談＆弾き語り配信】新曲「人生に期待をしてはいけない」Releaseしました！",
+      "publishedTimestamp": 1758895128169,
+      "songCount": 9,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "LEFtG4PDHOE",
+      "title": "9/5【お悩み相談＆弾き語り配信】新曲「人生に期待をしてはいけない」Releaseしました！",
+      "publishedTimestamp": 1758895128169,
+      "songCount": 5,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "MXKo5-a3XQI",
+      "title": "9/6【お悩み相談＆弾き語り配信】新曲「人生に期待をしてはいけない」Releaseしました！",
+      "publishedTimestamp": 1758895128169,
+      "songCount": 6,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "7y17_1Sp-Es",
+      "title": "【定期配信】7月が終わる、弾き語りをしますの日！",
+      "publishedTimestamp": 1756303128169,
+      "songCount": 10,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "A3JLHeq2Vzc",
+      "title": "【定期配信】お知らせ沢山と弾き語り",
+      "publishedTimestamp": 1756303128169,
+      "songCount": 6,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "HDz2ybgAfok",
+      "title": "【定期配信】お話と弾き語り",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 7,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "tM9Ooz70wds",
+      "title": "【定期配信】夏だ、弾き語りをしますの日！",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 10,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "BVIh2pkDE9E",
+      "title": "【定期配信】弾き語りと雑談！",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 9,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "IcQgWocGEB8",
+      "title": "あけましておめでとう弾き語り！！",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 34,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "NZpaiwFx29c",
+      "title": "お話と弾き語り！",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 6,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "HQQCWQ3w31c",
+      "title": "ただただ弾き語りたい気分",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 30,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "d8IlRDCH5Vs",
+      "title": "まったり弾き語りしましょ",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 8,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "4D74-9T7TyU",
+      "title": "雑談弾き語り",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 15,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "am8uDeAipy4",
+      "title": "雑談弾き語りですよ！！",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 15,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "BhTwmsUZglc",
+      "title": "雑談弾き語りですよ！！",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 10,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "2ftB3kU_tc0",
+      "title": "弾き語りする！！",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 14,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "bCpkFlcHuaU",
+      "title": "弾き語りたいのよ",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 11,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "nuCo_40aI1E",
+      "title": "弾き語り配信",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 2,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "A-EBqe2tWLM",
+      "title": "弾ける曲が増えたので弾き語り",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 1,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "WCwoKhpTBOE",
+      "title": "弾ける曲が増えたので弾き語り2",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 12,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "GB0yDLo9AsQ",
+      "title": "風邪が治ったのでリハビリ弾き語り！！",
+      "publishedTimestamp": 1753279128169,
+      "songCount": 11,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    },
+    {
+      "videoId": "VSXdl6a5NeI",
+      "title": "感情を沢山込めて「main actor / 美波」 歌ってみた acoustic ver.【 こはならむ 】",
+      "publishedTimestamp": 1721743211058,
+      "songCount": 2,
+      "status": "accepted",
+      "reason": "no hard dirty-audit exclusion term",
+      "matchedTerms": []
+    }
+  ]
+}

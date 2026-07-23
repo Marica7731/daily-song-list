@@ -1,0 +1,5 @@
+
+> daily-song-list@1.0.0 youtube:export-channel-increment
+> node scripts/export-channel-discovery-increment.js --input-dir /tmp/ytb-song-rank-source-backfill-20260720/batch128-soraotoha-continuation/partial-input --output /tmp/ytb-song-rank-source-backfill-20260720/batch128-soraotoha-continuation/accepted/unfiltered.accepted.json --allow-empty
+
+CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=35 usableVideos=35 acceptedVideos=35 skippedRegressions=0 occurrences=563 output="/tmp/ytb-song-rank-source-backfill-20260720/batch128-soraotoha-continuation/accepted/unfiltered.accepted.json"

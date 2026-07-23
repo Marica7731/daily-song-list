@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "batchId": "2026-07-23-source-backfill-batch128-soraotoha-continuation",
+  "generatedAt": "2026-07-23T14:19:53.471Z",
+  "status": "partial_artifact_ready",
+  "source": {
+    "handle": "SoraOtoha",
+    "channelUrl": "https://www.youtube.com/@SoraOtoha",
+    "reachedEnd": false,
+    "reachedEndEvidence": "not proven; discovery was killed after timeout/interruption before final manifest",
+    "fullSourceStillPending": true
+  },
+  "checkpoint": {
+    "channelUrl": "https://www.youtube.com/@SoraOtoha",
+    "singerName": "SoraOtoha",
+    "candidateCount": 128,
+    "inspectedInLatestRun": 32,
+    "completedVideoIds": 35,
+    "detailCount": 35,
+    "auditCount": 46,
+    "updatedAt": "2026-07-23T14:15:19.680Z",
+    "hasFinalManifest": false
+  },
+  "batch115Dedup": {
+    "oldAcceptedVideos": 10,
+    "duplicateOldVideoIds": [
+      "4EC4mRgbZOg",
+      "71tcJ1UhJdQ",
+      "Hg0WdW0MFaY",
+      "IDnakABONSs",
+      "Vf7tLxDDw4c",
+      "XDBD6c8e7Ds",
+      "m9brhopeO_c",
+      "qcLoaVseQWc",
+      "xpcqIHl1xxY",
+      "zVFkoTSCQ4U"
+    ],
+    "newVideosBeforeDirtyAudit": 25
+  },
+  "acceptedAfterDirtyAudit": {
+    "videos": 25,
+    "occurrences": 363,
+    "songs": 363,
+    "uniqueSongKeys": 362,
+    "publishedTimestampCoverage": "25/25",
+    "occurrenceTimeCoverage": "363/363",
+    "occurrenceSecondsCoverage": "363/363",
+    "thumbnailCoverage": "25/25"
+  },
+  "dirtyAudit": {
+    "droppedVideos": 0,
+    "droppedOccurrences": 0,
+    "suspiciousVideos": 7
+  },
+  "failureReason": "timeout/interrupted after >20min; full discovery was stopped by operator request before final runner manifest"
+}

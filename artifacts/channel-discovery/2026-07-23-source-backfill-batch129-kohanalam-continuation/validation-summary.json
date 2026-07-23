@@ -1,0 +1,27 @@
+{
+  "batchId": "2026-07-23-source-backfill-batch129-kohanalam-continuation",
+  "generatedAt": "2026-07-23T14:22:16.544Z",
+  "marker": "CODEX_BATCH129_VALIDATE_OK",
+  "checks": {
+    "acceptedVideoIdsUnique": true,
+    "batch32AcceptedVideoIdsExcluded": true,
+    "hardDirtyTermsAbsentFromAccepted": true,
+    "sourceLimitedToKohanaLam": true,
+    "statusIsPartial": true,
+    "dirtyAuditCountsMatchAccepted": true
+  },
+  "counts": {
+    "acceptedVideos": 28,
+    "acceptedOccurrences": 261,
+    "uniqueSongs": 134,
+    "droppedVideos": 0,
+    "suspiciousVideos": 0
+  },
+  "coverage": {
+    "publishedTimestamp": "28/28",
+    "occurrenceTime": "261/261",
+    "occurrenceSeconds": "261/261",
+    "thumbnailTopLevel": "0/28"
+  },
+  "reachedEnd": false
+}

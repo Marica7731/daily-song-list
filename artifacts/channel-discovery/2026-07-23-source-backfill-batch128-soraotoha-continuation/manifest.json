@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-23-source-backfill-batch128-soraotoha-continuation",
+  "generatedAt": "2026-07-23T14:19:53.471Z",
+  "status": "partial_artifact_ready",
+  "completeForImport": false,
+  "imported": false,
+  "fullComplete": false,
+  "source": {
+    "handle": "SoraOtoha",
+    "url": "https://www.youtube.com/@SoraOtoha",
+    "status": "partial_artifact_ready",
+    "acceptedIncrementReadyForReview": true,
+    "fullSourceStillPending": true,
+    "candidateCount": 128,
+    "inspectedInLatestRun": 32,
+    "checkpointDetailCount": 35,
+    "completedVideoIds": 35,
+    "batch115DuplicateVideos": 10,
+    "acceptedVideos": 25,
+    "acceptedOccurrences": 363,
+    "acceptedSongs": 363,
+    "publishedTimestampCoverage": "25/25",
+    "occurrenceTimeCoverage": "363/363",
+    "occurrenceSecondsCoverage": "363/363",
+    "thumbnailCoverage": "25/25",
+    "droppedVideos": 0,
+    "droppedOccurrences": 0,
+    "suspiciousVideos": 7,
+    "reachedEnd": false,
+    "failureReason": "timeout/interrupted after >20min; checkpoint-only partial, no final discovery marker"
+  },
+  "acceptedIncrement": "accepted/2026-07-23-source-backfill-batch128-soraotoha-continuation.partial.accepted.json",
+  "dirtyAudit": {
+    "path": "dirty-audit.json",
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 7
+  },
+  "scopeVerification": {
+    "onlyChannelProcessed": "https://www.youtube.com/@SoraOtoha",
+    "didNotModifyRunnerOrToolCode": true,
+    "didNotWriteDataExternal": true,
+    "didNotCommit": true,
+    "didNotPushOrDeploy": true
+  }
+}

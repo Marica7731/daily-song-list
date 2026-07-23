@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "batchId": "2026-07-23-source-backfill-batch129-kohanalam-continuation",
+  "generatedAt": "2026-07-23T14:21:36.230Z",
+  "purpose": "Continuation partial artifact for KohanaLam source-backfill from a seeded batch32 checkpoint.",
+  "status": "partial_artifact_ready",
+  "writePolicy": {
+    "dataExternalModified": false,
+    "acceptedIncrementGenerated": true,
+    "acceptedIncrementPath": "artifacts/channel-discovery/2026-07-23-source-backfill-batch129-kohanalam-continuation/accepted-increment.json",
+    "commitCreated": false,
+    "pushed": false,
+    "deployed": false,
+    "note": "Artifact-local partial only; not imported because the run timed out before full source completion."
+  },
+  "source": {
+    "handle": "KohanaLam",
+    "url": "https://www.youtube.com/@KohanaLam/streams",
+    "status": "pending_partial",
+    "imported": false,
+    "acceptedIncrementReadyForReview": true,
+    "candidates": 225,
+    "inspectedFromAudits": 116,
+    "completedVideoIds": 31,
+    "checkpointDetailCount": 31,
+    "seedDetailVideoIdsExcluded": [
+      "1_scZU0bCgQ",
+      "H5aQ0sId9CA",
+      "X9gtw7q1rQM"
+    ],
+    "batch32AcceptedVideoIdsExcluded": [
+      "1_scZU0bCgQ",
+      "X9gtw7q1rQM"
+    ],
+    "newDetailCountBeforeDirtyAudit": 28,
+    "reachedEnd": false,
+    "reachedEndEvidence": "No final discovery manifest was produced; remote supervisor stopped with timeout rc=124, so only checkpoint progress is proven.",
+    "acceptedAfterDirtyAudit": {
+      "videos": 28,
+      "occurrences": 261,
+      "songs": 134,
+      "publishedTimestampCoverage": "28/28",
+      "occurrenceTimeCoverage": "261/261",
+      "occurrenceSecondsCoverage": "261/261",
+      "acceptedIncrementThumbnailFieldCoverage": "0/28"
+    },
+    "droppedByDirtyAudit": {
+      "videos": 0,
+      "occurrences": 0,
+      "suspiciousVideos": 0,
+      "suspiciousOccurrences": 0
+    }
+  },
+  "remoteRun": {
+    "host": "be@192.168.1.13",
+    "repo": "/Users/be/daily-song-list",
+    "tempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch129-kohanalam-continuation",
+    "outputDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch129-kohanalam-continuation/discovery",
+    "seededCheckpoint": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/remote-download/vps3/KohanaLam/checkpoint.json",
+    "exitCode": 124,
+    "timeoutSecondsConfigured": 1180,
+    "timeoutEvidence": "phase.log records runner-timeout and runner-finished rc=124.",
+    "finalDfRecordedIn": "cleanup-df.txt"
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "unfilteredCandidateIncrement": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json",
+    "checkpointSummary": "checkpoint-summary.json",
+    "cleanupDf": "cleanup-df.txt",
+    "phaseLog": "phase.log",
+    "report": "report.md"
+  },
+  "verification": {
+    "marker": "CODEX_BATCH129_FINALIZE_OK",
+    "dataExternalDiff": "checked separately with git status --porcelain=v1 data/external"
+  }
+}
