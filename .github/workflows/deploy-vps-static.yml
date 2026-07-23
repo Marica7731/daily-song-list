@@ -29,6 +29,7 @@ jobs:
             .github/workflows/deploy-vps-static.yml
             index.html
             assets
+            data/status.json
             data/ui/meta.json
             data/diff
             .nojekyll
@@ -64,10 +65,11 @@ jobs:
             git fetch --quiet origin main --prune
             git checkout main
             if git config --bool core.sparseCheckout | grep -qx true; then
-              git sparse-checkout add data/ui data/diff
+              git sparse-checkout add data/status.json data/ui data/diff
             fi
             git merge --ff-only --quiet '${DEPLOY_SHA}'
             test \"\$(git rev-parse HEAD)\" = '${DEPLOY_SHA}'
+            test -s data/status.json
             test -s data/ui/meta.json
             test -s data/diff/latest-all.json
             test -s data/diff/latest-7d.json
@@ -94,6 +96,7 @@ jobs:
               set -Eeuo pipefail
               cd '${REMOTE_PROJECT_DIR}'
               test \"\$(git rev-parse HEAD)\" = '${EXPECTED_SHA}'
+              test -s data/status.json
               test -s data/ui/meta.json
               test -s data/diff/latest-all.json
               test -s data/diff/latest-7d.json
