@@ -5505,7 +5505,7 @@ function renderPageSelectControl(pageInfo, options) {
   submit.type = "button";
   submit.textContent = "选页";
   submit.setAttribute("aria-label", "跳转到输入页码");
-  submit.addEventListener("click", (event) => handlePaginationFormSubmit(event, label));
+  submit.addEventListener("click", () => submitPageFromForm(label));
   label.addEventListener("submit", (event) => handlePaginationFormSubmit(event, label));
   label.append(text, input, total, submit);
   return label;
@@ -5535,7 +5535,7 @@ function renderPageJumpControl(pageInfo) {
   button.className = "pagination-button page-jump-button";
   button.type = "button";
   button.textContent = "跳转";
-  button.addEventListener("click", (event) => handlePaginationFormSubmit(event, form));
+  button.addEventListener("click", () => submitPageFromForm(form));
   form.addEventListener("submit", (event) => handlePaginationFormSubmit(event, form));
   form.append(label, button);
   return form;
@@ -5556,6 +5556,10 @@ function handlePaginationFormSubmit(event, formOverride) {
     : event.target?.closest?.("[data-page-form], [data-page-jump-form]"));
   if (!form) return;
   event.preventDefault();
+  submitPageFromForm(form);
+}
+
+function submitPageFromForm(form) {
   const input = form.querySelector("[data-page-input]");
   const page = Number.parseInt(input?.value || "1", 10);
   setPage(page);
