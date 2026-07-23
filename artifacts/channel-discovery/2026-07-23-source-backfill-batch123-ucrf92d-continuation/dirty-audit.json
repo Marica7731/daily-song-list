@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "batch": "2026-07-23-source-backfill-batch123-ucrf92d-continuation",
+  "generatedAt": "2026-07-23T13:10:40.434244Z",
+  "channelUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+  "status": "partial_artifact_ready",
+  "rules": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "吹奏楽"
+    ],
+    "hardDropExactPhrases": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnly": [
+      "live",
+      "ライブ"
+    ]
+  },
+  "inputVideoCount": 6,
+  "acceptedVideoCount": 6,
+  "droppedCount": 0,
+  "suspiciousCount": 1,
+  "dropped": [],
+  "suspicious": [
+    {
+      "youtubeVideoId": "cYI3x_dpybM",
+      "youtubeUrl": "https://www.youtube.com/watch?v=cYI3x_dpybM",
+      "videoTitle": "【旅行の思い出／映画トーク／ライブ告知】弾き語り配信（2026/4/4アーカイブ）",
+      "matches": [
+        {
+          "rule": "suspicious_live_jp",
+          "term": "ライブ"
+        }
+      ],
+      "action": "suspicious_only"
+    }
+  ]
+}

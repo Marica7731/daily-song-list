@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "batch": "2026-07-23-source-backfill-batch123-ucrf92d-continuation",
+  "generatedAt": "2026-07-23T13:12:11.568860Z",
+  "status": "partial_artifact_ready",
+  "channelUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+  "completeForImport": false,
+  "fullDiscoveryRun": false,
+  "exportRun": true,
+  "partialArtifactReady": true,
+  "acceptedFile": "accepted/2026-07-23-source-backfill-batch123-ucrf92d-continuation.partial.accepted.json",
+  "acceptedVideoCount": 6,
+  "acceptedOccurrenceCount": 113,
+  "dirtyAudit": {
+    "droppedCount": 0,
+    "suspiciousCount": 1
+  },
+  "failureReason": "partial_checkpoint_reached_end_false;bounded_shard0of8_only;not_imported",
+  "cleanup": {
+    "status": "removed",
+    "marker": "CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation",
+    "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation",
+    "dfBefore": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+    "dfAfter": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+    "logFile": "remote-cleanup.log"
+  }
+}

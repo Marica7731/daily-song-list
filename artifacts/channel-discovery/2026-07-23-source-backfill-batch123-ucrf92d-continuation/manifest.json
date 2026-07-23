@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batch": "2026-07-23-source-backfill-batch123-ucrf92d-continuation",
+  "generatedAt": "2026-07-23T13:10:40.434244Z",
+  "strategy": "bounded partial shard only; no full discovery because channel tabs did not reachEnd",
+  "channelScope": [
+    "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw"
+  ],
+  "excludedOtherChannels": true,
+  "outputDir": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-23-source-backfill-batch123-ucrf92d-continuation",
+  "channels": [
+    {
+      "channelUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+      "handle": "UCrF92dEkXiTtexol0yg4Gmw",
+      "singerName": "UCrF92dEkXiTtexol0yg4Gmw",
+      "status": "partial_artifact_ready",
+      "imported": false,
+      "skipped": false,
+      "failed": false,
+      "pending": true,
+      "candidateIncrement": 113,
+      "inspectedInLatestRun": 15,
+      "usableVideoCountBeforeDirtyAudit": 6,
+      "acceptedVideoCount": 6,
+      "acceptedOccurrenceCount": 113,
+      "acceptedSongCount": 113,
+      "publishedTimestampCoverage": {
+        "candidatesWithPublishedTimestamp": 113,
+        "candidateCount": 113,
+        "percent": 100.0,
+        "acceptedVideosWithPublishedTimestamp": 6,
+        "acceptedVideoCount": 6,
+        "percentAccepted": 100.0
+      },
+      "occurrenceTimeCoverage": {
+        "occurrencesWithTimestampText": 113,
+        "occurrencesWithSeconds": 113,
+        "occurrenceCount": 113,
+        "percentTimestampText": 100.0,
+        "percentSeconds": 100.0
+      },
+      "thumbnailCoverCoverage": {
+        "candidatesWithThumbnail": 113,
+        "candidateCount": 113,
+        "percentCandidates": 100.0,
+        "acceptedVideosWithThumbnail": 6,
+        "acceptedVideoCount": 6,
+        "percentAccepted": 100.0
+      },
+      "failureReason": "partial_checkpoint_reached_end_false;bounded_shard0of8_only;not_imported",
+      "reachedEnd": false,
+      "reachedEndAllTabs": false,
+      "completeForImport": false,
+      "fullDiscoveryRun": false,
+      "exportRun": true,
+      "partialArtifactReady": true,
+      "acceptedFile": "accepted/2026-07-23-source-backfill-batch123-ucrf92d-continuation.partial.accepted.json",
+      "dirtyAudit": {
+        "droppedCount": 0,
+        "suspiciousCount": 1
+      },
+      "remoteCleanup": {
+        "status": "removed",
+        "marker": "CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation",
+        "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation",
+        "dfBefore": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+        "dfAfter": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+        "logFile": "remote-cleanup.log"
+      }
+    }
+  ],
+  "totals": {
+    "channelCount": 1,
+    "imported": 0,
+    "skipped": 0,
+    "failed": 0,
+    "pending": 1,
+    "partialArtifactReady": 1,
+    "candidateIncrement": 113,
+    "videoIncrement": 6,
+    "occurrenceIncrement": 113,
+    "songIncrement": 113,
+    "acceptedVideoCount": 6,
+    "acceptedOccurrenceCount": 113
+  },
+  "markers": [
+    {
+      "file": "export-partial.log",
+      "line": "CODEX_TIMEOUT_WRAPPER_START timeoutSeconds=300 command=['npm', 'run', 'youtube:export-channel-increment', '--', '--output', '/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/accepted/2026-07-23-source-backfill-batch123-ucrf92d-continuation.partial.accepted.json', '/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/partial-shard0of8']"
+    },
+    {
+      "file": "export-partial.log",
+      "line": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=6 usableVideos=6 acceptedVideos=6 skippedRegressions=0 occurrences=113 output=\"/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/accepted/2026-07-23-source-backfill-batch123-ucrf92d-continuation.partial.accepted.json\""
+    },
+    {
+      "file": "export-partial.log",
+      "line": "CODEX_TIMEOUT_WRAPPER_EXIT code=0"
+    },
+    {
+      "file": "partial-shard0of8.log",
+      "line": "CODEX_TIMEOUT_WRAPPER_START timeoutSeconds=1200 command=['npm', 'run', 'youtube:discover-channel', '--', '--channel-url', 'https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw', '--singer-name', 'UCrF92dEkXiTtexol0yg4Gmw', '--output-dir', '/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/partial-shard0of8', '--cache-dir', '/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/cache', '--max-channel-pages', '5', '--max-candidates', '113', '--max-inspect', '15', '--inspect-shard-index', '0', '--inspect-shard-count', '8', '--request-interval-ms', '750', '--request-jitter-ms', '250']"
+    },
+    {
+      "file": "partial-shard0of8.log",
+      "line": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw\" candidates=113 inspected=15 videos=6 occurrences=113 elapsedSeconds=96 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/partial-shard0of8\""
+    },
+    {
+      "file": "partial-shard0of8.log",
+      "line": "CODEX_TIMEOUT_WRAPPER_EXIT code=0"
+    },
+    {
+      "file": "probe.log",
+      "line": "CODEX_TIMEOUT_WRAPPER_START timeoutSeconds=300 command=['npm', 'run', 'youtube:discover-channel', '--', '--channel-url', 'https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw', '--singer-name', 'UCrF92dEkXiTtexol0yg4Gmw', '--output-dir', '/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/probe', '--cache-dir', '/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/cache', '--max-channel-pages', '5', '--max-candidates', '120', '--max-inspect', '0', '--candidate-only', '--fresh', '--request-interval-ms', '500', '--request-jitter-ms', '100']"
+    },
+    {
+      "file": "probe.log",
+      "line": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw\" candidates=113 inspected=0 videos=0 occurrences=0 elapsedSeconds=14 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation/probe\""
+    },
+    {
+      "file": "probe.log",
+      "line": "CODEX_TIMEOUT_WRAPPER_EXIT code=0"
+    },
+    {
+      "file": "remote-cleanup.log",
+      "line": "CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation"
+    }
+  ],
+  "remoteCleanup": {
+    "status": "removed",
+    "marker": "CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation",
+    "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch123-ucrf92d-continuation",
+    "dfBefore": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+    "dfAfter": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   335Gi   552Gi    38%    710k  5.8G    0%   /System/Volumes/Data",
+    "logFile": "remote-cleanup.log"
+  }
+}

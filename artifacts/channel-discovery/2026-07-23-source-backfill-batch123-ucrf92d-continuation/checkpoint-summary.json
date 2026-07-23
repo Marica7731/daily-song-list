@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "batch": "2026-07-23-source-backfill-batch123-ucrf92d-continuation",
+  "generatedAt": "2026-07-23T13:10:40.434244Z",
+  "channelUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+  "strategy": "bounded partial shard; maxChannelPages=5, inspectShardIndex=0, inspectShardCount=8, maxInspect=15",
+  "probe": {
+    "candidateCount": 113,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 5,
+        "rawItemCount": 58,
+        "candidateCount": 51,
+        "continuationRounds": 4,
+        "reachedEnd": false,
+        "fromCache": false,
+        "bytes": 1168520
+      },
+      {
+        "pageUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 5,
+        "rawItemCount": 147,
+        "candidateCount": 62,
+        "continuationRounds": 4,
+        "reachedEnd": false,
+        "fromCache": false,
+        "bytes": 1133645
+      }
+    ],
+    "requestStats": {
+      "requestCount": 2,
+      "networkRequestCount": 2,
+      "cacheHitCount": 0,
+      "totalBytes": 2302165,
+      "totalElapsedMs": 819,
+      "statuses": {
+        "200": 2
+      }
+    }
+  },
+  "partialDiscovery": {
+    "candidateCount": 113,
+    "inspectedInLatestRun": 15,
+    "usableVideoCount": 6,
+    "occurrenceCountBeforeDirtyAudit": 113,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 5,
+        "rawItemCount": 57,
+        "candidateCount": 51,
+        "continuationRounds": 4,
+        "reachedEnd": false,
+        "fromCache": false,
+        "bytes": 1192293
+      },
+      {
+        "pageUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 5,
+        "rawItemCount": 147,
+        "candidateCount": 62,
+        "continuationRounds": 4,
+        "reachedEnd": false,
+        "fromCache": false,
+        "bytes": 1122551
+      }
+    ],
+    "requestStats": {
+      "requestCount": 2,
+      "networkRequestCount": 2,
+      "cacheHitCount": 0,
+      "totalBytes": 2314844,
+      "totalElapsedMs": 563,
+      "statuses": {
+        "200": 2
+      }
+    },
+    "completedVideoIds": [
+      "LS332UnockQ",
+      "PDvrfy8kXaY",
+      "T1mGGARi_fU",
+      "YR05aqjl3pA",
+      "cYI3x_dpybM",
+      "dZnlfB7dO2s"
+    ],
+    "detailCount": 6
+  },
+  "acceptedAfterDirtyAudit": {
+    "videoCount": 6,
+    "occurrenceCount": 113,
+    "songCount": 113
+  }
+}
