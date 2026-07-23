@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-dirty-audit",
+  "batchId": "2026-07-23-source-backfill-batch89-uzakilarme-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:31:57+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "source": {
+    "channelHandle": "/@UzakiLarme",
+    "channelUrl": "https://www.youtube.com/@UzakiLarme/streams"
+  },
+  "droppedVideoCount": 2,
+  "droppedOccurrenceCount": 2,
+  "dropped": [
+    {
+      "videoId": "PmLtmUhaaRI",
+      "channelHandle": "/@UzakiLarme",
+      "shortTitle": "【まったり作業配信】Live2D！顔面整形する！",
+      "title": "【まったり作業配信】Live2D！顔面整形する！",
+      "occurrences": 1,
+      "hits": [
+        "live_en"
+      ],
+      "reason": "only parsed occurrence is an unrelated Santo Rosário / Live Ao vivo description row, not a song timestamp"
+    },
+    {
+      "videoId": "dR4X1YyethI",
+      "channelHandle": "/@UzakiLarme",
+      "shortTitle": "【耐久歌枠】チャンネル登録者600人目指して歌います！！リターンズ【卯咲らるむ / #新人Vtu...",
+      "title": "【耐久歌枠】チャンネル登録者600人目指して歌います！！リターンズ【卯咲らるむ / #新人Vtuber 】",
+      "occurrences": 1,
+      "hits": [
+        "live_en"
+      ],
+      "reason": "only parsed occurrence is an unrelated Santo Rosário / Live Ao vivo description row, not a song timestamp"
+    }
+  ],
+  "suspiciousCount": 3,
+  "suspicious": [
+    {
+      "videoId": "N_OB0DZ7XT0",
+      "channelHandle": "/@UzakiLarme",
+      "shortTitle": "【誕生日】新衣装お披露目！Live2Dアップデート！オリ曲披露も？！",
+      "title": "【誕生日】新衣装お披露目！Live2Dアップデート！オリ曲披露も？！",
+      "occurrences": 1,
+      "hits": [
+        "live_en"
+      ]
+    },
+    {
+      "videoId": "UGwI0nAxxnE",
+      "channelHandle": "/@UzakiLarme",
+      "shortTitle": "【 #歌枠 】1周年記念ライブ！！",
+      "title": "【 #歌枠 】1周年記念ライブ！！",
+      "occurrences": 26,
+      "hits": [
+        "live_ja"
+      ]
+    },
+    {
+      "videoId": "GuwgMywMoLU",
+      "channelHandle": "/@UzakiLarme",
+      "shortTitle": "【 #歌枠 】ホロライブしばり歌枠♪【卯咲らるむ / #新人Vtuber 】",
+      "title": "【 #歌枠 】ホロライブしばり歌枠♪【卯咲らるむ / #新人Vtuber 】",
+      "occurrences": 20,
+      "hits": [
+        "live_en",
+        "live_ja"
+      ]
+    }
+  ],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOf": {
+      "batchId": "2026-07-22-source-backfill-batch2",
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.accepted.json",
+      "rawExport": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/accepted/2026-07-22-source-backfill-batch2.raw-export.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/dirty-audit.json",
+      "auditSummary": "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/audit-summary.json"
+    },
+    "matchCriteria": {
+      "channelHandle": "/@UzakiLarme",
+      "channelUrl": "https://www.youtube.com/@UzakiLarme/streams"
+    },
+    "computedFromAcceptedJson": {
+      "acceptedVideos": 23,
+      "acceptedOccurrences": 238,
+      "uniqueSongs": 212,
+      "uniqueSongKey": "normalized title + normalized artist",
+      "uniqueSongsManifestOrReportExpected": 213,
+      "uniqueSongsDifferenceFromBatch2ManifestReport": -1,
+      "uniqueSongsNote": "computed normalized title+artist unique songs differs from batch2 manifest/report 213 by -1",
+      "coverage": {
+        "publishedTimestamp": "23/23",
+        "occurrenceTime": "238/238",
+        "occurrenceSeconds": "238/238",
+        "acceptedFileHasThumbnailOrCoverFields": false,
+        "acceptedThumbnailOrCoverFields": [],
+        "acceptedThumbnailOrCoverCoverage": "0/23",
+        "discoveryThumbnailCoverageFromBatch2": "25/25"
+      }
+    },
+    "batch2ManifestSourceEntry": {
+      "handle": "UzakiLarme",
+      "url": "https://www.youtube.com/@UzakiLarme/streams",
+      "status": "imported",
+      "reason": "complete manifest imported into artifacts accepted increment",
+      "acceptedVideos": 23,
+      "acceptedOccurrences": 238,
+      "uniqueSongs": 213,
+      "candidateCount": 69,
+      "inspectedCount": 69,
+      "usableVideoCount": 25,
+      "discoveryOccurrenceCount": 240,
+      "elapsedSeconds": 1172,
+      "reachedEnd": null,
+      "reachedEndInterpretation": "unknown",
+      "discoveryThumbnailCoverage": "25/25"
+    },
+    "dirtyAudit": {
+      "filter": "channelHandle == /@UzakiLarme",
+      "droppedVideoCount": 2,
+      "droppedOccurrenceCount": 2,
+      "dropped": [
+        {
+          "videoId": "PmLtmUhaaRI",
+          "channelHandle": "/@UzakiLarme",
+          "shortTitle": "【まったり作業配信】Live2D！顔面整形する！",
+          "title": "【まったり作業配信】Live2D！顔面整形する！",
+          "occurrences": 1,
+          "hits": [
+            "live_en"
+          ],
+          "reason": "only parsed occurrence is an unrelated Santo Rosário / Live Ao vivo description row, not a song timestamp"
+        },
+        {
+          "videoId": "dR4X1YyethI",
+          "channelHandle": "/@UzakiLarme",
+          "shortTitle": "【耐久歌枠】チャンネル登録者600人目指して歌います！！リターンズ【卯咲らるむ / #新人Vtu...",
+          "title": "【耐久歌枠】チャンネル登録者600人目指して歌います！！リターンズ【卯咲らるむ / #新人Vtuber 】",
+          "occurrences": 1,
+          "hits": [
+            "live_en"
+          ],
+          "reason": "only parsed occurrence is an unrelated Santo Rosário / Live Ao vivo description row, not a song timestamp"
+        }
+      ],
+      "suspiciousCount": 3,
+      "suspicious": [
+        {
+          "videoId": "N_OB0DZ7XT0",
+          "channelHandle": "/@UzakiLarme",
+          "shortTitle": "【誕生日】新衣装お披露目！Live2Dアップデート！オリ曲披露も？！",
+          "title": "【誕生日】新衣装お披露目！Live2Dアップデート！オリ曲披露も？！",
+          "occurrences": 1,
+          "hits": [
+            "live_en"
+          ]
+        },
+        {
+          "videoId": "UGwI0nAxxnE",
+          "channelHandle": "/@UzakiLarme",
+          "shortTitle": "【 #歌枠 】1周年記念ライブ！！",
+          "title": "【 #歌枠 】1周年記念ライブ！！",
+          "occurrences": 26,
+          "hits": [
+            "live_ja"
+          ]
+        },
+        {
+          "videoId": "GuwgMywMoLU",
+          "channelHandle": "/@UzakiLarme",
+          "shortTitle": "【 #歌枠 】ホロライブしばり歌枠♪【卯咲らるむ / #新人Vtuber 】",
+          "title": "【 #歌枠 】ホロライブしばり歌枠♪【卯咲らるむ / #新人Vtuber 】",
+          "occurrences": 20,
+          "hits": [
+            "live_en",
+            "live_ja"
+          ]
+        }
+      ],
+      "note": "Dirty dropped counts are filtered from batch2 dirty-audit only; candidate-to-usable differences are not used as dirty dropped inference."
+    },
+    "operationalBoundaries": {
+      "batch2VpsCleanupEvidence": [
+        "- VPS3 `/opt/ytb-song-rank-source-backfill-20260722-batch2-vps3`: removed; `df -h /` => `/dev/sda1 99G 11G 89G 11% /`.",
+        "- VPS5 `/opt/ytb-song-rank-source-backfill-20260722-batch2-vps5`: removed; `df -h /` => `/dev/vda1 10G 2.6G 7.0G 27% /`."
+      ],
+      "thisBatchUsedMac": false,
+      "thisBatchUsedVps": false,
+      "remoteTempDirectoryCreated": false,
+      "youtubeFetchStarted": false,
+      "modifiedDataExternal": false,
+      "pushed": false,
+      "deployed": false,
+      "committed": false,
+      "temporaryScriptsCreatedUnder": "G:\\codex-temp",
+      "temporaryScriptsDeleted": true
+    }
+  }
+}
