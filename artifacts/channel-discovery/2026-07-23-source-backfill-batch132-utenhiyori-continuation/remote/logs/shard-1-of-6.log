@@ -1,0 +1,7 @@
+CODEX_REMOTE_SHARD_START shard=1/6 startedAt=2026-07-23T14:37:02Z
+
+> daily-song-list@1.0.0 youtube:discover-channel
+> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@UtenHiyori --singer-name UtenHiyori --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation/discovery-shards/shard-1-of-6 --max-channel-pages 20 --max-candidates 0 --max-inspect 80 --inspect-shard-index 1 --inspect-shard-count 6 --request-interval-ms 3000 --request-jitter-ms 1000
+
+CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel="https://www.youtube.com/@UtenHiyori" candidates=338 inspected=53 videos=38 occurrences=812 elapsedSeconds=863 outputDir="/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation/discovery-shards/shard-1-of-6"
+CODEX_REMOTE_SHARD_EXIT shard=1/6 rc=0 finishedAt=2026-07-23T14:51:29Z

@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "kind": "source_backfill_channel_manifest",
+  "batchId": "2026-07-23-source-backfill-batch132-utenhiyori-continuation",
+  "generatedAt": "2026-07-23T14:57:15.459Z",
+  "status": "pending_partial",
+  "source": {
+    "handle": "UtenHiyori",
+    "url": "https://www.youtube.com/@UtenHiyori",
+    "status": "pending_partial",
+    "imported": false,
+    "skipped": false,
+    "failed": false,
+    "pending": true,
+    "actualDataExternalImportSkippedPerInstruction": true,
+    "reachedEnd": false,
+    "candidateCountLatest": 338,
+    "priorAcceptedVideosExcluded": 30,
+    "newAcceptedVideos": 232,
+    "newAcceptedOccurrences": 4763,
+    "newAcceptedSongs": 1018,
+    "publishedTimestampCoverage": "232/232",
+    "occurrenceTimeCoverage": "4763/4763",
+    "occurrenceSecondsCoverage": "4763/4763",
+    "discoveryThumbnailOrCoverCoverage": "232/232",
+    "acceptedJsonThumbnailOrCoverCoverage": "0/232",
+    "dirtyDroppedVideos": 0,
+    "dirtyDroppedOccurrences": 0,
+    "dirtySuspiciousVideos": 8,
+    "failureReason": "bounded channel pagination did not reach end with max-channel-pages=20; accepted increment covers completed inspected details only and full source remains pending"
+  },
+  "remoteExecution": {
+    "host": "be@192.168.1.13",
+    "repoPath": "/Users/be/daily-song-list",
+    "remoteTempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation",
+    "timeoutSecondsPerShard": 1100,
+    "outerTimeoutSeconds": 1250,
+    "shardCount": 6,
+    "markers": [
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-0-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@UtenHiyori\" candidates=338 inspected=51 videos=40 occurrences=920 elapsedSeconds=783 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation/discovery-shards/shard-0-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=0/6 rc=0 finishedAt=2026-07-23T14:50:09Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-1-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@UtenHiyori\" candidates=338 inspected=53 videos=38 occurrences=812 elapsedSeconds=863 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation/discovery-shards/shard-1-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=1/6 rc=0 finishedAt=2026-07-23T14:51:29Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-2-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@UtenHiyori\" candidates=338 inspected=51 videos=40 occurrences=874 elapsedSeconds=743 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation/discovery-shards/shard-2-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=2/6 rc=0 finishedAt=2026-07-23T14:49:29Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-3-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@UtenHiyori\" candidates=338 inspected=51 videos=37 occurrences=693 elapsedSeconds=877 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation/discovery-shards/shard-3-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=3/6 rc=0 finishedAt=2026-07-23T14:51:44Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-4-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@UtenHiyori\" candidates=338 inspected=52 videos=37 occurrences=828 elapsedSeconds=790 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation/discovery-shards/shard-4-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=4/6 rc=0 finishedAt=2026-07-23T14:50:14Z"
+      },
+      {
+        "log": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-5-of-6.log",
+        "discoveryOk": true,
+        "remoteExitOk": true,
+        "discoveryLine": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@UtenHiyori\" candidates=338 inspected=50 videos=40 occurrences=639 elapsedSeconds=774 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation/discovery-shards/shard-5-of-6\"",
+        "exitLine": "CODEX_REMOTE_SHARD_EXIT shard=5/6 rc=0 finishedAt=2026-07-23T14:49:59Z"
+      }
+    ]
+  },
+  "acceptedIncrementStats": {
+    "videos": 232,
+    "occurrences": 4763,
+    "songs": 1018,
+    "readStats": {
+      "inputDirs": 1,
+      "videoDetails": 232,
+      "usableVideos": 232,
+      "skippedNoSongs": 0,
+      "skippedInvalidVideoId": 0,
+      "duplicateVideoIds": 0,
+      "songs": 4763,
+      "skippedExistingRegressions": 0,
+      "skippedExistingRegressionVideoIds": []
+    },
+    "output": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/accepted/utenhiyori-batch132-accepted-increment.json"
+  },
+  "candidateIncrementStats": {
+    "videos": 232,
+    "occurrences": 4763,
+    "output": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/candidate-increment-unfiltered.json"
+  },
+  "dirtyAudit": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/dirty-audit.json",
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 8
+  },
+  "exportMarkers": {
+    "accepted": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=232 usableVideos=232 acceptedVideos=232 skippedRegressions=0 occurrences=4763 output=\"D:\\\\Projects\\\\daily_song_list_worker_source_backfill_20260720\\\\artifacts\\\\channel-discovery\\\\2026-07-23-source-backfill-batch132-utenhiyori-continuation\\\\accepted\\\\utenhiyori-batch132-accepted-increment.json\"",
+    "candidate": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=232 usableVideos=232 acceptedVideos=232 skippedRegressions=0 occurrences=4763 output=\"D:\\\\Projects\\\\daily_song_list_worker_source_backfill_20260720\\\\artifacts\\\\channel-discovery\\\\2026-07-23-source-backfill-batch132-utenhiyori-continuation\\\\candidate-increment-unfiltered.json\""
+  },
+  "remoteCleanup": {
+    "status": "removed",
+    "evidenceFile": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote-cleanup.txt",
+    "dfSummary": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   333Gi   555Gi    38%    711k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   333Gi   555Gi    38%    711k  5.8G    0%   /System/Volumes/Data",
+    "cleanupMarker": "CODEX_REMOTE_BATCH132_CLEANUP_OK removed=/tmp/ytb-song-rank-source-backfill-20260720/batch132-utenhiyori-continuation",
+    "dfMarker": "CODEX_REMOTE_BATCH132_DF_OK finishedAt=2026-07-23T14:55:37Z"
+  },
+  "outputFiles": [
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/accepted/utenhiyori-batch132-accepted-increment.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/candidate-increment-unfiltered.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/checkpoint-summary.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/dirty-audit.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/export-accepted.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/export-candidate.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote-cleanup.txt",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote-summary.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-0-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-0-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-1-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-1-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-2-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-2-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-3-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-3-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-4-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-4-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-5-of-6/manifest.json",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/discovery-shards/shard-5-of-6/report.md",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-0-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-1-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-2-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-3-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-4-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/remote/logs/shard-5-of-6.log",
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation/report.md"
+  ],
+  "scopeVerification": {
+    "onlyWroteThisArtifactDirectory": "artifacts/channel-discovery/2026-07-23-source-backfill-batch132-utenhiyori-continuation",
+    "didNotModifyRunnerTools": true,
+    "didNotModifyDataExternal": true,
+    "didNotCommitPushDeployOrImport": true,
+    "usedMac": true,
+    "noRawCacheCheckpointAuditsOccurrencesOrVideoDetailsRetained": true
+  },
+  "validationMarker": "CODEX_BATCH132_ARTIFACT_OK"
+}
