@@ -1,0 +1,82 @@
+{
+  "batchId": "2026-07-23-source-backfill-batch133-ebakyouka-continuation",
+  "generatedAt": "2026-07-23T15:00:55.692Z",
+  "status": "pending_partial",
+  "imported": false,
+  "skipped": false,
+  "failed": false,
+  "source": {
+    "handle": "ebakyouka",
+    "url": "https://www.youtube.com/@ebakyouka/streams"
+  },
+  "run": {
+    "remoteTempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch133-ebakyouka-continuation",
+    "remoteStatus": 124,
+    "timeoutReason": "watchdog terminated discovery after 1200 seconds; final discovery manifest was not written",
+    "marker": "CODEX_REMOTE_BATCH133_DONE status=124",
+    "discoveryOkMarkerPresent": false,
+    "watchdogMarkerPresent": true
+  },
+  "checkpoint": {
+    "candidateCount": 433,
+    "checkpointDetailCount": 85,
+    "completedVideoIds": 103,
+    "previousAcceptedVideoIdsSeeded": 18,
+    "newDetailCountAfterExcludingPreviousAccepted": 85,
+    "updatedAt": "2026-07-23T14:55:59.664Z",
+    "reachedEnd": null,
+    "reachedEndEvidence": "not available: process was watchdog-terminated before final manifest/pageSummaries were written"
+  },
+  "increment": {
+    "unfilteredVideoCount": 85,
+    "unfilteredOccurrenceCount": 2205,
+    "acceptedVideoCount": 85,
+    "acceptedOccurrenceCount": 2205,
+    "uniqueSongCount": 1380,
+    "publishedTimestampCoverage": "85/85",
+    "occurrenceTimeCoverage": "2205/2205",
+    "occurrenceSecondsCoverage": "2205/2205",
+    "acceptedIncrementThumbnailFieldCoverage": "0/85",
+    "acceptedOccurrenceThumbnailCoverage": "0/2205"
+  },
+  "dirtyAudit": {
+    "unfilteredVideoCount": 85,
+    "unfilteredOccurrenceCount": 2205,
+    "acceptedVideoCount": 85,
+    "acceptedOccurrenceCount": 2205,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 9,
+    "suspiciousOccurrenceCount": 56
+  },
+  "remoteDf": {
+    "before": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   334Gi   551Gi    38%    711k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   334Gi   551Gi    38%    711k  5.8G    0%   /System/Volumes/Data",
+    "afterRun": "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\n/dev/disk3s5   926Gi   333Gi   555Gi    38%    711k  5.8G    0%   /System/Volumes/Data\n/dev/disk3s5   926Gi   333Gi   555Gi    38%    711k  5.8G    0%   /System/Volumes/Data",
+    "cleanup": "CODEX_REMOTE_CLEANUP_OK\r\nFilesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on\r\n/dev/disk3s5   926Gi   333Gi   555Gi    38%    711k  5.8G    0%   /System/Volumes/Data\r\n/dev/disk3s5   926Gi   333Gi   555Gi    38%    711k  5.8G    0%   /System/Volumes/Data"
+  },
+  "writePolicy": {
+    "dataExternalModified": false,
+    "imported": false,
+    "committed": false,
+    "pushed": false,
+    "deployed": false
+  },
+  "artifacts": {
+    "acceptedIncrement": "accepted-increment.json",
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "dirtyAudit": "dirty-audit.json",
+    "checkpointSummary": "checkpoint-summary.json",
+    "report": "report.md",
+    "discoveryLog": "discovery.log",
+    "discoveryErrLog": "discovery.err.log",
+    "dfBefore": "df-before.txt",
+    "dfAfter": "df-after.txt",
+    "exportMarker": "export-marker.log",
+    "cleanupDf": "cleanup-df.txt"
+  },
+  "remoteCleanup": {
+    "removedRemoteTempDir": true,
+    "marker": "CODEX_REMOTE_CLEANUP_OK",
+    "remoteTempDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch133-ebakyouka-continuation"
+  }
+}

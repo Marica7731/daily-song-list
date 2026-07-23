@@ -1,0 +1,1654 @@
+{
+  "batchId": "2026-07-23-source-backfill-batch133-ebakyouka-continuation",
+  "generatedAt": "2026-07-23T15:00:55.692Z",
+  "source": {
+    "handle": "ebakyouka",
+    "url": "https://www.youtube.com/@ebakyouka/streams"
+  },
+  "policy": {
+    "hardDropTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "吹奏楽"
+    ],
+    "exactPhraseDropTerms": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "note": "live/ライブ are suspicious-only unless a hard drop term or exact phrase also matches the same occurrence context"
+  },
+  "counts": {
+    "unfilteredVideoCount": 85,
+    "unfilteredOccurrenceCount": 2205,
+    "acceptedVideoCount": 85,
+    "acceptedOccurrenceCount": 2205,
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 9,
+    "suspiciousOccurrenceCount": 56
+  },
+  "videos": [
+    {
+      "videoId": "qKkF0_JPzxI",
+      "title": "꒰ঌ 歌枠┆初見さん大歓迎❤チャンネル登録者さん2万人耐久歌枠🔥【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1782225613196,
+      "unfilteredSongCount": 90,
+      "acceptedSongCount": 90,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 54,
+          "time": "6:26:35",
+          "seconds": 23195,
+          "title": "僕らのLIVE 君とのLIFE",
+          "artist": "μ's",
+          "raw": "6:26:35 56. 僕らのLIVE 君とのLIFE / μ's",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "d3Kc0a4cBB4",
+      "title": "꒰ঌ #オリソン響く歌枠リレー┆パレプロのオリ曲は神曲だらけなんです！！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1777041613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "6XgfOaoQgSY",
+      "title": "꒰ঌ #歌枠┆初見さん50人と出会いたい！#おはぴよ朝活 2026/4/11 【 江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1777041613196,
+      "unfilteredSongCount": 34,
+      "acceptedSongCount": 34,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "rATPwawQi6Q",
+      "title": "꒰ঌ #歌枠┆天湊なるちゃんと一緒に おはぴよ朝活 ！#きょんちなるる【 江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1777041613196,
+      "unfilteredSongCount": 3,
+      "acceptedSongCount": 3,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "4XB2iUso6Tk",
+      "title": "꒰ঌ 歌枠┆#えばたん2026 お誕生日当日じゃけど歌っちゃお♡生誕ライブ前夜祭歌枠🎉 【 江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1777041613196,
+      "unfilteredSongCount": 24,
+      "acceptedSongCount": 24,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 1,
+          "time": "0:10:04",
+          "seconds": 604,
+          "title": "残酷な天使のテーゼ",
+          "artist": "高橋洋子",
+          "raw": "0:10:04 01. 残酷な天使のテーゼ / 高橋洋子",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 2,
+          "time": "0:16:13",
+          "seconds": 973,
+          "title": "Survivor",
+          "artist": "BLUE ENCOUNT",
+          "raw": "0:16:13 02. Survivor / BLUE ENCOUNT",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 3,
+          "time": "0:20:12",
+          "seconds": 1212,
+          "title": "言って",
+          "artist": "ヨルシカ",
+          "raw": "0:20:12 03. 言って。 / ヨルシカ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 4,
+          "time": "0:24:25",
+          "seconds": 1465,
+          "title": "赤いスイートピー",
+          "artist": "松田聖子",
+          "raw": "0:24:25 04. 赤いスイートピー / 松田聖子",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 5,
+          "time": "0:28:20",
+          "seconds": 1700,
+          "title": "銀色飛行船",
+          "artist": "supercell",
+          "raw": "0:28:20 05. 銀色飛行船 / supercell",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 6,
+          "time": "0:38:22",
+          "seconds": 2302,
+          "title": "紅蓮華",
+          "artist": "LiSA",
+          "raw": "0:38:22 06. 紅蓮華 / LiSA",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 7,
+          "time": "0:42:39",
+          "seconds": 2559,
+          "title": "ダダダダ天使",
+          "artist": "ナナヲアカリ",
+          "raw": "0:42:39 07. ダダダダ天使 / ナナヲアカリ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 8,
+          "time": "0:47:50",
+          "seconds": 2870,
+          "title": "ANGELUS アンジェラス",
+          "artist": "島谷ひとみ",
+          "raw": "0:47:50 08. ANGELUS アンジェラス / 島谷ひとみ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 9,
+          "time": "0:52:23",
+          "seconds": 3143,
+          "title": "1・2・3",
+          "artist": "西川くんとキリショー",
+          "raw": "0:52:23 09. 1・2・3 / 西川くんとキリショー",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 10,
+          "time": "0:57:41",
+          "seconds": 3461,
+          "title": "JUST COMMUNICATION",
+          "artist": "TWO-MIX",
+          "raw": "0:57:41 10. JUST COMMUNICATION / TWO-MIX",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 11,
+          "time": "1:02:10",
+          "seconds": 3730,
+          "title": "vestige ヴェスティージ",
+          "artist": "T.M.Revolution",
+          "raw": "1:02:10 11. vestige ヴェスティージ / T.M.Revolution",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 12,
+          "time": "1:07:51",
+          "seconds": 4071,
+          "title": "ミカヅキ",
+          "artist": "さユり",
+          "raw": "1:07:51 12. ミカヅキ / さユり",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 13,
+          "time": "1:12:37",
+          "seconds": 4357,
+          "title": "青空のナミダ",
+          "artist": "高橋瞳",
+          "raw": "1:12:37 13. 青空のナミダ / 高橋瞳",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 14,
+          "time": "1:17:18",
+          "seconds": 4638,
+          "title": "うまぴょい伝説",
+          "artist": "ウマ娘 プリティーダービー",
+          "raw": "1:17:18 14. うまぴょい伝説 / ウマ娘 プリティーダービー",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 15,
+          "time": "1:22:33",
+          "seconds": 4953,
+          "title": "優しさの理由",
+          "artist": "ChouCho",
+          "raw": "1:22:33 15. 優しさの理由 / ChouCho",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 16,
+          "time": "1:27:05",
+          "seconds": 5225,
+          "title": "未来形Answer",
+          "artist": "TRUSTRICK",
+          "raw": "1:27:05 16. 未来形Answer / TRUSTRICK",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 17,
+          "time": "1:31:25",
+          "seconds": 5485,
+          "title": "放課後オーバーフロウ",
+          "artist": "ランカ・リー（中島愛）",
+          "raw": "1:31:25 17. 放課後オーバーフロウ / ランカ・リー（中島愛）",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 18,
+          "time": "1:37:08",
+          "seconds": 5828,
+          "title": "Fallen",
+          "artist": "EGOIST",
+          "raw": "1:37:08 18. Fallen / EGOIST",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 19,
+          "time": "1:44:14",
+          "seconds": 6254,
+          "title": "リンネ",
+          "artist": "ハチ",
+          "raw": "1:44:14 19. リンネ / ハチ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 20,
+          "time": "1:48:41",
+          "seconds": 6521,
+          "title": "CQCQ",
+          "artist": "神様、僕は気づいてしまった",
+          "raw": "1:48:41 20. CQCQ / 神様、僕は気づいてしまった",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 21,
+          "time": "1:52:32",
+          "seconds": 6752,
+          "title": "深海のリトルクライ",
+          "artist": "sasakure. UK",
+          "raw": "1:52:32 21. 深海のリトルクライ / sasakure. UK",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 22,
+          "time": "2:05:18",
+          "seconds": 7518,
+          "title": "CheerS",
+          "artist": "ClariS",
+          "raw": "2:05:18 22. CheerS / ClariS",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 23,
+          "time": "2:09:31",
+          "seconds": 7771,
+          "title": "Fellows",
+          "artist": "遠藤正明",
+          "raw": "2:09:31 23. Fellows / 遠藤正明",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 24,
+          "time": "2:14:32",
+          "seconds": 8072,
+          "title": "きゃんびーはっぴ～！",
+          "artist": "未記載",
+          "raw": "2:14:32 きゃんびーはっぴ～！ :_あざうるす:",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "28hdzBMb9O0",
+      "title": "꒰ঌ 歌枠┆初見さん50人と出会いたい！春の恋愛ソング祭り🌸 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1777041613196,
+      "unfilteredSongCount": 57,
+      "acceptedSongCount": 57,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "YETnlHIRWj4",
+      "title": "꒰ঌ 歌枠┆初見さん50人と出会いたい✨今日はロックでいっくよ～！⚡【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1777041613196,
+      "unfilteredSongCount": 49,
+      "acceptedSongCount": 49,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 27,
+          "time": "2:29:35",
+          "seconds": 8975,
+          "title": "LIFE=LOVE=LIVE",
+          "artist": "第二文芸部バンド",
+          "raw": "2:29:35 27. LIFE=LOVE=LIVE / 第二文芸部バンド",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        },
+        {
+          "index": 28,
+          "time": "2:34:44",
+          "seconds": 9284,
+          "title": "幻想ドライブ",
+          "artist": "和島あみ",
+          "raw": "2:34:44 28. 幻想ドライブ / 和島あみ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "qjCMW0qYyrs",
+      "title": "꒰ঌ 歌枠┆初見さん大歓迎💖1曲だけでも聴いていってね！19,500人耐久歌枠【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1777041613196,
+      "unfilteredSongCount": 122,
+      "acceptedSongCount": 122,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 28,
+          "time": "2:35:22",
+          "seconds": 9322,
+          "title": "DEAD OR ALIVE",
+          "artist": "angela",
+          "raw": "2:35:22 28. DEAD OR ALIVE / angela",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "hgIJ5F_z5Z4",
+      "title": "꒰ঌ 歌枠┆初見さん大歓迎💖まったり歌う深夜の歌枠🌙【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1777041613196,
+      "unfilteredSongCount": 27,
+      "acceptedSongCount": 27,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "94iDe8cuQUo",
+      "title": "꒰ঌ #オススメ平成曲歌枠リレー┆平成を生き抜いたオタクたち集まれ～！✨【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1774449613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "ceOCXCjsDIk",
+      "title": "꒰ঌ #歌枠┆チャンネル登録者さん19,000人耐久歌枠✨ 【 #江波キョウカch登録者2万人計画/ パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1774449613196,
+      "unfilteredSongCount": 81,
+      "acceptedSongCount": 81,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "IaG8geG29Kw",
+      "title": "꒰ঌ #歌枠┆初見さん大歓迎🎉チャンネル登録者さん19,200人耐久歌枠✨ 【 #江波キョウカch登録者2万人計画/ パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1774449613196,
+      "unfilteredSongCount": 46,
+      "acceptedSongCount": 46,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "NiKX-_q45Ws",
+      "title": "꒰ঌ #歌枠┆深夜のまったりバラード縛り歌枠🌙 【 江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1774449613196,
+      "unfilteredSongCount": 20,
+      "acceptedSongCount": 20,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "IcCIZyG4JLU",
+      "title": "꒰ঌ #桜餅アイドル歌枠リレー┆桜色の髪&もちもちほっぺのバーチャルアイドルが歌います！🌸【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1774449613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "VciufR37coU",
+      "title": "꒰ঌ #春を彩る歌枠リレー┆春生まれのキョウカが爽やかな春をお届けします！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1774449613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "WK1jsK_c2TQ",
+      "title": "꒰ঌ #歌枠 縦型配信┆アニソンロックっていいよね⚡ 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 19,
+      "acceptedSongCount": 19,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "mJkFaWS1wV0",
+      "title": "꒰ঌ #歌枠 縦型配信┆アニソン盛り盛り歌枠だああああ！ 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 31,
+      "acceptedSongCount": 31,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "PL1b_ZuUTt0",
+      "title": "꒰ঌ #歌枠 縦型配信┆リクエスト歌枠 #おはぴよ朝活 2026/2/1 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 43,
+      "acceptedSongCount": 43,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "dTJocpd8Ayk",
+      "title": "꒰ঌ #歌枠 縦型配信┆リクエスト歌枠 #おはぴよ朝活 2026/2/7 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 38,
+      "acceptedSongCount": 38,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "vGCEsEjog-I",
+      "title": "꒰ঌ #歌枠┆パレプロのかわいいオリジナル曲を #天才児ぴよ で歌っちゃおう💚❤ 【 #江波キョウカ / #常磐カナメ / パレプロ 】",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 10,
+      "acceptedSongCount": 10,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "RAjf5SWsu5E",
+      "title": "꒰ঌ #歌枠┆初見さん40人目標！プチ耐久でボカロ老人会✨ 【 #江波キョウカch登録者2万人計画/ パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 49,
+      "acceptedSongCount": 49,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "KWcA8C1QrA0",
+      "title": "꒰ঌ #歌枠┆初見さん50人と出会いたい！#おはぴよ朝活 2026/2/14 【 江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 36,
+      "acceptedSongCount": 36,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 5,
+          "time": "0:37:47",
+          "seconds": 2267,
+          "title": "Alive A life",
+          "artist": "松本梨香",
+          "raw": "0:37:47 05. Alive A life / 松本梨香",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        },
+        {
+          "index": 6,
+          "time": "0:48:02",
+          "seconds": 2882,
+          "title": "DEAD OR ALIVE",
+          "artist": "angela",
+          "raw": "0:48:02 06. DEAD OR ALIVE / angela",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "v8JuhrufGBE",
+      "title": "꒰ঌ #歌枠┆初見さん50人と出会いたい！#おはぴよ朝活 2026/2/23 【 江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 32,
+      "acceptedSongCount": 32,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "3YJktdOupIY",
+      "title": "꒰ঌ #歌枠┆初見さん50人目標！プチ耐久歌枠✨ 【 #江波キョウカch登録者2万人計画/ パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 49,
+      "acceptedSongCount": 49,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "MouXIl6NCX4",
+      "title": "꒰ঌ 耐久 #歌枠┆登録者＋200人増えるまで終われません！初見さん歓迎歌枠 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1771857613196,
+      "unfilteredSongCount": 88,
+      "acceptedSongCount": 88,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 18,
+          "time": "2:12:44",
+          "seconds": 7964,
+          "title": "ALIVE",
+          "artist": "ClariS",
+          "raw": "2:12:44 18. ALIVE / ClariS",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        },
+        {
+          "index": 57,
+          "time": "6:27:53",
+          "seconds": 23273,
+          "title": "Alive A life",
+          "artist": "松本梨香",
+          "raw": "6:27:53 57. Alive A life / 松本梨香",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        },
+        {
+          "index": 59,
+          "time": "6:45:21",
+          "seconds": 24321,
+          "title": "JUST LIVE MORE",
+          "artist": "鎧武乃風",
+          "raw": "6:45:21 59. JUST LIVE MORE / 鎧武乃風",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "0pKZv90711Y",
+      "title": "꒰ঌ #歌枠 #雑談┆みんな年末気分！？キョウカともクリスマスしようよ～！👼【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 11,
+      "acceptedSongCount": 11,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "UyTkWr7FNto",
+      "title": "꒰ঌ #歌枠 縦型歌枠┆ロックでかっこいい歌でぶちあがろ～！⚡ 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 26,
+      "acceptedSongCount": 26,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "Qo0nId4qPHY",
+      "title": "꒰ঌ #歌枠 縦型配信┆#おはぴよ朝活 2026/1/17 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 34,
+      "acceptedSongCount": 34,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "-GA-9yQmqGU",
+      "title": "꒰ঌ #歌枠 縦型配信┆アニメのオープニング縛りで歌うよ～！🎵 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 29,
+      "acceptedSongCount": 29,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 18,
+          "time": "2:12:53",
+          "seconds": 7973,
+          "title": "ALIVE",
+          "artist": "ClariS",
+          "raw": "2:12:53 18. ALIVE / ClariS",
+          "status": "suspicious",
+          "matches": [
+            "live"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "wFSLkjlHLCU",
+      "title": "꒰ঌ #歌枠 縦型配信┆神曲だらけのアニメエンディング縛り歌枠🌙 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 27,
+      "acceptedSongCount": 27,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "HtbfDPG4Bgs",
+      "title": "꒰ঌ #歌枠┆#おはぴよ朝活 2026/1/10 【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 33,
+      "acceptedSongCount": 33,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "FrFhbdSyOIU",
+      "title": "꒰ঌ #歌枠┆#おはぴよ朝活 2026/1/12 【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 31,
+      "acceptedSongCount": 31,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "B8kAPg0zrfM",
+      "title": "꒰ঌ #歌枠┆2026年歌い初め！ 今年もたくさんの人の心に届きますように🌟【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 25,
+      "acceptedSongCount": 25,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "enwSTjKmvGs",
+      "title": "꒰ঌ #世界で1番かわいい歌枠リレー┆今年ラストの歌枠リレー！かわいいの集大成だ💖【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1769265613196,
+      "unfilteredSongCount": 4,
+      "acceptedSongCount": 4,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "FPl9smWVA-0",
+      "title": "꒰ঌ #歌枠 #縦型歌枠┆初見さん大歓迎✨好きな曲を歌っていこう！【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 29,
+      "acceptedSongCount": 29,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "Y1A5DK35UwU",
+      "title": "꒰ঌ #歌枠 #縦型歌枠┆初見さん大歓迎✨今日はなに歌おっか？アニソン歌枠！【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 34,
+      "acceptedSongCount": 34,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "4U4xY2eQ16s",
+      "title": "꒰ঌ #歌枠 縦型歌枠┆今日はバラードでゆっくり過ごそう☕ 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 21,
+      "acceptedSongCount": 21,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "uDwIx0s-bHY",
+      "title": "꒰ঌ #歌枠 縦型配信┆#おはぴよ朝活 2025/12/14 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 42,
+      "acceptedSongCount": 42,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "OAkKyMKfnRY",
+      "title": "꒰ঌ #歌枠┆初見さん大歓迎✨オールジャンル歌枠！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 33,
+      "acceptedSongCount": 33,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "Go3A6ccNlq0",
+      "title": "꒰ঌ #歌枠┆平成19年以降+前回歌わなかったドラマ主題歌オンリー歌枠！初見さん大歓迎だよ✨【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 31,
+      "acceptedSongCount": 31,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "rEzZZzysXdM",
+      "title": "꒰ঌ #歌枠┆平成元年～平成19年ドラマ主題歌オンリー歌枠！初見さん大歓迎だよ✨【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 35,
+      "acceptedSongCount": 35,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "IDGDGxY0x9A",
+      "title": "꒰ঌ #歌枠┆㊗現地チケット完売✨パレプロのオリジナル曲を歌うよ！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 28,
+      "acceptedSongCount": 28,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "Ogp-Z7n3lbc",
+      "title": "꒰ঌ #甘辛Reverse歌枠リレー┆可愛いチーム💗キョウカの魂の歌を浴びてけ～！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "brKR9l83E44",
+      "title": "꒰ঌ #私がすすめる神アニソン歌枠リレー┆大好きな神アニソンを歌います！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 6,
+      "acceptedSongCount": 6,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "ew-LmD0mHTg",
+      "title": "꒰ঌ #虹色ファンファーレ歌枠リレー┆お誕生日おめでとう🎉大好きの気持ちを込めて歌うよ😘💌【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "QEtz4D-TaxA",
+      "title": "꒰ঌ ノンストップ #歌枠 ┆Elysion 〜楽園幻想物語組曲～歌枠2025【 #江波キョウカ / パレプロ 】 #縦型歌枠 #shorts #vtuber",
+      "publishedTimestamp": 1766673613196,
+      "unfilteredSongCount": 11,
+      "acceptedSongCount": 11,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "ajnXe8ciTJA",
+      "title": "꒰ঌ #キミに想い届ける歌枠リレー ┆ そっと添えたキョウカの気持ち、受け取ってね💌【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1764081613196,
+      "unfilteredSongCount": 6,
+      "acceptedSongCount": 6,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "K-9ToADQ2Ao",
+      "title": "꒰ঌ #歌枠 ┆#しらせきょんち でロボソン、いきまーす！【 #江波キョウカ / #白河しらせ 】",
+      "publishedTimestamp": 1764081613196,
+      "unfilteredSongCount": 10,
+      "acceptedSongCount": 10,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "R8PD8zrq7Zs",
+      "title": "꒰ঌ #歌枠 ┆🍂秋の気分になりたい！歌おう！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1764081613196,
+      "unfilteredSongCount": 25,
+      "acceptedSongCount": 25,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "nGMu0yVCTnM",
+      "title": "꒰ঌ #歌枠 ┆初見さん大歓迎✨かっこいい曲オンリー歌枠🎵テンション上げてこ！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1764081613196,
+      "unfilteredSongCount": 21,
+      "acceptedSongCount": 21,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "tXKXDdKlYUU",
+      "title": "꒰ঌ #歌枠 ┆初見さん大歓迎✨今日はキャラソン気分でかわいく歌うよ！🎀✨【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1764081613196,
+      "unfilteredSongCount": 24,
+      "acceptedSongCount": 24,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "T69-HRpvyYA",
+      "title": "꒰ঌ #歌枠 ┆㊗リハビリ歌枠！！𝕏のリプで募集した曲も歌う…かも！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1764081613196,
+      "unfilteredSongCount": 20,
+      "acceptedSongCount": 20,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "_JBpdW7GUaE",
+      "title": "꒰ঌ #歌枠┆元気チャージ歌枠🔋耳から摂取するタイプのビタミンH(平成)！初見さん大歓迎だよ✨【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1764081613196,
+      "unfilteredSongCount": 1,
+      "acceptedSongCount": 1,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "MkoEreAGI4g",
+      "title": "꒰ঌ #歌枠┆初見さん大歓迎✨アニソン・特撮歌枠で熱くなれ～！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1764081613196,
+      "unfilteredSongCount": 30,
+      "acceptedSongCount": 30,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 25,
+          "time": "2:38:55",
+          "seconds": 9535,
+          "title": "幻想ドライブ",
+          "artist": "和島あみ",
+          "raw": "2:38:55 25. 幻想ドライブ / 和島あみ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "hpMdydh4_Zk",
+      "title": "꒰ঌ #歌枠 ┆ピアノ伴奏でまったりタイムを過ごそう🎹【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1761489613196,
+      "unfilteredSongCount": 13,
+      "acceptedSongCount": 13,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "w6oiI2RCXp0",
+      "title": "꒰ঌ #歌枠 ┆みんながオススメしてくれたニジガク曲を歌います🌈【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1761489613196,
+      "unfilteredSongCount": 17,
+      "acceptedSongCount": 17,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "Xky4iX--y-Y",
+      "title": "꒰ঌ #歌枠┆少女アニメの曲でかわいい #ゆるちきょんち をご堪能あれ～💖【 #江波キョウカ / #三日月ちゆる 】",
+      "publishedTimestamp": 1761489613196,
+      "unfilteredSongCount": 13,
+      "acceptedSongCount": 13,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "qJ5K5tjLztE",
+      "title": "꒰ঌ 歌枠 ┆#縦型配信 #おはぴよ朝活 2025/9/27 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1761489613196,
+      "unfilteredSongCount": 33,
+      "acceptedSongCount": 33,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "OPJPrkL6OfU",
+      "title": "꒰ঌ #歌枠 ┆キョウカ的チルい曲でまったり歌いたかった歌枠【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1758897613196,
+      "unfilteredSongCount": 39,
+      "acceptedSongCount": 39,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "SG_zcsVz5X4",
+      "title": "꒰ঌ #歌枠 ┆昭和から平成まで！？懐メロアニソン歌枠【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1758897613196,
+      "unfilteredSongCount": 31,
+      "acceptedSongCount": 31,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "941zLl63eDY",
+      "title": "꒰ঌ #虜になっちゃうギャップ萌え歌枠リレー ┆ 30分にぎゅぎゅっとギャップを詰め込むぞ！💘【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1758897613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "cXEySmy3oj0",
+      "title": "꒰ঌ 歌枠 ┆#縦型配信 #おはぴよ朝活 2025/8/31 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1758897613196,
+      "unfilteredSongCount": 39,
+      "acceptedSongCount": 39,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "IpoU4OBKyhA",
+      "title": "꒰ঌ 歌枠 ┆#縦型配信 #おはぴよ朝活 2025/9/20 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1758897613196,
+      "unfilteredSongCount": 37,
+      "acceptedSongCount": 37,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "XGSeB-C4t8I",
+      "title": "꒰ঌ 歌枠 ┆#縦型配信 #おはぴよ朝活 2025/9/7 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1758897613196,
+      "unfilteredSongCount": 37,
+      "acceptedSongCount": 37,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "6APwbNY55cU",
+      "title": "꒰ঌ #歌枠 ┆今日の気分で歌うアニソン多め歌枠！みんなの気分は～？？ 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1756305613196,
+      "unfilteredSongCount": 27,
+      "acceptedSongCount": 27,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "_yqzKqQYRxI",
+      "title": "꒰ঌ #歌枠 ┆今立ち止まったそこのあなた！8/2(土)に五反田でVアイドルの3Dライブを観に来ないかい？ 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1756305613196,
+      "unfilteredSongCount": 21,
+      "acceptedSongCount": 21,
+      "status": "accepted_suspicious",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": [
+        {
+          "index": 1,
+          "time": "0:09:50",
+          "seconds": 590,
+          "title": "はなまるぴっぴはよいこだけ",
+          "artist": "A応P",
+          "raw": "0:09:50 01. はなまるぴっぴはよいこだけ / A応P",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 2,
+          "time": "0:18:13",
+          "seconds": 1093,
+          "title": "紅蓮華",
+          "artist": "LiSA",
+          "raw": "0:18:13 02. 紅蓮華 / LiSA",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 3,
+          "time": "0:27:04",
+          "seconds": 1624,
+          "title": "だってアタシのヒーロー",
+          "artist": "LiSA",
+          "raw": "0:27:04 03. だってアタシのヒーロー / LiSA",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 4,
+          "time": "0:32:35",
+          "seconds": 1955,
+          "title": "オリオンをなぞる",
+          "artist": "UNISON SQUARE GARDEN",
+          "raw": "0:32:35 04. オリオンをなぞる / UNISON SQUARE GARDEN",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 5,
+          "time": "0:38:37",
+          "seconds": 2317,
+          "title": "カオスが極まる",
+          "artist": "UNISON SQUARE GARDEN",
+          "raw": "0:38:37 05. カオスが極まる / UNISON SQUARE GARDEN",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 6,
+          "time": "0:43:35",
+          "seconds": 2615,
+          "title": "桜のあと",
+          "artist": "UNISON SQUARE GARDEN",
+          "raw": "0:43:35 06. 桜のあと (all quartets lead to the?) / UNISON SQUARE GARDEN",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 7,
+          "time": "0:49:41",
+          "seconds": 2981,
+          "title": "ダダダダ天使",
+          "artist": "ナナヲアカリ",
+          "raw": "0:49:41 07. ダダダダ天使 / ナナヲアカリ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 8,
+          "time": "0:54:40",
+          "seconds": 3280,
+          "title": "ワンルームシュガーライフ",
+          "artist": "ナナヲアカリ",
+          "raw": "0:54:40 08. ワンルームシュガーライフ / ナナヲアカリ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 9,
+          "time": "0:58:53",
+          "seconds": 3533,
+          "title": "マンネリライフ",
+          "artist": "ナナヲアカリ",
+          "raw": "0:58:53 09. マンネリライフ / ナナヲアカリ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 10,
+          "time": "1:02:37",
+          "seconds": 3757,
+          "title": "航海の唄",
+          "artist": "さユり",
+          "raw": "1:02:37 10. 航海の唄 / さユり",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 11,
+          "time": "1:08:41",
+          "seconds": 4121,
+          "title": "るーららるーらーるららるーらー",
+          "artist": "さユり",
+          "raw": "1:08:41 11. るーららるーらーるららるーらー / さユり",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 12,
+          "time": "1:18:17",
+          "seconds": 4697,
+          "title": "Terminal",
+          "artist": "04 Limited Sazabys",
+          "raw": "1:18:17 12. Terminal / 04 Limited Sazabys",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 13,
+          "time": "1:23:34",
+          "seconds": 5014,
+          "title": "アカシア",
+          "artist": "BUMP OF CHICKEN",
+          "raw": "1:23:34 13. アカシア / BUMP OF CHICKEN",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 14,
+          "time": "1:29:47",
+          "seconds": 5387,
+          "title": "XY&Z",
+          "artist": "サトシ（松本梨香）",
+          "raw": "1:29:47 14. XY&Z / サトシ（松本梨香）",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 15,
+          "time": "1:35:04",
+          "seconds": 5704,
+          "title": "ひゃくごじゅういち",
+          "artist": "オーキド博士とポケモンキッズ",
+          "raw": "1:35:04 15. ひゃくごじゅういち / オーキド博士とポケモンキッズ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 16,
+          "time": "1:39:14",
+          "seconds": 5954,
+          "title": "1・2・3",
+          "artist": "サトシ&ゴウ",
+          "raw": "1:39:14 16. 1・2・3 / サトシ&ゴウ",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 17,
+          "time": "1:45:01",
+          "seconds": 6301,
+          "title": "ポーズ",
+          "artist": "岡崎体育",
+          "raw": "1:45:01 17.  ポーズ / 岡崎体育",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 18,
+          "time": "1:51:36",
+          "seconds": 6696,
+          "title": "ぼくのベストフレンドへ",
+          "artist": "岩崎宏美",
+          "raw": "1:51:36 18. ぼくのベストフレンドへ / 岩崎宏美",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 19,
+          "time": "2:01:01",
+          "seconds": 7261,
+          "title": "心の瞳",
+          "artist": "合唱曲",
+          "raw": "2:01:01 19. 心の瞳 / 合唱曲",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 20,
+          "time": "2:06:17",
+          "seconds": 7577,
+          "title": "チャージマン研",
+          "artist": "ひばり児童合唱団",
+          "raw": "2:06:17 20. チャージマン研 / ひばり児童合唱団",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        },
+        {
+          "index": 21,
+          "time": "2:19:19",
+          "seconds": 8359,
+          "title": "きゃんび～はっぴー！",
+          "artist": "未記載",
+          "raw": "2:19:19 きゃんび～はっぴー！",
+          "status": "suspicious",
+          "matches": [
+            "ライブ"
+          ]
+        }
+      ]
+    },
+    {
+      "videoId": "UuR1AD4EvwY",
+      "title": "꒰ঌ #世界で1番かわいい歌枠リレー ┆ 猛暑でもかわいいので最強です💖【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1756305613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "WxXt8dvDIOg",
+      "title": "꒰ঌ 歌枠 ┆#縦型配信 #おはぴよ朝活 2025/7/27 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1756305613196,
+      "unfilteredSongCount": 27,
+      "acceptedSongCount": 27,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "FO5qylXwLH8",
+      "title": "꒰ঌ 歌枠 ┆#縦型配信 #おはぴよ朝活 2025/8/17 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1756305613196,
+      "unfilteredSongCount": 38,
+      "acceptedSongCount": 38,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "AhGkbbuoV6w",
+      "title": "꒰ঌ 歌枠 ┆#縦型配信 #おはぴよ朝活 2025/8/23 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1756305613196,
+      "unfilteredSongCount": 32,
+      "acceptedSongCount": 32,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "gLJ6wD_p3vs",
+      "title": "꒰ঌ 歌枠 ┆#縦型配信 #おはぴよ朝活 2025/8/9 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1756305613196,
+      "unfilteredSongCount": 33,
+      "acceptedSongCount": 33,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "kXjgQ26H1qE",
+      "title": "【#大熱唱祭 #江波キョウカ】江波キョウカ、1番手、行きます！！【#ロボットアニメ #歌枠 #KARAOKE #Vtuber】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 4,
+      "acceptedSongCount": 4,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "cAw_fpvZVIA",
+      "title": "꒰ঌ #1人1アニメ歌枠リレー ┆ポケモン縛りで君のハートをゲットだぜ！？【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "7QCy1ZMargw",
+      "title": "꒰ঌ #Vアイドルが歌う2次元アイドル歌枠リレー ┆ アイマスとナナシスでお送りする8番手！✨ 【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "rJ5KC0dnM2w",
+      "title": "꒰ঌ #オンゲキ歌枠リレー┆1番手⚡かっこいいもかわいいも電波曲もあるオンゲキなんだよな！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 5,
+      "acceptedSongCount": 5,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "hNddEiNTOTg",
+      "title": "꒰ঌ #オンゲキ歌枠リレー┆難しい譜面だと壁のボタン破壊しそうで日和る2番手！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 9,
+      "acceptedSongCount": 9,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "tA457QVxrwg",
+      "title": "꒰ঌ #ゲキパレ歌枠リレー ┆ 2番手💖オンゲキとパレプロの『かっこいい』を歌います！⚡【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 4,
+      "acceptedSongCount": 4,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "3300s2lTVcI",
+      "title": "꒰ঌ #コイスカらんらん 歌枠リレー ┆ 夏が楽しみになる爽やかなセトリでバイバイ五月病！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 7,
+      "acceptedSongCount": 7,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "Ll8C2qdbYaA",
+      "title": "꒰ঌ #しらせきょんち┆めちゃ久しぶりの歌枠！こんなに仲良くなりました💕【 #江波キョウカ / #白河しらせ 】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 8,
+      "acceptedSongCount": 8,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "ROtGGZHFc9o",
+      "title": "꒰ঌ #ユニパレ歌枠リレー┆トリは任せて！？みんなにビタミン🍋🍊🍍をお届けするよ！【 #江波キョウカ / パレプロ 】",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 4,
+      "acceptedSongCount": 4,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "EfB4xPTU0r8",
+      "title": "꒰ঌ #歌枠 #縦型配信 ┆ 1曲だけでも聴いてみて✨オールジャンル歌枠！ 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 10,
+      "acceptedSongCount": 10,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "PgfQprHxWg8",
+      "title": "꒰ঌ #歌枠 #縦型配信 ┆ しっとりとラブソングを歌っていくよ💓【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 17,
+      "acceptedSongCount": 17,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "63FgFzbBtZU",
+      "title": "꒰ঌ #歌枠 #縦型配信 ┆ バレンタイン当日歌枠♡アニソンもボカロもラブソングだらけ！【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 19,
+      "acceptedSongCount": 19,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "3sVW4cnD_pk",
+      "title": "꒰ঌ #歌枠 #縦型配信 ┆ ポケモンオンリー歌枠！君はどの子がパートナー？【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 33,
+      "acceptedSongCount": 33,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    },
+    {
+      "videoId": "AhAtTOi1N8I",
+      "title": "꒰ঌ #歌枠 #縦型配信 ┆ 深夜のゲリラ歌枠！バラード多め！ 【 #江波キョウカ / パレプロ 】 #shorts #vtuber",
+      "publishedTimestamp": 1753281613196,
+      "unfilteredSongCount": 23,
+      "acceptedSongCount": 23,
+      "status": "accepted",
+      "reason": "hard instrument/performance-only terms removed at occurrence level; live terms are suspicious only",
+      "droppedSongs": [],
+      "suspiciousSongs": []
+    }
+  ]
+}

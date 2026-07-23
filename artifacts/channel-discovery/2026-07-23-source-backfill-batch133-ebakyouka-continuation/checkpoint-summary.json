@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "batchId": "2026-07-23-source-backfill-batch133-ebakyouka-continuation",
+  "generatedAt": "2026-07-23T14:59:45.723Z",
+  "status": "pending_partial",
+  "source": {
+    "url": "https://www.youtube.com/@ebakyouka/streams",
+    "handle": "ebakyouka"
+  },
+  "checkpoint": {
+    "candidateCount": 433,
+    "checkpointDetailCount": 85,
+    "completedVideoIds": 103,
+    "previousAcceptedVideoIdsSeeded": 18,
+    "newDetailCountAfterExcludingPreviousAccepted": 85,
+    "updatedAt": "2026-07-23T14:55:59.664Z",
+    "reachedEnd": null,
+    "reachedEndEvidence": "not available: process was watchdog-terminated before final manifest/pageSummaries were written"
+  },
+  "exclusions": {
+    "previousAcceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch31-ebakyouka-partial/accepted-increment.json",
+    "excludedVideoIds": [
+      "2ujlnZwOhs4",
+      "4TXIix3tjbc",
+      "B2B4-5gT3aE",
+      "EmC_vQqIr1g",
+      "GcBBTKmgj5Q",
+      "H4yRzfYnLQA",
+      "I3lrlxa8hJU",
+      "KatDdimYkBY",
+      "SX3DCZfJxHI",
+      "SdzX-NjKwpI",
+      "bHDfer3bLIs",
+      "d-4QgxZlFD8",
+      "dcdrS5rMdwQ",
+      "dlIEG0zef2M",
+      "fHTyWFMftpY",
+      "hR4bLVTZPsM",
+      "qIh2Y1RX9Hs",
+      "xy9yyJjNk0U"
+    ]
+  }
+}
