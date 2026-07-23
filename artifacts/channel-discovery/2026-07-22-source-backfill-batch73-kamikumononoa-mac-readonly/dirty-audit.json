@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery-dirty-audit-status-only",
+  "status": "interrupted",
+  "generatedAt": "2026-07-23T13:39:46.9944823+08:00",
+  "sourceUrl": "https://www.youtube.com/@KAMIKUMONONOA",
+  "hardDropTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット",
+    "サックス",
+    "サクソフォン",
+    "sax",
+    "saxophone",
+    "クラリネット"
+  ],
+  "exactPhraseDropTerms": [
+    "piano streaming",
+    "piano performance",
+    "ピアノ演奏"
+  ],
+  "liveRule": "live/ライブ only suspicious/drop when missing singing signal",
+  "singingSignals": [
+    "歌枠",
+    "歌",
+    "弾き語り",
+    "karaoke",
+    "歌ってみた"
+  ],
+  "auditedCandidates": 0,
+  "dropped": 0,
+  "suspicious": 0,
+  "accepted": 0,
+  "failureReason": "12-minute no checkpoint/progress after start marker; user requested immediate interruption before full discovery/export completed",
+  "items": []
+}

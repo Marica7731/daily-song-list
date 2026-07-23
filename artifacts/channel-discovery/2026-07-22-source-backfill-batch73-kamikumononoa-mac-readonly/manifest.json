@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery-worker-status",
+  "status": "interrupted",
+  "batch": "batch73",
+  "sourceUrl": "https://www.youtube.com/@KAMIKUMONONOA",
+  "sourceHandle": "@KAMIKUMONONOA",
+  "artifactGeneratedAt": "2026-07-23T13:39:46.9944823+08:00",
+  "artifactDir": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720\\artifacts\\channel-discovery\\2026-07-22-source-backfill-batch73-kamikumononoa-mac-readonly",
+  "windowsRepo": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+  "windowsHead": "ff60f29f028848ce850a56fb10d6cdb344176343",
+  "macRepo": "/Users/be/daily-song-list",
+  "macHead": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+  "toolEvidence": {
+    "discoveryScript": "scripts/youtube-channel-discovery.js",
+    "exportScript": "scripts/export-channel-discovery-increment.js",
+    "sourceFilterPath": "assets/source-filter.js",
+    "sourceFilterSha256": "bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103",
+    "sourceFilterBytes": 60415
+  },
+  "counters": {
+    "imported": 0,
+    "skipped": 0,
+    "failed": 1,
+    "candidateCount": 36,
+    "inspectedCount": 0,
+    "usableVideoCount": 0,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "uniqueSongs": 0
+  },
+  "coverage": {
+    "publishedTimestamp": "not_available_interrupted",
+    "occurrenceTime": "not_available_interrupted",
+    "occurrenceSeconds": "not_available_interrupted",
+    "acceptedThumbnailUrl": "not_available_interrupted",
+    "discoveryThumbnail": "not_exported_interrupted",
+    "reachedEnd": false
+  },
+  "failureReason": "12-minute no checkpoint/progress after start marker; user requested immediate interruption before full discovery/export completed",
+  "stageLog": [
+    "preflight started on Mac at 2026-07-23T13:27:24+08:00; repo=/Users/be/daily-song-list; head=f1b0e8423e755b2c3b38a5288c98bca3e5d092cc; source-filter sha256=bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103 size=60415; CODEX_PREFLIGHT_OK",
+    "candidate-only first attempt failed immediately because Mac lacks GNU timeout, rc=127",
+    "candidate-only rerun completed at 2026-07-23T13:28:15+08:00; candidates=36 inspected=0 videos=0 occurrences=0 elapsedSeconds=14; CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK",
+    "full-discovery started at 2026-07-23T13:28:25+08:00 but was interrupted by user request before discovery/export completed; no accepted increment was generated",
+    "remote process scan found zsh/npm/node full-discovery PIDs 31327/31329/31339; all were terminated before cleanup",
+    "Mac temp directory /Users/be/codex-temp/daily-song-list-source-backfill-batch73-kamikumononoa-mac-readonly removed; G:\\codex-temp had no matching batch73 directory"
+  ],
+  "cleanup": {
+    "macTempDir": "/Users/be/codex-temp/daily-song-list-source-backfill-batch73-kamikumononoa-mac-readonly",
+    "macCleanupMarker": "CODEX_REMOTE_CLEANUP_OK",
+    "macDfBefore": [
+      "Filesystem Size Used Avail Capacity Mounted on",
+      "/dev/disk3s5 926Gi 232Gi 655Gi 27% /System/Volumes/Data",
+      "/dev/disk3s5 926Gi 232Gi 655Gi 27% /System/Volumes/Data"
+    ],
+    "macDfAfter": [
+      "Filesystem Size Used Avail Capacity Mounted on",
+      "/dev/disk3s5 926Gi 232Gi 655Gi 27% /System/Volumes/Data",
+      "/dev/disk3s5 926Gi 232Gi 655Gi 27% /System/Volumes/Data"
+    ],
+    "gTemp": "no matching G:\\codex-temp batch73/kamikumononoa directory found",
+    "windowsDrives": [
+      {
+        "Name": "D",
+        "Used": 470183231488,
+        "Free": 9902043136,
+        "Root": "D:\\"
+      },
+      {
+        "Name": "C",
+        "Used": 255750627328,
+        "Free": 65388351488,
+        "Root": "C:\\"
+      },
+      {
+        "Name": "G",
+        "Used": 1362027409408,
+        "Free": 686047371264,
+        "Root": "G:\\"
+      }
+    ]
+  },
+  "success": false
+}
