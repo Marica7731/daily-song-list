@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "kind": "source_backfill_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch115-soraotoha-partial-checkpoint",
+  "handle": "SoraOtoha",
+  "status": "partial_artifact_ready",
+  "hardDropTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット"
+  ],
+  "hardDropExactPhrases": [
+    "piano streaming",
+    "ピアノ演奏"
+  ],
+  "suspiciousOnlyTerms": [
+    "live",
+    "ライブ"
+  ],
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "suspiciousVideoCount": 2,
+  "termHitCounts": {
+    "フルート": 0,
+    "生演奏": 0,
+    "クラリネット": 0,
+    "piano streaming": 0,
+    "ピアノ演奏": 0,
+    "live": 2,
+    "ライブ": 0
+  },
+  "dropped": [],
+  "suspicious": [
+    {
+      "youtubeVideoId": "4EC4mRgbZOg",
+      "videoTitle": "【定期歌枠🌟】41th Sora LIVE: Re:SONANCE🪽🫧【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り#歌枠",
+      "hardHits": [],
+      "broadHits": [
+        "live"
+      ],
+      "occurrenceCount": 22,
+      "action": "suspicious_only_not_dropped"
+    },
+    {
+      "youtubeVideoId": "Hg0WdW0MFaY",
+      "videoTitle": "【定期歌枠🌟】39th Sora LIVE: Re:SONANCE🪽🫧振替！！【Re:AcT/音羽奏來】#新人Vtuber #shorts #弾き語り#歌枠",
+      "hardHits": [],
+      "broadHits": [
+        "live"
+      ],
+      "occurrenceCount": 29,
+      "action": "suspicious_only_not_dropped"
+    }
+  ],
+  "note": "live/ライブ is suspicious-only for explicit song-frame titles; no hard instrumental drops were found in this checkpoint subset unless listed in dropped."
+}

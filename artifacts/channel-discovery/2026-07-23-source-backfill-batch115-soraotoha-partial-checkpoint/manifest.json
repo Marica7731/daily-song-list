@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-23-source-backfill-batch115-soraotoha-partial-checkpoint",
+  "generatedAt": "2026-07-23T12:34:42.8565117Z",
+  "status": "partial_artifact_ready",
+  "completeForImport": false,
+  "scope": "partial accepted increment extracted from existing SoraOtoha checkpoint details; no YouTube fetch; no data/external write",
+  "source": {
+    "handle": "SoraOtoha",
+    "url": "https://www.youtube.com/@SoraOtoha",
+    "status": "partial_artifact_ready",
+    "acceptedIncrementReadyForReview": true,
+    "fullSourceStillPending": true,
+    "checkpoint": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/remote-download/vps5/SoraOtoha/checkpoint.json",
+    "candidateCount": 126,
+    "inspectedInLatestRun": 14,
+    "checkpointDetailCount": 10,
+    "acceptedVideos": 10,
+    "acceptedOccurrences": 200,
+    "acceptedSongs": 200,
+    "uniqueSongsBeforeAudit": 142,
+    "publishedTimestampCoverage": "10/10",
+    "occurrenceTimeCoverage": "200/200",
+    "occurrenceSecondsCoverage": "200/200",
+    "thumbnailCoverage": "10/10",
+    "droppedVideos": 0,
+    "droppedOccurrences": 0,
+    "suspiciousVideos": 2,
+    "reachedEnd": false,
+    "failureReason": "full source remains pending; this batch exports only completed checkpoint details"
+  },
+  "acceptedIncrement": "accepted/2026-07-23-source-backfill-batch115.accepted.json",
+  "exportRan": true,
+  "exportMarker": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=10 usableVideos=10 acceptedVideos=10 skippedRegressions=0 occurrences=200",
+  "dirtyAudit": {
+    "path": "dirty-audit.json",
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousVideoCount": 2
+  },
+  "remoteCleanup": {
+    "status": "not_used",
+    "note": "No remote or VPS directory was created for this checkpoint extraction batch."
+  },
+  "scopeVerification": {
+    "didNotStartYouTubeFetch": true,
+    "didNotUseMacOrVps": true,
+    "didNotCreateRemoteTempDirectory": true,
+    "didNotModifyDataExternal": true,
+    "didNotPushOrDeploy": true
+  }
+}
