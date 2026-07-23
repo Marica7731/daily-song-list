@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-23T03:43:38Z",
+  "status": "interrupted",
+  "failureReason": "10-minute no checkpoint/progress after start marker",
+  "inputs": [],
+  "readStats": {
+    "inputDirs": 0,
+    "videoDetails": 0,
+    "usableVideos": 0,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 0,
+    "rawSongs": 0,
+    "acceptedSongs": 0,
+    "droppedSongs": 0,
+    "suspiciousSongs": 0,
+    "skippedAllSongsRejected": 0,
+    "importAudit": {
+      "schemaVersion": 1,
+      "dropped": [],
+      "suspicious": []
+    },
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": []
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": []
+}
