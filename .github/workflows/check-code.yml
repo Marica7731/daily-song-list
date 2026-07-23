@@ -31,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 50
           filter: blob:none
 
       - name: Ensure full workspace checkout
@@ -59,4 +59,44 @@ jobs:
         run: node scripts/check-blocked-vtuber-sync.js --source .tmp/mygit/config/blocked-vtuber-channels.json --mirror config/blocked-vtuber-channels.json
 
       - name: Run checks
-        run: npm run check
+        env:
+          CHECK_BASE_SHA: ${{ github.event.before }}
+        run: |
+          set -Eeuo pipefail
+          base="${CHECK_BASE_SHA}"
+          if [ -z "${base}" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            base="$(git rev-parse HEAD^ 2>/dev/null || true)"
+          fi
+          run_ui_proof=1
+          if [ -n "${base}" ]; then
+            ui_changes="$(git diff --name-only "${base}" HEAD -- \
+              index.html \
+              assets/app.js \
+              assets/styles.css \
+              assets/frontend-utils.js \
+              README.md \
+              docs/ui-spec.md \
+              docs/ui-proof.md \
+              scripts/capture-readme-screenshots.js \
+              scripts/validate-ui-proof.js \
+              scripts/ui-proof-config.js \
+              test/fixtures/ui-proof-runtime.json \
+              test/ui-proof-fixtures.test.js \
+              docs/data-architecture.md \
+              docs/range-migration.md \
+              docs/storage-layout.md \
+              docs/backfill.md)"
+            if [ -z "${ui_changes}" ]; then
+              run_ui_proof=0
+            fi
+          fi
+          node scripts/check-js-syntax.js
+          if [ "${run_ui_proof}" = "1" ]; then
+            npm run check:ui-proof
+          else
+            echo "CODEX_UI_PROOF_SKIPPED reason=no-ui-proof-input-changes"
+          fi
+          npm run blocklist:validate
+          npm test
+          npm run validate
+          npm run check:budget
