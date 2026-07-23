@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "kind": "batch127_validation_summary",
+  "batchId": "2026-07-23-source-backfill-batch127-ucrf92d-remaining-shards",
+  "generatedAt": "2026-07-23T14:12:30.634Z",
+  "passed": true,
+  "marker": "CODEX_BATCH127_VALIDATE_OK acceptedVideos=34 occurrences=564 candidateVideos=39 previousDuplicatesExcluded=5 hardDirtyMatchesInAccepted=0 suspicious=5 reachedEnd=false",
+  "acceptedVideoCount": 34,
+  "acceptedOccurrenceCount": 564,
+  "acceptedSongCount": 564,
+  "candidateVideoCountUnfiltered": 39,
+  "previousBatch123DuplicatesExcludedCount": 5,
+  "duplicateAcceptedIds": [],
+  "previousBatch123DuplicatesInAccepted": [],
+  "hardDirtyMatchesInAccepted": [],
+  "wrongChannelVideoIds": [],
+  "shardManifestMissing": [],
+  "rawLikeFilesKept": [],
+  "remoteCleanupMarkerPresent": true,
+  "cleanupMarker": "CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch127-ucrf92d-remaining-shards",
+  "dataExternalDiff": {
+    "command": "git diff -- data/external",
+    "hasDiff": false,
+    "evidence": "empty stdout"
+  },
+  "coverage": {
+    "publishedTimestampCoverage": "34/34",
+    "occurrenceTimeCoverage": "564/564",
+    "occurrenceSecondsCoverage": "564/564",
+    "thumbnailCoverCoverage": "34/34"
+  }
+}

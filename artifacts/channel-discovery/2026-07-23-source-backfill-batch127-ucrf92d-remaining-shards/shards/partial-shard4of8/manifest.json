@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "kind": "youtube-channel-discovery",
+  "sourceSystem": "youtube_channel_discovery",
+  "generatedAt": "2026-07-23T14:04:42.780Z",
+  "channelUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw",
+  "singerName": "UCrF92dEkXiTtexol0yg4Gmw",
+  "keywords": [
+    "LIVE",
+    "歌",
+    "弾き語",
+    "リレー"
+  ],
+  "tabs": [
+    "streams",
+    "videos"
+  ],
+  "pageUrls": [
+    "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/streams?hl=ja&persist_hl=1",
+    "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/videos?hl=ja&persist_hl=1"
+  ],
+  "maxChannelPages": 5,
+  "maxCandidates": 113,
+  "maxInspect": 15,
+  "inspectShardIndex": 4,
+  "inspectShardCount": 8,
+  "candidateOnly": false,
+  "candidateCount": 113,
+  "inspectedInLatestRun": 14,
+  "usableVideoCount": 7,
+  "occurrenceCount": 107,
+  "pageSummaries": [
+    {
+      "pageUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/streams?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 5,
+      "rawItemCount": 57,
+      "candidateCount": 52,
+      "continuationRounds": 4,
+      "reachedEnd": false,
+      "fromCache": false,
+      "bytes": 1191171
+    },
+    {
+      "pageUrl": "https://www.youtube.com/channel/UCrF92dEkXiTtexol0yg4Gmw/videos?hl=ja&persist_hl=1",
+      "status": 200,
+      "pageCount": 5,
+      "rawItemCount": 147,
+      "candidateCount": 62,
+      "continuationRounds": 4,
+      "reachedEnd": false,
+      "fromCache": false,
+      "bytes": 1124674
+    }
+  ],
+  "outputs": {
+    "rawVideos": "raw-videos.json",
+    "videoDetails": "video-details.json",
+    "occurrences": "occurrences.json",
+    "audits": "audits.json",
+    "report": "report.md",
+    "checkpoint": "checkpoint.json"
+  },
+  "requestStats": {
+    "requestCount": 2,
+    "networkRequestCount": 2,
+    "cacheHitCount": 0,
+    "totalBytes": 2315845,
+    "totalElapsedMs": 512,
+    "statuses": {
+      "200": 2
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch127-ucrf92d-remaining-shards",
+  "generatedAt": "2026-07-23T14:09:04.728Z",
+  "status": "completed",
+  "hardExcludeTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット",
+    "サックス",
+    "吹奏楽"
+  ],
+  "hardExcludeExactPhrases": [
+    "piano streaming",
+    "ピアノ演奏"
+  ],
+  "suspiciousOnlyTerms": [
+    "live",
+    "ライブ"
+  ],
+  "previousBatch123Shard0VideoIds": [
+    "LS332UnockQ",
+    "PDvrfy8kXaY",
+    "T1mGGARi_fU",
+    "YR05aqjl3pA",
+    "cYI3x_dpybM",
+    "dZnlfB7dO2s"
+  ],
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 5,
+  "suspiciousOccurrenceCount": 115,
+  "suspicious": [
+    {
+      "videoId": "b4rZJRRWvlQ",
+      "title": "【新曲披露‼️／旅行のお土産話】弾き語り配信（2026/4/25アーカイブ）",
+      "matched": [
+        "ライブ"
+      ],
+      "occurrenceCount": 25
+    },
+    {
+      "videoId": "lU30oefwn3w",
+      "title": "【こだわり／曲名と名前被り？】弾き語り配信！（2026/3/20アーカイブ）",
+      "matched": [
+        "ライブ"
+      ],
+      "occurrenceCount": 21
+    },
+    {
+      "videoId": "3HlLqnqtqCM",
+      "title": "【2026/1/17アーカイブ】弾き語り配信🎹",
+      "matched": [
+        "ライブ"
+      ],
+      "occurrenceCount": 26
+    },
+    {
+      "videoId": "DEARp2hcPwY",
+      "title": "弾き語り配信｜初見さんも大歓迎です！（2026/6/27アーカイブ）",
+      "matched": [
+        "ライブ"
+      ],
+      "occurrenceCount": 24
+    },
+    {
+      "videoId": "oD10sI0NVW4",
+      "title": "【ライブ欲／新曲一部披露／桜話】弾き語り配信（2026/4/5アーカイブ）",
+      "matched": [
+        "ライブ"
+      ],
+      "occurrenceCount": 19
+    }
+  ],
+  "hardDroppedVideoCount": 0,
+  "hardDroppedOccurrenceCount": 0,
+  "previousBatch123DuplicateVideoCount": 5,
+  "previousBatch123DuplicateOccurrenceCount": 112,
+  "duplicateWithinBatchVideoCount": 0,
+  "duplicateWithinBatchOccurrenceCount": 0,
+  "previousBatch123Duplicates": [
+    {
+      "videoId": "YR05aqjl3pA",
+      "title": "弾き語り配信｜初見さんも大歓迎です！（2026/6/13アーカイブ）",
+      "reason": "previous_batch123_shard0_duplicate",
+      "matched": [],
+      "occurrenceCount": 12
+    },
+    {
+      "videoId": "cYI3x_dpybM",
+      "title": "【旅行の思い出／映画トーク／ライブ告知】弾き語り配信（2026/4/4アーカイブ）",
+      "reason": "previous_batch123_shard0_duplicate",
+      "matched": [],
+      "occurrenceCount": 17
+    },
+    {
+      "videoId": "PDvrfy8kXaY",
+      "title": "【リリース情報/新曲/結婚】弾き語り配信（2026/2/14アーカイブ）",
+      "reason": "previous_batch123_shard0_duplicate",
+      "matched": [],
+      "occurrenceCount": 27
+    },
+    {
+      "videoId": "T1mGGARi_fU",
+      "title": "【2026/1/10アーカイブ】弾き語り配信🎹",
+      "reason": "previous_batch123_shard0_duplicate",
+      "matched": [],
+      "occurrenceCount": 29
+    },
+    {
+      "videoId": "dZnlfB7dO2s",
+      "title": "【2025/12/13アーカイブ】弾き語り配信🎹",
+      "reason": "previous_batch123_shard0_duplicate",
+      "matched": [],
+      "occurrenceCount": 27
+    }
+  ],
+  "duplicateWithinBatch": []
+}
