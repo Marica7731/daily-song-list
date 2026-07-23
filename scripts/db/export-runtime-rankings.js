@@ -24,7 +24,7 @@ const {
 const { canonicalizeSongIdentity, loadSongAliasContext } = require("../song-aliases");
 const { repairParsedEntry } = require("../entry-repair");
 const { isLikelyNonSongEntry, normalizeParsedSong, normalizeSourceAwareArtist } = require("../song-utils");
-const { dropSameSecondTranslatedAliasSongs, isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../../assets/source-filter");
+const { dropSameSecondTranslatedAliasSongs, filterBlockedVideos, isBlockedSongEntry, isSingletonPseudoSongEntry } = require("../../assets/source-filter");
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const REQUEST_PREVIEW_SOURCE_LIMIT = positiveInteger(process.env.DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT, 3);
@@ -178,10 +178,11 @@ function writeJsonlExport(outputPath, payload, runtimeImports, dataVersion, args
       const rangePayload = buildRangePayload(payload, rangeId, args, runtimeImports);
       rangePayload.dataVersion = dataVersion;
       const baseItems = Array.isArray(rangePayload.items) ? rangePayload.items.map((item) => withRuntimeScopedSongs(item, null, songAliasContext)) : [];
-      logPhase("range_items_ready", { range: rangeId, items: baseItems.length });
-      const titleStats = buildRuntimeTitleStats(baseItems);
+      const sourceFilteredItems = filterBlockedVideos(baseItems);
+      logPhase("range_items_ready", { range: rangeId, items: sourceFilteredItems.length, blockedSources: baseItems.length - sourceFilteredItems.length });
+      const titleStats = buildRuntimeTitleStats(sourceFilteredItems);
       logPhase("range_title_stats_ready", { range: rangeId, titles: titleStats.size });
-      const filteredItems = baseItems.map((item) => withRuntimeScopedSongs(item, titleStats));
+      const filteredItems = sourceFilteredItems.map((item) => withRuntimeScopedSongs(item, titleStats));
       const titleArtistFallbacks = buildRuntimeTitleArtistFallbacks(filteredItems);
       logPhase("range_artist_fallbacks_ready", { range: rangeId, titles: titleArtistFallbacks.size });
       const itemsBeforeChannelHydration = filteredItems.map((item) => withRuntimeArtistFallbacks(item, titleArtistFallbacks));

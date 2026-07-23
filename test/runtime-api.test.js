@@ -163,6 +163,76 @@ test("runtime API all-field source search sorts by matched occurrence count", as
   }
 });
 
+test("runtime API excludes blocked VTuber source occurrences from channel search", async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-blocked-source-"));
+  const latestPath = path.join(dir, "latest.json");
+  const dbPath = path.join(dir, "song-rank.sqlite");
+  let child = null;
+  let stderr = "";
+
+  try {
+    writeBlockedSourceSearchFixture(latestPath);
+    execFileSync(
+      PYTHON,
+      [
+        path.join(ROOT, "scripts", "db", "build-runtime-db.py"),
+        "--input",
+        latestPath,
+        "--output",
+        dbPath,
+        "--no-vsinger",
+        "--no-youtube-channel-discovery",
+      ],
+      {
+        cwd: ROOT,
+        encoding: "utf8",
+        env: { ...process.env, DAILY_SONG_REQUEST_PREVIEW_SOURCE_LIMIT: "2" },
+        timeout: 30000,
+      },
+    );
+    const port = await getFreePort();
+    child = spawn(
+      PYTHON,
+      [
+        path.join(ROOT, "server", "song_rank_api.py"),
+        "--db",
+        dbPath,
+        "--host",
+        "127.0.0.1",
+        "--port",
+        String(port),
+      ],
+      { cwd: ROOT, stdio: ["ignore", "pipe", "pipe"] },
+    );
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString("utf8");
+    });
+
+    await waitForReady(child, port);
+    const safeChannelSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=Safe%20Source&searchFields=channel&pageSize=5`);
+    assert.equal(safeChannelSearch.searchScope, "channel");
+    assert.equal(safeChannelSearch.totalCount, 1);
+    assert.equal(safeChannelSearch.records[0].title, "Safe Channel Song");
+    assert.equal(safeChannelSearch.records[0].matchedBySource, true);
+
+    for (const query of ["Uchi%20Fifi", "uchififi", "UCMhjWfFiyxVjNWBJpkDotcg"]) {
+      const blockedSearch = await fetchJson(`http://127.0.0.1:${port}/api/rankings?range=all&view=songs&q=${query}&searchFields=channel&pageSize=5`);
+      assert.equal(blockedSearch.searchScope, "channel");
+      const message = `${query} ${JSON.stringify(blockedSearch.records)}`;
+      assert.equal(blockedSearch.totalCount, 0, message);
+      assert.equal(blockedSearch.totalOccurrenceCount, 0, message);
+      assert.deepEqual(blockedSearch.records, [], message);
+    }
+  } finally {
+    if (child) {
+      child.kill();
+      await waitForExit(child);
+      assert.equal(stderr.includes("Traceback"), false, stderr);
+    }
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("runtime API serves health and ranking rows from SQLite", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-"));
   const latestPath = path.join(dir, "latest.json");
@@ -540,6 +610,43 @@ function sourceSortVideo(videoId, title, keyword, songs) {
     publishedText: "2026-07-19",
     songs,
   };
+}
+
+function writeBlockedSourceSearchFixture(latestPath) {
+  fs.writeFileSync(
+    latestPath,
+    JSON.stringify({
+      generatedAt: "2026-07-22T00:00:00.000Z",
+      capturedAt: "2026-07-22T00:00:00.000Z",
+      groups: {
+        all: {
+          items: [
+            {
+              videoId: "blocked-uchi-fifi",
+              title: "Regional Karaoke",
+              channelName: "羽芝扉扉 Uchi Fifi",
+              channelId: "UCMhjWfFiyxVjNWBJpkDotcg",
+              channelHandle: "/@uchififi",
+              channelUrl: "https://www.youtube.com/channel/UCMhjWfFiyxVjNWBJpkDotcg",
+              thumbnailUrl: "https://i.ytimg.com/vi/blocked-uchi-fifi/hqdefault.jpg",
+              songs: [{ title: "Blocked Regional Song", artist: "Known Artist", seconds: 10, time: "0:10" }],
+            },
+            {
+              videoId: "safe-source-video",
+              title: "Safe Karaoke",
+              channelName: "Safe Source Ch.",
+              channelId: "UC-safe-source",
+              channelHandle: "/@safe_source",
+              channelUrl: "https://www.youtube.com/@safe_source",
+              thumbnailUrl: "https://i.ytimg.com/vi/safe-source-video/hqdefault.jpg",
+              songs: [{ title: "Safe Channel Song", artist: "Known Artist", seconds: 20, time: "0:20" }],
+            },
+          ],
+        },
+      },
+    }),
+    "utf8",
+  );
 }
 
 function probeSourceOccurrenceFts(dir, dbPath, query) {

@@ -40,6 +40,9 @@ UNKNOWN_ARTISTS = {
 }
 KNOWN_SONG_ARTIST_OVERRIDES_PATH = ROOT / "config" / "known-song-artist-overrides.json"
 KNOWN_SONG_ARTIST_OVERRIDES_LOOKUP: dict[str, dict[str, str]] | None = None
+BLOCKED_VTUBER_CHANNELS_PATH = ROOT / "config" / "blocked-vtuber-channels.json"
+BLOCKED_VTUBER_LOCAL_CHANNELS_PATH = ROOT / "config" / "blocked-vtuber-local-channels.json"
+BLOCKED_SOURCE_MATCHER_INDEX: dict[str, set[str]] | None = None
 CURATED_ARTIST_ALIAS_GROUPS = (
     {"canonical": "40mP", "aliases": ("40mp",)},
     {"canonical": "Ado", "aliases": ("ado", "Ado :_heart:")},
@@ -505,6 +508,7 @@ def ingest_latest_payload(
     for range_id in CANONICAL_RANGES:
         group = group_for_range(groups, range_id)
         items = group.get("items") if isinstance(group, dict) and isinstance(group.get("items"), list) else []
+        items = [item for item in items if isinstance(item, dict) and not is_blocked_source_item(item)]
         if limit_per_range > 0:
             items = items[:limit_per_range]
         write_meta(conn, f"range_{range_id}_item_count", str(len(items)))
@@ -739,6 +743,8 @@ def import_js_runtime_export(
                 range_id = clean_text(record.get("rangeId"))
                 item_index = int(record.get("itemIndex") or 0)
                 video_id = video_key(item)
+                if is_blocked_source_item(item):
+                    continue
                 if video_id:
                     video_ids.add(video_id)
                 upsert_video(conn, video_id, item)
@@ -1750,6 +1756,7 @@ def insert_occurrence(
 
 def insert_source_detail(conn: sqlite3.Connection, source_key: str, range_id: str, entity_type: str, entity_key: str, payload: dict) -> None:
     payload = hydrate_source_detail_payload_channel_identities(payload, conn)
+    payload = filter_blocked_source_detail_payload(payload)
     conn.execute(
         """
         INSERT OR REPLACE INTO source_details(source_key, range_id, entity_type, entity_key, payload_json)
@@ -1768,6 +1775,7 @@ def insert_source_occurrences_for_detail(
     source_occurrence_seen: set[tuple[str, int]],
 ) -> int:
     payload = hydrate_source_detail_payload_channel_identities(payload, conn)
+    payload = filter_blocked_source_detail_payload(payload)
     occurrences = payload.get("occurrences") if isinstance(payload.get("occurrences"), list) else []
     inserted_count = 0
     for position, occurrence in enumerate(occurrences):
@@ -1807,6 +1815,170 @@ def hydrate_source_detail_payload_channel_identities(payload: dict, conn: sqlite
         else:
             hydrated_occurrences.append(occurrence)
     return {**payload, "occurrences": hydrated_occurrences} if changed else payload
+
+
+def filter_blocked_source_detail_payload(payload: dict) -> dict:
+    if not isinstance(payload, dict):
+        return payload
+    occurrences = payload.get("occurrences") if isinstance(payload.get("occurrences"), list) else []
+    if not occurrences:
+        return payload
+    filtered_occurrences = []
+    removed = 0
+    for occurrence in occurrences:
+        item = occurrence.get("item") if isinstance(occurrence, dict) and isinstance(occurrence.get("item"), dict) else {}
+        if item and is_blocked_source_item(item):
+            removed += 1
+            continue
+        filtered_occurrences.append(occurrence)
+    if not removed:
+        return payload
+    result = {**payload, "occurrences": filtered_occurrences}
+    occurrence_count = len(filtered_occurrences)
+    for key in ("count", "timestampCount", "occurrenceCount", "totalCount", "totalOccurrenceCount"):
+        if key in result:
+            result[key] = occurrence_count
+    if "videoCount" in result:
+        result["videoCount"] = len(unique_texts(
+            occurrence.get("item", {}).get("videoId")
+            for occurrence in filtered_occurrences
+            if isinstance(occurrence, dict) and isinstance(occurrence.get("item"), dict)
+        ))
+    if "occurrencePreviewLimited" in result and occurrence_count < len(occurrences):
+        result["occurrencePreviewLimited"] = False
+    return result
+
+
+def is_blocked_source_item(item: dict) -> bool:
+    if not isinstance(item, dict):
+        return False
+    index = blocked_source_matcher_index()
+    for value in source_field_values(item, ("channelId", "authorChannelId", "ownerChannelId")):
+        if normalize_key(value) in index["channelIds"]:
+            return True
+    for value in source_field_values(item, ("channelHandle", "handle", "ownerHandle")):
+        handle_key = blocked_handle_key(value)
+        if handle_key and handle_key in index["handles"]:
+            return True
+    for value in source_field_values(item, ("channelUrl", "authorUrl", "ownerUrl", "sourceUrl", "discoveryChannelUrl")):
+        url_key = normalize_channel_url_key(value)
+        if url_key and url_key in index["channelUrls"]:
+            return True
+        handle_key = blocked_handle_key(value)
+        if handle_key and handle_key in index["handles"]:
+            return True
+    for value in source_field_values(item, ("channelName", "ownerText", "longBylineText", "shortBylineText")):
+        alias_key = blocked_alias_key(value)
+        if alias_key and alias_key in index["aliases"]:
+            return True
+    title_key = blocked_alias_key(item.get("title"))
+    return bool(title_key and any(alias and alias in title_key for alias in index["titleAliases"]))
+
+
+def blocked_source_matcher_index() -> dict[str, set[str]]:
+    global BLOCKED_SOURCE_MATCHER_INDEX
+    if BLOCKED_SOURCE_MATCHER_INDEX is not None:
+        return BLOCKED_SOURCE_MATCHER_INDEX
+    index: dict[str, set[str]] = {
+        "channelIds": set(),
+        "handles": set(),
+        "channelUrls": set(),
+        "aliases": set(),
+        "titleAliases": set(),
+    }
+    for entry in blocked_source_entries():
+        if clean_text(entry.get("status")) != "blocked":
+            continue
+        for value in entry.get("channelIds") or []:
+            key = normalize_key(value)
+            if key:
+                index["channelIds"].add(key)
+        for value in entry.get("handles") or []:
+            key = blocked_handle_key(value)
+            if key:
+                index["handles"].add(key)
+        for value in entry.get("channelUrls") or []:
+            key = normalize_channel_url_key(value)
+            if key:
+                index["channelUrls"].add(key)
+            handle_key = blocked_handle_key(value)
+            if handle_key:
+                index["handles"].add(handle_key)
+        for value in (entry.get("name"), *(entry.get("aliases") or [])):
+            key = blocked_alias_key(value)
+            if key:
+                index["aliases"].add(key)
+        for value in entry.get("titleAliases") or []:
+            key = blocked_alias_key(value)
+            if key:
+                index["titleAliases"].add(key)
+    BLOCKED_SOURCE_MATCHER_INDEX = index
+    return index
+
+
+def blocked_source_entries() -> list[dict]:
+    by_id: dict[str, dict] = {}
+    for path in (BLOCKED_VTUBER_CHANNELS_PATH, BLOCKED_VTUBER_LOCAL_CHANNELS_PATH):
+        if not path.exists():
+            continue
+        payload = read_json(path)
+        entries = payload.get("entries") if isinstance(payload, dict) and isinstance(payload.get("entries"), list) else []
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            entry_id = clean_text(entry.get("id")) or stable_key("blocked-source-entry", dumps_json(entry))
+            by_id[entry_id] = merge_blocked_source_entry(by_id.get(entry_id), entry)
+    return list(by_id.values())
+
+
+def merge_blocked_source_entry(base: dict | None, override: dict) -> dict:
+    if not base:
+        return dict(override)
+    merged = dict(base)
+    for key, value in override.items():
+        if isinstance(value, list):
+            merged[key] = unique_texts([*(merged.get(key) if isinstance(merged.get(key), list) else []), *value])
+        elif value not in (None, ""):
+            merged[key] = value
+    return merged
+
+
+def source_field_values(item: dict, keys: tuple[str, ...], seen: set[int] | None = None) -> list[str]:
+    if not isinstance(item, dict):
+        return []
+    seen = seen or set()
+    item_id = id(item)
+    if item_id in seen:
+        return []
+    seen.add(item_id)
+    values = []
+    for key in keys:
+        value = item.get(key)
+        if isinstance(value, list):
+            values.extend(value)
+        elif value is not None:
+            values.append(value)
+    for nested_key in ("candidate", "sourceRecord", "source", "video", "item", "detail"):
+        nested = item.get(nested_key)
+        if isinstance(nested, dict):
+            values.extend(source_field_values(nested, keys, seen))
+    return unique_texts(values)
+
+
+def blocked_handle_key(value) -> str:
+    handle = normalize_channel_handle(value)
+    if handle:
+        return normalize_key(handle.lstrip("/@"))
+    url_key = normalize_channel_url_key(value)
+    if url_key.startswith("/@"):
+        return normalize_key(url_key[2:])
+    if url_key.startswith("@"):
+        return normalize_key(url_key[1:])
+    return ""
+
+
+def blocked_alias_key(value) -> str:
+    return normalize_key(value)
 
 
 def merge_channel_metadata_into_lookup(lookup: dict[str, dict], metadata: dict) -> None:
@@ -1866,6 +2038,8 @@ def insert_source_occurrence(
 ) -> bool:
     item = payload.get("item") if isinstance(payload.get("item"), dict) else {}
     song = payload.get("song") if isinstance(payload.get("song"), dict) else {}
+    if is_blocked_source_item(item):
+        return False
     video_id = clean_text(item.get("videoId"))
     channel_handle = normalize_channel_handle(item.get("channelHandle"))
     clean_item = {**item, "channelHandle": channel_handle, "channelAliases": channel_aliases(item)}
