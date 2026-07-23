@@ -589,6 +589,13 @@ function bindEvents() {
       return;
     }
 
+    const pageJumpButton = event.target.closest("[data-page-jump-form] button");
+    if (pageJumpButton) {
+      event.preventDefault();
+      submitPageFromForm(pageJumpButton.closest("[data-page-jump-form]"));
+      return;
+    }
+
     const pageButton = event.target.closest("[data-page]");
     if (pageButton) {
       const nextPage = Number.parseInt(pageButton.dataset.page || "1", 10);

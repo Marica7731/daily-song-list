@@ -400,6 +400,7 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function bindPaginationInput"), /event\.stopPropagation\(\)/u);
   assert.match(functionBody("function handlePaginationFormSubmit"), /event\.preventDefault\(\)/u);
   assert.match(functionBody("function bindEvents"), /event\.defaultPrevented/u);
+  assert.match(functionBody("function bindEvents"), /event\.target\.closest\("\[data-page-jump-form\] button"\)/u);
   assert.match(functionBody("async function requestApiViewPage"), /params\.set\("nicheOnly", "1"\)/u);
   assert.match(functionBody("async function requestApiViewPage"), /params\.set\("hideUnknownArtist", "1"\)/u);
   assert.match(appSource, /function sourceDetailPagePath[\s\S]{0,1800}filters\.nicheOnly/u);
