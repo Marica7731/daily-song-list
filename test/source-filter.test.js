@@ -14,6 +14,7 @@ const {
   isChannelScopedUnknownArtistDirtySong,
   isSingletonPseudoSongEntry,
   isSelfReferentialChannelTitle,
+  matchBlockedSource,
   BLOCKLIST_HASH,
   normalizeSongEntry,
 } = require("../assets/source-filter");
@@ -30,6 +31,9 @@ test("source filter removes blocked HK/TW VTuber channels without matching ordin
   assert.equal(isBlockedSource({ channelUrl: "https://www.youtube.com/channel/UCMhjWfFiyxVjNWBJpkDotcg", channelName: "Japanese Channel", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelName: "羽芝扉扉 Uchi Fifi", title: "歌枠" }), true);
   assert.equal(isBlockedSource({ channelName: "Uchi Fifi / 羽芝扉扉", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelUrl: "https://www.youtube.com/@%E9%9F%B3%E6%88%90%E3%81%BF%E3%82%89%E3%81%AD", channelName: "Japanese Channel", title: "歌枠" }), true);
+  assert.equal(isBlockedSource({ channelUrl: "https://www.youtube.com/@音成みらね", channelName: "Japanese Channel", title: "歌枠" }), true);
+  assert.equal(matchBlockedSource({ channelName: "羽芝扉扉 Uchi Fifi", title: "歌枠" })?.region, "LEGACY_REVIEW");
   assert.equal(isBlockedSource({ channelName: "AZKi Channel", title: "奔跑日記！ / 米亞 MYA" }), false);
   assert.equal(isBlockedSource({ channelName: "Narrator Music", title: "HKVtuber 台湾旅行" }), false);
   assert.equal(isBlockedSongEntry({ title: "DEN Q~~~", artist: "未記載" }), true);

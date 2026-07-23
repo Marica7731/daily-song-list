@@ -2235,14 +2235,14 @@ def is_collected_source(item: dict) -> bool:
     known_type = clean_text(item.get("knownSourceType") or known_source_type(item)).lower()
     source_system = clean_text(source_quality.get("sourceSystem")).lower()
     true_types = {"manual", "verified", "song-search", "song_search", "youtube_channel_discovery"}
+    if is_moment_source(item):
+        return "youtube_channel_discovery" in source_groups
     if (
         "youtube_channel_discovery" in source_groups
         or known_type in true_types
         or (source_quality.get("sourceType") == "external" and not is_moment_source_type(source_system))
     ):
         return True
-    if is_moment_source(item):
-        return False
     explicit = item.get("isCollected")
     return explicit is True or explicit == 1 or clean_text(explicit).lower() == "true"
 
@@ -2281,7 +2281,7 @@ def normalize_runtime_song(song: dict) -> dict:
     original_title = clean_text(song.get("title"))
     original_artist = clean_text(song.get("artist"))
     title = clean_runtime_safe_title_candidate(original_title)
-    artist = original_artist
+    artist = clean_runtime_artist(original_artist)
     known_override = known_song_artist_override_for_title(title) if is_unknown_artist(artist) else None
     if known_override:
         title = known_override["title"]
@@ -2292,6 +2292,53 @@ def normalize_runtime_song(song: dict) -> dict:
     normalized["title"] = title
     normalized["artist"] = artist
     return normalized
+
+
+def clean_runtime_artist(value) -> str:
+    text = clean_text(value)
+    if not text:
+        return text
+    text = drop_unknown_artist_parts(text)
+    return canonical_artist_display_name(text) or text
+
+
+def drop_unknown_artist_parts(value) -> str:
+    text = clean_text(value)
+    parts = split_artist_parts(text)
+    if len(parts) <= 1:
+        return text
+    real_parts = [part for part in parts if not is_unknown_artist(part)]
+    if real_parts and len(real_parts) < len(parts):
+        return " / ".join(real_parts)
+    return text
+
+
+def split_artist_parts(value) -> list[str]:
+    parts: list[str] = []
+    current: list[str] = []
+    depth = 0
+    open_chars = "([{（［【「『"
+    close_chars = ")]}）］】」』"
+    for char in clean_text(value):
+        if char in open_chars:
+            depth += 1
+            current.append(char)
+            continue
+        if char in close_chars:
+            depth = max(0, depth - 1)
+            current.append(char)
+            continue
+        if depth == 0 and re.match(r"[/／|｜￤∣丨、,，&＆+＋;；]", char):
+            part = "".join(current).strip()
+            if part:
+                parts.append(part)
+            current = []
+            continue
+        current.append(char)
+    tail = "".join(current).strip()
+    if tail:
+        parts.append(tail)
+    return parts
 
 
 def apply_runtime_artist_fallback(song: dict, title_artist_fallbacks: dict[str, dict[str, str]] | None) -> dict:
@@ -2985,7 +3032,7 @@ def is_composite_channel_name(value: str) -> bool:
     if not text:
         return False
     has_separator = re.search(r"(?:、|，|,|\s+\+\s+|\s+×\s+)", text)
-    has_channel_marker = re.search(r"(?:ch\.?|channel|ちゃんねる|チャンネル)", text, re.IGNORECASE)
+    has_channel_marker = re.search(r"(?:ch\.?|channel|music|ちゃんねる|チャンネル)", text, re.IGNORECASE)
     return bool(has_separator and has_channel_marker)
 
 
@@ -3143,6 +3190,8 @@ def channel_display_name_score(value) -> int:
     score = min(len(text), 80)
     if re.search(r"[ぁ-ゖァ-ヺ一-龯々〆〤]", text):
         score += 1000
+    if is_composite_channel_name(text):
+        score -= 1200
     if re.fullmatch(r"/?@[A-Za-z0-9._%~-]+", text) or re.fullmatch(r"/channel/UC[A-Za-z0-9_-]+", text) or re.fullmatch(r"UC[A-Za-z0-9_-]{20,}", text):
         score -= 1000
     return score

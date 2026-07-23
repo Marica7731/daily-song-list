@@ -58,6 +58,7 @@ test("buildClientGroup keeps only runtime video and song fields", () => {
     "catalogFirstSeenAt",
     "catalogLastInspectedAt",
     "catalogLastSeenAt",
+    "channelAliases",
     "channelHandle",
     "channelId",
     "channelName",
@@ -158,6 +159,15 @@ test("buildClientGroup treats moment sources as not collected even with stale fl
         songs: [{ seconds: 6, title: "VSinger Moment Alias Song", artist: "VSinger Moment Alias Artist" }],
       },
       {
+        videoId: "MOMENTNOSYS",
+        title: "vsinger moment missing system video",
+        channelName: "VSinger Moment Missing System Ch.",
+        isCollected: true,
+        sourceGroups: ["vsinger-moment"],
+        sourceQuality: { sourceType: "external" },
+        songs: [{ seconds: 7, title: "VSinger Moment Missing System Song", artist: "VSinger Moment Missing System Artist" }],
+      },
+      {
         videoId: "SCAN0000001",
         title: "scan video",
         channelName: "Scan Ch.",
@@ -188,6 +198,7 @@ test("buildClientGroup treats moment sources as not collected even with stale fl
       ["MOMENT00001", "vsinger_moment_http", false],
       ["MOMENTALIAS1", "moment", false],
       ["MOMENTALIAS2", "vsinger-moment", false],
+      ["MOMENTNOSYS", "vsinger_moment_http", false],
       ["SCAN0000001", "youtube_channel_discovery", true],
       ["MANUAL00001", "manual", true],
       ["MIXED000001", "vsinger_moment_http", true],
@@ -234,6 +245,95 @@ test("buildClientGroup backfills same-title unknown artists before UI search/sou
 
   const flowerSearchText = JSON.stringify(buildSearchRecords(group.items).filter((record) => record.type === "song" && record.title === "花になって"));
   assert.doesNotMatch(flowerSearchText, /未記載|⟦16⟧|Be a flower|52😎/u);
+});
+
+test("buildClientGroup canonicalizes dirty artist variants before ranking export", () => {
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "ARTCLEAN001",
+        title: "artist cleanup video",
+        channelName: "Artist Cleanup Ch.",
+        songs: [
+          { seconds: 1, title: "唱", artist: "Ado :_heart:" },
+          { seconds: 2, title: "踊", artist: "Ado / 未記載" },
+          { seconds: 3, title: "花に亡霊", artist: "yorushika" },
+          { seconds: 4, title: "晴る", artist: "ヨルシカ（yorushika）" },
+          { seconds: 5, title: "モニタリング", artist: "DECO＊27" },
+        ],
+      },
+    ],
+  });
+
+  assert.deepEqual(
+    group.items[0].songs.map((song) => `${song.title} / ${song.artist}`),
+    ["唱 / Ado", "踊 / Ado", "花に亡霊 / ヨルシカ", "晴る / ヨルシカ", "モニタリング / DECO*27"],
+  );
+});
+
+test("buildClientGroup hydrates same-channel display names away from ids handles and collab names", () => {
+  const channelId = "UCnKt20HH_BiuID0FDHGMcvw";
+  const shinoaId = "UCSHINOATEST";
+  const group = buildClientGroup({
+    id: "all",
+    title: "all",
+    items: [
+      {
+        videoId: "IMI000000001",
+        title: "id label",
+        channelName: channelId,
+        channelId,
+        channelHandle: `/channel/${channelId}`,
+        songs: [{ seconds: 1, title: "ノープラン", artist: "IMI" }],
+      },
+      {
+        videoId: "IMI000000002",
+        title: "clean label",
+        channelName: "IMI",
+        channelId,
+        songs: [{ seconds: 2, title: "ノープラン", artist: "IMI" }],
+      },
+      {
+        videoId: "IZU00000001",
+        title: "latin label",
+        channelName: "Isshiki Izu",
+        channelId: "UCISSHIKI",
+        songs: [{ seconds: 3, title: "雑魚", artist: "柊マグネタイト" }],
+      },
+      {
+        videoId: "IZU00000002",
+        title: "jp label",
+        channelName: "一色イズ◇Isshiki IS",
+        channelId: "UCISSHIKI",
+        channelHandle: "/@IsshikiIS",
+        songs: [{ seconds: 4, title: "雑魚", artist: "柊マグネタイト" }],
+      },
+      {
+        videoId: "SHINOA0001",
+        title: "collab label",
+        channelName: "Shinoa Yomi Music、氷晶もね",
+        channelId: shinoaId,
+        songs: [{ seconds: 5, title: "Collab Song", artist: "Known Artist" }],
+      },
+      {
+        videoId: "SHINOA0002",
+        title: "owner label",
+        channelName: "Shinoa Yomi Music",
+        channelId: shinoaId,
+        songs: [{ seconds: 6, title: "Owner Song", artist: "Known Artist" }],
+      },
+    ],
+  });
+
+  const names = Object.fromEntries(group.items.map((item) => [item.videoId, item.channelName]));
+  assert.equal(names.IMI000000001, "IMI");
+  assert.equal(names.IMI000000002, "IMI");
+  assert.equal(names.IZU00000001, "一色イズ◇Isshiki IS");
+  assert.equal(names.IZU00000002, "一色イズ◇Isshiki IS");
+  assert.equal(names.SHINOA0001, "Shinoa Yomi Music");
+  assert.equal(names.SHINOA0002, "Shinoa Yomi Music");
 });
 
 test("buildClientGroup filters runtime activity markers while preserving START songs", () => {

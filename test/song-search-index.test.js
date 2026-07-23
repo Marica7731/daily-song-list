@@ -123,6 +123,39 @@ test("merges supplemental known song overrides into niche annotation", () => {
   );
 });
 
+test("supplemental known songs keep とても素敵な6月でした from niche annotation", () => {
+  const index = mergeSupplementalKnownSongs(
+    buildSongSearchIndex([], {
+      generatedAt: "2026-07-23T00:00:00.000Z",
+      files: [],
+    }),
+    [{ title: "とても素敵な6月でした", artist: "Eight", reason: "manual_known_song_confirmation" }],
+  );
+  const payload = {
+    groups: {
+      "72h": {
+        items: [
+          {
+            videoId: "ROKUGATSU01",
+            songs: [
+              { title: "とても素敵な6月でした", artist: "Eight", seconds: 1, time: "0:00:01" },
+              { title: "とても素敵な6月でした", artist: "未記載", seconds: 2, time: "0:00:02" },
+              { title: "とても素敵な六月でした", artist: "未記載", seconds: 3, time: "0:00:03" },
+            ],
+          },
+        ],
+      },
+    },
+  };
+
+  const annotated = annotatePayloadWithSongSearchNiche(payload, index);
+
+  assert.deepEqual(
+    annotated.groups["72h"].items[0].songs.map((song) => song.isNiche),
+    [false, false, false],
+  );
+});
+
 test("supplemental known songs keep 晴るる by あたらよ distinct from 雨晴るる", () => {
   const index = mergeSupplementalKnownSongs(
     buildSongSearchIndex([{ title: "雨晴るる", artist: "ヨルシカ" }], {

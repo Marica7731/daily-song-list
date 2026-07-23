@@ -222,15 +222,19 @@ function mergeSupplementalKnownSongs(index, recordsInput = undefined) {
   const titleArtistKeys = new Set(index?.titleArtistKeys || []);
   let addedRecordCount = 0;
   for (const record of records) {
-    const titleKey = normalizeSongSearchText(record.title);
+    const titleKeyCandidates = supplementalTitleKeyCandidates(record.title);
     const artistKey = normalizeSongSearchText(record.artist);
-    if (!titleKey) continue;
-    const hadTitle = titleKeys.has(titleKey);
-    const titleArtistKey = artistKey && !isUnknownArtistKey(artistKey) ? `${titleKey}::${artistKey}` : "";
-    const hadTitleArtist = titleArtistKey ? titleArtistKeys.has(titleArtistKey) : true;
-    titleKeys.add(titleKey);
-    if (titleArtistKey) titleArtistKeys.add(titleArtistKey);
-    if (!hadTitle || !hadTitleArtist) addedRecordCount += 1;
+    if (!titleKeyCandidates.length) continue;
+    let addedAnyKey = false;
+    for (const titleKey of titleKeyCandidates) {
+      const hadTitle = titleKeys.has(titleKey);
+      const titleArtistKey = artistKey && !isUnknownArtistKey(artistKey) ? `${titleKey}::${artistKey}` : "";
+      const hadTitleArtist = titleArtistKey ? titleArtistKeys.has(titleArtistKey) : true;
+      titleKeys.add(titleKey);
+      if (titleArtistKey) titleArtistKeys.add(titleArtistKey);
+      if (!hadTitle || !hadTitleArtist) addedAnyKey = true;
+    }
+    if (addedAnyKey) addedRecordCount += 1;
   }
 
   return {
@@ -258,6 +262,26 @@ function normalizeSupplementalKnownSongs(records) {
       reviewedAt: cleanText(record?.reviewedAt),
     }))
     .filter((record) => record.title);
+}
+
+function supplementalTitleKeyCandidates(title) {
+  return uniqueValues([cleanText(title), ...monthNotationVariants(title)].map(normalizeSongSearchText).filter(Boolean));
+}
+
+function monthNotationVariants(title) {
+  const text = cleanText(title);
+  if (!text) return [];
+  const variants = [];
+  const monthKanji = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
+  for (const match of text.matchAll(/([0-9０-９]{1,2})月/gu)) {
+    const month = Number.parseInt(String(match[1]).normalize("NFKC"), 10);
+    if (month >= 1 && month <= 12) variants.push(text.replace(match[0], `${monthKanji[month]}月`));
+  }
+  for (let month = 12; month >= 1; month -= 1) {
+    const kanjiText = `${monthKanji[month]}月`;
+    if (text.includes(kanjiText)) variants.push(text.replace(kanjiText, `${month}月`));
+  }
+  return uniqueValues(variants);
 }
 
 function annotatePayloadWithSongSearchNiche(payload, index, aliasContext = loadSongAliasContext()) {

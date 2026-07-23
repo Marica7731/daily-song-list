@@ -212,13 +212,13 @@ test("artist rank toggle uses unique song count", () => {
   assert.equal(expanded.ariaLabel, "收起该歌手曲目");
 });
 
-test("VTuber channel rank toggle shows singing and unique song counts", () => {
+test("VTuber channel rank toggle exposes song and video counts in one compact button", () => {
   const collapsed = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7, rankCount: 21, videoCount: 4 });
   assert.equal(collapsed.text, "7首\n4视频");
   assert.equal(collapsed.ariaLabel, "查看该频道的 7 首歌曲、4 个视频");
 
   const songMetric = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 7, occurrenceCount: 21, rankMetric: "songs", rankCount: 7 });
-  assert.equal(songMetric.text, "7首歌");
+  assert.equal(songMetric.text, "7首");
   assert.equal(songMetric.ariaLabel, "查看该频道的 7 首歌曲");
 
   const expanded = rankToggleModel({ mode: "vtuber", isExpanded: true, songCount: 7, rankCount: 21, videoCount: 4 });
@@ -226,7 +226,7 @@ test("VTuber channel rank toggle shows singing and unique song counts", () => {
   assert.equal(expanded.ariaLabel, "收起该频道歌曲");
 
   const compact = rankToggleModel({ mode: "vtuber", isExpanded: false, songCount: 123, compact: true });
-  assert.equal(compact.text, "123首歌");
+  assert.equal(compact.text, "123首");
 });
 
 test("VTuber collection badge model tolerates missing backend fields", () => {

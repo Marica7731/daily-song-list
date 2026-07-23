@@ -196,12 +196,14 @@ function buildRuntimeRangePayload(payload, rangeId) {
 function buildClientGroup(group) {
   const items = (group.items || []).map(buildClientVideo).filter(Boolean);
   const titleArtistFallbacks = buildRuntimeTitleArtistFallbacks(items);
+  const artistFallbackItems = items.map((item) => withRuntimeArtistFallbacks(item, titleArtistFallbacks)).filter(Boolean);
+  const channelIdentityLookup = buildChannelIdentityLookup(artistFallbackItems);
   return {
     id: group.id || "",
     title: group.title || group.id || "",
     generatedAt: group.generatedAt || "",
     updatedAt: group.updatedAt || "",
-    items: items.map((item) => withRuntimeArtistFallbacks(item, titleArtistFallbacks)).filter(Boolean),
+    items: artistFallbackItems.map((item) => hydrateRuntimeItemChannelIdentity(item, channelIdentityLookup)).filter(Boolean),
   };
 }
 
@@ -329,6 +331,7 @@ function isCollectedSource(item) {
   const knownType = String(item.knownSourceType || knownSourceTypeForVideo(item) || "").trim().toLocaleLowerCase();
   const sourceSystem = String(item.sourceQuality?.sourceSystem || "").trim().toLocaleLowerCase();
   const trueTypes = new Set(["manual", "verified", "song-search", "song_search", "youtube_channel_discovery"]);
+  if (isMomentSource(item)) return sourceGroups.includes("youtube_channel_discovery");
   if (
     sourceGroups.includes("youtube_channel_discovery") ||
     trueTypes.has(knownType) ||
@@ -336,7 +339,6 @@ function isCollectedSource(item) {
   ) {
     return true;
   }
-  if (isMomentSource(item)) return false;
   const explicit = item.isCollected;
   return explicit === true || explicit === 1 || String(explicit).toLocaleLowerCase() === "true";
 }
@@ -1701,6 +1703,7 @@ function buildVtuberRequestItems(items, options = {}) {
 function buildChannelIdentityLookup(items, options = {}) {
   const nicheOnly = Boolean(options.nicheOnly);
   const nameToKey = new Map();
+  const keyToRecord = new Map();
   const ambiguousNames = new Set();
   for (const item of items || []) {
     const scopedSongs = (item.songs || [])
@@ -1709,6 +1712,7 @@ function buildChannelIdentityLookup(items, options = {}) {
     if (!scopedSongs.length) continue;
     const nameKey = channelNameIdentityKey(item);
     const directKey = directChannelRecordKey(item);
+    if (directKey) keyToRecord.set(directKey, mergeRuntimeChannelIdentityRecord(keyToRecord.get(directKey), item));
     if (!nameKey || !directKey) continue;
     const existing = nameToKey.get(nameKey);
     if (existing && existing !== directKey) {
@@ -1718,13 +1722,70 @@ function buildChannelIdentityLookup(items, options = {}) {
     nameToKey.set(nameKey, directKey);
   }
   for (const nameKey of ambiguousNames) nameToKey.delete(nameKey);
-  return { nameToKey };
+  return { nameToKey, keyToRecord };
+}
+
+function mergeRuntimeChannelIdentityRecord(existing, item) {
+  const record = existing || {
+    type: "vtuber",
+    key: directChannelRecordKey(item),
+    name: "",
+    channelName: "",
+    channelId: "",
+    channelHandle: "",
+    channelUrl: "",
+    avatarUrl: "",
+    thumbnailUrl: "",
+    videoThumbnailUrl: "",
+    aliases: new Set(),
+  };
+  mergeChannelRecordIdentity(record, item);
+  return record;
+}
+
+function hydrateRuntimeItemChannelIdentity(item, identityLookup) {
+  if (!item || typeof item !== "object" || !identityLookup?.keyToRecord?.size) return item;
+  const key = channelRecordKey(item, identityLookup);
+  const record = key ? identityLookup.keyToRecord.get(key) : null;
+  if (!record) return item;
+  const channelName = preferredChannelDisplayName(item.channelName, record.channelName || record.name);
+  const channelHandle = cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelName) || record.channelHandle || "";
+  const channelUrl = cleanText(item.channelUrl || item.authorUrl || item.ownerUrl) || record.channelUrl || "";
+  const channelId = cleanText(item.channelId) || record.channelId || "";
+  return {
+    ...item,
+    channelName,
+    channelAliases: runtimeChannelAliasValues(item, record, { channelName, channelId, channelHandle, channelUrl }),
+    channelId,
+    channelHandle,
+    channelUrl,
+    avatarUrl: cleanText(item.avatarUrl || item.channelAvatarUrl) || record.avatarUrl || "",
+    thumbnailUrl: cleanText(item.thumbnailUrl || item.thumbnail) || record.thumbnailUrl || record.videoThumbnailUrl || "",
+  };
+}
+
+function runtimeChannelAliasValues(item, record, identity = {}) {
+  const recordAliases = record?.aliases instanceof Set ? Array.from(record.aliases.values()) : record?.aliases || [];
+  return channelAliasValues(
+    [
+      ...(Array.isArray(item?.channelAliases) ? item.channelAliases : []),
+      item?.channelName,
+      record?.channelName,
+      record?.name,
+      record?.channelHandle,
+      ...recordAliases,
+    ],
+    identity,
+  );
 }
 
 function channelRecordKey(item, identityLookup = null) {
   const nameKey = channelNameIdentityKey(item);
   if (nameKey && identityLookup?.nameToKey?.has(nameKey)) return identityLookup.nameToKey.get(nameKey);
-  return directChannelRecordKey(item) || nameKey;
+  const directKey = directChannelRecordKey(item);
+  if (directKey) return directKey;
+  if (isCompositeChannelName(item?.channelName)) return "";
+  return nameKey;
 }
 
 function directChannelRecordKey(item) {
@@ -1755,6 +1816,12 @@ function handleFromChannelUrl(value) {
 function channelNameIdentityKey(item) {
   const name = cleanText(item?.channelName);
   return name ? normalizeSearchText(name) : "";
+}
+
+function isCompositeChannelName(value) {
+  const text = cleanText(value);
+  if (!text) return false;
+  return /(?:、|，|,|\s+\+\s+|\s+×\s+)/u.test(text) && /(?:ch\.?|channel|music|ちゃんねる|チャンネル)/iu.test(text);
 }
 
 function mergeChannelRecordIdentity(record, item) {
@@ -2181,8 +2248,22 @@ function channelSearchParts(item = {}) {
   return [item.channelName, ...channelAliasValues(item.channelAliases), item.channelId, cleanChannelHandle(item.channelHandle), item.channelUrl || item.authorUrl || item.ownerUrl];
 }
 
-function channelAliasValues(value) {
-  return listValues(value).map((item) => cleanText(item)).filter((item) => item && !isChannelPathAlias(item));
+function channelAliasValues(value, identity = {}) {
+  const identityTexts = new Set(
+    [identity.channelName, identity.channelId, identity.channelHandle, identity.channelUrl]
+      .map((item) => normalizeSearchText(cleanText(item)))
+      .filter(Boolean),
+  );
+  const seen = new Set();
+  const aliases = [];
+  for (const item of listValues(value)) {
+    const text = cleanText(item);
+    const key = normalizeSearchText(text);
+    if (!text || !key || isChannelPathAlias(text) || identityTexts.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    aliases.push(text);
+  }
+  return aliases;
 }
 
 function isChannelPathAlias(value) {
@@ -2211,6 +2292,7 @@ function channelDisplayNameScore(value) {
   if (!text) return -1;
   let score = Math.min(text.length, 80);
   if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
+  if (isCompositeChannelName(text)) score -= 1200;
   if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text) || /^\/channel\/UC[A-Za-z0-9_-]+$/u.test(text) || /^UC[A-Za-z0-9_-]{20,}$/u.test(text)) score -= 1000;
   return score;
 }

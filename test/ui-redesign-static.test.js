@@ -32,6 +32,8 @@ test("mobile information architecture exposes one query center and a one-row too
   assert.match(indexSource, /class="[^"]*view-mode[^"]*"[\s\S]*data-view="songRank"[\s\S]*data-view="artistRank"[\s\S]*data-view="vtuberRank"[\s\S]*data-view="songAz"[\s\S]*data-view="videos"/u);
   assert.match(indexSource, /data-view="vtuberRank"[\s\S]*<span>频道<\/span>/u);
   assert.match(indexSource, /class="query-field-bar"[\s\S]*name="searchField" value="title" checked[\s\S]*name="searchField" value="artist" checked[\s\S]*name="searchField" value="channel" checked[\s\S]*name="searchField" value="video"/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-search-form\s*\{[\s\S]*display: contents;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.query-field-bar\s*\{[\s\S]*grid-column: 1 \/ -1;[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/u);
   assert.doesNotMatch(indexSource, /queryCountBadge|query-field-menu|query-count/u);
   assert.doesNotMatch(indexSource, /id="searchSuggestions"/u);
   assert.match(indexSource, /class="query-submit-button" type="submit" aria-label="搜索"[\s\S]*id="queryInput" type="text"[\s\S]*id="clearQueryButton"/u);
@@ -66,6 +68,9 @@ test("URL state and query draft are wired while visible share actions are remove
   assert.match(appSource, /function makeQueryDraftFromState/u);
   assert.match(appSource, /function applyQueryDraft/u);
   assert.match(appSource, /function readQueryDraftFromControls[\s\S]*q: els\.queryInput\?\.value/u);
+  assert.match(appSource, /const selectedPageSize = Number\(els\.queryPageSizeSelect\?\.value \|\| state\.pageSize\)/u);
+  assert.match(appSource, /event\.isComposing \|\| state\.queryComposing/u);
+  assert.match(appSource, /function syncQueryInputValue\(draft, options = \{\}\)[\s\S]*cleanText\(els\.queryInput\.value\) === cleanText\(nextValue\)/u);
   assert.match(appSource, /FrontendUtils\.activeQueryConditionItems/u);
   assert.match(appSource, /urlParams\.get\("shared"\) === "1"/u);
   assert.doesNotMatch(appSource, /URL state is intentionally read-only/u);
@@ -236,16 +241,17 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(functionBody("function sourceSongKeyForGroup"), /canonicalWorkTitleKey/u);
   assert.match(appSource, /function renderVtuberCollectionBadge/u);
   assert.match(appSource, /FrontendUtils\.vtuberCollectionBadgeModel\(record \|\| \{\}\)/u);
-  assert.match(appSource, /function vtuberSideSummaryText/u);
-  assert.match(appSource, /vtuberSideSummaryText\(songCount, videoCount\)/u);
+  assert.doesNotMatch(appSource, /function vtuberSideSummaryText|vtuberSideSummaryText\(songCount, videoCount\)/u);
+  assert.match(appSource, /function renderRankSide\(\{[\s\S]*if \(expandable\) \{[\s\S]*renderSourceToggleButton\(\{ mode, drawerId, isExpanded, songCount, occurrenceCount, videoCount, rankCount, rankMetric \}\)/u);
+  assert.match(appSource, /function renderSourceToggleButton\(\{[\s\S]*button\.textContent = model\.text/u);
   const vtuberTitleLineBlock = cssBlock(".vtuber-title-line");
   assert.match(vtuberTitleLineBlock, /display: contents;/u);
   assert.doesNotMatch(vtuberTitleLineBlock, /grid-template-columns/u);
   assert.match(cssSource, /\.vtuber-display-image\s*\{[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
   assert.match(cssSource, /\.vtuber-display-link\s*\{[\s\S]*grid-area: image;[\s\S]*width: 44px;[\s\S]*height: 44px;/u);
   assert.match(cssSource, /\.vtuber-title-link:hover\s*\{[\s\S]*text-decoration: underline;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*grid-auto-rows: 78px;/u);
-  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-auto-rows: 74px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*grid-auto-rows: 74px;/u);
+  assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.artist-song-drawer\[data-source-mode="vtuber"\]\s*\{[\s\S]*grid-auto-rows: 72px;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*white-space: pre-line;[\s\S]*line-height: 1\.12;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.rank-row-vtuber \.rank-expand\s*\{[\s\S]*font-size: 10px;/u);
   assert.match(vtuberLayoutSource, /mobile-390[\s\S]*expectedColumns: 2[\s\S]*mobile-320[\s\S]*expectedColumns: 2/u);
@@ -260,6 +266,9 @@ test("high-density rank and source rules are encoded in css and browser checks",
   assert.match(cssSource, /\.source-copy-icon\s*\{[\s\S]*width: var\(--chip-icon-size\);[\s\S]*padding: 0;/u);
   assert.match(appSource, /function renderSourceVideoGroup[\s\S]*channel\.setAttribute\("aria-label", channelLink\.isFallbackSearch/u);
   assert.match(appSource, /function renderSourceVideoGroup[\s\S]*channel\.title = channelLink\.isFallbackSearch/u);
+  assert.match(appSource, /function renderSourceVideoGroup[\s\S]*sourcePublishedText\(group, videoItem\)[\s\S]*className = "source-video-date"/u);
+  assert.match(appSource, /function sourcePublishedText\(group = \{\}, item = \{\}\)[\s\S]*item\.publishedText \|\| group\.publishedText[\s\S]*item\.publishedAt \|\| group\.publishedAt \|\| item\.publishedTimestamp \|\| group\.publishedTimestamp/u);
+  assert.match(cssSource, /\.source-video-date\s*\{[\s\S]*text-overflow: ellipsis;[\s\S]*white-space: nowrap;/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 44px;[\s\S]*height: 25px;/u);
   assert.match(cssSource, /@media \(max-width: 340px\)[\s\S]*\.source-inline-strip \.source-inline-thumb\.source-link\s*\{[\s\S]*width: 40px;[\s\S]*height: 23px;/u);
   assert.match(lastCssBlock(".source-inline-item"), /grid-template-columns:\s*40px minmax\(0,\s*1fr\) 24px;/u);
@@ -385,8 +394,10 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(functionBody("function renderSourcePageSummary"), /form\.addEventListener\("submit"/u);
   assert.match(functionBody("function renderSourcePageSummary"), /submit\.addEventListener\("click"/u);
   assert.doesNotMatch(functionBody("function renderSourcePageSummary"), /document\.createElement\("select"\)|data\.pageSelect/u);
-  assert.match(cssSource, /\.source-page-jump\s*\{[\s\S]*grid-template-columns: 52px auto auto;/u);
-  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-page-jump\s*\{[\s\S]*grid-template-columns: 44px auto 44px;/u);
+  assert.match(cssSource, /\.source-page-jump\s*\{[\s\S]*grid-template-columns: 52px auto 52px;/u);
+  assert.match(cssSource, /\.source-page-jump input\s*\{[\s\S]*width: 52px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-page-jump\s*\{[\s\S]*grid-template-columns: 52px auto 52px;/u);
+  assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.source-page-jump input\s*\{[\s\S]*width: 52px;/u);
   assert.match(appSource, /setSourceDrawerPageForDrawer\(drawer, page\)/u);
   assert.match(appSource, /submitSourceDrawerPageForm\(sourcePageSubmit\.closest\("\[data-source-page-form\]"\)\)/u);
   assert.match(cssSource, /@media \(max-width: 720px\)[\s\S]*\.summary-actions\s*\{[\s\S]*display: none;/u);
@@ -412,7 +423,9 @@ test("mobile summary and pagination have compact rules", () => {
   assert.match(appSource, /function renderPageEllipsisToken/u);
   assert.doesNotMatch(appSource, /function renderPageJumpToken|data-page-jump-direction/u);
   assert.doesNotMatch(cssSource, /\.page-select-compact select|\.page-select-compact span::after/u);
-  assert.match(cssSource, /\.page-select input\s*\{[\s\S]*text-align: center;/u);
+  assert.match(cssSource, /\.page-select input\s*\{[\s\S]*width: 46px;[\s\S]*text-align: center;/u);
+  assert.match(cssSource, /\.page-select-compact input\s*\{[\s\S]*width: 38px;/u);
+  assert.match(cssSource, /\.page-jump input\s*\{[\s\S]*width: 52px;/u);
 });
 
 test("rank summaries keep metrics to entity count and song collections", () => {

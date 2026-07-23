@@ -1359,9 +1359,11 @@
     if (mode === "vtuber") {
       const songCount = Math.max(0, Number(options.songCount) || 0);
       const videoCount = Math.max(0, Number(options.videoCount) || 0);
-      const text = videoCount ? `${songCount}首\n${videoCount}视频` : `${songCount}首歌`;
+      const textParts = [];
+      if (songCount) textParts.push(`${songCount}首`);
+      if (videoCount) textParts.push(`${videoCount}视频`);
       return {
-        text: isExpanded ? "收起" : text,
+        text: isExpanded ? "收起" : textParts.join("\n") || "展开",
         ariaLabel: isExpanded ? "收起该频道歌曲" : `查看该频道的 ${songCount} 首歌曲${videoCount ? `、${videoCount} 个视频` : ""}`,
       };
     }

@@ -598,12 +598,12 @@ function hydrateRuntimeItemChannelIdentity(item, identityLookup) {
   const channelName = preferredChannelDisplayName(item.channelName, record.channelName || record.name);
   const channelHandle = cleanChannelHandle(item.channelHandle) || cleanChannelHandle(item.channelName) || record.channelHandle || "";
   const channelUrl = RankingUtils.cleanText(item.channelUrl || item.authorUrl || item.ownerUrl) || record.channelUrl || "";
-  const recordAliases = record.aliases instanceof Set ? Array.from(record.aliases.values()) : record.aliases || [];
+  const channelId = RankingUtils.cleanText(item.channelId) || record.channelId || "";
   return {
     ...item,
     channelName,
-    channelAliases: channelAliasValues([...(Array.isArray(item.channelAliases) ? item.channelAliases : []), item.channelName, record.channelName, record.name, record.channelHandle, ...recordAliases]),
-    channelId: RankingUtils.cleanText(item.channelId) || record.channelId || "",
+    channelAliases: runtimeChannelAliasValues(item, record, { channelName, channelId, channelHandle, channelUrl }),
+    channelId,
     channelHandle,
     channelUrl,
     avatarUrl: RankingUtils.cleanText(item.avatarUrl || item.channelAvatarUrl) || record.avatarUrl || "",
@@ -611,6 +611,21 @@ function hydrateRuntimeItemChannelIdentity(item, identityLookup) {
     knownSourceType: RankingUtils.cleanText(item.knownSourceType) || record.knownSourceType || "",
     thumbnailUrl: RankingUtils.cleanText(item.thumbnailUrl || item.thumbnail) || record.thumbnailUrl || record.videoThumbnailUrl || "",
   };
+}
+
+function runtimeChannelAliasValues(item, record, identity = {}) {
+  const recordAliases = record?.aliases instanceof Set ? Array.from(record.aliases.values()) : record?.aliases || [];
+  return channelAliasValues(
+    [
+      ...(Array.isArray(item?.channelAliases) ? item.channelAliases : []),
+      item?.channelName,
+      record?.channelName,
+      record?.name,
+      record?.channelHandle,
+      ...recordAliases,
+    ],
+    identity,
+  );
 }
 
 function withRuntimeScopedSongs(item, titleStats = null, aliasContext = null) {
@@ -801,7 +816,7 @@ function channelNameIdentityKey(item) {
 function isCompositeChannelName(value) {
   const text = RankingUtils.cleanText(value);
   if (!text) return false;
-  return /(?:、|，|,|\s+\+\s+|\s+×\s+)/u.test(text) && /(?:ch\.?|channel|ちゃんねる|チャンネル)/iu.test(text);
+  return /(?:、|，|,|\s+\+\s+|\s+×\s+)/u.test(text) && /(?:ch\.?|channel|music|ちゃんねる|チャンネル)/iu.test(text);
 }
 
 function mergeChannelRecordIdentity(record, item) {
@@ -885,6 +900,7 @@ function isCollectedSource(item) {
   const knownType = RankingUtils.cleanText(item.knownSourceType || knownSourceTypeForVideo(item)).toLocaleLowerCase();
   const sourceSystem = RankingUtils.cleanText(item.sourceQuality?.sourceSystem).toLocaleLowerCase();
   const trueTypes = new Set(["manual", "verified", "song-search", "song_search", "youtube_channel_discovery"]);
+  if (isMomentSource(item)) return sourceGroups.includes("youtube_channel_discovery");
   if (
     sourceGroups.includes("youtube_channel_discovery") ||
     trueTypes.has(knownType) ||
@@ -892,7 +908,6 @@ function isCollectedSource(item) {
   ) {
     return true;
   }
-  if (isMomentSource(item)) return false;
   const explicit = item.isCollected;
   return explicit === true || explicit === 1 || String(explicit).toLocaleLowerCase() === "true";
 }
@@ -1180,14 +1195,20 @@ function channelSearchParts(item = {}) {
   return [item.channelName, ...channelAliasValues(item.channelAliases), item.channelId, cleanChannelHandle(item.channelHandle), item.channelUrl || item.authorUrl || item.ownerUrl];
 }
 
-function channelAliasValues(value) {
+function channelAliasValues(value, identity = {}) {
   const aliases = Array.isArray(value) ? value : [];
   const result = [];
   const seen = new Set();
+  const identityTexts = new Set(
+    [identity.channelName, identity.channelId, identity.channelHandle, identity.channelUrl]
+      .map((item) => normalizeSearchText(RankingUtils.cleanText(item)))
+      .filter(Boolean),
+  );
   for (const alias of aliases) {
     const text = RankingUtils.cleanText(alias);
-    if (!text || isChannelPathAlias(text) || seen.has(text)) continue;
-    seen.add(text);
+    const key = normalizeSearchText(text);
+    if (!text || !key || isChannelPathAlias(text) || identityTexts.has(key) || seen.has(key)) continue;
+    seen.add(key);
     result.push(text);
   }
   return result;
@@ -1219,6 +1240,7 @@ function channelDisplayNameScore(value) {
   if (!text) return -1;
   let score = Math.min(text.length, 80);
   if (/[ぁ-ゖァ-ヺ一-龯々〆〤]/u.test(text)) score += 1000;
+  if (isCompositeChannelName(text)) score -= 1200;
   if (/^\/?@[A-Za-z0-9._%~-]+$/u.test(text) || /^\/channel\/UC[A-Za-z0-9_-]+$/u.test(text) || /^UC[A-Za-z0-9_-]{20,}$/u.test(text)) score -= 1000;
   return score;
 }

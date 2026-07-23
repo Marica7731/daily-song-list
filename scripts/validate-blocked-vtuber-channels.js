@@ -62,6 +62,7 @@ function assertMatcherSamples(errors, nodeMatcher, sourceFilterMatcher) {
     ["Aruma exact id", { channelId: "UCD1QOCJIAPsMKMvRSXjLahw", channelName: "Aruma Ch. 薬袋アルマ", title: "歌枠" }],
     ["Aruma handle", { channelHandle: "@ArumaCh", channelName: "Japanese Channel", title: "歌枠" }],
     ["Mirane AI singing exact id", { channelId: "UCLIE3ZrB5RSqnLnT7ReFJpw", channelName: "音成みらね / Mirane ch. 【VSingerAI】", title: "歌枠" }],
+    ["Mirane AI singing encoded handle url", { channelUrl: "https://www.youtube.com/@%E9%9F%B3%E6%88%90%E3%81%BF%E3%82%89%E3%81%AD", channelName: "Japanese Channel", title: "歌枠" }],
     ["Uchi Fifi exact id", { channelId: "UCMhjWfFiyxVjNWBJpkDotcg", channelName: "Japanese Channel", title: "歌枠" }],
     ["Uchi Fifi channel url", { channelUrl: "https://www.youtube.com/channel/UCMhjWfFiyxVjNWBJpkDotcg", channelName: "Japanese Channel", title: "歌枠" }],
   ];

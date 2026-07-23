@@ -769,8 +769,10 @@ function handleContentLinkNavigation(event, link) {
 
 function isSourceOrVideoContentLink(link) {
   return Boolean(
-    link.closest(".source-inline-strip, .source-drawer, .inline-source, .video-card") ||
-      link.matches(".source-link, .source-video-title, .source-video-thumb-link, .source-inline-channel, .video-title, .thumb-link, .video-song-link"),
+    link.closest(".source-inline-strip, .source-drawer, .inline-source, .video-card, .artist-song-group-vtuber") ||
+      link.matches(
+        ".source-link, .source-video-title, .source-video-thumb-link, .source-inline-channel, .video-title, .thumb-link, .video-song-link, .artist-song-title, .artist-song-thumb, .vtuber-title-link, .vtuber-display-link",
+      ),
   );
 }
 
@@ -807,6 +809,7 @@ function bindQueryOverlayEvents() {
     updateQueryDraft({ q: els.queryInput.value }, { sync: "input", schedule: false });
   });
   els.queryInput?.addEventListener("input", (event) => {
+    if (event.isComposing || state.queryComposing) return;
     updateQueryDraft({ q: els.queryInput.value }, {
       sync: "input",
       schedule: false,
@@ -984,7 +987,7 @@ function searchTextMatchesQuery(searchText, query) {
 
 function buildSearchSuggestions(query, draft = state.queryDraft || makeQueryDraftFromState()) {
   const filterKey = normalizeSearch(query);
-  if (!filterKey || !state.payload) return [];
+  if (!window.FrontendUtils.searchTokens(query).length || !state.payload) return [];
   const rangeCache = getRangeCache(currentGroup());
   const key = queryIndexKey(draft);
   const index = rangeCache.queryIndexes.get(key) || buildFastSearchSuggestionIndex(filterKey, rangeCache, draft);
@@ -1204,7 +1207,7 @@ function syncQueryPanelFromDraft(draft, options = {}) {
   const next = sanitizeQueryDraft(draft);
   const previous = options.previousDraft || state.queryDraft;
   state.queryDraft = next;
-  syncQueryInputValue(next);
+  syncQueryInputValue(next, { syncMode: options.syncMode });
   syncQueryClearButton(next);
   if (options.syncMode === "input") return next;
   if (options.syncMode === "light") return next;
@@ -1215,8 +1218,18 @@ function syncQueryPanelFromDraft(draft, options = {}) {
   return next;
 }
 
-function syncQueryInputValue(draft) {
-  if (els.queryInput && els.queryInput.value !== draft.q) els.queryInput.value = draft.q;
+function syncQueryInputValue(draft, options = {}) {
+  if (!els.queryInput) return;
+  const nextValue = draft.q || "";
+  if (
+    options.syncMode === "input" &&
+    document.activeElement === els.queryInput &&
+    cleanText(els.queryInput.value) === cleanText(nextValue) &&
+    els.queryInput.value.length >= nextValue.length
+  ) {
+    return;
+  }
+  if (els.queryInput.value !== nextValue) els.queryInput.value = nextValue;
 }
 
 function syncQueryToggleValues(draft) {
@@ -1298,6 +1311,7 @@ function updateQuerySnapshotSummary(path = SNAPSHOT_LATEST_PATH) {
 
 function readQueryDraftFromControls() {
   const selectedMetric = document.querySelector("input[name='queryMetric']:checked")?.value || "occurrences";
+  const selectedPageSize = Number(els.queryPageSizeSelect?.value || state.pageSize);
   return sanitizeQueryDraft({
     q: els.queryInput?.value || "",
     searchScope: "all",
@@ -1307,7 +1321,7 @@ function readQueryDraftFromControls() {
     rankMetric: rankMetricForView(state.view, selectedMetric),
     trend: "all",
     minCount: 1,
-    pageSize: LIST_PAGE_SIZE_OPTIONS.includes(Number(state.pageSize)) ? Number(state.pageSize) : defaultListPageSizeForMode(),
+    pageSize: LIST_PAGE_SIZE_OPTIONS.includes(selectedPageSize) ? selectedPageSize : defaultListPageSizeForMode(),
     snapshotPath: SNAPSHOT_LATEST_PATH,
   });
 }
@@ -6709,19 +6723,13 @@ function renderRankSide({
   if (mode === "artist" || mode === "vtuber") {
     if (expandable) {
       side.append(renderSourceToggleButton({ mode, drawerId, isExpanded, songCount, occurrenceCount, videoCount, rankCount, rankMetric }));
-    } else {
-      side.append(renderStaticSideChip(mode === "vtuber" ? vtuberSideSummaryText(songCount, videoCount) : `${songCount}首曲目`));
+    } else if (mode !== "vtuber") {
+      side.append(renderStaticSideChip(`${songCount}首曲目`));
     }
     return side;
   }
 
   return side;
-}
-
-function vtuberSideSummaryText(songCount = 0, videoCount = 0) {
-  const songs = Math.max(0, Number(songCount) || 0);
-  const videos = Math.max(0, Number(videoCount) || 0);
-  return videos ? `${songs}首\n${videos}视频` : `${songs}首歌`;
 }
 
 function renderStaticSideChip(text) {
@@ -7575,6 +7583,14 @@ function renderSourceVideoGroup(group, options = {}) {
   title.setAttribute("aria-label", `打开来源视频时间戳：${title.textContent}`);
   main.append(title);
 
+  const publishedText = sourcePublishedText(group, videoItem);
+  if (publishedText) {
+    const published = document.createElement("div");
+    published.className = "source-video-date";
+    published.textContent = publishedText;
+    main.append(published);
+  }
+
   const extra = document.createElement("div");
   extra.className = "source-extra-times";
   if (extraTimesId) extra.id = extraTimesId;
@@ -7585,6 +7601,13 @@ function renderSourceVideoGroup(group, options = {}) {
 
   section.append(renderCopySetlistIconButton(setlistItem));
   return section;
+}
+
+function sourcePublishedText(group = {}, item = {}) {
+  const explicit = cleanText(item.publishedText || group.publishedText);
+  if (explicit) return explicit;
+  const value = item.publishedAt || group.publishedAt || item.publishedTimestamp || group.publishedTimestamp;
+  return value ? formatDate(value) : "";
 }
 
 function uniqueSourceTimeOccurrences(occurrences = []) {

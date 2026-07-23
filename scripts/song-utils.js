@@ -31,6 +31,13 @@ const NOA_POLARIS_AIMER_START_ARTIST_RE =
   /^Aimer(?:[\s\u3000]+|[\s\u3000]*[\/／|｜￤∣丨✦:：\-—–−・･][\s\u3000]*)(?:start|star|スター|スタート)$/iu;
 const BRACKET_OPEN = "([{（［【「『";
 const BRACKET_CLOSE = ")]}）］】」』";
+const OFFICIAL_ARTIST_NAMES = new Map([
+  ["ado", "Ado"],
+  ["deco27", "DECO*27"],
+  ["yorushika", "ヨルシカ"],
+  ["ヨルシカ", "ヨルシカ"],
+  ["ヨルシカyorushika", "ヨルシカ"],
+]);
 
 function normalizeTimelineChars(text) {
   return String(text || "")
@@ -125,7 +132,7 @@ function normalizeParsedSong(song) {
 
 function normalizeSourceAwareArtist(song, sourceContext = {}) {
   if (!song || typeof song !== "object") return song;
-  const artist = cleanArtistMetadata(song.artist);
+  const artist = canonicalizeKnownArtistName(cleanArtistMetadata(song.artist));
   const baseSong = artist !== String(song.artist || "").trim() ? { ...song, artist } : song;
   if (!isNoaPolarisSourceContext(sourceContext) || !NOA_POLARIS_AIMER_START_ARTIST_RE.test(artist.normalize("NFKC"))) return baseSong;
   return {
@@ -158,7 +165,74 @@ function cleanArtistMetadata(text) {
     if (next === value) break;
     value = next;
   }
-  return value || original;
+  return dropUnknownArtistParts(value || original);
+}
+
+function dropUnknownArtistParts(value) {
+  const text = String(value || "").trim();
+  if (!text) return text;
+  const parts = splitArtistParts(text);
+  if (parts.length <= 1) return text;
+  const realParts = parts.filter((part) => !isUnknownArtistField(part));
+  return realParts.length && realParts.length < parts.length ? realParts.join(" / ") : text;
+}
+
+function splitArtistParts(value) {
+  const parts = [];
+  let current = "";
+  let depth = 0;
+  for (const char of String(value || "")) {
+    if (BRACKET_OPEN.includes(char)) {
+      depth += 1;
+      current += char;
+      continue;
+    }
+    if (BRACKET_CLOSE.includes(char)) {
+      depth = Math.max(0, depth - 1);
+      current += char;
+      continue;
+    }
+    if (depth === 0 && /[\/／|｜￤∣丨、,，&＆+＋;；]/u.test(char)) {
+      const part = current.trim();
+      if (part) parts.push(part);
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  const tail = current.trim();
+  if (tail) parts.push(tail);
+  return parts;
+}
+
+function canonicalizeKnownArtistName(value) {
+  const text = stripArtistEmojiDecorations(String(value || "").trim());
+  if (!text || isUnknownArtistField(text)) return text;
+  return OFFICIAL_ARTIST_NAMES.get(artistOfficialKey(text)) || text;
+}
+
+function artistOfficialKey(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .toLocaleLowerCase()
+    .replace(/[’‘]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "");
+}
+
+function stripArtistEmojiDecorations(value) {
+  let text = String(value || "").trim();
+  for (let index = 0; index < 4; index += 1) {
+    const next = text
+      .replace(/[:：]_[^\s\u3000:：/／|｜￤∣丨]+[:：]?/gu, " ")
+      .replace(/(^|[\s\u3000])_[A-Za-z0-9][A-Za-z0-9_-]*[:：]?(?=$|[\s\u3000])/gu, " ")
+      .replace(/^[\s\u3000\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F]+|[\s\u3000\u2600-\u27BF\u{1F300}-\u{1FAFF}\uFE0F]+$/gu, "")
+      .replace(/\s+/gu, " ")
+      .trim();
+    if (next === text) break;
+    text = next;
+  }
+  return text;
 }
 
 function isNoaPolarisSourceContext(sourceContext = {}) {

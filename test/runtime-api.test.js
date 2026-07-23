@@ -21,6 +21,13 @@ test("runtime API vtuber fallback uses normalized song title lookup for source e
   );
 });
 
+test("runtime API all-field source search prioritizes entity matches by global count", () => {
+  assert.match(SERVER_SOURCE, /def entity_source_search_scope_for_view/u);
+  assert.match(SERVER_SOURCE, /CASE WHEN \{entity_clause\} THEN 0 ELSE 1 END AS entity_match_order/u);
+  assert.match(SERVER_SOURCE, /entity_match_order ASC/u);
+  assert.match(SERVER_SOURCE, /CASE WHEN entity_match_order = 0 THEN \{global_order_column\} ELSE \{order_column\} END DESC/u);
+});
+
 test("runtime API merges indexed unknown artist song variants into the known song result", async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "song-rank-api-indexed-unknown-"));
   const latestPath = path.join(dir, "latest.json");

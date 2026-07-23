@@ -1015,14 +1015,15 @@
   }
 
   function normalizeHandle(value) {
-    const cleaned = String(value || "")
+    const cleaned = decodeURIComponentSafe(String(value || ""))
+      .normalize("NFKC")
       .trim()
       .replace(/^https?:\/\/(?:www\.)?youtube\.com\//iu, "")
       .replace(/^\/+/u, "")
       .split(/[/?#]/u)[0]
       .replace(/^@/u, "")
       .trim();
-    return /^[A-Za-z0-9._-]+$/u.test(cleaned) ? cleaned.toLocaleLowerCase() : "";
+    return /^[\p{Letter}\p{Number}._-]+$/u.test(cleaned) ? cleaned.toLocaleLowerCase() : "";
   }
 
   function decodeURIComponentSafe(value) {
@@ -1043,7 +1044,10 @@
       if (!["youtube.com", "m.youtube.com"].includes(host)) return "";
       const segments = url.pathname.split("/").filter(Boolean);
       if (!segments.length) return "";
-      if (segments[0].startsWith("@")) return `@${normalizeHandle(segments[0])}`;
+      if (segments[0].startsWith("@")) {
+        const handle = normalizeHandle(segments[0]);
+        return handle ? `@${handle}` : "";
+      }
       if (segments[0] === "channel" && segments[1]) return segments[1];
       return `/${segments.slice(0, 2).join("/")}`.toLocaleLowerCase();
     } catch {

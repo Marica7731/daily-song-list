@@ -764,6 +764,7 @@ def source_matched_rankings_payload(
     with connect(db_path) as conn:
         source_rows_sql, source_values = source_occurrence_match_rows_sql(conn, range_id, q, search_scope, search_fields)
         source_entity_type = source_detail_entity_type_for_view(view)
+        entity_clause, entity_values = search_filter_for_view(view, q, entity_source_search_scope_for_view(view))
         conn.execute("DROP TABLE IF EXISTS temp.matched_sources")
         conn.execute(
             """
@@ -789,9 +790,6 @@ def source_matched_rankings_payload(
             source_values,
         )
         conn.execute("CREATE INDEX temp.idx_matched_sources_rank ON matched_sources(matched_count, matched_videos, first_match_position)")
-        matched_params: list[object] = [range_id, source_entity_type, *candidate_params]
-        if min_count > 1 and view not in {"videos", "vtubers"}:
-            matched_params.append(min_count)
         matched_sql = f"""
             SELECT
               MIN(r.row_id) AS row_id,
@@ -806,6 +804,7 @@ def source_matched_rankings_payload(
               MIN(r.timestamp_count) AS timestamp_count,
               MIN(r.payload_json) AS payload_json,
               MIN(sd.source_key) AS matched_source_key,
+              CASE WHEN {entity_clause} THEN 0 ELSE 1 END AS entity_match_order,
               SUM(ms.matched_count) AS matched_count,
               SUM(ms.matched_videos) AS matched_videos,
               MIN(ms.first_match_position) AS first_match_position
@@ -821,6 +820,9 @@ def source_matched_rankings_payload(
             GROUP BY r.row_id
             {having}
         """
+        matched_params: list[object] = [*entity_values, range_id, source_entity_type, *candidate_params]
+        if min_count > 1 and view not in {"videos", "vtubers"}:
+            matched_params.append(min_count)
         base_total = conn.execute(
             "SELECT COUNT(*) AS total_count FROM ranking_rows WHERE range_id = ? AND view = ? AND metric = ? AND scope_key = 'all'",
             base_params,
@@ -837,11 +839,16 @@ def source_matched_rankings_payload(
             matched_params,
         ).fetchone()
         order_column = "matched_videos" if metric == "videos" else "matched_count"
+        global_order_column = "video_count" if metric == "videos" else "count"
         rows = conn.execute(
             f"""
             SELECT *
             FROM ({matched_sql}) matched
-            ORDER BY {order_column} DESC, rank ASC, first_match_position ASC
+            ORDER BY
+              entity_match_order ASC,
+              CASE WHEN entity_match_order = 0 THEN {global_order_column} ELSE {order_column} END DESC,
+              rank ASC,
+              first_match_position ASC
             LIMIT ? OFFSET ?
             """,
             [*matched_params, page_size, offset],
@@ -879,6 +886,12 @@ def source_detail_entity_type_for_view(view: str) -> str:
         return "vtuber"
     if view == "vsingerSongs":
         return "vsingerSong"
+    return "song"
+
+
+def entity_source_search_scope_for_view(view: str) -> str:
+    if view == "artists":
+        return "artist"
     return "song"
 
 
