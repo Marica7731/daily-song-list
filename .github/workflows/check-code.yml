@@ -90,6 +90,17 @@ jobs:
               run_ui_proof=0
             fi
           fi
+          run_data_validate=1
+          if [ -n "${base}" ]; then
+            data_changes="$(git diff --name-only "${base}" HEAD -- \
+              config \
+              data/latest.json \
+              data/status.json \
+              data/external)"
+            if [ -z "${data_changes}" ]; then
+              run_data_validate=0
+            fi
+          fi
           node scripts/check-js-syntax.js
           if [ "${run_ui_proof}" = "1" ]; then
             npm run check:ui-proof
@@ -103,5 +114,9 @@ jobs:
             test_files="$(git ls-files 'test/*.test.js' 'test/**/*.test.js' | grep -v '^test/ui-proof\.test\.js$' | sort -u)"
             node --test ${test_files}
           fi
-          npm run validate
+          if [ "${run_data_validate}" = "1" ]; then
+            npm run validate
+          else
+            echo "CODEX_DATA_VALIDATE_SKIPPED reason=no-data-input-changes"
+          fi
           npm run check:budget
