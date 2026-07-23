@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-worker-status",
+  "batch": "batch74",
+  "source": "https://www.youtube.com/@KOKONEch_uv/streams",
+  "channel": "KOKONEch_uv",
+  "status": "interrupted",
+  "generatedAt": "2026-07-23T13:56:33.7654633+08:00",
+  "accepted": 0,
+  "imported": 0,
+  "skipped": 0,
+  "failed": 1,
+  "failureReason": "12-minute no checkpoint/progress after start marker",
+  "candidateCount": 0,
+  "inspectedCount": 0,
+  "usableVideoCount": 0,
+  "acceptedVideos": 0,
+  "acceptedOccurrences": 0,
+  "acceptedSongs": 0,
+  "uniqueSongs": 0,
+  "publishedTimestampCoverage": "0/0",
+  "occurrenceTimeCoverage": "0/0",
+  "occurrenceSecondsCoverage": "0/0",
+  "acceptedThumbnailCoverage": "0/0",
+  "discoveryThumbnailCoverage": "0/0",
+  "reachedEnd": false,
+  "elapsedSeconds": 0,
+  "outputs": {
+    "candidateIncrementUnfiltered": "candidate-increment-unfiltered.json",
+    "acceptedIncrement": "accepted-increment.json",
+    "dirtyAudit": "dirty-audit.json",
+    "report": "report.md"
+  },
+  "cleanup": {
+    "mac": {
+      "marker": "REMOTE_CLEANUP_MARKER 2026-07-23T13:55:56+08:00 root=/Users/be/codex-temp/daily-song-list-source-backfill-batch74-kokonech-uv-mac-readonly exists=no",
+      "df": [
+        "/dev/disk3s5 926Gi 248Gi 639Gi 29% /System/Volumes/Data",
+        "/dev/disk3s5 926Gi 248Gi 639Gi 29% /System/Volumes/Data"
+      ]
+    },
+    "windows": {
+      "c": "Free=65371996160 Used=255766982656 Root=C:\\",
+      "d": "Free=9901510656 Used=470183763968 Root=D:\\",
+      "g": "Free=686044594176 Used=1362030186496 Root=G:\\",
+      "gCleanup": "G_CLEANUP_MARKER exists=False path=G:\\codex-temp\\daily-song-list-batch74 time=2026-07-23T13:55:55.5948342+08:00"
+    }
+  },
+  "stageLog": [
+    "windows_start_marker_written: worker-started.marker was created before interruption",
+    "mac_precheck_completed: repo=/Users/be/daily-song-list, source-filter.js size=60415, sha256=bd441cde1c6926aefe2e9fac95cae0f431dd871eceaa22feb43ce9b0e224e103",
+    "remote_cleanup_completed: /Users/be/codex-temp/daily-song-list-source-backfill-batch74-kokonech-uv-mac-readonly exists=no at 2026-07-23T13:55:56+08:00",
+    "g_cleanup_completed: G:\\codex-temp\\daily-song-list-batch74 exists=False at 2026-07-23T13:55:55.5948342+08:00",
+    "artifact_status_written: status-only interrupted artifact; discovery/export output intentionally not used after interruption"
+  ]
+}

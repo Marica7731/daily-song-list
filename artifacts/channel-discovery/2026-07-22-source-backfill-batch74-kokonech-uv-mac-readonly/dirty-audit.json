@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "dirty-audit",
+  "status": "interrupted",
+  "source": "https://www.youtube.com/@KOKONEch_uv/streams",
+  "hardDropTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット",
+    "サックス",
+    "サクソフォン",
+    "sax",
+    "saxophone"
+  ],
+  "exactPhraseDropTerms": [
+    "piano streaming",
+    "piano performance",
+    "ピアノ演奏"
+  ],
+  "liveRule": "live/ライブ only suspicious/drop when missing singing signal",
+  "singingSignals": [
+    "歌枠",
+    "歌",
+    "弾き語り",
+    "karaoke",
+    "歌ってみた"
+  ],
+  "auditedCount": 0,
+  "droppedCount": 0,
+  "suspiciousCount": 0,
+  "items": [],
+  "failureReason": "12-minute no checkpoint/progress after start marker"
+}
