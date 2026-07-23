@@ -48,6 +48,7 @@ jobs:
       REMOTE_STATE_DIR: "/var/lib/culua/ytb-song-rank"
       REMOTE_LOG_DIR: "/var/log/culua/ytb-song-rank"
       REMOTE_DB_PATH: "/var/lib/culua/ytb-song-rank/song-rank.sqlite"
+      RUNTIME_DB_CACHE_DIR: "/Users/be/actions-runner-cache/daily-song-list-runtime-db"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,7 +56,7 @@ jobs:
           ref: main
           fetch-depth: 1
           filter: blob:none
-          clean: false
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
             assets
             config
@@ -92,25 +93,32 @@ jobs:
         env:
           CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS: "1"
           CODEX_VSINGER_RUNTIME_IMPORT_PROGRESS_INTERVAL: "5000"
+          EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
           EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
         run: |
           mkdir -p artifacts/runtime
-          if [ -f artifacts/runtime/song-rank.sqlite ] && [ -f artifacts/runtime/song-rank.sqlite.manifest.json ]; then
-            manifest_latest_sha256="$(sed -n 's/.*"source_latest_sha256": "\([^"]*\)".*/\1/p' artifacts/runtime/song-rank.sqlite.manifest.json | head -n 1)"
-            if [ "${manifest_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ]; then
-              echo "CODEX_RUNTIME_DB_REUSE_CANDIDATE latestSha256=${manifest_latest_sha256}"
+          mkdir -p "${RUNTIME_DB_CACHE_DIR}"
+          cached_db="${RUNTIME_DB_CACHE_DIR}/song-rank.sqlite"
+          if [ -f "${cached_db}" ]; then
+            db_commit_sha="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='source_commit_sha';" || true)"
+            db_latest_sha256="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='source_latest_sha256';" || true)"
+            db_schema_version="$(sqlite3 "${cached_db}" "SELECT value FROM meta WHERE key='schema_version';" || true)"
+            if [ "${db_commit_sha}" = "${EXPECTED_COMMIT_SHA}" ] && [ "${db_latest_sha256}" = "${EXPECTED_LATEST_SHA256}" ] && [ "${db_schema_version}" = "2" ]; then
+              echo "CODEX_RUNTIME_DB_REUSE_CANDIDATE commitSha=${db_commit_sha} latestSha256=${db_latest_sha256}"
+              cp -f "${cached_db}" artifacts/runtime/song-rank.sqlite
               if python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only; then
                 echo "CODEX_RUNTIME_DB_REUSE_OK"
                 exit 0
               fi
               echo "CODEX_RUNTIME_DB_REUSE_INVALID query-failed"
             else
-              echo "CODEX_RUNTIME_DB_REUSE_SKIP expectedLatestSha256=${EXPECTED_LATEST_SHA256} manifestLatestSha256=${manifest_latest_sha256}"
+              echo "CODEX_RUNTIME_DB_REUSE_SKIP expectedCommitSha=${EXPECTED_COMMIT_SHA} dbCommitSha=${db_commit_sha} expectedLatestSha256=${EXPECTED_LATEST_SHA256} dbLatestSha256=${db_latest_sha256} dbSchemaVersion=${db_schema_version}"
             fi
-            rm -f artifacts/runtime/song-rank.sqlite artifacts/runtime/song-rank.sqlite.manifest.json
+            rm -f artifacts/runtime/song-rank.sqlite
           fi
           python3 -u scripts/db/build-runtime-db.py --output artifacts/runtime/song-rank.sqlite
           python3 -u scripts/db/query-runtime-db.py --db artifacts/runtime/song-rank.sqlite --range all --view songs --q "少女レイ" --page-size 5 --summary-only
+          cp -f artifacts/runtime/song-rank.sqlite "${cached_db}"
 
       - name: Write database manifest
         id: manifest
@@ -129,6 +137,8 @@ jobs:
             "bytes": ${bytes}
           }
           JSON
+          mkdir -p "${RUNTIME_DB_CACHE_DIR}"
+          cp -f artifacts/runtime/song-rank.sqlite.manifest.json "${RUNTIME_DB_CACHE_DIR}/song-rank.sqlite.manifest.json"
           echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
           echo "bytes=${bytes}" >> "$GITHUB_OUTPUT"
 
