@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_candidate_probe_manifest",
+  "batchId": "2026-07-23-source-backfill-batch108-mac-candidate-probes",
+  "generatedAt": "2026-07-23T19:18:10+08:00",
+  "workerGeneratedAt": "2026-07-23T11:18:10.276Z",
+  "scope": "candidate-only probe; no import; no data/external write; no accepted rows",
+  "status": "probe_only",
+  "completeForImport": false,
+  "repo": {
+    "localRoot": "D:\\Projects\\daily_song_list_worker_source_backfill_20260720",
+    "localBranch": "codex/source-backfill-20260720-v2",
+    "macRoot": "/Users/be/daily-song-list",
+    "macBranchObserved": "main",
+    "macDirtyStatusLineCountObserved": 6
+  },
+  "execution": {
+    "host": "ssh be@192.168.1.13",
+    "macEnvCommand": "source ~/.daily-song-list-build-env",
+    "macTempRoot": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes",
+    "candidateOnly": true,
+    "maxChannelPages": 2,
+    "maxCandidates": 120,
+    "requestIntervalMs": 3000,
+    "requestJitterMs": 1000,
+    "perChannelTimeoutMs": 180000,
+    "imported": false,
+    "wroteDataExternal": false,
+    "staged": false,
+    "committed": false,
+    "pushed": false,
+    "deployed": false
+  },
+  "summary": {
+    "sourceCount": 3,
+    "probeOnlyCount": 3,
+    "failedCount": 0,
+    "pendingCount": 0,
+    "candidateCount": 59,
+    "inspectedCount": 0,
+    "detailCount": 0,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "completeForImport": false
+  },
+  "sources": [
+    {
+      "handle": "asaxmayo",
+      "singerName": "asaxmayo",
+      "channelUrl": "https://www.youtube.com/@asaxmayo/streams",
+      "status": "probe_only",
+      "candidateCount": 7,
+      "inspectedCount": 0,
+      "detailCount": 0,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "completeForImport": false,
+      "exitCode": 0,
+      "timedOut": false,
+      "failure": "",
+      "elapsedSeconds": 15,
+      "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@asaxmayo/streams\" candidates=7 inspected=0 videos=0 occurrences=0 elapsedSeconds=15 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/asaxmayo\"",
+      "outputDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/asaxmayo",
+      "requestStats": {
+        "requestCount": 2,
+        "networkRequestCount": 2,
+        "cacheHitCount": 0,
+        "totalBytes": 2185004,
+        "statuses": {
+          "200": 2
+        }
+      },
+      "pageSummaries": [
+        {
+          "pageUrl": "https://www.youtube.com/@asaxmayo/streams?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 56,
+          "candidateCount": 5,
+          "continuationRounds": 1,
+          "reachedEnd": false,
+          "fromCache": false
+        },
+        {
+          "pageUrl": "https://www.youtube.com/@asaxmayo/videos?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 19,
+          "candidateCount": 2,
+          "continuationRounds": 1,
+          "reachedEnd": true,
+          "fromCache": false
+        }
+      ]
+    },
+    {
+      "handle": "HazukiHina",
+      "singerName": "HazukiHina",
+      "channelUrl": "https://www.youtube.com/@HazukiHina/streams",
+      "status": "probe_only",
+      "candidateCount": 5,
+      "inspectedCount": 0,
+      "detailCount": 0,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "completeForImport": false,
+      "exitCode": 0,
+      "timedOut": false,
+      "failure": "",
+      "elapsedSeconds": 15,
+      "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@HazukiHina/streams\" candidates=5 inspected=0 videos=0 occurrences=0 elapsedSeconds=15 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/HazukiHina\"",
+      "outputDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/HazukiHina",
+      "requestStats": {
+        "requestCount": 2,
+        "networkRequestCount": 2,
+        "cacheHitCount": 0,
+        "totalBytes": 2263823,
+        "statuses": {
+          "200": 2
+        }
+      },
+      "pageSummaries": [
+        {
+          "pageUrl": "https://www.youtube.com/@HazukiHina/streams?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 58,
+          "candidateCount": 2,
+          "continuationRounds": 1,
+          "reachedEnd": false,
+          "fromCache": false
+        },
+        {
+          "pageUrl": "https://www.youtube.com/@HazukiHina/videos?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 26,
+          "candidateCount": 3,
+          "continuationRounds": 1,
+          "reachedEnd": true,
+          "fromCache": false
+        }
+      ]
+    },
+    {
+      "handle": "Laz_Furuto",
+      "singerName": "Laz_Furuto",
+      "channelUrl": "https://www.youtube.com/@Laz_Furuto/streams",
+      "status": "probe_only",
+      "candidateCount": 47,
+      "inspectedCount": 0,
+      "detailCount": 0,
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedSongs": 0,
+      "completeForImport": false,
+      "exitCode": 0,
+      "timedOut": false,
+      "failure": "",
+      "elapsedSeconds": 15,
+      "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@Laz_Furuto/streams\" candidates=47 inspected=0 videos=0 occurrences=0 elapsedSeconds=15 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/Laz_Furuto\"",
+      "outputDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/Laz_Furuto",
+      "requestStats": {
+        "requestCount": 2,
+        "networkRequestCount": 2,
+        "cacheHitCount": 0,
+        "totalBytes": 2364796,
+        "statuses": {
+          "200": 2
+        }
+      },
+      "pageSummaries": [
+        {
+          "pageUrl": "https://www.youtube.com/@Laz_Furuto/streams?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 60,
+          "candidateCount": 34,
+          "continuationRounds": 1,
+          "reachedEnd": false,
+          "fromCache": false
+        },
+        {
+          "pageUrl": "https://www.youtube.com/@Laz_Furuto/videos?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 60,
+          "candidateCount": 13,
+          "continuationRounds": 1,
+          "reachedEnd": false,
+          "fromCache": false
+        }
+      ]
+    }
+  ],
+  "acceptedIncrement": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch108-mac-candidate-probes/accepted-increment.json",
+    "videoCount": 0,
+    "occurrenceCount": 0,
+    "songCount": 0,
+    "note": "Empty accepted increment; candidate-only probe output is not import-ready."
+  },
+  "cleanup": {
+    "status": "removed",
+    "marker": "CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes",
+    "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes",
+    "confirmedAt": "2026-07-23T19:18:49+08:00",
+    "dfAfter": [
+      "Filesystem Size Used Avail Capacity iused ifree %iused Mounted on",
+      "/dev/disk3s5 926Gi 335Gi 553Gi 38% 710k 5.8G 0% /System/Volumes/Data",
+      "/dev/disk3s5 926Gi 335Gi 553Gi 38% 710k 5.8G 0% /System/Volumes/Data"
+    ],
+    "dfBefore": [
+      "Filesystem Size Used Avail Capacity iused ifree %iused Mounted on",
+      "/dev/disk3s5 926Gi 335Gi 552Gi 38% 710k 5.8G 0% /System/Volumes/Data",
+      "/dev/disk3s5 926Gi 335Gi 552Gi 38% 710k 5.8G 0% /System/Volumes/Data"
+    ]
+  },
+  "validationCommands": [
+    "git status --short --branch",
+    "ssh be@192.168.1.13 \"source ~/.daily-song-list-build-env; cd /Users/be/daily-song-list; npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@asaxmayo/streams --singer-name asaxmayo --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/asaxmayo --candidate-only --max-channel-pages 2 --max-candidates 120 --request-interval-ms 3000 --request-jitter-ms 1000\"",
+    "ssh be@192.168.1.13 \"source ~/.daily-song-list-build-env; cd /Users/be/daily-song-list; npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@HazukiHina/streams --singer-name HazukiHina --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/HazukiHina --candidate-only --max-channel-pages 2 --max-candidates 120 --request-interval-ms 3000 --request-jitter-ms 1000\"",
+    "ssh be@192.168.1.13 \"source ~/.daily-song-list-build-env; cd /Users/be/daily-song-list; npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@Laz_Furuto/streams --singer-name Laz_Furuto --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/Laz_Furuto --candidate-only --max-channel-pages 2 --max-candidates 120 --request-interval-ms 3000 --request-jitter-ms 1000\"",
+    "ssh be@192.168.1.13 \"rm -rf -- /tmp/ytb-song-rank-source-backfill-20260720/batch108-probes; if [ -e /tmp/ytb-song-rank-source-backfill-20260720/batch108-probes ]; then echo CODEX_CLEANUP_FAILED path=/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes; else echo CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes; fi; df -h /tmp /Users/be\""
+  ]
+}

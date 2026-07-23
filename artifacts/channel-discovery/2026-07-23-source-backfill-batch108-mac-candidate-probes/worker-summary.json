@@ -1,0 +1,214 @@
+{
+  "generatedAt": "2026-07-23T11:18:10.276Z",
+  "worker": "batch108-mac-candidate-probes",
+  "repoRoot": "/Users/be/daily-song-list",
+  "macTempRoot": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes",
+  "completeForImport": false,
+  "accepted": "0/0",
+  "acceptedCount": 0,
+  "totalImportable": 0,
+  "mainSessionCleanupRequired": false,
+  "notes": [
+    "candidate-only probe output is not complete for import",
+    "video-details and occurrences are not required for candidate-only status",
+    "Mac temp root was cleaned and rechecked by the main session"
+  ],
+  "cleanup": {
+    "status": "removed",
+    "marker": "CODEX_CLEANUP_OK path=/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes",
+    "path": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes",
+    "postCleanupCheck": "CODEX_REMOTE_TEMP_ABSENT",
+    "dfAfter": "/dev/disk3s5 926Gi 335Gi 553Gi 38% /System/Volumes/Data"
+  },
+  "sources": [
+    {
+      "handle": "asaxmayo",
+      "channelUrl": "https://www.youtube.com/@asaxmayo/streams",
+      "status": "probe_only",
+      "command": "npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@asaxmayo/streams --singer-name asaxmayo --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/asaxmayo --candidate-only --max-channel-pages 2 --max-candidates 120 --request-interval-ms 3000 --request-jitter-ms 1000",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@asaxmayo/streams\" candidates=7 inspected=0 videos=0 occurrences=0 elapsedSeconds=15 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/asaxmayo\"",
+      "candidateCount": 7,
+      "reachedEnd": false,
+      "pageSummaries": [
+        {
+          "pageUrl": "https://www.youtube.com/@asaxmayo/streams?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 56,
+          "candidateCount": 5,
+          "continuationRounds": 1,
+          "reachedEnd": false,
+          "fromCache": false,
+          "bytes": 1149548
+        },
+        {
+          "pageUrl": "https://www.youtube.com/@asaxmayo/videos?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 19,
+          "candidateCount": 2,
+          "continuationRounds": 1,
+          "reachedEnd": true,
+          "fromCache": false,
+          "bytes": 1035456
+        }
+      ],
+      "requestStats": {
+        "requestCount": 2,
+        "networkRequestCount": 2,
+        "cacheHitCount": 0,
+        "totalBytes": 2185004,
+        "totalElapsedMs": 649,
+        "statuses": {
+          "200": 2
+        }
+      },
+      "manifestPath": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/asaxmayo/manifest.json",
+      "files": [
+        "audits.json",
+        "checkpoint.json",
+        "command.stderr.log",
+        "command.stdout.log",
+        "manifest.json",
+        "occurrences.json",
+        "raw-videos.json",
+        "report.md",
+        "video-details.json"
+      ],
+      "outputDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/asaxmayo",
+      "elapsedMs": 15082,
+      "startedAt": "2026-07-23T11:17:24.608Z",
+      "finishedAt": "2026-07-23T11:17:39.693Z",
+      "errorSummary": null
+    },
+    {
+      "handle": "HazukiHina",
+      "channelUrl": "https://www.youtube.com/@HazukiHina/streams",
+      "status": "probe_only",
+      "command": "npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@HazukiHina/streams --singer-name HazukiHina --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/HazukiHina --candidate-only --max-channel-pages 2 --max-candidates 120 --request-interval-ms 3000 --request-jitter-ms 1000",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@HazukiHina/streams\" candidates=5 inspected=0 videos=0 occurrences=0 elapsedSeconds=15 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/HazukiHina\"",
+      "candidateCount": 5,
+      "reachedEnd": false,
+      "pageSummaries": [
+        {
+          "pageUrl": "https://www.youtube.com/@HazukiHina/streams?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 58,
+          "candidateCount": 2,
+          "continuationRounds": 1,
+          "reachedEnd": false,
+          "fromCache": false,
+          "bytes": 1153166
+        },
+        {
+          "pageUrl": "https://www.youtube.com/@HazukiHina/videos?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 26,
+          "candidateCount": 3,
+          "continuationRounds": 1,
+          "reachedEnd": true,
+          "fromCache": false,
+          "bytes": 1110657
+        }
+      ],
+      "requestStats": {
+        "requestCount": 2,
+        "networkRequestCount": 2,
+        "cacheHitCount": 0,
+        "totalBytes": 2263823,
+        "totalElapsedMs": 617,
+        "statuses": {
+          "200": 2
+        }
+      },
+      "manifestPath": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/HazukiHina/manifest.json",
+      "files": [
+        "audits.json",
+        "checkpoint.json",
+        "command.stderr.log",
+        "command.stdout.log",
+        "manifest.json",
+        "occurrences.json",
+        "raw-videos.json",
+        "report.md",
+        "video-details.json"
+      ],
+      "outputDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/HazukiHina",
+      "elapsedMs": 15032,
+      "startedAt": "2026-07-23T11:17:39.694Z",
+      "finishedAt": "2026-07-23T11:17:54.726Z",
+      "errorSummary": null
+    },
+    {
+      "handle": "Laz_Furuto",
+      "channelUrl": "https://www.youtube.com/@Laz_Furuto/streams",
+      "status": "probe_only",
+      "command": "npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@Laz_Furuto/streams --singer-name Laz_Furuto --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/Laz_Furuto --candidate-only --max-channel-pages 2 --max-candidates 120 --request-interval-ms 3000 --request-jitter-ms 1000",
+      "exitCode": 0,
+      "signal": null,
+      "timedOut": false,
+      "marker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@Laz_Furuto/streams\" candidates=47 inspected=0 videos=0 occurrences=0 elapsedSeconds=15 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/Laz_Furuto\"",
+      "candidateCount": 47,
+      "reachedEnd": false,
+      "pageSummaries": [
+        {
+          "pageUrl": "https://www.youtube.com/@Laz_Furuto/streams?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 60,
+          "candidateCount": 34,
+          "continuationRounds": 1,
+          "reachedEnd": false,
+          "fromCache": false,
+          "bytes": 1194134
+        },
+        {
+          "pageUrl": "https://www.youtube.com/@Laz_Furuto/videos?hl=ja&persist_hl=1",
+          "status": 200,
+          "pageCount": 2,
+          "rawItemCount": 60,
+          "candidateCount": 13,
+          "continuationRounds": 1,
+          "reachedEnd": false,
+          "fromCache": false,
+          "bytes": 1170662
+        }
+      ],
+      "requestStats": {
+        "requestCount": 2,
+        "networkRequestCount": 2,
+        "cacheHitCount": 0,
+        "totalBytes": 2364796,
+        "totalElapsedMs": 526,
+        "statuses": {
+          "200": 2
+        }
+      },
+      "manifestPath": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/Laz_Furuto/manifest.json",
+      "files": [
+        "audits.json",
+        "checkpoint.json",
+        "command.stderr.log",
+        "command.stdout.log",
+        "manifest.json",
+        "occurrences.json",
+        "raw-videos.json",
+        "report.md",
+        "video-details.json"
+      ],
+      "outputDir": "/tmp/ytb-song-rank-source-backfill-20260720/batch108-probes/Laz_Furuto",
+      "elapsedMs": 15548,
+      "startedAt": "2026-07-23T11:17:54.728Z",
+      "finishedAt": "2026-07-23T11:18:10.276Z",
+      "errorSummary": null
+    }
+  ]
+}
