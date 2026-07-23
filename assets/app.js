@@ -5505,8 +5505,8 @@ function renderPageSelectControl(pageInfo, options) {
   submit.type = "submit";
   submit.textContent = "选页";
   submit.setAttribute("aria-label", "跳转到输入页码");
-  submit.addEventListener("click", handlePaginationFormSubmit);
-  label.addEventListener("submit", handlePaginationFormSubmit);
+  submit.addEventListener("click", (event) => handlePaginationFormSubmit(event, label));
+  label.addEventListener("submit", (event) => handlePaginationFormSubmit(event, label));
   label.append(text, input, total, submit);
   return label;
 }
@@ -5535,8 +5535,8 @@ function renderPageJumpControl(pageInfo) {
   button.className = "pagination-button page-jump-button";
   button.type = "submit";
   button.textContent = "跳转";
-  button.addEventListener("click", handlePaginationFormSubmit);
-  form.addEventListener("submit", handlePaginationFormSubmit);
+  button.addEventListener("click", (event) => handlePaginationFormSubmit(event, form));
+  form.addEventListener("submit", (event) => handlePaginationFormSubmit(event, form));
   form.append(label, button);
   return form;
 }
@@ -5550,10 +5550,10 @@ function bindPaginationInput(input) {
   });
 }
 
-function handlePaginationFormSubmit(event) {
-  const form = event.currentTarget?.matches?.("[data-page-form], [data-page-jump-form]")
+function handlePaginationFormSubmit(event, formOverride) {
+  const form = formOverride || (event.currentTarget?.matches?.("[data-page-form], [data-page-jump-form]")
     ? event.currentTarget
-    : event.target?.closest?.("[data-page-form], [data-page-jump-form]");
+    : event.target?.closest?.("[data-page-form], [data-page-jump-form]"));
   if (!form) return;
   event.preventDefault();
   const input = form.querySelector("[data-page-input]");
