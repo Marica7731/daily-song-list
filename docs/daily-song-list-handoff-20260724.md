@@ -21,6 +21,13 @@
 - 内部页面视图名 `vtuberRank` 与 API 视图名 `vtubers` 不要混用。错误 view 直接请求 API 会得到 400，应在前端或测试中覆盖这个映射。
 - 以上只证明当前动态 API 的能力，不证明所有浏览器输入、筛选状态、分页和展示标签已经正确。
 
+### 已确认但尚未修复的线上缺口
+
+- `nicheOnly` 和 `hideUnknownArtist` 当前在前端 state 中存在，但 Runtime API 请求没有发送这两个参数；线上带参数和不带参数的响应体与 `totalCount` 相同。这是实际功能缺陷，不是截图误差。
+- 相关入口：`assets/app.js` 的 `shouldUseRuntimeApiForRequest` 和 runtime request 参数组装，约 3555-3580 行。修复后必须增加“勾选前后请求/结果变化”的回归测试。
+- 线上 API 对错误字段和错误 range 返回 400；不要用前端静态 fallback 掩盖请求错误。
+- `deploy/vps2/nginx-staging.conf` 的 upstream timeout 当前为 30 秒。短词或全字段搜索会走大表 LIKE、返回多 MB payload，存在 504 风险；优先收紧列表 payload、短词查询保护和详情分离，不要只延长 Nginx timeout。
+
 ## 已上线的基线
 
 - `78b7303d fix: 收口 VTuber 榜单展开和响应式布局`
@@ -83,6 +90,19 @@
 - [ ] 缺失 `publishedAt` 的视频另做可重跑日期获取任务，建议复用当前仓库 GitHub Action/self-hosted Mac runner，不新建仓库，除非现有 workflow 无法隔离权限和产物。
 - [ ] 继续保留 runtime 性能根因记录：同一视频歌单曾在每个 occurrence 重复序列化，导致 source detail 近 194 万行和慢查询；优化要保持 occurrence 只携带当前 song 的 detail，避免重新引入平方级膨胀。
 - [ ] 只有动态 DB build、上传、激活和 `/healthz`/`/api/meta`/关键 rankings 查询全部通过后，才算数据库需求上线；静态 JSON 只能作为兜底。
+
+### 来源 checkpoint 续接表
+
+| 来源/批次 | 当前证据 | 续接动作 |
+| --- | --- | --- |
+| SoraOtoha / batch141 | candidate 128，checkpoint completed 94，本批 18 videos / 336 occurrences | 排除已完成 94 个 ID，约剩 34 个；原始 checkpoint 不在当前 D 产物中，先恢复或重建排除集 |
+| ebakyouka / batch142 | candidate 464，completed 142，本批 39 videos / 731 occurrences | 排除 142 个 ID，约剩 322 个；不能把 accepted increment 当完整 checkpoint |
+| UCrF92d / batch143 | candidate 234，completed 45，本批 5 videos / 88 occurrences | 排除 45 个 ID，约剩 189 个；先恢复 checkpoint/排除集 |
+| UtenHiyori / batch144-150 | candidate 327，completed 262，但最新六个 shard detail/occurrence 为 0 | 不要盲重跑；提高分页范围并更换详情获取路径，保留 262 个 seed completed ID |
+| KohanaLam / batch129 | candidate 225，checkpoint details 31，本批 28 videos / 261 occurrences | 先核对后续 batch139 queue refresh，不从 batch129 重复抓 |
+| Asaxmayo / batch109 | candidate 53，details 17，occurrences 99，accepted 0 | 当前产物缺 checkpoint，先恢复远端 checkpoint 后续跑 |
+
+审计还发现 D 盘有 202 个 manifest，其中 51 个明确为 `reachedEnd=false`；其中约 10 个是 queue-refresh 记录，不是新来源任务。G 目标工作树只有旧的 27 个 accepted 文件，D 盘最新 batch115+ 增量尚未导入 G。以上是本地 checkpoint 审计结果，不等于线上任务当前状态，续跑前仍要查询真实 runner/Actions 状态。
 
 ## 前端主要代码地图
 
