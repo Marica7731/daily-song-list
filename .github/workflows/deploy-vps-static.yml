@@ -86,7 +86,7 @@ jobs:
           EXPECTED_SHA: ${{ steps.revision.outputs.commit_sha }}
         run: |
           set -Eeuo pipefail
-          expected_app="$(grep -o 'assets/app.js?v=[^"]*' index.html | head -1)"
+          expected_app="$(grep -o 'assets/app-[^"]*\.js' index.html | head -1)"
           if [ -z "${expected_app}" ]; then
             echo "::error::could not resolve expected app asset from index.html"
             exit 1
@@ -100,7 +100,7 @@ jobs:
               test -s data/ui/meta.json
               test -s data/diff/latest-all.json
               test -s data/diff/latest-7d.json
-              grep -o 'assets/app.js?v=[^\"]*' index.html | head -1
+              grep -o 'assets/app-[^\"]*\.js' index.html | head -1
             "
           )"
           if [ "${remote_app}" != "${expected_app}" ]; then

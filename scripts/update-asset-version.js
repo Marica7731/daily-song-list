@@ -27,9 +27,28 @@ function updateHtmlAssetVersions(filePath, version) {
   let html = fs.readFileSync(filePath, "utf8");
   for (const assetPath of VERSIONED_ASSETS) {
     const escaped = escapeRegExp(assetPath);
-    html = html.replace(new RegExp(`${escaped}(?:\\?v=[^"']+)?`, "g"), `${assetPath}?v=${version}`);
+    const versionedPath = versionedAssetPath(assetPath, version);
+    html = html.replace(new RegExp(`${escaped}(?:-[^/"']+)?(?:\\?v=[^"']+)?`, "g"), versionedPath);
+    removeOldVersionedAssetCopies(assetPath, versionedPath);
+    fs.copyFileSync(path.join(ROOT, assetPath), path.join(ROOT, versionedPath));
   }
   fs.writeFileSync(filePath, html, "utf8");
+}
+
+function versionedAssetPath(assetPath, version) {
+  const extension = path.extname(assetPath);
+  return `${assetPath.slice(0, -extension.length)}-${version}${extension}`;
+}
+
+function removeOldVersionedAssetCopies(assetPath, currentVersionedPath) {
+  const extension = path.extname(assetPath);
+  const absoluteDir = path.join(ROOT, path.dirname(assetPath));
+  const baseName = path.basename(assetPath, extension);
+  const currentName = path.basename(currentVersionedPath);
+  for (const entry of fs.readdirSync(absoluteDir)) {
+    if (!entry.startsWith(`${baseName}-h`) || !entry.endsWith(extension) || entry === currentName) continue;
+    fs.rmSync(path.join(absoluteDir, entry), { force: true });
+  }
 }
 
 function escapeRegExp(value) {
