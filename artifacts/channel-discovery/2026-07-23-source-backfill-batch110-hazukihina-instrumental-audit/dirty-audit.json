@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "kind": "source_backfill_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch110-hazukihina-instrumental-audit",
+  "source": "HazukiHina",
+  "status": "dropped_all",
+  "hardDropTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット"
+  ],
+  "hardDropExactPhrases": [
+    "piano streaming",
+    "ピアノ演奏"
+  ],
+  "broadSuspiciousTerms": [
+    "live",
+    "ライブ"
+  ],
+  "droppedVideoCount": 7,
+  "droppedOccurrenceCount": 51,
+  "suspiciousVideoCount": 0,
+  "termHitCounts": {
+    "フルート": 7,
+    "生演奏": 1,
+    "クラリネット": 0,
+    "piano streaming": 0,
+    "ピアノ演奏": 0,
+    "live": 0,
+    "ライブ": 0
+  },
+  "dropped": [
+    {
+      "youtubeVideoId": "JeDur5lcJhs",
+      "videoTitle": "【虹をかけよう🌈#ライドリフェス歌枠リレー2026 】初歌枠リレー...！歌とフルートで癒しをお届け！🌱【#葉月ひな 】",
+      "occurrenceCount": 4,
+      "hardHits": [
+        "フルート"
+      ],
+      "broadHits": [],
+      "decision": "drop",
+      "reason": "instrumental_or_live_performance_filter"
+    },
+    {
+      "youtubeVideoId": "kFM32hD0q0w",
+      "videoTitle": "【#Vmusicianクレリエールリレー 】癒しで泣けるフルート演奏をお届け！🌙",
+      "occurrenceCount": 5,
+      "hardHits": [
+        "フルート"
+      ],
+      "broadHits": [],
+      "decision": "drop",
+      "reason": "instrumental_or_live_performance_filter"
+    },
+    {
+      "youtubeVideoId": "9qD3oo8DIBc",
+      "videoTitle": "【#フルート 】泣ける曲をフルートで歌う夜🌙",
+      "occurrenceCount": 16,
+      "hardHits": [
+        "フルート"
+      ],
+      "broadHits": [],
+      "decision": "drop",
+      "reason": "instrumental_or_live_performance_filter"
+    },
+    {
+      "youtubeVideoId": "JrlxsphTw9w",
+      "videoTitle": "【 #Vmusician演奏リレー 15:00~ 】泣けるフルート演奏をお届け！ゲスト：舞弦ウラ・Rika・夢音結マイ",
+      "occurrenceCount": 7,
+      "hardHits": [
+        "フルート"
+      ],
+      "broadHits": [],
+      "decision": "drop",
+      "reason": "instrumental_or_live_performance_filter"
+    },
+    {
+      "youtubeVideoId": "i2QDNwvLmPQ",
+      "videoTitle": "【#Vtuberフルート演奏リレーmini 】泣ける演奏担当！葉月ひな枠！🌙✨",
+      "occurrenceCount": 4,
+      "hardHits": [
+        "フルート"
+      ],
+      "broadHits": [],
+      "decision": "drop",
+      "reason": "instrumental_or_live_performance_filter"
+    },
+    {
+      "youtubeVideoId": "VzDwTY2XsMc",
+      "videoTitle": "【#Vtuber冬めく生演奏リレー 】【#フルート 】フルートの魅力たくさんお届けするよ！",
+      "occurrenceCount": 8,
+      "hardHits": [
+        "フルート",
+        "生演奏"
+      ],
+      "broadHits": [],
+      "decision": "drop",
+      "reason": "instrumental_or_live_performance_filter"
+    },
+    {
+      "youtubeVideoId": "kwydAuM1FGs",
+      "videoTitle": "【#Vtuberミュージックの日演奏リレー】フルート演奏で癒しをお届けします！【葉月ひな/18:00枠】",
+      "occurrenceCount": 7,
+      "hardHits": [
+        "フルート"
+      ],
+      "broadHits": [],
+      "decision": "drop",
+      "reason": "instrumental_or_live_performance_filter"
+    }
+  ],
+  "suspicious": [],
+  "note": "All parsed HazukiHina videos are dropped before import because they match instrumental/performance filters; broad live terms are recorded but not used as the sole drop reason."
+}

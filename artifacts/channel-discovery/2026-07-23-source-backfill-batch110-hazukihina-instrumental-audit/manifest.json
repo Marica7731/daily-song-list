@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-23-source-backfill-batch110-hazukihina-instrumental-audit",
+  "generatedAt": "2026-07-23T11:58:45.3444815Z",
+  "status": "skipped",
+  "completeForImport": false,
+  "scope": "HazukiHina import decision from existing complete discovery; no YouTube refetch; no data/external write",
+  "sourceDiscovery": {
+    "path": "artifacts/channel-discovery/2026-07-20-source-backfill/HazukiHina",
+    "generatedAt": "2026-07-19T21:30:26.881Z",
+    "channelUrl": "https://www.youtube.com/@HazukiHina",
+    "singerName": "Hazuki Hina",
+    "candidateCount": 12,
+    "inspectedInLatestRun": 11,
+    "usableVideoCount": 7,
+    "occurrenceCount": 51,
+    "pageSummaries": [
+      {
+        "pageUrl": "https://www.youtube.com/@HazukiHina/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 15,
+        "rawItemCount": 278,
+        "candidateCount": 9,
+        "continuationRounds": 14,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 1140029
+      },
+      {
+        "pageUrl": "https://www.youtube.com/@HazukiHina/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 2,
+        "rawItemCount": 26,
+        "candidateCount": 3,
+        "continuationRounds": 1,
+        "reachedEnd": true,
+        "fromCache": false,
+        "bytes": 1088704
+      }
+    ],
+    "reachedEndAllTabs": true
+  },
+  "acceptedIncrement": "accepted/2026-07-23-source-backfill-batch110.accepted.json",
+  "exportRan": false,
+  "exportMarker": "not run; accepted intentionally empty after dirty audit dropped all parsed videos",
+  "sources": [
+    {
+      "handle": "HazukiHina",
+      "url": "https://www.youtube.com/@HazukiHina",
+      "status": "skipped",
+      "reason": "dirty_audit_dropped_all_instrumental_or_live_performance_content",
+      "acceptedVideos": 0,
+      "acceptedOccurrences": 0,
+      "acceptedUniqueSongs": 0,
+      "candidateCount": 12,
+      "inspectedCount": 11,
+      "usableVideosBeforeAudit": 7,
+      "occurrencesBeforeAudit": 51,
+      "uniqueSongsBeforeAudit": 45,
+      "droppedVideos": 7,
+      "droppedOccurrences": 51,
+      "publishedTimestampCoverageBeforeDrop": "7/7",
+      "occurrencePublishedAtCoverageBeforeDrop": "51/51",
+      "occurrenceTimeCoverageBeforeDrop": "51/51",
+      "occurrenceSecondsCoverageBeforeDrop": "51/51",
+      "thumbnailCoverCoverageBeforeDrop": "7/7",
+      "publishedTimestampCoverage": "0/0",
+      "occurrenceTimeCoverage": "0/0",
+      "occurrenceSecondsCoverage": "0/0",
+      "thumbnailCoverCoverage": "0/0",
+      "reachedEnd": true,
+      "failureReason": ""
+    }
+  ],
+  "dirtyAudit": {
+    "path": "dirty-audit.json",
+    "droppedVideoCount": 7,
+    "droppedOccurrenceCount": 51,
+    "suspiciousVideoCount": 0,
+    "termHitCounts": {
+      "フルート": 7,
+      "生演奏": 1,
+      "クラリネット": 0,
+      "piano streaming": 0,
+      "ピアノ演奏": 0,
+      "live": 0,
+      "ライブ": 0
+    }
+  },
+  "remoteCleanup": {
+    "status": "not_used",
+    "note": "No remote or VPS directory was created for this audit-only batch."
+  },
+  "committed": false,
+  "pushed": false,
+  "deployed": false
+}

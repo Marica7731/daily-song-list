@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-23T11:58:45.3383484Z",
+  "batchId": "2026-07-23-source-backfill-batch110-hazukihina-instrumental-audit",
+  "status": "skipped",
+  "completeForImport": false,
+  "reason": "dirty_audit_dropped_all_instrumental_or_live_performance_content",
+  "inputs": [
+    "artifacts/channel-discovery/2026-07-20-source-backfill/HazukiHina"
+  ],
+  "readStats": {
+    "inputDirs": 1,
+    "candidateCount": 12,
+    "inspected": 11,
+    "videoDetails": 7,
+    "usableVideos": 7,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 51,
+    "droppedByDirtyAuditVideos": 7,
+    "droppedByDirtyAuditOccurrences": 51
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "songCount": 0,
+  "videos": [],
+  "occurrences": [],
+  "songs": []
+}
