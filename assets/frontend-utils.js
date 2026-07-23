@@ -261,6 +261,9 @@
     const searchFieldsParam = params.get("searchFields");
     const validTrendFilters = new Set(options.validTrendFilters || ["all", "new", "up", "down"]);
     const validMinCounts = new Set((options.validMinCounts || [1, 2, 5, 10]).map(Number));
+    const validSourceFilters = new Set(options.validSourceFilters || ["all", "cataloged", "uncataloged", "external"]);
+    const channelFilterRaw = params.get("channel");
+    const sourceFilterRaw = params.get("source");
 
     return {
       range: parseRangeParam(params.get("range"), validRanges, fallbackRange, options),
@@ -281,6 +284,8 @@
       snapshotPath: resolveSnapshotParam(params.get("snapshot"), options),
       trend: validTrendFilters.has(trend) ? trend : defaults.trend || "all",
       minCount: validMinCounts.has(parsedMinCount) ? parsedMinCount : positiveInteger(defaults.minCount, 1),
+      channelFilter: cleanFilterToken(channelFilterRaw),
+      sourceFilter: validSourceFilters.has(sourceFilterRaw) ? sourceFilterRaw : defaults.sourceFilter || "all",
     };
   }
 
@@ -297,6 +302,8 @@
       trend: "all",
       minCount: 1,
       searchScope: "all",
+      channelFilter: "",
+      sourceFilter: "all",
       ...(options.defaults || {}),
     };
     const range = normalizeRangeId(state.range || defaults.range, options);
@@ -331,6 +338,10 @@
     }
     if ((view === "songRank" || view === "artistRank") && trend !== defaults.trend) params.set("trend", trend);
     if (view !== "videos" && view !== "vtuberRank" && minCount !== defaults.minCount) params.set("minCount", String(minCount));
+
+    const channelFilter = cleanFilterToken(state.channelFilter);
+    if (channelFilter) params.set("channel", channelFilter);
+    if (state.sourceFilter && state.sourceFilter !== defaults.sourceFilter) params.set("source", state.sourceFilter);
 
     const snapshotParam = snapshotParamForPath(state.snapshotPath, options);
     if (snapshotParam) params.set("snapshot", snapshotParam);
@@ -1444,6 +1455,89 @@
     return sourceSystem === "vsinger_moment_http";
   }
 
+  function cleanFilterToken(value) {
+    if (value === null || value === undefined) return "";
+    const text = cleanText(String(value)).replace(/\s+/g, " ").trim();
+    return text.slice(0, 60);
+  }
+
+  // 区分"已收录 / 未记载 / 外部发现"来源或歌曲。
+  // 语义对齐 data/external/youtube-channel-discovery 的 accepted(收录) / sources(发现)。
+  // - cataloged: 已进入曲库或来源目录（显式 isCollected，或本地基线/人工补录/明确收录记录）。
+  // - uncataloged: 尚未记载到曲库或来源目录（空、unknown、待补等）。
+  // - external: 来自外部发现（如 youtube_channel_discovery）但尚未被 accepted 收录。
+  function catalogStateModel(record = {}) {
+    const type = cleanText(
+      firstNonEmpty(
+        record.knownSourceType,
+        record.sourceType,
+        record.collectionType,
+        record.knownSource?.type,
+        record.source?.knownSourceType,
+      ),
+    ).toLocaleLowerCase();
+    const explicit =
+      record.isCollected ?? record.collected ?? record.isKnownSource ?? record.knownSource?.isCollected;
+    const normalizedExplicit = String(explicit).toLocaleLowerCase();
+    const falseTypes = new Set(["0", "false", "no", "none", "unknown", "uncollected", "not_collected", "not-collected", "pending"]);
+    const collectedTrueTypes = new Set(["1", "true", "yes", "known", "collected", "library", "song-search", "song_search", "manual", "verified"]);
+
+    let state = "uncataloged";
+    let isCollected = false;
+    if (explicit === true || explicit === 1 || explicit === "1" || normalizedExplicit === "true" || collectedTrueTypes.has(type)) {
+      state = "cataloged";
+      isCollected = true;
+    } else if (falseTypes.has(type) || normalizedExplicit === "false" || normalizedExplicit === "uncollected") {
+      state = "uncataloged";
+      isCollected = false;
+    } else if (isMomentSourceType(type, record) || type === "youtube_channel_discovery") {
+      // 外部发现会话：仅补来源证据，不默认标记为已收录。
+      state = "external";
+      isCollected = false;
+    }
+
+    const labels = { cataloged: "已收录", uncataloged: "未记载", external: "外部发现" };
+    const titles = {
+      cataloged: "该来源已进入曲库或来源目录",
+      uncataloged: "尚未记载到曲库或来源目录",
+      external: "来自外部发现（YouTube 频道发现），尚未被收录",
+    };
+    return {
+      state,
+      isCataloged: state === "cataloged",
+      isUncataloged: state === "uncataloged",
+      isExternal: state === "external",
+      isPending: false,
+      text: labels[state] || "",
+      title: titles[state] || "",
+      sourceType: type,
+    };
+  }
+
+  function buildChannelFilterPredicate(channelFilter) {
+    const token = cleanFilterToken(channelFilter).toLocaleLowerCase();
+    if (!token) return () => true;
+    return (item = {}) => {
+      const haystack = [item.channelName, item.channelHandle, item.channelId, item.author, item.owner]
+        .map((value) => cleanText(value).toLocaleLowerCase())
+        .filter(Boolean)
+        .join(" ");
+      return haystack.includes(token);
+    };
+  }
+
+  function buildSourceFilterPredicate(sourceFilter) {
+    const value = cleanFilterToken(sourceFilter).toLocaleLowerCase();
+    if (!value || value === "all") return () => true;
+    return (record = {}) => {
+      const catalog = catalogStateModel(record);
+      if (value === "cataloged") return catalog.isCataloged;
+      if (value === "uncataloged") return catalog.isUncataloged;
+      if (value === "external") return catalog.isExternal;
+      return true;
+    };
+  }
+
   function firstNonEmpty(...values) {
     for (const value of values) {
       const text = cleanText(value);
@@ -1918,6 +2012,9 @@
     buildIndexBucketModel,
     buildInlineSourceModel,
     buildSourcePreview,
+    buildChannelFilterPredicate,
+    buildSourceFilterPredicate,
+    cleanFilterToken,
     createSnapshotLoader,
     createSongSearchLookup,
     createTrendLookup,
@@ -1959,6 +2056,7 @@
     rankToggleModel,
     vtuberAvatarModel,
     vtuberCollectionBadgeModel,
+    catalogStateModel,
     runtimeRangeMeta,
     runtimeRangePayloadFromGroup,
     runtimeRangePath,

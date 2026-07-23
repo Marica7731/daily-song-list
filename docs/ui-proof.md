@@ -116,3 +116,11 @@ The manifest at [`docs/assets/screenshots/manifest.json`](assets/screenshots/man
 | Long timestamp | Extra timestamps |
 | --- | --- |
 | ![Mobile long timestamp source](assets/screenshots/mobile-source-long-time.png) | ![Mobile extra timestamps](assets/screenshots/mobile-source-extra-times.png) |
+
+## UI 刷新说明（channel / source 筛选与收录状态）
+
+本批 UI 刷新在查询面板补齐了缺失的 **频道**（`#channelFilterInput`）与 **来源**（`#sourceFilterSelect`）筛选控件，并引入统一的收录状态语义 **已收录 / 未记载 / 外部发现**（`FrontendUtils.catalogStateModel` + `.catalog-tag` 系列样式）。
+
+- 这些控件复用既有 `.query-field` 结构与 `parseUrlState` / `serializeUrlState` 的 `channel` / `source` 参数，不新增 URL 字段。
+- 收录状态三态与 `data/external/youtube-channel-discovery` 的 `accepted`（已收录）/ `sources`（发现）语义一致：外部发现会话仅补来源证据、不默认标记已收录。
+- 上述交互由 `mobile-query-filter.png`、`desktop-query-panel.png` 与 `mobile-active-query-strip.png` 等既有截图场景覆盖；如需独立场景请按 `scripts/ui-proof-config.js` 的 `screenshotContracts` 约定补充，并重新生成截图与 `docs/assets/screenshots/manifest.json`。

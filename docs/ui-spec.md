@@ -115,6 +115,25 @@
 - 当前项不得给整个四分之一导航单元填满浅绿色；选中背景只包住 `.bottom-nav-icon-wrap`，文字和图标改为品牌色。
 - 图标尺寸保持约 20px，导航总高度约 52px 加 `safe-area-inset-bottom`，不得遮挡分页、toast、来源收起或视频收起按钮。
 
+## 榜单卡片与收录状态
+
+- 榜单行支持卡片化变体 `.rank-card`：复用既有 `--rank-columns` 与右侧列变量（`--rank-side-width-mobile/tablet/desktop`），保持与表格行 `.rank-row` 列对齐一致；移动端通过更小列宽与更大点按热区提升可读性。`rank-card` 与 `rank-row` 可并存，行容器按需选用，不得因启用卡片改变既有的 `sources` / `drawer` 网格区域。
+- 卡片视觉：1px 分隔描边、`--radius-panel` 圆角、`--shadow-soft` 阴影；hover 仅改变描边与背景，不得引入新字重或新颜色。前三名仍用 `.rank-top-1/2/3` 的左侧色条表达，不得用大面积色块。
+- 收录状态标签 `.catalog-tag` 提供三种语义：`.cataloged-tag`（`已收录`，品牌青绿）、`.uncataloged-tag`（`未记载`，中性灰）、`.external-tag`（`外部发现`，警告金）。三者都必须是独立内联标签，不得用裸文字或颜色 alone 表达状态。
+
+### 频道 / 来源筛选
+
+- `range`（范围）、`view`（视图）、`metric`（口径）控件已存在于顶部与查询面板；本刷新补齐缺失的 `channel`（频道）与 `source`（来源）筛选。
+- 频道筛选是文本输入 `#channelFilterInput`，按频道名 / handle / ID 做不区分大小写的子串匹配；空值表示不过滤。
+- 来源筛选 `#sourceFilterSelect` 选项为 `全部来源`(all) / `仅已收录`(cataloged) / `仅未记载`(uncataloged) / `仅外部发现`(external)。
+- 状态联动：频道/来源筛选与搜索词、隐藏无歌手、小众、最低收录、趋势取交集；它们属于"缩小结果集"的条件，可在 `active-query-strip` 中作为可删除 chip 展示，并计入查询按钮数量。序列化复用 `FrontendUtils.parseUrlState` / `serializeUrlState` 的 `channel` / `source` 参数，不写入额外字段。
+
+### 已收录 / 未记载语义
+
+- `FrontendUtils.catalogStateModel` 是统一的收录状态判定，返回 `{ state, isCataloged, isUncataloged, isExternal, text, title }`。
+- 语义对齐 `data/external/youtube-channel-discovery` 的 `accepted`（已收录）/ `sources`（发现）：`accepted` 或本地基线 / 人工补录 / 明确收录记录 → `cataloged`；空、`unknown`、`未記載`、`待补` 等 → `uncataloged`；`youtube_channel_discovery` / `vsinger-moment` 等外部发现会话仅补来源证据、不默认标记为已收录 → `external`。
+- `VTuberCollectionBadgeModel` 继续服务于频道行 `已收录` tag；新增的 `catalogStateModel` 覆盖歌曲/来源层面的统一语义，两者对"已收录"判定保持一致。
+
 ## 验证与截图
 
 本地验证必须覆盖：

@@ -1116,6 +1116,61 @@
     return String(value || "").replace(/\s+/g, " ").trim();
   }
 
+  function filterTokenText(value) {
+    return String(value ?? "").replace(/\s+/g, " ").trim().slice(0, 60).toLocaleLowerCase();
+  }
+
+  // 频道筛选：按频道名 / handle / id 做不区分大小写的子串匹配。
+  function matchesChannelFilter(item, filter) {
+    const token = filterTokenText(filter);
+    if (!token) return true;
+    const haystack = [item?.channelName, item?.channelHandle, item?.channelId, item?.author, item?.owner]
+      .map((value) => filterTokenText(value))
+      .filter(Boolean)
+      .join(" ");
+    return haystack.includes(token);
+  }
+
+  // 来源收录状态（与 frontend-utils.catalogStateModel 语义一致）。
+  function sourceCatalogState(record = {}) {
+    const type = String(
+      record.knownSourceType || record.sourceType || record.collectionType || record.knownSource?.type || record.source?.knownSourceType || "",
+    )
+      .trim()
+      .toLocaleLowerCase();
+    const explicit = record.isCollected ?? record.collected ?? record.isKnownSource ?? record.knownSource?.isCollected;
+    const normalizedExplicit = String(explicit).toLocaleLowerCase();
+    const falseTypes = new Set(["0", "false", "no", "none", "unknown", "uncollected", "not_collected", "not-collected", "pending"]);
+    const collectedTrueTypes = new Set(["1", "true", "yes", "known", "collected", "library", "song-search", "song_search", "manual", "verified"]);
+    const isMoment =
+      type === "vsinger_moment_http" || type === "vsinger-moment" || type === "moment";
+    let state = "uncataloged";
+    if (explicit === true || explicit === 1 || explicit === "1" || normalizedExplicit === "true" || collectedTrueTypes.has(type)) {
+      state = "cataloged";
+    } else if (falseTypes.has(type) || normalizedExplicit === "false" || normalizedExplicit === "uncollected") {
+      state = "uncataloged";
+    } else if (isMoment || type === "youtube_channel_discovery") {
+      state = "external";
+    }
+    return {
+      state,
+      isCataloged: state === "cataloged",
+      isUncataloged: state === "uncataloged",
+      isExternal: state === "external",
+    };
+  }
+
+  // 来源筛选：cataloged=已收录 / uncataloged=未记载 / external=外部发现 / all=全部。
+  function matchesSourceFilter(record, filter) {
+    const value = filterTokenText(filter);
+    if (!value || value === "all") return true;
+    const catalog = sourceCatalogState(record);
+    if (value === "cataloged") return catalog.isCataloged;
+    if (value === "uncataloged") return catalog.isUncataloged;
+    if (value === "external") return catalog.isExternal;
+    return true;
+  }
+
   return {
     cleanSongTitleNoise,
     assertNoBlockedVideos,
@@ -1134,6 +1189,8 @@
     isSingletonPseudoSongEntry,
     isSelfReferentialChannelTitle,
     matchBlockedSource,
+    matchesChannelFilter,
+    matchesSourceFilter,
     normalizeSongEntry,
     normalizeMatcherText,
   };

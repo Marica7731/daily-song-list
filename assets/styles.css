@@ -4985,6 +4985,101 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
+/* 13. Ranking cards & catalog-state tags (UI card / filter refresh)
+   卡片设计系统：.rank-card 是榜单行的卡片化变体，复用既有 --rank-columns 与
+   右侧列变量，保证与现有表格行在列对齐上一致；移动端通过更小列宽与更大点按热区
+   提升可读性。行容器可选择性添加 .rank-card 启用卡片外观，不影响既有 .rank-row 表格布局。 */
+.rank-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--rank-columns);
+  grid-template-areas:
+    "rank content side"
+    ". sources sources"
+    ". drawer drawer";
+  column-gap: var(--space-3);
+  align-items: center;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+.rank-card + .rank-card {
+  margin-top: var(--space-3);
+}
+
+.rank-card:hover {
+  border-color: var(--line-strong);
+  background: #f8fafc;
+}
+
+.rank-card .rank-number {
+  padding-top: 0;
+  align-self: center;
+}
+
+.rank-card .rank-content {
+  gap: var(--space-2);
+}
+
+.rank-card::before {
+  content: "";
+  grid-area: rank;
+  align-self: stretch;
+  justify-self: start;
+  width: 2px;
+  min-height: 44px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+}
+
+/* 收录状态标签：已收录 / 未记载 / 外部发现 */
+.catalog-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.catalog-tag.cataloged-tag {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-color: rgba(15, 118, 110, 0.18);
+}
+
+.catalog-tag.uncataloged-tag {
+  color: var(--muted);
+  background: #f2f4f7;
+  border-color: var(--line);
+}
+
+.catalog-tag.external-tag {
+  color: var(--warn);
+  background: var(--warn-soft);
+  border-color: rgba(161, 92, 7, 0.18);
+}
+
+/* 频道 / 来源筛选控件复用 .query-field 既有 select/input 样式，这里仅补强聚焦态。 */
+#channelFilterInput:focus-visible,
+#sourceFilterSelect:focus-visible {
+  outline: 2px solid rgba(15, 118, 110, 0.24);
+  outline-offset: 1px;
+  border-color: rgba(15, 118, 110, 0.28);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

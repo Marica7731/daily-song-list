@@ -213,6 +213,22 @@
                 <option value="30">30</option>
               </select>
             </label>
+
+            <label class="query-field query-compact-field" id="channelFilterGroup" title="按频道筛选结果">
+              <span class="query-field-caption" aria-label="频道筛选">频道</span>
+              <input id="channelFilterInput" type="text" inputmode="search" autocomplete="off" placeholder="频道名 / ID" aria-label="按频道名或 ID 筛选" />
+            </label>
+
+            <label class="query-field query-compact-field" id="sourceFilterGroup" title="按来源收录状态筛选结果">
+              <span class="query-field-caption" aria-label="来源筛选">来源</span>
+              <select id="sourceFilterSelect" aria-label="按来源收录状态筛选">
+                <option value="all">全部来源</option>
+                <option value="cataloged">仅已收录</option>
+                <option value="uncataloged">仅未记载</option>
+                <option value="external">仅外部发现</option>
+              </select>
+            </label>
+
             <section class="query-history-section query-context-card" aria-labelledby="queryHistoryHeading">
               <div class="query-history-heading">
                 <span class="query-field-caption" id="queryHistoryHeading">历史快照</span>
