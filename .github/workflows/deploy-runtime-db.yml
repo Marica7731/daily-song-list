@@ -332,19 +332,15 @@ jobs:
       - name: Verify VPS2 health endpoint
         run: curl -fsS http://staging-ytb-song-rank.culua.com/healthz
 
-      - name: Verify production API
+      - name: Verify VPS2 API contract
         env:
+          VPS2_PASSWORD: ${{ secrets.VPS2_PASSWORD }}
           DAILY_SONG_EXPECTED_COMMIT_SHA: ${{ steps.revision.outputs.commit_sha }}
           DAILY_SONG_EXPECTED_LATEST_SHA256: ${{ steps.revision.outputs.latest_sha256 }}
         run: |
           set -Eeuo pipefail
-          for attempt in {1..12}; do
-            if npm run check:published:api -- https://ytb-song-rank.culua.com/; then
-              exit 0
-            fi
-            if [ "${attempt}" = "12" ]; then
-              exit 1
-            fi
-            echo "CODEX_PUBLISHED_API_RETRY attempt=${attempt}"
-            sleep 10
-          done
+          sshpass -p "${VPS2_PASSWORD}" ssh -o StrictHostKeyChecking=no "${VPS2_USER}@${VPS2_HOST}" "
+            set -Eeuo pipefail
+            cd '${REMOTE_PROJECT_DIR}'
+            DAILY_SONG_EXPECTED_COMMIT_SHA='${DAILY_SONG_EXPECTED_COMMIT_SHA}' DAILY_SONG_EXPECTED_LATEST_SHA256='${DAILY_SONG_EXPECTED_LATEST_SHA256}' npm run check:published:api -- http://127.0.0.1:8765/
+          "

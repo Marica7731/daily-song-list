@@ -139,7 +139,7 @@ curl -fsS http://127.0.0.1:8765/healthz
 The routine update path is:
 
 1. `Update core song-list data` refreshes and commits source/static data to `main`.
-2. `Deploy SQLite runtime DB` is triggered by the successful `workflow_run`, resolves the latest `origin/main`, builds `artifacts/runtime/song-rank.sqlite`, uploads the manifest artifact for 14 days, rsyncs the DB to VPS2, activates it, checks VPS2 health, and verifies the production API.
+2. `Deploy SQLite runtime DB` is triggered by the successful `workflow_run`, resolves the latest `origin/main`, builds `artifacts/runtime/song-rank.sqlite`, uploads the manifest artifact for 14 days, rsyncs the DB to VPS2, activates it, checks VPS2 health, and verifies the VPS2 local API contract over SSH.
 3. After production cutover, `Update core song-list data` checks the public homepage and `https://ytb-song-rank.culua.com/` with `npm run check:published:api`.
 
 Troubleshooting map:
@@ -148,7 +148,7 @@ Troubleshooting map:
 - DB build failure: inspect `Build runtime database`; no remote candidate is uploaded.
 - Local API artifact failure: inspect `Verify runtime API artifact`; no remote candidate is activated.
 - Upload or activation failure: inspect `Upload and activate database`; remote candidates named `song-rank.sqlite.next.<run>.<attempt>` are removed on workflow failure. If the log shows `CODEX_RUNTIME_DB_UPLOAD_MODE direct-inplace`, check that `song-rank-api` is stopped, then rerun the deploy to finish the interrupted in-place upload before restarting the public API.
-- Health or production API failure: inspect `Verify VPS2 health endpoint` and `Verify production API`, then run `journalctl -u song-rank-api -n 100 --no-pager` and `curl -fsS http://127.0.0.1:8765/healthz` on VPS2. The production API check retries briefly after activation because the public endpoint can return a transient HTML error page while nginx/upstream state settles.
+- Health or API contract failure: inspect `Verify VPS2 health endpoint` and `Verify VPS2 API contract`, then run `journalctl -u song-rank-api -n 100 --no-pager` and `curl -fsS http://127.0.0.1:8765/healthz` on VPS2. The blocking deploy check uses the VPS2 local API because the public Cloudflare route can transiently return an HTML page to GitHub-hosted runners after activation; validate the public production URL from an external client after the deploy is green.
 - Concurrency cancellation is expected when a newer deploy run starts; the newest successful deploy is authoritative.
 
 Manual rerun options:
