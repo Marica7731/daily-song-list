@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_manifest",
+  "batchId": "2026-07-23-source-backfill-batch91-monicamelodia-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:50:05.6640362+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "scope": "Small duplicate-evidence artifact for MonicaMelodia. No YouTube fetch, no runner code changes, no data/external writes, no push, no deploy.",
+  "evidenceSource": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/accepted/2026-07-22-source-backfill-batch1.accepted.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/manifest.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/report.md"
+  ],
+  "laterStatusEvidence": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md"
+  ],
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch1",
+  "acceptedIncrement": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch91-monicamelodia-duplicate-evidence/accepted-increment.json",
+    "videoCount": 0,
+    "occurrenceCount": 0,
+    "note": "Empty accepted increment; batch1 already contains the concrete accepted rows."
+  },
+  "candidateIncrementUnfiltered": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch91-monicamelodia-duplicate-evidence/candidate-increment-unfiltered.json",
+    "candidateCount": 0,
+    "videoCount": 0
+  },
+  "dirtyAudit": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch91-monicamelodia-duplicate-evidence/dirty-audit.json",
+    "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/dirty-audit.json",
+    "filter": "channelHandle == /@MonicaMelodia or channelUrl == https://www.youtube.com/@MonicaMelodia",
+    "droppedVideoCount": 0,
+    "droppedOccurrenceCount": 0,
+    "suspiciousCount": 0,
+    "suspiciousOccurrenceCount": 0,
+    "note": "No MonicaMelodia dropped or suspicious entries exist in batch1 dirty-audit. Candidate-to-usable difference is not counted as dirty dropped."
+  },
+  "batch1ManifestSourceFields": {
+    "discoveryCandidateCount": 6,
+    "discoveryInspectedCount": 6,
+    "discoveryUsableVideoCount": 4,
+    "discoveryOccurrenceCount": 36,
+    "elapsedSeconds": 212,
+    "reachedEnd": true
+  },
+  "batch1DirectEvidence": {
+    "acceptedVideos": 4,
+    "acceptedOccurrences": 36,
+    "uniqueSongs": 35,
+    "publishedTimestampCoverage": "4/4",
+    "occurrenceTimeCoverage": "36/36",
+    "occurrenceSecondsCoverage": "36/36",
+    "discoveryThumbnailCoverage": "4/4",
+    "coverCoverage": "4/4"
+  },
+  "remoteCleanup": {
+    "source": "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/report.md",
+    "vps3": {
+      "cleanup": "removed",
+      "df": "/dev/sda1 99G 11G 89G 11% /"
+    },
+    "vps5": {
+      "cleanup": "removed",
+      "df": "/dev/vda1 10G 2.6G 7.0G 27% /"
+    }
+  },
+  "sources": [
+    {
+      "handle": "MonicaMelodia",
+      "url": "https://www.youtube.com/@MonicaMelodia",
+      "channelHandle": "/@MonicaMelodia",
+      "status": "skipped_duplicate",
+      "reason": "duplicate_concrete_accepted_artifact_exists",
+      "acceptedVideos": 4,
+      "acceptedOccurrences": 36,
+      "uniqueSongs": 35,
+      "publishedTimestampCoverage": "4/4",
+      "occurrenceTimeCoverage": "36/36",
+      "occurrenceSecondsCoverage": "36/36",
+      "coverage": {
+        "publishedTimestamp": "4/4",
+        "occurrenceTime": "36/36",
+        "occurrenceSeconds": "36/36"
+      },
+      "discoveryThumbnailCoverage": "4/4",
+      "coverCoverage": "4/4",
+      "discoveryCandidateCount": 6,
+      "discoveryInspectedCount": 6,
+      "discoveryUsableVideoCount": 4,
+      "discoveryOccurrenceCount": 36,
+      "elapsedSeconds": 212,
+      "reachedEnd": true,
+      "failure": "",
+      "evidenceSource": [
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/accepted/2026-07-22-source-backfill-batch1.accepted.json",
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/manifest.json",
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/report.md"
+      ],
+      "laterStatusEvidence": [
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+        "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md"
+      ],
+      "duplicateOfBatch": "2026-07-22-source-backfill-batch1",
+      "remoteCleanup": {
+        "vps3": "/dev/sda1 99G 11G 89G 11% /",
+        "vps5": "/dev/vda1 10G 2.6G 7.0G 27% /"
+      }
+    }
+  ],
+  "statusCounts": {
+    "skipped_duplicate": 1
+  },
+  "outputFiles": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "scopeVerification": {
+    "onlyWroteThisArtifactDirectory": "artifacts/channel-discovery/2026-07-23-source-backfill-batch91-monicamelodia-duplicate-evidence",
+    "didNotModifyRunnerToolCode": true,
+    "didNotModifyDataExternal": true,
+    "didNotStartYouTubeFetch": true,
+    "didNotUseMacOrVps": true,
+    "didNotCreateRemoteTempDirectory": true,
+    "didNotPushOrDeploy": true,
+    "commitCreated": false
+  }
+}

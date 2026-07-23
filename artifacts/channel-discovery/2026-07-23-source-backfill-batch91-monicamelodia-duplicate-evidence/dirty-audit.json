@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch91-monicamelodia-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:50:05.6640362+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/dirty-audit.json",
+  "filter": "channelHandle == /@MonicaMelodia or channelUrl == https://www.youtube.com/@MonicaMelodia",
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 0,
+  "suspiciousOccurrenceCount": 0,
+  "suspicious": [],
+  "note": "Filtered only to MonicaMelodia. Batch1 dirty-audit dropped entries belong only to ShirazunaIwo, so MonicaMelodia has 0 dropped videos, 0 dropped occurrences, 0 suspicious videos, and 0 suspicious occurrences. Discovery candidate 6 to usable 4 is not treated as dirty dropped evidence."
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_candidate_increment_unfiltered",
+  "batchId": "2026-07-23-source-backfill-batch91-monicamelodia-duplicate-evidence",
+  "generatedAt": "2026-07-23T16:50:05.6640362+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "source": {
+    "handle": "MonicaMelodia",
+    "channelHandle": "/@MonicaMelodia",
+    "channelUrl": "https://www.youtube.com/@MonicaMelodia"
+  },
+  "candidates": [],
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "note": "MonicaMelodia is already fully represented in the batch1 concrete accepted artifact. This duplicate-evidence batch does not repeat candidate rows.",
+    "evidenceSource": [
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/accepted/2026-07-22-source-backfill-batch1.accepted.json",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/manifest.json",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch1/report.md"
+    ],
+    "laterStatusEvidence": [
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/manifest.json",
+      "artifacts/channel-discovery/2026-07-22-source-backfill-batch2/report.md"
+    ],
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch1",
+    "batch1DirectEvidence": {
+      "acceptedVideos": 4,
+      "acceptedOccurrences": 36,
+      "uniqueSongs": 35,
+      "publishedTimestampCoverage": "4/4",
+      "occurrenceTimeCoverage": "36/36",
+      "occurrenceSecondsCoverage": "36/36",
+      "discoveryThumbnailCoverage": "4/4",
+      "coverCoverage": "4/4"
+    }
+  }
+}
