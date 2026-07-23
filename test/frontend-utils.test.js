@@ -240,7 +240,15 @@ test("VTuber collection badge model tolerates missing backend fields", () => {
     isCollected: false,
     sourceType: "vsinger_moment_http",
   });
+  assert.equal(vtuberCollectionBadgeModel({ isCollected: true }).isCollected, false);
   assert.equal(vtuberCollectionBadgeModel({ sourceGroups: ["vsinger-moment"], isCollected: true }).isCollected, false);
+  assert.equal(
+    vtuberCollectionBadgeModel({
+      isCollected: true,
+      occurrences: [{ item: { knownSourceType: "vsinger_moment_http" } }, { item: { knownSourceType: "manual" } }],
+    }).isCollected,
+    true,
+  );
   assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "youtube_channel_discovery" }).isCollected, true);
   assert.equal(vtuberCollectionBadgeModel({ knownSourceType: "unknown" }).isCollected, false);
   assert.equal(vtuberCollectionBadgeModel({}).text, "");

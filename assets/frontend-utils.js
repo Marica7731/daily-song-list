@@ -1403,32 +1403,37 @@
   }
 
   function vtuberCollectionBadgeModel(record = {}) {
+    const candidates = [record];
+    if (Array.isArray(record.occurrences)) {
+      for (const occurrence of record.occurrences) {
+        if (occurrence?.item && typeof occurrence.item === "object") candidates.push(occurrence.item);
+        if (occurrence?.song && typeof occurrence.song === "object") candidates.push(occurrence.song);
+        if (occurrence?.source && typeof occurrence.source === "object") candidates.push(occurrence.source);
+      }
+    }
+    const trustedCandidate = candidates.find((candidate) => isTrustedCollectionCandidate(candidate));
     const type = cleanText(firstNonEmpty(
+      trustedCandidate?.knownSourceType,
+      trustedCandidate?.sourceType,
+      trustedCandidate?.collectionType,
+      trustedCandidate?.knownSource?.type,
+      trustedCandidate?.source?.knownSourceType,
       record.knownSourceType,
       record.sourceType,
       record.collectionType,
       record.knownSource?.type,
       record.source?.knownSourceType,
     )).toLocaleLowerCase();
-    if (isMomentSourceType(type, record)) {
+    if (!trustedCandidate) {
       return {
         text: "",
         isCollected: false,
         sourceType: type,
       };
     }
-    const explicit = record.isCollected ?? record.collected ?? record.isKnownSource ?? record.knownSource?.isCollected;
-    const falseTypes = new Set(["0", "false", "no", "none", "unknown", "uncollected", "not_collected", "not-collected"]);
-    const trueTypes = new Set(["1", "true", "yes", "known", "collected", "library", "song-search", "song_search", "manual", "verified", "youtube_channel_discovery"]);
-    const isCollected =
-      explicit === true ||
-      explicit === 1 ||
-      explicit === "1" ||
-      String(explicit).toLocaleLowerCase() === "true" ||
-      trueTypes.has(type);
     return {
-      text: isCollected ? "已收录" : "",
-      isCollected,
+      text: "已收录",
+      isCollected: true,
       sourceType: type,
     };
   }
@@ -1439,6 +1444,34 @@
     if (groups.map((group) => cleanText(group).toLocaleLowerCase()).includes("vsinger-moment")) return true;
     const sourceSystem = cleanText(record.sourceQuality?.sourceSystem || record.source?.sourceSystem).toLocaleLowerCase();
     return sourceSystem === "vsinger_moment_http";
+  }
+
+  function isTrustedCollectionCandidate(record = {}) {
+    const type = cleanText(firstNonEmpty(
+      record.knownSourceType,
+      record.sourceType,
+      record.collectionType,
+      record.knownSource?.type,
+      record.source?.knownSourceType,
+    )).toLocaleLowerCase();
+    const trustedTypes = new Set([
+      "library",
+      "manual",
+      "song-search",
+      "song_search",
+      "verified",
+      "youtube_channel_discovery",
+      "youtube-channel-discovery",
+      "youtube_discovery",
+      "youtube-discovery",
+      "daily_song_list",
+      "daily-song-list",
+    ]);
+    if (trustedTypes.has(type)) return true;
+    const groups = Array.isArray(record.sourceGroups) ? record.sourceGroups : [];
+    if (groups.some((group) => trustedTypes.has(cleanText(group).toLocaleLowerCase()))) return true;
+    const sourceSystem = cleanText(record.sourceQuality?.sourceSystem || record.source?.sourceSystem || record.sourceSystem).toLocaleLowerCase();
+    return trustedTypes.has(sourceSystem);
   }
 
   function firstNonEmpty(...values) {
