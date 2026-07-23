@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_accepted_increment",
+  "batchId": "2026-07-23-source-backfill-batch97-sakisakatsumugi-duplicate-evidence",
+  "generatedAt": "2026-07-23T17:31:00+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch4",
+    "source": {
+      "handle": "sakisakatsumugi",
+      "channelHandle": "/@sakisakatsumugi",
+      "channelUrl": "https://www.youtube.com/@sakisakatsumugi",
+      "acceptedMatchRule": "batch4 accepted.videos matched where discoveryImport.discoverySingerName == sakisakatsumugi or channelHandle == /@sakisakatsumugi",
+      "manifestMatchRule": "batch4 manifest.sources matched where handle == sakisakatsumugi or url == https://www.youtube.com/@sakisakatsumugi"
+    },
+    "evidenceSource": {
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/accepted/2026-07-22-source-backfill-batch4.accepted.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch4/dirty-audit.json"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 19,
+      "acceptedOccurrences": 223,
+      "uniqueSongs": 130,
+      "note": "This accepted increment is intentionally empty because batch4 already contains the concrete accepted rows for sakisakatsumugi."
+    },
+    "coverage": {
+      "publishedTimestamp": "19/19",
+      "occurrenceTime": "223/223",
+      "occurrenceSeconds": "223/223",
+      "discoveryThumbnailCoverage": "19/19",
+      "coverCoverage": "19/19"
+    },
+    "batch4SourceManifest": {
+      "discoveryCandidateCount": 21,
+      "discoveryInspectedCount": 21,
+      "discoveryUsableVideoCount": 19,
+      "discoveryOccurrenceCount": 223,
+      "elapsedSeconds": 848,
+      "reachedEnd": true
+    },
+    "dirtyAudit": {
+      "filter": "Only sakisakatsumugi is filtered from the batch4 concrete accepted artifact and batch4 source manifest.",
+      "droppedVideos": 0,
+      "droppedOccurrences": 0,
+      "sourceBatchSuspiciousCount": 0,
+      "suspiciousCount": 0,
+      "note": "Batch4 dirty audit dropped 0/0 and suspicious 0/0. The 21 candidate to 19 usable difference is not dirty dropped."
+    }
+  }
+}
