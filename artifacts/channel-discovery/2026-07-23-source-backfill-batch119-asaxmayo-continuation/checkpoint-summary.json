@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T12:55:17.600Z",
+  "batchId": "2026-07-23-source-backfill-batch119-asaxmayo-continuation",
+  "remoteRoot": "/tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation",
+  "note": "Full checkpoint copied into the local batch119 artifact because discovery completed successfully.",
+  "channels": [
+    {
+      "handle": "asaxmayo",
+      "checkpoint": "asaxmayo/checkpoint.json",
+      "checkpointExists": true,
+      "checkpointBytes": 181956,
+      "checkpointSha256": "f91293aeeabd93397f8c84be0761e9e5a0e68266c19441d05e8d1ecfe443876d",
+      "candidateCount": 8,
+      "completedVideoIdsCount": 3,
+      "detailCount": 3,
+      "auditCount": 8,
+      "occurrenceCount": 27,
+      "reachedEnd": false,
+      "discoveryOkMarkerPresent": true,
+      "status": "imported",
+      "completeForImport": true
+    }
+  ]
+}

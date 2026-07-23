@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sourceSystem": "youtube_channel_discovery",
+  "kind": "youtube-channel-discovery-increment",
+  "generatedAt": "2026-07-23T12:59:16.1481723Z",
+  "inputs": [
+    "artifacts/channel-discovery/2026-07-23-source-backfill-batch119-asaxmayo-continuation/asaxmayo"
+  ],
+  "readStats": {
+    "inputDirs": 1,
+    "videoDetails": 3,
+    "usableVideos": 3,
+    "skippedNoSongs": 0,
+    "skippedInvalidVideoId": 0,
+    "duplicateVideoIds": 0,
+    "songs": 27,
+    "skippedExistingRegressions": 0,
+    "skippedExistingRegressionVideoIds": []
+  },
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "dirtyAuditApplied": {
+    "status": "skipped_dirty_audit",
+    "reason": "asaxmayo videos are sax/instrumental hybrid sources; user policy excludes flute/sax/piano style instrumental/performance sources from song ranking import",
+    "droppedVideos": 3,
+    "droppedOccurrences": 27
+  }
+}

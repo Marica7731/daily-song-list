@@ -1,0 +1,10 @@
+CODEX_ATTEMPT_STARTED_AT 2026-07-23T12:49:59.980240Z
+CODEX_ATTEMPT_TIMEOUT_SECONDS 1200
+CODEX_ATTEMPT_COMMAND npm run youtube:discover-channel -- --channel-url https://www.youtube.com/@asaxmayo/streams --singer-name asaxmayo --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation/asaxmayo --cache-dir /tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation/cache --max-candidates 100 --max-inspect 100 --request-interval-ms 2000 --request-jitter-ms 500
+
+> daily-song-list@1.0.0 youtube:discover-channel
+> node scripts/youtube-channel-discovery.js --channel-url https://www.youtube.com/@asaxmayo/streams --singer-name asaxmayo --output-dir /tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation/asaxmayo --cache-dir /tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation/cache --max-candidates 100 --max-inspect 100 --request-interval-ms 2000 --request-jitter-ms 500
+
+CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel="https://www.youtube.com/@asaxmayo/streams" candidates=8 inspected=8 videos=3 occurrences=27 elapsedSeconds=150 outputDir="/tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation/asaxmayo"
+CODEX_ATTEMPT_EXIT_CODE 0
+CODEX_ATTEMPT_ENDED_AT 2026-07-23T12:52:30.474586Z

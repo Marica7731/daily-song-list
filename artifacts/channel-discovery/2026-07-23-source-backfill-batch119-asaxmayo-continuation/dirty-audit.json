@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-23T12:59:16.1672500Z",
+  "batchId": "2026-07-23-source-backfill-batch119-asaxmayo-continuation",
+  "handle": "asaxmayo",
+  "sourceUrl": "https://www.youtube.com/@asaxmayo/streams",
+  "policy": {
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "吹奏楽"
+    ],
+    "hardExcludeExactPhrases": [
+      "piano streaming",
+      "ピアノ演奏"
+    ],
+    "suspiciousOnlyTerms": [
+      "live",
+      "ライブ"
+    ],
+    "note": "User clarified flute, sax, and piano/performance style sources should be filtered before import. live and ライブ remain suspicious markers only."
+  },
+  "input": {
+    "discoveryVideosBeforeAudit": 3,
+    "discoveryOccurrencesBeforeAudit": 27,
+    "preAuditPublishedTimestampCoverage": "3/3",
+    "preAuditOccurrenceTimeCoverage": "27/27",
+    "preAuditOccurrenceSecondsCoverage": "27/27"
+  },
+  "output": {
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedUniqueSongs": 0,
+    "droppedVideoCount": 3,
+    "droppedOccurrenceCount": 27,
+    "suspiciousVideoCount": 0
+  },
+  "droppedVideos": [
+    {
+      "videoId": "oZI9YkyasCs",
+      "title": "【 #サックス生演奏 & #歌枠 】歌とサックス演奏のハイブリッド演奏会🐼🎷やっチャイナ【 朔栖まよ - Sakusu Mayo 】 #生搾りまよ #サックス #吹奏楽 #jazz",
+      "reason": "hard_exclude_instrumental_or_sax_hybrid",
+      "matchedTerms": [
+        "生演奏",
+        "サックス",
+        "吹奏楽"
+      ],
+      "occurrenceCount": 9
+    },
+    {
+      "videoId": "tgiGGqKaHZk",
+      "title": "【 #サックス #歌 】おかえり！歌とサックスのハイブリッド演奏会♫【朔栖まよ - Sakusu Mayo】 #サックス #吹奏楽 #生搾りまよ",
+      "reason": "hard_exclude_instrumental_or_sax_hybrid",
+      "matchedTerms": [
+        "サックス",
+        "吹奏楽"
+      ],
+      "occurrenceCount": 15
+    },
+    {
+      "videoId": "n1shIoYGRhY",
+      "title": "【 #サックス生演奏 】おかえり！歌と演奏のハイブリッド枠🎶【朔栖まよ - Sakusu Mayo】#生搾りまよ #サックス",
+      "reason": "hard_exclude_instrumental_or_sax_hybrid",
+      "matchedTerms": [
+        "生演奏",
+        "サックス"
+      ],
+      "occurrenceCount": 3
+    }
+  ],
+  "suspiciousVideos": []
+}

@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-backfill-batch-manifest",
+  "batchId": "2026-07-23-source-backfill-batch119-asaxmayo-continuation",
+  "generatedAt": "2026-07-23T12:59:16.1689602Z",
+  "status": "skipped_dirty_audit",
+  "completeForImport": false,
+  "scope": "single-channel source-backfill continuation for handle asaxmayo only; no runner/tool code changes; no data/external write",
+  "source": {
+    "handle": "asaxmayo",
+    "url": "https://www.youtube.com/@asaxmayo/streams",
+    "imported": false,
+    "skipped": true,
+    "failed": false,
+    "pending": false,
+    "status": "skipped_dirty_audit",
+    "completeForImport": false,
+    "acceptedIncrementReadyForReview": true,
+    "candidateCount": 8,
+    "inspectedInLatestRun": 8,
+    "discoveryUsableVideosBeforeAudit": 3,
+    "discoveryOccurrencesBeforeAudit": 27,
+    "acceptedVideos": 0,
+    "acceptedOccurrences": 0,
+    "acceptedSongs": 0,
+    "droppedVideos": 3,
+    "droppedOccurrences": 27,
+    "suspiciousVideos": 0,
+    "skippedCandidateCount": 5,
+    "publishedTimestampCoverage": "0/0",
+    "publishedTimestampRange": {
+      "min": 1779627010118,
+      "max": 1779627010118,
+      "minIso": "2026-05-24T12:50:10.118Z",
+      "maxIso": "2026-05-24T12:50:10.118Z"
+    },
+    "occurrenceTimeCoverage": "0/0",
+    "occurrenceSecondsCoverage": "0/0",
+    "occurrenceSecondsRange": {
+      "min": 921,
+      "max": 9919,
+      "minIso": "1970-01-01T00:00:00.921Z",
+      "maxIso": "1970-01-01T00:00:09.919Z"
+    },
+    "thumbnailCoverCoverage": "0/0",
+    "failureReason": "skipped by dirty audit: sax/instrumental hybrid source excluded before import",
+    "reachedEnd": false,
+    "pageCoverage": [
+      {
+        "pageUrl": "https://www.youtube.com/@asaxmayo/streams?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 3,
+        "rawItemCount": 84,
+        "candidateCount": 6,
+        "continuationRounds": 2,
+        "reachedEnd": false
+      },
+      {
+        "pageUrl": "https://www.youtube.com/@asaxmayo/videos?hl=ja&persist_hl=1",
+        "status": 200,
+        "pageCount": 2,
+        "rawItemCount": 19,
+        "candidateCount": 2,
+        "continuationRounds": 1,
+        "reachedEnd": true
+      }
+    ],
+    "timeCoverageNote": "streams tab did not report reachedEnd; discovery still completed for inspected candidates",
+    "preAuditCoverage": {
+      "discoveryVideos": 3,
+      "discoveryOccurrences": 27,
+      "publishedTimestampCoverage": "3/3",
+      "occurrenceTimeCoverage": "27/27",
+      "occurrenceSecondsCoverage": "27/27"
+    }
+  },
+  "acceptedIncrement": "accepted/2026-07-23-source-backfill-batch119-asaxmayo-continuation.accepted.json",
+  "exportRan": true,
+  "exportMarker": "CODEX_CHANNEL_DISCOVERY_INCREMENT_OK inputs=1 readVideos=3 usableVideos=3 acceptedVideos=3 skippedRegressions=0 occurrences=27 output=\"D:\\\\Projects\\\\daily_song_list_worker_source_backfill_20260720\\\\artifacts\\\\channel-discovery\\\\2026-07-23-source-backfill-batch119-asaxmayo-continuation\\\\accepted\\\\2026-07-23-source-backfill-batch119-asaxmayo-continuation.accepted.json\"",
+  "discoveryMarker": "CODEX_YOUTUBE_CHANNEL_DISCOVERY_OK channel=\"https://www.youtube.com/@asaxmayo/streams\" candidates=8 inspected=8 videos=3 occurrences=27 elapsedSeconds=150 outputDir=\"/tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation/asaxmayo\"",
+  "dirtyAudit": {
+    "path": "dirty-audit.json",
+    "droppedVideoCount": 3,
+    "droppedOccurrenceCount": 27,
+    "suspiciousVideoCount": 0,
+    "hardExcludeTerms": [
+      "フルート",
+      "生演奏",
+      "クラリネット",
+      "サックス",
+      "吹奏楽"
+    ],
+    "hardExcludeExactPhrases": [
+      "piano streaming",
+      "ピアノ演奏"
+    ]
+  },
+  "remote": {
+    "host": "be@192.168.1.13",
+    "repo": "/Users/be/daily-song-list",
+    "branch": "main",
+    "commit": "f1b0e8423e755b2c3b38a5288c98bca3e5d092cc",
+    "tempRoot": "/tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation"
+  },
+  "remoteCleanup": {
+    "status": "ok",
+    "log": "cleanup-summary.txt",
+    "removed": true,
+    "dfSummary": [
+      "CODEX_REMOTE_CLEANUP_STARTED_AT=2026-07-23T12:53:51Z",
+      "CODEX_REMOTE_CLEANUP_TARGET=/tmp/ytb-song-rank-source-backfill-20260720/batch119-asaxmayo-continuation",
+      "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+      "/dev/disk3s5   926Gi   321Gi   567Gi    37%    710k  5.9G    0%   /System/Volumes/Data",
+      "/dev/disk3s5   926Gi   321Gi   567Gi    37%    710k  5.9G    0%   /System/Volumes/Data",
+      "CODEX_REMOTE_CLEANUP_REMOVED=1",
+      "Filesystem      Size    Used   Avail Capacity iused ifree %iused  Mounted on",
+      "/dev/disk3s5   926Gi   321Gi   567Gi    37%    710k  5.9G    0%   /System/Volumes/Data",
+      "/dev/disk3s5   926Gi   321Gi   567Gi    37%    710k  5.9G    0%   /System/Volumes/Data",
+      "CODEX_REMOTE_CLEANUP_OK"
+    ]
+  },
+  "localStorage": {
+    "artifactDir": "artifacts/channel-discovery/2026-07-23-source-backfill-batch119-asaxmayo-continuation",
+    "windowsLargeDiskWrites": "none; only small artifact files written under the existing D: checkout; temporary helper scripts on G:"
+  },
+  "scopeVerification": {
+    "onlyHandledHandle": "asaxmayo",
+    "didNotModifyRunnerOrToolCode": true,
+    "didNotWriteDataExternal": true,
+    "didNotPushOrDeploy": true,
+    "committed": false,
+    "pushed": false,
+    "deployed": false
+  }
+}
