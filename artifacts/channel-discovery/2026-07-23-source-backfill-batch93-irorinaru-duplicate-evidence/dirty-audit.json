@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch93-irorinaru-duplicate-evidence",
+  "generatedAt": "2026-07-23T09:05:19.135Z",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/dirty-audit.json",
+  "filter": "channelHandle == /@irorinaru or channelUrl == https://www.youtube.com/@irorinaru/streams",
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch5",
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 0,
+  "suspiciousOccurrenceCount": 0,
+  "suspicious": [],
+  "note": "Filtered only for irorinaru. Batch5 dirty audit dropped 0 videos / 0 occurrences and suspicious 0 videos / 0 occurrences. The 42 candidates to 4 usable videos discovery difference is not dirty dropped."
+}

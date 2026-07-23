@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_accepted_increment",
+  "batchId": "2026-07-23-source-backfill-batch93-irorinaru-duplicate-evidence",
+  "generatedAt": "2026-07-23T09:05:19.135Z",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "videoCount": 0,
+  "occurrenceCount": 0,
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch5",
+    "source": {
+      "handle": "irorinaru",
+      "channelHandle": "/@irorinaru",
+      "channelUrl": "https://www.youtube.com/@irorinaru/streams",
+      "acceptedMatchRule": "accepted.videos matched where channelHandle == /@irorinaru or channelUrl == https://www.youtube.com/@irorinaru/streams",
+      "manifestMatchRule": "manifest.sources matched where handle == irorinaru or url == https://www.youtube.com/@irorinaru/streams"
+    },
+    "evidenceSource": {
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/accepted/2026-07-22-source-backfill-batch5.accepted.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/dirty-audit.json"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 4,
+      "acceptedOccurrences": 15,
+      "uniqueSongs": 15,
+      "note": "This accepted increment is intentionally empty because batch5 already contains the concrete accepted rows for irorinaru."
+    },
+    "coverage": {
+      "publishedTimestamp": "4/4",
+      "occurrenceTime": "15/15",
+      "occurrenceSeconds": "15/15",
+      "discoveryThumbnailCoverage": "4/4",
+      "coverCoverage": "4/4"
+    },
+    "manifestSourceEntry": {
+      "discoveryCandidateCount": 42,
+      "discoveryInspectedCount": 42,
+      "discoveryUsableVideoCount": 4,
+      "discoveryOccurrenceCount": 15,
+      "elapsedSeconds": 744,
+      "reachedEnd": true
+    },
+    "dirtyAudit": {
+      "filter": "channelHandle == /@irorinaru or channelUrl == https://www.youtube.com/@irorinaru/streams",
+      "droppedVideos": 0,
+      "droppedOccurrences": 0,
+      "suspiciousVideos": 0,
+      "suspiciousOccurrences": 0,
+      "note": "Batch5 dirty audit is 0/0 dropped and 0/0 suspicious for this source. Candidate-to-usable difference is not dirty dropped."
+    }
+  }
+}
