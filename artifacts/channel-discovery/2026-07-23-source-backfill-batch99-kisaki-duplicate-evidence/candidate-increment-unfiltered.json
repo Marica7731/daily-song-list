@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_candidate_increment_unfiltered",
+  "batchId": "2026-07-23-source-backfill-batch99-kisaki-duplicate-evidence",
+  "generatedAt": "2026-07-23T17:46:47+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "candidates": [],
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch9",
+    "source": {
+      "handle": "kisaki",
+      "channelHandle": "/@%E5%A6%83%E7%8E%96-kisaki",
+      "channelUrl": "https://www.youtube.com/@%E5%A6%83%E7%8E%96-kisaki",
+      "acceptedMatchRule": "batch9 accepted.videos matched where discoveryImport.discoverySingerName == kisaki or channelUrl == https://www.youtube.com/@%E5%A6%83%E7%8E%96-kisaki",
+      "manifestMatchRule": "batch9 manifest.sources matched where handle == kisaki or url == https://www.youtube.com/@%E5%A6%83%E7%8E%96-kisaki"
+    },
+    "evidenceSource": {
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch9/accepted/2026-07-22-source-backfill-batch9.accepted.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch9/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch9/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch9/dirty-audit.json"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 16,
+      "acceptedOccurrences": 194,
+      "uniqueSongs": 175,
+      "note": "kisaki is fully recorded in the batch9 concrete accepted artifact; this duplicate-evidence batch intentionally emits no candidate rows."
+    },
+    "coverage": {
+      "publishedTimestamp": "16/16",
+      "occurrenceTime": "194/194",
+      "occurrenceSeconds": "194/194",
+      "discoveryThumbnailCoverage": "16/16",
+      "coverCoverage": "16/16"
+    },
+    "batch9SourceManifest": {
+      "discoveryCandidateCount": 34,
+      "discoveryInspectedCount": 34,
+      "discoveryUsableVideoCount": 17,
+      "discoveryOccurrenceCount": 212,
+      "elapsedSeconds": 376,
+      "reachedEnd": true
+    },
+    "dirtyAudit": {
+      "filter": "Only kisaki is filtered from the batch9 concrete accepted artifact and batch9 source manifest.",
+      "droppedVideos": 0,
+      "droppedOccurrences": 0,
+      "sourceBatchSuspiciousCount": 2,
+      "filteredSuspiciousCount": 1,
+      "note": "Batch9 dirty audit dropped 0/0; suspiciousCount 2 was retained after manual audit. The 17/212 discovery usable total and 16/194 direct accepted total difference is not dirty dropped."
+    },
+    "operationalScope": {
+      "didNotUseMacOrVps": true,
+      "didNotCreateRemoteTempDirectory": true,
+      "didNotStartYouTubeFetch": true,
+      "didNotModifyDataExternal": true,
+      "didNotPushOrDeploy": true,
+      "commitCreated": false,
+      "outputVideosOrCandidatesRepeated": false
+    }
+  }
+}

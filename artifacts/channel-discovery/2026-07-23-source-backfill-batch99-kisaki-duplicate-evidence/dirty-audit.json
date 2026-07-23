@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch99-kisaki-duplicate-evidence",
+  "generatedAt": "2026-07-23T17:46:47+08:00",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch9",
+  "filter": {
+    "handle": "kisaki",
+    "channelHandle": "/@%E5%A6%83%E7%8E%96-kisaki",
+    "channelUrl": "https://www.youtube.com/@%E5%A6%83%E7%8E%96-kisaki",
+    "rule": "Only kisaki is filtered from the batch9 dirty audit."
+  },
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch9/dirty-audit.json",
+  "sourceBatchDroppedVideoCount": 0,
+  "sourceBatchDroppedOccurrenceCount": 0,
+  "sourceBatchSuspiciousCount": 2,
+  "sourceBatchSuspiciousRetainedAfterManualAudit": true,
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 1,
+  "suspiciousOccurrenceCount": 14,
+  "suspicious": [
+    {
+      "youtubeVideoId": "UYZvCpQVWvY",
+      "channel": "@%E5%A6%83%E7%8E%96-kisaki",
+      "videoTitle": "【祝！収益化記念配信】ありがとうすぎ！ライブ振り返りも！#妃玖ノ記録【妃玖/RKmusic/Fused】",
+      "hits": [],
+      "broadHits": [
+        "ライブ"
+      ],
+      "occurrences": 14,
+      "retainedAfterManualAudit": true
+    }
+  ],
+  "termHitCounts": {
+    "ライブ": 1
+  },
+  "note": "Batch9 dirty audit dropped 0 videos / 0 occurrences, and suspiciousCount 2 was retained after manual audit. Do not treat suspicious rows as dropped. The discovery usable 17/212 to direct accepted 16/194 difference is not dirty dropped; direct accepted evidence is authoritative for duplicate stats and no dropped rows are recorded in dirty-audit."
+}
