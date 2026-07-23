@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_manifest",
+  "batchId": "2026-07-23-source-backfill-batch94-rayray429-duplicate-evidence",
+  "generatedAt": "2026-07-23T09:11:00.000Z",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch5",
+  "scope": "duplicate evidence only; no YouTube fetch, no accepted row duplication, no data/external write",
+  "sourceEvidence": [
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/accepted/2026-07-22-source-backfill-batch5.accepted.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/manifest.json",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/report.md",
+    "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/dirty-audit.json"
+  ],
+  "acceptedIncrement": {
+    "path": "artifacts/channel-discovery/2026-07-23-source-backfill-batch94-rayray429-duplicate-evidence/accepted-increment.json",
+    "videoCount": 0,
+    "occurrenceCount": 0,
+    "note": "Empty accepted increment; batch5 already contains the accepted rows."
+  },
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch5",
+    "evidenceSource": {
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/accepted/2026-07-22-source-backfill-batch5.accepted.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/dirty-audit.json"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 9,
+      "acceptedOccurrences": 155,
+      "uniqueSongs": 154,
+      "publishedTimestampCoverage": "9/9",
+      "occurrenceTimeCoverage": "155/155",
+      "occurrenceSecondsCoverage": "155/155",
+      "discoveryThumbnailCoverage": "9/9",
+      "coverCoverage": "9/9"
+    },
+    "batch5SourceManifest": {
+      "discoveryCandidateCount": 31,
+      "discoveryInspectedCount": 31,
+      "discoveryUsableVideoCount": 9,
+      "discoveryOccurrenceCount": 155,
+      "elapsedSeconds": 373,
+      "reachedEnd": true
+    },
+    "remoteCleanup": {
+      "vps3": {
+        "status": "removed",
+        "path": "/opt/ytb-song-rank-source-backfill-20260722-batch5-vps3",
+        "df": "/dev/sda1 99G 11G 89G 11% /",
+        "cleanupEvidence": "Batch5 report and manifest record VPS3 cleanup removed with df -h / line."
+      },
+      "vps5": {
+        "status": "removed",
+        "path": "/opt/ytb-song-rank-source-backfill-20260722-batch5-vps5",
+        "df": "/dev/vda1 10G 2.6G 7.0G 27% /",
+        "cleanupEvidence": "Batch5 report and manifest record VPS5 cleanup removed with df -h / line."
+      }
+    },
+    "dirtyAudit": {
+      "filter": "channelHandle == /@rayray_429 or channelUrl == https://www.youtube.com/@rayray_429",
+      "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/dirty-audit.json",
+      "droppedVideoCount": 0,
+      "droppedOccurrenceCount": 0,
+      "suspiciousCount": 0,
+      "suspiciousOccurrenceCount": 0,
+      "note": "Only rayray_429 is filtered. Batch5 dirty audit dropped 0/0 and suspicious 0/0; candidate-to-usable difference is not dirty dropped."
+    }
+  },
+  "sources": [
+    {
+      "handle": "rayray_429",
+      "url": "https://www.youtube.com/@rayray_429",
+      "channelHandle": "/@rayray_429",
+      "status": "skipped_duplicate",
+      "reason": "duplicate_concrete_accepted_artifact_exists",
+      "acceptedVideos": 9,
+      "acceptedOccurrences": 155,
+      "uniqueSongs": 154,
+      "publishedTimestampCoverage": "9/9",
+      "occurrenceTimeCoverage": "155/155",
+      "occurrenceSecondsCoverage": "155/155",
+      "discoveryThumbnailCoverage": "9/9",
+      "coverCoverage": "9/9",
+      "failure": "",
+      "evidenceSource": {
+        "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/accepted/2026-07-22-source-backfill-batch5.accepted.json",
+        "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/manifest.json",
+        "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/report.md",
+        "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/dirty-audit.json"
+      },
+      "duplicateOfBatch": "2026-07-22-source-backfill-batch5",
+      "discoveryCandidateCount": 31,
+      "discoveryInspectedCount": 31,
+      "discoveryUsableVideoCount": 9,
+      "discoveryOccurrenceCount": 155,
+      "elapsedSeconds": 373,
+      "reachedEnd": true,
+      "remoteCleanup": {
+        "vps3": {
+          "status": "removed",
+          "path": "/opt/ytb-song-rank-source-backfill-20260722-batch5-vps3",
+          "df": "/dev/sda1 99G 11G 89G 11% /"
+        },
+        "vps5": {
+          "status": "removed",
+          "path": "/opt/ytb-song-rank-source-backfill-20260722-batch5-vps5",
+          "df": "/dev/vda1 10G 2.6G 7.0G 27% /"
+        }
+      },
+      "cleanupEvidence": [
+        "- VPS3 `/opt/ytb-song-rank-source-backfill-20260722-batch5-vps3`: removed; `df -h /` => `/dev/sda1 99G 11G 89G 11% /`.",
+        "- VPS5 `/opt/ytb-song-rank-source-backfill-20260722-batch5-vps5`: removed; `df -h /` => `/dev/vda1 10G 2.6G 7.0G 27% /`."
+      ],
+      "dirtyAudit": {
+        "filter": "channelHandle == /@rayray_429 or channelUrl == https://www.youtube.com/@rayray_429",
+        "droppedVideoCount": 0,
+        "droppedOccurrenceCount": 0,
+        "suspiciousCount": 0,
+        "suspiciousOccurrenceCount": 0,
+        "note": "Only rayray_429 is filtered. Batch5 dirty audit dropped 0/0 and suspicious 0/0; candidate-to-usable difference is not dirty dropped."
+      }
+    }
+  ],
+  "outputFiles": [
+    "candidate-increment-unfiltered.json",
+    "accepted-increment.json",
+    "dirty-audit.json",
+    "manifest.json",
+    "report.md"
+  ],
+  "scopeVerification": {
+    "onlyWroteThisArtifactDirectory": "artifacts/channel-discovery/2026-07-23-source-backfill-batch94-rayray429-duplicate-evidence",
+    "didNotModifyRunnerTools": true,
+    "didNotModifyDataExternal": true,
+    "didNotStartYouTubeFetch": true,
+    "didNotUseMacOrVps": true,
+    "didNotCreateRemoteTempDirectory": true,
+    "didNotUseLargeTempCacheOnCOrD": true,
+    "didNotPushOrDeploy": true,
+    "commitCreated": false
+  }
+}

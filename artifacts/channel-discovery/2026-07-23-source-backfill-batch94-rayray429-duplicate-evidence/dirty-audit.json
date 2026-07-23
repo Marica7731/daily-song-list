@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_duplicate_evidence_dirty_audit",
+  "batchId": "2026-07-23-source-backfill-batch94-rayray429-duplicate-evidence",
+  "generatedAt": "2026-07-23T09:11:00.000Z",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "duplicateOfBatch": "2026-07-22-source-backfill-batch5",
+  "filter": {
+    "handle": "rayray_429",
+    "channelHandle": "/@rayray_429",
+    "channelUrl": "https://www.youtube.com/@rayray_429",
+    "rule": "Only rayray_429 is filtered from the batch5 concrete accepted artifact and batch5 source manifest."
+  },
+  "sourceDirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/dirty-audit.json",
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "suspiciousCount": 0,
+  "suspiciousOccurrenceCount": 0,
+  "suspicious": [],
+  "termHitCounts": {},
+  "note": "Batch5 dirty audit dropped 0 videos / 0 occurrences and suspicious 0 videos / 0 occurrences. The discovery candidate-to-usable difference of 31 to 9 is not dirty dropped."
+}

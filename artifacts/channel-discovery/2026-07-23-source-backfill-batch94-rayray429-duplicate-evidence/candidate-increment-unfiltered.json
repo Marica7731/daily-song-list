@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "kind": "channel_discovery_candidate_increment_unfiltered",
+  "batchId": "2026-07-23-source-backfill-batch94-rayray429-duplicate-evidence",
+  "generatedAt": "2026-07-23T09:11:00.000Z",
+  "status": "skipped_duplicate",
+  "reason": "duplicate_concrete_accepted_artifact_exists",
+  "candidates": [],
+  "videos": [],
+  "duplicateEvidence": {
+    "status": "skipped_duplicate",
+    "reason": "duplicate_concrete_accepted_artifact_exists",
+    "duplicateOfBatch": "2026-07-22-source-backfill-batch5",
+    "source": {
+      "handle": "rayray_429",
+      "channelHandle": "/@rayray_429",
+      "channelUrl": "https://www.youtube.com/@rayray_429",
+      "acceptedMatchRule": "accepted.videos matched where channelHandle == /@rayray_429 or channelUrl == https://www.youtube.com/@rayray_429",
+      "manifestMatchRule": "manifest.sources matched where handle == rayray_429 or url == https://www.youtube.com/@rayray_429"
+    },
+    "evidenceSource": {
+      "acceptedIncrement": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/accepted/2026-07-22-source-backfill-batch5.accepted.json",
+      "manifest": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/manifest.json",
+      "report": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/report.md",
+      "dirtyAudit": "artifacts/channel-discovery/2026-07-22-source-backfill-batch5/dirty-audit.json"
+    },
+    "acceptedStats": {
+      "acceptedVideos": 9,
+      "acceptedOccurrences": 155,
+      "uniqueSongs": 154,
+      "note": "rayray_429 is fully recorded in the batch5 concrete accepted artifact; this duplicate-evidence batch intentionally emits no candidate rows."
+    },
+    "coverage": {
+      "publishedTimestamp": "9/9",
+      "occurrenceTime": "155/155",
+      "occurrenceSeconds": "155/155",
+      "discoveryThumbnailCoverage": "9/9",
+      "coverCoverage": "9/9"
+    },
+    "manifestSourceEntry": {
+      "discoveryCandidateCount": 31,
+      "discoveryInspectedCount": 31,
+      "discoveryUsableVideoCount": 9,
+      "discoveryOccurrenceCount": 155,
+      "elapsedSeconds": 373,
+      "reachedEnd": true
+    },
+    "dirtyAudit": {
+      "filter": "channelHandle == /@rayray_429 or channelUrl == https://www.youtube.com/@rayray_429",
+      "droppedVideos": 0,
+      "droppedOccurrences": 0,
+      "suspiciousVideos": 0,
+      "suspiciousOccurrences": 0,
+      "note": "Batch5 dirty audit is 0/0 dropped and 0/0 suspicious for this source. Candidate-to-usable difference is not dirty dropped."
+    },
+    "operationalScope": {
+      "didNotUseMacOrVps": true,
+      "didNotCreateRemoteTempDirectory": true,
+      "didNotStartYouTubeFetch": true,
+      "didNotModifyDataExternal": true,
+      "didNotPushOrDeploy": true,
+      "commitCreated": false,
+      "outputVideosOrCandidatesRepeated": false
+    }
+  }
+}
