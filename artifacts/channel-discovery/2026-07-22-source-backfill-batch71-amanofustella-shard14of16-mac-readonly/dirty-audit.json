@@ -1,0 +1,28 @@
+{
+  "hardDropTerms": [
+    "フルート",
+    "生演奏",
+    "クラリネット",
+    "サックス",
+    "サクソフォン",
+    "sax",
+    "saxophone"
+  ],
+  "exactPhraseDropTerms": [
+    "piano streaming",
+    "piano performance",
+    "ピアノ演奏"
+  ],
+  "liveRule": "live/ライブ only suspicious/drop when no singing signal is present",
+  "singingSignals": [
+    "歌枠",
+    "歌",
+    "弾き語り",
+    "karaoke",
+    "歌ってみた"
+  ],
+  "droppedVideoCount": 0,
+  "droppedOccurrenceCount": 0,
+  "dropped": [],
+  "note": "Filtered after export; exact phrase terms are matched as phrases, not split terms."
+}
